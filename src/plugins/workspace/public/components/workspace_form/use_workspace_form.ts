@@ -153,11 +153,6 @@ export const useWorkspaceForm = ({
     setColor(resetValues?.color);
     setFeatureConfigs(appendDefaultFeatureIds(resetValues?.features ?? []));
     setPermissionSettings(initialPermissionSettingsRef.current);
-    setSelectedDataSources(
-      resetValues?.selectedDataSources && resetValues.selectedDataSources.length > 0
-        ? resetValues.selectedDataSources
-        : []
-    );
     setFormErrors({});
     setIsEditing(false);
   }, []);

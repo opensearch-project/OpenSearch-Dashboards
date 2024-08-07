@@ -9,18 +9,13 @@ import {
   EuiSmallButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useState, useCallback } from 'react';
-import { ApplicationStart } from 'opensearch-dashboards/public';
-import { WorkspaceCancelModal } from './workspace_cancel_modal';
-import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
+import React from 'react';
 
 interface WorkspaceBottomBarProps {
   formId: string;
-  application: ApplicationStart;
   numberOfChanges: number;
   numberOfErrors: number;
   handleResetForm: () => void;
@@ -30,12 +25,8 @@ export const WorkspaceBottomBar = ({
   formId,
   numberOfChanges,
   numberOfErrors,
-  application,
   handleResetForm,
 }: WorkspaceBottomBarProps) => {
-  const [isCancelModalVisible, setIsCancelModalVisible] = useState(false);
-  const closeCancelModal = useCallback(() => setIsCancelModalVisible(false), []);
-
   return (
     <div>
       <EuiBottomBar left={50}>
@@ -100,9 +91,6 @@ export const WorkspaceBottomBar = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>
-      {isCancelModalVisible && (
-        <WorkspaceCancelModal application={application} closeCancelModal={closeCancelModal} />
-      )}
     </div>
   );
 };

@@ -449,6 +449,32 @@ describe('getNumberOfChanges', () => {
       )
     ).toEqual(1);
   });
+  it('should return consistent color changes count', () => {
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          color: '#FFFFFF',
+        },
+        {
+          name: 'foo',
+          color: '#FFFFFF',
+        }
+      )
+    ).toEqual(0);
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          color: '#FFFFFF',
+        },
+        {
+          name: 'foo',
+          color: '#FFFF12',
+        }
+      )
+    ).toEqual(1);
+  });
   it('should return consistent features changes count', () => {
     expect(
       getNumberOfChanges(
