@@ -1,2 +1,0 @@
-fix:
-- [MDS] Fix the dsm plugin setup when mds feature flag is disabled ([#7163](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7163))

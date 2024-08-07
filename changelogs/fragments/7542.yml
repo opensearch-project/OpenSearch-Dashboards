@@ -1,2 +1,0 @@
-fix:
-- Fix tables not displaying in navigator and add local cluster to datasources ([#7542](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7542))
