@@ -47,7 +47,7 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
-import { IDataPluginServices, IIndexPattern, Query } from '../..';
+import { IDataPluginServices, IIndexPattern, IndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
 import {
@@ -184,7 +184,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
       const suggestions =
         (await this.services.data.autocomplete.getQuerySuggestions({
           language,
-          indexPatterns,
+          indexPattern: indexPatterns[0] as IndexPattern,
           query: queryString,
           selectionStart,
           selectionEnd,

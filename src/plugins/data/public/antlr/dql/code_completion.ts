@@ -10,7 +10,7 @@ import { DQLLexer } from './.generated/DQLLexer';
 import { DQLParser, KeyValueExpressionContext } from './.generated/DQLParser';
 import { getTokenPosition } from '../shared/cursor';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
-import { QuerySuggestionGetFnArgs } from '../../autocomplete';
+import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './.generated/DQLParserVisitor';
 import { getUiService } from '../../services';
 import { IDataPluginServices } from '../..';
@@ -45,14 +45,13 @@ const findFieldSuggestions = (indexPattern: IndexPattern) => {
       return idxField.name;
     });
 
-  const fieldSuggestions: Array<{
-    text: string;
-    type: monaco.languages.CompletionItemKind;
-  }> = fieldNames.map((field: string) => {
+  const fieldSuggestions: QuerySuggestion[] = fieldNames.map((field: string) => {
     return {
       text: field,
       type: monaco.languages.CompletionItemKind.Field,
       insertText: `${field}: `,
+      start: -1,
+      end: -1,
     };
   });
 
@@ -120,7 +119,7 @@ export const getSuggestions = async ({
   services,
   boolFilter,
   signal,
-}: QuerySuggestionGetFnArgs) => {
+}: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
   if (
     !services ||
     !services.appName ||
@@ -164,7 +163,7 @@ export const getSuggestions = async ({
     // gets candidates at specified token index
     const candidates = core.collectCandidates(cursorIndex);
 
-    const completions = [];
+    const completions: QuerySuggestion[] = [];
 
     // check to see if field rule is a candidate. if so, suggest field names
     if (candidates.rules.has(DQLParser.RULE_field)) {
@@ -185,7 +184,12 @@ export const getSuggestions = async ({
       if (!!values) {
         completions.push(
           ...values?.map((val: any) => {
-            return { text: val, type: monaco.languages.CompletionItemKind.Value };
+            return {
+              text: val,
+              type: monaco.languages.CompletionItemKind.Value,
+              start: -1,
+              end: -1,
+            };
           })
         );
       }
@@ -199,10 +203,14 @@ export const getSuggestions = async ({
       }
 
       const tokenSymbolName = parser.vocabulary.getSymbolicName(token)?.toLowerCase();
-      completions.push({
-        text: tokenSymbolName,
-        type: monaco.languages.CompletionItemKind.Keyword,
-      });
+      if (tokenSymbolName) {
+        completions.push({
+          text: tokenSymbolName,
+          type: monaco.languages.CompletionItemKind.Keyword,
+          start: -1,
+          end: -1,
+        });
+      }
     });
 
     return completions;
