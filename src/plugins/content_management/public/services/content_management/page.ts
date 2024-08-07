@@ -41,7 +41,6 @@ export class Page {
        */
       if (content.kind === 'dashboard' || sectionContents.some((c) => c.kind === 'dashboard')) {
         sectionContents.length = 0;
-        console.warn('Section type "dashboard" can only have one content type of "dashboard"');
       }
       sectionContents.push(content);
       // sort content by order
