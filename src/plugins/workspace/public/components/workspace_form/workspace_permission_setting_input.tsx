@@ -200,6 +200,7 @@ export const WorkspacePermissionSettingInput = ({
           selectedOptions={permissionModesSelected}
           onChange={handlePermissionModeOptionChange}
           isClearable={false}
+          data-test-subj="workspace.permissionModeOptions"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

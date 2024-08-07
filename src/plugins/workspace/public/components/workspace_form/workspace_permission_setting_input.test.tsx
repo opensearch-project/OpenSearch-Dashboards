@@ -44,9 +44,6 @@ describe('WorkspacePermissionSettingInput', () => {
 
     expect(renderResult.getByText('foo')).toBeInTheDocument();
     expect(renderResult.getByText('Read')).toBeInTheDocument();
-    expect(
-      renderResult.getByText('Read').closest('.euiButtonGroupButton-isSelected')
-    ).toBeInTheDocument();
   });
   it('should render consistent group id and permission modes', () => {
     const { renderResult } = setup({
@@ -100,6 +97,7 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult, onPermissionModesChangeMock } = setup({});
 
     expect(onPermissionModesChangeMock).not.toHaveBeenCalled();
+    fireEvent.click(renderResult.getByTestId('workspace.permissionModeOptions'));
     fireEvent.click(renderResult.getByText('Owner'));
     expect(onPermissionModesChangeMock).toHaveBeenCalledWith(['library_write', 'write'], 0);
   });
