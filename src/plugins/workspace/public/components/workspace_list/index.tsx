@@ -66,11 +66,6 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     );
   }, [workspaceList]);
 
-  // eslint-disable-next-line
-  console.log('newWorkspaceList', newWorkspaceList);
-  // eslint-disable-next-line
-  console.log('WorkspaceList', workspaceList);
-
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 5,
@@ -256,7 +251,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
           content={description}
           data-test-subj="workspaceList-hover-description"
         >
-          {/* Here I need to set width mannuly since there is  */}
+          {/* Here I need to set width mannuly as the tooltip affects the property : truncateText '  */}
           <EuiText size="s" className="eui-textTruncate" style={{ maxWidth: 150 }}>
             {description}
           </EuiText>

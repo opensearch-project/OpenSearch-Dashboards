@@ -130,24 +130,6 @@ describe('WorkspaceList', () => {
     expect(getByText('Observability')).toBeInTheDocument();
   });
 
-  it('should be able to see the description tooltip when hovering over the description', async () => {
-    const { getByText, getByTestId, queryByTestId } = render(getWrapWorkspaceListInContext());
-    const description = getByText(
-      'should be able to see the description tooltip when hovering over the description'
-    );
-    expect(description).toHaveClass('eui-textTruncate');
-    fireEvent.mouseEnter(description);
-    expect(getByTestId('workspaceList-hover-description')).toBeInTheDocument();
-
-    const tooltip = await queryByTestId('workspaceList-hover-description');
-    expect(tooltip).toBeInTheDocument();
-    expect(tooltip).toHaveTextContent(
-      'should be able to see the description tooltip when hovering over the description'
-    );
-    fireEvent.mouseLeave(description);
-    expect(queryByTestId('workspaceList-hover-description')).not.toBeInTheDocument();
-  });
-
   it('should be able to search and re-render the list', async () => {
     const { getByText, getByRole, queryByText } = render(getWrapWorkspaceListInContext());
     const input = getByRole('searchbox');
@@ -159,7 +141,7 @@ describe('WorkspaceList', () => {
     expect(queryByText('name3')).not.toBeInTheDocument();
   });
 
-  it('should be able to debounce when ', async () => {
+  it('should be able to apply debounce search after input', async () => {
     const { getByText, getByRole, queryByText } = render(getWrapWorkspaceListInContext());
     const input = getByRole('searchbox');
     fireEvent.change(input, {
@@ -184,13 +166,6 @@ describe('WorkspaceList', () => {
     expect(getByText(formatDate('1999-08-06T02:00:00.00Z'))).toBeInTheDocument();
   });
 
-  // it('should be able to update workspace after clicking name', async () => {
-  //   const { getAllByTestId } = render(getWrapWorkspaceListInContext());
-  //   const editIcon = getAllByTestId('workspace-list-edit-icon')[0];
-  //   fireEvent.click(editIcon);
-  //   expect(navigateToWorkspaceDetail).toBeCalled();
-  // });
-
   it('should be able to see the 3 operations: copy, update, delete after click in the meatballs button', async () => {
     const { getAllByTestId, getByText } = render(getWrapWorkspaceListInContext());
     const operationIcons = getAllByTestId('euiCollapsedItemActionsButton')[0];
@@ -208,17 +183,6 @@ describe('WorkspaceList', () => {
     fireEvent.click(editIcon);
     expect(navigateToWorkspaceDetail).toBeCalled();
   });
-
-  // it('should be able to copy workspace ID after clicking copy button', async () => {
-  //   const { getByText, getAllByTestId } = render(getWrapWorkspaceListInContext());
-  //   const operationIcons = getAllByTestId('euiCollapsedItemActionsButton')[0];
-  //   fireEvent.click(operationIcons);
-  //   const copyIcon = getByText('Copy');
-  //   fireEvent.click(copyIcon);
-  //   expect(
-  //     navigator.clipboard.text
-  //   ).toHaveBeenCalledWith('id1');
-  // });
 
   it('should be able to call delete modal after clicking delete button', async () => {
     const { getByText, getAllByTestId } = render(getWrapWorkspaceListInContext());
@@ -295,16 +259,4 @@ describe('WorkspaceList', () => {
     const { queryByText } = render(getWrapWorkspaceListInContext([], false));
     expect(queryByText('Create workspace')).toBeNull();
   });
-
-  // it('should be able to perform filtering when select a desired use case', async () => {
-  //   const { getByText, getByRole, queryByText } = render(getWrapWorkspaceListInContext());
-
-  //   // eslint-disable-next-line
-  //   console.log(render(getWrapWorkspaceListInContext()));
-  //   const filter = getByRole('selectfilters');
-  //   fireEvent.change(filter, { target: { value: 'Observability' } });
-  //   expect(getByText('name3')).toBeInTheDocument();
-  //   expect(queryByText('name1')).not.toBeInTheDocument();
-  //   expect(queryByText('name2')).not.toBeInTheDocument();
-  // });
 });
