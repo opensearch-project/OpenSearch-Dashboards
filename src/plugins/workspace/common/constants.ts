@@ -138,7 +138,7 @@ export const WORKSPACE_USE_CASES = Object.freeze({
     ] as string[],
   },
   essentials: {
-    id: 'essentials',
+    id: 'analytics',
     title: i18n.translate('workspace.usecase.essentials.title', {
       defaultMessage: 'Essentials',
     }),

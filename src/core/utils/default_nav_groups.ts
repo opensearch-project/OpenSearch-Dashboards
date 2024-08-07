@@ -65,7 +65,7 @@ const defaultNavGroups = {
     order: 5000,
   },
   essentials: {
-    id: 'essentials',
+    id: 'analytics',
     title: i18n.translate('core.ui.group.essential.title', {
       defaultMessage: 'Essentials',
     }),
