@@ -643,7 +643,7 @@ export class CreateDataSourceForm extends React.Component<
             <EuiSpacer size="m" />
 
             <EuiCompressedFormRow>
-              <EuiText>
+              <EuiText size="s">
                 <FormattedMessage
                   id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
                   defaultMessage="Enter the authentication details to access the endpoint."

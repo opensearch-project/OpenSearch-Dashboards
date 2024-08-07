@@ -13,7 +13,7 @@ export const NoAccess = () => {
         iconType="alert"
         title={<h2>{'No permissions to access'}</h2>}
         body={
-          <EuiText>
+          <EuiText size="s">
             {
               'You are missing permissions to view connection details. Contact your administrator for permissions.'
             }
