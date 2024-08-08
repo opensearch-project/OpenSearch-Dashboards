@@ -81,7 +81,13 @@ exports[`#start() getComponent returns renderable JSX tree 1`] = `
   }
   mounters={Map {}}
   setAppActionMenu={[Function]}
+  setAppBadgeControls={[Function]}
+  setAppBottomControls={[Function]}
+  setAppCenterControls={[Function]}
+  setAppDescriptionControls={[Function]}
   setAppLeaveHandler={[Function]}
+  setAppLeftControls={[Function]}
+  setAppRightControls={[Function]}
   setIsMounting={[Function]}
 />
 `;

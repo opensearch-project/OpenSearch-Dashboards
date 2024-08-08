@@ -79,7 +79,7 @@ describe('HeaderActionMenu', () => {
     await refresh();
 
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div data-test-subj=\\"headerAppActionMenu\\"><div>FOO</div></div>"`
+      `"<div data-test-subj=\\"headerAppActionMenu\\" class=\\"headerAppActionMenu\\"><div>FOO</div></div>"`
     );
   });
 
@@ -92,7 +92,7 @@ describe('HeaderActionMenu', () => {
     await refresh();
 
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div data-test-subj=\\"headerAppActionMenu\\"><div>FOO</div></div>"`
+      `"<div data-test-subj=\\"headerAppActionMenu\\" class=\\"headerAppActionMenu\\"><div>FOO</div></div>"`
     );
 
     act(() => {
@@ -101,7 +101,7 @@ describe('HeaderActionMenu', () => {
     await refresh();
 
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div data-test-subj=\\"headerAppActionMenu\\"></div>"`
+      `"<div data-test-subj=\\"headerAppActionMenu\\" class=\\"headerAppActionMenu\\"></div>"`
     );
   });
 
@@ -114,7 +114,7 @@ describe('HeaderActionMenu', () => {
     await refresh();
 
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div data-test-subj=\\"headerAppActionMenu\\"><div>FOO</div></div>"`
+      `"<div data-test-subj=\\"headerAppActionMenu\\" class=\\"headerAppActionMenu\\"><div>FOO</div></div>"`
     );
 
     act(() => {
@@ -123,7 +123,7 @@ describe('HeaderActionMenu', () => {
     await refresh();
 
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div data-test-subj=\\"headerAppActionMenu\\"><div>BAR</div></div>"`
+      `"<div data-test-subj=\\"headerAppActionMenu\\" class=\\"headerAppActionMenu\\"><div>BAR</div></div>"`
     );
   });
 

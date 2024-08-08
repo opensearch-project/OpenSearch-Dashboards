@@ -250,7 +250,7 @@ export class DataSourceSelector extends React.Component<
         isDisabled={this.props.disabled}
         fullWidth={this.props.fullWidth || false}
         data-test-subj={'dataSourceSelectorComboBox'}
-        renderOption={(option) => (
+        renderOption={(option: EuiComboBoxOptionOption<DataSourceItem>) => (
           <DataSourceItem
             className={'dataSourceSelector'}
             option={option}

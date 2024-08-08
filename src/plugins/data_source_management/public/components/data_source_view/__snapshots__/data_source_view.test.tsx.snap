@@ -6,6 +6,7 @@ exports[`DataSourceView Should render successfully when provided datasource has 
   button={
     <DataSourceMenuPopoverButton
       className="dataSourceView"
+      isDisabled={true}
       label=""
       onClick={[Function]}
     />
@@ -60,6 +61,7 @@ exports[`DataSourceView Should return error when provided datasource has been fi
   button={
     <DataSourceMenuPopoverButton
       className="dataSourceView"
+      isDisabled={true}
       label="test1"
       onClick={[Function]}
     />
@@ -115,6 +117,7 @@ exports[`DataSourceView When selected option is local cluster and hide local Clu
   button={
     <DataSourceMenuPopoverButton
       className="dataSourceView"
+      isDisabled={true}
       label=""
       onClick={[Function]}
     />
@@ -161,6 +164,7 @@ exports[`DataSourceView should call getDataSourceById when only pass id with no 
   button={
     <DataSourceMenuPopoverButton
       className="dataSourceView"
+      isDisabled={true}
       label=""
       onClick={[Function]}
     />
@@ -217,6 +221,7 @@ exports[`DataSourceView should render normally with local cluster not hidden 1`]
   button={
     <DataSourceMenuPopoverButton
       className="dataSourceView"
+      isDisabled={true}
       label="test1"
       onClick={[Function]}
     />
@@ -278,121 +283,30 @@ Object {
         <div
           class="euiPopover__anchor"
         >
-          <button
-            aria-label="dataSourceViewButton"
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
-            data-test-subj="dataSourceViewButton"
-            type="button"
-          >
-            <span
-              class="euiButtonContent euiButtonEmpty__content"
-            >
-              <span
-                class="euiButtonContent__icon"
-                color="inherit"
-                data-euiicon-type="database"
-              />
-              <span
-                class="euiButtonEmpty__text"
-              />
-            </span>
-          </button>
-        </div>
-      </div>
-    </div>
-    <div>
-      <div
-        data-eui="EuiFocusTrap"
-      >
-        <div
-          aria-describedby="generated-id"
-          aria-live="off"
-          aria-modal="true"
-          class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--bottom"
-          role="dialog"
-          style="top: 16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
-          tabindex="0"
-        >
           <div
-            class="euiPopover__panelArrow euiPopover__panelArrow--bottom"
-            style="left: 10px; top: 0px;"
-          />
-          <p
-            class="euiScreenReaderOnly"
-            id="generated-id"
+            class="dataSourceMenuPopoverButton dataSourceMenu-isDisabled"
+            data-label="Data source"
           >
-            You are in a dialog. To close this dialog, hit escape.
-          </p>
-          <div>
-            <div
-              class="euiPopoverTitle euiPopoverTitle--paddingSmall"
+            <button
+              aria-label="dataSourceViewButton"
+              class="euiButton euiButton--text euiButton--small euiButton-isDisabled dataSourceMenuPopoverButtonLabel"
+              data-test-subj="dataSourceViewButton"
+              disabled=""
+              type="button"
             >
-              <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+              <span
+                class="euiButtonContent euiButton__content"
               >
-                <div
-                  class="euiFlexItem"
-                >
-                  DATA SOURCE
-                   (
-                  1
-                  )
-                </div>
-                <div
-                  class="dataSourceDropDownHeaderInvisibleFocusable"
-                  tabindex="0"
+                <span
+                  class="euiButtonContent__icon"
+                  color="inherit"
+                  data-euiicon-type="database"
                 />
-                <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
-                >
-                  <button
-                    class="euiLink euiLink--primary"
-                    type="button"
-                  >
-                    Manage
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div
-              class="euiContextMenuPanel dataSourceViewOuiPanel"
-              tabindex="-1"
-            >
-              <div>
-                <div>
-                  <div
-                    class="euiPanel euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder"
-                  >
-                    <div
-                      class="euiSelectable"
-                      data-test-subj="dataSourceView"
-                    >
-                      <div
-                        class="euiSelectableList"
-                      >
-                        <div
-                          style="overflow: visible; width: 0px;"
-                        />
-                        <div
-                          class="resize-triggers"
-                        >
-                          <div
-                            class="expand-trigger"
-                          >
-                            <div
-                              style="width: 1px; height: 1px;"
-                            />
-                          </div>
-                          <div
-                            class="contract-trigger"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+                <span
+                  class="euiButton__text"
+                />
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -406,25 +320,31 @@ Object {
       <div
         class="euiPopover__anchor"
       >
-        <button
-          aria-label="dataSourceViewButton"
-          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
-          data-test-subj="dataSourceViewButton"
-          type="button"
+        <div
+          class="dataSourceMenuPopoverButton dataSourceMenu-isDisabled"
+          data-label="Data source"
         >
-          <span
-            class="euiButtonContent euiButtonEmpty__content"
+          <button
+            aria-label="dataSourceViewButton"
+            class="euiButton euiButton--text euiButton--small euiButton-isDisabled dataSourceMenuPopoverButtonLabel"
+            data-test-subj="dataSourceViewButton"
+            disabled=""
+            type="button"
           >
             <span
-              class="euiButtonContent__icon"
-              color="inherit"
-              data-euiicon-type="database"
-            />
-            <span
-              class="euiButtonEmpty__text"
-            />
-          </span>
-        </button>
+              class="euiButtonContent euiButton__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="database"
+              />
+              <span
+                class="euiButton__text"
+              />
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   </div>,

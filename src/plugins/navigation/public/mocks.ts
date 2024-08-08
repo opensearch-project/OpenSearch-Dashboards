@@ -45,6 +45,7 @@ const createStartContract = (): jest.Mocked<Start> => {
   const startContract = {
     ui: {
       TopNavMenu: jest.fn(),
+      HeaderControl: jest.fn(),
     },
   };
   return startContract;
