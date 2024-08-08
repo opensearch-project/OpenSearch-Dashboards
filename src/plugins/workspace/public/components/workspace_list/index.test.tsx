@@ -159,7 +159,7 @@ describe('WorkspaceList', () => {
     const { getAllByTestId, getByText } = render(getWrapWorkspaceListInContext());
     const operationIcons = getAllByTestId('euiCollapsedItemActionsButton')[0];
     fireEvent.click(operationIcons);
-    expect(getByText('Copy')).toBeInTheDocument();
+    expect(getByText('Copy ID')).toBeInTheDocument();
     expect(getByText('Edit')).toBeInTheDocument();
     expect(getByText('Delete')).toBeInTheDocument();
   });
@@ -168,7 +168,7 @@ describe('WorkspaceList', () => {
     const { getByText, getAllByTestId } = render(getWrapWorkspaceListInContext());
     const operationIcons = getAllByTestId('euiCollapsedItemActionsButton')[0];
     fireEvent.click(operationIcons);
-    const copyIcon = getByText('Copy');
+    const copyIcon = getByText('Copy ID');
     fireEvent.click(copyIcon);
     expect(mockNavigatorWrite).toHaveBeenCalledWith('id1');
   });
