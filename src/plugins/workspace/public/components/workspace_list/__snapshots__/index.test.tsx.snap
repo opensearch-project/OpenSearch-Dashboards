@@ -43,7 +43,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
       <div
         class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
         role="main"
-        style="width: 100%; max-width: 1000px;"
+        style="width: 100%;"
       >
         <div>
           <div
@@ -81,6 +81,48 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                 </div>
               </div>
             </div>
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero euiSearchBar__filtersHolder"
+            >
+              <div
+                class="euiFilterGroup"
+              >
+                <div
+                  class="euiPopover euiPopover--anchorDownCenter"
+                  id="field_value_selection_0"
+                >
+                  <div
+                    class="euiPopover__anchor"
+                  >
+                    <button
+                      class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--hasIcon"
+                      type="button"
+                    >
+                      <span
+                        class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                      >
+                        <span
+                          class="euiButtonContent__icon"
+                          color="inherit"
+                          data-euiicon-type="arrowDown"
+                        />
+                        <span
+                          class="euiButtonEmpty__text"
+                        >
+                          <span
+                            class="euiFilterButton__textShift"
+                            data-text="Use Case"
+                            title="Use Case"
+                          >
+                            Use Case
+                          </span>
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div
             class="euiSpacer euiSpacer--l"
@@ -97,7 +139,28 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                 >
                   <div
                     class="euiFlexItem euiFlexItem--flexGrowZero"
-                  />
+                  >
+                    <div
+                      class="euiCheckbox"
+                    >
+                      <input
+                        aria-label="Select all rows"
+                        class="euiCheckbox__input"
+                        disabled=""
+                        id="_selection_column-checkbox_generated-id"
+                        type="checkbox"
+                      />
+                      <div
+                        class="euiCheckbox__square"
+                      />
+                      <label
+                        class="euiCheckbox__label"
+                        for="_selection_column-checkbox_generated-id"
+                      >
+                        Select all rows
+                      </label>
+                    </div>
+                  </div>
                   <div
                     class="euiFlexItem euiFlexItem--flexGrowZero"
                   >
@@ -146,12 +209,37 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                 <thead>
                   <tr>
                     <th
+                      class="euiTableHeaderCellCheckbox"
+                      scope="col"
+                    >
+                      <div
+                        class="euiTableCellContent"
+                      >
+                        <div
+                          class="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                        >
+                          <input
+                            aria-label="Select all rows"
+                            class="euiCheckbox__input"
+                            data-test-subj="checkboxSelectAll"
+                            disabled=""
+                            id="_selection_column-checkbox_generated-id"
+                            type="checkbox"
+                          />
+                          <div
+                            class="euiCheckbox__square"
+                          />
+                        </div>
+                      </div>
+                    </th>
+                    <th
                       aria-live="polite"
                       aria-sort="ascending"
                       class="euiTableHeaderCell"
                       data-test-subj="tableHeaderCell_name_0"
                       role="columnheader"
                       scope="col"
+                      style="width: 25%;"
                     >
                       <button
                         class="euiTableHeaderButton euiTableHeaderButton-isSorted"
@@ -175,35 +263,29 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                       </button>
                     </th>
                     <th
-                      aria-live="polite"
-                      aria-sort="none"
                       class="euiTableHeaderCell"
-                      data-test-subj="tableHeaderCell_id_1"
+                      data-test-subj="tableHeaderCell_useCase_1"
                       role="columnheader"
                       scope="col"
+                      style="width: 20%;"
                     >
-                      <button
-                        class="euiTableHeaderButton"
-                        data-test-subj="tableHeaderSortButton"
-                        type="button"
+                      <span
+                        class="euiTableCellContent"
                       >
                         <span
-                          class="euiTableCellContent"
+                          class="euiTableCellContent__text"
+                          title="Use case"
                         >
-                          <span
-                            class="euiTableCellContent__text"
-                            title="ID"
-                          >
-                            ID
-                          </span>
+                          Use case
                         </span>
-                      </button>
+                      </span>
                     </th>
                     <th
                       class="euiTableHeaderCell"
                       data-test-subj="tableHeaderCell_description_2"
                       role="columnheader"
                       scope="col"
+                      style="width: 20%;"
                     >
                       <span
                         class="euiTableCellContent"
@@ -218,18 +300,19 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                     </th>
                     <th
                       class="euiTableHeaderCell"
-                      data-test-subj="tableHeaderCell_features_3"
+                      data-test-subj="tableHeaderCell_lastUpdatedTime_3"
                       role="columnheader"
                       scope="col"
+                      style="width: 25%;"
                     >
                       <span
                         class="euiTableCellContent"
                       >
                         <span
                           class="euiTableCellContent__text"
-                          title="Use case"
+                          title="Last updated"
                         >
-                          Use case
+                          Last updated
                         </span>
                       </span>
                     </th>
@@ -257,7 +340,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   >
                     <td
                       class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-                      colspan="5"
+                      colspan="6"
                     >
                       <div
                         class="euiTableCellContent euiTableCellContent--alignCenter"
@@ -265,7 +348,34 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         <span
                           class="euiTableCellContent__text"
                         >
-                          No items found
+                          <div
+                            class="euiEmptyPrompt"
+                          >
+                            <span
+                              color="subdued"
+                              data-euiicon-type="spacesApp"
+                            />
+                            <div
+                              class="euiSpacer euiSpacer--m"
+                            />
+                            <h3
+                              class="euiTitle euiTitle--small"
+                            >
+                              No workspace available
+                            </h3>
+                            <span
+                              class="euiTextColor euiTextColor--subdued"
+                            >
+                              <div
+                                class="euiSpacer euiSpacer--m"
+                              />
+                              <div
+                                class="euiText euiText--medium"
+                              >
+                                There are no workspace to display. Create workspace to get started.
+                              </div>
+                            </span>
+                          </div>
                         </span>
                       </div>
                     </td>

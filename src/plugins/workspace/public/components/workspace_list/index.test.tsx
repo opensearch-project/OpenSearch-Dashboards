@@ -6,7 +6,7 @@
 import React from 'react';
 import moment from 'moment';
 import { BehaviorSubject, of } from 'rxjs';
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import { coreMock } from '../../../../../core/public/mocks';
 import { navigateToWorkspaceDetail } from '../utils/workspace';
@@ -15,6 +15,18 @@ import { WORKSPACE_USE_CASES } from '../../../common/constants';
 import { WorkspaceList } from './index';
 
 jest.mock('../utils/workspace');
+
+const mockNavigatorWrite = jest.fn();
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    copyToClipboard: jest.fn().mockImplementation((id) => {
+      mockNavigatorWrite(id);
+    }),
+  };
+});
 
 jest.mock('../delete_workspace_modal', () => ({
   DeleteWorkspaceModal: ({ onClose }: { onClose: () => void }) => (
@@ -150,6 +162,15 @@ describe('WorkspaceList', () => {
     expect(getByText('Copy')).toBeInTheDocument();
     expect(getByText('Edit')).toBeInTheDocument();
     expect(getByText('Delete')).toBeInTheDocument();
+  });
+
+  it('should be able to copy workspace ID after clicking copy button', async () => {
+    const { getByText, getAllByTestId } = render(getWrapWorkspaceListInContext());
+    const operationIcons = getAllByTestId('euiCollapsedItemActionsButton')[0];
+    fireEvent.click(operationIcons);
+    const copyIcon = getByText('Copy');
+    fireEvent.click(copyIcon);
+    expect(mockNavigatorWrite).toHaveBeenCalledWith('id1');
   });
 
   it('should be able to update workspace after clicking name', async () => {
