@@ -265,6 +265,11 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         }
       }
 
+      /**
+       * When the workspace owner unassign themselves, ensure the default data source is set before
+       * updating the workspace permissions. This prevents a lack of write permission on saved objects
+       * after the user is removed from the workspace.
+       **/
       if (newDataSources && this.uiSettings && client) {
         const uiSettingsClient = this.uiSettings.asScopedToClient(client);
         try {
