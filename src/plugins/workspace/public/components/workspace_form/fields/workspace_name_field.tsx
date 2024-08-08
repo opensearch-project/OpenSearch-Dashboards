@@ -7,7 +7,7 @@ import { EuiCompressedFieldText, EuiCompressedFormRow } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useCallback } from 'react';
 
-import { MAX_NAME_LENGTH } from '../constants';
+import { MAX_WORKSPACE_NAME_LENGTH } from '../../../../common/constants';
 
 export interface WorkspaceNameFieldProps {
   value?: string;
@@ -25,7 +25,7 @@ export const WorkspaceNameField = ({
   const handleChange = useCallback(
     (e) => {
       const newValue = e.currentTarget.value;
-      if (newValue.length <= MAX_NAME_LENGTH) {
+      if (newValue.length <= MAX_WORKSPACE_NAME_LENGTH) {
         onChange(newValue);
       }
     },
@@ -39,7 +39,7 @@ export const WorkspaceNameField = ({
       })}
       helpText={
         <>
-          {MAX_NAME_LENGTH - (value?.length ?? 0)} characters left. <br />
+          {MAX_WORKSPACE_NAME_LENGTH - (value?.length ?? 0)} characters left. <br />
           {i18n.translate('workspace.form.workspaceDetails.name.helpText', {
             defaultMessage:
               'Use a unique name for the workspace. Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
@@ -57,7 +57,7 @@ export const WorkspaceNameField = ({
         placeholder={i18n.translate('workspace.form.workspaceDetails.name.placeholder', {
           defaultMessage: 'Enter a name',
         })}
-        maxLength={MAX_NAME_LENGTH}
+        maxLength={MAX_WORKSPACE_NAME_LENGTH}
       />
     </EuiCompressedFormRow>
   );

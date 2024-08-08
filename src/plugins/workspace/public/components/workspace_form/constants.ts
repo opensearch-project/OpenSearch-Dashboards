@@ -54,6 +54,3 @@ export enum DetailTab {
   Collaborators = 'collaborators',
   Overview = 'overview',
 }
-
-export const MAX_NAME_LENGTH = 40;
-export const MAX_DESCRIPTION_LENGTH = 200;

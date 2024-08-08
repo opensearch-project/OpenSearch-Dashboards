@@ -7,7 +7,7 @@ import { EuiCompressedFormRow, EuiCompressedTextArea } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useCallback } from 'react';
 
-import { MAX_DESCRIPTION_LENGTH } from '../constants';
+import { MAX_WORKSPACE_DESCRIPTION_LENGTH } from '../../../../common/constants';
 
 export interface WorkspaceDescriptionFieldProps {
   value?: string;
@@ -25,7 +25,7 @@ export const WorkspaceDescriptionField = ({
   const handleChange = useCallback(
     (e) => {
       const newValue = e.currentTarget.value;
-      if (newValue.length <= MAX_DESCRIPTION_LENGTH) {
+      if (newValue.length <= MAX_WORKSPACE_DESCRIPTION_LENGTH) {
         onChange(newValue);
       }
     },
@@ -41,7 +41,7 @@ export const WorkspaceDescriptionField = ({
       }
       isInvalid={!!error}
       error={error}
-      helpText={<>{MAX_DESCRIPTION_LENGTH - (value?.length ?? 0)} characters left.</>}
+      helpText={<>{MAX_WORKSPACE_DESCRIPTION_LENGTH - (value?.length ?? 0)} characters left.</>}
     >
       <EuiCompressedTextArea
         value={value}
@@ -52,7 +52,7 @@ export const WorkspaceDescriptionField = ({
           defaultMessage: 'Describe the workspace',
         })}
         readOnly={readOnly}
-        maxLength={MAX_DESCRIPTION_LENGTH}
+        maxLength={MAX_WORKSPACE_DESCRIPTION_LENGTH}
       />
     </EuiCompressedFormRow>
   );
