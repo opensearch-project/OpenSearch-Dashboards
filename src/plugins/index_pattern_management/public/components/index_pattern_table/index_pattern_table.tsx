@@ -38,6 +38,7 @@ import {
   EuiText,
   EuiBadgeGroup,
   EuiPageContent,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
