@@ -4,14 +4,12 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { Query, setOverrides as setFieldOverrides, TimeRange } from '../../../common';
 import { ConfigSchema } from '../../../config';
 import { ISearchStart } from '../../search';
 import { QueryEditorExtensionConfig } from '../query_editor/query_editor_extensions';
 import { QueryEnhancement } from '../types';
-import { Storage, History, createHistory, createStorage } from '../history';
-import { SimpleDataSet } from '../../../common/data_sets/types';
+import { History, createHistory, QueryStorage } from '../history';
 
 export interface DataSettings {
   userQueryLanguage: string;
@@ -29,24 +27,20 @@ export class Settings {
   private isEnabled = false;
   private enabledQueryEnhancementsUpdated$ = new BehaviorSubject<boolean>(this.isEnabled);
   private enhancedAppNames: string[] = [];
-  private Storage: Storage;
   private history: History;
 
   constructor(
     private readonly config: ConfigSchema['enhancements'],
     private readonly search: ISearchStart,
-    private readonly storage: IStorageWrapper,
+    private readonly storage: QueryStorage,
     private readonly queryEnhancements: Map<string, QueryEnhancement>,
     private readonly queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>
   ) {
     this.isEnabled = true;
     this.setUserQueryEnhancementsEnabled(this.isEnabled);
     this.enhancedAppNames = this.isEnabled ? this.config.supportedAppNames : [];
-    this.Storage = createStorage({
-      engine: storage,
-      prefix: 'opensearchDashboards.',
-    });
-    this.history = createHistory({ storage: this.Storage });
+    this.storage = storage;
+    this.history = createHistory({ storage: this.storage });
   }
 
   supportsEnhancementsEnabled(appName: string) {
@@ -100,11 +94,11 @@ export class Settings {
 
   //TODO: update all the prefixes to get rid of opensearchDashboards.
   getUserQueryLanguageBlocklist() {
-    return this.Storage.get('userQueryLanguageBlocklist') || [];
+    return this.storage.get('userQueryLanguageBlocklist') || [];
   }
 
   setUserQueryLanguageBlocklist(languages: string[]) {
-    this.Storage.set(
+    this.storage.set(
       'userQueryLanguageBlocklist',
       languages.map((language) => language.toLowerCase())
     );
@@ -112,14 +106,14 @@ export class Settings {
   }
 
   getUserQueryLanguage() {
-    return this.Storage.get('userQueryLanguage') || 'kuery';
+    return this.storage.get('userQueryLanguage') || 'kuery';
   }
 
   setUserQueryLanguage(language: string) {
     if (language !== this.getUserQueryLanguage()) {
       this.search.df.clear();
     }
-    this.Storage.set('userQueryLanguage', language);
+    this.storage.set('userQueryLanguage', language);
     const queryEnhancement = this.queryEnhancements.get(language);
     this.search.__enhance({
       searchInterceptor: queryEnhancement
@@ -132,26 +126,26 @@ export class Settings {
   }
 
   getUserQueryString() {
-    return this.Storage.get('userQueryString') || '';
+    return this.storage.get('userQueryString') || '';
   }
 
   //TODO: create a helper func to set user query that passed in a query object
   setUserQueryString(query: string) {
-    this.Storage.set('userQueryString', query);
+    this.storage.set('userQueryString', query);
     return true;
   }
 
   getUiOverrides() {
-    return this.Storage.get('uiOverrides') || {};
+    return this.storage.get('uiOverrides') || {};
   }
 
   setUiOverrides(overrides?: { [key: string]: any }) {
     if (!overrides) {
-      this.Storage.delete('uiOverrides');
+      this.storage.remove('uiOverrides');
       setFieldOverrides(undefined);
       return true;
     }
-    this.Storage.set('uiOverrides', overrides);
+    this.storage.set('uiOverrides', overrides);
     setFieldOverrides(overrides.fields);
     return true;
   }
@@ -200,7 +194,7 @@ export class Settings {
 interface Deps {
   config: ConfigSchema['enhancements'];
   search: ISearchStart;
-  storage: IStorageWrapper;
+  storage: QueryStorage;
   queryEnhancements: Map<string, QueryEnhancement>;
   queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>;
 }

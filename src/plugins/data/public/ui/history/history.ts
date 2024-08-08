@@ -10,11 +10,11 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { Storage } from './storage';
+import { QueryStorage } from './storage';
 import { Query, TimeRange } from '../..';
 
 export class History {
-  constructor(private readonly storage: Storage) {}
+  constructor(private readonly storage: QueryStorage) {}
 
   private changeEmitter = new BehaviorSubject<any[]>(this.getHistory() || []);
 
@@ -44,7 +44,7 @@ export class History {
     const keys = this.getHistoryKeys();
     keys.splice(0, 500); // only maintain most recent X;
     keys.forEach((key) => {
-      this.storage.delete(key);
+      this.storage.remove(key);
     });
 
     const timestamp = new Date().getTime();
@@ -78,14 +78,14 @@ export class History {
    * This function should only ever be called once for a user if they had legacy state.
    */
   deleteLegacySavedEditorState() {
-    this.storage.delete('editor_state');
+    this.storage.remove('editor_state');
   }
 
   clearHistory() {
-    this.getHistoryKeys().forEach((key) => this.storage.delete(key));
+    this.getHistoryKeys().forEach((key) => this.storage.remove(key));
   }
 }
 
-export function createHistory(deps: { storage: Storage }) {
+export function createHistory(deps: { storage: QueryStorage }) {
   return new History(deps.storage);
 }

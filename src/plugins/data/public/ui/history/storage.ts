@@ -9,16 +9,16 @@
  * GitHub history for details.
  */
 
-import { transform, startsWith } from 'lodash';
+import { transform, startsWith, keys } from 'lodash';
 import { parse, stringify } from '@osd/std';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 
 export enum StorageKeys {
   WIDTH = 'widths',
 }
 
-export class Storage {
-  constructor(private readonly engine: IStorageWrapper, private readonly prefix: string) {}
+type IStorageEngine = typeof window.localStorage;
+export class QueryStorage {
+  constructor(private readonly engine: IStorageEngine, private readonly prefix: string) {}
 
   encode(val: any) {
     return stringify(val);
@@ -41,34 +41,34 @@ export class Storage {
   }
 
   set(key: string, val: any) {
-    this.engine.set(this.encodeKey(key), this.encode(val));
+    this.engine.setItem(this.encodeKey(key), this.encode(val));
     return val;
   }
 
   has(key: string) {
-    return this.engine.get(this.encodeKey(key)) != null;
+    return this.engine.getItem(this.encodeKey(key)) != null;
   }
 
   get<T>(key: string, _default?: T) {
     if (this.has(key)) {
-      return this.decode(this.engine.get(this.encodeKey(key)));
+      return this.decode(this.engine.getItem(this.encodeKey(key)));
     } else {
       return _default;
     }
   }
 
-  delete(key: string) {
-    return this.engine.remove(this.encodeKey(key));
+  remove(key: string) {
+    return this.engine.removeItem(this.encodeKey(key));
   }
 
   keys(): string[] {
-    return transform(this.engine.keys(), (ours, key) => {
+    return transform(keys(this.engine), (ours, key) => {
       const ourKey = this.decodeKey(key);
       if (ourKey != null) ours.push(ourKey);
     });
   }
 }
 
-export function createStorage(deps: { engine: IStorageWrapper; prefix: string }) {
-  return new Storage(deps.engine, deps.prefix);
+export function createStorage(deps: { engine: IStorageEngine; prefix: string }) {
+  return new QueryStorage(deps.engine, deps.prefix);
 }

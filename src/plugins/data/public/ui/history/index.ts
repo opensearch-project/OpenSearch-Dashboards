@@ -9,5 +9,5 @@
  * GitHub history for details.
  */
 
-export { Storage, createStorage } from './storage';
+export { QueryStorage, createStorage } from './storage';
 export { History, createHistory } from './history';

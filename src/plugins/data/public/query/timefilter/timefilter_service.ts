@@ -29,9 +29,9 @@
  */
 
 import { IUiSettingsClient } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { TimeHistory, Timefilter, TimeHistoryContract, TimefilterContract } from './index';
 import { UI_SETTINGS } from '../../../common';
+import { QueryStorage } from '../../ui';
 
 /**
  * Filter Service
@@ -40,7 +40,7 @@ import { UI_SETTINGS } from '../../../common';
 
 export interface TimeFilterServiceDependencies {
   uiSettings: IUiSettingsClient;
-  storage: IStorageWrapper;
+  storage: QueryStorage;
 }
 
 export class TimefilterService {

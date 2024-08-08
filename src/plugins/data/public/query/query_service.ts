@@ -45,6 +45,7 @@ import {
   LanguageContract,
   LanguageManager,
 } from './query_string/language_manager/language_manager';
+import { QueryStorage } from '../ui';
 
 /**
  * Query Service
@@ -52,13 +53,13 @@ import {
  */
 
 interface QueryServiceSetupDependencies {
-  storage: IStorageWrapper;
+  storage: QueryStorage;
   uiSettings: IUiSettingsClient;
 }
 
 interface QueryServiceStartDependencies {
   savedObjectsClient: SavedObjectsClientContract;
-  storage: IStorageWrapper;
+  storage: QueryStorage;
   uiSettings: IUiSettingsClient;
   indexPatterns: IndexPatternsService;
 }

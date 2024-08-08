@@ -50,4 +50,4 @@ export {
 export { SearchBar, SearchBarProps, StatefulSearchBarProps } from './search_bar';
 export { SuggestionsComponent } from './typeahead';
 export { DataSetNavigator } from './dataset_navigator';
-export { Storage } from './history'
+export { QueryStorage, createStorage } from './history';

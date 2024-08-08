@@ -32,11 +32,12 @@ import moment from 'moment';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { PersistedLog } from '../persisted_log';
 import { TimeRange } from '../../../common';
+import { QueryStorage } from '../../ui';
 
 export class TimeHistory {
   private history: PersistedLog<TimeRange>;
 
-  constructor(storage: IStorageWrapper) {
+  constructor(storage: QueryStorage) {
     const historyOptions = {
       maxLength: 10,
       filterDuplicates: true,

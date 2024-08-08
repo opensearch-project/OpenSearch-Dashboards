@@ -34,14 +34,14 @@ import { CoreStart } from 'opensearch-dashboards/public';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { Query, UI_SETTINGS } from '../../../common';
 import { LanguageManager } from './language_manager/language_manager';
-import { UiEnhancements } from '../../ui';
+import { QueryStorage, UiEnhancements } from '../../ui';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;
   private languageManager: LanguageManager;
 
   constructor(
-    private readonly storage: IStorageWrapper,
+    private readonly storage: QueryStorage,
     private readonly uiSettings: CoreStart['uiSettings']
   ) {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());

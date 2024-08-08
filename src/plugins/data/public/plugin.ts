@@ -33,7 +33,6 @@ import './index.scss';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ConfigSchema } from '../config';
 import {
-  Storage,
   IStorageWrapper,
   createStartServicesGetter,
 } from '../../opensearch_dashboards_utils/public';
@@ -49,7 +48,7 @@ import { SearchService } from './search/search_service';
 import { UiService } from './ui/ui_service';
 import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
-import { Storage } from './ui'
+import { createStorage, QueryStorage } from './ui';
 import {
   IndexPatternsService,
   onRedirectNoIndexPattern,
@@ -118,7 +117,7 @@ export class DataPublicPlugin
   private readonly uiService: UiService;
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
-  private readonly storage: Storage;
+  private readonly storage: QueryStorage;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
@@ -126,10 +125,7 @@ export class DataPublicPlugin
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
     this.autocomplete = new AutocompleteService(initializerContext);
-    //this.storage = new Storage(window.localStorage);
-    this.storage = createStorage(
-      engine: window.localStorage,
-      prefix: 'opensearchDashboards.',);
+    this.storage = createStorage({ engine: window.localStorage, prefix: 'opensearchDashboards.' });
   }
 
   public setup(
