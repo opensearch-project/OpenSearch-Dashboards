@@ -208,7 +208,7 @@ export class HomePublicPlugin
     // Register sample data to all of the use cases in 2.16
     [
       DEFAULT_NAV_GROUPS.all,
-      DEFAULT_NAV_GROUPS.analytics,
+      DEFAULT_NAV_GROUPS.essentials,
       DEFAULT_NAV_GROUPS['security-analytics'],
       DEFAULT_NAV_GROUPS.observability,
       DEFAULT_NAV_GROUPS.search,
