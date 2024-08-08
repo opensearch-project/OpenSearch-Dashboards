@@ -52,7 +52,14 @@ const defaultValues = {
       modes: ['library_write', 'write'],
     },
   ],
-  selectedDataSources: [],
+  selectedDataSources: [
+    {
+      id: 'ds-1',
+      title: 'ds-1-title',
+      description: 'ds-1-description',
+      dataSourceEngineType: 'OpenSearch',
+    },
+  ],
 };
 
 const createWorkspacesSetupContractMockWithValue = (workspace?: WorkspaceObject) => {
@@ -143,7 +150,6 @@ describe('WorkspaceDetail', () => {
       pathname: '/current-path',
       search: '',
       hash: '',
-      state: null,
     };
 
     jest.mock('react-router-dom', () => ({

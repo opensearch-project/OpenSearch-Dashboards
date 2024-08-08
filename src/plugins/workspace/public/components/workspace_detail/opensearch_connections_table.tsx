@@ -162,7 +162,11 @@ export const OpenSearchConnectionTable = ({
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         {SelectedItems.length > 0 && !modalVisible && (
           <EuiFlexItem grow={false}>
-            <EuiButton color="danger" onClick={() => setModalVisible(true)}>
+            <EuiButton
+              color="danger"
+              onClick={() => setModalVisible(true)}
+              data-test-subj="workspace-detail-dataSources-table-bulkRemove"
+            >
               {i18n.translate('workspace.detail.dataSources.table.remove.button', {
                 defaultMessage: 'Remove {numberOfSelect} association(s)',
                 values: { numberOfSelect: SelectedItems.length },

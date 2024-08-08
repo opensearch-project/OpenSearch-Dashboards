@@ -18,13 +18,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from 'react-intl';
-import { CoreStart, SavedObjectsStart, WorkspaceObject } from '../../../../../core/public';
 import { DataSource } from '../../../common/types';
-import { AssociationDataSourceModal } from './association_data_source_modal';
 import { WorkspaceClient } from '../../workspace_client';
-import { convertPermissionSettingsToPermissions, useWorkspaceFormContext } from '../workspace_form';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { OpenSearchConnectionTable } from './opensearch_connections_table';
+import { AssociationDataSourceModal } from './association_data_source_modal';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { CoreStart, SavedObjectsStart, WorkspaceObject } from '../../../../../core/public';
+import { convertPermissionSettingsToPermissions, useWorkspaceFormContext } from '../workspace_form';
 
 export interface SelectDataSourcePanelProps {
   savedObjects: SavedObjectsStart;
@@ -84,7 +84,10 @@ export const SelectDataSourceDetailPanel = ({
   };
 
   const associationButton = (
-    <EuiSmallButton onClick={() => setIsVisible(true)}>
+    <EuiSmallButton
+      onClick={() => setIsVisible(true)}
+      data-test-subj="workspace-detail-dataSources-assign-button"
+    >
       {i18n.translate('workspace.detail.dataSources.assign.button', {
         defaultMessage: 'Association OpenSearch Connections',
       })}
