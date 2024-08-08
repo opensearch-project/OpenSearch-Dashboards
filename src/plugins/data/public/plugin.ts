@@ -49,6 +49,7 @@ import { SearchService } from './search/search_service';
 import { UiService } from './ui/ui_service';
 import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
+import { Storage } from './ui'
 import {
   IndexPatternsService,
   onRedirectNoIndexPattern,
@@ -117,7 +118,7 @@ export class DataPublicPlugin
   private readonly uiService: UiService;
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
-  private readonly storage: IStorageWrapper;
+  private readonly storage: Storage;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
@@ -125,7 +126,10 @@ export class DataPublicPlugin
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
     this.autocomplete = new AutocompleteService(initializerContext);
-    this.storage = new Storage(window.localStorage);
+    //this.storage = new Storage(window.localStorage);
+    this.storage = createStorage(
+      engine: window.localStorage,
+      prefix: 'opensearchDashboards.',);
   }
 
   public setup(
