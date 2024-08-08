@@ -202,9 +202,10 @@ export const getSortedNavLinks = (
     (props) => {
       const { currentItem, parentItem } = props;
       const enricheredResult = enricher ? enricher(currentItem, parentItem) : currentItem;
-      if (enricheredResult.itemType === LinkItemType.LINK) {
-        acc.push(enricheredResult.link);
-      } else if (enricheredResult.itemType === LinkItemType.PARENT_LINK) {
+      if (
+        enricheredResult.itemType === LinkItemType.LINK ||
+        enricheredResult.itemType === LinkItemType.PARENT_LINK
+      ) {
         if (enricheredResult.link) {
           acc.push(enricheredResult.link);
         }

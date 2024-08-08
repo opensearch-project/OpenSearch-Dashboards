@@ -136,9 +136,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           coreStart.chrome.navLinks.getAll()
         ).filter((item) => !item.hidden),
         (currentItem, parentItem) => {
-          /**
-           * Hide sub items in landing page
-           */
+          // Hide sub items because we will only show parent item in landing page.
           if (
             currentItem.itemType === LinkItemType.LINK &&
             parentItem?.itemType === LinkItemType.PARENT_LINK

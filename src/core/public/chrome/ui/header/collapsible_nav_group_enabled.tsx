@@ -145,6 +145,9 @@ export function NavGroups({
       const parentItem = {
         ...props,
         forceOpen: true,
+        /**
+         * The href and onClick should both be undefined to make parent item rendered as accordion.
+         */
         href: undefined,
         onClick: undefined,
         className: classNames(props.className, 'nav-link-parent-item'),
