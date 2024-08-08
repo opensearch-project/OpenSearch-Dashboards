@@ -107,7 +107,7 @@ describe('WorkspaceDetail', () => {
     });
     expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
     await waitFor(() => {
-      expect(screen.queryByText('Manage access and permissions')).not.toBeNull();
+      expect(screen.queryByText('Add collaborators')).not.toBeNull();
     });
   });
 
