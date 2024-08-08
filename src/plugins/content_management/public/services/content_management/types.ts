@@ -31,6 +31,7 @@ export type Section =
       id: string;
       order: number;
       title?: string;
+      columns?: number;
     };
 
 export type Content =

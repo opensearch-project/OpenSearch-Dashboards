@@ -85,7 +85,7 @@ export const HomeListCard = ({ config }: { config: Config }) => {
             {config.list.length > 0 && (
               <EuiDescriptionList>
                 {config.list.map((item) => (
-                  <>
+                  <React.Fragment key={item.href}>
                     <EuiDescriptionListTitle>
                       <EuiLink href={item.href} target="_blank">
                         {item.label}
@@ -94,7 +94,7 @@ export const HomeListCard = ({ config }: { config: Config }) => {
                     <EuiDescriptionListDescription>
                       {item.description}
                     </EuiDescriptionListDescription>
-                  </>
+                  </React.Fragment>
                 ))}
               </EuiDescriptionList>
             )}

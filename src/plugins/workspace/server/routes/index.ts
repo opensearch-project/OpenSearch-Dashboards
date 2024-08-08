@@ -46,13 +46,21 @@ const workspaceOptionalAttributesSchema = {
   reserved: schema.maybe(schema.boolean()),
 };
 
+const workspaceNameSchema = schema.string({
+  validate(value) {
+    if (!value || value.trim().length === 0) {
+      return "can't be empty or blank.";
+    }
+  },
+});
+
 const createWorkspaceAttributesSchema = schema.object({
-  name: schema.string(),
+  name: workspaceNameSchema,
   ...workspaceOptionalAttributesSchema,
 });
 
 const updateWorkspaceAttributesSchema = schema.object({
-  name: schema.maybe(schema.string()),
+  name: schema.maybe(workspaceNameSchema),
   ...workspaceOptionalAttributesSchema,
 });
 
