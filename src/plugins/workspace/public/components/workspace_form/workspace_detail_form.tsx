@@ -57,13 +57,13 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
     formErrors,
     numberOfErrors,
     numberOfChanges,
+    setName,
+    setDescription,
     handleFormSubmit,
     handleColorChange,
     handleUseCaseChange,
     setPermissionSettings,
-    handleNameInputChange,
     setSelectedDataSources,
-    handleDescriptionChange,
   } = useWorkspaceForm(props);
 
   const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin ?? false;
@@ -101,8 +101,8 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
                 description={formData.description}
                 color={formData.color}
                 readOnly={!!defaultValues?.reserved}
-                handleNameInputChange={handleNameInputChange}
-                handleDescriptionChange={handleDescriptionChange}
+                onNameChange={setName}
+                onDescriptionChange={setDescription}
                 handleColorChange={handleColorChange}
               />
             </FormGroup>

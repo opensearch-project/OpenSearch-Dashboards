@@ -39,13 +39,13 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     formErrors,
     numberOfErrors,
     numberOfChanges,
+    setName,
+    setDescription,
     handleFormSubmit,
     handleColorChange,
     handleUseCaseChange,
-    handleNameInputChange,
     setPermissionSettings,
     setSelectedDataSources,
-    handleDescriptionChange,
   } = useWorkspaceForm(props);
 
   const disabledUserOrGroupInputIdsRef = useRef(
@@ -73,9 +73,9 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           description={formData.description}
           color={formData.color}
           readOnly={!!defaultValues?.reserved}
-          handleNameInputChange={handleNameInputChange}
-          handleDescriptionChange={handleDescriptionChange}
           handleColorChange={handleColorChange}
+          onNameChange={setName}
+          onDescriptionChange={setDescription}
         />
       </EuiPanel>
       <EuiSpacer />
