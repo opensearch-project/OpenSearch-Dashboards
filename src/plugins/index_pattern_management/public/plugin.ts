@@ -68,6 +68,9 @@ const sectionsHeader = i18n.translate('indexPatternManagement.indexPattern.secti
   defaultMessage: 'Index patterns',
 });
 
+/**
+ * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
+ */
 const IPM_APP_ID = 'indexPatterns';
 
 export class IndexPatternManagementPlugin
@@ -158,46 +161,6 @@ export class IndexPatternManagementPlugin
         );
       },
     });
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
-      {
-        id: IPM_APP_ID,
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 200,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-      {
-        id: IPM_APP_ID,
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 200,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
-      {
-        id: IPM_APP_ID,
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 200,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
-      {
-        id: IPM_APP_ID,
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 200,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: IPM_APP_ID,
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 200,
-      },
-    ]);
 
     return this.indexPatternManagementService.setup({ httpClient: core.http });
   }

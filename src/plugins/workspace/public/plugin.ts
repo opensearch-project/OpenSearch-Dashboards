@@ -23,6 +23,7 @@ import {
   DEFAULT_NAV_GROUPS,
   NavGroupType,
   ALL_USE_CASE_ID,
+  DEFAULT_APP_CATEGORIES,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -234,6 +235,38 @@ export class WorkspacePlugin
     });
   }
 
+  /**
+   * Add nav links belong to `manage workspace` to all of the use cases.
+   * @param coreSetup
+   */
+  private registerManageWorkspaceCategory(coreSetup: CoreSetup) {
+    [
+      DEFAULT_NAV_GROUPS.all,
+      DEFAULT_NAV_GROUPS.analytics,
+      DEFAULT_NAV_GROUPS.observability,
+      DEFAULT_NAV_GROUPS.search,
+      DEFAULT_NAV_GROUPS['security-analytics'],
+    ].forEach((navGroup) => {
+      coreSetup.chrome.navGroup.addNavLinksToGroup(navGroup, [
+        {
+          id: 'dataSources_core',
+          category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+          order: 100,
+        },
+        {
+          id: 'indexPatterns',
+          category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+          order: 200,
+        },
+        {
+          id: 'objects',
+          category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+          order: 300,
+        },
+      ]);
+    });
+  }
+
   public async setup(
     core: CoreSetup,
     { savedObjectsManagement, management, dataSourceManagement }: WorkspacePluginSetupDeps
@@ -393,6 +426,8 @@ export class WorkspacePlugin
         }),
       },
     ]);
+
+    this.registerManageWorkspaceCategory(core);
 
     return {};
   }
