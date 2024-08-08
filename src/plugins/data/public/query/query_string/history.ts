@@ -10,10 +10,10 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { QueryStorage } from './storage';
+import { QueryStorage } from '../../ui/history/storage';
 import { Query, TimeRange } from '../..';
 
-export class History {
+export class QueryHistory {
   constructor(private readonly storage: QueryStorage) {}
 
   private changeEmitter = new BehaviorSubject<any[]>(this.getHistory() || []);
@@ -87,5 +87,5 @@ export class History {
 }
 
 export function createHistory(deps: { storage: QueryStorage }) {
-  return new History(deps.storage);
+  return new QueryHistory(deps.storage);
 }

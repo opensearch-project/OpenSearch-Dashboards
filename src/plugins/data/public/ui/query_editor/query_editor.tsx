@@ -380,7 +380,7 @@ export default class QueryEditorUI extends Component<Props, State> {
         });
 
     const recentQueries = () => {
-      return <RecentQuery settings={this.props.settings} />;
+      return <RecentQuery services={this.queryService.queryString} />;
     };
 
     return (

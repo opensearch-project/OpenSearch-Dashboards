@@ -10,4 +10,3 @@
  */
 
 export { QueryStorage, createStorage } from './storage';
-export { History, createHistory } from './history';

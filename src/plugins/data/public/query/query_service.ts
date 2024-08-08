@@ -41,10 +41,6 @@ import { DataSetContract, DataSetManager } from './dataset_manager';
 import { buildOpenSearchQuery, getOpenSearchQueryConfig, IndexPatternsService } from '../../common';
 import { getUiSettings } from '../services';
 import { IndexPattern } from '..';
-import {
-  LanguageContract,
-  LanguageManager,
-} from './query_string/language_manager/language_manager';
 import { QueryStorage } from '../ui';
 
 /**

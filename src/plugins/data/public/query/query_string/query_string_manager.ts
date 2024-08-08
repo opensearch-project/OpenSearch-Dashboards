@@ -31,14 +31,15 @@
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
-import { Query, UI_SETTINGS } from '../../../common';
+import { Query, TimeRange, UI_SETTINGS } from '../../../common';
 import { LanguageManager } from './language_manager/language_manager';
 import { QueryStorage, UiEnhancements } from '../../ui';
+import { QueryHistory } from './history';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;
   private languageManager: LanguageManager;
+  private queryHistory: QueryHistory;
 
   constructor(
     private readonly storage: QueryStorage,
@@ -46,6 +47,7 @@ export class QueryStringManager {
   ) {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
     this.languageManager = new LanguageManager(uiSettings);
+    this.queryHistory = new QueryHistory(storage);
   }
 
   private getDefaultQueryString() {
@@ -57,6 +59,24 @@ export class QueryStringManager {
       this.storage.get('opensearchDashboards.userQueryLanguage') ||
       this.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE)
     );
+  }
+
+  public addToQueryHistory(dataSet: string, query: Query, timeRange?: TimeRange) {
+    if (query.query) {
+      this.queryHistory.addQueryToHistory(dataSet, query, timeRange);
+    }
+  }
+
+  public getQueryHistory() {
+    return this.queryHistory.getHistory();
+  }
+
+  public clearQueryHistory() {
+    this.queryHistory.clearHistory();
+  }
+
+  public changeQueryHistory(listener: (reqs: any[]) => void) {
+    return this.queryHistory.change(listener);
   }
 
   public getDefaultQuery() {

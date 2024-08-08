@@ -47,16 +47,16 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
 } from '@elastic/eui';
-import { Settings } from '../types';
+import { QueryStringContract } from '../../query/query_string';
 
 interface Props {
-  settings: Settings;
+  services: QueryStringContract;
 }
 
 const CHILD_ELEMENT_PREFIX = 'historyReq';
 
-export function RecentQuery({ settings }: Props) {
-  const [recentQueries, setRecentQueries] = useState<any[]>(settings?.getQueryHistory());
+export function RecentQuery({ services }: Props) {
+  const [recentQueries, setRecentQueries] = useState<any[]>(services.getQueryHistory());
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onButtonClick = () => {
@@ -64,9 +64,9 @@ export function RecentQuery({ settings }: Props) {
   };
 
   const clearHistory = useCallback(() => {
-    settings?.clearQueryHistory();
-    setRecentQueries(settings?.getQueryHistory());
-  }, [settings]);
+    services?.clearQueryHistory();
+    setRecentQueries(services?.getQueryHistory());
+  }, [services]);
 
   const listRef = useRef<HTMLUListElement | null>(null);
 
@@ -102,9 +102,9 @@ export function RecentQuery({ settings }: Props) {
   //   }, [initialize]);
 
   useEffect(() => {
-    const done = settings.changeQueryHistory(setRecentQueries);
+    const done = services.changeQueryHistory(setRecentQueries);
     return () => done();
-  }, [settings]);
+  }, [services]);
 
   const recentQueryItems = recentQueries.map((query, idx) => {
     const date = moment(query.time);

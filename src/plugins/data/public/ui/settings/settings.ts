@@ -4,12 +4,12 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { Query, setOverrides as setFieldOverrides, TimeRange } from '../../../common';
+import { setOverrides as setFieldOverrides } from '../../../common';
 import { ConfigSchema } from '../../../config';
 import { ISearchStart } from '../../search';
 import { QueryEditorExtensionConfig } from '../query_editor/query_editor_extensions';
 import { QueryEnhancement } from '../types';
-import { History, createHistory, QueryStorage } from '../history';
+import { QueryStorage } from '../history';
 
 export interface DataSettings {
   userQueryLanguage: string;
@@ -27,7 +27,6 @@ export class Settings {
   private isEnabled = false;
   private enabledQueryEnhancementsUpdated$ = new BehaviorSubject<boolean>(this.isEnabled);
   private enhancedAppNames: string[] = [];
-  private history: History;
 
   constructor(
     private readonly config: ConfigSchema['enhancements'],
@@ -40,7 +39,6 @@ export class Settings {
     this.setUserQueryEnhancementsEnabled(this.isEnabled);
     this.enhancedAppNames = this.isEnabled ? this.config.supportedAppNames : [];
     this.storage = storage;
-    this.history = createHistory({ storage: this.storage });
   }
 
   supportsEnhancementsEnabled(appName: string) {
@@ -60,24 +58,6 @@ export class Settings {
     this.isEnabled = enabled;
     this.enabledQueryEnhancementsUpdated$.next(this.isEnabled);
     return true;
-  }
-
-  setQuery(dataSet: string, query: Query, timeRange?: TimeRange) {
-    if (query.query) {
-      this.history.addQueryToHistory(dataSet, query, timeRange);
-    }
-  }
-
-  getQueryHistory() {
-    return this.history.getHistory();
-  }
-
-  clearQueryHistory() {
-    this.history.clearHistory();
-  }
-
-  changeQueryHistory(listener: (reqs: any[]) => void) {
-    return this.history.change(listener);
   }
 
   getAllQueryEnhancements() {
