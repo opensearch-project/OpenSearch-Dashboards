@@ -179,7 +179,7 @@ export class DataPublicPlugin
       query: queryService,
       __enhance: (enhancements: DataPublicPluginEnhancements) => {
         if (enhancements.search) searchService.__enhance(enhancements.search);
-        if (enhancements.ui) uiService.__enhance(enhancements.ui);
+        if (enhancements.ui) queryService.languageManager.__enhance(enhancements.ui);
       },
     };
   }

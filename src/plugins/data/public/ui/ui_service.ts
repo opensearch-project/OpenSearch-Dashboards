@@ -28,8 +28,8 @@ export interface UiServiceStartDependencies {
 
 export class UiService implements Plugin<IUiSetup, IUiStart> {
   enhancementsConfig: ConfigSchema['enhancements'];
-  private queryEnhancements: Map<string, QueryEnhancement> = new Map();
-  private queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig> = {};
+  // private queryEnhancements: Map<string, QueryEnhancement> = new Map();
+  // private queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig> = {};
   private dataSetContainer$ = new BehaviorSubject<HTMLDivElement | null>(null);
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -38,19 +38,19 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
     this.enhancementsConfig = enhancements;
   }
 
-  public setup(core: CoreSetup, {}: UiServiceSetupDependencies): IUiSetup {
-    return {
-      __enhance: (enhancements?: UiEnhancements) => {
-        if (!enhancements) return;
-        if (enhancements.query && enhancements.query.language) {
-          this.queryEnhancements.set(enhancements.query.language, enhancements.query);
-        }
-        if (enhancements.queryEditorExtension) {
-          this.queryEditorExtensionMap[enhancements.queryEditorExtension.id] =
-            enhancements.queryEditorExtension;
-        }
-      },
-    };
+  public setup(core: CoreSetup, {}: UiServiceSetupDependencies): any {
+    // return {
+    //   __enhance: (enhancements?: UiEnhancements) => {
+    //     if (!enhancements) return;
+    //     if (enhancements.query && enhancements.query.language) {
+    //       this.queryEnhancements.set(enhancements.query.language, enhancements.query);
+    //     }
+    //     if (enhancements.queryEditorExtension) {
+    //       this.queryEditorExtensionMap[enhancements.queryEditorExtension.id] =
+    //         enhancements.queryEditorExtension;
+    //     }
+    //   },
+    // };
   }
 
   public start(core: CoreStart, { dataServices, storage }: UiServiceStartDependencies): IUiStart {
@@ -58,8 +58,8 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       config: this.enhancementsConfig,
       search: dataServices.search,
       storage,
-      queryEnhancements: this.queryEnhancements,
-      queryEditorExtensionMap: this.queryEditorExtensionMap,
+      queryEnhancements: dataServices.query.languageManager.getQueryEnhancement(),
+      queryEditorExtensionMap: dataServices.query.languageManager.getQueryEditorExtension(),
     });
 
     const setDataSetContainerRef = (ref: HTMLDivElement | null) => {

@@ -121,6 +121,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   private services = this.props.opensearchDashboards.services;
   private savedQueryService = this.services.data.query.savedQueries;
+  private dataSetService = this.services.data.query.dataSetManager;
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
 
@@ -371,8 +372,13 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         }
       }
     );
-    if (queryAndDateRange.query) {
-      this.props.settings?.setQuery(queryAndDateRange.query, queryAndDateRange.dateRange);
+    const dataSet = this.dataSetService.getDataSet();
+    if (dataSet && queryAndDateRange.query) {
+      this.props.settings?.setQuery(
+        dataSet.id,
+        queryAndDateRange.query,
+        queryAndDateRange.dateRange
+      );
     }
   };
 

@@ -39,6 +39,7 @@ export interface QueryState {
   filters?: Filter[];
   query?: Query;
   dataSet?: SimpleDataSet;
+  language: any;
 }
 
 type QueryStateChangePartial = {

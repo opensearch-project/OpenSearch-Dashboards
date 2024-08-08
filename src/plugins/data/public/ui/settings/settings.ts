@@ -11,6 +11,7 @@ import { ISearchStart } from '../../search';
 import { QueryEditorExtensionConfig } from '../query_editor/query_editor_extensions';
 import { QueryEnhancement } from '../types';
 import { Storage, History, createHistory, createStorage } from '../history';
+import { SimpleDataSet } from '../../../common/data_sets/types';
 
 export interface DataSettings {
   userQueryLanguage: string;
@@ -71,9 +72,9 @@ export class Settings {
   //   return this.Storage.get('userQuery');
   // }
 
-  setQuery(query: Query, timeRange?: TimeRange) {
+  setQuery(dataSet: string, query: Query, timeRange?: TimeRange) {
     if (query.query) {
-      this.history.addQueryToHistory(query, timeRange);
+      this.history.addQueryToHistory(dataSet, query, timeRange);
     }
   }
 

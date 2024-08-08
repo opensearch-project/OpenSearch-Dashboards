@@ -37,17 +37,20 @@ import { createStateContainer } from '../../../../opensearch_dashboards_utils/pu
 import { isFilterPinned, compareFilters, COMPARE_ALL_OPTIONS } from '../../../common';
 import { QueryStringContract } from '../query_string';
 import { DataSetContract } from '../dataset_manager';
+import { LanguageContract } from '../language_manager/language_manager';
 
 export function createQueryStateObservable({
   timefilter: { timefilter },
   filterManager,
   queryString,
   dataSetManager,
+  languageManager,
 }: {
   timefilter: TimefilterSetup;
   filterManager: FilterManager;
   queryString: QueryStringContract;
   dataSetManager: DataSetContract;
+  languageManager: LanguageContract;
 }): Observable<{ changes: QueryStateChange; state: QueryState }> {
   return new Observable((subscriber) => {
     const state = createStateContainer<QueryState>({
@@ -56,6 +59,7 @@ export function createQueryStateObservable({
       filters: filterManager.getFilters(),
       query: queryString.getQuery(),
       dataSet: dataSetManager.getDataSet(),
+      language: languageManager.getQueryEnhancement(),
     });
 
     let currentChange: QueryStateChange = {};
@@ -97,6 +101,10 @@ export function createQueryStateObservable({
           ...state.get(),
           filters: filterManager.getFilters(),
         });
+      }),
+      languageManager.getUpdates$().subscribe(() => {
+        currentChange.language = true;
+        state.set({ ...state.get(), language: languageManager.getQueryEnhancement() });
       }),
       state.state$
         .pipe(
