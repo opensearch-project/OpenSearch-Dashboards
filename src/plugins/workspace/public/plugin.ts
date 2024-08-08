@@ -376,15 +376,6 @@ export class WorkspacePlugin
       },
     ]);
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
-      {
-        id: WORKSPACE_LIST_APP_ID,
-        title: i18n.translate('workspace.settingsAndSetup.workspaceSettings', {
-          defaultMessage: 'workspace settings',
-        }),
-      },
-    ]);
-
     /**
      * register workspace column into saved objects table
      */
