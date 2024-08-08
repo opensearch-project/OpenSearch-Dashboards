@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import moment from 'moment';
 import { BehaviorSubject, of } from 'rxjs';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
@@ -22,36 +23,6 @@ jest.mock('../delete_workspace_modal', () => ({
     </div>
   ),
 }));
-
-const formatDate = function (dateString: string) {
-  const months = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
-
-  const date = new Date(dateString);
-
-  const month = months[date.getUTCMonth()];
-  const day = String(date.getUTCDate()).padStart(2, '0');
-  const year = date.getUTCFullYear();
-
-  const hours = String(date.getUTCHours()).padStart(2, '0');
-  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-  const seconds = String(date.getUTCSeconds()).padStart(2, '0');
-  const milliseconds = String(date.getUTCMilliseconds()).padStart(3, '0');
-
-  return `${month} ${day},${year}@${hours}:${minutes}:${seconds}.${milliseconds}`;
-};
 
 function getWrapWorkspaceListInContext(
   workspaceList = [
@@ -161,9 +132,15 @@ describe('WorkspaceList', () => {
 
   it('should be able to perform the time format transformation', async () => {
     const { getByText } = render(getWrapWorkspaceListInContext());
-    expect(getByText(formatDate('1999-08-06T00:00:00.00Z'))).toBeInTheDocument();
-    expect(getByText(formatDate('1999-08-06T01:00:00.00Z'))).toBeInTheDocument();
-    expect(getByText(formatDate('1999-08-06T02:00:00.00Z'))).toBeInTheDocument();
+    expect(
+      getByText(moment('1999-08-06T00:00:00.00Z').format('MMM DD[,]YYYY [@] HH:mm:ss.SSS'))
+    ).toBeInTheDocument();
+    expect(
+      getByText(moment('1999-08-06T01:00:00.00Z').format('MMM DD[,]YYYY [@] HH:mm:ss.SSS'))
+    ).toBeInTheDocument();
+    expect(
+      getByText(moment('1999-08-06T02:00:00.00Z').format('MMM DD[,]YYYY [@] HH:mm:ss.SSS'))
+    ).toBeInTheDocument();
   });
 
   it('should be able to see the 3 operations: copy, update, delete after click in the meatballs button', async () => {

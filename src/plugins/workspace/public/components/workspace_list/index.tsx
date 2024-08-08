@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
+import moment from 'moment';
 import {
   EuiPage,
   EuiPageBody,
@@ -90,9 +91,17 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
   const [message, setMessage] = useState<React.ReactNode>(
     <EuiEmptyPrompt
       iconType="spacesApp"
-      title={<h3>No workspace available</h3>}
+      title={
+        <h3>
+          {i18n.translate('workspace.workspaceList.emptyState.title', {
+            defaultMessage: 'No workspace available',
+          })}
+        </h3>
+      }
       titleSize="s"
-      body="There are no workspace to display. Create workspace to get started."
+      body={i18n.translate('workspace.workspaceList.emptyState.body', {
+        defaultMessage: 'There are no workspace to display. Create workspace to get started.',
+      })}
       actions={
         isDashboardAdmin && (
           <EuiSmallButton
@@ -121,36 +130,6 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     },
     [application, http]
   );
-
-  const formatDate = function (dateString: string) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
-    const date = new Date(dateString);
-
-    const month = months[date.getUTCMonth()];
-    const day = String(date.getUTCDate()).padStart(2, '0');
-    const year = date.getUTCFullYear();
-
-    const hours = String(date.getUTCHours()).padStart(2, '0');
-    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
-    const milliseconds = String(date.getUTCMilliseconds()).padStart(3, '0');
-
-    return `${month} ${day},${year}@${hours}:${minutes}:${seconds}.${milliseconds}`;
-  };
 
   const addFeatureFilter = (newFeature: string) => {
     setFeatureFilters((prevFilters) => {
@@ -264,7 +243,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
       width: '25%',
       truncateText: false,
       render: (lastUpdatedTime: string) => {
-        return formatDate(lastUpdatedTime);
+        return moment(lastUpdatedTime).format('MMM DD[,]YYYY [@] HH:mm:ss.SSS');
       },
     },
 
