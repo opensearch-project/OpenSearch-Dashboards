@@ -139,28 +139,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                 >
                   <div
                     class="euiFlexItem euiFlexItem--flexGrowZero"
-                  >
-                    <div
-                      class="euiCheckbox"
-                    >
-                      <input
-                        aria-label="Select all rows"
-                        class="euiCheckbox__input"
-                        disabled=""
-                        id="_selection_column-checkbox_generated-id"
-                        type="checkbox"
-                      />
-                      <div
-                        class="euiCheckbox__square"
-                      />
-                      <label
-                        class="euiCheckbox__label"
-                        for="_selection_column-checkbox_generated-id"
-                      >
-                        Select all rows
-                      </label>
-                    </div>
-                  </div>
+                  />
                   <div
                     class="euiFlexItem euiFlexItem--flexGrowZero"
                   >
@@ -208,30 +187,6 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                 />
                 <thead>
                   <tr>
-                    <th
-                      class="euiTableHeaderCellCheckbox"
-                      scope="col"
-                    >
-                      <div
-                        class="euiTableCellContent"
-                      >
-                        <div
-                          class="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
-                        >
-                          <input
-                            aria-label="Select all rows"
-                            class="euiCheckbox__input"
-                            data-test-subj="checkboxSelectAll"
-                            disabled=""
-                            id="_selection_column-checkbox_generated-id"
-                            type="checkbox"
-                          />
-                          <div
-                            class="euiCheckbox__square"
-                          />
-                        </div>
-                      </div>
-                    </th>
                     <th
                       aria-live="polite"
                       aria-sort="ascending"
@@ -340,7 +295,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   >
                     <td
                       class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-                      colspan="6"
+                      colspan="5"
                     >
                       <div
                         class="euiTableCellContent euiTableCellContent--alignCenter"
