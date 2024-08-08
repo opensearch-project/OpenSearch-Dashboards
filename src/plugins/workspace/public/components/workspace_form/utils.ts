@@ -309,7 +309,7 @@ export const validateWorkspaceForm = (
 ) => {
   const formErrors: WorkspaceFormErrors = {};
   const { name, permissionSettings, features, selectedDataSources } = formData;
-  if (name) {
+  if (name && name.trim()) {
     if (!isValidFormTextInput(name)) {
       formErrors.name = {
         code: WorkspaceFormErrorCode.InvalidWorkspaceName,
