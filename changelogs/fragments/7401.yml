@@ -1,2 +1,0 @@
-fix:
-- Make breadcrumb of 4 new added applications comply with BrowserRouter. ([#7401](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7401))

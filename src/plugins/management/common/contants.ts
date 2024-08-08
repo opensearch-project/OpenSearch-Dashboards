@@ -29,3 +29,17 @@
  */
 
 export const MANAGEMENT_APP_ID = 'management';
+export const DEFAULT_MANAGEMENT_CAPABILITIES = {
+  management: {
+    /*
+     * Management settings correspond to management section/link ids, and should not be changed
+     * without also updating those definitions.
+     */
+    opensearchDashboards: {
+      settings: true,
+      indexPatterns: true,
+      objects: true,
+      dataSources: true,
+    },
+  },
+};

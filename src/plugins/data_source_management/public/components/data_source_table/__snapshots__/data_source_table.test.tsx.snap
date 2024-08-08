@@ -56,9 +56,11 @@ exports[`DataSourceTable should get datasources failed should render empty table
           }
         }
       >
-        <EuiText>
+        <EuiText
+          size="s"
+        >
           <div
-            className="euiText euiText--medium"
+            className="euiText euiText--small"
           >
             <FormattedMessage
               defaultMessage="No Data Source Connections have been created yet."
@@ -3198,9 +3200,11 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
           }
         }
       >
-        <EuiText>
+        <EuiText
+          size="s"
+        >
           <div
-            className="euiText euiText--medium"
+            className="euiText euiText--small"
           >
             <FormattedMessage
               defaultMessage="No Data Source Connections have been created yet."

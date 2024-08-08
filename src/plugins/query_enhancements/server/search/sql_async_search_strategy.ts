@@ -15,6 +15,7 @@ import {
   createDataFrame,
 } from '../../../data/common';
 import { Facet } from '../utils';
+import { SEARCH_STRATEGY } from '../../common';
 
 export const sqlAsyncSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -22,11 +23,15 @@ export const sqlAsyncSearchStrategyProvider = (
   client: ILegacyClusterClient,
   usage?: SearchUsage
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
-  const sqlAsyncFacet = new Facet({ client, logger, endpoint: 'observability.runDirectQuery' });
+  const sqlAsyncFacet = new Facet({
+    client,
+    logger,
+    endpoint: 'enhancements.runDirectQuery',
+  });
   const sqlAsyncJobsFacet = new Facet({
     client,
     logger,
-    endpoint: 'observability.getJobStatus',
+    endpoint: 'enhancements.getJobStatus',
     useJobs: true,
   });
 
@@ -39,7 +44,7 @@ export const sqlAsyncSearchStrategyProvider = (
           request.body = {
             query: request.body.query.qs,
             datasource: df?.meta?.queryConfig?.dataSourceName,
-            lang: 'sql',
+            lang: SEARCH_STRATEGY.SQL,
             sessionId: df?.meta?.sessionId,
           };
           const rawResponse: any = await sqlAsyncFacet.describeQuery(context, request);
@@ -60,6 +65,7 @@ export const sqlAsyncSearchStrategyProvider = (
           };
           const dataFrame = createDataFrame(partial);
           dataFrame.meta = {
+            ...dataFrame.meta,
             query: request.body.query,
             queryId,
             sessionId,
@@ -76,7 +82,7 @@ export const sqlAsyncSearchStrategyProvider = (
           const asyncResponse: any = await sqlAsyncJobsFacet.describeQuery(context, request);
           const status = asyncResponse.data.status;
           const partial: PartialDataFrame = {
-            name: '',
+            ...request.body.df,
             fields: asyncResponse?.data?.schema || [],
           };
           const dataFrame = createDataFrame(partial);
@@ -87,6 +93,7 @@ export const sqlAsyncSearchStrategyProvider = (
           dataFrame.size = asyncResponse?.data?.datarows?.length || 0;
 
           dataFrame.meta = {
+            ...dataFrame.meta,
             status,
             queryId,
             error: status === 'FAILED' && asyncResponse.data?.error,

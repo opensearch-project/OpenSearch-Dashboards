@@ -1,2 +1,0 @@
-fix:
-- [Workspace]Add workspaces and permissions fields into saved objects _bulk_get response ([#7565](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7565))

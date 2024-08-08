@@ -73,7 +73,7 @@ export const DSL_SETTINGS = '/indices.getFieldSettings';
 export const OBSERVABILITY_BASE = '/api/observability';
 export const INTEGRATIONS_BASE = '/api/integrations';
 export const JOBS_BASE = '/query/jobs';
-export const DATACONNECTIONS_BASE = '/api/dataconnections';
+export const DATACONNECTIONS_BASE = '/api/directquery/dataconnections';
 export const EDIT = '/edit';
 export const DATACONNECTIONS_UPDATE_STATUS = '/status';
 export const SECURITY_ROLES = '/api/v1/configuration/roles';
@@ -88,7 +88,6 @@ export const SECURITY_PLUGIN_ACCOUNT_API = '/api/v1/configuration/account';
 export const PPL_ENDPOINT = '/_plugins/_ppl';
 export const SQL_ENDPOINT = '/_plugins/_sql';
 export const DSL_ENDPOINT = '/_plugins/_dsl';
-export const DATACONNECTIONS_ENDPOINT = '/_plugins/_query/_datasources';
 export const JOBS_ENDPOINT_BASE = '/_plugins/_async_query';
 export const JOB_RESULT_ENDPOINT = '/result';
 
@@ -318,10 +317,6 @@ export const VISUALIZATION_ERROR = {
 };
 
 export const S3_DATA_SOURCE_TYPE = 's3glue';
-
-export const ASYNC_QUERY_SESSION_ID = 'async-query-session-id';
-export const ASYNC_QUERY_DATASOURCE_CACHE = 'async-query-catalog-cache';
-export const ASYNC_QUERY_ACCELERATIONS_CACHE = 'async-query-acclerations-cache';
 
 export const DIRECT_DUMMY_QUERY = 'select 1';
 

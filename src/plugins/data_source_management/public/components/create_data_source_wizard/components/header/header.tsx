@@ -36,7 +36,7 @@ export const Header = () => {
             </h1>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <EuiText>
+          <EuiText size="s">
             <p>
               <FormattedMessage
                 id="dataSourcesManagement.createDataSource.description"

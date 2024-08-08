@@ -1,2 +1,0 @@
-fix:
-- [MDS][Version Decoupling] Add support of Version Decoupling in Index Patterns Dashboards Plugin ([#7100](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7100))
