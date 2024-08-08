@@ -62,6 +62,18 @@ const generateOSDAdminPermissionError = () =>
     )
   );
 
+const getWorkspacesFromSavedObjects = (savedObjects: SavedObject[]) => {
+  return savedObjects
+    .reduce<string[]>(
+      (previous, { workspaces }) => Array.from(new Set([...previous, ...(workspaces ?? [])])),
+      []
+    )
+    .map((id) => ({
+      type: WORKSPACE_TYPE,
+      id,
+    }));
+};
+
 const getDefaultValuesForEmpty = <T>(values: T[] | undefined, defaultValues: T[]) => {
   return !values || values.length === 0 ? defaultValues : values;
 };
@@ -116,15 +128,12 @@ export class WorkspaceSavedObjectsClientWrapper {
       return false;
     }
     for (const workspaceId of workspaces) {
-      const validateResult = await this.permissionControl.validate(
+      const validateResult = await this.validateMultiWorkspacesPermissions(
+        [workspaceId],
         request,
-        {
-          type: WORKSPACE_TYPE,
-          id: workspaceId,
-        },
         permissionModes
       );
-      if (validateResult?.result) {
+      if (validateResult) {
         return true;
       }
     }
@@ -246,6 +255,10 @@ export class WorkspaceSavedObjectsClientWrapper {
       options?: SavedObjectsBulkUpdateOptions
     ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
       const objectsToUpdate = await wrapperOptions.client.bulkGet<T>(objects, options);
+      this.permissionControl.addToCacheAllowlist(
+        wrapperOptions.request,
+        getWorkspacesFromSavedObjects(objectsToUpdate.saved_objects)
+      );
 
       for (const object of objectsToUpdate.saved_objects) {
         const permitted = await validateUpdateWithWorkspacePermission(object);
@@ -303,6 +316,10 @@ export class WorkspaceSavedObjectsClientWrapper {
                 throw error;
               }
             }
+            this.permissionControl.addToCacheAllowlist(
+              wrapperOptions.request,
+              getWorkspacesFromSavedObjects([rawObject])
+            );
             if (
               !(await this.validateWorkspacesAndSavedObjectsPermissions(
                 rawObject,
@@ -397,6 +414,10 @@ export class WorkspaceSavedObjectsClientWrapper {
       options: SavedObjectsBaseOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
       const objectToBulkGet = await wrapperOptions.client.bulkGet<T>(objects, options);
+      this.permissionControl.addToCacheAllowlist(
+        wrapperOptions.request,
+        getWorkspacesFromSavedObjects(objectToBulkGet.saved_objects)
+      );
 
       for (const object of objectToBulkGet.saved_objects) {
         if (
