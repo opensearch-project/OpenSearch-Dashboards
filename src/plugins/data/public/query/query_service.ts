@@ -41,7 +41,10 @@ import { DataSetContract, DataSetManager } from './dataset_manager';
 import { buildOpenSearchQuery, getOpenSearchQueryConfig, IndexPatternsService } from '../../common';
 import { getUiSettings } from '../services';
 import { IndexPattern } from '..';
-import { LanguageContract, LanguageManager } from './language_manager/language_manager';
+import {
+  LanguageContract,
+  LanguageManager,
+} from './query_string/language_manager/language_manager';
 
 /**
  * Query Service
@@ -65,7 +68,6 @@ export class QueryService {
   timefilter!: TimefilterSetup;
   queryStringManager!: QueryStringContract;
   dataSetManager!: DataSetContract;
-  languageManager!: LanguageContract;
 
   state$!: ReturnType<typeof createQueryStateObservable>;
 
@@ -80,14 +82,12 @@ export class QueryService {
 
     this.queryStringManager = new QueryStringManager(storage, uiSettings);
     this.dataSetManager = new DataSetManager(uiSettings);
-    this.languageManager = new LanguageManager(uiSettings);
 
     this.state$ = createQueryStateObservable({
       filterManager: this.filterManager,
       timefilter: this.timefilter,
       queryString: this.queryStringManager,
       dataSetManager: this.dataSetManager,
-      languageManager: this.languageManager,
     }).pipe(share());
 
     return {
@@ -95,7 +95,6 @@ export class QueryService {
       timefilter: this.timefilter,
       queryString: this.queryStringManager,
       dataSetManager: this.dataSetManager,
-      languageManager: this.languageManager,
       state$: this.state$,
     };
   }
@@ -115,7 +114,6 @@ export class QueryService {
       filterManager: this.filterManager,
       queryString: this.queryStringManager,
       dataSetManager: this.dataSetManager,
-      languageManager: this.languageManager,
       savedQueries: createSavedQueryService(savedObjectsClient),
       state$: this.state$,
       timefilter: this.timefilter,

@@ -12,20 +12,20 @@ import {
   SimpleDataSet,
   SimpleDataSource,
   UI_SETTINGS,
-} from '../../../common';
-import { IndexPatternsContract } from '../../index_patterns';
-import { QueryEnhancement, UiEnhancements } from '../../ui/types';
-import { QueryEditorExtensionConfig } from '../../ui';
-import { DataPublicPluginEnhancements } from '../../types';
+} from '../../../../common';
+import { IndexPatternsContract } from '../../../index_patterns';
+import { QueryEnhancement, UiEnhancements } from '../../../ui/types';
+import { QueryEditorExtensionConfig } from '../../../ui';
+import { DataPublicPluginEnhancements } from '../../../types';
 
 export class LanguageManager {
-  private queryEnhancements$: BehaviorSubject<Map<string, QueryEnhancement>>;
+  private queryEnhancements: Map<string, QueryEnhancement>;
   private queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>;
   //TODO
   //private queryEditorUISettings: Map<string, queryEditorUISettings>;
 
   constructor(private readonly uiSettings: CoreStart['uiSettings']) {
-    this.queryEnhancements$ = new BehaviorSubject<Map<string, QueryEnhancement>>({} as any);
+    this.queryEnhancements = new Map();
     this.queryEditorExtensionMap = {};
     //TODO
     //this.queryEditorUISettings = new Map();
@@ -34,9 +34,7 @@ export class LanguageManager {
   public __enhance = (enhancements: UiEnhancements) => {
     if (!enhancements) return;
     if (enhancements.query && enhancements.query.language) {
-      const map = new Map<string, QueryEnhancement>();
-      map.set(enhancements.query.language, enhancements.query);
-      this.queryEnhancements$.next(map);
+      this.queryEnhancements.set(enhancements.query.language, enhancements.query);
     }
     if (enhancements.queryEditorExtension) {
       this.queryEditorExtensionMap[enhancements.queryEditorExtension.id] =
@@ -82,11 +80,7 @@ export class LanguageManager {
   //   };
 
   public getQueryEnhancement = () => {
-    return this.queryEnhancements$.getValue();
-  };
-
-  public getUpdates$ = () => {
-    return this.queryEnhancements$.asObservable().pipe(skip(1));
+    return this.queryEnhancements;
   };
 
   public getQueryEditorExtension = () => {

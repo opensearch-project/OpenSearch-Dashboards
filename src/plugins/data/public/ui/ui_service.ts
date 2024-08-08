@@ -10,11 +10,10 @@ import { ConfigSchema } from '../../config';
 import { DataPublicPluginStart } from '../types';
 import { createDataSetNavigator } from './dataset_navigator';
 import { createIndexPatternSelect } from './index_pattern_select';
-import { QueryEditorExtensionConfig } from './query_editor';
 import { createSearchBar } from './search_bar/create_search_bar';
 import { createSettings } from './settings';
 import { SuggestionsComponent } from './typeahead';
-import { IUiSetup, IUiStart, QueryEnhancement, UiEnhancements } from './types';
+import { IUiSetup, IUiStart } from './types';
 
 /** @internal */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -58,8 +57,8 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       config: this.enhancementsConfig,
       search: dataServices.search,
       storage,
-      queryEnhancements: dataServices.query.languageManager.getQueryEnhancement(),
-      queryEditorExtensionMap: dataServices.query.languageManager.getQueryEditorExtension(),
+      queryEnhancements: dataServices.query.queryString.getQueryEnhancement(),
+      queryEditorExtensionMap: dataServices.query.queryString.getQueryEditorExtension(),
     });
 
     const setDataSetContainerRef = (ref: HTMLDivElement | null) => {

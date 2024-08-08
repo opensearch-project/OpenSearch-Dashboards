@@ -33,15 +33,19 @@ import { skip } from 'rxjs/operators';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { Query, UI_SETTINGS } from '../../../common';
+import { LanguageManager } from './language_manager/language_manager';
+import { UiEnhancements } from '../../ui';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;
+  private languageManager: LanguageManager;
 
   constructor(
     private readonly storage: IStorageWrapper,
     private readonly uiSettings: CoreStart['uiSettings']
   ) {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
+    this.languageManager = new LanguageManager(uiSettings);
   }
 
   private getDefaultQueryString() {
@@ -99,6 +103,18 @@ export class QueryStringManager {
    */
   public clearQuery = () => {
     this.setQuery(this.getDefaultQuery());
+  };
+
+  public __enhance = (enhancements: UiEnhancements) => {
+    this.languageManager.__enhance(enhancements);
+  };
+
+  public getQueryEnhancement = () => {
+    return this.languageManager.getQueryEnhancement();
+  };
+
+  public getQueryEditorExtension = () => {
+    return this.languageManager.getQueryEditorExtension();
   };
 }
 

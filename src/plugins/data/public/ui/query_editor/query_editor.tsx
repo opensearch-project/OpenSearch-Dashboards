@@ -308,12 +308,15 @@ export default class QueryEditorUI extends Component<Props, State> {
     const useQueryEditor =
       this.props.query.language !== 'kuery' && this.props.query.language !== 'lucene';
 
+    const queryEnhancements = this.queryService.queryString.getQueryEnhancement();
+    console.log('queryEnhancements', queryEnhancements);
     const languageSelector = (
       <QueryLanguageSelector
         language={this.props.query.language}
         anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
         onSelectLanguage={this.onSelectLanguage}
         appName={this.services.appName}
+        queryEnhancements={queryEnhancements}
       />
     );
 

@@ -13,12 +13,14 @@ import {
 import { i18n } from '@osd/i18n';
 import React, { useState } from 'react';
 import { getUiService } from '../../services';
+import { QueryEnhancement } from '../types';
 
 export interface QueryLanguageSelectorProps {
   language: string;
   onSelectLanguage: (newLanguage: string) => void;
   anchorPosition?: PopoverAnchorPosition;
   appName?: string;
+  queryEnhancements: Map<string, QueryEnhancement>;
 }
 
 const mapExternalLanguageToOptions = (language: string) => {
@@ -55,8 +57,9 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
 
   const uiService = getUiService();
 
-  const queryEnhancements = uiService.Settings.getAllQueryEnhancements();
-  queryEnhancements.forEach((enhancement) => {
+  //const queryEnhancements = uiService.Settings.getAllQueryEnhancements();
+
+  props.queryEnhancements.forEach((enhancement) => {
     if (
       (enhancement.supportedAppNames &&
         props.appName &&

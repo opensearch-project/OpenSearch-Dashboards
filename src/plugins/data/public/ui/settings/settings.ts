@@ -68,10 +68,6 @@ export class Settings {
     return true;
   }
 
-  // getUserQuery() {
-  //   return this.Storage.get('userQuery');
-  // }
-
   setQuery(dataSet: string, query: Query, timeRange?: TimeRange) {
     if (query.query) {
       this.history.addQueryToHistory(dataSet, query, timeRange);
