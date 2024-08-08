@@ -13,6 +13,7 @@ import {
   IDataFrameWithAggs,
   IDataFrameResponse,
   PartialDataFrame,
+  DataFrameQueryConfig,
 } from './types';
 import { IFieldType } from './fields';
 import { IndexPatternFieldMap, IndexPatternSpec } from '../index_patterns';
@@ -43,29 +44,6 @@ export const getRawQueryString = (
     searchRequest.params?.body?.query?.queries[1]?.query ??
     searchRequest.params?.body?.query?.queries[0]?.query
   );
-};
-
-/**
- * Parses a raw query string and extracts the query string and data source.
- * @param rawQueryString - The raw query string to parse.
- * @returns An object containing the parsed query string and data source (if found).
- */
-export const parseRawQueryString = (rawQueryString: string) => {
-  const rawDataSource = rawQueryString.match(/::(.*?)::/);
-  return {
-    qs: rawQueryString.replace(/::.*?::/, ''),
-    formattedQs(key: string = '.'): string {
-      const parts = rawQueryString.split('::');
-      if (parts.length > 1) {
-        return (parts.slice(0, 1).join('') + parts.slice(1).join(key)).replace(
-          new RegExp(key + '$'),
-          ''
-        );
-      }
-      return rawQueryString;
-    },
-    ...(rawDataSource && { dataSource: rawDataSource[1] }),
-  };
 };
 
 /**
@@ -188,16 +166,6 @@ export const convertResult = (response: IDataFrameResponse): SearchResponse<any>
   }
   const data = body as IDataFrame;
   const hits: any[] = [];
-  for (let index = 0; index < data.size; index++) {
-    const hit: { [key: string]: any } = {};
-    data.fields.forEach((field) => {
-      hit[field.name] = field.values[index];
-    });
-    hits.push({
-      _index: data.name,
-      _source: hit,
-    });
-  }
   const searchResponse: SearchResponse<any> = {
     took: response.took,
     timed_out: false,
@@ -210,9 +178,23 @@ export const convertResult = (response: IDataFrameResponse): SearchResponse<any>
     hits: {
       total: 0,
       max_score: 0,
-      hits,
+      hits: [],
     },
   };
+
+  if (data && data.fields && data.fields.length > 0) {
+    for (let index = 0; index < data.size; index++) {
+      const hit: { [key: string]: any } = {};
+      data.fields.forEach((field) => {
+        hit[field.name] = field.values[index];
+      });
+      hits.push({
+        _index: data.name,
+        _source: hit,
+      });
+    }
+  }
+  searchResponse.hits.hits = hits;
 
   if (data.hasOwnProperty('aggs')) {
     const dataWithAggs = data as IDataFrameWithAggs;
@@ -305,9 +287,19 @@ export const getFieldType = (field: IFieldType | Partial<IFieldType>): string | 
  */
 export const getTimeField = (
   data: IDataFrame,
+  queryConfig?: DataFrameQueryConfig,
   aggConfig?: DataFrameAggConfig
 ): Partial<IFieldType> | undefined => {
+  if (queryConfig?.timeFieldName) {
+    return {
+      name: queryConfig.timeFieldName,
+      type: 'date',
+    };
+  }
   const fields = data.schema || data.fields;
+  if (!fields) {
+    throw Error('Invalid time field');
+  }
   return aggConfig && aggConfig.date_histogram && aggConfig.date_histogram.field
     ? fields.find((field) => field.name === aggConfig?.date_histogram?.field)
     : fields.find((field) => field.type === 'date');
@@ -491,7 +483,12 @@ export const dataFrameToSpec = (dataFrame: IDataFrame, id?: string): IndexPatter
   return {
     id: id ?? DATA_FRAME_TYPES.DEFAULT,
     title: dataFrame.name,
-    timeFieldName: getTimeField(dataFrame)?.name,
+    timeFieldName: getTimeField(dataFrame, dataFrame.meta?.queryConfig)?.name,
+    dataSourceRef: {
+      id: dataFrame.meta?.queryConfig?.dataSourceId,
+      name: dataFrame.meta?.queryConfig?.dataSourceName,
+      type: dataFrame.meta?.queryConfig?.dataSourceType,
+    },
     type: !id ? DATA_FRAME_TYPES.DEFAULT : undefined,
     fields: fields.reduce(flattenFields, {} as IndexPatternFieldMap),
   };

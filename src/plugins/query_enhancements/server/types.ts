@@ -4,9 +4,7 @@
  */
 
 import { PluginSetup } from 'src/plugins/data/server';
-import { DataSourcePluginSetup } from '../../data_source/server';
-import { Logger } from '../../../core/server';
-import { ConfigSchema } from '../common/config';
+import { DataSourcePluginSetup } from 'src/plugins/data_source/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueryEnhancementsPluginSetup {}
@@ -17,6 +15,9 @@ export interface QueryEnhancementsPluginSetupDependencies {
   data: PluginSetup;
   dataSource?: DataSourcePluginSetup;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface QueryEnhancementsPluginStartDependencies {}
 
 export interface ISchema {
   name: string;

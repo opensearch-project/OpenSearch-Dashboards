@@ -88,8 +88,10 @@ export class Settings {
   }
 
   setUserQueryLanguage(language: string) {
+    if (language !== this.getUserQueryLanguage()) {
+      this.search.df.clear();
+    }
     this.storage.set('opensearchDashboards.userQueryLanguage', language);
-    this.search.df.clear();
     const queryEnhancement = this.queryEnhancements.get(language);
     this.search.__enhance({
       searchInterceptor: queryEnhancement
@@ -134,6 +136,22 @@ export class Settings {
       this.setUiOverrides({ fields: undefined, showDocLinks: undefined });
     }
   }
+
+  setUserQuerySessionId(dataSourceName: string, sessionId: string | null) {
+    if (sessionId !== null) {
+      sessionStorage.setItem(`async-query-session-id_${dataSourceName}`, sessionId);
+    }
+  }
+
+  setUserQuerySessionIdByObj = (dataSourceName: string, obj: Record<string, any>) => {
+    const sessionId =
+      'sessionId'.split('.').reduce((acc: any, part: string) => acc && acc[part], obj) || null;
+    this.setUserQuerySessionId(dataSourceName, sessionId);
+  };
+
+  getUserQuerySessionId = (dataSourceName: string) => {
+    return sessionStorage.getItem(`async-query-session-id_${dataSourceName}`);
+  };
 
   toJSON(): DataSettings {
     return {

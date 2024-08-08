@@ -177,6 +177,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
           tabs={detailTabs}
           selectedTab={detailTabs[detailTabs.findIndex((tab) => tab.id === selectedTabId)]}
           onTabClick={handleTabClick}
+          size="s"
         />
       </EuiPageBody>
       {deletedWorkspace && (

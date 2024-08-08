@@ -12,6 +12,7 @@ export * from './_df_cache';
 export enum DATA_FRAME_TYPES {
   DEFAULT = 'data_frame',
   POLLING = 'data_frame_polling',
+  ERROR = 'data_frame_error',
 }
 
 export interface DataFrameService {
@@ -44,6 +45,12 @@ export interface DataFrameAgg {
  */
 export interface DataFrameBucketAgg extends DataFrameAgg {
   key: string;
+}
+
+export interface DataFrameQueryConfig {
+  dataSourceId?: string;
+  dataSourceName?: string;
+  timeFieldName?: string;
 }
 
 /**

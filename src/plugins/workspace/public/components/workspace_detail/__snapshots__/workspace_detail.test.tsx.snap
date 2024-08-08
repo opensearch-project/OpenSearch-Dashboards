@@ -225,7 +225,7 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
         data-test-subj="workspaceTabs"
       >
         <div
-          class="euiTabs"
+          class="euiTabs euiTabs--small"
           role="tablist"
         >
           <button

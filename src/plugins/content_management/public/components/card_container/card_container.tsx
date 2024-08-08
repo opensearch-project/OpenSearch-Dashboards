@@ -5,17 +5,11 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Container, ContainerInput, EmbeddableStart } from '../../../../embeddable/public';
+import { Container, EmbeddableStart } from '../../../../embeddable/public';
 import { CardList } from './card_list';
+import { CardContainerInput } from './types';
 
 export const CARD_CONTAINER = 'CARD_CONTAINER';
-
-export type CardContainerInput = ContainerInput<{
-  description: string;
-  onClick?: () => void;
-  getIcon?: () => React.ReactElement;
-  getFooter?: () => React.ReactElement;
-}>;
 
 export class CardContainer extends Container<{}, CardContainerInput> {
   public readonly type = CARD_CONTAINER;

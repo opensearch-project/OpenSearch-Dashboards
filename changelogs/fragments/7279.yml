@@ -1,2 +1,0 @@
-fix:
-- Unassign data source before deleteByWorkspace ([#7279](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7279))

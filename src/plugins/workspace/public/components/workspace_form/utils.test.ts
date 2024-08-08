@@ -161,6 +161,18 @@ describe('validateWorkspaceForm', () => {
       message: 'Name is required. Enter a name.',
     });
   });
+  it('should return error if name is empty string', () => {
+    expect(validateWorkspaceForm({ name: '' }, false).name).toEqual({
+      code: WorkspaceFormErrorCode.WorkspaceNameMissing,
+      message: 'Name is required. Enter a name.',
+    });
+  });
+  it('should return error if name is blank string', () => {
+    expect(validateWorkspaceForm({ name: '   ' }, false).name).toEqual({
+      code: WorkspaceFormErrorCode.WorkspaceNameMissing,
+      message: 'Name is required. Enter a name.',
+    });
+  });
   it('should return error if name is invalid', () => {
     expect(validateWorkspaceForm({ name: '~' }, false).name).toEqual({
       code: WorkspaceFormErrorCode.InvalidWorkspaceName,

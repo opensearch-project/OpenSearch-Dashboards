@@ -7,16 +7,16 @@ import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { IStorageWrapper, Storage } from '../../opensearch_dashboards_utils/public';
 import { ConfigSchema } from '../common/config';
-import { ConnectionsService, createDataSourceConnectionExtension } from './data_source_connection';
-import { createQueryAssistExtension } from './query_assist';
-import { PPLSearchInterceptor, SQLAsyncSearchInterceptor, SQLSearchInterceptor } from './search';
 import { setData, setStorage } from './services';
+import { createQueryAssistExtension } from './query_assist';
+import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
 import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
+import { UI_SETTINGS } from '../common';
 
 export class QueryEnhancementsPlugin
   implements
@@ -28,7 +28,6 @@ export class QueryEnhancementsPlugin
     > {
   private readonly storage: IStorageWrapper;
   private readonly config: ConfigSchema;
-  private connectionsService!: ConnectionsService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -39,43 +38,34 @@ export class QueryEnhancementsPlugin
     core: CoreSetup<QueryEnhancementsPluginStartDependencies>,
     { data }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
-    this.connectionsService = new ConnectionsService({
-      startServices: core.getStartServices(),
-      http: core.http,
+    core.uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
+      if (key === UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) {
+        if (newValue) {
+          core.uiSettings.set(UI_SETTINGS.STATE_STORE_IN_SESSION_STORAGE, true);
+        }
+      }
+      if (key === UI_SETTINGS.STATE_STORE_IN_SESSION_STORAGE) {
+        if (!newValue) {
+          core.uiSettings.set(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED, false);
+        }
+      }
     });
 
-    const pplSearchInterceptor = new PPLSearchInterceptor(
-      {
-        toasts: core.notifications.toasts,
-        http: core.http,
-        uiSettings: core.uiSettings,
-        startServices: core.getStartServices(),
-        usageCollector: data.search.usageCollector,
-      },
-      this.connectionsService
-    );
+    const pplSearchInterceptor = new PPLSearchInterceptor({
+      toasts: core.notifications.toasts,
+      http: core.http,
+      uiSettings: core.uiSettings,
+      startServices: core.getStartServices(),
+      usageCollector: data.search.usageCollector,
+    });
 
-    const sqlSearchInterceptor = new SQLSearchInterceptor(
-      {
-        toasts: core.notifications.toasts,
-        http: core.http,
-        uiSettings: core.uiSettings,
-        startServices: core.getStartServices(),
-        usageCollector: data.search.usageCollector,
-      },
-      this.connectionsService
-    );
-
-    const sqlAsyncSearchInterceptor = new SQLAsyncSearchInterceptor(
-      {
-        toasts: core.notifications.toasts,
-        http: core.http,
-        uiSettings: core.uiSettings,
-        startServices: core.getStartServices(),
-        usageCollector: data.search.usageCollector,
-      },
-      this.connectionsService
-    );
+    const sqlSearchInterceptor = new SQLSearchInterceptor({
+      toasts: core.notifications.toasts,
+      http: core.http,
+      uiSettings: core.uiSettings,
+      startServices: core.getStartServices(),
+      usageCollector: data.search.usageCollector,
+    });
 
     data.__enhance({
       ui: {
@@ -89,15 +79,15 @@ export class QueryEnhancementsPlugin
               initialTo: moment().add(2, 'days').toISOString(),
             },
             showFilterBar: false,
-            showDataSetsSelector: false,
+            showDataSetsSelector: true,
             showDataSourcesSelector: true,
           },
           fields: {
             filterable: false,
             visualizable: false,
           },
+          showDocLinks: false,
           supportedAppNames: ['discover'],
-          connectionService: this.connectionsService,
         },
       },
     });
@@ -110,9 +100,9 @@ export class QueryEnhancementsPlugin
           searchBar: {
             showDatePicker: false,
             showFilterBar: false,
-            showDataSetsSelector: false,
+            showDataSetsSelector: true,
             showDataSourcesSelector: true,
-            queryStringInput: { initialValue: 'SELECT * FROM <data_source>' },
+            queryStringInput: { initialValue: 'SELECT * FROM <data_source> LIMIT 10' },
           },
           fields: {
             filterable: false,
@@ -120,51 +110,13 @@ export class QueryEnhancementsPlugin
           },
           showDocLinks: false,
           supportedAppNames: ['discover'],
-          connectionService: this.connectionsService,
         },
       },
     });
 
     data.__enhance({
       ui: {
-        query: {
-          language: 'SQLAsync',
-          search: sqlAsyncSearchInterceptor,
-          searchBar: {
-            showDatePicker: false,
-            showFilterBar: false,
-            showDataSetsSelector: false,
-            showDataSourcesSelector: true,
-            queryStringInput: { initialValue: 'SHOW DATABASES IN ::mys3::' },
-          },
-          fields: {
-            filterable: false,
-            visualizable: false,
-          },
-          showDocLinks: false,
-          supportedAppNames: ['discover'],
-          connectionService: this.connectionsService,
-        },
-      },
-    });
-
-    data.__enhance({
-      ui: {
-        queryEditorExtension: createQueryAssistExtension(
-          core.http,
-          this.connectionsService,
-          this.config.queryAssist
-        ),
-      },
-    });
-
-    data.__enhance({
-      ui: {
-        queryEditorExtension: createDataSourceConnectionExtension(
-          this.connectionsService,
-          core.notifications.toasts,
-          this.config
-        ),
+        queryEditorExtension: createQueryAssistExtension(core.http, data, this.config.queryAssist),
       },
     });
 

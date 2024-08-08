@@ -22,6 +22,7 @@ export type QueryAssistCallOutType =
 
 const EmptyIndexCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   <EuiCallOut
+    className="queryAssist queryAssist__callout"
     data-test-subj="query-assist-empty-index-callout"
     title={
       <FormattedMessage
@@ -39,6 +40,7 @@ const EmptyIndexCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
 
 const ProhibitedQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   <EuiCallOut
+    className="queryAssist queryAssist__callout"
     data-test-subj="query-assist-guard-callout"
     title={
       <FormattedMessage
@@ -56,6 +58,7 @@ const ProhibitedQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
 
 const EmptyQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   <EuiCallOut
+    className="queryAssist queryAssist__callout"
     data-test-subj="query-assist-empty-query-callout"
     title={
       <FormattedMessage
@@ -73,6 +76,7 @@ const EmptyQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
 
 const QueryGeneratedCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   <EuiCallOut
+    className="queryAssist queryAssist__callout"
     data-test-subj="query-assist-query-generated-callout"
     title={
       <FormattedMessage
