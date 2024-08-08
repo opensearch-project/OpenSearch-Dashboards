@@ -324,41 +324,51 @@ export function CollapsibleNavGroupEnabled({
       paddingSize="none"
     >
       <div className="eui-fullHeight left-navigation-wrapper">
-        <div className="eui-yScroll scrollable-container">
+        {!isNavOpen ? null : (
           <EuiPanel
             hasBorder={false}
             borderRadius="none"
             paddingSize={!isNavOpen ? 's' : 'l'}
-            style={{ minHeight: '100%' }}
             hasShadow={false}
+            style={{ flexGrow: 0, paddingBottom: 0 }}
           >
-            {!isNavOpen ? null : (
-              <>
-                <CollapsibleNavTop
-                  navLinks={navLinks}
-                  navigateToApp={navigateToApp}
-                  logos={logos}
-                  onClickBack={() => setCurrentNavGroup(undefined)}
-                  currentNavGroup={currentNavGroup}
-                  shouldShrinkNavigation={!isNavOpen}
-                  onClickShrink={closeNav}
-                  visibleUseCases={visibleUseCases}
-                />
-                <NavGroups
-                  navLinks={navLinksForRender}
-                  navigateToApp={navigateToApp}
-                  onNavItemClick={(event, navItem) => {
-                    if (navItem.title === titleForSeeAll && navItem.category?.id) {
-                      const navGroup = navGroupsMap[navItem.category.id];
-                      onGroupClick(event, navGroup);
-                    }
-                  }}
-                  appId={appId}
-                />
-              </>
-            )}
+            <CollapsibleNavTop
+              navLinks={navLinks}
+              navigateToApp={navigateToApp}
+              logos={logos}
+              onClickBack={() => setCurrentNavGroup(undefined)}
+              currentNavGroup={currentNavGroup}
+              shouldShrinkNavigation={!isNavOpen}
+              onClickShrink={closeNav}
+              visibleUseCases={visibleUseCases}
+            />
           </EuiPanel>
-        </div>
+        )}
+        {!isNavOpen ? null : (
+          <EuiPanel
+            hasBorder={false}
+            borderRadius="none"
+            paddingSize={!isNavOpen ? 's' : 'l'}
+            hasShadow={false}
+            className="eui-yScroll flex-1-container"
+          >
+            <NavGroups
+              navLinks={navLinksForRender}
+              navigateToApp={navigateToApp}
+              onNavItemClick={(event, navItem) => {
+                if (navItem.title === titleForSeeAll && navItem.category?.id) {
+                  const navGroup = navGroupsMap[navItem.category.id];
+                  onGroupClick(event, navGroup);
+                }
+              }}
+              appId={appId}
+            />
+          </EuiPanel>
+        )}
+        {
+          // This element is used to push icons to the bottom of left navigation when collapsed
+          !isNavOpen ? <div className="flex-1-container" /> : null
+        }
         <EuiHorizontalRule margin="none" />
         <div
           className={classNames({

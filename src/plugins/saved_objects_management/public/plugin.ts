@@ -160,6 +160,9 @@ export class SavedObjectsManagementPlugin
 
     if (core.chrome.navGroup.getNavGroupEnabled()) {
       core.application.register({
+        /**
+         * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
+         */
         id: 'objects',
         title: i18n.translate('savedObjectsManagement.assets.label', {
           defaultMessage: 'Assets',
@@ -188,46 +191,6 @@ export class SavedObjectsManagementPlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
       {
         id: 'objects',
-        order: 300,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-      {
-        id: 'objects',
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 300,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
-      {
-        id: 'objects',
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 300,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
-      {
-        id: 'objects',
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 300,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
-      {
-        id: 'objects',
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 300,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: 'objects',
-        category: DEFAULT_APP_CATEGORIES.manage,
         order: 300,
       },
     ]);

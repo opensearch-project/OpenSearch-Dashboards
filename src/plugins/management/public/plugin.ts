@@ -106,7 +106,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
     const settingsLandingPageId = 'settings_landing';
 
     const settingsLandingPageTitle = i18n.translate('management.settings.landingPage.title', {
-      defaultMessage: 'Settings and setup',
+      defaultMessage: 'Overview',
     });
 
     const dataAdministrationLandingPageId = 'data_administration_landing';
@@ -114,7 +114,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
     const dataAdministrationPageTitle = i18n.translate(
       'management.dataAdministration.landingPage.title',
       {
-        defaultMessage: 'Data administration',
+        defaultMessage: 'Overview',
       }
     );
 

@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { InternalApplicationStart } from 'src/core/public/application';
 import { i18n } from '@osd/i18n';
@@ -90,8 +91,7 @@ export const CollapsibleNavTop = ({
   }, [homeLink, navigateToApp]);
 
   return (
-    <div className="side-naivgation-top">
-      <EuiSpacer size="s" />
+    <div>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         {shouldShowHomeLink ? (
           <EuiFlexItem grow={false}>
@@ -130,6 +130,11 @@ export const CollapsibleNavTop = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
+      <EuiText>
+        <div className="nav-link-item" style={{ fontWeight: 'normal' }}>
+          {currentNavGroup?.title}
+        </div>
+      </EuiText>
     </div>
   );
 };
