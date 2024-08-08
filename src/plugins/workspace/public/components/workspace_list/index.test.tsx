@@ -201,7 +201,7 @@ describe('WorkspaceList', () => {
         name: 'name4',
         features: ['use-case-all'],
         description: '',
-        lastUpdatedTime: '2024-08-06T00:00:00.00Z',
+        lastUpdatedTime: '2024-08-05T00:00:00.00Z',
       },
       {
         id: 'id5',
