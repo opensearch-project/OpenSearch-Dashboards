@@ -102,11 +102,11 @@ export const createDashboardInput = async (
                 }
                 const reference = references.find((ref) => ref.name === panel.panelRefName);
                 if (reference) {
-                  panels[panel.panelIndex] = {
-                    gridData: panel.gridData,
+                  panels[reference.id] = {
+                    gridData: { ...panel.gridData, i: reference.id },
                     type: reference.type,
                     explicitInput: {
-                      id: panel.panelIndex,
+                      id: reference.id,
                       savedObjectId: reference.id,
                     },
                   };
