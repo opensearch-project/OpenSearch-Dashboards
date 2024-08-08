@@ -165,7 +165,7 @@ const UserOrGroupSection = ({
       <EuiSmallButton
         fullWidth={false}
         onClick={handleAddNewOne}
-        // data-test-subj={`workspaceForm-permissionSettingPanel-${type}-addNew`}
+        data-test-subj={`workspaceForm-permissionSettingPanel-addNew`}
         color="primary"
         iconType="plusInCircle"
       >

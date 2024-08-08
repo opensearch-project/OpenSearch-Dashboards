@@ -16,6 +16,7 @@ const setup = (options?: Partial<WorkspacePermissionSettingInputProps>) => {
   const onGroupOrUserIdChangeMock = jest.fn();
   const onPermissionModesChangeMock = jest.fn();
   const onDeleteMock = jest.fn();
+  const onTypeChangeMock = jest.fn();
   const renderResult = render(
     <WorkspacePermissionSettingInput
       index={0}
@@ -24,6 +25,7 @@ const setup = (options?: Partial<WorkspacePermissionSettingInputProps>) => {
       onGroupOrUserIdChange={onGroupOrUserIdChangeMock}
       onPermissionModesChange={onPermissionModesChangeMock}
       onDelete={onDeleteMock}
+      onTypeChange={onTypeChangeMock}
       {...options}
     />
   );
@@ -32,6 +34,7 @@ const setup = (options?: Partial<WorkspacePermissionSettingInputProps>) => {
     onGroupOrUserIdChangeMock,
     onPermissionModesChangeMock,
     onDeleteMock,
+    onTypeChangeMock,
   };
 };
 
@@ -54,19 +57,16 @@ describe('WorkspacePermissionSettingInput', () => {
 
     expect(renderResult.getByText('bar')).toBeInTheDocument();
     expect(renderResult.getByText('Read & Write')).toBeInTheDocument();
-    expect(
-      renderResult.getByText('Read & Write').closest('.euiButtonGroupButton-isSelected')
-    ).toBeInTheDocument();
   });
   it('should call onGroupOrUserIdChange with user id', () => {
     const { renderResult, onGroupOrUserIdChangeMock } = setup();
 
     expect(onGroupOrUserIdChangeMock).not.toHaveBeenCalled();
     fireEvent.click(renderResult.getByText('Select a user'));
-    fireEvent.input(renderResult.getByTestId('comboBoxSearchInput'), {
+    fireEvent.input(renderResult.getAllByTestId('comboBoxSearchInput')[0], {
       target: { value: 'user1' },
     });
-    fireEvent.blur(renderResult.getByTestId('comboBoxSearchInput'));
+    fireEvent.blur(renderResult.getAllByTestId('comboBoxSearchInput')[0]);
     expect(onGroupOrUserIdChangeMock).toHaveBeenCalledWith({ type: 'user', userId: 'user1' }, 0);
   });
   it('should call onGroupOrUserIdChange with group', () => {
@@ -76,10 +76,10 @@ describe('WorkspacePermissionSettingInput', () => {
 
     expect(onGroupOrUserIdChangeMock).not.toHaveBeenCalled();
     fireEvent.click(renderResult.getByText('Select a user group'));
-    fireEvent.input(renderResult.getByTestId('comboBoxSearchInput'), {
+    fireEvent.input(renderResult.getAllByTestId('comboBoxSearchInput')[0], {
       target: { value: 'group' },
     });
-    fireEvent.blur(renderResult.getByTestId('comboBoxSearchInput'));
+    fireEvent.blur(renderResult.getAllByTestId('comboBoxSearchInput')[0]);
     expect(onGroupOrUserIdChangeMock).toHaveBeenCalledWith({ type: 'group', group: 'group' }, 0);
   });
 
@@ -97,7 +97,10 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult, onPermissionModesChangeMock } = setup({});
 
     expect(onPermissionModesChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(renderResult.getByTestId('workspace.permissionModeOptions'));
+    const permissionToggleListButton = renderResult
+      .getAllByTestId('comboBoxToggleListButton')
+      .filter((button) => button.closest('[data-test-subj="workspace.permissionModeOptions"]'))[0];
+    fireEvent.click(permissionToggleListButton);
     fireEvent.click(renderResult.getByText('Owner'));
     expect(onPermissionModesChangeMock).toHaveBeenCalledWith(['library_write', 'write'], 0);
   });
@@ -109,4 +112,14 @@ describe('WorkspacePermissionSettingInput', () => {
     fireEvent.click(renderResult.getByLabelText('Delete permission setting'));
     expect(onDeleteMock).toHaveBeenCalledWith(0);
   });
+});
+
+it('should call onTypeChange with types after types changed', () => {
+  const { renderResult, onTypeChangeMock } = setup({});
+
+  expect(onTypeChangeMock).not.toHaveBeenCalled();
+  fireEvent.change(renderResult.getByTestId('workspace.typeOptions'), {
+    target: { value: 'group' },
+  });
+  expect(onTypeChangeMock).toHaveBeenCalledWith('group', 0);
 });

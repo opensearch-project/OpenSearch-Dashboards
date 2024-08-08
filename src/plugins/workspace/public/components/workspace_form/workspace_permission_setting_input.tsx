@@ -186,6 +186,7 @@ export const WorkspacePermissionSettingInput = ({
                   boxShadow: 'none',
                   fontWeight: 'bold',
                 }}
+                data-test-subj="workspace.typeOptions"
               />
             </EuiFlexItem>
           }
