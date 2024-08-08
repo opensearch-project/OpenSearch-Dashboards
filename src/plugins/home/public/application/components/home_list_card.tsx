@@ -9,10 +9,12 @@ import {
   EuiText,
   EuiLink,
   EuiTitle,
-  EuiPanel,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
+  EuiPanel,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
@@ -67,35 +69,49 @@ export const HomeListCard = ({ config }: { config: Config }) => {
   return (
     <>
       <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
-        <EuiTitle>
-          <h4>{config.title}</h4>
-        </EuiTitle>
-        <EuiSpacer />
-        {config.list.length > 0 && (
-          <EuiDescriptionList>
-            {config.list.map((item) => (
-              <>
-                <EuiDescriptionListTitle>
-                  <EuiLink href={item.href} target="_blank">
-                    {item.label}
-                  </EuiLink>
-                </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>{item.description}</EuiDescriptionListDescription>
-              </>
-            ))}
-          </EuiDescriptionList>
-        )}
-
-        {config.allLink ? (
-          <>
-            <EuiSpacer />
-            <EuiLink href={config.allLink} target="_blank">
-              <EuiText size="s" style={{ display: 'inline' }}>
-                View all
-              </EuiText>
-            </EuiLink>
-          </>
-        ) : null}
+        <EuiFlexGroup
+          direction="column"
+          justifyContent="spaceBetween"
+          style={{ height: '100%' }}
+          gutterSize="none"
+        >
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h4>{config.title}</h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiSpacer />
+          <EuiFlexItem style={{ overflow: 'auto' }} grow={true}>
+            {config.list.length > 0 && (
+              <EuiDescriptionList>
+                {config.list.map((item) => (
+                  <>
+                    <EuiDescriptionListTitle>
+                      <EuiLink href={item.href} target="_blank">
+                        {item.label}
+                      </EuiLink>
+                    </EuiDescriptionListTitle>
+                    <EuiDescriptionListDescription>
+                      {item.description}
+                    </EuiDescriptionListDescription>
+                  </>
+                ))}
+              </EuiDescriptionList>
+            )}
+          </EuiFlexItem>
+          <EuiSpacer />
+          <EuiFlexItem grow={false}>
+            {config.allLink ? (
+              <EuiLink href={config.allLink} target="_blank">
+                <EuiText size="s" className="eui-displayInline">
+                  {i18n.translate('home.list.card.view_all', {
+                    defaultMessage: 'View all',
+                  })}
+                </EuiText>
+              </EuiLink>
+            ) : null}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPanel>
     </>
   );
