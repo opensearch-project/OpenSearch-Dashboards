@@ -27,6 +27,7 @@ export const Sidebar: FC = ({ children }) => {
       data: { indexPatterns, dataSources, ui },
       notifications: { toasts },
       application,
+      uiSettings,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
@@ -168,6 +169,7 @@ export const Sidebar: FC = ({ children }) => {
               selectedSources={selectedSources}
               onGetDataSetError={handleGetDataSetError}
               onRefresh={memorizedReload}
+              uiSettings={uiSettings}
               fullWidth
             />
           </EuiSplitPanel.Inner>
