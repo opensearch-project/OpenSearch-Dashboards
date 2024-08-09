@@ -46,7 +46,7 @@ export const selectDataSourceTitle = i18n.translate('workspace.form.selectDataSo
 });
 
 export const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndPermissions.title', {
-  defaultMessage: 'Team members',
+  defaultMessage: 'Workspaces access',
 });
 
 export const detailsName = i18n.translate('workspace.form.workspaceDetails.name.label', {
@@ -68,8 +68,7 @@ export const detailsNamePlaceholder = i18n.translate(
 export const detailsDescriptionIntroduction = i18n.translate(
   'workspace.form.workspaceDetails.description.introduction',
   {
-    defaultMessage:
-      'Help others understand the purpose of this workspace by providing an overview of the workspace you’re creating.',
+    defaultMessage: 'Describe the workspace.',
   }
 );
 
@@ -91,7 +90,7 @@ export const detailsColorLabel = i18n.translate('workspace.form.workspaceDetails
 export const detailsColorHelpText = i18n.translate(
   'workspace.form.workspaceDetails.color.helpText',
   {
-    defaultMessage: 'Accent color for your workspace',
+    defaultMessage: 'The background color of the icon that represents the workspace.',
   }
 );
 

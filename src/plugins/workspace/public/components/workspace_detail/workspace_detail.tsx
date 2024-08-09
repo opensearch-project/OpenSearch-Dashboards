@@ -106,7 +106,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
 
   const pageTitle = (
     <EuiFlexGroup gutterSize="none" alignItems="baseline" justifyContent="flexStart">
-      <EuiFlexItem grow={false}>{currentWorkspace?.name}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{currentWorkspace?.name} settings</EuiFlexItem>
     </EuiFlexGroup>
   );
 

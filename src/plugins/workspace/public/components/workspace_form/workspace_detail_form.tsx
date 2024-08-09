@@ -11,33 +11,19 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiCompressedFormRow,
-  EuiCompressedFieldText,
   EuiText,
-  EuiCompressedTextArea,
-  EuiColorPicker,
   EuiPanel,
   EuiSmallButton,
   EuiHorizontalRule,
 } from '@elastic/eui';
 
+import { i18n } from '@osd/i18n';
 import { WorkspaceFormProps } from './types';
-import { WorkspaceUseCase } from './workspace_use_case';
 import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
-import {
-  DetailTab,
-  detailsColorHelpText,
-  detailsColorLabel,
-  detailsDescriptionIntroduction,
-  detailsDescriptionPlaceholder,
-  detailsName,
-  detailsNameHelpText,
-  detailsNamePlaceholder,
-  detailsUseCaseLabel,
-  usersAndPermissionsTitle,
-} from './constants';
+import { DetailTab, usersAndPermissionsTitle } from './constants';
 import { WorkspaceFormErrorCallout } from './workspace_form_error_callout';
 import { useWorkspaceFormContext } from './workspace_form_context';
+import { WorkspaceDetailFormDetailsProps } from './workspace_detail_form_details';
 
 interface FormGroupProps {
   title: React.ReactNode;
@@ -77,15 +63,8 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
     numberOfChanges,
     handleResetForm,
     handleFormSubmit,
-    handleColorChange,
-    handleUseCaseChange,
     setPermissionSettings,
-    handleNameInputChange,
-    handleDescriptionChange,
   } = useWorkspaceFormContext();
-
-  const currentUseCase =
-    availableUseCases.find((useCase) => useCase.id === formData.useCase)?.title ?? '';
   const disabledUserOrGroupInputIdsRef = useRef(
     defaultValues?.permissionSettings?.map((item) => item.id) ?? []
   );
@@ -135,89 +114,25 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
                 onClick={handleResetForm}
                 data-test-subj="workspaceForm-workspaceDetails-discardChanges"
               >
-                Discard changes
+                {i18n.translate('workspace.detail.button.discardChanges', {
+                  defaultMessage: 'Discard changes',
+                })}
               </EuiSmallButton>
             ) : (
               <EuiSmallButton
                 onClick={() => setIsEditing((prevIsEditing) => !prevIsEditing)}
                 data-test-subj="workspaceForm-workspaceDetails-edit"
               >
-                Edit
+                {i18n.translate('workspace.detail.button.edit', {
+                  defaultMessage: 'Edit',
+                })}
               </EuiSmallButton>
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule />
         {detailTab === DetailTab.Details && (
-          <>
-            <FormGroup title={detailsName}>
-              <EuiCompressedFormRow
-                label={detailsName}
-                helpText={detailsNameHelpText}
-                isInvalid={!!formErrors.name}
-                error={formErrors.name?.message}
-              >
-                <EuiCompressedFieldText
-                  value={formData.name}
-                  onChange={handleNameInputChange}
-                  readOnly={!isEditing}
-                  data-test-subj="workspaceForm-workspaceDetails-nameInputText"
-                  placeholder={detailsNamePlaceholder}
-                />
-              </EuiCompressedFormRow>
-            </FormGroup>
-            <FormGroup
-              title={
-                <>
-                  Description - <i>optional</i>
-                </>
-              }
-              describe={detailsDescriptionIntroduction}
-            >
-              <EuiCompressedFormRow label="Description">
-                <EuiCompressedTextArea
-                  value={formData.description}
-                  onChange={handleDescriptionChange}
-                  readOnly={!isEditing}
-                  data-test-subj="workspaceForm-workspaceDetails-descriptionInputText"
-                  rows={4}
-                  placeholder={detailsDescriptionPlaceholder}
-                />
-              </EuiCompressedFormRow>
-            </FormGroup>
-            <FormGroup title={detailsUseCaseLabel}>
-              {isEditing ? (
-                <WorkspaceUseCase
-                  value={formData.useCase}
-                  onChange={handleUseCaseChange}
-                  formErrors={formErrors}
-                  availableUseCases={availableUseCases}
-                />
-              ) : (
-                <EuiCompressedFormRow label={detailsUseCaseLabel}>
-                  <EuiCompressedFieldText
-                    value={currentUseCase}
-                    readOnly={true}
-                    data-test-subj="workspaceForm-workspaceDetails-nameInputText"
-                  />
-                </EuiCompressedFormRow>
-              )}
-            </FormGroup>
-            <FormGroup title={detailsColorLabel} describe={detailsColorHelpText}>
-              <EuiCompressedFormRow
-                label={detailsColorLabel}
-                isInvalid={!!formErrors.color}
-                error={formErrors.color?.message}
-              >
-                <EuiColorPicker
-                  color={formData.color}
-                  onChange={handleColorChange}
-                  readOnly={!isEditing}
-                  data-test-subj="workspaceForm-workspaceDetails-colorPicker"
-                />
-              </EuiCompressedFormRow>
-            </FormGroup>
-          </>
+          <WorkspaceDetailFormDetailsProps availableUseCases={availableUseCases} />
         )}
         {detailTab === DetailTab.Collaborators && (
           <FormGroup title={usersAndPermissionsTitle}>
