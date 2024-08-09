@@ -259,7 +259,13 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 2`] = `
         <div
           class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
           style="min-height: 100%;"
-        />
+        >
+          <button
+            data-test-subj="back"
+          >
+            go back
+          </button>
+        </div>
       </div>
       <hr
         class="euiHorizontalRule euiHorizontalRule--full"
