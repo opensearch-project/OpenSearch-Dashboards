@@ -6,20 +6,9 @@
 .newTopNavHeader {
   z-index: 1000;
   padding-left: $euiSizeXS;
-
-  &.shadedTopNavHeader {
-    background-color: $euiColorGhost;
-
-    &:not(:last-child) {
-      box-shadow: none;
-      border-bottom: none;
-    }
-  }
-
-  &:not(.shadedTopNavHeader) {
-    box-shadow: none;
-    border-bottom: none;
-  }
+  box-shadow: none;
+  border-bottom: none;
+  background: none;
 
   &.primaryHeader {
     height: auto;
