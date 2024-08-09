@@ -14,11 +14,7 @@ import {
 import { map, switchMap, takeUntil } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from '../../ui_settings';
-import {
-  flattenLinksOrCategories,
-  fulfillRegistrationLinksToChromeNavLinks,
-  getOrderedLinksOrCategories,
-} from '../utils';
+import { fulfillRegistrationLinksToChromeNavLinks, getSortedNavLinks } from '../utils';
 import { ChromeNavLinks } from '../nav_links';
 import { InternalApplicationStart } from '../../application';
 import { NavGroupStatus } from '../../../../core/types';
@@ -117,10 +113,8 @@ export class ChromeNavGroupService {
     navGroup: NavGroupItemInMap,
     allValidNavLinks: Array<Readonly<ChromeNavLink>>
   ) {
-    return flattenLinksOrCategories(
-      getOrderedLinksOrCategories(
-        fulfillRegistrationLinksToChromeNavLinks(navGroup.navLinks, allValidNavLinks)
-      )
+    return getSortedNavLinks(
+      fulfillRegistrationLinksToChromeNavLinks(navGroup.navLinks, allValidNavLinks)
     );
   }
 
@@ -267,14 +261,17 @@ export class ChromeNavGroupService {
       if (appId && navGroupMap) {
         const appIdNavGroupMap = new Map<string, Set<string>>();
         // iterate navGroupMap
-        Object.keys(navGroupMap).forEach((navGroupId) => {
-          navGroupMap[navGroupId].navLinks.forEach((navLink) => {
-            const navLinkId = navLink.id;
-            const navGroupSet = appIdNavGroupMap.get(navLinkId) || new Set();
-            navGroupSet.add(navGroupId);
-            appIdNavGroupMap.set(navLinkId, navGroupSet);
+        Object.keys(navGroupMap)
+          // Nav group of Hidden status should be filtered out when counting navGroups the currentApp belongs to
+          .filter((navGroupId) => navGroupMap[navGroupId].status !== NavGroupStatus.Hidden)
+          .forEach((navGroupId) => {
+            navGroupMap[navGroupId].navLinks.forEach((navLink) => {
+              const navLinkId = navLink.id;
+              const navGroupSet = appIdNavGroupMap.get(navLinkId) || new Set();
+              navGroupSet.add(navGroupId);
+              appIdNavGroupMap.set(navLinkId, navGroupSet);
+            });
           });
-        });
 
         const navGroups = appIdNavGroupMap.get(appId);
         if (navGroups && navGroups.size === 1) {

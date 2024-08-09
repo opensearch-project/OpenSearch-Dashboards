@@ -43,7 +43,7 @@ describe('<NavGroups />', () => {
   it('should render correctly', () => {
     const navigateToApp = jest.fn();
     const onNavItemClick = jest.fn();
-    const { container, getByTestId } = render(
+    const { container, getByTestId, queryByTestId } = render(
       <NavGroups
         navLinks={[
           getMockedNavLink({
@@ -88,7 +88,14 @@ describe('<NavGroups />', () => {
     expect(container).toMatchSnapshot();
     expect(container.querySelectorAll('.nav-link-item-btn').length).toEqual(5);
     fireEvent.click(getByTestId('collapsibleNavAppLink-pure'));
-    expect(navigateToApp).toBeCalledWith('pure');
+    expect(navigateToApp).toBeCalledTimes(0);
+    // The accordion is collapsed
+    expect(queryByTestId('collapsibleNavAppLink-subLink')).toBeNull();
+
+    // Expand the accordion
+    fireEvent.click(getByTestId('collapsibleNavAppLink-pure'));
+    fireEvent.click(getByTestId('collapsibleNavAppLink-subLink'));
+    expect(navigateToApp).toBeCalledWith('subLink');
   });
 });
 
