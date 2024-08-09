@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import {
   IContainer,
@@ -13,10 +13,11 @@ import {
   ContainerOutput,
   EmbeddableStart,
 } from '../../../../embeddable/public';
+import { CardContainerInput } from './types';
 
 interface Props {
   embeddable: IContainer;
-  input: ContainerInput;
+  input: CardContainerInput;
   embeddableServices: EmbeddableStart;
 }
 
@@ -29,10 +30,12 @@ const CardListInner = ({ embeddable, input, embeddableServices }: Props) => {
       </EuiFlexItem>
     );
   });
+
+  // TODO: we should perhaps display the cards in multiple rows when the actual number of cards exceed the column size
   return (
-    <EuiFlexGrid gutterSize="s" columns={4}>
-      {cards}
-    </EuiFlexGrid>
+    <EuiFlexGroup gutterSize="s">
+      {input.columns ? cards.slice(0, input.columns) : cards}
+    </EuiFlexGroup>
   );
 };
 
