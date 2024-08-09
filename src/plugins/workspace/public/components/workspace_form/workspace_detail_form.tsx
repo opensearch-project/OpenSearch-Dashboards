@@ -21,7 +21,6 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-import { WorkspaceBottomBar } from './workspace_bottom_bar';
 import { WorkspaceFormProps } from './types';
 import { WorkspaceUseCase } from './workspace_use_case';
 import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
@@ -67,7 +66,7 @@ const FormGroup = ({ title, children, describe }: FormGroupProps) => (
 );
 
 export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
-  const { detailTab, detailTitle, application, defaultValues, availableUseCases } = props;
+  const { detailTab, detailTitle, defaultValues, availableUseCases } = props;
   const {
     formId,
     formData,
@@ -234,14 +233,6 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
         )}
       </EuiPanel>
       <EuiSpacer />
-      {isEditing && (
-        <WorkspaceBottomBar
-          formId={formId}
-          numberOfChanges={numberOfChanges}
-          numberOfErrors={numberOfErrors}
-          handleResetForm={handleResetForm}
-        />
-      )}
     </EuiForm>
   );
 };

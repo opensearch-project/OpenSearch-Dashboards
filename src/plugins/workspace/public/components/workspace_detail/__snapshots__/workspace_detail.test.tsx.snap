@@ -4,6 +4,7 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
 <div>
   <div
     class="euiPage euiPage--paddingMedium euiPage--column euiPage--grow"
+    style="display: flex;"
   >
     <header
       class="euiPageHeader euiPageHeader--responsive euiPageHeader--center"

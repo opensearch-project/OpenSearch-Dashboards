@@ -83,6 +83,16 @@ const deleteFn = jest.fn().mockReturnValue({
 const WorkspaceDetailPage = (props: any) => {
   const workspacesService = props.workspacesService || createWorkspacesSetupContractMockWithValue();
   const values = props.defaultValues || defaultValues;
+  const permissionEnabled = props.permissionEnabled ?? true;
+  const dataSourceManagement =
+    props.dataSourceEnabled !== false
+      ? {
+          ui: {
+            getDataSourceMenu: jest.fn(),
+          },
+        }
+      : undefined;
+
   const { Provider } = createOpenSearchDashboardsReactContext({
     ...mockCoreStart,
     ...{
@@ -92,7 +102,7 @@ const WorkspaceDetailPage = (props: any) => {
         capabilities: {
           ...mockCoreStart.application.capabilities,
           workspaces: {
-            permissionEnabled: true,
+            permissionEnabled,
           },
           dashboards: { isDashboardAdmin: true },
         },
@@ -108,11 +118,7 @@ const WorkspaceDetailPage = (props: any) => {
           delete: deleteFn,
         },
       },
-      dataSourceManagement: {
-        ui: {
-          getDataSourceMenu: jest.fn(),
-        },
-      },
+      dataSourceManagement,
     },
   });
 
@@ -177,7 +183,7 @@ describe('WorkspaceDetail', () => {
     expect(document.querySelector('#details')).toHaveClass('euiTab-isSelected');
   });
 
-  it('click on Collaborators tab when user has permission', async () => {
+  it('click on Collaborators tab when permission control enabled', async () => {
     const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
     const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
     fireEvent.click(getByText('Collaborators'));
@@ -209,6 +215,19 @@ describe('WorkspaceDetail', () => {
     fireEvent.click(confirmButton);
   });
 
+  it('click on Collaborators tab when permission control and dataSource disabled', async () => {
+    const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
+    const { queryByText } = render(
+      WorkspaceDetailPage({
+        workspacesService: workspaceService,
+        permissionEnabled: false,
+        dataSourceEnabled: false,
+      })
+    );
+    expect(queryByText('Collaborators')).toBeNull();
+    expect(queryByText('Data Sources')).toBeNull();
+  });
+
   it('click on tab button will show navigate modal when number of changes > 1', async () => {
     const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
     const { getByText, getByTestId, queryByText } = render(
@@ -230,7 +249,7 @@ describe('WorkspaceDetail', () => {
     expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
   });
 
-  it('click on badge button will navigate to Collaborators tab when number of changes = 0', async () => {
+  it('click on badge button will navigate to Collaborators tab when number of changes > 0', async () => {
     const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
     const { getByText, getByTestId } = render(
       WorkspaceDetailPage({ workspacesService: workspaceService })
@@ -248,6 +267,14 @@ describe('WorkspaceDetail', () => {
     expect(getByText('Any unsaved changes will be lost.')).toBeInTheDocument();
 
     fireEvent.click(getByText('Navigate away'));
+    expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
+  });
+
+  it('click on badge button will navigate to Collaborators tab when number of changes = 0', async () => {
+    const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
+    const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
+    expect(getByText('+1 more')).toBeInTheDocument();
+    fireEvent.click(getByText('+1 more'));
     expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
   });
 });

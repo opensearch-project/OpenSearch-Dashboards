@@ -33,6 +33,7 @@ import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { SelectDataSourceDetailPanel } from './select_data_source_panel';
+import { WorkspaceBottomBar } from './workspace_bottom_bar';
 
 export interface WorkspaceDetailProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -46,12 +47,18 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
     dataSourceManagement?: DataSourceManagementPluginSetup;
   }>();
 
-  const { formData } = useWorkspaceFormContext();
+  const {
+    formData,
+    isEditing,
+    formId,
+    numberOfErrors,
+    handleResetForm,
+    numberOfChanges,
+  } = useWorkspaceFormContext();
   const [deletedWorkspace, setDeletedWorkspace] = useState<WorkspaceAttribute | null>(null);
   const [selectedTabId, setSelectedTabId] = useState<string>(DetailTab.Details);
   const [modalVisible, setModalVisible] = useState(false);
   const [tabId, setTabId] = useState<string>(DetailTab.Details);
-  const { handleResetForm, numberOfChanges } = useWorkspaceFormContext();
 
   const availableUseCases = useObservable(props.registeredUseCases$, []);
   const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
@@ -156,74 +163,84 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
   );
 
   return (
-    <EuiPage direction="column">
-      <EuiPageHeader pageTitle={pageTitle} rightSideItems={[deleteButton]} alignItems="center" />
-      <EuiPageBody>
-        <EuiText color="subdued">{currentWorkspace.description}</EuiText>
-      </EuiPageBody>
-      <EuiSpacer />
-      <EuiPageContent>
-        <WorkspaceDetailPanel
-          useCaseUrl={useCaseUrl}
-          handleBadgeClick={handleBadgeClick}
-          currentUseCase={currentUseCase}
-          currentWorkspace={currentWorkspace}
-        />
-      </EuiPageContent>
-      <EuiSpacer />
-      <EuiPageBody>
-        <EuiTabbedContent
-          data-test-subj="workspaceTabs"
-          tabs={detailTabs}
-          selectedTab={detailTabs[detailTabs.findIndex((tab) => tab.id === selectedTabId)]}
-          onTabClick={handleTabClick}
-          size="s"
-        />
-      </EuiPageBody>
-      {deletedWorkspace && (
-        <DeleteWorkspaceModal
-          selectedWorkspace={deletedWorkspace}
-          onClose={() => setDeletedWorkspace(null)}
-          onDeleteSuccess={() => {
-            window.setTimeout(() => {
-              window.location.assign(
-                cleanWorkspaceId(
-                  application.getUrlForApp(WORKSPACE_LIST_APP_ID, {
-                    absolute: false,
-                  })
-                )
-              );
-            }, 1000);
-          }}
+    <>
+      <EuiPage direction="column" style={{ display: 'flex' }}>
+        <EuiPageHeader pageTitle={pageTitle} rightSideItems={[deleteButton]} alignItems="center" />
+        <EuiPageBody>
+          <EuiText color="subdued">{currentWorkspace.description}</EuiText>
+        </EuiPageBody>
+        <EuiSpacer />
+        <EuiPageContent>
+          <WorkspaceDetailPanel
+            useCaseUrl={useCaseUrl}
+            handleBadgeClick={handleBadgeClick}
+            currentUseCase={currentUseCase}
+            currentWorkspace={currentWorkspace}
+          />
+        </EuiPageContent>
+        <EuiSpacer />
+        <EuiPageBody>
+          <EuiTabbedContent
+            data-test-subj="workspaceTabs"
+            tabs={detailTabs}
+            selectedTab={detailTabs[detailTabs.findIndex((tab) => tab.id === selectedTabId)]}
+            onTabClick={handleTabClick}
+            size="s"
+          />
+        </EuiPageBody>
+        {deletedWorkspace && (
+          <DeleteWorkspaceModal
+            selectedWorkspace={deletedWorkspace}
+            onClose={() => setDeletedWorkspace(null)}
+            onDeleteSuccess={() => {
+              window.setTimeout(() => {
+                window.location.assign(
+                  cleanWorkspaceId(
+                    application.getUrlForApp(WORKSPACE_LIST_APP_ID, {
+                      absolute: false,
+                    })
+                  )
+                );
+              }, 1000);
+            }}
+          />
+        )}
+        {modalVisible && (
+          <EuiConfirmModal
+            data-test-subj="workspaceForm-cancelModal"
+            title={i18n.translate('workspace.form.cancelModal.title', {
+              defaultMessage: 'Navigate away?',
+            })}
+            onCancel={() => setModalVisible(false)}
+            onConfirm={() => {
+              handleResetForm();
+              setModalVisible(false);
+              history.push(`?tab=${tabId}`);
+              setSelectedTabId(tabId);
+            }}
+            cancelButtonText={i18n.translate('workspace.form.cancelButtonText', {
+              defaultMessage: 'Cancel',
+            })}
+            confirmButtonText={i18n.translate('workspace.form.confirmButtonText', {
+              defaultMessage: 'Navigate away',
+            })}
+            buttonColor="danger"
+            defaultFocusedButton="confirm"
+          >
+            {i18n.translate('workspace.form.cancelModal.body', {
+              defaultMessage: 'Any unsaved changes will be lost.',
+            })}
+          </EuiConfirmModal>
+        )}
+      </EuiPage>
+      {isEditing && (
+        <WorkspaceBottomBar
+          formId={formId}
+          numberOfChanges={numberOfChanges}
+          numberOfErrors={numberOfErrors}
+          handleResetForm={handleResetForm}
         />
       )}
-      {modalVisible && (
-        <EuiConfirmModal
-          data-test-subj="workspaceForm-cancelModal"
-          title={i18n.translate('workspace.form.cancelModal.title', {
-            defaultMessage: 'Navigate away?',
-          })}
-          onCancel={() => setModalVisible(false)}
-          onConfirm={() => {
-            handleResetForm();
-            setModalVisible(false);
-            history.push(`?tab=${tabId}`);
-            setSelectedTabId(tabId);
-          }}
-          cancelButtonText={i18n.translate('workspace.form.cancelButtonText', {
-            defaultMessage: 'Cancel',
-          })}
-          confirmButtonText={i18n.translate('workspace.form.confirmButtonText', {
-            defaultMessage: 'Navigate away',
-          })}
-          buttonColor="danger"
-          defaultFocusedButton="confirm"
-        >
-          {i18n.translate('workspace.form.cancelModal.body', {
-            defaultMessage: 'Any unsaved changes will be lost.',
-          })}
-        </EuiConfirmModal>
-      )}
-    </EuiPage>
+    </>
   );
 };
