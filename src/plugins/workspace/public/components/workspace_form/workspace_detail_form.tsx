@@ -113,6 +113,8 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
                 onChange={handleUseCaseChange}
                 formErrors={formErrors}
                 availableUseCases={availableUseCases}
+                savedObjects={savedObjects}
+                operationType={operationType}
               />
             </FormGroup>
 

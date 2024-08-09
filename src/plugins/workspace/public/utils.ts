@@ -23,6 +23,7 @@ import {
 } from '../../../core/public';
 import { DEFAULT_SELECTED_FEATURES_IDS, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
 import { WorkspaceUseCase } from './types';
+import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
 
 export const USE_CASE_PREFIX = 'use-case-';
 
@@ -202,7 +203,7 @@ export const getDataSourcesList = (client: SavedObjectsStart['client'], workspac
   return client
     .find({
       type: 'data-source',
-      fields: ['id', 'title'],
+      fields: ['id', 'title', 'auth'],
       perPage: 10000,
       workspaces,
     })
@@ -212,15 +213,28 @@ export const getDataSourcesList = (client: SavedObjectsStart['client'], workspac
         return objects.map((source) => {
           const id = source.id;
           const title = source.get('title');
+          const auth = source.get('auth');
           return {
             id,
             title,
+            auth,
           };
         });
       } else {
         return [];
       }
     });
+};
+
+// If all connected data sources are serverless, will only allow to select essential use case.
+export const getIsOnlyAllowEssentialUseCase = async (client: SavedObjectsStart['client']) => {
+  const allDataSources = await getDataSourcesList(client, ['*']);
+  if (allDataSources.length > 0) {
+    return allDataSources.every(
+      (ds) => ds?.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless
+    );
+  }
+  return false;
 };
 
 export const convertNavGroupToWorkspaceUseCase = ({

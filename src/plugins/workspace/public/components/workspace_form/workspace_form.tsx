@@ -89,6 +89,8 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           onChange={handleUseCaseChange}
           formErrors={formErrors}
           availableUseCases={availableUseCases}
+          savedObjects={savedObjects}
+          operationType={operationType}
         />
       </EuiPanel>
       <EuiSpacer />
