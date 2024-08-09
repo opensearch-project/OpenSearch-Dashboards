@@ -5,7 +5,6 @@
 
 import { CharStream, CommonTokenStream, TokenStream } from 'antlr4ng';
 import { CodeCompletionCore } from 'antlr4-c3';
-import { HttpSetup } from 'opensearch-dashboards/public';
 import { monaco } from '@osd/monaco';
 import { DQLLexer } from './.generated/DQLLexer';
 import { DQLParser, KeyValueExpressionContext } from './.generated/DQLParser';
@@ -14,21 +13,22 @@ import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './.generated/DQLParserVisitor';
 import { getUiService } from '../../services';
+import { IDataPluginServices } from '../..';
 
 const findCursorIndex = (
   tokenStream: TokenStream,
   cursorColumn: number,
-  cursorLine: number,
-  whitespaceToken: number
+  cursorLine: number
 ): number | undefined => {
   const actualCursorCol = cursorColumn - 1;
 
   for (let i = 0; i < tokenStream.size; i++) {
     const token = tokenStream.get(i);
-    const { startLine, endColumn, endLine } = getTokenPosition(token, whitespaceToken);
+    const { startLine, endColumn, endLine } = getTokenPosition(token, DQLParser.WS);
 
+    const moveToNextToken = [DQLParser.WS, DQLParser.EQ];
     if (endLine > cursorLine || (startLine === cursorLine && endColumn >= actualCursorCol)) {
-      if (tokenStream.get(i).type === whitespaceToken || tokenStream.get(i).type === DQLParser.EQ) {
+      if (moveToNextToken.includes(tokenStream.get(i).type)) {
         return i + 1;
       }
       return i;
@@ -59,24 +59,13 @@ const findFieldSuggestions = (indexPattern: IndexPattern) => {
   return fieldSuggestions;
 };
 
-const getFieldSuggestedValues = async (
-  indexTitle: string,
-  fieldName: string,
-  currentValue: string,
-  http?: HttpSetup
-) => {
-  if (!http) return [];
-  return await http.fetch(`/api/opensearch-dashboards/suggestions/values/${indexTitle}`, {
-    method: 'POST',
-    body: JSON.stringify({ query: currentValue, field: fieldName, boolFilter: [] }),
-  });
-};
-
 const findValueSuggestions = async (
   index: IndexPattern,
   field: string,
   value: string,
-  http?: HttpSetup
+  services: IDataPluginServices,
+  boolFilter?: any,
+  signal?: AbortSignal
 ) => {
   // check to see if last field is within index and if it can suggest values, first check
   // if .keyword appended field exists because that has values
@@ -90,14 +79,15 @@ const findValueSuggestions = async (
       if (idxField.name === field) return idxField;
     });
 
-  if (matchedField?.type === 'boolean') {
-    return ['true', 'false'];
-  }
+  if (!matchedField) return;
 
-  if (!matchedField || !matchedField.aggregatable || matchedField.type !== 'string') return;
-
-  // ask api for suggestions
-  return await getFieldSuggestedValues(index.title, matchedField.name, value, http);
+  return await services?.data.autocomplete.getValueSuggestions({
+    indexPattern: index,
+    field: matchedField,
+    query: value,
+    boolFilter,
+    signal,
+  });
 };
 
 // visitor for parsing the current query
@@ -128,6 +118,8 @@ export const getSuggestions = async ({
   position,
   selectionEnd,
   services,
+  boolFilter,
+  signal,
 }: QuerySuggestionGetFnArgs) => {
   if (
     !services ||
@@ -138,8 +130,6 @@ export const getSuggestions = async ({
     return [];
   }
   try {
-    const http = services.http;
-
     const inputStream = CharStream.fromString(query);
     const lexer = new DQLLexer(inputStream);
     const tokenStream = new CommonTokenStream(lexer);
@@ -153,7 +143,7 @@ export const getSuggestions = async ({
     const cursorColumn = position?.column ?? selectionEnd;
     const cursorLine = position?.lineNumber ?? 1;
 
-    const cursorIndex = findCursorIndex(tokenStream, cursorColumn, cursorLine, DQLParser.WS) ?? 0;
+    const cursorIndex = findCursorIndex(tokenStream, cursorColumn, cursorLine) ?? 0;
 
     const core = new CodeCompletionCore(parser);
 
@@ -184,7 +174,14 @@ export const getSuggestions = async ({
     // find suggested values for the last found field (only for kvexpression rule)
     const { field: lastField = '', value: lastValue = '' } = visitor.visit(tree) ?? {};
     if (!!lastField && candidates.tokens.has(DQLParser.PHRASE)) {
-      const values = await findValueSuggestions(indexPattern, lastField, lastValue ?? '', http);
+      const values = await findValueSuggestions(
+        indexPattern,
+        lastField,
+        lastValue ?? '',
+        services,
+        boolFilter,
+        signal
+      );
       if (!!values) {
         completions.push(
           ...values?.map((val: any) => {

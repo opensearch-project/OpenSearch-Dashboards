@@ -11,6 +11,7 @@ import {
   notOperatorSuggestion,
   testingIndex,
 } from '../shared/constants';
+import { IDataPluginServices } from '../../types';
 
 jest.mock('../../services', () => ({
   getUiService: () => ({
@@ -28,7 +29,7 @@ const getSuggestionsAtPos = async (query: string, endPos: number) => {
     language: '', // not relevant
     selectionEnd: 0, // not relevant
     selectionStart: 0, // not relevant
-    services: { appName: 'discover' },
+    services: { appName: 'discover' } as IDataPluginServices,
   });
 };
 
