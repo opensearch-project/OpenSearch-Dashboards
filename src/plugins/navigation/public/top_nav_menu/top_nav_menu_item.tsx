@@ -145,26 +145,6 @@ export function TopNavMenuItem(props: TopNavMenuData) {
           </>
         );
 
-      /* ToDo: Check with UX if this is needed
-      case 'link':
-        return (
-          <EuiButtonEmpty
-            size="s"
-            iconType={props.iconType}
-            iconSide={props.iconSide}
-            className={className}
-            isLoading={props.isLoading}
-            href={props.href}
-            isDisabled={isDisabled()}
-            onClick={handleClick}
-            aria-label={props.ariaLabel}
-            data-test-subj={props.testId}
-          >
-            {props.label}
-          </EuiButtonEmpty>
-        );
-       */
-
       case 'icon':
         return (
           <EuiButtonIcon

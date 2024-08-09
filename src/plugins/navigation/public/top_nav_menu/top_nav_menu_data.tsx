@@ -65,23 +65,6 @@ interface TopNavMenuCommonData {
   tooltip?: string | (() => string | undefined);
 }
 
-/* ToDo: Check with UX if this is needed
-export type TopNavMenuLinkData = TopNavMenuCommonData &
-  RequireAtLeastOne<
-    {
-      label: string;
-      iconType?: EuiButtonProps['iconType'];
-      iconSide?: EuiButtonProps['iconSide'];
-      ariaLabel?: string;
-      isLoading?: boolean;
-      run?: TopNavMenuClickAction;
-      href?: string;
-      controlType: 'link';
-    },
-    'href' | 'run'
-  >;
- */
-
 export type TopNavMenuButtonData = TopNavMenuCommonData &
   RequireAtLeastOne<
     {
@@ -120,7 +103,6 @@ export type TopNavMenuSwitchData = TopNavMenuCommonData & {
 
 export type TopNavMenuData =
   | TopNavMenuLegacyData
-  // | TopNavMenuLinkData
   | TopNavMenuButtonData
   | TopNavMenuIconData
   | TopNavMenuSwitchData;
