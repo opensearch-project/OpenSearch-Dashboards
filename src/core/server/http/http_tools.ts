@@ -35,6 +35,9 @@ import { ValidationError } from 'joi';
 import uuid from 'uuid';
 import { HttpConfig } from './http_config';
 import { validateObject } from './prototype_pollution';
+import { getWorkspaceState } from '../utils';
+import { OpenSearchDashboardsRequest } from './router';
+import { WORKSPACE_PATH_PREFIX } from '../../../core/utils';
 
 /**
  * Converts OpenSearch Dashboards `HttpConfig` into `ServerOptions` that are accepted by the Hapi server.
@@ -193,4 +196,25 @@ export function getRequestId(request: Request, options: HttpConfig['requestId'])
       options.ipAllowlist.includes(request.raw.req.socket.remoteAddress))
     ? request.headers['x-opaque-id'] ?? uuid.v4()
     : uuid.v4();
+}
+
+/**
+ * Return back the expected redirect url with basePath and conditional workspace id based on the request.
+ * This method should be used when the request is not authenticated and need a redirect url after login.
+ * And it should take care all the stuff on prepending required params into the path.
+ * @param request Hapi request object
+ * @returns the expected next url
+ */
+export function getRedirectUrl(props: {
+  request: OpenSearchDashboardsRequest;
+  nextUrl: string; // The url without basePath and workspace id prefix
+  basePath: string;
+}) {
+  const { request, nextUrl, basePath } = props;
+  const workspaceState = getWorkspaceState(request);
+  if (workspaceState.requestWorkspaceId) {
+    return `${basePath}${WORKSPACE_PATH_PREFIX}/${workspaceState.requestWorkspaceId}${nextUrl}`;
+  }
+
+  return `${basePath}${nextUrl}`;
 }

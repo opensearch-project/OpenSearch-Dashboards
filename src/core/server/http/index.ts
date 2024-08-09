@@ -105,3 +105,4 @@ export {
 } from './cookie_session_storage';
 export * from './types';
 export { BasePath, IBasePath } from './base_path_service';
+export { getRedirectUrl } from './http_tools';
