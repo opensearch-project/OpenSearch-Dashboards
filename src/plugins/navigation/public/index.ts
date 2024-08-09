@@ -35,7 +35,23 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new NavigationPublicPlugin(initializerContext);
 }
 
-export { TopNavMenuData, TopNavMenu } from './top_nav_menu';
+export {
+  TopNavMenu,
+  TopNavMenuData,
+  TopNavMenuButtonData,
+  TopNavMenuSwitchData,
+  TopNavMenuIconData,
+  TopNavMenuLegacyData,
+  TopNavMenuItemRenderType,
+  TopNavControls,
+  TopNavControlData,
+  TopNavControlButtonData,
+  TopNavControlLinkData,
+  TopNavControlIconData,
+  TopNavControlTextData,
+  TopNavControlDescriptionData,
+  TopNavControlComponentData,
+} from './top_nav_menu';
 
 export { NavigationPublicPluginSetup, NavigationPublicPluginStart } from './types';
 

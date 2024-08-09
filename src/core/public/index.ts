@@ -79,6 +79,7 @@ import {
   createRecentNavLink,
   LinkItemType,
   getSortedNavLinks,
+  HeaderVariant,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -385,6 +386,7 @@ export {
   createRecentNavLink,
   LinkItemType,
   getSortedNavLinks,
+  HeaderVariant,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';

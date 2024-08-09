@@ -58,6 +58,6 @@ export {
 } from './recently_accessed';
 export { ChromeNavControl, ChromeNavControls } from './nav_controls';
 export { ChromeDocTitle } from './doc_title';
-export { RightNavigationOrder } from './constants';
+export { RightNavigationOrder, HeaderVariant } from './constants';
 export { ChromeRegistrationNavLink, ChromeNavGroupUpdater, NavGroupItemInMap } from './nav_group';
 export { fulfillRegistrationLinksToChromeNavLinks, LinkItemType, getSortedNavLinks } from './utils';

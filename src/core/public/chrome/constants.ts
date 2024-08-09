@@ -37,3 +37,17 @@ export enum RightNavigationOrder {
   Settings = 10,
   DevTool = 20,
 }
+
+export enum HeaderControlsContainer {
+  LEFT = 'left',
+  CENTER = 'center',
+  RIGHT = 'right',
+  BADGE = 'badge',
+  DESCRIPTION = 'description',
+  BOTTOM = 'bottom',
+}
+
+export enum HeaderVariant {
+  PAGE = 'page',
+  APPLICATION = 'application',
+}
