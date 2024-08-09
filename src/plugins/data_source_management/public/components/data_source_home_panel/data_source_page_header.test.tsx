@@ -6,7 +6,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { DataSourceHeader } from './data_source_page_header';
-import { EuiTitle, EuiText } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
 describe('DataSourceHeader', () => {
@@ -25,12 +25,11 @@ describe('DataSourceHeader', () => {
 
   test('contains correct title and description', () => {
     const wrapper = shallowComponent();
-
-    const titleMessage = wrapper.find(EuiTitle).find(FormattedMessage);
+    const titleMessage = wrapper.find(EuiText).at(0).find(FormattedMessage);
     expect(titleMessage.prop('id')).toEqual('dataSourcesManagement.dataSourcesTable.title');
     expect(titleMessage.prop('defaultMessage')).toEqual('Data Sources');
 
-    const descriptionMessage = wrapper.find(EuiText).find(FormattedMessage);
+    const descriptionMessage = wrapper.find(EuiText).at(1).find(FormattedMessage);
     expect(descriptionMessage.prop('id')).toEqual(
       'dataSourcesManagement.dataSourcesTable.description'
     );

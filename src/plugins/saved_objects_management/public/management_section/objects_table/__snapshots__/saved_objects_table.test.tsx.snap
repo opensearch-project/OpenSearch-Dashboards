@@ -837,15 +837,21 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
-        defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
-        id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
-        values={
-          Object {
-            "filteredItemCount": 4,
-          }
-        }
-      />
+      <EuiText
+        size="s"
+      >
+        <h2>
+          <FormattedMessage
+            defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
+            id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
+            values={
+              Object {
+                "filteredItemCount": 4,
+              }
+            }
+          />
+        </h2>
+      </EuiText>
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>

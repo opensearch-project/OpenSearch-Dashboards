@@ -34,7 +34,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 
 export const PageTitle = () => {
   return (
-    <EuiText>
+    <EuiText size="s">
       <h1 data-test-subj="managementSettingsTitle">
         <FormattedMessage id="advancedSettings.pageTitle" defaultMessage="Settings" />
       </h1>

@@ -1027,14 +1027,14 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     return (
       <EuiFlyout onClose={close} size="s">
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
+          <EuiText size="s">
             <h2>
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
                 defaultMessage="Import saved objects"
               />
             </h2>
-          </EuiTitle>
+          </EuiText>
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>

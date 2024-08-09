@@ -30,7 +30,7 @@
 
 import React from 'react';
 
-import { EuiBetaBadge, EuiSpacer, EuiTitle, EuiText, EuiCode, EuiLink } from '@elastic/eui';
+import { EuiBetaBadge, EuiSpacer, EuiText, EuiCode, EuiLink } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -63,7 +63,7 @@ export const Header = ({
 
   return (
     <div>
-      <EuiTitle>
+      <EuiText size="s">
         <h1>
           {createIndexPatternHeader}
           {isBeta ? (
@@ -77,7 +77,7 @@ export const Header = ({
             </>
           ) : null}
         </h1>
-      </EuiTitle>
+      </EuiText>
       <EuiSpacer size="s" />
       <EuiText>
         <p>

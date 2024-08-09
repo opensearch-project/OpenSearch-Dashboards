@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiFlexGroup, EuiToolTip, EuiFlexItem, EuiTitle, EuiSmallButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiToolTip, EuiFlexItem, EuiSmallButtonIcon, EuiText } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/public';
 
 interface IndexHeaderProps {
@@ -81,9 +81,9 @@ export function IndexHeader({
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>
-        <EuiTitle>
+        <EuiText size="s">
           <h1 data-test-subj="indexPatternTitle">{indexPattern.title}</h1>
-        </EuiTitle>
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup responsive={false}>

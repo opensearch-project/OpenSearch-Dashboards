@@ -23,24 +23,28 @@ exports[`Header should render a different name, prompt, and beta tag if provided
     }
   >
     <div>
-      <EuiTitle>
-        <h1
-          className="euiTitle euiTitle--medium"
+      <EuiText
+        size="s"
+      >
+        <div
+          className="euiText euiText--small"
         >
-          Create test index pattern
-           
-          <EuiBetaBadge
-            label="Beta"
-          >
-            <span
-              className="euiBetaBadge euiBetaBadge--hollow"
-              title="Beta"
+          <h1>
+            Create test index pattern
+             
+            <EuiBetaBadge
+              label="Beta"
             >
-              Beta
-            </span>
-          </EuiBetaBadge>
-        </h1>
-      </EuiTitle>
+              <span
+                className="euiBetaBadge euiBetaBadge--hollow"
+                title="Beta"
+              >
+                Beta
+              </span>
+            </EuiBetaBadge>
+          </h1>
+        </div>
+      </EuiText>
       <EuiSpacer
         size="s"
       >
@@ -158,13 +162,17 @@ exports[`Header should render normally 1`] = `
     indexPatternName="test index pattern"
   >
     <div>
-      <EuiTitle>
-        <h1
-          className="euiTitle euiTitle--medium"
+      <EuiText
+        size="s"
+      >
+        <div
+          className="euiText euiText--small"
         >
-          Create test index pattern
-        </h1>
-      </EuiTitle>
+          <h1>
+            Create test index pattern
+          </h1>
+        </div>
+      </EuiText>
       <EuiSpacer
         size="s"
       >
@@ -272,13 +280,17 @@ exports[`Header should render without including system indices 1`] = `
     indexPatternName="test index pattern"
   >
     <div>
-      <EuiTitle>
-        <h1
-          className="euiTitle euiTitle--medium"
+      <EuiText
+        size="s"
+      >
+        <div
+          className="euiText euiText--small"
         >
-          Create test index pattern
-        </h1>
-      </EuiTitle>
+          <h1>
+            Create test index pattern
+          </h1>
+        </div>
+      </EuiText>
       <EuiSpacer
         size="s"
       >

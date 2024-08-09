@@ -44,8 +44,8 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiSpacer,
-  EuiTitle,
   EuiPageBody,
+  EuiText,
 } from '@elastic/eui';
 
 import { getTutorials } from '../load_tutorials';
@@ -280,14 +280,14 @@ class TutorialDirectoryUi extends React.Component {
       <>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
-            <EuiTitle size="l">
+            <EuiText size="s">
               <h1>
                 <FormattedMessage
                   id="home.tutorial.addDataToOpenSearchDashboardsTitle"
                   defaultMessage="Add sample data"
                 />
               </h1>
-            </EuiTitle>
+            </EuiText>
           </EuiFlexItem>
           {headerLinks ? <EuiFlexItem grow={false}>{headerLinks}</EuiFlexItem> : null}
         </EuiFlexGroup>

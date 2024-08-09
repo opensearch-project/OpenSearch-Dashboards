@@ -7,7 +7,6 @@ import React, { useState } from 'react';
 
 import {
   EuiSpacer,
-  EuiTitle,
   EuiFlexItem,
   EuiFlexGroup,
   EuiToolTip,
@@ -169,9 +168,9 @@ export const Header = ({
       {/* Title */}
       <EuiFlexItem grow={false}>
         <div>
-          <EuiTitle data-test-subj="editDataSourceTitle">
+          <EuiText size="s" data-test-subj="editDataSourceTitle">
             <h1>{dataSourceName}</h1>
-          </EuiTitle>
+          </EuiText>
           <EuiSpacer size="s" />
         </div>
       </EuiFlexItem>

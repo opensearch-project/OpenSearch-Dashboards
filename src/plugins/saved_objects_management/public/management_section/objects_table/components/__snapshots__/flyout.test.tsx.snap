@@ -8,8 +8,8 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
-      size="m"
+    <EuiText
+      size="s"
     >
       <h2>
         <FormattedMessage
@@ -18,7 +18,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
           values={Object {}}
         />
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiSpacer
@@ -272,8 +272,8 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
-      size="m"
+    <EuiText
+      size="s"
     >
       <h2>
         <FormattedMessage
@@ -282,7 +282,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
           values={Object {}}
         />
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiSpacer
@@ -536,8 +536,8 @@ exports[`Flyout should render cluster selector and import options when datasourc
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
-      size="m"
+    <EuiText
+      size="s"
     >
       <h2>
         <FormattedMessage
@@ -546,7 +546,7 @@ exports[`Flyout should render cluster selector and import options when datasourc
           values={Object {}}
         />
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiForm>
@@ -692,8 +692,8 @@ exports[`Flyout should render import step 1`] = `
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
-      size="m"
+    <EuiText
+      size="s"
     >
       <h2>
         <FormattedMessage
@@ -702,7 +702,7 @@ exports[`Flyout should render import step 1`] = `
           values={Object {}}
         />
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiForm>

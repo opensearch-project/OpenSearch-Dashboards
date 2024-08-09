@@ -74,13 +74,17 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
           <div
             className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
-            <EuiTitle>
-              <h4
-                className="euiTitle euiTitle--medium"
+            <EuiText
+              size="s"
+            >
+              <div
+                className="euiText euiText--small"
               >
-                Configure Prometheus data source
-              </h4>
-            </EuiTitle>
+                <h1>
+                  Configure Prometheus data source
+                </h1>
+              </div>
+            </EuiText>
             <EuiSpacer
               size="s"
             >
