@@ -30,6 +30,7 @@
 
 // ToDo: Use `THEME_SOURCES` from `src/core/server/rendering/views/theme` to generate the logic below.
 import LightTheme from '@elastic/eui/dist/eui_theme_light.json';
+import { resolveThemeTag, resolveThemeVersion } from './theme_config';
 
 const globals: any = typeof window === 'undefined' ? {} : window;
 
@@ -37,13 +38,13 @@ export type Theme = typeof LightTheme;
 
 // in the OpenSearch Dashboards app we can rely on this global being defined, but in
 // some cases (like jest) the global is undefined
-export const tag: string = globals.__osdThemeTag__ || 'v8light';
-export const version = tag.startsWith('v7') ? 7 : 8;
+export const tag: string = resolveThemeTag(globals.__osdThemeTag__);
+export const version = resolveThemeVersion(tag);
 export const darkMode = tag.endsWith('dark');
 
 export let euiLightVars: Theme;
 export let euiDarkVars: Theme;
-if (version === 7) {
+if (version === 'v7') {
   euiLightVars = require('@elastic/eui/dist/eui_theme_light.json');
   euiDarkVars = require('@elastic/eui/dist/eui_theme_dark.json');
 } else {

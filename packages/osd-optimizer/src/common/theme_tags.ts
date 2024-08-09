@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import { themeTags as THEME_TAGS } from '@osd/ui-shared-deps';
+import type { ThemeTag, ThemeTags } from '@osd/ui-shared-deps';
 import { ascending } from './array_helpers';
 
 const tags = (...themeTags: string[]) =>
@@ -37,10 +39,9 @@ const validTag = (tag: any): tag is ThemeTag => ALL_THEMES.includes(tag);
 const isArrayOfStrings = (input: unknown): input is string[] =>
   Array.isArray(input) && input.every((v) => typeof v === 'string');
 
-export type ThemeTags = readonly ThemeTag[];
-export type ThemeTag = 'v7light' | 'v7dark' | 'v8light' | 'v8dark';
-export const DEFAULT_THEMES = tags('v7light', 'v7dark', 'v8light', 'v8dark');
-export const ALL_THEMES = tags('v7light', 'v7dark', 'v8light', 'v8dark');
+export type { ThemeTag, ThemeTags };
+export const DEFAULT_THEMES = tags(...THEME_TAGS);
+export const ALL_THEMES = tags(...THEME_TAGS);
 
 export function parseThemeTags(input?: any): ThemeTags {
   if (!input) {

@@ -1,0 +1,2 @@
+refactor:
+- Simplify theme configuration and defaulting ([#7625](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7625))
