@@ -378,8 +378,15 @@ describe('workspace utils: getDataSourcesList', () => {
       savedObjects: [
         {
           id: 'id1',
-          get: () => {
-            return 'title1';
+          get: (param: string) => {
+            switch (param) {
+              case 'title':
+                return 'title1';
+              case 'description':
+                return 'description1';
+              case 'dataSourceEngineType':
+                return 'dataSourceEngineType1';
+            }
           },
         },
       ],
@@ -388,6 +395,8 @@ describe('workspace utils: getDataSourcesList', () => {
       {
         id: 'id1',
         title: 'title1',
+        description: 'description1',
+        dataSourceEngineType: 'dataSourceEngineType1',
       },
     ]);
   });

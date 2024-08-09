@@ -140,4 +140,25 @@ describe('useWorkspaceForm', () => {
     });
     expect(renderResult.result.current.formData.useCase).toBe('search');
   });
+
+  it('should reset workspace form', () => {
+    const { renderResult } = setup({
+      id: 'test',
+      name: 'current-workspace-name',
+      features: ['use-case-observability'],
+    });
+    expect(renderResult.result.current.formData.name).toBe('current-workspace-name');
+
+    act(() => {
+      renderResult.result.current.handleNameInputChange({
+        target: { value: 'update-workspace-name' },
+      });
+    });
+    expect(renderResult.result.current.formData.name).toBe('update-workspace-name');
+
+    act(() => {
+      renderResult.result.current.handleResetForm();
+    });
+    expect(renderResult.result.current.formData.name).toBe('current-workspace-name');
+  });
 });

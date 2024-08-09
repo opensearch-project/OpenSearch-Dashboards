@@ -5,6 +5,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
 import { AppMountParameters, ScopedHistory } from '../../../core/public';
 import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
 import { WorkspaceFatalError } from './components/workspace_fatal_error';
@@ -14,6 +15,7 @@ import { Services } from './types';
 import { WorkspaceCreatorProps } from './components/workspace_creator/workspace_creator';
 import { WorkspaceDetailApp } from './components/workspace_detail_app';
 import { WorkspaceDetailProps } from './components/workspace_detail/workspace_detail';
+import { DetailTab } from './components/workspace_form/constants';
 
 export const renderCreatorApp = (
   { element }: AppMountParameters,
@@ -70,7 +72,14 @@ export const renderDetailApp = (
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceDetailApp {...props} />
+      <Router>
+        <Switch>
+          <Route>
+            <WorkspaceDetailApp {...props} />
+          </Route>
+          <Redirect to={`?tab=${DetailTab.Details}`} />
+        </Switch>
+      </Router>
     </OpenSearchDashboardsContextProvider>,
     element
   );

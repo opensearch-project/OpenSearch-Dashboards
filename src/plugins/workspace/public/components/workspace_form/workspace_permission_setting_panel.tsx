@@ -33,6 +33,7 @@ export interface WorkspacePermissionSettingPanelProps {
   onChange?: (
     value: Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
   ) => void;
+  isEditing?: boolean;
 }
 
 interface UserOrGroupSectionProps extends WorkspacePermissionSettingPanelProps {
@@ -44,6 +45,7 @@ const UserOrGroupSection = ({
   type,
   errors,
   onChange,
+  isEditing,
   nextIdGenerator,
   permissionSettings,
   disabledUserOrGroupInputIds,
@@ -143,24 +145,27 @@ const UserOrGroupSection = ({
               onDelete={handleDelete}
               onGroupOrUserIdChange={handleGroupOrUserIdChange}
               onPermissionModesChange={handlePermissionModesChange}
+              isEditing={isEditing}
             />
           </EuiCompressedFormRow>
         </React.Fragment>
       ))}
-      <EuiSmallButton
-        fullWidth={false}
-        onClick={handleAddNewOne}
-        data-test-subj={`workspaceForm-permissionSettingPanel-${type}-addNew`}
-        color="secondary"
-      >
-        {type === WorkspacePermissionItemType.User
-          ? i18n.translate('workspace.form.permissionSettingPanel.addUser', {
-              defaultMessage: 'Add user',
-            })
-          : i18n.translate('workspace.form.permissionSettingPanel.addUserGroup', {
-              defaultMessage: 'Add user group',
-            })}
-      </EuiSmallButton>
+      {isEditing && (
+        <EuiSmallButton
+          fullWidth={false}
+          onClick={handleAddNewOne}
+          data-test-subj={`workspaceForm-permissionSettingPanel-${type}-addNew`}
+          color="secondary"
+        >
+          {type === WorkspacePermissionItemType.User
+            ? i18n.translate('workspace.form.permissionSettingPanel.addUser', {
+                defaultMessage: 'Add user',
+              })
+            : i18n.translate('workspace.form.permissionSettingPanel.addUserGroup', {
+                defaultMessage: 'Add user group',
+              })}
+        </EuiSmallButton>
+      )}
     </div>
   );
 };
@@ -170,6 +175,7 @@ export const WorkspacePermissionSettingPanel = ({
   onChange,
   permissionSettings,
   disabledUserOrGroupInputIds,
+  isEditing = true,
 }: WorkspacePermissionSettingPanelProps) => {
   const userPermissionSettings = useMemo(
     () =>
@@ -224,6 +230,7 @@ export const WorkspacePermissionSettingPanel = ({
         type={WorkspacePermissionItemType.User}
         nextIdGenerator={nextIdGenerator}
         disabledUserOrGroupInputIds={disabledUserOrGroupInputIds}
+        isEditing={isEditing}
       />
       <EuiSpacer size="m" />
       <UserOrGroupSection
@@ -233,6 +240,7 @@ export const WorkspacePermissionSettingPanel = ({
         type={WorkspacePermissionItemType.Group}
         nextIdGenerator={nextIdGenerator}
         disabledUserOrGroupInputIds={disabledUserOrGroupInputIds}
+        isEditing={isEditing}
       />
     </div>
   );
