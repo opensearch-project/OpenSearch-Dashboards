@@ -22,7 +22,7 @@ export const sqlSearchStrategyProvider = (
   client: ILegacyClusterClient,
   usage?: SearchUsage
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
-  const sqlFacet = new Facet({ client, logger, endpoint: 'ppl.sqlQuery' });
+  const sqlFacet = new Facet({ client, logger, endpoint: 'enhancements.sqlQuery' });
 
   return {
     search: async (context, request: any, _options) => {

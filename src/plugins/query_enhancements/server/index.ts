@@ -18,12 +18,5 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new QueryEnhancementsPlugin(initializerContext);
 }
 
-export {
-  Facet,
-  FacetProps,
-  OpenSearchPPLPlugin,
-  OpenSearchObservabilityPlugin,
-  shimStats,
-  shimSchemaRow,
-} from './utils';
+export { Facet, FacetProps, OpenSearchEnhancements, shimStats, shimSchemaRow } from './utils';
 export { QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart } from './types';

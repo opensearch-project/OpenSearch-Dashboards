@@ -137,6 +137,22 @@ export class Settings {
     }
   }
 
+  setUserQuerySessionId(dataSourceName: string, sessionId: string | null) {
+    if (sessionId !== null) {
+      sessionStorage.setItem(`async-query-session-id_${dataSourceName}`, sessionId);
+    }
+  }
+
+  setUserQuerySessionIdByObj = (dataSourceName: string, obj: Record<string, any>) => {
+    const sessionId =
+      'sessionId'.split('.').reduce((acc: any, part: string) => acc && acc[part], obj) || null;
+    this.setUserQuerySessionId(dataSourceName, sessionId);
+  };
+
+  getUserQuerySessionId = (dataSourceName: string) => {
+    return sessionStorage.getItem(`async-query-session-id_${dataSourceName}`);
+  };
+
   toJSON(): DataSettings {
     return {
       userQueryLanguage: this.getUserQueryLanguage(),

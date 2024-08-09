@@ -8,6 +8,5 @@ export * from './fetch_data_sources';
 export * from './fetch_external_data_sources';
 export * from './fetch_index_patterns';
 export * from './fetch_indices';
-export * from './query_session_utils';
 export * from './shared';
 export * from './use_polling';
