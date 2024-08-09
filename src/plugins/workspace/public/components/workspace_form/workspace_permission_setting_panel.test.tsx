@@ -101,6 +101,50 @@ describe('WorkspacePermissionSettingInput', () => {
       },
     ]);
   });
+  it('should call onChange with new user type', () => {
+    const { renderResult, onChangeMock } = setup();
+
+    expect(onChangeMock).not.toHaveBeenCalled();
+    fireEvent.change(renderResult.getAllByTestId('workspace.typeOptions')[1], {
+      target: { value: 'user' },
+    });
+    expect(onChangeMock).toHaveBeenCalledWith([
+      {
+        id: 0,
+        type: WorkspacePermissionItemType.User,
+        userId: 'foo',
+        modes: ['library_read', 'read'],
+      },
+      {
+        id: 1,
+        type: WorkspacePermissionItemType.User,
+        userId: '',
+        modes: ['library_write', 'read'],
+      },
+    ]);
+  });
+  it('should call onChange with new group type', () => {
+    const { renderResult, onChangeMock } = setup();
+
+    expect(onChangeMock).not.toHaveBeenCalled();
+    fireEvent.change(renderResult.getAllByTestId('workspace.typeOptions')[0], {
+      target: { value: 'group' },
+    });
+    expect(onChangeMock).toHaveBeenCalledWith([
+      {
+        id: 0,
+        type: WorkspacePermissionItemType.Group,
+        group: '',
+        modes: ['library_read', 'read'],
+      },
+      {
+        id: 1,
+        type: WorkspacePermissionItemType.Group,
+        group: 'bar',
+        modes: ['library_write', 'read'],
+      },
+    ]);
+  });
 
   it('should call onChange with new user permission setting after add new button click', () => {
     const { renderResult, onChangeMock } = setup({
