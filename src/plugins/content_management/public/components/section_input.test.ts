@@ -7,7 +7,7 @@ import { coreMock } from '../../../../core/public/mocks';
 import { Content, Section } from '../services';
 import { createCardInput, createDashboardInput } from './section_input';
 
-test('it should create input for card section', () => {
+test('it should create card section input', () => {
   const section: Section = { id: 'section1', kind: 'card', order: 10 };
   const content: Content = {
     id: 'content1',
@@ -22,6 +22,41 @@ test('it should create input for card section', () => {
     title: '',
     hidePanelTitles: true,
     viewMode: 'view',
+    panels: {
+      content1: {
+        type: 'card_embeddable',
+        explicitInput: {
+          description: 'content description',
+          id: 'content1',
+          onClick: undefined,
+          title: 'content title',
+        },
+      },
+    },
+  });
+});
+
+test('it should create card section input with explicit input specified', () => {
+  const section: Section = {
+    id: 'section1',
+    kind: 'card',
+    order: 10,
+    input: { title: 'new title', columns: 4 },
+  };
+  const content: Content = {
+    id: 'content1',
+    kind: 'card',
+    order: 0,
+    title: 'content title',
+    description: 'content description',
+  };
+  const input = createCardInput(section, [content]);
+  expect(input).toEqual({
+    id: 'section1',
+    title: 'new title',
+    hidePanelTitles: true,
+    viewMode: 'view',
+    columns: 4,
     panels: {
       content1: {
         type: 'card_embeddable',
@@ -79,7 +114,12 @@ test('it should throw error if creating dashboard input with non-dashboard secti
 });
 
 test('it should create dashboard input', async () => {
-  const section: Section = { id: 'section1', kind: 'dashboard', order: 10 };
+  const section: Section = {
+    id: 'section1',
+    kind: 'dashboard',
+    order: 10,
+    input: { timeRange: { from: 'now-1d', to: 'now' } },
+  };
   const staticViz: Content = {
     id: 'content1',
     kind: 'visualization',
@@ -111,6 +151,9 @@ test('it should create dashboard input', async () => {
   const input = await createDashboardInput(section, [staticViz, dynamicViz, customRender], {
     savedObjectsClient: clientMock,
   });
+
+  // with explicit section input
+  expect(input.timeRange).toEqual({ from: 'now-1d', to: 'now' });
 
   expect(input.panels).toEqual({
     content1: {

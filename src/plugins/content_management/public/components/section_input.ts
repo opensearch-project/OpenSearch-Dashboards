@@ -32,6 +32,7 @@ export const createCardInput = (
     viewMode: ViewMode.VIEW,
     columns: section.columns,
     panels,
+    ...section.input,
   };
 
   contents.forEach((content) => {
@@ -74,7 +75,7 @@ export const createDashboardInput = async (
   const h = 15;
   const counter = new BehaviorSubject(0);
 
-  contents.forEach(async (content, i) => {
+  contents.forEach(async (content) => {
     counter.next(counter.value + 1);
     try {
       if (content.kind === 'dashboard') {
@@ -164,29 +165,27 @@ export const createDashboardInput = async (
     }
   });
 
-  /**
-   * TODO: the input should be hooked with query input
-   */
   const input: DashboardContainerInput = {
-    viewMode: ViewMode.VIEW,
     panels,
+    id: section.id,
+    title: section.title ?? '',
+    viewMode: ViewMode.VIEW,
+    useMargins: true,
     isFullScreenMode: false,
     filters: [],
-    useMargins: true,
-    id: section.id,
     timeRange: {
       to: 'now',
       from: 'now-7d',
     },
-    title: section.title ?? 'test',
     query: {
       query: '',
-      language: 'lucene',
+      language: 'kuery',
     },
     refreshConfig: {
       pause: true,
       value: 15,
     },
+    ...section.input,
   };
 
   return new Promise<DashboardContainerInput>((resolve) => {

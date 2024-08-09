@@ -161,3 +161,106 @@ test('it should only allow to add one dashboard to a section', () => {
     },
   ]);
 });
+
+test('it should update dashboard section with new input', () => {
+  const page = new Page({ id: 'page1' });
+  page.createSection({
+    id: 'section_id',
+    kind: 'dashboard',
+    order: 1000,
+    input: { timeRange: { from: 'now-7d', to: 'now' } },
+  });
+  expect(page.getSections()).toHaveLength(1);
+  expect(page.getSections()[0]).toEqual({
+    id: 'section_id',
+    kind: 'dashboard',
+    order: 1000,
+    input: { timeRange: { from: 'now-7d', to: 'now' } },
+  });
+
+  page.updateSectionInput('section_id', (section) => {
+    if (section?.kind === 'dashboard') {
+      return { ...section, input: { timeRange: { from: 'now-1d', to: 'now' } } };
+    }
+    return section;
+  });
+
+  expect(page.getSections()[0]).toEqual({
+    id: 'section_id',
+    kind: 'dashboard',
+    order: 1000,
+    input: { timeRange: { from: 'now-1d', to: 'now' } },
+  });
+});
+
+test('it should update card section with new input', () => {
+  const page = new Page({ id: 'page1' });
+  page.createSection({
+    id: 'section_id',
+    kind: 'card',
+    order: 1000,
+    input: {},
+  });
+  expect(page.getSections()).toHaveLength(1);
+  expect(page.getSections()[0]).toEqual({
+    id: 'section_id',
+    kind: 'card',
+    order: 1000,
+    input: {},
+  });
+
+  page.updateSectionInput('section_id', (section) => {
+    if (section?.kind === 'card') {
+      return { ...section, input: { title: 'new title' } };
+    }
+    return section;
+  });
+
+  expect(page.getSections()[0]).toEqual({
+    id: 'section_id',
+    kind: 'card',
+    order: 1000,
+    input: { title: 'new title' },
+  });
+});
+
+test('it should not allow to update section property other than `input`', () => {
+  const page = new Page({ id: 'page1' });
+  page.createSection({
+    id: 'section_id',
+    kind: 'dashboard',
+    order: 1000,
+    input: { timeRange: { from: 'now-7d', to: 'now' } },
+  });
+  expect(page.getSections()).toHaveLength(1);
+  expect(page.getSections()[0]).toEqual({
+    id: 'section_id',
+    kind: 'dashboard',
+    order: 1000,
+    input: { timeRange: { from: 'now-7d', to: 'now' } },
+  });
+
+  // update the section with new kind: custom and new id: section_id_new
+  page.updateSectionInput('section_id', (section) => {
+    if (section?.kind === 'dashboard') {
+      return { ...section, id: 'section_id_new', kind: 'custom', render: jest.fn() };
+    }
+    return section;
+  });
+
+  // section should not changed as it only allows to update `section.input` field
+  expect(page.getSections()[0]).toEqual({
+    id: 'section_id',
+    kind: 'dashboard',
+    order: 1000,
+    input: { timeRange: { from: 'now-7d', to: 'now' } },
+  });
+});
+
+test('it should callback with error if section not exist', () => {
+  const page = new Page({ id: 'page1' });
+  const callbackMock = jest.fn();
+  page.updateSectionInput('section_id_not_exist', callbackMock);
+  expect(callbackMock.mock.calls[0][0]).toBe(null);
+  expect(callbackMock.mock.calls[0][1]).toBeInstanceOf(Error);
+});

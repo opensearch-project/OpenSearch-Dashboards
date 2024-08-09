@@ -14,3 +14,8 @@ export interface CardExplicitInput {
 }
 
 export type CardContainerInput = ContainerInput<CardExplicitInput> & { columns?: number };
+
+/**
+ * The props which allow to be updated after card container was created
+ */
+export type CardContainerExplicitInput = Partial<Pick<CardContainerInput, 'title' | 'columns'>>;

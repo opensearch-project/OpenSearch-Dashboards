@@ -18,9 +18,13 @@ export class Page {
     this.config = pageConfig;
   }
 
-  createSection(section: Section) {
+  private setSection(section: Section) {
     this.sections.set(section.id, section);
     this.sections$.next(this.getSections());
+  }
+
+  createSection(section: Section) {
+    this.setSection(section);
   }
 
   getSections() {
@@ -29,6 +33,28 @@ export class Page {
 
   getSections$() {
     return this.sections$;
+  }
+
+  updateSectionInput(
+    sectionId: string,
+    callback: (section: Section | null, err?: Error) => Section | null
+  ) {
+    const section = this.sections.get(sectionId);
+    if (!section) {
+      callback(null, new Error(`Section id ${sectionId} not found`));
+      return;
+    }
+
+    const updated = callback(section);
+    if (updated) {
+      if (updated.kind === 'dashboard' && section.kind === 'dashboard') {
+        this.setSection({ ...section, input: updated.input });
+      }
+      if (updated.kind === 'card' && section.kind === 'card') {
+        this.setSection({ ...section, input: updated.input });
+      }
+      // TODO: we may need to support update input of `custom` section
+    }
   }
 
   addContent(sectionId: string, content: Content) {

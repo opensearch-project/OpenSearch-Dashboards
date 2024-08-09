@@ -69,3 +69,25 @@ test('it should throw error when register content provider with invalid target a
     })
   ).toThrowError();
 });
+
+test('it should throw error if update page section with invalid target area', () => {
+  const cms = new ContentManagementService();
+  cms.registerPage({ id: 'page1', sections: [{ id: 'section1', kind: 'card', order: 0 }] });
+  expect(() => cms.updatePageSection('invalid_target_area', jest.fn())).toThrowError();
+});
+
+test('it should update page section', () => {
+  const cms = new ContentManagementService();
+  cms.registerPage({ id: 'page1', sections: [{ id: 'section1', kind: 'card', order: 0 }] });
+  cms.updatePageSection(
+    'page1/section1',
+    jest.fn().mockReturnValue({ id: 'section1', kind: 'card', input: { title: 'new title' } })
+  );
+  expect(cms.getPage('page1')?.getSections()).toHaveLength(1);
+  expect(cms.getPage('page1')?.getSections()[0]).toEqual({
+    id: 'section1',
+    kind: 'card',
+    order: 0,
+    input: { title: 'new title' },
+  });
+});
