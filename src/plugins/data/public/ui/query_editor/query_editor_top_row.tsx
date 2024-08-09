@@ -71,7 +71,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     storage,
     appName,
     data: {
-      query: { dataSetManager: dataSetManager },
+      query: { dataSetManager: dataSetManager, queryString: queryString },
     },
   } = opensearchDashboards.services;
   const { dataSet } = useDataSetManager({ dataSetManager: dataSetManager! });

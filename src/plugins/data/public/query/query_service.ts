@@ -41,6 +41,7 @@ import { DataSetContract, DataSetManager } from './dataset_manager';
 import { buildOpenSearchQuery, getOpenSearchQueryConfig, IndexPatternsService } from '../../common';
 import { getUiSettings } from '../services';
 import { IndexPattern } from '..';
+import { QueryStorage } from '../ui';
 
 /**
  * Query Service
@@ -48,13 +49,13 @@ import { IndexPattern } from '..';
  */
 
 interface QueryServiceSetupDependencies {
-  storage: IStorageWrapper;
+  storage: QueryStorage;
   uiSettings: IUiSettingsClient;
 }
 
 interface QueryServiceStartDependencies {
   savedObjectsClient: SavedObjectsClientContract;
-  storage: IStorageWrapper;
+  storage: QueryStorage;
   uiSettings: IUiSettingsClient;
   indexPatterns: IndexPatternsService;
 }

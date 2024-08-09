@@ -50,6 +50,8 @@ export interface QueryEnhancement {
 export interface UiEnhancements {
   query?: QueryEnhancement;
   queryEditorExtension?: QueryEditorExtensionConfig;
+  //TODO
+  //queryEditorUISettings?: QueryEditorUISettings;
 }
 
 /**

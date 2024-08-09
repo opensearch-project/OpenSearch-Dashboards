@@ -32,6 +32,7 @@ import _ from 'lodash';
 import * as Rx from 'rxjs';
 import { map } from 'rxjs/operators';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
+import { QueryStorage } from '../../ui';
 
 const defaultIsDuplicate = (oldItem: any, newItem: any) => {
   return _.isEqual(oldItem, newItem);
@@ -48,12 +49,12 @@ export class PersistedLog<T = any> {
   public maxLength?: number;
   public filterDuplicates?: boolean;
   public isDuplicate: (oldItem: T, newItem: T) => boolean;
-  public storage: IStorageWrapper;
+  public storage: QueryStorage;
   public items: T[];
 
   private update$ = new Rx.BehaviorSubject(undefined);
 
-  constructor(name: string, options: PersistedLogOptions<T> = {}, storage: IStorageWrapper) {
+  constructor(name: string, options: PersistedLogOptions<T> = {}, storage: QueryStorage) {
     this.name = name;
     this.maxLength =
       typeof options.maxLength === 'string'

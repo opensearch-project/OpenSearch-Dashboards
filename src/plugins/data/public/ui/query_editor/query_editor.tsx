@@ -21,6 +21,7 @@ import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
 import { SimpleDataSet } from '../../../common';
 import { createDQLEditor, createDefaultEditor } from './editors';
 import { getQueryService, getIndexPatterns } from '../../services';
+import { RecentQuery } from '../history/recent_query';
 
 const LANGUAGE_ID_SQL = 'SQL';
 monaco.languages.register({ id: LANGUAGE_ID_SQL });
@@ -307,12 +308,15 @@ export default class QueryEditorUI extends Component<Props, State> {
     const useQueryEditor =
       this.props.query.language !== 'kuery' && this.props.query.language !== 'lucene';
 
+    const queryEnhancements = this.queryService.queryString.getQueryEnhancement();
+    console.log('queryEnhancements', queryEnhancements);
     const languageSelector = (
       <QueryLanguageSelector
         language={this.props.query.language}
         anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
         onSelectLanguage={this.onSelectLanguage}
         appName={this.services.appName}
+        queryEnhancements={queryEnhancements}
       />
     );
 
@@ -375,6 +379,10 @@ export default class QueryEditorUI extends Component<Props, State> {
           filterBar: this.props.filterBar,
         });
 
+    const recentQueries = () => {
+      return <RecentQuery services={this.queryService.queryString} />;
+    };
+
     return (
       <div
         className={classNames(
@@ -409,6 +417,8 @@ export default class QueryEditorUI extends Component<Props, State> {
         {!this.state.isCollapsed && (
           <div className="osdQueryEditor__body">{languageEditor.Body()}</div>
         )}
+
+        {recentQueries()}
 
         {/*  <EuiFlexGroup gutterSize="xs" direction="column">
            <EuiFlexItem grow={false}>
