@@ -47,21 +47,21 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult } = setup();
 
     expect(renderResult.getByText('foo')).toBeInTheDocument();
-    expect(
-      renderResult.getAllByText('Read')[0].closest('.euiButtonGroupButton-isSelected')
-    ).toBeInTheDocument();
+    expect(renderResult.getByText('Read')).toBeInTheDocument();
 
     expect(renderResult.getByText('bar')).toBeInTheDocument();
-    expect(
-      renderResult.getAllByText('Read & Write')[1].closest('.euiButtonGroupButton-isSelected')
-    ).toBeInTheDocument();
+    expect(renderResult.getByText('Read & Write')).toBeInTheDocument();
   });
 
   it('should call onChange with new user permission modes', () => {
     const { renderResult, onChangeMock } = setup();
 
     expect(onChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(renderResult.getAllByText('Read & Write')[0]);
+    const permissionToggleListButton = renderResult
+      .getAllByTestId('comboBoxToggleListButton')
+      .filter((button) => button.closest('[data-test-subj="workspace-permissionModeOptions"]'))[0];
+    fireEvent.click(permissionToggleListButton);
+    fireEvent.click(renderResult.getAllByText('Read & Write')[1]);
     expect(onChangeMock).toHaveBeenCalledWith([
       {
         id: 0,
@@ -81,7 +81,11 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult, onChangeMock } = setup();
 
     expect(onChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(renderResult.getAllByText('Owner')[1]);
+    const permissionToggleListButton = renderResult
+      .getAllByTestId('comboBoxToggleListButton')
+      .filter((button) => button.closest('[data-test-subj="workspace-permissionModeOptions"]'))[1];
+    fireEvent.click(permissionToggleListButton);
+    fireEvent.click(renderResult.getByText('Owner'));
     expect(onChangeMock).toHaveBeenCalledWith([
       {
         id: 0,
@@ -97,6 +101,48 @@ describe('WorkspacePermissionSettingInput', () => {
       },
     ]);
   });
+  it('should call onChange with new user type', () => {
+    const { renderResult, onChangeMock } = setup();
+
+    expect(onChangeMock).not.toHaveBeenCalled();
+    fireEvent.change(renderResult.getAllByTestId('workspace-typeOptions')[1], {
+      target: { value: 'user' },
+    });
+    expect(onChangeMock).toHaveBeenCalledWith([
+      {
+        id: 0,
+        type: WorkspacePermissionItemType.User,
+        userId: 'foo',
+        modes: ['library_read', 'read'],
+      },
+      {
+        id: 1,
+        type: WorkspacePermissionItemType.User,
+        modes: ['library_write', 'read'],
+      },
+    ]);
+  });
+  it('should call onChange with new group type', () => {
+    const { renderResult, onChangeMock } = setup();
+
+    expect(onChangeMock).not.toHaveBeenCalled();
+    fireEvent.change(renderResult.getAllByTestId('workspace-typeOptions')[0], {
+      target: { value: 'group' },
+    });
+    expect(onChangeMock).toHaveBeenCalledWith([
+      {
+        id: 0,
+        type: WorkspacePermissionItemType.Group,
+        modes: ['library_read', 'read'],
+      },
+      {
+        id: 1,
+        type: WorkspacePermissionItemType.Group,
+        group: 'bar',
+        modes: ['library_write', 'read'],
+      },
+    ]);
+  });
 
   it('should call onChange with new user permission setting after add new button click', () => {
     const { renderResult, onChangeMock } = setup({
@@ -104,27 +150,11 @@ describe('WorkspacePermissionSettingInput', () => {
     });
 
     expect(onChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(renderResult.getByTestId('workspaceForm-permissionSettingPanel-user-addNew'));
+    fireEvent.click(renderResult.getByTestId('workspaceForm-permissionSettingPanel-addNew'));
     expect(onChangeMock).toHaveBeenCalledWith([
       {
         id: 0,
         type: WorkspacePermissionItemType.User,
-        modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
-      },
-    ]);
-  });
-
-  it('should call onChange with new group permission setting after add new button click', () => {
-    const { renderResult, onChangeMock } = setup({
-      permissionSettings: [],
-    });
-
-    expect(onChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(renderResult.getByTestId('workspaceForm-permissionSettingPanel-group-addNew'));
-    expect(onChangeMock).toHaveBeenCalledWith([
-      {
-        id: 0,
-        type: WorkspacePermissionItemType.Group,
         modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
       },
     ]);

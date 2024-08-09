@@ -46,7 +46,7 @@ export const selectDataSourceTitle = i18n.translate('workspace.form.selectDataSo
 });
 
 export const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndPermissions.title', {
-  defaultMessage: 'Manage access and permissions',
+  defaultMessage: 'Add collaborators',
 });
 
 export enum DetailTab {

@@ -261,7 +261,7 @@ describe('WorkspaceUpdater', () => {
     const { getByTestId, getAllByTestId } = render(
       <WorkspaceUpdater detailTab={DetailTab.Collaborators} />
     );
-    await waitFor(() => expect(screen.queryByText('Manage access and permissions')).not.toBeNull());
+    await waitFor(() => expect(screen.queryByText('Add collaborators')).not.toBeNull());
 
     const userIdInput = getAllByTestId('comboBoxSearchInput')[0];
     fireEvent.click(userIdInput);
