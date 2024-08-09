@@ -159,7 +159,7 @@ export class IndexPatternManagementPlugin
       },
     });
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
       {
         id: IPM_APP_ID,
         category: DEFAULT_APP_CATEGORIES.manage,

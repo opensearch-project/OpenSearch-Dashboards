@@ -60,7 +60,7 @@ export class UseCaseService {
             return [
               WORKSPACE_USE_CASES.observability,
               WORKSPACE_USE_CASES['security-analytics'],
-              WORKSPACE_USE_CASES.analytics,
+              WORKSPACE_USE_CASES.essentials,
               WORKSPACE_USE_CASES.search,
             ].filter((useCase) => {
               return useCase.features.some((featureId) => configurableAppsId.includes(featureId));

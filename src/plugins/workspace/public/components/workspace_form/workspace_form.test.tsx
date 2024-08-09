@@ -41,7 +41,7 @@ const setup = (
       application={application}
       savedObjects={savedObjects}
       operationType={WorkspaceOperationType.Create}
-      availableUseCases={[WORKSPACE_USE_CASES.analytics]}
+      availableUseCases={[WORKSPACE_USE_CASES.essentials]}
       dataSourceManagement={dataSourceManagement}
     />
   );

@@ -12,7 +12,7 @@ const defaultNavGroups = {
   dataAdministration: {
     id: 'dataAdministration',
     title: i18n.translate('core.ui.group.dataAdministration.title', {
-      defaultMessage: 'data administration',
+      defaultMessage: 'Data administration',
     }),
     description: i18n.translate('core.ui.group.dataAdministration.description', {
       defaultMessage: 'Apply policies or security on your data.',
@@ -23,7 +23,7 @@ const defaultNavGroups = {
   settingsAndSetup: {
     id: 'settingsAndSetup',
     title: i18n.translate('core.ui.group.settingsAndSetup.title', {
-      defaultMessage: 'settings and setup',
+      defaultMessage: 'Settings and setup',
     }),
     description: i18n.translate('core.ui.group.settingsAndSetup.description', {
       defaultMessage: 'Set up your cluster with index patterns.',
@@ -34,7 +34,7 @@ const defaultNavGroups = {
   all: {
     id: ALL_USE_CASE_ID,
     title: i18n.translate('core.ui.group.all.title', {
-      defaultMessage: 'All use case',
+      defaultMessage: 'Analytics (All)',
     }),
     description: i18n.translate('core.ui.group.all.description', {
       defaultMessage: 'This is a use case contains all the features.',
@@ -64,16 +64,16 @@ const defaultNavGroups = {
     }),
     order: 5000,
   },
-  analytics: {
+  essentials: {
     id: 'analytics',
-    title: i18n.translate('core.ui.group.analytics.title', {
-      defaultMessage: 'Analytics',
+    title: i18n.translate('core.ui.group.essential.title', {
+      defaultMessage: 'Essentials',
     }),
-    description: i18n.translate('core.ui.group.analytics.description', {
+    description: i18n.translate('core.ui.group.essential.description', {
       defaultMessage:
         'Analyze data to derive insights, identify patterns and trends, and make data-driven decisions.',
     }),
-    order: 6000,
+    order: 7000,
   },
   search: {
     id: 'search',
@@ -84,7 +84,7 @@ const defaultNavGroups = {
       defaultMessage:
         "Quickly find and explore relevant information across your organization's data sources.",
     }),
-    order: 7000,
+    order: 6000,
   },
 } as const;
 

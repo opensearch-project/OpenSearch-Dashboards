@@ -307,7 +307,7 @@ export class DiscoverPlugin
       },
     ]);
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
       {
         id: PLUGIN_ID,
         category: undefined,
