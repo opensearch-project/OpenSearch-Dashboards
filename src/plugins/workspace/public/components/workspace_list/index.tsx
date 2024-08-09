@@ -67,19 +67,22 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
   const [deletedWorkspaces, setDeletedWorkspaces] = useState<WorkspaceAttribute[]>([]);
   const [selection, setSelection] = useState<WorkspaceAttribute[]>([]);
 
-  const extractUseCaseFromFeatures = (features: string[]) => {
-    if (!features || features.length === 0) {
-      return '';
-    }
-    const useCaseId = getFirstUseCaseOfFeatureConfigs(features);
-    const usecase =
-      useCaseId === DEFAULT_NAV_GROUPS.all.id
-        ? DEFAULT_NAV_GROUPS.all
-        : registeredUseCases?.find(({ id }) => id === useCaseId);
-    if (usecase) {
-      return usecase.title;
-    }
-  };
+  const extractUseCaseFromFeatures = useCallback(
+    (features: string[]) => {
+      if (!features || features.length === 0) {
+        return '';
+      }
+      const useCaseId = getFirstUseCaseOfFeatureConfigs(features);
+      const usecase =
+        useCaseId === DEFAULT_NAV_GROUPS.all.id
+          ? DEFAULT_NAV_GROUPS.all
+          : registeredUseCases?.find(({ id }) => id === useCaseId);
+      if (usecase) {
+        return usecase.title;
+      }
+    },
+    [registeredUseCases]
+  );
 
   const newWorkspaceList: WorkspaceAttributeWithUseCaseID[] = useMemo(() => {
     return workspaceList.map(
@@ -88,8 +91,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
         useCase: extractUseCaseFromFeatures(workspace.features ?? []),
       })
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workspaceList]);
+  }, [workspaceList, extractUseCaseFromFeatures]);
 
   const workspaceCreateUrl = useMemo(() => {
     if (!application || !http) {
