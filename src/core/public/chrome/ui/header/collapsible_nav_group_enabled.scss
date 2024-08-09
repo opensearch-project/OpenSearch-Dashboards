@@ -8,10 +8,6 @@
     margin-bottom: 0;
     margin-top: 0;
 
-    &::after {
-      display: none;
-    }
-
     .nav-link-item-btn {
       margin-bottom: 0;
 
@@ -21,7 +17,32 @@
     }
   }
 
+  .nav-link-parent-item-button {
+    > span {
+      flex-direction: row-reverse;
+
+      > * {
+        margin-right: $euiSizeS;
+        margin-left: 2px;
+      }
+    }
+  }
+
+  .nav-link-fake-item {
+    margin-top: 0;
+  }
+
+  .nav-link-fake-item-button {
+    display: none;
+  }
+
   .nav-nested-item {
+    margin-bottom: 4px;
+
+    &::after {
+      height: unset;
+    }
+
     .nav-link-item-btn {
       padding-left: 0;
       padding-right: 0;
@@ -31,7 +52,7 @@
   .left-navigation-wrapper {
     display: flex;
     flex-direction: column;
-    border-right: $ouiBorderThin;
+    border-right: $euiBorderThin;
   }
 
   .scrollable-container {

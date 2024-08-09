@@ -10,7 +10,7 @@ import {
   fulfillRegistrationLinksToChromeNavLinks,
   getOrderedLinks,
   getOrderedLinksOrCategories,
-  flattenLinksOrCategories,
+  getSortedNavLinks,
 } from './utils';
 
 const mockedNonCategoryLink = {
@@ -45,6 +45,15 @@ const mockedNavLinkB = {
     order: 5,
   },
   order: 5,
+};
+
+const mockedSubNavLinkA = {
+  id: 'sub_a',
+  parentNavLinkId: 'a',
+  title: 'sub_a',
+  baseUrl: '',
+  href: '',
+  order: 10,
 };
 
 describe('getAllCategories', () => {
@@ -124,15 +133,15 @@ describe('getOrderedLinksOrCategories', () => {
   });
 });
 
-describe('flattenLinksOrCategories', () => {
+describe('getSortedNavLinks', () => {
   it('should return flattened links', () => {
-    const navLinks = [mockedNonCategoryLink, mockedNavLinkA, mockedNavLinkB];
-    const orderedLinks = getOrderedLinksOrCategories(navLinks);
-    const flattenedLinks = flattenLinksOrCategories(orderedLinks);
-    expect(flattenedLinks.map((item) => item.id)).toEqual([
+    const navLinks = [mockedNonCategoryLink, mockedNavLinkA, mockedNavLinkB, mockedSubNavLinkA];
+    const sortedNavLinks = getSortedNavLinks(navLinks);
+    expect(sortedNavLinks.map((item) => item.id)).toEqual([
       mockedNavLinkB.id,
       mockedNonCategoryLink.id,
       mockedNavLinkA.id,
+      mockedSubNavLinkA.id,
     ]);
   });
 });
