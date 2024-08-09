@@ -12,6 +12,7 @@ import {
   EuiCompressedFieldText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import { useObservable } from 'react-use';
 import {
   detailsName,
   detailsColorLabel,
@@ -22,9 +23,12 @@ import {
   detailsDescriptionPlaceholder,
   detailsDescriptionIntroduction,
 } from './constants';
+import { CoreStart } from '../../../../../core/public';
+import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
 import { useWorkspaceFormContext } from './workspace_form_context';
 import { WorkspaceUseCase as WorkspaceUseCaseObject } from '../../types';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
 interface WorkspaceDetailFormDetailsProps {
   availableUseCases: Array<
@@ -44,8 +48,12 @@ export const WorkspaceDetailFormDetailsProps = ({
     handleNameInputChange,
     handleDescriptionChange,
   } = useWorkspaceFormContext();
-
+  const {
+    services: { workspaces },
+  } = useOpenSearchDashboards<CoreStart>();
   const [value, setValue] = useState(formData.useCase);
+  const currentWorkspace = useObservable(workspaces.currentWorkspace$);
+  const currentUseCase = getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features ?? []);
 
   useEffect(() => {
     setValue(formData.useCase);
@@ -55,10 +63,19 @@ export const WorkspaceDetailFormDetailsProps = ({
     .filter((item) => !item.systematic)
     .concat(DEFAULT_NAV_GROUPS.all)
     .map((useCase) => {
+      let isDisabled = false;
+      // Essential can be changed to other use cases
+      if (currentUseCase === 'analytics') {
+        isDisabled = false;
+      } else {
+        // other use cases can only be changed to "ALL" use case
+        isDisabled = useCase.id !== 'all';
+      }
       return {
         value: useCase.id,
         inputDisplay: useCase.title,
         'data-test-subj': useCase.id,
+        disabled: isDisabled,
       };
     });
 
