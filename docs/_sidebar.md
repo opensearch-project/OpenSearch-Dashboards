@@ -1,4 +1,4 @@
-* [Home](/)
+- [Home](/)
 
   - Capabilities
     - [Read_only_mode](capabilities/read_only_mode.md)
@@ -30,7 +30,6 @@
         - public
           - application
             - [Hooks](../src/plugins/console/public/application/hooks/README.md)
-      - [Content_management](../src/plugins/content_management/README.md)
       - [Csp_handler](../src/plugins/csp_handler/README.md)
       - [Dashboard](../src/plugins/dashboard/README.md)
       - [Data](../src/plugins/data/README.md)
@@ -165,7 +164,6 @@
     - [Opensearch dashboards.release notes 2.13.0](../release-notes/opensearch-dashboards.release-notes-2.13.0.md)
     - [Opensearch dashboards.release notes 2.14.0](../release-notes/opensearch-dashboards.release-notes-2.14.0.md)
     - [Opensearch dashboards.release notes 2.15.0](../release-notes/opensearch-dashboards.release-notes-2.15.0.md)
-    - [Opensearch dashboards.release notes 2.16.0](../release-notes/opensearch-dashboards.release-notes-2.16.0.md)
     - [Opensearch dashboards.release notes 2.2.0](../release-notes/opensearch-dashboards.release-notes-2.2.0.md)
     - [Opensearch dashboards.release notes 2.2.1](../release-notes/opensearch-dashboards.release-notes-2.2.1.md)
     - [Opensearch dashboards.release notes 2.3.0](../release-notes/opensearch-dashboards.release-notes-2.3.0.md)
