@@ -49,6 +49,7 @@ import {
 } from '@elastic/eui';
 import { HttpFetchError, ToastsStart } from 'opensearch-dashboards/public';
 import { toMountPoint } from '../util';
+import { EditActionDropdown, VisualizationItem } from './edit_action_dropdown';
 
 interface Column {
   name: string;
@@ -56,18 +57,15 @@ interface Column {
   actions?: object[];
 }
 
-interface Item {
-  id?: string;
-}
-
 export interface TableListViewProps {
   createButton?: JSX.Element;
   createItem?(): void;
   deleteItems?(items: object[]): Promise<void>;
   editItem?(item: object): void;
+  visbuilderEditItem?(item: object): void;
   entityName: string;
   entityNamePlural: string;
-  findItems(query: string): Promise<{ total: number; hits: object[] }>;
+  findItems(query: string): Promise<{ total: number; hits: VisualizationItem[] }>;
   listingLimit: number;
   initialFilter: string;
   initialPageSize: number;
@@ -84,7 +82,7 @@ export interface TableListViewProps {
 }
 
 export interface TableListViewState {
-  items: object[];
+  items: VisualizationItem[];
   hasInitialFetchReturned: boolean;
   isFetchingItems: boolean;
   isDeletingItems: boolean;
@@ -115,7 +113,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       pageSizeOptions: uniq([10, 20, 50, props.initialPageSize]).sort(),
     };
     this.state = {
-      items: [],
+      items: [] as VisualizationItem[],
       totalItems: 0,
       hasInitialFetchReturned: false,
       isFetchingItems: false,
@@ -413,7 +411,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   renderTable() {
     const selection = this.props.deleteItems
       ? {
-          onSelectionChange: (obj: Item[]) => {
+          onSelectionChange: (obj: VisualizationItem[]) => {
             this.setState({
               selectedIds: obj
                 .map((item) => item.id)
@@ -440,10 +438,15 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         icon: 'pencil',
         type: 'icon',
         enabled: ({ error }: { error: string }) => !error,
-        onClick: this.props.editItem,
+        render: (item: VisualizationItem) => (
+          <EditActionDropdown
+            item={item}
+            editItem={this.props.editItem}
+            visbuilderEditItem={this.props.visbuilderEditItem}
+          />
+        ),
       },
     ];
-
     const search = {
       onChange: this.setFilter.bind(this),
       toolsLeft: this.renderToolsLeft(),
@@ -475,10 +478,10 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       />
     );
     return (
-      <EuiInMemoryTable
+      <EuiInMemoryTable<VisualizationItem>
         itemId="id"
         items={this.state.items}
-        columns={(columns as unknown) as Array<EuiBasicTableColumn<object>>} // EuiBasicTableColumn is stricter than Column
+        columns={(columns as unknown) as Array<EuiBasicTableColumn<VisualizationItem>>} // EuiBasicTableColumn is stricter than Column
         pagination={this.pagination}
         loading={this.state.isFetchingItems}
         message={noItemsMessage}

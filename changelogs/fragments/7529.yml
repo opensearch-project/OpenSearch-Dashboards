@@ -1,0 +1,2 @@
+feat:
+- [VisBuilder-Next] Migration of legacy visualizations to VisBuilder by constructing the URL. ([#7529](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7529))

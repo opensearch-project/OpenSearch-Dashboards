@@ -15,13 +15,14 @@ type EditorState = 'loading' | 'loaded' | 'clean' | 'dirty';
 
 export interface MetadataState {
   editor: {
-    errors: {
+    errors?: {
       // Errors for each section in the editor
       [key: string]: boolean;
     };
     state: EditorState;
   };
   originatingApp?: string;
+  isMigrated?: boolean;
 }
 
 const initialState: MetadataState = {
@@ -30,6 +31,7 @@ const initialState: MetadataState = {
     state: 'loading',
   },
   originatingApp: undefined,
+  isMigrated: false,
 };
 
 export const getPreloadedState = async ({
@@ -53,7 +55,7 @@ export const slice = createSlice({
   reducers: {
     setError: (state, action: PayloadAction<{ key: string; error: boolean }>) => {
       const { key, error } = action.payload;
-      state.editor.errors[key] = error;
+      (state.editor.errors ??= {})[key] = error;
     },
     setEditorState: (state, action: PayloadAction<{ state: EditorState }>) => {
       state.editor.state = action.payload.state;

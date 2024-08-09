@@ -5,6 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { SavedObject } from '../../../../../saved_objects/public';
 import {
   InvalidJSONProperty,
@@ -30,6 +31,7 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
   const { services } = useOpenSearchDashboards<VisBuilderServices>();
   const [savedVisState, setSavedVisState] = useState<SavedObject | undefined>(undefined);
   const dispatch = useTypedDispatch();
+  const isMigrated = useSelector((state: any) => state.metadata?.isMigrated);
 
   useEffect(() => {
     const {
@@ -60,8 +62,17 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
 
         if (savedVisBuilderVis.id) {
           const { title, state } = getStateFromSavedObject(savedVisBuilderVis);
-          chrome.setBreadcrumbs(getEditBreadcrumbs(title, navigateToApp));
-          chrome.docTitle.change(title);
+
+          // Use isMigrated to determine which breadcrumb function to use
+          const breadcrumbs = isMigrated
+            ? getCreateBreadcrumbs(navigateToApp, isMigrated)
+            : getEditBreadcrumbs(title, navigateToApp);
+
+          chrome.setBreadcrumbs(breadcrumbs);
+
+          // Change the title based on isMigrated
+          const newTitle = isMigrated ? 'New Visualization' : title;
+          chrome.docTitle.change(newTitle);
           // sync initial app filters from savedObject to filterManager
           const filters = savedVisBuilderVis.searchSourceFields.filter;
           const query =
@@ -86,7 +97,7 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
           dispatch(setVisualizationState(state.visualization));
           dispatch(setEditorState({ state: 'loaded' }));
         } else {
-          chrome.setBreadcrumbs(getCreateBreadcrumbs(navigateToApp));
+          chrome.setBreadcrumbs(getCreateBreadcrumbs(navigateToApp, isMigrated));
         }
 
         setSavedVisState(savedVisBuilderVis);
@@ -121,7 +132,7 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
     };
 
     loadSavedVisBuilderVis();
-  }, [dispatch, services, visualizationIdFromUrl]);
+  }, [dispatch, services, visualizationIdFromUrl, isMigrated]);
 
   return savedVisState;
 };
