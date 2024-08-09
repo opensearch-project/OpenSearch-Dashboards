@@ -1,4 +1,4 @@
-$osdDocTableCellPadding: calc($ouiSizeM / 2); // corresponds to DataGrid medium cellPadding (6px)
+$osdDocTableCellPadding: calc($euiSizeM / 2); // corresponds to DataGrid medium cellPadding (6px)
 
 .osdDocTable__detailsParent {
   border-top: none !important;
@@ -47,7 +47,7 @@ $osdDocTableCellPadding: calc($ouiSizeM / 2); // corresponds to DataGrid medium 
       top: 0;
       height: 100%;
       width: 100%;
-      background-image: linear-gradient(to right, transparent 0, $ouiColorEmptyShade 16px);
+      background-image: linear-gradient(to right, transparent 0, $euiColorEmptyShade 16px);
       z-index: 1;
     }
 

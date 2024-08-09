@@ -31,14 +31,14 @@
 
 // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
 .euiButton.dataSourceMenuPopoverButtonLabel {
-  /* The inner element of the button has a right padding of $ouiSize - $ouiSizeXS wich appears
-   * to the left of the following icon. This icon has a width of $ouiSizeM. We need to push
+  /* The inner element of the button has a right padding of $euiSize - $euiSizeXS wich appears
+   * to the left of the following icon. This icon has a width of $euiSizeM. We need to push
    * the right boundary of the button to hold the width of the icon and space equal to the
    * space on its left:
    */
 
-  $rightIconWidth: $ouiSizeM;
-  $rightIconSpace: $ouiSize - $ouiSizeXS;
+  $rightIconWidth: $euiSizeM;
+  $rightIconSpace: $euiSize - $euiSizeXS;
 
   white-space: nowrap;
   overflow: hidden;
