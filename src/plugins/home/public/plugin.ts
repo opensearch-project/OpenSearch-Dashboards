@@ -70,6 +70,7 @@ import {
   ContentManagementPluginStart,
 } from '../../content_management/public';
 import { initHome, setupHome } from './application/home_render';
+import { registerSampleDataCard } from './application/components/sample_data/sample_data_card';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -236,6 +237,9 @@ export class HomePublicPlugin
 
     // initialize homepage
     initHome(contentManagement, core);
+
+    // register sample data card to use case overview page
+    registerSampleDataCard(contentManagement, core);
 
     this.featuresCatalogueRegistry.start({ capabilities });
     this.sectionTypeService.start({ core, data });

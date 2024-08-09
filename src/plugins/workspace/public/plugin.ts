@@ -31,13 +31,18 @@ import {
   WORKSPACE_LIST_APP_ID,
   WORKSPACE_USE_CASES,
   WORKSPACE_INITIAL_APP_ID,
+  ESSENTIAL_OVERVIEW_APP_ID,
+  ANALYTICS_OVERVIEW_CONTENT_AREAS,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services, WorkspaceUseCase } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
 import { ManagementSetup } from '../../../plugins/management/public';
-import { ContentManagementPluginStart } from '../../../plugins/content_management/public';
+import {
+  ContentManagementPluginSetup,
+  ContentManagementPluginStart,
+} from '../../../plugins/content_management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
 import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
@@ -53,8 +58,12 @@ import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { UseCaseService } from './services/use_case_service';
 import { WorkspaceListCard } from './components/service_card';
 import { UseCaseFooter } from './components/home_get_start_card';
-import { HOME_CONTENT_AREAS } from '../../home/public';
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
+import { HOME_CONTENT_AREAS } from '../../../plugins/home/public';
+import {
+  registerEssentialOverviewContent,
+  setEssentialOverviewSection,
+} from './components/use_case_overview';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -66,6 +75,7 @@ interface WorkspacePluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
   management?: ManagementSetup;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  contentManagement?: ContentManagementPluginSetup;
 }
 
 export interface WorkspacePluginStartDeps {
@@ -239,7 +249,12 @@ export class WorkspacePlugin
 
   public async setup(
     core: CoreSetup<WorkspacePluginStartDeps>,
-    { savedObjectsManagement, management, dataSourceManagement }: WorkspacePluginSetupDeps
+    {
+      savedObjectsManagement,
+      management,
+      dataSourceManagement,
+      contentManagement,
+    }: WorkspacePluginSetupDeps
   ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
@@ -406,6 +421,43 @@ export class WorkspacePlugin
       },
     ]);
 
+    if (core.chrome.navGroup.getNavGroupEnabled() && contentManagement) {
+      // workspace essential use case overview
+      core.application.register({
+        id: ESSENTIAL_OVERVIEW_APP_ID,
+        title: '',
+        async mount(params: AppMountParameters) {
+          const { renderOverviewApp } = await import('./application');
+          const [
+            coreStart,
+            { contentManagement: contentManagementStart },
+          ] = await core.getStartServices();
+          const services = {
+            ...coreStart,
+            workspaceClient,
+            dataSourceManagement,
+            contentManagement: contentManagementStart,
+          };
+
+          return renderOverviewApp(params, services, ESSENTIAL_OVERVIEW_APP_ID);
+        },
+        workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+      });
+
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
+        {
+          id: ESSENTIAL_OVERVIEW_APP_ID,
+          order: -1,
+          title: i18n.translate('workspace.nav.essential_overview.title', {
+            defaultMessage: 'Overview',
+          }),
+        },
+      ]);
+
+      // initial the page structure
+      setEssentialOverviewSection(contentManagement);
+    }
+
     /**
      * register workspace column into saved objects table
      */
@@ -441,7 +493,10 @@ export class WorkspacePlugin
     useCases.forEach((useCase, index) => {
       contentManagement.registerContentProvider({
         id: `home_get_start_${useCase.id}`,
-        getTargetArea: () => HOME_CONTENT_AREAS.GET_STARTED,
+        getTargetArea: () => [
+          HOME_CONTENT_AREAS.GET_STARTED,
+          ANALYTICS_OVERVIEW_CONTENT_AREAS.GET_STARTED,
+        ],
         getContent: () => ({
           id: useCase.id,
           kind: 'card',
@@ -503,6 +558,9 @@ export class WorkspacePlugin
 
       // set breadcrumbs enricher for workspace
       this.breadcrumbsSubscription = enrichBreadcrumbsWithWorkspace(core);
+
+      // register content to essential overview page
+      registerEssentialOverviewContent(contentManagement, core);
     }
     return {};
   }

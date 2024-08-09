@@ -7,6 +7,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { EuiCard } from '@elastic/eui';
 
+import { EuiCardSelectProps } from '@elastic/eui/src/components/card/card_select';
 import { Embeddable, EmbeddableInput, IContainer } from '../../../../embeddable/public';
 
 export const CARD_EMBEDDABLE = 'card_embeddable';
@@ -15,6 +16,7 @@ export type CardEmbeddableInput = EmbeddableInput & {
   onClick?: () => void;
   getIcon?: () => React.ReactElement;
   getFooter?: () => React.ReactElement;
+  selectable?: EuiCardSelectProps;
 };
 
 export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
@@ -35,10 +37,10 @@ export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
         textAlign="left"
         title={this.input.title ?? ''}
         description={this.input.description}
-        display="plain"
         onClick={this.input.onClick}
         icon={this.input?.getIcon?.()}
         footer={this.input?.getFooter?.()}
+        selectable={this.input.selectable}
       />,
       node
     );

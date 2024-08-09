@@ -46,6 +46,7 @@ export const createCardInput = (
           onClick: content.onClick,
           getIcon: content?.getIcon,
           getFooter: content?.getFooter,
+          selectable: content.selectable,
         },
       };
     }

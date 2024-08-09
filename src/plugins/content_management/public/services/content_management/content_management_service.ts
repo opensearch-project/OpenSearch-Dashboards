@@ -35,16 +35,19 @@ export class ContentManagementService {
   registerContentProvider = (provider: ContentProvider) => {
     this.contentProviders.set(provider.id, provider);
 
-    const targetArea = provider.getTargetArea();
-    const [pageId, sectionId] = targetArea.split('/');
+    const area = provider.getTargetArea();
+    const targetAreas: string[] = Array.isArray(area) ? [...area] : [area];
+    for (const targetArea of targetAreas) {
+      const [pageId, sectionId] = targetArea.split('/');
 
-    if (!pageId || !sectionId) {
-      throw new Error('getTargetArea() should return a string in format {pageId}/{sectionId}');
-    }
+      if (!pageId || !sectionId) {
+        throw new Error('getTargetArea() should return a string in format {pageId}/{sectionId}');
+      }
 
-    const page = this.getPage(pageId);
-    if (page) {
-      page.addContent(sectionId, provider.getContent());
+      const page = this.getPage(pageId);
+      if (page) {
+        page.addContent(sectionId, provider.getContent());
+      }
     }
   };
 

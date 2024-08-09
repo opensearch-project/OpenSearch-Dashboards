@@ -102,3 +102,20 @@ export const renderInitialApp = ({}: AppMountParameters, services: Services) => 
     ReactDOM.unmountComponentAtNode(rootElement!);
   };
 };
+
+export const renderOverviewApp = async (
+  { element }: AppMountParameters,
+  services: Services,
+  pageId: string
+) => {
+  ReactDOM.render(
+    <OpenSearchDashboardsContextProvider services={services}>
+      {services.contentManagement?.renderPage(pageId)}
+    </OpenSearchDashboardsContextProvider>,
+    element
+  );
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
+};

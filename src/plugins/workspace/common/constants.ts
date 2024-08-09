@@ -11,6 +11,8 @@ export const WORKSPACE_CREATE_APP_ID = 'workspace_create';
 export const WORKSPACE_LIST_APP_ID = 'workspace_list';
 export const WORKSPACE_DETAIL_APP_ID = 'workspace_detail';
 export const WORKSPACE_INITIAL_APP_ID = 'workspace_initial';
+export const ESSENTIAL_OVERVIEW_APP_ID = 'essential_overview';
+export const ANALYTICS_OVERVIEW_ALL_APP_ID = 'analytics_all_overview';
 /**
  * Since every workspace always have overview and update page, these features will be selected by default
  * and can't be changed in the workspace form feature selector
@@ -189,3 +191,22 @@ export const CURRENT_USER_PLACEHOLDER = '%me%';
 
 export const MAX_WORKSPACE_NAME_LENGTH = 40;
 export const MAX_WORKSPACE_DESCRIPTION_LENGTH = 200;
+export const ESSENTIAL_OVERVIEW_PAGE_ID = 'essential_overview';
+export const ANALYTICS_OVERVIEW_PAGE_ID = 'analytics_overview';
+export enum SECTIONS {
+  GET_STARTED = `get_started`,
+  SERVICE_CARDS = `service_cards`,
+  RECENTLY_VIEWED = `recently_viewed`,
+}
+
+export enum ESSENTIAL_OVERVIEW_CONTENT_AREAS {
+  GET_STARTED = `${ESSENTIAL_OVERVIEW_PAGE_ID}/${SECTIONS.GET_STARTED}`,
+  SERVICE_CARDS = `${ESSENTIAL_OVERVIEW_PAGE_ID}/${SECTIONS.SERVICE_CARDS}`,
+  RECENTLY_VIEWED = `${ESSENTIAL_OVERVIEW_PAGE_ID}/${SECTIONS.RECENTLY_VIEWED}`,
+}
+
+export enum ANALYTICS_OVERVIEW_CONTENT_AREAS {
+  GET_STARTED = `${ANALYTICS_OVERVIEW_PAGE_ID}/${SECTIONS.GET_STARTED}`,
+  SERVICE_CARDS = `${ANALYTICS_OVERVIEW_PAGE_ID}/${SECTIONS.SERVICE_CARDS}`,
+  RECENTLY_VIEWED = `${ANALYTICS_OVERVIEW_PAGE_ID}/${SECTIONS.RECENTLY_VIEWED}`,
+}
