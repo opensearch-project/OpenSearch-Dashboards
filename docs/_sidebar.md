@@ -1,4 +1,4 @@
-- [Home](/)
+* [Home](/)
 
   - Capabilities
     - [Read_only_mode](capabilities/read_only_mode.md)
