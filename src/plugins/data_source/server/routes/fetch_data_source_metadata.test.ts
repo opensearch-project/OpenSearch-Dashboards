@@ -16,6 +16,8 @@ import { registerFetchDataSourceMetaDataRoute } from './fetch_data_source_metada
 import { AuthType } from '../../common/data_sources';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { opensearchClientMock } from '../../../../../src/core/server/opensearch/client/mocks';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { dynamicConfigServiceMock } from '../../../../../src/core/server/config';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -31,6 +33,7 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
   let dataSourceClient: ReturnType<typeof opensearchClientMock.createInternalClient>;
   let dataSourceServiceSetupMock: DataSourceServiceSetup;
   let authRegistryPromiseMock: Promise<IAuthenticationMethodRegistry>;
+  const dynamicConfigServiceStart = dynamicConfigServiceMock.createInternalStartContract();
   const dataSourceAttr = {
     endpoint: 'https://test.com',
     auth: {
@@ -186,7 +189,7 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
       customApiSchemaRegistryPromise
     );
 
-    await server.start();
+    await server.start({ dynamicConfigService: dynamicConfigServiceStart });
   });
 
   afterEach(async () => {

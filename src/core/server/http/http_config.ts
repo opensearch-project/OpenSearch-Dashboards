@@ -31,8 +31,9 @@
 import { ByteSizeValue, schema, TypeOf } from '@osd/config-schema';
 import { hostname } from 'os';
 
-import { CspConfigType, CspConfig, ICspConfig } from '../csp';
+import { CspConfigType } from '../csp';
 import { SslConfig, sslSchema } from './ssl_config';
+import { CspConfigImpl } from '../csp/csp_config';
 
 const validBasePathRegex = /^\/.*[^\/]$/;
 const uuidRegexp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -138,6 +139,13 @@ export const config = {
 };
 export type HttpConfigType = TypeOf<typeof config.schema>;
 
+/**
+ * TODO Add more dynamic configs
+ */
+export interface UpdateHttpConfigProps {
+  cspConfig: CspConfigType;
+}
+
 export class HttpConfig {
   public name: string;
   public autoListen: boolean;
@@ -152,7 +160,7 @@ export class HttpConfig {
   public rewriteBasePath: boolean;
   public ssl: SslConfig;
   public compression: { enabled: boolean; referrerWhitelist?: string[] };
-  public csp: ICspConfig;
+  public csp: CspConfigImpl;
   public xsrf: { disableProtection: boolean; whitelist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
 
@@ -181,9 +189,13 @@ export class HttpConfig {
     this.rewriteBasePath = rawHttpConfig.rewriteBasePath;
     this.ssl = new SslConfig(rawHttpConfig.ssl || {});
     this.compression = rawHttpConfig.compression;
-    this.csp = new CspConfig(rawCspConfig);
+    this.csp = new CspConfigImpl(rawCspConfig);
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;
+  }
+
+  public updateConfigs({ cspConfig }: UpdateHttpConfigProps) {
+    this.csp.updateCSPConfig(cspConfig);
   }
 }
 

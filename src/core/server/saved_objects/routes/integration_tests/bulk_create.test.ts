@@ -33,6 +33,7 @@ import { UnwrapPromise } from '@osd/utility-types';
 import { registerBulkCreateRoute } from '../bulk_create';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { setupServer } from '../test_utils';
+import { dynamicConfigServiceMock } from '../../../config/dynamic_config_service.mock';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -50,7 +51,8 @@ describe('POST /api/saved_objects/_bulk_create', () => {
     const router = httpSetup.createRouter('/api/saved_objects/');
     registerBulkCreateRoute(router);
 
-    await server.start();
+    const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
+    await server.start({ dynamicConfigService });
   });
 
   afterEach(async () => {

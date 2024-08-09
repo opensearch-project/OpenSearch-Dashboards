@@ -221,6 +221,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     getStartServices: () => plugin.startDependencies,
     auditTrail: deps.auditTrail,
     security: deps.security,
+    dynamicConfigService: {
+      registerDynamicConfigClientFactory: deps.dynamicConfig.registerDynamicConfigClientFactory,
+      registerAsyncLocalStoreRequestHeader: deps.dynamicConfig.registerAsyncLocalStoreRequestHeader,
+    },
   };
 }
 

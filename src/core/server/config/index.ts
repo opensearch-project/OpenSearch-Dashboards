@@ -30,6 +30,10 @@
 
 export { coreDeprecationProvider } from './deprecation';
 
+export { dynamicConfigServiceMock } from './mocks';
+
+export { config } from './dynamic_config_service_config';
+
 export {
   ConfigService,
   IConfigService,
@@ -50,3 +54,5 @@ export {
   PackageInfo,
   LegacyObjectToConfigAdapter,
 } from '@osd/config';
+
+export * from './types';
