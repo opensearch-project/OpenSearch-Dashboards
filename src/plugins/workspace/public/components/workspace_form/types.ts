@@ -55,6 +55,7 @@ export enum WorkspaceFormErrorCode {
   PermissionSettingOwnerMissing,
   InvalidDataSource,
   DuplicateDataSource,
+  InvalidColor,
 }
 
 export interface WorkspaceFormError {
