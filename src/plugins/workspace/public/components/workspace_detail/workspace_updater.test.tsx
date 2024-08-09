@@ -127,7 +127,7 @@ const WorkspaceUpdater = (
   const registeredUseCases$ = new BehaviorSubject([
     WORKSPACE_USE_CASES.observability,
     WORKSPACE_USE_CASES['security-analytics'],
-    WORKSPACE_USE_CASES.analytics,
+    WORKSPACE_USE_CASES.essentials,
     WORKSPACE_USE_CASES.search,
   ]);
 

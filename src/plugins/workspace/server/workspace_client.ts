@@ -220,7 +220,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     const { permissions, dataSources: newDataSources, ...attributes } = payload;
     try {
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
-      const workspaceInDB: SavedObject<WorkspaceAttribute> = await client.get(WORKSPACE_TYPE, id);
+      let workspaceInDB: SavedObject<WorkspaceAttribute> = await client.get(WORKSPACE_TYPE, id);
       if (workspaceInDB.attributes.name !== attributes.name) {
         const existingWorkspaceRes = await this.getScopedClientWithoutPermission(
           requestDetail
@@ -265,6 +265,22 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         }
       }
 
+      /**
+       * When the workspace owner unassign themselves, ensure the default data source is set before
+       * updating the workspace permissions. This prevents a lack of write permission on saved objects
+       * after the user is removed from the workspace.
+       **/
+      if (newDataSources && this.uiSettings && client) {
+        const uiSettingsClient = this.uiSettings.asScopedToClient(client);
+        try {
+          await checkAndSetDefaultDataSource(uiSettingsClient, newDataSources, true);
+          // Doc version may changed after default data source updated.
+          workspaceInDB = await client.get(WORKSPACE_TYPE, id);
+        } catch (error) {
+          this.logger.error('Set default data source error during workspace updating');
+        }
+      }
+
       await client.create<Omit<WorkspaceAttribute, 'id'>>(
         WORKSPACE_TYPE,
         { ...workspaceInDB.attributes, ...attributes },
@@ -275,11 +291,6 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           version: workspaceInDB.version,
         }
       );
-
-      if (newDataSources && this.uiSettings && client) {
-        const uiSettingsClient = this.uiSettings.asScopedToClient(client);
-        checkAndSetDefaultDataSource(uiSettingsClient, newDataSources, true);
-      }
 
       return {
         success: true,
