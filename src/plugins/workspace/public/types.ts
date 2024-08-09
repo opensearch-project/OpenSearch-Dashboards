@@ -6,10 +6,12 @@
 import { CoreStart } from '../../../core/public';
 import { WorkspaceClient } from './workspace_client';
 import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
+import { ContentManagementPluginStart } from '../../../plugins/content_management/public';
 
 export type Services = CoreStart & {
   workspaceClient: WorkspaceClient;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  contentManagement?: ContentManagementPluginStart;
 };
 
 export interface WorkspaceUseCase {
