@@ -26,6 +26,7 @@ describe('Test on PopoverButton', () => {
   });
 
   // ToDo: Find out if this is actually the correct behavior
+  // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/7674
   it('renders a blank label', () => {
     const component = mount(<DataSourceMenuPopoverButton className="random" onClick={jest.fn()} />);
     expect(component.find('EuiButton').text()).toBe('');
