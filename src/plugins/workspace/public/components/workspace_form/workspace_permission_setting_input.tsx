@@ -99,7 +99,6 @@ export const WorkspacePermissionSettingInput = ({
     [group, userId]
   );
 
-  // const permissionModesSelectedId = useMemo(() => getPermissionModeId(modes ?? []), [modes]);
   const idSelected = useMemo(() => getPermissionModeId(modes ?? []), [modes]);
   const permissionModesSelected = useMemo(() => {
     const permissionModeSelected = permissionModeOptions.find(
