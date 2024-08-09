@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { PublicAppInfo, WorkspaceObject } from 'opensearch-dashboards/public';
@@ -125,7 +125,7 @@ const WorkspaceDetailPage = (props: any) => {
   const registeredUseCases$ = new BehaviorSubject([
     WORKSPACE_USE_CASES.observability,
     WORKSPACE_USE_CASES['security-analytics'],
-    WORKSPACE_USE_CASES.analytics,
+    WORKSPACE_USE_CASES.essentials,
     WORKSPACE_USE_CASES.search,
   ]);
   return (

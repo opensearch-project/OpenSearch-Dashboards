@@ -17,7 +17,7 @@ const setup = (options?: Partial<WorkspaceUseCaseProps>) => {
       availableUseCases={[
         WORKSPACE_USE_CASES.observability,
         WORKSPACE_USE_CASES['security-analytics'],
-        WORKSPACE_USE_CASES.analytics,
+        WORKSPACE_USE_CASES.essentials,
         WORKSPACE_USE_CASES.search,
         {
           id: 'system-use-case',
@@ -43,7 +43,7 @@ describe('WorkspaceUseCase', () => {
     const { renderResult } = setup();
 
     expect(renderResult.getByText('Observability')).toBeInTheDocument();
-    expect(renderResult.getByText('Analytics')).toBeInTheDocument();
+    expect(renderResult.getByText('Essentials')).toBeInTheDocument();
     expect(renderResult.getByText('Security Analytics')).toBeInTheDocument();
     expect(renderResult.getByText('Search')).toBeInTheDocument();
   });
