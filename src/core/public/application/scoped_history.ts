@@ -39,6 +39,8 @@ import {
   Href,
   Action,
 } from 'history';
+import { i18n } from '@osd/i18n';
+import { extractLocaleInfo } from '../locale_helper';
 
 /**
  * A wrapper around a `History` instance that is scoped to a particular base path of the history stack. Behaves
@@ -307,11 +309,19 @@ export class ScopedHistory<HistoryLocationState = unknown>
    * state. Also forwards events to child listeners with the base path stripped from the location.
    */
   private setupHistoryListener() {
+    const currentLocale = i18n.getLocale() || 'en';
     const unlisten = this.parentHistory.listen((location, action) => {
       // If the user navigates outside the scope of this basePath, tear it down.
       if (!location.pathname.startsWith(this.basePath)) {
         unlisten();
         this.isActive = false;
+        return;
+      }
+      // const fullUrl = `${location.pathname}${location.search}${location.hash}`;
+      const { localeValue } = extractLocaleInfo(window.location.href);
+      if (localeValue !== currentLocale) {
+        // Force a full page reload
+        window.location.reload();
         return;
       }
 
