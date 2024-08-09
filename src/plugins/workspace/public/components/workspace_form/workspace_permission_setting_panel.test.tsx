@@ -59,7 +59,7 @@ describe('WorkspacePermissionSettingInput', () => {
     expect(onChangeMock).not.toHaveBeenCalled();
     const permissionToggleListButton = renderResult
       .getAllByTestId('comboBoxToggleListButton')
-      .filter((button) => button.closest('[data-test-subj="workspace.permissionModeOptions"]'))[0];
+      .filter((button) => button.closest('[data-test-subj="workspace-permissionModeOptions"]'))[0];
     fireEvent.click(permissionToggleListButton);
     fireEvent.click(renderResult.getAllByText('Read & Write')[1]);
     expect(onChangeMock).toHaveBeenCalledWith([
@@ -83,7 +83,7 @@ describe('WorkspacePermissionSettingInput', () => {
     expect(onChangeMock).not.toHaveBeenCalled();
     const permissionToggleListButton = renderResult
       .getAllByTestId('comboBoxToggleListButton')
-      .filter((button) => button.closest('[data-test-subj="workspace.permissionModeOptions"]'))[1];
+      .filter((button) => button.closest('[data-test-subj="workspace-permissionModeOptions"]'))[1];
     fireEvent.click(permissionToggleListButton);
     fireEvent.click(renderResult.getByText('Owner'));
     expect(onChangeMock).toHaveBeenCalledWith([
@@ -105,7 +105,7 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult, onChangeMock } = setup();
 
     expect(onChangeMock).not.toHaveBeenCalled();
-    fireEvent.change(renderResult.getAllByTestId('workspace.typeOptions')[1], {
+    fireEvent.change(renderResult.getAllByTestId('workspace-typeOptions')[1], {
       target: { value: 'user' },
     });
     expect(onChangeMock).toHaveBeenCalledWith([
@@ -118,7 +118,6 @@ describe('WorkspacePermissionSettingInput', () => {
       {
         id: 1,
         type: WorkspacePermissionItemType.User,
-        userId: '',
         modes: ['library_write', 'read'],
       },
     ]);
@@ -127,14 +126,13 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult, onChangeMock } = setup();
 
     expect(onChangeMock).not.toHaveBeenCalled();
-    fireEvent.change(renderResult.getAllByTestId('workspace.typeOptions')[0], {
+    fireEvent.change(renderResult.getAllByTestId('workspace-typeOptions')[0], {
       target: { value: 'group' },
     });
     expect(onChangeMock).toHaveBeenCalledWith([
       {
         id: 0,
         type: WorkspacePermissionItemType.Group,
-        group: '',
         modes: ['library_read', 'read'],
       },
       {

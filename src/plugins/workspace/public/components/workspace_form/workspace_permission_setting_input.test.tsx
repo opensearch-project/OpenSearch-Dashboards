@@ -99,7 +99,7 @@ describe('WorkspacePermissionSettingInput', () => {
     expect(onPermissionModesChangeMock).not.toHaveBeenCalled();
     const permissionToggleListButton = renderResult
       .getAllByTestId('comboBoxToggleListButton')
-      .filter((button) => button.closest('[data-test-subj="workspace.permissionModeOptions"]'))[0];
+      .filter((button) => button.closest('[data-test-subj="workspace-permissionModeOptions"]'))[0];
     fireEvent.click(permissionToggleListButton);
     fireEvent.click(renderResult.getByText('Owner'));
     expect(onPermissionModesChangeMock).toHaveBeenCalledWith(['library_write', 'write'], 0);
@@ -118,7 +118,7 @@ it('should call onTypeChange with types after types changed', () => {
   const { renderResult, onTypeChangeMock } = setup({});
 
   expect(onTypeChangeMock).not.toHaveBeenCalled();
-  fireEvent.change(renderResult.getByTestId('workspace.typeOptions'), {
+  fireEvent.change(renderResult.getByTestId('workspace-typeOptions'), {
     target: { value: 'group' },
   });
   expect(onTypeChangeMock).toHaveBeenCalledWith('group', 0);

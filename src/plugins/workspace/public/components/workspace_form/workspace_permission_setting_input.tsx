@@ -63,19 +63,14 @@ export interface WorkspacePermissionSettingInputProps {
   deletable?: boolean;
   userOrGroupDisabled: boolean;
   onGroupOrUserIdChange: (
-    groupOrUserId:
+    id:
       | { type: WorkspacePermissionItemType.User; userId?: string }
       | { type: WorkspacePermissionItemType.Group; group?: string },
     index: number
   ) => void;
-  onPermissionModesChange: (
-    WorkspacePermissionMode: WorkspacePermissionMode[],
-    index: number
-  ) => void;
+  onPermissionModesChange: (modes: WorkspacePermissionMode[], index: number) => void;
   onTypeChange: (
-    WorkspacePermissionItemType:
-      | WorkspacePermissionItemType.User
-      | WorkspacePermissionItemType.Group,
+    type: WorkspacePermissionItemType.User | WorkspacePermissionItemType.Group,
     index: number
   ) => void;
   onDelete: (index: number) => void;
@@ -99,13 +94,13 @@ export const WorkspacePermissionSettingInput = ({
     [group, userId]
   );
 
-  const idSelected = useMemo(() => getPermissionModeId(modes ?? []), [modes]);
   const permissionModesSelected = useMemo(() => {
+    const idSelected = getPermissionModeId(modes ?? []);
     const permissionModeSelected = permissionModeOptions.find(
       (option) => option.value === idSelected
     );
     return permissionModeSelected ? [permissionModeSelected] : [];
-  }, [idSelected]);
+  }, [modes]);
 
   const handleGroupOrUserIdCreate = useCallback(
     (groupOrUserId) => {
@@ -185,7 +180,7 @@ export const WorkspacePermissionSettingInput = ({
                   boxShadow: 'none',
                   fontWeight: 'bold',
                 }}
-                data-test-subj="workspace.typeOptions"
+                data-test-subj="workspace-typeOptions"
               />
             </EuiFlexItem>
           }
@@ -200,7 +195,7 @@ export const WorkspacePermissionSettingInput = ({
           selectedOptions={permissionModesSelected}
           onChange={handlePermissionModeOptionChange}
           isClearable={false}
-          data-test-subj="workspace.permissionModeOptions"
+          data-test-subj="workspace-permissionModeOptions"
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

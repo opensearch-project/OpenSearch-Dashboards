@@ -35,22 +35,37 @@ export interface WorkspacePermissionSettingPanelProps {
   ) => void;
 }
 
-interface UserOrGroupSectionProps extends WorkspacePermissionSettingPanelProps {
-  // type: WorkspacePermissionItemType;
-  nextIdGenerator: () => number;
-}
-
-const UserOrGroupSection = ({
-  // type,
+export const WorkspacePermissionSettingPanel = ({
   errors,
   onChange,
-  nextIdGenerator,
   permissionSettings,
   disabledUserOrGroupInputIds,
-}: UserOrGroupSectionProps) => {
+}: WorkspacePermissionSettingPanelProps) => {
+  const nextIdRef = useRef(generateNextPermissionSettingsId(permissionSettings));
+
+  const handlePermissionSettingsChange = useCallback(
+    (newSettings) => {
+      onChange?.([...newSettings]);
+    },
+    [onChange]
+  );
+
+  const nextIdGenerator = useCallback(() => {
+    const nextId = nextIdRef.current;
+    nextIdRef.current++;
+    return nextId;
+  }, []);
+
+  useEffect(() => {
+    nextIdRef.current = Math.max(
+      nextIdRef.current,
+      generateNextPermissionSettingsId(permissionSettings)
+    );
+  }, [permissionSettings]);
+
   // default permission mode is read
   const handleAddNewOne = useCallback(() => {
-    onChange?.([
+    handlePermissionSettingsChange?.([
       ...permissionSettings,
       {
         id: nextIdGenerator(),
@@ -58,33 +73,35 @@ const UserOrGroupSection = ({
         modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read],
       },
     ]);
-  }, [onChange, permissionSettings, nextIdGenerator]);
+  }, [handlePermissionSettingsChange, permissionSettings, nextIdGenerator]);
 
   const handleDelete = useCallback(
     (index: number) => {
-      onChange?.(permissionSettings.filter((_item, itemIndex) => itemIndex !== index));
+      handlePermissionSettingsChange?.(
+        permissionSettings.filter((_item, itemIndex) => itemIndex !== index)
+      );
     },
-    [onChange, permissionSettings]
+    [handlePermissionSettingsChange, permissionSettings]
   );
 
   const handlePermissionModesChange = useCallback<
     WorkspacePermissionSettingInputProps['onPermissionModesChange']
   >(
     (modes, index) => {
-      onChange?.(
+      handlePermissionSettingsChange?.(
         permissionSettings.map((item, itemIndex) =>
           index === itemIndex ? { ...item, modes } : item
         )
       );
     },
-    [onChange, permissionSettings]
+    [handlePermissionSettingsChange, permissionSettings]
   );
 
   const handleGroupOrUserIdChange = useCallback<
     WorkspacePermissionSettingInputProps['onGroupOrUserIdChange']
   >(
     (userOrGroupIdWithType, index) => {
-      onChange?.(
+      handlePermissionSettingsChange?.(
         permissionSettings.map((item, itemIndex) =>
           index === itemIndex
             ? {
@@ -96,27 +113,18 @@ const UserOrGroupSection = ({
         )
       );
     },
-    [onChange, permissionSettings]
+    [handlePermissionSettingsChange, permissionSettings]
   );
 
   const handleTypeChange = useCallback<WorkspacePermissionSettingInputProps['onTypeChange']>(
     (type, index) => {
-      onChange?.(
-        permissionSettings.map((item, itemIndex) => {
-          if (index === itemIndex) {
-            if (type === WorkspacePermissionItemType.User) {
-              const { group, ...newItem } = { ...item, type, userId: '', group: '' };
-              return newItem;
-            } else {
-              const { userId, ...newItem } = { ...item, type, userId: '', group: '' };
-              return newItem;
-            }
-          }
-          return item;
-        })
+      handlePermissionSettingsChange?.(
+        permissionSettings.map((item, itemIndex) =>
+          index === itemIndex ? { id: item.id, type, modes: item.modes } : item
+        )
       );
     },
-    [onChange, permissionSettings]
+    [handlePermissionSettingsChange, permissionSettings]
   );
 
   return (
@@ -173,47 +181,6 @@ const UserOrGroupSection = ({
           defaultMessage: 'Add collaborator',
         })}
       </EuiSmallButton>
-    </div>
-  );
-};
-
-export const WorkspacePermissionSettingPanel = ({
-  errors,
-  onChange,
-  permissionSettings,
-  disabledUserOrGroupInputIds,
-}: WorkspacePermissionSettingPanelProps) => {
-  const nextIdRef = useRef(generateNextPermissionSettingsId(permissionSettings));
-
-  const handlePermissionSettingsChange = useCallback(
-    (newSettings) => {
-      onChange?.([...newSettings]);
-    },
-    [onChange]
-  );
-
-  const nextIdGenerator = useCallback(() => {
-    const nextId = nextIdRef.current;
-    nextIdRef.current++;
-    return nextId;
-  }, []);
-
-  useEffect(() => {
-    nextIdRef.current = Math.max(
-      nextIdRef.current,
-      generateNextPermissionSettingsId(permissionSettings)
-    );
-  }, [permissionSettings]);
-
-  return (
-    <div>
-      <UserOrGroupSection
-        errors={errors}
-        onChange={handlePermissionSettingsChange}
-        permissionSettings={permissionSettings}
-        nextIdGenerator={nextIdGenerator}
-        disabledUserOrGroupInputIds={disabledUserOrGroupInputIds}
-      />
     </div>
   );
 };
