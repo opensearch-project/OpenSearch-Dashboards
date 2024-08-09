@@ -5,7 +5,11 @@
 
 import { schema } from '@osd/config-schema';
 import { CoreSetup, Logger, PrincipalType, ACL } from '../../../../core/server';
-import { WorkspacePermissionMode } from '../../common/constants';
+import {
+  WorkspacePermissionMode,
+  MAX_WORKSPACE_NAME_LENGTH,
+  MAX_WORKSPACE_DESCRIPTION_LENGTH,
+} from '../../common/constants';
 import { IWorkspaceClientImpl, WorkspaceAttributeWithPermission } from '../types';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import { registerDuplicateRoute } from './duplicate';
@@ -38,7 +42,7 @@ const settingsSchema = schema.object({
 });
 
 const workspaceOptionalAttributesSchema = {
-  description: schema.maybe(schema.string()),
+  description: schema.maybe(schema.string({ maxLength: MAX_WORKSPACE_DESCRIPTION_LENGTH })),
   features: schema.maybe(schema.arrayOf(schema.string())),
   color: schema.maybe(schema.string()),
   icon: schema.maybe(schema.string()),
@@ -47,6 +51,7 @@ const workspaceOptionalAttributesSchema = {
 };
 
 const workspaceNameSchema = schema.string({
+  maxLength: MAX_WORKSPACE_NAME_LENGTH,
   validate(value) {
     if (!value || value.trim().length === 0) {
       return "can't be empty or blank.";

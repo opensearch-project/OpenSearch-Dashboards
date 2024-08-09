@@ -38,7 +38,7 @@ export const useWorkspaceForm = ({
   permissionEnabled,
 }: WorkspaceFormProps) => {
   const applications = useApplications(application);
-  const [name, setName] = useState(defaultValues?.name);
+  const [name, setName] = useState(defaultValues?.name ?? '');
   const [description, setDescription] = useState(defaultValues?.description);
   const [color, setColor] = useState(defaultValues?.color);
   const defaultValuesRef = useRef(defaultValues);
@@ -133,14 +133,6 @@ export const useWorkspaceForm = ({
     [onSubmit, permissionEnabled]
   );
 
-  const handleNameInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>((e) => {
-    setName(e.target.value);
-  }, []);
-
-  const handleDescriptionChange = useCallback<Required<EuiTextAreaProps>['onChange']>((e) => {
-    setDescription(e.target.value);
-  }, []);
-
   const handleColorChange = useCallback<Required<EuiColorPickerProps>['onChange']>((text) => {
     setColor(text);
   }, []);
@@ -152,12 +144,12 @@ export const useWorkspaceForm = ({
     applications,
     numberOfErrors,
     numberOfChanges,
+    setName,
+    setDescription,
     handleFormSubmit,
     handleColorChange,
     handleUseCaseChange,
-    handleNameInputChange,
     setPermissionSettings,
     setSelectedDataSources,
-    handleDescriptionChange,
   };
 };
