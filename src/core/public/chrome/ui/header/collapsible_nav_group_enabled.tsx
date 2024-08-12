@@ -420,6 +420,7 @@ export function CollapsibleNavGroupEnabled({
           className={classNames({
             'bottom-container': true,
             'bottom-container-collapsed': !isNavOpen,
+            'bottom-container-expanded': isNavOpen,
           })}
         >
           <HeaderNavControls

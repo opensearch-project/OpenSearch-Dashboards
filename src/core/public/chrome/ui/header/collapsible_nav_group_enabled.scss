@@ -66,14 +66,15 @@
     &.bottom-container-collapsed {
       flex-direction: column;
       align-items: center;
-
-      > * {
-        margin: $euiSizeS 0;
-      }
+      gap: $euiSize;
+      padding-top: $euiSizeS;
+      padding-bottom: $euiSizeS;
     }
-  }
 
-  .nav-controls-padding {
-    padding: $euiSize;
+    &.bottom-container-expanded {
+      gap: 16px;
+      padding-top: $euiSize;
+      padding-bottom: $euiSize;
+    }
   }
 }
