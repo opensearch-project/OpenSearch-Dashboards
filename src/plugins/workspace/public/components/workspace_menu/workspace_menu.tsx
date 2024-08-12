@@ -32,6 +32,7 @@ import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 import { WorkspaceUseCase } from '../../types';
 import { navigateToWorkspaceDetail } from '../utils/workspace';
+import { validateWorkspaceColor } from '../../../common/utils';
 
 const defaultHeaderName = i18n.translate('workspace.menu.defaultHeaderName', {
   defaultMessage: 'Workspaces',
@@ -60,6 +61,9 @@ const manageWorkspaceButton = i18n.translate('workspace.menu.button.manageWorksp
 const manageWorkspacesButton = i18n.translate('workspace.menu.button.manageWorkspaces', {
   defaultMessage: 'Manage workspaces',
 });
+
+const getValidWorkspaceColor = (color?: string) =>
+  validateWorkspaceColor(color) ? color : undefined;
 
 interface Props {
   coreStart: CoreStart;
@@ -109,7 +113,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
         size="s"
         type="space"
         name={currentWorkspace.name}
-        color={currentWorkspace.color}
+        color={getValidWorkspaceColor(currentWorkspace.color)}
         initialsLength={2}
       />
     </EuiButtonEmpty>
@@ -138,7 +142,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
               size="s"
               type="space"
               name={workspace.name}
-              color={workspace.color}
+              color={getValidWorkspaceColor(workspace.color)}
               initialsLength={2}
             />
           }
@@ -186,7 +190,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                   size="m"
                   type="space"
                   name={currentWorkspaceName}
-                  color={currentWorkspace?.color}
+                  color={getValidWorkspaceColor(currentWorkspace?.color)}
                   initialsLength={2}
                 />
               </EuiFlexItem>
