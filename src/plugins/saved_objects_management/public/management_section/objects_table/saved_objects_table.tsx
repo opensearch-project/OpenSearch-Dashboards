@@ -72,7 +72,6 @@ import {
   WorkspaceAttribute,
   SavedObjectsImportSuccess,
   SavedObjectsImportError,
-  IWorkspaceClient,
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
