@@ -1,0 +1,61 @@
+/*
+* Copyright OpenSearch Contributors
+* SPDX-License-Identifier: Apache-2.0
+*/
+
+.newTopNavHeader {
+  z-index: 1000;
+  padding-left: $euiSizeXS;
+  box-shadow: none;
+  border-bottom: none;
+  background: none;
+
+  &.primaryHeader {
+    height: auto;
+    padding-top: $euiSizeM;
+  }
+
+  &.primaryApplicationHeader {
+    height: auto;
+    padding-top: $euiSizeM - $euiSizeXS;
+  }
+
+  &:has(.headerDescriptionControl, .headerBottomControl) {
+    height: auto;
+  }
+}
+
+.primaryApplicationHeader {
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiHeaderSection > .euiHeaderSectionItem {
+    align-items: stretch;
+  }
+
+  .headerAppActionMenuSection {
+    flex-grow: 1;
+  }
+
+  .headerAppActionMenu {
+    width: 100%;
+  }
+}
+
+.newTopNavApplicationTitle {
+  padding: 0 $euiSizeM;
+}
+
+.newAppTopNavExpander {
+  position: fixed;
+  left: 0;
+  top: $euiSizeL - $euiSizeXS;
+}
+
+.newPageTopNavExpander {
+  position: fixed;
+  left: 0;
+  top: $euiSizeL - $euiSizeXS;
+}
+
+.stretchedActionMenu {
+  width: 100%;
+}

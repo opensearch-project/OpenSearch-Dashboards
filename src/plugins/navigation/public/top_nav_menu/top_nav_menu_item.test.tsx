@@ -28,9 +28,15 @@
  * under the License.
  */
 
+import { EuiButton, EuiButtonIcon, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import { TopNavMenuData } from './top_nav_menu_data';
+import {
+  TopNavMenuData,
+  TopNavMenuButtonData,
+  TopNavMenuIconData,
+  TopNavMenuSwitchData,
+} from './top_nav_menu_data';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 describe('TopNavMenu', () => {
@@ -137,5 +143,57 @@ describe('TopNavMenu', () => {
       disableButton: () => true,
       run: jest.fn(),
     });
+  });
+
+  const defaultProps = {
+    label: 'Test Label',
+    run: jest.fn(),
+    testId: 'test-id',
+  };
+
+  it('Should render a button with tooltip', () => {
+    const props = {
+      ...defaultProps,
+      controlType: 'button',
+      tooltip: 'Test Tooltip',
+    } as TopNavMenuButtonData;
+    const wrapper = shallowWithIntl(<TopNavMenuItem {...props} />);
+    expect(wrapper.find(EuiToolTip).length).toBe(1);
+    expect(wrapper.find(EuiButton).length).toBe(1);
+  });
+
+  it('Should render an icon button', () => {
+    const props = {
+      ...defaultProps,
+      controlType: 'icon',
+      iconType: 'alert',
+      tooltip: 'Test Tooltip',
+      ariaLabel: 'Test',
+    } as TopNavMenuIconData;
+    const wrapper = shallowWithIntl(<TopNavMenuItem {...props} />);
+    expect(wrapper.find(EuiButtonIcon).length).toBe(1);
+  });
+
+  it('Should render a switch', () => {
+    const props = { ...defaultProps, controlType: 'switch', checked: true } as TopNavMenuSwitchData;
+    const wrapper = shallowWithIntl(<TopNavMenuItem {...props} />);
+    expect(wrapper.find(EuiSwitch).length).toBe(1);
+  });
+
+  it('Should handles button click', () => {
+    const props = { ...defaultProps, controlType: 'button' } as TopNavMenuButtonData;
+    const wrapper = shallowWithIntl(<TopNavMenuItem {...props} />);
+    wrapper.find(EuiButton).simulate('click', { currentTarget: {} });
+    expect(props.run).toHaveBeenCalled();
+  });
+
+  it('Should disable the button when disabled is true', () => {
+    const props = {
+      ...defaultProps,
+      controlType: 'button',
+      disabled: true,
+    } as TopNavMenuButtonData;
+    const wrapper = shallowWithIntl(<TopNavMenuItem {...props} />);
+    expect(wrapper.find(EuiButton).props().isDisabled).toBe(true);
   });
 });
