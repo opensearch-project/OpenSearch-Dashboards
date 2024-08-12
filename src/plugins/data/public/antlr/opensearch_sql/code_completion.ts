@@ -62,7 +62,7 @@ export const getSuggestions = async ({
       const tableNames = suggestions.suggestColumns.tables.map((table) => table.name);
       const schemas = await fetchTableSchemas(tableNames, api, dataSetManager);
 
-      (schemas as IDataFrameResponse[]).forEach((schema: IDataFrameResponse) => {
+      (schemas as IDataFrameResponse[]).forEach((schema: IDataFrameResponse, index: number) => {
         if ('body' in schema && schema.body && 'fields' in schema.body) {
           const columns = schema.body.fields.find((col: IFieldType) => col.name === 'COLUMN_NAME');
           const fieldTypes = schema.body.fields.find((col: IFieldType) => col.name === 'DATA_TYPE');
@@ -70,7 +70,7 @@ export const getSuggestions = async ({
           if (columns && fieldTypes) {
             finalSuggestions.push(
               ...columns.values.map((col: string) => ({
-                text: col,
+                text: `${tableNames[index]}.${col}`,
                 type: monaco.languages.CompletionItemKind.Field,
               }))
             );
