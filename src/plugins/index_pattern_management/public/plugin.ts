@@ -46,7 +46,7 @@ import {
 } from './service';
 
 import { ManagementSetup } from '../../management/public';
-import { AppStatus } from '../../../core/public';
+import { AppStatus, DEFAULT_NAV_GROUPS } from '../../../core/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 
 export interface IndexPatternManagementSetupDependencies {
@@ -161,6 +161,14 @@ export class IndexPatternManagementPlugin
         );
       },
     });
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+      {
+        id: IPM_APP_ID,
+        title: sectionsHeader,
+        order: 400,
+      },
+    ]);
 
     return this.indexPatternManagementService.setup({ httpClient: core.http });
   }
