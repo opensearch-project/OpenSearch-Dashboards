@@ -1,2 +1,0 @@
-fix:
-- [MDS][Version Decoupling] Add support of required backend plugins check on data sources ([#7146](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7146))

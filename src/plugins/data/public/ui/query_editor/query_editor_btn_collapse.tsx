@@ -17,15 +17,17 @@ export function QueryEditorBtnCollapse({ onClick, isCollapsed }: Props) {
     defaultMessage: 'Toggle query editor',
   });
   return (
-    <EuiToolTip content={label}>
-      <EuiButtonIcon
-        aria-expanded={!isCollapsed}
-        aria-label={label}
-        data-test-subj="queryEditorCollapseBtn"
-        onClick={onClick}
-        iconType={!isCollapsed ? 'arrowRight' : 'arrowDown'}
-        iconSize={'s'}
-      />
-    </EuiToolTip>
+    <div className="osdQueryEditor__collapseBtn">
+      <EuiToolTip content={label}>
+        <EuiButtonIcon
+          aria-expanded={!isCollapsed}
+          aria-label={label}
+          data-test-subj="queryEditorCollapseBtn"
+          onClick={onClick}
+          iconType={!isCollapsed ? 'arrowRight' : 'arrowDown'}
+          iconSize={'m'}
+        />
+      </EuiToolTip>
+    </div>
   );
 }

@@ -5,7 +5,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
-import { ASYNC_POLLING_INTERVAL, SPARK_HIVE_TABLE_REGEX, SPARK_PARTITION_INFO } from '../constants';
+import { ASYNC_QUERY, SPARK } from '../constants';
 import {
   AsyncPollingResult,
   CachedColumn,
@@ -16,17 +16,12 @@ import {
   DirectQueryLoadingStatus,
   DirectQueryRequest,
 } from '../types';
-import { getAsyncSessionId, setAsyncSessionId } from '../utils/query_session_utils';
-import {
-  addBackticksIfNeeded,
-  combineSchemaAndDatarows,
-  get as getObjValue,
-  formatError,
-} from '../utils/shared';
+import { SIMPLE_DATA_SOURCE_TYPES, SimpleDataSource } from '../../../../../common';
+import { addBackticksIfNeeded, combineSchemaAndDatarows, formatError } from '../utils/shared';
 import { usePolling } from '../utils/use_polling';
-import { SQLService } from '../requests/sql';
 import { CatalogCacheManager } from './cache_manager';
 import { fetchExternalDataSources } from '../utils';
+import { getUiService } from '../../../../services';
 
 export const updateDatabasesToCache = (
   dataSourceName: string,
@@ -101,10 +96,9 @@ export const updateTablesToCache = (
       );
       return;
     }
-
     const combinedData = combineSchemaAndDatarows(pollingResult.schema, pollingResult.datarows);
     const newTables = combinedData
-      .filter((row: any) => !SPARK_HIVE_TABLE_REGEX.test(row.information))
+      .filter((row: any) => !SPARK.HIVE_TABLE_REGEX.test(row.information))
       .map((row: any) => ({
         name: row.tableName,
       }));
@@ -189,7 +183,7 @@ export const updateTableColumnsToCache = (
 
     const tableColumns: CachedColumn[] = [];
     for (const row of combinedData) {
-      if (row.col_name === SPARK_PARTITION_INFO) {
+      if (row.col_name === SPARK.PARTITION_INFO) {
         break;
       }
       tableColumns.push({
@@ -287,7 +281,6 @@ export const useLoadToCache = (
   http: HttpStart,
   notifications: NotificationsStart
 ) => {
-  const sqlService = new SQLService(http);
   const [currentDataSourceName, setCurrentDataSourceName] = useState('');
   const [currentDatabaseName, setCurrentDatabaseName] = useState<string | undefined>('');
   const [currentTableName, setCurrentTableName] = useState<string | undefined>('');
@@ -303,8 +296,13 @@ export const useLoadToCache = (
     startPolling,
     stopPolling: stopLoading,
   } = usePolling<any, any>((params) => {
-    return sqlService.fetchWithJobId(params, dataSourceMDSClientId.current);
-  }, ASYNC_POLLING_INTERVAL);
+    return http.fetch(`../../api/enhancements/datasource/jobs`, {
+      query: {
+        id: dataSourceMDSClientId.current,
+        queryId: params.queryId,
+      },
+    });
+  }, ASYNC_QUERY.POLLING_INTERVAL);
 
   const onLoadingFailed = () => {
     setLoadStatus(DirectQueryLoadingStatus.FAILED);
@@ -324,6 +322,7 @@ export const useLoadToCache = (
     databaseName,
     tableName,
   }: StartLoadingParams) => {
+    const uiService = getUiService();
     setLoadStatus(DirectQueryLoadingStatus.SCHEDULED);
     setCurrentDataSourceName(dataSourceName);
     setCurrentDatabaseName(databaseName);
@@ -336,14 +335,19 @@ export const useLoadToCache = (
       datasource: dataSourceName,
     };
 
-    const sessionId = getAsyncSessionId(dataSourceName);
+    const sessionId = uiService.Settings.getUserQuerySessionId(dataSourceName);
     if (sessionId) {
       requestPayload = { ...requestPayload, sessionId };
     }
-    await sqlService
-      .fetch(requestPayload, dataSourceMDSId)
+    await http
+      .post(`../../api/enhancements/datasource/jobs`, {
+        body: JSON.stringify(requestPayload),
+        query: {
+          id: dataSourceMDSClientId.current,
+        },
+      })
       .then((result) => {
-        setAsyncSessionId(dataSourceName, getObjValue(result, 'sessionId', null));
+        uiService.Settings.setUserQuerySessionIdByObj(dataSourceName, result);
         if (result.queryId) {
           startPolling({
             queryId: result.queryId,
@@ -448,7 +452,9 @@ export const useLoadExternalDataSourcesToCache = (
     DirectQueryLoadingStatus.INITIAL
   );
 
-  const loadExternalDataSources = async (connectedClusters: string[]) => {
+  const loadExternalDataSources = async (
+    connectedClusters: SimpleDataSource[]
+  ): Promise<SimpleDataSource[]> => {
     setLoadStatus(DirectQueryLoadingStatus.SCHEDULED);
     CatalogCacheManager.setExternalDataSourcesLoadingStatus(CachedDataSourceStatus.Empty);
 
@@ -457,6 +463,11 @@ export const useLoadExternalDataSourcesToCache = (
       CatalogCacheManager.updateExternalDataSources(externalDataSources);
       setLoadStatus(DirectQueryLoadingStatus.SUCCESS);
       CatalogCacheManager.setExternalDataSourcesLoadingStatus(CachedDataSourceStatus.Updated);
+      return externalDataSources.map((dataSource) => ({
+        id: dataSource.dataSourceRef,
+        name: dataSource.name,
+        type: SIMPLE_DATA_SOURCE_TYPES.EXTERNAL,
+      }));
     } catch (error) {
       setLoadStatus(DirectQueryLoadingStatus.FAILED);
       CatalogCacheManager.setExternalDataSourcesLoadingStatus(CachedDataSourceStatus.Failed);
@@ -464,6 +475,7 @@ export const useLoadExternalDataSourcesToCache = (
         title: 'Failed to load external datasources',
       });
     }
+    return [];
   };
 
   return { loadStatus, loadExternalDataSources };

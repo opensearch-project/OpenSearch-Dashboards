@@ -9,6 +9,7 @@ import '@testing-library/jest-dom';
 import { MemoryRouter, Route } from 'react-router-dom';
 import { DirectQueryDataConnectionDetail } from './direct_query_connection_detail';
 import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
+import { isPluginInstalled } from '../../utils';
 
 jest.mock('../../../constants', () => ({
   DATACONNECTIONS_BASE: '/api/dataconnections',
@@ -61,19 +62,9 @@ jest.mock('../associated_object_management/utils/associated_objects_tab_utils', 
   redirectToExplorerS3: jest.fn(),
 }));
 
-beforeAll(() => {
-  global.fetch = jest.fn(() =>
-    Promise.resolve({
-      json: () =>
-        Promise.resolve({ status: { statuses: [{ id: 'plugin:observabilityDashboards' }] } }),
-    })
-  ) as jest.Mock;
-});
-
-afterAll(() => {
-  global.fetch.mockClear();
-  delete global.fetch;
-});
+jest.mock('../../utils', () => ({
+  isPluginInstalled: jest.fn(),
+}));
 
 const renderComponent = ({
   featureFlagStatus = false,
@@ -98,6 +89,11 @@ const renderComponent = ({
 };
 
 describe('DirectQueryDataConnectionDetail', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (isPluginInstalled as jest.Mock).mockResolvedValue(true);
+  });
+
   test('renders without crashing', async () => {
     const mockHttp = {
       get: jest.fn().mockResolvedValue({

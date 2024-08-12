@@ -22,7 +22,7 @@ export const sqlSearchStrategyProvider = (
   client: ILegacyClusterClient,
   usage?: SearchUsage
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
-  const sqlFacet = new Facet({ client, logger, endpoint: 'ppl.sqlQuery' });
+  const sqlFacet = new Facet({ client, logger, endpoint: 'enhancements.sqlQuery' });
 
   return {
     search: async (context, request: any, _options) => {
@@ -32,7 +32,7 @@ export const sqlSearchStrategyProvider = (
 
         if (!rawResponse.success) {
           return {
-            type: DATA_FRAME_TYPES.DEFAULT,
+            type: DATA_FRAME_TYPES.ERROR,
             body: { error: rawResponse.data },
             took: rawResponse.took,
           } as IDataFrameError;

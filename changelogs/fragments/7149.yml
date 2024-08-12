@@ -1,2 +1,0 @@
-security:
-- [SNYK-JS-AXIOS-6144788] Bump axios to `1.7.2` ([#7149](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7149))

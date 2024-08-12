@@ -1,7 +1,6 @@
 // SASSTODO: Probably not the right file for this selector, but temporary until the files get re-organized
 .globalQueryBar {
   padding: 0 $euiSizeS $euiSizeS $euiSizeS;
-  height: 160px;
 }
 
 .globalQueryBar:first-child {
@@ -10,18 +9,6 @@
 
 .globalQueryBar:not(:empty) {
   padding-bottom: $euiSizeS;
-}
-
-.globalQueryEditor {
-  padding: 0 $euiSizeXS $euiSizeXS $euiSizeXS;
-}
-
-.globalQueryEditor:first-child {
-  padding-top: $euiSizeXS;
-}
-
-.globalQueryEditor:not(:empty) {
-  padding-bottom: $euiSizeXS;
 }
 
 .globalFilterGroup__filterBar {

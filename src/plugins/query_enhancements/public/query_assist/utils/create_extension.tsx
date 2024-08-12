@@ -5,16 +5,16 @@
 
 import { HttpSetup } from 'opensearch-dashboards/public';
 import React, { useEffect, useState } from 'react';
-import { of } from 'rxjs';
-import { distinctUntilChanged, switchMap, map } from 'rxjs/operators';
+import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
+import { SIMPLE_DATA_SOURCE_TYPES } from '../../../../data/common';
 import {
+  DataPublicPluginSetup,
   QueryEditorExtensionConfig,
   QueryEditorExtensionDependencies,
 } from '../../../../data/public';
 import { API } from '../../../common';
 import { ConfigSchema } from '../../../common/config';
-import { ConnectionsService } from '../../services';
-import { QueryAssistBar, QueryAssistBanner } from '../components';
+import { QueryAssistBanner, QueryAssistBar } from '../components';
 
 /**
  * @returns observable list of query assist agent configured languages in the
@@ -22,13 +22,18 @@ import { QueryAssistBar, QueryAssistBanner } from '../components';
  */
 const getAvailableLanguages$ = (
   availableLanguagesByDataSource: Map<string | undefined, string[]>,
-  connectionsService: ConnectionsService,
-  http: HttpSetup
+  http: HttpSetup,
+  data: DataPublicPluginSetup
 ) =>
-  connectionsService.getSelectedConnection$().pipe(
+  data.query.dataSetManager.getUpdates$().pipe(
+    startWith(data.query.dataSetManager.getDataSet()),
     distinctUntilChanged(),
-    switchMap(async (connection) => {
-      const dataSourceId = connection?.dataSource?.id;
+    switchMap(async (simpleDataSet) => {
+      // currently query assist tool relies on opensearch API to get index
+      // mappings, external data source types (e.g. s3) are not supported
+      if (simpleDataSet?.dataSourceRef?.type === SIMPLE_DATA_SOURCE_TYPES.EXTERNAL) return [];
+
+      const dataSourceId = simpleDataSet?.dataSourceRef?.id;
       const cached = availableLanguagesByDataSource.get(dataSourceId);
       if (cached !== undefined) return cached;
       const languages = await http
@@ -44,7 +49,7 @@ const getAvailableLanguages$ = (
 
 export const createQueryAssistExtension = (
   http: HttpSetup,
-  connectionsService: ConnectionsService,
+  data: DataPublicPluginSetup,
   config: ConfigSchema['queryAssist']
 ): QueryEditorExtensionConfig => {
   const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
@@ -52,26 +57,20 @@ export const createQueryAssistExtension = (
   return {
     id: 'query-assist',
     order: 1000,
-    isEnabled$: (dependencies) => {
-      // currently query assist tool relies on opensearch API to get index
-      // mappings, non-default data source types are not supported
-      if (dependencies.dataSource && dependencies.dataSource?.getType() !== 'default')
-        return of(false);
-
-      return getAvailableLanguages$(availableLanguagesByDataSource, connectionsService, http).pipe(
+    isEnabled$: () =>
+      getAvailableLanguages$(availableLanguagesByDataSource, http, data).pipe(
         map((languages) => languages.length > 0)
-      );
-    },
+      ),
     getComponent: (dependencies) => {
       // only show the component if user is on a supported language.
       return (
         <QueryAssistWrapper
           availableLanguagesByDataSource={availableLanguagesByDataSource}
           dependencies={dependencies}
-          connectionsService={connectionsService}
           http={http}
+          data={data}
         >
-          <QueryAssistBar dependencies={dependencies} connectionsService={connectionsService} />
+          <QueryAssistBar dependencies={dependencies} />
         </QueryAssistWrapper>
       );
     },
@@ -81,11 +80,14 @@ export const createQueryAssistExtension = (
         <QueryAssistWrapper
           availableLanguagesByDataSource={availableLanguagesByDataSource}
           dependencies={dependencies}
-          connectionsService={connectionsService}
           http={http}
+          data={data}
           invert
         >
-          <QueryAssistBanner languages={config.supportedLanguages.map((conf) => conf.language)} />
+          <QueryAssistBanner
+            dependencies={dependencies}
+            languages={config.supportedLanguages.map((conf) => conf.language)}
+          />
         </QueryAssistWrapper>
       );
     },
@@ -95,8 +97,8 @@ export const createQueryAssistExtension = (
 interface QueryAssistWrapperProps {
   availableLanguagesByDataSource: Map<string | undefined, string[]>;
   dependencies: QueryEditorExtensionDependencies;
-  connectionsService: ConnectionsService;
   http: HttpSetup;
+  data: DataPublicPluginSetup;
   invert?: boolean;
 }
 
@@ -108,8 +110,8 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
 
     const subscription = getAvailableLanguages$(
       props.availableLanguagesByDataSource,
-      props.connectionsService,
-      props.http
+      props.http,
+      props.data
     ).subscribe((languages) => {
       const available = languages.includes(props.dependencies.language);
       if (mounted) setVisible(props.invert ? !available : available);

@@ -97,7 +97,7 @@ function VegaHelpMenu() {
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel items={items} />
+      <EuiContextMenuPanel items={items} size="s" />
     </EuiPopover>
   );
 }

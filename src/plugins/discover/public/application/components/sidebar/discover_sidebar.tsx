@@ -38,7 +38,7 @@ import {
   EuiDraggable,
   EuiPanel,
   EuiSplitPanel,
-  EuiSmallButtonEmpty,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { DiscoverField } from './discover_field';
@@ -96,6 +96,7 @@ export interface DiscoverSidebarProps {
    * Currently selected index pattern
    */
   selectedIndexPattern?: IndexPattern;
+  isEnhancementsEnabledOverride: boolean;
 }
 
 export function DiscoverSidebar(props: DiscoverSidebarProps) {
@@ -108,6 +109,7 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     onNormalize,
     onCreateIndexPattern,
     selectedIndexPattern,
+    isEnhancementsEnabledOverride,
   } = props;
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
@@ -213,11 +215,16 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
           color="transparent"
           hasBorder={false}
         >
-          <EuiSplitPanel.Inner grow={false} paddingSize="s">
+          <EuiSplitPanel.Inner
+            grow={false}
+            paddingSize="none"
+            className="dscSideBar_searchContainer"
+          >
             <DiscoverFieldSearch
               onChange={onChangeFieldSearch}
               value={fieldFilterState.name}
               types={fieldTypes}
+              isEnhancementsEnabledOverride={isEnhancementsEnabledOverride}
             />
           </EuiSplitPanel.Inner>
           {displayIndexPatternCreation(selectedIndexPattern) ? (
@@ -298,7 +305,7 @@ const FieldList = ({
 
   return (
     <>
-      <EuiSmallButtonEmpty
+      <EuiButtonEmpty
         iconSide="right"
         color="text"
         iconType={expanded ? 'arrowDown' : 'arrowRight'}
@@ -310,7 +317,7 @@ const FieldList = ({
         })}
       >
         {title}
-      </EuiSmallButtonEmpty>
+      </EuiButtonEmpty>
       {expanded && (
         <EuiDroppable
           droppableId={`${category.toUpperCase()}_FIELDS`}

@@ -13,17 +13,10 @@ import {
   prettyDuration,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { compact, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import {
-  DataSource,
-  IDataPluginServices,
-  IIndexPattern,
-  Query,
-  TimeHistoryContract,
-  TimeRange,
-} from '../..';
+import { IDataPluginServices, IIndexPattern, Query, TimeHistoryContract, TimeRange } from '../..';
 import {
   useOpenSearchDashboards,
   withOpenSearchDashboards,
@@ -33,6 +26,7 @@ import { getQueryLog, PersistedLog } from '../../query';
 import { Settings } from '../types';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
+import { useDataSetManager } from '../search_bar/lib/use_dataset_manager';
 
 const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 
@@ -48,7 +42,6 @@ export interface QueryEditorTopRowProps {
   disableAutoFocus?: boolean;
   screenTitle?: string;
   indexPatterns?: Array<IIndexPattern | string>;
-  dataSource?: DataSource;
   isLoading?: boolean;
   prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   showQueryEditor?: boolean;
@@ -72,9 +65,16 @@ export interface QueryEditorTopRowProps {
 export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
-
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
-  const { uiSettings, storage, appName } = opensearchDashboards.services;
+  const {
+    uiSettings,
+    storage,
+    appName,
+    data: {
+      query: { dataSetManager: dataSetManager },
+    },
+  } = opensearchDashboards.services;
+  const { dataSet } = useDataSetManager({ dataSetManager: dataSetManager! });
 
   const queryLanguage = props.query && props.query.language;
   const queryUiEnhancement =
@@ -196,21 +196,13 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function getQueryStringInitialValue(language: string) {
-    const { indexPatterns, settings } = props;
+    const { settings } = props;
     const input = settings?.getQueryEnhancements(language)?.searchBar?.queryStringInput
       ?.initialValue;
 
-    if (
-      !indexPatterns ||
-      (!Array.isArray(indexPatterns) && compact(indexPatterns).length > 0) ||
-      !input
-    )
-      return '';
+    if (!input) return '';
 
-    const defaultDataSet = indexPatterns[0];
-    const dataSet = typeof defaultDataSet === 'string' ? defaultDataSet : defaultDataSet.title;
-
-    return input.replace('<data_source>', dataSet);
+    return input.replace('<data_source>', dataSet?.title ?? dataSet?.title ?? '');
   }
 
   function renderQueryEditor() {
@@ -219,9 +211,8 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       <EuiFlexItem>
         <QueryEditor
           disableAutoFocus={props.disableAutoFocus}
-          indexPatterns={props.indexPatterns!}
-          dataSource={props.dataSource}
-          prepend={props.prepend}
+          dataSet={dataSet}
+          queryActions={props.prepend}
           query={parsedQuery}
           dataSetContainerRef={props.dataSetContainerRef}
           settings={props.settings!}
@@ -264,11 +255,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function shouldRenderQueryEditor(): boolean {
-    // TODO: MQL probably can modify to not care about index patterns
-    // TODO: call queryUiEnhancement?.showQueryEditor
-    return Boolean(
-      props.showQueryEditor && props.settings && props.indexPatterns && props.query && storage
-    );
+    return Boolean(props.showQueryEditor && props.settings && props.query && storage);
   }
 
   function renderUpdateButton() {
@@ -282,8 +269,9 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
         data-test-subj="querySubmitButton"
         className="euiSuperUpdateButton"
         iconType="play"
+        fill
       >
-        {props.isDirty ? 'Refresh' : 'Run'}
+        Run
       </EuiButton>
     );
 

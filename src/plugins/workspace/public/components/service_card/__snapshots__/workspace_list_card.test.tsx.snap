@@ -6,116 +6,131 @@ exports[`workspace list card render normally should show workspace list card cor
     class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionColumn euiFlexGroup--responsive"
+      style="height: 100%;"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrow3"
-      >
-        <h4
-          class="euiTitle euiTitle--medium"
-        >
-          Workspaces
-        </h4>
-      </div>
-      <div
-        class="euiFlexItem euiFlexItem--flexGrow1"
-      >
-        <span
-          class="euiToolTipAnchor"
-        >
-          <span
-            aria-label="workspace list card description"
-            data-euiicon-type="iInCircle"
-          />
-        </span>
-      </div>
-      <div
-        class="euiFlexItem euiFlexItem--flexGrow5"
+        class="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <div
-          class="euiFormControlLayout"
+          class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiFlexItem euiFlexItem--flexGrow3"
           >
-            <select
-              class="euiSelect"
-              data-test-subj="workspace_filter"
+            <h4
+              class="euiTitle euiTitle--medium"
             >
-              <option
-                value="viewed"
-              >
-                Recently viewed
-              </option>
-              <option
-                value="updated"
-              >
-                Recently updated
-              </option>
-            </select>
-            <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              Workspaces
+            </h4>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrow1"
+          >
+            <span
+              class="euiToolTipAnchor"
             >
               <span
-                class="euiFormControlLayoutCustomIcon"
+                aria-label="workspace list card description"
+                data-euiicon-type="iInCircle"
+              />
+            </span>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrow5"
+          >
+            <div
+              class="euiFormControlLayout"
+            >
+              <div
+                class="euiFormControlLayout__childrenWrapper"
               >
-                <span
-                  aria-hidden="true"
-                  class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="arrowDown"
-                />
-              </span>
+                <select
+                  class="euiSelect"
+                  data-test-subj="workspace_filter"
+                >
+                  <option
+                    value="viewed"
+                  >
+                    Recently viewed
+                  </option>
+                  <option
+                    value="updated"
+                  >
+                    Recently updated
+                  </option>
+                </select>
+                <div
+                  class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                >
+                  <span
+                    class="euiFormControlLayoutCustomIcon"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="arrowDown"
+                    />
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div
-      class="euiSpacer euiSpacer--l"
-    />
-    <ul
-      class="euiListGroup euiListGroup-flush euiListGroup--gutterSmall euiListGroup-maxWidthDefault"
-      style="min-height: 300px;"
-    >
       <div
-        class="euiEmptyPrompt"
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiFlexItem"
       >
-        <span
-          color="subdued"
-          data-euiicon-type="database"
-        />
         <div
-          class="euiSpacer euiSpacer--m"
-        />
-        <p
-          class="euiTitle euiTitle--xsmall"
+          class="euiEmptyPrompt"
         >
-          No Workspaces found
-        </p>
-        <span
-          class="euiTextColor euiTextColor--subdued"
-        >
+          <span
+            color="subdued"
+            data-euiicon-type="database"
+          />
           <div
             class="euiSpacer euiSpacer--m"
           />
-          <div
-            class="euiText euiText--medium"
+          <p
+            class="euiTitle euiTitle--xsmall"
           >
-            Workspaces you have recently viewed will appear here.
-          </div>
-        </span>
+            No Workspaces found
+          </p>
+          <span
+            class="euiTextColor euiTextColor--subdued"
+          >
+            <div
+              class="euiSpacer euiSpacer--m"
+            />
+            <div
+              class="euiText euiText--medium"
+            >
+              Workspaces you have recently viewed will appear here.
+            </div>
+          </span>
+        </div>
       </div>
-    </ul>
-    <button
-      class="euiLink euiLink--primary"
-      type="button"
-    >
       <div
-        class="euiText euiText--small"
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
       >
-        View all
+        <button
+          class="euiLink euiLink--primary"
+          type="button"
+        >
+          <div
+            class="euiText euiText--small"
+          >
+            View all
+          </div>
+        </button>
       </div>
-    </button>
+    </div>
   </div>
 </div>
 `;

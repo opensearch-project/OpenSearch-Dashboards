@@ -45,7 +45,6 @@ export interface QueryEnhancement {
   // List of supported app names that this enhancement should be enabled for,
   // if not provided it will be enabled for all apps
   supportedAppNames?: string[];
-  connectionService?: any; // temporary workaround until we settle the way to reference the connection service
 }
 
 export interface UiEnhancements {

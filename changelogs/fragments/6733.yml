@@ -1,2 +1,0 @@
-fix:
-- [OSD Availability] Prevent OSD process crashes when disk is full ([#6733](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6733))

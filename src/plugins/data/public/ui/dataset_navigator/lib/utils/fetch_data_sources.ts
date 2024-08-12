@@ -11,9 +11,12 @@ export const fetchDataSources = async (client: SavedObjectsClientContract) => {
     type: 'data-source',
     perPage: 10000,
   });
-  return resp.savedObjects.map((savedObject) => ({
-    id: savedObject.id,
-    name: savedObject.attributes.title,
-    type: 'data-source',
-  })) as SimpleDataSource[];
+  const dataSources: SimpleDataSource[] = [{ id: '', name: 'Local Cluster', type: 'data-source' }];
+  return dataSources.concat([
+    ...(resp.savedObjects.map((savedObject) => ({
+      id: savedObject.id,
+      name: savedObject.attributes.title,
+      type: 'data-source',
+    })) as SimpleDataSource[]),
+  ]);
 };

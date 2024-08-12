@@ -1,2 +1,0 @@
-feat:
-- [navigation-next] fix: redirect to standard index pattern applications while nav group is enabled ([#7305](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7305))
