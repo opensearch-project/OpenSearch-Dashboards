@@ -10,6 +10,7 @@ import { IWorkspaceClientImpl, WorkspaceAttributeWithPermission } from '../types
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import { registerDuplicateRoute } from './duplicate';
 import { transferCurrentUserInPermissions } from '../utils';
+import { validateWorkspaceColor } from '../../common/utils';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -40,7 +41,15 @@ const settingsSchema = schema.object({
 const workspaceOptionalAttributesSchema = {
   description: schema.maybe(schema.string()),
   features: schema.maybe(schema.arrayOf(schema.string())),
-  color: schema.maybe(schema.string()),
+  color: schema.maybe(
+    schema.string({
+      validate: (color) => {
+        if (!validateWorkspaceColor(color)) {
+          return 'invalid workspace color format';
+        }
+      },
+    })
+  ),
   icon: schema.maybe(schema.string()),
   defaultVISTheme: schema.maybe(schema.string()),
   reserved: schema.maybe(schema.boolean()),
