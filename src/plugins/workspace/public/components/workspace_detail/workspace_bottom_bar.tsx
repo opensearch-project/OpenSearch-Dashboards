@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
+import ReactDOM from 'react-dom';
 
 interface WorkspaceBottomBarProps {
   formId: string;
@@ -27,7 +28,12 @@ export const WorkspaceBottomBar = ({
   numberOfErrors,
   handleResetForm,
 }: WorkspaceBottomBarProps) => {
-  return (
+  const applicationElement = document.querySelector('.app-wrapper');
+  if (!applicationElement) {
+    return null;
+  }
+
+  return ReactDOM.createPortal(
     <EuiBottomBar position="sticky">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -89,6 +95,7 @@ export const WorkspaceBottomBar = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiBottomBar>
+    </EuiBottomBar>,
+    applicationElement
   );
 };

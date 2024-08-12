@@ -164,7 +164,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
 
   return (
     <>
-      <EuiPage direction="column" style={{ display: 'flex' }}>
+      <EuiPage direction="column">
         <EuiPageHeader pageTitle={pageTitle} rightSideItems={[deleteButton]} alignItems="center" />
         <EuiPageBody>
           <EuiText color="subdued">{currentWorkspace.description}</EuiText>
