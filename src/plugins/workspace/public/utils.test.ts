@@ -15,10 +15,12 @@ import {
   isEqualWorkspaceUseCase,
   USE_CASE_PREFIX,
   prependWorkspaceToBreadcrumbs,
+  getIsOnlyAllowEssentialUseCase,
 } from './utils';
 import { WorkspaceAvailability } from '../../../core/public';
 import { coreMock } from '../../../core/public/mocks';
 import { WORKSPACE_DETAIL_APP_ID, WORKSPACE_USE_CASES } from '../common/constants';
+import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
 
 const startMock = coreMock.createStart();
 const STATIC_USE_CASES = [
@@ -386,6 +388,8 @@ describe('workspace utils: getDataSourcesList', () => {
                 return 'description1';
               case 'dataSourceEngineType':
                 return 'dataSourceEngineType1';
+              case 'auth':
+                return 'mock_value';
             }
           },
         },
@@ -395,6 +399,7 @@ describe('workspace utils: getDataSourcesList', () => {
       {
         id: 'id1',
         title: 'title1',
+        auth: 'mock_value',
         description: 'description1',
         dataSourceEngineType: 'dataSourceEngineType1',
       },
@@ -404,6 +409,56 @@ describe('workspace utils: getDataSourcesList', () => {
   it('should return empty array if no saved objects responded', async () => {
     mockedSavedObjectClient.find = jest.fn().mockResolvedValue({});
     expect(await getDataSourcesList(mockedSavedObjectClient, [])).toStrictEqual([]);
+  });
+});
+
+describe('workspace utils: getIsOnlyAllowEssentialUseCase', () => {
+  const mockedSavedObjectClient = startMock.savedObjects.client;
+
+  it('should return true when all data sources are serverless', async () => {
+    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
+      savedObjects: [
+        {
+          id: 'id1',
+          get: () => {
+            return {
+              credentials: {
+                service: SigV4ServiceName.OpenSearchServerless,
+              },
+            };
+          },
+        },
+      ],
+    });
+    expect(await getIsOnlyAllowEssentialUseCase(mockedSavedObjectClient)).toBe(true);
+  });
+
+  it('should return false when not all data sources are serverless', async () => {
+    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
+      savedObjects: [
+        {
+          id: 'id1',
+          get: () => {
+            return {
+              credentials: {
+                service: SigV4ServiceName.OpenSearchServerless,
+              },
+            };
+          },
+        },
+        {
+          id: 'id2',
+          get: () => {
+            return {
+              credentials: {
+                service: SigV4ServiceName.OpenSearch,
+              },
+            };
+          },
+        },
+      ],
+    });
+    expect(await getIsOnlyAllowEssentialUseCase(mockedSavedObjectClient)).toBe(false);
   });
 });
 
