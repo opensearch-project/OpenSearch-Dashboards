@@ -93,7 +93,7 @@ export const WorkspaceUseCase = ({
     // When creating and isOnlyAllowEssential is true, only display essential use case
     if (isOnlyAllowEssential && operationType === WorkspaceOperationType.Create) {
       allAvailableUseCases = allAvailableUseCases.filter(
-        (item) => item.id === DEFAULT_NAV_GROUPS.analytics.id
+        (item) => item.id === DEFAULT_NAV_GROUPS.essentials.id
       );
     }
     return allAvailableUseCases;

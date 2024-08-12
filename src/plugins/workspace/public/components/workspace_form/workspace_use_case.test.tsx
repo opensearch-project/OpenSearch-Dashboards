@@ -79,7 +79,7 @@ describe('WorkspaceUseCase', () => {
 
     const { renderResult } = setup();
     await waitFor(() => {
-      expect(renderResult.queryByText('Analytics')).toBeInTheDocument();
+      expect(renderResult.queryByText('Essentials')).toBeInTheDocument();
       expect(renderResult.queryByText('Observability')).not.toBeInTheDocument();
     });
   });
