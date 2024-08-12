@@ -16,16 +16,11 @@ import { ChromeNavLink } from '../../nav_links';
 import { ChromeRegistrationNavLink, NavGroupItemInMap } from '../../nav_group';
 import { httpServiceMock } from '../../../mocks';
 import { getLogos } from '../../../../common';
-import { ALL_USE_CASE_ID, DEFAULT_NAV_GROUPS } from '../../../../public';
-import { CollapsibleNavTopProps } from './collapsible_nav_group_enabled_top';
+import { ALL_USE_CASE_ID, DEFAULT_NAV_GROUPS, WorkspaceObject } from '../../../../public';
 import { capabilitiesServiceMock } from '../../../application/capabilities/capabilities_service.mock';
 
 jest.mock('./collapsible_nav_group_enabled_top', () => ({
-  CollapsibleNavTop: (props: CollapsibleNavTopProps) => (
-    <button data-test-subj="back" onClick={props.onClickBack}>
-      go back
-    </button>
-  ),
+  CollapsibleNavTop: () => <button data-test-subj="back">go back</button>,
 }));
 
 const mockBasePath = httpServiceMock.createSetupContract({ basePath: '/test' }).basePath;
@@ -138,6 +133,7 @@ describe('<CollapsibleNavGroupEnabled />', () => {
       id: 'collapsibe-nav',
       isLocked: false,
       isNavOpen: false,
+      currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>({ id: 'test', name: 'test' }),
       navLinks$: new BehaviorSubject([
         {
           id: 'link-in-all',

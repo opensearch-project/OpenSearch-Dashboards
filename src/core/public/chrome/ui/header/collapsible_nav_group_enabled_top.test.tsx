@@ -10,6 +10,8 @@ import { ChromeRegistrationNavLink } from '../../nav_group';
 import { httpServiceMock } from '../../../mocks';
 import { getLogos } from '../../../../common';
 import { CollapsibleNavTop } from './collapsible_nav_group_enabled_top';
+import { BehaviorSubject } from 'rxjs';
+import { WorkspaceObject } from 'src/core/public/workspace';
 
 const mockBasePath = httpServiceMock.createSetupContract({ basePath: '/test' }).basePath;
 
@@ -66,6 +68,8 @@ describe('<CollapsibleNavTop />', () => {
       logos: getLogos({}, mockBasePath.serverBasePath),
       shouldShrinkNavigation: false,
       visibleUseCases: [],
+      currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>(null),
+      setCurrentNavGroup: jest.fn(),
     };
   };
   it('should render home icon', async () => {

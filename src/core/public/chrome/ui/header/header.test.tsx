@@ -38,6 +38,7 @@ import { Header } from './header';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../../../overlays';
 import { EuiHeaderSectionItemButton } from '@elastic/eui';
+import { WorkspaceObject } from 'src/core/public/workspace';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -85,6 +86,7 @@ function mockProps() {
     navControlsLeftBottom$: new BehaviorSubject([]),
     setCurrentNavGroup: jest.fn(() => {}),
     workspaceList$: new BehaviorSubject([]),
+    currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>(null),
   };
 }
 
