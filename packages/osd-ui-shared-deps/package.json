@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@elastic/charts": "31.1.0",
-    "@elastic/eui": "npm:@opensearch-project/oui@1.8.1",
+    "@elastic/eui": "npm:@opensearch-project/oui@1.9.0",
     "@elastic/numeral": "npm:@amoo-miki/numeral@2.6.0",
     "@opensearch/datemath": "5.0.3",
     "@osd/i18n": "1.0.0",

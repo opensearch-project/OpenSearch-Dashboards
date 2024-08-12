@@ -29,10 +29,15 @@
  */
 
 import { pick } from '@osd/std';
-import { CoreId } from '../server';
-import { PackageInfo, EnvironmentMode } from '../server/types';
 import { CoreSetup, CoreStart } from '.';
+import { CoreId } from '../server';
+import { EnvironmentMode, PackageInfo } from '../server/types';
+import { ApplicationService } from './application';
+import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 import { ChromeService } from './chrome';
+import { ContextService } from './context';
+import { CoreApp } from './core_app';
+import { DocLinksService } from './doc_links';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
 import { I18nService } from './i18n';
@@ -42,18 +47,13 @@ import {
   InjectedMetadataSetup,
   InjectedMetadataStart,
 } from './injected_metadata';
+import { IntegrationsService } from './integrations';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
-import { UiSettingsService } from './ui_settings';
-import { ApplicationService } from './application';
-import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
-import { ContextService } from './context';
-import { IntegrationsService } from './integrations';
-import { CoreApp } from './core_app';
-import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
+import { UiSettingsService } from './ui_settings';
 import { WorkspacesService } from './workspace';
 
 interface Params {
@@ -272,7 +272,11 @@ export class CoreSystem {
 
       await this.plugins.start(core);
 
-      const { useExpandedHeader = true } = injectedMetadata.getBranding() ?? {};
+      let { useExpandedHeader = true } = injectedMetadata.getBranding() ?? {};
+      if (uiSettings.get('home:useNewHomePage')) {
+        useExpandedHeader = false;
+        this.rootDomElement.classList.add('headerIsDense');
+      }
 
       // ensure the rootDomElement is empty
       this.rootDomElement.textContent = '';

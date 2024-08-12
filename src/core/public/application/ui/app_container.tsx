@@ -52,6 +52,12 @@ interface Props {
   appStatus: AppStatus;
   setAppLeaveHandler: (appId: string, handler: AppLeaveHandler) => void;
   setAppActionMenu: (appId: string, mount: MountPoint | undefined) => void;
+  setAppLeftControls: (appId: string, mount: MountPoint | undefined) => void;
+  setAppCenterControls: (appId: string, mount: MountPoint | undefined) => void;
+  setAppRightControls: (appId: string, mount: MountPoint | undefined) => void;
+  setAppBadgeControls: (appId: string, mount: MountPoint | undefined) => void;
+  setAppDescriptionControls: (appId: string, mount: MountPoint | undefined) => void;
+  setAppBottomControls: (appId: string, mount: MountPoint | undefined) => void;
   createScopedHistory: (appUrl: string) => ScopedHistory;
   setIsMounting: (isMounting: boolean) => void;
 }
@@ -62,6 +68,12 @@ export const AppContainer: FunctionComponent<Props> = ({
   appPath,
   setAppLeaveHandler,
   setAppActionMenu,
+  setAppLeftControls,
+  setAppCenterControls,
+  setAppRightControls,
+  setAppBadgeControls,
+  setAppDescriptionControls,
+  setAppBottomControls,
   createScopedHistory,
   appStatus,
   setIsMounting,
@@ -99,6 +111,13 @@ export const AppContainer: FunctionComponent<Props> = ({
             element: elementRef.current!,
             onAppLeave: (handler) => setAppLeaveHandler(appId, handler),
             setHeaderActionMenu: (menuMount) => setAppActionMenu(appId, menuMount),
+            setHeaderLeftControls: (menuMount) => setAppLeftControls(appId, menuMount),
+            setHeaderCenterControls: (menuMount) => setAppCenterControls(appId, menuMount),
+            setHeaderRightControls: (menuMount) => setAppRightControls(appId, menuMount),
+            setHeaderBadgeControls: (menuMount) => setAppBadgeControls(appId, menuMount),
+            setHeaderDescriptionControls: (menuMount) =>
+              setAppDescriptionControls(appId, menuMount),
+            setHeaderBottomControls: (menuMount) => setAppBottomControls(appId, menuMount),
           })) || null;
       } catch (e) {
         // TODO: add error UI
@@ -122,6 +141,12 @@ export const AppContainer: FunctionComponent<Props> = ({
     createScopedHistory,
     setAppLeaveHandler,
     setAppActionMenu,
+    setAppLeftControls,
+    setAppRightControls,
+    setAppCenterControls,
+    setAppBadgeControls,
+    setAppDescriptionControls,
+    setAppBottomControls,
     appPath,
     setIsMounting,
   ]);
