@@ -169,7 +169,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   private _isMounted = false;
   private currentWorkspaceIdSubscription?: Subscription;
   private workspacesSubscription?: Subscription;
-  private workspacesClientSubscription?: Subscription;
 
   constructor(props: SavedObjectsTableProps) {
     super(props);
@@ -381,7 +380,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   unSubscribeWorkspace = () => {
     this.currentWorkspaceIdSubscription?.unsubscribe();
-    this.workspacesClientSubscription?.unsubscribe();
     this.workspacesSubscription?.unsubscribe();
   };
 
