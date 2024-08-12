@@ -73,7 +73,7 @@ import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../../../overlays';
 import { CollapsibleNavGroupEnabled } from './collapsible_nav_group_enabled';
 import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
 import { RecentItems } from './recent_items';
-import { WorkspaceObject } from '../../../../public/workspace';
+import { WorkspaceObject, WorkspacesStart } from '../../../../public/workspace';
 
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
@@ -111,6 +111,7 @@ export interface HeaderProps {
   navGroupsMap$: Observable<Record<string, NavGroupItemInMap>>;
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
   workspaceList$: Observable<WorkspaceObject[]>;
+  currentWorkspace$: WorkspacesStart['currentWorkspace$'];
 }
 
 export function Header({
@@ -318,6 +319,7 @@ export function Header({
             currentNavGroup$={observables.currentNavGroup$}
             setCurrentNavGroup={setCurrentNavGroup}
             capabilities={application.capabilities}
+            currentWorkspace$={observables.currentWorkspace$}
           />
         ) : (
           <CollapsibleNav

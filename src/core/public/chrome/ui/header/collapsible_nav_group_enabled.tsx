@@ -18,6 +18,7 @@ import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import classNames from 'classnames';
+import { WorkspacesStart } from 'src/core/public/workspace';
 import { ChromeNavControl, ChromeNavLink } from '../..';
 import { AppCategory, NavGroupStatus } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
@@ -59,6 +60,7 @@ export interface CollapsibleNavGroupEnabledProps {
   currentNavGroup$: Rx.Observable<NavGroupItemInMap | undefined>;
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
   capabilities: InternalApplicationStart['capabilities'];
+  currentWorkspace$: WorkspacesStart['currentWorkspace$'];
 }
 
 interface NavGroupsProps {
@@ -224,10 +226,20 @@ export function CollapsibleNavGroupEnabled({
   capabilities,
   ...observables
 }: CollapsibleNavGroupEnabledProps) {
-  const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
+  const allNavLinks = useObservable(observables.navLinks$, []);
+  const navLinks = allNavLinks.filter((link) => !link.hidden);
+  const homeLink = useMemo(() => allNavLinks.find((item) => item.id === 'home'), [allNavLinks]);
   const appId = useObservable(observables.appId$, '');
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
+  const firstVisibleNavLinkOfAllUseCase = useMemo(
+    () =>
+      fulfillRegistrationLinksToChromeNavLinks(
+        navGroupsMap[ALL_USE_CASE_ID]?.navLinks || [],
+        navLinks
+      )[0],
+    [navGroupsMap, navLinks]
+  );
 
   const visibleUseCases = useMemo(
     () =>
@@ -364,14 +376,17 @@ export function CollapsibleNavGroupEnabled({
             style={{ flexGrow: 0, paddingBottom: 0 }}
           >
             <CollapsibleNavTop
+              homeLink={homeLink}
+              firstVisibleNavLinkOfAllUseCase={firstVisibleNavLinkOfAllUseCase}
               navLinks={navLinks}
               navigateToApp={navigateToApp}
               logos={logos}
-              onClickBack={() => setCurrentNavGroup(undefined)}
+              setCurrentNavGroup={setCurrentNavGroup}
               currentNavGroup={currentNavGroup}
               shouldShrinkNavigation={!isNavOpen}
               onClickShrink={closeNav}
               visibleUseCases={visibleUseCases}
+              currentWorkspace$={observables.currentWorkspace$}
             />
           </EuiPanel>
         )}

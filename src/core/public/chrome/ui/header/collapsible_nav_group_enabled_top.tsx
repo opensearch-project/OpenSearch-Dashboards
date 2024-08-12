@@ -4,7 +4,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { Logos } from 'opensearch-dashboards/public';
+import useObservable from 'react-use/lib/useObservable';
+import { Logos, WorkspacesStart } from 'opensearch-dashboards/public';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -17,19 +18,22 @@ import {
 import { InternalApplicationStart } from 'src/core/public/application';
 import { i18n } from '@osd/i18n';
 import { createEuiListItem } from './nav_link';
-import { NavGroupItemInMap } from '../../nav_group';
+import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
 import { ChromeNavLink } from '../../nav_links';
 import { ALL_USE_CASE_ID } from '../../../../../core/utils';
 
 export interface CollapsibleNavTopProps {
+  homeLink?: ChromeNavLink;
+  firstVisibleNavLinkOfAllUseCase?: ChromeNavLink;
   navLinks: ChromeNavLink[];
   currentNavGroup?: NavGroupItemInMap;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   logos: Logos;
-  onClickBack?: () => void;
   onClickShrink?: () => void;
   shouldShrinkNavigation: boolean;
   visibleUseCases: NavGroupItemInMap[];
+  currentWorkspace$: WorkspacesStart['currentWorkspace$'];
+  setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
 }
 
 export const CollapsibleNavTop = ({
@@ -37,40 +41,39 @@ export const CollapsibleNavTop = ({
   currentNavGroup,
   navigateToApp,
   logos,
-  onClickBack,
   onClickShrink,
   shouldShrinkNavigation,
   visibleUseCases,
+  currentWorkspace$,
+  setCurrentNavGroup,
+  homeLink,
+  firstVisibleNavLinkOfAllUseCase,
 }: CollapsibleNavTopProps) => {
-  const homeLink = useMemo(() => navLinks.find((link) => link.id === 'home'), [navLinks]);
+  const currentWorkspace = useObservable(currentWorkspace$);
 
-  const isOutsideWorkspace = useMemo(
-    () => !visibleUseCases.find((useCase) => useCase.id === currentNavGroup?.id),
-    [currentNavGroup, visibleUseCases]
+  const isAllUseCaseWorkspace = useMemo(() => visibleUseCases.length > 1 && !!currentWorkspace, [
+    currentWorkspace,
+    visibleUseCases,
+  ]);
+
+  const isInsideSecondLevel = useMemo(
+    () => isAllUseCaseWorkspace && currentNavGroup?.id !== ALL_USE_CASE_ID,
+    [isAllUseCaseWorkspace, currentNavGroup]
   );
 
   const shouldShowBackButton = useMemo(() => {
-    if (!currentNavGroup || currentNavGroup.id === ALL_USE_CASE_ID || shouldShrinkNavigation) {
+    if (shouldShrinkNavigation) {
       return false;
     }
 
-    // It means user is in a specific type of workspace
-    if (visibleUseCases.length <= 1) {
-      return false;
-    }
-
-    if (isOutsideWorkspace) {
-      return true;
-    }
-
-    return visibleUseCases.length > 1;
-  }, [visibleUseCases, currentNavGroup, shouldShrinkNavigation, isOutsideWorkspace]);
+    return isInsideSecondLevel;
+  }, [isInsideSecondLevel, shouldShrinkNavigation]);
 
   const shouldShowHomeLink = useMemo(() => {
-    if (!homeLink || shouldShrinkNavigation) return false;
+    if (shouldShrinkNavigation) return false;
 
     return !shouldShowBackButton;
-  }, [shouldShowBackButton, homeLink, shouldShrinkNavigation]);
+  }, [shouldShowBackButton, shouldShrinkNavigation]);
 
   const homeLinkProps = useMemo(() => {
     if (homeLink) {
@@ -104,17 +107,18 @@ export const CollapsibleNavTop = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="l"
-              onClick={isOutsideWorkspace ? homeLinkProps.onClick : onClickBack}
+              onClick={() => {
+                if (firstVisibleNavLinkOfAllUseCase) {
+                  navigateToApp(firstVisibleNavLinkOfAllUseCase.id);
+                }
+                setCurrentNavGroup(ALL_USE_CASE_ID);
+              }}
               data-test-subj="collapsibleNavBackButton"
             >
               <EuiIcon type="arrowLeft" />
-              {isOutsideWorkspace
-                ? i18n.translate('core.ui.primaryNav.homeButtonLabel', {
-                    defaultMessage: 'Home',
-                  })
-                : i18n.translate('core.ui.primaryNav.backButtonLabel', {
-                    defaultMessage: 'Back',
-                  })}
+              {i18n.translate('core.ui.primaryNav.backButtonLabel', {
+                defaultMessage: 'Back',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
         ) : null}
