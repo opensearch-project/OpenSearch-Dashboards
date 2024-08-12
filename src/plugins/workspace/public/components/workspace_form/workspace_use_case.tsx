@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiCheckableCard,
@@ -76,7 +76,6 @@ export const WorkspaceUseCase = ({
   savedObjects,
   operationType,
 }: WorkspaceUseCaseProps) => {
-  const [displayedUseCases, setDisplayedUseCases] = useState(availableUseCases);
   const [isOnlyAllowEssential, setIsOnlyAllowEssential] = useState(false);
 
   useEffect(() => {
@@ -87,7 +86,7 @@ export const WorkspaceUseCase = ({
     }
   }, [savedObjects, operationType]);
 
-  useEffect(() => {
+  const displayedUseCases = useMemo(() => {
     let allAvailableUseCases = availableUseCases
       .filter((item) => !item.systematic)
       .concat(DEFAULT_NAV_GROUPS.all);
@@ -97,7 +96,7 @@ export const WorkspaceUseCase = ({
         (item) => item.id === DEFAULT_NAV_GROUPS.analytics.id
       );
     }
-    setDisplayedUseCases(allAvailableUseCases);
+    return allAvailableUseCases;
   }, [availableUseCases, isOnlyAllowEssential, operationType]);
 
   return (
