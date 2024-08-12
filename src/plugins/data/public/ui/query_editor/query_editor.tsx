@@ -295,6 +295,7 @@ export default class QueryEditorUI extends Component<Props, State> {
               kind: s.type as monaco.languages.CompletionItemKind,
               insertText: s.insertText ?? s.text,
               range,
+              detail: s.detail,
             }))
           : [],
       incomplete: false,

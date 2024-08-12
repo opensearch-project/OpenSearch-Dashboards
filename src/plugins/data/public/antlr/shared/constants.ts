@@ -190,3 +190,9 @@ export const fieldNameSuggestions: Array<{ text: string; type: number; insertTex
 ];
 
 export const fieldNameWithNotSuggestions = fieldNameSuggestions.concat(notOperatorSuggestion);
+
+// suggestion item details tags
+export const enum SuggestionItemDetailsTags {
+  Keyword = 'Keyword',
+  AggregateFunction = 'Aggregate Function',
+}

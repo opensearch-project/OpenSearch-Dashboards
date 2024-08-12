@@ -25,6 +25,7 @@ import { SQL_SYMBOLS } from './constants';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { fetchTableSchemas } from '../shared/utils';
 import { IDataFrameResponse, IFieldType } from '../../../common';
+import { SuggestionItemDetailsTags } from '../shared/constants';
 
 export interface SuggestionParams {
   position: monaco.Position;
@@ -62,16 +63,20 @@ export const getSuggestions = async ({
       const tableNames = suggestions.suggestColumns.tables.map((table) => table.name);
       const schemas = await fetchTableSchemas(tableNames, api, dataSetManager);
 
-      (schemas as IDataFrameResponse[]).forEach((schema: IDataFrameResponse, index: number) => {
+      (schemas as IDataFrameResponse[]).forEach((schema: IDataFrameResponse) => {
         if ('body' in schema && schema.body && 'fields' in schema.body) {
           const columns = schema.body.fields.find((col: IFieldType) => col.name === 'COLUMN_NAME');
-          const fieldTypes = schema.body.fields.find((col: IFieldType) => col.name === 'DATA_TYPE');
+          const fieldTypes = schema.body.fields.find((col: IFieldType) => col.name === 'TYPE_NAME');
 
           if (columns && fieldTypes) {
             finalSuggestions.push(
-              ...columns.values.map((col: string) => ({
-                text: `${tableNames[index]}.${col}`,
+              ...columns.values.map((col: string, index: number) => ({
+                text: col,
                 type: monaco.languages.CompletionItemKind.Field,
+                insertText: col,
+                detail: fieldTypes.values[index],
+                start: 0,
+                end: 0,
               }))
             );
           }
@@ -85,6 +90,10 @@ export const getSuggestions = async ({
         ...SQL_SYMBOLS.AGREGATE_FUNCTIONS.map((af) => ({
           text: af,
           type: monaco.languages.CompletionItemKind.Function,
+          insertText: af,
+          detail: SuggestionItemDetailsTags.AggregateFunction,
+          start: 0,
+          end: 0,
         }))
       );
     }
@@ -95,6 +104,10 @@ export const getSuggestions = async ({
         ...suggestions.suggestKeywords.map((sk) => ({
           text: sk.value,
           type: monaco.languages.CompletionItemKind.Keyword,
+          insertText: sk.value,
+          detail: SuggestionItemDetailsTags.Keyword,
+          start: 0,
+          end: 0,
         }))
       );
     }
