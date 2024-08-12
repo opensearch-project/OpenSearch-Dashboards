@@ -461,12 +461,12 @@ const isSamePermissionSetting = (a: PermissionSettingLike, b: PermissionSettingL
 };
 
 export const getNumberOfChanges = (
-  newFormData: Omit<Partial<WorkspaceFormSubmitData>, 'permissionSettings'> & {
+  newFormData: Partial<Omit<WorkspaceFormSubmitData, 'permissionSettings'>> & {
     permissionSettings?: Array<
       Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
     >;
   },
-  initialFormData: Omit<WorkspaceFormData, 'id'>
+  initialFormData: Partial<Omit<WorkspaceFormData, 'id'>>
 ) => {
   let count = 0;
   if (newFormData.name !== initialFormData.name) {
