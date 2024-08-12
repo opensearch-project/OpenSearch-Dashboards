@@ -443,6 +443,7 @@ export class Table extends PureComponent<TableProps, TableState> {
               button={button}
               isOpen={this.state.isExportPopoverOpen}
               closePopover={this.closeExportPopover}
+              panelPaddingSize="s"
             >
               <EuiCompressedFormRow
                 label={

@@ -1,2 +1,0 @@
-fix:
-- [MDS] Add a new message to data source components when there are no compatible datasources ([#6678](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6678))

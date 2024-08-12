@@ -1,2 +1,0 @@
-fix:
-- [Version Decoupling] Add data source version and installed plugins in data source viewer returns ([#7420](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7420))

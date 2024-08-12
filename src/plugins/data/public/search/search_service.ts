@@ -161,6 +161,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         if (this.dfCache.get() && this.dfCache.get()?.name !== dataFrame.name) {
           indexPatterns.clearCache(this.dfCache.get()!.name, false);
         }
+
         if (
           dataFrame.meta &&
           dataFrame.meta.queryConfig &&
@@ -175,11 +176,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         const dataSetName = `${dataFrame.meta?.queryConfig?.dataSourceId ?? ''}.${dataFrame.name}`;
         const existingIndexPattern = await indexPatterns.get(dataSetName, true);
         const dataSet = await indexPatterns.create(
-          dataFrameToSpec(dataFrame, existingIndexPattern?.id),
+          dataFrameToSpec(dataFrame, existingIndexPattern?.id ?? dataSetName),
           !existingIndexPattern?.id
         );
-        // save to cache by title because the id is not unique for temporary index pattern created
-        indexPatterns.saveToCache(dataSet.title, dataSet);
+        indexPatterns.saveToCache(dataSetName, dataSet);
       },
       clear: () => {
         if (this.dfCache.get() === undefined) return;

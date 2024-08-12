@@ -976,13 +976,17 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       <EuiModal onClose={this.closeExportAllModal}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
-              defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
-              values={{
-                filteredItemCount,
-              }}
-            />
+            <EuiText size="s">
+              <h2>
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
+                  defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
+                  values={{
+                    filteredItemCount,
+                  }}
+                />
+              </h2>
+            </EuiText>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>

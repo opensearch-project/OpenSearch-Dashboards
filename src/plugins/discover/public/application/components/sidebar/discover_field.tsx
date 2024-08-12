@@ -32,7 +32,6 @@ import React, { useState } from 'react';
 import {
   EuiPopover,
   EuiPopoverTitle,
-  EuiSmallButtonIcon,
   EuiButtonIcon,
   EuiToolTip,
   EuiFlexGroup,
@@ -153,7 +152,7 @@ export const DiscoverField = ({
           defaultMessage: 'Add field as column',
         })}
       >
-        <EuiSmallButtonIcon
+        <EuiButtonIcon
           iconType="plusInCircleFilled"
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
             if (ev.type === 'click') {
@@ -163,6 +162,7 @@ export const DiscoverField = ({
             ev.stopPropagation();
             toggleDisplay(field);
           }}
+          size="xs"
           data-test-subj={`fieldToggle-${field.name}`}
           aria-label={addLabelAria}
           className="dscSidebarField__actionButton"
@@ -177,7 +177,7 @@ export const DiscoverField = ({
           defaultMessage: 'Remove field from table',
         })}
       >
-        <EuiSmallButtonIcon
+        <EuiButtonIcon
           color="danger"
           iconType="cross"
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
@@ -188,6 +188,7 @@ export const DiscoverField = ({
             ev.stopPropagation();
             toggleDisplay(field);
           }}
+          size="xs"
           data-test-subj={`fieldToggle-${field.name}`}
           aria-label={removeLabelAria}
           className="dscSidebarField__actionButton"

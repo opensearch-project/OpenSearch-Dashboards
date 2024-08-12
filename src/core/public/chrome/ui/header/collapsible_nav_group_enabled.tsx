@@ -77,6 +77,8 @@ const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
   defaultMessage: 'See all...',
 });
 
+const LEVEL_FOR_ROOT_ITEMS = 1;
+
 export function NavGroups({
   navLinks,
   suffix,
@@ -114,7 +116,11 @@ export function NavGroups({
       'aria-label': link.title,
     };
   };
-  const createSideNavItem = (navLink: LinkItem, className?: string): EuiSideNavItemType<{}> => {
+  const createSideNavItem = (
+    navLink: LinkItem,
+    level: number,
+    className?: string
+  ): EuiSideNavItemType<{}> => {
     if (navLink.itemType === LinkItemType.LINK) {
       if (navLink.link.title === titleForSeeAll) {
         const navItem = createNavItem({
@@ -135,18 +141,43 @@ export function NavGroups({
     }
 
     if (navLink.itemType === LinkItemType.PARENT_LINK && navLink.link) {
-      return {
-        ...createNavItem({ link: navLink.link }),
+      const props = createNavItem({ link: navLink.link });
+      const parentItem = {
+        ...props,
         forceOpen: true,
-        items: navLink.links.map((subNavLink) => createSideNavItem(subNavLink, 'nav-nested-item')),
+        /**
+         * The href and onClick should both be undefined to make parent item rendered as accordion.
+         */
+        href: undefined,
+        onClick: undefined,
+        className: classNames(props.className, 'nav-link-parent-item'),
+        buttonClassName: classNames(props.buttonClassName, 'nav-link-parent-item-button'),
+        items: navLink.links.map((subNavLink) =>
+          createSideNavItem(subNavLink, level + 1, 'nav-nested-item')
+        ),
       };
+      /**
+       * OuiSideBar will never render items of first level as accordion,
+       * in order to display accordion, we need to render a fake parent item.
+       */
+      if (level === LEVEL_FOR_ROOT_ITEMS) {
+        return {
+          className: 'nav-link-fake-item',
+          buttonClassName: 'nav-link-fake-item-button',
+          name: '',
+          items: [parentItem],
+          id: `fake_${props.id}`,
+        };
+      }
+
+      return parentItem;
     }
 
     if (navLink.itemType === LinkItemType.CATEGORY) {
       return {
         id: navLink.category?.id ?? '',
         name: <div className="nav-link-item">{navLink.category?.label ?? ''}</div>,
-        items: navLink.links?.map((link) => createSideNavItem(link)),
+        items: navLink.links?.map((link) => createSideNavItem(link, level + 1)),
         'aria-label': navLink.category?.label,
       };
     }
@@ -155,7 +186,7 @@ export function NavGroups({
   };
   const orderedLinksOrCategories = getOrderedLinksOrCategories(navLinks);
   const sideNavItems = orderedLinksOrCategories
-    .map((navLink) => createSideNavItem(navLink))
+    .map((navLink) => createSideNavItem(navLink, LEVEL_FOR_ROOT_ITEMS))
     .filter((item): item is EuiSideNavItemType<{}> => !!item);
   return (
     <EuiFlexItem style={style}>
@@ -172,6 +203,11 @@ const customCategory: AppCategory = {
   label: i18n.translate('core.ui.customNavList.label', { defaultMessage: 'Custom' }),
   order: (DEFAULT_APP_CATEGORIES.manage.order || 0) - 500,
 };
+
+enum NavWidth {
+  Expanded = 270,
+  Collapsed = 48, // The Collasped width is supposed to be aligned with the hamburger icon on the top left navigation.
+}
 
 export function CollapsibleNavGroupEnabled({
   basePath,
@@ -193,6 +229,14 @@ export function CollapsibleNavGroupEnabled({
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
 
+  const visibleUseCases = useMemo(
+    () =>
+      Object.values(navGroupsMap).filter(
+        (group) => group.type === undefined && group.status !== NavGroupStatus.Hidden
+      ),
+    [navGroupsMap]
+  );
+
   const navLinksForRender: ChromeNavLink[] = useMemo(() => {
     if (currentNavGroup && currentNavGroup.id !== ALL_USE_CASE_ID) {
       return fulfillRegistrationLinksToChromeNavLinks(
@@ -200,10 +244,6 @@ export function CollapsibleNavGroupEnabled({
         navLinks
       );
     }
-
-    const visibleUseCases = Object.values(navGroupsMap).filter(
-      (group) => group.type === undefined && group.status !== NavGroupStatus.Hidden
-    );
 
     if (visibleUseCases.length === 1) {
       return fulfillRegistrationLinksToChromeNavLinks(
@@ -264,14 +304,14 @@ export function CollapsibleNavGroupEnabled({
       });
 
     return fulfillRegistrationLinksToChromeNavLinks(navLinksForAll, navLinks);
-  }, [navLinks, navGroupsMap, currentNavGroup]);
+  }, [navLinks, navGroupsMap, currentNavGroup, visibleUseCases]);
 
   const width = useMemo(() => {
     if (!isNavOpen) {
-      return 50;
+      return NavWidth.Collapsed;
     }
 
-    return 270;
+    return NavWidth.Expanded;
   }, [isNavOpen]);
 
   const onGroupClick = (
@@ -327,13 +367,13 @@ export function CollapsibleNavGroupEnabled({
               <>
                 <CollapsibleNavTop
                   navLinks={navLinks}
-                  navGroupsMap={navGroupsMap}
                   navigateToApp={navigateToApp}
                   logos={logos}
                   onClickBack={() => setCurrentNavGroup(undefined)}
                   currentNavGroup={currentNavGroup}
                   shouldShrinkNavigation={!isNavOpen}
                   onClickShrink={closeNav}
+                  visibleUseCases={visibleUseCases}
                 />
                 <NavGroups
                   navLinks={navLinksForRender}

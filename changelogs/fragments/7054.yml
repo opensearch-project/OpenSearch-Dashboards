@@ -1,2 +1,0 @@
-fix:
-- [BUG][NewHomePage] Temp Solution to avoid crash for anonymous user with no write permission ([#7054](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7054))

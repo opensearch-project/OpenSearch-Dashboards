@@ -1,2 +1,0 @@
-fix:
-- [VisBuilder][BUG] Flat render structure in Metric and Table Vis ([#6674](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6674))

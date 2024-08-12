@@ -32,7 +32,7 @@ import { Subscription } from 'rxjs';
 import { createBrowserHistory, History } from 'history';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
-import { Filter, FilterStateStore, UI_SETTINGS } from '../../../common';
+import { Filter, FilterStateStore, IndexPatternsService, UI_SETTINGS } from '../../../common';
 import { coreMock } from '../../../../../core/public/mocks';
 import {
   createOsdUrlStateStorage,
@@ -50,6 +50,8 @@ const startMock = coreMock.createStart();
 
 setupMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
+    case 'defaultIndex':
+      return 'logstash-*';
     case UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT:
       return true;
     case 'timepicker:timeDefaults':
@@ -58,6 +60,8 @@ setupMock.uiSettings.get.mockImplementation((key: string) => {
       return 'kuery';
     case UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS:
       return { pause: false, value: 0 };
+    case UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED:
+      return false;
     default:
       throw new Error(`sync_query test: not mocked uiSetting: ${key}`);
   }
@@ -69,6 +73,13 @@ describe('sync_query_state_with_url', () => {
   let timefilter: TimefilterContract;
   let osdUrlStateStorage: IOsdUrlStateStorage;
   let history: History;
+  let indexPatternsMock: IndexPatternsService;
+
+  beforeEach(() => {
+    indexPatternsMock = ({
+      get: jest.fn(),
+    } as unknown) as IndexPatternsService;
+  });
 
   let filterManagerChangeSub: Subscription;
   let filterManagerChangeTriggered = jest.fn();
@@ -86,6 +97,7 @@ describe('sync_query_state_with_url', () => {
       storage: new Storage(new StubBrowserStorage()),
     });
     queryServiceStart = queryService.start({
+      indexPatterns: indexPatternsMock,
       uiSettings: startMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
       savedObjectsClient: startMock.savedObjects.client,

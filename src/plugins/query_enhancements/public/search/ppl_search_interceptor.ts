@@ -5,16 +5,16 @@
 
 import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
-import { concatMap } from 'rxjs/operators';
+import { catchError, concatMap } from 'rxjs/operators';
 import {
   DataFrameAggConfig,
   getAggConfig,
   getRawDataFrame,
   getRawQueryString,
-  getTimeField,
   formatTimePickerDate,
   getUniqueValuesForRawAggs,
   updateDataFrameMeta,
+  getRawAggs,
 } from '../../../data/common';
 import {
   DataPublicPluginStart,
@@ -63,17 +63,13 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     const { fromDate, toDate } = formatTimePickerDate(dateRange, 'YYYY-MM-DD HH:mm:ss.SSS');
 
     const getTimeFilter = (timeField: any) => {
-      return ` | where ${timeField?.name} >= '${formatDate(fromDate)}' and ${
-        timeField?.name
-      } <= '${formatDate(toDate)}'`;
+      return ` | where \`${timeField}\` >= '${formatDate(
+        fromDate
+      )}' and \`${timeField}\` <= '${formatDate(toDate)}'`;
     };
 
     const insertTimeFilter = (query: string, filter: string) => {
-      const pipes = query.split('|');
-      return pipes
-        .slice(0, 1)
-        .concat(filter.substring(filter.indexOf('where')), pipes.slice(1))
-        .join(' | ');
+      return `${query}${filter}`;
     };
 
     const getAggQsFn = ({
@@ -92,16 +88,16 @@ export class PPLSearchInterceptor extends SearchInterceptor {
 
     const getAggString = (timeField: any, aggsConfig?: DataFrameAggConfig) => {
       if (!aggsConfig) {
-        return ` | stats count() by span(${
-          timeField?.name
-        }, ${this.aggsService.calculateAutoTimeExpression({
-          from: fromDate,
-          to: toDate,
-          mode: 'absolute',
-        })})`;
+        return ` | stats count() by span(${timeField}, ${this.aggsService.calculateAutoTimeExpression(
+          {
+            from: fromDate,
+            to: toDate,
+            mode: 'absolute',
+          }
+        )})`;
       }
       if (aggsConfig.date_histogram) {
-        return ` | stats count() by span(${timeField?.name}, ${
+        return ` | stats count() by span(${timeField}, ${
           aggsConfig.date_histogram.fixed_interval ??
           aggsConfig.date_histogram.calendar_interval ??
           this.aggsService.calculateAutoTimeExpression({
@@ -149,13 +145,16 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       ...dataFrame.meta,
       aggConfig: {
         ...dataFrame.meta.aggConfig,
-        ...(this.aggsService.types.get.bind(this) &&
+        ...(getRawAggs(searchRequest) &&
+          this.aggsService.types.get.bind(this) &&
           getAggConfig(searchRequest, {}, this.aggsService.types.get.bind(this))),
       },
       queryConfig: {
         ...dataFrame.meta.queryConfig,
-        ...(this.queryService.dataSet.getDataSet() && {
-          dataSourceId: this.queryService.dataSet.getDataSet()?.dataSourceRef?.id,
+        ...(this.queryService.dataSetManager.getDataSet() && {
+          dataSourceId: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.id,
+          dataSourceName: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.name,
+          timeFieldName: this.queryService.dataSetManager.getDataSet()?.timeFieldName,
         }),
       },
     };
@@ -168,14 +167,15 @@ export class PPLSearchInterceptor extends SearchInterceptor {
             const jsError = new Error(df.error.response);
             return throwError(jsError);
           }
-          const timeField = getTimeField(df, dataFrame.meta?.aggConfig);
-          if (timeField) {
+          const timeField = dataFrame.meta?.queryConfig?.timeFieldName;
+          const aggConfig = dataFrame.meta?.aggConfig;
+          if (timeField && aggConfig) {
             const timeFilter = getTimeFilter(timeField);
             const newQuery = insertTimeFilter(queryString, timeFilter);
             updateDataFrameMeta({
               dataFrame: df,
               qs: newQuery,
-              aggConfig: dataFrame.meta?.aggConfig,
+              aggConfig,
               timeField,
               timeFilter,
               getAggQsFn: getAggQsFn.bind(this),
@@ -183,13 +183,17 @@ export class PPLSearchInterceptor extends SearchInterceptor {
             return fetchDataFrame(dfContext, newQuery, df);
           }
           return fetchDataFrame(dfContext, queryString, df);
+        }),
+        catchError((error) => {
+          return throwError(error);
         })
       );
     }
 
     if (dataFrame.schema) {
-      const timeField = getTimeField(dataFrame, dataFrame.meta?.aggConfig);
-      if (timeField) {
+      const timeField = dataFrame.meta?.queryConfig?.timeFieldName;
+      const aggConfig = dataFrame.meta?.aggConfig;
+      if (timeField && aggConfig) {
         const timeFilter = getTimeFilter(timeField);
         const newQuery = insertTimeFilter(queryString, timeFilter);
         updateDataFrameMeta({
@@ -204,7 +208,11 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       }
     }
 
-    return fetchDataFrame(dfContext, queryString, dataFrame);
+    return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
+      catchError((error) => {
+        return throwError(error);
+      })
+    );
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {

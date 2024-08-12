@@ -6,7 +6,7 @@
 import ReactDOM from 'react-dom';
 import { I18nProvider, FormattedMessage } from '@osd/i18n/react';
 import React, { useMemo } from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiPage, EuiPageBody, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexItem, EuiPage, EuiPageBody, EuiSpacer, EuiText } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { ApplicationStart, AppNavLinkStatus, CoreStart } from '../../../core/public';
 import { OverviewApp } from '.';
@@ -31,11 +31,11 @@ export function ManagementOverviewWrapper(props: ManagementOverviewProps) {
   return (
     <EuiPage restrictWidth={1200}>
       <EuiPageBody component="main">
-        <EuiTitle size="l">
+        <EuiText size="s">
           <h1>
             <FormattedMessage id="management.overview.overviewTitle" defaultMessage="Overview" />
           </h1>
-        </EuiTitle>
+        </EuiText>
         <EuiSpacer />
         <EuiFlexGrid columns={3}>
           {availableApps?.map((app) => (

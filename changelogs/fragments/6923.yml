@@ -1,2 +1,0 @@
-fix:
-- Close any open system flyout when changing view mode of the dashboard ([#6923](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6923))

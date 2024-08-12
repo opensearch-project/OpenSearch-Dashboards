@@ -12,6 +12,10 @@
 .osdQueryBar__wrap {
   max-width: 100%;
   z-index: $euiZContentMenu;
+
+  .euiToolTipAnchor {
+    height: 100%;
+  }
 }
 
 // Uses the append style, but no bordering
