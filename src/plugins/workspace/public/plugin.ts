@@ -235,44 +235,19 @@ export class WorkspacePlugin
     });
   }
 
-  /**
-   * Add nav links belong to `manage workspace` to all of the use cases.
-   * @param coreSetup
-   */
-  private registerManageWorkspaceCategory(coreSetup: CoreSetup) {
-    [
-      DEFAULT_NAV_GROUPS.all,
-      DEFAULT_NAV_GROUPS.analytics,
-      DEFAULT_NAV_GROUPS.observability,
-      DEFAULT_NAV_GROUPS.search,
-      DEFAULT_NAV_GROUPS['security-analytics'],
-    ].forEach((navGroup) => {
-      coreSetup.chrome.navGroup.addNavLinksToGroup(navGroup, [
-        {
-          id: 'dataSources_core',
-          category: DEFAULT_APP_CATEGORIES.manageWorkspace,
-          order: 100,
-        },
-        {
-          id: 'indexPatterns',
-          category: DEFAULT_APP_CATEGORIES.manageWorkspace,
-          order: 200,
-        },
-        {
-          id: 'objects',
-          category: DEFAULT_APP_CATEGORIES.manageWorkspace,
-          order: 300,
-        },
-      ]);
-    });
-  }
-
   public async setup(
     core: CoreSetup,
     { savedObjectsManagement, management, dataSourceManagement }: WorkspacePluginSetupDeps
   ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
+
+    this.useCase.setup({
+      chrome: core.chrome,
+      getStartServices: core.getStartServices,
+      workspaces: core.workspaces,
+    });
+
     core.application.registerAppUpdater(this.appUpdater$);
     this.unregisterNavGroupUpdater = core.chrome.navGroup.registerNavGroupUpdater(
       this.navGroupUpdater$
@@ -427,8 +402,6 @@ export class WorkspacePlugin
       },
     ]);
 
-    this.registerManageWorkspaceCategory(core);
-
     return {};
   }
 
@@ -538,5 +511,6 @@ export class WorkspacePlugin
     this.unregisterNavGroupUpdater?.();
     this.registeredUseCasesUpdaterSubscription?.unsubscribe();
     this.workspaceAndUseCasesCombineSubscription?.unsubscribe();
+    this.useCase.stop();
   }
 }
