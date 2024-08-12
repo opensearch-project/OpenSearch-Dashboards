@@ -34,7 +34,7 @@ describe('<WorkspaceNameField />', () => {
     expect(onChangeMock).not.toHaveBeenCalled();
   });
 
-  it('should render the correct number of characters left when value is falsy', () => {
+  it('should render the correct number of characters left when value is empty', () => {
     render(<WorkspaceNameField value={undefined} onChange={jest.fn()} />);
 
     const helpText = screen.getByText(
