@@ -33,10 +33,6 @@ export class ContentManagementService {
   };
 
   registerContentProvider = (provider: ContentProvider) => {
-    if (this.contentProviders.get(provider.id)) {
-      throw new Error(`Cannot register content provider with the same id ${provider.id}`);
-    }
-
     this.contentProviders.set(provider.id, provider);
 
     const targetArea = provider.getTargetArea();

@@ -27,7 +27,7 @@ const STATIC_USE_CASES = [
   WORKSPACE_USE_CASES.observability,
   WORKSPACE_USE_CASES['security-analytics'],
   WORKSPACE_USE_CASES.search,
-  WORKSPACE_USE_CASES.analytics,
+  WORKSPACE_USE_CASES.essentials,
 ];
 const useCaseMock = {
   id: 'foo',

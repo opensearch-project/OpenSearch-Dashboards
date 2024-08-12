@@ -1,2 +1,0 @@
-fix:
-- [Discover][Bug] Migrate global state from legacy URL ([#6780](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6780))

@@ -181,6 +181,24 @@ describe('#WorkspaceClient', () => {
     expect(mockCheckAndSetDefaultDataSource).toHaveBeenCalledWith(uiSettingsClient, ['id1'], true);
   });
 
+  it('update# should log error when failed set default data source', async () => {
+    const client = new WorkspaceClient(coreSetup, logger);
+    await client.setup(coreSetup);
+    client?.setSavedObjects(savedObjects);
+    client?.setUiSettings(uiSettings);
+    mockCheckAndSetDefaultDataSource.mockRejectedValueOnce(new Error());
+
+    await client.update(mockRequestDetail, mockWorkspaceId, {
+      name: mockWorkspaceName,
+      permissions: {},
+      dataSources: ['id1'],
+    });
+
+    expect(logger.error).toHaveBeenLastCalledWith(
+      'Set default data source error during workspace updating'
+    );
+  });
+
   it('delete# should unassign data source before deleting related saved objects', async () => {
     const client = new WorkspaceClient(coreSetup, logger);
     await client.setup(coreSetup);
