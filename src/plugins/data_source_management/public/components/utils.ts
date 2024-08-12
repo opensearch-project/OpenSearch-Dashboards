@@ -14,7 +14,7 @@ import {
   NotificationsStart,
 } from 'src/core/public';
 import { deepFreeze } from '@osd/std';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   DataSourceAttributes,
   DataSourceTableItem,
@@ -388,7 +388,7 @@ const getDataSourceSelection = () => {
 export { getDataSourceSelection, setDataSourceSelection };
 
 export const generateComponentId = () => {
-  return uuid.v4();
+  return uuidv4();
 };
 
 export const formatError = (name: string, message: string, details: string) => {

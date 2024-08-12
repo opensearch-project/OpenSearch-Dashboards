@@ -31,7 +31,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import classNames from 'classnames';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { get } from 'lodash';
 import { Markdown } from '../../../../../../opensearch_dashboards_react/public';
 
@@ -46,7 +46,7 @@ export function MarkdownVisualization(props) {
   const { backgroundColor, model, visData, dateFormat } = props;
   const series = get(visData, `${model.id}.series`, []);
   const variables = convertSeriesToVars(series, model, dateFormat, props.getConfig);
-  const markdownElementId = getMarkdownId(uuid.v1());
+  const markdownElementId = getMarkdownId(uuidv4());
 
   const panelBackgroundColor = model.background_color || backgroundColor;
   const style = { backgroundColor: panelBackgroundColor };

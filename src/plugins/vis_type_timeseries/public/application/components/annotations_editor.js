@@ -36,7 +36,7 @@ import { OSD_FIELD_TYPES } from '../../../../../plugins/data/public';
 import { AddDeleteButtons } from './add_delete_buttons';
 import { ColorPicker } from './color_picker';
 import { FieldSelect } from './aggs/field_select';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { IconSelect } from './icon_select/icon_select';
 import { YesNo } from './yes_no';
 import { QueryBarWrapper } from './query_bar_wrapper';
@@ -59,7 +59,7 @@ import { i18n } from '@osd/i18n';
 
 function newAnnotation() {
   return {
-    id: uuid.v1(),
+    id: uuidv4(),
     color: '#F00',
     index_pattern: '*',
     time_field: '@timestamp',

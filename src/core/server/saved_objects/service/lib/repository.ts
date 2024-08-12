@@ -30,7 +30,7 @@
 
 import { omit } from 'lodash';
 import type { opensearchtypes } from '@opensearch-project/opensearch';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { OpenSearchClient, DeleteDocumentResponse } from '../../../opensearch/';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
@@ -361,7 +361,7 @@ export class SavedObjectsRepository {
       const method = object.id && overwrite ? 'index' : 'create';
       const requiresNamespacesCheck = object.id && this._registry.isMultiNamespace(object.type);
 
-      if (object.id == null) object.id = uuid.v1();
+      if (object.id == null) object.id = uuidv4();
 
       return {
         tag: 'Right' as 'Right',

@@ -36,7 +36,7 @@ import { resolveInstanceUuid, UUID_7_6_0_BUG } from './resolve_uuid';
 import { HttpConfigType } from '../http';
 
 jest.mock('uuid', () => ({
-  v4: () => 'NEW_UUID',
+  v4: jest.fn(() => 'NEW_UUID'),
 }));
 
 jest.mock('./fs', () => ({

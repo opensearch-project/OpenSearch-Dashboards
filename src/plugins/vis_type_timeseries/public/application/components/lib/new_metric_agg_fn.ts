@@ -28,12 +28,12 @@
  * under the License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { MetricsItemsSchema } from '../../../../common/types';
 
 export const newMetricAggFn = (): MetricsItemsSchema => {
   return {
-    id: uuid.v1(),
+    id: uuidv4(),
     type: 'count',
   };
 };

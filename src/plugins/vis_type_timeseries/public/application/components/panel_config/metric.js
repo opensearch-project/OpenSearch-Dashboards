@@ -34,7 +34,7 @@ import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import { ColorRules } from '../color_rules';
 import { YesNo } from '../yes_no';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   htmlIdGenerator,
   EuiTabs,
@@ -68,7 +68,7 @@ export class MetricPanelConfig extends Component {
       (model.background_color_rules && model.background_color_rules.length === 0)
     ) {
       this.props.onChange({
-        background_color_rules: [{ id: uuid.v1() }],
+        background_color_rules: [{ id: uuidv4() }],
       });
     }
   }

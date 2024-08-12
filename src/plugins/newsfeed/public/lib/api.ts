@@ -30,7 +30,7 @@
 
 import * as Rx from 'rxjs';
 import moment from 'moment';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@osd/i18n';
 import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
 import { HttpSetup } from 'src/core/public';
@@ -52,7 +52,7 @@ export enum NewsfeedApiEndpoint {
 }
 
 export class NewsfeedApiDriver {
-  private readonly id = uuid.v4();
+  private readonly id = uuidv4();
   private readonly opensearchDashboardsVersion: string;
   private readonly loadedTime = moment().utc(); // the date is compared to time in UTC format coming from the service
   private readonly lastFetchStorageKey: string;
