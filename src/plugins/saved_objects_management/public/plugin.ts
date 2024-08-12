@@ -63,7 +63,7 @@ import {
 } from './services';
 import { registerServices } from './register_services';
 import { bootstrap } from './ui_actions_bootstrap';
-import { DEFAULT_NAV_GROUPS, DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { DEFAULT_NAV_GROUPS } from '../../../core/public';
 import { RecentWork } from './management_section/recent_work';
 import { HOME_CONTENT_AREAS } from '../../../plugins/home/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';

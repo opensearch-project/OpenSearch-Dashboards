@@ -1,2 +1,0 @@
-fix:
-- Fix not setting the default data source when creating data source bug ([#6908](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6908))

@@ -46,7 +46,7 @@ import {
 } from './service';
 
 import { ManagementSetup } from '../../management/public';
-import { DEFAULT_NAV_GROUPS, AppStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { AppStatus } from '../../../core/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 
 export interface IndexPatternManagementSetupDependencies {

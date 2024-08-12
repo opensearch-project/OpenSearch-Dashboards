@@ -11,7 +11,6 @@ import {
   EuiPageHeaderSection,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -434,9 +433,9 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
           <EuiPageHeaderSection style={{ width: '100%', justifyContent: 'space-between' }}>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiTitle data-test-subj="datasourceTitle" size="l">
+                <EuiText data-test-subj="datasourceTitle" size="s">
                   <h1>{datasourceDetails.name}</h1>
-                </EuiTitle>
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageHeaderSection>
@@ -459,7 +458,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
             >
               <QueryOrAccelerateData />
             </EuiAccordion>
-            <EuiTabbedContent tabs={tabs} />
+            <EuiTabbedContent tabs={tabs} size="s" />
           </>
         )}
 
