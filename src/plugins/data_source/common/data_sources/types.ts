@@ -47,6 +47,7 @@ export enum AuthType {
   SigV4 = 'sigv4',
 }
 
+// src/plugins/workspace/public/utils.ts Workspace plugin depends on this to do use case limitation.
 export enum SigV4ServiceName {
   OpenSearch = 'es',
   OpenSearchServerless = 'aoss',
