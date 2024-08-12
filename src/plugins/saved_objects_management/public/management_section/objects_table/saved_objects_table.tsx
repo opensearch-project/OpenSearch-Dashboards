@@ -164,7 +164,6 @@ export interface SavedObjectsTableState {
   failedCopies: SavedObjectsImportError[];
   successfulCopies: SavedObjectsImportSuccess[];
   targetWorkspaceName: string;
-  workspaceClient: IWorkspaceClient | null;
 }
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
@@ -203,7 +202,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       isIncludeReferencesDeepChecked: true,
       currentWorkspaceId: this.props.workspaces.currentWorkspaceId$.getValue(),
       availableWorkspaces: this.props.workspaces.workspaceList$.getValue(),
-      workspaceClient: this.props.workspaces.client$.getValue(),
       workspaceEnabled: this.props.applications.capabilities.workspaces.enabled,
       isShowingDuplicateResultFlyout: false,
       failedCopies: [],
@@ -375,11 +373,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         currentWorkspaceId: workspaceId,
       })
     );
-    this.workspacesClientSubscription = workspace.client$.subscribe((client) => {
-      this.setState({
-        workspaceClient: client,
-      });
-    });
 
     this.workspacesSubscription = workspace.workspaceList$.subscribe((workspaceList) => {
       this.setState({ availableWorkspaces: workspaceList });
@@ -744,8 +737,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     targetWorkspace: string,
     targetWorkspaceName: string
   ) => {
-    const { notifications } = this.props;
-    const { workspaceClient } = this.state;
+    const { notifications, workspaces } = this.props;
+    const workspaceClient = workspaces.client$.getValue();
 
     const showErrorNotification = () => {
       notifications.toasts.addDanger({

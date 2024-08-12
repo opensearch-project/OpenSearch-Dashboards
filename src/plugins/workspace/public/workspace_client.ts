@@ -316,15 +316,15 @@ export class WorkspaceClient implements IWorkspaceClient {
   }
 
   /**
-   * copy saved objects among workspaces
+   * copy saved objects to target workspace
    *
-   * @param {any[]} objects
+   * @param {Array<{ id: string; type: string }>} objects
    * @param {string} targetWorkspace
    * @param {boolean} includeReferencesDeep
    * @returns {Promise<IResponse<any>>} result for this operation
    */
   public async copy(
-    objects: any[],
+    objects: Array<{ id: string; type: string }>,
     targetWorkspace: string,
     includeReferencesDeep: boolean = true
   ): Promise<IResponse<any>> {
