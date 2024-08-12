@@ -95,7 +95,7 @@ export const CollapsibleNavTop = ({
 
   return (
     <div>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+      <EuiFlexGroup responsive={false} alignItems="center" justifyContent="spaceBetween">
         {shouldShowHomeLink ? (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty size="l" {...homeLinkProps}>

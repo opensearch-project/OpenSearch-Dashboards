@@ -192,7 +192,7 @@ export function NavGroups({
     .filter((item): item is EuiSideNavItemType<{}> => !!item);
   return (
     <EuiFlexItem style={style}>
-      <EuiSideNav items={sideNavItems} />
+      <EuiSideNav items={sideNavItems} isOpenOnMobile />
       {suffix}
     </EuiFlexItem>
   );
@@ -365,6 +365,7 @@ export function CollapsibleNavGroupEnabled({
       closeButtonPosition="outside"
       hideCloseButton
       paddingSize="none"
+      ownFocus={false}
     >
       <div className="eui-fullHeight left-navigation-wrapper">
         {!isNavOpen ? null : (
