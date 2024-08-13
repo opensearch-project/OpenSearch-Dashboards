@@ -38,14 +38,14 @@ export const SelectDataSourcePanel = ({
   }, [savedObjects, setDataSourcesOptions]);
 
   const handleSelect = useCallback(
-    (newOptions) => {
-      setDataSourcesOptions(newOptions);
-      const newSelectedOptions = [];
-      for (const option of newOptions) {
+    (options) => {
+      setDataSourcesOptions(options);
+      const selectedOptions = [];
+      for (const option of options) {
         if (option.checked === 'on')
-          newSelectedOptions.push({ title: option.label, id: option.value });
+          selectedOptions.push({ title: option.label, id: option.value });
       }
-      onChange(newSelectedOptions);
+      onChange(selectedOptions);
     },
     [onChange]
   );

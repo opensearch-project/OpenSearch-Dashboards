@@ -4,9 +4,10 @@
  */
 
 import React from 'react';
-import { fireEvent, render, act } from '@testing-library/react';
+import { fireEvent, render, act, waitFor } from '@testing-library/react';
 import { SelectDataSourcePanel, SelectDataSourcePanelProps } from './select_data_source_panel';
 import { coreMock } from '../../../../../core/public/mocks';
+import { log } from 'console';
 
 const dataSources = [
   {
@@ -39,15 +40,12 @@ const setup = ({
 };
 
 describe('SelectDataSourcePanel', () => {
+  const originalOffsetHeight = Object.getOwnPropertyDescriptor(
+    HTMLElement.prototype,
+    'offsetHeight'
+  );
+  const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
   beforeEach(() => {
-    const originalOffsetHeight = Object.getOwnPropertyDescriptor(
-      HTMLElement.prototype,
-      'offsetHeight'
-    );
-    const originalOffsetWidth = Object.getOwnPropertyDescriptor(
-      HTMLElement.prototype,
-      'offsetWidth'
-    );
     Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
       configurable: true,
       value: 600,
@@ -58,51 +56,34 @@ describe('SelectDataSourcePanel', () => {
     });
   });
 
-  it('should render consistent data sources when selected data sources passed', () => {
-    const { getByText } = setup({ selectedDataSources: dataSources });
+  afterEach(() => {
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'offsetHeight',
+      originalOffsetHeight as PropertyDescriptor
+    );
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'offsetWidth',
+      originalOffsetWidth as PropertyDescriptor
+    );
+  });
+
+  it('should render consistent data sources when selected data sources passed', async () => {
+    const { getByText } = await setup({ selectedDataSources: [] });
 
     expect(getByText(dataSources[0].title)).toBeInTheDocument();
     expect(getByText(dataSources[1].title)).toBeInTheDocument();
   });
 
-  it('should call onChange when clicking add new data source button', () => {
+  it('should call onChange when updating selected data sources in selectable', async () => {
     const onChangeMock = jest.fn();
-    const { getByTestId } = setup({ onChange: onChangeMock });
-
-    expect(onChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(getByTestId('workspaceForm-select-dataSource-addNew'));
-    expect(onChangeMock).toHaveBeenCalledWith([
-      {
-        id: '',
-        title: '',
-      },
-    ]);
-  });
-
-  it('should call onChange when updating selected data sources in combo box', async () => {
-    const onChangeMock = jest.fn();
-    const { getByTitle, getByText } = setup({
+    const { getByTitle } = await setup({
       onChange: onChangeMock,
-      selectedDataSources: [{ id: '', title: '' }],
+      selectedDataSources: [],
     });
     expect(onChangeMock).not.toHaveBeenCalled();
-    await act(() => {
-      fireEvent.click(getByText('Select'));
-    });
     fireEvent.click(getByTitle(dataSources[0].title));
     expect(onChangeMock).toHaveBeenCalledWith([{ id: 'id1', title: 'title1' }]);
-  });
-
-  it('should call onChange when deleting selected data source', async () => {
-    const onChangeMock = jest.fn();
-    const { getByLabelText } = setup({
-      onChange: onChangeMock,
-      selectedDataSources: [{ id: '', title: '' }],
-    });
-    expect(onChangeMock).not.toHaveBeenCalled();
-    await act(() => {
-      fireEvent.click(getByLabelText('Delete data source'));
-    });
-    expect(onChangeMock).toHaveBeenCalledWith([]);
   });
 });
