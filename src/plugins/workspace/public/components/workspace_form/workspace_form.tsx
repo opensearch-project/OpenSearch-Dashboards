@@ -29,6 +29,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     permissionEnabled,
     dataSourceManagement: isDataSourceEnabled,
     availableUseCases,
+    operationType,
   } = props;
   const {
     formId,

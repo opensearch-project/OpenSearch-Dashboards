@@ -29,11 +29,7 @@ export const WorkspaceBottomBar = ({
   handleResetForm,
 }: WorkspaceBottomBarProps) => {
   const applicationElement = document.querySelector('.app-wrapper');
-  if (!applicationElement) {
-    return null;
-  }
-
-  return ReactDOM.createPortal(
+  const bottomBar = (
     <EuiBottomBar position="sticky">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -95,7 +91,11 @@ export const WorkspaceBottomBar = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiBottomBar>,
-    applicationElement
+    </EuiBottomBar>
   );
+  if (!applicationElement) {
+    return bottomBar;
+  }
+
+  return ReactDOM.createPortal(bottomBar, applicationElement);
 };
