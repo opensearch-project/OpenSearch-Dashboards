@@ -10,7 +10,7 @@ import { MAX_WORKSPACE_DESCRIPTION_LENGTH } from '../../../../common/constants';
 import { WorkspaceDescriptionField } from './workspace_description_field';
 
 describe('<WorkspaceDescriptionField />', () => {
-  it('should call onChange when the new value is within MAX_WORKSPACE_DESCRIPTION_LENGTH', () => {
+  it('should call onChange when the new value', () => {
     const onChangeMock = jest.fn();
     const value = 'test';
 
@@ -20,20 +20,24 @@ describe('<WorkspaceDescriptionField />', () => {
     fireEvent.change(textarea, { target: { value: 'new value' } });
 
     expect(onChangeMock).toHaveBeenCalledWith('new value');
-  });
 
-  it('should not call onChange when the new value exceeds MAX_WORKSPACE_DESCRIPTION_LENGTH', () => {
-    const onChangeMock = jest.fn();
-    const value = 'a'.repeat(MAX_WORKSPACE_DESCRIPTION_LENGTH);
-
-    render(<WorkspaceDescriptionField value={value} onChange={onChangeMock} />);
-
-    const textarea = screen.getByPlaceholderText('Describe the workspace');
     fireEvent.change(textarea, {
       target: { value: 'a'.repeat(MAX_WORKSPACE_DESCRIPTION_LENGTH + 1) },
     });
 
-    expect(onChangeMock).not.toHaveBeenCalled();
+    expect(onChangeMock).toHaveBeenCalledWith('a'.repeat(MAX_WORKSPACE_DESCRIPTION_LENGTH + 1));
+  });
+
+  it('should render the correct number of characters left when value larger than MAX_WORKSPACE_DESCRIPTION_LENGTH', () => {
+    render(
+      <WorkspaceDescriptionField
+        value={'a'.repeat(MAX_WORKSPACE_DESCRIPTION_LENGTH + 1)}
+        onChange={jest.fn()}
+      />
+    );
+
+    const helpText = screen.getByText(new RegExp(`-1.+characters left\.`));
+    expect(helpText).toBeInTheDocument();
   });
 
   it('should render the correct number of characters left when value is empty', () => {

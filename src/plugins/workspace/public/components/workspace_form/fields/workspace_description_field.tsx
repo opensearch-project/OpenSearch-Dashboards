@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiCompressedFormRow, EuiCompressedTextArea } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedTextArea, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useCallback } from 'react';
 
@@ -24,13 +24,12 @@ export const WorkspaceDescriptionField = ({
 }: WorkspaceDescriptionFieldProps) => {
   const handleChange = useCallback(
     (e) => {
-      const newValue = e.currentTarget.value;
-      if (newValue.length <= MAX_WORKSPACE_DESCRIPTION_LENGTH) {
-        onChange(newValue);
-      }
+      onChange(e.currentTarget.value);
     },
     [onChange]
   );
+  const leftCharacters = MAX_WORKSPACE_DESCRIPTION_LENGTH - (value?.length ?? 0);
+  const charactersOverflow = leftCharacters < 0;
 
   return (
     <EuiCompressedFormRow
@@ -39,9 +38,18 @@ export const WorkspaceDescriptionField = ({
           Description - <i>optional</i>
         </>
       }
-      isInvalid={!!error}
+      isInvalid={!!error || charactersOverflow}
       error={error}
-      helpText={<>{MAX_WORKSPACE_DESCRIPTION_LENGTH - (value?.length ?? 0)} characters left.</>}
+      helpText={
+        <EuiTextColor color={charactersOverflow ? 'danger' : 'subdued'}>
+          {i18n.translate('workspace.form.description.charactersLeft', {
+            defaultMessage: '{leftCharacters} characters left.',
+            values: {
+              leftCharacters,
+            },
+          })}
+        </EuiTextColor>
+      }
     >
       <EuiCompressedTextArea
         value={value}
@@ -52,7 +60,6 @@ export const WorkspaceDescriptionField = ({
           defaultMessage: 'Describe the workspace',
         })}
         readOnly={readOnly}
-        maxLength={MAX_WORKSPACE_DESCRIPTION_LENGTH}
       />
     </EuiCompressedFormRow>
   );

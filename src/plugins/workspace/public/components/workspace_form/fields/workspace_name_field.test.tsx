@@ -10,7 +10,7 @@ import { MAX_WORKSPACE_NAME_LENGTH } from '../../../../common/constants';
 import { WorkspaceNameField } from './workspace_name_field';
 
 describe('<WorkspaceNameField />', () => {
-  it('should call onChange when the new value is within MAX_WORKSPACE_NAME_LENGTH', () => {
+  it('should call onChange when the new value', () => {
     const onChangeMock = jest.fn();
     const value = 'test';
 
@@ -20,18 +20,19 @@ describe('<WorkspaceNameField />', () => {
     fireEvent.change(input, { target: { value: 'new value' } });
 
     expect(onChangeMock).toHaveBeenCalledWith('new value');
-  });
 
-  it('should not call onChange when the new value exceeds MAX_WORKSPACE_NAME_LENGTH', () => {
-    const onChangeMock = jest.fn();
-    const value = 'a'.repeat(MAX_WORKSPACE_NAME_LENGTH);
-
-    render(<WorkspaceNameField value={value} onChange={onChangeMock} />);
-
-    const input = screen.getByPlaceholderText('Enter a name');
     fireEvent.change(input, { target: { value: 'a'.repeat(MAX_WORKSPACE_NAME_LENGTH + 1) } });
 
-    expect(onChangeMock).not.toHaveBeenCalled();
+    expect(onChangeMock).toHaveBeenCalledWith('a'.repeat(MAX_WORKSPACE_NAME_LENGTH + 1));
+  });
+
+  it('should render the correct number of characters left when value greater than MAX_WORKSPACE_NAME_LENGTH', () => {
+    render(
+      <WorkspaceNameField value={'a'.repeat(MAX_WORKSPACE_NAME_LENGTH + 1)} onChange={jest.fn()} />
+    );
+
+    const helpText = screen.getByText(new RegExp(`-1.+characters left\.`));
+    expect(helpText).toBeInTheDocument();
   });
 
   it('should render the correct number of characters left when value is empty', () => {

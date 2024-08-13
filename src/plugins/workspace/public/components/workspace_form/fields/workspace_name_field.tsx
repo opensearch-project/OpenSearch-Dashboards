@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiCompressedFieldText, EuiCompressedFormRow } from '@elastic/eui';
+import { EuiCompressedFieldText, EuiCompressedFormRow, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useCallback } from 'react';
 
@@ -24,13 +24,12 @@ export const WorkspaceNameField = ({
 }: WorkspaceNameFieldProps) => {
   const handleChange = useCallback(
     (e) => {
-      const newValue = e.currentTarget.value;
-      if (newValue.length <= MAX_WORKSPACE_NAME_LENGTH) {
-        onChange(newValue);
-      }
+      onChange(e.currentTarget.value);
     },
     [onChange]
   );
+  const leftCharacters = MAX_WORKSPACE_NAME_LENGTH - (value?.length ?? 0);
+  const charactersOverflow = leftCharacters < 0;
 
   return (
     <EuiCompressedFormRow
@@ -39,14 +38,22 @@ export const WorkspaceNameField = ({
       })}
       helpText={
         <>
-          {MAX_WORKSPACE_NAME_LENGTH - (value?.length ?? 0)} characters left. <br />
+          <EuiTextColor color={charactersOverflow ? 'danger' : 'subdued'}>
+            {i18n.translate('workspace.form.name.charactersLeft', {
+              defaultMessage: '{leftCharacters} characters left.',
+              values: {
+                leftCharacters,
+              },
+            })}
+          </EuiTextColor>
+          <br />
           {i18n.translate('workspace.form.workspaceDetails.name.helpText', {
             defaultMessage:
               'Use a unique name for the workspace. Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
           })}
         </>
       }
-      isInvalid={!!error}
+      isInvalid={!!error || charactersOverflow}
       error={error}
     >
       <EuiCompressedFieldText
@@ -57,7 +64,6 @@ export const WorkspaceNameField = ({
         placeholder={i18n.translate('workspace.form.workspaceDetails.name.placeholder', {
           defaultMessage: 'Enter a name',
         })}
-        maxLength={MAX_WORKSPACE_NAME_LENGTH}
       />
     </EuiCompressedFormRow>
   );

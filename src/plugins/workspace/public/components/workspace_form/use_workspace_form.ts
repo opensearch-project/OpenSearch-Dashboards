@@ -4,12 +4,7 @@
  */
 
 import { useCallback, useState, FormEventHandler, useRef, useMemo } from 'react';
-import {
-  htmlIdGenerator,
-  EuiFieldTextProps,
-  EuiTextAreaProps,
-  EuiColorPickerProps,
-} from '@elastic/eui';
+import { htmlIdGenerator, EuiColorPickerProps } from '@elastic/eui';
 
 import { useApplications } from '../../hooks';
 import {

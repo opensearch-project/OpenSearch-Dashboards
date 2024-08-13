@@ -126,7 +126,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
       )}
       <EuiSpacer />
       {operationType === WorkspaceOperationType.Create && (
-        <WorkspaceCreateActionPanel formId={formId} application={application} />
+        <WorkspaceCreateActionPanel formData={formData} formId={formId} application={application} />
       )}
       {operationType === WorkspaceOperationType.Update && (
         <WorkspaceBottomBar
