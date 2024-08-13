@@ -122,7 +122,7 @@ export class AdvancedSettingsPlugin
   public start(core: CoreStart) {
     const enableUserControl = core.uiSettings.get('theme:enableUserControl');
     if (enableUserControl) {
-      setupTopNavThemeButton(core);
+      setupTopNavThemeButton(core, core.uiSettings.get('home:useNewHomePage'));
     }
 
     return {

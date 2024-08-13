@@ -77,6 +77,7 @@ import {
   NavGroupItemInMap,
   fulfillRegistrationLinksToChromeNavLinks,
   createRecentNavLink,
+  HeaderVariant,
   LinkItemType,
   getSortedNavLinks,
 } from './chrome';
@@ -383,6 +384,7 @@ export {
   NavGroupItemInMap,
   fulfillRegistrationLinksToChromeNavLinks,
   createRecentNavLink,
+  HeaderVariant,
   LinkItemType,
   getSortedNavLinks,
 };
