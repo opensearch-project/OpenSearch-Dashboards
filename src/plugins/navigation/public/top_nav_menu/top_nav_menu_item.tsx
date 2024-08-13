@@ -30,10 +30,25 @@
 
 import { upperFirst, isFunction } from 'lodash';
 import React, { MouseEvent } from 'react';
-import { EuiToolTip, EuiButton, EuiHeaderLink, EuiCompressedSwitch } from '@elastic/eui';
-import { TopNavMenuData } from './top_nav_menu_data';
+import classNames from 'classnames';
+import {
+  EuiToolTip,
+  EuiButton,
+  EuiHeaderLink,
+  EuiCompressedSwitch,
+  EuiButtonIcon,
+  EuiSwitch,
+  EuiSwitchEvent,
+} from '@elastic/eui';
+import {
+  TopNavMenuClickAction,
+  TopNavMenuData,
+  TopNavMenuLegacyData,
+  TopNavMenuSwitchAction,
+  TopNavMenuSwitchData,
+} from './top_nav_menu_data';
 
-export function TopNavMenuItem(props: TopNavMenuData) {
+function TopNavMenuLegacyItem(props: TopNavMenuLegacyData) {
   function isDisabled(): boolean {
     const val = isFunction(props.disableButton) ? props.disableButton() : props.disableButton;
     return val!;
@@ -89,6 +104,103 @@ export function TopNavMenuItem(props: TopNavMenuData) {
     return <EuiToolTip content={tooltip}>{component}</EuiToolTip>;
   }
   return component;
+}
+
+export function TopNavMenuItem(props: TopNavMenuData) {
+  if (!('controlType' in props)) return TopNavMenuLegacyItem(props);
+
+  const { disabled, tooltip, run } = props as Exclude<TopNavMenuData, TopNavMenuLegacyData>;
+
+  const isDisabled = () => Boolean(typeof disabled === 'function' ? disabled() : disabled);
+
+  const handleClick = (e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
+    if (!isDisabled()) (run as TopNavMenuClickAction)?.(e.currentTarget);
+  };
+
+  const getComponent = (addTypeClassName: boolean = false) => {
+    const className = classNames(props.className, {
+      [`osdTopNavGroup--${props.controlType}`]: addTypeClassName,
+      'osdTopNavGroup-isDisabled': isDisabled(),
+    });
+    switch (props.controlType) {
+      case 'button':
+        return (
+          <>
+            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+            <EuiButton
+              size="s"
+              iconType={props.iconType}
+              iconSide={props.iconSide}
+              className={className}
+              isLoading={props.isLoading}
+              href={props.href}
+              isDisabled={isDisabled()}
+              onClick={handleClick}
+              aria-label={props.ariaLabel}
+              data-test-subj={props.testId}
+              color="text"
+            >
+              {props.label}
+            </EuiButton>
+          </>
+        );
+
+      case 'icon':
+        return (
+          <EuiButtonIcon
+            size="s"
+            display="base"
+            iconType={props.iconType}
+            className={className}
+            href={props.href}
+            isDisabled={isDisabled()}
+            onClick={handleClick}
+            aria-label={props.ariaLabel}
+            data-test-subj={props.testId}
+            color="text"
+          />
+        );
+
+      case 'switch':
+        const { checked } = props as TopNavMenuSwitchData;
+
+        const isChecked = () => Boolean(typeof checked === 'function' ? checked() : checked);
+
+        const handleSwitch = (e: EuiSwitchEvent) => {
+          if (!isDisabled()) (run as TopNavMenuSwitchAction)?.(e.currentTarget, e.target.checked);
+        };
+
+        return (
+          <EuiSwitch
+            compressed
+            label={props.label}
+            checked={isChecked()}
+            className={className}
+            disabled={isDisabled()}
+            onChange={handleSwitch}
+            aria-label={props.ariaLabel}
+            data-test-subj={props.testId}
+            color="text"
+            display="base"
+          />
+        );
+    }
+  };
+
+  const tooltipContent = typeof tooltip === 'function' ? tooltip() : tooltip;
+
+  if (tooltipContent) {
+    const className = classNames(`osdTopNavGroup--${props.controlType}`, {
+      'osdTopNavGroup-isDisabled': isDisabled(),
+    });
+    return (
+      <EuiToolTip content={tooltipContent} anchorClassName={className}>
+        {getComponent()}
+      </EuiToolTip>
+    );
+  }
+
+  return getComponent(true);
 }
 
 TopNavMenuItem.defaultProps = {

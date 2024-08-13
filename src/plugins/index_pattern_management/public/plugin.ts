@@ -48,6 +48,7 @@ import {
 import { ManagementSetup } from '../../management/public';
 import { AppStatus, DEFAULT_NAV_GROUPS } from '../../../core/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
+import { NavigationPublicPluginStart } from '../../navigation/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -57,6 +58,7 @@ export interface IndexPatternManagementSetupDependencies {
 
 export interface IndexPatternManagementStartDependencies {
   data: DataPublicPluginStart;
+  navigation: NavigationPublicPluginStart;
   dataSource?: DataSourcePluginStart;
 }
 
