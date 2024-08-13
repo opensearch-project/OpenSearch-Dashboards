@@ -40,12 +40,20 @@ const mockProps = () => ({
       query: { query: '', language: 'kuery' } as Query,
     } as SavedQueryAttributes,
   },
-  filters: [],
+  filters: [
+    {
+      meta: {
+        alias: null,
+        disabled: false,
+        negate: false,
+      },
+    },
+  ],
   indexPatterns: [],
   useSaveQueryMenu: false,
 });
 
-describe('FilterOptions', () => {
+describe('Filter options menu', () => {
   beforeEach(() => {
     // Mocking `uiSettings.get` to return true for `useNewHeader`
     (useOpenSearchDashboards as jest.Mock).mockReturnValue({
@@ -95,5 +103,86 @@ describe('FilterOptions', () => {
     expect(saveQueryButton.exists()).toBeTruthy();
     saveQueryButton.simulate('click');
     expect(wrapper.find('[data-test-subj="save-query-panel"]').exists()).toBeTruthy();
+  });
+
+  it('should call onFiltersUpdated when enable all filters button is clicked', () => {
+    const props = mockProps();
+    const wrapper = mountWithIntl(<FilterOptions {...props} />);
+    const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
+    button.simulate('click');
+    wrapper.update();
+    const enableAllFiltersButton = wrapper.find('[data-test-subj="enableAllFilters"]').at(0);
+    enableAllFiltersButton.simulate('click');
+    expect(props.onFiltersUpdated).toHaveBeenCalled();
+  });
+
+  it('should call onFiltersUpdated when disable all filters button is clicked', () => {
+    const props = mockProps();
+    const wrapper = mountWithIntl(<FilterOptions {...props} />);
+    const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
+    button.simulate('click');
+    wrapper.update();
+    const disableAllFiltersButton = wrapper.find('[data-test-subj="disableAllFilters"]').at(0);
+    disableAllFiltersButton.simulate('click');
+    expect(props.onFiltersUpdated).toHaveBeenCalled();
+  });
+
+  it('should call onFiltersUpdated when pin all filters button is clicked', () => {
+    const props = mockProps();
+    const wrapper = mountWithIntl(<FilterOptions {...props} />);
+    const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
+    button.simulate('click');
+    wrapper.update();
+    const pinAllFiltersButton = wrapper.find('[data-test-subj="pinAllFilters"]').at(0);
+    pinAllFiltersButton.simulate('click');
+    expect(props.onFiltersUpdated).toHaveBeenCalled();
+  });
+
+  it('should call onFiltersUpdated when unpin all filters button is clicked', () => {
+    const props = mockProps();
+    const wrapper = mountWithIntl(<FilterOptions {...props} />);
+    const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
+    button.simulate('click');
+    wrapper.update();
+    const unpinAllFiltersButton = wrapper.find('[data-test-subj="unpinAllFilters"]').at(0);
+    unpinAllFiltersButton.simulate('click');
+    expect(props.onFiltersUpdated).toHaveBeenCalled();
+  });
+
+  it('should call onFiltersUpdated when Invert all filters button is clicked', () => {
+    const props = mockProps();
+    const wrapper = mountWithIntl(<FilterOptions {...props} />);
+    const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
+    button.simulate('click');
+    wrapper.update();
+    const invertAllFiltersButton = wrapper
+      .find('[data-test-subj="invertInclusionAllFilters"]')
+      .at(0);
+    invertAllFiltersButton.simulate('click');
+    expect(props.onFiltersUpdated).toHaveBeenCalled();
+  });
+
+  it('should call onFiltersUpdated when Invert enabled/disabled filters button is clicked', () => {
+    const props = mockProps();
+    const wrapper = mountWithIntl(<FilterOptions {...props} />);
+    const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
+    button.simulate('click');
+    wrapper.update();
+    const invertEnabledDisabledFiltersButton = wrapper
+      .find('[data-test-subj="invertEnableDisableAllFilters"]')
+      .at(0);
+    invertEnabledDisabledFiltersButton.simulate('click');
+    expect(props.onFiltersUpdated).toHaveBeenCalled();
+  });
+
+  it('should call onFiltersUpdated when remove all filters button is clicked', () => {
+    const props = mockProps();
+    const wrapper = mountWithIntl(<FilterOptions {...props} />);
+    const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
+    button.simulate('click');
+    wrapper.update();
+    const removeAllFiltersButton = wrapper.find('[data-test-subj="removeAllFilters"]').at(0);
+    removeAllFiltersButton.simulate('click');
+    expect(props.onFiltersUpdated).toHaveBeenCalled();
   });
 });

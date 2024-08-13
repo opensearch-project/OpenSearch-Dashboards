@@ -56,7 +56,7 @@ interface Props {
   onSaveAsNew: () => void;
   onLoad: (savedQuery: SavedQuery) => void;
   onClearSavedQuery: () => void;
-  closeMenuPopover?: () => void;
+  closeMenuPopover: () => void;
 }
 
 export function SavedQueryManagementComponent({
@@ -101,9 +101,7 @@ export function SavedQueryManagementComponent({
 
   const handleClosePopover = useCallback(() => {
     setIsOpen(false);
-    if (closeMenuPopover) {
-      closeMenuPopover();
-    }
+    closeMenuPopover();
   }, [closeMenuPopover]);
 
   const handleSave = useCallback(() => {

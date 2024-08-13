@@ -22,6 +22,7 @@ const mockProps = () => ({
   onSaveAsNew: jest.fn(),
   onLoad: jest.fn(),
   onClearSavedQuery: jest.fn(),
+  closeMenuPopover: jest.fn(),
   showSaveQuery: true,
   loadedSavedQuery: {
     id: '1',
@@ -49,6 +50,7 @@ describe('Saved query management component', () => {
       .at(0);
     saveButton.simulate('click');
     expect(props.onSave).toHaveBeenCalled();
+    expect(props.closeMenuPopover).toHaveBeenCalled();
   });
 
   it('should call onSaveAsNew when save as new button is clicked', () => {
