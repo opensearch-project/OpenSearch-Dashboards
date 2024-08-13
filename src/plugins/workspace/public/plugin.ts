@@ -23,7 +23,6 @@ import {
   DEFAULT_NAV_GROUPS,
   NavGroupType,
   ALL_USE_CASE_ID,
-  DEFAULT_APP_CATEGORIES,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -367,6 +366,9 @@ export class WorkspacePlugin
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,
+      description: i18n.translate('workspace.workspaceList.description', {
+        defaultMessage: 'Organize collaborative projects in use-case-specific workspaces.',
+      }),
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);

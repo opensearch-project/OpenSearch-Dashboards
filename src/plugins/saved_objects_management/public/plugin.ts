@@ -167,6 +167,9 @@ export class SavedObjectsManagementPlugin
         title: i18n.translate('savedObjectsManagement.assets.label', {
           defaultMessage: 'Assets',
         }),
+        description: i18n.translate('savedObjectsManagement.assets.description', {
+          defaultMessage: 'Manage and share your global assets.',
+        }),
         mount: async (params: AppMountParameters) => {
           const { mountManagementSection } = await import('./management_section');
           const [coreStart] = await core.getStartServices();

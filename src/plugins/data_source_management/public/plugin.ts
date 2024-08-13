@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@osd/i18n';
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import {
   AppMountParameters,
@@ -158,6 +159,9 @@ export class DataSourceManagementPlugin
         id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
         title: PLUGIN_NAME,
         order: 100,
+        description: i18n.translate('data_source_management.description', {
+          defaultMessage: 'Create and manage data source connections.',
+        }),
         mount: async (params: AppMountParameters) => {
           const { mountManagementSection } = await import('./management_app');
           const [coreStart] = await core.getStartServices();
