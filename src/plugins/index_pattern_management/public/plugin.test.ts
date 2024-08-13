@@ -25,7 +25,7 @@ describe('DiscoverPlugin', () => {
       })
     ).not.toThrow();
     expect(setupMock.application.register).toBeCalledTimes(1);
-    expect(setupMock.chrome.navGroup.addNavLinksToGroup).toBeCalledTimes(5);
+    expect(setupMock.chrome.navGroup.addNavLinksToGroup).toBeCalledTimes(1);
   });
 
   it('when new navigation is enabled, should navigate to standard IPM app', async () => {
