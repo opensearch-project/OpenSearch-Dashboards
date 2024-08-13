@@ -42,7 +42,7 @@ export const workspaceUseCaseTitle = i18n.translate('workspace.form.workspaceUse
 });
 
 export const selectDataSourceTitle = i18n.translate('workspace.form.selectDataSource.title', {
-  defaultMessage: 'Associate data source',
+  defaultMessage: 'Associate data sources',
 });
 
 export const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndPermissions.title', {

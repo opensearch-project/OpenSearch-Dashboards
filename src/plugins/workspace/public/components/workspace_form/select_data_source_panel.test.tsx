@@ -39,6 +39,25 @@ const setup = ({
 };
 
 describe('SelectDataSourcePanel', () => {
+  beforeEach(() => {
+    const originalOffsetHeight = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'offsetHeight'
+    );
+    const originalOffsetWidth = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'offsetWidth'
+    );
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+      configurable: true,
+      value: 600,
+    });
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      value: 600,
+    });
+  });
+
   it('should render consistent data sources when selected data sources passed', () => {
     const { getByText } = setup({ selectedDataSources: dataSources });
 
