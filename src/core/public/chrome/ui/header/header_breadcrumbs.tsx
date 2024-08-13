@@ -34,14 +34,21 @@ import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { ChromeBreadcrumb, ChromeBreadcrumbEnricher } from '../../chrome_service';
+import './header_breadcrumbs.scss';
 
 interface Props {
   appTitle$: Observable<string>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   breadcrumbsEnricher$: Observable<ChromeBreadcrumbEnricher | undefined>;
+  useUpdatedHeader?: boolean;
 }
 
-export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$, breadcrumbsEnricher$ }: Props) {
+export function HeaderBreadcrumbs({
+  appTitle$,
+  breadcrumbs$,
+  breadcrumbsEnricher$,
+  useUpdatedHeader,
+}: Props) {
   const appTitle = useObservable(appTitle$, 'OpenSearch Dashboards');
   const breadcrumbs = useObservable(breadcrumbs$, []);
   const [breadcrumbEnricher, setBreadcrumbEnricher] = useState<
@@ -75,5 +82,15 @@ export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$, breadcrumbsEnricher
     ),
   }));
 
-  return <EuiHeaderBreadcrumbs breadcrumbs={crumbs} max={10} data-test-subj="breadcrumbs" />;
+  const remainingCrumbs = useUpdatedHeader ? crumbs.slice(0, -1) : crumbs;
+  const className = useUpdatedHeader ? 'headerBreadcrumbs' : '';
+
+  return (
+    <EuiHeaderBreadcrumbs
+      breadcrumbs={remainingCrumbs}
+      max={10}
+      data-test-subj="breadcrumbs"
+      className={className}
+    />
+  );
 }

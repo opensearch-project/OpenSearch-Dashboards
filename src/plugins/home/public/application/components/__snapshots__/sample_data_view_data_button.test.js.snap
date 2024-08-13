@@ -51,7 +51,7 @@ exports[`should render popover when appLinks is not empty 1`] = `
         },
       ]
     }
-    size="m"
+    size="s"
   />
 </EuiPopover>
 `;

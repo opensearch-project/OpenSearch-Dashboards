@@ -10,7 +10,7 @@ exports[`Recent items should render base element normally 1`] = `
         class="euiPopover__anchor"
       >
         <button
-          class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+          class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiHeaderSectionItemButton headerRecentItemsButton"
           data-test-subj="recentItemsSectionButton"
           type="button"
         >

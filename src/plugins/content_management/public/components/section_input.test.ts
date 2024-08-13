@@ -246,7 +246,7 @@ test('it should create section with a dashboard as content', async () => {
       id: 'dashboard-id-static',
       attributes: {
         panelsJSON:
-          '[{"version":"3.0.0","gridData":{"x":0,"y":0,"w":48,"h":5,"i":"debc95ec-7d43-49ee-84c8-95ad7b0b03ea"},"panelIndex":"debc95ec-7d43-49ee-84c8-95ad7b0b03ea","embeddableConfig":{"hidePanelTitles":true},"panelRefName":"panel_0"}]',
+          '[{"version":"3.0.0","gridData":{"x":0,"y":0,"w":48,"h":5,"i":"i"},"panelIndex":"1","embeddableConfig":{"hidePanelTitles":true},"panelRefName":"panel_0"}]',
       },
       references: [
         { id: 'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2', name: 'panel_0', type: 'visualization' },
@@ -258,14 +258,14 @@ test('it should create section with a dashboard as content', async () => {
     savedObjectsClient: clientMock,
   });
   expect(input.panels).toEqual({
-    'debc95ec-7d43-49ee-84c8-95ad7b0b03ea': {
+    'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2': {
       explicitInput: {
-        id: 'debc95ec-7d43-49ee-84c8-95ad7b0b03ea',
+        id: 'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2',
         savedObjectId: 'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2',
       },
       gridData: {
         h: 5,
-        i: 'debc95ec-7d43-49ee-84c8-95ad7b0b03ea',
+        i: 'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2',
         w: 48,
         x: 0,
         y: 0,
@@ -292,7 +292,7 @@ test('it should create section with a dynamic dashboard as content', async () =>
       id: 'dashboard-id-static',
       attributes: {
         panelsJSON:
-          '[{"version":"3.0.0","gridData":{"x":0,"y":0,"w":48,"h":5,"i":"debc95ec-7d43-49ee-84c8-95ad7b0b03ea"},"panelIndex":"debc95ec-7d43-49ee-84c8-95ad7b0b03ea","embeddableConfig":{"hidePanelTitles":true},"panelRefName":"panel_0"}]',
+          '[{"version":"3.0.0","gridData":{"x":0,"y":0,"w":48,"h":5,"i":"1"},"panelIndex":"1","embeddableConfig":{"hidePanelTitles":true},"panelRefName":"panel_0"}]',
       },
       references: [
         { id: 'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2', name: 'panel_0', type: 'visualization' },
@@ -304,14 +304,14 @@ test('it should create section with a dynamic dashboard as content', async () =>
     savedObjectsClient: clientMock,
   });
   expect(input.panels).toEqual({
-    'debc95ec-7d43-49ee-84c8-95ad7b0b03ea': {
+    'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2': {
       explicitInput: {
-        id: 'debc95ec-7d43-49ee-84c8-95ad7b0b03ea',
+        id: 'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2',
         savedObjectId: 'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2',
       },
       gridData: {
         h: 5,
-        i: 'debc95ec-7d43-49ee-84c8-95ad7b0b03ea',
+        i: 'ce24dd10-eb8a-11ed-8e00-17d7d50cd7b2',
         w: 48,
         x: 0,
         y: 0,
