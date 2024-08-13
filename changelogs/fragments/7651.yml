@@ -1,0 +1,2 @@
+feat:
+- [contentManagement] allow to update section input after page rendered ([#7651](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7651))
