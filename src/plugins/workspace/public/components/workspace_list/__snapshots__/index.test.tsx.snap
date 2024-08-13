@@ -5,41 +5,30 @@ exports[`WorkspaceList should render title and table normally 1`] = `
   <div
     class="euiPage euiPage--grow"
   >
+    Organize collaborative projects with use-case-specific workspaces.
+    <button
+      class="euiButton euiButton--primary euiButton--small"
+      data-test-subj="workspaceList-create-workspace"
+      type="button"
+    >
+      <span
+        class="euiButtonContent euiButton__content"
+      >
+        <span
+          class="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="plus"
+        />
+        <span
+          class="euiButton__text"
+        >
+          Create workspace
+        </span>
+      </span>
+    </button>
     <div
       class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--hasShadow euiPageBody euiPageBody--borderRadiusNone euiPageBody--paddingLarge"
     >
-      <header
-        class="euiPageHeader euiPageHeader--responsive euiPage--restrictWidth-default euiPageHeader--center"
-        style="padding-bottom: 0px; border-bottom: 0;"
-      >
-        <div
-          class="euiPageHeaderContent"
-        >
-          <div
-            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
-          >
-            <div
-              class="euiFlexItem"
-            >
-              <h1
-                class="euiTitle euiTitle--large"
-              >
-                Workspaces
-              </h1>
-              <div
-                class="euiSpacer euiSpacer--l"
-              />
-              <div
-                class="euiText euiText--medium euiText--constrainedWidth"
-              >
-                <p>
-                  Workspace allow you to save and organize library items, such as index patterns, visualizations, dashboards, saved searches, and share them with other OpenSearch Dashboards users. You can control which features are visible in each workspace, and which users and groups have read and write access to the library items in the workspace.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
       <div
         class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
         role="main"
@@ -253,25 +242,498 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                 </thead>
                 <tbody>
                   <tr
-                    class="euiTableRow"
+                    class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
                   >
                     <td
-                      class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-                      colspan="5"
+                      class="euiTableRowCell"
                     >
                       <div
-                        class="euiTableCellContent euiTableCellContent--alignCenter"
+                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                      >
+                        Name
+                      </div>
+                      <div
+                        class="euiTableCellContent euiTableCellContent--overflowingContent"
+                      >
+                        <span
+                          class=""
+                        >
+                          <button
+                            class="euiLink euiLink--primary"
+                            type="button"
+                          >
+                            name1
+                          </button>
+                        </span>
+                      </div>
+                    </td>
+                    <td
+                      class="euiTableRowCell"
+                    >
+                      <div
+                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                      >
+                        ID
+                      </div>
+                      <div
+                        class="euiTableCellContent"
                       >
                         <span
                           class="euiTableCellContent__text"
                         >
-                          No items found
+                          id1
+                        </span>
+                      </div>
+                    </td>
+                    <td
+                      class="euiTableRowCell"
+                    >
+                      <div
+                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                      >
+                        Description
+                      </div>
+                      <div
+                        class="euiTableCellContent euiTableCellContent--truncateText"
+                      >
+                        <span
+                          class="euiTableCellContent__text"
+                        />
+                      </div>
+                    </td>
+                    <td
+                      class="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--isExpander"
+                    >
+                      <div
+                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                      >
+                        Use case
+                      </div>
+                      <div
+                        class="euiTableCellContent euiTableCellContent--overflowingContent"
+                      >
+                        Analytics (All)
+                      </div>
+                    </td>
+                    <td
+                      class="euiTableRowCell euiTableRowCell--hasActions"
+                    >
+                      <div
+                        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                      >
+                        <span
+                          class="euiToolTipAnchor"
+                        >
+                          <button
+                            aria-labelledby="generated-id"
+                            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                            data-test-subj="workspace-list-edit-icon"
+                            type="button"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="euiButtonIcon__icon"
+                              color="inherit"
+                              data-euiicon-type="pencil"
+                            />
+                          </button>
+                          <span
+                            class="euiScreenReaderOnly"
+                            id="generated-id"
+                          >
+                            Edit
+                          </span>
+                        </span>
+                        <span
+                          class="euiToolTipAnchor"
+                        >
+                          <button
+                            aria-labelledby="generated-id"
+                            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                            data-test-subj="workspace-list-delete-icon"
+                            type="button"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="euiButtonIcon__icon"
+                              color="inherit"
+                              data-euiicon-type="trash"
+                            />
+                          </button>
+                          <span
+                            class="euiScreenReaderOnly"
+                            id="generated-id"
+                          >
+                            Delete
+                          </span>
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr
+                    class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                  >
+                    <td
+                      class="euiTableRowCell"
+                    >
+                      <div
+                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                      >
+                        Name
+                      </div>
+                      <div
+                        class="euiTableCellContent euiTableCellContent--overflowingContent"
+                      >
+                        <span
+                          class=""
+                        >
+                          <button
+                            class="euiLink euiLink--primary"
+                            type="button"
+                          >
+                            name2
+                          </button>
+                        </span>
+                      </div>
+                    </td>
+                    <td
+                      class="euiTableRowCell"
+                    >
+                      <div
+                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                      >
+                        ID
+                      </div>
+                      <div
+                        class="euiTableCellContent"
+                      >
+                        <span
+                          class="euiTableCellContent__text"
+                        >
+                          id2
+                        </span>
+                      </div>
+                    </td>
+                    <td
+                      class="euiTableRowCell"
+                    >
+                      <div
+                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                      >
+                        Description
+                      </div>
+                      <div
+                        class="euiTableCellContent euiTableCellContent--truncateText"
+                      >
+                        <span
+                          class="euiTableCellContent__text"
+                        />
+                      </div>
+                    </td>
+                    <td
+                      class="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--isExpander"
+                    >
+                      <div
+                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                      >
+                        Use case
+                      </div>
+                      <div
+                        class="euiTableCellContent euiTableCellContent--overflowingContent"
+                      />
+                    </td>
+                    <td
+                      class="euiTableRowCell euiTableRowCell--hasActions"
+                    >
+                      <div
+                        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                      >
+                        <span
+                          class="euiToolTipAnchor"
+                        >
+                          <button
+                            aria-labelledby="generated-id"
+                            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                            data-test-subj="workspace-list-edit-icon"
+                            type="button"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="euiButtonIcon__icon"
+                              color="inherit"
+                              data-euiicon-type="pencil"
+                            />
+                          </button>
+                          <span
+                            class="euiScreenReaderOnly"
+                            id="generated-id"
+                          >
+                            Edit
+                          </span>
+                        </span>
+                        <span
+                          class="euiToolTipAnchor"
+                        >
+                          <button
+                            aria-labelledby="generated-id"
+                            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                            data-test-subj="workspace-list-delete-icon"
+                            type="button"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="euiButtonIcon__icon"
+                              color="inherit"
+                              data-euiicon-type="trash"
+                            />
+                          </button>
+                          <span
+                            class="euiScreenReaderOnly"
+                            id="generated-id"
+                          >
+                            Delete
+                          </span>
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr
+                    class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                  >
+                    <td
+                      class="euiTableRowCell"
+                    >
+                      <div
+                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                      >
+                        Name
+                      </div>
+                      <div
+                        class="euiTableCellContent euiTableCellContent--overflowingContent"
+                      >
+                        <span
+                          class=""
+                        >
+                          <button
+                            class="euiLink euiLink--primary"
+                            type="button"
+                          >
+                            name3
+                          </button>
+                        </span>
+                      </div>
+                    </td>
+                    <td
+                      class="euiTableRowCell"
+                    >
+                      <div
+                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                      >
+                        ID
+                      </div>
+                      <div
+                        class="euiTableCellContent"
+                      >
+                        <span
+                          class="euiTableCellContent__text"
+                        >
+                          id3
+                        </span>
+                      </div>
+                    </td>
+                    <td
+                      class="euiTableRowCell"
+                    >
+                      <div
+                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                      >
+                        Description
+                      </div>
+                      <div
+                        class="euiTableCellContent euiTableCellContent--truncateText"
+                      >
+                        <span
+                          class="euiTableCellContent__text"
+                        />
+                      </div>
+                    </td>
+                    <td
+                      class="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--isExpander"
+                    >
+                      <div
+                        class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                      >
+                        Use case
+                      </div>
+                      <div
+                        class="euiTableCellContent euiTableCellContent--overflowingContent"
+                      >
+                        Observability
+                      </div>
+                    </td>
+                    <td
+                      class="euiTableRowCell euiTableRowCell--hasActions"
+                    >
+                      <div
+                        class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                      >
+                        <span
+                          class="euiToolTipAnchor"
+                        >
+                          <button
+                            aria-labelledby="generated-id"
+                            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                            data-test-subj="workspace-list-edit-icon"
+                            type="button"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="euiButtonIcon__icon"
+                              color="inherit"
+                              data-euiicon-type="pencil"
+                            />
+                          </button>
+                          <span
+                            class="euiScreenReaderOnly"
+                            id="generated-id"
+                          >
+                            Edit
+                          </span>
+                        </span>
+                        <span
+                          class="euiToolTipAnchor"
+                        >
+                          <button
+                            aria-labelledby="generated-id"
+                            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                            data-test-subj="workspace-list-delete-icon"
+                            type="button"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="euiButtonIcon__icon"
+                              color="inherit"
+                              data-euiicon-type="trash"
+                            />
+                          </button>
+                          <span
+                            class="euiScreenReaderOnly"
+                            id="generated-id"
+                          >
+                            Delete
+                          </span>
                         </span>
                       </div>
                     </td>
                   </tr>
                 </tbody>
               </table>
+            </div>
+            <div>
+              <div
+                class="euiSpacer euiSpacer--m"
+              />
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <div
+                    class="euiPopover euiPopover--anchorUpRight"
+                  >
+                    <div
+                      class="euiPopover__anchor"
+                    >
+                      <button
+                        class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+                        data-test-subj="tablePaginationPopoverButton"
+                        type="button"
+                      >
+                        <span
+                          class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                        >
+                          <span
+                            class="euiButtonContent__icon"
+                            color="inherit"
+                            data-euiicon-type="arrowDown"
+                          />
+                          <span
+                            class="euiButtonEmpty__text"
+                          >
+                            Rows per page
+                            : 
+                            5
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <nav
+                    class="euiPagination"
+                  >
+                    <button
+                      aria-label="Previous page"
+                      class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                      data-test-subj="pagination-button-previous"
+                      disabled=""
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="arrowLeft"
+                      />
+                    </button>
+                    <ul
+                      class="euiPagination__list"
+                    >
+                      <li
+                        class="euiPagination__item"
+                      >
+                        <button
+                          aria-controls="__table_generated-id"
+                          aria-current="true"
+                          aria-label="Page 1 of 1"
+                          class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                          data-test-subj="pagination-button-0"
+                          disabled=""
+                          type="button"
+                        >
+                          <span
+                            class="euiButtonContent euiButtonEmpty__content"
+                          >
+                            <span
+                              class="euiButtonEmpty__text"
+                            >
+                              1
+                            </span>
+                          </span>
+                        </button>
+                      </li>
+                    </ul>
+                    <button
+                      aria-label="Next page"
+                      class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                      data-test-subj="pagination-button-next"
+                      disabled=""
+                      type="button"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiButtonIcon__icon"
+                        color="inherit"
+                        data-euiicon-type="arrowRight"
+                      />
+                    </button>
+                  </nav>
+                </div>
+              </div>
             </div>
           </div>
         </div>
