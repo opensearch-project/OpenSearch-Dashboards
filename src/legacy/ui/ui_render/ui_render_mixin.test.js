@@ -4,7 +4,6 @@
  */
 
 import { uiRenderMixin } from './ui_render_mixin';
-import Boom from '@hapi/boom';
 
 // Mock dependencies
 jest.mock('@osd/i18n', () => ({
@@ -96,7 +95,10 @@ describe('uiRenderMixin', () => {
       await handler(request, h);
 
       expect(i18n.getTranslation).toHaveBeenCalled();
-      expect(h.response).toHaveBeenCalledWith(JSON.stringify(defaultTranslations));
+      expect(h.response).toHaveBeenCalledWith({
+        translations: defaultTranslations,
+        warning: null,
+      });
       expect(h.header).toHaveBeenCalledWith('cache-control', 'must-revalidate');
       expect(h.header).toHaveBeenCalledWith('content-type', 'application/json');
       expect(h.etag).toHaveBeenCalled();
@@ -114,19 +116,34 @@ describe('uiRenderMixin', () => {
       await handler(request, h);
 
       expect(i18nLoader.getTranslationsByLocale).toHaveBeenCalledWith(requestedLocale);
-      expect(h.response).toHaveBeenCalledWith(JSON.stringify(frTranslations));
+      expect(h.response).toHaveBeenCalledWith({
+        translations: frTranslations,
+        warning: null,
+      });
     });
 
-    it('should throw not found error for unknown locale', async () => {
+    it('should fallback to English translations for unknown locale', async () => {
       const defaultLocale = 'en';
       const unknownLocale = 'xx';
+      const englishTranslations = { hello: 'Hello' };
       i18n.getLocale.mockReturnValue(defaultLocale);
       i18nLoader.getRegisteredLocales.mockReturnValue([defaultLocale]);
+      i18nLoader.getTranslationsByLocale.mockResolvedValue(englishTranslations);
 
       const request = { params: { locale: unknownLocale } };
-      await expect(handler(request, h)).rejects.toThrow(
-        Boom.notFound(`Unknown locale: ${unknownLocale}`)
-      );
+      await handler(request, h);
+
+      expect(i18nLoader.getTranslationsByLocale).toHaveBeenCalledWith('en');
+      expect(h.response).toHaveBeenCalledWith({
+        translations: englishTranslations,
+        warning: {
+          title: 'Unsupported Locale',
+          text: `The requested locale "${unknownLocale}" is not supported. Falling back to English.`,
+        },
+      });
+      expect(h.header).toHaveBeenCalledWith('cache-control', 'must-revalidate');
+      expect(h.header).toHaveBeenCalledWith('content-type', 'application/json');
+      expect(h.etag).toHaveBeenCalled();
     });
 
     it('should cache translations', async () => {

@@ -31,18 +31,6 @@
 import { applicationServiceMock } from './application/application_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 export const fatalErrorMock = fatalErrorsServiceMock.createSetupContract();
-export const coreSystemMock = {
-  setup: jest.fn().mockResolvedValue({
-    fatalErrors: fatalErrorMock,
-  }),
-  start: jest.fn().mockResolvedValue({
-    application: applicationServiceMock.createInternalStartContract(),
-  }),
-};
-jest.doMock('./core_system', () => ({
-  CoreSystem: jest.fn().mockImplementation(() => coreSystemMock),
-}));
-
 export const apmSystem = {
   setup: jest.fn().mockResolvedValue(undefined),
   start: jest.fn().mockResolvedValue(undefined),
@@ -53,9 +41,25 @@ jest.doMock('./apm_system', () => ({
 }));
 
 export const i18nLoad = jest.fn().mockResolvedValue(undefined);
+export const i18nSetLocale = jest.fn();
 jest.doMock('@osd/i18n', () => ({
   i18n: {
     ...jest.requireActual('@osd/i18n').i18n,
     load: i18nLoad,
+    setLocale: i18nSetLocale,
   },
+}));
+
+export const displayWarningMock = jest.fn();
+export const coreSystemMock = {
+  setup: jest.fn().mockResolvedValue({
+    fatalErrors: fatalErrorMock,
+  }),
+  start: jest.fn().mockResolvedValue({
+    application: applicationServiceMock.createInternalStartContract(),
+  }),
+  displayWarning: displayWarningMock,
+};
+jest.doMock('./core_system', () => ({
+  CoreSystem: jest.fn().mockImplementation(() => coreSystemMock),
 }));

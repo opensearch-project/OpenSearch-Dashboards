@@ -31,7 +31,7 @@
 import { i18n } from '@osd/i18n';
 import { CoreSystem } from './core_system';
 import { ApmSystem } from './apm_system';
-import { getAndUpdateLocaleInUrl } from './locale_helper';
+import { getLocaleInUrl } from './locale_helper';
 
 /** @internal */
 export async function __osdBootstrap__() {
@@ -40,8 +40,7 @@ export async function __osdBootstrap__() {
   );
 
   // Extract the locale from the URL if present
-  // This allows for dynamic locale setting via URL parameters
-  const urlLocale = getAndUpdateLocaleInUrl(window.location.href);
+  const urlLocale = getLocaleInUrl(window.location.href);
 
   if (urlLocale) {
     // If a locale is specified in the URL, update the i18n settings
@@ -95,4 +94,18 @@ export async function __osdBootstrap__() {
 
   const start = await coreSystem.start();
   await apmSystem.start(start);
+
+  // Display the i18n warning if it exists
+  if ((window as any).__i18nWarning) {
+    const warning = (window as any).__i18nWarning;
+    coreSystem.displayWarning(warning.title, warning.text);
+    delete (window as any).__i18nWarning;
+  }
+
+  // Display the locale warning if it exists
+  if ((window as any).__localeWarning) {
+    const warning = (window as any).__localeWarning;
+    coreSystem.displayWarning(warning.title, warning.text);
+    delete (window as any).__localeWarning;
+  }
 }

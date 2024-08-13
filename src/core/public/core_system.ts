@@ -318,4 +318,35 @@ export class CoreSystem {
     this.workspaces.stop();
     this.rootDomElement.textContent = '';
   }
+
+  public async displayWarning(title: string, text: string) {
+    const i18n = await this.i18n.start();
+    const injectedMetadata = this.injectedMetadata.setup();
+      this.fatalErrorsSetup = this.fatalErrors.setup({
+        injectedMetadata,
+        i18n: this.i18n.getContext(),
+    });
+    await this.integrations.setup();
+    this.docLinks.setup();
+    const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
+    const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
+    const notificationsTargetDomElement = document.createElement('div');
+    const overlayTargetDomElement = document.createElement('div');
+    const overlays = this.overlay.start({
+      i18n,
+      targetDomElement: overlayTargetDomElement,
+      uiSettings,
+    });
+    if (this.notifications) {
+      const toasts = await this.notifications.start({
+        i18n,
+        overlays,
+        targetDomElement: notificationsTargetDomElement,
+      })?.toasts;
+
+      if (toasts) {
+        toasts.addWarning({ title, text });
+      }
+    }
+  }
 }

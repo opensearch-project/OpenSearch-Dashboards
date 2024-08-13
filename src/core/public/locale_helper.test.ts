@@ -3,126 +3,48 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { extractLocaleInfo, getAndUpdateLocaleInUrl } from './locale_helper';
+import { getLocaleInUrl } from './locale_helper';
 
-describe('extractLocaleInfo', () => {
-  const testCases = [
-    {
-      description: 'After hash and slash',
-      input: 'http://localhost:5603/app/home#/&i18n-locale=fr-FR',
-      expected: {
-        localeValue: 'fr-FR',
-        localeParam: 'i18n-locale=fr-FR',
-        updatedUrl: 'http://localhost:5603/app/home#/',
-      },
-    },
-    {
-      description: 'After path and slash',
-      input: 'http://localhost:5603/app/home/&i18n-locale=de-DE',
-      expected: {
-        localeValue: 'de-DE',
-        localeParam: 'i18n-locale=de-DE',
-        updatedUrl: 'http://localhost:5603/app/home/',
-      },
-    },
-    {
-      description: 'No locale parameter',
-      input: 'http://localhost:5603/app/home',
-      expected: {
-        localeValue: 'en',
-        localeParam: null,
-        updatedUrl: 'http://localhost:5603/app/home',
-      },
-    },
-    {
-      description: 'Complex URL with locale',
-      input: 'http://localhost:5603/app/dashboards#/view/id?_g=(...)&_a=(...)&i18n-locale=es-ES',
-      expected: {
-        localeValue: 'es-ES',
-        localeParam: 'i18n-locale=es-ES',
-        updatedUrl: 'http://localhost:5603/app/dashboards#/view/id?_g=(...)&_a=(...)',
-      },
-    },
-  ];
-
-  testCases.forEach(({ description, input, expected }) => {
-    it(description, () => {
-      const result = extractLocaleInfo(input);
-      expect(result).toEqual(expected);
-    });
-  });
-});
-
-describe('getAndUpdateLocaleInUrl', () => {
-  let originalHistoryReplaceState: typeof window.history.replaceState;
-
+describe('getLocaleInUrl', () => {
   beforeEach(() => {
-    // Mock window.history.replaceState
-    originalHistoryReplaceState = window.history.replaceState;
-    window.history.replaceState = jest.fn();
+    // Clear any warnings before each test
+    delete (window as any).__localeWarning;
   });
 
-  afterEach(() => {
-    // Restore original window.history.replaceState
-    window.history.replaceState = originalHistoryReplaceState;
+  it('should return the locale from a valid query string', () => {
+    const url = 'http://localhost:5603/app/home?locale=en-US';
+    expect(getLocaleInUrl(url)).toBe('en-US');
   });
 
-  const testCases = [
-    {
-      description: 'Category 1: basePath + #/',
-      input: 'http://localhost:5603/app/home#/&i18n-locale=zh-CN',
-      expected: 'http://localhost:5603/app/home#/?i18n-locale=zh-CN',
-      locale: 'zh-CN',
-    },
-    {
-      description: 'Category 1: basePath + # (empty hashPath)',
-      input: 'http://localhost:5603/app/home#&i18n-locale=zh-CN',
-      expected: 'http://localhost:5603/app/home#?i18n-locale=zh-CN',
-      locale: 'zh-CN',
-    },
-    {
-      description: 'Category 2: basePath + # + hashPath + ? + hashQuery',
-      input: 'http://localhost:5603/app/dashboards#/view/id?_g=(...)&_a=(...)&i18n-locale=zh-CN',
-      expected: 'http://localhost:5603/app/dashboards#/view/id?_g=(...)&_a=(...)&i18n-locale=zh-CN',
-      locale: 'zh-CN',
-    },
-    {
-      description: 'Category 3: basePath only',
-      input: 'http://localhost:5603/app/management&i18n-locale=zh-CN',
-      expected: 'http://localhost:5603/app/management?i18n-locale=zh-CN',
-      locale: 'zh-CN',
-    },
-    {
-      description: 'Category 1: basePath + # + hashPath',
-      input: 'http://localhost:5603/app/dev_tools#/console&i18n-locale=zh-CN',
-      expected: 'http://localhost:5603/app/dev_tools#/console?i18n-locale=zh-CN',
-      locale: 'zh-CN',
-    },
-    {
-      description: 'URL without locale parameter',
-      input: 'http://localhost:5603/app/home#/',
-      expected: 'http://localhost:5603/app/home#/',
-      locale: 'en',
-    },
-    {
-      description: 'Complex URL with multiple parameters',
-      input:
-        "http://localhost:5603/app/dashboards#/view/7adfa750-4c81-11e8-b3d7-01146121b73d?_g=(filters:!(),refreshInterval:(pause:!f,value:900000),time:(from:now-24h,to:now))&_a=(description:'Analyze%20mock%20flight%20data',filters:!())&i18n-locale=zh-CN",
-      expected:
-        "http://localhost:5603/app/dashboards#/view/7adfa750-4c81-11e8-b3d7-01146121b73d?_g=(filters:!(),refreshInterval:(pause:!f,value:900000),time:(from:now-24h,to:now))&_a=(description:'Analyze%20mock%20flight%20data',filters:!())&i18n-locale=zh-CN",
-      locale: 'zh-CN',
-    },
-  ];
+  it('should return the locale from a valid hash query string', () => {
+    const url = 'http://localhost:5603/app/home#/?locale=fr-FR';
+    expect(getLocaleInUrl(url)).toBe('fr-FR');
+  });
 
-  testCases.forEach(({ description, input, expected, locale }) => {
-    it(description, () => {
-      const result = getAndUpdateLocaleInUrl(input);
-      expect(result).toBe(locale);
-      if (locale !== 'en') {
-        expect(window.history.replaceState).toHaveBeenCalledWith(null, '', expected);
-      } else {
-        expect(window.history.replaceState).not.toHaveBeenCalled();
-      }
-    });
+  it('should return null for a URL without locale', () => {
+    const url = 'http://localhost:5603/app/home';
+    expect(getLocaleInUrl(url)).toBeNull();
+  });
+
+  it('should return null and set a warning for an invalid locale format in hash', () => {
+    const url = 'http://localhost:5603/app/home#/&locale=de-DE';
+    expect(getLocaleInUrl(url)).toBeNull();
+    expect((window as any).__localeWarning).toBeDefined();
+    expect((window as any).__localeWarning.title).toBe('Invalid URL Format');
+  });
+
+  it('should return null for an empty locale value', () => {
+    const url = 'http://localhost:5603/app/home?locale=';
+    expect(getLocaleInUrl(url)).toBeNull();
+  });
+
+  it('should handle URLs with other query parameters', () => {
+    const url = 'http://localhost:5603/app/home?param1=value1&locale=ja-JP&param2=value2';
+    expect(getLocaleInUrl(url)).toBe('ja-JP');
+  });
+
+  it('should handle URLs with other hash parameters', () => {
+    const url = 'http://localhost:5603/app/home#/route?param1=value1&locale=zh-CN&param2=value2';
+    expect(getLocaleInUrl(url)).toBe('zh-CN');
   });
 });

@@ -40,7 +40,7 @@ import {
   Action,
 } from 'history';
 import { i18n } from '@osd/i18n';
-import { extractLocaleInfo } from '../locale_helper';
+import { getLocaleInUrl } from '../locale_helper';
 
 /**
  * A wrapper around a `History` instance that is scoped to a particular base path of the history stack. Behaves
@@ -318,7 +318,7 @@ export class ScopedHistory<HistoryLocationState = unknown>
         return;
       }
       // const fullUrl = `${location.pathname}${location.search}${location.hash}`;
-      const { localeValue } = extractLocaleInfo(window.location.href);
+      const localeValue = getLocaleInUrl(window.location.href);
       if (localeValue !== currentLocale) {
         // Force a full page reload
         window.location.reload();

@@ -67,13 +67,14 @@ export function uiRenderMixin(osdServer, server, config) {
       const { locale } = request.params;
       const normalizedLocale = locale.toLowerCase();
       const registeredLocales = i18nLoader.getRegisteredLocales().map((l) => l.toLowerCase());
+      let warning = null;
 
       // Function to get or create cached translations
       const getCachedTranslations = async (localeKey, getTranslationsFn) => {
         if (!translationsCache[localeKey]) {
           const translations = await getTranslationsFn();
           translationsCache[localeKey] = {
-            translations: JSON.stringify(translations),
+            translations: translations,
             hash: createHash('sha1').update(JSON.stringify(translations)).digest('hex'),
           };
         }
@@ -93,12 +94,23 @@ export function uiRenderMixin(osdServer, server, config) {
           i18nLoader.getTranslationsByLocale(locale)
         );
       } else {
-        // Locale not found
-        throw Boom.notFound(`Unknown locale: ${locale}`);
+        // Locale not found, fall back to en locale
+        cachedTranslations = await getCachedTranslations('en', () =>
+          i18nLoader.getTranslationsByLocale('en')
+        );
+        warning = {
+          title: 'Unsupported Locale',
+          text: `The requested locale "${locale}" is not supported. Falling back to English.`,
+        };
       }
 
+      const response = {
+        translations: cachedTranslations.translations,
+        warning,
+      };
+
       return h
-        .response(cachedTranslations.translations)
+        .response(response)
         .header('cache-control', 'must-revalidate')
         .header('content-type', 'application/json')
         .etag(cachedTranslations.hash);
