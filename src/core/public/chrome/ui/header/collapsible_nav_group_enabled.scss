@@ -69,6 +69,10 @@
       gap: $euiSize;
       padding-top: $euiSizeS;
       padding-bottom: $euiSizeS;
+
+      > * {
+        justify-content: center;
+      }
     }
 
     &.bottom-container-expanded {
