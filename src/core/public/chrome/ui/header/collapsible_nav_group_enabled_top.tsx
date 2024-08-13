@@ -25,7 +25,6 @@ import { ALL_USE_CASE_ID } from '../../../../../core/utils';
 export interface CollapsibleNavTopProps {
   homeLink?: ChromeNavLink;
   firstVisibleNavLinkOfAllUseCase?: ChromeNavLink;
-  navLinks: ChromeNavLink[];
   currentNavGroup?: NavGroupItemInMap;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   logos: Logos;
@@ -37,7 +36,6 @@ export interface CollapsibleNavTopProps {
 }
 
 export const CollapsibleNavTop = ({
-  navLinks,
   currentNavGroup,
   navigateToApp,
   logos,
@@ -51,6 +49,9 @@ export const CollapsibleNavTop = ({
 }: CollapsibleNavTopProps) => {
   const currentWorkspace = useObservable(currentWorkspace$);
 
+  /**
+   * Only workspace of all use case type will have more than 1 visibleUseCases
+   */
   const isAllUseCaseWorkspace = useMemo(() => visibleUseCases.length > 1 && !!currentWorkspace, [
     currentWorkspace,
     visibleUseCases,

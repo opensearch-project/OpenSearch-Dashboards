@@ -379,7 +379,6 @@ export function CollapsibleNavGroupEnabled({
             <CollapsibleNavTop
               homeLink={homeLink}
               firstVisibleNavLinkOfAllUseCase={firstVisibleNavLinkOfAllUseCase}
-              navLinks={navLinks}
               navigateToApp={navigateToApp}
               logos={logos}
               setCurrentNavGroup={setCurrentNavGroup}

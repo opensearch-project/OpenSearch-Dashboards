@@ -224,14 +224,12 @@ describe('<CollapsibleNavGroupEnabled />', () => {
         },
       },
     });
-    const { container, getAllByTestId, getByTestId } = render(
+    const { container, getAllByTestId } = render(
       <CollapsibleNavGroupEnabled {...props} isNavOpen />
     );
     fireEvent.click(getAllByTestId('collapsibleNavAppLink-link-in-essentials')[1]);
     expect(getAllByTestId('collapsibleNavAppLink-link-in-essentials').length).toEqual(1);
     expect(container).toMatchSnapshot();
-    fireEvent.click(getByTestId('back'));
-    expect(getAllByTestId('collapsibleNavAppLink-link-in-essentials').length).toEqual(2);
   });
 
   it('should show all use case when current nav group is `all`', async () => {
@@ -250,14 +248,12 @@ describe('<CollapsibleNavGroupEnabled />', () => {
         },
       },
     });
-    const { container, getAllByTestId, getByTestId } = render(
+    const { container, getAllByTestId } = render(
       <CollapsibleNavGroupEnabled {...props} isNavOpen />
     );
     fireEvent.click(getAllByTestId('collapsibleNavAppLink-link-in-essentials')[1]);
     expect(getAllByTestId('collapsibleNavAppLink-link-in-essentials').length).toEqual(1);
     expect(container).toMatchSnapshot();
-    fireEvent.click(getByTestId('back'));
-    expect(getAllByTestId('collapsibleNavAppLink-link-in-essentials').length).toEqual(2);
   });
 
   it('should not show group if the nav link is hidden', async () => {
