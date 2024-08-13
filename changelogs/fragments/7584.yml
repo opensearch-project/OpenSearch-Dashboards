@@ -1,0 +1,2 @@
+fix:
+- Disable non index pattern datasources redirection when new nav is on and query enhancement is off ([#7584](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7584))
