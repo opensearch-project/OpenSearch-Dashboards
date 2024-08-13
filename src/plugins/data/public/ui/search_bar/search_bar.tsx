@@ -119,6 +119,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   private services = this.props.opensearchDashboards.services;
+  private dataSetService = this.services.data.query.dataSetManager;
+  private queryStringService = this.services.data.query.queryString;
   private savedQueryService = this.services.data.query.savedQueries;
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
@@ -372,6 +374,14 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         }
       }
     );
+    const dataSet = this.dataSetService.getDataSet();
+    if (dataSet && queryAndDateRange.query) {
+      this.queryStringService.addToQueryHistory(
+        dataSet.id,
+        queryAndDateRange.query,
+        queryAndDateRange.dateRange
+      );
+    }
   };
 
   public onLoadSavedQuery = (savedQuery: SavedQuery) => {

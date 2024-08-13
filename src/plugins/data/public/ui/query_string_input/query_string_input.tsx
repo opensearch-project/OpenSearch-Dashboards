@@ -381,13 +381,13 @@ export default class QueryStringInputUI extends Component<Props, State> {
       'field' in suggestion &&
       suggestion.field.subType &&
       suggestion.field.subType.nested &&
-      !this.services.storage.get('opensearchDashboards.DQLNestedQuerySyntaxInfoOptOut')
+      !this.services.storage.get('DQLNestedQuerySyntaxInfoOptOut')
     ) {
       const { notifications, docLinks } = this.services;
 
       const onDQLNestedQuerySyntaxInfoOptOut = (toast: Toast) => {
         if (!this.services.storage) return;
-        this.services.storage.set('opensearchDashboards.DQLNestedQuerySyntaxInfoOptOut', true);
+        this.services.storage.set('DQLNestedQuerySyntaxInfoOptOut', true);
         notifications!.toasts.remove(toast);
       };
 
@@ -469,7 +469,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    this.services.storage.set('opensearchDashboards.userQueryLanguage', language);
+    this.services.storage.set('userQueryLanguage', language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
