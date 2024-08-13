@@ -142,6 +142,9 @@ export class IndexPatternManagementPlugin
     core.application.register({
       id: IPM_APP_ID,
       title: sectionsHeader,
+      description: i18n.translate('indexPatternManagement.indexPattern.description', {
+        defaultMessage: 'Manage index patterns to retrieve data from OpenSearch.',
+      }),
       status: core.chrome.navGroup.getNavGroupEnabled()
         ? AppStatus.accessible
         : AppStatus.inaccessible,
