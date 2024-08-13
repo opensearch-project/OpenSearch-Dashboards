@@ -1,0 +1,2 @@
+feat:
+- Make parent item unclickable and fix duplicate items in landing page. ([#7619](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7619))

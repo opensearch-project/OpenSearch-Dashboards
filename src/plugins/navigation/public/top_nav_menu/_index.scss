@@ -1,3 +1,69 @@
+@use "sass:map";
+
 .osdTopNavMenu {
   margin-right: $euiSizeXS;
+}
+
+.osdTopNavMenuGroupedActions {
+  background-color: $euiColorEmptyShade;
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  & > .euiSwitch,
+  & > .euiButton,
+  & > .euiButtonIcon,
+  & > .euiToolTipAnchor > .euiSwitch,
+  & > .euiToolTipAnchor > .euiButton,
+  & > .euiToolTipAnchor > .euiButtonIcon {
+    border-radius: 0;
+    border: $euiFormInputGroupBorder;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  & > :not(:first-child),
+  & > .euiToolTipAnchor:not(:first-child) > .euiSwitch,
+  & > .euiToolTipAnchor:not(:first-child) > .euiButton,
+  & > .euiToolTipAnchor:not(:first-child) > .euiButtonIcon {
+    border-left-width: 0;
+    border-bottom-left-radius: 0;
+    border-top-left-radius: 0;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  & > :not(:last-child),
+  & > .euiToolTipAnchor:not(:last-child) > .euiSwitch,
+  & > .euiToolTipAnchor:not(:last-child) > .euiButton,
+  & > .euiToolTipAnchor:not(:last-child) > .euiButtonIcon {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+
+    // border-right-color: map.get($euiSwitchColors, "text") !important;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  & > .osdTopNavGroup-isDisabled:not(:last-child):has(+ .osdTopNavGroup-isDisabled),
+  & > .osdTopNavGroup-isDisabled.euiToolTipAnchor:not(:last-child):has(+ .osdTopNavGroup-isDisabled) > .euiButton,
+  & > .osdTopNavGroup-isDisabled.euiToolTipAnchor:not(:last-child):has(+ .osdTopNavGroup-isDisabled) > .euiButtonIcon {
+    // border-right-color: $euiButtonColorDisabled !important;
+  }
+}
+
+.osdTopNavGroup {
+  &--button {
+    min-width: auto;
+  }
+}
+
+.osdTopNavGroup-isDisabled {
+  cursor: not-allowed;
+}
+
+.osdTopNavMenuScreenTitle {
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiText {
+    line-height: $euiFormControlCompressedHeight;
+    white-space: nowrap;
+    max-width: 18ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

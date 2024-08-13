@@ -30,14 +30,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import {
-  EuiText,
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiFlyoutBody,
-  EuiTitle,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiText, EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import { EditorExample } from './editor_example';
 
 interface Props {
@@ -48,11 +41,11 @@ export function HelpPanel(props: Props) {
   return (
     <EuiFlyout onClose={props.onClose} data-test-subj="helpFlyout" size="s">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiText size="s">
           <h2>
             <FormattedMessage id="console.helpPage.pageTitle" defaultMessage="Help" />
           </h2>
-        </EuiTitle>
+        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiText>

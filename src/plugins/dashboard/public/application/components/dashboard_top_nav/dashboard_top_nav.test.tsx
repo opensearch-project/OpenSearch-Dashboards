@@ -33,7 +33,7 @@ import { Dashboard } from '../../../dashboard';
 import { DashboardContainer } from '../../embeddable';
 import { createDashboardServicesMock } from '../../utils/mocks';
 import { mount } from 'enzyme';
-import { TopNavMenu } from 'src/plugins/navigation/public';
+import { TopNavMenu, TopNavControls as HeaderControl } from 'src/plugins/navigation/public';
 import { dashboardAppStateStub } from '../../utils/stubs';
 
 let mockURL = '?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))';
@@ -55,7 +55,7 @@ function wrapDashboardTopNavInContext(mockServices: any, currentState: Dashboard
       saveQuery: true,
     },
     navigation: {
-      ui: { TopNavMenu },
+      ui: { TopNavMenu, HeaderControl },
     },
   };
 

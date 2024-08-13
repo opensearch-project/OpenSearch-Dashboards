@@ -42,6 +42,10 @@ const getSuggestionFromErrorCode = (error: WorkspaceFormError) => {
       return i18n.translate('workspace.form.errorCallout.permissionSettingOwnerMissing', {
         defaultMessage: 'Add a workspace owner.',
       });
+    case WorkspaceFormErrorCode.InvalidColor:
+      return i18n.translate('workspace.form.errorCallout.invalidColor', {
+        defaultMessage: 'Enter a valid color.',
+      });
     default:
       return error.message;
   }
@@ -104,6 +108,14 @@ export const WorkspaceFormErrorCallout = ({ errors }: WorkspaceFormErrorCalloutP
                 defaultMessage: 'Name:',
               })}
               message={getSuggestionFromErrorCode(errors.name)}
+            />
+          )}
+          {errors.color && (
+            <WorkspaceFormErrorCalloutItem
+              errorKey={i18n.translate('workspace.form.errorCallout.nameKey', {
+                defaultMessage: 'Color:',
+              })}
+              message={getSuggestionFromErrorCode(errors.color)}
             />
           )}
           {errors.features && (
