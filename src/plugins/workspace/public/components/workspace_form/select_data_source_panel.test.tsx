@@ -4,10 +4,9 @@
  */
 
 import React from 'react';
-import { fireEvent, render, act, waitFor } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { SelectDataSourcePanel, SelectDataSourcePanelProps } from './select_data_source_panel';
 import { coreMock } from '../../../../../core/public/mocks';
-import { log } from 'console';
 
 const dataSources = [
   {
