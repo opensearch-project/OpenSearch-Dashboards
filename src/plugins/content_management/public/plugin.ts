@@ -64,6 +64,7 @@ export class ContentManagementPublicPlugin
     this.contentManagementService.start();
     return {
       registerContentProvider: this.contentManagementService.registerContentProvider,
+      updatePageSection: this.contentManagementService.updatePageSection,
       renderPage: (id: string) => {
         const page = this.contentManagementService.getPage(id);
         if (page) {
