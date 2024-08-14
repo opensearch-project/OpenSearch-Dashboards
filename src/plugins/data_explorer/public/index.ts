@@ -20,3 +20,4 @@ export {
   setIndexPattern,
   setDataSet,
 } from './utils/state_management';
+export { DiscoverAction, DiscoverActionContext } from './types';

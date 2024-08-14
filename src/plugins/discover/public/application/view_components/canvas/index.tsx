@@ -13,7 +13,11 @@ import {
   EuiCompressedSwitch,
 } from '@elastic/eui';
 import { TopNav } from './top_nav';
-import { ViewProps } from '../../../../../data_explorer/public';
+import {
+  DataExplorerServices,
+  DiscoverAction,
+  ViewProps,
+} from '../../../../../data_explorer/public';
 import { DiscoverTable } from './discover_table';
 import { DiscoverChartContainer } from './discover_chart_container';
 import { useDiscoverContext } from '../context';
@@ -35,6 +39,7 @@ import { buildColumns } from '../../utils/columns';
 import './discover_canvas.scss';
 import { getNewDiscoverSetting, setNewDiscoverSetting } from '../../components/utils/local_storage';
 import { HeaderVariant } from '../../../../../../core/public';
+import { DiscoverActions } from './discover_actions';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalRef }: ViewProps) {
@@ -47,6 +52,10 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
       chrome: { setHeaderVariant },
     },
   } = useOpenSearchDashboards<DiscoverViewServices>();
+  const {
+    services: { discoverActions },
+  } = useOpenSearchDashboards<DataExplorerServices>();
+
   const { columns } = useSelector((state) => {
     const stateColumns = state.discover.columns;
 
@@ -166,6 +175,10 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
         <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
           <MemoizedDiscoverChartContainer {...fetchState} />
           <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+          <DiscoverActions
+            actions={discoverActions as DiscoverAction[]}
+            context={{ indexPattern }}
+          />
         </EuiPanel>
       )}
     </EuiPanel>

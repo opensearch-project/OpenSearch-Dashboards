@@ -20,6 +20,7 @@ import {
   DataExplorerPluginStart,
   DataExplorerPluginStartDependencies,
   DataExplorerServices,
+  DiscoverAction,
 } from './types';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { ViewService } from './services/view_service';
@@ -43,11 +44,12 @@ export class DataExplorerPlugin
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private stopUrlTracking?: () => void;
   private currentHistory?: ScopedHistory;
+  private discoverActions: DiscoverAction[] = [];
 
   public setup(
     core: CoreSetup<DataExplorerPluginStartDependencies, DataExplorerPluginStart>,
     { data }: DataExplorerPluginSetupDependencies
-  ): DataExplorerPluginSetup {
+  ) {
     const viewService = this.viewService;
 
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
@@ -105,6 +107,7 @@ export class DataExplorerPlugin
             ...withNotifyOnErrors(coreStart.notifications.toasts),
           }),
           viewRegistry: viewService.start(),
+          discoverActions: this.discoverActions,
         };
 
         // Get start services as specified in opensearch_dashboards.json
@@ -124,7 +127,10 @@ export class DataExplorerPlugin
     });
 
     return {
-      ...this.viewService.setup(),
+      registerView: this.viewService.setup().registerView,
+      registerDiscoverAction: (discoverAction: DiscoverAction) => {
+        this.discoverActions.push(discoverAction);
+      },
     };
   }
 

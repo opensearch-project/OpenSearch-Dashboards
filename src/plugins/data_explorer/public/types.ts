@@ -8,7 +8,7 @@ import { EmbeddableStart } from '../../embeddable/public';
 import { ExpressionsStart } from '../../expressions/public';
 import { ViewServiceStart, ViewServiceSetup } from './services/view_service';
 import { IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart, IndexPattern } from '../../data/public';
 import { Store } from './utils/state_management';
 
 export type DataExplorerPluginSetup = ViewServiceSetup;
@@ -34,4 +34,16 @@ export interface DataExplorerServices extends CoreStart {
   data: DataPublicPluginStart;
   scopedHistory: ScopedHistory;
   osdUrlStateStorage: IOsdUrlStateStorage;
+  discoverActions?: DiscoverAction[];
+}
+
+export interface DiscoverActionContext {
+  indexPattern: IndexPattern | undefined;
+}
+
+export interface DiscoverAction {
+  order: number;
+  name: string;
+  iconType: string;
+  onClick: (context: DiscoverActionContext) => void;
 }

@@ -12,6 +12,12 @@
     position: relative;
   }
 
+  &_actions {
+    position: absolute;
+    top: 0;
+    right: 30px;
+  }
+
   &_options {
     position: absolute;
     top: 0;
