@@ -6,19 +6,26 @@
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { chromeServiceMock } from '../../../../core/public/mocks';
-import { DEFAULT_NAV_GROUPS, NavGroupType } from '../../../../core/public';
+import {
+  ALL_USE_CASE_ID,
+  DEFAULT_NAV_GROUPS,
+  NavGroupItemInMap,
+  NavGroupType,
+} from '../../../../core/public';
 import { UseCaseService } from './use_case_service';
 
 const mockNavGroupsMap = {
   system: {
     id: 'system',
     title: 'System',
+    description: 'System use case',
     navLinks: [],
     type: NavGroupType.SYSTEM,
   },
   search: {
     id: 'search',
     title: 'Search',
+    description: 'Search use case',
     navLinks: [{ id: 'searchRelevance', title: 'Search Relevance' }],
     order: 2000,
   },
@@ -35,7 +42,7 @@ const setupUseCaseStart = (options?: { navGroupEnabled?: boolean }) => {
   const workspaceConfigurableApps$ = new BehaviorSubject([
     { id: 'searchRelevance', title: 'Search Relevance' },
   ]);
-  const navGroupsMap$ = new BehaviorSubject(mockNavGroupsMap);
+  const navGroupsMap$ = new BehaviorSubject<Record<string, NavGroupItemInMap>>(mockNavGroupsMap);
   const useCase = new UseCaseService();
 
   chrome.navGroup.getNavGroupEnabled.mockImplementation(() => options?.navGroupEnabled ?? true);
@@ -122,6 +129,35 @@ describe('UseCaseService', () => {
         },
       });
       expect(fn).toHaveBeenCalledTimes(2);
+    });
+    it('should move all use case to the last one', async () => {
+      const { useCaseStart, navGroupsMap$ } = setupUseCaseStart();
+
+      navGroupsMap$.next({
+        ...mockNavGroupsMap,
+        [ALL_USE_CASE_ID]: { ...DEFAULT_NAV_GROUPS.all, navLinks: [], order: -1 },
+      });
+      let useCases = await useCaseStart.getRegisteredUseCases$().pipe(first()).toPromise();
+
+      expect(useCases[useCases.length - 1]).toEqual(
+        expect.objectContaining({
+          id: ALL_USE_CASE_ID,
+          systematic: true,
+        })
+      );
+
+      navGroupsMap$.next({
+        [ALL_USE_CASE_ID]: { ...DEFAULT_NAV_GROUPS.all, navLinks: [], order: 1500 },
+        ...mockNavGroupsMap,
+      });
+      useCases = await useCaseStart.getRegisteredUseCases$().pipe(first()).toPromise();
+
+      expect(useCases[useCases.length - 1]).toEqual(
+        expect.objectContaining({
+          id: ALL_USE_CASE_ID,
+          systematic: true,
+        })
+      );
     });
   });
 });
