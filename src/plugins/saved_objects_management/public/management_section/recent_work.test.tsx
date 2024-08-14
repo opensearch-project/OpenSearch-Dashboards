@@ -10,6 +10,7 @@ import { RecentWork } from './recent_work';
 import { coreMock } from '../../../../core/public/mocks';
 import { ChromeRecentlyAccessedHistoryItem } from 'opensearch-dashboards/public';
 import { SavedObjectWithMetadata } from '../types';
+import { APP_ID } from '../plugin';
 
 const mockedRecentItems: ChromeRecentlyAccessedHistoryItem[] = [
   {
@@ -94,5 +95,18 @@ describe('<RecentWork />', () => {
     expect(allCardsAfterSort[0].querySelector('.euiCard__titleAnchor')?.textContent).toEqual(
       mockedRecentItems[1].label.charAt(0).toUpperCase() + mockedRecentItems[1].label.slice(1)
     );
+  });
+
+  it('should be able to show view all button', () => {
+    const { getByText } = render(<RecentWork core={getStartMockForRecentWork()} />);
+    expect(getByText('View all')).toBeInTheDocument();
+  });
+
+  it('shoule be able to be linked to the expected page when clicking View all button', () => {
+    const coreStartMock = getStartMockForRecentWork();
+    const { getByText } = render(<RecentWork core={coreStartMock} />);
+    const mockedViewAllButton = getByText('View all');
+    fireEvent.click(mockedViewAllButton);
+    expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith(APP_ID);
   });
 });
