@@ -82,7 +82,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
   }, [workspaceList, queryInput]);
 
   const workspaceCreateUrl = useMemo(() => {
-    if (!application || !http) {
+    if (!application) {
       return '';
     }
 
@@ -92,10 +92,9 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     if (!appUrl) return '';
 
     return cleanWorkspaceId(appUrl);
-  }, [application, http]);
+  }, [application]);
 
   const renderCreateWorkspaceButton = () => {
-    if (!isDashboardAdmin) return null;
     const button = (
       <EuiSmallButton
         href={workspaceCreateUrl}
@@ -210,7 +209,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
         ]}
         setMountPoint={application?.setAppDescriptionControls}
       />
-      {renderCreateWorkspaceButton()}
+      {isDashboardAdmin && renderCreateWorkspaceButton()}
       <EuiPageBody panelled>
         <EuiPageContent
           verticalPosition="center"
