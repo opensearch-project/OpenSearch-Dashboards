@@ -206,7 +206,7 @@ describe('<CollapsibleNavGroupEnabled />', () => {
   it('should render correctly when only one visible use case is provided', () => {
     const props = mockProps();
     const { getAllByTestId } = render(<CollapsibleNavGroupEnabled {...props} isNavOpen />);
-    expect(getAllByTestId('collapsibleNavAppLink-link-in-observability').length).toEqual(1);
+    expect(getAllByTestId('collapsibleNavAppLink-link-in-observability').length).toEqual(2);
   });
 
   it('should show all use case by default and able to click see all', async () => {
