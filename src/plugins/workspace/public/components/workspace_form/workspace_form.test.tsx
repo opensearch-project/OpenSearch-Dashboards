@@ -8,7 +8,7 @@ import { render } from '@testing-library/react';
 import { WorkspaceForm } from './workspace_form';
 import { coreMock } from '../../../../../core/public/mocks';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
-import { WORKSPACE_USE_CASES } from '../../../common/constants';
+import { createMockedRegisteredUseCases } from '../../mocks';
 import { WorkspaceOperationType } from './constants';
 
 const mockCoreStart = coreMock.createStart();
@@ -41,7 +41,7 @@ const setup = (
       application={application}
       savedObjects={savedObjects}
       operationType={WorkspaceOperationType.Create}
-      availableUseCases={[WORKSPACE_USE_CASES.essentials]}
+      availableUseCases={createMockedRegisteredUseCases()}
       dataSourceManagement={dataSourceManagement}
     />
   );

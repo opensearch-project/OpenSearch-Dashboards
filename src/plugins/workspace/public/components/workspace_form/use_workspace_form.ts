@@ -152,6 +152,8 @@ export const useWorkspaceForm = ({
     applications,
     numberOfErrors,
     numberOfChanges,
+    setName,
+    setDescription,
     handleFormSubmit,
     handleColorChange,
     handleUseCaseChange,

@@ -9,7 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import { PublicAppInfo, WorkspaceObject } from 'opensearch-dashboards/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
-import { WORKSPACE_USE_CASES } from '../../../common/constants';
+import { createMockedRegisteredUseCases$ } from '../../mocks';
 import { WorkspaceDetail } from './workspace_detail';
 
 // all applications
@@ -72,12 +72,7 @@ const WorkspaceDetailPage = (props: any) => {
     },
   });
 
-  const registeredUseCases$ = new BehaviorSubject([
-    WORKSPACE_USE_CASES.observability,
-    WORKSPACE_USE_CASES['security-analytics'],
-    WORKSPACE_USE_CASES.essentials,
-    WORKSPACE_USE_CASES.search,
-  ]);
+  const registeredUseCases$ = createMockedRegisteredUseCases$();
 
   return (
     <Provider>

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle, EuiForm } from '@elastic/eui';
 
 import { WorkspaceBottomBar } from './workspace_bottom_bar';
@@ -39,19 +39,37 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     formErrors,
     numberOfErrors,
     numberOfChanges,
+    setName,
     handleFormSubmit,
     handleColorChange,
-    handleUseCaseChange,
-    handleNameInputChange,
+    handleUseCaseChange: handleUseCaseChangeInHook,
     setPermissionSettings,
     setSelectedDataSources,
     handleDescriptionChange,
   } = useWorkspaceForm(props);
+  const nameManualChangedRef = useRef(false);
 
   const disabledUserOrGroupInputIdsRef = useRef(
     defaultValues?.permissionSettings?.map((item) => item.id) ?? []
   );
   const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin ?? false;
+  const handleNameInputChange = useCallback(
+    (e) => {
+      setName(e.target.value);
+      nameManualChangedRef.current = true;
+    },
+    [setName]
+  );
+  const handleUseCaseChange = useCallback(
+    (newUseCase) => {
+      handleUseCaseChangeInHook(newUseCase);
+      const useCase = availableUseCases.find((item) => newUseCase === item.id);
+      if (!nameManualChangedRef.current && useCase) {
+        setName(useCase.title);
+      }
+    },
+    [handleUseCaseChangeInHook, availableUseCases, setName]
+  );
 
   return (
     <EuiForm id={formId} onSubmit={handleFormSubmit} component="form">
@@ -89,8 +107,6 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           onChange={handleUseCaseChange}
           formErrors={formErrors}
           availableUseCases={availableUseCases}
-          savedObjects={savedObjects}
-          operationType={operationType}
         />
       </EuiPanel>
       <EuiSpacer />

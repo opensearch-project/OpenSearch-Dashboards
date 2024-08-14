@@ -12,7 +12,6 @@ import {
   euiPaletteColorBlind,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { useObservable } from 'react-use';
 import { BehaviorSubject } from 'rxjs';
 
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -25,12 +24,15 @@ import { DataSource } from '../../../common/types';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { WorkspaceUseCase } from '../../types';
 import { WorkspaceFormData } from '../workspace_form/types';
+import { getUseCaseFeatureConfig } from '../../utils';
+import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
 
 export interface WorkspaceCreatorProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
 }
 
 export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
+  const { registeredUseCases$ } = props;
   const {
     services: {
       application,
@@ -45,12 +47,23 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     dataSourceManagement?: DataSourceManagementPluginSetup;
   }>();
 
+  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
+  const { isOnlyAllowEssential, availableUseCases } = useFormAvailableUseCases({
+    savedObjects,
+    registeredUseCases$,
+    onlyAllowEssentialEnabled: true,
+  });
+
+  const defaultSelectedUseCase = availableUseCases?.[0];
   const defaultWorkspaceFormValues: Partial<WorkspaceFormData> = {
     color: euiPaletteColorBlind()[0],
+    ...(defaultSelectedUseCase
+      ? {
+          name: defaultSelectedUseCase.title,
+          features: [getUseCaseFeatureConfig(defaultSelectedUseCase.id)],
+        }
+      : {}),
   };
-
-  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
-  const availableUseCases = useObservable(props.registeredUseCases$, []);
 
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
@@ -110,18 +123,22 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           color="subdued"
           hasShadow={false}
         >
-          {application && savedObjects && (
-            <WorkspaceForm
-              application={application}
-              savedObjects={savedObjects}
-              onSubmit={handleWorkspaceFormSubmit}
-              operationType={WorkspaceOperationType.Create}
-              permissionEnabled={isPermissionEnabled}
-              dataSourceManagement={dataSourceManagement}
-              availableUseCases={availableUseCases}
-              defaultValues={defaultWorkspaceFormValues}
-            />
-          )}
+          {application &&
+            savedObjects &&
+            // Default values only worked for component mount, should wait for isOnlyAllowEssential and availableUseCases loaded
+            isOnlyAllowEssential !== undefined &&
+            availableUseCases !== undefined && (
+              <WorkspaceForm
+                application={application}
+                savedObjects={savedObjects}
+                onSubmit={handleWorkspaceFormSubmit}
+                operationType={WorkspaceOperationType.Create}
+                permissionEnabled={isPermissionEnabled}
+                dataSourceManagement={dataSourceManagement}
+                availableUseCases={availableUseCases}
+                defaultValues={defaultWorkspaceFormValues}
+              />
+            )}
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>

@@ -132,7 +132,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
     const listItems = filterWorkspaceList.map((workspace: WorkspaceObject) => {
       const useCase = getUseCase(workspace);
       const appId =
-        (useCase?.id !== ALL_USE_CASE_ID && useCase?.features?.[0]) || WORKSPACE_DETAIL_APP_ID;
+        (useCase?.id !== ALL_USE_CASE_ID && useCase?.features?.[0].id) || WORKSPACE_DETAIL_APP_ID;
       const useCaseURL = formatUrlWithWorkspaceId(
         coreStart.application.getUrlForApp(appId, {
           absolute: false,

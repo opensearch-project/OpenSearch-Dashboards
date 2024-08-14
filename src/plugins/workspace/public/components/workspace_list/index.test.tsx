@@ -4,13 +4,13 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, of } from 'rxjs';
+import { of } from 'rxjs';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import { coreMock } from '../../../../../core/public/mocks';
 import { navigateToWorkspaceDetail } from '../utils/workspace';
+import { createMockedRegisteredUseCases$ } from '../../mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
-import { WORKSPACE_USE_CASES } from '../../../common/constants';
 import { WorkspaceList } from './index';
 
 jest.mock('../utils/workspace');
@@ -49,9 +49,7 @@ function getWrapWorkspaceListInContext(
   return (
     <I18nProvider>
       <OpenSearchDashboardsContextProvider services={services}>
-        <WorkspaceList
-          registeredUseCases$={new BehaviorSubject([WORKSPACE_USE_CASES.observability])}
-        />
+        <WorkspaceList registeredUseCases$={createMockedRegisteredUseCases$()} />
       </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );
@@ -60,9 +58,7 @@ function getWrapWorkspaceListInContext(
 describe('WorkspaceList', () => {
   it('should render title and table normally', () => {
     const { getByText, getByRole, container } = render(
-      <WorkspaceList
-        registeredUseCases$={new BehaviorSubject([WORKSPACE_USE_CASES.observability])}
-      />
+      <WorkspaceList registeredUseCases$={createMockedRegisteredUseCases$()} />
     );
     expect(getByText('Workspaces')).toBeInTheDocument();
     expect(getByRole('table')).toBeInTheDocument();

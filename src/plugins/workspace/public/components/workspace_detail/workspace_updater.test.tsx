@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import { coreMock, workspacesServiceMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 import { DetailTab } from '../workspace_form/constants';
-import { WORKSPACE_USE_CASES } from '../../../common/constants';
+import { createMockedRegisteredUseCases$ } from '../../mocks';
 import {
   WorkspaceUpdater as WorkspaceUpdaterComponent,
   WorkspaceUpdaterProps,
@@ -124,12 +124,7 @@ const WorkspaceUpdater = (
       dataSourceManagement: {},
     },
   });
-  const registeredUseCases$ = new BehaviorSubject([
-    WORKSPACE_USE_CASES.observability,
-    WORKSPACE_USE_CASES['security-analytics'],
-    WORKSPACE_USE_CASES.essentials,
-    WORKSPACE_USE_CASES.search,
-  ]);
+  const registeredUseCases$ = createMockedRegisteredUseCases$();
 
   return (
     <Provider>

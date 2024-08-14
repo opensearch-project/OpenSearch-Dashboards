@@ -45,7 +45,7 @@ export const isFeatureIdInsideUseCase = (
   useCases: WorkspaceUseCase[]
 ) => {
   const availableFeatures = useCases.find(({ id }) => id === useCaseId)?.features ?? [];
-  return availableFeatures.includes(featureId);
+  return availableFeatures.some((feature) => feature.id === featureId);
 };
 
 export const isNavGroupInFeatureConfigs = (navGroupId: string, featureConfigs: string[]) =>
@@ -248,7 +248,7 @@ export const convertNavGroupToWorkspaceUseCase = ({
   id,
   title,
   description,
-  features: navLinks.map((item) => item.id),
+  features: navLinks.map((item) => ({ id: item.id, title: item.title })),
   systematic: type === NavGroupType.SYSTEM,
   order,
 });
@@ -271,7 +271,11 @@ export const isEqualWorkspaceUseCase = (a: WorkspaceUseCase, b: WorkspaceUseCase
   }
   if (
     a.features.length !== b.features.length ||
-    a.features.some((featureId) => !b.features.includes(featureId))
+    a.features.some((aFeature) =>
+      b.features.some(
+        (bFeature) => aFeature.id !== bFeature.id || aFeature.title !== bFeature.title
+      )
+    )
   ) {
     return false;
   }
