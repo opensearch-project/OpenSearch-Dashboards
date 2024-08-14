@@ -312,6 +312,22 @@ export function CollapsibleNavGroupEnabled({
             order: Number.MAX_SAFE_INTEGER,
             category: categoryInfo,
           });
+        } else {
+          /**
+           * Find if there are any links inside a use case but without a `see all` entry.
+           * If so, append these features into custom category as a fallback
+           */
+          fulfillRegistrationLinksToChromeNavLinks(group.navLinks, navLinks)
+            // Filter out links that already exists in all use case
+            .filter(
+              (navLink) => !navLinksForAll.find((navLinkInAll) => navLinkInAll.id === navLink.id)
+            )
+            .forEach((navLink) => {
+              navLinksForAll.push({
+                ...navLink,
+                category: customCategory,
+              });
+            });
         }
       });
 

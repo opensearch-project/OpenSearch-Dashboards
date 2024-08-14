@@ -287,4 +287,46 @@ describe('<CollapsibleNavGroupEnabled />', () => {
     );
     expect(queryAllByTestId('collapsibleNavAppLink-link-in-all').length).toEqual(1);
   });
+
+  it('should show links with custom category if the nav link is inside second level but no entry in all use case', async () => {
+    const props = mockProps({
+      currentNavGroupId: ALL_USE_CASE_ID,
+      navGroupsMap: {
+        [DEFAULT_NAV_GROUPS.essentials.id]: {
+          ...DEFAULT_NAV_GROUPS.essentials,
+          navLinks: [
+            {
+              id: 'link-in-essentials',
+              title: 'link-in-essentials',
+            },
+            {
+              id: 'link-in-all',
+              title: 'link-in-all',
+            },
+          ],
+        },
+      },
+      navLinks: [
+        {
+          id: 'link-in-essentials',
+          title: 'link-in-essentials',
+          baseUrl: '',
+          href: '',
+        },
+        {
+          id: 'link-in-all',
+          title: 'link-in-all',
+          baseUrl: '',
+          href: '',
+        },
+      ],
+    });
+    const { queryAllByTestId, getByText, getByTestId } = render(
+      <CollapsibleNavGroupEnabled {...props} isNavOpen />
+    );
+    // Should render custom category
+    expect(getByText('Custom')).toBeInTheDocument();
+    expect(getByTestId('collapsibleNavAppLink-link-in-essentials')).toBeInTheDocument();
+    expect(queryAllByTestId('collapsibleNavAppLink-link-in-all').length).toEqual(1);
+  });
 });
