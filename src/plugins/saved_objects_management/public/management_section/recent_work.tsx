@@ -115,6 +115,10 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
     return options.map((option: string) => ({ label: option, value: option }));
   }, [detailedSavedObjects]);
 
+  const capitalTheFirstLetter = function (recentAccessItem: DetailedRecentlyAccessedItem) {
+    return recentAccessItem.type.charAt(0).toUpperCase() + recentAccessItem.type.slice(1);
+  };
+
   const itemsForDisplay = useMemo(() => {
     const sortedResult = [...detailedSavedObjects]
       .filter((item) => !item.error)
@@ -189,7 +193,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
         <EuiFlexItem grow={false}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFilterGroup style={{ borderRadius: '5px' }}>
+              <EuiFilterGroup>
                 {[recentlyViewed, recentlyUpdated].map((item) => (
                   <EuiFilterButton
                     hasActiveFilters={selectedSort === item}
@@ -243,8 +247,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiText size="xs" color="subdued">
-                          {recentAccessItem.type.charAt(0).toUpperCase() +
-                            recentAccessItem.type.slice(1)}
+                          {capitalTheFirstLetter(recentAccessItem)}
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
