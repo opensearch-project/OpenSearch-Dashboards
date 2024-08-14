@@ -96,6 +96,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
             tabs={detailTabs}
             initialSelectedTab={detailTabs[0]}
             autoFocus="selected"
+            size="s"
           />
         </EuiPageBody>
       </EuiPage>

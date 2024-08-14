@@ -28,9 +28,28 @@
  * under the License.
  */
 
-export { createTopNav } from './create_top_nav_menu';
-export { TopNavMenu, TopNavMenuProps } from './top_nav_menu';
-export { TopNavMenuData } from './top_nav_menu_data';
+export { createTopNav, createTopNavControl } from './create_top_nav_menu';
+export { TopNavMenu, TopNavMenuProps, TopNavMenuItemRenderType } from './top_nav_menu';
+export { TopNavControls, TopNavControlsProps } from './top_nav_controls';
+export {
+  TopNavControlData,
+  TopNavControlButtonData,
+  TopNavControlLinkData,
+  TopNavControlIconData,
+  TopNavControlTextData,
+  TopNavControlDescriptionData,
+  TopNavControlComponentData,
+} from './top_nav_control_data';
+export {
+  TopNavMenuData,
+  TopNavMenuButtonData,
+  TopNavMenuSwitchData,
+  TopNavMenuIconData,
+  TopNavMenuLegacyData,
+  TopNavMenuSwitchAction,
+  TopNavMenuClickAction,
+  TopNavMenuAction,
+} from './top_nav_menu_data';
 export {
   TopNavMenuExtensionsRegistrySetup,
   TopNavMenuExtensionsRegistry,

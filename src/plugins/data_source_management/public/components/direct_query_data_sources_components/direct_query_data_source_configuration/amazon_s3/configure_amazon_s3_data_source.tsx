@@ -86,9 +86,9 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
   return (
     <div>
       <EuiPanel>
-        <EuiTitle>
+        <EuiText size="s">
           <h1>{`Configure Amazon S3 data source`}</h1>
-        </EuiTitle>
+        </EuiText>
         <EuiSpacer size="s" />
         <EuiCallOut title="Setup Amazon EMR as execution engine first" iconType="iInCircle">
           <EuiText size="s" color="subdued">

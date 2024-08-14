@@ -73,21 +73,36 @@ export function fulfillRegistrationLinksToChromeNavLinks(
 export const getOrderedLinks = (navLinks: ChromeNavLink[]): ChromeNavLink[] =>
   navLinks.sort(sortBy('order'));
 
-export function flattenLinksOrCategories(linkItems: LinkItem[]): ChromeNavLink[] {
-  return linkItems.reduce((acc, item) => {
-    if (item.itemType === LinkItemType.LINK) {
-      acc.push(item.link);
-    } else if (item.itemType === LinkItemType.PARENT_LINK) {
-      if (item.link) {
-        acc.push(item.link);
-      }
-      acc.push(...flattenLinksOrCategories(item.links));
+function walkLinkItemsTree(
+  props: {
+    linkItems: LinkItem[];
+    parentItem?: LinkItem;
+  },
+  callback: (props: { currentItem: LinkItem; parentItem?: LinkItem }) => void
+) {
+  props.linkItems.forEach((item) => {
+    callback({
+      parentItem: props.parentItem,
+      currentItem: item,
+    });
+    if (item.itemType === LinkItemType.PARENT_LINK) {
+      walkLinkItemsTree(
+        {
+          linkItems: item.links,
+          parentItem: item,
+        },
+        callback
+      );
     } else if (item.itemType === LinkItemType.CATEGORY) {
-      acc.push(...flattenLinksOrCategories(item.links || []));
+      walkLinkItemsTree(
+        {
+          linkItems: item.links || [],
+          parentItem: item,
+        },
+        callback
+      );
     }
-
-    return acc;
-  }, [] as ChromeNavLink[]);
+  });
 }
 
 export const generateItemTypeByLink = (
@@ -173,3 +188,29 @@ export function getOrderedLinksOrCategories(
 
   return result.sort(sortBy('order'));
 }
+
+export const getSortedNavLinks = (
+  navLinks: ChromeNavLink[],
+  enricher?: (currentItem: LinkItem, parentItem?: LinkItem) => LinkItem
+) => {
+  const sortedNavLinksTree = getOrderedLinksOrCategories(navLinks);
+  const acc: ChromeNavLink[] = [];
+  walkLinkItemsTree(
+    {
+      linkItems: sortedNavLinksTree,
+    },
+    (props) => {
+      const { currentItem, parentItem } = props;
+      const enricheredResult = enricher ? enricher(currentItem, parentItem) : currentItem;
+      if (
+        enricheredResult.itemType === LinkItemType.LINK ||
+        enricheredResult.itemType === LinkItemType.PARENT_LINK
+      ) {
+        if (enricheredResult.link) {
+          acc.push(enricheredResult.link);
+        }
+      }
+    }
+  );
+  return acc;
+};

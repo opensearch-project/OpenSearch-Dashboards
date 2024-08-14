@@ -30,7 +30,6 @@
 
 import React, { Component } from 'react';
 import {
-  EuiTitle,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -336,9 +335,9 @@ export class Relationships extends Component<RelationshipsProps, RelationshipsSt
     return (
       <EuiFlyout onClose={close}>
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m" className="eui-textBreakWord">
+          <EuiText size="s" className="eui-textBreakWord">
             <h2>{savedObject.meta.title || getDefaultTitle(savedObject)}</h2>
-          </EuiTitle>
+          </EuiText>
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>{this.renderRelationships()}</EuiFlyoutBody>

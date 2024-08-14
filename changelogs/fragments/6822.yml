@@ -1,2 +1,0 @@
-fix:
-- Fix endpoint validation by passing in request when creating datasource client ([#6822](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6822))

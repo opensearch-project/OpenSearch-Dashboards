@@ -1,2 +1,0 @@
-feat:
-- Disable inputs in edit data source screen when data_source.manageableBy is none ([#7307](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7307))

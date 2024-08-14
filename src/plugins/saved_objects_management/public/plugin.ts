@@ -68,6 +68,8 @@ import { RecentWork } from './management_section/recent_work';
 import { HOME_CONTENT_AREAS } from '../../../plugins/home/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 
+export const APP_ID = 'objects';
+
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
   columns: SavedObjectsManagementColumnServiceSetup;
@@ -141,7 +143,7 @@ export class SavedObjectsManagementPlugin
 
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
     opensearchDashboardsSection.registerApp({
-      id: 'objects',
+      id: APP_ID,
       title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
         defaultMessage: 'Saved objects',
       }),
@@ -160,7 +162,7 @@ export class SavedObjectsManagementPlugin
 
     if (core.chrome.navGroup.getNavGroupEnabled()) {
       core.application.register({
-        id: 'objects',
+        id: APP_ID,
         title: i18n.translate('savedObjectsManagement.assets.label', {
           defaultMessage: 'Assets',
         }),
@@ -187,14 +189,14 @@ export class SavedObjectsManagementPlugin
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
       {
-        id: 'objects',
+        id: APP_ID,
         order: 300,
       },
     ]);
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
-        id: 'objects',
+        id: APP_ID,
         category: DEFAULT_APP_CATEGORIES.manage,
         order: 300,
       },
@@ -202,7 +204,7 @@ export class SavedObjectsManagementPlugin
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
       {
-        id: 'objects',
+        id: APP_ID,
         category: DEFAULT_APP_CATEGORIES.manage,
         order: 300,
       },
@@ -210,15 +212,15 @@ export class SavedObjectsManagementPlugin
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
       {
-        id: 'objects',
+        id: APP_ID,
         category: DEFAULT_APP_CATEGORIES.manage,
         order: 300,
       },
     ]);
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
       {
-        id: 'objects',
+        id: APP_ID,
         category: DEFAULT_APP_CATEGORIES.manage,
         order: 300,
       },
@@ -226,7 +228,7 @@ export class SavedObjectsManagementPlugin
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
       {
-        id: 'objects',
+        id: APP_ID,
         category: DEFAULT_APP_CATEGORIES.manage,
         order: 300,
       },

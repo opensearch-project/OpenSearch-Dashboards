@@ -8,7 +8,7 @@ import React, { useRef } from 'react';
 import { EuiPanel, EuiSpacer, EuiForm, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
 import { WorkspaceBottomBar } from './workspace_bottom_bar';
-import { WorkspaceFormProps } from './types';
+import { WorkspaceDetailedFormProps } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
 import { WorkspaceUseCase } from './workspace_use_case';
 import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
@@ -41,7 +41,7 @@ const FormGroup = ({ title, children }: FormGroupProps) => (
   </EuiFlexGroup>
 );
 
-export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
+export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
   const {
     detailTab,
     application,
@@ -113,6 +113,8 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
                 onChange={handleUseCaseChange}
                 formErrors={formErrors}
                 availableUseCases={availableUseCases}
+                savedObjects={savedObjects}
+                operationType={operationType}
               />
             </FormGroup>
 

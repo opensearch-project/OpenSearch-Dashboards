@@ -1,2 +1,0 @@
-fix:
-- Remove unused import and property which broke compilation ([#6879](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6879))

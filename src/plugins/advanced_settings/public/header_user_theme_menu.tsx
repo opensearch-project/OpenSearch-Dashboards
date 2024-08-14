@@ -8,7 +8,6 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
   EuiSmallButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFormRow,
@@ -18,8 +17,8 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiCompressedSelect,
-  EuiSpacer,
   EuiToolTip,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { CoreStart } from 'opensearch-dashboards/public';
 import {
@@ -31,10 +30,7 @@ import { useOpenSearchDashboards, useUiSetting$ } from '../../opensearch_dashboa
 
 export const HeaderUserThemeMenu = () => {
   const {
-    services: {
-      http: { basePath },
-      uiSettings,
-    },
+    services: { uiSettings },
   } = useOpenSearchDashboards<CoreStart>();
   const themeOptions = Object.keys(themeVersionLabelMap).map((v) => ({
     value: v,
@@ -75,6 +71,8 @@ export const HeaderUserThemeMenu = () => {
   const defaultTheme = allSettings['theme:version'].value;
   const defaultScreenMode = allSettings['theme:darkMode'].value;
 
+  const legacyAppearance = !uiSettings.get('home:useNewHomePage');
+
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
   };
@@ -112,6 +110,31 @@ export const HeaderUserThemeMenu = () => {
     setPopover(false);
   };
 
+  const innerButton = legacyAppearance ? (
+    <EuiHeaderSectionItemButton
+      aria-expanded="false"
+      aria-haspopup="true"
+      aria-label={i18n.translate('advancedSettings.headerGlobalNav.themeMenuButtonAriaLabel', {
+        defaultMessage: 'Appearance menu',
+      })}
+      onClick={onButtonClick}
+    >
+      <EuiIcon type="color" size="m" />
+    </EuiHeaderSectionItemButton>
+  ) : (
+    <EuiButtonIcon
+      iconType="color"
+      color="primary"
+      size="xs"
+      aria-expanded="false"
+      aria-haspopup="true"
+      aria-label={i18n.translate('advancedSettings.headerGlobalNav.themeMenuButtonAriaLabel', {
+        defaultMessage: 'Appearance menu',
+      })}
+      onClick={onButtonClick}
+    />
+  );
+
   const button = (
     <EuiToolTip
       content={i18n.translate('advancedSettings.headerGlobalNav.themeMenuButtonTitle', {
@@ -120,16 +143,7 @@ export const HeaderUserThemeMenu = () => {
       delay="long"
       position="bottom"
     >
-      <EuiHeaderSectionItemButton
-        aria-expanded="false"
-        aria-haspopup="true"
-        aria-label={i18n.translate('advancedSettings.headerGlobalNav.themeMenuButtonAriaLabel', {
-          defaultMessage: 'Appearance menu',
-        })}
-        onClick={onButtonClick}
-      >
-        <EuiIcon type="color" size="m" />
-      </EuiHeaderSectionItemButton>
+      {innerButton}
     </EuiToolTip>
   );
 
@@ -184,7 +198,7 @@ export const HeaderUserThemeMenu = () => {
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      anchorPosition="downLeft"
+      anchorPosition={legacyAppearance ? 'downLeft' : 'rightDown'}
       panelPaddingSize="s"
     >
       <EuiPopoverTitle>
