@@ -324,7 +324,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
             </h2>
           }
           body={i18n.translate('savedObjectsManagement.recentWorkSection.empty.body', {
-            defaultMessage: "Asset's you've recently viewed or updated will appear here.",
+            defaultMessage: "Assets you've recently viewed or updated will appear here.",
           })}
         />
       )}
