@@ -170,6 +170,9 @@ function FilterBarUI(props: Props) {
   }
 
   const classes = classNames('globalFilterBar', props.className);
+  const filterBarPrefixText = i18n.translate('data.search.filterBar.filterBarPrefixText', {
+    defaultMessage: 'Filters: ',
+  });
 
   return (
     <EuiFlexGroup
@@ -181,7 +184,7 @@ function FilterBarUI(props: Props) {
       <EuiFlexItem className="globalFilterGroup__branch" grow={false}>
         {useNewHeader ? (
           <EuiText size="s" className="globalFilterGroup__filterPrefix">
-            Filters:
+            {filterBarPrefixText}:
           </EuiText>
         ) : (
           <FilterOptions

@@ -69,7 +69,6 @@ export function SavedQueryManagementComponent({
   savedQueryService,
   closeMenuPopover,
 }: Props) {
-  const [isOpen, setIsOpen] = useState(true);
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
   const [activePage, setActivePage] = useState(0);
@@ -94,13 +93,10 @@ export function SavedQueryManagementComponent({
       setTotalCount(savedQueryCount);
       setSavedQueries(sortedSavedQueryItems);
     };
-    if (isOpen) {
-      fetchCountAndSavedQueries();
-    }
-  }, [isOpen, activePage, savedQueryService]);
+    fetchCountAndSavedQueries();
+  }, [activePage, savedQueryService]);
 
   const handleClosePopover = useCallback(() => {
-    setIsOpen(false);
     closeMenuPopover();
   }, [closeMenuPopover]);
 
