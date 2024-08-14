@@ -60,7 +60,7 @@ const getStartMockForRecentWork = () => {
 describe('<RecentWork />', () => {
   it('render with emty recent work', async () => {
     const { findByText } = render(<RecentWork core={getStartMockForRecentWork()} />);
-    await findByText('No recent work');
+    await findByText('No assets found');
   });
 
   it('render with recent works', async () => {
@@ -85,14 +85,14 @@ describe('<RecentWork />', () => {
     const allCards = await findAllByTestId('recentlyCard');
     expect(allCards.length).toBe(2);
     expect(allCards[0].querySelector('.euiCard__titleAnchor')?.textContent).toEqual(
-      mockedRecentItems[0].label
+      mockedRecentItems[0].label.charAt(0).toUpperCase() + mockedRecentItems[0].label.slice(1)
     );
 
     // click the filter button
-    fireEvent.click(getByTestId('filterButton-recently%20updated'));
+    fireEvent.click(getByTestId('filterButton-Recently%20updated'));
     const allCardsAfterSort = await findAllByTestId('recentlyCard');
     expect(allCardsAfterSort[0].querySelector('.euiCard__titleAnchor')?.textContent).toEqual(
-      mockedRecentItems[1].label
+      mockedRecentItems[1].label.charAt(0).toUpperCase() + mockedRecentItems[1].label.slice(1)
     );
   });
 });
