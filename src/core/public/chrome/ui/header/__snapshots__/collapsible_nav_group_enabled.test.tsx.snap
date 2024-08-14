@@ -50,7 +50,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                       title="link-in-all"
                     >
                       <div
-                        class="euiText euiText--small"
+                        class="euiText euiText--extraSmall"
                       >
                         link-in-all
                       </div>
@@ -100,7 +100,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                           title="link-in-observability"
                         >
                           <div
-                            class="euiText euiText--small"
+                            class="euiText euiText--extraSmall"
                           >
                             link-in-observability
                           </div>
@@ -131,7 +131,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                               class="euiTextColor euiTextColor--success"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--extraSmall"
                               >
                                 See all...
                               </div>
@@ -185,7 +185,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                           title="link-in-essentials"
                         >
                           <div
-                            class="euiText euiText--small"
+                            class="euiText euiText--extraSmall"
                           >
                             link-in-essentials
                           </div>
@@ -216,7 +216,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                               class="euiTextColor euiTextColor--success"
                             >
                               <div
-                                class="euiText euiText--small"
+                                class="euiText euiText--extraSmall"
                               >
                                 See all...
                               </div>
@@ -317,7 +317,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case by default and 
                       title="link-in-essentials"
                     >
                       <div
-                        class="euiText euiText--small"
+                        class="euiText euiText--extraSmall"
                       >
                         link-in-essentials
                       </div>
@@ -390,7 +390,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case when current na
                       title="link-in-essentials"
                     >
                       <div
-                        class="euiText euiText--small"
+                        class="euiText euiText--extraSmall"
                       >
                         link-in-essentials
                       </div>
@@ -459,7 +459,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                     title="pure link"
                   >
                     <div
-                      class="euiText euiText--small"
+                      class="euiText euiText--extraSmall"
                     >
                       pure link
                     </div>
@@ -489,7 +489,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                         title="subLink"
                       >
                         <div
-                          class="euiText euiText--small"
+                          class="euiText euiText--extraSmall"
                         >
                           subLink
                         </div>
@@ -543,7 +543,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                     title="link-in-category"
                   >
                     <div
-                      class="euiText euiText--small"
+                      class="euiText euiText--extraSmall"
                     >
                       link-in-category
                     </div>
@@ -573,7 +573,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                         title="sub-link-in-category"
                       >
                         <div
-                          class="euiText euiText--small"
+                          class="euiText euiText--extraSmall"
                         >
                           sub-link-in-category
                         </div>
@@ -600,7 +600,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                     title="link-in-category-2"
                   >
                     <div
-                      class="euiText euiText--small"
+                      class="euiText euiText--extraSmall"
                     >
                       link-in-category-2
                     </div>
