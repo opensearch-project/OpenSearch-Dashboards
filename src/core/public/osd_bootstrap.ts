@@ -98,14 +98,16 @@ export async function __osdBootstrap__() {
   // Display the i18n warning if it exists
   if ((window as any).__i18nWarning) {
     const warning = (window as any).__i18nWarning;
-    coreSystem.displayWarning(warning.title, warning.text);
+    // eslint-disable-next-line no-console
+    console.warn(`${warning.title}: ${warning.text}`);
     delete (window as any).__i18nWarning;
   }
 
   // Display the locale warning if it exists
   if ((window as any).__localeWarning) {
     const warning = (window as any).__localeWarning;
-    coreSystem.displayWarning(warning.title, warning.text);
+    // eslint-disable-next-line no-console
+    console.warn(`${warning.title}: ${warning.text}`);
     delete (window as any).__localeWarning;
   }
 }

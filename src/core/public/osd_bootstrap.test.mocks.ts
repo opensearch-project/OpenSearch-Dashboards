@@ -50,7 +50,6 @@ jest.doMock('@osd/i18n', () => ({
   },
 }));
 
-export const displayWarningMock = jest.fn();
 export const coreSystemMock = {
   setup: jest.fn().mockResolvedValue({
     fatalErrors: fatalErrorMock,
@@ -58,8 +57,9 @@ export const coreSystemMock = {
   start: jest.fn().mockResolvedValue({
     application: applicationServiceMock.createInternalStartContract(),
   }),
-  displayWarning: displayWarningMock,
 };
 jest.doMock('./core_system', () => ({
   CoreSystem: jest.fn().mockImplementation(() => coreSystemMock),
 }));
+
+export const consoleWarnMock = jest.spyOn(console, 'warn').mockImplementation(() => {});

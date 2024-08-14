@@ -33,7 +33,7 @@ import {
   fatalErrorMock,
   i18nLoad,
   i18nSetLocale,
-  displayWarningMock,
+  consoleWarnMock,
 } from './osd_bootstrap.test.mocks';
 import { __osdBootstrap__ } from './';
 import { getLocaleInUrl } from './locale_helper';
@@ -110,7 +110,7 @@ describe('osd_bootstrap', () => {
 
     await __osdBootstrap__();
 
-    expect(displayWarningMock).toHaveBeenCalledWith('Locale Warning', 'Invalid locale');
+    expect(consoleWarnMock).toHaveBeenCalledWith('Locale Warning: Invalid locale');
     expect((window as any).__localeWarning).toBeUndefined();
   });
 
@@ -119,7 +119,7 @@ describe('osd_bootstrap', () => {
 
     await __osdBootstrap__();
 
-    expect(displayWarningMock).toHaveBeenCalledWith('i18n Warning', 'Translation issue');
+    expect(consoleWarnMock).toHaveBeenCalledWith('i18n Warning: Translation issue');
     expect((window as any).__i18nWarning).toBeUndefined();
   });
 });
