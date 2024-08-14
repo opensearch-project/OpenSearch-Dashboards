@@ -145,13 +145,13 @@ describe('WorkspaceList', () => {
   it('should be able to perform the time format transformation', async () => {
     const { getByText } = render(getWrapWorkspaceListInContext());
     expect(
-      getByText(moment('1999-08-06T00:00:00.00Z').format('MMM DD[,]YYYY [@] HH:mm:ss.SSS'))
+      getByText(moment('1999-08-06T00:00:00.00Z').format('MMM D, YYYY @ HH:mm:ss.SSS'))
     ).toBeInTheDocument();
     expect(
-      getByText(moment('1999-08-06T01:00:00.00Z').format('MMM DD[,]YYYY [@] HH:mm:ss.SSS'))
+      getByText(moment('1999-08-06T01:00:00.00Z').format('MMM D, YYYY @ HH:mm:ss.SSS'))
     ).toBeInTheDocument();
     expect(
-      getByText(moment('1999-08-06T02:00:00.00Z').format('MMM DD[,]YYYY [@] HH:mm:ss.SSS'))
+      getByText(moment('1999-08-06T02:00:00.00Z').format('MMM D, YYYY @ HH:mm:ss.SSS'))
     ).toBeInTheDocument();
   });
 

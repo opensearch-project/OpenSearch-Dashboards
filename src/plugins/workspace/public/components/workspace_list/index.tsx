@@ -158,14 +158,14 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
 
     const onClick = () => {
       const deleteWorkspacesByIds = (workSpaces: WorkspaceAttribute[], ids: string[]) => {
-        const needToBeDeleteWorkspaceList: WorkspaceAttribute[] = [];
+        const needToBeDeletedWorkspaceList: WorkspaceAttribute[] = [];
         ids.forEach((id) => {
           const index = workSpaces.findIndex((workSpace) => workSpace.id === id);
           if (index >= 0) {
-            needToBeDeleteWorkspaceList.push(workSpaces[index]);
+            needToBeDeletedWorkspaceList.push(workSpaces[index]);
           }
         });
-        return needToBeDeleteWorkspaceList;
+        return needToBeDeletedWorkspaceList;
       };
 
       setDeletedWorkspaces(
@@ -277,7 +277,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
       width: '25%',
       truncateText: false,
       render: (lastUpdatedTime: string) => {
-        return moment(lastUpdatedTime).format('MMM DD[,]YYYY [@] HH:mm:ss.SSS');
+        return moment(lastUpdatedTime).format('MMM D, YYYY @ HH:mm:ss.SSS');
       },
     },
 
