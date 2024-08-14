@@ -50,31 +50,16 @@ export const CollapsibleNavTop = ({
   const currentWorkspace = useObservable(currentWorkspace$);
 
   /**
-   * Only workspace of all use case type will have more than 1 visibleUseCases
+   * We can ensure that left nav is inside second level once all the following conditions are met:
+   * 1. Inside a workspace
+   * 2. The use case type of current workspace is all use case
+   * 3. current nav group is not all use case
    */
-  const isAllUseCaseWorkspace = useMemo(() => visibleUseCases.length > 1 && !!currentWorkspace, [
-    currentWorkspace,
-    visibleUseCases,
-  ]);
+  const isInsideSecondLevelOfAllWorkspace =
+    visibleUseCases.length > 1 && !!currentWorkspace && currentNavGroup?.id !== ALL_USE_CASE_ID;
 
-  const isInsideSecondLevel = useMemo(
-    () => isAllUseCaseWorkspace && currentNavGroup?.id !== ALL_USE_CASE_ID,
-    [isAllUseCaseWorkspace, currentNavGroup]
-  );
-
-  const shouldShowBackButton = useMemo(() => {
-    if (shouldShrinkNavigation) {
-      return false;
-    }
-
-    return isInsideSecondLevel;
-  }, [isInsideSecondLevel, shouldShrinkNavigation]);
-
-  const shouldShowHomeLink = useMemo(() => {
-    if (shouldShrinkNavigation) return false;
-
-    return !shouldShowBackButton;
-  }, [shouldShowBackButton, shouldShrinkNavigation]);
+  const shouldShowBackButton = !shouldShrinkNavigation && isInsideSecondLevelOfAllWorkspace;
+  const shouldShowHomeLink = !shouldShrinkNavigation && !shouldShowBackButton;
 
   const homeLinkProps = useMemo(() => {
     if (homeLink) {
