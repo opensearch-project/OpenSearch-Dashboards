@@ -134,9 +134,7 @@ Component styles are not loaded as stylesheets.
 
 ### Change default theme
 
-Update `DEFAULT_THEME_TAG` and `DEFAULT_THEME_VERSION` in `./packages/osd-ui-shared-deps/theme_config.js` to point to the desired theme.
-
-Note: dark themes will require updating consumers of `theme_config` to use a defaultDarkMode value.
+Update `DEFAULT_THEME_VERSION` in `src/core/server/ui_settings/ui_settings_config.ts` to point to the desired theme version.
 
 ### Adding a new theme
 
@@ -149,7 +147,10 @@ Note: dark themes will require updating consumers of `theme_config` to use a def
         1. Create kui sass files for your theme in `packages/osd-ui-framework/src/`
         2. Update `packages/osd-ui-framework/Gruntfile.js` to build these files
         3. Generate the files by running `npx grunt compileCss` from this package root
-    3. Make sure your theme fonts are in [/src/core/server/core_app/assets/fonts](/src/core/server/core_app/assets/fonts/readme.md)
+    3. Add fonts to OSD:
+        1. Make sure your theme fonts are in [/src/core/server/core_app/assets/fonts](/src/core/server/core_app/assets/fonts/readme.md)
+        2. Update `src/core/server/rendering/views/fonts.tsx` to reference those files
+        3. Update src/core/server/core_app/assets/fonts/readme.md to reference the fonts
     4. Update `packages/osd-ui-shared-deps/theme_config.js`:
         1. Add version and label for version to `THEME_VERSION_LABEL_MAP`
         2. Update `kuiCssDistFilenames` map for new theme

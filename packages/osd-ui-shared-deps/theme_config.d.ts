@@ -17,11 +17,6 @@ export type ThemeTags = readonly ThemeTag[];
 export const themeTags: ThemeTags;
 
 /**
- * Default themeVersion
- */
-export const defaultThemeVersion: string;
-
-/**
  * Map of themeVersion values to labels
  * Note: this is used for ui display
  */
@@ -32,16 +27,6 @@ export const themeVersionLabelMap: Record<string, string>;
  * Note: this is used to correct incorrectly persisted ui settings
  */
 export const themeVersionValueMap: Record<string, string>;
-
-/**
- * Returns passed themeTag if valid, default if not
- */
-export function resolveThemeTag(themeTag: string): ThemeTag;
-
-/**
- * Returns themeVersion from themeTag if valid, the defaultThemeVersion if not
- */
-export function resolveThemeVersion(themeTag: string): string;
 
 /**
  * Theme CSS distributable filenames by themeVersion and themeMode

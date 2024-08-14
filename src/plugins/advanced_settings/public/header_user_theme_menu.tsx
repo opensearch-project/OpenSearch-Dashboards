@@ -21,11 +21,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { CoreStart } from 'opensearch-dashboards/public';
-import {
-  defaultThemeVersion,
-  themeVersionLabelMap,
-  themeVersionValueMap,
-} from '@osd/ui-shared-deps/theme_config';
+import { themeVersionLabelMap, themeVersionValueMap } from '@osd/ui-shared-deps/theme_config';
 import { useOpenSearchDashboards, useUiSetting$ } from '../../opensearch_dashboards_react/public';
 
 export const HeaderUserThemeMenu = () => {
@@ -50,6 +46,8 @@ export const HeaderUserThemeMenu = () => {
       text: 'Use browser settings',
     },
   ];
+  const defaultTheme = uiSettings.getDefault('theme:version');
+  const defaultScreenMode = uiSettings.getDefault('theme:darkMode');
   const prefersAutomatic =
     (window.localStorage.getItem('useBrowserColorScheme') && window.matchMedia) || false;
   const [darkMode, setDarkMode] = useUiSetting$<boolean>('theme:darkMode');
@@ -58,7 +56,7 @@ export const HeaderUserThemeMenu = () => {
   // TODO: improve naming?
   const [theme, setTheme] = useState(
     themeOptions.find((t) => t.value === themeVersionValueMap[themeVersion])?.value ||
-      defaultThemeVersion
+      themeVersionValueMap[defaultTheme]
   );
   const [screenMode, setScreenMode] = useState(
     prefersAutomatic
@@ -67,9 +65,6 @@ export const HeaderUserThemeMenu = () => {
       ? screenModeOptions[1].value
       : screenModeOptions[0].value
   );
-  const allSettings = uiSettings.getAll();
-  const defaultTheme = allSettings['theme:version'].value;
-  const defaultScreenMode = allSettings['theme:darkMode'].value;
 
   const legacyAppearance = !uiSettings.get('home:useNewHomePage');
 

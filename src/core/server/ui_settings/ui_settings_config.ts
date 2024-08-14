@@ -30,13 +30,14 @@
 
 import { schema, TypeOf } from '@osd/config-schema';
 import { ConfigDeprecationProvider } from 'src/core/server';
-import { defaultThemeVersion } from '@osd/ui-shared-deps';
 import { ServiceConfigDescriptor } from '../internal_types';
 
 const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => [
   unused('enabled'),
   renameFromRoot('server.defaultRoute', 'uiSettings.overrides.defaultRoute'),
 ];
+
+export const DEFAULT_THEME_VERSION = 'v8';
 
 /* There are 4 levels of uiSettings:
  *   1) defaults hardcoded in code
@@ -57,7 +58,7 @@ const configSchema = schema.object({
   overrides: schema.object({}, { unknowns: 'allow' }),
   defaults: schema.object({
     'theme:darkMode': schema.maybe(schema.boolean({ defaultValue: false })),
-    'theme:version': schema.maybe(schema.string({ defaultValue: defaultThemeVersion })),
+    'theme:version': schema.maybe(schema.string({ defaultValue: DEFAULT_THEME_VERSION })),
   }),
 });
 

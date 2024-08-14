@@ -60,6 +60,10 @@ export interface IUiSettingsClient {
    */
   getOverrideOrDefault: (key: string) => unknown;
   /**
+   * Returns the registered default if one exists {@link UiSettingsParams}
+   */
+  getDefault: (key: string) => unknown;
+  /**
    * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
    */
   get: <T = any>(key: string) => Promise<T>;

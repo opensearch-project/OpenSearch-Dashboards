@@ -226,7 +226,8 @@ export function uiRenderMixin(osdServer, server, config) {
             configEnableUserControl,
             configDarkMode,
             configThemeVersion,
-            defaultThemeVersion: UiSharedDeps.defaultThemeVersion,
+            defaultThemeVersion:
+              UiSharedDeps.themeVersionValueMap[uiSettings.getDefault('theme:version')],
             THEME_VERSION_VALUE_MAP: JSON.stringify(UiSharedDeps.themeVersionValueMap),
             THEME_SOURCES,
             fontText,

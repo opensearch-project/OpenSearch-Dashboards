@@ -30,9 +30,10 @@
 
 import { schema } from '@osd/config-schema';
 import { i18n } from '@osd/i18n';
-import { defaultThemeVersion, themeVersionLabelMap } from '@osd/ui-shared-deps';
+import { themeVersionLabelMap } from '@osd/ui-shared-deps';
 import type { Type } from '@osd/config-schema';
 import { UiSettingsParams } from '../../../types';
+import { DEFAULT_THEME_VERSION } from '../ui_settings_config';
 
 export const getThemeSettings = (): Record<string, UiSettingsParams> => {
   return {
@@ -67,7 +68,7 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
       name: i18n.translate('core.ui_settings.params.themeVersionTitle', {
         defaultMessage: 'Theme version',
       }),
-      value: themeVersionLabelMap[defaultThemeVersion],
+      value: themeVersionLabelMap[DEFAULT_THEME_VERSION],
       type: 'select',
       options: Object.values(themeVersionLabelMap),
       description: i18n.translate('core.ui_settings.params.themeVersionText', {

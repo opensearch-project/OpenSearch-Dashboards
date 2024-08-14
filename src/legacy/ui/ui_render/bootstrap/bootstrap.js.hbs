@@ -18,7 +18,7 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
   var themeMode = isDarkMode ? 'dark' : 'light';
   var themeVersion = window.__osdThemeTag__.replace(/(light|dark)$/, '');
   if (!themeCssDistFilenames[themeVersion]) {
-    themeVersion = UiSharedDeps.defaultThemeVersion;
+    themeVersion = 'v8'; // this default should only be needed by tests
   }
 
   var loadingMessage = document.getElementById('osd_loading_message');
