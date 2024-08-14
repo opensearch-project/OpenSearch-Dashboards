@@ -40,7 +40,6 @@ const defaultNavGroups = {
       defaultMessage: 'This is a use case contains all the features.',
     }),
     order: 3000,
-    type: NavGroupType.SYSTEM,
   },
   observability: {
     id: 'observability',

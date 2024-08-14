@@ -134,12 +134,16 @@ export const CollapsibleNavTop = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
-      <EuiText>
-        <div className="nav-link-item" style={{ fontWeight: 'normal' }}>
-          {currentNavGroup?.title}
-        </div>
-      </EuiText>
+      {currentNavGroup?.title && (
+        <>
+          <EuiSpacer />
+          <EuiText>
+            <div className="nav-link-item" style={{ fontWeight: 'normal' }}>
+              {currentNavGroup?.title}
+            </div>
+          </EuiText>
+        </>
+      )}
     </div>
   );
 };
