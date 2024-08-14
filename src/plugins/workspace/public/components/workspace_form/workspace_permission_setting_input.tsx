@@ -125,7 +125,7 @@ export const WorkspacePermissionSettingInput = ({
 
   const handlePermissionModeOptionChange = useCallback(
     (option) => {
-      if (option) {
+      if (Array.isArray(option) && option.length > 0 && option[0] instanceof Object) {
         const id = option[0].value;
         if (optionIdToWorkspacePermissionModesMap[id]) {
           onPermissionModesChange([...optionIdToWorkspacePermissionModesMap[id]], index);
