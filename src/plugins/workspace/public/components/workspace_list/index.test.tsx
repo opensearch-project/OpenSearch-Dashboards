@@ -6,7 +6,7 @@
 import React from 'react';
 import moment from 'moment';
 import { BehaviorSubject, of } from 'rxjs';
-import { render, fireEvent, screen, waitFor } from '@testing-library/react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import { coreMock } from '../../../../../core/public/mocks';
 import { navigateToWorkspaceDetail } from '../utils/workspace';
@@ -76,6 +76,14 @@ function getWrapWorkspaceListInContext(
     ...coreStartMock,
     workspaces: {
       workspaceList$: of(workspaceList),
+    },
+    uiSettings: {
+      get: jest.fn().mockImplementation((key) => {
+        if (key === 'dateFormat') {
+          return 'MMM D, YYYY @ HH:mm:ss.SSS';
+        }
+        return null;
+      }),
     },
   };
 

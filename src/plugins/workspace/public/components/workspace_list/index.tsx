@@ -51,7 +51,7 @@ interface WorkspaceAttributeWithUseCaseID extends WorkspaceAttribute {
 
 export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
   const {
-    services: { workspaces, application, http },
+    services: { workspaces, application, http, uiSettings },
   } = useOpenSearchDashboards();
   const registeredUseCases = useObservable(registeredUseCases$);
   const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin;
@@ -66,6 +66,8 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
   });
   const [deletedWorkspaces, setDeletedWorkspaces] = useState<WorkspaceAttribute[]>([]);
   const [selection, setSelection] = useState<WorkspaceAttribute[]>([]);
+
+  const dateFormat = uiSettings?.get('dateFormat');
 
   const extractUseCaseFromFeatures = useCallback(
     (features: string[]) => {
@@ -277,7 +279,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
       width: '25%',
       truncateText: false,
       render: (lastUpdatedTime: string) => {
-        return moment(lastUpdatedTime).format('MMM D, YYYY @ HH:mm:ss.SSS');
+        return moment(lastUpdatedTime).format(dateFormat);
       },
     },
 
