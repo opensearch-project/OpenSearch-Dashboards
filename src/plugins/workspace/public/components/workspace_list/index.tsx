@@ -6,7 +6,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiLink,
   EuiSmallButton,
@@ -23,7 +22,6 @@ import { navigateToWorkspaceDetail } from '../utils/workspace';
 
 import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 
-import { cleanWorkspaceId } from '../../../../../core/public';
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { WorkspaceUseCase } from '../../types';
@@ -91,7 +89,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     });
     if (!appUrl) return '';
 
-    return cleanWorkspaceId(appUrl);
+    return appUrl;
   }, [application]);
 
   const renderCreateWorkspaceButton = () => {
@@ -198,7 +196,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
   };
 
   return (
-    <EuiPage paddingSize="none">
+    <EuiPage paddingSize="m">
       <HeaderControl
         controls={[
           {
@@ -210,36 +208,33 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
         setMountPoint={application?.setAppDescriptionControls}
       />
       {isDashboardAdmin && renderCreateWorkspaceButton()}
-      <EuiPageBody panelled>
-        <EuiPageContent
-          verticalPosition="center"
-          horizontalPosition="center"
-          paddingSize="m"
-          panelPaddingSize="l"
-          hasShadow={false}
-          style={{ width: '100%', maxWidth: 1000 }}
-        >
-          <EuiInMemoryTable
-            items={searchResult}
-            columns={columns}
-            itemId="id"
-            onTableChange={({ page: { index, size } }) =>
-              setPagination((prev) => {
-                return { ...prev, pageIndex: index, pageSize: size };
-              })
-            }
-            pagination={pagination}
-            sorting={{
-              sort: {
-                field: initialSortField,
-                direction: initialSortDirection,
-              },
-            }}
-            isSelectable={true}
-            search={search}
-          />
-        </EuiPageContent>
-      </EuiPageBody>
+      <EuiPageContent
+        verticalPosition="center"
+        horizontalPosition="center"
+        paddingSize="m"
+        panelPaddingSize="l"
+        hasShadow={false}
+      >
+        <EuiInMemoryTable
+          items={searchResult}
+          columns={columns}
+          itemId="id"
+          onTableChange={({ page: { index, size } }) =>
+            setPagination((prev) => {
+              return { ...prev, pageIndex: index, pageSize: size };
+            })
+          }
+          pagination={pagination}
+          sorting={{
+            sort: {
+              field: initialSortField,
+              direction: initialSortDirection,
+            },
+          }}
+          isSelectable={true}
+          search={search}
+        />
+      </EuiPageContent>
       {deletedWorkspace && (
         <DeleteWorkspaceModal
           selectedWorkspace={deletedWorkspace}
