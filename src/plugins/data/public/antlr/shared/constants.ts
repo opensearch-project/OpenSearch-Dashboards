@@ -167,26 +167,65 @@ export const testingIndex = ({
 } as unknown) as IndexPattern;
 
 export const booleanOperatorSuggestions = [
-  { text: 'or', type: 17 },
-  { text: 'and', type: 17 },
+  { end: -1, start: -1, text: 'or', type: 17 },
+  { end: -1, start: -1, text: 'and', type: 17 },
 ];
 
-export const notOperatorSuggestion = { text: 'not', type: 17 };
+export const notOperatorSuggestion = { text: 'not', type: 17, end: -1, start: -1 };
 
-export const fieldNameSuggestions: Array<{ text: string; type: number; insertText?: string }> = [
-  { text: 'Carrier', type: 3, insertText: 'Carrier: ' },
-  { text: 'DestCityName', type: 3, insertText: 'DestCityName: ' },
-  { text: 'DestCountry', type: 3, insertText: 'DestCountry: ' },
-  { text: 'DestWeather', type: 3, insertText: 'DestWeather: ' },
-  { text: 'DistanceMiles', type: 3, insertText: 'DistanceMiles: ' },
-  { text: 'FlightDelay', type: 3, insertText: 'FlightDelay: ' },
-  { text: 'FlightNum', type: 3, insertText: 'FlightNum: ' },
-  { text: 'OriginWeather', type: 3, insertText: 'OriginWeather: ' },
-  { text: '_id', type: 3, insertText: '_id: ' },
-  { text: '_index', type: 3, insertText: '_index: ' },
-  { text: '_score', type: 3, insertText: '_score: ' },
-  { text: '_source', type: 3, insertText: '_source: ' },
-  { text: '_type', type: 3, insertText: '_type: ' },
+export const fieldNameSuggestions: Array<{
+  text: string;
+  type: number;
+  insertText?: string;
+  end: number;
+  start: number;
+}> = [
+  { text: 'Carrier', type: 3, insertText: 'Carrier: ', end: -1, start: -1 },
+  { text: 'DestCityName', type: 3, insertText: 'DestCityName: ', end: -1, start: -1 },
+  { text: 'DestCountry', type: 3, insertText: 'DestCountry: ', end: -1, start: -1 },
+  { text: 'DestWeather', type: 3, insertText: 'DestWeather: ', end: -1, start: -1 },
+  { text: 'DistanceMiles', type: 3, insertText: 'DistanceMiles: ', end: -1, start: -1 },
+  { text: 'FlightDelay', type: 3, insertText: 'FlightDelay: ', end: -1, start: -1 },
+  { text: 'FlightNum', type: 3, insertText: 'FlightNum: ', end: -1, start: -1 },
+  { text: 'OriginWeather', type: 3, insertText: 'OriginWeather: ', end: -1, start: -1 },
+  { text: '_id', type: 3, insertText: '_id: ', end: -1, start: -1 },
+  { text: '_index', type: 3, insertText: '_index: ', end: -1, start: -1 },
+  { text: '_score', type: 3, insertText: '_score: ', end: -1, start: -1 },
+  { text: '_source', type: 3, insertText: '_source: ', end: -1, start: -1 },
+  { text: '_type', type: 3, insertText: '_type: ', end: -1, start: -1 },
 ];
 
 export const fieldNameWithNotSuggestions = fieldNameSuggestions.concat(notOperatorSuggestion);
+
+export const carrierValues = [
+  'Logstash Airways',
+  'BeatsWest',
+  'OpenSearch Dashboards Airlines',
+  'OpenSearch-Air',
+];
+
+export const allCarrierValueSuggestions = [
+  { text: 'Logstash Airways', type: 13, start: -1, end: -1 },
+  { text: 'BeatsWest', type: 13, start: -1, end: -1 },
+  {
+    text: 'OpenSearch Dashboards Airlines',
+    type: 13,
+    start: -1,
+    end: -1,
+  },
+  { text: 'OpenSearch-Air', type: 13, start: -1, end: -1 },
+];
+
+export const logCarrierValueSuggestion = [
+  { text: 'Logstash Airways', type: 13, start: -1, end: -1 },
+];
+
+export const openCarrierValueSuggestion = [
+  {
+    text: 'OpenSearch Dashboards Airlines',
+    type: 13,
+    start: -1,
+    end: -1,
+  },
+  { text: 'OpenSearch-Air', type: 13, start: -1, end: -1 },
+];
