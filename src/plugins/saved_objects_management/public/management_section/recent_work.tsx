@@ -175,7 +175,10 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
               <EuiToolTip
                 display="inlineBlock"
                 position="right"
-                content="Dashboards, visualizations, saved queries, and other assets within your Worksapces."
+                content={i18n.translate('savedObjectsManagement.recentWorkSection.assetsInfo', {
+                  defaultMessage:
+                    'Dashboards, visualizations, saved queries, and other assets within your Worksapces.',
+                })}
                 data-test-subj="assetsTooltip"
               >
                 <EuiIcon type="iInCircle" />
