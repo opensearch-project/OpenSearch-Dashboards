@@ -22,6 +22,7 @@ import {
   PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER,
   WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID,
   PRIORITY_FOR_WORKSPACE_UI_SETTINGS_WRAPPER,
+  WORKSPACE_INITIAL_APP_ID,
 } from '../common/constants';
 import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
 import { WorkspaceClient } from './workspace_client';
@@ -108,6 +109,26 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     });
   }
 
+  private setUpRedirectPage(core: CoreSetup) {
+    core.http.registerOnPostAuth(async (request, response, toolkit) => {
+      const path = request.url.pathname;
+      if (path === '/') {
+        const listResponse = await this.client?.list(
+          { request, logger: this.logger },
+          { page: 1, perPage: 1 }
+        );
+        if (listResponse?.success && listResponse.result.total > 0) {
+          return toolkit.next();
+        }
+        const basePath = request.url.origin;
+        return response.redirected({
+          headers: { location: `${basePath}/app/${WORKSPACE_INITIAL_APP_ID}` },
+        });
+      }
+      return toolkit.next();
+    });
+  }
+
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.globalConfig$ = initializerContext.config.legacy.globalConfig$;
@@ -171,6 +192,8 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       const isDashboardAdmin = getWorkspaceState(request).isDashboardAdmin !== false;
       return { dashboards: { isDashboardAdmin } };
     });
+
+    this.setUpRedirectPage(core);
 
     return {
       client: this.client,
