@@ -78,6 +78,7 @@ export interface TopNavControlTextData {
 
 export interface TopNavControlDescriptionData {
   description: string;
+  links?: TopNavControlLinkData | TopNavControlLinkData[];
 }
 
 export interface TopNavControlComponentData {

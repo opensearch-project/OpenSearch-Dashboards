@@ -46,9 +46,14 @@ export function TopNavControlItem(props: TopNavControlData) {
   }
 
   if ('description' in props) {
+    const links = props.links && [props.links].flat();
+
     return (
       <EuiText className="descriptionHeaderControl" size="s">
         {props.description}
+        {links?.map((linkProps) => (
+          <TopNavControlItem {...linkProps} />
+        ))}
       </EuiText>
     );
   }
