@@ -114,8 +114,8 @@ describe('WorkspacePermissionSettingInput', () => {
   });
 });
 
-it('should call onTypeChange with types after types changed', async () => {
-  const { renderResult, onTypeChangeMock } = await setup({});
+it('should call onTypeChange with types after types changed', () => {
+  const { renderResult, onTypeChangeMock } = setup({});
 
   expect(onTypeChangeMock).not.toHaveBeenCalled();
   waitFor(() => {
