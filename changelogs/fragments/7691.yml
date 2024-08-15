@@ -1,0 +1,2 @@
+feat:
+- Allow customizing `restrictWidth` and `paddingSize` of `TableListView` ([#7691](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7691))
