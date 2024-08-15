@@ -36,7 +36,12 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
         text: currentWorkspace.name,
       });
       breadcrumbs.push({
-        text: i18n.translate('workspace.detail.breadcrumb', { defaultMessage: 'Workspace Detail' }),
+        text: i18n.translate('workspace.detail.title', {
+          defaultMessage: '{name} settings',
+          values: {
+            name: currentWorkspace.name,
+          },
+        }),
       });
     }
     chrome?.setBreadcrumbs(breadcrumbs);

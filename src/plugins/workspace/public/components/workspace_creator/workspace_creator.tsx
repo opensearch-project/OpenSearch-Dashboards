@@ -4,13 +4,7 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiPageContent,
-  euiPaletteColorBlind,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent, euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { BehaviorSubject } from 'rxjs';
@@ -25,6 +19,7 @@ import { DataSource } from '../../../common/types';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { WorkspaceUseCase } from '../../types';
 import { WorkspaceFormData } from '../workspace_form/types';
+import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
 
 export interface WorkspaceCreatorProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -39,10 +34,12 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
       workspaceClient,
       savedObjects,
       dataSourceManagement,
+      navigationUI: { HeaderControl },
     },
   } = useOpenSearchDashboards<{
     workspaceClient: WorkspaceClient;
     dataSourceManagement?: DataSourceManagementPluginSetup;
+    navigationUI: NavigationPublicPluginStart['ui'];
   }>();
 
   const defaultWorkspaceFormValues: Partial<WorkspaceFormData> = {
@@ -102,8 +99,17 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
 
   return (
     <EuiPage>
+      <HeaderControl
+        controls={[
+          {
+            description: i18n.translate('workspace.creator.description', {
+              defaultMessage: 'Organize collaborative projects in use-case-specific workspaces.',
+            }),
+          },
+        ]}
+        setMountPoint={application?.setAppDescriptionControls}
+      />
       <EuiPageBody>
-        <EuiPageHeader pageTitle="Create a workspace" />
         <EuiPageContent
           verticalPosition="center"
           paddingSize="none"
