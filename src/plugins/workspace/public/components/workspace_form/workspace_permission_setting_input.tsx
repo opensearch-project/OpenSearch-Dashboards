@@ -149,7 +149,7 @@ export const WorkspacePermissionSettingInput = ({
                   defaultMessage: 'Select a user group',
                 })
           }
-          isDisabled={userOrGroupDisabled}
+          isDisabled={userOrGroupDisabled || !isEditing}
         />
       </EuiFlexItem>
       <EuiFlexItem style={{ maxWidth: 332 }}>
