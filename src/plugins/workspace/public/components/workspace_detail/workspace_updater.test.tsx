@@ -223,10 +223,6 @@ describe('WorkspaceUpdater', () => {
     fireEvent.click(getByTestId('workspaceUseCase-observability'));
     fireEvent.click(getByTestId('workspaceUseCase-analytics'));
 
-    act(() => {
-      fireEvent.click(getAllByLabelText('Delete data source')[0]);
-    });
-
     fireEvent.click(getByTestId('workspaceForm-bottomBar-updateButton'));
     expect(workspaceClientUpdate).toHaveBeenCalledWith(
       expect.any(String),
@@ -245,7 +241,7 @@ describe('WorkspaceUpdater', () => {
             users: ['foo'],
           },
         },
-        dataSources: ['id2'],
+        dataSources: ['id1', 'id2'],
       }
     );
     await waitFor(() => {

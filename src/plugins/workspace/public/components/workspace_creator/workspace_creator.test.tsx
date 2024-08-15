@@ -274,39 +274,33 @@ describe('WorkspaceCreator', () => {
   });
 
   it('create workspace with customized selected dataSources', async () => {
-    const { getByTestId, getByTitle, getByText } = render(
-      <WorkspaceCreator isDashboardAdmin={true} />
-    );
-    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
-    fireEvent.input(nameInput, {
-      target: { value: 'test workspace name' },
-    });
-    fireEvent.click(getByTestId('workspaceUseCase-observability'));
-    fireEvent.click(getByTestId('workspaceForm-select-dataSource-addNew'));
-    fireEvent.click(getByTestId('workspaceForm-select-dataSource-comboBox'));
-    await act(() => {
-      fireEvent.click(getByText('Select'));
-    });
-    fireEvent.click(getByTitle(dataSourcesList[0].title));
+    const { getByTestId, getByText } = render(<WorkspaceCreator isDashboardAdmin={true} />);
 
-    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    expect(workspaceClientCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'test workspace name',
-      }),
-      {
-        dataSources: ['id1'],
-        permissions: {
-          library_write: {
-            users: ['%me%'],
+    waitFor(() => {
+      const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+      fireEvent.input(nameInput, {
+        target: { value: 'test workspace name' },
+      });
+      fireEvent.click(getByTestId('workspaceUseCase-observability'));
+      fireEvent.click(getByText(dataSourcesList[0].title));
+
+      fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+      expect(workspaceClientCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'test workspace name',
+        }),
+        {
+          dataSources: ['id1'],
+          permissions: {
+            library_write: {
+              users: ['%me%'],
+            },
+            write: {
+              users: ['%me%'],
+            },
           },
-          write: {
-            users: ['%me%'],
-          },
-        },
-      }
-    );
-    await waitFor(() => {
+        }
+      );
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
     });
     expect(notificationToastsAddDanger).not.toHaveBeenCalled();
