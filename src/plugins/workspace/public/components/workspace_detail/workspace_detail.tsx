@@ -106,12 +106,6 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
     setSelectedTabId(DetailTab.Collaborators);
   };
 
-  const pageTitle = (
-    <EuiFlexGroup gutterSize="none" alignItems="baseline" justifyContent="flexStart">
-      <EuiFlexItem grow={false}>{currentWorkspace?.name} settings</EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   const createDetailTab = (id: DetailTab, detailTitle: string) => ({
     id,
     name: detailTitle,
@@ -167,7 +161,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
   return (
     <>
       <EuiPage direction="column">
-        <EuiPageHeader pageTitle={pageTitle} rightSideItems={[deleteButton]} alignItems="center" />
+        <EuiPageHeader rightSideItems={[deleteButton]} alignItems="center" />
         <EuiPageBody>
           <EuiText color="subdued">{currentWorkspace.description}</EuiText>
         </EuiPageBody>

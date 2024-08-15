@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { PublicAppInfo, WorkspaceObject } from 'opensearch-dashboards/public';
@@ -181,6 +181,7 @@ describe('WorkspaceDetail', () => {
     const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
     render(WorkspaceDetailPage({ workspacesService: workspaceService }));
     expect(document.querySelector('#details')).toHaveClass('euiTab-isSelected');
+    expect(screen.queryByTestId('workspaceTabs')).not.toBeNull();
   });
 
   it('click on Collaborators tab when permission control enabled', async () => {

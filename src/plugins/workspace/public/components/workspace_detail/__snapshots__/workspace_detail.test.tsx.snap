@@ -16,22 +16,7 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
         >
           <div
             class="euiFlexItem"
-          >
-            <h1
-              class="euiTitle euiTitle--large"
-            >
-              <div
-                class="euiFlexGroup euiFlexGroup--alignItemsBaseline euiFlexGroup--directionRow euiFlexGroup--responsive"
-              >
-                <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
-                >
-                  foo
-                   settings
-                </div>
-              </div>
-            </h1>
-          </div>
+          />
           <div
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >
