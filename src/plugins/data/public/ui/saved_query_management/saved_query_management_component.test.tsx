@@ -6,6 +6,8 @@
 import React from 'react';
 import { SavedQueryManagementComponent } from './saved_query_management_component';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { Query } from 'src/plugins/data/common';
+import { SavedQueryAttributes } from '../../query';
 
 const mockProps = () => ({
   savedQueryService: {
@@ -20,15 +22,54 @@ const mockProps = () => ({
   onSaveAsNew: jest.fn(),
   onLoad: jest.fn(),
   onClearSavedQuery: jest.fn(),
+  closeMenuPopover: jest.fn(),
+  showSaveQuery: true,
+  loadedSavedQuery: {
+    id: '1',
+    attributes: {
+      name: 'Test Query',
+      title: '',
+      description: '',
+      query: { query: '', language: 'kuery' } as Query,
+    } as SavedQueryAttributes,
+  },
 });
 
 describe('Saved query management component', () => {
-  it('has a popover button', () => {
-    const props = {
-      ...mockProps(),
-    };
-    const component = shallowWithIntl(<SavedQueryManagementComponent {...props} />);
-    const savedQueryPopoverButton = component.find('#savedQueryPopover');
-    expect(savedQueryPopoverButton).toMatchSnapshot();
+  it('should render without errors', () => {
+    const props = mockProps();
+    const wrapper = shallowWithIntl(<SavedQueryManagementComponent {...props} />);
+    expect(wrapper.exists()).toBe(true);
+  });
+
+  it('should call onSave when save button is clicked', () => {
+    const props = mockProps();
+    const wrapper = shallowWithIntl(<SavedQueryManagementComponent {...props} />);
+    const saveButton = wrapper
+      .find('[data-test-subj="saved-query-management-save-changes-button"]')
+      .at(0);
+    saveButton.simulate('click');
+    expect(props.onSave).toHaveBeenCalled();
+    expect(props.closeMenuPopover).toHaveBeenCalled();
+  });
+
+  it('should call onSaveAsNew when save as new button is clicked', () => {
+    const props = mockProps();
+    const wrapper = shallowWithIntl(<SavedQueryManagementComponent {...props} />);
+    const saveAsNewButton = wrapper
+      .find('[data-test-subj="saved-query-management-save-as-new-button"]')
+      .at(0);
+    saveAsNewButton.simulate('click');
+    expect(props.onSaveAsNew).toHaveBeenCalled();
+  });
+
+  it('should call onClearSavedQuery when clear saved query button is clicked', () => {
+    const props = mockProps();
+    const wrapper = shallowWithIntl(<SavedQueryManagementComponent {...props} />);
+    const clearSavedQueryButton = wrapper.find(
+      '[data-test-subj="saved-query-management-clear-button"]'
+    );
+    clearSavedQueryButton.simulate('click');
+    expect(props.onClearSavedQuery).toHaveBeenCalled();
   });
 });

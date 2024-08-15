@@ -1,0 +1,2 @@
+refactor:
+- Refactor search bar & filters to conditionally render new look with application header ([#7687](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7687))
