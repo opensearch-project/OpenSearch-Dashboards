@@ -196,3 +196,4 @@ export const enum SuggestionItemDetailsTags {
   Keyword = 'Keyword',
   AggregateFunction = 'Aggregate Function',
 }
+export const quotesRegex = /^'(.*)'$/;
