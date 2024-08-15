@@ -3,8 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSelect, EuiComboBox } from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiComboBox,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiSelectable,
+  EuiComboBoxOptionOption,
+  EuiSelectableOption,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { WorkspacePermissionMode } from '../../../common/constants';
 import {
@@ -35,21 +45,6 @@ const permissionModeOptions = [
     value: PermissionModeId.Owner,
     label: i18n.translate('workspace.form.permissionSettingPanel.permissionModeOptions.owner', {
       defaultMessage: 'Owner',
-    }),
-  },
-];
-
-const typeOptions = [
-  {
-    value: WorkspacePermissionItemType.User,
-    text: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.user', {
-      defaultMessage: 'User',
-    }),
-  },
-  {
-    value: WorkspacePermissionItemType.Group,
-    text: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.group', {
-      defaultMessage: 'Group',
     }),
   },
 ];
@@ -94,6 +89,23 @@ export const WorkspacePermissionSettingInput = ({
     [group, userId]
   );
 
+  const [isTypeListOpen, setIsTypeListOpen] = useState(false);
+
+  const [typeOptions, setTypeOptions] = useState<Array<EuiSelectableOption<any>>>([
+    {
+      value: WorkspacePermissionItemType.User,
+      label: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.user', {
+        defaultMessage: 'User',
+      }),
+    },
+    {
+      value: WorkspacePermissionItemType.Group,
+      label: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.group', {
+        defaultMessage: 'Group',
+      }),
+    },
+  ]);
+
   const permissionModesSelected = useMemo(() => {
     const idSelected = getPermissionModeId(modes ?? []);
     const permissionModeSelected = permissionModeOptions.find(
@@ -115,7 +127,7 @@ export const WorkspacePermissionSettingInput = ({
   );
 
   const handleGroupOrUserIdChange = useCallback(
-    (options) => {
+    (options: Array<EuiComboBoxOptionOption<any>>) => {
       if (options.length === 0) {
         onGroupOrUserIdChange({ type }, index);
       }
@@ -124,8 +136,8 @@ export const WorkspacePermissionSettingInput = ({
   );
 
   const handlePermissionModeOptionChange = useCallback(
-    (option) => {
-      if (Array.isArray(option) && option.length > 0 && option[0] instanceof Object) {
+    (option: Array<EuiComboBoxOptionOption<any>>) => {
+      if (option.length > 0) {
         const id = option[0].value;
         if (optionIdToWorkspacePermissionModesMap[id]) {
           onPermissionModesChange([...optionIdToWorkspacePermissionModesMap[id]], index);
@@ -135,11 +147,26 @@ export const WorkspacePermissionSettingInput = ({
     [index, onPermissionModesChange]
   );
 
+  const toggleTypeList = () => {
+    if (!isTypeListOpen) {
+      if (type === WorkspacePermissionItemType.User) {
+        setTypeOptions([{ ...typeOptions[0], checked: 'on' }, typeOptions[1]]);
+      } else {
+        setTypeOptions([typeOptions[0], { ...typeOptions[1], checked: 'on' }]);
+      }
+    }
+    setIsTypeListOpen((current) => !current);
+  };
+
   const handleTypeChange = useCallback(
-    (e) => {
-      if (e.target.value) {
-        const option = e.target.value;
-        onTypeChange(option, index);
+    (options: Array<EuiSelectableOption<any>>) => {
+      setTypeOptions(options);
+      for (const option of options) {
+        if (option.checked === 'on') {
+          onTypeChange(option.value, index);
+          setIsTypeListOpen(false);
+          return;
+        }
       }
     },
     [index, onTypeChange]
@@ -169,20 +196,37 @@ export const WorkspacePermissionSettingInput = ({
           }
           isDisabled={userOrGroupDisabled}
           prepend={
-            <EuiFlexItem style={{ maxWidth: 100 }}>
-              <EuiSelect
-                className="workspacePermissionSettingUserAndGroupSelect"
-                compressed={true}
+            <EuiPopover
+              button={
+                <EuiButtonEmpty
+                  color="text"
+                  iconType="arrowDown"
+                  iconSide="right"
+                  onClick={toggleTypeList}
+                  data-test-subj="workspace-typeOptions"
+                >
+                  {type === WorkspacePermissionItemType.User
+                    ? typeOptions[0].label
+                    : typeOptions[1].label}
+                </EuiButtonEmpty>
+              }
+              isOpen={isTypeListOpen}
+              closePopover={() => setIsTypeListOpen(false)}
+              panelPaddingSize="none"
+            >
+              <EuiSelectable
+                singleSelection={true}
                 options={typeOptions}
-                onChange={handleTypeChange}
-                value={type}
-                style={{
-                  boxShadow: 'none',
-                  fontWeight: 'bold',
+                listProps={{
+                  bordered: true,
+                  rowHeight: 32,
+                  onFocusBadge: false,
                 }}
-                data-test-subj="workspace-typeOptions"
-              />
-            </EuiFlexItem>
+                onChange={handleTypeChange}
+              >
+                {(list) => list}
+              </EuiSelectable>
+            </EuiPopover>
           }
         />
       </EuiFlexItem>

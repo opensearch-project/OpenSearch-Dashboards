@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import {
   WorkspacePermissionSettingInput,
   WorkspacePermissionSettingInputProps,
@@ -114,12 +114,13 @@ describe('WorkspacePermissionSettingInput', () => {
   });
 });
 
-it('should call onTypeChange with types after types changed', () => {
-  const { renderResult, onTypeChangeMock } = setup({});
+it('should call onTypeChange with types after types changed', async () => {
+  const { renderResult, onTypeChangeMock } = await setup({});
 
   expect(onTypeChangeMock).not.toHaveBeenCalled();
-  fireEvent.change(renderResult.getByTestId('workspace-typeOptions'), {
-    target: { value: 'group' },
+  waitFor(() => {
+    fireEvent.click(renderResult.getByTestId('workspace-typeOptions'));
+    fireEvent.click(renderResult.getByText('Group'));
+    expect(onTypeChangeMock).toHaveBeenCalledWith('group', 0);
   });
-  expect(onTypeChangeMock).toHaveBeenCalledWith('group', 0);
 });
