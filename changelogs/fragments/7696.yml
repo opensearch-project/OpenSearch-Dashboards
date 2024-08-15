@@ -1,0 +1,2 @@
+feat:
+- Refactor Associate data sources to support multi-select ([#7696](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7696))
