@@ -377,7 +377,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     const dataSet = this.dataSetService.getDataSet();
     if (dataSet && queryAndDateRange.query) {
       this.queryStringService.addToQueryHistory(
-        dataSet.id,
+        dataSet,
         queryAndDateRange.query,
         queryAndDateRange.dateRange
       );
