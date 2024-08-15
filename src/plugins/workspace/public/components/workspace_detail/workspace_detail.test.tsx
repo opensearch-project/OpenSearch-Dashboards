@@ -278,4 +278,18 @@ describe('WorkspaceDetail', () => {
     fireEvent.click(getByText('+1 more'));
     expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
   });
+
+  it('will not render xss content', async () => {
+    const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+    const workspaceService = createWorkspacesSetupContractMockWithValue({
+      ...workspaceObject,
+      name: '<script>alert("name")</script>',
+      description: '<script>alert("description")</script>',
+    });
+    const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
+    expect(getByText('<script>alert("name")</script>')).toBeInTheDocument();
+    expect(getByText('<script>alert("description")</script>')).toBeInTheDocument();
+    expect(alertSpy).toBeCalledTimes(0);
+    alertSpy.mockRestore();
+  });
 });
