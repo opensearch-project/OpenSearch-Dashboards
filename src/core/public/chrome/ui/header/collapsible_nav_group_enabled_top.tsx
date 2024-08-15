@@ -91,7 +91,6 @@ export const CollapsibleNavTop = ({
 
   return (
     <div className="side-naivgation-top">
-      <EuiSpacer size="s" />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         {shouldShowHomeLink ? (
           <EuiFlexItem grow={false}>

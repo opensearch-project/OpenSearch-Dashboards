@@ -12,6 +12,8 @@ import { useWorkspaceForm } from './use_workspace_form';
 
 interface WorkspaceFormContextProps {
   formId: string;
+  setName: React.Dispatch<React.SetStateAction<string>>;
+  setDescription: React.Dispatch<React.SetStateAction<string | undefined>>;
   formData: any;
   isEditing: boolean;
   formErrors: WorkspaceFormErrors;
@@ -23,8 +25,6 @@ interface WorkspaceFormContextProps {
   handleFormSubmit: FormEventHandler;
   handleColorChange: (text: string, output: EuiColorPickerOutput) => void;
   handleUseCaseChange: (newUseCase: string) => void;
-  handleNameInputChange: React.ChangeEventHandler<HTMLInputElement>;
-  handleDescriptionChange: React.ChangeEventHandler<HTMLTextAreaElement>;
   setPermissionSettings: React.Dispatch<
     React.SetStateAction<
       Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>

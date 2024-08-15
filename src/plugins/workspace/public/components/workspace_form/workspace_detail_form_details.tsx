@@ -9,18 +9,14 @@ import {
   EuiCompressedFormRow,
   EuiDescribedFormGroup,
   EuiCompressedTextArea,
-  EuiCompressedFieldText,
-  EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useObservable } from 'react-use';
 import {
   detailsName,
   detailsColorLabel,
-  detailsNameHelpText,
   detailsUseCaseLabel,
   detailsColorHelpText,
-  detailsNamePlaceholder,
   detailsDescriptionPlaceholder,
   detailsDescriptionIntroduction,
   detailsUseCaseHelpText,
@@ -31,6 +27,8 @@ import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
 import { useWorkspaceFormContext } from './workspace_form_context';
 import { WorkspaceUseCase as WorkspaceUseCaseObject } from '../../types';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { WorkspaceNameField } from './fields/workspace_name_field';
+import { WorkspaceDescriptionField } from './fields/workspace_description_field';
 
 interface WorkspaceDetailFormDetailsProps {
   availableUseCases: Array<
@@ -42,13 +40,13 @@ export const WorkspaceDetailFormDetailsProps = ({
   availableUseCases,
 }: WorkspaceDetailFormDetailsProps) => {
   const {
+    setName,
     formData,
     isEditing,
     formErrors,
+    setDescription,
     handleColorChange,
     handleUseCaseChange,
-    handleNameInputChange,
-    handleDescriptionChange,
   } = useWorkspaceFormContext();
   const {
     services: { workspaces },
@@ -79,20 +77,12 @@ export const WorkspaceDetailFormDetailsProps = ({
   return (
     <>
       <EuiDescribedFormGroup title={<h3>{detailsName}</h3>}>
-        <EuiCompressedFormRow
-          label={detailsName}
-          helpText={detailsNameHelpText}
-          isInvalid={!!formErrors.name}
+        <WorkspaceNameField
+          value={formData.name}
+          onChange={setName}
+          readOnly={!isEditing}
           error={formErrors.name?.message}
-        >
-          <EuiCompressedFieldText
-            value={formData.name}
-            onChange={handleNameInputChange}
-            readOnly={!isEditing}
-            data-test-subj="workspaceForm-workspaceDetails-nameInputText"
-            placeholder={detailsNamePlaceholder}
-          />
-        </EuiCompressedFormRow>
+        />
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
@@ -102,16 +92,12 @@ export const WorkspaceDetailFormDetailsProps = ({
         }
         description={detailsDescriptionIntroduction}
       >
-        <EuiCompressedFormRow label="Description">
-          <EuiCompressedTextArea
-            value={formData.description}
-            onChange={handleDescriptionChange}
-            readOnly={!isEditing}
-            data-test-subj="workspaceForm-workspaceDetails-descriptionInputText"
-            rows={4}
-            placeholder={detailsDescriptionPlaceholder}
-          />
-        </EuiCompressedFormRow>
+        <WorkspaceDescriptionField
+          value={formData.description}
+          onChange={setDescription}
+          readOnly={!isEditing}
+          error={formErrors.name?.message}
+        />
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup title={<h3>{detailsUseCaseLabel}</h3>}>
         <EuiCompressedFormRow

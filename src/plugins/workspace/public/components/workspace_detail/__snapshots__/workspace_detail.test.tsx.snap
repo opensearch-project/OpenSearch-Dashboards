@@ -378,7 +378,13 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
                           class="euiFormHelpText euiFormRow__text"
                           id="generated-id-help-0"
                         >
-                          Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).
+                          <span
+                            class="euiTextColor euiTextColor--subdued"
+                          >
+                            37 characters left.
+                          </span>
+                          <br />
+                          Use a unique name for the workspace. Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).
                         </div>
                       </div>
                     </div>
@@ -424,16 +430,21 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
                         class="euiFormRow__labelWrapper"
                       >
                         <label
+                          aria-invalid="false"
                           class="euiFormLabel euiFormRow__label"
                           for="generated-id"
                         >
-                          Description
+                          Description - 
+                          <i>
+                            optional
+                          </i>
                         </label>
                       </div>
                       <div
                         class="euiFormRow__fieldWrapper"
                       >
                         <textarea
+                          aria-describedby="generated-id-help-0"
                           class="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
                           data-test-subj="workspaceForm-workspaceDetails-descriptionInputText"
                           id="generated-id"
@@ -443,6 +454,16 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
                         >
                           this is my foo workspace description
                         </textarea>
+                        <div
+                          class="euiFormHelpText euiFormRow__text"
+                          id="generated-id-help-0"
+                        >
+                          <span
+                            class="euiTextColor euiTextColor--subdued"
+                          >
+                            164 characters left.
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
