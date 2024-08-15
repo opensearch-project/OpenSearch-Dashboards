@@ -198,11 +198,11 @@ export const WorkspacePermissionSettingInput = ({
             <EuiPopover
               button={
                 <EuiButtonEmpty
-                  color="text"
                   iconType="arrowDown"
                   iconSide="right"
                   onClick={toggleTypeList}
                   data-test-subj="workspace-typeOptions"
+                  isDisabled={userOrGroupDisabled}
                 >
                   {type === WorkspacePermissionItemType.User
                     ? typeOptions[0].label
