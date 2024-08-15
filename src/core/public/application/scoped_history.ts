@@ -317,8 +317,9 @@ export class ScopedHistory<HistoryLocationState = unknown>
         this.isActive = false;
         return;
       }
-      // const fullUrl = `${location.pathname}${location.search}${location.hash}`;
+
       const localeValue = getLocaleInUrl(window.location.href);
+
       if (localeValue !== currentLocale) {
         // Force a full page reload
         window.location.reload();

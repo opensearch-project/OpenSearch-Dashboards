@@ -21,21 +21,21 @@ describe('getLocaleInUrl', () => {
     expect(getLocaleInUrl(url)).toBe('fr-FR');
   });
 
-  it('should return null for a URL without locale', () => {
+  it('should return en for a URL without locale', () => {
     const url = 'http://localhost:5603/app/home';
-    expect(getLocaleInUrl(url)).toBeNull();
+    expect(getLocaleInUrl(url)).toBe('en');
   });
 
-  it('should return null and set a warning for an invalid locale format in hash', () => {
+  it('should return en and set a warning for an invalid locale format in hash', () => {
     const url = 'http://localhost:5603/app/home#/&locale=de-DE';
-    expect(getLocaleInUrl(url)).toBeNull();
+    expect(getLocaleInUrl(url)).toBe('en');
     expect((window as any).__localeWarning).toBeDefined();
     expect((window as any).__localeWarning.title).toBe('Invalid URL Format');
   });
 
-  it('should return null for an empty locale value', () => {
+  it('should return en for an empty locale value', () => {
     const url = 'http://localhost:5603/app/home?locale=';
-    expect(getLocaleInUrl(url)).toBeNull();
+    expect(getLocaleInUrl(url)).toBe('en');
   });
 
   it('should handle URLs with other query parameters', () => {

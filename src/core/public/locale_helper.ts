@@ -43,11 +43,11 @@ export function getLocaleInUrl(url: string): string | null {
   // Check for non standard query format:
   if (localeValue === null && url.includes('&locale=')) {
     setInvalidUrlWithLocaleWarning();
-    return null;
+    return 'en';
   }
 
-  // Return the locale value if found, or null if not found
-  return localeValue && localeValue.trim() !== '' ? localeValue : null;
+  // Return the locale value if found, or 'en' if not found
+  return localeValue && localeValue.trim() !== '' ? localeValue : 'en';
 }
 
 function setInvalidUrlWarning(): void {

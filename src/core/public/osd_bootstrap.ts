@@ -40,9 +40,10 @@ export async function __osdBootstrap__() {
   );
 
   // Extract the locale from the URL if present
+  const currentLocale = i18n.getLocale();
   const urlLocale = getLocaleInUrl(window.location.href);
 
-  if (urlLocale) {
+  if (urlLocale && urlLocale !== currentLocale) {
     // If a locale is specified in the URL, update the i18n settings
     // This enables dynamic language switching
     // Note: This works in conjunction with server-side changes:
@@ -61,7 +62,7 @@ export async function __osdBootstrap__() {
       /\/([^/]+)\.json$/,
       `/${urlLocale}.json`
     );
-  } else {
+  } else if (!urlLocale) {
     i18n.setLocale('en');
   }
 
