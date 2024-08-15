@@ -53,6 +53,7 @@ import { UseCaseService } from './services/use_case_service';
 import { WorkspaceListCard } from './components/service_card';
 import { UseCaseFooter } from './components/home_get_start_card';
 import { HOME_CONTENT_AREAS } from '../../home/public';
+import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -68,6 +69,7 @@ interface WorkspacePluginSetupDeps {
 
 export interface WorkspacePluginStartDeps {
   contentManagement: ContentManagementPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export class WorkspacePlugin
@@ -150,15 +152,15 @@ export class WorkspacePlugin
           /**
            * The following logic determines whether a navigation group should be hidden or not based on the workspace's feature configurations.
            * It checks the following conditions:
-           * 1. The navigation group is not a system-level group (system groups are always visible).
+           * 1. The navigation group is not a system-level group (system groups are always visible except all use case).
            * 2. The current workspace has feature configurations set up.
-           * 3. The current workspace's use case it not "All use case".
+           * 3. The current workspace's use case is not "All use case".
            * 4. The current navigation group is not included in the feature configurations of the workspace.
            *
            * If all these conditions are true, it means that the navigation group should be hidden.
            */
           if (
-            navGroup.type !== NavGroupType.SYSTEM &&
+            (navGroup.type !== NavGroupType.SYSTEM || navGroup.id === ALL_USE_CASE_ID) &&
             currentWorkspace.features &&
             getFirstUseCaseOfFeatureConfigs(currentWorkspace.features) !== ALL_USE_CASE_ID &&
             !isNavGroupInFeatureConfigs(navGroup.id, currentWorkspace.features)
@@ -235,7 +237,7 @@ export class WorkspacePlugin
   }
 
   public async setup(
-    core: CoreSetup,
+    core: CoreSetup<WorkspacePluginStartDeps>,
     { savedObjectsManagement, management, dataSourceManagement }: WorkspacePluginSetupDeps
   ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
@@ -295,11 +297,13 @@ export class WorkspacePlugin
     }
 
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
-      const [coreStart] = await core.getStartServices();
+      const [coreStart, { navigation }] = await core.getStartServices();
+
       const services = {
         ...coreStart,
         workspaceClient,
         dataSourceManagement,
+        navigationUI: navigation.ui,
       };
 
       return renderApp(params, services, {
@@ -376,15 +380,6 @@ export class WorkspacePlugin
       },
     ]);
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
-      {
-        id: WORKSPACE_LIST_APP_ID,
-        title: i18n.translate('workspace.settingsAndSetup.workspaceSettings', {
-          defaultMessage: 'workspace settings',
-        }),
-      },
-    ]);
-
     /**
      * register workspace column into saved objects table
      */
@@ -414,7 +409,7 @@ export class WorkspacePlugin
       WORKSPACE_USE_CASES.observability,
       WORKSPACE_USE_CASES['security-analytics'],
       WORKSPACE_USE_CASES.search,
-      WORKSPACE_USE_CASES.analytics,
+      WORKSPACE_USE_CASES.essentials,
     ];
 
     useCases.forEach((useCase, index) => {
@@ -440,7 +435,7 @@ export class WorkspacePlugin
     });
   }
 
-  public start(core: CoreStart, { contentManagement }: WorkspacePluginStartDeps) {
+  public start(core: CoreStart, { contentManagement, navigation }: WorkspacePluginStartDeps) {
     this.coreStart = core;
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();

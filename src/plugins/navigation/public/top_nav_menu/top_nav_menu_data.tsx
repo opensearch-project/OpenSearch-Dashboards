@@ -28,12 +28,15 @@
  * under the License.
  */
 
-import { EuiButtonProps } from '@elastic/eui';
+import { EuiButtonProps, EuiButtonIconProps } from '@elastic/eui';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 export type TopNavMenuAction = (anchorElement: HTMLElement) => void;
+export type TopNavMenuClickAction = (targetElement: HTMLElement) => void;
+export type TopNavMenuSwitchAction = (targetElement: HTMLElement, checked: boolean) => void;
 
-export interface TopNavMenuData {
+// @deprecated
+export interface TopNavMenuLegacyData {
   id?: string;
   label: string;
   run: TopNavMenuAction;
@@ -50,6 +53,60 @@ export interface TopNavMenuData {
   type?: 'toggle' | 'button';
 }
 
-export interface RegisteredTopNavMenuData extends TopNavMenuData {
-  appName?: string;
+type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
+  {
+    [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>;
+  }[Keys];
+
+interface TopNavMenuCommonData {
+  testId?: string;
+  className?: string;
+  disabled?: boolean | (() => boolean);
+  tooltip?: string | (() => string | undefined);
 }
+
+export type TopNavMenuButtonData = TopNavMenuCommonData &
+  RequireAtLeastOne<
+    {
+      label: string;
+      iconType?: EuiButtonProps['iconType'];
+      iconSide?: EuiButtonProps['iconSide'];
+      ariaLabel?: string;
+      isLoading?: boolean;
+      run?: TopNavMenuClickAction;
+      href?: string;
+      controlType: 'button';
+    },
+    'href' | 'run'
+  >;
+
+export type TopNavMenuIconData = TopNavMenuCommonData &
+  RequireAtLeastOne<
+    {
+      iconType: EuiButtonIconProps['iconType'];
+      ariaLabel: string;
+      run?: TopNavMenuClickAction;
+      href?: string;
+      tooltip: string | (() => string | undefined);
+      controlType: 'icon';
+    },
+    'href' | 'run'
+  >;
+
+export type TopNavMenuSwitchData = TopNavMenuCommonData & {
+  label: string;
+  ariaLabel?: string;
+  checked: boolean | (() => boolean);
+  run: TopNavMenuSwitchAction;
+  controlType: 'switch';
+};
+
+export type TopNavMenuData =
+  | TopNavMenuLegacyData
+  | TopNavMenuButtonData
+  | TopNavMenuIconData
+  | TopNavMenuSwitchData;
+
+export type RegisteredTopNavMenuData = TopNavMenuData & {
+  appName?: string;
+};

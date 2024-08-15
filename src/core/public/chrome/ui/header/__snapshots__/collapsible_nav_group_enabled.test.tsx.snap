@@ -146,7 +146,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                   class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems"
                 >
                   <div
-                    aria-label="Analytics"
+                    aria-label="Essentials"
                     class="euiSideNavItemButton"
                   >
                     <span
@@ -154,12 +154,12 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                     >
                       <span
                         class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
-                        title="Analytics"
+                        title="Essentials"
                       >
                         <div
                           class="nav-link-item"
                         >
-                          Analytics
+                          Essentials
                         </div>
                       </span>
                     </span>
@@ -171,9 +171,9 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                       class="euiSideNavItem euiSideNavItem--trunk nav-link-item "
                     >
                       <button
-                        aria-label="link-in-analytics"
+                        aria-label="link-in-essentials"
                         class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
-                        data-test-subj="collapsibleNavAppLink-link-in-analytics"
+                        data-test-subj="collapsibleNavAppLink-link-in-essentials"
                         type="button"
                       >
                         <span
@@ -181,12 +181,12 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                         >
                           <span
                             class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
-                            title="link-in-analytics"
+                            title="link-in-essentials"
                           >
                             <div
                               class="euiText euiText--small"
                             >
-                              link-in-analytics
+                              link-in-essentials
                             </div>
                           </span>
                         </span>
@@ -198,7 +198,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                       <button
                         aria-label="See all..."
                         class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
-                        data-test-subj="collapsibleNavAppLink-link-in-analytics"
+                        data-test-subj="collapsibleNavAppLink-link-in-essentials"
                         type="button"
                       >
                         <span
@@ -308,9 +308,9 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case by default and 
                   class="euiSideNavItem euiSideNavItem--root nav-link-item "
                 >
                   <button
-                    aria-label="link-in-analytics"
+                    aria-label="link-in-essentials"
                     class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
-                    data-test-subj="collapsibleNavAppLink-link-in-analytics"
+                    data-test-subj="collapsibleNavAppLink-link-in-essentials"
                     type="button"
                   >
                     <span
@@ -318,12 +318,12 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case by default and 
                     >
                       <span
                         class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
-                        title="link-in-analytics"
+                        title="link-in-essentials"
                       >
                         <div
                           class="euiText euiText--small"
                         >
-                          link-in-analytics
+                          link-in-essentials
                         </div>
                       </span>
                     </span>
@@ -381,9 +381,9 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case when current na
                   class="euiSideNavItem euiSideNavItem--root nav-link-item "
                 >
                   <button
-                    aria-label="link-in-analytics"
+                    aria-label="link-in-essentials"
                     class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
-                    data-test-subj="collapsibleNavAppLink-link-in-analytics"
+                    data-test-subj="collapsibleNavAppLink-link-in-essentials"
                     type="button"
                   >
                     <span
@@ -391,12 +391,12 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case when current na
                     >
                       <span
                         class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
-                        title="link-in-analytics"
+                        title="link-in-essentials"
                       >
                         <div
                           class="euiText euiText--small"
                         >
-                          link-in-analytics
+                          link-in-essentials
                         </div>
                       </span>
                     </span>
@@ -431,39 +431,29 @@ exports[`<NavGroups /> should render correctly 1`] = `
         id="euiSideNavContent_generated-id"
       >
         <div
-          class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems nav-link-item "
+          class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems nav-link-fake-item"
         >
-          <button
-            aria-label="pure link"
-            class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
-            data-test-subj="collapsibleNavAppLink-pure"
-            type="button"
+          <div
+            class="euiSideNavItemButton nav-link-fake-item-button"
           >
             <span
               class="euiSideNavItemButton__content"
             >
               <span
                 class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
-                title="pure link"
-              >
-                <div
-                  class="euiText euiText--small"
-                >
-                  pure link
-                </div>
-              </span>
+              />
             </span>
-          </button>
+          </div>
           <div
             class="euiSideNavItem__items"
           >
             <div
-              class="euiSideNavItem euiSideNavItem--trunk nav-link-item nav-nested-item"
+              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item  nav-link-parent-item"
             >
               <button
-                aria-label="subLink"
-                class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
-                data-test-subj="collapsibleNavAppLink-subLink"
+                aria-label="pure link"
+                class="euiSideNavItemButton euiSideNavItemButton-isOpen nav-link-item-btn nav-link-parent-item-button"
+                data-test-subj="collapsibleNavAppLink-pure"
                 type="button"
               >
                 <span
@@ -471,16 +461,48 @@ exports[`<NavGroups /> should render correctly 1`] = `
                 >
                   <span
                     class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
-                    title="subLink"
+                    title="pure link"
                   >
                     <div
                       class="euiText euiText--small"
                     >
-                      subLink
+                      pure link
                     </div>
                   </span>
+                  <span
+                    data-euiicon-type="arrowDown"
+                  />
                 </span>
               </button>
+              <div
+                class="euiSideNavItem__items"
+              >
+                <div
+                  class="euiSideNavItem euiSideNavItem--branch nav-link-item nav-nested-item"
+                >
+                  <button
+                    aria-label="subLink"
+                    class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
+                    data-test-subj="collapsibleNavAppLink-subLink"
+                    type="button"
+                  >
+                    <span
+                      class="euiSideNavItemButton__content"
+                    >
+                      <span
+                        class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                        title="subLink"
+                      >
+                        <div
+                          class="euiText euiText--small"
+                        >
+                          subLink
+                        </div>
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -510,11 +532,11 @@ exports[`<NavGroups /> should render correctly 1`] = `
             class="euiSideNavItem__items"
           >
             <div
-              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item "
+              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item  nav-link-parent-item"
             >
               <button
                 aria-label="link-in-category"
-                class="euiSideNavItemButton euiSideNavItemButton--isClickable euiSideNavItemButton-isOpen nav-link-item-btn"
+                class="euiSideNavItemButton euiSideNavItemButton-isOpen nav-link-item-btn nav-link-parent-item-button"
                 data-test-subj="collapsibleNavAppLink-link-in-category"
                 type="button"
               >
@@ -531,6 +553,9 @@ exports[`<NavGroups /> should render correctly 1`] = `
                       link-in-category
                     </div>
                   </span>
+                  <span
+                    data-euiicon-type="arrowDown"
+                  />
                 </span>
               </button>
               <div

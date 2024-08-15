@@ -137,12 +137,12 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       'management',
     ] as string[],
   },
-  analytics: {
+  essentials: {
     id: 'analytics',
-    title: i18n.translate('workspace.usecase.analytics.title', {
-      defaultMessage: 'Analytics',
+    title: i18n.translate('workspace.usecase.essentials.title', {
+      defaultMessage: 'Essentials',
     }),
-    description: i18n.translate('workspace.usecase.analytics.description', {
+    description: i18n.translate('workspace.usecase.essentials.description', {
       defaultMessage:
         'Analyze data to derive insights, identify patterns and trends, and make data-driven decisions.',
     }),
@@ -185,3 +185,6 @@ export const WORKSPACE_USE_CASES = Object.freeze({
 export const MAX_WORKSPACE_PICKER_NUM = 3;
 export const RECENT_WORKSPACES_KEY = 'recentWorkspaces';
 export const CURRENT_USER_PLACEHOLDER = '%me%';
+
+export const MAX_WORKSPACE_NAME_LENGTH = 40;
+export const MAX_WORKSPACE_DESCRIPTION_LENGTH = 200;

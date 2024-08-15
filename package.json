@@ -144,7 +144,7 @@
   "dependencies": {
     "@aws-crypto/client-node": "^3.1.1",
     "@elastic/datemath": "5.0.3",
-    "@elastic/eui": "npm:@opensearch-project/oui@1.8.1",
+    "@elastic/eui": "npm:@opensearch-project/oui@1.9.0",
     "@elastic/good": "^9.0.1-kibana3",
     "@elastic/numeral": "npm:@amoo-miki/numeral@2.6.0",
     "@elastic/request-crypto": "2.0.0",

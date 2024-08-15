@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { CardContainerExplicitInput } from '../../components/card_container/types';
+import { DashboardContainerExplicitInput } from '../../components/types';
+
 export interface PageConfig {
   id: string;
   title?: string;
@@ -25,12 +28,15 @@ export type Section =
       order: number;
       title?: string;
       description?: string;
+      input?: DashboardContainerExplicitInput;
     }
   | {
       kind: 'card';
       id: string;
       order: number;
       title?: string;
+      columns?: number;
+      input?: CardContainerExplicitInput;
     };
 
 export type Content =

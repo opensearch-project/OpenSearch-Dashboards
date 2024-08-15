@@ -46,6 +46,7 @@ import {
   EuiCallOut,
   EuiBasicTableColumn,
   EuiText,
+  EuiPageProps,
 } from '@elastic/eui';
 import { HttpFetchError, ToastsStart } from 'opensearch-dashboards/public';
 import { toMountPoint } from '../util';
@@ -81,6 +82,8 @@ export interface TableListViewProps {
    * If the table is not empty, this component renders its own h1 element using the same id.
    */
   headingId?: string;
+  restrictWidth?: boolean;
+  paddingSize?: EuiPageProps['paddingSize'];
 }
 
 export interface TableListViewState {
@@ -559,7 +562,8 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       <EuiPage
         data-test-subj={this.props.entityName + 'LandingPage'}
         className="itemListing__page"
-        restrictWidth
+        restrictWidth={this.props.restrictWidth}
+        paddingSize={this.props.paddingSize}
       >
         <EuiPageBody
           component="main"

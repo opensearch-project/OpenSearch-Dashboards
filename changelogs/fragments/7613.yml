@@ -1,0 +1,2 @@
+fix:
+- [navigation] add sample data to left navigation ([#7613](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7613))

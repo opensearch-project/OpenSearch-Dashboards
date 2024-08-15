@@ -4,6 +4,6 @@
  */
 
 export { Facet, FacetProps } from './facet';
-export { OpenSearchPPLPlugin, OpenSearchObservabilityPlugin } from './plugins';
+export { OpenSearchEnhancements } from './plugins';
 export { shimStats } from './shim_stats';
 export { shimSchemaRow } from './shim_schema_row';

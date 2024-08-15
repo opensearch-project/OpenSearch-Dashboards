@@ -222,7 +222,7 @@ export const EditIndexPattern = withRouter(
             </EuiFlexGroup>
           )}
           <EuiSpacer size="m" />
-          <EuiText>
+          <EuiText size="s">
             <p>
               <FormattedMessage
                 id="indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail"

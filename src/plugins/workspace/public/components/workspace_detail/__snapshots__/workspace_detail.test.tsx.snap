@@ -3,39 +3,6 @@
 exports[`WorkspaceDetail render workspace detail page normally 1`] = `
 <div>
   <div
-    class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
-  >
-    <header
-      class="euiPageHeader euiPageHeader--responsive euiPageHeader--center"
-    >
-      <div
-        class="euiPageHeaderContent"
-      >
-        <div
-          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
-        >
-          <div
-            class="euiFlexItem"
-          >
-            <h1
-              class="euiTitle euiTitle--large"
-            >
-              <div
-                class="euiFlexGroup euiFlexGroup--alignItemsBaseline euiFlexGroup--directionRow euiFlexGroup--responsive"
-              >
-                <div
-                  class="euiFlexItem euiFlexItem--flexGrowZero"
-                >
-                  foo
-                </div>
-              </div>
-            </h1>
-          </div>
-        </div>
-      </div>
-    </header>
-  </div>
-  <div
     class="euiPage euiPage--paddingLarge euiPage--grow"
   >
     <div
@@ -45,7 +12,7 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
         data-test-subj="workspaceTabs"
       >
         <div
-          class="euiTabs"
+          class="euiTabs euiTabs--small"
           role="tablist"
         >
           <button

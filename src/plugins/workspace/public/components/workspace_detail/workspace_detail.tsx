@@ -4,15 +4,7 @@
  */
 
 import React from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageHeader,
-  EuiFlexItem,
-  EuiTabbedContent,
-  EuiFlexGroup,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiTabbedContent } from '@elastic/eui';
 
 import { useObservable } from 'react-use';
 import { i18n } from '@osd/i18n';
@@ -39,12 +31,6 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
   if (!currentWorkspace) {
     return null;
   }
-
-  const pageTitle = (
-    <EuiFlexGroup gutterSize="none" alignItems="baseline" justifyContent="flexStart">
-      <EuiFlexItem grow={false}>{currentWorkspace?.name}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
 
   const detailTabs = [
     {
@@ -86,9 +72,6 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
 
   return (
     <>
-      <EuiPanel paddingSize="l" borderRadius="none" hasShadow={false} hasBorder={false}>
-        <EuiPageHeader pageTitle={pageTitle} />
-      </EuiPanel>
       <EuiPage paddingSize="l">
         <EuiPageBody>
           <EuiTabbedContent
@@ -96,6 +79,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
             tabs={detailTabs}
             initialSelectedTab={detailTabs[0]}
             autoFocus="selected"
+            size="s"
           />
         </EuiPageBody>
       </EuiPage>

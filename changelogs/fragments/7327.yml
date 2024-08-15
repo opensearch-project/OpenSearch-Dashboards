@@ -1,2 +1,0 @@
-fix:
-- Fix wrapping of labels in filter by type popover ([#7327](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7327))

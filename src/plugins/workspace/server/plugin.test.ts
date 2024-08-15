@@ -8,6 +8,7 @@ import { coreMock, httpServerMock } from '../../../core/server/mocks';
 import { WorkspacePlugin } from './plugin';
 import { getWorkspaceState, updateWorkspaceState } from '../../../core/server/utils';
 import * as utilsExports from './utils';
+import { SavedObjectsPermissionControl } from './permission_control/client';
 
 describe('Workspace server plugin', () => {
   it('#setup', async () => {
@@ -156,6 +157,22 @@ describe('Workspace server plugin', () => {
         toolKitMock
       );
       expect(toolKitMock.next).toBeCalledTimes(1);
+    });
+
+    it('should clear saved objects cache', async () => {
+      jest.spyOn(utilsExports, 'getPrincipalsFromRequest').mockImplementation(() => ({}));
+      const clearSavedObjectsCacheMock = jest
+        .spyOn(SavedObjectsPermissionControl.prototype, 'clearSavedObjectsCache')
+        .mockImplementationOnce(() => {});
+
+      await workspacePlugin.setup(setupMock);
+      const toolKitMock = httpServerMock.createToolkit();
+
+      expect(setupMock.http.registerOnPreResponse).toHaveBeenCalled();
+      const preResponseFn = setupMock.http.registerOnPreResponse.mock.calls[0][0];
+
+      preResponseFn(requestWithWorkspaceInUrl, { statusCode: 200 }, toolKitMock);
+      expect(clearSavedObjectsCacheMock).toHaveBeenCalled();
     });
   });
 

@@ -10,8 +10,8 @@ import { Content, Section } from '../services';
 import { ViewMode } from '../../../embeddable/public';
 import { DashboardContainerInput, SavedObjectDashboard } from '../../../dashboard/public';
 import { CUSTOM_CONTENT_EMBEDDABLE } from './custom_content_embeddable';
-import { CardContainerInput } from './card_container/card_container';
 import { CARD_EMBEDDABLE } from './card_container/card_embeddable';
+import { CardContainerInput } from './card_container/types';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
 
@@ -30,7 +30,9 @@ export const createCardInput = (
     title: section.title ?? '',
     hidePanelTitles: true,
     viewMode: ViewMode.VIEW,
+    columns: section.columns,
     panels,
+    ...section.input,
   };
 
   contents.forEach((content) => {
@@ -73,7 +75,7 @@ export const createDashboardInput = async (
   const h = 15;
   const counter = new BehaviorSubject(0);
 
-  contents.forEach(async (content, i) => {
+  contents.forEach(async (content) => {
     counter.next(counter.value + 1);
     try {
       if (content.kind === 'dashboard') {
@@ -102,11 +104,11 @@ export const createDashboardInput = async (
                 }
                 const reference = references.find((ref) => ref.name === panel.panelRefName);
                 if (reference) {
-                  panels[panel.panelIndex] = {
-                    gridData: panel.gridData,
+                  panels[reference.id] = {
+                    gridData: { ...panel.gridData, i: reference.id },
                     type: reference.type,
                     explicitInput: {
-                      id: panel.panelIndex,
+                      id: reference.id,
                       savedObjectId: reference.id,
                     },
                   };
@@ -163,29 +165,27 @@ export const createDashboardInput = async (
     }
   });
 
-  /**
-   * TODO: the input should be hooked with query input
-   */
   const input: DashboardContainerInput = {
-    viewMode: ViewMode.VIEW,
     panels,
+    id: section.id,
+    title: section.title ?? '',
+    viewMode: ViewMode.VIEW,
+    useMargins: true,
     isFullScreenMode: false,
     filters: [],
-    useMargins: true,
-    id: section.id,
     timeRange: {
       to: 'now',
       from: 'now-7d',
     },
-    title: section.title ?? 'test',
     query: {
       query: '',
-      language: 'lucene',
+      language: 'kuery',
     },
     refreshConfig: {
       pause: true,
       value: 15,
     },
+    ...section.input,
   };
 
   return new Promise<DashboardContainerInput>((resolve) => {

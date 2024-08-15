@@ -72,6 +72,10 @@ function getWrapWorkspaceListInContext(
     },
   };
 
+  const mockHeaderControl = ({ controls }) => {
+    return controls?.[0].description ?? controls?.[0].renderComponent ?? null;
+  };
+
   const services = {
     ...coreStartMock,
     workspaces: {
@@ -84,6 +88,9 @@ function getWrapWorkspaceListInContext(
         }
         return null;
       }),
+    },
+    navigationUI: {
+      HeaderControl: mockHeaderControl,
     },
   };
 
@@ -100,12 +107,10 @@ function getWrapWorkspaceListInContext(
 
 describe('WorkspaceList', () => {
   it('should render title and table normally', () => {
-    const { getByText, getByRole, container } = render(
-      <WorkspaceList
-        registeredUseCases$={new BehaviorSubject([WORKSPACE_USE_CASES.observability])}
-      />
-    );
-    expect(getByText('Workspaces')).toBeInTheDocument();
+    const { getByText, getByRole, container } = render(getWrapWorkspaceListInContext());
+    expect(
+      getByText('Organize collaborative projects with use-case-specific workspaces.')
+    ).toBeInTheDocument();
     expect(getByRole('table')).toBeInTheDocument();
     expect(container).toMatchSnapshot();
   });
@@ -117,7 +122,7 @@ describe('WorkspaceList', () => {
     expect(getByText('name2')).toBeInTheDocument();
 
     // should display use case
-    expect(getByText('All use case')).toBeInTheDocument();
+    expect(getByText('Analytics (All)')).toBeInTheDocument();
     expect(getByText('Observability')).toBeInTheDocument();
   });
 
