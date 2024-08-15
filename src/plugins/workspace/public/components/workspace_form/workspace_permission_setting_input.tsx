@@ -23,7 +23,6 @@ import {
   PermissionModeId,
 } from './constants';
 import { getPermissionModeId } from './utils';
-import './workspace_permission_setting_input.scss';
 
 const permissionModeOptions = [
   {
