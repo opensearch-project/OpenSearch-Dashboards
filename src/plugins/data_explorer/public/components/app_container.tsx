@@ -31,6 +31,7 @@ export const AppContainer = React.memo(
     const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
     const { uiSettings } = opensearchDashboards.services;
     const isEnhancementsEnabled = uiSettings?.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
+    const showActionsInGroup = uiSettings?.get('home:useNewHomePage');
 
     const topLinkRef = useRef<HTMLDivElement>(null);
     const datePickerRef = useRef<HTMLDivElement>(null);
@@ -47,21 +48,22 @@ export const AppContainer = React.memo(
       topLinkRef,
       datePickerRef,
     };
-
     // Render the application DOM.
     return (
       <div className="mainPage">
         {isEnhancementsEnabled && (
           <EuiFlexGroup
             direction="row"
-            className="mainPage navBar"
+            className={`mainPage ${showActionsInGroup ? '' : 'navBar'}"`}
             gutterSize="none"
             alignItems="center"
             justifyContent="spaceBetween"
           >
-            <EuiFlexItem grow={false}>
-              <div ref={topLinkRef} />
-            </EuiFlexItem>
+            {!showActionsInGroup && (
+              <EuiFlexItem grow={false}>
+                <div ref={topLinkRef} />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <div ref={datePickerRef} />
             </EuiFlexItem>
