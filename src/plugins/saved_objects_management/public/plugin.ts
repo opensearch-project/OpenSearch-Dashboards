@@ -68,6 +68,11 @@ import { RecentWork } from './management_section/recent_work';
 import { HOME_CONTENT_AREAS } from '../../../plugins/home/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 
+/**
+ * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
+ */
+export const APP_ID = 'objects';
+
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
   columns: SavedObjectsManagementColumnServiceSetup;
@@ -141,7 +146,7 @@ export class SavedObjectsManagementPlugin
 
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
     opensearchDashboardsSection.registerApp({
-      id: 'objects',
+      id: APP_ID,
       title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
         defaultMessage: 'Saved objects',
       }),
@@ -160,10 +165,7 @@ export class SavedObjectsManagementPlugin
 
     if (core.chrome.navGroup.getNavGroupEnabled()) {
       core.application.register({
-        /**
-         * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
-         */
-        id: 'objects',
+        id: APP_ID,
         title: i18n.translate('savedObjectsManagement.assets.label', {
           defaultMessage: 'Assets',
         }),
@@ -193,7 +195,7 @@ export class SavedObjectsManagementPlugin
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
       {
-        id: 'objects',
+        id: APP_ID,
         order: 300,
       },
     ]);
