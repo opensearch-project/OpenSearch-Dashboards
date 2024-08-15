@@ -36,8 +36,22 @@ export const WorkspaceInitial = () => {
   const createWorkspaceUrl = application.getUrlForApp(WORKSPACE_CREATE_APP_ID, { absolute: true });
   const settingsAndSetupUrl = application.getUrlForApp('settings_landing', { absolute: true });
 
+  const createButton = (
+    <EuiSmallButton
+      fill
+      iconType="plus"
+      key={WORKSPACE_CREATE_APP_ID}
+      data-test-subj="workspace-initial-card-createWorkspace-button"
+      href={createWorkspaceUrl}
+    >
+      {i18n.translate('workspace.initial.card.createWorkspace.button', {
+        defaultMessage: 'Create Workspace',
+      })}
+    </EuiSmallButton>
+  );
+
   const cards = (
-    <EuiFlexGroup style={{ overflowX: 'scroll', overflowY: 'hidden' }}>
+    <EuiFlexGroup className="eui-xScrollWithShadows">
       <EuiFlexItem grow={false}>
         <EuiCard
           style={{ width: '270px' }}
@@ -50,17 +64,7 @@ export const WorkspaceInitial = () => {
           })}
           footer={
             isDashboardAdmin ? (
-              <EuiSmallButton
-                fill
-                iconType="plus"
-                key={WORKSPACE_CREATE_APP_ID}
-                data-test-subj="workspace-initial-card-createWorkspace-button"
-                href={createWorkspaceUrl}
-              >
-                {i18n.translate('workspace.initial.card.createWorkspace.button', {
-                  defaultMessage: 'Create Workspace',
-                })}
-              </EuiSmallButton>
+              createButton
             ) : (
               <EuiText color="subdued" style={{ fontSize: '18px' }}>
                 {i18n.translate('workspace.initial.card.createWorkspace.footer', {
@@ -180,9 +184,7 @@ export const WorkspaceInitial = () => {
           <EuiText>
             <EuiIcon type="dashboardApp" size="l" />
             &nbsp;&nbsp;Explore live demo environment at{' '}
-            <EuiLink href="https://future.playground.opensearch.org/">
-              playground.opensearch.org
-            </EuiLink>
+            <EuiLink href="https://playground.opensearch.org/">playground.opensearch.org</EuiLink>
           </EuiText>
         </EuiPanel>
       </EuiFlexItem>
@@ -191,7 +193,7 @@ export const WorkspaceInitial = () => {
   );
 
   return (
-    <EuiPage style={{ minHeight: '100vh', display: 'flex' }}>
+    <EuiPage style={{ minHeight: '100vh' }}>
       <EuiPageBody>
         <EuiFlexGroup direction="column" justifyContent="center" alignItems="center">
           <EuiFlexItem grow={false}>

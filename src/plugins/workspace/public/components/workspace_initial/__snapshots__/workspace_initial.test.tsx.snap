@@ -4,7 +4,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is da
 <div>
   <div
     class="euiPage euiPage--paddingMedium euiPage--grow"
-    style="min-height: 100vh; display: flex;"
+    style="min-height: 100vh;"
   >
     <div
       class="euiPageBody euiPageBody--borderRadiusNone"
@@ -105,7 +105,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is da
                      
                     <a
                       class="euiLink euiLink--primary"
-                      href="https://future.playground.opensearch.org/"
+                      href="https://playground.opensearch.org/"
                       rel="noreferrer"
                     >
                       playground.opensearch.org
@@ -117,8 +117,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is da
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                  style="overflow-x: scroll; overflow-y: hidden;"
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive eui-xScrollWithShadows"
                 >
                   <div
                     class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -358,7 +357,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
 <div>
   <div
     class="euiPage euiPage--paddingMedium euiPage--grow"
-    style="min-height: 100vh; display: flex;"
+    style="min-height: 100vh;"
   >
     <div
       class="euiPageBody euiPageBody--borderRadiusNone"
@@ -459,7 +458,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                      
                     <a
                       class="euiLink euiLink--primary"
-                      href="https://future.playground.opensearch.org/"
+                      href="https://playground.opensearch.org/"
                       rel="noreferrer"
                     >
                       playground.opensearch.org
@@ -471,8 +470,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                 class="euiFlexItem euiFlexItem--flexGrowZero"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-                  style="overflow-x: scroll; overflow-y: hidden;"
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive eui-xScrollWithShadows"
                 >
                   <div
                     class="euiFlexItem euiFlexItem--flexGrowZero"

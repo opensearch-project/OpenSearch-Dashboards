@@ -113,14 +113,14 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     core.http.registerOnPostAuth(async (request, response, toolkit) => {
       const path = request.url.pathname;
       if (path === '/') {
-        const listResponse = await this.client?.list(
+        const workspaceListResponse = await this.client?.list(
           { request, logger: this.logger },
           { page: 1, perPage: 1 }
         );
-        if (listResponse?.success && listResponse.result.total > 0) {
+        if (workspaceListResponse?.success && workspaceListResponse.result.total > 0) {
           return toolkit.next();
         }
-        const basePath = request.url.origin;
+        const basePath = core.http.basePath.serverBasePath;
         return response.redirected({
           headers: { location: `${basePath}/app/${WORKSPACE_INITIAL_APP_ID}` },
         });
