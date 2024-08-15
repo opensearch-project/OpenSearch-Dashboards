@@ -53,6 +53,7 @@ import { UseCaseService } from './services/use_case_service';
 import { WorkspaceListCard } from './components/service_card';
 import { UseCaseFooter } from './components/home_get_start_card';
 import { HOME_CONTENT_AREAS } from '../../home/public';
+import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -68,6 +69,7 @@ interface WorkspacePluginSetupDeps {
 
 export interface WorkspacePluginStartDeps {
   contentManagement: ContentManagementPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export class WorkspacePlugin
@@ -235,7 +237,7 @@ export class WorkspacePlugin
   }
 
   public async setup(
-    core: CoreSetup,
+    core: CoreSetup<WorkspacePluginStartDeps>,
     { savedObjectsManagement, management, dataSourceManagement }: WorkspacePluginSetupDeps
   ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
@@ -302,11 +304,13 @@ export class WorkspacePlugin
     }
 
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
-      const [coreStart] = await core.getStartServices();
+      const [coreStart, { navigation }] = await core.getStartServices();
+
       const services = {
         ...coreStart,
         workspaceClient,
         dataSourceManagement,
+        navigationUI: navigation.ui,
       };
 
       return renderApp(params, services, {
@@ -441,7 +445,7 @@ export class WorkspacePlugin
     });
   }
 
-  public start(core: CoreStart, { contentManagement }: WorkspacePluginStartDeps) {
+  public start(core: CoreStart, { contentManagement, navigation }: WorkspacePluginStartDeps) {
     this.coreStart = core;
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
