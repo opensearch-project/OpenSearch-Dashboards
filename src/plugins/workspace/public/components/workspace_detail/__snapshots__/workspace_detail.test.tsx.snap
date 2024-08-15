@@ -510,6 +510,7 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
                                     Select an option: Observability, is selected
                                   </span>
                                   <button
+                                    aria-describedby="generated-id-help-0"
                                     aria-haspopup="true"
                                     aria-labelledby="generated-id generated-id"
                                     class="euiSuperSelectControl"
@@ -536,6 +537,12 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
                               </div>
                             </div>
                           </div>
+                        </div>
+                        <div
+                          class="euiFormHelpText euiFormRow__text"
+                          id="generated-id-help-0"
+                        >
+                          You can only choose use cases with more features than the current use case.
                         </div>
                       </div>
                     </div>

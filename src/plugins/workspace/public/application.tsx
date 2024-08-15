@@ -77,7 +77,6 @@ export const renderDetailApp = (
           <Route>
             <WorkspaceDetailApp {...props} />
           </Route>
-          <Redirect to={`?tab=${DetailTab.Details}`} />
         </Switch>
       </Router>
     </OpenSearchDashboardsContextProvider>,

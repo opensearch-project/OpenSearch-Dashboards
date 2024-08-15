@@ -54,16 +54,18 @@ interface WorkspaceDetailPanelProps {
   handleBadgeClick: () => void;
   currentUseCase: WorkspaceUseCase | undefined;
   currentWorkspace: WorkspaceObject;
+  dateFormat: string;
 }
 export const WorkspaceDetailPanel = ({
   useCaseUrl,
   currentUseCase,
   handleBadgeClick,
   currentWorkspace,
+  dateFormat,
 }: WorkspaceDetailPanelProps) => {
   const owners = getOwners(currentWorkspace);
   const formatDate = (lastUpdatedTime: string) => {
-    return moment(lastUpdatedTime).format('MMM DD, YYYY @ HH:mm:ss.SSS');
+    return moment(lastUpdatedTime).format(dateFormat);
   };
 
   return (

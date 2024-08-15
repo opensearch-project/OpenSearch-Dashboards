@@ -10,6 +10,7 @@ import {
   EuiDescribedFormGroup,
   EuiCompressedTextArea,
   EuiCompressedFieldText,
+  EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useObservable } from 'react-use';
@@ -22,6 +23,7 @@ import {
   detailsNamePlaceholder,
   detailsDescriptionPlaceholder,
   detailsDescriptionIntroduction,
+  detailsUseCaseHelpText,
 } from './constants';
 import { CoreStart } from '../../../../../core/public';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
@@ -62,22 +64,17 @@ export const WorkspaceDetailFormDetailsProps = ({
   const options = availableUseCases
     .filter((item) => !item.systematic)
     .concat(DEFAULT_NAV_GROUPS.all)
-    .map((useCase) => {
-      let isDisabled = false;
-      // Essential can be changed to other use cases
-      if (currentUseCase === 'analytics') {
-        isDisabled = false;
-      } else {
-        // other use cases can only be changed to "ALL" use case
-        isDisabled = useCase.id !== 'all';
-      }
-      return {
-        value: useCase.id,
-        inputDisplay: useCase.title,
-        'data-test-subj': useCase.id,
-        disabled: isDisabled,
-      };
-    });
+    .filter(({ id }) => {
+      // Essential can be changed to other use cases;
+      // Analytics (all) cannot be changed back to a single use case;
+      // Other use cases can only be changed to Analytics (all) use case.
+      return currentUseCase === 'analytics' || id === 'all' || id === currentUseCase;
+    })
+    .map((useCase) => ({
+      value: useCase.id,
+      inputDisplay: useCase.title,
+      'data-test-subj': useCase.id,
+    }));
 
   return (
     <>
@@ -121,6 +118,7 @@ export const WorkspaceDetailFormDetailsProps = ({
           label={detailsUseCaseLabel}
           isInvalid={!!formErrors.features}
           error={formErrors.features?.message}
+          helpText={detailsUseCaseHelpText}
         >
           <EuiSuperSelect
             options={options}

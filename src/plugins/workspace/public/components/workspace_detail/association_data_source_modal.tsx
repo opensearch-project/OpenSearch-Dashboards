@@ -3,28 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import React from 'react';
 import {
+  EuiText,
   EuiModal,
   EuiButton,
   EuiModalBody,
+  EuiSelectable,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiText,
-  EuiSelectable,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
+import { getDataSourcesList } from '../../utils';
 import { DataSource } from '../../../common/types';
 import { SavedObjectsStart } from '../../../../../core/public';
-import { getDataSourcesList } from '../../utils';
 
 export interface AssociationDataSourceModalProps {
   savedObjects: SavedObjectsStart;
   assignedDataSources: DataSource[];
   closeModal: () => void;
-  handleAssignDataSources: (options: any) => Promise<void>;
+  handleAssignDataSources: (dataSources: DataSource[]) => Promise<void>;
 }
 
 export const AssociationDataSourceModal = ({
@@ -33,8 +34,7 @@ export const AssociationDataSourceModal = ({
   assignedDataSources,
   handleAssignDataSources,
 }: AssociationDataSourceModalProps) => {
-  const [options, setOptions] = useState<any>([]);
-  const [selectedDataSources, setSelectedDataSources] = useState<DataSource[]>([]);
+  const [options, setOptions] = useState<EuiSelectableOption[]>([]);
   const [allDataSources, setAllDataSources] = useState<DataSource[]>([]);
 
   useEffect(() => {
@@ -44,19 +44,20 @@ export const AssociationDataSourceModal = ({
       );
       setAllDataSources(filteredDataSources);
       setOptions(
-        filteredDataSources.map((dataSource) => {
-          return { label: dataSource.title, id: dataSource.id };
-        })
+        filteredDataSources.map((dataSource) => ({
+          label: dataSource.title,
+          key: dataSource.id,
+        }))
       );
     });
   }, [assignedDataSources, savedObjects]);
 
-  useEffect(() => {
+  const selectedDataSources = useMemo(() => {
     const selectedIds = options
-      .filter((option: any) => option.checked)
-      .map((option: any) => option.id);
+      .filter((option: EuiSelectableOption) => option.checked)
+      .map((option: EuiSelectableOption) => option.key);
 
-    setSelectedDataSources(allDataSources.filter((ds) => selectedIds.includes(ds.id)));
+    return allDataSources.filter((ds) => selectedIds.includes(ds.id));
   }, [options, allDataSources]);
 
   return (
@@ -104,7 +105,11 @@ export const AssociationDataSourceModal = ({
             defaultMessage="Close"
           />
         </EuiButton>
-        <EuiButton onClick={() => handleAssignDataSources(selectedDataSources)} fill>
+        <EuiButton
+          onClick={() => handleAssignDataSources(selectedDataSources)}
+          isDisabled={!selectedDataSources || selectedDataSources.length === 0}
+          fill
+        >
           <FormattedMessage
             id="workspace.detail.dataSources.associateModal.save.button"
             defaultMessage="Save changes"

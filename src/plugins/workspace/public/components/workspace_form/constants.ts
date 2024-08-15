@@ -83,6 +83,13 @@ export const detailsUseCaseLabel = i18n.translate('workspace.form.workspaceDetai
   defaultMessage: 'Use case',
 });
 
+export const detailsUseCaseHelpText = i18n.translate(
+  'workspace.form.workspaceDetails.useCase.helpText',
+  {
+    defaultMessage: 'You can only choose use cases with more features than the current use case.',
+  }
+);
+
 export const detailsColorLabel = i18n.translate('workspace.form.workspaceDetails.color.label', {
   defaultMessage: 'Workspace icon color',
 });

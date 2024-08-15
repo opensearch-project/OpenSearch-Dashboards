@@ -73,7 +73,7 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
 
   // Handle beforeunload event
   useEffect(() => {
-    const handleBeforeUnload = (event: any) => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (!isSaving && isEditing && numberOfChanges > 0) {
         event.preventDefault();
       }

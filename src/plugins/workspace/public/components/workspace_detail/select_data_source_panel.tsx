@@ -86,6 +86,7 @@ export const SelectDataSourceDetailPanel = ({
   const associationButton = (
     <EuiSmallButton
       onClick={() => setIsVisible(true)}
+      isLoading={isLoading}
       data-test-subj="workspace-detail-dataSources-assign-button"
     >
       {i18n.translate('workspace.detail.dataSources.assign.button', {
@@ -93,6 +94,69 @@ export const SelectDataSourceDetailPanel = ({
       })}
     </EuiSmallButton>
   );
+
+  const loadingMessage = (
+    <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+      <EuiLoadingSpinner size="xl" />
+      <EuiSpacer size="m" />
+      <EuiText>
+        <FormattedMessage
+          id="workspace.detail.dataSources.noAssociation.message"
+          defaultMessage="Loading OpenSearch connections..."
+        />
+      </EuiText>
+    </div>
+  );
+
+  const noAssociationMessage = (
+    <EuiTextAlign textAlign="center">
+      <EuiTitle>
+        <h3>
+          <FormattedMessage
+            id="workspace.detail.dataSources.noAssociation.title"
+            defaultMessage="No associated data sources"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer />
+      <EuiText color="subdued">
+        <FormattedMessage
+          id="workspace.detail.dataSources.noAssociation.message"
+          defaultMessage="No OpenSearch connections are available in this workspace."
+        />
+      </EuiText>
+      {isDashboardAdmin ? (
+        <>
+          <EuiSpacer />
+          {associationButton}
+        </>
+      ) : (
+        <EuiText color="subdued">
+          <FormattedMessage
+            id="workspace.detail.dataSources.noAssociation.noAdmin.message"
+            defaultMessage="Contact your administrator to associate data sources with the workspace."
+          />
+        </EuiText>
+      )}
+    </EuiTextAlign>
+  );
+
+  const renderTableContent = () => {
+    if (isLoading) {
+      return loadingMessage;
+    }
+    if (assignedDataSources.length === 0) {
+      return noAssociationMessage;
+    }
+    return (
+      <OpenSearchConnectionTable
+        isDashboardAdmin={isDashboardAdmin}
+        currentWorkspace={currentWorkspace}
+        assignedDataSources={assignedDataSources}
+        setIsLoading={setIsLoading}
+      />
+    );
+  };
 
   return (
     <EuiPanel>
@@ -102,63 +166,10 @@ export const SelectDataSourceDetailPanel = ({
             <h2>{detailTitle}</h2>
           </EuiTitle>
         </EuiFlexItem>
-        {isDashboardAdmin && !isLoading && (
-          <EuiFlexItem grow={false}>{associationButton}</EuiFlexItem>
-        )}
+        {isDashboardAdmin && <EuiFlexItem grow={false}>{associationButton}</EuiFlexItem>}
       </EuiFlexGroup>
       <EuiHorizontalRule />
-      {assignedDataSources.length > 0 ? (
-        isLoading ? (
-          <div style={{ textAlign: 'center', marginTop: '2rem' }}>
-            <EuiLoadingSpinner size="xl" />
-            <EuiSpacer size="m" />
-            <EuiText>
-              <FormattedMessage
-                id="workspace.detail.dataSources.noAssociation.message"
-                defaultMessage="Loading OpenSearch connections..."
-              />
-            </EuiText>
-          </div>
-        ) : (
-          <OpenSearchConnectionTable
-            isDashboardAdmin={isDashboardAdmin}
-            currentWorkspace={currentWorkspace}
-            assignedDataSources={assignedDataSources}
-            setIsLoading={setIsLoading}
-          />
-        )
-      ) : (
-        <EuiTextAlign textAlign="center">
-          <EuiTitle>
-            <h3>
-              <FormattedMessage
-                id="workspace.detail.dataSources.noAssociation.title"
-                defaultMessage="No associated data sources"
-              />
-            </h3>
-          </EuiTitle>
-          <EuiSpacer />
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="workspace.detail.dataSources.noAssociation.message"
-              defaultMessage="No OpenSearch connections are available in this workspace."
-            />
-          </EuiText>
-          {isDashboardAdmin ? (
-            <>
-              <EuiSpacer />
-              {associationButton}
-            </>
-          ) : (
-            <EuiText color="subdued">
-              <FormattedMessage
-                id="workspace.detail.dataSources.noAssociation.noAdmin.message"
-                defaultMessage="Contact your administrator to associate data sources with the workspace."
-              />
-            </EuiText>
-          )}
-        </EuiTextAlign>
-      )}
+      {renderTableContent()}
       {isVisible && (
         <AssociationDataSourceModal
           savedObjects={savedObjects}

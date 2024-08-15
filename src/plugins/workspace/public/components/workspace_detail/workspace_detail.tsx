@@ -41,7 +41,7 @@ export interface WorkspaceDetailProps {
 
 export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
   const {
-    services: { workspaces, application, http, savedObjects, dataSourceManagement },
+    services: { workspaces, application, http, savedObjects, dataSourceManagement, uiSettings },
   } = useOpenSearchDashboards<{
     CoreStart: CoreStart;
     dataSourceManagement?: DataSourceManagementPluginSetup;
@@ -54,6 +54,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
     numberOfErrors,
     handleResetForm,
     numberOfChanges,
+    setIsEditing,
   } = useWorkspaceFormContext();
   const [deletedWorkspace, setDeletedWorkspace] = useState<WorkspaceAttribute | null>(null);
   const [selectedTabId, setSelectedTabId] = useState<string>(DetailTab.Details);
@@ -78,7 +79,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
     }
   }, [location.search]);
 
-  if (!currentWorkspace || !application || !http || !savedObjects) {
+  if (!currentWorkspace || !application || !http || !savedObjects || !uiSettings) {
     return null;
   }
 
@@ -91,6 +92,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
       return;
     }
     history.push(`?tab=${tab.id}`);
+    setIsEditing(false);
     setSelectedTabId(tab.id);
   };
 
@@ -176,6 +178,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
             handleBadgeClick={handleBadgeClick}
             currentUseCase={currentUseCase}
             currentWorkspace={currentWorkspace}
+            dateFormat={uiSettings.get('dateFormat')}
           />
         </EuiPageContent>
         <EuiSpacer />
