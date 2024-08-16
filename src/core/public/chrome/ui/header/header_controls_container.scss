@@ -16,6 +16,7 @@
 
   &.headerBottomControl {
     padding: $euiSizeM;
+    max-width: 725px;
   }
 
   &:empty {

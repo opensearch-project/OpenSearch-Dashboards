@@ -26,10 +26,7 @@ describe('Workspace plugin', () => {
   const mockDependencies: WorkspacePluginStartDeps = {
     contentManagement: contentManagementPluginMocks.createStartContract(),
   };
-  const getSetupMock = () => ({
-    ...coreMock.createSetup(),
-    chrome: chromeServiceMock.createSetupContract(),
-  });
+  const getSetupMock = () => coreMock.createSetup();
 
   beforeEach(() => {
     WorkspaceClientMock.mockClear();
@@ -96,7 +93,7 @@ describe('Workspace plugin', () => {
     expect(setupMock.application.register).toBeCalledTimes(5);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
-    expect(setupMock.getStartServices).toBeCalledTimes(1);
+    expect(setupMock.getStartServices).toBeCalledTimes(2);
     await waitFor(
       () => {
         expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_FATAL_ERROR_APP_ID, {
@@ -129,6 +126,7 @@ describe('Workspace plugin', () => {
     });
     const setupMock = getSetupMock();
     const applicationStartMock = applicationServiceMock.createStartContract();
+    const chromeStartMock = chromeServiceMock.createStartContract();
     let currentAppIdSubscriber: Subscriber<string> | undefined;
     setupMock.getStartServices.mockImplementation(() => {
       return Promise.resolve([
@@ -139,6 +137,7 @@ describe('Workspace plugin', () => {
               currentAppIdSubscriber = subscriber;
             }),
           },
+          chrome: chromeStartMock,
         },
         {},
         {},
@@ -296,6 +295,7 @@ describe('Workspace plugin', () => {
 
     expect(coreStart.chrome.navControls.registerLeftBottom).toBeCalledTimes(1);
   });
+
   it('#start should not update systematic use case features after currentWorkspace set', async () => {
     const registeredUseCases$ = new BehaviorSubject([
       {
