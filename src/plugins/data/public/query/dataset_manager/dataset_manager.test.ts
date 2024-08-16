@@ -5,8 +5,9 @@
 
 import { DataSetManager } from './dataset_manager';
 import { coreMock } from '../../../../../core/public/mocks';
-import { SimpleDataSet } from '../../../common';
-describe('DataSetManager', () => {
+import { Dataset } from '../../../common';
+
+describe('DatasetManager', () => {
   let service: DataSetManager;
 
   beforeEach(() => {
@@ -17,14 +18,18 @@ describe('DataSetManager', () => {
 
   test('getUpdates$ is a cold emits only after dataset changes', () => {
     const obs$ = service.getUpdates$();
-    const emittedValues: SimpleDataSet[] = [];
+    const emittedValues: Dataset[] = [];
     obs$.subscribe((v) => {
       emittedValues.push(v!);
     });
     expect(emittedValues).toHaveLength(0);
     expect(emittedValues[0]).toEqual(undefined);
 
-    const newDataSet: SimpleDataSet = { id: 'test_dataset', title: 'Test Dataset' };
+    const newDataSet: Dataset = {
+      id: 'test_dataset',
+      title: 'Test Dataset',
+      type: 'INDEX_PATTERN',
+    };
     service.setDataSet(newDataSet);
     expect(emittedValues).toHaveLength(1);
     expect(emittedValues[0]).toEqual(newDataSet);

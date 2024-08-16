@@ -6,22 +6,16 @@
 import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { skip } from 'rxjs/operators';
-import {
-  IndexPattern,
-  SIMPLE_DATA_SET_TYPES,
-  SimpleDataSet,
-  SimpleDataSource,
-  UI_SETTINGS,
-} from '../../../common';
+import { DEFAULT_QUERY, Dataset, DataSource, IndexPattern, UI_SETTINGS } from '../../../common';
 import { IndexPatternsContract } from '../../index_patterns';
 
 export class DataSetManager {
-  private dataSet$: BehaviorSubject<SimpleDataSet | undefined>;
+  private dataSet$: BehaviorSubject<Dataset | undefined>;
   private indexPatterns?: IndexPatternsContract;
-  private defaultDataSet?: SimpleDataSet;
+  private defaultDataSet?: Dataset;
 
   constructor(private readonly uiSettings: CoreStart['uiSettings']) {
-    this.dataSet$ = new BehaviorSubject<SimpleDataSet | undefined>(undefined);
+    this.dataSet$ = new BehaviorSubject<Dataset | undefined>(undefined);
   }
 
   public init = async (indexPatterns: IndexPatternsContract) => {
@@ -39,16 +33,15 @@ export class DataSetManager {
     this.defaultDataSet = {
       id: indexPattern.id,
       title: indexPattern.title,
-      type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
+      type: DEFAULT_QUERY.DATASET_TYPE,
       timeFieldName: indexPattern.timeFieldName,
-      fields: indexPattern.fields,
       ...(indexPattern.dataSourceRef
         ? {
-            dataSourceRef: {
+            dataSource: {
               id: indexPattern.dataSourceRef?.id,
-              name: indexPattern.dataSourceRef?.name,
+              title: indexPattern.dataSourceRef?.name,
               type: indexPattern.dataSourceRef?.type,
-            } as SimpleDataSource,
+            } as DataSource,
           }
         : {}),
     };
@@ -66,15 +59,8 @@ export class DataSetManager {
    * Updates the query.
    * @param {Query} query
    */
-  public setDataSet = (dataSet: SimpleDataSet | undefined) => {
+  public setDataSet = (dataSet: Dataset | undefined) => {
     if (!this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) return;
-
-    // if (dataSet) {
-    //   const { fields, ...dataSetWithoutFields } = dataSet;
-    //   this.dataSet$.next(dataSetWithoutFields);
-    // } else {
-    //   this.dataSet$.next(undefined);
-    // }
     this.dataSet$.next(dataSet);
   };
 
@@ -82,7 +68,7 @@ export class DataSetManager {
     return this.defaultDataSet;
   };
 
-  public fetchDefaultDataSet = async (): Promise<SimpleDataSet | undefined> => {
+  public fetchDefaultDataSet = async (): Promise<Dataset | undefined> => {
     const defaultIndexPatternId = this.uiSettings.get('defaultIndex');
     if (!defaultIndexPatternId) {
       return undefined;
@@ -96,15 +82,15 @@ export class DataSetManager {
     return {
       id: indexPattern.id,
       title: indexPattern.title,
-      type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
+      type: DEFAULT_QUERY.DATASET_TYPE,
       timeFieldName: indexPattern.timeFieldName,
       ...(indexPattern.dataSourceRef
         ? {
-            dataSourceRef: {
+            dataSource: {
               id: indexPattern.dataSourceRef?.id,
-              name: indexPattern.dataSourceRef?.name,
+              title: indexPattern.dataSourceRef?.name,
               type: indexPattern.dataSourceRef?.type,
-            } as SimpleDataSource,
+            } as DataSource,
           }
         : {}),
     };

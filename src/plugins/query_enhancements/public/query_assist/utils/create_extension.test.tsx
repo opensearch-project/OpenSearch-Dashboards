@@ -8,7 +8,7 @@ import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
-import { SimpleDataSet } from '../../../../data/common';
+import { Dataset } from '../../../../data/common';
 import { QueryEditorExtensionDependencies } from '../../../../data/public';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { DataSetContract } from '../../../../data/public/query';
@@ -26,16 +26,16 @@ const httpMock = coreSetupMock.http;
 const dataMock = dataPluginMock.createSetupContract();
 const dataSetMock = (dataMock.query.dataSetManager as unknown) as jest.Mocked<DataSetContract>;
 
-const mockSimpleDataSet = {
+const mockDataset = {
   id: 'mock-data-set-id',
   title: 'mock-title',
-  dataSourceRef: {
+  dataSource: {
     id: 'mock-data-source-id',
   },
-} as SimpleDataSet;
+} as Dataset;
 
-dataSetMock.getDataSet.mockReturnValue(mockSimpleDataSet);
-dataSetMock.getUpdates$.mockReturnValue(of(mockSimpleDataSet));
+dataSetMock.getDataSet.mockReturnValue(mockDataset);
+dataSetMock.getUpdates$.mockReturnValue(of(mockDataset));
 
 jest.mock('../components', () => ({
   QueryAssistBar: jest.fn(() => <div>QueryAssistBar</div>),
