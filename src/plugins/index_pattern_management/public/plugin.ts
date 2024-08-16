@@ -46,7 +46,7 @@ import {
 } from './service';
 
 import { ManagementSetup } from '../../management/public';
-import { DEFAULT_NAV_GROUPS, AppStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { AppStatus, DEFAULT_NAV_GROUPS } from '../../../core/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 
@@ -70,6 +70,9 @@ const sectionsHeader = i18n.translate('indexPatternManagement.indexPattern.secti
   defaultMessage: 'Index patterns',
 });
 
+/**
+ * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
+ */
 const IPM_APP_ID = 'indexPatterns';
 
 export class IndexPatternManagementPlugin
@@ -139,6 +142,9 @@ export class IndexPatternManagementPlugin
     core.application.register({
       id: IPM_APP_ID,
       title: sectionsHeader,
+      description: i18n.translate('indexPatternManagement.indexPattern.description', {
+        defaultMessage: 'Manage index patterns to retrieve data from OpenSearch.',
+      }),
       status: core.chrome.navGroup.getNavGroupEnabled()
         ? AppStatus.accessible
         : AppStatus.inaccessible,
@@ -161,43 +167,11 @@ export class IndexPatternManagementPlugin
       },
     });
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
       {
         id: IPM_APP_ID,
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 200,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-      {
-        id: IPM_APP_ID,
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 200,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
-      {
-        id: IPM_APP_ID,
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 200,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
-      {
-        id: IPM_APP_ID,
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 200,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: IPM_APP_ID,
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 200,
+        title: sectionsHeader,
+        order: 400,
       },
     ]);
 

@@ -249,7 +249,7 @@ export const convertNavGroupToWorkspaceUseCase = ({
   title,
   description,
   features: navLinks.map((item) => item.id),
-  systematic: type === NavGroupType.SYSTEM,
+  systematic: type === NavGroupType.SYSTEM || id === ALL_USE_CASE_ID,
   order,
 });
 

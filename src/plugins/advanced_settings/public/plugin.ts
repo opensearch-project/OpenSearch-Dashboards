@@ -70,6 +70,9 @@ export class AdvancedSettingsPlugin
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+      description: i18n.translate('advancedSettings.description', {
+        defaultMessage: 'Customize the appearance and behavior of OpenSearch Dashboards.',
+      }),
       mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import(
           './management_app/mount_management_section'
