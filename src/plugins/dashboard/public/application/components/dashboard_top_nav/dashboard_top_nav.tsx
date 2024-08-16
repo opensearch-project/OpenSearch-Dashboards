@@ -8,11 +8,12 @@ import { IndexPattern } from 'src/plugins/data/public';
 import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { getTopNavConfig } from './top_nav';
+import { getTopNavConfig, getTopNavRightConfig, getTopNavLegacyConfig } from './top_nav';
 import { DashboardAppStateContainer, DashboardAppState, DashboardServices } from '../../../types';
 import { getNavActions } from '../../utils/get_nav_actions';
 import { DashboardContainer } from '../../embeddable';
 import { Dashboard } from '../../../dashboard';
+import { TopNavMenuItemRenderType, TopNavControlData } from '../../../../../navigation/public';
 
 interface DashboardTopNavProps {
   isChromeVisible: boolean;
@@ -46,11 +47,15 @@ const TopNav = ({
   dashboardIdFromUrl,
 }: DashboardTopNavProps) => {
   const [topNavMenu, setTopNavMenu] = useState<any>();
+  const [topRightControls, setTopRightControls] = useState<TopNavControlData[]>([]);
   const [isFullScreenMode, setIsFullScreenMode] = useState<any>();
 
   const { services } = useOpenSearchDashboards<DashboardServices>();
-  const { TopNavMenu } = services.navigation.ui;
+  const { TopNavMenu, HeaderControl } = services.navigation.ui;
   const { dashboardConfig, setHeaderActionMenu } = services;
+  const { setAppRightControls } = services.application;
+
+  const showActionsInGroup = services.uiSettings.get('home:useNewHomePage');
 
   const location = useLocation();
   const queryParameters = new URLSearchParams(location.search);
@@ -86,11 +91,20 @@ const TopNav = ({
         currentContainer
       );
       setTopNavMenu(
-        getTopNavConfig(
-          currentAppState?.viewMode,
-          navActions,
-          dashboardConfig.getHideWriteControls()
-        )
+        showActionsInGroup
+          ? getTopNavConfig(
+              currentAppState?.viewMode,
+              navActions,
+              dashboardConfig.getHideWriteControls()
+            )
+          : getTopNavLegacyConfig(
+              currentAppState?.viewMode,
+              navActions,
+              dashboardConfig.getHideWriteControls()
+            )
+      );
+      setTopRightControls(
+        showActionsInGroup ? getTopNavRightConfig(currentAppState?.viewMode, navActions) : []
       );
     }
   }, [
@@ -103,6 +117,7 @@ const TopNav = ({
     isEmbeddableRendered,
     dashboard,
     dashboardIdFromUrl,
+    showActionsInGroup,
   ]);
 
   useEffect(() => {
@@ -124,27 +139,31 @@ const TopNav = ({
   const showSearchBar = showQueryBar || showFilterBar;
 
   return (
-    <TopNavMenu
-      appName={'dashboard'}
-      config={showTopNavMenu ? topNavMenu : undefined}
-      className={isFullScreenMode ? 'osdTopNavMenu-isFullScreen' : undefined}
-      screenTitle={currentAppState.title}
-      showSearchBar={showSearchBar}
-      showQueryBar={showQueryBar}
-      showQueryInput={showQueryInput}
-      showDatePicker={showDatePicker}
-      showFilterBar={showFilterBar}
-      useDefaultBehaviors={true}
-      indexPatterns={indexPatterns}
-      showSaveQuery={services.dashboardCapabilities.saveQuery as boolean}
-      savedQuery={undefined}
-      onSavedQueryIdChange={(savedQueryId?: string) => {
-        appState.transitions.set('savedQuery', savedQueryId);
-      }}
-      savedQueryId={currentAppState?.savedQuery}
-      onQuerySubmit={handleRefresh}
-      setMenuMountPoint={isEmbeddedExternally ? undefined : setHeaderActionMenu}
-    />
+    <>
+      <TopNavMenu
+        appName={'dashboard'}
+        config={showTopNavMenu ? topNavMenu : undefined}
+        className={isFullScreenMode ? 'osdTopNavMenu-isFullScreen' : undefined}
+        screenTitle={currentAppState.title}
+        showSearchBar={showSearchBar && TopNavMenuItemRenderType.IN_PORTAL}
+        showQueryBar={showQueryBar}
+        showQueryInput={showQueryInput}
+        showDatePicker={showDatePicker}
+        showFilterBar={showFilterBar}
+        useDefaultBehaviors={true}
+        indexPatterns={indexPatterns}
+        showSaveQuery={services.dashboardCapabilities.saveQuery as boolean}
+        savedQuery={undefined}
+        onSavedQueryIdChange={(savedQueryId?: string) => {
+          appState.transitions.set('savedQuery', savedQueryId);
+        }}
+        savedQueryId={currentAppState?.savedQuery}
+        onQuerySubmit={handleRefresh}
+        setMenuMountPoint={isEmbeddedExternally ? undefined : setHeaderActionMenu}
+        groupActions={showActionsInGroup}
+      />
+      <HeaderControl setMountPoint={setAppRightControls} controls={topRightControls} />
+    </>
   );
 };
 

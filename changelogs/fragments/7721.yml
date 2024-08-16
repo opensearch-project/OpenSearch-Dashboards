@@ -1,0 +1,2 @@
+feat:
+- Allow `screenTitle` to be present when SearchBar is not in Application header ([#7721](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7721))

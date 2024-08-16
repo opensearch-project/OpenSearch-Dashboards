@@ -261,5 +261,12 @@ export async function load(translationsUrl: string) {
     throw new Error(`Translations request failed with status code: ${response.status}`);
   }
 
-  init(await response.json());
+  const data = await response.json();
+
+  if (data.warning) {
+    // Store the warning to be displayed after core system setup
+    (window as any).__i18nWarning = data.warning;
+  }
+
+  init(data.translations);
 }

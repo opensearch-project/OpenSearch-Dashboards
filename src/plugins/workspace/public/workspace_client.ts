@@ -233,6 +233,9 @@ export class WorkspaceClient implements IWorkspaceClient {
     const result = await this.safeFetch<null>(this.getPath(id), { method: 'DELETE' });
 
     if (result.success) {
+      // After deleting workspace, need to reset current workspace ID.
+      this.workspaces.currentWorkspaceId$.next('');
+
       await this.updateWorkspaceList();
     }
 

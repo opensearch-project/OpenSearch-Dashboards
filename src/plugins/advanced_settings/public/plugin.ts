@@ -71,6 +71,9 @@ export class AdvancedSettingsPlugin
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+      description: i18n.translate('advancedSettings.description', {
+        defaultMessage: 'Customize the appearance and behavior of OpenSearch Dashboards.',
+      }),
       mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import(
           './management_app/mount_management_section'
@@ -122,7 +125,7 @@ export class AdvancedSettingsPlugin
   public start(core: CoreStart) {
     const enableUserControl = core.uiSettings.get('theme:enableUserControl');
     if (enableUserControl) {
-      setupTopNavThemeButton(core);
+      setupTopNavThemeButton(core, core.uiSettings.get('home:useNewHomePage'));
     }
 
     return {
