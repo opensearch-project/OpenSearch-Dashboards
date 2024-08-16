@@ -167,13 +167,17 @@ export class IndexPatternManagementPlugin
       },
     });
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
-      {
-        id: IPM_APP_ID,
-        title: sectionsHeader,
-        order: 400,
-      },
-    ]);
+    core.getStartServices().then(([coreStart]) => {
+      if (!coreStart.application.capabilities.workspaces.enabled) {
+        core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+          {
+            id: IPM_APP_ID,
+            title: sectionsHeader,
+            order: 400,
+          },
+        ]);
+      }
+    });
 
     return this.indexPatternManagementService.setup({ httpClient: core.http });
   }
