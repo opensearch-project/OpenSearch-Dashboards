@@ -334,6 +334,15 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on header w
   }
   workspaces={
     Object {
+      "client$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
       "currentWorkspace$": BehaviorSubject {
         "_isScalar": false,
         "_value": Object {
@@ -512,6 +521,15 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
   selectedSavedObjects={Array []}
   workspaces={
     Object {
+      "client$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
       "currentWorkspace$": BehaviorSubject {
         "_isScalar": false,
         "_value": Object {
@@ -702,6 +720,15 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
   }
   workspaces={
     Object {
+      "client$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
       "currentWorkspace$": BehaviorSubject {
         "_isScalar": false,
         "_value": Object {
