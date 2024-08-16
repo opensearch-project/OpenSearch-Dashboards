@@ -9,7 +9,7 @@ import { ChromeRegistrationNavLink } from './nav_group';
 
 type KeyOf<T> = keyof T;
 
-const sortBy = <T>(key: KeyOf<T>) => {
+export const sortBy = <T>(key: KeyOf<T>) => {
   return (a: T, b: T): number => (a[key] > b[key] ? 1 : b[key] > a[key] ? -1 : 0);
 };
 

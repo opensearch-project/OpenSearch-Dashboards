@@ -276,6 +276,8 @@ export class ChromeNavGroupService {
         const navGroups = appIdNavGroupMap.get(appId);
         if (navGroups && navGroups.size === 1) {
           setCurrentNavGroup(navGroups.values().next().value);
+        } else if (!navGroups) {
+          setCurrentNavGroup(undefined);
         }
       }
     });

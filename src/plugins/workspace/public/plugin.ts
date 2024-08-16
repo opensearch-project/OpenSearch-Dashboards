@@ -7,7 +7,7 @@ import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { map } from 'rxjs/operators';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiPanel } from '@elastic/eui';
 import {
   Plugin,
   CoreStart,
@@ -55,6 +55,7 @@ import { WorkspaceListCard } from './components/service_card';
 import { UseCaseFooter } from './components/home_get_start_card';
 import { HOME_CONTENT_AREAS } from '../../home/public';
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
+import { WorkspacePickerContent } from './components/workspace_picker_content/workspace_picker_content';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -423,6 +424,28 @@ export class WorkspacePlugin
         }),
       },
     ]);
+
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      /**
+       * Show workspace picker content when outside of workspace and not in any nav group
+       */
+      core.chrome.registerCollapsibleNavHeader(() => {
+        if (!this.coreStart) {
+          return null;
+        }
+        return React.createElement(EuiPanel, {
+          hasShadow: false,
+          hasBorder: false,
+          children: [
+            React.createElement(WorkspacePickerContent, {
+              key: 'workspacePickerContent',
+              coreStart: this.coreStart,
+              registeredUseCases$: this.registeredUseCases$,
+            }),
+          ],
+        });
+      });
+    }
 
     return {};
   }
