@@ -156,15 +156,13 @@ export class WorkspacePlugin
            * It checks the following conditions:
            * 1. The navigation group is not a system-level group.
            * 2. The current workspace has feature configurations set up.
-           * 3. The current workspace's use case is not "All use case".
-           * 4. The current navigation group is not included in the feature configurations of the workspace.
+           * 3. The current navigation group is not included in the feature configurations of the workspace.
            *
            * If all these conditions are true, it means that the navigation group should be hidden.
            */
           if (
             navGroup.type !== NavGroupType.SYSTEM &&
             currentWorkspace.features &&
-            getFirstUseCaseOfFeatureConfigs(currentWorkspace.features) !== ALL_USE_CASE_ID &&
             !isNavGroupInFeatureConfigs(navGroup.id, currentWorkspace.features)
           ) {
             return {

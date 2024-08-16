@@ -12,7 +12,7 @@ import * as Rx from 'rxjs';
 import classNames from 'classnames';
 import { WorkspacesStart } from 'src/core/public/workspace';
 import { ChromeNavControl, ChromeNavLink } from '../..';
-import { AppCategory, NavGroupStatus, NavGroupType } from '../../../../types';
+import { AppCategory, NavGroupType } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
@@ -23,7 +23,7 @@ import {
   ChromeRegistrationNavLink,
   NavGroupItemInMap,
 } from '../../nav_group';
-import { fulfillRegistrationLinksToChromeNavLinks, sortBy } from '../../utils';
+import { fulfillRegistrationLinksToChromeNavLinks, getVisibleUseCases, sortBy } from '../../utils';
 import { ALL_USE_CASE_ID, DEFAULT_APP_CATEGORIES } from '../../../../../core/utils';
 import { CollapsibleNavTop } from './collapsible_nav_group_enabled_top';
 import { HeaderNavControls } from './header_nav_controls';
@@ -57,11 +57,11 @@ const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
 });
 
 // Custom category is used for those features not belong to any of use cases in all use case.
-// and the custom category should always sit before manage category
+// and the custom category should always sit after manage category
 const customCategory: AppCategory = {
   id: 'custom',
   label: i18n.translate('core.ui.customNavList.label', { defaultMessage: 'Custom' }),
-  order: (DEFAULT_APP_CATEGORIES.manage.order || 0) - 500,
+  order: (DEFAULT_APP_CATEGORIES.manage.order || 0) + 500,
 };
 
 enum NavWidth {
@@ -85,7 +85,6 @@ export function CollapsibleNavGroupEnabled({
   collapsibleNavHeaderRender,
   ...observables
 }: CollapsibleNavGroupEnabledProps) {
-  const currentWorkspace = useObservable(observables.currentWorkspace$, undefined);
   const allNavLinks = useObservable(observables.navLinks$, []);
   const navLinks = allNavLinks.filter((link) => !link.hidden);
   const homeLink = useMemo(() => allNavLinks.find((item) => item.id === 'home'), [allNavLinks]);
@@ -101,27 +100,34 @@ export function CollapsibleNavGroupEnabled({
     [navGroupsMap, navLinks]
   );
 
-  const visibleUseCases = useMemo(
-    () =>
-      Object.values(navGroupsMap).filter(
-        (group) => group.type === undefined && group.status !== NavGroupStatus.Hidden
-      ),
-    [navGroupsMap]
-  );
+  const visibleUseCases = useMemo(() => getVisibleUseCases(navGroupsMap), [navGroupsMap]);
+
+  const currentNavGroupId = useMemo(() => {
+    if (!currentNavGroup) {
+      if (visibleUseCases.length === 1) {
+        return visibleUseCases[0].id;
+      }
+
+      if (!capabilities.workspaces.enabled) {
+        return ALL_USE_CASE_ID;
+      }
+    }
+
+    return currentNavGroup?.id;
+  }, [capabilities, currentNavGroup, visibleUseCases]);
+
+  const shouldAppendManageCategory = capabilities.workspaces.enabled
+    ? !currentNavGroupId
+    : currentNavGroupId === ALL_USE_CASE_ID;
 
   const shouldShowCollapsedNavHeaderContent = useMemo(
-    () =>
-      isNavOpen &&
-      collapsibleNavHeaderRender &&
-      capabilities.workspaces.enabled &&
-      !currentWorkspace &&
-      !currentNavGroup,
-    [currentWorkspace, capabilities, collapsibleNavHeaderRender, isNavOpen, currentNavGroup]
+    () => isNavOpen && collapsibleNavHeaderRender && !currentNavGroupId,
+    [collapsibleNavHeaderRender, isNavOpen, currentNavGroupId]
   );
 
   const navLinksForRender: ChromeNavLink[] = useMemo(() => {
-    if (shouldShowCollapsedNavHeaderContent) {
-      const resultLinks: ChromeNavLink[] = [];
+    const getSystemNavGroups = () => {
+      const result: ChromeNavLink[] = [];
       Object.values(navGroupsMap)
         .sort(sortBy('order'))
         .filter((navGroup) => navGroup.type === NavGroupType.SYSTEM)
@@ -131,7 +137,7 @@ export function CollapsibleNavGroupEnabled({
             navLinks
           );
           if (visibleNavLinksWithinNavGroup[0]) {
-            resultLinks.push({
+            result.push({
               ...visibleNavLinksWithinNavGroup[0],
               title: navGroup.title,
               category: DEFAULT_APP_CATEGORIES.manage,
@@ -139,97 +145,95 @@ export function CollapsibleNavGroupEnabled({
           }
         });
 
-      return resultLinks;
+      return result;
+    };
+
+    const navLinksResult: ChromeRegistrationNavLink[] = [];
+
+    if (currentNavGroupId && currentNavGroupId !== ALL_USE_CASE_ID) {
+      navLinksResult.push(...(navGroupsMap[currentNavGroupId].navLinks || []));
     }
 
-    if (currentNavGroup && currentNavGroup.id !== ALL_USE_CASE_ID) {
-      return fulfillRegistrationLinksToChromeNavLinks(
-        navGroupsMap[currentNavGroup.id].navLinks || [],
-        navLinks
-      );
-    }
-
-    if (visibleUseCases.length === 1) {
-      return fulfillRegistrationLinksToChromeNavLinks(
-        navGroupsMap[visibleUseCases[0].id].navLinks || [],
-        navLinks
-      );
-    }
-
-    const navLinksForAll: ChromeRegistrationNavLink[] = [];
-
-    // Append all the links that do not have use case info to keep backward compatible
-    const linkIdsWithUseGroupInfo = Object.values(navGroupsMap).reduce((total, navGroup) => {
-      return [...total, ...navGroup.navLinks.map((navLink) => navLink.id)];
-    }, [] as string[]);
-    navLinks
-      .filter((link) => !linkIdsWithUseGroupInfo.includes(link.id))
-      .forEach((navLink) => {
-        navLinksForAll.push({
-          ...navLink,
-          category: customCategory,
-        });
-      });
-
-    // Append all the links registered to all use case
-    navGroupsMap[ALL_USE_CASE_ID]?.navLinks.forEach((navLink) => {
-      navLinksForAll.push(navLink);
-    });
-
-    // Append use case section into left navigation
-    Object.values(navGroupsMap)
-      .filter((group) => !group.type)
-      .forEach((group) => {
-        const categoryInfo = {
-          id: group.id,
-          label: group.title,
-          order: group.order,
-        };
-        const linksForAllUseCaseWithinNavGroup = fulfillRegistrationLinksToChromeNavLinks(
-          group.navLinks,
-          navLinks
-        )
-          .filter((navLink) => navLink.showInAllNavGroup)
-          .map((navLink) => ({
+    if (currentNavGroupId === ALL_USE_CASE_ID) {
+      // Append all the links that do not have use case info to keep backward compatible
+      const linkIdsWithUseGroupInfo = Object.values(navGroupsMap).reduce((total, navGroup) => {
+        return [...total, ...navGroup.navLinks.map((navLink) => navLink.id)];
+      }, [] as string[]);
+      navLinks
+        .filter((link) => !linkIdsWithUseGroupInfo.includes(link.id))
+        .forEach((navLink) => {
+          navLinksResult.push({
             ...navLink,
-            category: categoryInfo,
-          }));
-
-        navLinksForAll.push(...linksForAllUseCaseWithinNavGroup);
-
-        if (linksForAllUseCaseWithinNavGroup.length) {
-          navLinksForAll.push({
-            id: group.navLinks[0].id,
-            title: titleForSeeAll,
-            order: Number.MAX_SAFE_INTEGER,
-            category: categoryInfo,
+            category: customCategory,
           });
-        } else {
-          /**
-           * Find if there are any links inside a use case but without a `see all` entry.
-           * If so, append these features into custom category as a fallback
-           */
-          fulfillRegistrationLinksToChromeNavLinks(group.navLinks, navLinks)
-            // Filter out links that already exists in all use case
-            .filter(
-              (navLink) => !navLinksForAll.find((navLinkInAll) => navLinkInAll.id === navLink.id)
-            )
-            .forEach((navLink) => {
-              navLinksForAll.push({
-                ...navLink,
-                category: customCategory,
-              });
-            });
-        }
+        });
+
+      // Append all the links registered to all use case
+      navGroupsMap[ALL_USE_CASE_ID]?.navLinks.forEach((navLink) => {
+        navLinksResult.push(navLink);
       });
 
-    return fulfillRegistrationLinksToChromeNavLinks(navLinksForAll, navLinks);
+      // Append use case section into left navigation
+      Object.values(navGroupsMap)
+        .filter((group) => !group.type)
+        .forEach((group) => {
+          const categoryInfo = {
+            id: group.id,
+            label: group.title,
+            order: group.order,
+          };
+
+          const fulfilledLinksOfNavGroup = fulfillRegistrationLinksToChromeNavLinks(
+            group.navLinks,
+            navLinks
+          );
+
+          const linksForAllUseCaseWithinNavGroup = fulfilledLinksOfNavGroup
+            .filter((navLink) => navLink.showInAllNavGroup)
+            .map((navLink) => ({
+              ...navLink,
+              category: categoryInfo,
+            }));
+
+          navLinksResult.push(...linksForAllUseCaseWithinNavGroup);
+
+          if (linksForAllUseCaseWithinNavGroup.length) {
+            navLinksResult.push({
+              id: fulfilledLinksOfNavGroup[0].id,
+              title: titleForSeeAll,
+              order: Number.MAX_SAFE_INTEGER,
+              category: categoryInfo,
+            });
+          } else {
+            /**
+             * Find if there are any links inside a use case but without a `see all` entry.
+             * If so, append these features into custom category as a fallback
+             */
+            fulfillRegistrationLinksToChromeNavLinks(group.navLinks, navLinks)
+              // Filter out links that already exists in all use case
+              .filter(
+                (navLink) => !navLinksResult.find((navLinkInAll) => navLinkInAll.id === navLink.id)
+              )
+              .forEach((navLink) => {
+                navLinksResult.push({
+                  ...navLink,
+                  category: customCategory,
+                });
+              });
+          }
+        });
+    }
+
+    if (shouldAppendManageCategory) {
+      navLinksResult.push(...getSystemNavGroups());
+    }
+
+    return fulfillRegistrationLinksToChromeNavLinks(navLinksResult, navLinks);
   }, [
     navLinks,
     navGroupsMap,
-    currentNavGroup,
-    visibleUseCases,
-    shouldShowCollapsedNavHeaderContent,
+    currentNavGroupId,
+    shouldAppendManageCategory,
   ]);
 
   const width = useMemo(() => {
@@ -296,7 +300,7 @@ export function CollapsibleNavGroupEnabled({
               navigateToApp={navigateToApp}
               logos={logos}
               setCurrentNavGroup={setCurrentNavGroup}
-              currentNavGroup={currentNavGroup}
+              currentNavGroup={currentNavGroupId ? navGroupsMap[currentNavGroupId] : undefined}
               shouldShrinkNavigation={!isNavOpen}
               onClickShrink={closeNav}
               visibleUseCases={visibleUseCases}

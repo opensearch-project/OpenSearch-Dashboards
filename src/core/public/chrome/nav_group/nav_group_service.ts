@@ -14,11 +14,16 @@ import {
 import { map, switchMap, takeUntil } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from '../../ui_settings';
-import { fulfillRegistrationLinksToChromeNavLinks, getSortedNavLinks } from '../utils';
+import {
+  fulfillRegistrationLinksToChromeNavLinks,
+  getSortedNavLinks,
+  getVisibleUseCases,
+} from '../utils';
 import { ChromeNavLinks } from '../nav_links';
 import { InternalApplicationStart } from '../../application';
 import { NavGroupStatus } from '../../../../core/types';
 import { ChromeBreadcrumb, ChromeBreadcrumbEnricher } from '../chrome_service';
+import { ALL_USE_CASE_ID } from '../../../utils';
 
 export const CURRENT_NAV_GROUP_ID = 'core.chrome.currentNavGroupId';
 
@@ -260,18 +265,26 @@ export class ChromeNavGroupService {
       }
       if (appId && navGroupMap) {
         const appIdNavGroupMap = new Map<string, Set<string>>();
-        // iterate navGroupMap
-        Object.keys(navGroupMap)
+        let visibleNavGroups: NavGroupItemInMap[] = [];
+        const visibleUseCases = getVisibleUseCases(navGroupMap);
+        if (visibleUseCases.length === 1 && visibleUseCases[0].id === ALL_USE_CASE_ID) {
+          // If the only visible use case is all use case
+          // All the other nav groups will be visible because all use case can visit all of the nav groups.
+          visibleNavGroups = Object.values(navGroupMap);
+        } else {
           // Nav group of Hidden status should be filtered out when counting navGroups the currentApp belongs to
-          .filter((navGroupId) => navGroupMap[navGroupId].status !== NavGroupStatus.Hidden)
-          .forEach((navGroupId) => {
-            navGroupMap[navGroupId].navLinks.forEach((navLink) => {
-              const navLinkId = navLink.id;
-              const navGroupSet = appIdNavGroupMap.get(navLinkId) || new Set();
-              navGroupSet.add(navGroupId);
-              appIdNavGroupMap.set(navLinkId, navGroupSet);
-            });
+          visibleNavGroups = Object.values(navGroupMap).filter(
+            (navGroup) => navGroup.status !== NavGroupStatus.Hidden
+          );
+        }
+        visibleNavGroups.forEach((navGroup) => {
+          navGroup.navLinks.forEach((navLink) => {
+            const navLinkId = navLink.id;
+            const navGroupSet = appIdNavGroupMap.get(navLinkId) || new Set();
+            navGroupSet.add(navGroup.id);
+            appIdNavGroupMap.set(navLinkId, navGroupSet);
           });
+        });
 
         const navGroups = appIdNavGroupMap.get(appId);
         if (navGroups && navGroups.size === 1) {

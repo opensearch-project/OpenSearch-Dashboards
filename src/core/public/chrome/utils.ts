@@ -5,7 +5,8 @@
 
 import { AppCategory } from 'opensearch-dashboards/public';
 import { ChromeNavLink } from './nav_links';
-import { ChromeRegistrationNavLink } from './nav_group';
+import { ChromeRegistrationNavLink, NavGroupItemInMap } from './nav_group';
+import { NavGroupStatus } from '../../../core/types';
 
 type KeyOf<T> = keyof T;
 
@@ -213,4 +214,10 @@ export const getSortedNavLinks = (
     }
   );
   return acc;
+};
+
+export const getVisibleUseCases = (navGroupMap: Record<string, NavGroupItemInMap>) => {
+  return Object.values(navGroupMap).filter(
+    (navGroup) => navGroup.status !== NavGroupStatus.Hidden && navGroup.type === undefined
+  );
 };
