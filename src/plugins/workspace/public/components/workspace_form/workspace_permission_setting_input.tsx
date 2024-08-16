@@ -90,20 +90,25 @@ export const WorkspacePermissionSettingInput = ({
 
   const [isTypeListOpen, setIsTypeListOpen] = useState(false);
 
-  const [typeOptions, setTypeOptions] = useState<Array<EuiSelectableOption<any>>>([
-    {
-      value: WorkspacePermissionItemType.User,
-      label: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.user', {
-        defaultMessage: 'User',
-      }),
-    },
-    {
-      value: WorkspacePermissionItemType.Group,
-      label: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.group', {
-        defaultMessage: 'Group',
-      }),
-    },
-  ]);
+  const typeOptions = useMemo<Array<EuiSelectableOption<any>>>(
+    () => [
+      {
+        value: WorkspacePermissionItemType.User,
+        label: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.user', {
+          defaultMessage: 'User',
+        }),
+        checked: type === WorkspacePermissionItemType.User ? 'on' : 'off',
+      },
+      {
+        value: WorkspacePermissionItemType.Group,
+        label: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.group', {
+          defaultMessage: 'Group',
+        }),
+        checked: type === WorkspacePermissionItemType.Group ? 'on' : 'off',
+      },
+    ],
+    [type]
+  );
 
   const permissionModesSelected = useMemo(() => {
     const idSelected = getPermissionModeId(modes ?? []);
@@ -146,20 +151,8 @@ export const WorkspacePermissionSettingInput = ({
     [index, onPermissionModesChange]
   );
 
-  const toggleTypeList = () => {
-    if (!isTypeListOpen) {
-      if (type === WorkspacePermissionItemType.User) {
-        setTypeOptions([{ ...typeOptions[0], checked: 'on' }, typeOptions[1]]);
-      } else {
-        setTypeOptions([typeOptions[0], { ...typeOptions[1], checked: 'on' }]);
-      }
-    }
-    setIsTypeListOpen((current) => !current);
-  };
-
   const handleTypeChange = useCallback(
     (options: Array<EuiSelectableOption<any>>) => {
-      setTypeOptions(options);
       for (const option of options) {
         if (option.checked === 'on') {
           onTypeChange(option.value, index);
@@ -200,7 +193,7 @@ export const WorkspacePermissionSettingInput = ({
                 <EuiButtonEmpty
                   iconType="arrowDown"
                   iconSide="right"
-                  onClick={toggleTypeList}
+                  onClick={() => setIsTypeListOpen((current) => !current)}
                   data-test-subj="workspace-typeOptions"
                   isDisabled={userOrGroupDisabled}
                 >
