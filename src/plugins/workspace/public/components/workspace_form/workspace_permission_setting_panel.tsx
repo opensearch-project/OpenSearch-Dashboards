@@ -33,11 +33,13 @@ export interface WorkspacePermissionSettingPanelProps {
   onChange?: (
     value: Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
   ) => void;
+  isEditing?: boolean;
 }
 
 export const WorkspacePermissionSettingPanel = ({
   errors,
   onChange,
+  isEditing = true,
   permissionSettings,
   disabledUserOrGroupInputIds,
 }: WorkspacePermissionSettingPanelProps) => {
@@ -118,6 +120,7 @@ export const WorkspacePermissionSettingPanel = ({
 
   const handleTypeChange = useCallback<WorkspacePermissionSettingInputProps['onTypeChange']>(
     (type, index) => {
+      // console.log(type, index);
       handlePermissionSettingsChange?.(
         permissionSettings.map((item, itemIndex) =>
           index === itemIndex ? { id: item.id, type, modes: item.modes } : item
@@ -166,21 +169,24 @@ export const WorkspacePermissionSettingPanel = ({
               onGroupOrUserIdChange={handleGroupOrUserIdChange}
               onPermissionModesChange={handlePermissionModesChange}
               onTypeChange={handleTypeChange}
+              isEditing={isEditing}
             />
           </EuiCompressedFormRow>
         </React.Fragment>
       ))}
-      <EuiSmallButton
-        fullWidth={false}
-        onClick={handleAddNewOne}
-        data-test-subj={`workspaceForm-permissionSettingPanel-addNew`}
-        color="primary"
-        iconType="plusInCircle"
-      >
-        {i18n.translate('workspace.form.permissionSettingPanel.addCollaborator', {
-          defaultMessage: 'Add collaborator',
-        })}
-      </EuiSmallButton>
+      {isEditing && (
+        <EuiSmallButton
+          fullWidth={false}
+          onClick={handleAddNewOne}
+          data-test-subj={`workspaceForm-permissionSettingPanel-addNew`}
+          color="primary"
+          iconType="plusInCircle"
+        >
+          {i18n.translate('workspace.form.permissionSettingPanel.addCollaborator', {
+            defaultMessage: 'Add collaborator',
+          })}
+        </EuiSmallButton>
+      )}
     </div>
   );
 };

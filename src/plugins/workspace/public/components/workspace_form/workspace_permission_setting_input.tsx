@@ -54,6 +54,7 @@ export interface WorkspacePermissionSettingInputProps {
   userId?: string;
   group?: string;
   modes?: WorkspacePermissionMode[];
+  isEditing?: boolean;
   deletable?: boolean;
   userOrGroupDisabled: boolean;
   onGroupOrUserIdChange: (
@@ -76,6 +77,7 @@ export const WorkspacePermissionSettingInput = ({
   userId,
   group,
   modes,
+  isEditing = true,
   deletable = true,
   userOrGroupDisabled,
   onDelete,
@@ -97,14 +99,14 @@ export const WorkspacePermissionSettingInput = ({
         label: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.user', {
           defaultMessage: 'User',
         }),
-        checked: type === WorkspacePermissionItemType.User ? 'on' : 'off',
+        checked: type === WorkspacePermissionItemType.User ? 'on' : undefined,
       },
       {
         value: WorkspacePermissionItemType.Group,
         label: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.group', {
           defaultMessage: 'Group',
         }),
-        checked: type === WorkspacePermissionItemType.Group ? 'on' : 'off',
+        checked: type === WorkspacePermissionItemType.Group ? 'on' : undefined,
       },
     ],
     [type]
@@ -153,6 +155,8 @@ export const WorkspacePermissionSettingInput = ({
 
   const handleTypeChange = useCallback(
     (options: Array<EuiSelectableOption<any>>) => {
+      console.log(options);
+      // console.log(type);
       for (const option of options) {
         if (option.checked === 'on') {
           onTypeChange(option.value, index);
@@ -186,7 +190,7 @@ export const WorkspacePermissionSettingInput = ({
                   defaultMessage: 'Select a user group',
                 })
           }
-          isDisabled={userOrGroupDisabled}
+          isDisabled={userOrGroupDisabled || !isEditing}
           prepend={
             <EuiPopover
               button={
@@ -195,7 +199,7 @@ export const WorkspacePermissionSettingInput = ({
                   iconSide="right"
                   onClick={() => setIsTypeListOpen((current) => !current)}
                   data-test-subj="workspace-typeOptions"
-                  isDisabled={userOrGroupDisabled}
+                  isDisabled={userOrGroupDisabled || !isEditing}
                 >
                   {type === WorkspacePermissionItemType.User
                     ? typeOptions[0].label
@@ -235,7 +239,7 @@ export const WorkspacePermissionSettingInput = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {deletable && (
+        {deletable && isEditing && (
           <EuiButtonIcon
             color="danger"
             aria-label="Delete permission setting"

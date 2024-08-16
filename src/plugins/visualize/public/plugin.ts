@@ -256,6 +256,13 @@ export class VisualizePlugin
         order: 400,
       },
     ]);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: visualizeAppId,
+        category: undefined,
+        order: 400,
+      },
+    ]);
 
     urlForwarding.forwardApp('visualize', 'visualize');
 

@@ -64,7 +64,7 @@ import { PLUGIN_ID, HOME_APP_BASE_PATH, IMPORT_SAMPLE_DATA_APP_ID } from '../com
 import { DataSourcePluginStart } from '../../data_source/public';
 import { workWithDataSection } from './application/components/homepage/sections/work_with_data';
 import { learnBasicsSection } from './application/components/homepage/sections/learn_basics';
-import { DEFAULT_NAV_GROUPS, DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { DEFAULT_NAV_GROUPS } from '../../../core/public';
 import {
   ContentManagementPluginSetup,
   ContentManagementPluginStart,
@@ -179,9 +179,7 @@ export class HomePublicPlugin
       title: i18n.translate('home.tutorialDirectory.featureCatalogueTitle', {
         defaultMessage: 'Add sample data',
       }),
-      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
-        ? AppNavLinkStatus.visible
-        : AppNavLinkStatus.hidden,
+      navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
         setCommonService();
@@ -195,26 +193,6 @@ export class HomePublicPlugin
       },
     });
     urlForwarding.forwardApp('home', 'home');
-
-    const configurationInfoForImportSampleData = {
-      id: IMPORT_SAMPLE_DATA_APP_ID,
-      title: i18n.translate('home.nav.sampleData.label', {
-        defaultMessage: 'Sample data',
-      }),
-      order: 400,
-      category: DEFAULT_APP_CATEGORIES.manage,
-    };
-
-    // Register sample data to all of the use cases in 2.16
-    [
-      DEFAULT_NAV_GROUPS.all,
-      DEFAULT_NAV_GROUPS.essentials,
-      DEFAULT_NAV_GROUPS['security-analytics'],
-      DEFAULT_NAV_GROUPS.observability,
-      DEFAULT_NAV_GROUPS.search,
-    ].forEach((navGroup) =>
-      core.chrome.navGroup.addNavLinksToGroup(navGroup, [configurationInfoForImportSampleData])
-    );
 
     const featureCatalogue = { ...this.featuresCatalogueRegistry.setup() };
 

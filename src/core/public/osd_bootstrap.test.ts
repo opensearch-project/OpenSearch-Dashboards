@@ -28,23 +28,46 @@
  * under the License.
  */
 
-import { apmSystem, fatalErrorMock, i18nLoad } from './osd_bootstrap.test.mocks';
+import {
+  apmSystem,
+  fatalErrorMock,
+  i18nLoad,
+  i18nSetLocale,
+  consoleWarnMock,
+} from './osd_bootstrap.test.mocks';
 import { __osdBootstrap__ } from './';
+import { getLocaleInUrl } from './locale_helper';
+
+jest.mock('./locale_helper', () => ({
+  getLocaleInUrl: jest.fn(),
+}));
 
 describe('osd_bootstrap', () => {
+  let originalWindowLocation: Location;
+
   beforeAll(() => {
     const metadata = {
       branding: { darkMode: 'true' },
-      i18n: { translationsUrl: 'http://localhost' },
+      i18n: { translationsUrl: 'http://localhost/translations/en.json' },
       vars: { apmConfig: null },
     };
     // eslint-disable-next-line no-unsanitized/property
-    document.body.innerHTML = `<osd-injected-metadata data=${JSON.stringify(metadata)}>
-</osd-injected-metadata>`;
+    document.body.innerHTML = `<osd-injected-metadata data=${JSON.stringify(
+      metadata
+    )}> </osd-injected-metadata>`;
+
+    originalWindowLocation = window.location;
+    delete (window as any).location;
+    window.location = { ...originalWindowLocation, href: 'http://localhost' };
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (getLocaleInUrl as jest.Mock).mockReturnValue(null);
+  });
+
+  afterAll(() => {
+    window.location = originalWindowLocation;
   });
 
   it('does not report a fatal error if apm load fails', async () => {
@@ -63,5 +86,40 @@ describe('osd_bootstrap', () => {
     await __osdBootstrap__();
 
     expect(fatalErrorMock.add).toHaveBeenCalledTimes(1);
+  });
+
+  it('sets locale from URL if present', async () => {
+    (getLocaleInUrl as jest.Mock).mockReturnValue('fr');
+    window.location.href = 'http://localhost/?locale=fr';
+
+    await __osdBootstrap__();
+
+    expect(i18nSetLocale).toHaveBeenCalledWith('fr');
+    expect(i18nLoad).toHaveBeenCalledWith('http://localhost/translations/fr.json');
+  });
+
+  it('sets default locale if not present in URL', async () => {
+    await __osdBootstrap__();
+
+    expect(i18nSetLocale).toHaveBeenCalledWith('en');
+    expect(i18nLoad).toHaveBeenCalledWith('http://localhost/translations/en.json');
+  });
+
+  it('displays locale warning if set', async () => {
+    (window as any).__localeWarning = { title: 'Locale Warning', text: 'Invalid locale' };
+
+    await __osdBootstrap__();
+
+    expect(consoleWarnMock).toHaveBeenCalledWith('Locale Warning: Invalid locale');
+    expect((window as any).__localeWarning).toBeUndefined();
+  });
+
+  it('displays i18n warning if set', async () => {
+    (window as any).__i18nWarning = { title: 'i18n Warning', text: 'Translation issue' };
+
+    await __osdBootstrap__();
+
+    expect(consoleWarnMock).toHaveBeenCalledWith('i18n Warning: Translation issue');
+    expect((window as any).__i18nWarning).toBeUndefined();
   });
 });
