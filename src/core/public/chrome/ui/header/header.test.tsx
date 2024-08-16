@@ -37,6 +37,7 @@ import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { httpServiceMock } from '../../../http/http_service.mock';
 import { applicationServiceMock, chromeServiceMock } from '../../../mocks';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../../../overlays';
+import { WorkspaceObject } from 'src/core/public/workspace';
 import { HeaderVariant } from '../../constants';
 import { Header } from './header';
 
@@ -87,6 +88,7 @@ function mockProps() {
     navControlsLeftBottom$: new BehaviorSubject([]),
     setCurrentNavGroup: jest.fn(() => {}),
     workspaceList$: new BehaviorSubject([]),
+    currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>(null),
     useUpdatedHeader: false,
   };
 }

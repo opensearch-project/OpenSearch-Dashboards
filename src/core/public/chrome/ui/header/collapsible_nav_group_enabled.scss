@@ -55,7 +55,7 @@
     border-right: $euiBorderThin;
   }
 
-  .scrollable-container {
+  .flex-1-container {
     flex: 1;
   }
 
@@ -66,14 +66,19 @@
     &.bottom-container-collapsed {
       flex-direction: column;
       align-items: center;
+      gap: $euiSize;
+      padding-top: $euiSizeS;
+      padding-bottom: $euiSizeS;
 
       > * {
-        margin: $euiSizeS 0;
+        justify-content: center;
       }
     }
-  }
 
-  .nav-controls-padding {
-    padding: $euiSize;
+    &.bottom-container-expanded {
+      gap: 16px;
+      padding-top: $euiSize;
+      padding-bottom: $euiSize;
+    }
   }
 }

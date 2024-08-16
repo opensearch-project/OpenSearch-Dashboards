@@ -3,15 +3,90 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Observable } from 'rxjs';
+import { combineLatest, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
-import { ChromeStart, PublicAppInfo } from '../../../../core/public';
+import {
+  ChromeStart,
+  CoreSetup,
+  DEFAULT_APP_CATEGORIES,
+  PublicAppInfo,
+  WorkspacesSetup,
+} from '../../../../core/public';
 import { WORKSPACE_USE_CASES } from '../../common/constants';
-import { convertNavGroupToWorkspaceUseCase, isEqualWorkspaceUseCase } from '../utils';
+import {
+  convertNavGroupToWorkspaceUseCase,
+  getFirstUseCaseOfFeatureConfigs,
+  isEqualWorkspaceUseCase,
+} from '../utils';
+
+export interface UseCaseServiceSetupDeps {
+  chrome: CoreSetup['chrome'];
+  workspaces: WorkspacesSetup;
+  getStartServices: CoreSetup['getStartServices'];
+}
 
 export class UseCaseService {
+  private workspaceAndManageWorkspaceCategorySubscription?: Subscription;
   constructor() {}
+
+  /**
+   * Add nav links belong to `manage workspace` to all of the use cases.
+   * @param coreSetup
+   * @param currentWorkspace
+   */
+  private async registerManageWorkspaceCategory(setupDeps: UseCaseServiceSetupDeps) {
+    const [coreStart] = await setupDeps.getStartServices();
+    this.workspaceAndManageWorkspaceCategorySubscription?.unsubscribe();
+    this.workspaceAndManageWorkspaceCategorySubscription = combineLatest([
+      setupDeps.workspaces.currentWorkspace$,
+      coreStart.chrome.navGroup.getNavGroupsMap$(),
+    ])
+      .pipe(
+        map(([currentWorkspace, navGroupMap]) => {
+          const currentUseCase = getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features || []);
+          if (!currentUseCase) {
+            return undefined;
+          }
+
+          return navGroupMap[currentUseCase];
+        })
+      )
+      .pipe(
+        distinctUntilChanged((navGroupInfo, anotherNavGroup) => {
+          return navGroupInfo?.id === anotherNavGroup?.id;
+        })
+      )
+      .subscribe((navGroupInfo) => {
+        if (navGroupInfo) {
+          setupDeps.chrome.navGroup.addNavLinksToGroup(navGroupInfo, [
+            {
+              id: 'dataSources_core',
+              category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+              order: 100,
+            },
+            {
+              id: 'indexPatterns',
+              category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+              order: 200,
+            },
+            {
+              id: 'objects',
+              category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+              order: 300,
+            },
+          ]);
+        }
+      });
+  }
+
+  setup({ chrome, workspaces, getStartServices }: UseCaseServiceSetupDeps) {
+    this.registerManageWorkspaceCategory({
+      chrome,
+      workspaces,
+      getStartServices,
+    });
+  }
 
   start({
     chrome,
@@ -69,5 +144,9 @@ export class UseCaseService {
         );
       },
     };
+  }
+
+  stop() {
+    this.workspaceAndManageWorkspaceCategorySubscription?.unsubscribe();
   }
 }

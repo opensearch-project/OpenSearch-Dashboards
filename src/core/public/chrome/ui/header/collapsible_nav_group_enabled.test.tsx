@@ -16,16 +16,11 @@ import { ChromeNavLink } from '../../nav_links';
 import { ChromeRegistrationNavLink, NavGroupItemInMap } from '../../nav_group';
 import { httpServiceMock } from '../../../mocks';
 import { getLogos } from '../../../../common';
-import { ALL_USE_CASE_ID, DEFAULT_NAV_GROUPS } from '../../../../public';
-import { CollapsibleNavTopProps } from './collapsible_nav_group_enabled_top';
+import { ALL_USE_CASE_ID, DEFAULT_NAV_GROUPS, WorkspaceObject } from '../../../../public';
 import { capabilitiesServiceMock } from '../../../application/capabilities/capabilities_service.mock';
 
 jest.mock('./collapsible_nav_group_enabled_top', () => ({
-  CollapsibleNavTop: (props: CollapsibleNavTopProps) => (
-    <button data-test-subj="back" onClick={props.onClickBack}>
-      go back
-    </button>
-  ),
+  CollapsibleNavTop: () => <button data-test-subj="back">go back</button>,
 }));
 
 const mockBasePath = httpServiceMock.createSetupContract({ basePath: '/test' }).basePath;
@@ -99,6 +94,28 @@ describe('<NavGroups />', () => {
   });
 });
 
+const defaultNavGroupMap = {
+  [ALL_USE_CASE_ID]: {
+    ...DEFAULT_NAV_GROUPS[ALL_USE_CASE_ID],
+    navLinks: [
+      {
+        id: 'link-in-all',
+        title: 'link-in-all',
+      },
+    ],
+  },
+  [DEFAULT_NAV_GROUPS.observability.id]: {
+    ...DEFAULT_NAV_GROUPS.observability,
+    navLinks: [
+      {
+        id: 'link-in-observability',
+        title: 'link-in-observability',
+        showInAllNavGroup: true,
+      },
+    ],
+  },
+};
+
 describe('<CollapsibleNavGroupEnabled />', () => {
   function mockProps(
     props?: Partial<CollapsibleNavGroupEnabledProps> & {
@@ -107,28 +124,9 @@ describe('<CollapsibleNavGroupEnabled />', () => {
       navLinks?: ChromeNavLink[];
     }
   ): CollapsibleNavGroupEnabledProps {
-    const navGroupsMap$ = new BehaviorSubject<Record<string, NavGroupItemInMap>>({
-      [ALL_USE_CASE_ID]: {
-        ...DEFAULT_NAV_GROUPS[ALL_USE_CASE_ID],
-        navLinks: [
-          {
-            id: 'link-in-all',
-            title: 'link-in-all',
-          },
-        ],
-      },
-      [DEFAULT_NAV_GROUPS.observability.id]: {
-        ...DEFAULT_NAV_GROUPS.observability,
-        navLinks: [
-          {
-            id: 'link-in-observability',
-            title: 'link-in-observability',
-            showInAllNavGroup: true,
-          },
-        ],
-      },
-      ...props?.navGroupsMap,
-    });
+    const navGroupsMap$ = new BehaviorSubject<Record<string, NavGroupItemInMap>>(
+      props?.navGroupsMap || defaultNavGroupMap
+    );
     const currentNavGroup$ = new BehaviorSubject<NavGroupItemInMap | undefined>(
       props?.currentNavGroupId ? navGroupsMap$.getValue()[props.currentNavGroupId] : undefined
     );
@@ -138,6 +136,7 @@ describe('<CollapsibleNavGroupEnabled />', () => {
       id: 'collapsibe-nav',
       isLocked: false,
       isNavOpen: false,
+      currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>({ id: 'test', name: 'test' }),
       navLinks$: new BehaviorSubject([
         {
           id: 'link-in-all',
@@ -187,6 +186,7 @@ describe('<CollapsibleNavGroupEnabled />', () => {
     const props = mockProps({
       isNavOpen: true,
       navGroupsMap: {
+        ...defaultNavGroupMap,
         [DEFAULT_NAV_GROUPS.essentials.id]: {
           ...DEFAULT_NAV_GROUPS.essentials,
           navLinks: [
@@ -208,7 +208,12 @@ describe('<CollapsibleNavGroupEnabled />', () => {
   });
 
   it('should render correctly when only one visible use case is provided', () => {
-    const props = mockProps();
+    const props = mockProps({
+      navGroupsMap: {
+        [DEFAULT_NAV_GROUPS.observability.id]:
+          defaultNavGroupMap[DEFAULT_NAV_GROUPS.observability.id],
+      },
+    });
     const { getAllByTestId } = render(<CollapsibleNavGroupEnabled {...props} isNavOpen />);
     expect(getAllByTestId('collapsibleNavAppLink-link-in-observability').length).toEqual(1);
   });
@@ -216,6 +221,7 @@ describe('<CollapsibleNavGroupEnabled />', () => {
   it('should show all use case by default and able to click see all', async () => {
     const props = mockProps({
       navGroupsMap: {
+        ...defaultNavGroupMap,
         [DEFAULT_NAV_GROUPS.essentials.id]: {
           ...DEFAULT_NAV_GROUPS.essentials,
           navLinks: [
@@ -228,20 +234,19 @@ describe('<CollapsibleNavGroupEnabled />', () => {
         },
       },
     });
-    const { container, getAllByTestId, getByTestId } = render(
+    const { container, getAllByTestId } = render(
       <CollapsibleNavGroupEnabled {...props} isNavOpen />
     );
     fireEvent.click(getAllByTestId('collapsibleNavAppLink-link-in-essentials')[1]);
     expect(getAllByTestId('collapsibleNavAppLink-link-in-essentials').length).toEqual(1);
     expect(container).toMatchSnapshot();
-    fireEvent.click(getByTestId('back'));
-    expect(getAllByTestId('collapsibleNavAppLink-link-in-essentials').length).toEqual(2);
   });
 
   it('should show all use case when current nav group is `all`', async () => {
     const props = mockProps({
       currentNavGroupId: ALL_USE_CASE_ID,
       navGroupsMap: {
+        ...defaultNavGroupMap,
         [DEFAULT_NAV_GROUPS.essentials.id]: {
           ...DEFAULT_NAV_GROUPS.essentials,
           navLinks: [
@@ -254,20 +259,19 @@ describe('<CollapsibleNavGroupEnabled />', () => {
         },
       },
     });
-    const { container, getAllByTestId, getByTestId } = render(
+    const { container, getAllByTestId } = render(
       <CollapsibleNavGroupEnabled {...props} isNavOpen />
     );
     fireEvent.click(getAllByTestId('collapsibleNavAppLink-link-in-essentials')[1]);
     expect(getAllByTestId('collapsibleNavAppLink-link-in-essentials').length).toEqual(1);
     expect(container).toMatchSnapshot();
-    fireEvent.click(getByTestId('back'));
-    expect(getAllByTestId('collapsibleNavAppLink-link-in-essentials').length).toEqual(2);
   });
 
   it('should not show group if the nav link is hidden', async () => {
     const props = mockProps({
       currentNavGroupId: ALL_USE_CASE_ID,
       navGroupsMap: {
+        ...defaultNavGroupMap,
         [DEFAULT_NAV_GROUPS.essentials.id]: {
           ...DEFAULT_NAV_GROUPS.essentials,
           navLinks: [
@@ -293,6 +297,49 @@ describe('<CollapsibleNavGroupEnabled />', () => {
     expect(queryAllByTestId('collapsibleNavAppLink-link-in-essentials-but-hidden').length).toEqual(
       0
     );
+    expect(queryAllByTestId('collapsibleNavAppLink-link-in-all').length).toEqual(1);
+  });
+
+  it('should show links with custom category if the nav link is inside second level but no entry in all use case', async () => {
+    const props = mockProps({
+      currentNavGroupId: ALL_USE_CASE_ID,
+      navGroupsMap: {
+        ...defaultNavGroupMap,
+        [DEFAULT_NAV_GROUPS.essentials.id]: {
+          ...DEFAULT_NAV_GROUPS.essentials,
+          navLinks: [
+            {
+              id: 'link-in-essentials',
+              title: 'link-in-essentials',
+            },
+            {
+              id: 'link-in-all',
+              title: 'link-in-all',
+            },
+          ],
+        },
+      },
+      navLinks: [
+        {
+          id: 'link-in-essentials',
+          title: 'link-in-essentials',
+          baseUrl: '',
+          href: '',
+        },
+        {
+          id: 'link-in-all',
+          title: 'link-in-all',
+          baseUrl: '',
+          href: '',
+        },
+      ],
+    });
+    const { queryAllByTestId, getByText, getByTestId } = render(
+      <CollapsibleNavGroupEnabled {...props} isNavOpen />
+    );
+    // Should render custom category
+    expect(getByText('Custom')).toBeInTheDocument();
+    expect(getByTestId('collapsibleNavAppLink-link-in-essentials')).toBeInTheDocument();
     expect(queryAllByTestId('collapsibleNavAppLink-link-in-all').length).toEqual(1);
   });
 });
