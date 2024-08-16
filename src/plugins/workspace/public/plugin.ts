@@ -152,7 +152,7 @@ export class WorkspacePlugin
           /**
            * The following logic determines whether a navigation group should be hidden or not based on the workspace's feature configurations.
            * It checks the following conditions:
-           * 1. The navigation group is not a system-level group (system groups are always visible except all use case).
+           * 1. The navigation group is not a system-level group.
            * 2. The current workspace has feature configurations set up.
            * 3. The current workspace's use case is not "All use case".
            * 4. The current navigation group is not included in the feature configurations of the workspace.
@@ -160,7 +160,7 @@ export class WorkspacePlugin
            * If all these conditions are true, it means that the navigation group should be hidden.
            */
           if (
-            (navGroup.type !== NavGroupType.SYSTEM || navGroup.id === ALL_USE_CASE_ID) &&
+            navGroup.type !== NavGroupType.SYSTEM &&
             currentWorkspace.features &&
             getFirstUseCaseOfFeatureConfigs(currentWorkspace.features) !== ALL_USE_CASE_ID &&
             !isNavGroupInFeatureConfigs(navGroup.id, currentWorkspace.features)
@@ -242,6 +242,14 @@ export class WorkspacePlugin
   ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
+    core.workspaces.setClient(workspaceClient);
+
+    this.useCase.setup({
+      chrome: core.chrome,
+      getStartServices: core.getStartServices,
+      workspaces: core.workspaces,
+    });
+
     core.application.registerAppUpdater(this.appUpdater$);
     this.unregisterNavGroupUpdater = core.chrome.navGroup.registerNavGroupUpdater(
       this.navGroupUpdater$
@@ -363,6 +371,9 @@ export class WorkspacePlugin
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,
+      description: i18n.translate('workspace.workspaceList.description', {
+        defaultMessage: 'Organize collaborative projects in use-case-specific workspaces.',
+      }),
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);
@@ -507,5 +518,6 @@ export class WorkspacePlugin
     this.unregisterNavGroupUpdater?.();
     this.registeredUseCasesUpdaterSubscription?.unsubscribe();
     this.workspaceAndUseCasesCombineSubscription?.unsubscribe();
+    this.useCase.stop();
   }
 }
