@@ -120,7 +120,6 @@ export const WorkspacePermissionSettingPanel = ({
 
   const handleTypeChange = useCallback<WorkspacePermissionSettingInputProps['onTypeChange']>(
     (type, index) => {
-      // console.log(type, index);
       handlePermissionSettingsChange?.(
         permissionSettings.map((item, itemIndex) =>
           index === itemIndex ? { id: item.id, type, modes: item.modes } : item

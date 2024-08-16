@@ -190,7 +190,7 @@ describe('WorkspaceDetail', () => {
     fireEvent.click(getByText('Collaborators'));
     expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
     await waitFor(() => {
-      expect(screen.queryByText('Add collaborators')).not.toBeNull();
+      expect(screen.queryByText('Workspaces access')).not.toBeNull();
     });
   });
 

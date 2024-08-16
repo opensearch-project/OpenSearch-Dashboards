@@ -155,8 +155,6 @@ export const WorkspacePermissionSettingInput = ({
 
   const handleTypeChange = useCallback(
     (options: Array<EuiSelectableOption<any>>) => {
-      console.log(options);
-      // console.log(type);
       for (const option of options) {
         if (option.checked === 'on') {
           onTypeChange(option.value, index);
