@@ -18,7 +18,7 @@ import { DataSettings } from '../types';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
-import { SimpleDataSet } from '../../../common';
+import { Dataset } from '../../../common';
 import { createDQLEditor, createDefaultEditor } from './editors';
 import { getQueryService, getIndexPatterns } from '../../services';
 
@@ -29,7 +29,7 @@ const LANGUAGE_ID_KUERY = 'kuery';
 monaco.languages.register({ id: LANGUAGE_ID_KUERY });
 
 export interface QueryEditorProps {
-  dataSet?: SimpleDataSet;
+  dataSet?: Dataset;
   query: Query;
   dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
   settings: Settings;

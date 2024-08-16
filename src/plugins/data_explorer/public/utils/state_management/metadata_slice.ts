@@ -5,13 +5,13 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DataExplorerServices } from '../../types';
-import { SimpleDataSet } from '../../../../data/common';
+import { Dataset } from '../../../../data/common';
 
 export interface MetadataState {
   indexPattern?: string;
   originatingApp?: string;
   view?: string;
-  dataSet?: Omit<SimpleDataSet, 'id'>;
+  dataSet?: Omit<Dataset, 'id'>;
 }
 
 const initialState: MetadataState = {};
@@ -42,7 +42,7 @@ export const slice = createSlice({
     setIndexPattern: (state, action: PayloadAction<string>) => {
       state.indexPattern = action.payload;
     },
-    setDataSet: (state, action: PayloadAction<Omit<SimpleDataSet, 'id'>>) => {
+    setDataSet: (state, action: PayloadAction<Omit<Dataset, 'id'>>) => {
       state.dataSet = action.payload;
     },
     setOriginatingApp: (state, action: PayloadAction<string | undefined>) => {

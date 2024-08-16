@@ -5,7 +5,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow } from '@elastic/eui';
 import React, { SyntheticEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { SimpleDataSet } from '../../../../data/common';
+import { Dataset } from '../../../../data/common';
 import {
   IDataPluginServices,
   PersistedLog,
@@ -35,7 +35,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const { generateQuery, loading } = useGenerateQuery();
   const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
   const dismissCallout = () => setCallOutType(undefined);
-  const [selectedDataSet, setSelectedDataSet] = useState<SimpleDataSet | undefined>(
+  const [selectedDataSet, setSelectedDataSet] = useState<Dataset | undefined>(
     services.data.query.dataSetManager.getDataSet()
   );
   const selectedIndex = selectedDataSet?.title;

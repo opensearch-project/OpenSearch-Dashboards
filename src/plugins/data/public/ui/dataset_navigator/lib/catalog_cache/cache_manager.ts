@@ -15,7 +15,7 @@ import {
   ExternalDataSourcesCacheData,
   RecentDataSetOptionsCacheData,
 } from '../types';
-import { SimpleDataSet, SimpleObject } from '../../../../../common';
+import { Dataset, DataStructure } from '../../../../../common';
 
 /**
  * Manages caching for catalog data including data sources and accelerations.
@@ -233,14 +233,16 @@ export class CatalogCacheManager {
     databaseName: string,
     tableName: string,
     dataSourceMDSId?: string
-  ): SimpleObject {
+  ): DataStructure {
     const cachedDatabase = this.getDatabase(dataSourceName, databaseName, dataSourceMDSId);
 
     const cachedTable = cachedDatabase.tables!.find((table) => table.name === tableName);
     if (!cachedTable) {
       throw new Error('Table not found exception: ' + tableName);
     }
-    return { id: cachedTable.name, ...cachedTable };
+
+    // TODO: Potentional source of error, id should be MDS_ID::connectionName.defaultDb.table1
+    return { id: cachedTable.name, title: cachedTable.name, type: 'TABLE', ...cachedTable };
   }
 
   /**
@@ -356,7 +358,7 @@ export class CatalogCacheManager {
     }
   }
 
-  static addRecentDataSet(dataSet: SimpleDataSet): void {
+  static addRecentDataSet(dataSet: Dataset): void {
     const cacheData = this.getRecentDataSetsCache();
 
     cacheData.recentDataSets = cacheData.recentDataSets.filter(
@@ -372,7 +374,7 @@ export class CatalogCacheManager {
     this.saveRecentDataSetsCache(cacheData);
   }
 
-  static getRecentDataSets(): SimpleDataSet[] {
+  static getRecentDataSets(): Dataset[] {
     return this.getRecentDataSetsCache().recentDataSets;
   }
 

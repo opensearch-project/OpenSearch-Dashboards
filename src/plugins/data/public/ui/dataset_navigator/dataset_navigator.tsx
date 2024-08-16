@@ -19,13 +19,7 @@ import {
 } from '@elastic/eui';
 import { HttpStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
-import {
-  SIMPLE_DATA_SET_TYPES,
-  SIMPLE_DATA_SOURCE_TYPES,
-  SimpleDataSet,
-  SimpleDataSource,
-  SimpleObject,
-} from '../../../common';
+import { Dataset, DataSource, DataStructure } from '../../../common';
 import {
   useLoadDatabasesToCache,
   useLoadExternalDataSourcesToCache,
@@ -50,8 +44,8 @@ export interface DataSetNavigatorProps {
   dataSetManager?: DataSetContract;
 }
 
-interface SelectedDataSetState extends SimpleDataSet {
-  database?: SimpleObject | undefined;
+interface SelectedDataSetState extends Dataset {
+  database?: DataStructure | undefined;
 }
 
 export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
@@ -70,11 +64,11 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
   const isInitialized = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [dataSources, setDataSources] = useState<SimpleDataSource[]>([]);
-  const [externalDataSources, setExternalDataSources] = useState<SimpleDataSource[]>([]);
-  const [indexPatterns, setIndexPatterns] = useState<any[]>([]);
-  const [cachedDatabases, setCachedDatabases] = useState<SimpleObject[]>([]);
-  const [cachedTables, setCachedTables] = useState<SimpleObject[]>([]);
+  const [dataSources, setDataSources] = useState<DataSource[]>([]);
+  const [externalDataSources, setExternalDataSources] = useState<DataSource[]>([]);
+  const [indexPatterns, setIndexPatterns] = useState<Dataset[]>([]);
+  const [cachedDatabases, setCachedDatabases] = useState<DataStructure[]>([]);
+  const [cachedTables, setCachedTables] = useState<DataStructure[]>([]);
   const [selectedDataSetState, setSelectedDataSetState] = useState<
     SelectedDataSetState | undefined
   >(undefined);
@@ -103,7 +97,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
   }, [dataSourcesLoadStatus, dataSources, startLoadingDataSources]);
 
   const handleSelectedDataSet = useCallback(
-    async (ds?: SimpleDataSet) => {
+    async (ds?: Dataset) => {
       const selectedDataSet = ds ?? selectedDataSetState;
       if (!selectedDataSet || !selectedDataSet.id) return;
 
@@ -122,7 +116,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
       CatalogCacheManager.addRecentDataSet({
         id: selectedDataSet.id,
         title: selectedDataSet.title ?? selectedDataSet.id!,
-        dataSourceRef: selectedDataSet.dataSourceRef,
+        dataSource: selectedDataSet.dataSource,
         timeFieldName: selectedDataSet.timeFieldName,
         type: selectedDataSet.type,
       });
@@ -130,11 +124,11 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
       setSelectedDataSetState({
         id: selectedDataSet.id,
         title: selectedDataSet.title,
-        ...(selectedDataSet.dataSourceRef && {
-          dataSourceRef: {
-            id: selectedDataSet.dataSourceRef?.id,
-            name: selectedDataSet.dataSourceRef?.name,
-            type: selectedDataSet.dataSourceRef?.type,
+        ...(selectedDataSet.dataSource && {
+          dataSource: {
+            id: selectedDataSet.dataSource?.id,
+            title: selectedDataSet.dataSource?.title,
+            type: selectedDataSet.dataSource?.type,
           },
         }),
         timeFieldName: selectedDataSet.timeFieldName,
@@ -161,9 +155,9 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
         if (externalDataSourcesCache.status === CachedDataSourceStatus.Updated) {
           setExternalDataSources(
             externalDataSourcesCache.dataSources.map((ds) => ({
-              id: ds.dataSourceRef,
-              name: ds.name,
-              type: SIMPLE_DATA_SOURCE_TYPES.EXTERNAL,
+              id: ds.id,
+              title: ds.title,
+              type: ds.type,
             }))
           );
         } else if (fetchedDataSources.length > 0) {
@@ -179,16 +173,15 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
             title: dataSet.title,
             type: dataSet.type,
             timeFieldName: dataSet.timeFieldName,
-            fields: dataSet.fields,
-            ...(dataSet.dataSourceRef
+            ...(dataSet.dataSource
               ? {
-                  dataSourceRef: {
-                    id: dataSet.dataSourceRef.id,
-                    name: dataSet.dataSourceRef.name,
-                    type: dataSet.dataSourceRef.type,
+                  dataSource: {
+                    id: dataSet.dataSource.id,
+                    title: dataSet.dataSource.title,
+                    type: dataSet.dataSource.type,
                   },
                 }
-              : { dataSourceRef: undefined }),
+              : { dataSource: undefined }),
             database: undefined,
           });
         }
@@ -209,9 +202,9 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
     if (status === DirectQueryLoadingStatus.SUCCESS) {
       setExternalDataSources(
         externalDataSourcesCache.dataSources.map((ds) => ({
-          id: ds.dataSourceRef,
-          name: ds.name,
-          type: SIMPLE_DATA_SOURCE_TYPES.EXTERNAL,
+          id: ds.id,
+          title: ds.title,
+          type: ds.type,
         }))
       );
     } else if (
@@ -223,11 +216,11 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
   }, [dataSourcesLoadStatus, notifications.toasts]);
 
   const handleSelectExternalDataSource = useCallback(
-    async (dataSource: SimpleDataSource) => {
-      if (dataSource && dataSource.type === SIMPLE_DATA_SOURCE_TYPES.EXTERNAL) {
+    async (dataSource: DataSource) => {
+      if (dataSource && dataSource.type === 'EXTERNAL') {
         const dataSourceCache = CatalogCacheManager.getOrCreateDataSource(
-          dataSource.name,
-          dataSource.id
+          dataSource.title,
+          dataSource.id!
         );
         if (
           (dataSourceCache.status === CachedDataSourceStatus.Empty ||
@@ -235,17 +228,21 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
           !isCatalogCacheFetching(databasesLoadStatus)
         ) {
           await startLoadingDatabases({
-            dataSourceName: dataSource.name,
-            dataSourceMDSId: dataSource.id,
+            dataSourceName: dataSource.title,
+            dataSourceMDSId: dataSource.id!,
           });
         } else if (dataSourceCache.status === CachedDataSourceStatus.Updated) {
           setCachedDatabases(
-            dataSourceCache.databases.map((db) => ({ id: db.name, title: db.name }))
+            dataSourceCache.databases.map((db) => ({
+              id: db.id,
+              title: db.title,
+              type: 'DATABASE',
+            }))
           );
         }
         setSelectedDataSetState((prevState) => ({
           ...prevState!,
-          dataSourceRef: dataSource,
+          dataSource,
         }));
       }
     },
@@ -253,14 +250,14 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
   );
 
   const handleSelectExternalDatabase = useCallback(
-    (externalDatabase: SimpleObject) => {
-      if (selectedDataSetState?.dataSourceRef && externalDatabase && externalDatabase.title) {
+    (externalDatabase: DataStructure) => {
+      if (selectedDataSetState?.dataSource && externalDatabase && externalDatabase.title) {
         let databaseCache: CachedDatabase;
         try {
           databaseCache = CatalogCacheManager.getDatabase(
-            selectedDataSetState.dataSourceRef.name,
+            selectedDataSetState.dataSource.title,
             externalDatabase.title,
-            selectedDataSetState.dataSourceRef.id
+            selectedDataSetState.dataSource.id!
           );
         } catch (error) {
           return;
@@ -271,36 +268,38 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
             !isCatalogCacheFetching(tablesLoadStatus))
         ) {
           startLoadingTables({
-            dataSourceName: selectedDataSetState.dataSourceRef.name,
+            dataSourceName: selectedDataSetState.dataSource.title,
             databaseName: externalDatabase.title,
-            dataSourceMDSId: selectedDataSetState.dataSourceRef.id,
+            dataSourceMDSId: selectedDataSetState.dataSource.id!,
           });
         } else if (databaseCache.status === CachedDataSourceStatus.Updated) {
           setCachedTables(
             databaseCache.tables.map((table) => ({
-              id: table.name,
-              title: table.name,
+              id: table.title,
+              title: table.title,
+              type: 'TABLE',
             }))
           );
         }
       }
     },
-    [selectedDataSetState?.dataSourceRef, tablesLoadStatus, startLoadingTables]
+    [selectedDataSetState?.dataSource, tablesLoadStatus, startLoadingTables]
   );
 
   useEffect(() => {
     const status = databasesLoadStatus.toLowerCase();
-    if (
-      selectedDataSetState?.dataSourceRef &&
-      selectedDataSetState.dataSourceRef.type === SIMPLE_DATA_SOURCE_TYPES.EXTERNAL
-    ) {
+    if (selectedDataSetState?.dataSource && selectedDataSetState.dataSource.type === 'EXTERNAL') {
       const dataSourceCache = CatalogCacheManager.getOrCreateDataSource(
-        selectedDataSetState.dataSourceRef.name,
-        selectedDataSetState.dataSourceRef.id
+        selectedDataSetState.dataSource.title,
+        selectedDataSetState.dataSource.id!
       );
       if (status === DirectQueryLoadingStatus.SUCCESS) {
         setCachedDatabases(
-          dataSourceCache.databases.map((db) => ({ id: db.name, title: db.name }))
+          dataSourceCache.databases.map((db) => ({
+            id: db.title,
+            title: db.title,
+            type: 'DATABASE',
+          }))
         );
       } else if (
         status === DirectQueryLoadingStatus.CANCELED ||
@@ -309,21 +308,21 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
         notifications.toasts.addWarning('Error loading databases');
       }
     }
-  }, [databasesLoadStatus, selectedDataSetState?.dataSourceRef, notifications.toasts]);
+  }, [databasesLoadStatus, selectedDataSetState?.dataSource, notifications.toasts]);
 
   useEffect(() => {
     if (
-      selectedDataSetState?.dataSourceRef &&
-      selectedDataSetState.dataSourceRef?.type === SIMPLE_DATA_SOURCE_TYPES.EXTERNAL &&
+      selectedDataSetState?.dataSource &&
+      selectedDataSetState.dataSource?.type === 'EXTERNAL' &&
       selectedDataSetState.database
     ) {
       const tablesStatus = tablesLoadStatus.toLowerCase();
       let databaseCache: CachedDatabase;
       try {
         databaseCache = CatalogCacheManager.getDatabase(
-          selectedDataSetState.dataSourceRef.name,
+          selectedDataSetState.dataSource.title,
           selectedDataSetState.database.title!,
-          selectedDataSetState.dataSourceRef.id
+          selectedDataSetState.dataSource.id!
         );
       } catch (error) {
         return;
@@ -331,8 +330,9 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
       if (tablesStatus === DirectQueryLoadingStatus.SUCCESS) {
         setCachedTables(
           databaseCache.tables.map((table) => ({
-            id: table.name,
-            title: table.name,
+            id: table.id,
+            title: table.title,
+            type: 'TABLE',
           }))
         );
       } else if (
@@ -344,25 +344,25 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
     }
   }, [
     tablesLoadStatus,
-    selectedDataSetState?.dataSourceRef,
+    selectedDataSetState?.dataSource,
     selectedDataSetState?.database,
     notifications.toasts,
   ]);
 
   const handleSelectedDataSource = useCallback(
-    async (source: SimpleDataSource) => {
+    async (source: DataSource) => {
       if (source) {
         setIsLoading(true);
         try {
-          const indices = await fetchIndices(searchService, source.id);
+          const indices = await fetchIndices(searchService, source.id!);
           const updatedSource = {
             ...source,
             indices: indices.map((indexName: string) => ({
               id: indexName,
               title: indexName,
-              dataSourceRef: {
+              dataSource: {
                 id: source.id,
-                name: source.name,
+                title: source.title,
                 type: source.type,
               },
             })),
@@ -374,7 +374,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
 
           setSelectedDataSetState((prevState) => ({
             ...prevState!,
-            dataSourceRef: updatedSource,
+            dataSource: updatedSource,
           }));
         } finally {
           setIsLoading(false);
@@ -385,25 +385,25 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
   );
 
   const handleSelectedObject = useCallback(
-    async (object: SimpleObject) => {
+    async (object: DataStructure) => {
       if (object) {
         setIsLoading(true);
         const fields = await indexPatternsService.getFieldsForWildcard({
           pattern: object.title,
-          dataSourceId: object.dataSourceRef?.id,
+          dataSourceId: object.parent?.id,
         });
 
         const timeFields = fields.filter((field: any) => field.type === 'date');
-        const timeFieldName = timeFields?.length > 0 ? timeFields[0].name : undefined;
+        const timeFieldName = timeFields?.length > 0 ? timeFields[0].title : undefined;
         setSelectedDataSetState((prevState) => ({
-          ...prevState,
-          id: `${object.dataSourceRef ? object.dataSourceRef.id : ''}.${object.id}`,
+          ...prevState!,
+          id: `${object.parent ? object.parent.id : ''}.${object.id}`,
           title: object.title,
           fields,
           timeFields,
           timeFieldName,
-          dataSourceRef: object.dataSourceRef,
-          type: SIMPLE_DATA_SET_TYPES.TEMPORARY,
+          dataSource: object.parent,
+          type: 'TEMPORARY',
         }));
         setIsLoading(false);
       }
@@ -446,23 +446,23 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
           ...(CatalogCacheManager.getRecentDataSets().length > 0
             ? [
                 {
-                  name: 'Recently Used',
+                  title: 'Recently Used',
                   panel: 8,
                 },
               ]
             : []),
           {
-            name: indexPatternsLabel,
+            title: indexPatternsLabel,
             panel: 1,
           },
           {
-            name: indicesLabel,
+            title: indicesLabel,
             panel: 2,
           },
           ...(isExternalDataSourcesEnabled
             ? [
                 {
-                  name: S3DataSourcesLabel,
+                  title: S3DataSourcesLabel,
                   panel: 4,
                   onClick: () => {},
                 },
@@ -474,7 +474,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
         id: 1,
         title: indexPatternsLabel,
         items: indexPatterns.map((indexPattern) => ({
-          name: indexPattern.title,
+          title: indexPattern.title,
           onClick: () => handleSelectedDataSet(indexPattern),
         })),
         content: indexPatterns.length === 0 && createLoadingSpinner(),
@@ -483,7 +483,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
         id: 2,
         title: indicesLabel,
         items: dataSources.map((dataSource) => ({
-          name: dataSource.name,
+          title: dataSource.title,
           panel: 3,
           onClick: () => handleSelectedDataSource(dataSource),
         })),
@@ -491,14 +491,14 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
       },
       {
         id: 3,
-        title: selectedDataSetState?.dataSourceRef?.name ?? indicesLabel,
-        items: selectedDataSetState?.dataSourceRef?.indices?.map((object) => ({
-          name: object.title,
-          panel: 7,
-          onClick: () => handleSelectedObject(object),
-        })),
-        content:
-          isLoading && !selectedDataSetState?.dataSourceRef?.indices && createLoadingSpinner(),
+        title: selectedDataSetState?.dataSource?.title ?? indicesLabel,
+        items:
+          selectedDataSetState?.dataSource?.indices?.map((object) => ({
+            title: object.title,
+            panel: 7,
+            onClick: () => handleSelectedObject(object),
+          })) ?? [],
+        content: isLoading && !selectedDataSetState?.dataSource?.indices && createLoadingSpinner(),
       },
       {
         id: 4,
@@ -510,7 +510,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
           </div>
         ),
         items: externalDataSources.map((dataSource) => ({
-          name: dataSource.name,
+          title: dataSource.title,
           onClick: async () => await handleSelectExternalDataSource(dataSource),
           panel: 5,
         })),
@@ -518,9 +518,9 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
       },
       {
         id: 5,
-        title: selectedDataSetState?.dataSourceRef?.name ?? 'Databases',
+        title: selectedDataSetState?.dataSource?.title ?? 'Databases',
         items: cachedDatabases.map((db) => ({
-          name: db.title,
+          title: db.title,
           onClick: () => {
             setSelectedDataSetState((prevState) => ({
               ...prevState!,
@@ -536,24 +536,21 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
         id: 6,
         title: selectedDataSetState?.database?.title ?? 'Tables',
         items: cachedTables.map((table) => ({
-          name: table.title,
+          title: table.title,
           onClick: () => {
-            const tableObject: SimpleDataSet = {
-              ...selectedDataSetState,
-              id: `${selectedDataSetState?.dataSourceRef!.name}.${
-                selectedDataSetState?.database?.title
-              }.${table.title}`,
-              title: `${selectedDataSetState?.dataSourceRef!.name}.${
-                selectedDataSetState?.database?.title
-              }.${table.title}`,
-              ...(selectedDataSetState?.dataSourceRef && {
-                dataSourceRef: {
-                  id: selectedDataSetState?.dataSourceRef!.id,
-                  name: selectedDataSetState?.dataSourceRef!.name,
-                  type: selectedDataSetState?.dataSourceRef!.type,
-                } as SimpleDataSource,
+            const tableObject: Dataset = {
+              ...selectedDataSetState!,
+              // TODO: potential error case where we do not append the MDS ID for ID
+              id: `${selectedDataSetState?.dataSource?.meta?.name}.${selectedDataSetState?.database?.title}.${table.title}`,
+              title: `${selectedDataSetState?.dataSource?.meta?.name}.${selectedDataSetState?.database?.title}.${table.title}`,
+              ...(selectedDataSetState?.dataSource && {
+                dataSource: {
+                  id: selectedDataSetState?.dataSource!.id,
+                  title: selectedDataSetState?.dataSource!.title,
+                  type: selectedDataSetState?.dataSource!.type,
+                },
               }),
-              type: SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC,
+              type: 'TEMPORARY_ASYNC',
             };
             handleSelectedDataSet(tableObject);
           },
@@ -580,7 +577,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
                     selectedDataSetState.timeFields.length > 0
                       ? selectedDataSetState.timeFields.map((field: any) => ({
                           value: field.value,
-                          text: field.name,
+                          text: field.title,
                         }))
                       : []),
                     { value: 'no-time-filter', text: "I don't want to use a time filter" },
@@ -605,12 +602,12 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
         id: 8,
         title: 'Recently Used',
         items: CatalogCacheManager.getRecentDataSets().map((ds) => ({
-          name: ds.title,
+          title: ds.title,
           onClick: () => {
             setSelectedDataSetState({
               id: ds.id ?? ds.title,
               title: ds.title,
-              dataSourceRef: ds.dataSourceRef,
+              dataSource: ds.dataSource,
               database: undefined,
               timeFieldName: ds.timeFieldName,
               type: ds.type,
@@ -646,9 +643,9 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
 
   const dataSetTitle =
     selectedDataSetState &&
-    selectedDataSetState?.dataSourceRef &&
-    selectedDataSetState?.dataSourceRef.name
-      ? `${selectedDataSetState.dataSourceRef?.name}::${selectedDataSetState?.title}`
+    selectedDataSetState?.dataSource &&
+    selectedDataSetState?.dataSource.title
+      ? `${selectedDataSetState.dataSource?.title}::${selectedDataSetState?.title}`
       : selectedDataSetState?.title;
 
   return (

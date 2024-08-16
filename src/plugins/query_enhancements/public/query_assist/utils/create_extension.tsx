@@ -6,7 +6,7 @@
 import { HttpSetup } from 'opensearch-dashboards/public';
 import React, { useEffect, useState } from 'react';
 import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
-import { SIMPLE_DATA_SOURCE_TYPES } from '../../../../data/common';
+import { DEFAULT_QUERY } from '../../../../data/common';
 import {
   DataPublicPluginSetup,
   QueryEditorExtensionConfig,
@@ -28,12 +28,12 @@ const getAvailableLanguages$ = (
   data.query.dataSetManager.getUpdates$().pipe(
     startWith(data.query.dataSetManager.getDataSet()),
     distinctUntilChanged(),
-    switchMap(async (simpleDataSet) => {
+    switchMap(async (dataset) => {
       // currently query assist tool relies on opensearch API to get index
       // mappings, external data source types (e.g. s3) are not supported
-      if (simpleDataSet?.dataSourceRef?.type === SIMPLE_DATA_SOURCE_TYPES.EXTERNAL) return [];
+      if (dataset?.dataSource?.type !== DEFAULT_QUERY.ENGINE_TYPE) return [];
 
-      const dataSourceId = simpleDataSet?.dataSourceRef?.id;
+      const dataSourceId = dataset?.dataSource?.id;
       const cached = availableLanguagesByDataSource.get(dataSourceId);
       if (cached !== undefined) return cached;
       const languages = await http

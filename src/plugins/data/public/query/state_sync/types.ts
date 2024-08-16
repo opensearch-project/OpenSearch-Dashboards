@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { Filter, RefreshInterval, TimeRange, Query, SimpleDataSet } from '../../../common';
+import { Filter, RefreshInterval, TimeRange, Query, Dataset } from '../../../common';
 
 /**
  * All query state service state
@@ -38,7 +38,6 @@ export interface QueryState {
   refreshInterval?: RefreshInterval;
   filters?: Filter[];
   query?: Query;
-  dataSet?: SimpleDataSet;
 }
 
 type QueryStateChangePartial = {

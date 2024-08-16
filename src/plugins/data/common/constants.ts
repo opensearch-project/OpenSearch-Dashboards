@@ -28,7 +28,11 @@
  * under the License.
  */
 
-export const DEFAULT_QUERY_LANGUAGE = 'kuery';
+export const DEFAULT_QUERY = {
+  LANGUAGE: 'kuery',
+  DATASET_TYPE: 'INDEX_PATTERN',
+  ENGINE_TYPE: 'OPENSEARCH',
+};
 
 export const UI_SETTINGS = {
   META_FIELDS: 'metaFields',
