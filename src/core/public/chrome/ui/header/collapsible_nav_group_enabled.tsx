@@ -229,12 +229,7 @@ export function CollapsibleNavGroupEnabled({
     }
 
     return fulfillRegistrationLinksToChromeNavLinks(navLinksResult, navLinks);
-  }, [
-    navLinks,
-    navGroupsMap,
-    currentNavGroupId,
-    shouldAppendManageCategory,
-  ]);
+  }, [navLinks, navGroupsMap, currentNavGroupId, shouldAppendManageCategory]);
 
   const width = useMemo(() => {
     if (!isNavOpen) {
