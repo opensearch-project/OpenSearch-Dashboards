@@ -44,30 +44,38 @@ export const jsFilename: string;
 export const jsDepFilenames: string[];
 
 /**
+ * Re-export all types from theme_config
+ */
+export * from './theme_config';
+
+/**
  * Filename of the unthemed css file in the distributable directory
  */
 export const baseCssDistFilename: string;
 
 /**
  * Filename of the dark-theme css file in the distributable directory
+ * @deprecated
  */
 export const darkCssDistFilename: string;
 
 /**
  * Filename of the dark-theme css file in the distributable directory
+ * @deprecated
  */
 export const darkV8CssDistFilename: string;
 
 /**
  * Filename of the light-theme css file in the distributable directory
+ * @deprecated
  */
 export const lightCssDistFilename: string;
 
 /**
  * Filename of the light-theme css file in the distributable directory
+ * @deprecated
  */
 export const lightV8CssDistFilename: string;
-
 /**
  * Externals mapping inteded to be used in a webpack config
  */

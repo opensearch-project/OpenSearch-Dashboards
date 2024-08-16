@@ -33,6 +33,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { first, take } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { Agent as HttpsAgent } from 'https';
+import { themeVersionValueMap } from '@osd/ui-shared-deps';
 
 import Axios from 'axios';
 // @ts-expect-error untyped internal module used to prevent axios from using xhr adapter in tests
@@ -102,10 +103,14 @@ export class RenderingService {
           false;
 
         // At the very least, the schema should define a default theme; the '' will be unreachable
-        const themeVersion =
+        const configuredThemeVersion =
           (settings.user?.['theme:version']?.userValue ??
             uiSettings.getOverrideOrDefault('theme:version')) ||
           '';
+        // Validate themeVersion is in valid format
+        const themeVersion =
+          themeVersionValueMap[configuredThemeVersion] ||
+          (uiSettings.getDefault('theme:version') as string);
 
         const brandingAssignment = await this.assignBrandingConfig(
           darkMode,
