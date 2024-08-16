@@ -12,7 +12,7 @@ import {
   CollapsibleNavGroupEnabledProps,
 } from './collapsible_nav_group_enabled';
 import { ChromeNavLink } from '../../nav_links';
-import { ChromeRegistrationNavLink, NavGroupItemInMap } from '../../nav_group';
+import { NavGroupItemInMap } from '../../nav_group';
 import { httpServiceMock } from '../../../mocks';
 import { getLogos } from '../../../../common';
 import { ALL_USE_CASE_ID, DEFAULT_NAV_GROUPS, WorkspaceObject } from '../../../../public';
