@@ -86,6 +86,7 @@ export interface WorkspaceFormProps {
   detailTab?: DetailTab;
   dataSourceManagement?: DataSourceManagementPluginSetup;
   availableUseCases: WorkspaceUseCase[];
+  detailTitle?: string;
 }
 
 export interface WorkspaceDetailedFormProps extends WorkspaceFormProps {
