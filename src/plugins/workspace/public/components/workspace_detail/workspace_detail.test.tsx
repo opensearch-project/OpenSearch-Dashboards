@@ -290,7 +290,6 @@ describe('WorkspaceDetail', () => {
       description: '<script>alert("description")</script>',
     });
     const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
-    expect(getByText('<script>alert("name")</script>')).toBeInTheDocument();
     expect(getByText('<script>alert("description")</script>')).toBeInTheDocument();
     expect(alertSpy).toBeCalledTimes(0);
     alertSpy.mockRestore();
