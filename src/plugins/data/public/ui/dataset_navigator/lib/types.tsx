@@ -4,7 +4,7 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { SimpleDataSet } from '../../../../common';
+import { Dataset, DataStructure } from '../../../../common';
 
 export enum DirectQueryLoadingStatus {
   SUCCESS = 'success',
@@ -122,13 +122,14 @@ export interface CachedColumn {
 }
 
 export interface CachedTable {
+  id: any;
   name: string;
   columns?: CachedColumn[];
 }
 
 export interface CachedDatabase {
   name: string;
-  tables: CachedTable[];
+  tables: DataStructure[];
   lastUpdated: string; // date string in UTC format
   status: CachedDataSourceStatus;
 }
@@ -137,7 +138,7 @@ export interface CachedDataSource {
   name: string;
   lastUpdated: string; // date string in UTC format
   status: CachedDataSourceStatus;
-  databases: CachedDatabase[];
+  databases: DataStructure[];
   dataSourceMDSId?: string;
 }
 
@@ -300,18 +301,18 @@ export interface DataSetOption {
 
 export interface RecentDataSetOptionsCacheData {
   version: string;
-  recentDataSets: SimpleDataSet[];
+  recentDataSets: Dataset[];
 }
 
 export interface ExternalDataSource {
   name: string;
   status: string;
-  dataSourceRef: string;
+  dataSource: string;
 }
 
 export interface ExternalDataSourcesCacheData {
   version: string;
-  dataSources: ExternalDataSource[];
+  dataSources: DataStructure[];
   lastUpdated: string;
   status: CachedDataSourceStatus;
 }

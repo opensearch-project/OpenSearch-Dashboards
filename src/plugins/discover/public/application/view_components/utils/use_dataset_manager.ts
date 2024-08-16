@@ -6,15 +6,15 @@
 import { useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
 import { DataSetManager } from '../../../../../data/public';
-import { SimpleDataSet } from '../../../../../data/common';
+import { Dataset } from '../../../../../data/common';
 
 interface UseDataSetManagerProps {
-  dataSet?: SimpleDataSet;
+  dataSet?: Dataset;
   dataSetManager: DataSetManager;
 }
 
 export const useDataSetManager = (props: UseDataSetManagerProps) => {
-  const [dataSet, setDataSet] = useState<SimpleDataSet | undefined>(
+  const [dataSet, setDataSet] = useState<Dataset | undefined>(
     props.dataSet || props.dataSetManager.getDataSet()
   );
 

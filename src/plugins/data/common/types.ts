@@ -35,7 +35,7 @@ export * from './query/types';
 export * from './osd_field_types/types';
 export * from './index_patterns/types';
 export * from './data_frames/types';
-export * from './data_sets/types';
+export * from './datasets/types';
 
 /**
  * If a service is being shared on both the client and the server, and

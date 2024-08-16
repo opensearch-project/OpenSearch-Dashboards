@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { SIMPLE_DATA_SET_TYPES, SimpleDataSet } from '../../../../../data/common';
+import { DEFAULT_QUERY, Dataset, SavedObjectReference } from '../../../../../data/common';
 import { IndexPattern } from '../../../../../data/public';
 import { useSelector, updateIndexPattern } from '../../utils/state_management';
 import { DiscoverViewServices } from '../../../build_services';
@@ -42,16 +42,15 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
   ]);
 
   const createTempIndexPattern = useCallback(
-    async (dataSetFromState: SimpleDataSet) => {
+    async (dataSetFromState: Dataset) => {
       try {
         const tempIndexPattern = await data.indexPatterns.create(
           {
-            id: `${dataSetFromState.dataSourceRef?.id || ''}.${dataSetFromState.title}`,
+            id: `${dataSetFromState.dataSource?.id || ''}::${dataSetFromState.title}`,
             title: dataSetFromState.title,
-            dataSourceRef: dataSetFromState.dataSourceRef,
+            dataSourceRef: dataSetFromState.dataSource as SavedObjectReference,
             type: dataSetFromState.type,
             timeFieldName: dataSetFromState.timeFieldName,
-            fields: dataSetFromState.fields as any,
           },
           true
         );
@@ -71,7 +70,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
       if (isQueryEnhancementEnabled && dataSet) {
         let pattern;
 
-        if (dataSet.type === SIMPLE_DATA_SET_TYPES.INDEX_PATTERN) {
+        if (dataSet.type === DEFAULT_QUERY.DATASET_TYPE) {
           pattern = await fetchIndexPatternDetails(dataSet.id);
         } else {
           pattern = await createTempIndexPattern(dataSet);
