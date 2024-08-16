@@ -21,9 +21,10 @@ import {
   EuiButtonEmpty,
   EuiPageContent,
   EuiSmallButton,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import img from '../../assets/image.png';
+import BackgroundSVG from '../../assets/background.svg';
 import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
@@ -35,6 +36,11 @@ export const WorkspaceInitial = () => {
   const logos = chrome.logos;
   const createWorkspaceUrl = application.getUrlForApp(WORKSPACE_CREATE_APP_ID, { absolute: true });
   const settingsAndSetupUrl = application.getUrlForApp('settings_landing', { absolute: true });
+
+  const noAdminToolTip = i18n.translate('workspace.initial.card.createWorkspace.toolTip', {
+    defaultMessage:
+      'Contact your administrator to create a workspace or to be added to an existing one.',
+  });
 
   const createButton = (
     <EuiSmallButton
@@ -59,20 +65,16 @@ export const WorkspaceInitial = () => {
           title={i18n.translate('workspace.initial.card.createWorkspace.title', {
             defaultMessage: 'Create a workspace',
           })}
-          description={i18n.translate('workspace.initial.card.createWorkspace.description', {
-            defaultMessage: 'Organize projects by use case in a collaborative workspace.',
-          })}
-          footer={
-            isDashboardAdmin ? (
-              createButton
-            ) : (
-              <EuiText color="subdued" style={{ fontSize: '18px' }}>
-                {i18n.translate('workspace.initial.card.createWorkspace.footer', {
-                  defaultMessage: 'Contact your administrator',
+          description={
+            <EuiToolTip content={isDashboardAdmin || noAdminToolTip}>
+              <>
+                {i18n.translate('workspace.initial.card.createWorkspace.description', {
+                  defaultMessage: 'Organize projects by use case in a collaborative workspace.',
                 })}
-              </EuiText>
-            )
+              </>
+            </EuiToolTip>
           }
+          footer={isDashboardAdmin && createButton}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -203,10 +205,10 @@ export const WorkspaceInitial = () => {
           <EuiFlexItem grow={false} style={{ width: '1122px' }} className="eui-displayInline">
             <EuiPageContent
               style={{
-                backgroundImage: `url(${img})`,
+                backgroundImage: `url(${BackgroundSVG})`,
                 backgroundSize: '490px 380px',
                 backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'right 10px top 30px',
+                backgroundPosition: 'right 10px top 20px',
               }}
             >
               {content}

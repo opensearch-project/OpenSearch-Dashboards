@@ -201,7 +201,7 @@ describe('Workspace server plugin', () => {
 
       await registerOnPostAuthFn(request, response, toolKitMock);
       expect(response.redirected).toBeCalledWith({
-        headers: { location: 'http://localhost/app/workspace_initial' },
+        headers: { location: '/mock-server-basepath/app/workspace_initial' },
       });
     });
 

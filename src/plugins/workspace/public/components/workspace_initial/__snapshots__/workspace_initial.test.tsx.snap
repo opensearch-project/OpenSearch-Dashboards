@@ -140,7 +140,11 @@ exports[`WorkspaceInitial render workspace initial page normally when user is da
                           id="generated-idDescription"
                         >
                           <p>
-                            Organize projects by use case in a collaborative workspace.
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              Organize projects by use case in a collaborative workspace.
+                            </span>
                           </p>
                         </div>
                       </div>
@@ -493,22 +497,12 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                           id="generated-idDescription"
                         >
                           <p>
-                            Organize projects by use case in a collaborative workspace.
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              Organize projects by use case in a collaborative workspace.
+                            </span>
                           </p>
-                        </div>
-                      </div>
-                      <div
-                        class="euiCard__footer"
-                      >
-                        <div
-                          class="euiText euiText--medium"
-                          style="font-size: 18px;"
-                        >
-                          <div
-                            class="euiTextColor euiTextColor--subdued"
-                          >
-                            Contact your administrator
-                          </div>
                         </div>
                       </div>
                     </div>
