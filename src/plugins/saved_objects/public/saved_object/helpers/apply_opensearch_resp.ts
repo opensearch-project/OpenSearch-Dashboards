@@ -91,10 +91,7 @@ export async function applyOpenSearchResp(
       let searchSourceValues = parseSearchSourceJSON(meta.searchSourceJSON);
 
       if (config.searchSource) {
-        searchSourceValues = injectSearchSourceReferences(
-          searchSourceValues as any,
-          resp.references
-        );
+        searchSourceValues = injectSearchSourceReferences(searchSourceValues, resp.references);
         savedObject.searchSource = await dependencies.search.searchSource.create(
           searchSourceValues
         );
