@@ -8613,7 +8613,6 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                         }
                       }
                       buttonSize="s"
-                      headerVariant="application"
                       navLinks$={
                         BehaviorSubject {
                           "_isScalar": false,
@@ -8867,6 +8866,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                               "thrownError": null,
                             }
                           }
+                          renderFullLength={true}
                           useUpdatedHeader={true}
                         />
                       }
@@ -17371,6 +17371,7 @@ exports[`Header renders page header with application title 1`] = `
                               "thrownError": null,
                             }
                           }
+                          renderFullLength={true}
                           useUpdatedHeader={true}
                         />
                       }
