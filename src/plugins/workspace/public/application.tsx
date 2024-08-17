@@ -16,6 +16,7 @@ import { WorkspaceCreatorProps } from './components/workspace_creator/workspace_
 import { WorkspaceDetailApp } from './components/workspace_detail_app';
 import { WorkspaceDetailProps } from './components/workspace_detail/workspace_detail';
 import { WorkspaceInitialApp } from './components/workspace_initial_app';
+import { WorkspaceUseCaseOverviewApp } from './components/workspace_use_case_overview_app';
 
 export const renderCreatorApp = (
   { element }: AppMountParameters,
@@ -110,7 +111,7 @@ export const renderOverviewApp = async (
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      {services.contentManagement?.renderPage(pageId)}
+      <WorkspaceUseCaseOverviewApp pageId={pageId} />
     </OpenSearchDashboardsContextProvider>,
     element
   );

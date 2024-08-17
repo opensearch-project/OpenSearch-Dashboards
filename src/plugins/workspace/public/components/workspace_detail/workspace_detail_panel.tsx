@@ -45,8 +45,12 @@ const overview = i18n.translate('workspace.detail.overview', {
 });
 
 function getOwners(currentWorkspace: WorkspaceAttributeWithPermission) {
-  const { groups = [], users = [] } = currentWorkspace.permissions!.write;
-  return [...groups, ...users];
+  if (currentWorkspace.permissions) {
+    const { groups = [], users = [] } = currentWorkspace.permissions.write;
+    return [...groups, ...users];
+  } else {
+    return [];
+  }
 }
 
 interface WorkspaceDetailPanelProps {
