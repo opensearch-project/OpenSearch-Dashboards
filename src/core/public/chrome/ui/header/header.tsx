@@ -208,12 +208,13 @@ export function Header({
     />
   );
 
-  const renderBreadcrumbs = () => (
+  const renderBreadcrumbs = (renderFullLength?: boolean) => (
     <HeaderBreadcrumbs
       appTitle$={observables.appTitle$}
       breadcrumbs$={observables.breadcrumbs$}
       breadcrumbsEnricher$={observables.breadcrumbsEnricher$}
       useUpdatedHeader={useUpdatedHeader}
+      renderFullLength={renderFullLength}
     />
   );
 
@@ -354,8 +355,7 @@ export function Header({
         navigateToUrl={application.navigateToUrl}
         navLinks$={observables.navLinks$}
         basePath={basePath}
-        headerVariant={headerVariant}
-        renderBreadcrumbs={renderBreadcrumbs()}
+        renderBreadcrumbs={renderBreadcrumbs(true)}
         buttonSize={useApplicationHeader ? 's' : 'xs'}
       />
     </EuiHeaderSectionItem>
