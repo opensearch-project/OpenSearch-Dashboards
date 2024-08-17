@@ -50,6 +50,7 @@ export const registerTestConnectionRoute = async (
                     service: schema.oneOf([
                       schema.literal(SigV4ServiceName.OpenSearch),
                       schema.literal(SigV4ServiceName.OpenSearchServerless),
+                      schema.literal(SigV4ServiceName.SecurityLake),
                     ]),
                   }),
                 }),

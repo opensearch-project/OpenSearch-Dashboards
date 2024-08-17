@@ -51,6 +51,7 @@ export enum AuthType {
 export enum SigV4ServiceName {
   OpenSearch = 'es',
   OpenSearchServerless = 'aoss',
+  SecurityLake = 'security_lake',
 }
 
 export { DataSourceError } from './error';
@@ -59,5 +60,6 @@ export enum DataSourceEngineType {
   OpenSearch = 'OpenSearch',
   OpenSearchServerless = 'OpenSearch Serverless',
   Elasticsearch = 'Elasticsearch',
+  SecurityLake = 'AWS Security Lake',
   NA = 'No Engine Type Available',
 }

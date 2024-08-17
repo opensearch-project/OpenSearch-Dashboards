@@ -17,8 +17,13 @@ export class DataSourceConnectionValidator {
   async validate() {
     try {
       let validationResponse;
-      // Amazon OpenSearch Serverless does not support .info() API
-      if (
+
+      if (this.dataSourceAttr.auth?.credentials?.service === SigV4ServiceName.SecurityLake) {
+        return {
+          statusCode: 200,
+        };
+      } else if (
+        // Amazon OpenSearch Serverless does not support .info() API
         this.dataSourceAttr.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless
       ) {
         validationResponse = await this.callDataCluster.cat.indices();
@@ -45,6 +50,11 @@ export class DataSourceConnectionValidator {
     };
 
     try {
+      // Security Lake
+      if (this.dataSourceAttr.auth?.credentials?.service === SigV4ServiceName.SecurityLake) {
+        dataSourceInfo.dataSourceEngineType = DataSourceEngineType.SecurityLake;
+        return dataSourceInfo;
+      }
       // OpenSearch Serverless does not have version concept
       if (
         this.dataSourceAttr.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless
@@ -80,9 +90,10 @@ export class DataSourceConnectionValidator {
   async fetchInstalledPlugins() {
     const installedPlugins = new Set();
     try {
-      // TODO : retrieve installed plugins from OpenSearch Serverless datasource
+      // TODO : retrieve installed plugins from OpenSearch Serverless and Security Lake datasource
       if (
-        this.dataSourceAttr.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless
+        this.dataSourceAttr.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless ||
+        this.dataSourceAttr.auth?.credentials?.service === SigV4ServiceName.SecurityLake
       ) {
         return installedPlugins;
       }

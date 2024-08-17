@@ -21,6 +21,7 @@ import {
   AuthType,
   DataSourceAttributes,
   SigV4Content,
+  SigV4ServiceName,
   UsernamePasswordTypedContent,
 } from '../../common/data_sources';
 import { EncryptionContext, CryptographyServiceSetup } from '../cryptography_service';
@@ -254,11 +255,18 @@ export class DataSourceSavedObjectsClientWrapper {
   private async validateAttributes<T = unknown>(attributes: T) {
     const { title, endpoint, auth } = attributes;
     this.validateTitle(title);
-    this.validateEndpoint(endpoint);
+    this.validateEndpoint(endpoint, auth);
     await this.validateAuth(auth);
   }
 
-  private validateEndpoint(endpoint: string) {
+  private validateEndpoint(endpoint: string, auth: any) {
+    // Bypass endpoint validation for SecurityLake
+    if (
+      auth.type === AuthType.SigV4 &&
+      auth.credentials?.service === SigV4ServiceName.SecurityLake
+    ) {
+      return;
+    }
     if (!isValidURL(endpoint, this.endpointBlockedIps)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         '"endpoint" attribute is not valid or allowed'
