@@ -30,13 +30,18 @@
 
 const Path = require('path');
 
+Object.assign(exports, require('./theme_config'));
 exports.distDir = Path.resolve(__dirname, 'target');
 exports.jsDepFilenames = ['osd-ui-shared-deps.@elastic.js'];
 exports.jsFilename = 'osd-ui-shared-deps.js';
 exports.baseCssDistFilename = 'osd-ui-shared-deps.css';
+/** @deprecated */
 exports.lightCssDistFilename = 'osd-ui-shared-deps.v7.light.css';
+/** @deprecated */
 exports.lightV8CssDistFilename = 'osd-ui-shared-deps.v8.light.css';
+/** @deprecated */
 exports.darkCssDistFilename = 'osd-ui-shared-deps.v7.dark.css';
+/** @deprecated */
 exports.darkV8CssDistFilename = 'osd-ui-shared-deps.v8.dark.css';
 exports.externals = {
   // stateful deps
