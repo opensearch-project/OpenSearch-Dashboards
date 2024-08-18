@@ -33,10 +33,12 @@ import { skip } from 'rxjs/operators';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { DataStorage, Query, SimpleDataSet, TimeRange, UI_SETTINGS } from '../../../common';
 import { createHistory, QueryHistory } from './query_history';
+import { DatasetContract, DatasetManager } from './dataset_manager';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;
   private queryHistory: QueryHistory;
+  private datasetManager!: DatasetContract;
 
   constructor(
     private readonly storage: DataStorage,
@@ -44,6 +46,7 @@ export class QueryStringManager {
   ) {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
     this.queryHistory = createHistory({ storage });
+    this.datasetManager = new DatasetManager(uiSettings);
   }
 
   private getDefaultQueryString() {
@@ -121,6 +124,41 @@ export class QueryStringManager {
   public changeQueryHistory(listener: (reqs: any[]) => void) {
     return this.queryHistory.change(listener);
   }
+  /**
+   * TODO: verify if we want to just access the dataset manager directly or access each function
+   */
+  public getDatasetManager = () => {
+    return this.datasetManager;
+  };
+
+  // TODO: uncomment or use based on decision above
+  // public initDataset = async (indexPatterns: IndexPatternsContract) => {
+  //   return this.datasetManager.init(indexPatterns);
+  // };
+
+  // public initDatasetWithIndexPattern = (indexPattern: IndexPattern | null) => {
+  //   return this.datasetManager.initWithIndexPattern(indexPattern);
+  // };
+
+  // public getDatasetUpdates$ = () => {
+  //   return this.datasetManager.getUpdates$();
+  // };
+
+  // public getDataset = () => {
+  //   return this.datasetManager.getDataset();
+  // };
+
+  // public setDataset = (dataset: Dataset | undefined) => {
+  //   return this.datasetManager.setDataset(dataset);
+  // };
+
+  // public getDefaultDataset = () => {
+  //   return this.datasetManager.getDefaultDataset();
+  // };
+
+  // public fetchDefaultDataset = async (): Promise<Dataset | undefined> => {
+  //   return this.datasetManager.fetchDefaultDataset();
+  // };
 }
 
 export type QueryStringContract = PublicMethodsOf<QueryStringManager>;

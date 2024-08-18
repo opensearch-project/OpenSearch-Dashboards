@@ -3,22 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DataSetContract } from '.';
+import { DatasetContract } from '.';
 
 const createSetupContractMock = () => {
-  const dataSetManagerMock: jest.Mocked<DataSetContract> = {
+  const datasetManagerMock: jest.Mocked<DatasetContract> = {
     init: jest.fn(),
-    getDataSet: jest.fn(),
-    setDataSet: jest.fn(),
+    getDataset: jest.fn(),
+    setDataset: jest.fn(),
     getUpdates$: jest.fn(),
-    getDefaultDataSet: jest.fn(),
-    fetchDefaultDataSet: jest.fn(),
+    getDefaultDataset: jest.fn(),
+    fetchDefaultDataset: jest.fn(),
     initWithIndexPattern: jest.fn(),
   };
-  return dataSetManagerMock;
+  return datasetManagerMock;
 };
 
-export const dataSetManagerMock = {
+export const datasetManagerMock = {
   createSetupContract: createSetupContractMock,
   createStartContract: createSetupContractMock,
 };
