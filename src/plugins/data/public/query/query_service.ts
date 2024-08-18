@@ -37,7 +37,6 @@ import { TimefilterService, TimefilterSetup } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
 import { createQueryStateObservable } from './state_sync/create_global_query_observable';
 import { QueryStringManager, QueryStringContract } from './query_string';
-import { DataSetContract, DataSetManager } from './dataset_manager';
 import { buildOpenSearchQuery, getOpenSearchQueryConfig, IndexPatternsService } from '../../common';
 import { getUiSettings } from '../services';
 import { IndexPattern } from '..';
@@ -63,7 +62,6 @@ export class QueryService {
   filterManager!: FilterManager;
   timefilter!: TimefilterSetup;
   queryStringManager!: QueryStringContract;
-  dataSetManager!: DataSetContract;
 
   state$!: ReturnType<typeof createQueryStateObservable>;
 
@@ -77,20 +75,19 @@ export class QueryService {
     });
 
     this.queryStringManager = new QueryStringManager(storage, uiSettings);
-    this.dataSetManager = new DataSetManager(uiSettings);
 
     this.state$ = createQueryStateObservable({
       filterManager: this.filterManager,
       timefilter: this.timefilter,
       queryString: this.queryStringManager,
-      dataSetManager: this.dataSetManager,
+      datasetManager: this.queryStringManager.getDatasetManager(),
     }).pipe(share());
 
     return {
       filterManager: this.filterManager,
       timefilter: this.timefilter,
       queryString: this.queryStringManager,
-      dataSetManager: this.dataSetManager,
+      datasetManager: this.queryStringManager.getDatasetManager(),
       state$: this.state$,
     };
   }
@@ -101,7 +98,7 @@ export class QueryService {
     uiSettings,
     indexPatterns,
   }: QueryServiceStartDependencies) {
-    this.dataSetManager.init(indexPatterns);
+    this.queryStringManager.getDatasetManager().init(indexPatterns);
     return {
       addToQueryLog: createAddToQueryLog({
         storage,
@@ -109,7 +106,7 @@ export class QueryService {
       }),
       filterManager: this.filterManager,
       queryString: this.queryStringManager,
-      dataSetManager: this.dataSetManager,
+      dataSetManager: this.queryStringManager.getDatasetManager(),
       savedQueries: createSavedQueryService(savedObjectsClient),
       state$: this.state$,
       timefilter: this.timefilter,

@@ -36,7 +36,7 @@ export interface DataSourceMeta {
  * const openSearchCluster: DataStructure = {
  *   id: "b18e5f58-cf71-11ee-ad92-2468ce360004",
  *   title: "Production Cluster",
- *   type: "OPENSEARCH",
+ *   type: "DATA-SOURCE",
  *   children: [
  *     {
  *       id: "b18e5f58-cf71-11ee-ad92-2468ce360004::logs-2023.05",
@@ -58,7 +58,7 @@ export interface DataSourceMeta {
  * const s3DataSource: DataStructure = {
  *   id: "7d5c3e1c-ae5f-11ee-9c91-1357bd240003",
  *   title: "mys3",
- *   type: "S3,
+ *   type: "DATA-SOURCE",
  *   children: [
  *     {
  *       id: "mys3.defaultDb",

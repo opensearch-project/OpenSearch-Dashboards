@@ -462,8 +462,6 @@ export {
   QueryState,
   getDefaultQuery,
   FilterManager,
-  DataSetManager,
-  DataSetContract,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,

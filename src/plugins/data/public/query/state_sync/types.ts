@@ -38,6 +38,8 @@ export interface QueryState {
   refreshInterval?: RefreshInterval;
   filters?: Filter[];
   query?: Query;
+  // TODO: remove once query object correctly has dataset
+  dataset?: Dataset;
 }
 
 type QueryStateChangePartial = {

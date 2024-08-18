@@ -33,15 +33,18 @@ import { skip } from 'rxjs/operators';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { Query, UI_SETTINGS } from '../../../common';
+import { DatasetContract, DatasetManager } from './dataset_manager';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;
+  private datasetManager!: DatasetContract;
 
   constructor(
     private readonly storage: IStorageWrapper,
     private readonly uiSettings: CoreStart['uiSettings']
   ) {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
+    this.datasetManager = new DatasetManager(uiSettings);
   }
 
   private getDefaultQueryString() {
@@ -100,6 +103,42 @@ export class QueryStringManager {
   public clearQuery = () => {
     this.setQuery(this.getDefaultQuery());
   };
+
+  /**
+   * TODO: verify if we want to just access the dataset manager directly or access each function
+   */
+  public getDatasetManager = () => {
+    return this.datasetManager;
+  };
+
+  // TODO: uncomment or use based on decision above
+  // public initDataset = async (indexPatterns: IndexPatternsContract) => {
+  //   return this.datasetManager.init(indexPatterns);
+  // };
+
+  // public initDatasetWithIndexPattern = (indexPattern: IndexPattern | null) => {
+  //   return this.datasetManager.initWithIndexPattern(indexPattern);
+  // };
+
+  // public getDatasetUpdates$ = () => {
+  //   return this.datasetManager.getUpdates$();
+  // };
+
+  // public getDataset = () => {
+  //   return this.datasetManager.getDataset();
+  // };
+
+  // public setDataset = (dataset: Dataset | undefined) => {
+  //   return this.datasetManager.setDataset(dataset);
+  // };
+
+  // public getDefaultDataset = () => {
+  //   return this.datasetManager.getDefaultDataset();
+  // };
+
+  // public fetchDefaultDataset = async (): Promise<Dataset | undefined> => {
+  //   return this.datasetManager.fetchDefaultDataset();
+  // };
 }
 
 export type QueryStringContract = PublicMethodsOf<QueryStringManager>;

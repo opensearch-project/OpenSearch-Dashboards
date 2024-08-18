@@ -3,17 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DataSetManager } from './dataset_manager';
-import { coreMock } from '../../../../../core/public/mocks';
-import { Dataset } from '../../../common';
+import { DatasetManager } from './dataset_manager';
+import { coreMock } from '../../../../../../core/public/mocks';
+import { Dataset } from '../../../../common';
 
 describe('DatasetManager', () => {
-  let service: DataSetManager;
+  let service: DatasetManager;
 
   beforeEach(() => {
     const uiSettingsMock = coreMock.createSetup().uiSettings;
     uiSettingsMock.get.mockReturnValue(true);
-    service = new DataSetManager(uiSettingsMock);
+    service = new DatasetManager(uiSettingsMock);
   });
 
   test('getUpdates$ is a cold emits only after dataset changes', () => {
@@ -25,16 +25,16 @@ describe('DatasetManager', () => {
     expect(emittedValues).toHaveLength(0);
     expect(emittedValues[0]).toEqual(undefined);
 
-    const newDataSet: Dataset = {
+    const newDataset: Dataset = {
       id: 'test_dataset',
       title: 'Test Dataset',
       type: 'INDEX_PATTERN',
     };
-    service.setDataSet(newDataSet);
+    service.setDataset(newDataset);
     expect(emittedValues).toHaveLength(1);
-    expect(emittedValues[0]).toEqual(newDataSet);
+    expect(emittedValues[0]).toEqual(newDataset);
 
-    service.setDataSet({ ...newDataSet });
+    service.setDataset({ ...newDataset });
     expect(emittedValues).toHaveLength(2);
   });
 });

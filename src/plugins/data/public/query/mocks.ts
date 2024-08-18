@@ -33,7 +33,7 @@ import { QueryService, QuerySetup, QueryStart } from '.';
 import { timefilterServiceMock } from './timefilter/timefilter_service.mock';
 import { createFilterManagerMock } from './filter_manager/filter_manager.mock';
 import { queryStringManagerMock } from './query_string/query_string_manager.mock';
-import { dataSetManagerMock } from './dataset_manager/dataset_manager.mock';
+import { dataSetManagerMock } from './query_string/dataset_manager/dataset_manager.mock';
 
 type QueryServiceClientContract = PublicMethodsOf<QueryService>;
 
