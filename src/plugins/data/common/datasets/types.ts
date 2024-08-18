@@ -138,7 +138,7 @@ export enum DATA_STRUCTURE_META_TYPES {
 /**
  * Metadata for a data structure, used for additional properties like icons or tooltips.
  */
-export interface DataStructureFeatureMeta extends DataSourceMeta {
+export interface DataStructureFeatureMeta extends DataStructureMeta {
   type: DATA_STRUCTURE_META_TYPES.FEATURE;
   icon: string;
   tooltip: string;
