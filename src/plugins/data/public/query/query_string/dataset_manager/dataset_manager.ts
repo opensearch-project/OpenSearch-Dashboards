@@ -6,22 +6,22 @@
 import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { skip } from 'rxjs/operators';
-import { DEFAULT_QUERY, Dataset, DataSource, IndexPattern, UI_SETTINGS } from '../../../common';
-import { IndexPatternsContract } from '../../index_patterns';
+import { DEFAULT_QUERY, Dataset, DataSource, IndexPattern, UI_SETTINGS } from '../../../../common';
+import { IndexPatternsContract } from '../../../index_patterns';
 
-export class DataSetManager {
-  private dataSet$: BehaviorSubject<Dataset | undefined>;
+export class DatasetManager {
+  private dataset$: BehaviorSubject<Dataset | undefined>;
   private indexPatterns?: IndexPatternsContract;
-  private defaultDataSet?: Dataset;
+  private defaultDataset?: Dataset;
 
   constructor(private readonly uiSettings: CoreStart['uiSettings']) {
-    this.dataSet$ = new BehaviorSubject<Dataset | undefined>(undefined);
+    this.dataset$ = new BehaviorSubject<Dataset | undefined>(undefined);
   }
 
   public init = async (indexPatterns: IndexPatternsContract) => {
     if (!this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) return;
     this.indexPatterns = indexPatterns;
-    this.defaultDataSet = await this.fetchDefaultDataSet();
+    this.defaultDataset = await this.fetchDefaultDataset();
   };
 
   public initWithIndexPattern = (indexPattern: IndexPattern | null) => {
@@ -30,7 +30,7 @@ export class DataSetManager {
       return undefined;
     }
 
-    this.defaultDataSet = {
+    this.defaultDataset = {
       id: indexPattern.id,
       title: indexPattern.title,
       type: DEFAULT_QUERY.DATASET_TYPE,
@@ -48,27 +48,27 @@ export class DataSetManager {
   };
 
   public getUpdates$ = () => {
-    return this.dataSet$.asObservable().pipe(skip(1));
+    return this.dataset$.asObservable().pipe(skip(1));
   };
 
-  public getDataSet = () => {
-    return this.dataSet$.getValue();
+  public getDataset = () => {
+    return this.dataset$.getValue();
   };
 
   /**
    * Updates the query.
    * @param {Query} query
    */
-  public setDataSet = (dataSet: Dataset | undefined) => {
+  public setDataset = (dataSet: Dataset | undefined) => {
     if (!this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) return;
-    this.dataSet$.next(dataSet);
+    this.dataset$.next(dataSet);
   };
 
-  public getDefaultDataSet = () => {
-    return this.defaultDataSet;
+  public getDefaultDataset = () => {
+    return this.defaultDataset;
   };
 
-  public fetchDefaultDataSet = async (): Promise<Dataset | undefined> => {
+  public fetchDefaultDataset = async (): Promise<Dataset | undefined> => {
     const defaultIndexPatternId = this.uiSettings.get('defaultIndex');
     if (!defaultIndexPatternId) {
       return undefined;
@@ -97,4 +97,4 @@ export class DataSetManager {
   };
 }
 
-export type DataSetContract = PublicMethodsOf<DataSetManager>;
+export type DatasetContract = PublicMethodsOf<DatasetManager>;
