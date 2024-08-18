@@ -33,7 +33,7 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -45,7 +45,7 @@ import {
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 
 export const newPercentile = (opts) => {
-  return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
+  return _.assign({ id: uuidv4(), mode: 'line', shade: 0.2 }, opts);
 };
 
 class PercentilesUi extends Component {

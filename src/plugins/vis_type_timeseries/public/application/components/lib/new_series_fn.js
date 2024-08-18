@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
 import { newMetricAggFn } from './new_metric_agg_fn';
 import { STACKED_OPTIONS } from '../../visualizations/constants';
@@ -36,7 +36,7 @@ import { STACKED_OPTIONS } from '../../visualizations/constants';
 export const newSeriesFn = (obj = {}) => {
   return _.assign(
     {
-      id: uuid.v1(),
+      id: uuidv4(),
       color: '#68BC00',
       split_mode: 'everything',
       metrics: [newMetricAggFn()],

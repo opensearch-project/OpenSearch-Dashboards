@@ -30,7 +30,7 @@
 
 import { i18n } from '@osd/i18n';
 import { CoreStart } from 'src/core/public';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import _ from 'lodash';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { ActionByType, IncompatibleActionError } from '../../../../ui_actions/public';
@@ -142,7 +142,7 @@ export class ClonePanelAction implements ActionByType<typeof ACTION_CLONE_PANEL>
       type: embeddableType,
       explicitInput: {
         ...panelToClone.explicitInput,
-        id: uuid.v4(),
+        id: uuidv4(),
       },
     };
     let newTitle: string = '';

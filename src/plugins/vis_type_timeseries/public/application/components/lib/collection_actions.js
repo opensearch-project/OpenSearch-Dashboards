@@ -28,9 +28,9 @@
  * under the License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
-const newFn = () => ({ id: uuid.v1() });
+const newFn = () => ({ id: uuidv4() });
 
 export function handleChange(props, doc) {
   const { model, name } = props;

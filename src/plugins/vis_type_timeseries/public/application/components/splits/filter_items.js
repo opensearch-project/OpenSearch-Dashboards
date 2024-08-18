@@ -34,7 +34,7 @@ import _ from 'lodash';
 import { collectionActions } from '../lib/collection_actions';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { ColorPicker } from '../color_picker';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiCompressedFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@osd/i18n/react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
@@ -70,7 +70,7 @@ class FilterItemsUi extends Component {
 
     const newFilter = () => ({
       color: this.props.model.color,
-      id: uuid.v1(),
+      id: uuidv4(),
       filter: { language: model.filter.language || getDefaultQueryLanguage(), query: '' },
     });
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newFilter);

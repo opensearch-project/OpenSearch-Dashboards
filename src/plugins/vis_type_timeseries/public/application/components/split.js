@@ -30,7 +30,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { get } from 'lodash';
 import { SplitByTerms } from './splits/terms';
 import { SplitByFilter } from './splits/filter';
@@ -55,7 +55,7 @@ export class Split extends Component {
         split_filters: [
           {
             color: model.color,
-            id: uuid.v1(),
+            id: uuidv4(),
             filter: {
               query: '',
               language: getDefaultQueryLanguage(),

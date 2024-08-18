@@ -30,7 +30,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@osd/i18n';
 import _ from 'lodash';
 import { AddDeleteButtons } from '../add_delete_buttons';
@@ -38,7 +38,7 @@ import { collectionActions } from '../lib/collection_actions';
 import { MetricSelect } from './metric_select';
 import { EuiFlexGroup, EuiFlexItem, EuiCompressedFieldText } from '@elastic/eui';
 
-export const newVariable = (opts) => ({ id: uuid.v1(), name: '', field: '', ...opts });
+export const newVariable = (opts) => ({ id: uuidv4(), name: '', field: '', ...opts });
 
 export class CalculationVars extends Component {
   constructor(props) {

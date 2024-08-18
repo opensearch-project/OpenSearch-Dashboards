@@ -30,7 +30,7 @@
 
 import { i18n } from '@osd/i18n';
 import _ from 'lodash';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { ActionByType, IncompatibleActionError } from '../../../../ui_actions/public';
 import {
@@ -102,7 +102,7 @@ export class AddToLibraryAction implements ActionByType<typeof ACTION_ADD_TO_LIB
 
     const newPanel: PanelState<EmbeddableInput> = {
       type: embeddable.type,
-      explicitInput: { ...newInput, id: uuid.v4() },
+      explicitInput: { ...newInput, id: uuidv4() },
     };
     dashboard.replacePanel(panelToReplace, newPanel);
   }

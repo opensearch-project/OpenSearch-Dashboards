@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { join } from 'path';
 import { PathConfigType } from '@osd/utils';
 import { readFile, writeFile } from './fs';
@@ -75,7 +75,7 @@ export async function resolveInstanceUuid({
     }
   }
   if (uuidFromFile === undefined) {
-    const newUuid = uuid.v4();
+    const newUuid = uuidv4();
     // no uuid either in config or file, we need to generate and write it.
     logger.debug(`Setting new OpenSearch Dashboards instance UUID: ${newUuid}`);
     await writeUuidToFile(uuidFilePath, newUuid);

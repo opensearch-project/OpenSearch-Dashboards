@@ -36,7 +36,7 @@ import { createSelectHandler } from '../lib/create_select_handler';
 import { createTextHandler } from '../lib/create_text_handler';
 import { ColorRules } from '../color_rules';
 import { ColorPicker } from '../color_picker';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
@@ -73,7 +73,7 @@ class GaugePanelConfigUi extends Component {
       !model.gauge_color_rules ||
       (model.gauge_color_rules && model.gauge_color_rules.length === 0)
     ) {
-      parts.gauge_color_rules = [{ id: uuid.v1() }];
+      parts.gauge_color_rules = [{ id: uuidv4() }];
     }
     if (model.gauge_width == null) parts.gauge_width = 10;
     if (model.gauge_inner_width == null) parts.gauge_inner_width = 10;
