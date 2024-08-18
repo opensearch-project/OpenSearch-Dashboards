@@ -27,6 +27,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
     toolsRight={
       Array [
         <React.Fragment />,
+        <React.Fragment />,
         <EuiSmallButton
           color="danger"
           data-test-subj="savedObjectsManagementDelete"
@@ -253,6 +254,7 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
     onChange={[Function]}
     toolsRight={
       Array [
+        <React.Fragment />,
         <React.Fragment>
           <EuiSmallButton
             data-test-subj="savedObjectsManagementDuplicate"
@@ -501,6 +503,7 @@ exports[`Table should render normally 1`] = `
     onChange={[Function]}
     toolsRight={
       Array [
+        <React.Fragment />,
         <React.Fragment />,
         <EuiSmallButton
           color="danger"

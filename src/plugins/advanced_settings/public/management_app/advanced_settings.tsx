@@ -239,6 +239,7 @@ export class AdvancedSettingsComponent extends Component<
       if (!this.props.useUpdatedUX) {
         return (
           <>
+            <EuiSpacer size="m" />
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem>
                 <PageTitle />
@@ -259,30 +260,24 @@ export class AdvancedSettingsComponent extends Component<
       } else {
         const { HeaderControl } = this.props.navigationUI;
         return (
-          <HeaderControl
-            setMountPoint={this.props.application.setAppBottomControls}
-            controls={[
-              {
-                renderComponent: (
-                  <div>
-                    <CallOuts />
-                    <Search
-                      query={query}
-                      categories={this.categories}
-                      onQueryChange={this.onQueryChange}
-                    />
-                  </div>
-                ),
-              },
-            ]}
-          />
+          <>
+            <HeaderControl
+              setMountPoint={this.props.application.setAppBottomControls}
+              controls={[
+                {
+                  renderComponent: <CallOuts />,
+                },
+              ]}
+            />
+            <Search query={query} categories={this.categories} onQueryChange={this.onQueryChange} />
+            <EuiSpacer size="m" />
+          </>
         );
       }
     };
 
     return (
       <div>
-        <EuiSpacer size="m" />
         {renderHeader()}
         <AdvancedSettingsVoiceAnnouncement queryText={query.text} settings={filteredSettings} />
 

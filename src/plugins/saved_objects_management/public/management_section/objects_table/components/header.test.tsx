@@ -31,16 +31,24 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 import { Header } from './header';
+import { applicationServiceMock } from '../../../../../../core/public/mocks';
+
+const defaultProps = {
+  onExportAll: () => {},
+  onImport: () => {},
+  onRefresh: () => {},
+  onDuplicate: () => {},
+  objectCount: 4,
+  filteredCount: 2,
+  useUpdatedUX: false,
+  navigationUI: { HeaderControl: () => null, TopNavMenu: () => null },
+  applications: applicationServiceMock.createStartContract(),
+};
 
 describe('Header', () => {
   it('should render normally', () => {
     const props = {
-      onExportAll: () => {},
-      onImport: () => {},
-      onRefresh: () => {},
-      onDuplicate: () => {},
-      objectCount: 4,
-      filteredCount: 2,
+      ...defaultProps,
       showDuplicateAll: false,
     };
 
@@ -51,12 +59,7 @@ describe('Header', () => {
 
   it('should render normally when showDuplicateAll is undefined', () => {
     const props = {
-      onExportAll: () => {},
-      onImport: () => {},
-      onRefresh: () => {},
-      onDuplicate: () => {},
-      objectCount: 4,
-      filteredCount: 2,
+      ...defaultProps,
       showDuplicateAll: undefined,
     };
 
@@ -69,12 +72,7 @@ describe('Header', () => {
 describe('Header - workspace enabled', () => {
   it('should render `Duplicate All` button when workspace enabled', () => {
     const props = {
-      onExportAll: () => {},
-      onImport: () => {},
-      onRefresh: () => {},
-      onDuplicate: () => {},
-      objectCount: 4,
-      filteredCount: 2,
+      ...defaultProps,
       showDuplicateAll: true,
     };
 
