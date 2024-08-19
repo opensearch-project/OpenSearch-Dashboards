@@ -29,17 +29,16 @@
  */
 
 import { QueryStringManager } from './query_string_manager';
-import { Storage } from '../../../../opensearch_dashboards_utils/public/storage';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { coreMock } from '../../../../../core/public/mocks';
 import { Query } from '../../../common/query';
+import { DataStorage } from '../../../../data/common';
 
 describe('QueryStringManager', () => {
   let service: QueryStringManager;
 
   beforeEach(() => {
     service = new QueryStringManager(
-      new Storage(new StubBrowserStorage()),
+      new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       coreMock.createSetup().uiSettings
     );
   });
