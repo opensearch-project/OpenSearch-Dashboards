@@ -163,6 +163,11 @@ export const getSuggestions = async ({
     // gets candidates at specified token index
     const candidates = core.collectCandidates(cursorIndex);
 
+    // manually remove NOT from candidates when cursor is in a phrase
+    if (tokenStream.get(cursorIndex).type === DQLParser.PHRASE) {
+      candidates.tokens.delete(DQLParser.NOT);
+    }
+
     const completions: QuerySuggestion[] = [];
 
     // check to see if field rule is a candidate. if so, suggest field names
