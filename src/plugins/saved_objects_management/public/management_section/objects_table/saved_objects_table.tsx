@@ -89,7 +89,6 @@ import {
   findObject,
   extractExportDetails,
   SavedObjectsExportResultDetails,
-  duplicateSavedObjects,
 } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
 import {
@@ -735,12 +734,25 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     targetWorkspace: string,
     targetWorkspaceName: string
   ) => {
-    const { http, notifications } = this.props;
+    const { notifications, workspaces } = this.props;
+    const workspaceClient = workspaces.client$.getValue();
+
+    const showErrorNotification = () => {
+      notifications.toasts.addDanger({
+        title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
+          defaultMessage:
+            'Unable to copy {errorCount, plural, one {# saved object} other {# saved objects}}.',
+          values: { errorCount: savedObjects.length },
+        }),
+      });
+    };
+    if (!workspaceClient) {
+      showErrorNotification();
+      return;
+    }
     const objectsToDuplicate = savedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
-    let result;
     try {
-      result = await duplicateSavedObjects(
-        http,
+      const result = await workspaceClient.copy(
         objectsToDuplicate,
         targetWorkspace,
         includeReferencesDeep
@@ -753,13 +765,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         targetWorkspaceName,
       });
     } catch (e) {
-      notifications.toasts.addDanger({
-        title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
-          defaultMessage:
-            'Unable to copy {errorCount, plural, one {# saved object} other {# saved objects}}.',
-          values: { errorCount: savedObjects.length },
-        }),
-      });
+      showErrorNotification();
     }
     this.hideDuplicateModal();
     await this.refreshObjects();

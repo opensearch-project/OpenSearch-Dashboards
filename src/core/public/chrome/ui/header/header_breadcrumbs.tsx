@@ -41,6 +41,7 @@ interface Props {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   breadcrumbsEnricher$: Observable<ChromeBreadcrumbEnricher | undefined>;
   useUpdatedHeader?: boolean;
+  renderFullLength?: boolean;
 }
 
 export function HeaderBreadcrumbs({
@@ -48,6 +49,7 @@ export function HeaderBreadcrumbs({
   breadcrumbs$,
   breadcrumbsEnricher$,
   useUpdatedHeader,
+  renderFullLength,
 }: Props) {
   const appTitle = useObservable(appTitle$, 'OpenSearch Dashboards');
   const breadcrumbs = useObservable(breadcrumbs$, []);
@@ -87,7 +89,7 @@ export function HeaderBreadcrumbs({
 
   return (
     <EuiHeaderBreadcrumbs
-      breadcrumbs={remainingCrumbs}
+      breadcrumbs={renderFullLength ? crumbs : remainingCrumbs}
       max={10}
       data-test-subj="breadcrumbs"
       className={className}
