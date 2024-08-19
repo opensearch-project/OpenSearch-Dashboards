@@ -1,0 +1,2 @@
+feat:
+- Created language manager inside query string service ([#7756](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7756))
