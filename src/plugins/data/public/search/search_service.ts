@@ -64,7 +64,7 @@ import {
   createDataFrameCache,
   dataFrameToSpec,
 } from '../../common/data_frames';
-import { getQueryService, getUiService } from '../services';
+import { getQueryService } from '../services';
 import { UI_SETTINGS } from '../../common';
 
 /** @internal */
@@ -135,10 +135,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options) => {
+      const queryString = getQueryService().queryString;
       const selectedLanguage = getQueryService().queryString.getQuery().language;
-      const uiService = getUiService();
-      const enhancement = uiService.Settings.getQueryEnhancements(selectedLanguage);
-      uiService.Settings.setUiOverridesByUserQueryLanguage(selectedLanguage);
+      const enhancement = queryString.getLanguageManager().getQueryEnhancements(selectedLanguage);
+      queryString.getLanguageManager().setUiOverridesByUserQueryLanguage(selectedLanguage);
       const isEnhancedEnabled = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
 
       if (enhancement) {

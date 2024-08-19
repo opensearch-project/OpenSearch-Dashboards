@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useState } from 'react';
-import { getUiService } from '../../services';
+import { getQueryService } from '../../services';
 
 export interface QueryLanguageSelectorProps {
   language: string;
@@ -53,17 +53,16 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
     },
   ];
 
-  const uiService = getUiService();
+  const queryService = getQueryService();
+  const languageManager = queryService.queryString.getLanguageManager();
 
-  const queryEnhancements = uiService.Settings.getAllQueryEnhancements();
+  const queryEnhancements = languageManager.getAllQueryEnhancements();
   queryEnhancements.forEach((enhancement) => {
     if (
       (enhancement.supportedAppNames &&
         props.appName &&
         !enhancement.supportedAppNames.includes(props.appName)) ||
-      uiService.Settings.getUserQueryLanguageBlocklist().includes(
-        enhancement.language.toLowerCase()
-      )
+      languageManager.getUserQueryLanguageBlocklist().includes(enhancement.language.toLowerCase())
     )
       return;
     languageOptions.unshift(mapExternalLanguageToOptions(enhancement.language));
@@ -78,10 +77,10 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
 
   const handleLanguageChange = (newLanguage: string) => {
     props.onSelectLanguage(newLanguage);
-    uiService.Settings.setUserQueryLanguage(newLanguage);
+    languageManager.setUserQueryLanguage(newLanguage);
   };
 
-  uiService.Settings.setUserQueryLanguage(props.language);
+  languageManager.setUserQueryLanguage(props.language);
 
   const languageOptionsMenu = languageOptions
     .sort((a, b) => {

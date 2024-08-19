@@ -9,11 +9,9 @@ import { ConfigSchema } from '../../config';
 import { DataPublicPluginStart } from '../types';
 import { createDataSetNavigator } from './dataset_navigator';
 import { createIndexPatternSelect } from './index_pattern_select';
-import { QueryEditorExtensionConfig } from './query_editor';
 import { createSearchBar } from './search_bar/create_search_bar';
-import { createSettings } from './settings';
 import { SuggestionsComponent } from './typeahead';
-import { IUiSetup, IUiStart, QueryEnhancement, UiEnhancements } from './types';
+import { IUiSetup, IUiStart } from './types';
 import { DataStorage } from '../../common';
 
 /** @internal */
@@ -28,8 +26,6 @@ export interface UiServiceStartDependencies {
 
 export class UiService implements Plugin<IUiSetup, IUiStart> {
   enhancementsConfig: ConfigSchema['enhancements'];
-  private queryEnhancements: Map<string, QueryEnhancement> = new Map();
-  private queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig> = {};
   private dataSetContainer$ = new BehaviorSubject<HTMLDivElement | null>(null);
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -38,30 +34,9 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
     this.enhancementsConfig = enhancements;
   }
 
-  public setup(core: CoreSetup, {}: UiServiceSetupDependencies): IUiSetup {
-    return {
-      __enhance: (enhancements?: UiEnhancements) => {
-        if (!enhancements) return;
-        if (enhancements.query && enhancements.query.language) {
-          this.queryEnhancements.set(enhancements.query.language, enhancements.query);
-        }
-        if (enhancements.queryEditorExtension) {
-          this.queryEditorExtensionMap[enhancements.queryEditorExtension.id] =
-            enhancements.queryEditorExtension;
-        }
-      },
-    };
-  }
+  public setup(core: CoreSetup, {}: UiServiceSetupDependencies): any {}
 
   public start(core: CoreStart, { dataServices, storage }: UiServiceStartDependencies): IUiStart {
-    const Settings = createSettings({
-      config: this.enhancementsConfig,
-      search: dataServices.search,
-      storage,
-      queryEnhancements: this.queryEnhancements,
-      queryEditorExtensionMap: this.queryEditorExtensionMap,
-    });
-
     const setDataSetContainerRef = (ref: HTMLDivElement | null) => {
       this.dataSetContainer$.next(ref);
     };
@@ -70,7 +45,6 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       core,
       data: dataServices,
       storage,
-      settings: Settings,
       setDataSetContainerRef,
     });
 
@@ -83,7 +57,6 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       ),
       SearchBar,
       SuggestionsComponent,
-      Settings,
       dataSetContainer$: this.dataSetContainer$,
     };
   }

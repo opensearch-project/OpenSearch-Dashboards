@@ -9,10 +9,7 @@ import { DataSetNavigatorProps } from './dataset_navigator';
 import { IndexPatternSelectProps } from './index_pattern_select';
 import { StatefulSearchBarProps } from './search_bar';
 import { QueryEditorExtensionConfig } from './query_editor/query_editor_extensions';
-import { Settings } from './settings';
 import { SuggestionsComponentProps } from './typeahead/suggestions_component';
-
-export * from './settings';
 
 export interface QueryEnhancement {
   // TODO: MQL do want to default have supported all data_sources?
@@ -71,9 +68,5 @@ export interface IUiStart {
   DataSetNavigator: React.ComponentType<DataSetNavigatorProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
   SuggestionsComponent: React.ComponentType<SuggestionsComponentProps>;
-  /**
-   * @experimental - Subject to change
-   */
-  Settings: Settings;
   dataSetContainer$: Observable<HTMLDivElement | null>;
 }

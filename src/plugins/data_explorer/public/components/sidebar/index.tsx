@@ -24,7 +24,12 @@ export const Sidebar: FC = ({ children }) => {
 
   const {
     services: {
-      data: { indexPatterns, dataSources, ui },
+      data: {
+        indexPatterns,
+        dataSources,
+        ui,
+        query: { queryString },
+      },
       notifications: { toasts },
       application,
     },
@@ -33,16 +38,17 @@ export const Sidebar: FC = ({ children }) => {
   const { DataSetNavigator } = ui;
 
   useEffect(() => {
-    const subscriptions = ui.Settings.getEnabledQueryEnhancementsUpdated$().subscribe(
-      (enabledQueryEnhancements) => {
+    const subscriptions = queryString
+      .getLanguageManager()
+      .getEnabledQueryEnhancementsUpdated$()
+      .subscribe((enabledQueryEnhancements) => {
         setIsEnhancementsEnabled(enabledQueryEnhancements);
-      }
-    );
+      });
 
     return () => {
       subscriptions.unsubscribe();
     };
-  }, [ui.Settings]);
+  }, [queryString]);
 
   const setContainerRef = useCallback((uiContainerRef) => {
     uiContainerRef.appendChild(containerRef.current);

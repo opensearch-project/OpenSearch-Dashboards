@@ -8,19 +8,18 @@ import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
 import { monaco } from '@osd/monaco';
-import { Settings } from '..';
 import { IDataPluginServices, IFieldType, IIndexPattern, Query, TimeRange } from '../..';
 import { OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
 import { QuerySuggestion } from '../../autocomplete';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
-import { DataSettings } from '../types';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
 import { SimpleDataSet } from '../../../common';
 import { createDQLEditor, createDefaultEditor } from './editors';
 import { getQueryService, getIndexPatterns } from '../../services';
+import { DataSettings } from '..';
 
 const LANGUAGE_ID_SQL = 'SQL';
 monaco.languages.register({ id: LANGUAGE_ID_SQL });
@@ -32,7 +31,6 @@ export interface QueryEditorProps {
   dataSet?: SimpleDataSet;
   query: Query;
   dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
-  settings: Settings;
   disableAutoFocus?: boolean;
   screenTitle?: string;
   queryActions?: any;
@@ -99,13 +97,14 @@ export default class QueryEditorUI extends Component<Props, State> {
   public inputRef: monaco.editor.IStandaloneCodeEditor | null = null;
 
   private queryService = getQueryService();
+  private languageManager = this.queryService.queryString.getLanguageManager();
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
   private services = this.props.opensearchDashboards.services;
   private headerRef: RefObject<HTMLDivElement> = createRef();
   private bannerRef: RefObject<HTMLDivElement> = createRef();
-  private extensionMap = this.props.settings?.getQueryEditorExtensionMap();
+  private extensionMap = this.languageManager.getQueryEditorExtensionMap();
 
   private getQueryString = () => {
     if (!this.props.query.query) {
@@ -198,14 +197,14 @@ export default class QueryEditorUI extends Component<Props, State> {
       language,
     };
 
-    const enhancement = this.props.settings.getQueryEnhancements(newQuery.language);
+    const enhancement = this.languageManager.getQueryEnhancements(newQuery.language);
     const fields = enhancement?.fields;
     const newSettings: DataSettings = {
       userQueryLanguage: newQuery.language,
       userQueryString: newQuery.query,
       ...(fields && { uiOverrides: { fields } }),
     };
-    this.props.settings?.updateSettings(newSettings);
+    this.languageManager.updateSettings(newSettings);
 
     const dateRangeEnhancement = enhancement?.searchBar?.dateRange;
     const dateRange = dateRangeEnhancement
