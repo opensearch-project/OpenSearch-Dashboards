@@ -119,7 +119,7 @@ export class DataPublicPlugin
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
     this.uiService = new UiService(initializerContext);
-    this.queryService = new QueryService();
+    this.queryService = new QueryService(initializerContext);
     this.fieldFormatsService = new FieldFormatsService();
     this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = createStorage({ engine: window.localStorage, prefix: 'opensearch_dashboards.' });
@@ -176,7 +176,8 @@ export class DataPublicPlugin
       query: queryService,
       __enhance: (enhancements: DataPublicPluginEnhancements) => {
         if (enhancements.search) searchService.__enhance(enhancements.search);
-        if (enhancements.ui) uiService.__enhance(enhancements.ui);
+        if (enhancements.ui)
+          queryService.queryString.getLanguageManager().__enhance(enhancements.ui);
       },
     };
   }

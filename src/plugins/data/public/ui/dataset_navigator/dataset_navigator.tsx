@@ -61,6 +61,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
 }) => {
   const searchService = getSearchService();
   const queryService = getQueryService();
+  const languageManager = queryService.queryString.getLanguageManager();
   const uiService = getUiService();
   const indexPatternsService = getIndexPatterns();
   const notifications = getNotifications();
@@ -107,14 +108,14 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
       const selectedDataSet = ds ?? selectedDataSetState;
       if (!selectedDataSet || !selectedDataSet.id) return;
 
-      const language = uiService.Settings.getUserQueryLanguage();
-      const queryEnhancements = uiService.Settings.getQueryEnhancements(language);
+      const language = languageManager.getUserQueryLanguage();
+      const queryEnhancements = languageManager.getQueryEnhancements(language);
       const initialInput = queryEnhancements?.searchBar?.queryStringInput?.initialValue;
 
       const query = initialInput
         ? initialInput.replace('<data_source>', selectedDataSet.title!)
         : '';
-      uiService.Settings.setUserQueryString(query);
+      languageManager.setUserQueryString(query);
       queryService.queryString.setQuery({ query, language });
 
       queryService.dataSetManager.setDataSet(selectedDataSet);
@@ -143,7 +144,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
 
       closePopover();
     },
-    [queryService, setSelectedDataSetState, selectedDataSetState, uiService.Settings]
+    [queryService, setSelectedDataSetState, selectedDataSetState, languageManager]
   );
 
   useEffect(() => {

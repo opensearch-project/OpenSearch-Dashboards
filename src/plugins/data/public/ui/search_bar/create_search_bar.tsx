@@ -40,13 +40,11 @@ import { useSavedQuery } from './lib/use_saved_query';
 import { DataPublicPluginStart } from '../../types';
 import { DataStorage, Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
-import { Settings } from '../types';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: DataStorage;
-  settings: Settings;
   setDataSetContainerRef: (ref: HTMLDivElement | null) => void;
 }
 
@@ -136,7 +134,6 @@ export function createSearchBar({
   core,
   storage,
   data,
-  settings,
   setDataSetContainerRef,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
@@ -217,7 +214,6 @@ export function createSearchBar({
           isRefreshPaused={refreshInterval.pause}
           filters={filters}
           query={query}
-          settings={settings}
           dataSetContainerRef={dataSetContainerRef}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}

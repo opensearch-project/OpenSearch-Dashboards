@@ -4,11 +4,10 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { DataStorage, setOverrides as setFieldOverrides } from '../../../common';
-import { ConfigSchema } from '../../../config';
-import { ISearchStart } from '../../search';
-import { QueryEditorExtensionConfig } from '../query_editor/query_editor_extensions';
-import { QueryEnhancement } from '../types';
+import { QueryEnhancement, UiEnhancements } from '../../../ui/types';
+import { QueryEditorExtensionConfig } from '../../../ui';
+import { ConfigSchema } from '../../../../config';
+import { DataStorage, setOverrides as setFieldOverrides } from '../../../../common';
 
 export interface DataSettings {
   userQueryLanguage: string;
@@ -22,21 +21,45 @@ export interface DataSettings {
   };
 }
 
-export class Settings {
+export class LanguageManager {
   private isEnabled = false;
   private enabledQueryEnhancementsUpdated$ = new BehaviorSubject<boolean>(this.isEnabled);
   private enhancedAppNames: string[] = [];
+  private queryEnhancements: Map<string, QueryEnhancement>;
+  private queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>;
 
   constructor(
     private readonly config: ConfigSchema['enhancements'],
-    private readonly search: ISearchStart,
-    private readonly storage: DataStorage,
-    private readonly queryEnhancements: Map<string, QueryEnhancement>,
-    private readonly queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>
+    private readonly storage: DataStorage
   ) {
     this.isEnabled = true;
     this.setUserQueryEnhancementsEnabled(this.isEnabled);
     this.enhancedAppNames = this.isEnabled ? this.config.supportedAppNames : [];
+    this.queryEnhancements = new Map();
+    this.queryEditorExtensionMap = {};
+  }
+
+  public __enhance = (enhancements: UiEnhancements) => {
+    if (!enhancements) return;
+    if (enhancements.query && enhancements.query.language) {
+      this.queryEnhancements.set(enhancements.query.language, enhancements.query);
+    }
+    if (enhancements.queryEditorExtension) {
+      this.queryEditorExtensionMap[enhancements.queryEditorExtension.id] =
+        enhancements.queryEditorExtension;
+    }
+  };
+
+  public getAllQueryEnhancements() {
+    return this.queryEnhancements;
+  }
+
+  public getQueryEnhancements(language: string) {
+    return this.queryEnhancements.get(language);
+  }
+
+  public getQueryEditorExtensionMap() {
+    return this.queryEditorExtensionMap;
   }
 
   supportsEnhancementsEnabled(appName: string) {
@@ -58,18 +81,6 @@ export class Settings {
     return true;
   }
 
-  getAllQueryEnhancements() {
-    return this.queryEnhancements;
-  }
-
-  getQueryEnhancements(language: string) {
-    return this.queryEnhancements.get(language);
-  }
-
-  getQueryEditorExtensionMap() {
-    return this.queryEditorExtensionMap;
-  }
-
   getUserQueryLanguageBlocklist() {
     return this.storage.get('userQueryLanguageBlocklist') || [];
   }
@@ -87,18 +98,8 @@ export class Settings {
   }
 
   setUserQueryLanguage(language: string) {
-    if (language !== this.getUserQueryLanguage()) {
-      this.search.df.clear();
-    }
     this.storage.set('userQueryLanguage', language);
-    const queryEnhancement = this.queryEnhancements.get(language);
-    this.search.__enhance({
-      searchInterceptor: queryEnhancement
-        ? queryEnhancement.search
-        : this.search.getDefaultSearchInterceptor(),
-    });
     this.setUiOverridesByUserQueryLanguage(language);
-
     return true;
   }
 
@@ -167,20 +168,4 @@ export class Settings {
   }
 }
 
-interface Deps {
-  config: ConfigSchema['enhancements'];
-  search: ISearchStart;
-  storage: DataStorage;
-  queryEnhancements: Map<string, QueryEnhancement>;
-  queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>;
-}
-
-export function createSettings({
-  config,
-  search,
-  storage,
-  queryEnhancements,
-  queryEditorExtensionMap,
-}: Deps) {
-  return new Settings(config, search, storage, queryEnhancements, queryEditorExtensionMap);
-}
+export type LanguageContract = PublicMethodsOf<LanguageManager>;

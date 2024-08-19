@@ -23,7 +23,6 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { UI_SETTINGS } from '../../../common';
 import { getQueryLog, PersistedLog } from '../../query';
-import { Settings } from '../types';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
 import { useDataSetManager } from '../search_bar/lib/use_dataset_manager';
@@ -34,7 +33,6 @@ const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 export interface QueryEditorTopRowProps {
   query?: Query;
   dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
-  settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
@@ -71,7 +69,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     storage,
     appName,
     data: {
-      query: { dataSetManager: dataSetManager },
+      query: { dataSetManager: dataSetManager, queryString },
     },
   } = opensearchDashboards.services;
   const { dataSet } = useDataSetManager({ dataSetManager: dataSetManager! });
@@ -79,8 +77,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const queryLanguage = props.query && props.query.language;
   const queryUiEnhancement =
     (queryLanguage &&
-      props.settings &&
-      props.settings.getQueryEnhancements(queryLanguage)?.searchBar) ||
+      queryString.getLanguageManager().getQueryEnhancements(queryLanguage)?.searchBar) ||
     null;
   const parsedQuery =
     !queryUiEnhancement || isValidQuery(props.query)
@@ -196,9 +193,8 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function getQueryStringInitialValue(language: string) {
-    const { settings } = props;
-    const input = settings?.getQueryEnhancements(language)?.searchBar?.queryStringInput
-      ?.initialValue;
+    const input = queryString.getLanguageManager().getQueryEnhancements(language)?.searchBar
+      ?.queryStringInput?.initialValue;
 
     if (!input) return '';
 
@@ -215,7 +211,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           queryActions={props.prepend}
           query={parsedQuery}
           dataSetContainerRef={props.dataSetContainerRef}
-          settings={props.settings!}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
           onChangeQueryEditorFocus={onChangeQueryEditorFocus}
@@ -255,7 +250,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function shouldRenderQueryEditor(): boolean {
-    return Boolean(props.showQueryEditor && props.settings && props.query && storage);
+    return Boolean(props.showQueryEditor && props.query && storage);
   }
 
   function renderUpdateButton() {

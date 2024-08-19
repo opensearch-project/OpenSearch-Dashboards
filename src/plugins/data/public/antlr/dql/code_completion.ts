@@ -13,7 +13,7 @@ import { getTokenPosition } from '../shared/cursor';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './.generated/DQLParserVisitor';
-import { getUiService } from '../../services';
+import { getQueryService } from '../../services';
 
 const findCursorIndex = (
   tokenStream: TokenStream,
@@ -132,7 +132,9 @@ export const getSuggestions = async ({
   if (
     !services ||
     !services.appName ||
-    !getUiService().Settings.supportsEnhancementsEnabled(services.appName) ||
+    !getQueryService()
+      .queryString.getLanguageManager()
+      .supportsEnhancementsEnabled(services.appName) ||
     !indexPattern
   ) {
     return [];
