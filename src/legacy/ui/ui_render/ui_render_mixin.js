@@ -96,14 +96,19 @@ export function uiRenderMixin(osdServer, server, config) {
         !authEnabled || request.auth.isAuthenticated
           ? await uiSettings.get('theme:darkMode')
           : uiSettings.getOverrideOrDefault('theme:darkMode');
+      const themeMode = darkMode ? 'dark' : 'light';
 
-      const themeVersion =
+      const configuredThemeVersion =
         !authEnabled || request.auth.isAuthenticated
           ? await uiSettings.get('theme:version')
           : uiSettings.getOverrideOrDefault('theme:version');
+      // Validate themeVersion is in valid format
+      const themeVersion =
+        UiSharedDeps.themeVersionValueMap[configuredThemeVersion] ||
+        uiSettings.getDefault('theme:version');
 
       // Next (preview) label is mapped to v8 here
-      const themeTag = `${themeVersion === 'v7' ? 'v7' : 'v8'}${darkMode ? 'dark' : 'light'}`;
+      const themeTag = `${themeVersion}${themeMode}`;
 
       const buildHash = server.newPlatform.env.packageInfo.buildNum;
       const basePath = config.get('server.basePath');
@@ -112,25 +117,9 @@ export function uiRenderMixin(osdServer, server, config) {
 
       const styleSheetPaths = [
         `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
-        ...(darkMode
-          ? [
-              themeVersion === 'v7'
-                ? `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.darkCssDistFilename}`
-                : `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.darkV8CssDistFilename}`,
-              themeVersion === 'v7'
-                ? `${basePath}/node_modules/@osd/ui-framework/dist/kui_dark.css`
-                : `${basePath}/node_modules/@osd/ui-framework/dist/kui_next_dark.css`,
-              `${basePath}/ui/legacy_dark_theme.css`,
-            ]
-          : [
-              themeVersion === 'v7'
-                ? `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.lightCssDistFilename}`
-                : `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.lightV8CssDistFilename}`,
-              themeVersion === 'v7'
-                ? `${basePath}/node_modules/@osd/ui-framework/dist/kui_light.css`
-                : `${basePath}/node_modules/@osd/ui-framework/dist/kui_next_light.css`,
-              `${basePath}/ui/legacy_light_theme.css`,
-            ]),
+        `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.themeCssDistFilenames[themeVersion][themeMode]}`,
+        `${basePath}/node_modules/@osd/ui-framework/dist/${UiSharedDeps.kuiCssDistFilenames[themeVersion][themeMode]}`,
+        `${basePath}/ui/legacy_${themeMode}_theme.css`,
       ];
 
       const kpUiPlugins = osdServer.newPlatform.__internals.uiPlugins;
