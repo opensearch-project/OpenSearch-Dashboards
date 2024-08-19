@@ -92,7 +92,7 @@
     "!chromedriver/**/axios": "^0.21.4",
     "chromedriver/**/axios": "^0.27.2",
     "chromedriver/**/debug": "^4.3.1",
-    "**/ejs": "^3.1.6",
+    "**/ejs": "^3.1.10",
     "**/express": "^4.19.2",
     "**/flat": "^5.0.2",
     "**/follow-redirects": "^1.15.6",
