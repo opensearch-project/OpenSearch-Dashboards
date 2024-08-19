@@ -44,4 +44,10 @@ describe('WorkspaceInitial', () => {
     const { container } = render(<WorkspaceInitialPage isDashboardAdmin={false} />);
     expect(container).toMatchSnapshot();
   });
+
+  it('render workspace initial page normally when theme is dark mode', async () => {
+    mockCoreStart.uiSettings.get.mockReturnValue(true);
+    const { container } = render(<WorkspaceInitialPage isDashboardAdmin={true} />);
+    expect(container).toMatchSnapshot();
+  });
 });

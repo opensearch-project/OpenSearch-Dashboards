@@ -24,18 +24,21 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import BackgroundSVG from '../../assets/background.svg';
+import BackgroundLightSVG from '../../assets/background_light.svg';
+import BackgroundDarkSVG from '../../assets/background_light.svg';
 import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
 export const WorkspaceInitial = () => {
   const {
-    services: { application, chrome },
+    services: { application, chrome, uiSettings },
   } = useOpenSearchDashboards<CoreStart>();
   const isDashboardAdmin = application.capabilities.dashboards?.isDashboardAdmin;
   const logos = chrome.logos;
   const createWorkspaceUrl = application.getUrlForApp(WORKSPACE_CREATE_APP_ID, { absolute: true });
   const settingsAndSetupUrl = application.getUrlForApp('settings_landing', { absolute: true });
+  const isDarkTheme = uiSettings.get('theme:darkMode');
+  const backGroundUrl = isDarkTheme ? BackgroundDarkSVG : BackgroundLightSVG;
 
   const noAdminToolTip = i18n.translate('workspace.initial.card.createWorkspace.toolTip', {
     defaultMessage:
@@ -205,7 +208,7 @@ export const WorkspaceInitial = () => {
           <EuiFlexItem grow={false} style={{ width: '1122px' }} className="eui-displayInline">
             <EuiPageContent
               style={{
-                backgroundImage: `url(${BackgroundSVG})`,
+                backgroundImage: `url(${backGroundUrl})`,
                 backgroundSize: '490px 380px',
                 backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'right 10px top 20px',
