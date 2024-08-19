@@ -30,8 +30,18 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiFlexGroup, EuiToolTip, EuiFlexItem, EuiSmallButtonIcon, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiToolTip,
+  EuiFlexItem,
+  EuiSmallButtonIcon,
+  EuiText,
+  EuiButtonIcon,
+  EuiButton,
+} from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/public';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { IndexPatternManagmentContext } from '../../../types';
 
 interface IndexHeaderProps {
   indexPattern: IIndexPattern;
@@ -78,7 +88,85 @@ export function IndexHeader({
   refreshFields,
   deleteIndexPatternClick,
 }: IndexHeaderProps) {
-  return (
+  const {
+    uiSettings,
+    navigationUI: { HeaderControl },
+    application,
+  } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
+
+  const useUpdatedUX = uiSettings.get('home:useNewHomePage');
+
+  return useUpdatedUX ? (
+    <HeaderControl
+      controls={[
+        ...(deleteIndexPatternClick
+          ? [
+              {
+                renderComponent: (
+                  <EuiToolTip content={removeTooltip}>
+                    <EuiButtonIcon
+                      color="danger"
+                      onClick={deleteIndexPatternClick}
+                      iconType="trash"
+                      aria-label={removeAriaLabel}
+                      data-test-subj="deleteIndexPatternButton"
+                      display="base"
+                      type="base"
+                      size="s"
+                    />
+                  </EuiToolTip>
+                ),
+              },
+            ]
+          : []),
+        ...(defaultIndex !== indexPattern.id && setDefault
+          ? [
+              {
+                renderComponent: (
+                  <EuiButton
+                    onClick={setDefault}
+                    aria-label={setDefaultAriaLabel}
+                    data-test-subj="setDefaultIndexPatternButton"
+                    size="s"
+                  >
+                    {i18n.translate(
+                      'indexPatternManagement.editIndexPattern.setDefaultButton.text',
+                      {
+                        defaultMessage: 'Set as default index',
+                      }
+                    )}
+                  </EuiButton>
+                ),
+              },
+            ]
+          : []),
+        ...(refreshFields
+          ? [
+              {
+                renderComponent: (
+                  <EuiButton
+                    size="s"
+                    onClick={refreshFields}
+                    iconType="refresh"
+                    aria-label={refreshAriaLabel}
+                    data-test-subj="refreshFieldsIndexPatternButton"
+                    fill={true}
+                  >
+                    {i18n.translate(
+                      'indexPatternManagement.editIndexPattern.refreshFieldsButton.text',
+                      {
+                        defaultMessage: 'Refresh field list',
+                      }
+                    )}
+                  </EuiButton>
+                ),
+              },
+            ]
+          : []),
+      ]}
+      setMountPoint={application.setAppRightControls}
+    />
+  ) : (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>
         <EuiText size="s">

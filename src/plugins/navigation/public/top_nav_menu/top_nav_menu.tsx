@@ -128,11 +128,14 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     );
   }
 
-  function renderMenu(className: string): ReactElement | null {
+  function renderMenu(className: string, spreadSections: boolean = false): ReactElement | null {
     if ((!config || config.length === 0) && (!showDataSourceMenu || !dataSourceMenuConfig))
       return null;
+
+    const menuClassName = classNames(className, { osdTopNavMenuSpread: spreadSections });
+
     return (
-      <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={className}>
+      <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={menuClassName}>
         {renderItems()}
         {renderDataSourceMenu()}
       </EuiHeaderLinks>
@@ -169,7 +172,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
             return (
               <>
                 <MountPointPortal setMountPoint={setMenuMountPoint}>
-                  <EuiFlexGroup alignItems="stretch" gutterSize="s">
+                  <EuiFlexGroup alignItems="stretch" gutterSize="none">
                     <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                       <EuiText size="s">{screenTitle}</EuiText>
                     </EuiFlexItem>
@@ -182,12 +185,19 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
 
           case false:
           case TopNavMenuItemRenderType.OMITTED:
-            return (
-              <>
-                <MountPointPortal setMountPoint={setMenuMountPoint}>
-                  {renderMenu(menuClassName)}
-                </MountPointPortal>
-              </>
+            return screenTitle ? (
+              <MountPointPortal setMountPoint={setMenuMountPoint}>
+                <EuiFlexGroup alignItems="stretch" gutterSize="none">
+                  <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
+                    <EuiText size="s">{screenTitle}</EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>{renderMenu(menuClassName, true)}</EuiFlexItem>
+                </EuiFlexGroup>
+              </MountPointPortal>
+            ) : (
+              <MountPointPortal setMountPoint={setMenuMountPoint}>
+                {renderMenu(menuClassName)}
+              </MountPointPortal>
             );
 
           // Show the SearchBar in-place
@@ -196,7 +206,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
               return (
                 <>
                   <MountPointPortal setMountPoint={setMenuMountPoint}>
-                    <EuiFlexGroup alignItems="stretch" gutterSize="s">
+                    <EuiFlexGroup alignItems="stretch" gutterSize="none">
                       <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                         <EuiText size="s">{screenTitle}</EuiText>
                       </EuiFlexItem>

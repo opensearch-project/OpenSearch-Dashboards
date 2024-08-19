@@ -63,4 +63,5 @@ export const UI_SETTINGS = {
   QUERY_ENHANCEMENTS_ENABLED: 'query:enhancements:enabled',
   QUERY_DATAFRAME_HYDRATION_STRATEGY: 'query:dataframe:hydrationStrategy',
   SEARCH_QUERY_LANGUAGE_BLOCKLIST: 'search:queryLanguageBlocklist',
+  NEW_HOME_PAGE: 'home:useNewHomePage',
 } as const;

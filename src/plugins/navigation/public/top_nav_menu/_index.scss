@@ -2,10 +2,18 @@
 
 .osdTopNavMenu {
   margin-right: $euiSizeXS;
+
+  .newTopNavHeader & {
+    margin-right: 0;
+  }
 }
 
 .osdTopNavMenuGroupedActions {
   background-color: $euiColorEmptyShade;
+
+  .newTopNavHeader & {
+    margin: 0;
+  }
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
   & > .euiSwitch,
@@ -66,4 +74,10 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+}
+
+// stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+.osdTopNavMenuSpread .euiHeaderLinks__list {
+  width: 100%;
+  justify-content: space-between;
 }

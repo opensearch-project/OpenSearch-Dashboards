@@ -32,7 +32,12 @@ import { i18n } from '@osd/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'opensearch-dashboards/public';
 import { FeatureCatalogueCategory } from '../../home/public';
 import { ComponentRegistry } from './component_registry';
-import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
+import {
+  AdvancedSettingsSetup,
+  AdvancedSettingsStart,
+  AdvancedSettingsPluginSetup,
+  AdvancedSettingsPluginStart,
+} from './types';
 import { setupTopNavThemeButton } from './register_nav_control';
 import { DEFAULT_NAV_GROUPS, AppNavLinkStatus, WorkspaceAvailability } from '../../../core/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
@@ -48,8 +53,17 @@ const titleInGroup = i18n.translate('advancedSettings.applicationSettingsLabel',
 });
 
 export class AdvancedSettingsPlugin
-  implements Plugin<AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup> {
-  public setup(core: CoreSetup, { management, home }: AdvancedSettingsPluginSetup) {
+  implements
+    Plugin<
+      AdvancedSettingsSetup,
+      AdvancedSettingsStart,
+      AdvancedSettingsPluginSetup,
+      AdvancedSettingsPluginStart
+    > {
+  public setup(
+    core: CoreSetup<AdvancedSettingsPluginStart>,
+    { management, home }: AdvancedSettingsPluginSetup
+  ) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
     opensearchDashboardsSection.registerApp({
@@ -71,6 +85,9 @@ export class AdvancedSettingsPlugin
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+      description: i18n.translate('advancedSettings.description', {
+        defaultMessage: 'Customize the appearance and behavior of OpenSearch Dashboards.',
+      }),
       mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import(
           './management_app/mount_management_section'

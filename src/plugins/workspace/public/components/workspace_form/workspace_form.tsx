@@ -6,12 +6,10 @@
 import React, { useRef } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle, EuiForm } from '@elastic/eui';
 
-import { WorkspaceBottomBar } from './workspace_bottom_bar';
 import { WorkspaceFormProps } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
 import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
 import { WorkspaceUseCase } from './workspace_use_case';
-import { WorkspaceOperationType } from './constants';
 import { WorkspaceFormErrorCallout } from './workspace_form_error_callout';
 import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
 import { SelectDataSourcePanel } from './select_data_source_panel';
@@ -28,10 +26,10 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     application,
     savedObjects,
     defaultValues,
-    operationType,
     permissionEnabled,
     dataSourceManagement: isDataSourceEnabled,
     availableUseCases,
+    operationType,
   } = props;
   const {
     formId,
@@ -39,13 +37,13 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     formErrors,
     numberOfErrors,
     numberOfChanges,
+    setName,
+    setDescription,
     handleFormSubmit,
     handleColorChange,
     handleUseCaseChange,
-    handleNameInputChange,
     setPermissionSettings,
     setSelectedDataSources,
-    handleDescriptionChange,
   } = useWorkspaceForm(props);
 
   const disabledUserOrGroupInputIdsRef = useRef(
@@ -73,9 +71,9 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           description={formData.description}
           color={formData.color}
           readOnly={!!defaultValues?.reserved}
-          handleNameInputChange={handleNameInputChange}
-          handleDescriptionChange={handleDescriptionChange}
           handleColorChange={handleColorChange}
+          onNameChange={setName}
+          onDescriptionChange={setDescription}
         />
       </EuiPanel>
       <EuiSpacer />
@@ -127,16 +125,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
         </EuiPanel>
       )}
       <EuiSpacer />
-      {operationType === WorkspaceOperationType.Create && (
-        <WorkspaceCreateActionPanel formId={formId} application={application} />
-      )}
-      {operationType === WorkspaceOperationType.Update && (
-        <WorkspaceBottomBar
-          formId={formId}
-          application={application}
-          numberOfChanges={numberOfChanges}
-        />
-      )}
+      <WorkspaceCreateActionPanel formData={formData} formId={formId} application={application} />
     </EuiForm>
   );
 };

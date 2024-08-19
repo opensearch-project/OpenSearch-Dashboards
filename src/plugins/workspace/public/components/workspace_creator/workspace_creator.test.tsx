@@ -91,6 +91,9 @@ const WorkspaceCreator = ({
         },
       },
       dataSourceManagement: {},
+      navigationUI: {
+        HeaderControl: () => null,
+      },
     },
   });
   const registeredUseCases$ = new BehaviorSubject([

@@ -1,0 +1,95 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Description render normally 1`] = `
+<Description
+  docLinks={
+    Object {
+      "links": Object {
+        "noDocumentation": Object {
+          "indexPatterns": Object {},
+          "scriptedFields": Object {},
+        },
+      },
+    }
+  }
+>
+  <EuiText>
+    <div
+      className="euiText euiText--medium"
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
+          id="indexPatternManagement.createIndexPattern.description"
+          values={
+            Object {
+              "multiple": <strong>
+                multiple
+              </strong>,
+              "single": <EuiCode>
+                filebeat-4-3-22
+              </EuiCode>,
+              "star": <EuiCode>
+                filebeat-*
+              </EuiCode>,
+            }
+          }
+        >
+          <span>
+            An index pattern can match a single source, for example, 
+            <EuiCode>
+              <EuiCodeBlockImpl
+                inline={true}
+              >
+                <span>
+                  <code>
+                    filebeat-4-3-22
+                  </code>
+                </span>
+              </EuiCodeBlockImpl>
+            </EuiCode>
+            , or 
+            <strong>
+              multiple
+            </strong>
+             data sources, 
+            <EuiCode>
+              <EuiCodeBlockImpl
+                inline={true}
+              >
+                <span>
+                  <code>
+                    filebeat-*
+                  </code>
+                </span>
+              </EuiCodeBlockImpl>
+            </EuiCode>
+            .
+          </span>
+        </FormattedMessage>
+        <br />
+        <EuiLink
+          external={true}
+          target="_blank"
+        >
+          <button
+            className="euiLink euiLink--primary"
+            disabled={false}
+            type="button"
+          >
+            <FormattedMessage
+              defaultMessage="Read documentation"
+              id="indexPatternManagement.createIndexPattern.documentation"
+              values={Object {}}
+            >
+              <span>
+                Read documentation
+              </span>
+            </FormattedMessage>
+          </button>
+        </EuiLink>
+      </p>
+    </div>
+  </EuiText>
+</Description>
+`;

@@ -38,6 +38,7 @@ import { ManagementRouter } from './management_router';
 import { ManagementSidebarNav } from '../management_sidebar_nav';
 import { reactRouterNavigate } from '../../../../opensearch_dashboards_react/public';
 import { SectionsServiceStart } from '../../types';
+import { CoreStart } from '../../../../../core/public';
 
 import './management_app.scss';
 
@@ -52,6 +53,7 @@ export interface ManagementAppDependencies {
   opensearchDashboardsVersion: string;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
   hideInAppNavigation?: boolean;
+  uiSettings: CoreStart['uiSettings'];
 }
 
 export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => {
