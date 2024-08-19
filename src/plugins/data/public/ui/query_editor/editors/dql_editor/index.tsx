@@ -4,12 +4,9 @@
  */
 
 import React from 'react';
-import { createEditor, SingleLineInput } from '../shared';
 
 interface DQLBodyProps extends React.JSX.IntrinsicAttributes {
   filterBar?: any;
 }
 
-const DQLBody: React.FC<DQLBodyProps> = ({ filterBar }) => <div>{filterBar}</div>;
-
-export const createDQLEditor = createEditor(SingleLineInput, SingleLineInput, DQLBody);
+export const DQLBody: React.FC<DQLBodyProps> = ({ filterBar }) => <div>{filterBar}</div>;

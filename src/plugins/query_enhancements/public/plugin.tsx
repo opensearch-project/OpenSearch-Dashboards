@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { IStorageWrapper, Storage } from '../../opensearch_dashboards_utils/public';
 import { ConfigSchema } from '../common/config';
@@ -17,6 +16,7 @@ import {
   QueryEnhancementsPluginStartDependencies,
 } from './types';
 import { UI_SETTINGS } from '../common';
+import { createEditor, DefaultInput, SingleLineInput } from '../../data/public';
 
 export class QueryEnhancementsPlugin
   implements
@@ -67,26 +67,20 @@ export class QueryEnhancementsPlugin
       usageCollector: data.search.usageCollector,
     });
 
+    const enhancedQueryEditor = createEditor(SingleLineInput, null, DefaultInput);
+
     data.__enhance({
       ui: {
         query: {
           language: 'PPL',
           search: pplSearchInterceptor,
-          searchBar: {
+          editor: enhancedQueryEditor,
+          meta: {
             queryStringInput: { initialValue: 'source=<data_source>' },
-            dateRange: {
-              initialFrom: moment().subtract(2, 'days').toISOString(),
-              initialTo: moment().add(2, 'days').toISOString(),
-            },
-            showFilterBar: false,
-            showDataSetsSelector: true,
-            showDataSourcesSelector: true,
           },
           fields: {
-            filterable: false,
             visualizable: false,
           },
-          showDocLinks: false,
           supportedAppNames: ['discover'],
         },
       },
@@ -97,18 +91,13 @@ export class QueryEnhancementsPlugin
         query: {
           language: 'SQL',
           search: sqlSearchInterceptor,
-          searchBar: {
-            showDatePicker: false,
-            showFilterBar: false,
-            showDataSetsSelector: true,
-            showDataSourcesSelector: true,
+          editor: enhancedQueryEditor,
+          meta: {
             queryStringInput: { initialValue: 'SELECT * FROM <data_source> LIMIT 10' },
           },
           fields: {
-            filterable: false,
             visualizable: false,
           },
-          showDocLinks: false,
           supportedAppNames: ['discover'],
         },
       },
