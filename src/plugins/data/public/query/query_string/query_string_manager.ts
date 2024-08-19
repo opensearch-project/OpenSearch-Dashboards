@@ -35,7 +35,6 @@ import { DataStorage, Query, SimpleDataSet, TimeRange, UI_SETTINGS } from '../..
 import { createHistory, QueryHistory } from './query_history';
 import { LanguageManager } from './language_manager/language_manager';
 import { ConfigSchema } from '../../../config';
-import { SearchService } from '../../search/search_service';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;

@@ -5,7 +5,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { QueryEnhancement, UiEnhancements } from '../../../ui/types';
-import { QueryEditorExtensionConfig } from '../../../ui';
+import { createEditor, DQLBody, QueryEditorExtensionConfig, SingleLineInput } from '../../../ui';
 import { ConfigSchema } from '../../../../config';
 import { DataStorage, setOverrides as setFieldOverrides } from '../../../../common';
 
@@ -37,6 +37,10 @@ export class LanguageManager {
     this.enhancedAppNames = this.isEnabled ? this.config.supportedAppNames : [];
     this.queryEnhancements = new Map();
     this.queryEditorExtensionMap = {};
+  }
+
+  public createDefaultQueryEditor() {
+    return createEditor(SingleLineInput, SingleLineInput, DQLBody);
   }
 
   public __enhance = (enhancements: UiEnhancements) => {
@@ -130,10 +134,10 @@ export class LanguageManager {
   setUiOverridesByUserQueryLanguage(language: string) {
     const queryEnhancement = this.queryEnhancements.get(language);
     if (queryEnhancement) {
-      const { fields = {}, showDocLinks } = queryEnhancement;
-      this.setUiOverrides({ fields, showDocLinks });
+      const { fields = {} } = queryEnhancement;
+      this.setUiOverrides({ fields });
     } else {
-      this.setUiOverrides({ fields: undefined, showDocLinks: undefined });
+      this.setUiOverrides({ fields: undefined });
     }
   }
 

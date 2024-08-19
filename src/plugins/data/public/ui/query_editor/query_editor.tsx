@@ -17,9 +17,8 @@ import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
 import { SimpleDataSet } from '../../../common';
-import { createDQLEditor, createDefaultEditor } from './editors';
 import { getQueryService, getIndexPatterns } from '../../services';
-import { DataSettings } from '..';
+import { DataSettings } from '../../query/query_string/language_manager/language_manager';
 
 const LANGUAGE_ID_SQL = 'SQL';
 monaco.languages.register({ id: LANGUAGE_ID_SQL });
@@ -206,15 +205,16 @@ export default class QueryEditorUI extends Component<Props, State> {
     };
     this.languageManager.updateSettings(newSettings);
 
-    const dateRangeEnhancement = enhancement?.searchBar?.dateRange;
-    const dateRange = dateRangeEnhancement
-      ? {
-          from: dateRangeEnhancement.initialFrom!,
-          to: dateRangeEnhancement.initialTo!,
-        }
-      : undefined;
-    this.onChange(newQuery, dateRange);
-    this.onSubmit(newQuery, dateRange);
+    // TODO: confirm if this is needed
+    // const dateRangeEnhancement = enhancement?.searchBar?.dateRange;
+    // const dateRange = dateRangeEnhancement
+    //   ? {
+    //       from: dateRangeEnhancement.initialFrom!,
+    //       to: dateRangeEnhancement.initialTo!,
+    //     }
+    //   : undefined;
+    this.onChange(newQuery);
+    this.onSubmit(newQuery);
   };
 
   private initPersistedLog = () => {
@@ -303,9 +303,6 @@ export default class QueryEditorUI extends Component<Props, State> {
   public render() {
     const className = classNames(this.props.className);
 
-    const useQueryEditor =
-      this.props.query.language !== 'kuery' && this.props.query.language !== 'lucene';
-
     const languageSelector = (
       <QueryLanguageSelector
         language={this.props.query.language}
@@ -368,11 +365,28 @@ export default class QueryEditorUI extends Component<Props, State> {
       provideCompletionItems: this.provideCompletionItems,
     };
 
-    const languageEditor = useQueryEditor
-      ? createDefaultEditor(singleLineInputProps, {}, defaultInputProps)
-      : createDQLEditor(singleLineInputProps, singleLineInputProps, {
+    const languageEditor = this.languageManager.getQueryEnhancements(this.props.query.language)
+      ?.editor;
+
+    const defaultLanguageEditor = this.languageManager.createDefaultQueryEditor();
+
+    // const languageEditor = useQueryEditor
+    // ? createDefaultEditor(singleLineInputProps, {}, defaultInputProps)
+    // : createDQLEditor(singleLineInputProps, singleLineInputProps, {
+    //     filterBar: this.props.filterBar,
+    //   });
+
+    const TopBar = languageEditor
+      ? languageEditor(singleLineInputProps, {}, defaultInputProps).TopBar
+      : defaultLanguageEditor(singleLineInputProps, singleLineInputProps, {
           filterBar: this.props.filterBar,
-        });
+        }).TopBar;
+
+    const Body = languageEditor
+      ? languageEditor(singleLineInputProps, {}, defaultInputProps).Body
+      : defaultLanguageEditor(singleLineInputProps, singleLineInputProps, {
+          filterBar: this.props.filterBar,
+        }).Body;
 
     return (
       <div
@@ -380,7 +394,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           className,
           'osdQueryEditor',
           this.state.isCollapsed ? 'collapsed' : 'expanded',
-          !languageEditor.TopBar.Expanded && 'emptyExpanded'
+          !TopBar.Expanded && 'emptyExpanded'
         )}
       >
         <div
@@ -394,9 +408,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           />
           <div ref={this.props.dataSetContainerRef} className="osdQueryEditor__dataSetPicker" />
           <div className="osdQueryEditor__input">
-            {this.state.isCollapsed
-              ? languageEditor.TopBar.Collapsed()
-              : languageEditor.TopBar.Expanded && languageEditor.TopBar.Expanded()}
+            {this.state.isCollapsed ? TopBar.Collapsed() : TopBar.Expanded && TopBar.Expanded()}
           </div>
           {languageSelector}
           {this.props.queryActions}
@@ -405,173 +417,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           ref={this.headerRef}
           className={classNames('osdQueryEditor__header', this.props.headerClassName)}
         />
-        {!this.state.isCollapsed && (
-          <div className="osdQueryEditor__body">{languageEditor.Body()}</div>
-        )}
-
-        {/*  <EuiFlexGroup gutterSize="xs" direction="column">
-           <EuiFlexItem grow={false}>
-             <EuiFlexGroup gutterSize="xs" alignItems="center" className={`${className}__wrapper`}>
-               <EuiFlexItem className={`${className}__collapseWrapper`}>
-                 <QueryEditorBtnCollapse
-                   onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}
-                   isCollapsed={!this.state.isCollapsed}
-                 />
-               </EuiFlexItem>
-               <EuiFlexItem className={`${className}__dataSetWrapper`}>
-                 <div ref={this.props.dataSetContainerRef} />
-               </EuiFlexItem>
-               <EuiFlexItem grow={true}>
-                 <EuiFlexGroup
-                   gutterSize="none"
-                   className={
-                     !useQueryEditor
-                       ? 'euiFormControlLayout euiFormControlLayout--group osdQueryEditor__editorAndSelectorWrapper'
-                       : ''
-                   }
-                 >
-                   {(this.state.isCollapsed || !useQueryEditor) && (
-                     <EuiFlexItem grow={9}>
-                       <div className="single-line-editor-wrapper">
-                         <CodeEditor
-                           height={40} // Adjusted to match lineHeight for a single line
-                           languageId={this.props.query.language}
-                           value={this.getQueryString()}
-                           onChange={this.onSingleLineInputChange}
-                           editorDidMount={this.singleLineEditorDidMount}
-                           options={{
-                             lineNumbers: 'off', // Disabled line numbers
-                             lineHeight: 40,
-                             fontSize: 14,
-                             fontFamily: 'Roboto Mono',
-                             minimap: {
-                               enabled: false,
-                             },
-                             scrollBeyondLastLine: false,
-                             wordWrap: 'off', // Disabled word wrapping
-                             wrappingIndent: 'none', // No indent since wrapping is off
-                             folding: false,
-                             glyphMargin: false,
-                             lineDecorationsWidth: 0,
-                             scrollbar: {
-                               vertical: 'hidden',
-                             },
-                             overviewRulerLanes: 0,
-                             hideCursorInOverviewRuler: true,
-                             cursorStyle: 'line',
-                             wordBasedSuggestions: false,
-                           }}
-                           suggestionProvider={{
-                             provideCompletionItems: this.provideCompletionItems,
-                           }}
-                           languageConfiguration={{
-                             language: LANGUAGE_ID_KUERY,
-                             autoClosingPairs: [
-                               {
-                                 open: '(',
-                                 close: ')',
-                               },
-                               {
-                                 open: '"',
-                                 close: '"',
-                               },
-                             ],
-                           }}
-                         />
-                       </div>
-                     </EuiFlexItem>
-                   )}
-                   {!useQueryEditor && (
-                     <EuiFlexItem grow={false}>
-                       <QueryLanguageSelector
-                         language={this.props.query.language}
-                         anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-                         onSelectLanguage={this.onSelectLanguage}
-                         appName={this.services.appName}
-                       />
-                     </EuiFlexItem>
-                   )}
-                 </EuiFlexGroup>
-               </EuiFlexItem>
-               <EuiFlexItem
-                 className={`${className}__prependWrapper${
-                   !this.state.isCollapsed && useQueryEditor ? '' : '-isCollapsed'
-                 }`}
-               >
-                 {this.props.prepend}
-               </EuiFlexItem>
-             </EuiFlexGroup>
-           </EuiFlexItem>
-
-           <EuiFlexItem onClick={this.onClickInput} grow={true}>
-             {!this.state.isCollapsed && useQueryEditor && (
-               <CodeEditor
-                 height={70}
-                 languageId={this.props.query.language}
-                 value={this.getQueryString()}
-                 onChange={this.onInputChange}
-                 editorDidMount={this.editorDidMount}
-                 options={{
-                   lineNumbers: 'on',
-                   lineHeight: 24,
-                   fontSize: 14,
-                   fontFamily: 'Roboto Mono',
-                   minimap: {
-                     enabled: false,
-                   },
-                   scrollBeyondLastLine: false,
-                   wordWrap: 'on',
-                   wrappingIndent: 'indent',
-                   lineDecorationsWidth: 0,
-                   lineNumbersMinChars: 2,
-                   wordBasedSuggestions: false,
-                 }}
-                 suggestionProvider={{
-                   provideCompletionItems: this.provideCompletionItems,
-                 }}
-                 languageConfiguration={{
-                   language: LANGUAGE_ID_KUERY,
-                   autoClosingPairs: [
-                     {
-                       open: '(',
-                       close: ')',
-                     },
-                     {
-                       open: '"',
-                       close: '"',
-                     },
-                   ],
-                 }}
-               />
-             )}
-
-             <div
-               className={
-                 !this.state.isCollapsed && useQueryEditor
-                   ? footerClassName
-                   : 'osdQueryEditorFooter-isHidden'
-               }
-             >
-               <EuiFlexGroup gutterSize="s" responsive={false}>
-                 <EuiFlexItem grow={false}>{languageSelector}</EuiFlexItem>
-
-                 <EuiFlexItem grow={false}>
-                   {this.state.lineCount} {this.state.lineCount === 1 ? 'line' : 'lines'}
-                 </EuiFlexItem>
-                 <EuiFlexItem grow={false}>
-                   {typeof this.props.indexPatterns?.[0] !== 'string' &&
-                     '@' + this.props.indexPatterns?.[0].timeFieldName}
-                 </EuiFlexItem>
-               </EuiFlexGroup>
-             </div>
-           </EuiFlexItem>
-
-           {!this.state.isCollapsed && (
-             <EuiFlexItem grow={false}>
-               <div className="osdQueryEditor__filterBarWrapper">{this.props.filterBar}</div>
-             </EuiFlexItem>
-           )}
-         </EuiFlexGroup> */}
+        {!this.state.isCollapsed && <div className="osdQueryEditor__body">{Body()}</div>}
         {this.renderQueryEditorExtensions()}
       </div>
     );
