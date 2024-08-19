@@ -9,6 +9,7 @@ import {
   allCarrierValueSuggestions,
   booleanOperatorSuggestions,
   carrierValues,
+  carrierWithNotSuggestions,
   fieldNameWithNotSuggestions,
   logCarrierValueSuggestion,
   notOperatorSuggestion,
@@ -225,52 +226,50 @@ describe('Test group value suggestions', () => {
     'Carrier: ',
     ['(', ')'],
     'should suggest within grouping',
-    allCarrierValueSuggestions,
+    carrierWithNotSuggestions
+  );
+
+  testAroundClosing(
+    'Carrier: (',
+    ['"', '"'],
+    'should suggest within grouping and phrase',
+    allCarrierValueSuggestions
+  );
+
+  testAroundClosing(
+    'Carrier: ("',
+    [undefined, '")'],
+    'should suggest within closed grouping and phrase',
+    allCarrierValueSuggestions
+  );
+
+  testAroundClosing(
+    'Carrier: (BeatsWest or ',
+    [undefined, ')'],
+    'should suggest after grouping with term',
+    carrierWithNotSuggestions,
     true
   );
 
-  // TODO: NEED TO FIX EXTRA NOT ISSUE
-  // testAroundClosing(
-  //   'Carrier: (',
-  //   ['"', '"'],
-  //   'should suggest within grouping and phrase',
-  //   allCarrierValueSuggestions
-  // );
+  testAroundClosing(
+    'Carrier: (BeatsWest or ',
+    ['"', '")'],
+    'should suggest in phrase after grouping with term',
+    allCarrierValueSuggestions
+  );
 
-  // testAroundClosing(
-  //   'Carrier: ("',
-  //   [undefined, '")'],
-  //   'should suggest within closed grouping and phrase',
-  //   allCarrierValueSuggestions
-  // );
+  testAroundClosing(
+    'Carrier: ("BeatsWest" or ',
+    [undefined, ')'],
+    'should suggest after grouping with phrase',
+    carrierWithNotSuggestions,
+    true
+  );
 
-  // testAroundClosing(
-  //   'Carrier: (BeatsWest or ',
-  //   [undefined, ')'],
-  //   'should suggest after grouping with term',
-  //   allCarrierValueSuggestions,
-  //   true
-  // );
-
-  // testAroundClosing(
-  //   'Carrier: (BeatsWest or ',
-  //   ['"', '")'],
-  //   'should suggest in phrase after grouping with term',
-  //   allCarrierValueSuggestions
-  // );
-
-  // testAroundClosing(
-  //   'Carrier: ("BeatsWest" or ',
-  //   [undefined, ')'],
-  //   'should suggest after grouping with phrase',
-  //   allCarrierValueSuggestions,
-  //   true
-  // );
-
-  // testAroundClosing(
-  //   'Carrier: ("BeatsWest" or ',
-  //   ['"', '")'],
-  //   'should suggest in phrase after grouping with phrase',
-  //   allCarrierValueSuggestions
-  // );
+  testAroundClosing(
+    'Carrier: ("BeatsWest" or ',
+    ['"', '")'],
+    'should suggest in phrase after grouping with phrase',
+    allCarrierValueSuggestions
+  );
 });

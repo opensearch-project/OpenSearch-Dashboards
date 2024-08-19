@@ -26,7 +26,7 @@ const findCursorIndex = (
     const token = tokenStream.get(i);
     const { startLine, endColumn, endLine } = getTokenPosition(token, DQLParser.WS);
 
-    const moveToNextToken = [DQLParser.WS, DQLParser.EQ];
+    const moveToNextToken = [DQLParser.WS, DQLParser.EQ, DQLParser.LPAREN];
     if (endLine > cursorLine || (startLine === cursorLine && endColumn >= actualCursorCol)) {
       if (moveToNextToken.includes(tokenStream.get(i).type)) {
         return i + 1;

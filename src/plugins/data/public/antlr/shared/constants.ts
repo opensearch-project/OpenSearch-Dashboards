@@ -216,6 +216,8 @@ export const allCarrierValueSuggestions = [
   { text: 'OpenSearch-Air', type: 13, start: -1, end: -1 },
 ];
 
+export const carrierWithNotSuggestions = allCarrierValueSuggestions.concat(notOperatorSuggestion);
+
 export const logCarrierValueSuggestion = [
   { text: 'Logstash Airways', type: 13, start: -1, end: -1 },
 ];
