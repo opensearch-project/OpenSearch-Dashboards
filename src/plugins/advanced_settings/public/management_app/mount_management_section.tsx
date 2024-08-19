@@ -40,13 +40,9 @@ import { EuiPageContent } from '@elastic/eui';
 import { AdvancedSettings } from './advanced_settings';
 import { ManagementAppMountParams } from '../../../management/public';
 import { ComponentRegistry } from '../types';
+import { NavigationPublicPluginStart } from '../../../../plugins/navigation/public';
 
 import './index.scss';
-
-const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
-  defaultMessage: 'Advanced settings',
-});
-const crumb = [{ text: title }];
 
 const readOnlyBadge = {
   text: i18n.translate('advancedSettings.badge.readOnly.text', {
@@ -59,18 +55,34 @@ const readOnlyBadge = {
 };
 
 export async function mountManagementSection(
-  getStartServices: StartServicesAccessor,
+  getStartServices: StartServicesAccessor<{
+    navigation: NavigationPublicPluginStart;
+  }>,
   params: ManagementAppMountParams & { wrapInPage?: boolean },
   componentRegistry: ComponentRegistry['start']
 ) {
-  params.setBreadcrumbs(crumb);
-  const [{ uiSettings, notifications, docLinks, application, chrome }] = await getStartServices();
+  const [
+    { uiSettings, notifications, docLinks, application, chrome },
+    { navigation },
+  ] = await getStartServices();
 
   const canSave = application.capabilities.advancedSettings.save as boolean;
 
   if (!canSave) {
     chrome.setBadge(readOnlyBadge);
   }
+
+  const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
+    defaultMessage: 'Advanced settings',
+  });
+  const newUXTitle = i18n.translate('advancedSettings.newHeader.pageTitle', {
+    defaultMessage: 'Application settings',
+  });
+
+  const useUpdatedUX = uiSettings.get('home:useNewHomePage');
+  // If new navigation is off, this will be rendered as breadcrumb. If is on, this will be rendered as title.
+  const crumb = [{ text: useUpdatedUX ? newUXTitle : title }];
+  params.setBreadcrumbs(crumb);
 
   const content = (
     <Router history={params.history}>
@@ -82,6 +94,9 @@ export async function mountManagementSection(
             dockLinks={docLinks.links}
             uiSettings={uiSettings}
             componentRegistry={componentRegistry}
+            useUpdatedUX={useUpdatedUX}
+            navigationUI={navigation.ui}
+            application={application}
           />
         </Route>
       </Switch>

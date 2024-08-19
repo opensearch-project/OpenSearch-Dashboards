@@ -29,3 +29,4 @@
  */
 
 export { Header } from './header';
+export { Description } from './description';

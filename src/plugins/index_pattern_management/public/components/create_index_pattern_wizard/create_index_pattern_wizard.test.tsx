@@ -182,4 +182,15 @@ describe('CreateIndexPatternWizard', () => {
     expect(clear).toBeCalledWith('1');
     expect(routeComponentPropsMock.history.push).toBeCalledWith(`/patterns/1`);
   });
+
+  test('should render normally when use update UX', () => {
+    mockContext.uiSettings.get = () => true;
+    const component = createComponentWithContext(
+      CreateIndexPatternWizard,
+      { ...routeComponentPropsMock },
+      mockContext
+    );
+
+    expect(component).toMatchSnapshot();
+  });
 });
