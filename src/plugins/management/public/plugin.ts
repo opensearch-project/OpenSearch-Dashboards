@@ -128,12 +128,26 @@ export class ManagementPlugin
       }
     );
 
+    const settingsLandingPageTitleForLeftNav = i18n.translate(
+      'management.settings.landingPage.leftNav.title',
+      {
+        defaultMessage: 'Overview',
+      }
+    );
+
     const dataAdministrationLandingPageId = 'data_administration_landing';
 
     const dataAdministrationPageTitle = i18n.translate(
       'management.dataAdministration.landingPage.title',
       {
         defaultMessage: 'Data administration overview',
+      }
+    );
+
+    const dataAdministrationPageTitleForLeftNav = i18n.translate(
+      'management.dataAdministration.landingPage.leftNav.title',
+      {
+        defaultMessage: 'Overview',
       }
     );
 
@@ -199,7 +213,7 @@ export class ManagementPlugin
 
     core.application.register({
       id: settingsLandingPageId,
-      title: settingsLandingPageTitle,
+      title: settingsLandingPageTitleForLeftNav,
       order: 100,
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.visible
@@ -232,7 +246,7 @@ export class ManagementPlugin
 
     core.application.register({
       id: dataAdministrationLandingPageId,
-      title: dataAdministrationPageTitle,
+      title: dataAdministrationPageTitleForLeftNav,
       order: 100,
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.visible
