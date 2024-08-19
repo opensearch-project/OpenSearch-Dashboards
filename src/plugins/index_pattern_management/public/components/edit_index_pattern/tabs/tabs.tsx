@@ -208,7 +208,6 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
             <>
               {useUpdatedUX && <EuiSpacer size="m" />}
               <Wrapper>
-                {useUpdatedUX && <EuiSpacer size="m" />}
                 <EuiSpacer size="m" />
                 {getFilterSection(type)}
                 <EuiSpacer size="m" />
