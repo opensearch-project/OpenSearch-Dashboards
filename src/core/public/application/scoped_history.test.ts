@@ -30,8 +30,23 @@
 
 import { ScopedHistory } from './scoped_history';
 import { createMemoryHistory } from 'history';
+import { getLocaleInUrl } from '../locale_helper';
+import { i18n } from '@osd/i18n';
+
+jest.mock('../locale_helper', () => ({
+  getLocaleInUrl: jest.fn(),
+}));
+
+jest.mock('@osd/i18n', () => ({
+  i18n: {
+    getLocale: jest.fn(),
+  },
+}));
 
 describe('ScopedHistory', () => {
+  beforeEach(() => {
+    (getLocaleInUrl as jest.Mock).mockReturnValue('en');
+  });
   describe('construction', () => {
     it('succeeds if current location matches basePath', () => {
       const gh = createMemoryHistory();
@@ -356,6 +371,51 @@ describe('ScopedHistory', () => {
       expect(h2.length).toBe(2);
       expect(h1.length).toBe(3);
       expect(gh.length).toBe(4);
+    });
+  });
+
+  describe('locale handling', () => {
+    let originalLocation: Location;
+
+    beforeEach(() => {
+      originalLocation = window.location;
+      delete (window as any).location;
+      window.location = { href: 'http://localhost/app/wow', reload: jest.fn() } as any;
+      (i18n.getLocale as jest.Mock).mockReturnValue('en');
+    });
+
+    afterEach(() => {
+      window.location = originalLocation;
+      jest.resetAllMocks();
+    });
+
+    it('reloads the page when locale changes', () => {
+      const gh = createMemoryHistory();
+      gh.push('/app/wow');
+      const h = new ScopedHistory(gh, '/app/wow');
+      // Use the 'h' variable to trigger the listener
+      h.push('/new-page');
+
+      // Mock getLocaleInUrl to return a different locale
+      (getLocaleInUrl as jest.Mock).mockReturnValue('fr');
+
+      // Simulate navigation
+      gh.push('/app/wow/new-page');
+
+      expect(window.location.reload).toHaveBeenCalled();
+    });
+
+    it('does not reload the page when locale changes', () => {
+      const gh = createMemoryHistory();
+      gh.push('/app/wow');
+
+      // Mock getLocaleInUrl to return a different locale
+      (getLocaleInUrl as jest.Mock).mockReturnValue('en');
+
+      // Simulate navigation
+      gh.push('/app/wow/new-page');
+
+      expect(window.location.reload).not.toHaveBeenCalled();
     });
   });
 });

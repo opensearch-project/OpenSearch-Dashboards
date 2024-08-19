@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { PublicAppInfo } from 'opensearch-dashboards/public';
-import { fireEvent, render, waitFor, act } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import {
   WorkspaceCreator as WorkspaceCreatorComponent,
@@ -91,6 +91,9 @@ const WorkspaceCreator = ({
         },
       },
       dataSourceManagement: {},
+      navigationUI: {
+        HeaderControl: () => null,
+      },
     },
   });
   const registeredUseCases$ = new BehaviorSubject([
