@@ -67,6 +67,9 @@ export class QueryEnhancementsPlugin
       usageCollector: data.search.usageCollector,
     });
 
+    // TODO: SEAN - register DATASETS HERE
+    // data.query.dataSetManager.registerDatasetHandler('S3', s3DatasetHandler);
+
     data.__enhance({
       ui: {
         query: {

@@ -29,3 +29,4 @@
  */
 
 export { QueryStringContract, QueryStringManager } from './query_string_manager';
+export { DatasetHandlerConfig } from './dataset_manager';

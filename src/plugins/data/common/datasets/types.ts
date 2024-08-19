@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+export * from './_structure_cache';
+
 /**
  * Describes a data source with its properties.
  */

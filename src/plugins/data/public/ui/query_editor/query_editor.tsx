@@ -258,7 +258,7 @@ export default class QueryEditorUI extends Component<Props, State> {
   };
 
   private fetchIndexPattern = async () => {
-    const dataSetTitle = this.queryService.dataSetManager.getDataSet()?.title;
+    const dataSetTitle = this.queryService.dataSetManager.getDataset()?.title;
     if (!dataSetTitle) return undefined;
     return getIndexPatterns().getByTitle(dataSetTitle);
   };
