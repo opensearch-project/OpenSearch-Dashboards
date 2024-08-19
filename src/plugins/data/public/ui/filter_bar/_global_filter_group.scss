@@ -18,7 +18,8 @@
 
 .headerAppActionMenu .globalQueryBar,
 .headerAppActionMenu .globalDatePicker {
-  padding-top: 0;
+  // The left-padding is a magic number just to add some space to the left that reduces with screen width
+  padding: 0 0 0 calc(100vw - 1600px);
 }
 
 .globalFilterGroup__filterBar {
