@@ -44,6 +44,7 @@ import {
 import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import { VisualizeAppProps } from '../app';
+import { HeaderVariant } from '../../../../../core/public/index';
 
 export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();
@@ -52,6 +53,17 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [embeddableId, setEmbeddableId] = useState<string>();
   const [valueInput, setValueInput] = useState<VisualizeInput>();
+  const { chrome, uiSettings } = services;
+  const showActionsInGroup = uiSettings.get('home:useNewHomePage');
+  const { setHeaderVariant } = chrome;
+
+  useEffect(() => {
+    if (showActionsInGroup) setHeaderVariant?.(HeaderVariant.APPLICATION);
+
+    return () => {
+      setHeaderVariant?.();
+    };
+  }, [setHeaderVariant, showActionsInGroup]);
 
   useEffect(() => {
     const { originatingApp: value, embeddableId: embeddableIdValue, valueInput: valueInputValue } =

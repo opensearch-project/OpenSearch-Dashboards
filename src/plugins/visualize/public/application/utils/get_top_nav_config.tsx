@@ -517,7 +517,7 @@ export const getTopNavConfig = (
         defaultMessage: 'Inspect',
       }),
       ariaLabel: i18n.translate('visualize.topNavMenu.openInspectorButtonLabel', {
-        defaultMessage: 'inspect',
+        defaultMessage: 'Inspect',
       }),
       testId: 'openInspectorButton',
       run: navActions[VisualizeTopNavIds.INSPECT],

@@ -54,21 +54,9 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
     services: {
       data: { query },
       osdUrlStateStorage,
-      chrome,
-      uiSettings,
     },
   } = useOpenSearchDashboards<VisualizeServices>();
   const { pathname } = useLocation();
-  const { setHeaderVariant } = chrome;
-  const showActionsInGroup = uiSettings.get('home:useNewHomePage');
-
-  useEffect(() => {
-    if (showActionsInGroup) setHeaderVariant?.(HeaderVariant.APPLICATION);
-
-    return () => {
-      setHeaderVariant?.();
-    };
-  }, [setHeaderVariant, showActionsInGroup]);
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
