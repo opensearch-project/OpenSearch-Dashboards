@@ -67,6 +67,18 @@ describe('Header', () => {
 
     expect(component).toMatchSnapshot();
   });
+
+  it('should render normally when useUpdatedUX is true', () => {
+    const props = {
+      ...defaultProps,
+      showDuplicateAll: true,
+      useUpdatedUX: true,
+    };
+
+    const component = shallow(<Header {...props} />);
+
+    expect(component).toMatchSnapshot();
+  });
 });
 
 describe('Header - workspace enabled', () => {
