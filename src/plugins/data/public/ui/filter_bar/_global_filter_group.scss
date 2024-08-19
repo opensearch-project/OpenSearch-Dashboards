@@ -55,3 +55,12 @@
     margin-top: $euiSize * -1;
   }
 }
+
+.globalFilterGroup__removeAllFilters {
+  color: $euiColorDangerText;
+}
+
+.globalFilterGroup__filterPrefix {
+  padding-top: $euiSizeS;
+  padding-right: $euiSizeS;
+}

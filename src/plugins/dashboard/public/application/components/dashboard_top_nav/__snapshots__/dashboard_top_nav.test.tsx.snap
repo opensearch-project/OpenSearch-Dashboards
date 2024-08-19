@@ -929,6 +929,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               },
               "get$": [MockFunction],
               "getAll": [MockFunction],
+              "getDefault": [MockFunction],
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
               "getUpdateErrors$": [MockFunction],
@@ -955,6 +956,15 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "reportUiStats": [MockFunction],
             },
             "workspaces": Object {
+              "client$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
               "currentWorkspace$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": null,
@@ -1985,6 +1995,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               },
               "get$": [MockFunction],
               "getAll": [MockFunction],
+              "getDefault": [MockFunction],
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
               "getUpdateErrors$": [MockFunction],
@@ -2011,6 +2022,15 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "reportUiStats": [MockFunction],
             },
             "workspaces": Object {
+              "client$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
               "currentWorkspace$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": null,
@@ -3041,6 +3061,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               },
               "get$": [MockFunction],
               "getAll": [MockFunction],
+              "getDefault": [MockFunction],
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
               "getUpdateErrors$": [MockFunction],
@@ -3067,6 +3088,15 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "reportUiStats": [MockFunction],
             },
             "workspaces": Object {
+              "client$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
               "currentWorkspace$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": null,
@@ -4097,6 +4127,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               },
               "get$": [MockFunction],
               "getAll": [MockFunction],
+              "getDefault": [MockFunction],
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
               "getUpdateErrors$": [MockFunction],
@@ -4123,6 +4154,15 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "reportUiStats": [MockFunction],
             },
             "workspaces": Object {
+              "client$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
               "currentWorkspace$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": null,
@@ -5153,6 +5193,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               },
               "get$": [MockFunction],
               "getAll": [MockFunction],
+              "getDefault": [MockFunction],
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
               "getUpdateErrors$": [MockFunction],
@@ -5179,6 +5220,15 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "reportUiStats": [MockFunction],
             },
             "workspaces": Object {
+              "client$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
               "currentWorkspace$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": null,
@@ -6209,6 +6259,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               },
               "get$": [MockFunction],
               "getAll": [MockFunction],
+              "getDefault": [MockFunction],
               "getSaved$": [MockFunction],
               "getUpdate$": [MockFunction],
               "getUpdateErrors$": [MockFunction],
@@ -6235,6 +6286,15 @@ exports[`Dashboard top nav render with all components 1`] = `
               "reportUiStats": [MockFunction],
             },
             "workspaces": Object {
+              "client$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
               "currentWorkspace$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": null,

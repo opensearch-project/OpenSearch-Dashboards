@@ -39,10 +39,17 @@ function getWrapWorkspaceListInContext(
     },
   };
 
+  const mockHeaderControl = ({ controls }) => {
+    return controls?.[0].description ?? controls?.[0].renderComponent ?? null;
+  };
+
   const services = {
     ...coreStartMock,
     workspaces: {
       workspaceList$: of(workspaceList),
+    },
+    navigationUI: {
+      HeaderControl: mockHeaderControl,
     },
   };
 
@@ -57,10 +64,10 @@ function getWrapWorkspaceListInContext(
 
 describe('WorkspaceList', () => {
   it('should render title and table normally', () => {
-    const { getByText, getByRole, container } = render(
-      <WorkspaceList registeredUseCases$={createMockedRegisteredUseCases$()} />
-    );
-    expect(getByText('Workspaces')).toBeInTheDocument();
+    const { getByText, getByRole, container } = render(getWrapWorkspaceListInContext());
+    expect(
+      getByText('Organize collaborative projects with use-case-specific workspaces.')
+    ).toBeInTheDocument();
     expect(getByRole('table')).toBeInTheDocument();
     expect(container).toMatchSnapshot();
   });

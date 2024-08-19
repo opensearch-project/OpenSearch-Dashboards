@@ -20,6 +20,19 @@ You can use \`IUiSettingsClient.get(\\"throwableProperty\\", defaultValue)\`, wh
 \`defaultValue\` when the key is unrecognized."
 `;
 
+exports[`#getDefault converts json default values 1`] = `
+Object {
+  "a": 1,
+}
+`;
+
+exports[`#getDefault fetches correct uiSettings defaults 1`] = `"Browser"`;
+
+exports[`#getDefault throws on unknown properties that don't have a value yet. 1`] = `
+"Unexpected \`IUiSettingsClient.getDefaultValue(\\"unknownProperty\\")\` call on unrecognized configuration setting \\"unknownProperty\\".
+Please check that the setting for \\"unknownProperty\\" exists."
+`;
+
 exports[`#getUpdate$ sends { key, newValue, oldValue } notifications when client changes 1`] = `
 Array [
   Array [

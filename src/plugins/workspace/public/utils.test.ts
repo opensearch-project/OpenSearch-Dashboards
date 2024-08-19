@@ -376,8 +376,17 @@ describe('workspace utils: getDataSourcesList', () => {
       savedObjects: [
         {
           id: 'id1',
-          get: () => {
-            return 'mock_value';
+          get: (param: string) => {
+            switch (param) {
+              case 'title':
+                return 'title1';
+              case 'description':
+                return 'description1';
+              case 'dataSourceEngineType':
+                return 'dataSourceEngineType1';
+              case 'auth':
+                return 'mock_value';
+            }
           },
         },
       ],
@@ -385,8 +394,10 @@ describe('workspace utils: getDataSourcesList', () => {
     expect(await getDataSourcesList(mockedSavedObjectClient, [])).toStrictEqual([
       {
         id: 'id1',
-        title: 'mock_value',
+        title: 'title1',
         auth: 'mock_value',
+        description: 'description1',
+        dataSourceEngineType: 'dataSourceEngineType1',
       },
     ]);
   });

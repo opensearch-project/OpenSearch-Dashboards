@@ -4,12 +4,7 @@
  */
 
 import { useCallback, useState, FormEventHandler, useRef, useMemo } from 'react';
-import {
-  htmlIdGenerator,
-  EuiFieldTextProps,
-  EuiTextAreaProps,
-  EuiColorPickerProps,
-} from '@elastic/eui';
+import { htmlIdGenerator, EuiColorPickerProps } from '@elastic/eui';
 
 import { useApplications } from '../../hooks';
 import {
@@ -38,10 +33,11 @@ export const useWorkspaceForm = ({
   permissionEnabled,
 }: WorkspaceFormProps) => {
   const applications = useApplications(application);
-  const [name, setName] = useState(defaultValues?.name);
+  const [name, setName] = useState(defaultValues?.name ?? '');
   const [description, setDescription] = useState(defaultValues?.description);
   const [color, setColor] = useState(defaultValues?.color);
   const defaultValuesRef = useRef(defaultValues);
+  const [isEditing, setIsEditing] = useState(false);
   const initialPermissionSettingsRef = useRef(
     generatePermissionSettingsState(operationType, defaultValues?.permissionSettings)
   );
@@ -124,7 +120,7 @@ export const useWorkspaceForm = ({
       onSubmit?.({
         name: currentFormData.name!,
         description: currentFormData.description,
-        color: currentFormData.color,
+        color: currentFormData.color || '#FFFFFF',
         features: currentFormData.features,
         permissionSettings: currentFormData.permissionSettings as WorkspacePermissionSetting[],
         selectedDataSources: currentFormData.selectedDataSources,
@@ -133,33 +129,37 @@ export const useWorkspaceForm = ({
     [onSubmit, permissionEnabled]
   );
 
-  const handleNameInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>((e) => {
-    setName(e.target.value);
-  }, []);
-
-  const handleDescriptionChange = useCallback<Required<EuiTextAreaProps>['onChange']>((e) => {
-    setDescription(e.target.value);
-  }, []);
-
   const handleColorChange = useCallback<Required<EuiColorPickerProps>['onChange']>((text) => {
     setColor(text);
+  }, []);
+
+  const handleResetForm = useCallback(() => {
+    const resetValues = defaultValuesRef.current;
+    setName(resetValues?.name ?? '');
+    setDescription(resetValues?.description);
+    setColor(resetValues?.color);
+    setFeatureConfigs(appendDefaultFeatureIds(resetValues?.features ?? []));
+    setPermissionSettings(initialPermissionSettingsRef.current);
+    setFormErrors({});
+    setIsEditing(false);
   }, []);
 
   return {
     formId: formIdRef.current,
     formData,
+    isEditing,
     formErrors,
+    setIsEditing,
     applications,
     numberOfErrors,
     numberOfChanges,
+    handleResetForm,
     setName,
     setDescription,
     handleFormSubmit,
     handleColorChange,
     handleUseCaseChange,
-    handleNameInputChange,
     setPermissionSettings,
     setSelectedDataSources,
-    handleDescriptionChange,
   };
 };
