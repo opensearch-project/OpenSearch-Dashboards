@@ -7,12 +7,7 @@ import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { concatMap, map } from 'rxjs/operators';
-import {
-  DATA_FRAME_TYPES,
-  getRawDataFrame,
-  getRawQueryString,
-  SIMPLE_DATA_SET_TYPES,
-} from '../../../data/common';
+import { DATA_FRAME_TYPES, getRawDataFrame, getRawQueryString } from '../../../data/common';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -66,10 +61,10 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       ...dataFrame.meta,
       queryConfig: {
         ...dataFrame.meta.queryConfig,
-        ...(this.queryService.dataSetManager.getDataSet() && {
-          dataSourceId: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.id,
-          dataSourceName: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.name,
-          timeFieldName: this.queryService.dataSetManager.getDataSet()?.timeFieldName,
+        ...(this.queryService.dataSetManager.getDataset() && {
+          dataSourceId: this.queryService.dataSetManager.getDataset()?.dataSource?.id,
+          dataSourceName: this.queryService.dataSetManager.getDataset()?.dataSource?.title,
+          timeFieldName: this.queryService.dataSetManager.getDataset()?.timeFieldName,
         }),
       },
     };
@@ -109,10 +104,10 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     }
 
     const queryString = getRawQueryString(searchRequest) ?? '';
-    const dataSourceRef = this.queryService.dataSetManager.getDataSet()
+    const dataSourceRef = this.queryService.dataSetManager.getDataset()
       ? {
-          dataSourceId: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.id,
-          dataSourceName: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.name,
+          dataSourceId: this.queryService.dataSetManager.getDataset()?.dataSource?.id,
+          dataSourceName: this.queryService.dataSetManager.getDataset()?.dataSource?.title,
         }
       : {};
 
@@ -187,8 +182,8 @@ export class SQLSearchInterceptor extends SearchInterceptor {
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    const dataSet = this.queryService.dataSetManager.getDataSet();
-    if (dataSet?.type === SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC) {
+    const dataSet = this.queryService.dataSetManager.getDataset();
+    if (dataSet?.type === 'TEMPORARY_ASYNC') {
       return this.runSearchAsync(request, options.abortSignal, SEARCH_STRATEGY.SQL_ASYNC);
     }
     return this.runSearch(request, options.abortSignal, SEARCH_STRATEGY.SQL);

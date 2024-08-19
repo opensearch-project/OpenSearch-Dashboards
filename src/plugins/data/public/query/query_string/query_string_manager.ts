@@ -31,7 +31,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { DataStorage, Query, SimpleDataSet, TimeRange, UI_SETTINGS } from '../../../common';
+import { Dataset, DataStorage, Query, TimeRange, UI_SETTINGS } from '../../../common';
 import { createHistory, QueryHistory } from './query_history';
 import { DatasetContract, DatasetManager } from './dataset_manager';
 
@@ -107,7 +107,7 @@ export class QueryStringManager {
   };
 
   // Todo: update this function to use the Query object when it is udpated, Query object should include time range and dataset
-  public addToQueryHistory(dataSet: SimpleDataSet, query: Query, timeRange?: TimeRange) {
+  public addToQueryHistory(dataSet: Dataset, query: Query, timeRange?: TimeRange) {
     if (query.query) {
       this.queryHistory.addQueryToHistory(dataSet, query, timeRange);
     }
