@@ -67,6 +67,7 @@ import { DEFAULT_NAV_GROUPS } from '../../../core/public';
 import { RecentWork } from './management_section/recent_work';
 import { HOME_CONTENT_AREAS } from '../../../plugins/home/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
+import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
 
 /**
  * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
@@ -104,6 +105,7 @@ export interface StartDependencies {
   visBuilder?: VisBuilderStart;
   uiActions: UiActionsStart;
   contentManagement?: ContentManagementPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export class SavedObjectsManagementPlugin

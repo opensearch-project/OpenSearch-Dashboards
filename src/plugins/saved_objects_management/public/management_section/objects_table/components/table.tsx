@@ -47,6 +47,7 @@ import {
   EuiTableFieldDataColumnType,
   EuiTableActionsColumnType,
   EuiSearchBarProps,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -90,6 +91,8 @@ export interface TableProps {
   availableWorkspaces?: WorkspaceAttribute[];
   currentWorkspaceId?: string;
   showDuplicate: boolean;
+  useUpdatedUX: boolean;
+  onRefresh: () => void;
 }
 
 interface TableState {
@@ -189,6 +192,8 @@ export class Table extends PureComponent<TableProps, TableState> {
       availableWorkspaces,
       currentWorkspaceId,
       showDuplicate,
+      useUpdatedUX,
+      onRefresh,
     } = this.props;
 
     const visibleWsIds = availableWorkspaces?.map((ws) => ws.id) || [];
@@ -417,6 +422,17 @@ export class Table extends PureComponent<TableProps, TableState> {
           filters={filters}
           onChange={this.onChange}
           toolsRight={[
+            <>
+              {useUpdatedUX && (
+                <EuiButtonIcon
+                  iconType="refresh"
+                  size="s"
+                  display="base"
+                  type="base"
+                  onClick={onRefresh}
+                />
+              )}
+            </>,
             <>{showDuplicate && duplicateButton}</>,
             <EuiSmallButton
               key="deleteSO"
