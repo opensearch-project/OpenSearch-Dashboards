@@ -160,3 +160,7 @@ Update `DEFAULT_THEME_VERSION` in `src/core/server/ui_settings/ui_settings_confi
         1. Load variables for your theme in `THEME_SOURCES`
         2. Define the text font for your theme in `fontText`
         3. Define the code font for your theme in `fontCode`
+    7. If on a branch without user specific themes:
+        1. Update `THEME_SOURCES` in `src/core/server/rendering/views/theme.ts`
+        2. Update `fontText` and `fontCode` in `src/core/server/rendering/views/fonts.tsx`
+    
