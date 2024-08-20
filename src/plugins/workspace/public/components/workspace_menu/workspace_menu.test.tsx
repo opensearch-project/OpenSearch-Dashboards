@@ -155,28 +155,6 @@ describe('<WorkspaceMenu />', () => {
     });
   });
 
-  it('should navigate to workspace management page', () => {
-    coreStartMock.workspaces.currentWorkspace$.next({
-      id: 'workspace-1',
-      name: 'workspace 1',
-      features: ['use-case-observability'],
-    });
-    const navigateToWorkspaceDetail = jest.spyOn(workspaceUtils, 'navigateToWorkspaceDetail');
-    render(<WorkspaceMenuCreatorComponent />);
-
-    fireEvent.click(screen.getByTestId('current-workspace-button'));
-    const button = screen.getByText(/Manage workspace/i);
-    fireEvent.click(button);
-    expect(navigateToWorkspaceDetail).toBeCalled();
-  });
-
-  it('should navigate to workspaces management page', () => {
-    render(<WorkspaceMenuCreatorComponent />);
-    fireEvent.click(screen.getByTestId('workspace-select-button'));
-    fireEvent.click(screen.getByText(/manage workspaces/i));
-    expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith('workspace_list');
-  });
-
   it('should navigate to create workspace page', () => {
     render(<WorkspaceMenuCreatorComponent />);
     fireEvent.click(screen.getByTestId('workspace-select-button'));
@@ -188,7 +166,7 @@ describe('<WorkspaceMenu />', () => {
     render(<WorkspaceMenuCreatorComponent />);
 
     fireEvent.click(screen.getByTestId('workspace-select-button'));
-    fireEvent.click(screen.getByText(/View all/i));
+    fireEvent.click(screen.getByText(/manage/i));
     expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith('workspace_list');
   });
 
@@ -203,7 +181,7 @@ describe('<WorkspaceMenu />', () => {
     render(<WorkspaceMenuCreatorComponent />);
 
     fireEvent.click(screen.getByTestId('workspace-select-button'));
-    expect(screen.getByText(/View all/i)).toBeInTheDocument();
+    expect(screen.queryByText(/manage/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/create workspaces/i)).toBeNull();
   });
 });

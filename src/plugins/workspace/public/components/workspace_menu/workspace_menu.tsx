@@ -4,26 +4,29 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useObservable } from 'react-use';
 import {
   EuiText,
   EuiPanel,
   EuiAvatar,
+  EuiHorizontalRule,
+  EuiButton,
   EuiPopover,
   EuiToolTip,
   EuiFlexItem,
+  EuiFieldSearch,
+  EuiIcon,
   EuiFlexGroup,
   EuiButtonIcon,
   EuiSmallButtonEmpty,
-  EuiSmallButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
-import { CoreStart, WorkspaceObject } from '../../../../../core/public';
+import { CoreStart, WorkspaceObject, debounce } from '../../../../../core/public';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { WorkspaceUseCase } from '../../types';
-import { navigateToWorkspaceDetail } from '../utils/workspace';
 import { validateWorkspaceColor } from '../../../common/utils';
 import { WorkspacePickerContent } from '../workspace_picker_content/workspace_picker_content';
 
@@ -35,16 +38,12 @@ const createWorkspaceButton = i18n.translate('workspace.menu.button.createWorksp
   defaultMessage: 'Create workspace',
 });
 
-const viewAllButton = i18n.translate('workspace.menu.button.viewAll', {
-  defaultMessage: 'View all',
-});
-
-const manageWorkspaceButton = i18n.translate('workspace.menu.button.manageWorkspace', {
-  defaultMessage: 'Manage workspace',
+const searchFieldPlaceholder = i18n.translate('workspace.menu.search.placeholder', {
+  defaultMessage: 'Search workspace name',
 });
 
 const manageWorkspacesButton = i18n.translate('workspace.menu.button.manageWorkspaces', {
-  defaultMessage: 'Manage workspaces',
+  defaultMessage: 'Manage',
 });
 
 const getValidWorkspaceColor = (color?: string) =>
@@ -63,6 +62,8 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
 
   const currentWorkspaceName = currentWorkspace?.name ?? defaultHeaderName;
 
+  const [querySearch, setQuerySearch] = useState('');
+
   const getUseCase = (workspace: WorkspaceObject) => {
     if (!workspace.features) {
       return;
@@ -78,6 +79,17 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
   const closePopover = () => {
     setPopover(false);
   };
+
+  const debouncedSetQueryInput = useMemo(() => {
+    return debounce(setQuerySearch, 100);
+  }, [setQuerySearch]);
+
+  const handleSearchInput = useCallback(
+    (query) => {
+      debouncedSetQueryInput(query?.text ?? '');
+    },
+    [debouncedSetQueryInput]
+  );
 
   const currentWorkspaceButton = currentWorkspace ? (
     <EuiSmallButtonEmpty
@@ -112,23 +124,17 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
       panelPaddingSize="s"
       anchorPosition="downCenter"
     >
-      <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
+      <EuiPanel hasBorder={false} color="transparent">
         <EuiFlexGroup
           justifyContent="spaceAround"
           alignItems="center"
           direction="column"
-          gutterSize="s"
+          gutterSize="m"
         >
           {currentWorkspace ? (
             <>
               <EuiFlexItem grow={false}>
-                <EuiAvatar
-                  size="m"
-                  type="space"
-                  name={currentWorkspaceName}
-                  color={getValidWorkspaceColor(currentWorkspace?.color)}
-                  initialsLength={2}
-                />
+                <EuiIcon size="l" color="plain" name="spacesApp" type="spacesApp" />
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="workspace-menu-current-workspace-name">
                 <EuiToolTip
@@ -136,86 +142,103 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                   position="right"
                   content={currentWorkspaceName}
                 >
-                  <EuiText size="s" style={{ maxWidth: '195px' }} className="eui-textTruncate">
+                  <EuiText
+                    textAlign="center"
+                    style={{ maxWidth: '195px' }}
+                    className="eui-textTruncate"
+                  >
                     {currentWorkspaceName}
                   </EuiText>
                 </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} data-test-subj="workspace-menu-current-use-case">
-                <EuiText size="s">{getUseCase(currentWorkspace)?.title ?? ''}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSmallButton
-                  color="text"
-                  onClick={() => {
-                    closePopover();
-                    navigateToWorkspaceDetail(coreStart, currentWorkspace.id);
-                  }}
+                <EuiText
+                  size="xs"
+                  data-test-subj="workspace-menu-current-use-case"
+                  textAlign="center"
+                  color="subdued"
                 >
-                  {manageWorkspaceButton}
-                </EuiSmallButton>
+                  {getUseCase(currentWorkspace)?.title ?? ''}
+                </EuiText>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false} style={{ width: '100%' }}>
+                <EuiFieldSearch
+                  value={querySearch}
+                  onChange={(e) => handleSearchInput({ text: e.target.value })}
+                  placeholder={searchFieldPlaceholder}
+                />
               </EuiFlexItem>
             </>
           ) : (
             <>
               <EuiFlexItem grow={false}>
-                <EuiAvatar size="m" color="plain" name="spacesApp" iconType="spacesApp" />
+                <EuiIcon size="l" color="plain" name="spacesApp" type="spacesApp" />
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="workspace-menu-current-workspace-name">
-                {currentWorkspaceName}
+                <EuiText textAlign="center">{currentWorkspaceName}</EuiText>
               </EuiFlexItem>
+
+              <EuiFlexItem grow={false} style={{ width: '100%' }}>
+                <EuiFieldSearch
+                  value={querySearch}
+                  onChange={(e) => handleSearchInput({ text: e.target.value })}
+                  placeholder={searchFieldPlaceholder}
+                />
+              </EuiFlexItem>
+            </>
+          )}
+        </EuiFlexGroup>
+      </EuiPanel>
+
+      <EuiPanel
+        paddingSize="s"
+        hasBorder={false}
+        color="transparent"
+        style={{ height: '360px', overflow: 'auto' }}
+      >
+        <WorkspacePickerContent
+          searchQuery={querySearch}
+          coreStart={coreStart}
+          registeredUseCases$={registeredUseCases$}
+          onClickWorkspace={() => setPopover(false)}
+        />
+      </EuiPanel>
+
+      <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
+        <EuiHorizontalRule />
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="m">
+          {isDashboardAdmin && (
+            <>
               <EuiFlexItem grow={false}>
-                <EuiSmallButton
-                  color="text"
+                <EuiButtonEmpty
+                  color="primary"
+                  size="xs"
+                  flush="left"
+                  data-test-subj="workspace-menu-manage-button"
                   onClick={() => {
                     closePopover();
                     coreStart.application.navigateToApp(WORKSPACE_LIST_APP_ID);
                   }}
                 >
                   {manageWorkspacesButton}
-                </EuiSmallButton>
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  color="primary"
+                  iconType="plus"
+                  size="s"
+                  key={WORKSPACE_CREATE_APP_ID}
+                  data-test-subj="workspace-menu-create-workspace-button"
+                  onClick={() => {
+                    closePopover();
+                    coreStart.application.navigateToApp(WORKSPACE_CREATE_APP_ID);
+                  }}
+                >
+                  {createWorkspaceButton}
+                </EuiButton>
               </EuiFlexItem>
             </>
-          )}
-        </EuiFlexGroup>
-      </EuiPanel>
-      <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
-        <WorkspacePickerContent
-          coreStart={coreStart}
-          registeredUseCases$={registeredUseCases$}
-          onClickWorkspace={() => setPopover(false)}
-        />
-      </EuiPanel>
-      <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
-        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiSmallButtonEmpty
-              flush="left"
-              key={WORKSPACE_LIST_APP_ID}
-              data-test-subj="workspace-menu-view-all-button"
-              onClick={() => {
-                closePopover();
-                coreStart.application.navigateToApp(WORKSPACE_LIST_APP_ID);
-              }}
-            >
-              {viewAllButton}
-            </EuiSmallButtonEmpty>
-          </EuiFlexItem>
-          {isDashboardAdmin && (
-            <EuiFlexItem grow={false}>
-              <EuiSmallButton
-                color="text"
-                iconType="plus"
-                key={WORKSPACE_CREATE_APP_ID}
-                data-test-subj="workspace-menu-create-workspace-button"
-                onClick={() => {
-                  closePopover();
-                  coreStart.application.navigateToApp(WORKSPACE_CREATE_APP_ID);
-                }}
-              >
-                {createWorkspaceButton}
-              </EuiSmallButton>
-            </EuiFlexItem>
           )}
         </EuiFlexGroup>
       </EuiPanel>
