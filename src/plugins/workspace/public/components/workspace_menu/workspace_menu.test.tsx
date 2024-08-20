@@ -78,7 +78,7 @@ describe('<WorkspaceMenu />', () => {
     expect(screen.getByText(/no workspace available/i)).toBeInTheDocument();
   });
 
-  it('should be able to perform search and filter, and the results will be shown in both all and recent section', () => {
+  it('should be able to perform search and filter and the results will be shown in both all and recent section', () => {
     coreStartMock.workspaces.workspaceList$.next([
       { id: 'workspace-1', name: 'workspace 1', features: [] },
       { id: 'test-2', name: 'test 2', features: [] },
