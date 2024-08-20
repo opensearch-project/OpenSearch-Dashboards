@@ -52,7 +52,6 @@ export type Content =
       id: string;
       order: number;
       input: SavedObjectInput;
-      width: number;
     }
   | {
       kind: 'custom';
