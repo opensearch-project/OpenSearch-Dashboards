@@ -30,6 +30,7 @@ import {
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
   WORKSPACE_USE_CASES,
+  WORKSPACE_INITIAL_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services, WorkspaceUseCase } from './types';
@@ -356,6 +357,20 @@ export class WorkspacePlugin
         const { renderDetailApp } = await import('./application');
         return mountWorkspaceApp(params, renderDetailApp);
       },
+    });
+
+    // workspace initial page
+    core.application.register({
+      id: WORKSPACE_INITIAL_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceInitial', {
+        defaultMessage: 'Workspace Initial',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderInitialApp } = await import('./application');
+        return mountWorkspaceApp(params, renderInitialApp);
+      },
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
     // workspace list
