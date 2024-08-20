@@ -109,6 +109,7 @@ import {
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { DuplicateObject } from '../types';
 import { formatWorkspaceIdParams } from '../../utils';
+import { NavigationPublicPluginStart } from '../../../../navigation/public';
 
 interface ExportAllOption {
   id: string;
@@ -134,6 +135,8 @@ export interface SavedObjectsTableProps {
   dateFormat: string;
   dataSourceEnabled: boolean;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  navigationUI: NavigationPublicPluginStart['ui'];
+  useUpdatedUX: boolean;
 }
 
 export interface SavedObjectsTableState {
@@ -1054,7 +1057,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       workspaceEnabled,
       currentWorkspaceId,
     } = this.state;
-    const { http, allowedTypes, applications, namespaceRegistry } = this.props;
+    const {
+      http,
+      allowedTypes,
+      applications,
+      namespaceRegistry,
+      useUpdatedUX,
+      navigationUI,
+    } = this.props;
 
     const selectionConfig = {
       onSelectionChange: this.onSelectionChanged,
@@ -1144,6 +1154,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           onDuplicate={this.onDuplicateAll}
           onRefresh={this.refreshObjects}
           objectCount={savedObjects.length}
+          useUpdatedUX={useUpdatedUX}
+          navigationUI={navigationUI}
+          applications={applications}
         />
         <EuiSpacer size="xs" />
         <RedirectAppLinks application={applications}>
@@ -1185,6 +1198,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             availableWorkspaces={availableWorkspaces}
             currentWorkspaceId={currentWorkspaceId}
             showDuplicate={this.state.workspaceEnabled}
+            onRefresh={this.refreshObjects}
+            useUpdatedUX={useUpdatedUX}
           />
         </RedirectAppLinks>
       </EuiPageContent>
