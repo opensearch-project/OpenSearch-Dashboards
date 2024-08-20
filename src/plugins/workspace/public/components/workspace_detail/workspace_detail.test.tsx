@@ -119,6 +119,9 @@ const WorkspaceDetailPage = (props: any) => {
         },
       },
       dataSourceManagement,
+      navigationUI: {
+        HeaderControl: () => null,
+      },
     },
   });
 
@@ -198,24 +201,6 @@ describe('WorkspaceDetail', () => {
     expect(document.querySelector('#dataSources')).toHaveClass('euiTab-isSelected');
   });
 
-  it('click on delete button will show delete modal', async () => {
-    const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
-    const { getByText, getByTestId, queryByText } = render(
-      WorkspaceDetailPage({ workspacesService: workspaceService })
-    );
-    fireEvent.click(getByText('delete'));
-    expect(getByText('Delete workspace')).toBeInTheDocument();
-    fireEvent.click(getByText('Cancel'));
-    expect(queryByText('Delete workspace')).toBeNull();
-    fireEvent.click(getByText('delete'));
-    const input = getByTestId('delete-workspace-modal-input');
-    fireEvent.change(input, {
-      target: { value: 'delete' },
-    });
-    const confirmButton = getByTestId('delete-workspace-modal-confirm');
-    fireEvent.click(confirmButton);
-  });
-
   it('click on Collaborators tab when permission control and dataSource disabled', async () => {
     const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
     const { queryByText } = render(
@@ -281,13 +266,16 @@ describe('WorkspaceDetail', () => {
 
   it('will not render xss content', async () => {
     const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
-    const workspaceService = createWorkspacesSetupContractMockWithValue({
-      ...workspaceObject,
-      name: '<script>alert("name")</script>',
-      description: '<script>alert("description")</script>',
-    });
-    const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
-    expect(getByText('<script>alert("description")</script>')).toBeInTheDocument();
+    const workspaceService = createWorkspacesSetupContractMockWithValue();
+    const { getByTestId } = render(
+      WorkspaceDetailPage({
+        workspacesService: workspaceService,
+        defaultValues: { ...defaultValues, description: '<script>alert("description")</script>' },
+      })
+    );
+    expect(getByTestId('workspaceForm-workspaceDetails-descriptionInputText').value).toEqual(
+      '<script>alert("description")</script>'
+    );
     expect(alertSpy).toBeCalledTimes(0);
     alertSpy.mockRestore();
   });

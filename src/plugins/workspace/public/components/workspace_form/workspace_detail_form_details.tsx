@@ -8,7 +8,6 @@ import {
   EuiColorPicker,
   EuiCompressedFormRow,
   EuiDescribedFormGroup,
-  EuiCompressedTextArea,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useObservable } from 'react-use';
@@ -17,7 +16,6 @@ import {
   detailsColorLabel,
   detailsUseCaseLabel,
   detailsColorHelpText,
-  detailsDescriptionPlaceholder,
   detailsDescriptionIntroduction,
   detailsUseCaseHelpText,
 } from './constants';
@@ -36,7 +34,7 @@ interface WorkspaceDetailFormDetailsProps {
   >;
 }
 
-export const WorkspaceDetailFormDetailsProps = ({
+export const WorkspaceDetailFormDetails = ({
   availableUseCases,
 }: WorkspaceDetailFormDetailsProps) => {
   const {
