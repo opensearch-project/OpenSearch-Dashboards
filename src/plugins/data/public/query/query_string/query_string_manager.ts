@@ -130,35 +130,6 @@ export class QueryStringManager {
   public getDatasetManager = () => {
     return this.datasetManager;
   };
-
-  // TODO: uncomment or use based on decision above
-  // public initDataset = async (indexPatterns: IndexPatternsContract) => {
-  //   return this.datasetManager.init(indexPatterns);
-  // };
-
-  // public initDatasetWithIndexPattern = (indexPattern: IndexPattern | null) => {
-  //   return this.datasetManager.initWithIndexPattern(indexPattern);
-  // };
-
-  // public getDatasetUpdates$ = () => {
-  //   return this.datasetManager.getUpdates$();
-  // };
-
-  // public getDataset = () => {
-  //   return this.datasetManager.getDataset();
-  // };
-
-  // public setDataset = (dataset: Dataset | undefined) => {
-  //   return this.datasetManager.setDataset(dataset);
-  // };
-
-  // public getDefaultDataset = () => {
-  //   return this.datasetManager.getDefaultDataset();
-  // };
-
-  // public fetchDefaultDataset = async (): Promise<Dataset | undefined> => {
-  //   return this.datasetManager.fetchDefaultDataset();
-  // };
 }
 
 export type QueryStringContract = PublicMethodsOf<QueryStringManager>;

@@ -6,16 +6,27 @@
 import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { skip } from 'rxjs/operators';
-import { DEFAULT_QUERY, Dataset, DataSource, IndexPattern, UI_SETTINGS } from '../../../../common';
+import {
+  DEFAULT_QUERY,
+  Dataset,
+  DataSource,
+  IndexPattern,
+  UI_SETTINGS,
+  DatasetTypeConfig,
+} from '../../../../common';
 import { IndexPatternsContract } from '../../../index_patterns';
+import { DataStructureCache } from './datastructure_cache/datastructure_cache';
 
 export class DatasetManager {
   private dataset$: BehaviorSubject<Dataset | undefined>;
   private indexPatterns?: IndexPatternsContract;
   private defaultDataset?: Dataset;
+  private datasetTypes: Map<string, DatasetTypeConfig> = new Map();
+  private dataStructureCache: DataStructureCache;
 
   constructor(private readonly uiSettings: CoreStart['uiSettings']) {
     this.dataset$ = new BehaviorSubject<Dataset | undefined>(undefined);
+    this.dataStructureCache = new DataStructureCache();
   }
 
   public init = async (indexPatterns: IndexPatternsContract) => {
@@ -45,6 +56,21 @@ export class DatasetManager {
           }
         : {}),
     };
+  };
+
+  public registerType = (type: string, config: DatasetTypeConfig) => {
+    if (this.datasetTypes.has(type)) {
+      throw new Error(`Error: ${type} has already been registered`);
+    }
+    this.datasetTypes.set(type, config);
+  };
+
+  public getTypes = () => {
+    return Array.from(this.datasetTypes.keys());
+  };
+
+  public getTypeConfig = (type: string) => {
+    return this.datasetTypes.get(type);
   };
 
   public getUpdates$ = () => {

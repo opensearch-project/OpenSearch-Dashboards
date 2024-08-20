@@ -173,6 +173,10 @@ export interface CachedDataStructure extends Omit<DataStructure, 'parent' | 'chi
   parent: string;
   /** Array of child data structure IDs */
   children: string[];
+  /** Timestamp of when this data structure was fetched */
+  lastUpdated: number;
+  /** Check if children have been fetched  */
+  fetchedChildren: boolean;
 }
 
 /**
@@ -220,4 +224,9 @@ export interface Dataset {
   timeFieldName?: string;
   /** Optional reference to the data source */
   dataSource?: DataSource;
+}
+
+export interface DatasetTypeConfig {
+  fetchOptions: (params: any) => DataStructure[];
+  supportedLanguages: string[];
 }
