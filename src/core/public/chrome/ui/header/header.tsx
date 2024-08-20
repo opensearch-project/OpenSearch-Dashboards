@@ -36,7 +36,7 @@ import {
   EuiHideFor,
   EuiIcon,
   EuiShowFor,
-  EuiText,
+  EuiTitle,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -209,12 +209,13 @@ export function Header({
     />
   );
 
-  const renderBreadcrumbs = () => (
+  const renderBreadcrumbs = (renderFullLength?: boolean) => (
     <HeaderBreadcrumbs
       appTitle$={observables.appTitle$}
       breadcrumbs$={observables.breadcrumbs$}
       breadcrumbsEnricher$={observables.breadcrumbsEnricher$}
       useUpdatedHeader={useUpdatedHeader}
+      renderFullLength={renderFullLength}
     />
   );
 
@@ -355,8 +356,7 @@ export function Header({
         navigateToUrl={application.navigateToUrl}
         navLinks$={observables.navLinks$}
         basePath={basePath}
-        headerVariant={headerVariant}
-        renderBreadcrumbs={renderBreadcrumbs()}
+        renderBreadcrumbs={renderBreadcrumbs(true)}
         buttonSize={useApplicationHeader ? 's' : 'xs'}
       />
     </EuiHeaderSectionItem>
@@ -412,12 +412,10 @@ export function Header({
       {/* Secondary header */}
       <EuiHeader className="newTopNavHeader">
         <EuiHeaderSection side="left">
-          <EuiHeaderSectionItem
-            border="none"
-            className="newTopNavApplicationTitle"
-            data-test-subj="headerApplicationTitle"
-          >
-            <EuiText>{breadcrumbs && <h2>{breadcrumbs[breadcrumbs.length - 1]?.text}</h2>}</EuiText>
+          <EuiHeaderSectionItem border="none" data-test-subj="headerApplicationTitle">
+            <EuiTitle size="l" className="newTopNavHeaderTitle">
+              {breadcrumbs && <h1>{breadcrumbs[breadcrumbs.length - 1]?.text}</h1>}
+            </EuiTitle>
           </EuiHeaderSectionItem>
 
           {renderBadge()}

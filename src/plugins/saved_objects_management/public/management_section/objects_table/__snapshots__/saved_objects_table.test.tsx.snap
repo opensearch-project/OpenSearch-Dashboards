@@ -334,6 +334,15 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on header w
   }
   workspaces={
     Object {
+      "client$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
       "currentWorkspace$": BehaviorSubject {
         "_isScalar": false,
         "_value": Object {
@@ -512,6 +521,15 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
   selectedSavedObjects={Array []}
   workspaces={
     Object {
+      "client$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
       "currentWorkspace$": BehaviorSubject {
         "_isScalar": false,
         "_value": Object {
@@ -702,6 +720,15 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
   }
   workspaces={
     Object {
+      "client$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
       "currentWorkspace$": BehaviorSubject {
         "_isScalar": false,
         "_value": Object {
@@ -965,6 +992,51 @@ exports[`SavedObjectsTable should render normally 1`] = `
   horizontalPosition="center"
 >
   <Header
+    applications={
+      Object {
+        "applications$": BehaviorSubject {
+          "_isScalar": false,
+          "_value": Map {},
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+          "savedObjectsManagement": Object {
+            "delete": false,
+            "edit": false,
+            "read": true,
+          },
+          "workspaces": Object {},
+        },
+        "currentAppId$": Observable {
+          "_isScalar": false,
+          "source": Subject {
+            "_isScalar": false,
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+        "registerMountContext": [MockFunction],
+        "setAppBadgeControls": [MockFunction],
+        "setAppBottomControls": [MockFunction],
+        "setAppCenterControls": [MockFunction],
+        "setAppDescriptionControls": [MockFunction],
+        "setAppLeftControls": [MockFunction],
+        "setAppRightControls": [MockFunction],
+      }
+    }
     objectCount={4}
     onDuplicate={[Function]}
     onExportAll={[Function]}
@@ -1147,6 +1219,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
       onDuplicateSingle={[Function]}
       onExport={[Function]}
       onQueryChange={[Function]}
+      onRefresh={[Function]}
       onShowRelationships={[Function]}
       onTableChange={[Function]}
       pageIndex={0}

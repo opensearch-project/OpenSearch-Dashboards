@@ -4,8 +4,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { IStorageWrapper } from '../../../../opensearch_dashboards_utils/public';
-import { setOverrides as setFieldOverrides } from '../../../common';
+import { DataStorage, setOverrides as setFieldOverrides } from '../../../common';
 import { ConfigSchema } from '../../../config';
 import { ISearchStart } from '../../search';
 import { QueryEditorExtensionConfig } from '../query_editor/query_editor_extensions';
@@ -31,7 +30,7 @@ export class Settings {
   constructor(
     private readonly config: ConfigSchema['enhancements'],
     private readonly search: ISearchStart,
-    private readonly storage: IStorageWrapper,
+    private readonly storage: DataStorage,
     private readonly queryEnhancements: Map<string, QueryEnhancement>,
     private readonly queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>
   ) {
@@ -72,26 +71,26 @@ export class Settings {
   }
 
   getUserQueryLanguageBlocklist() {
-    return this.storage.get('opensearchDashboards.userQueryLanguageBlocklist') || [];
+    return this.storage.get('userQueryLanguageBlocklist') || [];
   }
 
   setUserQueryLanguageBlocklist(languages: string[]) {
     this.storage.set(
-      'opensearchDashboards.userQueryLanguageBlocklist',
+      'userQueryLanguageBlocklist',
       languages.map((language) => language.toLowerCase())
     );
     return true;
   }
 
   getUserQueryLanguage() {
-    return this.storage.get('opensearchDashboards.userQueryLanguage') || 'kuery';
+    return this.storage.get('userQueryLanguage') || 'kuery';
   }
 
   setUserQueryLanguage(language: string) {
     if (language !== this.getUserQueryLanguage()) {
       this.search.df.clear();
     }
-    this.storage.set('opensearchDashboards.userQueryLanguage', language);
+    this.storage.set('userQueryLanguage', language);
     const queryEnhancement = this.queryEnhancements.get(language);
     this.search.__enhance({
       searchInterceptor: queryEnhancement
@@ -104,25 +103,25 @@ export class Settings {
   }
 
   getUserQueryString() {
-    return this.storage.get('opensearchDashboards.userQueryString') || '';
+    return this.storage.get('userQueryString') || '';
   }
 
   setUserQueryString(query: string) {
-    this.storage.set('opensearchDashboards.userQueryString', query);
+    this.storage.set('userQueryString', query);
     return true;
   }
 
   getUiOverrides() {
-    return this.storage.get('opensearchDashboards.uiOverrides') || {};
+    return this.storage.get('uiOverrides') || {};
   }
 
   setUiOverrides(overrides?: { [key: string]: any }) {
     if (!overrides) {
-      this.storage.remove('opensearchDashboards.uiOverrides');
+      this.storage.remove('uiOverrides');
       setFieldOverrides(undefined);
       return true;
     }
-    this.storage.set('opensearchDashboards.uiOverrides', overrides);
+    this.storage.set('uiOverrides', overrides);
     setFieldOverrides(overrides.fields);
     return true;
   }
@@ -171,7 +170,7 @@ export class Settings {
 interface Deps {
   config: ConfigSchema['enhancements'];
   search: ISearchStart;
-  storage: IStorageWrapper;
+  storage: DataStorage;
   queryEnhancements: Map<string, QueryEnhancement>;
   queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>;
 }
