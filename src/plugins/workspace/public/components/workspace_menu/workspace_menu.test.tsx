@@ -12,11 +12,7 @@ import { CoreStart, DEFAULT_NAV_GROUPS } from '../../../../../core/public';
 import { BehaviorSubject } from 'rxjs';
 import { IntlProvider } from 'react-intl';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
-import * as workspaceUtils from '../utils/workspace';
-
-// jest.mock('../workspace_picker_content/workspace_picker_content.tsx', () => ({
-//   WorkspacePickerContent:
-// }));
+import { WORKSPACE_USE_CASES } from '../../../common/constants';
 
 describe('<WorkspaceMenu />', () => {
   let coreStartMock: CoreStart;
