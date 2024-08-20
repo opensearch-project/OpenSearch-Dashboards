@@ -32,7 +32,7 @@ import {
   WORKSPACE_USE_CASES,
   WORKSPACE_INITIAL_APP_ID,
   ESSENTIAL_OVERVIEW_APP_ID,
-  ANALYTICS_OVERVIEW_CONTENT_AREAS,
+  ANALYTICS_OVERVIEW_ALL_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services, WorkspaceUseCase } from './types';
@@ -64,6 +64,10 @@ import {
   registerEssentialOverviewContent,
   setEssentialOverviewSection,
 } from './components/use_case_overview';
+import {
+  registerAnalyticsAllOverviewContent,
+  setAnalyticsAllOverviewSection,
+} from './components/use_case_overview/setup_overview';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -427,7 +431,7 @@ export class WorkspacePlugin
         id: ESSENTIAL_OVERVIEW_APP_ID,
         title: '',
         async mount(params: AppMountParameters) {
-          const { renderOverviewApp } = await import('./application');
+          const { renderUseCaseOverviewApp } = await import('./application');
           const [
             coreStart,
             { contentManagement: contentManagementStart },
@@ -439,7 +443,7 @@ export class WorkspacePlugin
             contentManagement: contentManagementStart,
           };
 
-          return renderOverviewApp(params, services, ESSENTIAL_OVERVIEW_APP_ID);
+          return renderUseCaseOverviewApp(params, services, ESSENTIAL_OVERVIEW_APP_ID);
         },
         workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       });
@@ -456,6 +460,41 @@ export class WorkspacePlugin
 
       // initial the page structure
       setEssentialOverviewSection(contentManagement);
+
+      // register workspace Analytics(all) use case overview app
+      core.application.register({
+        id: ANALYTICS_OVERVIEW_ALL_APP_ID,
+        title: '',
+        async mount(params: AppMountParameters) {
+          const { renderUseCaseOverviewApp } = await import('./application');
+          const [
+            coreStart,
+            { contentManagement: contentManagementStart },
+          ] = await core.getStartServices();
+          const services = {
+            ...coreStart,
+            workspaceClient,
+            dataSourceManagement,
+            contentManagement: contentManagementStart,
+          };
+
+          return renderUseCaseOverviewApp(params, services, ANALYTICS_OVERVIEW_ALL_APP_ID);
+        },
+        workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+      });
+
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+        {
+          id: ANALYTICS_OVERVIEW_ALL_APP_ID,
+          order: -1,
+          title: i18n.translate('workspace.nav.analyticsAll_overview.title', {
+            defaultMessage: 'Overview',
+          }),
+        },
+      ]);
+
+      // initial the page structure
+      setAnalyticsAllOverviewSection(contentManagement);
     }
 
     /**
@@ -493,10 +532,7 @@ export class WorkspacePlugin
     useCases.forEach((useCase, index) => {
       contentManagement.registerContentProvider({
         id: `home_get_start_${useCase.id}`,
-        getTargetArea: () => [
-          HOME_CONTENT_AREAS.GET_STARTED,
-          ANALYTICS_OVERVIEW_CONTENT_AREAS.GET_STARTED,
-        ],
+        getTargetArea: () => [HOME_CONTENT_AREAS.GET_STARTED],
         getContent: () => ({
           id: useCase.id,
           kind: 'card',
@@ -561,6 +597,9 @@ export class WorkspacePlugin
 
       // register content to essential overview page
       registerEssentialOverviewContent(contentManagement, core);
+
+      // register content to analytics(All) overview page
+      registerAnalyticsAllOverviewContent(contentManagement, core);
     }
     return {};
   }

@@ -239,7 +239,7 @@ export class SavedObjectsManagementPlugin
       getTargetArea: () => [
         HOME_CONTENT_AREAS.RECENTLY_VIEWED,
         'essential_overview/recently_viewed',
-        'analytics_overview/recently_viewed',
+        'analytics_all_overview/recently_viewed',
       ],
     });
 

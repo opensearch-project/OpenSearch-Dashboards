@@ -104,7 +104,7 @@ export const renderInitialApp = ({}: AppMountParameters, services: Services) => 
   };
 };
 
-export const renderOverviewApp = async (
+export const renderUseCaseOverviewApp = async (
   { element }: AppMountParameters,
   services: Services,
   pageId: string
