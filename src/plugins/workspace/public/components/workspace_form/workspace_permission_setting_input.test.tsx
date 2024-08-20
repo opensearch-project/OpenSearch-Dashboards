@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, within } from '@testing-library/react';
 import {
   WorkspacePermissionSettingInput,
   WorkspacePermissionSettingInputProps,
@@ -44,10 +44,6 @@ describe('WorkspacePermissionSettingInput', () => {
     'offsetHeight'
   );
   const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
-  Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
-    configurable: true,
-    value: 600,
-  });
 
   beforeEach(() => {
     Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
@@ -131,9 +127,9 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult, onPermissionModesChangeMock } = setup({});
 
     expect(onPermissionModesChangeMock).not.toHaveBeenCalled();
-    const permissionToggleListButton = renderResult
-      .getAllByTestId('comboBoxToggleListButton')
-      .filter((button) => button.closest('[data-test-subj="workspace-permissionModeOptions"]'))[0];
+    const permissionToggleListButton = within(
+      renderResult.getAllByTestId('workspace-permissionModeOptions')[0]
+    ).getByTestId('comboBoxToggleListButton');
     fireEvent.click(permissionToggleListButton);
     fireEvent.click(renderResult.getByText('Owner'));
     expect(onPermissionModesChangeMock).toHaveBeenCalledWith(['library_write', 'write'], 0);

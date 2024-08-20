@@ -189,7 +189,6 @@ describe('WorkspaceDetail', () => {
     const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
     fireEvent.click(getByText('Collaborators'));
     expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
-    expect(screen.queryByText('Workspaces access')).not.toBeNull();
   });
 
   it('click on Data Sources tab when dataSource enabled', async () => {

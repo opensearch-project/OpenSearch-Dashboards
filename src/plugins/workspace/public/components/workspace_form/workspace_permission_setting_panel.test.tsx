@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import {
   WorkspacePermissionSettingPanel,
   WorkspacePermissionSettingPanelProps,
@@ -48,10 +48,6 @@ describe('WorkspacePermissionSettingInput', () => {
     'offsetHeight'
   );
   const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
-  Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
-    configurable: true,
-    value: 600,
-  });
 
   beforeEach(() => {
     Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
@@ -91,9 +87,9 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult, onChangeMock } = setup();
 
     expect(onChangeMock).not.toHaveBeenCalled();
-    const permissionToggleListButton = renderResult
-      .getAllByTestId('comboBoxToggleListButton')
-      .filter((button) => button.closest('[data-test-subj="workspace-permissionModeOptions"]'))[0];
+    const permissionToggleListButton = within(
+      renderResult.getAllByTestId('workspace-permissionModeOptions')[0]
+    ).getByTestId('comboBoxToggleListButton');
     fireEvent.click(permissionToggleListButton);
     fireEvent.click(renderResult.getAllByText('Read & Write')[1]);
     expect(onChangeMock).toHaveBeenCalledWith([
@@ -115,9 +111,9 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult, onChangeMock } = setup();
 
     expect(onChangeMock).not.toHaveBeenCalled();
-    const permissionToggleListButton = renderResult
-      .getAllByTestId('comboBoxToggleListButton')
-      .filter((button) => button.closest('[data-test-subj="workspace-permissionModeOptions"]'))[1];
+    const permissionToggleListButton = within(
+      renderResult.getAllByTestId('workspace-permissionModeOptions')[1]
+    ).getByTestId('comboBoxToggleListButton');
     fireEvent.click(permissionToggleListButton);
     fireEvent.click(renderResult.getByText('Owner'));
     expect(onChangeMock).toHaveBeenCalledWith([

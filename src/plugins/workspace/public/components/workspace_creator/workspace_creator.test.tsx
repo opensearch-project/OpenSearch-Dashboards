@@ -309,7 +309,7 @@ describe('WorkspaceCreator', () => {
         },
       }
     );
-    waitFor(() => {
+    await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
     });
     expect(notificationToastsAddDanger).not.toHaveBeenCalled();
