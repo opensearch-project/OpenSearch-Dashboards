@@ -30,18 +30,11 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import {
-  EuiFlexGroup,
-  EuiToolTip,
-  EuiFlexItem,
-  EuiSmallButtonIcon,
-  EuiText,
-  EuiButtonIcon,
-  EuiButton,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiToolTip, EuiFlexItem, EuiSmallButtonIcon, EuiText } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { IndexPatternManagmentContext } from '../../../types';
+import { TopNavControlButtonData, TopNavControlIconData } from '../../../../../navigation/public';
 
 interface IndexHeaderProps {
   indexPattern: IIndexPattern;
@@ -102,65 +95,49 @@ export function IndexHeader({
         ...(deleteIndexPatternClick
           ? [
               {
-                renderComponent: (
-                  <EuiToolTip content={removeTooltip}>
-                    <EuiButtonIcon
-                      color="danger"
-                      onClick={deleteIndexPatternClick}
-                      iconType="trash"
-                      aria-label={removeAriaLabel}
-                      data-test-subj="deleteIndexPatternButton"
-                      display="base"
-                      type="base"
-                      size="s"
-                    />
-                  </EuiToolTip>
-                ),
-              },
+                color: 'danger',
+                run: deleteIndexPatternClick,
+                iconType: 'trash',
+                ariaLabel: removeAriaLabel,
+                testId: 'deleteIndexPatternButton',
+                display: 'base',
+                controlType: 'icon',
+                tooltip: removeTooltip,
+              } as TopNavControlIconData,
             ]
           : []),
         ...(defaultIndex !== indexPattern.id && setDefault
           ? [
               {
-                renderComponent: (
-                  <EuiButton
-                    onClick={setDefault}
-                    aria-label={setDefaultAriaLabel}
-                    data-test-subj="setDefaultIndexPatternButton"
-                    size="s"
-                  >
-                    {i18n.translate(
-                      'indexPatternManagement.editIndexPattern.setDefaultButton.text',
-                      {
-                        defaultMessage: 'Set as default index',
-                      }
-                    )}
-                  </EuiButton>
+                run: setDefault,
+                ariaLabel: setDefaultAriaLabel,
+                testId: 'setDefaultIndexPatternButton',
+                label: i18n.translate(
+                  'indexPatternManagement.editIndexPattern.setDefaultButton.text',
+                  {
+                    defaultMessage: 'Set as default index',
+                  }
                 ),
-              },
+                controlType: 'button',
+              } as TopNavControlButtonData,
             ]
           : []),
         ...(refreshFields
           ? [
               {
-                renderComponent: (
-                  <EuiButton
-                    size="s"
-                    onClick={refreshFields}
-                    iconType="refresh"
-                    aria-label={refreshAriaLabel}
-                    data-test-subj="refreshFieldsIndexPatternButton"
-                    fill={true}
-                  >
-                    {i18n.translate(
-                      'indexPatternManagement.editIndexPattern.refreshFieldsButton.text',
-                      {
-                        defaultMessage: 'Refresh field list',
-                      }
-                    )}
-                  </EuiButton>
+                run: refreshFields,
+                iconType: 'refresh',
+                ariaLabel: refreshAriaLabel,
+                testId: 'refreshFieldsIndexPatternButton',
+                fill: true,
+                label: i18n.translate(
+                  'indexPatternManagement.editIndexPattern.refreshFieldsButton.text',
+                  {
+                    defaultMessage: 'Refresh field list',
+                  }
                 ),
-              },
+                controlType: 'button',
+              } as TopNavControlButtonData,
             ]
           : []),
       ]}
