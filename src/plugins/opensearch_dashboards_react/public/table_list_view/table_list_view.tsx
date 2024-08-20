@@ -444,6 +444,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         type: 'icon',
         enabled: ({ error }: { error: string }) => !error,
         onClick: this.props.editItem,
+        'data-test-subj': 'edit-dashboard-action',
       },
     ];
 
