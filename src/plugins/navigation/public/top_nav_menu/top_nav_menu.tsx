@@ -172,7 +172,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
             return (
               <>
                 <MountPointPortal setMountPoint={setMenuMountPoint}>
-                  <EuiFlexGroup alignItems="stretch" gutterSize="s">
+                  <EuiFlexGroup alignItems="stretch" gutterSize="none">
                     <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                       <EuiText size="s">{screenTitle}</EuiText>
                     </EuiFlexItem>
@@ -187,7 +187,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
           case TopNavMenuItemRenderType.OMITTED:
             return screenTitle ? (
               <MountPointPortal setMountPoint={setMenuMountPoint}>
-                <EuiFlexGroup alignItems="stretch" gutterSize="s">
+                <EuiFlexGroup alignItems="stretch" gutterSize="none">
                   <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                     <EuiText size="s">{screenTitle}</EuiText>
                   </EuiFlexItem>
@@ -206,7 +206,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
               return (
                 <>
                   <MountPointPortal setMountPoint={setMenuMountPoint}>
-                    <EuiFlexGroup alignItems="stretch" gutterSize="s">
+                    <EuiFlexGroup alignItems="stretch" gutterSize="none">
                       <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                         <EuiText size="s">{screenTitle}</EuiText>
                       </EuiFlexItem>

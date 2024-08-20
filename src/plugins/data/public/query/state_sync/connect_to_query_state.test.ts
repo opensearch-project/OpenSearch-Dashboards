@@ -32,6 +32,7 @@ import { Subscription } from 'rxjs';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
 import {
+  DataStorage,
   Filter,
   FilterStateStore,
   IndexPatternsService,
@@ -44,10 +45,8 @@ import {
   createStateContainer,
   IOsdUrlStateStorage,
   createOsdUrlStateStorage,
-  Storage,
 } from '../../../../opensearch_dashboards_utils/public';
 import { QueryService, QueryStart } from '../query_service';
-import { StubBrowserStorage } from '../../../../../test_utils/public/stub_browser_storage';
 import { connectStorageToQueryState, connectToQueryState } from './connect_to_query_state';
 import { TimefilterContract } from '../timefilter';
 import { QueryState } from './types';
@@ -118,11 +117,11 @@ describe('connect_storage_to_query_state', () => {
     const queryService = new QueryService();
     queryService.setup({
       uiSettings: setupMock.uiSettings,
-      storage: new Storage(new StubBrowserStorage()),
+      storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
-      storage: new Storage(new StubBrowserStorage()),
+      storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       savedObjectsClient: startMock.savedObjects.client,
       indexPatterns: indexPatternsMock,
     });
@@ -226,11 +225,11 @@ describe('connect_to_global_state', () => {
     const queryService = new QueryService();
     queryService.setup({
       uiSettings: setupMock.uiSettings,
-      storage: new Storage(new StubBrowserStorage()),
+      storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
-      storage: new Storage(new StubBrowserStorage()),
+      storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       savedObjectsClient: startMock.savedObjects.client,
       indexPatterns: indexPatternsMock,
     });
@@ -464,11 +463,11 @@ describe('connect_to_app_state', () => {
     const queryService = new QueryService();
     queryService.setup({
       uiSettings: setupMock.uiSettings,
-      storage: new Storage(new StubBrowserStorage()),
+      storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
-      storage: new Storage(new StubBrowserStorage()),
+      storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       savedObjectsClient: startMock.savedObjects.client,
       indexPatterns: indexPatternsMock,
     });
@@ -647,11 +646,11 @@ describe('filters with different state', () => {
     const queryService = new QueryService();
     queryService.setup({
       uiSettings: setupMock.uiSettings,
-      storage: new Storage(new StubBrowserStorage()),
+      storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
-      storage: new Storage(new StubBrowserStorage()),
+      storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       savedObjectsClient: startMock.savedObjects.client,
       indexPatterns: indexPatternsMock,
     });

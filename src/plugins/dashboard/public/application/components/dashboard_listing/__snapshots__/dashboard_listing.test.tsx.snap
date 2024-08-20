@@ -1050,6 +1050,15 @@ exports[`dashboard listing hideWriteControls 1`] = `
               "reportUiStats": [MockFunction],
             },
             "workspaces": Object {
+              "client$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
               "currentWorkspace$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": null,
@@ -2240,6 +2249,15 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
               "reportUiStats": [MockFunction],
             },
             "workspaces": Object {
+              "client$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
               "currentWorkspace$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": null,
@@ -3491,6 +3509,15 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
               "reportUiStats": [MockFunction],
             },
             "workspaces": Object {
+              "client$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
               "currentWorkspace$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": null,
@@ -4742,6 +4769,15 @@ exports[`dashboard listing renders table rows 1`] = `
               "reportUiStats": [MockFunction],
             },
             "workspaces": Object {
+              "client$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
               "currentWorkspace$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": null,
@@ -5993,6 +6029,15 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
               "reportUiStats": [MockFunction],
             },
             "workspaces": Object {
+              "client$": BehaviorSubject {
+                "_isScalar": false,
+                "_value": null,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [],
+                "thrownError": null,
+              },
               "currentWorkspace$": BehaviorSubject {
                 "_isScalar": false,
                 "_value": null,
