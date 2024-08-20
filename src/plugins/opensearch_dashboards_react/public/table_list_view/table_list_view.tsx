@@ -84,6 +84,7 @@ export interface TableListViewProps {
   headingId?: string;
   restrictWidth?: boolean;
   paddingSize?: EuiPageProps['paddingSize'];
+  showUpdatedUx?: boolean;
 }
 
 export interface TableListViewState {
@@ -525,15 +526,17 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       <div>
         {this.state.showDeleteModal && this.renderConfirmDeleteModal()}
 
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <h1 id={this.props.headingId}>{this.props.tableListTitle}</h1>
-            </EuiText>
-          </EuiFlexItem>
+        {!this.props.showUpdatedUx && (
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <h1 id={this.props.headingId}>{this.props.tableListTitle}</h1>
+              </EuiText>
+            </EuiFlexItem>
 
-          {this.props.createButton || defaultCreateButton}
-        </EuiFlexGroup>
+            {this.props.createButton || defaultCreateButton}
+          </EuiFlexGroup>
+        )}
 
         <EuiSpacer size="m" />
 
