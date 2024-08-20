@@ -123,6 +123,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
       closePopover={closePopover}
       panelPaddingSize="s"
       anchorPosition="downCenter"
+      repositionOnScroll={true}
     >
       <EuiPanel hasBorder={false} color="transparent">
         <EuiFlexGroup
@@ -193,7 +194,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
         paddingSize="s"
         hasBorder={false}
         color="transparent"
-        style={{ height: '360px', overflow: 'auto' }}
+        style={{ height: '30vh', overflow: 'auto' }}
       >
         <WorkspacePickerContent
           searchQuery={querySearch}
