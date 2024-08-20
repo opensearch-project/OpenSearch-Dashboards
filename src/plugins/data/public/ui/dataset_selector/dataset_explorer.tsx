@@ -50,6 +50,7 @@ export const DatasetExplorer = ({
       setSelectedDataSetState(dataset);
       return;
     }
+
     setLoading(true);
     const { isLoadable = false, options, columnHeader } = await mockDatasetManager
       .getType(nextPath[1].id)
@@ -116,7 +117,6 @@ export const DatasetExplorer = ({
                   <h3>{current.columnHeader}</h3>
                 </EuiTitle>
                 <EuiSelectable
-                  isLoading={loading && index === path.length - 1}
                   options={current.children?.map((child) => ({
                     label: child.title,
                     value: child.id,
@@ -153,7 +153,7 @@ export const DatasetExplorer = ({
               </div>
             );
           })}
-          {path[path.length - 1].isLoadable && <EmptyColumn />}
+          {path[path.length - 1].isLoadable && <LoadingEmptyColumn isLoading={loading} />}
         </div>
       </EuiModalBody>
       <EuiModalFooter>
@@ -183,6 +183,20 @@ export const DatasetExplorer = ({
 const EmptyColumn = () => (
   <div className="datasetExplorer__column datasetExplorer__column--empty" />
 );
+
+const LoadingEmptyColumn = ({ isLoading }: { isLoading: boolean }) =>
+  isLoading ? (
+    <div className="datasetExplorer__column">
+      <EuiTitle size="xxs" className="datasetExplorer__columnTitle">
+        <h3>...</h3>
+      </EuiTitle>
+      <EuiSelectable options={[]} singleSelection className="datasetSelector__selectable" isLoading>
+        {(list) => <>{list}</>}
+      </EuiSelectable>
+    </div>
+  ) : (
+    <EmptyColumn />
+  );
 
 const appendIcon = (item: DataStructure) => {
   if (item.meta?.type === DATA_STRUCTURE_META_TYPES.FEATURE) {

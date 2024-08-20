@@ -67,7 +67,7 @@ class MockDatasetManager implements DatasetManager {
     });
 
     this.registerType({
-      id: 'index',
+      id: 'indices',
       title: 'Indices',
       getOptions: this.mockGetIndicesOptions,
       getDataset: this.mockGetIndicesDataset,
@@ -78,6 +78,21 @@ class MockDatasetManager implements DatasetManager {
           type: 'logoOpenSearch',
         },
         hasTimeField: true,
+      },
+    });
+
+    this.registerType({
+      id: 's3',
+      title: 'S3',
+      getOptions: this.mockGetS3Options,
+      getDataset: this.mockGetS3Dataset,
+      getFields: this.mockGetS3Fields,
+      config: {
+        supportedLanguages: ['SQL'],
+        icon: {
+          type: 'logoAWS',
+        },
+        hasTimeField: false,
       },
     });
   }
@@ -172,7 +187,7 @@ class MockDatasetManager implements DatasetManager {
 
   private mockGetIndicesOptions = async (path?: DataStructure[]) => {
     const option = path?.[path.length - 1];
-    if (option?.type === 'index') {
+    if (option?.type === 'indices') {
       // First level: List of clusters
       const mockClusters: DataStructure[] = [
         { id: 'cluster1', title: 'Production Cluster', type: 'cluster' },
@@ -212,7 +227,7 @@ class MockDatasetManager implements DatasetManager {
     return {
       id: option?.id,
       title: option?.title,
-      type: 'index',
+      type: 'indices',
       timeFieldName: 'timestamp',
       dataSource: {
         id: 'main-cluster',
@@ -244,6 +259,88 @@ class MockDatasetManager implements DatasetManager {
         name: 'log',
         type: 'string',
       },
+    ];
+  };
+
+  private mockGetS3Options = async (path?: DataStructure[]) => {
+    const lastOption = path?.[path.length - 1];
+
+    if (!lastOption || lastOption.type === 's3') {
+      // First level: Connections (instantaneous)
+      const mockConnections: DataStructure[] = [
+        { id: 'conn1', title: 'Production S3', type: 'connection' },
+        { id: 'conn2', title: 'Development S3', type: 'connection' },
+        { id: 'conn3', title: 'Testing S3', type: 'connection' },
+      ];
+
+      return {
+        options: mockConnections,
+        columnHeader: 'S3 Connections',
+        isLoadable: true,
+      };
+    } else if (lastOption.type === 'connection') {
+      // Second level: Databases (10s delay)
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      const mockDatabases: DataStructure[] = [
+        { id: `${lastOption.id}-db1`, title: 'Customer Data', type: 'database' },
+        { id: `${lastOption.id}-db2`, title: 'Product Catalog', type: 'database' },
+        { id: `${lastOption.id}-db3`, title: 'Sales Records', type: 'database' },
+      ];
+
+      return {
+        options: mockDatabases,
+        columnHeader: 'S3 Databases',
+        isLoadable: true,
+      };
+    } else if (lastOption.type === 'database') {
+      // Third level: Tables (10s delay)
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+
+      const mockTables: DataStructure[] = [
+        { id: `${lastOption.id}-table1`, title: 'Users', type: 'table' },
+        { id: `${lastOption.id}-table2`, title: 'Orders', type: 'table' },
+        { id: `${lastOption.id}-table3`, title: 'Products', type: 'table' },
+      ];
+
+      return {
+        options: mockTables,
+        columnHeader: 'S3 Tables',
+        isLoadable: false,
+      };
+    }
+
+    return {
+      options: [],
+      columnHeader: 'S3',
+    };
+  };
+
+  private mockGetS3Dataset = (path: DataStructure[]) => {
+    const lastOption = path[path.length - 1];
+
+    return {
+      id: lastOption.id,
+      title: lastOption.title,
+      type: 's3',
+      dataSource: {
+        id: path[1].id, // Connection ID
+        title: path[1].title, // Connection Title
+        type: 'S3',
+      },
+    };
+  };
+
+  private mockGetS3Fields = async (dataset: Dataset) => {
+    // Simulate a delay for field fetching
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+
+    return [
+      { name: 'id', type: 'string' },
+      { name: 'name', type: 'string' },
+      { name: 'created_at', type: 'date' },
+      { name: 'updated_at', type: 'date' },
+      { name: 'value', type: 'number' },
     ];
   };
 }
