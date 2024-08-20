@@ -39,6 +39,40 @@ const setup = (options?: Partial<WorkspacePermissionSettingInputProps>) => {
 };
 
 describe('WorkspacePermissionSettingInput', () => {
+  const originalOffsetHeight = Object.getOwnPropertyDescriptor(
+    HTMLElement.prototype,
+    'offsetHeight'
+  );
+  const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
+  Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+    configurable: true,
+    value: 600,
+  });
+
+  beforeEach(() => {
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+      configurable: true,
+      value: 600,
+    });
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      value: 600,
+    });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'offsetHeight',
+      originalOffsetHeight as PropertyDescriptor
+    );
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'offsetWidth',
+      originalOffsetWidth as PropertyDescriptor
+    );
+  });
+
   it('should render consistent user id and permission modes', () => {
     const { renderResult } = setup({
       userId: 'foo',
@@ -115,14 +149,6 @@ describe('WorkspacePermissionSettingInput', () => {
 
   it('should call onTypeChange with types after types changed', () => {
     const { renderResult, onTypeChangeMock } = setup({});
-    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
-      configurable: true,
-      value: 600,
-    });
-    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
-      configurable: true,
-      value: 600,
-    });
     expect(onTypeChangeMock).not.toHaveBeenCalled();
 
     fireEvent.click(renderResult.getByTestId('workspace-typeOptions'));
