@@ -215,6 +215,86 @@ describe('Workspace plugin', () => {
     );
   });
 
+  it('#setup should register workspace essential use case when new home is disabled', async () => {
+    const setupMock = {
+      ...coreMock.createSetup(),
+      chrome: {
+        ...coreMock.createSetup().chrome,
+        navGroup: {
+          ...coreMock.createSetup().chrome.navGroup,
+          getNavGroupEnabled: jest.fn().mockReturnValue(false),
+        },
+      },
+    };
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock, {
+      contentManagement: {
+        registerPage: jest.fn(),
+      },
+    });
+
+    expect(setupMock.application.register).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'essential_overview',
+      })
+    );
+    expect(setupMock.application.register).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'analytics_all_overview',
+      })
+    );
+  });
+
+  it('#setup should register workspace essential use case when new nav is enabled', async () => {
+    const setupMock = {
+      ...coreMock.createSetup(),
+      chrome: {
+        ...coreMock.createSetup().chrome,
+        navGroup: {
+          ...coreMock.createSetup().chrome.navGroup,
+          getNavGroupEnabled: jest.fn().mockReturnValue(true),
+        },
+      },
+    };
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock, {
+      contentManagement: {
+        registerPage: jest.fn(),
+      },
+    });
+
+    expect(setupMock.application.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'essential_overview',
+      })
+    );
+  });
+
+  it('#setup should register workspace analytics(All) use case when new nav is enabled', async () => {
+    const setupMock = {
+      ...coreMock.createSetup(),
+      chrome: {
+        ...coreMock.createSetup().chrome,
+        navGroup: {
+          ...coreMock.createSetup().chrome.navGroup,
+          getNavGroupEnabled: jest.fn().mockReturnValue(true),
+        },
+      },
+    };
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock, {
+      contentManagement: {
+        registerPage: jest.fn(),
+      },
+    });
+
+    expect(setupMock.application.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'analytics_all_overview',
+      })
+    );
+  });
+
   it('#start add workspace detail page to breadcrumbs when start', async () => {
     const startMock = coreMock.createStart();
     const workspaceObject = {
