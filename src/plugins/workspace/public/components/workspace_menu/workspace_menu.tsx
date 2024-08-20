@@ -194,7 +194,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
         paddingSize="s"
         hasBorder={false}
         color="transparent"
-        style={{ height: '30vh', overflow: 'auto' }}
+        style={{ height: '25vh', overflow: 'auto' }}
       >
         <WorkspacePickerContent
           searchQuery={querySearch}
