@@ -102,12 +102,20 @@ describe('WorkspacePermissionSettingInput', () => {
     ]);
   });
   it('should call onChange with new user type', () => {
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+      configurable: true,
+      value: 600,
+    });
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      value: 600,
+    });
     const { renderResult, onChangeMock } = setup();
+    expect(onChangeMock).not.toHaveBeenCalled();
 
     waitFor(() => {
-      expect(onChangeMock).not.toHaveBeenCalled();
       fireEvent.click(renderResult.getAllByTestId('workspace-typeOptions')[1]);
-      fireEvent.click(renderResult.getByText('User'));
+      fireEvent.click(renderResult.getAllByText('User')[1]);
       expect(onChangeMock).toHaveBeenCalledWith([
         {
           id: 0,
@@ -124,12 +132,20 @@ describe('WorkspacePermissionSettingInput', () => {
     });
   });
   it('should call onChange with new group type', () => {
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+      configurable: true,
+      value: 600,
+    });
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      value: 600,
+    });
     const { renderResult, onChangeMock } = setup();
 
     expect(onChangeMock).not.toHaveBeenCalled();
     waitFor(() => {
       fireEvent.click(renderResult.getAllByTestId('workspace-typeOptions')[0]);
-      fireEvent.click(renderResult.getByText('Group'));
+      fireEvent.click(renderResult.getAllByText('Group')[0]);
       expect(onChangeMock).toHaveBeenCalledWith([
         {
           id: 0,
@@ -160,6 +176,29 @@ describe('WorkspacePermissionSettingInput', () => {
         modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
       },
     ]);
+  });
+
+  it('should call onChange with user permission setting after delete button click', () => {
+    const { renderResult, onChangeMock } = setup();
+
+    expect(onChangeMock).not.toHaveBeenCalled();
+    fireEvent.click(renderResult.getAllByLabelText('Delete permission setting')[0]);
+    expect(onChangeMock).toHaveBeenCalledWith([
+      {
+        id: 1,
+        type: WorkspacePermissionItemType.Group,
+        group: 'bar',
+        modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Read],
+      },
+    ]);
+  });
+
+  it('should call onGroupOrUserIdChange without user id after clear button clicked', () => {
+    const { renderResult, onChangeMock } = setup();
+
+    expect(onChangeMock).not.toHaveBeenCalled();
+    fireEvent.click(renderResult.getAllByTestId('comboBoxClearButton')[0]);
+    expect(onChangeMock).toHaveBeenCalled();
   });
 
   it('should not able to edit user or group when disabled', () => {
