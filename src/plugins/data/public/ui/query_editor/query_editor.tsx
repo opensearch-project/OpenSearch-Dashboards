@@ -31,9 +31,6 @@ import { QueryControls } from '../../query/query_string/language_service/get_que
 import { RecentQueriesTable } from '../../query/query_string/language_service/recent_query';
 import { DefaultInputProps } from './editors';
 
-const LANGUAGE_ID_SQL = 'SQL';
-monaco.languages.register({ id: LANGUAGE_ID_SQL });
-
 const LANGUAGE_ID_KUERY = 'kuery';
 monaco.languages.register({ id: LANGUAGE_ID_KUERY });
 
@@ -300,6 +297,7 @@ export default class QueryEditorUI extends Component<Props, State> {
               kind: s.type as monaco.languages.CompletionItemKind,
               insertText: s.insertText ?? s.text,
               range,
+              detail: 'detail' in s ? s.detail : '',
             }))
           : [],
       incomplete: false,

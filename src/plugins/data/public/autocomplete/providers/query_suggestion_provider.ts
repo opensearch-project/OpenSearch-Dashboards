@@ -59,7 +59,7 @@ export interface QuerySuggestionGetFnArgs {
 
 /** @public **/
 export interface QuerySuggestionBasic {
-  type: QuerySuggestionTypes | monaco.languages.CompletionItemKind;
+  type: QuerySuggestionTypes;
   description?: string | JSX.Element;
   end: number;
   start: number;
@@ -74,5 +74,15 @@ export interface QuerySuggestionField extends QuerySuggestionBasic {
   field: IFieldType;
 }
 
+export interface SqlMonacoCompatibleQuerySuggestion
+  extends Pick<QuerySuggestionBasic, 'description' | 'insertText' | 'cursorIndex'> {
+  type: monaco.languages.CompletionItemKind;
+  text: string;
+  detail: string;
+}
+
 /** @public **/
-export type QuerySuggestion = QuerySuggestionBasic | QuerySuggestionField;
+export type QuerySuggestion =
+  | QuerySuggestionBasic
+  | QuerySuggestionField
+  | SqlMonacoCompatibleQuerySuggestion;
