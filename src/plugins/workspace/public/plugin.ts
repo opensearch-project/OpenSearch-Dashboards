@@ -30,6 +30,7 @@ import {
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
   WORKSPACE_USE_CASES,
+  WORKSPACE_INITIAL_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services, WorkspaceUseCase } from './types';
@@ -53,6 +54,7 @@ import { UseCaseService } from './services/use_case_service';
 import { WorkspaceListCard } from './components/service_card';
 import { UseCaseFooter } from './components/home_get_start_card';
 import { HOME_CONTENT_AREAS } from '../../home/public';
+import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -68,6 +70,7 @@ interface WorkspacePluginSetupDeps {
 
 export interface WorkspacePluginStartDeps {
   contentManagement: ContentManagementPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export class WorkspacePlugin
@@ -150,7 +153,7 @@ export class WorkspacePlugin
           /**
            * The following logic determines whether a navigation group should be hidden or not based on the workspace's feature configurations.
            * It checks the following conditions:
-           * 1. The navigation group is not a system-level group (system groups are always visible except all use case).
+           * 1. The navigation group is not a system-level group.
            * 2. The current workspace has feature configurations set up.
            * 3. The current workspace's use case is not "All use case".
            * 4. The current navigation group is not included in the feature configurations of the workspace.
@@ -158,7 +161,7 @@ export class WorkspacePlugin
            * If all these conditions are true, it means that the navigation group should be hidden.
            */
           if (
-            (navGroup.type !== NavGroupType.SYSTEM || navGroup.id === ALL_USE_CASE_ID) &&
+            navGroup.type !== NavGroupType.SYSTEM &&
             currentWorkspace.features &&
             getFirstUseCaseOfFeatureConfigs(currentWorkspace.features) !== ALL_USE_CASE_ID &&
             !isNavGroupInFeatureConfigs(navGroup.id, currentWorkspace.features)
@@ -235,11 +238,19 @@ export class WorkspacePlugin
   }
 
   public async setup(
-    core: CoreSetup,
+    core: CoreSetup<WorkspacePluginStartDeps>,
     { savedObjectsManagement, management, dataSourceManagement }: WorkspacePluginSetupDeps
   ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
+    core.workspaces.setClient(workspaceClient);
+
+    this.useCase.setup({
+      chrome: core.chrome,
+      getStartServices: core.getStartServices,
+      workspaces: core.workspaces,
+    });
+
     core.application.registerAppUpdater(this.appUpdater$);
     this.unregisterNavGroupUpdater = core.chrome.navGroup.registerNavGroupUpdater(
       this.navGroupUpdater$
@@ -295,11 +306,13 @@ export class WorkspacePlugin
     }
 
     const mountWorkspaceApp = async (params: AppMountParameters, renderApp: WorkspaceAppType) => {
-      const [coreStart] = await core.getStartServices();
+      const [coreStart, { navigation }] = await core.getStartServices();
+
       const services = {
         ...coreStart,
         workspaceClient,
         dataSourceManagement,
+        navigationUI: navigation.ui,
       };
 
       return renderApp(params, services, {
@@ -347,6 +360,20 @@ export class WorkspacePlugin
       },
     });
 
+    // workspace initial page
+    core.application.register({
+      id: WORKSPACE_INITIAL_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceInitial', {
+        defaultMessage: 'Workspace Initial',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderInitialApp } = await import('./application');
+        return mountWorkspaceApp(params, renderInitialApp);
+      },
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+    });
+
     // workspace list
     core.application.register({
       id: WORKSPACE_LIST_APP_ID,
@@ -359,6 +386,9 @@ export class WorkspacePlugin
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,
+      description: i18n.translate('workspace.workspaceList.description', {
+        defaultMessage: 'Organize collaborative projects in use-case-specific workspaces.',
+      }),
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);
@@ -431,7 +461,7 @@ export class WorkspacePlugin
     });
   }
 
-  public start(core: CoreStart, { contentManagement }: WorkspacePluginStartDeps) {
+  public start(core: CoreStart, { contentManagement, navigation }: WorkspacePluginStartDeps) {
     this.coreStart = core;
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
@@ -503,5 +533,6 @@ export class WorkspacePlugin
     this.unregisterNavGroupUpdater?.();
     this.registeredUseCasesUpdaterSubscription?.unsubscribe();
     this.workspaceAndUseCasesCombineSubscription?.unsubscribe();
+    this.useCase.stop();
   }
 }

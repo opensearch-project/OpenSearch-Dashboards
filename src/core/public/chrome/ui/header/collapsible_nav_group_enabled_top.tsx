@@ -4,7 +4,8 @@
  */
 
 import React, { useMemo } from 'react';
-import { Logos } from 'opensearch-dashboards/public';
+import useObservable from 'react-use/lib/useObservable';
+import { Logos, WorkspacesStart } from 'opensearch-dashboards/public';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -12,64 +13,53 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { InternalApplicationStart } from 'src/core/public/application';
 import { i18n } from '@osd/i18n';
 import { createEuiListItem } from './nav_link';
-import { NavGroupItemInMap } from '../../nav_group';
+import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
 import { ChromeNavLink } from '../../nav_links';
 import { ALL_USE_CASE_ID } from '../../../../../core/utils';
 
 export interface CollapsibleNavTopProps {
-  navLinks: ChromeNavLink[];
+  homeLink?: ChromeNavLink;
+  firstVisibleNavLinkOfAllUseCase?: ChromeNavLink;
   currentNavGroup?: NavGroupItemInMap;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   logos: Logos;
-  onClickBack?: () => void;
   onClickShrink?: () => void;
   shouldShrinkNavigation: boolean;
   visibleUseCases: NavGroupItemInMap[];
+  currentWorkspace$: WorkspacesStart['currentWorkspace$'];
+  setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
 }
 
 export const CollapsibleNavTop = ({
-  navLinks,
   currentNavGroup,
   navigateToApp,
   logos,
-  onClickBack,
   onClickShrink,
   shouldShrinkNavigation,
   visibleUseCases,
+  currentWorkspace$,
+  setCurrentNavGroup,
+  homeLink,
+  firstVisibleNavLinkOfAllUseCase,
 }: CollapsibleNavTopProps) => {
-  const homeLink = useMemo(() => navLinks.find((link) => link.id === 'home'), [navLinks]);
+  const currentWorkspace = useObservable(currentWorkspace$);
 
-  const isOutsideWorkspace = useMemo(
-    () => !visibleUseCases.find((useCase) => useCase.id === currentNavGroup?.id),
-    [currentNavGroup, visibleUseCases]
-  );
+  /**
+   * We can ensure that left nav is inside second level once all the following conditions are met:
+   * 1. Inside a workspace
+   * 2. The use case type of current workspace is all use case
+   * 3. current nav group is not all use case
+   */
+  const isInsideSecondLevelOfAllWorkspace =
+    visibleUseCases.length > 1 && !!currentWorkspace && currentNavGroup?.id !== ALL_USE_CASE_ID;
 
-  const shouldShowBackButton = useMemo(() => {
-    if (!currentNavGroup || currentNavGroup.id === ALL_USE_CASE_ID || shouldShrinkNavigation) {
-      return false;
-    }
-
-    // It means user is in a specific type of workspace
-    if (visibleUseCases.length <= 1) {
-      return false;
-    }
-
-    if (isOutsideWorkspace) {
-      return true;
-    }
-
-    return visibleUseCases.length > 1;
-  }, [visibleUseCases, currentNavGroup, shouldShrinkNavigation, isOutsideWorkspace]);
-
-  const shouldShowHomeLink = useMemo(() => {
-    if (!homeLink || shouldShrinkNavigation) return false;
-
-    return !shouldShowBackButton;
-  }, [shouldShowBackButton, homeLink, shouldShrinkNavigation]);
+  const shouldShowBackButton = !shouldShrinkNavigation && isInsideSecondLevelOfAllWorkspace;
+  const shouldShowHomeLink = !shouldShrinkNavigation && !shouldShowBackButton;
 
   const homeLinkProps = useMemo(() => {
     if (homeLink) {
@@ -90,8 +80,8 @@ export const CollapsibleNavTop = ({
   }, [homeLink, navigateToApp]);
 
   return (
-    <div className="side-naivgation-top">
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+    <div>
+      <EuiFlexGroup responsive={false} alignItems="center" justifyContent="spaceBetween">
         {shouldShowHomeLink ? (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty size="l" {...homeLinkProps}>
@@ -103,17 +93,18 @@ export const CollapsibleNavTop = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="l"
-              onClick={isOutsideWorkspace ? homeLinkProps.onClick : onClickBack}
+              onClick={() => {
+                if (firstVisibleNavLinkOfAllUseCase) {
+                  navigateToApp(firstVisibleNavLinkOfAllUseCase.id);
+                }
+                setCurrentNavGroup(ALL_USE_CASE_ID);
+              }}
               data-test-subj="collapsibleNavBackButton"
             >
               <EuiIcon type="arrowLeft" />
-              {isOutsideWorkspace
-                ? i18n.translate('core.ui.primaryNav.homeButtonLabel', {
-                    defaultMessage: 'Home',
-                  })
-                : i18n.translate('core.ui.primaryNav.backButtonLabel', {
-                    defaultMessage: 'Back',
-                  })}
+              {i18n.translate('core.ui.primaryNav.backButtonLabel', {
+                defaultMessage: 'Back',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
         ) : null}
@@ -128,7 +119,16 @@ export const CollapsibleNavTop = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer />
+      {currentNavGroup?.title && (
+        <>
+          <EuiSpacer />
+          <EuiText>
+            <div className="nav-link-item" style={{ fontWeight: 'normal' }}>
+              {currentNavGroup?.title}
+            </div>
+          </EuiText>
+        </>
+      )}
     </div>
   );
 };

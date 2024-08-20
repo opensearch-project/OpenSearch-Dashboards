@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@osd/i18n';
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import {
   AppMountParameters,
@@ -93,6 +94,9 @@ export interface DataSourceManagementPluginStart {
   getAuthenticationMethodRegistry: () => IAuthenticationMethodRegistry;
 }
 
+/**
+ * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
+ */
 export const DSM_APP_ID = 'dataSources';
 
 export class DataSourceManagementPlugin
@@ -145,6 +149,8 @@ export class DataSourceManagementPlugin
     /**
      * The data sources features in observability has the same name as `DSM_APP_ID`
      * Add a suffix to avoid duplication
+     *
+     * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
      */
     const DSM_APP_ID_FOR_STANDARD_APPLICATION = `${DSM_APP_ID}_core`;
 
@@ -153,6 +159,9 @@ export class DataSourceManagementPlugin
         id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
         title: PLUGIN_NAME,
         order: 100,
+        description: i18n.translate('data_source_management.description', {
+          defaultMessage: 'Create and manage data source connections.',
+        }),
         mount: async (params: AppMountParameters) => {
           const { mountManagementSection } = await import('./management_app');
           const [coreStart] = await core.getStartServices();
@@ -177,46 +186,6 @@ export class DataSourceManagementPlugin
       {
         id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
         category: DEFAULT_APP_CATEGORIES.manageData,
-        order: 100,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-      {
-        id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 100,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
-      {
-        id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 100,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
-      {
-        id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 100,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
-      {
-        id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 100,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
-        category: DEFAULT_APP_CATEGORIES.manage,
         order: 100,
       },
     ]);

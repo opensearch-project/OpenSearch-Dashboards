@@ -10,6 +10,7 @@ export const WORKSPACE_FATAL_ERROR_APP_ID = 'workspace_fatal_error';
 export const WORKSPACE_CREATE_APP_ID = 'workspace_create';
 export const WORKSPACE_LIST_APP_ID = 'workspace_list';
 export const WORKSPACE_DETAIL_APP_ID = 'workspace_detail';
+export const WORKSPACE_INITIAL_APP_ID = 'workspace_initial';
 /**
  * Since every workspace always have overview and update page, these features will be selected by default
  * and can't be changed in the workspace form feature selector
@@ -185,3 +186,6 @@ export const WORKSPACE_USE_CASES = Object.freeze({
 export const MAX_WORKSPACE_PICKER_NUM = 3;
 export const RECENT_WORKSPACES_KEY = 'recentWorkspaces';
 export const CURRENT_USER_PLACEHOLDER = '%me%';
+
+export const MAX_WORKSPACE_NAME_LENGTH = 40;
+export const MAX_WORKSPACE_DESCRIPTION_LENGTH = 200;

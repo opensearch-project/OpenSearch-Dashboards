@@ -205,3 +205,79 @@ exports[`Header should render normally when showDuplicateAll is undefined 1`] = 
   />
 </Fragment>
 `;
+
+exports[`Header should render normally when useUpdatedUX is true 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="baseline"
+    justifyContent="spaceBetween"
+  >
+    <HeaderControl
+      controls={
+        Array [
+          Object {
+            "renderComponent": <EuiButton
+              data-test-subj="duplicateObjects"
+              disabled={false}
+              iconType="copy"
+              onClick={[Function]}
+              size="s"
+            >
+              <FormattedMessage
+                defaultMessage="Copy all objects to..."
+                id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>,
+          },
+          Object {
+            "renderComponent": <EuiButton
+              data-test-subj="exportAllObjects"
+              iconType="exportAction"
+              onClick={[Function]}
+              size="s"
+            >
+              <FormattedMessage
+                defaultMessage="Export all objects"
+                id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>,
+          },
+          Object {
+            "renderComponent": <EuiButton
+              data-test-subj="importObjects"
+              iconType="importAction"
+              onClick={[Function]}
+              size="s"
+            >
+              <FormattedMessage
+                defaultMessage="Import"
+                id="savedObjectsManagement.objectsTable.header.importButtonLabel"
+                values={Object {}}
+              />
+            </EuiButton>,
+          },
+        ]
+      }
+      setMountPoint={[MockFunction]}
+    />
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="m"
+  />
+  <HeaderControl
+    controls={
+      Array [
+        Object {
+          "description": "Manage and share your assets.",
+        },
+      ]
+    }
+    setMountPoint={[MockFunction]}
+  />
+  <EuiSpacer
+    size="m"
+  />
+</Fragment>
+`;

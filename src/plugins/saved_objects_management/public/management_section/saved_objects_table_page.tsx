@@ -41,6 +41,7 @@ import {
   SavedObjectsManagementNamespaceServiceStart,
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
+import { NavigationPublicPluginStart } from '../../../navigation/public';
 
 const SavedObjectsTablePage = ({
   coreStart,
@@ -53,6 +54,8 @@ const SavedObjectsTablePage = ({
   setBreadcrumbs,
   dataSourceEnabled,
   dataSourceManagement,
+  navigation,
+  useUpdatedUX,
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
@@ -64,6 +67,8 @@ const SavedObjectsTablePage = ({
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   dataSourceEnabled: boolean;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  navigation: NavigationPublicPluginStart;
+  useUpdatedUX: boolean;
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
@@ -71,14 +76,20 @@ const SavedObjectsTablePage = ({
 
   useEffect(() => {
     setBreadcrumbs([
-      {
-        text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
-          defaultMessage: 'Saved objects',
-        }),
-        href: '/',
-      },
+      useUpdatedUX
+        ? {
+            text: i18n.translate('savedObjectsManagement.updatedUX.title', {
+              defaultMessage: 'Assets',
+            }),
+          }
+        : {
+            text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
+              defaultMessage: 'Saved objects',
+            }),
+            href: '/',
+          },
     ]);
-  }, [setBreadcrumbs]);
+  }, [setBreadcrumbs, useUpdatedUX]);
 
   return (
     <SavedObjectsTable
@@ -111,6 +122,8 @@ const SavedObjectsTablePage = ({
       }}
       dataSourceEnabled={dataSourceEnabled}
       dataSourceManagement={dataSourceManagement}
+      navigationUI={navigation.ui}
+      useUpdatedUX={useUpdatedUX}
     />
   );
 };

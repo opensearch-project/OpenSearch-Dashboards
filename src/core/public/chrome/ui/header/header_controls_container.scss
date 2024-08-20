@@ -4,18 +4,21 @@
 */
 
 .headerControl {
-  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  & > .euiHeaderSectionItem {
-    margin: 0 $euiSizeXS;
-  }
+  gap: $euiSizeS;
 
   &.headerDescriptionControl {
-    padding: 0 $euiSizeM;
-    color: $euiTextSubduedColor;
-  }
+    .descriptionHeaderControl {
+      max-width: $euiLegibilityMaxWidth;
+      line-height: 1.5;
+      color: $euiTextSubduedColor;
 
-  &.headerBottomControl {
-    padding: $euiSizeM;
+      // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+      .euiHeaderLink {
+        vertical-align: unset;
+        border: 0;
+        height: auto;
+      }
+    }
   }
 
   &:empty {

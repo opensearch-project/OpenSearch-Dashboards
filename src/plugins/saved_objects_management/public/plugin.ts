@@ -63,10 +63,16 @@ import {
 } from './services';
 import { registerServices } from './register_services';
 import { bootstrap } from './ui_actions_bootstrap';
-import { DEFAULT_NAV_GROUPS, DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { DEFAULT_NAV_GROUPS } from '../../../core/public';
 import { RecentWork } from './management_section/recent_work';
 import { HOME_CONTENT_AREAS } from '../../../plugins/home/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
+import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
+
+/**
+ * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
+ */
+export const APP_ID = 'objects';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
@@ -99,6 +105,7 @@ export interface StartDependencies {
   visBuilder?: VisBuilderStart;
   uiActions: UiActionsStart;
   contentManagement?: ContentManagementPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export class SavedObjectsManagementPlugin
@@ -141,7 +148,7 @@ export class SavedObjectsManagementPlugin
 
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
     opensearchDashboardsSection.registerApp({
-      id: 'objects',
+      id: APP_ID,
       title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
         defaultMessage: 'Saved objects',
       }),
@@ -160,9 +167,12 @@ export class SavedObjectsManagementPlugin
 
     if (core.chrome.navGroup.getNavGroupEnabled()) {
       core.application.register({
-        id: 'objects',
+        id: APP_ID,
         title: i18n.translate('savedObjectsManagement.assets.label', {
           defaultMessage: 'Assets',
+        }),
+        description: i18n.translate('savedObjectsManagement.assets.description', {
+          defaultMessage: 'Manage and share your global assets.',
         }),
         mount: async (params: AppMountParameters) => {
           const { mountManagementSection } = await import('./management_section');
@@ -187,47 +197,7 @@ export class SavedObjectsManagementPlugin
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
       {
-        id: 'objects',
-        order: 300,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-      {
-        id: 'objects',
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 300,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
-      {
-        id: 'objects',
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 300,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
-      {
-        id: 'objects',
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 300,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
-      {
-        id: 'objects',
-        category: DEFAULT_APP_CATEGORIES.manage,
-        order: 300,
-      },
-    ]);
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: 'objects',
-        category: DEFAULT_APP_CATEGORIES.manage,
+        id: APP_ID,
         order: 300,
       },
     ]);
