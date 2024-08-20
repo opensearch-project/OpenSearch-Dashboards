@@ -48,9 +48,8 @@ import {
   IndexPatternsService,
 } from '../../common';
 import { getUiSettings } from '../services';
-import { IndexPattern, ISearchStart } from '..';
+import { IndexPattern } from '..';
 import { ConfigSchema } from '../../config';
-import { SearchService } from '../search/search_service';
 
 /**
  * Query Service

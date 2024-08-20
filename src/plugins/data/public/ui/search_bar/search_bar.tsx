@@ -251,10 +251,34 @@ class SearchBarUI extends Component<SearchBarProps, State> {
    */
   private shouldRenderTimeFilterInSavedQueryForm() {
     const { dateRangeFrom, dateRangeTo, showDatePicker } = this.props;
+    const enhancement = this.queryStringService
+      .getLanguageManager()
+      .getQueryEnhancements(this.state.query?.language!);
+
+    // if it is an enhanced language, check the filterable field
+    if (enhancement) {
+      return enhancement.fields?.filterable;
+    }
+
+    // otherwise, check if showDatePicker is enabled
     return (
       showDatePicker ||
       (!showDatePicker && dateRangeFrom !== undefined && dateRangeTo !== undefined)
     );
+  }
+
+  private shouldRenderFilterInSavedQueryForm() {
+    const enhancement = this.queryStringService
+      .getLanguageManager()
+      .getQueryEnhancements(this.state.query?.language!);
+
+    // if it is an enhanced language, check the filterable field
+    if (enhancement) {
+      return enhancement.fields?.filterable;
+    }
+
+    // otherwise, check if filters are enabled
+    return this.props.showFilterBar;
   }
 
   public setFilterBarHeight = () => {
@@ -560,7 +584,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             savedQueryService={this.savedQueryService}
             onSave={this.onSave}
             onClose={() => this.setState({ showSaveQueryModal: false })}
-            showFilterOption={this.props.showFilterBar}
+            showFilterOption={this.shouldRenderFilterInSavedQueryForm()}
             showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
           />
         ) : null}
@@ -569,7 +593,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             savedQueryService={this.savedQueryService}
             onSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
             onClose={() => this.setState({ showSaveNewQueryModal: false })}
-            showFilterOption={this.props.showFilterBar}
+            showFilterOption={this.shouldRenderFilterInSavedQueryForm()}
             showTimeFilterOption={this.shouldRenderTimeFilterInSavedQueryForm()}
           />
         ) : null}

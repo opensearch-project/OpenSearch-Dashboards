@@ -28,6 +28,7 @@ export interface QueryEnhancement {
   };
   fields?: {
     visualizable?: boolean;
+    filterable?: boolean;
   };
   // List of supported app names that this enhancement should be enabled for,
   // if not provided it will be enabled for all apps
