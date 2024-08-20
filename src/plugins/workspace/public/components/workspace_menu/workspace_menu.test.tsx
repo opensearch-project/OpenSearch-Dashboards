@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, getByTestId, render, screen } from '@testing-library/react';
 
 import { WorkspaceMenu } from './workspace_menu';
 import { coreMock } from '../../../../../core/public/mocks';
@@ -13,6 +13,10 @@ import { BehaviorSubject } from 'rxjs';
 import { IntlProvider } from 'react-intl';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 import * as workspaceUtils from '../utils/workspace';
+
+// jest.mock('../workspace_picker_content/workspace_picker_content.tsx', () => ({
+//   WorkspacePickerContent:
+// }));
 
 describe('<WorkspaceMenu />', () => {
   let coreStartMock: CoreStart;
@@ -68,6 +72,33 @@ describe('<WorkspaceMenu />', () => {
     expect(screen.getByText(/all workspaces/i)).toBeInTheDocument();
     expect(screen.getByTestId('workspace-menu-item-all-workspace-1')).toBeInTheDocument();
     expect(screen.getByTestId('workspace-menu-item-all-workspace-2')).toBeInTheDocument();
+  });
+
+  it('should be able to display empty state when the workspace list is empty', () => {
+    coreStartMock.workspaces.workspaceList$.next([]);
+    render(<WorkspaceMenuCreatorComponent />);
+    const selectButton = screen.getByTestId('workspace-select-button');
+    fireEvent.click(selectButton);
+    expect(screen.getByText(/no workspace available/i)).toBeInTheDocument();
+  });
+
+  it('should be able to perform search and filter, and the results will be shown in both all and recent section', () => {
+    coreStartMock.workspaces.workspaceList$.next([
+      { id: 'workspace-1', name: 'workspace 1', features: [] },
+      { id: 'test-2', name: 'test 2', features: [] },
+    ]);
+    jest
+      .spyOn(recentWorkspaceManager, 'getRecentWorkspaces')
+      .mockReturnValue([{ id: 'workspace-1', timestamp: 1234567890 }]);
+    render(<WorkspaceMenuCreatorComponent />);
+
+    const selectButton = screen.getByTestId('workspace-select-button');
+    fireEvent.click(selectButton);
+
+    const searchInput = screen.getByRole('searchbox');
+    fireEvent.change(searchInput, { target: { value: 'works' } });
+    expect(screen.getByTestId('workspace-menu-item-recent-workspace-1')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-item-recent-workspace-1')).toBeInTheDocument();
   });
 
   it('should display a list of recent workspaces in the dropdown', () => {

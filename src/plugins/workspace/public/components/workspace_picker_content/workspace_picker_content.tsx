@@ -156,9 +156,10 @@ export const WorkspacePickerContent = ({
       {searchQuery ? (
         queryedWorkspace && queryedWorkspace.length > 0 ? (
           <>
-            {getWorkspaceListGroup(queryedRecentWorkspace, 'recent')}
+            {filteredRecentWorkspaces.length > 0 &&
+              getWorkspaceListGroup(queryedRecentWorkspace, 'recent')}
             <EuiSpacer />
-            {getWorkspaceListGroup(queryedWorkspace, 'all')}
+            {workspaceList.length > 0 && getWorkspaceListGroup(queryedWorkspace, 'all')}
           </>
         ) : (
           getEmptyStatePrompt()
