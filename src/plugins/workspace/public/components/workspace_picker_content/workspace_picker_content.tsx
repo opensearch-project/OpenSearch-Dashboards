@@ -138,16 +138,15 @@ export const WorkspacePickerContent = ({
       );
     });
     return (
-      <EuiListGroup showToolTips flush gutterSize="none" wrapText maxWidth={240}>
-        <EuiListGroupItem
-          label={
-            <EuiTitle size="xxs">
-              <h4>{itemType === 'all' ? allWorkspacesTitle : recentWorkspacesTitle}</h4>
-            </EuiTitle>
-          }
-        />
-        {listItems}
-      </EuiListGroup>
+      <>
+        <EuiTitle size="xxs">
+          <h4>{itemType === 'all' ? allWorkspacesTitle : recentWorkspacesTitle}</h4>
+        </EuiTitle>
+        <EuiListGroup showToolTips flush gutterSize="none" wrapText maxWidth={240}>
+          {listItems}
+        </EuiListGroup>
+        <EuiSpacer />
+      </>
     );
   };
 
@@ -158,7 +157,6 @@ export const WorkspacePickerContent = ({
           <>
             {filteredRecentWorkspaces.length > 0 &&
               getWorkspaceListGroup(queryedRecentWorkspace, 'recent')}
-            <EuiSpacer />
             {workspaceList.length > 0 && getWorkspaceListGroup(queryedWorkspace, 'all')}
           </>
         ) : (
@@ -168,14 +166,9 @@ export const WorkspacePickerContent = ({
         <>
           {filteredRecentWorkspaces.length > 0 &&
             getWorkspaceListGroup(filteredRecentWorkspaces, 'recent')}
-          <EuiSpacer />
+
           {workspaceList.length > 0 && getWorkspaceListGroup(workspaceList, 'all')}
-          {workspaceList.length === 0 && (
-            <>
-              <EuiSpacer />
-              {getEmptyStatePrompt()}
-            </>
-          )}
+          {workspaceList.length === 0 && <>{getEmptyStatePrompt()}</>}
         </>
       )}
     </>
