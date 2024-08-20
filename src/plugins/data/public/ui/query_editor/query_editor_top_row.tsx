@@ -33,7 +33,6 @@ const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 // @internal
 export interface QueryEditorTopRowProps {
   query?: Query;
-  dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
   settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -71,10 +70,10 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     storage,
     appName,
     data: {
-      query: { dataSetManager: dataSetManager },
+      query: { dataSetManager },
     },
   } = opensearchDashboards.services;
-  const { dataSet } = useDataSetManager({ dataSetManager: dataSetManager! });
+  const { dataSet } = useDataSetManager({ dataSetManager });
 
   const queryLanguage = props.query && props.query.language;
   const queryUiEnhancement =
@@ -214,7 +213,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           dataSet={dataSet}
           queryActions={props.prepend}
           query={parsedQuery}
-          dataSetContainerRef={props.dataSetContainerRef}
           settings={props.settings!}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}

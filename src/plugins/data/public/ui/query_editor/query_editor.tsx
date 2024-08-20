@@ -21,6 +21,7 @@ import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
 import { SimpleDataSet } from '../../../common';
 import { createDQLEditor, createDefaultEditor } from './editors';
 import { getQueryService, getIndexPatterns } from '../../services';
+import { DatasetSelector } from '../dataset_selector';
 
 const LANGUAGE_ID_SQL = 'SQL';
 monaco.languages.register({ id: LANGUAGE_ID_SQL });
@@ -31,7 +32,6 @@ monaco.languages.register({ id: LANGUAGE_ID_KUERY });
 export interface QueryEditorProps {
   dataSet?: SimpleDataSet;
   query: Query;
-  dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
   settings: Settings;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -69,18 +69,6 @@ interface State {
   timeStamp: IFieldType | null;
   lineCount: number | undefined;
 }
-
-const KEY_CODES = {
-  LEFT: 37,
-  UP: 38,
-  RIGHT: 39,
-  DOWN: 40,
-  ENTER: 13,
-  ESC: 27,
-  TAB: 9,
-  HOME: 36,
-  END: 35,
-};
 
 // Needed for React.lazy
 // TODO: MQL export this and let people extended this
@@ -393,7 +381,7 @@ export default class QueryEditorUI extends Component<Props, State> {
             onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}
             isCollapsed={!this.state.isCollapsed}
           />
-          <div ref={this.props.dataSetContainerRef} className="osdQueryEditor__dataSetPicker" />
+          <DatasetSelector />
           <div className="osdQueryEditor__input">
             {this.state.isCollapsed
               ? languageEditor.TopBar.Collapsed()
