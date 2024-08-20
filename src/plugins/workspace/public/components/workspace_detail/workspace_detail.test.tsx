@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { PublicAppInfo, WorkspaceObject } from 'opensearch-dashboards/public';
@@ -189,9 +189,7 @@ describe('WorkspaceDetail', () => {
     const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
     fireEvent.click(getByText('Collaborators'));
     expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
-    await waitFor(() => {
-      expect(screen.queryByText('Workspaces access')).not.toBeNull();
-    });
+    expect(screen.queryByText('Workspaces access')).not.toBeNull();
   });
 
   it('click on Data Sources tab when dataSource enabled', async () => {
