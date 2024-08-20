@@ -80,6 +80,7 @@ export class QueryEnhancementsPlugin
           },
           fields: {
             visualizable: false,
+            filterable: false,
           },
           supportedAppNames: ['discover'],
         },
@@ -97,6 +98,7 @@ export class QueryEnhancementsPlugin
           },
           fields: {
             visualizable: false,
+            filterable: false,
           },
           supportedAppNames: ['discover'],
         },
