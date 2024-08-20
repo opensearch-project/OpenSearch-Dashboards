@@ -8923,17 +8923,23 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                       <EuiPopover
                         anchorPosition="downCenter"
                         button={
-                          <EuiHeaderSectionItemButton
-                            className="headerRecentItemsButton"
-                            data-test-subj="recentItemsSectionButton"
-                            onClick={[Function]}
-                            size="s"
+                          <EuiToolTip
+                            content="Recents"
+                            delay="long"
+                            position="bottom"
                           >
-                            <EuiIcon
-                              size="m"
-                              type="recentlyViewedApp"
+                            <EuiButtonIcon
+                              aria-expanded={false}
+                              aria-haspopup="true"
+                              aria-label="View recents"
+                              className="headerRecentItemsButton"
+                              color="text"
+                              data-test-subj="recentItemsSectionButton"
+                              iconType="recent"
+                              onClick={[Function]}
+                              size="xs"
                             />
-                          </EuiHeaderSectionItemButton>
+                          </EuiToolTip>
                         }
                         closePopover={[Function]}
                         display="inlineBlock"
@@ -8950,86 +8956,61 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                           <div
                             className="euiPopover__anchor"
                           >
-                            <EuiHeaderSectionItemButton
-                              className="headerRecentItemsButton"
-                              data-test-subj="recentItemsSectionButton"
-                              onClick={[Function]}
-                              size="s"
+                            <EuiToolTip
+                              content="Recents"
+                              delay="long"
+                              position="bottom"
                             >
-                              <EuiButtonEmpty
-                                buttonRef={
-                                  Object {
-                                    "current": <button
-                                      class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiHeaderSectionItemButton headerRecentItemsButton"
-                                      data-test-subj="recentItemsSectionButton"
-                                      type="button"
-                                    >
-                                      <span
-                                        class="euiButtonContent euiButtonEmpty__content"
-                                      >
-                                        <span
-                                          class="euiButtonEmpty__text"
-                                        >
-                                          <span
-                                            class="euiHeaderSectionItemButton__content"
-                                          >
-                                            <span
-                                              data-euiicon-type="recentlyViewedApp"
-                                            />
-                                          </span>
-                                        </span>
-                                      </span>
-                                    </button>,
-                                  }
-                                }
-                                className="euiHeaderSectionItemButton headerRecentItemsButton"
-                                color="text"
-                                data-test-subj="recentItemsSectionButton"
-                                onClick={[Function]}
-                                size="s"
+                              <span
+                                className="euiToolTipAnchor"
+                                onKeyUp={[Function]}
+                                onMouseOut={[Function]}
+                                onMouseOver={[Function]}
                               >
-                                <button
-                                  className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiHeaderSectionItemButton headerRecentItemsButton"
+                                <EuiButtonIcon
+                                  aria-expanded={false}
+                                  aria-haspopup="true"
+                                  aria-label="View recents"
+                                  className="headerRecentItemsButton"
+                                  color="text"
                                   data-test-subj="recentItemsSectionButton"
-                                  disabled={false}
+                                  iconType="recent"
+                                  onBlur={[Function]}
                                   onClick={[Function]}
-                                  type="button"
+                                  onFocus={[Function]}
+                                  size="xs"
                                 >
-                                  <EuiButtonContent
-                                    className="euiButtonEmpty__content"
-                                    iconSide="left"
-                                    iconSize="m"
-                                    textProps={
-                                      Object {
-                                        "className": "euiButtonEmpty__text",
-                                      }
-                                    }
+                                  <button
+                                    aria-expanded={false}
+                                    aria-haspopup="true"
+                                    aria-label="View recents"
+                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall headerRecentItemsButton"
+                                    data-test-subj="recentItemsSectionButton"
+                                    disabled={false}
+                                    onBlur={[Function]}
+                                    onClick={[Function]}
+                                    onFocus={[Function]}
+                                    type="button"
                                   >
-                                    <span
-                                      className="euiButtonContent euiButtonEmpty__content"
+                                    <EuiIcon
+                                      aria-hidden="true"
+                                      className="euiButtonIcon__icon"
+                                      color="inherit"
+                                      size="m"
+                                      type="recent"
                                     >
                                       <span
-                                        className="euiButtonEmpty__text"
-                                      >
-                                        <span
-                                          className="euiHeaderSectionItemButton__content"
-                                        >
-                                          <EuiIcon
-                                            size="m"
-                                            type="recentlyViewedApp"
-                                          >
-                                            <span
-                                              data-euiicon-type="recentlyViewedApp"
-                                              size="m"
-                                            />
-                                          </EuiIcon>
-                                        </span>
-                                      </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </button>
-                              </EuiButtonEmpty>
-                            </EuiHeaderSectionItemButton>
+                                        aria-hidden="true"
+                                        className="euiButtonIcon__icon"
+                                        color="inherit"
+                                        data-euiicon-type="recent"
+                                        size="m"
+                                      />
+                                    </EuiIcon>
+                                  </button>
+                                </EuiButtonIcon>
+                              </span>
+                            </EuiToolTip>
                           </div>
                         </div>
                       </EuiPopover>
@@ -17428,17 +17409,23 @@ exports[`Header renders page header with application title 1`] = `
                       <EuiPopover
                         anchorPosition="downCenter"
                         button={
-                          <EuiHeaderSectionItemButton
-                            className="headerRecentItemsButton"
-                            data-test-subj="recentItemsSectionButton"
-                            onClick={[Function]}
-                            size="xs"
+                          <EuiToolTip
+                            content="Recents"
+                            delay="long"
+                            position="bottom"
                           >
-                            <EuiIcon
-                              size="m"
-                              type="recentlyViewedApp"
+                            <EuiButtonIcon
+                              aria-expanded={false}
+                              aria-haspopup="true"
+                              aria-label="View recents"
+                              className="headerRecentItemsButton"
+                              color="text"
+                              data-test-subj="recentItemsSectionButton"
+                              iconType="recent"
+                              onClick={[Function]}
+                              size="xs"
                             />
-                          </EuiHeaderSectionItemButton>
+                          </EuiToolTip>
                         }
                         closePopover={[Function]}
                         display="inlineBlock"
@@ -17455,86 +17442,61 @@ exports[`Header renders page header with application title 1`] = `
                           <div
                             className="euiPopover__anchor"
                           >
-                            <EuiHeaderSectionItemButton
-                              className="headerRecentItemsButton"
-                              data-test-subj="recentItemsSectionButton"
-                              onClick={[Function]}
-                              size="xs"
+                            <EuiToolTip
+                              content="Recents"
+                              delay="long"
+                              position="bottom"
                             >
-                              <EuiButtonEmpty
-                                buttonRef={
-                                  Object {
-                                    "current": <button
-                                      class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiHeaderSectionItemButton headerRecentItemsButton"
-                                      data-test-subj="recentItemsSectionButton"
-                                      type="button"
-                                    >
-                                      <span
-                                        class="euiButtonContent euiButtonEmpty__content"
-                                      >
-                                        <span
-                                          class="euiButtonEmpty__text"
-                                        >
-                                          <span
-                                            class="euiHeaderSectionItemButton__content"
-                                          >
-                                            <span
-                                              data-euiicon-type="recentlyViewedApp"
-                                            />
-                                          </span>
-                                        </span>
-                                      </span>
-                                    </button>,
-                                  }
-                                }
-                                className="euiHeaderSectionItemButton headerRecentItemsButton"
-                                color="text"
-                                data-test-subj="recentItemsSectionButton"
-                                onClick={[Function]}
-                                size="xs"
+                              <span
+                                className="euiToolTipAnchor"
+                                onKeyUp={[Function]}
+                                onMouseOut={[Function]}
+                                onMouseOver={[Function]}
                               >
-                                <button
-                                  className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall euiHeaderSectionItemButton headerRecentItemsButton"
+                                <EuiButtonIcon
+                                  aria-expanded={false}
+                                  aria-haspopup="true"
+                                  aria-label="View recents"
+                                  className="headerRecentItemsButton"
+                                  color="text"
                                   data-test-subj="recentItemsSectionButton"
-                                  disabled={false}
+                                  iconType="recent"
+                                  onBlur={[Function]}
                                   onClick={[Function]}
-                                  type="button"
+                                  onFocus={[Function]}
+                                  size="xs"
                                 >
-                                  <EuiButtonContent
-                                    className="euiButtonEmpty__content"
-                                    iconSide="left"
-                                    iconSize="s"
-                                    textProps={
-                                      Object {
-                                        "className": "euiButtonEmpty__text",
-                                      }
-                                    }
+                                  <button
+                                    aria-expanded={false}
+                                    aria-haspopup="true"
+                                    aria-label="View recents"
+                                    className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall headerRecentItemsButton"
+                                    data-test-subj="recentItemsSectionButton"
+                                    disabled={false}
+                                    onBlur={[Function]}
+                                    onClick={[Function]}
+                                    onFocus={[Function]}
+                                    type="button"
                                   >
-                                    <span
-                                      className="euiButtonContent euiButtonEmpty__content"
+                                    <EuiIcon
+                                      aria-hidden="true"
+                                      className="euiButtonIcon__icon"
+                                      color="inherit"
+                                      size="m"
+                                      type="recent"
                                     >
                                       <span
-                                        className="euiButtonEmpty__text"
-                                      >
-                                        <span
-                                          className="euiHeaderSectionItemButton__content"
-                                        >
-                                          <EuiIcon
-                                            size="m"
-                                            type="recentlyViewedApp"
-                                          >
-                                            <span
-                                              data-euiicon-type="recentlyViewedApp"
-                                              size="m"
-                                            />
-                                          </EuiIcon>
-                                        </span>
-                                      </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </button>
-                              </EuiButtonEmpty>
-                            </EuiHeaderSectionItemButton>
+                                        aria-hidden="true"
+                                        className="euiButtonIcon__icon"
+                                        color="inherit"
+                                        data-euiicon-type="recent"
+                                        size="m"
+                                      />
+                                    </EuiIcon>
+                                  </button>
+                                </EuiButtonIcon>
+                              </span>
+                            </EuiToolTip>
                           </div>
                         </div>
                       </EuiPopover>
@@ -17807,22 +17769,22 @@ exports[`Header renders page header with application title 1`] = `
               >
                 <EuiHeaderSectionItem
                   border="none"
-                  className="newTopNavApplicationTitle"
                   data-test-subj="headerApplicationTitle"
                 >
                   <div
-                    className="euiHeaderSectionItem newTopNavApplicationTitle"
+                    className="euiHeaderSectionItem"
                     data-test-subj="headerApplicationTitle"
                   >
-                    <EuiText>
-                      <div
-                        className="euiText euiText--medium"
+                    <EuiTitle
+                      className="newTopNavHeaderTitle"
+                      size="l"
+                    >
+                      <h1
+                        className="euiTitle euiTitle--large newTopNavHeaderTitle"
                       >
-                        <h2>
-                          testTitle
-                        </h2>
-                      </div>
-                    </EuiText>
+                        testTitle
+                      </h1>
+                    </EuiTitle>
                   </div>
                 </EuiHeaderSectionItem>
                 <EuiHeaderSectionItem

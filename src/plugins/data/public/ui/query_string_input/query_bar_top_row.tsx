@@ -333,7 +333,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     if (
       language === 'kuery' &&
       typeof query === 'string' &&
-      (!storage || !storage.get('opensearchDashboards.luceneSyntaxWarningOptOut')) &&
+      (!storage || !storage.get('luceneSyntaxWarningOptOut')) &&
       doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {
       const toast = notifications!.toasts.addWarning({
@@ -379,7 +379,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
 
   function onLuceneSyntaxWarningOptOut(toast: Toast) {
     if (!storage) return;
-    storage.set('opensearchDashboards.luceneSyntaxWarningOptOut', true);
+    storage.set('luceneSyntaxWarningOptOut', true);
     notifications!.toasts.remove(toast);
   }
 

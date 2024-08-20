@@ -4,19 +4,26 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
+import moment from 'moment';
 import {
   EuiPage,
   EuiPageContent,
   EuiLink,
   EuiSmallButton,
   EuiInMemoryTable,
+  EuiToolTip,
+  EuiText,
   EuiSearchBarProps,
+  copyToClipboard,
+  EuiTableSelectionType,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, of } from 'rxjs';
 import { i18n } from '@osd/i18n';
-import { debounce, DEFAULT_NAV_GROUPS } from '../../../../../core/public';
-import { WorkspaceAttribute } from '../../../../../core/public';
+import { DEFAULT_NAV_GROUPS, WorkspaceAttribute } from '../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { navigateToWorkspaceDetail } from '../utils/workspace';
 
@@ -31,6 +38,10 @@ export interface WorkspaceListProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
 }
 
+interface WorkspaceAttributeWithUseCaseID extends WorkspaceAttribute {
+  useCase?: string;
+}
+
 export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
   const {
     services: {
@@ -38,47 +49,52 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
       application,
       http,
       navigationUI: { HeaderControl },
+      uiSettings,
     },
   } = useOpenSearchDashboards<{
     navigationUI: NavigationPublicPluginStart['ui'];
   }>();
   const registeredUseCases = useObservable(registeredUseCases$);
   const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin;
-
   const initialSortField = 'name';
   const initialSortDirection = 'asc';
   const workspaceList = useObservable(workspaces?.workspaceList$ ?? of([]), []);
-  const [queryInput, setQueryInput] = useState<string>('');
+
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 5,
     pageSizeOptions: [5, 10, 20],
   });
-  const [deletedWorkspace, setDeletedWorkspace] = useState<WorkspaceAttribute | null>(null);
+  const [deletedWorkspaces, setDeletedWorkspaces] = useState<WorkspaceAttribute[]>([]);
+  const [selection, setSelection] = useState<WorkspaceAttribute[]>([]);
 
-  const handleSwitchWorkspace = useCallback(
-    (id: string) => {
-      if (application && http) {
-        navigateToWorkspaceDetail({ application, http }, id);
+  const dateFormat = uiSettings?.get('dateFormat');
+
+  const extractUseCaseFromFeatures = useCallback(
+    (features: string[]) => {
+      if (!features || features.length === 0) {
+        return '';
+      }
+      const useCaseId = getFirstUseCaseOfFeatureConfigs(features);
+      const usecase =
+        useCaseId === DEFAULT_NAV_GROUPS.all.id
+          ? DEFAULT_NAV_GROUPS.all
+          : registeredUseCases?.find(({ id }) => id === useCaseId);
+      if (usecase) {
+        return usecase.title;
       }
     },
-    [application, http]
+    [registeredUseCases]
   );
 
-  const searchResult = useMemo(() => {
-    if (queryInput) {
-      const normalizedQuery = queryInput.toLowerCase();
-      const result = workspaceList.filter((item) => {
-        return (
-          item.id.toLowerCase().indexOf(normalizedQuery) > -1 ||
-          item.name.toLowerCase().indexOf(normalizedQuery) > -1
-        );
-      });
-      return result;
-    }
-    return workspaceList;
-  }, [workspaceList, queryInput]);
-
+  const newWorkspaceList: WorkspaceAttributeWithUseCaseID[] = useMemo(() => {
+    return workspaceList.map(
+      (workspace): WorkspaceAttributeWithUseCaseID => ({
+        ...workspace,
+        useCase: extractUseCaseFromFeatures(workspace.features ?? []),
+      })
+    );
+  }, [workspaceList, extractUseCaseFromFeatures]);
   const workspaceCreateUrl = useMemo(() => {
     if (!application) {
       return '';
@@ -91,6 +107,38 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
 
     return appUrl;
   }, [application]);
+
+  const emptyStateMessage = useMemo(() => {
+    return (
+      <EuiEmptyPrompt
+        iconType="spacesApp"
+        title={
+          <h3>
+            {i18n.translate('workspace.workspaceList.emptyState.title', {
+              defaultMessage: 'No workspace available',
+            })}
+          </h3>
+        }
+        titleSize="s"
+        body={i18n.translate('workspace.workspaceList.emptyState.body', {
+          defaultMessage: 'There are no workspace to display. Create workspace to get started.',
+        })}
+        actions={
+          isDashboardAdmin && (
+            <EuiSmallButton
+              href={workspaceCreateUrl}
+              key="create_workspace"
+              data-test-subj="workspaceList-create-workspace"
+            >
+              {i18n.translate('workspace.workspaceList.buttons.createWorkspace', {
+                defaultMessage: 'Create workspace',
+              })}
+            </EuiSmallButton>
+          )
+        }
+      />
+    );
+  }, [isDashboardAdmin, workspaceCreateUrl]);
 
   const renderCreateWorkspaceButton = () => {
     const button = (
@@ -113,87 +161,200 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     );
   };
 
+  const handleCopyId = (id: string) => {
+    copyToClipboard(id);
+  };
+
+  const handleSwitchWorkspace = useCallback(
+    (id: string) => {
+      if (application && http) {
+        navigateToWorkspaceDetail({ application, http }, id);
+      }
+    },
+    [application, http]
+  );
+
+  const renderToolsLeft = () => {
+    if (selection.length === 0) {
+      return;
+    }
+
+    const onClick = () => {
+      const deleteWorkspacesByIds = (workSpaces: WorkspaceAttribute[], ids: string[]) => {
+        const needToBeDeletedWorkspaceList: WorkspaceAttribute[] = [];
+        ids.forEach((id) => {
+          const index = workSpaces.findIndex((workSpace) => workSpace.id === id);
+          if (index >= 0) {
+            needToBeDeletedWorkspaceList.push(workSpaces[index]);
+          }
+        });
+        return needToBeDeletedWorkspaceList;
+      };
+
+      setDeletedWorkspaces(
+        deleteWorkspacesByIds(
+          newWorkspaceList,
+          selection.map((item) => item.id)
+        )
+      );
+
+      setSelection([]);
+    };
+
+    return (
+      <>
+        <EuiButton color="danger" iconType="trash" onClick={onClick}>
+          Delete {selection.length} Workspace
+        </EuiButton>
+        {deletedWorkspaces && deletedWorkspaces.length > 0 && (
+          <DeleteWorkspaceModal
+            selectedWorkspaces={deletedWorkspaces}
+            onClose={() => setDeletedWorkspaces([])}
+          />
+        )}
+      </>
+    );
+  };
+
+  const selectionValue: EuiTableSelectionType<WorkspaceAttribute> = {
+    onSelectionChange: (deletedSelection) => setSelection(deletedSelection),
+  };
+
+  const search: EuiSearchBarProps = {
+    box: {
+      incremental: true,
+    },
+    filters: [
+      {
+        type: 'field_value_selection',
+        field: 'useCase',
+        name: 'Use Case',
+        multiSelect: false,
+        options: Array.from(
+          new Set(newWorkspaceList.map(({ useCase }) => useCase).filter(Boolean))
+        ).map((useCase) => ({
+          value: useCase!,
+          name: useCase!,
+        })),
+      },
+    ],
+    toolsLeft: renderToolsLeft(),
+  };
+
   const columns = [
     {
       field: 'name',
       name: 'Name',
+      width: '25%',
       sortable: true,
       render: (name: string, item: WorkspaceAttribute) => (
         <span>
-          <EuiLink onClick={() => handleSwitchWorkspace(item.id)}>{name}</EuiLink>
+          <EuiLink onClick={() => handleSwitchWorkspace(item.id)}>
+            <EuiLink>{name}</EuiLink>
+          </EuiLink>
         </span>
       ),
     },
+
     {
-      field: 'id',
-      name: 'ID',
-      sortable: true,
+      field: 'useCase',
+      name: 'Use case',
+      width: '20%',
     },
+
     {
       field: 'description',
       name: 'Description',
-      truncateText: true,
+      width: '20%',
+      render: (description: string) => (
+        <EuiToolTip
+          position="bottom"
+          content={description}
+          data-test-subj="workspaceList-hover-description"
+        >
+          {/* Here I need to set width mannuly as the tooltip will ineffect the property : truncateText ',  */}
+          <EuiText size="s" className="eui-textTruncate" style={{ maxWidth: 150 }}>
+            {description}
+          </EuiText>
+        </EuiToolTip>
+      ),
     },
     {
-      field: 'features',
-      name: 'Use case',
-      isExpander: true,
-      hasActions: true,
-      render: (features: string[]) => {
-        if (!features || features.length === 0) {
-          return '';
-        }
-        const useCaseId = getFirstUseCaseOfFeatureConfigs(features);
-        const useCase =
-          useCaseId === DEFAULT_NAV_GROUPS.all.id
-            ? DEFAULT_NAV_GROUPS.all
-            : registeredUseCases?.find(({ id }) => id === useCaseId);
-        if (useCase) {
-          return useCase.title;
-        }
+      field: 'lastUpdatedTime',
+      name: 'Last updated',
+      width: '25%',
+      truncateText: false,
+      render: (lastUpdatedTime: string) => {
+        return moment(lastUpdatedTime).format(dateFormat);
       },
     },
+
     {
       name: 'Actions',
       field: '',
       actions: [
         {
+          name: 'Copy ID',
+          type: 'button',
+          description: 'Copy id',
+          'data-test-subj': 'workspace-list-copy-id-icon',
+          render: ({ id }: WorkspaceAttribute) => {
+            return (
+              <EuiButtonEmpty
+                onClick={() => handleCopyId(id)}
+                size="xs"
+                iconType="copy"
+                color="text"
+              >
+                <EuiText size="m">Copy ID</EuiText>
+              </EuiButtonEmpty>
+            );
+          },
+        },
+        {
           name: 'Edit',
-          icon: 'pencil',
           type: 'icon',
+          icon: 'edit',
+          color: 'danger',
           description: 'Edit workspace',
-          onClick: ({ id }: WorkspaceAttribute) => handleSwitchWorkspace(id),
           'data-test-subj': 'workspace-list-edit-icon',
+          onClick: ({ id }: WorkspaceAttribute) => handleSwitchWorkspace(id),
+          render: ({ id }: WorkspaceAttribute) => {
+            return (
+              <EuiButtonEmpty
+                onClick={() => handleSwitchWorkspace(id)}
+                iconType="pencil"
+                size="xs"
+                color="text"
+              >
+                <EuiText size="m">Edit</EuiText>
+              </EuiButtonEmpty>
+            );
+          },
         },
         {
           name: 'Delete',
-          icon: 'trash',
-          type: 'icon',
+          type: 'button',
           description: 'Delete workspace',
-          onClick: (item: WorkspaceAttribute) => setDeletedWorkspace(item),
           'data-test-subj': 'workspace-list-delete-icon',
+          render: (item: WorkspaceAttribute) => {
+            return (
+              <EuiButtonEmpty
+                onClick={() => {
+                  setDeletedWorkspaces([item]);
+                }}
+                size="xs"
+                iconType="trash"
+                color="danger"
+              >
+                <EuiText size="m">Delete</EuiText>
+              </EuiButtonEmpty>
+            );
+          },
         },
       ],
     },
   ];
-
-  const debouncedSetQueryInput = useMemo(() => {
-    return debounce(setQueryInput, 300);
-  }, [setQueryInput]);
-
-  const handleSearchInput: EuiSearchBarProps['onChange'] = useCallback(
-    ({ query }) => {
-      debouncedSetQueryInput(query?.text ?? '');
-    },
-    [debouncedSetQueryInput]
-  );
-
-  const search: EuiSearchBarProps = {
-    onChange: handleSearchInput,
-    box: {
-      incremental: true,
-    },
-  };
 
   return (
     <EuiPage paddingSize="m">
@@ -216,9 +377,10 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
         hasShadow={false}
       >
         <EuiInMemoryTable
-          items={searchResult}
+          items={newWorkspaceList}
           columns={columns}
           itemId="id"
+          message={emptyStateMessage}
           onTableChange={({ page: { index, size } }) =>
             setPagination((prev) => {
               return { ...prev, pageIndex: index, pageSize: size };
@@ -233,12 +395,14 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
           }}
           isSelectable={true}
           search={search}
+          selection={selectionValue}
         />
       </EuiPageContent>
-      {deletedWorkspace && (
+
+      {deletedWorkspaces.length > 0 && (
         <DeleteWorkspaceModal
-          selectedWorkspace={deletedWorkspace}
-          onClose={() => setDeletedWorkspace(null)}
+          selectedWorkspaces={deletedWorkspaces}
+          onClose={() => setDeletedWorkspaces([])}
         />
       )}
     </EuiPage>

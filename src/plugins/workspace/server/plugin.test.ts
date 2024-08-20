@@ -176,6 +176,63 @@ describe('Workspace server plugin', () => {
     });
   });
 
+  describe('#setUpRedirectPage', () => {
+    const setupMock = coreMock.createSetup();
+    const initializerContextConfigMock = coreMock.createPluginInitializerContext({
+      enabled: true,
+      permission: {
+        enabled: true,
+      },
+    });
+    let registerOnPostAuthFn: OnPostAuthHandler = () => httpServerMock.createResponseFactory().ok();
+    setupMock.http.registerOnPostAuth.mockImplementation((fn) => {
+      registerOnPostAuthFn = fn;
+      return fn;
+    });
+    const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
+    const response = httpServerMock.createResponseFactory();
+
+    it('with / request path', async () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest({
+        path: '/',
+      });
+      await workspacePlugin.setup(setupMock);
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(request, response, toolKitMock);
+      expect(response.redirected).toBeCalledWith({
+        headers: { location: '/mock-server-basepath/app/workspace_initial' },
+      });
+    });
+
+    it('without / request path', async () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest({
+        path: '/foo',
+      });
+      await workspacePlugin.setup(setupMock);
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(request, response, toolKitMock);
+      expect(toolKitMock.next).toBeCalledTimes(1);
+    });
+
+    it('with more than one workspace', async () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest({
+        path: '/',
+      });
+      const workspaceSetup = await workspacePlugin.setup(setupMock);
+      const client = workspaceSetup.client;
+      jest.spyOn(client, 'list').mockResolvedValue({
+        success: true,
+        result: { total: 1 },
+      });
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(request, response, toolKitMock);
+      expect(toolKitMock.next).toBeCalledTimes(1);
+    });
+  });
+
   it('#start', async () => {
     const setupMock = coreMock.createSetup();
     const startMock = coreMock.createStart();
