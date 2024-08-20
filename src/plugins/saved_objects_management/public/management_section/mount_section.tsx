@@ -64,7 +64,7 @@ export const mountManagementSection = async ({
   dataSourceEnabled,
   dataSourceManagement,
 }: MountParams) => {
-  const [coreStart, { data, uiActions }, pluginStart] = await core.getStartServices();
+  const [coreStart, { data, uiActions, navigation }, pluginStart] = await core.getStartServices();
   const { element, history, setBreadcrumbs } = mountParams;
   if (allowedObjectTypes === undefined) {
     allowedObjectTypes = await getAllowedTypes(coreStart.http);
@@ -88,6 +88,8 @@ export const mountManagementSection = async ({
     }
     return children! as React.ReactElement;
   };
+
+  const useUpdatedUX = coreStart.uiSettings.get('home:useNewHomePage');
 
   const content = (
     <Router history={history}>
@@ -119,6 +121,8 @@ export const mountManagementSection = async ({
                 setBreadcrumbs={setBreadcrumbs}
                 dataSourceEnabled={dataSourceEnabled}
                 dataSourceManagement={dataSourceManagement}
+                navigation={navigation}
+                useUpdatedUX={useUpdatedUX}
               />
             </Suspense>
           </RedirectToHomeIfUnauthorized>

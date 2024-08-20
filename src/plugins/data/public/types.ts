@@ -29,7 +29,6 @@
  */
 
 import { CoreStart } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
@@ -41,6 +40,7 @@ import { IndexPatternsContract } from './index_patterns';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { DataSourceStart } from './data_sources/datasource_services/types';
 import { IUiStart, UiEnhancements } from './ui';
+import { DataStorage } from '../common';
 
 export interface DataPublicPluginEnhancements {
   search?: SearchEnhancements;
@@ -131,6 +131,6 @@ export interface IDataPluginServices extends Partial<CoreStart> {
   savedObjects: CoreStart['savedObjects'];
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
-  storage: IStorageWrapper;
+  storage: DataStorage;
   data: DataPublicPluginStart;
 }
