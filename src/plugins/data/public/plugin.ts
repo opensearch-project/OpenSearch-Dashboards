@@ -32,11 +32,7 @@ import './index.scss';
 
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ConfigSchema } from '../config';
-import {
-  Storage,
-  IStorageWrapper,
-  createStartServicesGetter,
-} from '../../opensearch_dashboards_utils/public';
+import { createStartServicesGetter } from '../../opensearch_dashboards_utils/public';
 import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
@@ -95,6 +91,7 @@ import { DefaultDslDataSource } from './data_sources/default_datasource';
 import { DEFAULT_DATA_SOURCE_TYPE } from './data_sources/constants';
 import { getSuggestions as getSQLSuggestions } from './antlr/opensearch_sql/code_completion';
 import { getSuggestions as getDQLSuggestions } from './antlr/dql/code_completion';
+import { createStorage, DataStorage } from '../common';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -117,7 +114,7 @@ export class DataPublicPlugin
   private readonly uiService: UiService;
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
-  private readonly storage: IStorageWrapper;
+  private readonly storage: DataStorage;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
@@ -125,7 +122,7 @@ export class DataPublicPlugin
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
     this.autocomplete = new AutocompleteService(initializerContext);
-    this.storage = new Storage(window.localStorage);
+    this.storage = createStorage({ engine: window.localStorage, prefix: 'opensearch_dashboards.' });
   }
 
   public setup(

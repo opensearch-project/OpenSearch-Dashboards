@@ -5,7 +5,6 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { IStorageWrapper } from '../../../opensearch_dashboards_utils/public';
 import { ConfigSchema } from '../../config';
 import { DataPublicPluginStart } from '../types';
 import { createDataSetNavigator } from './dataset_navigator';
@@ -15,6 +14,7 @@ import { createSearchBar } from './search_bar/create_search_bar';
 import { createSettings } from './settings';
 import { SuggestionsComponent } from './typeahead';
 import { IUiSetup, IUiStart, QueryEnhancement, UiEnhancements } from './types';
+import { DataStorage } from '../../common';
 
 /** @internal */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -23,7 +23,7 @@ export interface UiServiceSetupDependencies {}
 /** @internal */
 export interface UiServiceStartDependencies {
   dataServices: Omit<DataPublicPluginStart, 'ui'>;
-  storage: IStorageWrapper;
+  storage: DataStorage;
 }
 
 export class UiService implements Plugin<IUiSetup, IUiStart> {
