@@ -1,0 +1,1048 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WorkspaceInitial render workspace initial page normally when theme is dark mode 1`] = `
+<div>
+  <div
+    class="euiPage euiPage--paddingMedium euiPage--grow"
+    style="min-height: 100vh;"
+  >
+    <div
+      class="euiPageBody euiPageBody--borderRadiusNone"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <figure
+            class="euiImage euiImage--large"
+          >
+            <img
+              alt="OpenSearch"
+              class="euiImage__img"
+              src="/ui/logos/opensearch_on_light.svg"
+            />
+          </figure>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero eui-displayInline"
+          style="width: 1122px;"
+        >
+          <div
+            class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+            role="main"
+            style="background-image: url(test-file-stub); background-size: 490px 380px; background-repeat: no-repeat;"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <h1
+                  class="euiTitle euiTitle--large"
+                >
+                  Getting started with OpenSearch
+                </h1>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+                style="max-width: 650px;"
+              >
+                <div
+                  class="euiText euiText--medium euiText--constrainedWidth"
+                >
+                  OpenSearch is a flexible, scalable, open-source way to build solutions for data-intensive search and analytics applications. Explore, enrich, and visualize your data, using developer-friendly tools and powerful integrations for machine learning, data processing, and more.
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero eui-displayInline"
+              >
+                <a
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+                  data-test-subj="workspace-initial-button-openSearch"
+                  href="https://www.opensearch.org/"
+                  rel="noreferrer"
+                >
+                  <span
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  >
+                    <span
+                      class="euiButtonContent__icon"
+                      color="inherit"
+                      data-euiicon-type="popout"
+                    />
+                    <span
+                      class="euiButtonEmpty__text"
+                    >
+                      <div
+                        class="euiText euiText--medium"
+                      >
+                        Learn more from documentation and more.
+                      </div>
+                    </span>
+                  </span>
+                </a>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+                style="max-width: 540px;"
+              >
+                <div
+                  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder"
+                >
+                  <div
+                    class="euiText euiText--medium"
+                  >
+                    <span
+                      data-euiicon-type="dashboardApp"
+                    />
+                      Explore live demo environment at
+                     
+                    <a
+                      class="euiLink euiLink--primary"
+                      href="https://playground.opensearch.org/"
+                      rel="noreferrer"
+                    >
+                      playground.opensearch.org
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive eui-xScrollWithShadows"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned"
+                      style="width: 270px;"
+                    >
+                      <div
+                        class="euiCard__content"
+                      >
+                        <span
+                          class="euiTitle euiTitle--small euiCard__title"
+                          id="generated-idTitle"
+                        >
+                          Create a workspace
+                        </span>
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              Organize projects by use case in a collaborative workspace.
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="euiCard__footer"
+                      >
+                        <button
+                          class="euiButton euiButton--primary euiButton--small euiButton--fill"
+                          data-test-subj="workspace-initial-card-createWorkspace-button"
+                          type="button"
+                        >
+                          <span
+                            class="euiButtonContent euiButton__content"
+                          >
+                            <span
+                              class="euiButtonContent__icon"
+                              color="inherit"
+                              data-euiicon-type="plus"
+                            />
+                            <span
+                              class="euiButton__text"
+                            >
+                              Create Workspace
+                            </span>
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned"
+                      style="width: 270px; height: 162px;"
+                    >
+                      <div
+                        class="euiCard__content"
+                      >
+                        <span
+                          class="euiTitle euiTitle--small euiCard__title"
+                          id="generated-idTitle"
+                        >
+                          Try OpenSearch
+                        </span>
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            Explore sample data before adding your own.
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="euiCard__footer"
+                      >
+                        <div
+                          class="euiText euiText--medium"
+                          style="font-size: 18px;"
+                        >
+                          <div
+                            class="euiTextColor euiTextColor--subdued"
+                          >
+                            with Sample Datasets
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned"
+                      style="width: 270px; height: 162px;"
+                    >
+                      <div
+                        class="euiCard__content"
+                      >
+                        <span
+                          class="euiTitle euiTitle--small euiCard__title"
+                          id="generated-idTitle"
+                        >
+                          Add your data
+                        </span>
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            Start collecting and analyzing your data.
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="euiCard__footer"
+                      >
+                        <div
+                          class="euiText euiText--medium"
+                          style="font-size: 18px;"
+                        >
+                          <div
+                            class="euiTextColor euiTextColor--subdued"
+                          >
+                            with Getting Started Guide
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned"
+                      style="width: 270px; height: 162px;"
+                    >
+                      <div
+                        class="euiCard__content"
+                      >
+                        <span
+                          class="euiTitle euiTitle--small euiCard__title"
+                          id="generated-idTitle"
+                        >
+                          Discover insights
+                        </span>
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            Explore data interactively to uncover insights.
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="euiCard__footer"
+                      >
+                        <div
+                          class="euiText euiText--medium"
+                          style="font-size: 18px;"
+                        >
+                          <div
+                            class="euiTextColor euiTextColor--subdued"
+                          >
+                            with Discover
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned"
+                      style="width: 270px; height: 162px;"
+                    >
+                      <div
+                        class="euiCard__content"
+                      >
+                        <span
+                          class="euiTitle euiTitle--small euiCard__title"
+                          id="generated-idTitle"
+                        />
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            And much more...
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+            data-test-subj="workspace-initial-button-settingsAndSetup"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="gear"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                <div
+                  class="euiText euiText--medium"
+                >
+                  Settings and setup
+                </div>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`WorkspaceInitial render workspace initial page normally when user is dashboard admin 1`] = `
+<div>
+  <div
+    class="euiPage euiPage--paddingMedium euiPage--grow"
+    style="min-height: 100vh;"
+  >
+    <div
+      class="euiPageBody euiPageBody--borderRadiusNone"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <figure
+            class="euiImage euiImage--large"
+          >
+            <img
+              alt="OpenSearch"
+              class="euiImage__img"
+              src="/ui/logos/opensearch_on_light.svg"
+            />
+          </figure>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero eui-displayInline"
+          style="width: 1122px;"
+        >
+          <div
+            class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+            role="main"
+            style="background-image: url(test-file-stub); background-size: 490px 380px; background-repeat: no-repeat;"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <h1
+                  class="euiTitle euiTitle--large"
+                >
+                  Getting started with OpenSearch
+                </h1>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+                style="max-width: 650px;"
+              >
+                <div
+                  class="euiText euiText--medium euiText--constrainedWidth"
+                >
+                  OpenSearch is a flexible, scalable, open-source way to build solutions for data-intensive search and analytics applications. Explore, enrich, and visualize your data, using developer-friendly tools and powerful integrations for machine learning, data processing, and more.
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero eui-displayInline"
+              >
+                <a
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+                  data-test-subj="workspace-initial-button-openSearch"
+                  href="https://www.opensearch.org/"
+                  rel="noreferrer"
+                >
+                  <span
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  >
+                    <span
+                      class="euiButtonContent__icon"
+                      color="inherit"
+                      data-euiicon-type="popout"
+                    />
+                    <span
+                      class="euiButtonEmpty__text"
+                    >
+                      <div
+                        class="euiText euiText--medium"
+                      >
+                        Learn more from documentation and more.
+                      </div>
+                    </span>
+                  </span>
+                </a>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+                style="max-width: 540px;"
+              >
+                <div
+                  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder"
+                >
+                  <div
+                    class="euiText euiText--medium"
+                  >
+                    <span
+                      data-euiicon-type="dashboardApp"
+                    />
+                      Explore live demo environment at
+                     
+                    <a
+                      class="euiLink euiLink--primary"
+                      href="https://playground.opensearch.org/"
+                      rel="noreferrer"
+                    >
+                      playground.opensearch.org
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive eui-xScrollWithShadows"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned"
+                      style="width: 270px;"
+                    >
+                      <div
+                        class="euiCard__content"
+                      >
+                        <span
+                          class="euiTitle euiTitle--small euiCard__title"
+                          id="generated-idTitle"
+                        >
+                          Create a workspace
+                        </span>
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              Organize projects by use case in a collaborative workspace.
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="euiCard__footer"
+                      >
+                        <button
+                          class="euiButton euiButton--primary euiButton--small euiButton--fill"
+                          data-test-subj="workspace-initial-card-createWorkspace-button"
+                          type="button"
+                        >
+                          <span
+                            class="euiButtonContent euiButton__content"
+                          >
+                            <span
+                              class="euiButtonContent__icon"
+                              color="inherit"
+                              data-euiicon-type="plus"
+                            />
+                            <span
+                              class="euiButton__text"
+                            >
+                              Create Workspace
+                            </span>
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned"
+                      style="width: 270px; height: 162px;"
+                    >
+                      <div
+                        class="euiCard__content"
+                      >
+                        <span
+                          class="euiTitle euiTitle--small euiCard__title"
+                          id="generated-idTitle"
+                        >
+                          Try OpenSearch
+                        </span>
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            Explore sample data before adding your own.
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="euiCard__footer"
+                      >
+                        <div
+                          class="euiText euiText--medium"
+                          style="font-size: 18px;"
+                        >
+                          <div
+                            class="euiTextColor euiTextColor--subdued"
+                          >
+                            with Sample Datasets
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned"
+                      style="width: 270px; height: 162px;"
+                    >
+                      <div
+                        class="euiCard__content"
+                      >
+                        <span
+                          class="euiTitle euiTitle--small euiCard__title"
+                          id="generated-idTitle"
+                        >
+                          Add your data
+                        </span>
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            Start collecting and analyzing your data.
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="euiCard__footer"
+                      >
+                        <div
+                          class="euiText euiText--medium"
+                          style="font-size: 18px;"
+                        >
+                          <div
+                            class="euiTextColor euiTextColor--subdued"
+                          >
+                            with Getting Started Guide
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned"
+                      style="width: 270px; height: 162px;"
+                    >
+                      <div
+                        class="euiCard__content"
+                      >
+                        <span
+                          class="euiTitle euiTitle--small euiCard__title"
+                          id="generated-idTitle"
+                        >
+                          Discover insights
+                        </span>
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            Explore data interactively to uncover insights.
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="euiCard__footer"
+                      >
+                        <div
+                          class="euiText euiText--medium"
+                          style="font-size: 18px;"
+                        >
+                          <div
+                            class="euiTextColor euiTextColor--subdued"
+                          >
+                            with Discover
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned"
+                      style="width: 270px; height: 162px;"
+                    >
+                      <div
+                        class="euiCard__content"
+                      >
+                        <span
+                          class="euiTitle euiTitle--small euiCard__title"
+                          id="generated-idTitle"
+                        />
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            And much more...
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+            data-test-subj="workspace-initial-button-settingsAndSetup"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="gear"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                <div
+                  class="euiText euiText--medium"
+                >
+                  Settings and setup
+                </div>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`WorkspaceInitial render workspace initial page normally when user is non dashboard admin 1`] = `
+<div>
+  <div
+    class="euiPage euiPage--paddingMedium euiPage--grow"
+    style="min-height: 100vh;"
+  >
+    <div
+      class="euiPageBody euiPageBody--borderRadiusNone"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <figure
+            class="euiImage euiImage--large"
+          >
+            <img
+              alt="OpenSearch"
+              class="euiImage__img"
+              src="/ui/logos/opensearch_on_light.svg"
+            />
+          </figure>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero eui-displayInline"
+          style="width: 1122px;"
+        >
+          <div
+            class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+            role="main"
+            style="background-image: url(test-file-stub); background-size: 490px 380px; background-repeat: no-repeat;"
+          >
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <h1
+                  class="euiTitle euiTitle--large"
+                >
+                  Getting started with OpenSearch
+                </h1>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+                style="max-width: 650px;"
+              >
+                <div
+                  class="euiText euiText--medium euiText--constrainedWidth"
+                >
+                  OpenSearch is a flexible, scalable, open-source way to build solutions for data-intensive search and analytics applications. Explore, enrich, and visualize your data, using developer-friendly tools and powerful integrations for machine learning, data processing, and more.
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero eui-displayInline"
+              >
+                <a
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+                  data-test-subj="workspace-initial-button-openSearch"
+                  href="https://www.opensearch.org/"
+                  rel="noreferrer"
+                >
+                  <span
+                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  >
+                    <span
+                      class="euiButtonContent__icon"
+                      color="inherit"
+                      data-euiicon-type="popout"
+                    />
+                    <span
+                      class="euiButtonEmpty__text"
+                    >
+                      <div
+                        class="euiText euiText--medium"
+                      >
+                        Learn more from documentation and more.
+                      </div>
+                    </span>
+                  </span>
+                </a>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+                style="max-width: 540px;"
+              >
+                <div
+                  class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder"
+                >
+                  <div
+                    class="euiText euiText--medium"
+                  >
+                    <span
+                      data-euiicon-type="dashboardApp"
+                    />
+                      Explore live demo environment at
+                     
+                    <a
+                      class="euiLink euiLink--primary"
+                      href="https://playground.opensearch.org/"
+                      rel="noreferrer"
+                    >
+                      playground.opensearch.org
+                    </a>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive eui-xScrollWithShadows"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned"
+                      style="width: 270px;"
+                    >
+                      <div
+                        class="euiCard__content"
+                      >
+                        <span
+                          class="euiTitle euiTitle--small euiCard__title"
+                          id="generated-idTitle"
+                        >
+                          Create a workspace
+                        </span>
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              Organize projects by use case in a collaborative workspace.
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned"
+                      style="width: 270px; height: 162px;"
+                    >
+                      <div
+                        class="euiCard__content"
+                      >
+                        <span
+                          class="euiTitle euiTitle--small euiCard__title"
+                          id="generated-idTitle"
+                        >
+                          Try OpenSearch
+                        </span>
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            Explore sample data before adding your own.
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="euiCard__footer"
+                      >
+                        <div
+                          class="euiText euiText--medium"
+                          style="font-size: 18px;"
+                        >
+                          <div
+                            class="euiTextColor euiTextColor--subdued"
+                          >
+                            with Sample Datasets
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned"
+                      style="width: 270px; height: 162px;"
+                    >
+                      <div
+                        class="euiCard__content"
+                      >
+                        <span
+                          class="euiTitle euiTitle--small euiCard__title"
+                          id="generated-idTitle"
+                        >
+                          Add your data
+                        </span>
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            Start collecting and analyzing your data.
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="euiCard__footer"
+                      >
+                        <div
+                          class="euiText euiText--medium"
+                          style="font-size: 18px;"
+                        >
+                          <div
+                            class="euiTextColor euiTextColor--subdued"
+                          >
+                            with Getting Started Guide
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned"
+                      style="width: 270px; height: 162px;"
+                    >
+                      <div
+                        class="euiCard__content"
+                      >
+                        <span
+                          class="euiTitle euiTitle--small euiCard__title"
+                          id="generated-idTitle"
+                        >
+                          Discover insights
+                        </span>
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            Explore data interactively to uncover insights.
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        class="euiCard__footer"
+                      >
+                        <div
+                          class="euiText euiText--medium"
+                          style="font-size: 18px;"
+                        >
+                          <div
+                            class="euiTextColor euiTextColor--subdued"
+                          >
+                            with Discover
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned"
+                      style="width: 270px; height: 162px;"
+                    >
+                      <div
+                        class="euiCard__content"
+                      >
+                        <span
+                          class="euiTitle euiTitle--small euiCard__title"
+                          id="generated-idTitle"
+                        />
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            And much more...
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+            data-test-subj="workspace-initial-button-settingsAndSetup"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="gear"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                <div
+                  class="euiText euiText--medium"
+                >
+                  Settings and setup
+                </div>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

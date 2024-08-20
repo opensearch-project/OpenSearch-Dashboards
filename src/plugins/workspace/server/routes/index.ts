@@ -112,7 +112,6 @@ export function registerRoutes({
     router.handleLegacyErrors(async (context, req, res) => {
       const result = await client.list(
         {
-          context,
           request: req,
           logger,
         },
@@ -139,7 +138,6 @@ export function registerRoutes({
       const { id } = req.params;
       const result = await client.get(
         {
-          context,
           request: req,
           logger,
         },
@@ -183,7 +181,6 @@ export function registerRoutes({
 
       const result = await client.create(
         {
-          context,
           request: req,
           logger,
         },
@@ -211,7 +208,6 @@ export function registerRoutes({
 
       const result = await client.update(
         {
-          context,
           request: req,
           logger,
         },
@@ -239,7 +235,6 @@ export function registerRoutes({
 
       const result = await client.delete(
         {
-          context,
           request: req,
           logger,
         },
