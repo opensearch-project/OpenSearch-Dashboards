@@ -43,6 +43,40 @@ const setup = (options?: Partial<WorkspacePermissionSettingPanelProps>) => {
 };
 
 describe('WorkspacePermissionSettingInput', () => {
+  const originalOffsetHeight = Object.getOwnPropertyDescriptor(
+    HTMLElement.prototype,
+    'offsetHeight'
+  );
+  const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
+  Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+    configurable: true,
+    value: 600,
+  });
+
+  beforeEach(() => {
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+      configurable: true,
+      value: 600,
+    });
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      value: 600,
+    });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'offsetHeight',
+      originalOffsetHeight as PropertyDescriptor
+    );
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'offsetWidth',
+      originalOffsetWidth as PropertyDescriptor
+    );
+  });
+
   it('should render consistent user and group permissions', () => {
     const { renderResult } = setup();
 
@@ -102,14 +136,6 @@ describe('WorkspacePermissionSettingInput', () => {
     ]);
   });
   it('should call onChange with new user type', () => {
-    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
-      configurable: true,
-      value: 600,
-    });
-    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
-      configurable: true,
-      value: 600,
-    });
     const { renderResult, onChangeMock } = setup();
     expect(onChangeMock).not.toHaveBeenCalled();
 
@@ -132,14 +158,6 @@ describe('WorkspacePermissionSettingInput', () => {
     });
   });
   it('should call onChange with new group type', () => {
-    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
-      configurable: true,
-      value: 600,
-    });
-    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
-      configurable: true,
-      value: 600,
-    });
     const { renderResult, onChangeMock } = setup();
 
     expect(onChangeMock).not.toHaveBeenCalled();
