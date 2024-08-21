@@ -59,10 +59,12 @@ describe('theme settings', () => {
       expect(() => validate('v7')).not.toThrow();
       expect(() => validate('Next (preview)')).not.toThrow();
       expect(() => validate('v12')).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value to equal [v7]
-- [1]: expected value to equal [Next (preview)]"
-`);
+        "types that failed validation:
+        - [0]: expected value to equal [v7]
+        - [1]: expected value to equal [v8]
+        - [2]: expected value to equal [v9]
+        - [3]: expected value to equal [Next (preview)]"
+      `);
     });
   });
 });
