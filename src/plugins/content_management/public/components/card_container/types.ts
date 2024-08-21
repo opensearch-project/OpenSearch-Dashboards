@@ -15,7 +15,10 @@ export interface CardExplicitInput {
   selectable?: EuiCardSelectProps;
 }
 
-export type CardContainerInput = ContainerInput<CardExplicitInput> & { columns?: number };
+export type CardContainerInput = ContainerInput<CardExplicitInput> & {
+  columns?: number;
+  wrap?: boolean;
+};
 
 /**
  * The props which allow to be updated after card container was created

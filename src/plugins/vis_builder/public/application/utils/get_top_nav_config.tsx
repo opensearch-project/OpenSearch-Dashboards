@@ -48,8 +48,11 @@ export interface TopNavConfigParams {
   dispatch: AppDispatch;
   originatingApp?: string;
 }
+interface VisBuilderNavActionMap {
+  [key: string]: (anchorElement?: any) => void;
+}
 
-export const getTopNavConfig = (
+export const getLegacyTopNavConfig = (
   {
     visualizationIdFromUrl,
     savedVisBuilderVis,
@@ -57,15 +60,9 @@ export const getTopNavConfig = (
     dispatch,
     originatingApp,
   }: TopNavConfigParams,
-  services: VisBuilderServices
+  services: VisBuilderServices,
+  navActions: VisBuilderNavActionMap
 ) => {
-  const {
-    i18n: { Context: I18nContext },
-    embeddable,
-  } = services;
-
-  const stateTransfer = embeddable.getStateTransfer();
-
   const topNavConfig: TopNavMenuData[] = [
     {
       id: 'save',
@@ -86,26 +83,7 @@ export const getTopNavConfig = (
       testId: 'visBuilderSaveButton',
       disableButton: !!saveDisabledReason,
       tooltip: saveDisabledReason,
-      run: (_anchorElement) => {
-        const saveModal = (
-          <SavedObjectSaveModalOrigin
-            documentInfo={savedVisBuilderVis}
-            onSave={getOnSave(
-              savedVisBuilderVis,
-              originatingApp,
-              visualizationIdFromUrl,
-              dispatch,
-              services
-            )}
-            objectType={'visualization'}
-            onClose={() => {}}
-            originatingApp={originatingApp}
-            getAppNameFromId={stateTransfer.getAppNameFromId}
-          />
-        );
-
-        showSaveModal(saveModal, I18nContext);
-      },
+      run: navActions.save,
     },
     ...(originatingApp && savedVisBuilderVis && savedVisBuilderVis.id
       ? [
@@ -125,31 +103,68 @@ export const getTopNavConfig = (
             testId: 'visBuilderSaveAndReturnButton',
             disableButton: !!saveDisabledReason,
             tooltip: saveDisabledReason,
-            run: async () => {
-              const saveOptions = {
-                newTitle: savedVisBuilderVis.title,
-                newCopyOnSave: false,
-                isTitleDuplicateConfirmed: false,
-                newDescription: savedVisBuilderVis.description,
-                returnToOrigin: true,
-              };
-
-              const onSave = getOnSave(
-                savedVisBuilderVis,
-                originatingApp,
-                visualizationIdFromUrl,
-                dispatch,
-                services
-              );
-
-              return onSave(saveOptions);
-            },
+            run: navActions.saveAndReturn,
           },
         ]
       : []),
   ];
 
   return topNavConfig;
+};
+
+export const getTopNavConfig = (
+  {
+    visualizationIdFromUrl,
+    savedVisBuilderVis,
+    saveDisabledReason,
+    dispatch,
+    originatingApp,
+  }: TopNavConfigParams,
+  services: VisBuilderServices,
+  navActions: VisBuilderNavActionMap
+) => {
+  const topNavMenu = [
+    {
+      tooltip: !!saveDisabledReason
+        ? saveDisabledReason
+        : savedVisBuilderVis?.id && originatingApp
+        ? i18n.translate('visBuilder.topNavMenu.saveVisualizationAsButtonLabel', {
+            defaultMessage: 'save as',
+          })
+        : i18n.translate('visBuilder.topNavMenu.saveVisualizationButtonLabel', {
+            defaultMessage: 'save',
+          }),
+      ariaLabel: i18n.translate('visBuilder.topNavMenu.saveVisualizationAsButtonLabel', {
+        defaultMessage: 'save',
+      }),
+      testId: 'visBuilderSaveButton',
+      run: navActions.save,
+      iconType: 'save',
+      controlType: 'icon',
+      disabled: !!saveDisabledReason,
+    },
+    ...(originatingApp && savedVisBuilderVis && savedVisBuilderVis.id
+      ? [
+          {
+            tooltip: i18n.translate('visualize.topNavMenu.openInspectorTooltip', {
+              defaultMessage: 'Save and return',
+            }),
+            ariaLabel: i18n.translate(
+              'visBuilder.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
+              {
+                defaultMessage: 'Finish editing visBuilder and return to the last app',
+              }
+            ),
+            testId: 'visBuilderSaveAndReturnButton',
+            run: navActions.saveAndReturn,
+            iconType: 'checkInCircleFilled',
+            controlType: 'icon',
+            disabled: !!saveDisabledReason,
+          },
+        ]
+      : []),
+  ];
+  return topNavMenu as TopNavMenuData[];
 };
 
 export const getOnSave = (
@@ -257,4 +272,69 @@ export const getOnSave = (
     }
   };
   return onSave;
+};
+
+export const getNavActions = (
+  {
+    visualizationIdFromUrl,
+    savedVisBuilderVis,
+    saveDisabledReason,
+    dispatch,
+    originatingApp,
+  }: TopNavConfigParams,
+  services: VisBuilderServices
+): VisBuilderNavActionMap => {
+  const {
+    i18n: { Context: I18nContext },
+    embeddable,
+  } = services;
+
+  const stateTransfer = embeddable.getStateTransfer();
+
+  const navActions: any = {};
+
+  const saveAndReturnNavAction = async () => {
+    const saveOptions = {
+      newTitle: savedVisBuilderVis.title,
+      newCopyOnSave: false,
+      isTitleDuplicateConfirmed: false,
+      newDescription: savedVisBuilderVis.description,
+      returnToOrigin: true,
+    };
+
+    const onSave = getOnSave(
+      savedVisBuilderVis,
+      originatingApp,
+      visualizationIdFromUrl,
+      dispatch,
+      services
+    );
+
+    return onSave(saveOptions);
+  };
+  navActions.saveAndReturn = saveAndReturnNavAction;
+
+  const saveNavAction = (_anchorElement) => {
+    const saveModal = (
+      <SavedObjectSaveModalOrigin
+        documentInfo={savedVisBuilderVis}
+        onSave={getOnSave(
+          savedVisBuilderVis,
+          originatingApp,
+          visualizationIdFromUrl,
+          dispatch,
+          services
+        )}
+        objectType={'visualization'}
+        onClose={() => {}}
+        originatingApp={originatingApp}
+        getAppNameFromId={stateTransfer.getAppNameFromId}
+      />
+    );
+
+    showSaveModal(saveModal, I18nContext);
+  };
+
+  navActions.save = saveNavAction;
+  return navActions;
 };

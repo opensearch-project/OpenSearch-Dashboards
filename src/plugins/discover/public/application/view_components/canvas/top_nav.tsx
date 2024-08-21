@@ -126,6 +126,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     <>
       {isEnhancementsEnabled &&
         !!opts?.optionalRef?.topLinkRef?.current &&
+        !showActionsInGroup &&
         createPortal(
           <EuiFlexGroup gutterSize="m">
             {topNavLinks.map((topNavLink) => (
@@ -145,7 +146,6 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
           opts.optionalRef.topLinkRef.current
         )}
       <TopNavMenu
-        className={isEnhancementsEnabled ? 'topNav hidden' : ''}
         appName={PLUGIN_ID}
         config={topNavLinks}
         showSearchBar={TopNavMenuItemRenderType.IN_PLACE}
