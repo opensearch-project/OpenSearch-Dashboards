@@ -33,7 +33,7 @@ export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
     this.node = node;
 
     const cardProps: EuiCardProps = {
-      ...(this.input.cardProps ? { ...this.input.cardProps } : {}),
+      ...this.input.cardProps,
       title: this.input.title ?? '',
       description: this.input.description,
       onClick: this.input.onClick,
