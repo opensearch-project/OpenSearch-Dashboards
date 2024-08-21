@@ -24,8 +24,8 @@ import {
   WorkspaceObject,
   WorkspaceAvailability,
 } from '../../../core/public';
-import { WORKSPACE_DETAIL_APP_ID } from '../common/constants';
 import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
+import { WORKSPACE_DETAIL_APP_ID, WORKSPACE_CREATE_APP_ID } from '../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
 import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
 import {
@@ -330,11 +330,7 @@ export function prependWorkspaceToBreadcrumbs(
   currentNavGroup: NavGroupItemInMap | undefined,
   navGroupsMap: Record<string, NavGroupItemInMap>
 ) {
-  if (
-    appId === WORKSPACE_DETAIL_APP_ID ||
-    appId === ESSENTIAL_OVERVIEW_PAGE_ID ||
-    appId === ANALYTICS_ALL_OVERVIEW_PAGE_ID
-  ) {
+  if (appId === WORKSPACE_DETAIL_APP_ID || appId === WORKSPACE_CREATE_APP_ID) {
     core.chrome.setBreadcrumbsEnricher(undefined);
     return;
   }
@@ -349,6 +345,17 @@ export function prependWorkspaceToBreadcrumbs(
    * so we don't need to have reset logic for workspace
    */
   if (currentWorkspace) {
+    // use case overview page only show workspace name
+    if (
+      appId === `${DEFAULT_NAV_GROUPS.search.id}_overview` ||
+      appId === `${DEFAULT_NAV_GROUPS.observability.id}_overview` ||
+      appId === `${DEFAULT_NAV_GROUPS['security-analytics'].id}_overview` ||
+      appId === ESSENTIAL_OVERVIEW_PAGE_ID ||
+      appId === ANALYTICS_ALL_OVERVIEW_PAGE_ID
+    ) {
+      core.chrome.setBreadcrumbsEnricher((breadcrumbs) => [{ text: currentWorkspace.name }]);
+      return;
+    }
     const useCase = getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features || []);
     // get workspace the only use case
     if (useCase && useCase !== ALL_USE_CASE_ID) {

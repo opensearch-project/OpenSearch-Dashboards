@@ -9,6 +9,7 @@ import { EuiI18n } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
   ContentManagementPluginStart,
+  ContentProvider,
   ESSENTIAL_OVERVIEW_CONTENT_AREAS,
 } from '../../../../../content_management/public';
 import { IMPORT_SAMPLE_DATA_APP_ID } from '../../../../common/constants';
@@ -17,13 +18,13 @@ export const registerSampleDataCard = (
   contentManagement: ContentManagementPluginStart,
   core: CoreStart
 ) => {
-  contentManagement.registerContentProvider({
-    id: `get_start_sample_data`,
-    getTargetArea: () => [ESSENTIAL_OVERVIEW_CONTENT_AREAS.GET_STARTED],
+  const sampleDataCard = (order: number, targetArea: string): ContentProvider => ({
+    id: `get_start_sample_data_${targetArea}`,
+    getTargetArea: () => targetArea,
     getContent: () => ({
       id: 'sample_data',
       kind: 'card',
-      order: 0,
+      order,
       description: i18n.translate('home.sampleData.card.description', {
         defaultMessage: 'You can install sample data to experiment with OpenSearch Dashboards.',
       }),
@@ -42,4 +43,9 @@ export const registerSampleDataCard = (
       },
     }),
   });
+
+  contentManagement.registerContentProvider(
+    sampleDataCard(0, ESSENTIAL_OVERVIEW_CONTENT_AREAS.GET_STARTED)
+  );
+  contentManagement.registerContentProvider(sampleDataCard(30, 'search_overview/get_started'));
 };

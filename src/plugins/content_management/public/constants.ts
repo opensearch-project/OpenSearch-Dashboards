@@ -20,6 +20,7 @@ export const SEARCH_OVERVIEW_PAGE_ID = `${SEARCH_USE_CASE_ID}_overview`;
 export const OBSERVABILITY_OVERVIEW_PAGE_ID = `${OBSERVABILITY_USE_CASE_ID}_overview`;
 export const SECURITY_ANALYTICS_OVERVIEW_PAGE_ID = `${SECURITY_ANALYTICS_USE_CASE_ID}_overview`;
 export const HOME_PAGE_ID = 'osd_homepage';
+export const SEARCH_OVERVIEW_ID = 'search_overview';
 
 // section ids
 export enum SECTIONS {

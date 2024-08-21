@@ -74,6 +74,10 @@ import { registerSampleDataCard } from './application/components/sample_data/sam
 import { registerHomeListCardToPage } from './application/components/home_list_card';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { HomeIcon } from './application/components/home_icon';
+import {
+  registerContentToSearchUseCasePage,
+  setupSearchUseCase,
+} from './application/components/usecase_overview/search_use_case_setup';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -168,6 +172,44 @@ export class HomePublicPlugin
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: PLUGIN_ID,
+        title: 'Home',
+        order: 0,
+      },
+    ]);
+
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      // register search use case overview page
+      core.application.register({
+        id: 'search_overview',
+        title: 'Overview',
+        mount: async (params: AppMountParameters) => {
+          const [
+            coreStart,
+            { contentManagement: contentManagementStart },
+          ] = await core.getStartServices();
+          setCommonService();
+
+          const { renderSearchUseCaseOverviewApp } = await import('./application');
+          return await renderSearchUseCaseOverviewApp(
+            params.element,
+            coreStart,
+            contentManagementStart
+          );
+        },
+      });
+
+      // add to search group
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
+        {
+          id: 'search_overview',
+          order: -1,
+        },
+      ]);
+    }
+
     // Register import sample data as a standalone app so that it is available inside workspace.
     core.application.register({
       id: IMPORT_SAMPLE_DATA_APP_ID,
@@ -211,6 +253,7 @@ export class HomePublicPlugin
     sectionTypes.registerSection(workWithDataSection);
     sectionTypes.registerSection(learnBasicsSection);
     setupHome(contentManagement);
+    setupSearchUseCase(contentManagement);
 
     return {
       featureCatalogue,
@@ -234,6 +277,7 @@ export class HomePublicPlugin
 
     // register sample data card to use case overview page
     registerSampleDataCard(contentManagement, core);
+    registerContentToSearchUseCasePage(contentManagement, core);
 
     // register what's new learn opensearch card to use case overview page
     registerHomeListCardToPage(contentManagement);
