@@ -15,6 +15,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSelectableOption,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
 import { getDataSourcesList } from '../../utils';
@@ -64,21 +65,20 @@ export const AssociationDataSourceModal = ({
     <EuiModal onClose={closeModal}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h1>
-            <FormattedMessage
-              id="workspace.detail.dataSources.associateModal.title"
-              defaultMessage="Associate OpenSearch connections"
-            />
-          </h1>
+          <FormattedMessage
+            id="workspace.detail.dataSources.associateModal.title"
+            defaultMessage="Associate OpenSearch connections"
+          />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiText size="s" color="subdued">
+        <EuiText size="xs" color="subdued">
           <FormattedMessage
             id="workspace.detail.dataSources.associateModal.message"
             defaultMessage="Add OpenSearch connections that will be available in the workspace."
           />
         </EuiText>
+        <EuiSpacer />
         <EuiSelectable
           aria-label="Searchable"
           searchable
@@ -99,7 +99,7 @@ export const AssociationDataSourceModal = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButton onClick={closeModal} fill>
+        <EuiButton onClick={closeModal}>
           <FormattedMessage
             id="workspace.detail.dataSources.associateModal.close.button"
             defaultMessage="Close"
@@ -112,7 +112,7 @@ export const AssociationDataSourceModal = ({
         >
           <FormattedMessage
             id="workspace.detail.dataSources.associateModal.save.button"
-            defaultMessage="Save changes"
+            defaultMessage="Associate data sources"
           />
         </EuiButton>
       </EuiModalFooter>
