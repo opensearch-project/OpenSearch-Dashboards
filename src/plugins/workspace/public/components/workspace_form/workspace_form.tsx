@@ -4,8 +4,8 @@
  */
 
 import React, { useRef } from 'react';
-import { EuiPanel, EuiSpacer, EuiTitle, EuiForm } from '@elastic/eui';
-
+import { EuiPanel, EuiSpacer, EuiTitle, EuiForm, EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { WorkspaceFormProps } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
 import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
@@ -16,7 +16,7 @@ import { SelectDataSourcePanel } from './select_data_source_panel';
 import { EnterDetailsPanel } from './workspace_enter_details_panel';
 import {
   selectDataSourceTitle,
-  usersAndPermissionsTitle,
+  usersAndPermissionsCreatePageTitle,
   workspaceDetailsTitle,
   workspaceUseCaseTitle,
 } from './constants';
@@ -36,7 +36,6 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     formData,
     formErrors,
     numberOfErrors,
-    numberOfChanges,
     setName,
     setDescription,
     handleFormSubmit,
@@ -95,8 +94,15 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
       {permissionEnabled && (
         <EuiPanel>
           <EuiTitle size="s">
-            <h2>{usersAndPermissionsTitle}</h2>
+            <h2>{usersAndPermissionsCreatePageTitle}</h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="default">
+            {i18n.translate('workspace.form.usersAndPermissions.description', {
+              defaultMessage:
+                'You will be added as an owner to the workspace. Select additional users and user groups as workspace collaborators with different access levels.',
+            })}
+          </EuiText>
           <EuiSpacer size="m" />
           <WorkspacePermissionSettingPanel
             errors={formErrors.permissionSettings?.fields}
