@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PopoverAnchorPosition } from '@elastic/eui';
+import { EuiCompressedFieldText, PopoverAnchorPosition } from '@elastic/eui';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
@@ -51,6 +51,7 @@ export interface QueryEditorProps {
   bannerClassName?: string;
   footerClassName?: string;
   filterBar?: any;
+  prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
 }
 
 interface Props extends QueryEditorProps {
@@ -363,6 +364,7 @@ export default class QueryEditorUI extends Component<Props, State> {
         };
       },
       provideCompletionItems: this.provideCompletionItems,
+      prepend: this.props.prepend,
     };
 
     const languageEditor = this.languageManager.getQueryEnhancements(this.props.query.language)

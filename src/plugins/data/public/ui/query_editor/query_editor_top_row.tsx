@@ -208,7 +208,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
         <QueryEditor
           disableAutoFocus={props.disableAutoFocus}
           dataSet={dataSet}
-          queryActions={props.prepend}
+          prepend={props.prepend}
           query={parsedQuery}
           dataSetContainerRef={props.dataSetContainerRef}
           screenTitle={props.screenTitle}

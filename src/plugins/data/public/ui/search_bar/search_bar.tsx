@@ -45,6 +45,7 @@ import { QueryEditorTopRow } from '../query_editor';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { FilterOptions } from '../filter_bar/filter_options';
+import { LanguageManager } from '../../query/query_string/language_manager/language_manager';
 
 interface SearchBarInjectedDeps {
   opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
@@ -230,6 +231,13 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     return this.props.showQueryBar && (showDatePicker || showQueryInput);
   }
 
+  private isQueryLanguageFilterable() {
+    return (
+      this.queryStringService.getLanguageManager().getQueryEnhancements(this.state.query?.language!)
+        ?.fields?.filterable ?? true
+    );
+  }
+
   private shouldRenderFilterBar() {
     // TODO: MQL handle no index patterns?
     return (
@@ -238,10 +246,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       (!this.useNewHeader || this.props.filters.length > 0) &&
       this.props.indexPatterns &&
       compact(this.props.indexPatterns).length > 0 &&
-      (this.queryStringService
-        .getLanguageManager()
-        .getQueryEnhancements(this.state.query?.language!)?.searchBar?.showFilterBar ??
-        true)
+      this.isQueryLanguageFilterable()
     );
   }
 
@@ -547,7 +552,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
           isLoading={this.props.isLoading}
-          prepend={this.props.showFilterBar ? searchBarMenu(!this.useNewHeader) : undefined}
+          prepend={this.isQueryLanguageFilterable() ? searchBarMenu() : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}
