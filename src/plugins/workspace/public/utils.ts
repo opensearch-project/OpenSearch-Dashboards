@@ -13,6 +13,7 @@ import {
   ChromeBreadcrumb,
   ApplicationStart,
   HttpSetup,
+  DEFAULT_NAV_GROUPS,
 } from '../../../core/public';
 import {
   App,
@@ -23,7 +24,12 @@ import {
   WorkspaceObject,
   WorkspaceAvailability,
 } from '../../../core/public';
-import { DEFAULT_SELECTED_FEATURES_IDS, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
+import {
+  ANALYTICS_ALL_OVERVIEW_PAGE_ID,
+  DEFAULT_SELECTED_FEATURES_IDS,
+  ESSENTIAL_OVERVIEW_PAGE_ID,
+  WORKSPACE_DETAIL_APP_ID,
+} from '../common/constants';
 import { WorkspaceUseCase } from './types';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
 import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
@@ -312,7 +318,11 @@ export function prependWorkspaceToBreadcrumbs(
   currentNavGroup: NavGroupItemInMap | undefined,
   navGroupsMap: Record<string, NavGroupItemInMap>
 ) {
-  if (appId === WORKSPACE_DETAIL_APP_ID) {
+  if (
+    appId === WORKSPACE_DETAIL_APP_ID ||
+    appId === ESSENTIAL_OVERVIEW_PAGE_ID ||
+    appId === ANALYTICS_ALL_OVERVIEW_PAGE_ID
+  ) {
     core.chrome.setBreadcrumbsEnricher(undefined);
     return;
   }
@@ -358,7 +368,7 @@ export function prependWorkspaceToBreadcrumbs(
         },
       };
       if (useCase === ALL_USE_CASE_ID) {
-        if (currentNavGroup) {
+        if (currentNavGroup && currentNavGroup.id !== DEFAULT_NAV_GROUPS.all.id) {
           return [homeBreadcrumb, workspaceBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
         } else {
           return [homeBreadcrumb, workspaceBreadcrumb, ...breadcrumbs];

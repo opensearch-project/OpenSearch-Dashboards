@@ -31,8 +31,8 @@ import {
   WORKSPACE_LIST_APP_ID,
   WORKSPACE_USE_CASES,
   WORKSPACE_INITIAL_APP_ID,
-  ESSENTIAL_OVERVIEW_APP_ID,
-  ANALYTICS_OVERVIEW_ALL_APP_ID,
+  ESSENTIAL_OVERVIEW_PAGE_ID,
+  ANALYTICS_ALL_OVERVIEW_PAGE_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services, WorkspaceUseCase } from './types';
@@ -135,14 +135,14 @@ export class WorkspacePlugin
 
           // disable essential overview page for workspace use case is not essential
           if (
-            app.id === ESSENTIAL_OVERVIEW_APP_ID &&
+            app.id === ESSENTIAL_OVERVIEW_PAGE_ID &&
             workspaceUseCase !== WORKSPACE_USE_CASES.essentials.id
           ) {
             return { status: AppStatus.inaccessible };
           }
 
           // disable analytics(All) overview page for workspace use case is not analytics(All)
-          if (app.id === ANALYTICS_OVERVIEW_ALL_APP_ID && workspaceUseCase !== ALL_USE_CASE_ID) {
+          if (app.id === ANALYTICS_ALL_OVERVIEW_PAGE_ID && workspaceUseCase !== ALL_USE_CASE_ID) {
             return { status: AppStatus.inaccessible };
           }
 
@@ -426,7 +426,7 @@ export class WorkspacePlugin
     if (core.chrome.navGroup.getNavGroupEnabled() && contentManagement) {
       // workspace essential use case overview
       core.application.register({
-        id: ESSENTIAL_OVERVIEW_APP_ID,
+        id: ESSENTIAL_OVERVIEW_PAGE_ID,
         title: '',
         async mount(params: AppMountParameters) {
           const { renderUseCaseOverviewApp } = await import('./application');
@@ -441,14 +441,14 @@ export class WorkspacePlugin
             contentManagement: contentManagementStart,
           };
 
-          return renderUseCaseOverviewApp(params, services, ESSENTIAL_OVERVIEW_APP_ID);
+          return renderUseCaseOverviewApp(params, services, ESSENTIAL_OVERVIEW_PAGE_ID);
         },
         workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       });
 
       core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
         {
-          id: ESSENTIAL_OVERVIEW_APP_ID,
+          id: ESSENTIAL_OVERVIEW_PAGE_ID,
           order: -1,
           title: i18n.translate('workspace.nav.essential_overview.title', {
             defaultMessage: 'Overview',
@@ -461,7 +461,7 @@ export class WorkspacePlugin
 
       // register workspace Analytics(all) use case overview app
       core.application.register({
-        id: ANALYTICS_OVERVIEW_ALL_APP_ID,
+        id: ANALYTICS_ALL_OVERVIEW_PAGE_ID,
         title: '',
         async mount(params: AppMountParameters) {
           const { renderUseCaseOverviewApp } = await import('./application');
@@ -476,14 +476,14 @@ export class WorkspacePlugin
             contentManagement: contentManagementStart,
           };
 
-          return renderUseCaseOverviewApp(params, services, ANALYTICS_OVERVIEW_ALL_APP_ID);
+          return renderUseCaseOverviewApp(params, services, ANALYTICS_ALL_OVERVIEW_PAGE_ID);
         },
         workspaceAvailability: WorkspaceAvailability.insideWorkspace,
       });
 
       core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
         {
-          id: ANALYTICS_OVERVIEW_ALL_APP_ID,
+          id: ANALYTICS_ALL_OVERVIEW_PAGE_ID,
           order: -1,
           title: i18n.translate('workspace.nav.analyticsAll_overview.title', {
             defaultMessage: 'Overview',

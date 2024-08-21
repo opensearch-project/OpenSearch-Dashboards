@@ -39,7 +39,7 @@ describe('Setup use case overview', () => {
     const call = registerPageMock.mock.calls[0];
     expect(call[0]).toMatchInlineSnapshot(`
       Object {
-        "id": "essential_overview",
+        "id": "analytics_overview",
         "sections": Array [
           Object {
             "id": "service_cards",
@@ -71,7 +71,7 @@ describe('Setup use case overview', () => {
     expect(calls.length).toBe(5);
 
     const firstCall = calls[0];
-    expect(firstCall[0].getTargetArea()).toMatchInlineSnapshot(`"essential_overview/get_started"`);
+    expect(firstCall[0].getTargetArea()).toMatchInlineSnapshot(`"analytics_overview/get_started"`);
     expect(firstCall[0].getContent()).toMatchInlineSnapshot(`
       Object {
         "cardProps": Object {
@@ -91,6 +91,32 @@ describe('Setup use case overview', () => {
         "title": "Discover insights",
       }
     `);
+
+    const whatsNew = calls[3];
+    expect(whatsNew[0].getTargetArea()).toMatchInlineSnapshot(`"analytics_overview/service_cards"`);
+    expect(whatsNew[0].getContent()).toMatchInlineSnapshot(`
+      Object {
+        "id": "whats_new",
+        "kind": "custom",
+        "order": 10,
+        "render": [Function],
+        "width": 24,
+      }
+    `);
+
+    const learnOpenSearch = calls[4];
+    expect(learnOpenSearch[0].getTargetArea()).toMatchInlineSnapshot(
+      `"analytics_overview/service_cards"`
+    );
+    expect(learnOpenSearch[0].getContent()).toMatchInlineSnapshot(`
+      Object {
+        "id": "learn_opensearch",
+        "kind": "custom",
+        "order": 20,
+        "render": [Function],
+        "width": 24,
+      }
+    `);
   });
 
   it('setAnalyticsAllOverviewSection', () => {
@@ -99,7 +125,7 @@ describe('Setup use case overview', () => {
     const call = registerPageMock.mock.calls[0];
     expect(call[0]).toMatchInlineSnapshot(`
       Object {
-        "id": "essential_overview",
+        "id": "analytics_overview",
         "sections": Array [
           Object {
             "id": "service_cards",
@@ -131,9 +157,7 @@ describe('Setup use case overview', () => {
     expect(calls.length).toBe(5);
 
     const firstCall = calls[0];
-    expect(firstCall[0].getTargetArea()).toMatchInlineSnapshot(
-      `"analytics_all_overview/get_started"`
-    );
+    expect(firstCall[0].getTargetArea()).toMatchInlineSnapshot(`"all_overview/get_started"`);
     expect(firstCall[0].getContent()).toMatchInlineSnapshot(`
       Object {
         "cardProps": Object {
@@ -146,6 +170,32 @@ describe('Setup use case overview', () => {
         "onClick": [Function],
         "order": 4000,
         "title": "Observability",
+      }
+    `);
+
+    const whatsNew = calls[3];
+    expect(whatsNew[0].getTargetArea()).toMatchInlineSnapshot(`"all_overview/service_cards"`);
+    expect(whatsNew[0].getContent()).toMatchInlineSnapshot(`
+      Object {
+        "id": "whats_new",
+        "kind": "custom",
+        "order": 30,
+        "render": [Function],
+        "width": 12,
+      }
+    `);
+
+    const learnOpenSearch = calls[4];
+    expect(learnOpenSearch[0].getTargetArea()).toMatchInlineSnapshot(
+      `"all_overview/service_cards"`
+    );
+    expect(learnOpenSearch[0].getContent()).toMatchInlineSnapshot(`
+      Object {
+        "id": "learn_opensearch",
+        "kind": "custom",
+        "order": 40,
+        "render": [Function],
+        "width": 12,
       }
     `);
   });

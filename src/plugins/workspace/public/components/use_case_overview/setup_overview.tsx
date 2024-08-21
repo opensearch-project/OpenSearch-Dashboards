@@ -25,6 +25,21 @@ import {
   WHATS_NEW_CONFIG,
 } from '../../../../../plugins/home/public';
 import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
+import { Content } from '../../../../../plugins/content_management/public';
+
+const recentlyViewSectionRender = (contents: Content[]) => {
+  return (
+    <>
+      {contents.map((content) => {
+        if (content.kind === 'custom') {
+          return content.render();
+        }
+
+        return null;
+      })}
+    </>
+  );
+};
 
 // Essential overview part
 export const setEssentialOverviewSection = (contentManagement: ContentManagementPluginSetup) => {
@@ -42,19 +57,7 @@ export const setEssentialOverviewSection = (contentManagement: ContentManagement
         order: 2000,
         title: 'Recently viewed',
         kind: 'custom',
-        render: (contents) => {
-          return (
-            <>
-              {contents.map((content) => {
-                if (content.kind === 'custom') {
-                  return content.render();
-                }
-
-                return null;
-              })}
-            </>
-          );
-        },
+        render: recentlyViewSectionRender,
       },
       {
         id: SECTIONS.GET_STARTED,
@@ -140,19 +143,7 @@ export const setAnalyticsAllOverviewSection = (contentManagement: ContentManagem
         order: 2000,
         title: 'Recently viewed',
         kind: 'custom',
-        render: (contents) => {
-          return (
-            <>
-              {contents.map((content) => {
-                if (content.kind === 'custom') {
-                  return content.render();
-                }
-
-                return null;
-              })}
-            </>
-          );
-        },
+        render: recentlyViewSectionRender,
       },
       {
         id: SECTIONS.GET_STARTED,

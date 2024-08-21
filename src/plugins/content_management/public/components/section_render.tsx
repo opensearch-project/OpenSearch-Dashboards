@@ -42,8 +42,8 @@ const DashboardSection = ({ section, embeddable, contents$, savedObjectsClient }
   if (section.kind === 'dashboard' && factory && input) {
     // const input = createDashboardSection(section, contents ?? []);
     return (
-      // to make dashboard section align with others add margin left -8px
-      <div style={{ marginLeft: '-8px' }}>
+      // to make dashboard section align with others add margin left and right -8px
+      <div style={{ margin: '0 -8px' }}>
         <EmbeddableRenderer factory={factory} input={input} />
       </div>
     );
