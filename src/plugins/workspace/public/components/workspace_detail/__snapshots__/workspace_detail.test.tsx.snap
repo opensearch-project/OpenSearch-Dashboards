@@ -5,7 +5,6 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
   <div
     class="euiPage euiPage--paddingMedium euiPage--column euiPage--grow"
   >
-    workspace-detail-delete-button
     <div
       class="euiSpacer euiSpacer--l"
     />

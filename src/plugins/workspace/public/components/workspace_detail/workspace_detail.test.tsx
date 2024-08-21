@@ -121,7 +121,10 @@ const WorkspaceDetailPage = (props: any) => {
       dataSourceManagement,
       navigationUI: {
         HeaderControl: ({ controls }) => {
-          return controls?.[0].testId ?? null;
+          if (props.showDeleteModal && controls && controls[0] && controls[0].run) {
+            controls[0].run();
+          }
+          return null;
         },
       },
     },
@@ -205,8 +208,19 @@ describe('WorkspaceDetail', () => {
 
   it('delete button will been shown at page header', async () => {
     const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
-    const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
-    expect(getByText('workspace-detail-delete-button')).toBeInTheDocument();
+    const { getByText, getByTestId } = render(
+      WorkspaceDetailPage({
+        workspacesService: workspaceService,
+        showDeleteModal: true,
+      })
+    );
+    expect(getByText('Delete workspace')).toBeInTheDocument();
+    const input = getByTestId('delete-workspace-modal-input');
+    fireEvent.change(input, {
+      target: { value: 'delete' },
+    });
+    const confirmButton = getByTestId('delete-workspace-modal-confirm');
+    fireEvent.click(confirmButton);
   });
 
   it('click on Collaborators tab when permission control and dataSource disabled', async () => {
