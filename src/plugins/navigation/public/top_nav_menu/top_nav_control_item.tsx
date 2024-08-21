@@ -52,7 +52,10 @@ export function TopNavControlItem(props: TopNavControlData) {
       <EuiText className="descriptionHeaderControl" size="s">
         {props.description}
         {links?.map((linkProps) => (
-          <TopNavControlItem {...linkProps} />
+          <>
+            {/* @ts-ignore using an undefined property to prevent abuse */}
+            <TopNavControlItem {...linkProps} sizeOverride="xs" />
+          </>
         ))}
       </EuiText>
     );
@@ -102,7 +105,8 @@ export function TopNavControlItem(props: TopNavControlData) {
     case 'link':
       component = (
         <EuiHeaderLink
-          size="s"
+          // @ts-ignore using an undefined property to prevent abuse
+          size={props.sizeOverride || 's'}
           iconType={props.iconType}
           iconSide={props.iconSide}
           iconSize={props.iconSize}

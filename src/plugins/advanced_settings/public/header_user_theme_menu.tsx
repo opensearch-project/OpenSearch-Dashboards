@@ -21,23 +21,17 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { CoreStart } from 'opensearch-dashboards/public';
+import { themeVersionLabelMap, themeVersionValueMap } from '@osd/ui-shared-deps/theme_config';
 import { useOpenSearchDashboards, useUiSetting$ } from '../../opensearch_dashboards_react/public';
 
 export const HeaderUserThemeMenu = () => {
   const {
     services: { uiSettings },
   } = useOpenSearchDashboards<CoreStart>();
-  // TODO: move to central location?
-  const themeOptions = [
-    {
-      value: 'v7',
-      text: 'v7',
-    },
-    {
-      value: 'next',
-      text: 'Next (preview)',
-    },
-  ];
+  const themeOptions = Object.keys(themeVersionLabelMap).map((v) => ({
+    value: v,
+    text: themeVersionLabelMap[v],
+  }));
   const screenModeOptions = [
     {
       value: 'light',
@@ -52,13 +46,18 @@ export const HeaderUserThemeMenu = () => {
       text: 'Use browser settings',
     },
   ];
+  const defaultTheme = uiSettings.getDefault('theme:version');
+  const defaultScreenMode = uiSettings.getDefault('theme:darkMode');
   const prefersAutomatic =
     (window.localStorage.getItem('useBrowserColorScheme') && window.matchMedia) || false;
   const [darkMode, setDarkMode] = useUiSetting$<boolean>('theme:darkMode');
   const [themeVersion, setThemeVersion] = useUiSetting$<string>('theme:version');
   const [isPopoverOpen, setPopover] = useState(false);
   // TODO: improve naming?
-  const [theme, setTheme] = useState(themeOptions.find((t) => t.text === themeVersion)?.value);
+  const [theme, setTheme] = useState(
+    themeOptions.find((t) => t.value === themeVersionValueMap[themeVersion])?.value ||
+      themeVersionValueMap[defaultTheme]
+  );
   const [screenMode, setScreenMode] = useState(
     prefersAutomatic
       ? screenModeOptions[2].value
@@ -66,9 +65,6 @@ export const HeaderUserThemeMenu = () => {
       ? screenModeOptions[1].value
       : screenModeOptions[0].value
   );
-  const allSettings = uiSettings.getAll();
-  const defaultTheme = allSettings['theme:version'].value;
-  const defaultScreenMode = allSettings['theme:darkMode'].value;
 
   const legacyAppearance = !uiSettings.get('home:useNewHomePage');
 
@@ -85,7 +81,7 @@ export const HeaderUserThemeMenu = () => {
   };
 
   const onAppearanceSubmit = async (e: SyntheticEvent) => {
-    const actions = [setThemeVersion(themeOptions.find((t) => theme === t.value)?.text ?? '')];
+    const actions = [setThemeVersion(themeOptions.find((t) => theme === t.value)?.value ?? '')];
 
     if (screenMode === 'automatic') {
       const browserMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -182,7 +178,7 @@ export const HeaderUserThemeMenu = () => {
         <EuiFlexItem grow={false}>
           <EuiCompressedFormRow hasEmptyLabelSpace>
             {/* TODO: disable submit until changes */}
-            <EuiSmallButton fill onClick={onAppearanceSubmit} type="submit">
+            <EuiSmallButton onClick={onAppearanceSubmit} type="submit">
               Apply
             </EuiSmallButton>
           </EuiCompressedFormRow>

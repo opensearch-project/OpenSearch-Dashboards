@@ -1,0 +1,2 @@
+refactor:
+- Update page header for settings, objects and index pattern page ([#7744](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7744))

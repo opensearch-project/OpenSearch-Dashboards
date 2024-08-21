@@ -36,8 +36,12 @@ import {
   EuiText,
   EuiTextColor,
   EuiButtonEmpty,
+  EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+import { ApplicationStart } from 'src/core/public';
+import { i18n } from '@osd/i18n';
+import { NavigationPublicPluginStart } from '../../../../../navigation/public';
 
 export const Header = ({
   onExportAll,
@@ -46,6 +50,9 @@ export const Header = ({
   onRefresh,
   objectCount,
   showDuplicateAll = false,
+  useUpdatedUX,
+  navigationUI: { HeaderControl },
+  applications,
 }: {
   onExportAll: () => void;
   onImport: () => void;
@@ -53,76 +60,34 @@ export const Header = ({
   onRefresh: () => void;
   objectCount: number;
   showDuplicateAll: boolean;
-}) => (
-  <Fragment>
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <h1>
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.header.savedObjectsTitle"
-              defaultMessage="Saved Objects"
-            />
-          </h1>
-        </EuiText>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
-          {showDuplicateAll && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                data-test-subj="duplicateObjects"
-                onClick={onDuplicate}
-                disabled={objectCount === 0}
-                iconType="copy"
-              >
-                <FormattedMessage
-                  id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
-                  defaultMessage="Copy all objects to..."
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="exportAction"
-              data-test-subj="exportAllObjects"
-              onClick={onExportAll}
-            >
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
-                defaultMessage="Export all objects"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="importAction"
-              data-test-subj="importObjects"
-              onClick={onImport}
-            >
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.header.importButtonLabel"
-                defaultMessage="Import"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" iconType="refresh" onClick={onRefresh}>
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.header.refreshButtonLabel"
-                defaultMessage="Refresh"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer size="m" />
+  useUpdatedUX: boolean;
+  navigationUI: NavigationPublicPluginStart['ui'];
+  applications: ApplicationStart;
+}) => {
+  const title = useUpdatedUX ? null : (
+    <EuiFlexItem grow={false}>
+      <EuiText size="s">
+        <h1>
+          <FormattedMessage
+            id="savedObjectsManagement.objectsTable.header.savedObjectsTitle"
+            defaultMessage="Saved Objects"
+          />
+        </h1>
+      </EuiText>
+    </EuiFlexItem>
+  );
+  const description = useUpdatedUX ? (
+    <HeaderControl
+      controls={[
+        {
+          description: i18n.translate('savedObjectsManagement.objectsTable.table.description', {
+            defaultMessage: 'Manage and share your assets.',
+          }),
+        },
+      ]}
+      setMountPoint={applications.setAppDescriptionControls}
+    />
+  ) : (
     <EuiText size="s">
       <p>
         <EuiTextColor color="subdued">
@@ -133,6 +98,130 @@ export const Header = ({
         </EuiTextColor>
       </p>
     </EuiText>
-    <EuiSpacer size="m" />
-  </Fragment>
-);
+  );
+
+  const rightControls = useUpdatedUX ? (
+    <HeaderControl
+      controls={[
+        ...(showDuplicateAll
+          ? [
+              {
+                renderComponent: (
+                  <EuiButton
+                    size="s"
+                    data-test-subj="duplicateObjects"
+                    onClick={onDuplicate}
+                    disabled={objectCount === 0}
+                    iconType="copy"
+                  >
+                    <FormattedMessage
+                      id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
+                      defaultMessage="Copy all objects to..."
+                    />
+                  </EuiButton>
+                ),
+              },
+            ]
+          : []),
+        {
+          renderComponent: (
+            <EuiButton
+              size="s"
+              iconType="exportAction"
+              data-test-subj="exportAllObjects"
+              onClick={onExportAll}
+            >
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
+                defaultMessage="Export all objects"
+              />
+            </EuiButton>
+          ),
+        },
+        {
+          renderComponent: (
+            <EuiButton
+              size="s"
+              iconType="importAction"
+              data-test-subj="importObjects"
+              onClick={onImport}
+            >
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.header.importButtonLabel"
+                defaultMessage="Import"
+              />
+            </EuiButton>
+          ),
+        },
+      ]}
+      setMountPoint={applications.setAppRightControls}
+    />
+  ) : (
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
+        {showDuplicateAll && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              data-test-subj="duplicateObjects"
+              onClick={onDuplicate}
+              disabled={objectCount === 0}
+              iconType="copy"
+            >
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
+                defaultMessage="Copy all objects to..."
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            iconType="exportAction"
+            data-test-subj="exportAllObjects"
+            onClick={onExportAll}
+          >
+            <FormattedMessage
+              id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
+              defaultMessage="Export all objects"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            iconType="importAction"
+            data-test-subj="importObjects"
+            onClick={onImport}
+          >
+            <FormattedMessage
+              id="savedObjectsManagement.objectsTable.header.importButtonLabel"
+              defaultMessage="Import"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="s" iconType="refresh" onClick={onRefresh}>
+            <FormattedMessage
+              id="savedObjectsManagement.objectsTable.header.refreshButtonLabel"
+              defaultMessage="Refresh"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+
+  return (
+    <Fragment>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
+        {title}
+        {rightControls}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      {description}
+      <EuiSpacer size="m" />
+    </Fragment>
+  );
+};

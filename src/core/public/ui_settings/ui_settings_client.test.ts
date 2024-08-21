@@ -64,6 +64,24 @@ afterEach(() => {
   done$.complete();
 });
 
+describe('#getDefault', () => {
+  it('fetches correct uiSettings defaults', () => {
+    const { client } = setup();
+    expect(client.getDefault('dateFormat')).toMatchSnapshot();
+    expect(client.getDefault('aLongNumeral')).toBe(BigInt(Number.MAX_SAFE_INTEGER) + 11n);
+  });
+
+  it('converts json default values', () => {
+    const { client } = setup({ defaults: { test: { value: '{"a": 1}', type: 'json' } } });
+    expect(client.getDefault('test')).toMatchSnapshot();
+  });
+
+  it("throws on unknown properties that don't have a value yet.", () => {
+    const { client } = setup();
+    expect(() => client.getDefault('unknownProperty')).toThrowErrorMatchingSnapshot();
+  });
+});
+
 describe('#get', () => {
   it('gives access to uiSettings values', () => {
     const { client } = setup();

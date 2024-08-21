@@ -35,6 +35,8 @@ import * as v7light from '@elastic/eui/dist/eui_theme_light.json';
 import * as v7dark from '@elastic/eui/dist/eui_theme_dark.json';
 import * as v8light from '@elastic/eui/dist/eui_theme_next_light.json';
 import * as v8dark from '@elastic/eui/dist/eui_theme_next_dark.json';
+import * as v9light from '@elastic/eui/dist/eui_theme_v9_light.json';
+import * as v9dark from '@elastic/eui/dist/eui_theme_v9_dark.json';
 import * as UiSharedDeps from '@osd/ui-shared-deps';
 import { OpenSearchDashboardsRequest } from '../../../core/server';
 import { AppBootstrap } from './bootstrap';
@@ -174,6 +176,8 @@ export function uiRenderMixin(osdServer, server, config) {
           basePath,
           regularBundlePath,
           UiSharedDeps,
+          THEME_CSS_DIST_FILENAMES: JSON.stringify(UiSharedDeps.themeCssDistFilenames),
+          KUI_CSS_DIST_FILENAMES: JSON.stringify(UiSharedDeps.kuiCssDistFilenames),
         },
       });
 
@@ -237,6 +241,10 @@ export function uiRenderMixin(osdServer, server, config) {
           light: getLoadingVars(v8light),
           dark: getLoadingVars(v8dark),
         },
+        v9: {
+          light: getLoadingVars(v9light),
+          dark: getLoadingVars(v9dark),
+        },
       });
 
       /*
@@ -246,11 +254,13 @@ export function uiRenderMixin(osdServer, server, config) {
       const fontText = JSON.stringify({
         v7: 'Inter UI',
         v8: 'Source Sans 3',
+        v9: 'Rubik',
       });
 
       const fontCode = JSON.stringify({
         v7: 'Roboto Mono',
         v8: 'Source Code Pro',
+        v9: 'Fira Code',
       });
 
       const startup = new AppBootstrap(
@@ -259,6 +269,9 @@ export function uiRenderMixin(osdServer, server, config) {
             configEnableUserControl,
             configDarkMode,
             configThemeVersion,
+            defaultThemeVersion:
+              UiSharedDeps.themeVersionValueMap[uiSettings.getDefault('theme:version')],
+            THEME_VERSION_VALUE_MAP: JSON.stringify(UiSharedDeps.themeVersionValueMap),
             THEME_SOURCES,
             fontText,
             fontCode,

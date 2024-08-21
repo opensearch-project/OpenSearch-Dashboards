@@ -4,19 +4,7 @@
  */
 
 .headerRecentItemsButton {
-  margin-left: $euiSizeM;
-  margin-right: $euiSizeS;
-  min-width: $euiSizeL;
-  font-size: 0 !important;
-
-  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  .euiHeaderSectionItemButton__content,
-  .euiButtonEmpty__text {
-    line-height: 1;
-  }
-
-  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
-  .euiButtonEmpty__content {
-    padding: 0;
+  .primaryApplicationHeader & {
+    margin-top: $euiSizeXS;
   }
 }

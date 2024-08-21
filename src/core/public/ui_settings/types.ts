@@ -67,6 +67,13 @@ export interface IUiSettingsClient {
   getAll: () => Readonly<Record<string, PublicUiSettingsParams & UserProvidedValues>>;
 
   /**
+   * Gets the default value for a specific uiSetting. If the parameter is not defined and the key is
+   * not registered by any plugin then an error is thrown, otherwise reads the default value defined by
+   * a plugin.
+   */
+  getDefault: <T = any>(key: string) => T;
+
+  /**
    * Sets the value for a uiSetting. If the setting is not registered by any plugin
    * it will be stored as a custom setting. The new value will be synchronously available via
    * the `get()` method and sent to the server in the background. If the request to the

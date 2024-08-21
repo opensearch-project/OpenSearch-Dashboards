@@ -22,6 +22,27 @@ interface Props {
 }
 
 const CardListInner = ({ embeddable, input, embeddableServices }: Props) => {
+  if (input.columns) {
+    const width = `${(1 / input.columns) * 100}%`;
+    const cards = Object.values(input.panels).map((panel) => {
+      const child = embeddable.getChild(panel.explicitInput.id);
+      return (
+        <EuiFlexItem key={panel.explicitInput.id} style={{ minWidth: `calc(${width} - 8px)` }}>
+          <embeddableServices.EmbeddablePanel embeddable={child} />
+        </EuiFlexItem>
+      );
+    });
+    return (
+      <EuiFlexGroup
+        wrap={!!input.wrap}
+        style={input.wrap ? {} : { overflowX: 'auto' }}
+        gutterSize="s"
+      >
+        {cards}
+      </EuiFlexGroup>
+    );
+  }
+
   const cards = Object.values(input.panels).map((panel) => {
     const child = embeddable.getChild(panel.explicitInput.id);
     return (
@@ -31,10 +52,9 @@ const CardListInner = ({ embeddable, input, embeddableServices }: Props) => {
     );
   });
 
-  // TODO: we should perhaps display the cards in multiple rows when the actual number of cards exceed the column size
   return (
-    <EuiFlexGroup gutterSize="s">
-      {input.columns ? cards.slice(0, input.columns) : cards}
+    <EuiFlexGroup wrap={input.wrap} gutterSize="s">
+      {cards}
     </EuiFlexGroup>
   );
 };
