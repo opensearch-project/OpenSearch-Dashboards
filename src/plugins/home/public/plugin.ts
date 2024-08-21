@@ -171,6 +171,7 @@ export class HomePublicPlugin
       {
         id: PLUGIN_ID,
         title: 'Home',
+        order: 0,
       },
     ]);
 

@@ -125,17 +125,25 @@ export class WorkspacePlugin
       this.registeredUseCases$,
     ]).subscribe(([currentWorkspace, registeredUseCases]) => {
       if (currentWorkspace) {
-        const isAllUseCase =
-          getFirstUseCaseOfFeatureConfigs(currentWorkspace.features || []) === ALL_USE_CASE_ID;
+        const workspaceUseCase = getFirstUseCaseOfFeatureConfigs(currentWorkspace.features || []);
+        const isAllUseCase = workspaceUseCase === ALL_USE_CASE_ID;
         this.appUpdater$.next((app) => {
-          // When in all workspace, the home should be replaced by workspace detail page
+          // When in all workspace, the home should be replaced by workspace overview page
           if (app.id === 'home' && isAllUseCase) {
             return { navLinkStatus: AppNavLinkStatus.hidden };
           }
 
-          // show the overview page in all use case
-          if (app.id === WORKSPACE_DETAIL_APP_ID && isAllUseCase) {
-            return { navLinkStatus: AppNavLinkStatus.visible };
+          // disable essential overview page for workspace use case is not essential
+          if (
+            app.id === ESSENTIAL_OVERVIEW_APP_ID &&
+            workspaceUseCase !== WORKSPACE_USE_CASES.essentials.id
+          ) {
+            return { status: AppStatus.inaccessible };
+          }
+
+          // disable analytics(All) overview page for workspace use case is not analytics(All)
+          if (app.id === ANALYTICS_OVERVIEW_ALL_APP_ID && workspaceUseCase !== ALL_USE_CASE_ID) {
+            return { status: AppStatus.inaccessible };
           }
 
           if (isAppAccessibleInWorkspace(app, currentWorkspace, registeredUseCases)) {
@@ -414,16 +422,6 @@ export class WorkspacePlugin
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: WORKSPACE_DETAIL_APP_ID,
-        order: 100,
-        title: i18n.translate('workspace.nav.workspaceDetail.title', {
-          defaultMessage: 'Overview',
-        }),
-      },
-    ]);
 
     if (core.chrome.navGroup.getNavGroupEnabled() && contentManagement) {
       // workspace essential use case overview

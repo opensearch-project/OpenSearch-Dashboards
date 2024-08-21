@@ -177,7 +177,7 @@ describe('Workspace plugin', () => {
     );
   });
 
-  it('#setup should register workspace detail with a visible application and register to all nav group', async () => {
+  it('#setup should register workspace detail with a hidden application and not register to all nav group', async () => {
     const setupMock = coreMock.createSetup();
     setupMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     const workspacePlugin = new WorkspacePlugin();
@@ -190,7 +190,8 @@ describe('Workspace plugin', () => {
       })
     );
 
-    expect(setupMock.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
+    // not register to all nav group
+    expect(setupMock.chrome.navGroup.addNavLinksToGroup).not.toHaveBeenCalledWith(
       DEFAULT_NAV_GROUPS.all,
       expect.arrayContaining([
         {

@@ -376,8 +376,7 @@ export const getUseCaseUrl = (
   application: ApplicationStart,
   http: HttpSetup
 ): string => {
-  const appId =
-    (useCase?.id !== ALL_USE_CASE_ID && useCase?.features?.[0]) || WORKSPACE_DETAIL_APP_ID;
+  const appId = useCase?.features?.[0] || WORKSPACE_DETAIL_APP_ID;
   const useCaseURL = formatUrlWithWorkspaceId(
     application.getUrlForApp(appId, {
       absolute: false,

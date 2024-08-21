@@ -136,6 +136,9 @@ describe('Setup use case overview', () => {
     );
     expect(firstCall[0].getContent()).toMatchInlineSnapshot(`
       Object {
+        "cardProps": Object {
+          "layout": "horizontal",
+        },
         "description": "Gain visibility into system health, performance, and reliability through monitoring and analysis of logs, metrics, and traces.",
         "getIcon": [Function],
         "id": "observability",
