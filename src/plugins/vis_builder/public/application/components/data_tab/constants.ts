@@ -9,3 +9,4 @@ export enum FIELD_SELECTOR_ID {
   NUMERICAL = 'numericalFields',
   META = 'metaFields',
 }
+export const ADD_PANEL_PREFIX = 'AddPanel_';

@@ -178,7 +178,7 @@ export const HeaderUserThemeMenu = () => {
         <EuiFlexItem grow={false}>
           <EuiCompressedFormRow hasEmptyLabelSpace>
             {/* TODO: disable submit until changes */}
-            <EuiSmallButton fill onClick={onAppearanceSubmit} type="submit">
+            <EuiSmallButton onClick={onAppearanceSubmit} type="submit">
               Apply
             </EuiSmallButton>
           </EuiCompressedFormRow>

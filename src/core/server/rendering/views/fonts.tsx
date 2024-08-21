@@ -50,6 +50,113 @@ interface FontFace {
 }
 
 export const Fonts: FunctionComponent<Props> = ({ url }) => {
+  // For v9 theme
+  const rubik: FontFace = {
+    family: 'Rubik',
+    variants: [
+      {
+        weight: 300,
+        style: 'normal',
+        sources: [`${url}/fonts/rubik/static/Rubik-Light.woff2`],
+      },
+      {
+        weight: 300,
+        style: 'italic',
+        sources: [`${url}/fonts/rubik/static/Rubik-LightItalic.woff2`],
+      },
+      {
+        weight: 400,
+        style: 'normal',
+        sources: [`${url}/fonts/rubik/static/Rubik-Regular.woff2`],
+      },
+      {
+        weight: 400,
+        style: 'italic',
+        sources: [`${url}/fonts/rubik/static/Rubik-Italic.woff2`],
+      },
+      {
+        weight: 500,
+        style: 'normal',
+        sources: [`${url}/fonts/rubik/static/Rubik-Medium.woff2`],
+      },
+      {
+        weight: 500,
+        style: 'italic',
+        sources: [`${url}/fonts/rubik/static/Rubik-MediumItalic.woff2`],
+      },
+      {
+        weight: 600,
+        style: 'normal',
+        sources: [`${url}/fonts/rubik/static/Rubik-SemiBold.woff2`],
+      },
+      {
+        weight: 600,
+        style: 'italic',
+        sources: [`${url}/fonts/rubik/static/Rubik-SemiBoldItalic.woff2`],
+      },
+      {
+        weight: 700,
+        style: 'normal',
+        sources: [`${url}/fonts/rubik/static/Rubik-Bold.woff2`],
+      },
+      {
+        weight: 700,
+        style: 'italic',
+        sources: [`${url}/fonts/rubik/static/Rubik-BoldItalic.woff2`],
+      },
+      {
+        weight: 800,
+        style: 'normal',
+        sources: [`${url}/fonts/rubik/static/Rubik-ExtraBold.woff2`],
+      },
+      {
+        weight: 800,
+        style: 'italic',
+        sources: [`${url}/fonts/rubik/static/Rubik-ExtraBoldItalic.woff2`],
+      },
+      {
+        weight: 900,
+        style: 'normal',
+        sources: [`${url}/fonts/rubik/static/Rubik-Black.woff2`],
+      },
+      {
+        weight: 900,
+        style: 'italic',
+        sources: [`${url}/fonts/rubik/static/Rubik-BlackItalic.woff2`],
+      },
+    ],
+  };
+  const firaCode: FontFace = {
+    family: 'Fira Code',
+    variants: [
+      {
+        weight: 300,
+        style: 'normal',
+        sources: [`${url}/fonts/fira_code/static/FiraCode-Light.woff2`],
+      },
+      {
+        weight: 400,
+        style: 'normal',
+        sources: [`${url}/fonts/fira_code/static/FiraCode-Regular.woff2`],
+      },
+      {
+        weight: 500,
+        style: 'normal',
+        sources: [`${url}/fonts/fira_code/static/FiraCode-Medium.woff2`],
+      },
+      {
+        weight: 600,
+        style: 'normal',
+        sources: [`${url}/fonts/fira_code/static/FiraCode-SemiBold.woff2`],
+      },
+      {
+        weight: 700,
+        style: 'normal',
+        sources: [`${url}/fonts/fira_code/static/FiraCode-Bold.woff2`],
+      },
+    ],
+  };
+
   // For next theme
   const sourceSans3: FontFace = {
     family: 'Source Sans 3',
@@ -531,7 +638,7 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
       url('${url}/fonts/inter_ui/Inter-UI-italic.var.woff2') format('woff2');
   }
   */
-  const fontsDefinitionRules = [interUi, sourceSans3, roboto, sourceCodePro]
+  const fontsDefinitionRules = [interUi, sourceSans3, roboto, sourceCodePro, rubik, firaCode]
     .flatMap(({ family, variants }) =>
       variants.map(({ style, weight, format, sources, unicodeRange }) => {
         const src = sources
