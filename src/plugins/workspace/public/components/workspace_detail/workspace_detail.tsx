@@ -187,7 +187,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
         </EuiPageBody>
         {deletedWorkspace && (
           <DeleteWorkspaceModal
-            selectedWorkspace={deletedWorkspace}
+            selectedWorkspaces={[deletedWorkspace]}
             onClose={() => setDeletedWorkspace(null)}
             onDeleteSuccess={() => {
               window.setTimeout(() => {
