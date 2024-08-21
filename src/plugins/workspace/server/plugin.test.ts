@@ -192,7 +192,7 @@ describe('Workspace server plugin', () => {
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
     const response = httpServerMock.createResponseFactory();
 
-    it('with / request path', async () => {
+    it('with / request path and no workspaces', async () => {
       const request = httpServerMock.createOpenSearchDashboardsRequest({
         path: '/',
       });
@@ -216,7 +216,7 @@ describe('Workspace server plugin', () => {
       expect(toolKitMock.next).toBeCalledTimes(1);
     });
 
-    it('with more than one workspace', async () => {
+    it('with / request path and workspaces', async () => {
       const request = httpServerMock.createOpenSearchDashboardsRequest({
         path: '/',
       });
@@ -229,7 +229,9 @@ describe('Workspace server plugin', () => {
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(request, response, toolKitMock);
-      expect(toolKitMock.next).toBeCalledTimes(1);
+      expect(response.redirected).toBeCalledWith({
+        headers: { location: '/mock-server-basepath/app/workspace_navigation' },
+      });
     });
   });
 

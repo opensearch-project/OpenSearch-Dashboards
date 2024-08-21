@@ -31,6 +31,7 @@ import {
   WORKSPACE_LIST_APP_ID,
   WORKSPACE_USE_CASES,
   WORKSPACE_INITIAL_APP_ID,
+  WORKSPACE_NAVIGATION_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services, WorkspaceUseCase } from './types';
@@ -370,6 +371,18 @@ export class WorkspacePlugin
       async mount(params: AppMountParameters) {
         const { renderInitialApp } = await import('./application');
         return mountWorkspaceApp(params, renderInitialApp);
+      },
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+    });
+
+    // register workspace navigation
+    core.application.register({
+      id: WORKSPACE_NAVIGATION_APP_ID,
+      title: '',
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderNavigationApp } = await import('./application');
+        return mountWorkspaceApp(params, renderNavigationApp);
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });

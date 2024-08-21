@@ -16,6 +16,10 @@ import { WorkspaceCreatorProps } from './components/workspace_creator/workspace_
 import { WorkspaceDetailApp } from './components/workspace_detail_app';
 import { WorkspaceDetailProps } from './components/workspace_detail/workspace_detail';
 import { WorkspaceInitialApp } from './components/workspace_initial_app';
+import {
+  WorkspaceNavigationApp,
+  WorkspaceNavigationAppProps,
+} from './components/workspace_navigation_app';
 
 export const renderCreatorApp = (
   { element }: AppMountParameters,
@@ -100,5 +104,21 @@ export const renderInitialApp = ({}: AppMountParameters, services: Services) => 
 
   return () => {
     ReactDOM.unmountComponentAtNode(rootElement!);
+  };
+};
+
+export const renderNavigationApp = (
+  { element }: AppMountParameters,
+  services: Services,
+  props: WorkspaceNavigationAppProps
+) => {
+  ReactDOM.render(
+    <OpenSearchDashboardsContextProvider services={services}>
+      <WorkspaceNavigationApp {...props} />
+    </OpenSearchDashboardsContextProvider>,
+    element
+  );
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
   };
 };

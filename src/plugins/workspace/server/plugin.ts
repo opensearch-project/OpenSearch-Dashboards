@@ -23,6 +23,7 @@ import {
   WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID,
   PRIORITY_FOR_WORKSPACE_UI_SETTINGS_WRAPPER,
   WORKSPACE_INITIAL_APP_ID,
+  WORKSPACE_NAVIGATION_APP_ID,
 } from '../common/constants';
 import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
 import { WorkspaceClient } from './workspace_client';
@@ -115,12 +116,16 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       if (path === '/') {
         const workspaceListResponse = await this.client?.list(
           { request, logger: this.logger },
-          { page: 1, perPage: 1 }
+          { page: 1, perPage: 2 }
         );
-        if (workspaceListResponse?.success && workspaceListResponse.result.total > 0) {
-          return toolkit.next();
-        }
         const basePath = core.http.basePath.serverBasePath;
+
+        if (workspaceListResponse?.success && workspaceListResponse.result.total > 0) {
+          return response.redirected({
+            headers: { location: `${basePath}/app/${WORKSPACE_NAVIGATION_APP_ID}` },
+          });
+        }
+        // If user has no workspaces, go to initial page
         return response.redirected({
           headers: { location: `${basePath}/app/${WORKSPACE_INITIAL_APP_ID}` },
         });
