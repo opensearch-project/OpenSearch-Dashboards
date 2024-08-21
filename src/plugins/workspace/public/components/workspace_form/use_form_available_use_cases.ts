@@ -41,7 +41,7 @@ export const useFormAvailableUseCases = ({
         const result = await getIsOnlyAllowEssentialUseCase(savedObjects.client);
         updateEssential(result);
       } catch (e) {
-        // Set to false is failed to fetch is only allow essential use case
+        // Set to false if failed to fetch the "only allow essential use case" setting
         updateEssential(false);
       }
     })();

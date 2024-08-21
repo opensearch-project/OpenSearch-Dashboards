@@ -110,6 +110,13 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     [notifications?.toasts, http, application, workspaceClient]
   );
 
+  const isFormReadyToRender =
+    application &&
+    savedObjects &&
+    // Default values only worked for component mount, should wait for isOnlyAllowEssential and availableUseCases loaded
+    isOnlyAllowEssential !== undefined &&
+    availableUseCases !== undefined;
+
   return (
     <EuiPage>
       <HeaderControl
@@ -129,22 +136,18 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           color="subdued"
           hasShadow={false}
         >
-          {application &&
-            savedObjects &&
-            // Default values only worked for component mount, should wait for isOnlyAllowEssential and availableUseCases loaded
-            isOnlyAllowEssential !== undefined &&
-            availableUseCases !== undefined && (
-              <WorkspaceForm
-                application={application}
-                savedObjects={savedObjects}
-                onSubmit={handleWorkspaceFormSubmit}
-                operationType={WorkspaceOperationType.Create}
-                permissionEnabled={isPermissionEnabled}
-                dataSourceManagement={dataSourceManagement}
-                availableUseCases={availableUseCases}
-                defaultValues={defaultWorkspaceFormValues}
-              />
-            )}
+          {isFormReadyToRender && (
+            <WorkspaceForm
+              application={application}
+              savedObjects={savedObjects}
+              onSubmit={handleWorkspaceFormSubmit}
+              operationType={WorkspaceOperationType.Create}
+              permissionEnabled={isPermissionEnabled}
+              dataSourceManagement={dataSourceManagement}
+              availableUseCases={availableUseCases}
+              defaultValues={defaultWorkspaceFormValues}
+            />
+          )}
         </EuiPageContent>
       </EuiPageBody>
     </EuiPage>
