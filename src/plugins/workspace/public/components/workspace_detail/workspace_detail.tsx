@@ -8,7 +8,6 @@ import {
   EuiPage,
   EuiSpacer,
   EuiPageBody,
-  EuiButtonIcon,
   EuiPageContent,
   EuiConfirmModal,
   EuiTabbedContent,
@@ -30,7 +29,11 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { SelectDataSourceDetailPanel } from './select_data_source_panel';
 import { WorkspaceBottomBar } from './workspace_bottom_bar';
-import { NavigationPublicPluginStart } from '../../../../navigation/public';
+import {
+  NavigationPublicPluginStart,
+  TopNavControlDescriptionData,
+  TopNavControlIconData,
+} from '../../../../navigation/public';
 
 export interface WorkspaceDetailProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -152,18 +155,6 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
       : []),
   ];
 
-  const deleteButton = (
-    <EuiButtonIcon
-      size="s"
-      display="base"
-      iconType="trash"
-      aria-label="Delete"
-      color="danger"
-      data-test-subj="workspace-detail-delete-button"
-      onClick={() => setDeletedWorkspace(currentWorkspace)}
-    />
-  );
-
   return (
     <>
       <EuiPage direction="column">
@@ -172,13 +163,23 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
             controls={[
               {
                 description: currentWorkspace.description,
-              },
+              } as TopNavControlDescriptionData,
             ]}
             setMountPoint={application.setAppDescriptionControls}
           />
         )}
         <HeaderControl
-          controls={[{ renderComponent: deleteButton }]}
+          controls={[
+            {
+              run: () => setDeletedWorkspace(currentWorkspace),
+              color: 'danger',
+              iconType: 'trash',
+              ariaLabel: 'Delete',
+              testId: 'workspace-detail-delete-button',
+              controlType: 'icon',
+              display: 'base',
+            } as TopNavControlIconData,
+          ]}
           setMountPoint={application.setAppRightControls}
         />
         <EuiSpacer />
