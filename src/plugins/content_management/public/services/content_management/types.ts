@@ -35,8 +35,9 @@ export type Section =
       id: string;
       order: number;
       title?: string;
-      columns?: number;
       input?: CardContainerExplicitInput;
+      columns?: number;
+      wrap?: boolean;
     };
 
 export type Content =
@@ -45,18 +46,24 @@ export type Content =
       id: string;
       order: number;
       input: SavedObjectInput;
+      width?: number;
+      height?: number;
     }
   | {
       kind: 'dashboard';
       id: string;
       order: number;
       input: SavedObjectInput;
+      width?: number;
+      height?: number;
     }
   | {
       kind: 'custom';
       id: string;
       order: number;
       render: () => JSX.Element;
+      width?: number;
+      height?: number;
     }
   | {
       kind: 'card';
