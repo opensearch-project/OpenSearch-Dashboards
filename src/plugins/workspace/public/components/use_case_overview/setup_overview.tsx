@@ -83,12 +83,14 @@ export const registerEssentialOverviewContent = (
         order: card.order,
         description: card.description,
         title: card.title,
-        selectable: {
-          onClick: () => {
-            core.application.navigateToApp(card.navigateAppId);
+        cardProps: {
+          selectable: {
+            onClick: () => {
+              core.application.navigateToApp(card.navigateAppId);
+            },
+            children: card.footer,
+            isSelected: false,
           },
-          children: card.footer,
-          isSelected: false,
         },
       }),
     });
@@ -185,6 +187,9 @@ export const registerAnalyticsAllOverviewContent = (
         order: card.order || index,
         description: card.description,
         title: card.title,
+        cardProps: {
+          layout: 'horizontal',
+        },
         onClick: async () => {
           const navGroups = await core.chrome.navGroup.getNavGroupsMap$().pipe(first()).toPromise();
           const group = navGroups[card.id];

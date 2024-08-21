@@ -29,14 +29,16 @@ test('CardEmbeddable should render a card with the title', () => {
   ).toBeFalsy();
 });
 
-test('CardEmbeddable should render a card with the selectable', () => {
+test('CardEmbeddable should render a card with the cardProps', () => {
   const embeddable = new CardEmbeddable({
     id: 'card-id',
     title: 'card title',
     description: '',
-    selectable: {
-      children: 'selectable line',
-      onSelect: () => {},
+    cardProps: {
+      selectable: {
+        children: 'selectable line',
+        onSelect: () => {},
+      },
     },
   });
 

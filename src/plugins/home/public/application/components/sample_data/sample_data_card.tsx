@@ -27,12 +27,14 @@ export const registerSampleDataCard = (
       title: i18n.translate('home.sampleData.card.title', {
         defaultMessage: 'Try openSearch',
       }),
-      selectable: {
-        children: <EuiI18n token="home.sampleData.card.footer" default="with Sample Datasets" />,
-        isSelected: false,
-        onClick: () => {
-          // TODO change to a modal
-          core.application.navigateToApp(IMPORT_SAMPLE_DATA_APP_ID);
+      cardProps: {
+        selectable: {
+          children: <EuiI18n token="home.sampleData.card.footer" default="with Sample Datasets" />,
+          isSelected: false,
+          onClick: () => {
+            // TODO change to a modal
+            core.application.navigateToApp(IMPORT_SAMPLE_DATA_APP_ID);
+          },
         },
       },
     }),

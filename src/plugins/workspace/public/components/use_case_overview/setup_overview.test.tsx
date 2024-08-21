@@ -74,18 +74,20 @@ describe('Setup use case overview', () => {
     expect(firstCall[0].getTargetArea()).toMatchInlineSnapshot(`"essential_overview/get_started"`);
     expect(firstCall[0].getContent()).toMatchInlineSnapshot(`
       Object {
+        "cardProps": Object {
+          "selectable": Object {
+            "children": <EuiI18n
+              default="with Discover"
+              token="workspace.essential_overview.discover.card.footer"
+            />,
+            "isSelected": false,
+            "onClick": [Function],
+          },
+        },
         "description": "Explore data interactively to uncover insights.",
         "id": "get_start_discover",
         "kind": "card",
         "order": 20,
-        "selectable": Object {
-          "children": <EuiI18n
-            default="with Discover"
-            token="workspace.essential_overview.discover.card.footer"
-          />,
-          "isSelected": false,
-          "onClick": [Function],
-        },
         "title": "Discover insights",
       }
     `);

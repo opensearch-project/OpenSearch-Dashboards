@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiCardSelectProps } from '@elastic/eui/src/components/card/card_select';
+import { EuiCardProps } from '@elastic/eui';
 import { ContainerInput } from '../../../../embeddable/public';
 
 export interface CardExplicitInput {
@@ -12,7 +12,7 @@ export interface CardExplicitInput {
   onClick?: () => void;
   getIcon?: () => React.ReactElement;
   getFooter?: () => React.ReactElement;
-  selectable?: EuiCardSelectProps;
+  cardProps?: Omit<EuiCardProps, 'title' | 'description'>;
 }
 
 export type CardContainerInput = ContainerInput<CardExplicitInput> & {

@@ -23,18 +23,20 @@ describe('Sample data card', () => {
     expect(call[0].getTargetArea()).toEqual(['essential_overview/get_started']);
     expect(call[0].getContent()).toMatchInlineSnapshot(`
       Object {
+        "cardProps": Object {
+          "selectable": Object {
+            "children": <EuiI18n
+              default="with Sample Datasets"
+              token="home.sampleData.card.footer"
+            />,
+            "isSelected": false,
+            "onClick": [Function],
+          },
+        },
         "description": "Explore sample data before adding your own.",
         "id": "sample_data",
         "kind": "card",
         "order": 0,
-        "selectable": Object {
-          "children": <EuiI18n
-            default="with Sample Datasets"
-            token="home.sampleData.card.footer"
-          />,
-          "isSelected": false,
-          "onClick": [Function],
-        },
         "title": "Try openSearch",
       }
     `);
