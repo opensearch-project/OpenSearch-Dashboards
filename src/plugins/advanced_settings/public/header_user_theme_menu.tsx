@@ -50,21 +50,32 @@ export const HeaderUserThemeMenu = () => {
   const defaultScreenMode = uiSettings.getDefault('theme:darkMode');
   const prefersAutomatic =
     (window.localStorage.getItem('useBrowserColorScheme') && window.matchMedia) || false;
+
+  const [enableUserControl] = useUiSetting$<boolean>('theme:enableUserControl');
   const [darkMode, setDarkMode] = useUiSetting$<boolean>('theme:darkMode');
   const [themeVersion, setThemeVersion] = useUiSetting$<string>('theme:version');
   const [isPopoverOpen, setPopover] = useState(false);
   // TODO: improve naming?
-  const [theme, setTheme] = useState(
-    themeOptions.find((t) => t.value === themeVersionValueMap[themeVersion])?.value ||
-      themeVersionValueMap[defaultTheme]
-  );
-  const [screenMode, setScreenMode] = useState(
-    prefersAutomatic
-      ? screenModeOptions[2].value
-      : darkMode
-      ? screenModeOptions[1].value
-      : screenModeOptions[0].value
-  );
+
+  const [theme, setTheme] = useState(() => {
+    const result = uiSettings.getWithBrowserSettings<string>('theme:version');
+    const currentTheme = enableUserControl
+      ? result.browserValue ?? result.advancedSettingValue ?? result.defaultValue
+      : result.advancedSettingValue ?? result.defaultValue;
+    return (
+      themeOptions.find((t) => t.value === themeVersionValueMap[currentTheme])?.value ??
+      themeVersionValueMap[result.defaultValue]
+    );
+  });
+
+  const [screenMode, setScreenMode] = useState(() => {
+    if (prefersAutomatic) return 'automatic';
+    const result = uiSettings.getWithBrowserSettings<string>('theme:darkMode');
+    const currentDarkMode = enableUserControl
+      ? result.browserValue ?? result.advancedSettingValue ?? result.defaultValue
+      : result.advancedSettingValue ?? result.defaultValue;
+    return currentDarkMode ? 'dark' : 'light';
+  });
 
   const legacyAppearance = !uiSettings.get('home:useNewHomePage');
 
@@ -82,6 +93,10 @@ export const HeaderUserThemeMenu = () => {
 
   const onAppearanceSubmit = async (e: SyntheticEvent) => {
     const actions = [setThemeVersion(themeOptions.find((t) => theme === t.value)?.value ?? '')];
+    const result = uiSettings.getWithBrowserSettings<string>('theme:darkMode');
+    const currentDarkMode = enableUserControl
+      ? result.browserValue ?? result.advancedSettingValue ?? result.defaultValue
+      : result.advancedSettingValue ?? result.defaultValue;
 
     if (screenMode === 'automatic') {
       const browserMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -90,7 +105,7 @@ export const HeaderUserThemeMenu = () => {
       if (browserMode !== darkMode) {
         actions.push(setDarkMode(browserMode));
       }
-    } else if ((screenMode === 'dark') !== darkMode) {
+    } else if ((screenMode === 'dark') !== currentDarkMode) {
       actions.push(setDarkMode(screenMode === 'dark'));
       window.localStorage.removeItem('useBrowserColorScheme');
     } else {
