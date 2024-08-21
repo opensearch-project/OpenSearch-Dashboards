@@ -7,16 +7,41 @@ try {
   window.console.log(error);
 }
 
-var useBrowserColorScheme = window.localStorage.getItem('useBrowserColorScheme') === 'true' || false;
+/** @type {'browser' | 'light' | 'dark' | null} */
+var urlThemeParam = null;
+try {
+  urlThemeParam = new URLSearchParams(window.location.search).get('theme');
+  if (!urlThemeParam && window.location.hash.includes('?')) {
+    urlThemeParam = new URLSearchParams(window.location.hash.split('?')[1]).get('theme');
+  }
+  if (
+    urlThemeParam !== null &&
+    urlThemeParam !== 'dark' &&
+    urlThemeParam !== 'light' &&
+    urlThemeParam !== 'browser'
+  ) {
+    throw new Error('theme must be "browser", "light", or "dark", received ' + urlThemeParam);
+    urlThemeParam = null;
+  }
+} catch (error) {
+  window.console.warn('Failed to parse "theme" parameter in URL', error);
+}
 
-var browserDarkMode = uiSettings['theme:darkMode'] || {};
+var useBrowserColorScheme =
+  urlThemeParam === 'browser' ||
+  window.localStorage.getItem('useBrowserColorScheme') === 'true' ||
+  false;
+
+var browserDarkMode = urlThemeParam
+  ? { userValue: urlThemeParam === 'dark' }
+  : uiSettings['theme:darkMode'] || {};
 var browserThemeVersion = uiSettings['theme:version'] || {};
 
 var rawDarkMode = typeof browserDarkMode.userValue !== 'boolean' ? {{configDarkMode}} : browserDarkMode.userValue;
 
 var rawThemeVersion = browserThemeVersion.userValue || '{{configThemeVersion}}'
 
-if ({{configEnableUserControl}}) {
+if (urlThemeParam || {{configEnableUserControl}}) {
   if (useBrowserColorScheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches !==
   rawDarkMode) {
     uiSettings['theme:darkMode'] = window.matchMedia('(prefers-color-scheme: dark)').matches;
