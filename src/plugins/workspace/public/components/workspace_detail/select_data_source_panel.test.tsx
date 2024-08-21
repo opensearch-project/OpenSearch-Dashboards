@@ -141,7 +141,7 @@ describe('WorkspaceDetail', () => {
         getByText('Add OpenSearch connections that will be available in the workspace.')
       ).toBeInTheDocument();
       expect(getByText('Close')).toBeInTheDocument();
-      expect(getByText('Save changes')).toBeInTheDocument();
+      expect(getByText('Associate data sources')).toBeInTheDocument();
       expect(getByText('ds-2-title')).toBeInTheDocument();
     });
     fireEvent.click(getByText('Close'));
@@ -171,11 +171,11 @@ describe('WorkspaceDetail', () => {
         getByText('Add OpenSearch connections that will be available in the workspace.')
       ).toBeInTheDocument();
       expect(getByText('Close')).toBeInTheDocument();
-      expect(getByText('Save changes')).toBeInTheDocument();
+      expect(getByText('Associate data sources')).toBeInTheDocument();
       expect(getByText('ds-2-title')).toBeInTheDocument();
     });
     fireEvent.click(getByText('ds-2-title'));
-    fireEvent.click(getByText('Save changes'));
+    fireEvent.click(getByText('Associate data sources'));
     await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
     });
@@ -205,11 +205,11 @@ describe('WorkspaceDetail', () => {
         getByText('Add OpenSearch connections that will be available in the workspace.')
       ).toBeInTheDocument();
       expect(getByText('Close')).toBeInTheDocument();
-      expect(getByText('Save changes')).toBeInTheDocument();
+      expect(getByText('Associate data sources')).toBeInTheDocument();
       expect(getByText('ds-2-title')).toBeInTheDocument();
     });
     fireEvent.click(getByText('ds-2-title'));
-    fireEvent.click(getByText('Save changes'));
+    fireEvent.click(getByText('Associate data sources'));
     await waitFor(() => {
       expect(notificationToastsAddDanger).toHaveBeenCalled();
     });

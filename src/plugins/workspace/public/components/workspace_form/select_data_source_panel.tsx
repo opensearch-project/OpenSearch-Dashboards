@@ -39,7 +39,6 @@ export const SelectDataSourcePanel = ({
     return (
       <CreatePageOpenSearchConnectionTable
         isDashboardAdmin={isDashboardAdmin}
-        // currentWorkspace={currentWorkspace}
         assignedDataSources={assignedDataSources}
         setAssignedDataSources={onChange}
         setModalVisible={setModalVisible}

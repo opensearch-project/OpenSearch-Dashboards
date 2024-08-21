@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { SelectDataSourcePanel, SelectDataSourcePanelProps } from './select_data_source_panel';
 import { coreMock } from '../../../../../core/public/mocks';
 
@@ -24,16 +24,18 @@ const mockCoreStart = coreMock.createStart();
 
 const setup = ({
   savedObjects = mockCoreStart.savedObjects,
-  selectedDataSources = [],
+  assignedDataSources = [],
   onChange = jest.fn(),
   errors = undefined,
+  isDashboardAdmin = true,
 }: Partial<SelectDataSourcePanelProps>) => {
   return render(
     <SelectDataSourcePanel
       onChange={onChange}
       savedObjects={savedObjects}
-      selectedDataSources={selectedDataSources}
+      assignedDataSources={assignedDataSources}
       errors={errors}
+      isDashboardAdmin={isDashboardAdmin}
     />
   );
 };
@@ -68,18 +70,43 @@ describe('SelectDataSourcePanel', () => {
     );
   });
 
-  it('should render consistent data sources when selected data sources passed', async () => {
-    const { getByText } = await setup({ selectedDataSources: [] });
+  it('should click on Add data sources button', async () => {
+    const { getByText } = setup({});
+    expect(getByText('Add data sources')).toBeInTheDocument();
 
-    expect(getByText(dataSources[0].title)).toBeInTheDocument();
-    expect(getByText(dataSources[1].title)).toBeInTheDocument();
+    fireEvent.click(getByText('Add data sources'));
+    await waitFor(() => {
+      expect(
+        getByText('Add OpenSearch connections that will be available in the workspace.')
+      ).toBeInTheDocument();
+      expect(getByText('Close')).toBeInTheDocument();
+      expect(getByText('Associate data sources')).toBeInTheDocument();
+      expect(getByText(dataSources[0].title)).toBeInTheDocument();
+    });
+    fireEvent.click(getByText('Close'));
   });
 
-  it('should call onChange when updating selected data sources in selectable', async () => {
+  it('should render consistent data sources when assigned data sources passed', async () => {
+    const { getByText } = setup({ assignedDataSources: [] });
+    fireEvent.click(getByText('Add data sources'));
+    await waitFor(() => {
+      expect(getByText(dataSources[0].title)).toBeInTheDocument();
+      expect(getByText(dataSources[1].title)).toBeInTheDocument();
+    });
+    fireEvent.click(getByText(dataSources[0].title));
+    fireEvent.click(getByText(dataSources[1].title));
+    await waitFor(() => {
+      fireEvent.click(getByText('Associate data sources'));
+      expect(getByText(dataSources[0].title)).toBeInTheDocument();
+      expect(getByText(dataSources[1].title)).toBeInTheDocument();
+    });
+  });
+
+  it('should call onChange when updating assigned data sources', async () => {
     const onChangeMock = jest.fn();
     const { getByTitle } = await setup({
       onChange: onChangeMock,
-      selectedDataSources: [],
+      assignedDataSources: [],
     });
     expect(onChangeMock).not.toHaveBeenCalled();
     fireEvent.click(getByTitle(dataSources[0].title));

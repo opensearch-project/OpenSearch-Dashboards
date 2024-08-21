@@ -108,7 +108,7 @@ export const CreatePageOpenSearchConnectionTable = ({
       data-test-subj="workspace-creator-dataSources-assign-button"
     >
       {i18n.translate('workspace.form.selectDataSourcePanel.addNew', {
-        defaultMessage: 'Add New',
+        defaultMessage: 'Add data sources',
       })}
     </EuiSmallButton>
   );
