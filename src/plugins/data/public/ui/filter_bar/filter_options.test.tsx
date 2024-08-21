@@ -92,14 +92,12 @@ describe('Filter options menu', () => {
     expect(wrapper.find('[data-test-subj="add-filter-panel"]').exists()).toBeTruthy();
   });
 
-  it("render filter options with 'Save Query' button", () => {
+  it("render saved query panel with 'saved queries' button", () => {
     const wrapper = mountWithIntl(<FilterOptions {...mockProps()} />);
     const button = wrapper.find('[data-test-subj="showFilterActions"]').at(0);
     button.simulate('click');
     wrapper.update();
-    const saveQueryButton = wrapper
-      .find('[data-test-subj="saved-query-management-save-button"]')
-      .at(0);
+    const saveQueryButton = wrapper.find('[data-test-subj="savedQueries"]').at(0);
     expect(saveQueryButton.exists()).toBeTruthy();
     saveQueryButton.simulate('click');
     expect(wrapper.find('[data-test-subj="save-query-panel"]').exists()).toBeTruthy();
