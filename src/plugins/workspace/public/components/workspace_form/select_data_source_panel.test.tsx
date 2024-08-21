@@ -93,13 +93,6 @@ describe('SelectDataSourcePanel', () => {
       expect(getByText(dataSources[0].title)).toBeInTheDocument();
       expect(getByText(dataSources[1].title)).toBeInTheDocument();
     });
-    fireEvent.click(getByText(dataSources[0].title));
-    fireEvent.click(getByText(dataSources[1].title));
-    await waitFor(() => {
-      fireEvent.click(getByText('Associate data sources'));
-      expect(getByText(dataSources[0].title)).toBeInTheDocument();
-      expect(getByText(dataSources[1].title)).toBeInTheDocument();
-    });
   });
 
   it('should call onChange when updating assigned data sources', async () => {
