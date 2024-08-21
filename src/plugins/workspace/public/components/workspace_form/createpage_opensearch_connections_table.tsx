@@ -122,7 +122,7 @@ export const CreatePageOpenSearchConnectionTable = ({
       data-test-subj="workspace-creator-dataSources-assign-button"
     >
       {i18n.translate('workspace.form.selectDataSourcePanel.remove', {
-        defaultMessage: 'Remove Selected',
+        defaultMessage: 'Remove selected',
       })}
     </EuiSmallButton>
   );

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 import { SelectDataSourcePanel, SelectDataSourcePanelProps } from './select_data_source_panel';
 import { coreMock } from '../../../../../core/public/mocks';
 
@@ -104,12 +104,38 @@ describe('SelectDataSourcePanel', () => {
 
   it('should call onChange when updating assigned data sources', async () => {
     const onChangeMock = jest.fn();
-    const { getByTitle } = await setup({
+    const { getByText } = await setup({
       onChange: onChangeMock,
       assignedDataSources: [],
     });
     expect(onChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(getByTitle(dataSources[0].title));
+    fireEvent.click(getByText('Add data sources'));
+    await waitFor(() => {
+      expect(getByText(dataSources[0].title)).toBeInTheDocument();
+    });
+    fireEvent.click(getByText(dataSources[0].title));
+    fireEvent.click(getByText('Associate data sources'));
     expect(onChangeMock).toHaveBeenCalledWith([{ id: 'id1', title: 'title1' }]);
+  });
+
+  it('should call onChange when remove assigned data sources', async () => {
+    const onChangeMock = jest.fn();
+    const { getByText, getAllByTestId } = await setup({
+      onChange: onChangeMock,
+      assignedDataSources: dataSources,
+    });
+    expect(onChangeMock).not.toHaveBeenCalled();
+
+    // Remove by unlink icon
+    const button = getAllByTestId('workspace-creator-dataSources-table-actions-remove')[0];
+    fireEvent.click(button);
+    expect(onChangeMock).toHaveBeenCalledWith([{ id: 'id2', title: 'title2' }]);
+
+    // Remove by clicking the checkbox and remove button
+    const checkbox = screen.getAllByRole('checkbox')[0];
+    fireEvent.click(checkbox);
+    expect(getByText('Remove selected')).toBeInTheDocument();
+    fireEvent.click(getByText('Remove selected'));
+    expect(onChangeMock).toHaveBeenCalledWith([]);
   });
 });
