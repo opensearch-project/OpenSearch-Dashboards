@@ -11,7 +11,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { Dataset } from '../../../../data/common';
 import { QueryEditorExtensionDependencies } from '../../../../data/public';
 import { dataPluginMock } from '../../../../data/public/mocks';
-import { DataSetContract } from '../../../../data/public/query';
+import { DatasetContract } from '../../../../data/public/query';
 import { ConfigSchema } from '../../../common/config';
 import { createQueryAssistExtension } from './create_extension';
 
@@ -24,7 +24,9 @@ const coreSetupMock = coreMock.createSetup({
 });
 const httpMock = coreSetupMock.http;
 const dataMock = dataPluginMock.createSetupContract();
-const dataSetMock = (dataMock.query.dataSetManager as unknown) as jest.Mocked<DataSetContract>;
+const datasetMock = (dataMock.query.queryString.getDatasetManager() as unknown) as jest.Mocked<
+  DatasetContract
+>;
 
 const mockDataset = {
   id: 'mock-data-set-id',
@@ -34,8 +36,8 @@ const mockDataset = {
   },
 } as Dataset;
 
-dataSetMock.getDataSet.mockReturnValue(mockDataset);
-dataSetMock.getUpdates$.mockReturnValue(of(mockDataset));
+datasetMock.getDataset.mockReturnValue(mockDataset);
+datasetMock.getUpdates$.mockReturnValue(of(mockDataset));
 
 jest.mock('../components', () => ({
   QueryAssistBar: jest.fn(() => <div>QueryAssistBar</div>),

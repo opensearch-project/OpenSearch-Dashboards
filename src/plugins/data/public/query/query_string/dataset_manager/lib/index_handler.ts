@@ -3,11 +3,43 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Dataset, DEFAULT_DATA, DataStructure } from '../../../../../common';
-import { IndexPatternsContract } from '../../../../index_patterns';
+import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { map } from 'rxjs/operators';
+import {
+  Dataset,
+  DEFAULT_DATA,
+  DataStructure,
+  DATA_STRUCTURE_META_TYPES,
+  DataStructureFeatureMeta,
+} from '../../../../../common';
 import { DatasetHandlerConfig } from '../types';
+import { getSearchService } from '../../../../services';
 
+const INDEX_INFO = {
+  ID: DEFAULT_DATA.SET_TYPES.INDEX,
+  TITLE: 'Indexes',
+  ICON: 'logoOpenSearch',
+  LOCAL_DATASOURCE: {
+    id: '',
+    title: 'Local Cluster',
+    type: 'data-source',
+  },
+};
+const meta = {
+  type: DATA_STRUCTURE_META_TYPES.FEATURE,
+  icon: INDEX_INFO.ICON,
+  tooltip: INDEX_INFO.TITLE,
+} as DataStructureFeatureMeta;
+
+/**
+ * Configuration for handling index operations.
+ */
 export const indexHandlerConfig: DatasetHandlerConfig = {
+  /**
+   * Converts a DataStructure to a Dataset.
+   * @param dataStructure - The DataStructure to convert.
+   * @returns The resulting Dataset.
+   */
   toDataset: (dataStructure: DataStructure): Dataset => ({
     id: dataStructure.id,
     title: dataStructure.title,
@@ -21,6 +53,11 @@ export const indexHandlerConfig: DatasetHandlerConfig = {
       : undefined,
   }),
 
+  /**
+   * Converts a Dataset to a DataStructure.
+   * @param dataset - The Dataset to convert.
+   * @returns The resulting DataStructure.
+   */
   toDataStructure: (dataset: Dataset): DataStructure => ({
     id: dataset.id,
     title: dataset.title,
@@ -32,50 +69,106 @@ export const indexHandlerConfig: DatasetHandlerConfig = {
           type: dataset.dataSource.type,
         }
       : undefined,
+    meta,
   }),
 
+  /**
+   * Fetches index options.
+   * @param client - The saved objects client
+   * @param dataStructure - The parent DataStructure.
+   * @returns A promise that resolves to an array of child DataStructures.
+   */
   fetchOptions: async (
-    dataStructure: DataStructure,
-    indexPatterns: IndexPatternsContract
+    savedObjects: SavedObjectsClientContract,
+    dataStructure: DataStructure
   ): Promise<DataStructure[]> => {
-    const indices = await indexPatterns.getFieldsForWildcard({ pattern: dataStructure.title });
-    return indices.map((index: any) => ({
-      id: index.name,
-      title: index.name,
-      type: DEFAULT_DATA.SET_TYPES.INDEX,
-      parent: dataStructure,
-    }));
+    switch (dataStructure.type) {
+      case DEFAULT_DATA.STRUCTURES.ROOT.type: {
+        const dataSources = await fetchDataSources(savedObjects);
+        return [
+          {
+            id: INDEX_INFO.ID,
+            title: INDEX_INFO.TITLE,
+            type: DEFAULT_DATA.STRUCTURES.CATEGORY.type,
+            children: dataSources,
+          } as DataStructure,
+        ];
+      }
+      case DEFAULT_DATA.STRUCTURES.CATEGORY.type: {
+        return dataStructure.children || [];
+      }
+      case DEFAULT_DATA.STRUCTURES.DATA_SOURCE.type: {
+        const indices = await fetchIndices(dataStructure);
+        dataStructure.children = indices;
+        return indices;
+      }
+    }
+    return [dataStructure];
   },
 
+  /**
+   * Determines if a DataStructure is a leaf node.
+   * @returns Always true for indices.
+   */
   isLeaf: () => true,
 };
 
-export function indexToDataStructure(dataset: Dataset): DataStructure {
-  return {
-    id: dataset.id,
-    title: dataset.title,
-    type: DEFAULT_DATA.SET_TYPES.INDEX,
-    parent: dataset.dataSource
-      ? {
-          id: dataset.dataSource.id!,
-          title: dataset.dataSource.title!,
-          type: DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
-        }
-      : undefined,
-  };
-}
+export const fetchDataSources = async (client: SavedObjectsClientContract) => {
+  const resp = await client.find<any>({
+    type: 'data-source',
+    perPage: 10000,
+  });
+  const dataSources: DataStructure[] = [INDEX_INFO.LOCAL_DATASOURCE];
+  return dataSources.concat([
+    ...(resp.savedObjects.map((savedObject) => ({
+      id: savedObject.id,
+      title: savedObject.attributes.title,
+      type: 'data-source',
+    })) as DataStructure[]),
+  ]);
+};
 
-export function indexToDataset(index: DataStructure): Dataset {
-  return {
-    id: index.id,
-    title: index.title,
-    type: DEFAULT_DATA.SET_TYPES.INDEX,
-    dataSource: index.parent
-      ? {
-          id: index.parent.id,
-          title: index.parent.title,
-          type: index.parent.type,
-        }
-      : undefined,
+/**
+ * Fetches indices and converts them to DataStructures.
+ * @param client - The SavedObjectsClientContract for accessing index information.
+ * @returns A promise that resolves to an array of DataStructures representing indices.
+ */
+const fetchIndices = async (dataStructure: DataStructure) => {
+  const search = getSearchService();
+  const buildSearchRequest = () => {
+    const request = {
+      params: {
+        ignoreUnavailable: true,
+        expand_wildcards: 'all',
+        index: '*',
+        body: {
+          size: 0, // no hits
+          aggs: {
+            indices: {
+              terms: {
+                field: '_index',
+                size: 100,
+              },
+            },
+          },
+        },
+      },
+      dataSourceId: dataStructure.id,
+    };
+
+    return request;
   };
-}
+
+  const searchResponseToArray = (response: any) => {
+    const { rawResponse } = response;
+    return rawResponse.aggregations
+      ? rawResponse.aggregations.indices.buckets.map((bucket: { key: any }) => bucket.key)
+      : [];
+  };
+
+  return search
+    .getDefaultSearchInterceptor()
+    .search(buildSearchRequest())
+    .pipe(map(searchResponseToArray))
+    .toPromise();
+};

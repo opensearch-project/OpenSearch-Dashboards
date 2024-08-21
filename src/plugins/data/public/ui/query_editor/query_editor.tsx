@@ -30,7 +30,7 @@ const LANGUAGE_ID_KUERY = 'kuery';
 monaco.languages.register({ id: LANGUAGE_ID_KUERY });
 
 export interface QueryEditorProps {
-  dataSet?: Dataset;
+  dataset?: Dataset;
   query: Query;
   settings: Settings;
   disableAutoFocus?: boolean;
@@ -246,7 +246,7 @@ export default class QueryEditorUI extends Component<Props, State> {
   };
 
   private fetchIndexPattern = async () => {
-    const dataSetTitle = this.queryService.dataSetManager.getDataset()?.title;
+    const dataSetTitle = this.queryService.queryString.getDatasetManager().getDataset()?.title;
     if (!dataSetTitle) return undefined;
     return getIndexPatterns().getByTitle(dataSetTitle);
   };
@@ -320,7 +320,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       footerItems: {
         start: [
           `${this.state.lineCount} ${this.state.lineCount === 1 ? 'line' : 'lines'}`,
-          this.props.dataSet?.timeFieldName || '',
+          this.props.dataset?.timeFieldName || '',
         ],
       },
       provideCompletionItems: this.provideCompletionItems,

@@ -29,10 +29,52 @@
  */
 
 export const DEFAULT_DATA = {
-  STRUCTURE_TYPES: {
-    DATA_SOURCE: 'DATA_SOURCE',
-    CONNECTION: 'CONNECTION',
-    INDEX: 'INDEX',
+  STRUCTURES: {
+    ROOT: {
+      id: 'ROOT',
+      title: 'Data',
+      type: 'ROOT',
+    },
+    CATEGORY: {
+      id: 'CATEGORY',
+      title: 'Categories',
+      type: 'CATEGORY',
+    },
+    DATA_SOURCE: {
+      id: 'DATA_SOURCE',
+      title: 'Clusters',
+      type: 'DATA_SOURCE',
+    },
+    CONNECTION: {
+      id: 'CONNECTION',
+      title: 'Connections',
+      type: 'CONNECTION',
+    },
+    INDEX: {
+      id: 'INDEX',
+      title: 'Indexes',
+      type: 'INDEX',
+    },
+    FIELD: {
+      id: 'FIELD',
+      title: 'Fields',
+      type: 'FIELD',
+    },
+    TIME_FIELD: {
+      id: 'TIME_FIELD',
+      title: 'Time fields',
+      type: 'TIME_FIELD',
+    },
+    DATASET: {
+      id: 'DATASET',
+      title: 'Datasets',
+      type: 'DATASET',
+    },
+    DATASET_CATEGORY: {
+      id: 'DATASET_CATEGORY',
+      title: 'Datasets',
+      type: 'DATASET_CATEGORY',
+    },
   },
   SET_TYPES: {
     INDEX_PATTERN: 'INDEX_PATTERN',
@@ -44,11 +86,15 @@ export const DEFAULT_DATA = {
   },
 };
 
+export const DEFAULT_QUERY_LANGUAGE = 'kuery';
+
 export const DEFAULT_QUERY = {
-  LANGUAGE: 'kuery',
-  DATA: {
-    SET: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-    SOURCE: DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+  LANGUAGE: DEFAULT_QUERY_LANGUAGE,
+  DATASET: {
+    TYPE: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+    DATASOURCE: {
+      TYPE: DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+    },
   },
 };
 

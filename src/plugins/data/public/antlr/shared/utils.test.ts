@@ -5,7 +5,7 @@
 
 import { of } from 'rxjs';
 import { fetchData } from './utils';
-import { DataSetManager } from '../../query';
+import { DatasetManager } from '../../query';
 
 describe('fetchData', () => {
   it('should fetch data using the dataSourceRequestHandler', async () => {
@@ -26,18 +26,18 @@ describe('fetchData', () => {
         fetch: jest.fn().mockResolvedValue('fetchedData'),
       },
     };
-    const mockDataSetManager: Partial<DataSetManager> = {
+    const mockDatasetManager: Partial<DatasetManager> = {
       getUpdates$: jest
         .fn()
         .mockReturnValue(of({ dataSourceRef: { id: 'testId', name: 'testTitle' } })),
-      getDataSet: jest.fn().mockReturnValue({ dataSourceRef: { id: 'testId', name: 'testTitle' } }),
+      getDataset: jest.fn().mockReturnValue({ dataSourceRef: { id: 'testId', name: 'testTitle' } }),
     };
 
     const result = await fetchData(
       mockTables,
       mockQueryFormatter,
       mockApi,
-      mockDataSetManager as DataSetManager
+      mockDatasetManager as DatasetManager
     );
     expect(result).toEqual(['fetchedData', 'fetchedData']);
     expect(mockQueryFormatter).toHaveBeenCalledWith('table1', 'testId', 'testTitle');
@@ -59,16 +59,16 @@ describe('fetchData', () => {
         fetch: jest.fn().mockResolvedValue('fetchedData'),
       },
     };
-    const mockDataSetManager: Partial<DataSetManager> = {
+    const mockDatasetManager: Partial<DatasetManager> = {
       getUpdates$: jest.fn().mockReturnValue(of(undefined)),
-      getDataSet: jest.fn().mockReturnValue(undefined),
+      getDataset: jest.fn().mockReturnValue(undefined),
     };
 
     const result = await fetchData(
       mockTables,
       mockQueryFormatter,
       mockApi,
-      mockDataSetManager as DataSetManager
+      mockDatasetManager as DatasetManager
     );
     expect(result).toEqual(['fetchedData', 'fetchedData']);
     expect(mockQueryFormatter).toHaveBeenCalledWith('table1');

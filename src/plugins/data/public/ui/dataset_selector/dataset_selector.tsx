@@ -15,121 +15,105 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
-import { Dataset } from '../../../common/data_sets';
+import { Dataset, DataStructure, DEFAULT_DATA } from '../../../common';
 import { IDataPluginServices } from '../../types';
 import { AdvancedSelector } from './advanced_selector';
-import { mockDatasetManager } from './__mocks__/utils';
+import { getQueryService } from '../../services';
 
-interface DataSetSelectorProps {
-  selectedDataSet?: Dataset;
-  setSelectedDataSet: (dataset?: Dataset) => void;
+interface DatasetSelectorProps {
+  selectedDataset?: Dataset;
+  setSelectedDataset: (dataset?: Dataset) => void;
   services: IDataPluginServices;
 }
 
 export const DatasetSelector = ({
-  selectedDataSet,
-  setSelectedDataSet,
+  selectedDataset,
+  setSelectedDataset,
   services,
-}: DataSetSelectorProps) => {
+}: DatasetSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const togglePopover = () => setIsOpen(!isOpen);
   const closePopover = () => setIsOpen(false);
-  const [cachedDatasets, setCachedDatasets] = useState<Dataset[]>([]);
-  const {
-    overlays,
-    data: { indexPatterns },
-  } = services;
+  const [categories, setCategories] = useState<DataStructure[]>([]);
+  const { overlays, savedObjects } = services;
 
-  // Load the index patterns cache
+  const queryService = getQueryService();
+  const datasetManager = queryService.queryString.getDatasetManager();
+
+  // Load the category data structures
   useEffect(() => {
-    const init = async () => {
-      const cachedIndexPatterns = await indexPatterns.getIdsWithTitle();
-      setCachedDatasets(
-        cachedIndexPatterns.map((indexPattern) => ({
-          id: indexPattern.id,
-          title: indexPattern.title,
-          type: 'index-pattern',
-        }))
+    const loadCategories = async () => {
+      const dataStructures = await datasetManager.fetchOptions(
+        savedObjects.client,
+        DEFAULT_DATA.STRUCTURES.ROOT
       );
+      setCategories(dataStructures);
     };
 
-    init();
-  }, [indexPatterns]);
-  const recents = mockDatasetManager.getRecentlyUsed();
-  const datasetIcon = selectedDataSet
-    ? mockDatasetManager.getType(selectedDataSet.type).config.icon.type
+    loadCategories();
+  }, [datasetManager, savedObjects.client]);
+
+  const datasetIcon = selectedDataset
+    ? datasetManager.getCachedDataStructure(selectedDataset.id)?.meta?.icon || 'database'
     : 'database';
 
   // Memoize the options
   const options = useMemo(() => {
     const newOptions: EuiSelectableOption[] = [];
 
-    if (recents.length > 0) {
-      // Add recently used datasets
+    categories.forEach((category) => {
       newOptions.push({
-        label: 'Recently used',
+        label: category.title,
         isGroupLabel: true,
       });
 
-      recents
-        .slice(0, 3) // Only show 3 recent datasets
-        .forEach((dataset) => {
+      if (category.children) {
+        category.children.forEach((child) => {
           newOptions.push({
-            label: dataset.title,
-            checked: dataset.id === selectedDataSet?.id ? 'on' : undefined,
-            key: dataset.id,
-            prepend: <EuiIcon type={mockDatasetManager.getType(dataset.type).config.icon.type} />,
+            label: child.title,
+            checked: child.id === selectedDataset?.id ? 'on' : undefined,
+            key: child.id,
+            prepend: <EuiIcon type={child.meta?.icon || 'database'} />,
           });
         });
-    }
-
-    // Add index pattern datasets
-    newOptions.push({
-      label: 'Index patterns',
-      isGroupLabel: true,
-    });
-
-    cachedDatasets.forEach(({ id, title, type }) => {
-      newOptions.push({
-        label: title,
-        checked: id === selectedDataSet?.id ? 'on' : undefined,
-        key: id,
-        prepend: <EuiIcon type={mockDatasetManager.getType(type).config.icon.type} />,
-      });
+      }
     });
 
     return newOptions;
-  }, [cachedDatasets, recents, selectedDataSet?.id]);
+  }, [categories, selectedDataset?.id]);
 
   // Handle option change
   const handleOptionChange = (newOptions: EuiSelectableOption[]) => {
     const selectedOption = newOptions.find((option) => option.checked === 'on');
 
     if (!selectedOption) {
-      setSelectedDataSet(undefined);
+      setSelectedDataset(undefined);
       return;
     }
 
-    const foundDataset =
-      recents.find((dataset) => dataset.id === selectedOption.key) ||
-      cachedDatasets.find((dataset) => dataset.id === selectedOption.key);
+    const selectedDataStructure = categories
+      .flatMap((category) => category.children || [])
+      .find((child) => child.id === selectedOption.key);
 
-    closePopover();
-    setSelectedDataSet(foundDataset || undefined);
+    if (selectedDataStructure) {
+      const dataset = datasetManager.toDataset(selectedDataStructure);
+      closePopover();
+      setSelectedDataset(dataset);
+    }
   };
 
   return (
     <EuiPopover
       button={
-        <EuiToolTip content={`${selectedDataSet?.title ?? 'Select data'}`}>
+        <EuiToolTip content={`${selectedDataset?.title ?? 'Select data'}`}>
           <EuiButtonEmpty
             className="datasetSelector__button"
             iconType="arrowDown"
             iconSide="right"
             onClick={togglePopover}
           >
-            <EuiIcon type={datasetIcon} className="dataSetNavigator__icon" />
-            {selectedDataSet?.title ?? 'Select data'}
+            <EuiIcon type={datasetIcon} className="datasetSelector__icon" />
+            {selectedDataset?.title ?? 'Select data'}
           </EuiButtonEmpty>
         </EuiToolTip>
       }
@@ -152,9 +136,10 @@ export const DatasetSelector = ({
             const overlay = overlays?.openModal(
               toMountPoint(
                 <AdvancedSelector
+                  savedObjects={savedObjects.client}
                   onSelect={(dataset?: Dataset) => {
                     overlay?.close();
-                    setSelectedDataSet(dataset);
+                    setSelectedDataset(dataset);
                   }}
                   onCancel={() => overlay?.close()}
                 />
@@ -164,7 +149,7 @@ export const DatasetSelector = ({
         >
           <FormattedMessage
             id="data.datasetSelector.advancedButton"
-            defaultMessage="Open Advanced data selector for more data types"
+            defaultMessage="View all available categories"
           />
         </EuiButtonEmpty>
       </EuiPopoverTitle>

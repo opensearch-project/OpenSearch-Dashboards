@@ -26,6 +26,7 @@ interface QueryAssistInputProps {
 
 export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
+  const datasetManager = services.data.query.queryString.getDatasetManager();
   const inputRef = useRef<HTMLInputElement>(null);
   const storage = getStorage();
   const persistedLog: PersistedLog = useMemo(
@@ -35,18 +36,18 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const { generateQuery, loading } = useGenerateQuery();
   const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
   const dismissCallout = () => setCallOutType(undefined);
-  const [selectedDataSet, setSelectedDataSet] = useState<Dataset | undefined>(
-    services.data.query.dataSetManager.getDataSet()
+  const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(
+    datasetManager.getDataset()
   );
-  const selectedIndex = selectedDataSet?.title;
+  const selectedIndex = selectedDataset?.title;
   const previousQuestionRef = useRef<string>();
 
   useEffect(() => {
-    const subscription = services.data.query.dataSetManager.getUpdates$().subscribe((dataSet) => {
-      setSelectedDataSet(dataSet);
+    const subscription = datasetManager.getUpdates$().subscribe((dataset) => {
+      setSelectedDataset(dataset);
     });
     return () => subscription.unsubscribe();
-  }, [services.data.query.dataSetManager]);
+  }, [datasetManager]);
 
   const onSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -65,7 +66,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
       question: inputRef.current.value,
       index: selectedIndex,
       language: props.dependencies.language,
-      dataSourceId: selectedDataSet?.dataSourceRef?.id,
+      dataSourceId: selectedDataset?.dataSource?.id,
     };
     const { response, error } = await generateQuery(params);
     if (error) {

@@ -26,7 +26,7 @@ import { getQueryLog, PersistedLog } from '../../query';
 import { Settings } from '../types';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
-import { useDataSetManager } from '../search_bar/lib/use_dataset_manager';
+import { useDatasetManager } from '../search_bar/lib/use_dataset_manager';
 
 const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 
@@ -70,10 +70,11 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     storage,
     appName,
     data: {
-      query: { dataSetManager },
+      query: { queryString },
     },
   } = opensearchDashboards.services;
-  const { dataSet } = useDataSetManager({ dataSetManager });
+  const datasetManager = queryString.getDatasetManager();
+  const { dataset } = useDatasetManager({ datasetManager });
 
   const queryLanguage = props.query && props.query.language;
   const queryUiEnhancement =
@@ -201,7 +202,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
 
     if (!input) return '';
 
-    return input.replace('<data_source>', dataSet?.title ?? dataSet?.title ?? '');
+    return input.replace('<data_source>', dataset?.title ?? dataset?.title ?? '');
   }
 
   function renderQueryEditor() {
@@ -210,7 +211,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       <EuiFlexItem>
         <QueryEditor
           disableAutoFocus={props.disableAutoFocus}
-          dataSet={dataSet}
+          dataset={dataset}
           queryActions={props.prepend}
           query={parsedQuery}
           settings={props.settings!}

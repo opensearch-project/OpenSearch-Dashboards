@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { EuiIconProps } from '@elastic/eui';
 export * from './_structure_cache';
 
 /**
@@ -123,36 +124,47 @@ export interface DataStructure {
 }
 
 /**
- * Metadata for a data structure, used for additional properties like icons or tooltips.
- */
-export interface DataStructureMeta {
-  type: DATA_STRUCTURE_META_TYPES;
-}
-
-/**
  * DataStructureMeta types
  */
 export enum DATA_STRUCTURE_META_TYPES {
   FEATURE = 'FEATURE',
+  TYPE = 'TYPE',
   CUSTOM = 'CUSTOM',
 }
 
 /**
  * Metadata for a data structure, used for additional properties like icons or tooltips.
  */
-export interface DataStructureFeatureMeta extends DataStructureMeta {
+export interface DataStructureFeatureMeta {
   type: DATA_STRUCTURE_META_TYPES.FEATURE;
-  icon: string;
+  icon?: string;
+  tooltip?: string;
+}
+
+/**
+ * Metadata for dataset type
+ */
+export interface DataStructureDataTypeMeta {
+  type: DATA_STRUCTURE_META_TYPES.TYPE;
+  icon: EuiIconProps;
   tooltip: string;
 }
 
 /**
  * Metadata for a data structure with CUSTOM type, allowing any additional fields.
  */
-export interface DataStructureCustomMeta extends DataStructureMeta {
+export interface DataStructureCustomMeta {
   type: DATA_STRUCTURE_META_TYPES.CUSTOM;
   [key: string]: any;
 }
+
+/**
+ * Union type for DataStructureMeta
+ */
+export type DataStructureMeta =
+  | DataStructureFeatureMeta
+  | DataStructureDataTypeMeta
+  | DataStructureCustomMeta;
 
 /**
  * Represents a cached version of DataStructure with string references instead of object references.
@@ -170,7 +182,7 @@ export interface DataStructureCustomMeta extends DataStructureMeta {
  *   ]
  * };
  */
-export interface CachedDataStructure extends Omit<DataStructure, 'parent' | 'children' | 'meta'> {
+export interface CachedDataStructure extends Omit<DataStructure, 'parent' | 'children'> {
   /** ID of the parent data structure */
   parent: string;
   /** Array of child data structure IDs */
@@ -220,6 +232,8 @@ export interface Dataset {
   type: string;
   /** Optional name of the field used for time-based operations */
   timeFieldName?: string;
+  /** Optional language to default to from the language selector */
+  language?: string;
   /** Optional reference to the data source */
   dataSource?: DataSource;
 }

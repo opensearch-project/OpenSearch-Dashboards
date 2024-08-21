@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,44 +19,44 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { Dataset, DatasetPathItem } from '../../../common/data_sets';
-import { mockDatasetManager } from './__mocks__/utils';
+import { Dataset } from '../../../common/datasets';
+import { getQueryService } from '../../services';
+import { IndexPatternsContract } from '../../index_patterns';
 
 export const Configurator = ({
+  indexPatternsService,
   dataset,
-  path,
   onConfirm,
   onCancel,
   onPrevious,
 }: {
+  indexPatternsService: IndexPatternsContract;
   dataset: Dataset;
-  path: DatasetPathItem[];
   onConfirm: (dataset: Dataset) => void;
   onCancel: () => void;
   onPrevious: () => void;
 }) => {
-  const datasetType = mockDatasetManager.getType(dataset.type);
-  const [finalDataset, setFinalDataset] = React.useState<Dataset>(dataset);
-  const [timeFields, setTimeFields] = React.useState<string[]>();
-  const [timeField, setTimeField] = React.useState<string>();
-  const [selectedLanguage, setSelectedLanguage] = React.useState<string>(
-    datasetType.config.supportedLanguages[0]
-  ); // TODO: set the default language from the language manager and dataset supported languages
+  // const languageManager = queryService.queryString.getLanguageManager();
+  const [finalDataset, setFinalDataset] = useState<Dataset>(dataset);
+  const [timeFields, setTimeFields] = useState<string[]>();
+  const [timeField, setTimeField] = useState<string | undefined>(dataset.timeFieldName);
+  // const [selectedLanguage, setSelectedLanguage] = useState<string>(
+  //   languageManager.getDefaultLanguage(dataset.type)
+  // );
 
   useEffect(() => {
-    datasetType.getFields(dataset).then((fields) => {
-      const filteredFields = fields.filter((f) => f.type === 'date');
-      const defaultTimeField = filteredFields.find((f) => f.type === 'date')?.name;
-      setTimeField(defaultTimeField);
-      setTimeFields(filteredFields.map((f) => f.name));
-      setFinalDataset((prev) => {
-        return {
-          ...prev,
-          timeField: defaultTimeField,
-        };
+    const fetchFields = async () => {
+      const fields = await indexPatternsService.getFieldsForWildcard({
+        pattern: dataset.title,
       });
-    });
-  }, [dataset, datasetType]);
+      const dateFields = fields.filter((field: any) => field.type === 'date');
+      setTimeFields(dateFields.map((field: any) => field.name));
+    };
+
+    fetchFields();
+  }, [dataset, indexPatternsService]);
+
+  // const supportedLanguages = languageManager.getSupportedLanguages(dataset.type);
 
   return (
     <>
@@ -90,7 +90,7 @@ export const Configurator = ({
           >
             <EuiFieldText disabled value={dataset.title} />
           </EuiFormRow>
-          {datasetType && datasetType.config.hasTimeField && (
+          {timeFields && timeFields.length > 0 && (
             <EuiFormRow
               label={i18n.translate(
                 'data.explorer.datasetSelector.advancedSelector.configurator.timeFieldLabel',
@@ -100,18 +100,21 @@ export const Configurator = ({
               )}
             >
               <EuiSelect
-                isLoading={timeFields === undefined}
                 options={[
-                  ...(timeFields?.map((field) => ({ text: field, value: field })) || []),
+                  ...timeFields.map((field) => ({ text: field, value: field })),
                   { text: '-----', value: '', disabled: true },
                   { text: 'No time field', value: undefined },
                 ]}
                 value={timeField}
-                onChange={(e) => setTimeField(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value === 'undefined' ? undefined : e.target.value;
+                  setTimeField(value);
+                  setFinalDataset({ ...finalDataset, timeFieldName: value });
+                }}
               />
             </EuiFormRow>
           )}
-          <EuiFormRow
+          {/* <EuiFormRow
             label={i18n.translate(
               'data.explorer.datasetSelector.advancedSelector.configurator.languageLabel',
               {
@@ -120,18 +123,18 @@ export const Configurator = ({
             )}
           >
             <EuiSelect
-              options={datasetType.config.supportedLanguages.map((lang) => ({
-                text: lang,
-                value: lang,
+              options={supportedLanguages.map((language: any) => ({
+                text: language,
+                value: language,
               }))}
               value={selectedLanguage}
               onChange={(e) => setSelectedLanguage(e.target.value)}
             />
-          </EuiFormRow>
+          </EuiFormRow> */}
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={() => onCancel()}>
+        <EuiButtonEmpty onClick={onCancel}>
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.cancel"
             defaultMessage="Cancel"
@@ -143,11 +146,8 @@ export const Configurator = ({
             defaultMessage="Previous"
           />
         </EuiButton>
-        <EuiButton
-          disabled={datasetType?.config.hasTimeField && !timeFields}
-          onClick={() => onConfirm(finalDataset)}
-          fill
-        >
+        <EuiButton onClick={() => onConfirm({ ...finalDataset })} fill>
+          {/* <EuiButton onClick={() => onConfirm({ ...finalDataset, language: selectedLanguage })} fill> */}
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"
             defaultMessage="Select Data"

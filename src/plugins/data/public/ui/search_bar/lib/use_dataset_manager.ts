@@ -6,26 +6,26 @@
 import { useState, useEffect } from 'react';
 import { Subscription } from 'rxjs';
 import { Dataset } from '../../../../../data/common';
-import { DataSetContract } from '../../../query';
+import { DatasetContract } from '../../../query';
 
-interface UseDataSetManagerProps {
-  dataSet?: Dataset;
-  dataSetManager: DataSetContract;
+interface UseDatasetManagerProps {
+  dataset?: Dataset;
+  datasetManager: DatasetContract;
 }
 
-export const useDataSetManager = (props: UseDataSetManagerProps) => {
-  const [dataSet, setDataSet] = useState<Dataset | undefined>(
-    props.dataSet || props.dataSetManager.getDataSet()
+export const useDatasetManager = (props: UseDatasetManagerProps) => {
+  const [dataset, setDataset] = useState<Dataset | undefined>(
+    props.dataset || props.datasetManager.getDataset()
   );
 
   useEffect(() => {
     const subscriptions = new Subscription();
 
     subscriptions.add(
-      props.dataSetManager.getUpdates$().subscribe({
+      props.datasetManager.getUpdates$().subscribe({
         next: () => {
-          const newDataSet = props.dataSetManager.getDataSet();
-          setDataSet(newDataSet);
+          const newDataset = props.datasetManager.getDataset();
+          setDataset(newDataset);
         },
       })
     );
@@ -33,7 +33,7 @@ export const useDataSetManager = (props: UseDataSetManagerProps) => {
     return () => {
       subscriptions.unsubscribe();
     };
-  }, [dataSet, props.dataSet, props.dataSetManager]);
+  }, [dataset, props.dataset, props.datasetManager]);
 
-  return { dataSet };
+  return { dataset };
 };

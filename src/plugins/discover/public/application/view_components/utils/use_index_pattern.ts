@@ -10,7 +10,7 @@ import { IndexPattern } from '../../../../../data/public';
 import { useSelector, updateIndexPattern } from '../../utils/state_management';
 import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
-import { useDataSetManager } from './use_dataset_manager';
+import { useDatasetManager } from './use_dataset_manager';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 
 /**
@@ -29,7 +29,9 @@ import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
  */
 export const useIndexPattern = (services: DiscoverViewServices) => {
   const { data, toastNotifications, uiSettings, store } = services;
-  const { dataSet } = useDataSetManager({ dataSetManager: data.query.dataSetManager });
+  const { dataset } = useDatasetManager({
+    datasetManager: data.query.queryString.getDatasetManager(),
+  });
   const indexPatternIdFromState = useSelector((state) => state.metadata.indexPattern);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const isQueryEnhancementEnabled = useMemo(
@@ -67,13 +69,13 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     let isMounted = true;
 
     const handleIndexPattern = async () => {
-      if (isQueryEnhancementEnabled && dataSet) {
+      if (isQueryEnhancementEnabled && dataset) {
         let pattern;
 
-        if (dataSet.type === DEFAULT_QUERY.DATASET_TYPE) {
-          pattern = await fetchIndexPatternDetails(dataSet.id);
+        if (dataset.type === DEFAULT_QUERY.DATASET.TYPE) {
+          pattern = await fetchIndexPatternDetails(dataset.id);
         } else {
-          pattern = await createTempIndexPattern(dataSet);
+          pattern = await createTempIndexPattern(dataset);
         }
 
         if (isMounted && pattern) {
@@ -113,7 +115,6 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     };
   }, [
     isQueryEnhancementEnabled,
-    dataSet,
     indexPatternIdFromState,
     fetchIndexPatternDetails,
     createTempIndexPattern,
@@ -121,6 +122,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     store,
     toastNotifications,
     uiSettings,
+    dataset,
   ]);
 
   return indexPattern;

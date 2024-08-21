@@ -2,8 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { Dataset, DataStructure } from '../../../../common';
-import { IndexPatternsContract } from '../../../index_patterns';
 
 /**
  * TODO: SEAN - supportedLanguages, and more here.
@@ -34,8 +34,8 @@ export interface DatasetHandlerConfig {
    * @returns {Promise<DataStructure[]>} A promise that resolves to an array of child DataStructures.
    */
   fetchOptions: (
-    dataStructure: DataStructure,
-    indexPatterns: IndexPatternsContract
+    client: SavedObjectsClientContract,
+    dataStructure: DataStructure
   ) => Promise<DataStructure[]>;
   /**
    * Determines if a DataStructure is a leaf node (i.e., has no children).

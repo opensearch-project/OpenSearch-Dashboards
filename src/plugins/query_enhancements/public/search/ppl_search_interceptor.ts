@@ -151,10 +151,13 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       },
       queryConfig: {
         ...dataFrame.meta.queryConfig,
-        ...(this.queryService.dataSetManager.getDataSet() && {
-          dataSourceId: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.id,
-          dataSourceName: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.name,
-          timeFieldName: this.queryService.dataSetManager.getDataSet()?.timeFieldName,
+        ...(this.queryService.queryString.getDatasetManager().getDataset() && {
+          dataSourceId: this.queryService.queryString.getDatasetManager().getDataset()?.dataSource
+            ?.id,
+          dataSourceName: this.queryService.queryString.getDatasetManager().getDataset()?.dataSource
+            ?.title,
+          timeFieldName: this.queryService.queryString.getDatasetManager().getDataset()
+            ?.timeFieldName,
         }),
       },
     };

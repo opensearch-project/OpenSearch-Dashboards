@@ -64,6 +64,11 @@ export class QueryStringManager {
     return {
       query: this.getDefaultQueryString(),
       language: this.getDefaultLanguage(),
+      //   ...(this.uiSettings &&
+      //     this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) && {
+      //       dataset: this.getDatasetManager().getDefaultDataset(),
+      //     }),
+      // };
     };
   }
 

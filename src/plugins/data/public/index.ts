@@ -462,6 +462,7 @@ export {
   QueryState,
   getDefaultQuery,
   FilterManager,
+  DatasetContract,
   DatasetManager,
   DatasetHandlerConfig,
   SavedQuery,

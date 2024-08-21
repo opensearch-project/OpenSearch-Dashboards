@@ -61,11 +61,17 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       ...dataFrame.meta,
       queryConfig: {
         ...dataFrame.meta.queryConfig,
-        ...(this.queryService.dataSetManager.getDataset() && {
-          dataSourceId: this.queryService.dataSetManager.getDataset()?.dataSource?.id,
-          dataSourceName: this.queryService.dataSetManager.getDataset()?.dataSource?.title,
-          timeFieldName: this.queryService.dataSetManager.getDataset()?.timeFieldName,
-        }),
+        queryConfig: {
+          ...dataFrame.meta.queryConfig,
+          ...(this.queryService.queryString.getDatasetManager().getDataset() && {
+            dataSourceId: this.queryService.queryString.getDatasetManager().getDataset()?.dataSource
+              ?.id,
+            dataSourceName: this.queryService.queryString.getDatasetManager().getDataset()
+              ?.dataSource?.title,
+            timeFieldName: this.queryService.queryString.getDatasetManager().getDataset()
+              ?.timeFieldName,
+          }),
+        },
       },
     };
 
@@ -104,10 +110,12 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     }
 
     const queryString = getRawQueryString(searchRequest) ?? '';
-    const dataSourceRef = this.queryService.dataSetManager.getDataset()
+    const dataSourceRef = this.queryService.queryString.getDatasetManager().getDataset()
       ? {
-          dataSourceId: this.queryService.dataSetManager.getDataset()?.dataSource?.id,
-          dataSourceName: this.queryService.dataSetManager.getDataset()?.dataSource?.title,
+          dataSourceId: this.queryService.queryString.getDatasetManager().getDataset()?.dataSource
+            ?.id,
+          dataSourceName: this.queryService.queryString.getDatasetManager().getDataset()?.dataSource
+            ?.title,
         }
       : {};
 
@@ -182,7 +190,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    const dataSet = this.queryService.dataSetManager.getDataset();
+    const dataSet = this.queryService.queryString.getDatasetManager().getDataset();
     if (dataSet?.type === 'TEMPORARY_ASYNC') {
       return this.runSearchAsync(request, options.abortSignal, SEARCH_STRATEGY.SQL_ASYNC);
     }

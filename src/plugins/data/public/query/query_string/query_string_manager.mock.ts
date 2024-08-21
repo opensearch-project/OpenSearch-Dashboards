@@ -29,6 +29,7 @@
  */
 
 import { QueryStringContract } from '.';
+// import { datasetManagerMock } from './dataset_manager/dataset_manager.mock';
 
 const createSetupContractMock = () => {
   const queryStringManagerMock: jest.Mocked<QueryStringContract> = {
@@ -38,6 +39,8 @@ const createSetupContractMock = () => {
     getDefaultQuery: jest.fn(),
     formatQuery: jest.fn(),
     clearQuery: jest.fn(),
+    // getDatasetManager: () => datasetManagerMock.createSetupContract(),
+    getDatasetManager: jest.fn(),
   };
   return queryStringManagerMock;
 };

@@ -84,14 +84,12 @@ export class QueryService {
       filterManager: this.filterManager,
       timefilter: this.timefilter,
       queryString: this.queryStringManager,
-      datasetManager: this.queryStringManager.getDatasetManager(),
     }).pipe(share());
 
     return {
       filterManager: this.filterManager,
       timefilter: this.timefilter,
       queryString: this.queryStringManager,
-      datasetManager: this.queryStringManager.getDatasetManager(),
       state$: this.state$,
     };
   }
@@ -110,7 +108,6 @@ export class QueryService {
       }),
       filterManager: this.filterManager,
       queryString: this.queryStringManager,
-      dataSetManager: this.queryStringManager.getDatasetManager(),
       savedQueries: createSavedQueryService(savedObjectsClient),
       state$: this.state$,
       timefilter: this.timefilter,

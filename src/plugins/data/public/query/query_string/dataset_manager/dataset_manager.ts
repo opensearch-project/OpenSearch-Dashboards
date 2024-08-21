@@ -4,7 +4,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { CoreStart } from 'opensearch-dashboards/public';
+import { CoreStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { skip } from 'rxjs/operators';
 import {
   Dataset,
@@ -28,12 +28,15 @@ export class DatasetManager {
   private dataStructureCache: DataStructureCache;
   private datasetHandlers: Map<string, DatasetHandlerConfig>;
   private dataStructuresMap: Map<string, DataStructure>;
+  private datasetsMap: Map<string, Dataset[]> = new Map();
+  private categoryDataStructures: DataStructure[] = [];
 
   constructor(private readonly uiSettings: CoreStart['uiSettings']) {
     this.dataset$ = new BehaviorSubject<Dataset | undefined>(undefined);
     this.dataStructureCache = createDataStructureCache();
     this.datasetHandlers = new Map();
     this.dataStructuresMap = new Map();
+    this.datasetsMap = new Map();
     this.registerDefaultHandlers();
   }
 
@@ -55,32 +58,127 @@ export class DatasetManager {
   }
 
   /**
+   * Gets all CATEGORY type data structures.
+   * @returns {DataStructure[]} An array of CATEGORY type data structures.
+   */
+  public getCategoryDataStructures(): DataStructure[] {
+    return this.categoryDataStructures;
+  }
+
+  /**
+   * Fetch all CATEGORY type data structures.
+   * @returns {DataStructure[]} An array of CATEGORY type data structures.
+   */
+  public async fetchCategoryDataStructures(
+    savedObjects: SavedObjectsClientContract,
+    rootDataStructure: DataStructure
+  ): Promise<DataStructure[]> {
+    const categoryPromises = Array.from(this.datasetHandlers.values()).map((datasetHandler) => {
+      const category = datasetHandler.fetchOptions(savedObjects, rootDataStructure);
+      // const datasets = this.fetchDatasets();
+      // for each dataset call:
+      // this.addDatasetToMap(dataset);
+      return category;
+    });
+    const categories = await Promise.all(categoryPromises);
+    this.categoryDataStructures = categories.flat();
+    return this.categoryDataStructures;
+  }
+
+  /**
+   * Adds a dataset to the datasetsMap.
+   * @param {Dataset} dataset - The dataset to add.
+   */
+  private addDatasetToMap(dataset: Dataset) {
+    if (!this.datasetsMap.has(dataset.type)) {
+      this.datasetsMap.set(dataset.type, []);
+    }
+    const datasets = this.datasetsMap.get(dataset.type)!;
+    if (!datasets.some((d) => d.id === dataset.id)) {
+      datasets.push(dataset);
+    }
+  }
+
+  /**
+   * @returns {boolean} if the data structure is the leaf data structure, where it has no children
+   */
+  public isLeafDataStructure(dataStructure: DataStructure): boolean {
+    if (dataStructure.type === DEFAULT_DATA.STRUCTURES.CATEGORY.type) {
+      return false;
+    }
+    const handler = this.datasetHandlers.get(dataStructure.type);
+
+    if (!handler) {
+      throw new Error(`No handler found for type: ${dataStructure.type}`);
+    }
+
+    return handler.isLeaf(dataStructure);
+  }
+
+  /**
+   * @returns {boolean} if the data structure is the leaf data structure, where it has no children
+   */
+  public toDataset(dataStructure: DataStructure): Dataset {
+    const handler = this.datasetHandlers.get(dataStructure.type);
+
+    if (!handler) {
+      throw new Error(`No handler found for type: ${dataStructure.type}`);
+    }
+
+    return handler.toDataset(dataStructure);
+  }
+
+  // /**
+  //  * Fetches all datasets.
+  //  * @param {SavedObjectsClientContract} savedObjects - The saved objects client.
+  //  * @returns {Promise<DataStructure[]>} A promise that resolves to an array of dataset category data structures.
+  //  */
+  // private async fetchDatasets(dataStructure: DataStructure): Promise<DataStructure[]> {
+  //   // TODO:
+  // }
+
+  /**
    * Fetches options for a given data structure.
    * @param {DataStructure} dataStructure - The data structure to fetch options for.
    * @returns {Promise<DataStructure[]>} A promise that resolves to an array of child data structures.
    */
-  public async fetchOptions(dataStructure: DataStructure): Promise<DataStructure[]> {
-    const handler = this.datasetHandlers.get(dataStructure.type);
-    if (!handler) {
-      throw new Error(`No handler registered for type: ${dataStructure.type}`);
-    }
+  public async fetchOptions(
+    savedObjects: SavedObjectsClientContract,
+    dataStructure: DataStructure
+  ): Promise<DataStructure[]> {
+    switch (dataStructure.type) {
+      case DEFAULT_DATA.STRUCTURES.ROOT.type: {
+        const categories = await this.fetchCategoryDataStructures(savedObjects, dataStructure);
+        return categories;
+      }
+      case DEFAULT_DATA.STRUCTURES.CATEGORY.type: {
+        return dataStructure.children || [];
+      }
+      case DEFAULT_DATA.STRUCTURES.DATASET.type:
+        return [dataStructure];
+      default:
+        const handler = this.datasetHandlers.get(dataStructure.type);
+        if (!handler) {
+          throw new Error(`No handler registered for type: ${dataStructure.type}`);
+        }
 
-    if (handler.isLeaf(dataStructure)) {
-      return [];
-    }
+        if (handler.isLeaf(dataStructure)) {
+          return [];
+        }
 
-    const cachedChildren = this.getCachedChildren(dataStructure.id);
-    if (cachedChildren.length > 0) {
-      return cachedChildren;
-    }
+        const cachedChildren = this.getCachedChildren(dataStructure.id);
+        if (cachedChildren.length > 0) {
+          return cachedChildren;
+        }
 
-    if (!this.indexPatterns) {
-      throw new Error('IndexPatterns not initialized');
-    }
+        if (!this.indexPatterns) {
+          throw new Error('IndexPatterns not initialized');
+        }
 
-    const children = await handler.fetchOptions(dataStructure, this.indexPatterns);
-    this.cacheDataStructures(children);
-    return children;
+        const children = await handler.fetchOptions(savedObjects, dataStructure);
+        this.cacheDataStructures(children);
+        return children;
+    }
   }
 
   /**
@@ -107,19 +205,34 @@ export class DatasetManager {
       this.dataStructuresMap.set(fullId, ds);
       const cachedDs = toCachedDataStructure(ds);
       this.dataStructureCache.set(fullId, cachedDs);
+
+      // If the data structure is a CATEGORY type, add it to the categoryDataStructures array
+      if (ds.type === 'CATEGORY') {
+        this.categoryDataStructures.push(ds);
+      }
     });
   }
 
   /**
    * Gets the full ID for a data structure, including its parent's ID.
-   * @param {DataStructure} dataStructure - The data structure to get the full ID for.
-   * @returns {string} The full ID of the data structure.
+   * @param dataStructure - The data structure to get the full ID for.
+   * @returns The full ID of the data structure.
    */
   private getFullId(dataStructure: DataStructure): string {
-    const parentId = dataStructure.parent ? this.getFullId(dataStructure.parent) : '';
-    return parentId ? `${parentId}::${dataStructure.id}` : dataStructure.id;
+    switch (dataStructure.type) {
+      case DEFAULT_DATA.STRUCTURES.ROOT.type:
+      case DEFAULT_DATA.STRUCTURES.CATEGORY.type:
+        return dataStructure.id;
+      default:
+        if (!dataStructure.parent) {
+          return dataStructure.id;
+        }
+        const parentId = this.getFullId(dataStructure.parent);
+        const separator =
+          dataStructure.parent.type === DEFAULT_DATA.STRUCTURES.DATA_SOURCE.type ? '::' : '.';
+        return `${parentId}${separator}${dataStructure.id}`;
+    }
   }
-
   /**
    * Sets the current dataset.
    * @param {Dataset | undefined} dataset - The dataset to set.
@@ -141,7 +254,7 @@ export class DatasetManager {
    * Gets the current dataset.
    * @returns {Dataset | undefined} The current dataset.
    */
-  public getDataset() {
+  public getDataset(): Dataset | undefined {
     return this.dataset$.getValue();
   }
 
@@ -170,9 +283,11 @@ export class DatasetManager {
     if (id) {
       this.dataStructureCache.clear(id);
       this.dataStructuresMap.delete(id);
+      this.categoryDataStructures = this.categoryDataStructures.filter((ds) => ds.id !== id);
     } else {
       this.dataStructureCache.clearAll();
       this.dataStructuresMap.clear();
+      this.categoryDataStructures = [];
     }
   }
 
