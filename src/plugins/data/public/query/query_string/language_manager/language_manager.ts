@@ -3,11 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { QueryEnhancement, UiEnhancements } from '../../../ui/types';
 import { createEditor, DQLBody, QueryEditorExtensionConfig, SingleLineInput } from '../../../ui';
 import { ConfigSchema } from '../../../../config';
 import { DataStorage, setOverrides as setFieldOverrides } from '../../../../common';
+import {
+  createDefaultQueryControls,
+  createEnhancedQueryControls,
+  createQueryControls,
+} from './get_query_control_links';
 
 export interface DataSettings {
   userQueryLanguage: string;
@@ -41,6 +48,14 @@ export class LanguageManager {
 
   public createDefaultQueryEditor() {
     return createEditor(SingleLineInput, SingleLineInput, DQLBody);
+  }
+
+  public createQueryControls(language: string) {
+    if (language === 'PPL' || language === 'SQL') {
+      return createEnhancedQueryControls();
+    } else {
+      return createDefaultQueryControls();
+    }
   }
 
   public __enhance = (enhancements: UiEnhancements) => {

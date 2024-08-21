@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiCompressedFieldText, PopoverAnchorPosition } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiCompressedFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  PopoverAnchorPosition,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
@@ -301,6 +307,32 @@ export default class QueryEditorUI extends Component<Props, State> {
     };
   };
 
+  private renderQueryControls = (language: string) => {
+    const queryControls = this.languageManager.createQueryControls(language);
+    const toggleAction = (queryControl) => {
+      this.setState({ isCollapsed: !this.state.isCollapsed });
+    };
+    const toggleIcon = this.state.isCollapsed ? 'expand' : 'minimize';
+
+    return (
+      <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
+        {queryControls.map((queryControl) => (
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType={queryControl.id === 'languageToggle' ? toggleIcon : queryControl.iconType}
+              aria-label={queryControl.ariaLabel}
+              onClick={
+                queryControl.id === 'languageToggle'
+                  ? () => toggleAction(queryControl)
+                  : (event) => queryControl.run(event.currentTarget)
+              }
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  };
+
   public render() {
     const className = classNames(this.props.className);
 
@@ -404,16 +436,14 @@ export default class QueryEditorUI extends Component<Props, State> {
           className={classNames('osdQueryEditor__banner', this.props.bannerClassName)}
         />
         <div className="osdQueryEditor__topBar">
-          <QueryEditorBtnCollapse
-            onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}
-            isCollapsed={!this.state.isCollapsed}
-          />
           <div ref={this.props.dataSetContainerRef} className="osdQueryEditor__dataSetPicker" />
           <div className="osdQueryEditor__input">
             {this.state.isCollapsed ? TopBar.Collapsed() : TopBar.Expanded && TopBar.Expanded()}
           </div>
           {languageSelector}
-          {this.props.queryActions}
+          <div className="osdQueryEditor__querycontrols">
+            {this.renderQueryControls(this.props.query.language)}
+          </div>
         </div>
         <div
           ref={this.headerRef}
