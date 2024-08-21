@@ -15,7 +15,12 @@ import { ChromeNavLink } from '../../nav_links';
 import { NavGroupItemInMap } from '../../nav_group';
 import { httpServiceMock } from '../../../mocks';
 import { getLogos } from '../../../../common';
-import { ALL_USE_CASE_ID, DEFAULT_NAV_GROUPS, WorkspaceObject } from '../../../../public';
+import {
+  ALL_USE_CASE_ID,
+  DEFAULT_APP_CATEGORIES,
+  DEFAULT_NAV_GROUPS,
+  WorkspaceObject,
+} from '../../../../public';
 import { capabilitiesServiceMock } from '../../../application/capabilities/capabilities_service.mock';
 
 jest.mock('./collapsible_nav_group_enabled_top', () => ({
@@ -271,5 +276,34 @@ describe('<CollapsibleNavGroupEnabled />', () => {
     expect(getByText('Custom')).toBeInTheDocument();
     expect(getByTestId('collapsibleNavAppLink-link-in-essentials')).toBeInTheDocument();
     expect(queryAllByTestId('collapsibleNavAppLink-link-in-all').length).toEqual(1);
+  });
+
+  it('should render manage category when in all use case if workspace disabled', () => {
+    const props = mockProps({
+      currentNavGroupId: ALL_USE_CASE_ID,
+      navGroupsMap: {
+        ...defaultNavGroupMap,
+        [DEFAULT_NAV_GROUPS.dataAdministration.id]: {
+          ...DEFAULT_NAV_GROUPS.dataAdministration,
+          navLinks: [
+            {
+              id: 'link-in-dataAdministration',
+              title: 'link-in-dataAdministration',
+            },
+          ],
+        },
+      },
+      navLinks: [
+        {
+          id: 'link-in-dataAdministration',
+          title: 'link-in-dataAdministration',
+          baseUrl: '',
+          href: '',
+        },
+      ],
+    });
+    const { getByText } = render(<CollapsibleNavGroupEnabled {...props} isNavOpen />);
+    // Should render manage category
+    expect(getByText(DEFAULT_APP_CATEGORIES.manage.label)).toBeInTheDocument();
   });
 });
