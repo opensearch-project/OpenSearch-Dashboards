@@ -32,14 +32,13 @@ import {
   EuiContextMenu,
   EuiPopover,
   EuiToolTip,
-  EuiButton,
-  EuiPopoverFooter,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiSmallButtonEmpty,
   EuiIcon,
   EuiResizeObserver,
+  EuiContextMenuPanelItemDescriptor,
   EuiContextMenuPanel,
+  EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
 import { stringify } from '@osd/std';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
@@ -83,7 +82,6 @@ const FilterOptionsUI = (props: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const [renderedComponent, setRenderedComponent] = React.useState('menu');
   const [filterWidth, setFilterWidth] = React.useState(maxFilterWidth);
-  const [showSaveQueryButton, setShowSaveQueryButton] = React.useState(true);
   const opensearchDashboards = useOpenSearchDashboards();
   const uiSettings = opensearchDashboards.services.uiSettings;
   const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
@@ -94,7 +92,6 @@ const FilterOptionsUI = (props: Props) => {
 
   const togglePopover = () => {
     setRenderedComponent('menu');
-    setShowSaveQueryButton(true);
     setIsPopoverOpen((prevState) => !prevState);
   };
 
@@ -152,7 +149,7 @@ const FilterOptionsUI = (props: Props) => {
     setFilterWidth(dimensions.width);
   }
 
-  const addFilterPanelItem = {
+  const addFilterPanelItem: EuiContextMenuPanelItemDescriptor = {
     name: props.intl.formatMessage({
       id: 'data.filter.options.addFiltersButtonLabel',
       defaultMessage: 'Add filters',
@@ -160,15 +157,32 @@ const FilterOptionsUI = (props: Props) => {
     icon: 'plusInCircle',
     onClick: () => {
       setRenderedComponent('addFilter');
-      setShowSaveQueryButton(false);
     },
     'data-test-subj': 'addFilters',
     disabled: false,
   };
 
+  const savedQueriesPanelItem: EuiContextMenuPanelItemDescriptor = {
+    name: props.intl.formatMessage({
+      id: 'data.filter.options.savedQueriesButtonLabel',
+      defaultMessage: 'Saved queries',
+    }),
+    icon: 'folderOpen',
+    onClick: () => {
+      setRenderedComponent('saveQuery');
+    },
+    'data-test-subj': 'savedQueries',
+    disabled: false,
+  };
+
+  const menuOptionsSeparator: EuiContextMenuPanelItemDescriptor = {
+    isSeparator: true,
+    key: 'sep',
+  };
+
   const disableMenuOption = props.filters.length === 0 && useNewHeader;
 
-  const panelTree = [
+  const panelTree: EuiContextMenuPanelDescriptor[] = [
     {
       id: 0,
       title: 'Filters',
@@ -339,7 +353,10 @@ const FilterOptionsUI = (props: Props) => {
   };
 
   if (useNewHeader) {
-    panelTree[0].items.unshift(addFilterPanelItem);
+    panelTree[0].items?.unshift(addFilterPanelItem);
+    panelTree[0].items?.push(menuOptionsSeparator);
+    panelTree[0].items?.push(savedQueriesPanelItem);
+    panelTree[0].title = '';
   }
 
   const label = i18n.translate('data.search.searchBar.savedQueryPopoverButtonText', {
@@ -395,33 +412,6 @@ const FilterOptionsUI = (props: Props) => {
       repositionOnScroll
     >
       {useNewHeader ? renderComponent() : props.useSaveQueryMenu ? saveQueryPanel : menuPanel}
-      {useNewHeader && showSaveQueryButton && (
-        <EuiPopoverFooter>
-          <EuiFlexGroup justifyContent="spaceAround">
-            <EuiFlexItem>
-              <EuiButton
-                size="s"
-                fill={false}
-                aria-label={i18n.translate(
-                  'data.search.searchBar.savedQueryPopoverSaveButtonAriaLabel',
-                  {
-                    defaultMessage: 'Save a new saved query',
-                  }
-                )}
-                data-test-subj="saved-query-management-save-button"
-                onClick={() => {
-                  setRenderedComponent('saveQuery');
-                  setShowSaveQueryButton(false);
-                }}
-              >
-                {i18n.translate('data.search.searchBar.savedQueryPopoverSaveButtonText', {
-                  defaultMessage: 'Save query',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPopoverFooter>
-      )}
     </EuiPopover>
   );
 };
