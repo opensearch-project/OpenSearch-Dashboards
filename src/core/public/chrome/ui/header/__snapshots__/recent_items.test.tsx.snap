@@ -9,27 +9,25 @@ exports[`Recent items should render base element normally 1`] = `
       <div
         class="euiPopover__anchor"
       >
-        <button
-          class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiHeaderSectionItemButton headerRecentItemsButton"
-          data-test-subj="recentItemsSectionButton"
-          type="button"
+        <span
+          class="euiToolTipAnchor"
         >
-          <span
-            class="euiButtonContent euiButtonEmpty__content"
+          <button
+            aria-expanded="false"
+            aria-haspopup="true"
+            aria-label="View recents"
+            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall headerRecentItemsButton"
+            data-test-subj="recentItemsSectionButton"
+            type="button"
           >
             <span
-              class="euiButtonEmpty__text"
-            >
-              <span
-                class="euiHeaderSectionItemButton__content"
-              >
-                <span
-                  data-euiicon-type="recentlyViewedApp"
-                />
-              </span>
-            </span>
-          </span>
-        </button>
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="recent"
+            />
+          </button>
+        </span>
       </div>
     </div>
   </div>

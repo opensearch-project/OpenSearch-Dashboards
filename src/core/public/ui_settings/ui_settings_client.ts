@@ -32,7 +32,7 @@ import { cloneDeep, defaultsDeep } from 'lodash';
 import { Observable, Subject, concat, defer, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { UserProvidedValues, PublicUiSettingsParams } from 'src/core/server/types';
+import { UserProvidedValues, PublicUiSettingsParams, UiSettingsType } from 'src/core/server/types';
 import { IUiSettingsClient, UiSettingsState } from './types';
 
 import { UiSettingsApi } from './ui_settings_api';
@@ -78,6 +78,18 @@ export class UiSettingsClient implements IUiSettingsClient {
     return cloneDeep(this.cache);
   }
 
+  getDefault<T = any>(key: string): T {
+    const declared = this.isDeclared(key);
+
+    if (!declared) {
+      throw new Error(
+        `Unexpected \`IUiSettingsClient.getDefaultValue("${key}")\` call on unrecognized configuration setting "${key}".
+Please check that the setting for "${key}" exists.`
+      );
+    }
+    return this.resolveValue(this.cache[key].value, this.cache[key].type);
+  }
+
   get<T = any>(key: string, defaultOverride?: T) {
     const declared = this.isDeclared(key);
 
@@ -99,16 +111,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     const userValue = this.cache[key].userValue;
     const defaultValue = defaultOverride !== undefined ? defaultOverride : this.cache[key].value;
     const value = userValue == null ? defaultValue : userValue;
-
-    if (type === 'json') {
-      return JSON.parse(value);
-    }
-
-    return type === 'number' && typeof value !== 'bigint'
-      ? isFinite(value) && (value > Number.MAX_SAFE_INTEGER || value < Number.MIN_SAFE_INTEGER)
-        ? BigInt(value)
-        : parseFloat(value)
-      : value;
+    return this.resolveValue(value, type);
   }
 
   get$<T = any>(key: string, defaultOverride?: T) {
@@ -178,6 +181,18 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
 
   getUpdateErrors$() {
     return this.updateErrors$.asObservable();
+  }
+
+  private resolveValue(value: any, type: UiSettingsType | undefined) {
+    if (type === 'json') {
+      return JSON.parse(value);
+    }
+
+    return type === 'number' && typeof value !== 'bigint'
+      ? isFinite(value) && (value > Number.MAX_SAFE_INTEGER || value < Number.MIN_SAFE_INTEGER)
+        ? BigInt(value)
+        : parseFloat(value)
+      : value;
   }
 
   private getBrowserStoredSettings() {

@@ -31,26 +31,28 @@
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
-import { Query, UI_SETTINGS } from '../../../common';
+import { DataStorage, Query, SimpleDataSet, TimeRange, UI_SETTINGS } from '../../../common';
+import { createHistory, QueryHistory } from './query_history';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;
+  private queryHistory: QueryHistory;
 
   constructor(
-    private readonly storage: IStorageWrapper,
+    private readonly storage: DataStorage,
     private readonly uiSettings: CoreStart['uiSettings']
   ) {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
+    this.queryHistory = createHistory({ storage });
   }
 
   private getDefaultQueryString() {
-    return this.storage.get('opensearchDashboards.userQueryString') || '';
+    return this.storage.get('userQueryString') || '';
   }
 
   private getDefaultLanguage() {
     return (
-      this.storage.get('opensearchDashboards.userQueryLanguage') ||
+      this.storage.get('userQueryLanguage') ||
       this.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE)
     );
   }
@@ -100,6 +102,25 @@ export class QueryStringManager {
   public clearQuery = () => {
     this.setQuery(this.getDefaultQuery());
   };
+
+  // Todo: update this function to use the Query object when it is udpated, Query object should include time range and dataset
+  public addToQueryHistory(dataSet: SimpleDataSet, query: Query, timeRange?: TimeRange) {
+    if (query.query) {
+      this.queryHistory.addQueryToHistory(dataSet, query, timeRange);
+    }
+  }
+
+  public getQueryHistory() {
+    return this.queryHistory.getHistory();
+  }
+
+  public clearQueryHistory() {
+    this.queryHistory.clearHistory();
+  }
+
+  public changeQueryHistory(listener: (reqs: any[]) => void) {
+    return this.queryHistory.change(listener);
+  }
 }
 
 export type QueryStringContract = PublicMethodsOf<QueryStringManager>;

@@ -110,11 +110,22 @@ const defaultProps: TableProps = {
   onDuplicate: () => {},
   onDuplicateSingle: () => {},
   showDuplicate: false,
+  useUpdatedUX: false,
 };
 
 describe('Table', () => {
   it('should render normally', () => {
     const component = shallowWithI18nProvider(<Table {...defaultProps} />);
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render normally when use updated UX', () => {
+    const props = {
+      ...defaultProps,
+      useUpdatedUX: true,
+    };
+    const component = shallowWithI18nProvider(<Table {...props} />);
 
     expect(component).toMatchSnapshot();
   });

@@ -391,6 +391,12 @@ export {
 
 export { __osdBootstrap__ } from './osd_bootstrap';
 
-export { WorkspacesStart, WorkspacesSetup, WorkspacesService, WorkspaceObject } from './workspace';
+export {
+  WorkspacesStart,
+  WorkspacesSetup,
+  WorkspacesService,
+  WorkspaceObject,
+  IWorkspaceClient,
+} from './workspace';
 
 export { debounce } from './utils';
