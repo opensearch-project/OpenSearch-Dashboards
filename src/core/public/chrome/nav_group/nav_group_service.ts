@@ -216,7 +216,7 @@ export class ChromeNavGroupService {
 
     const setCurrentNavGroup = (navGroupId: string | undefined) => {
       const navGroup = navGroupId ? this.navGroupsMap$.getValue()[navGroupId] : undefined;
-      if (navGroup && navGroup.status !== NavGroupStatus.Hidden) {
+      if (navGroup) {
         this.currentNavGroup$.next(navGroup);
         sessionStorage.setItem(CURRENT_NAV_GROUP_ID, navGroup.id);
       } else {
@@ -259,10 +259,6 @@ export class ChromeNavGroupService {
       application.currentAppId$,
       this.getSortedNavGroupsMap$(),
     ]).subscribe(([appId, navGroupMap]) => {
-      if (appId === 'home') {
-        setCurrentNavGroup(undefined);
-        return;
-      }
       if (appId && navGroupMap) {
         const appIdNavGroupMap = new Map<string, Set<string>>();
         let visibleNavGroups: NavGroupItemInMap[] = [];
