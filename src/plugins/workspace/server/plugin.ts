@@ -116,14 +116,42 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       if (path === '/') {
         const workspaceListResponse = await this.client?.list(
           { request, logger: this.logger },
-          { page: 1, perPage: 2 }
+          { page: 1, perPage: 100 }
         );
         const basePath = core.http.basePath.serverBasePath;
 
         if (workspaceListResponse?.success && workspaceListResponse.result.total > 0) {
-          return response.redirected({
-            headers: { location: `${basePath}/app/${WORKSPACE_NAVIGATION_APP_ID}` },
-          });
+          const workspaceList = workspaceListResponse.result.workspaces;
+          // If user only has one workspace, go to overview page of that workspace
+          if (workspaceList.length === 1) {
+            return response.redirected({
+              headers: {
+                location: `${basePath}/app/${WORKSPACE_NAVIGATION_APP_ID}/?workspaceId=${workspaceList[0].id}`,
+              },
+            });
+          }
+          const [coreStart] = await core.getStartServices();
+          const uiSettings = coreStart.uiSettings.asScopedToClient(
+            coreStart.savedObjects.getScopedClient(request)
+          );
+          // Temporarily use defaultWorkspace as a placeholder
+          const defaultWorkspaceId = await uiSettings.get('defaultWorkspace');
+          const defaultWorkspace = workspaceList.find(
+            (workspace) => workspace.id === defaultWorkspaceId
+          );
+          // If user has a default workspace configured, go to overview page of that workspace
+          // If user has more than one workspaces, go to homepage
+          if (defaultWorkspace) {
+            return response.redirected({
+              headers: {
+                location: `${basePath}/app/${WORKSPACE_NAVIGATION_APP_ID}/?workspaceId=${defaultWorkspace.id}`,
+              },
+            });
+          } else {
+            return response.redirected({
+              headers: { location: `${basePath}/app/home` },
+            });
+          }
         }
         // If user has no workspaces, go to initial page
         return response.redirected({

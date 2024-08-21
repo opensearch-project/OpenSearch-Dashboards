@@ -46,6 +46,7 @@ import {
   enrichBreadcrumbsWithWorkspace,
   filterWorkspaceConfigurableApps,
   getFirstUseCaseOfFeatureConfigs,
+  getUseCaseUrl,
   isAppAccessibleInWorkspace,
   isNavGroupInFeatureConfigs,
 } from './utils';
@@ -375,14 +376,31 @@ export class WorkspacePlugin
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
+    const registeredUseCases$ = this.registeredUseCases$;
     // register workspace navigation
     core.application.register({
       id: WORKSPACE_NAVIGATION_APP_ID,
       title: '',
+      chromeless: true,
       navLinkStatus: AppNavLinkStatus.hidden,
-      async mount(params: AppMountParameters) {
-        const { renderNavigationApp } = await import('./application');
-        return mountWorkspaceApp(params, renderNavigationApp);
+      async mount() {
+        const [coreStart] = await core.getStartServices();
+        const { application, http, workspaces } = coreStart;
+        const urlParams = new URLSearchParams(location.search);
+        const navigateWorkspaceId = urlParams.get('workspaceId');
+        const workspaceList = workspaces.workspaceList$.getValue();
+        const workspace = workspaceList.find((ws) => ws.id === navigateWorkspaceId);
+        if (workspace) {
+          const availableUseCases = registeredUseCases$.getValue();
+          const currentUseCase = availableUseCases.find(
+            (useCase) => useCase.id === getFirstUseCaseOfFeatureConfigs(workspace?.features ?? [])
+          );
+          const useCaseUrl = getUseCaseUrl(currentUseCase, workspace, application, http);
+          application.navigateToUrl(useCaseUrl);
+        } else {
+          application.navigateToApp('home');
+        }
+        return () => {};
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });

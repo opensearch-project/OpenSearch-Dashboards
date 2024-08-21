@@ -73,7 +73,7 @@ export const WorkspaceInitial = () => {
             defaultMessage: 'Create a workspace',
           })}
           description={
-            <EuiToolTip content={isDashboardAdmin ? <></> : noAdminToolTip}>
+            <EuiToolTip content={isDashboardAdmin ? null : noAdminToolTip}>
               <>
                 {i18n.translate('workspace.initial.card.createWorkspace.description', {
                   defaultMessage: 'Organize projects by use case in a collaborative workspace.',

@@ -11,6 +11,10 @@ import * as utilsExports from './utils';
 import { SavedObjectsPermissionControl } from './permission_control/client';
 
 describe('Workspace server plugin', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('#setup', async () => {
     let value;
     const capabilities = {} as any;
@@ -192,6 +196,17 @@ describe('Workspace server plugin', () => {
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
     const response = httpServerMock.createResponseFactory();
 
+    it('without / request path', async () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest({
+        path: '/foo',
+      });
+      await workspacePlugin.setup(setupMock);
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(request, response, toolKitMock);
+      expect(toolKitMock.next).toBeCalledTimes(1);
+    });
+
     it('with / request path and no workspaces', async () => {
       const request = httpServerMock.createOpenSearchDashboardsRequest({
         path: '/',
@@ -205,18 +220,7 @@ describe('Workspace server plugin', () => {
       });
     });
 
-    it('without / request path', async () => {
-      const request = httpServerMock.createOpenSearchDashboardsRequest({
-        path: '/foo',
-      });
-      await workspacePlugin.setup(setupMock);
-      const toolKitMock = httpServerMock.createToolkit();
-
-      await registerOnPostAuthFn(request, response, toolKitMock);
-      expect(toolKitMock.next).toBeCalledTimes(1);
-    });
-
-    it('with / request path and workspaces', async () => {
+    it('with / request path and one workspace', async () => {
       const request = httpServerMock.createOpenSearchDashboardsRequest({
         path: '/',
       });
@@ -224,13 +228,87 @@ describe('Workspace server plugin', () => {
       const client = workspaceSetup.client;
       jest.spyOn(client, 'list').mockResolvedValue({
         success: true,
-        result: { total: 1 },
+        result: {
+          total: 1,
+          per_page: 100,
+          page: 1,
+          workspaces: [{ id: 'workspace-1', name: 'workspace-1' }],
+        },
       });
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(request, response, toolKitMock);
       expect(response.redirected).toBeCalledWith({
-        headers: { location: '/mock-server-basepath/app/workspace_navigation' },
+        headers: {
+          location: '/mock-server-basepath/app/workspace_navigation/?workspaceId=workspace-1',
+        },
+      });
+    });
+
+    it('with / request path and more than one workspaces', async () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest({
+        path: '/',
+      });
+      const workspaceSetup = await workspacePlugin.setup(setupMock);
+      const client = workspaceSetup.client;
+      jest.spyOn(client, 'list').mockResolvedValue({
+        success: true,
+        result: {
+          total: 2,
+          per_page: 100,
+          page: 1,
+          workspaces: [
+            { id: 'workspace-1', name: 'workspace-1' },
+            { id: 'workspace-2', name: 'workspace-2' },
+          ],
+        },
+      });
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(request, response, toolKitMock);
+      expect(response.redirected).toBeCalledWith({
+        headers: {
+          location: '/mock-server-basepath/app/home',
+        },
+      });
+    });
+
+    it('with / request path and default workspace', async () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest({
+        path: '/',
+      });
+      const mockUiSettings = {
+        get: jest.fn().mockResolvedValue('default'),
+      };
+      setupMock.getStartServices.mockResolvedValue([
+        {
+          uiSettings: { asScopedToClient: () => mockUiSettings },
+          savedObjects: { getScopedClient: () => null },
+        },
+        {},
+        {},
+      ]);
+      const workspaceSetup = await workspacePlugin.setup(setupMock);
+      const client = workspaceSetup.client;
+      jest.spyOn(client, 'list').mockResolvedValue({
+        success: true,
+        result: {
+          total: 2,
+          per_page: 100,
+          page: 1,
+          workspaces: [
+            { id: 'default', name: 'default-workspace' },
+            { id: 'workspace-2', name: 'workspace-2' },
+          ],
+        },
+      });
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(request, response, toolKitMock);
+      expect(response.redirected).toBeCalledWith({
+        headers: {
+          location: '/mock-server-basepath/app/workspace_navigation/?workspaceId=default',
+        },
       });
     });
   });
