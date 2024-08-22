@@ -80,18 +80,13 @@ describe('Recent items', () => {
       recentlyAccessed$: mockRecentlyAccessed,
     };
 
-    let getByText: (text: string) => HTMLElement;
-    let getByTestId: (testId: string) => HTMLElement;
-
     await act(async () => {
-      const renderResult = render(<RecentItems {...mockProps} />);
-      getByText = renderResult.getByText;
-      getByTestId = renderResult.getByTestId;
+      render(<RecentItems {...mockProps} />);
     });
 
-    const mockRecentButton = getByTestId!('recentItemsSectionButton');
+    const mockRecentButton = screen.getByTestId('recentItemsSectionButton');
     fireEvent.click(mockRecentButton);
-    expect(getByText!('visualizeMock')).toBeInTheDocument();
+    expect(screen.getByText('visualizeMock')).toBeInTheDocument();
   });
 
   it('shoulde be able to display workspace name if the asset is attched to a workspace and render it with brackets wrapper ', async () => {
@@ -101,18 +96,13 @@ describe('Recent items', () => {
       workspaceList$: mockWorkspaceList,
     };
 
-    let getByText: (text: string) => HTMLElement;
-    let getByTestId: (testId: string) => HTMLElement;
-
     await act(async () => {
-      const renderResult = render(<RecentItems {...mockProps} />);
-      getByText = renderResult.getByText;
-      getByTestId = renderResult.getByTestId;
+      render(<RecentItems {...mockProps} />);
     });
 
-    const mockRecentButton = getByTestId!('recentItemsSectionButton');
+    const mockRecentButton = screen.getByTestId('recentItemsSectionButton');
     fireEvent.click(mockRecentButton);
-    expect(getByText!('(WorkspaceMock_1)')).toBeInTheDocument();
+    expect(screen.getByText('(WorkspaceMock_1)')).toBeInTheDocument();
   });
 
   it('should call navigateToUrl with link generated from createRecentNavLink when clicking a recent item', async () => {
@@ -122,14 +112,10 @@ describe('Recent items', () => {
       workspaceList$: mockWorkspaceList,
     };
 
-    let getByText: (text: string) => HTMLElement;
-    let getByTestId: (testId: string) => HTMLElement;
     const navigateToUrl = jest.fn();
 
     await act(async () => {
-      const renderResult = render(<RecentItems {...mockProps} navigateToUrl={navigateToUrl} />);
-      getByText = renderResult.getByText;
-      getByTestId = renderResult.getByTestId;
+      render(<RecentItems {...mockProps} navigateToUrl={navigateToUrl} />);
     });
 
     const button = screen.getByTestId('recentItemsSectionButton');
@@ -145,19 +131,16 @@ describe('Recent items', () => {
       ...defaultMockProps,
       recentlyAccessed$: mockRecentlyAccessed,
     };
-    let getByText: (text: string) => HTMLElement;
-    let getByTestId: (testId: string) => HTMLElement;
 
     await act(async () => {
-      const renderResult = render(<RecentItems {...mockProps} />);
-      getByText = renderResult.getByText;
-      getByTestId = renderResult.getByTestId;
+      render(<RecentItems {...mockProps} />);
     });
+
     const button = screen.getByTestId('recentItemsSectionButton');
     fireEvent.click(button);
 
     const preferencesButton = screen.getByTestId('preferencesSettingButton');
     fireEvent.click(preferencesButton);
-    expect(getByTestId!('preferencesSettingPopover')).toBeInTheDocument();
+    expect(screen.getByTestId('preferencesSettingPopover')).toBeInTheDocument();
   });
 });
