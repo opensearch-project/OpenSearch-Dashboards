@@ -20,7 +20,7 @@ describe('Sample data card', () => {
   it('should call the getTargetArea function with the correct arguments', () => {
     registerSampleDataCard(contentManagement, coreStart);
     const call = registerContentProviderMock.mock.calls[0];
-    expect(call[0].getTargetArea()).toEqual(['essential_overview/get_started']);
+    expect(call[0].getTargetArea()).toEqual(['analytics_overview/get_started']);
     expect(call[0].getContent()).toMatchInlineSnapshot(`
       Object {
         "cardProps": Object {

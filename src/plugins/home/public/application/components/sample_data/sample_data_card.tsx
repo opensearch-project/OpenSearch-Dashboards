@@ -16,7 +16,7 @@ export const registerSampleDataCard = (
 ) => {
   contentManagement.registerContentProvider({
     id: `get_start_sample_data`,
-    getTargetArea: () => ['essential_overview/get_started'],
+    getTargetArea: () => ['analytics_overview/get_started'],
     getContent: () => ({
       id: 'sample_data',
       kind: 'card',
