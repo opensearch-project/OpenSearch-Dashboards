@@ -37,6 +37,7 @@ import {
 } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { first } from 'rxjs/operators';
+import React from 'react';
 
 import { Branding } from 'src/core/types';
 import {
@@ -70,6 +71,8 @@ import {
   ContentManagementPluginStart,
 } from '../../content_management/public';
 import { initHome, setupHome } from './application/home_render';
+import { toMountPoint } from '../../opensearch_dashboards_react/public';
+import { HomeIcon } from './application/components/home_icon';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -252,6 +255,18 @@ export class HomePublicPlugin
           // This doesn't do anything as along as the default settings are kept.
           urlForwarding.navigateToDefaultApp({ overwriteHash: false });
         }
+      });
+    }
+
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.chrome.navControls.registerLeftBottom({
+        order: 0,
+        mount: toMountPoint(
+          React.createElement(HomeIcon, {
+            core,
+            appId: PLUGIN_ID,
+          })
+        ),
       });
     }
 
