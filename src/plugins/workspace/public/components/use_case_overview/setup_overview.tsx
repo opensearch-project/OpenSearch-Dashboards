@@ -170,7 +170,8 @@ export const registerAnalyticsAllOverviewContent = (
       getContent: () => ({
         id: card.id,
         kind: 'card',
-        getIcon: () => React.createElement(EuiIcon, { size: 'xl', type: 'spacesApp' }),
+        getIcon: () =>
+          React.createElement(EuiIcon, { size: 'xl', type: card.icon || 'wsSelector' }),
         order: card.order || index,
         description: card.description,
         title: card.title,

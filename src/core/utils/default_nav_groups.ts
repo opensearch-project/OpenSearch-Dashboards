@@ -40,6 +40,7 @@ const defaultNavGroups = {
       defaultMessage: 'This is a use case contains all the features.',
     }),
     order: 3000,
+    icon: 'wsAnalytics',
   },
   observability: {
     id: 'observability',
@@ -51,6 +52,7 @@ const defaultNavGroups = {
         'Gain visibility into system health, performance, and reliability through monitoring and analysis of logs, metrics, and traces.',
     }),
     order: 4000,
+    icon: 'wsObservability',
   },
   'security-analytics': {
     id: 'security-analytics',
@@ -62,6 +64,7 @@ const defaultNavGroups = {
         'Detect and investigate potential security threats and vulnerabilities across your systems and data.',
     }),
     order: 5000,
+    icon: 'wsSecurityAnalytics',
   },
   essentials: {
     id: 'analytics',
@@ -73,6 +76,7 @@ const defaultNavGroups = {
         'Analyze data to derive insights, identify patterns and trends, and make data-driven decisions.',
     }),
     order: 7000,
+    icon: 'wsEssentials',
   },
   search: {
     id: 'search',
@@ -84,6 +88,7 @@ const defaultNavGroups = {
         "Quickly find and explore relevant information across your organization's data sources.",
     }),
     order: 6000,
+    icon: 'wsSearch',
   },
 } as const;
 
