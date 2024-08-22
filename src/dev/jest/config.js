@@ -122,7 +122,6 @@ const ciGroups = process.argv.reduce((acc, arg) => {
   return acc;
 }, []);
 
-console.log('ciGroups', ciGroups);
 if (ciGroups.length > 0) {
   console.log(`Requested group${ciGroups.length === 1 ? '' : 's'}: ${ciGroups.join(', ')}`);
   ciGroups.forEach((id) => {
