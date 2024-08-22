@@ -37,7 +37,8 @@ export const getAgentIdByConfig = async (
       method: 'GET',
       path: `${URI.ML}/config/${configName}`,
     })) as ApiResponse<{ type: string; configuration: { agent_id?: string } }>;
-    if (!response ||
+    if (
+      !response ||
       !(response.body.ml_configuration?.agent_id || response.body.configuration?.agent_id)
     ) {
       throw new Error('cannot find any agent by configuration: ' + configName);
