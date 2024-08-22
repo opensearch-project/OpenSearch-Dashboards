@@ -132,6 +132,15 @@ export const WorkspacePermissionSettingPanel = ({
   return (
     <div>
       <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem style={{ maxWidth: 150 }}>
+          <EuiCompressedFormRow
+            label={i18n.translate('workspaceForm.permissionSetting.typeLabel', {
+              defaultMessage: 'Type',
+            })}
+          >
+            <></>
+          </EuiCompressedFormRow>
+        </EuiFlexItem>
         <EuiFlexItem style={{ maxWidth: 400 }}>
           <EuiCompressedFormRow
             label={i18n.translate('workspaceForm.permissionSetting.collaboratorLabel', {
