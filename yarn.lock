@@ -7174,10 +7174,10 @@ discontinuous-range@1.0.0:
   resolved "https://registry.yarnpkg.com/discontinuous-range/-/discontinuous-range-1.0.0.tgz#e38331f0844bba49b9a9cb71c771585aab1bc65a"
   integrity sha1-44Mx8IRLukm5qctxx3FYWqsbxlo=
 
-dns-sync@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/dns-sync/-/dns-sync-0.2.1.tgz#c519da400b90fa2e4a30a70030a1573330c72fa9"
-  integrity sha512-VB1pDSVs82kFsZuoHQ5/Ysx62WiIfDGn9sx/x55EoVyk8pLwdqWGB2XCaDDOusBllb+1y3XRijscFPJJfpbFiw==
+"dns-sync@npm:@amoo-miki/dns-sync@^0.2.1":
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/@amoo-miki/dns-sync/-/dns-sync-0.2.2.tgz#e713eb46c3ddf6fde37e9453a31a4440ca45a8e7"
+  integrity sha512-GoWRmng1RpnFXrfITbAgfndTjvBgf438jRq1Q5m1Db9HfN9qR/TlRRcl7LXsvq+oS3iUzXyNECzoU62jHPilKw==
   dependencies:
     debug "^4"
     shelljs "~0.8"
