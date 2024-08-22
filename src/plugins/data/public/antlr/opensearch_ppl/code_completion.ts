@@ -77,7 +77,7 @@ export const getSuggestions = async ({
           text: sk.value,
           type: monaco.languages.CompletionItemKind.Keyword,
           detail: '',
-          insertText: '',
+          insertText: sk.value,
         }))
       );
     }
