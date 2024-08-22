@@ -691,7 +691,9 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                     >
                       <span
                         class="euiTableCellContent__text"
-                      />
+                      >
+                        Search
+                      </span>
                     </div>
                   </td>
                   <td

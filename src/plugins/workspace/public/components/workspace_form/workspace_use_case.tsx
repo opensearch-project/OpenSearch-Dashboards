@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useState, useEffect, useMemo } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiCheckableCard,
@@ -11,34 +11,71 @@ import {
   EuiFlexItem,
   EuiCompressedFormRow,
   EuiText,
+  EuiLink,
 } from '@elastic/eui';
 
-import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
-import { WorkspaceUseCase as WorkspaceUseCaseObject } from '../../types';
-import { WorkspaceFormErrors } from './types';
+import { ALL_USE_CASE_ID, DEFAULT_NAV_GROUPS } from '../../../../../core/public';
+import { WorkspaceFormErrors, AvailableUseCaseItem } from './types';
 import './workspace_use_case.scss';
-import type { SavedObjectsStart } from '../../../../../core/public';
-import { getIsOnlyAllowEssentialUseCase } from '../../utils';
-import { WorkspaceOperationType } from './constants';
 
 interface WorkspaceUseCaseCardProps {
   id: string;
   title: string;
   checked: boolean;
+  disabled?: boolean;
   description: string;
+  features: Array<{ id: string; title?: string }>;
   onChange: (id: string) => void;
 }
 
 const WorkspaceUseCaseCard = ({
   id,
   title,
+  features,
   description,
   checked,
+  disabled,
   onChange,
 }: WorkspaceUseCaseCardProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const featureItems = useMemo(() => {
+    if (id === DEFAULT_NAV_GROUPS.essentials.id) {
+      return [];
+    }
+    if (id === ALL_USE_CASE_ID) {
+      return [
+        i18n.translate('workspace.form.useCase.feature.all.discover', {
+          defaultMessage: 'Discover',
+        }),
+        i18n.translate('workspace.form.useCase.feature.all.dashboards', {
+          defaultMessage: 'Dashboards',
+        }),
+        i18n.translate('workspace.form.useCase.feature.all.visualize', {
+          defaultMessage: 'Visualize',
+        }),
+        i18n.translate('workspace.form.useCase.feature.all.observability', {
+          defaultMessage: 'Observability services, metrics, traces, and more',
+        }),
+        i18n.translate('workspace.form.useCase.feature.all.securityAnalytics', {
+          defaultMessage: 'Security analytics threat alerts, findings, correlations, and more',
+        }),
+        i18n.translate('workspace.form.useCase.feature.all.search', {
+          defaultMessage: 'Search studio, relevance tuning, vector search, and more',
+        }),
+      ];
+    }
+
+    const featureTitles = features.flatMap((feature) => (feature.title ? [feature.title] : []));
+    return featureTitles;
+  }, [features, id]);
+
   const handleChange = useCallback(() => {
     onChange(id);
   }, [id, onChange]);
+  const toggleExpanded = useCallback(() => {
+    setIsExpanded((flag) => !flag);
+  }, []);
+
   return (
     <EuiCheckableCard
       id={id}
@@ -49,23 +86,45 @@ const WorkspaceUseCaseCard = ({
       className="workspace-use-case-item"
       onChange={handleChange}
       data-test-subj={`workspaceUseCase-${id}`}
+      disabled={disabled}
     >
-      <EuiText color="subdued" size="xs">
-        {description}
-      </EuiText>
+      <EuiText size="xs">{description}</EuiText>
+      {featureItems.length > 0 && (
+        <EuiText size="xs">
+          {isExpanded && (
+            <>
+              {i18n.translate('workspace.form.useCase.featureExpandedTitle', {
+                defaultMessage: 'Feature includes:',
+              })}
+              <ul style={{ marginBottom: 0 }}>
+                {featureItems.map((feature, index) => (
+                  <li key={index}>{feature}</li>
+                ))}
+              </ul>
+            </>
+          )}
+          <EuiLink onClick={toggleExpanded} color="text">
+            <u>
+              {isExpanded
+                ? i18n.translate('workspace.form.useCase.showLessButton', {
+                    defaultMessage: 'See less....',
+                  })
+                : i18n.translate('workspace.form.useCase.showMoreButton', {
+                    defaultMessage: 'See more....',
+                  })}
+            </u>
+          </EuiLink>
+        </EuiText>
+      )}
     </EuiCheckableCard>
   );
 };
-
-type AvailableUseCase = Pick<WorkspaceUseCaseObject, 'id' | 'title' | 'description' | 'systematic'>;
 
 export interface WorkspaceUseCaseProps {
   value: string | undefined;
   onChange: (newValue: string) => void;
   formErrors: WorkspaceFormErrors;
-  availableUseCases: AvailableUseCase[];
-  savedObjects: SavedObjectsStart;
-  operationType: WorkspaceOperationType;
+  availableUseCases: AvailableUseCaseItem[];
 }
 
 export const WorkspaceUseCase = ({
@@ -73,32 +132,7 @@ export const WorkspaceUseCase = ({
   onChange,
   formErrors,
   availableUseCases,
-  savedObjects,
-  operationType,
 }: WorkspaceUseCaseProps) => {
-  const [isOnlyAllowEssential, setIsOnlyAllowEssential] = useState(false);
-
-  useEffect(() => {
-    if (operationType === WorkspaceOperationType.Create) {
-      getIsOnlyAllowEssentialUseCase(savedObjects.client).then((result: boolean) => {
-        setIsOnlyAllowEssential(result);
-      });
-    }
-  }, [savedObjects, operationType]);
-
-  const displayedUseCases = useMemo(() => {
-    let allAvailableUseCases = availableUseCases
-      .filter((item) => !item.systematic)
-      .concat(DEFAULT_NAV_GROUPS.all);
-    // When creating and isOnlyAllowEssential is true, only display essential use case
-    if (isOnlyAllowEssential && operationType === WorkspaceOperationType.Create) {
-      allAvailableUseCases = allAvailableUseCases.filter(
-        (item) => item.id === DEFAULT_NAV_GROUPS.essentials.id
-      );
-    }
-    return allAvailableUseCases;
-  }, [availableUseCases, isOnlyAllowEssential, operationType]);
-
   return (
     <EuiCompressedFormRow
       label={i18n.translate('workspace.form.workspaceUseCase.name.label', {
@@ -108,15 +142,17 @@ export const WorkspaceUseCase = ({
       error={formErrors.features?.message}
       fullWidth
     >
-      <EuiFlexGroup>
-        {displayedUseCases.map(({ id, title, description }) => (
+      <EuiFlexGroup direction="column">
+        {availableUseCases.map(({ id, title, description, features, disabled }) => (
           <EuiFlexItem key={id}>
             <WorkspaceUseCaseCard
               id={id}
               title={title}
               description={description}
               checked={value === id}
+              features={features}
               onChange={onChange}
+              disabled={disabled}
             />
           </EuiFlexItem>
         ))}

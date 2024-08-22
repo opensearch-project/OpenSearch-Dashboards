@@ -8,21 +8,17 @@ import { fireEvent, render, screen } from '@testing-library/react';
 
 import { WorkspaceMenu } from './workspace_menu';
 import { coreMock } from '../../../../../core/public/mocks';
-import { CoreStart } from '../../../../../core/public';
+import { CoreStart, DEFAULT_NAV_GROUPS } from '../../../../../core/public';
 import { BehaviorSubject } from 'rxjs';
 import { IntlProvider } from 'react-intl';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
-import { WORKSPACE_USE_CASES } from '../../../common/constants';
 import * as workspaceUtils from '../utils/workspace';
 
 describe('<WorkspaceMenu />', () => {
   let coreStartMock: CoreStart;
   const navigateToApp = jest.fn();
   const registeredUseCases$ = new BehaviorSubject([
-    WORKSPACE_USE_CASES.observability,
-    WORKSPACE_USE_CASES['security-analytics'],
-    WORKSPACE_USE_CASES.essentials,
-    WORKSPACE_USE_CASES.search,
+    { ...DEFAULT_NAV_GROUPS.observability, features: [{ id: 'discover', title: 'Discover' }] },
   ]);
 
   beforeEach(() => {
