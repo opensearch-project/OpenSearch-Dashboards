@@ -1,0 +1,4 @@
+feat:
+- Add external icon to `TopNavControlButtonData` and `TopNavControlLinkData` with `target: '_blank'` ([#7799](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7799))
+- Add `iconGap` to `TopNavControlButtonData` and `TopNavControlLinkData` ([#7799](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7799))
+- Bump OUI to 1.11.0 ([#7799](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7799))
