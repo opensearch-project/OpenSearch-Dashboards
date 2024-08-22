@@ -1,0 +1,3 @@
+feat:
+- Add `iconGap` to `TopNavControlButtonData` abd `TopNavControlLinkData` ([#7799](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7799))
+- Bump OUI to 1.11.0 ([#7799](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7799))
