@@ -174,7 +174,9 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
               run: () => setDeletedWorkspace(currentWorkspace),
               color: 'danger',
               iconType: 'trash',
-              ariaLabel: 'Delete',
+              ariaLabel: i18n.translate('workspace.detail.delete.button', {
+                defaultMessage: 'Delete',
+              }),
               testId: 'workspace-detail-delete-button',
               controlType: 'icon',
               display: 'base',

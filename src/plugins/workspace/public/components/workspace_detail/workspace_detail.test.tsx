@@ -121,8 +121,8 @@ const WorkspaceDetailPage = (props: any) => {
       dataSourceManagement,
       navigationUI: {
         HeaderControl: ({ controls }) => {
-          if (props.showDeleteModal && controls && controls[0] && controls[0].run) {
-            controls[0].run();
+          if (props.showDeleteModal) {
+            controls?.[0]?.run?.();
           }
           return null;
         },

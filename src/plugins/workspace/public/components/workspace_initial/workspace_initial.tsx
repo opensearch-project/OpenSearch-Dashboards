@@ -40,14 +40,10 @@ export const WorkspaceInitial = () => {
   const isDarkTheme = uiSettings.get('theme:darkMode');
   const backGroundUrl = isDarkTheme ? BackgroundDarkSVG : BackgroundLightSVG;
 
-  const noAdminToolTip = (
-    <>
-      {i18n.translate('workspace.initial.card.createWorkspace.toolTip', {
-        defaultMessage:
-          'Contact your administrator to create a workspace or to be added to an existing one.',
-      })}
-    </>
-  );
+  const noAdminToolTip = i18n.translate('workspace.initial.card.createWorkspace.toolTip', {
+    defaultMessage:
+      'Contact your administrator to create a workspace or to be added to an existing one.',
+  });
 
   const createButton = (
     <EuiSmallButton
@@ -73,7 +69,7 @@ export const WorkspaceInitial = () => {
             defaultMessage: 'Create a workspace',
           })}
           description={
-            <EuiToolTip content={isDashboardAdmin ? <></> : noAdminToolTip}>
+            <EuiToolTip content={isDashboardAdmin ? null : noAdminToolTip}>
               <>
                 {i18n.translate('workspace.initial.card.createWorkspace.description', {
                   defaultMessage: 'Organize projects by use case in a collaborative workspace.',
