@@ -122,6 +122,7 @@ export function enrichAutocompleteResult(
   const result: OpenSearchPplAutocompleteResult = {
     ...baseResult,
     ...suggestionsFromRules,
+    suggestColumns: shouldSuggestColumns ? shouldSuggestColumns : undefined,
   };
   return result;
 }

@@ -9,33 +9,48 @@
  * GitHub history for details.
  */
 
+import { monaco } from '@osd/monaco';
 import { CursorPosition, AutocompleteResultBase } from '../shared/types';
 import { parseQuery } from '../shared/utils';
 import { openSearchPplAutocompleteData } from './opensearch_ppl_autocomplete';
 import { QuerySuggestion } from '../../autocomplete';
+import { IndexPattern, IndexPatternField } from '../../index_patterns';
 
-// Function to map token types to their names
-const getTokenNameByType = (parser, type) => {
-  return parser.vocabulary.getSymbolicName(type);
+const fetchFieldSuggestions = (
+  indexPattern: IndexPattern
+): Array<{
+  text: string;
+  type: monaco.languages.CompletionItemKind;
+  insertText: string;
+  detail: string;
+}> => {
+  const fieldNames: string[] = indexPattern.fields
+    .filter((idxField: IndexPatternField) => !idxField?.subType) // filter removed .keyword fields
+    .map((idxField: { name: string }) => {
+      return idxField.name;
+    });
+
+  const fieldSuggestions: Array<{
+    text: string;
+    type: monaco.languages.CompletionItemKind;
+    insertText: string;
+    detail: string;
+  }> = fieldNames.map((field: string) => {
+    return {
+      text: field,
+      type: monaco.languages.CompletionItemKind.Field,
+      insertText: `${field}: `,
+      detail: '',
+    };
+  });
+
+  return fieldSuggestions;
 };
-
-function getExistingTokenNames(tokenStream, lexer, cursorIndex) {
-  tokenStream.seek(0); // Reset to start of the stream
-  const existingTokens = new Set();
-  while (tokenStream.index < cursorIndex) {
-    const token = tokenStream.LT(1);
-    if (token.type !== lexer.EOF) {
-      const tokenName = lexer.symbolicNames[token.type];
-      existingTokens.add(tokenName);
-    }
-    tokenStream.consume();
-  }
-  return existingTokens;
-}
 
 export const getSuggestions = async ({
   selectionStart,
   selectionEnd,
+  indexPattern,
   position,
   query,
   services,
@@ -50,12 +65,19 @@ export const getSuggestions = async ({
     });
 
     const finalSuggestions: QuerySuggestion[] = [];
+
+    if (suggestions.suggestColumns) {
+      finalSuggestions.push(...fetchFieldSuggestions(indexPattern));
+    }
+
     // Fill in PPL keywords
     if (suggestions.suggestKeywords?.length) {
       finalSuggestions.push(
         ...suggestions.suggestKeywords.map((sk) => ({
           text: sk.value,
           type: monaco.languages.CompletionItemKind.Keyword,
+          detail: '',
+          insertText: '',
         }))
       );
     }

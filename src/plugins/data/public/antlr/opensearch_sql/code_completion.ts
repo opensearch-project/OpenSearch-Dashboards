@@ -117,63 +117,6 @@ export const getSuggestions = async ({
   return finalSuggestions;
 };
 
-// export const parseQuery = <
-//   A extends AutocompleteResultBase,
-//   L extends LexerType,
-//   P extends ParserType
-// >({
-//   Lexer,
-//   Parser,
-//   tokenDictionary,
-//   ignoredTokens,
-//   rulesToVisit,
-//   getParseTree,
-//   enrichAutocompleteResult,
-//   query,
-//   cursor,
-//   context,
-// }: ParsingSubject<A, L, P>) => {
-//   const parser = createParser(Lexer, Parser, query);
-//   const { tokenStream } = parser;
-//   const errorListener = new SqlErrorListener(tokenDictionary.SPACE);
-
-//   parser.removeErrorListeners();
-//   parser.addErrorListener(errorListener);
-//   getParseTree(parser);
-
-//   const core = new CodeCompletionCore(parser);
-//   core.ignoredTokens = ignoredTokens;
-//   core.preferredRules = rulesToVisit;
-//   const cursorTokenIndex = findCursorTokenIndex(tokenStream, cursor, tokenDictionary.SPACE);
-//   if (cursorTokenIndex === undefined) {
-//     throw new Error(
-//       `Could not find cursor token index for line: ${cursor.line}, column: ${cursor.column}`
-//     );
-//   }
-
-//   const suggestKeywords: KeywordSuggestion[] = [];
-//   const { tokens, rules } = core.collectCandidates(cursorTokenIndex, context);
-//   tokens.forEach((_, tokenType) => {
-//     // Literal keyword names are quoted
-//     const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');
-
-//     if (!literalName) {
-//       throw new Error(`Could not get literal name for token ${tokenType}`);
-//     }
-
-//     suggestKeywords.push({
-//       value: literalName,
-//     });
-//   });
-
-//   const result: AutocompleteResultBase = {
-//     errors: errorListener.errors,
-//     suggestKeywords,
-//   };
-
-//   return enrichAutocompleteResult(result, rules, tokenStream, cursorTokenIndex, cursor, query);
-// };
-
 export const getOpenSearchSqlAutoCompleteSuggestions = (
   query: string,
   cursor: CursorPosition
