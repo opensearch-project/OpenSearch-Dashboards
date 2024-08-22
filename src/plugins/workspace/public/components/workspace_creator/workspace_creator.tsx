@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
@@ -43,6 +43,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     dataSourceManagement?: DataSourceManagementPluginSetup;
     navigationUI: NavigationPublicPluginStart['ui'];
   }>();
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
   const { isOnlyAllowEssential, availableUseCases } = useFormAvailableUseCases({
@@ -65,6 +66,10 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
       let result;
+      if (isFormSubmitting) {
+        return;
+      }
+      setIsFormSubmitting(true);
       try {
         const { permissionSettings, selectedDataSources, ...attributes } = data;
         const selectedDataSourceIds = (selectedDataSources ?? []).map((ds: DataSource) => {
@@ -105,9 +110,11 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           text: error instanceof Error ? error.message : JSON.stringify(error),
         });
         return;
+      } finally {
+        setIsFormSubmitting(false);
       }
     },
-    [notifications?.toasts, http, application, workspaceClient]
+    [notifications?.toasts, http, application, workspaceClient, isFormSubmitting]
   );
 
   const isFormReadyToRender =
@@ -146,6 +153,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               dataSourceManagement={dataSourceManagement}
               availableUseCases={availableUseCases}
               defaultValues={defaultWorkspaceFormValues}
+              isSubmitting={isFormSubmitting}
             />
           )}
         </EuiPageContent>

@@ -344,4 +344,33 @@ describe('WorkspaceCreator', () => {
     });
     expect(notificationToastsAddDanger).not.toHaveBeenCalled();
   });
+
+  it('should not create workspace API when submitting', async () => {
+    workspaceClientCreate.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(resolve, 100);
+        })
+    );
+    const { getByTestId } = render(<WorkspaceCreator />);
+    // Ensure workspace create form rendered
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceUseCase-observability'));
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    expect(workspaceClientCreate).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    expect(workspaceClientCreate).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => {
+      fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+      expect(workspaceClientCreate).toHaveBeenCalledTimes(2);
+    });
+  });
 });

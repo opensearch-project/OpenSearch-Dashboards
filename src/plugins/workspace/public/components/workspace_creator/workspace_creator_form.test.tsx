@@ -38,6 +38,7 @@ const setup = (
 
   return render(
     <WorkspaceCreatorForm
+      isSubmitting={false}
       application={application}
       savedObjects={savedObjects}
       operationType={WorkspaceOperationType.Create}

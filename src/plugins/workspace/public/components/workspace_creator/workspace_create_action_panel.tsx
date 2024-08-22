@@ -17,12 +17,14 @@ interface WorkspaceCreateActionPanelProps {
   formId: string;
   formData: Pick<WorkspaceFormDataState, 'name' | 'description'>;
   application: ApplicationStart;
+  isSubmitting: boolean;
 }
 
 export const WorkspaceCreateActionPanel = ({
   formId,
   formData,
   application,
+  isSubmitting,
 }: WorkspaceCreateActionPanelProps) => {
   const [isCancelModalVisible, setIsCancelModalVisible] = useState(false);
   const closeCancelModal = useCallback(() => setIsCancelModalVisible(false), []);
@@ -38,6 +40,7 @@ export const WorkspaceCreateActionPanel = ({
           <EuiSmallButtonEmpty
             data-test-subj="workspaceForm-bottomBar-cancelButton"
             onClick={showCancelModal}
+            disabled={isSubmitting}
           >
             {i18n.translate('workspace.form.right.sidebar.buttons.cancelText', {
               defaultMessage: 'Cancel',
@@ -50,7 +53,8 @@ export const WorkspaceCreateActionPanel = ({
             form={formId}
             data-test-subj="workspaceForm-bottomBar-createButton"
             fill
-            disabled={createButtonDisabled}
+            disabled={createButtonDisabled || isSubmitting}
+            isLoading={isSubmitting}
           >
             {i18n.translate('workspace.form.right.sidebar.buttons.createWorkspaceText', {
               defaultMessage: 'Create workspace',

@@ -34,7 +34,11 @@ import { generateRightSidebarScrollProps, RightSidebarScrollField } from './util
 
 import './workspace_creator_form.scss';
 
-export const WorkspaceCreatorForm = (props: WorkspaceFormProps) => {
+interface WorkspaceCreatorFormProps extends WorkspaceFormProps {
+  isSubmitting: boolean;
+}
+
+export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
   const {
     application,
     savedObjects,
@@ -217,6 +221,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceFormProps) => {
               formData={formData}
               formId={formId}
               application={application}
+              isSubmitting={props.isSubmitting}
             />
           </div>
         </div>
