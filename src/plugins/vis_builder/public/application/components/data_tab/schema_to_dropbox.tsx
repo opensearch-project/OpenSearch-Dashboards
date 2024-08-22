@@ -13,7 +13,8 @@ export const mapSchemaToAggPanel = (
   schemas: Schemas,
   aggProps: AggProps,
   activeSchemaFields: SchemaDisplayStates,
-  setActiveSchemaFields: React.Dispatch<React.SetStateAction<SchemaDisplayStates>>
+  setActiveSchemaFields: React.Dispatch<React.SetStateAction<SchemaDisplayStates>>,
+  isDragging: boolean
 ) => {
   const panelComponents = schemas.all.map((schema) => {
     return (
@@ -25,6 +26,7 @@ export const mapSchemaToAggPanel = (
         aggProps={aggProps}
         activeSchemaFields={activeSchemaFields}
         setActiveSchemaFields={setActiveSchemaFields}
+        isDragging={isDragging}
       />
     );
   });

@@ -53,6 +53,7 @@ const DropboxComponent = ({
   isValidDropTarget,
   canDrop,
   dropProps,
+  isDragging,
 }: DropboxProps) => {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [closing, setClosing] = useState<boolean | string>(false);
@@ -79,58 +80,74 @@ const DropboxComponent = ({
           droppableId={dropboxId}
           isCombineEnabled={true}
         >
-          {fields.map(({ id, label }, index) => (
-            <EuiDraggable
-              className={`dropBox__draggable ${id === closing && 'closing'}`}
-              key={id}
-              draggableId={id}
-              index={index}
-            >
-              <EuiPanel
-                key={index}
-                paddingSize="s"
-                className="dropBox__field"
-                data-test-subj={`dropBoxField-${dropboxId}-${index}`}
-              >
-                <EuiText size="s" className="dropBox__field_text" onClick={() => onEditField(id)}>
-                  <a role="button" tabIndex={0}>
-                    {label}
-                  </a>
-                </EuiText>
-                <EuiSmallButtonIcon
-                  color="subdued"
-                  iconType="cross"
-                  aria-label="clear-field"
-                  iconSize="s"
-                  onClick={() => animateDelete(id)}
-                  data-test-subj="dropBoxRemoveBtn"
-                />
-              </EuiPanel>
-            </EuiDraggable>
-          ))}
+          {(provided, snapshot) => (
+            <div ref={provided.innerRef} {...provided.droppableProps}>
+              {fields.map(({ id, label }, index) => (
+                <EuiDraggable
+                  className={`dropBox__draggable ${id === closing && 'closing'}`}
+                  key={id}
+                  draggableId={id}
+                  index={index}
+                >
+                  <EuiPanel
+                    key={index}
+                    paddingSize="s"
+                    className={`dropBox__field dropBox__dropTarget ${
+                      isDragging ? 'validField' : ''
+                    } ${snapshot.isDraggingOver ? 'canDrop' : ''}`}
+                    data-test-subj={`dropBoxField-${dropboxId}-${index}`}
+                  >
+                    <EuiText
+                      size="s"
+                      className="dropBox__field_text"
+                      onClick={() => onEditField(id)}
+                    >
+                      <a role="button" tabIndex={0}>
+                        {label}
+                      </a>
+                    </EuiText>
+                    <EuiSmallButtonIcon
+                      color="subdued"
+                      iconType="cross"
+                      aria-label="clear-field"
+                      iconSize="s"
+                      onClick={() => animateDelete(id)}
+                      data-test-subj="dropBoxRemoveBtn"
+                    />
+                  </EuiPanel>
+                </EuiDraggable>
+              ))}
+            </div>
+          )}
         </EuiDroppable>
-        {fields.length < limit && (
-          <EuiPanel
-            data-test-subj={`dropBoxAddField-${dropboxId}`}
-            className={`dropBox__field dropBox__dropTarget ${
-              isValidDropTarget ? 'validField' : ''
-            } ${canDrop ? 'canDrop' : ''}`}
-            {...(isValidDropTarget && dropProps)}
-          >
-            <EuiText size="s">
-              {i18n.translate('visBuilder.dropbox.addField.title', {
-                defaultMessage: 'Click or drop to add',
-              })}
-            </EuiText>
-            <EuiSmallButtonIcon
-              iconType="plusInCircle"
-              aria-label="clear-field"
-              iconSize="s"
-              onClick={() => onAddField()}
-              data-test-subj="dropBoxAddBtn"
-            />
-          </EuiPanel>
-        )}
+        <EuiDroppable droppableId={`AddPanel_${dropboxId}`}>
+          {(provided, snapshot) => (
+            <div ref={provided.innerRef} {...provided.droppableProps}>
+              {fields.length < limit && (
+                <EuiPanel
+                  data-test-subj={`dropBoxAddField-${dropboxId}`}
+                  className={`dropBox__field dropBox__dropTarget ${
+                    isDragging ? 'validField' : ''
+                  } ${snapshot.isDraggingOver ? 'canDrop' : ''}`}
+                  {...(isValidDropTarget && dropProps)}
+                >
+                  <EuiText size="s">
+                    {i18n.translate('visBuilder.dropbox.addField.title', {
+                      defaultMessage: 'Click or drop to add',
+                    })}
+                  </EuiText>
+                  <EuiSmallButtonIcon
+                    iconType="plusInCircle"
+                    aria-label="clear-field"
+                    iconSize="s"
+                    onClick={() => onAddField()}
+                    data-test-subj="dropBoxAddBtn"
+                  />
+                </EuiPanel>
+              )}
+            </div>
+          )}
+        </EuiDroppable>
       </div>
     </EuiCompressedFormRow>
   );
