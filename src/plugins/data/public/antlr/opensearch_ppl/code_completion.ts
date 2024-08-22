@@ -39,7 +39,7 @@ const fetchFieldSuggestions = (
     return {
       text: field,
       type: monaco.languages.CompletionItemKind.Field,
-      insertText: `${field}: `,
+      insertText: `${field}`,
       detail: '',
     };
   });
