@@ -117,19 +117,6 @@ export const getSuggestions = async ({
   return finalSuggestions;
 };
 
-// export interface ParsingSubject<A extends AutocompleteResultBase, L, P> {
-//   Lexer: LexerConstructor<L>;
-//   Parser: ParserConstructor<P>;
-//   tokenDictionary: TokenDictionary;
-//   ignoredTokens: Set<number>;
-//   rulesToVisit: Set<number>;
-//   getParseTree: GetParseTree<P>;
-//   enrichAutocompleteResult: EnrichAutocompleteResult<A>;
-//   query: string;
-//   cursor: CursorPosition;
-//   context?: ParserRuleContext;
-// }
-
 // export const parseQuery = <
 //   A extends AutocompleteResultBase,
 //   L extends LexerType,

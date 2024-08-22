@@ -6,13 +6,13 @@
 import { from } from 'rxjs';
 import { distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
 import { CodeCompletionCore } from 'antlr4-c3';
-import { Lexer as LexerType, ParserRuleContext, Parser as ParserType } from 'antlr4ng';
+import { Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
 import { DataSetManager } from '../../query';
 import { findCursorTokenIndex } from './cursor';
 import { GeneralErrorListener } from './general_error_listerner';
 import { createParser } from '../opensearch_sql/parse';
 import { AutocompleteResultBase, KeywordSuggestion } from './types';
-import { ParsingSubject } from '../opensearch_sql/code_completion';
+import { ParsingSubject } from './types';
 import { quotesRegex } from './constants';
 
 export interface IDataSourceRequestHandlerParams {
@@ -150,7 +150,7 @@ export const parseQuery = <
     const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');
 
     if (!literalName) {
-      throw new Error(`Could not get literal name for token ${tokenType}`);
+      return;
     }
 
     suggestKeywords.push({
