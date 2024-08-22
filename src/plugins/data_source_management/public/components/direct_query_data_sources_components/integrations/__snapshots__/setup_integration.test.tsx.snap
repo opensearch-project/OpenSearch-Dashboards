@@ -999,6 +999,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                         >
                           <EuiButtonContent
                             className="euiButtonEmpty__content"
+                            iconGap="m"
                             iconSide="left"
                             iconSize="m"
                             iconType="cross"
@@ -1077,6 +1078,7 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                           >
                             <EuiButtonContent
                               className="euiButton__content"
+                              iconGap="m"
                               iconSide="right"
                               iconType="arrowRight"
                               isLoading={false}

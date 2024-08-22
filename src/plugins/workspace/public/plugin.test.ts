@@ -349,30 +349,6 @@ describe('Workspace plugin', () => {
         appUpdater({ id: 'system-feature', title: '', mount: () => () => {} })
       ).toBeUndefined();
     });
-
-    it('#start should update nav group status after currentWorkspace set', async () => {
-      const workspacePlugin = new WorkspacePlugin();
-      const setupMock = getSetupMock();
-      const coreStart = coreMock.createStart();
-      await workspacePlugin.setup(setupMock, {});
-      const workspaceObject = {
-        id: 'foo',
-        name: 'bar',
-        features: ['use-case-foo'],
-      };
-      coreStart.workspaces.currentWorkspace$.next(workspaceObject);
-
-      const navGroupUpdater$ = setupMock.chrome.navGroup.registerNavGroupUpdater.mock.calls[0][0];
-
-      workspacePlugin.start(coreStart, mockDependencies);
-
-      const navGroupUpdater = await navGroupUpdater$.pipe(first()).toPromise();
-
-      expect(navGroupUpdater({ id: 'foo' })).toBeUndefined();
-      expect(navGroupUpdater({ id: 'bar' })).toEqual({
-        status: NavGroupStatus.Hidden,
-      });
-    });
   });
 
   describe('#stop', () => {

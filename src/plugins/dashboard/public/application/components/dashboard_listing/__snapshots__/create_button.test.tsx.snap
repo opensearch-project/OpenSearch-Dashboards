@@ -316,6 +316,7 @@ exports[`create button with props renders button dropdown menu when two provider
                   >
                     <EuiButtonContent
                       className="euiButton__content"
+                      iconGap="m"
                       iconSide="right"
                       iconType="arrowDown"
                       textProps={
@@ -528,6 +529,7 @@ exports[`create button with props renders single button when one provider given 
             >
               <EuiButtonContent
                 className="euiButton__content"
+                iconGap="m"
                 iconSide="left"
                 iconType="plus"
                 textProps={

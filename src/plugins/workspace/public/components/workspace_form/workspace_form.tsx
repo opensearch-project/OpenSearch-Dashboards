@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef } from 'react';
-import { EuiPanel, EuiSpacer, EuiTitle, EuiForm } from '@elastic/eui';
-
+import React, { useCallback, useRef } from 'react';
+import { EuiPanel, EuiSpacer, EuiTitle, EuiForm, EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { WorkspaceFormProps } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
 import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
@@ -16,7 +16,7 @@ import { SelectDataSourcePanel } from './select_data_source_panel';
 import { EnterDetailsPanel } from './workspace_enter_details_panel';
 import {
   selectDataSourceTitle,
-  usersAndPermissionsTitle,
+  usersAndPermissionsCreatePageTitle,
   workspaceDetailsTitle,
   workspaceUseCaseTitle,
 } from './constants';
@@ -29,27 +29,43 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     permissionEnabled,
     dataSourceManagement: isDataSourceEnabled,
     availableUseCases,
-    operationType,
   } = props;
   const {
     formId,
     formData,
     formErrors,
     numberOfErrors,
-    numberOfChanges,
     setName,
     setDescription,
     handleFormSubmit,
     handleColorChange,
-    handleUseCaseChange,
+    handleUseCaseChange: handleUseCaseChangeInHook,
     setPermissionSettings,
     setSelectedDataSources,
   } = useWorkspaceForm(props);
+  const nameManualChangedRef = useRef(false);
 
   const disabledUserOrGroupInputIdsRef = useRef(
     defaultValues?.permissionSettings?.map((item) => item.id) ?? []
   );
   const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin ?? false;
+  const handleNameInputChange = useCallback(
+    (newName) => {
+      setName(newName);
+      nameManualChangedRef.current = true;
+    },
+    [setName]
+  );
+  const handleUseCaseChange = useCallback(
+    (newUseCase) => {
+      handleUseCaseChangeInHook(newUseCase);
+      const useCase = availableUseCases.find((item) => newUseCase === item.id);
+      if (!nameManualChangedRef.current && useCase) {
+        setName(useCase.title);
+      }
+    },
+    [handleUseCaseChangeInHook, availableUseCases, setName]
+  );
 
   return (
     <EuiForm id={formId} onSubmit={handleFormSubmit} component="form">
@@ -72,7 +88,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           color={formData.color}
           readOnly={!!defaultValues?.reserved}
           handleColorChange={handleColorChange}
-          onNameChange={setName}
+          onNameChange={handleNameInputChange}
           onDescriptionChange={setDescription}
         />
       </EuiPanel>
@@ -87,16 +103,21 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           onChange={handleUseCaseChange}
           formErrors={formErrors}
           availableUseCases={availableUseCases}
-          savedObjects={savedObjects}
-          operationType={operationType}
         />
       </EuiPanel>
       <EuiSpacer />
       {permissionEnabled && (
         <EuiPanel>
           <EuiTitle size="s">
-            <h2>{usersAndPermissionsTitle}</h2>
+            <h2>{usersAndPermissionsCreatePageTitle}</h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="default">
+            {i18n.translate('workspace.form.usersAndPermissions.description', {
+              defaultMessage:
+                'You will be added as an owner to the workspace. Select additional users and user groups as workspace collaborators with different access levels.',
+            })}
+          </EuiText>
           <EuiSpacer size="m" />
           <WorkspacePermissionSettingPanel
             errors={formErrors.permissionSettings?.fields}

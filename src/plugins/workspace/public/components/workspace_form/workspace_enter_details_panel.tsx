@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiColorPicker,
-  EuiCompressedFieldText,
-  EuiCompressedFormRow,
-  EuiSpacer,
-  EuiText,
-  EuiCompressedTextArea,
-} from '@elastic/eui';
+import { EuiColorPicker, EuiCompressedFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/color_picker';

@@ -47,7 +47,7 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
       name: i18n.translate('core.ui_settings.params.enableUserControlTitle', {
         defaultMessage: 'Enable user control',
       }),
-      value: true,
+      value: false,
       description: i18n.translate('core.ui_settings.params.enableUserControlText', {
         defaultMessage: `Enable users to control theming and dark or light mode via "Appearance" control in top navigation. When true, those settings can no longer be set globally by administrators.`,
       }),

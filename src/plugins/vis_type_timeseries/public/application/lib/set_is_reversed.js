@@ -72,7 +72,7 @@ export const isBackgroundDark = (backgroundColor, currentTheme) => {
 };
 
 /**
- * Checks to see if `backgroundColor` is the the same lightness spectrum as `currentTheme`.
+ * Checks to see if `backgroundColor` is the same lightness spectrum as `currentTheme`.
  */
 export const isBackgroundInverted = (backgroundColor, currentTheme) => {
   const backgroundIsDark = isBackgroundDark(backgroundColor, currentTheme);
