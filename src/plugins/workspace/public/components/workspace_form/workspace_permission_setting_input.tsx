@@ -150,7 +150,7 @@ export const WorkspacePermissionSettingInput = ({
   }, [index, onDelete]);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m">
+    <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem style={{ maxWidth: 150 }}>
         <EuiSuperSelect
           compressed={true}
@@ -196,7 +196,7 @@ export const WorkspacePermissionSettingInput = ({
       <EuiFlexItem grow={false}>
         {deletable && isEditing && (
           <EuiButtonIcon
-            color="danger"
+            color="text"
             aria-label="Delete permission setting"
             iconType="trash"
             display="empty"
