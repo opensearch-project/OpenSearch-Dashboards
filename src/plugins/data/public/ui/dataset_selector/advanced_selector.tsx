@@ -5,10 +5,10 @@
 
 import React, { useState } from 'react';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { Dataset } from '../../../common/datasets';
+import { Dataset, DataStructure } from '../../../common/datasets';
 import { DatasetExplorer } from './dataset_explorer';
 import { Configurator } from './configurator';
-import { getIndexPatterns, getQueryService } from '../../services';
+import { getQueryService } from '../../services';
 
 export const AdvancedSelector = ({
   savedObjects,
@@ -19,24 +19,23 @@ export const AdvancedSelector = ({
   onSelect: (dataset: Dataset) => void;
   onCancel: () => void;
 }) => {
-  const indexPatternsService = getIndexPatterns();
   const queryService = getQueryService();
   const datasetManager = queryService.queryString.getDatasetManager();
-  const [selectedDataSet, setSelectedDataSet] = useState<Dataset | undefined>();
+  const [currentDataStructure, setCurrentDataStructure] = useState<DataStructure | undefined>();
 
-  return selectedDataSet ? (
+  return currentDataStructure ? (
     <Configurator
-      indexPatternsService={indexPatternsService}
-      dataset={selectedDataSet}
+      savedObjects={savedObjects}
+      currentDataStructure={currentDataStructure}
       onConfirm={onSelect}
       onCancel={onCancel}
-      onPrevious={() => setSelectedDataSet(undefined)}
+      onPrevious={() => setCurrentDataStructure(undefined)}
     />
   ) : (
     <DatasetExplorer
       savedObjects={savedObjects}
       datasetManager={datasetManager}
-      onNext={(dataset) => setSelectedDataSet(dataset)}
+      onNext={(dataStructure) => setCurrentDataStructure(dataStructure)}
       onCancel={onCancel}
     />
   );

@@ -94,15 +94,20 @@ export const indexPatternHandlerConfig: DatasetHandlerConfig = {
       case DEFAULT_DATA.STRUCTURES.CATEGORY.type: {
         return dataStructure.children || [];
       }
+      case DEFAULT_DATA.STRUCTURES.DATASET.type: {
+        return [];
+      }
     }
     return [dataStructure];
   },
 
   /**
    * Determines if a DataStructure is a leaf node.
-   * @returns Always true for index patterns.
+   * @returns true if DATASET
    */
-  isLeaf: () => true,
+  isLeaf: (dataStructure: DataStructure) => {
+    return dataStructure.type === DEFAULT_DATA.STRUCTURES.DATASET.type;
+  },
 };
 
 /**

@@ -9,6 +9,8 @@
  * GitHub history for details.
  */
 
+import { DATA_STRUCTURE_META_TYPES, DataStructure } from './types';
+
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -34,52 +36,118 @@ export const DEFAULT_DATA = {
       id: 'ROOT',
       title: 'Data',
       type: 'ROOT',
-    },
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.FEATURE,
+        icon: 'folderOpen',
+        tooltip: 'Root Data Structure',
+      },
+    } as DataStructure,
+
+    NULL: {
+      id: 'NULL',
+      title: 'Empty',
+      type: 'NULL',
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.FEATURE,
+        icon: 'empty',
+        tooltip: 'Empty Data Structure',
+      },
+    } as DataStructure,
+
     CATEGORY: {
       id: 'CATEGORY',
       title: 'Categories',
       type: 'CATEGORY',
-    },
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.FEATURE,
+        icon: 'listAdd',
+        tooltip: 'Data Categories',
+      },
+    } as DataStructure,
+
     DATA_SOURCE: {
       id: 'DATA_SOURCE',
       title: 'Clusters',
       type: 'DATA_SOURCE',
-    },
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.FEATURE,
+        icon: 'cluster',
+        tooltip: 'Data Clusters',
+      },
+    } as DataStructure,
+
     CONNECTION: {
       id: 'CONNECTION',
       title: 'Connections',
       type: 'CONNECTION',
-    },
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.FEATURE,
+        icon: 'link',
+        tooltip: 'Data Connections',
+      },
+    } as DataStructure,
+
     INDEX: {
       id: 'INDEX',
       title: 'Indexes',
       type: 'INDEX',
-    },
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.FEATURE,
+        icon: 'indexOpen',
+        tooltip: 'Data Indexes',
+      },
+    } as DataStructure,
+
     FIELD: {
       id: 'FIELD',
       title: 'Fields',
       type: 'FIELD',
-    },
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.FEATURE,
+        icon: 'field',
+        tooltip: 'Data Fields',
+      },
+    } as DataStructure,
+
     TIME_FIELD: {
       id: 'TIME_FIELD',
       title: 'Time fields',
       type: 'TIME_FIELD',
-    },
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.FEATURE,
+        icon: 'clock',
+        tooltip: 'Time Fields',
+      },
+    } as DataStructure,
+
     DATASET: {
       id: 'DATASET',
       title: 'Datasets',
       type: 'DATASET',
-    },
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.FEATURE,
+        icon: 'document',
+        tooltip: 'Datasets',
+      },
+    } as DataStructure,
+
     DATASET_CATEGORY: {
       id: 'DATASET_CATEGORY',
       title: 'Datasets',
       type: 'DATASET_CATEGORY',
-    },
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.FEATURE,
+        icon: 'documents',
+        tooltip: 'Dataset Categories',
+      },
+    } as DataStructure,
   },
+
   SET_TYPES: {
     INDEX_PATTERN: 'INDEX_PATTERN',
     INDEX: 'INDEX',
   },
+
   SOURCE_TYPES: {
     OPENSEARCH: 'OPENSEARCH',
     LEGACY: 'LEGACY',

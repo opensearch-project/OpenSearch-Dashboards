@@ -28,7 +28,6 @@ export class DatasetManager {
   private dataStructureCache: DataStructureCache;
   private datasetHandlers: Map<string, DatasetHandlerConfig>;
   private dataStructuresMap: Map<string, DataStructure>;
-  private datasetsMap: Map<string, Dataset[]> = new Map();
   private categoryDataStructures: DataStructure[] = [];
 
   constructor(private readonly uiSettings: CoreStart['uiSettings']) {
@@ -36,7 +35,6 @@ export class DatasetManager {
     this.dataStructureCache = createDataStructureCache();
     this.datasetHandlers = new Map();
     this.dataStructuresMap = new Map();
-    this.datasetsMap = new Map();
     this.registerDefaultHandlers();
   }
 
@@ -75,9 +73,6 @@ export class DatasetManager {
   ): Promise<DataStructure[]> {
     const categoryPromises = Array.from(this.datasetHandlers.values()).map((datasetHandler) => {
       const category = datasetHandler.fetchOptions(savedObjects, rootDataStructure);
-      // const datasets = this.fetchDatasets();
-      // for each dataset call:
-      // this.addDatasetToMap(dataset);
       return category;
     });
     const categories = await Promise.all(categoryPromises);
@@ -86,24 +81,13 @@ export class DatasetManager {
   }
 
   /**
-   * Adds a dataset to the datasetsMap.
-   * @param {Dataset} dataset - The dataset to add.
-   */
-  private addDatasetToMap(dataset: Dataset) {
-    if (!this.datasetsMap.has(dataset.type)) {
-      this.datasetsMap.set(dataset.type, []);
-    }
-    const datasets = this.datasetsMap.get(dataset.type)!;
-    if (!datasets.some((d) => d.id === dataset.id)) {
-      datasets.push(dataset);
-    }
-  }
-
-  /**
    * @returns {boolean} if the data structure is the leaf data structure, where it has no children
    */
   public isLeafDataStructure(dataStructure: DataStructure): boolean {
-    if (dataStructure.type === DEFAULT_DATA.STRUCTURES.CATEGORY.type) {
+    if (
+      dataStructure.type === DEFAULT_DATA.STRUCTURES.ROOT.type ||
+      dataStructure.type === DEFAULT_DATA.STRUCTURES.CATEGORY.type
+    ) {
       return false;
     }
     const handler = this.datasetHandlers.get(dataStructure.type);
@@ -128,15 +112,6 @@ export class DatasetManager {
     return handler.toDataset(dataStructure);
   }
 
-  // /**
-  //  * Fetches all datasets.
-  //  * @param {SavedObjectsClientContract} savedObjects - The saved objects client.
-  //  * @returns {Promise<DataStructure[]>} A promise that resolves to an array of dataset category data structures.
-  //  */
-  // private async fetchDatasets(dataStructure: DataStructure): Promise<DataStructure[]> {
-  //   // TODO:
-  // }
-
   /**
    * Fetches options for a given data structure.
    * @param {DataStructure} dataStructure - The data structure to fetch options for.
@@ -155,7 +130,15 @@ export class DatasetManager {
         return dataStructure.children || [];
       }
       case DEFAULT_DATA.STRUCTURES.DATASET.type:
-        return [dataStructure];
+        const category = this.findDataStructureCategory(dataStructure);
+
+        if (!category) {
+          throw new Error(`No category found for dataset: ${dataStructure.id}`);
+        }
+
+        const dataset = this.datasetHandlers.get(dataStructure.type)?.toDataset(dataStructure);
+        this.setDataset(dataset);
+        return [DEFAULT_DATA.STRUCTURES.NULL];
       default:
         const handler = this.datasetHandlers.get(dataStructure.type);
         if (!handler) {
@@ -163,7 +146,7 @@ export class DatasetManager {
         }
 
         if (handler.isLeaf(dataStructure)) {
-          return [];
+          return [DEFAULT_DATA.STRUCTURES.NULL];
         }
 
         const cachedChildren = this.getCachedChildren(dataStructure.id);
@@ -179,6 +162,14 @@ export class DatasetManager {
         this.cacheDataStructures(children);
         return children;
     }
+  }
+
+  private findDataStructureCategory(dataStructure: DataStructure): DataStructure | null {
+    let current: DataStructure | undefined = dataStructure;
+    while (current && current.type !== DEFAULT_DATA.STRUCTURES.CATEGORY.type) {
+      current = current.parent;
+    }
+    return current || null;
   }
 
   /**

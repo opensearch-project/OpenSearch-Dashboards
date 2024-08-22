@@ -13,7 +13,7 @@ import {
   DataStructureFeatureMeta,
 } from '../../../../../common';
 import { DatasetHandlerConfig } from '../types';
-import { getSearchService } from '../../../../services';
+import { getIndexPatterns, getSearchService } from '../../../../services';
 
 const INDEX_INFO = {
   ID: DEFAULT_DATA.SET_TYPES.INDEX,
@@ -31,15 +31,7 @@ const meta = {
   tooltip: INDEX_INFO.TITLE,
 } as DataStructureFeatureMeta;
 
-/**
- * Configuration for handling index operations.
- */
 export const indexHandlerConfig: DatasetHandlerConfig = {
-  /**
-   * Converts a DataStructure to a Dataset.
-   * @param dataStructure - The DataStructure to convert.
-   * @returns The resulting Dataset.
-   */
   toDataset: (dataStructure: DataStructure): Dataset => ({
     id: dataStructure.id,
     title: dataStructure.title,
@@ -53,11 +45,6 @@ export const indexHandlerConfig: DatasetHandlerConfig = {
       : undefined,
   }),
 
-  /**
-   * Converts a Dataset to a DataStructure.
-   * @param dataset - The Dataset to convert.
-   * @returns The resulting DataStructure.
-   */
   toDataStructure: (dataset: Dataset): DataStructure => ({
     id: dataset.id,
     title: dataset.title,
@@ -72,12 +59,6 @@ export const indexHandlerConfig: DatasetHandlerConfig = {
     meta,
   }),
 
-  /**
-   * Fetches index options.
-   * @param client - The saved objects client
-   * @param dataStructure - The parent DataStructure.
-   * @returns A promise that resolves to an array of child DataStructures.
-   */
   fetchOptions: async (
     savedObjects: SavedObjectsClientContract,
     dataStructure: DataStructure
@@ -102,18 +83,53 @@ export const indexHandlerConfig: DatasetHandlerConfig = {
         dataStructure.children = indices;
         return indices;
       }
+      case DEFAULT_DATA.STRUCTURES.INDEX.type: {
+        const fields = await getIndexPatterns().getFieldsForWildcard({
+          pattern: dataStructure.title,
+          dataSourceId: dataStructure.parent!.id,
+        });
+
+        dataStructure.children = fields.map(
+          (field: any) =>
+            ({
+              id: `${dataStructure.id}-${field.name}`,
+              title: field.name,
+              type:
+                field.type === 'date'
+                  ? DEFAULT_DATA.STRUCTURES.TIME_FIELD.type
+                  : DEFAULT_DATA.STRUCTURES.FIELD.type,
+              parent: dataStructure,
+              meta:
+                field.type === 'date'
+                  ? DEFAULT_DATA.STRUCTURES.TIME_FIELD.meta
+                  : DEFAULT_DATA.STRUCTURES.FIELD.meta,
+            } as DataStructure)
+        );
+
+        return dataStructure.children || [];
+      }
+      case DEFAULT_DATA.STRUCTURES.FIELD.type:
+      case DEFAULT_DATA.STRUCTURES.TIME_FIELD.type: {
+        return [
+          {
+            id: dataStructure.parent!.id,
+            title: dataStructure.parent!.title,
+            type: DEFAULT_DATA.STRUCTURES.DATASET.type,
+            parent: dataStructure,
+            meta: DEFAULT_DATA.STRUCTURES.DATASET.meta,
+          } as DataStructure,
+        ];
+      }
     }
     return [dataStructure];
   },
 
-  /**
-   * Determines if a DataStructure is a leaf node.
-   * @returns Always true for indices.
-   */
-  isLeaf: () => true,
+  isLeaf: (dataStructure: DataStructure) => {
+    return dataStructure.type === DEFAULT_DATA.STRUCTURES.DATASET.type;
+  },
 };
 
-export const fetchDataSources = async (client: SavedObjectsClientContract) => {
+const fetchDataSources = async (client: SavedObjectsClientContract) => {
   const resp = await client.find<any>({
     type: 'data-source',
     perPage: 10000,

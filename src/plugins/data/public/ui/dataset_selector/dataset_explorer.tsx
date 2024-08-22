@@ -31,10 +31,9 @@ export const DatasetExplorer = ({
 }: {
   savedObjects: SavedObjectsClientContract;
   datasetManager: DatasetContract;
-  onNext: (dataset: Dataset) => void;
+  onNext: (dataStructure: DataStructure) => void;
   onCancel: () => void;
 }) => {
-  const [selectedDataSet, setSelectedDataSet] = useState<Dataset | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
   const [currentDataStructure, setCurrentDataStructure] = useState<DataStructure>(
     DEFAULT_DATA.STRUCTURES.ROOT
@@ -43,15 +42,14 @@ export const DatasetExplorer = ({
 
   useEffect(() => {
     const loadCategories = async () => {
-      setLoading(true);
-      try {
-        currentDataStructure.children = await datasetManager.fetchOptions(
-          savedObjects,
-          currentDataStructure
-        );
-        setCurrentDataStructure(currentDataStructure);
-      } finally {
-        setLoading(false);
+      if (!datasetManager.isLeafDataStructure(currentDataStructure)) {
+        setLoading(true);
+        try {
+          const children = await datasetManager.fetchOptions(savedObjects, currentDataStructure);
+          setCurrentDataStructure({ ...currentDataStructure, children });
+        } finally {
+          setLoading(false);
+        }
       }
     };
 
@@ -59,27 +57,9 @@ export const DatasetExplorer = ({
   }, [currentDataStructure, datasetManager, savedObjects]);
 
   const selectDataStructure = async (item: DataStructure) => {
-    setLoading(true);
-    try {
-      const children = await datasetManager.fetchOptions(savedObjects, item);
-      if (datasetManager.isLeafDataStructure(item)) {
-        // If it's a leaf, we don't set the dataset immediately
-        // Instead, we update the current structure to show the leaf as selectable
-        setCurrentDataStructure({ ...item, children });
-        setDataStructures([...dataStructures, item]);
-
-        // Enable the next button if this is a selectable leaf
-        const dataset = datasetManager.toDataset(item);
-        setSelectedDataSet(dataset);
-      } else {
-        // If it's not a leaf, we continue navigation as before
-        setCurrentDataStructure({ ...item, children });
-        setDataStructures([...dataStructures, item]);
-        // Clear any previously selected dataset as we're not at a leaf anymore
-        setSelectedDataSet(undefined);
-      }
-    } finally {
-      setLoading(false);
+    if (!datasetManager.isLeafDataStructure(item)) {
+      setCurrentDataStructure(item);
+      setDataStructures([...dataStructures, currentDataStructure]);
     }
   };
 
@@ -87,14 +67,13 @@ export const DatasetExplorer = ({
     if (dataStructures.length > 0) {
       const newStack = dataStructures.slice(0, -1);
       setDataStructures(newStack);
-      const previousStructure = newStack[newStack.length - 1] || {
-        ...DEFAULT_DATA.STRUCTURES.ROOT,
-        children: [],
-      };
+      const previousStructure = newStack[newStack.length - 1] || DEFAULT_DATA.STRUCTURES.ROOT;
       setCurrentDataStructure(previousStructure);
-      setSelectedDataSet(undefined);
     }
   };
+
+  const isLeaf = datasetManager.isLeafDataStructure(currentDataStructure);
+  const columnCount = dataStructures.length + (isLeaf ? 1 : 2); // +1 for current, +1 for next (if not leaf)
 
   return (
     <>
@@ -120,42 +99,34 @@ export const DatasetExplorer = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <div className="datasetExplorer">
-          <EuiTitle size="xxs" className="datasetExplorer__columnTitle">
-            <h3>{currentDataStructure?.title || 'Data Sources'}</h3>
-          </EuiTitle>
-          <EuiSelectable
-            options={(currentDataStructure?.children || []).map((child) => ({
-              label: child.title,
-              value: child.id,
-              prepend: child.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE && child.meta?.icon && (
-                <EuiIcon {...child.meta.icon} />
-              ),
-              append: appendIcon(child),
-            }))}
-            onChange={(options) => {
-              const selected = options.find((option) => option.checked);
-              if (selected) {
-                const item = currentDataStructure?.children?.find(
-                  (child) => child.id === selected.value
-                );
-                if (item) {
-                  selectDataStructure(item);
-                }
-              }
-            }}
-            singleSelection
-            searchable={true}
+        <div
+          className="datasetExplorer"
+          style={{
+            gridTemplateColumns: `repeat(${
+              columnCount - 1
+            }, minmax(200px, 240px)) minmax(300px, 1fr)`,
+          }}
+        >
+          {dataStructures.map((structure, index) => (
+            <DataStructureColumn
+              key={structure.id}
+              dataStructure={structure}
+              onSelect={(item) => {
+                setDataStructures(dataStructures.slice(0, index + 1));
+                setCurrentDataStructure(item);
+                selectDataStructure(item);
+              }}
+              isActive={false}
+            />
+          ))}
+          <DataStructureColumn
+            dataStructure={currentDataStructure}
+            onSelect={selectDataStructure}
+            isActive={true}
             isLoading={loading}
-            className="datasetSelector__selectable"
-          >
-            {(list, search) => (
-              <>
-                {search}
-                {list}
-              </>
-            )}
-          </EuiSelectable>
+            isLeaf={isLeaf}
+          />
+          {!isLeaf && <EmptyColumn />}
         </div>
       </EuiModalBody>
       <EuiModalFooter>
@@ -173,8 +144,8 @@ export const DatasetExplorer = ({
           Back
         </EuiButtonEmpty>
         <EuiButton
-          disabled={selectedDataSet === undefined}
-          onClick={() => onNext(selectedDataSet!)}
+          disabled={!isLeaf}
+          onClick={() => onNext(currentDataStructure)}
           iconType="arrowRight"
           iconSide="right"
           fill
@@ -188,6 +159,63 @@ export const DatasetExplorer = ({
     </>
   );
 };
+
+const DataStructureColumn = ({
+  dataStructure,
+  onSelect,
+  isActive,
+  isLoading = false,
+  isLeaf = false,
+}: {
+  dataStructure: DataStructure;
+  onSelect: (item: DataStructure) => void;
+  isActive: boolean;
+  isLoading?: boolean;
+  isLeaf?: boolean;
+}) => (
+  <div className={`datasetExplorer__column ${isActive ? 'datasetExplorer__column--active' : ''}`}>
+    <EuiTitle size="xxs" className="datasetExplorer__columnTitle">
+      <h3>{dataStructure.title}</h3>
+    </EuiTitle>
+    <EuiSelectable
+      options={(dataStructure.children || []).map((child) => ({
+        label: child.title,
+        value: child.id,
+        prepend: child.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE && child.meta?.icon && (
+          <EuiIcon {...child.meta.icon} />
+        ),
+        append: appendIcon(child),
+        disabled: isLeaf,
+      }))}
+      onChange={(options) => {
+        if (!isLeaf) {
+          const selected = options.find((option) => option.checked);
+          if (selected) {
+            const item = dataStructure.children?.find((child) => child.id === selected.value);
+            if (item) {
+              onSelect(item);
+            }
+          }
+        }
+      }}
+      singleSelection
+      searchable={isActive}
+      isLoading={isLoading}
+      className="datasetSelector__selectable"
+    >
+      {(list, search) => (
+        <>
+          {search}
+          {list}
+        </>
+      )}
+    </EuiSelectable>
+  </div>
+);
+
+const EmptyColumn = () => (
+  <div className="datasetExplorer__column datasetExplorer__column--empty" />
+);
 
 const appendIcon = (item: DataStructure) => {
   if (item.meta?.type === DATA_STRUCTURE_META_TYPES.FEATURE) {

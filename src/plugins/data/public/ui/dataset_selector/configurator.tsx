@@ -19,44 +19,57 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { Dataset } from '../../../common/datasets';
+import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { Dataset, DataStructure, DEFAULT_DATA } from '../../../common';
 import { getQueryService } from '../../services';
-import { IndexPatternsContract } from '../../index_patterns';
 
 export const Configurator = ({
-  indexPatternsService,
-  dataset,
+  savedObjects,
+  currentDataStructure,
   onConfirm,
   onCancel,
   onPrevious,
 }: {
-  indexPatternsService: IndexPatternsContract;
-  dataset: Dataset;
-  onConfirm: (dataset: Dataset) => void;
+  savedObjects: SavedObjectsClientContract;
+  currentDataStructure: DataStructure;
+  onConfirm: (dataStructure: DataStructure) => void;
   onCancel: () => void;
   onPrevious: () => void;
 }) => {
   // const languageManager = queryService.queryString.getLanguageManager();
-  const [finalDataset, setFinalDataset] = useState<Dataset>(dataset);
-  const [timeFields, setTimeFields] = useState<string[]>();
-  const [timeField, setTimeField] = useState<string | undefined>(dataset.timeFieldName);
+  const [timeFields, setTimeFields] = useState<string[]>([]);
+  const [timeField, setTimeField] = useState<string | undefined>(undefined);
+  const [loading, setLoading] = useState<boolean>(false);
   // const [selectedLanguage, setSelectedLanguage] = useState<string>(
   //   languageManager.getDefaultLanguage(dataset.type)
   // );
 
+  // if the data structure is already a dataset do not enable the ability to change it through selector
+  const isDataset = currentDataStructure.type === DEFAULT_DATA.STRUCTURES.DATASET.type;
+  const datasetManager = getQueryService().queryString.getDatasetManager();
+
   useEffect(() => {
     const fetchFields = async () => {
-      const fields = await indexPatternsService.getFieldsForWildcard({
-        pattern: dataset.title,
-      });
-      const dateFields = fields.filter((field: any) => field.type === 'date');
-      setTimeFields(dateFields.map((field: any) => field.name));
+      setLoading(true);
+      try {
+        const children = await datasetManager.fetchOptions(savedObjects, currentDataStructure);
+        const dateFields = children.filter(
+          (child) => child.type === DEFAULT_DATA.STRUCTURES.TIME_FIELD.type
+        );
+        setTimeFields(dateFields.map((field) => field.title));
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchFields();
-  }, [dataset, indexPatternsService]);
-
+  }, [currentDataStructure, datasetManager, savedObjects]);
   // const supportedLanguages = languageManager.getSupportedLanguages(dataset.type);
+
+  const handleConfirm = () => {
+    const dataset = datasetManager.toDataset(currentDataStructure);
+    onConfirm({ ...dataset, timeFieldName: timeField });
+  };
 
   return (
     <>
@@ -88,49 +101,31 @@ export const Configurator = ({
               }
             )}
           >
-            <EuiFieldText disabled value={dataset.title} />
+            <EuiFieldText disabled value={currentDataStructure.title} />
           </EuiFormRow>
-          {timeFields && timeFields.length > 0 && (
-            <EuiFormRow
-              label={i18n.translate(
-                'data.explorer.datasetSelector.advancedSelector.configurator.timeFieldLabel',
-                {
-                  defaultMessage: 'Time field',
-                }
-              )}
-            >
-              <EuiSelect
-                options={[
-                  ...timeFields.map((field) => ({ text: field, value: field })),
-                  { text: '-----', value: '', disabled: true },
-                  { text: 'No time field', value: undefined },
-                ]}
-                value={timeField}
-                onChange={(e) => {
-                  const value = e.target.value === 'undefined' ? undefined : e.target.value;
-                  setTimeField(value);
-                  setFinalDataset({ ...finalDataset, timeFieldName: value });
-                }}
-              />
-            </EuiFormRow>
-          )}
-          {/* <EuiFormRow
+          <EuiFormRow
             label={i18n.translate(
-              'data.explorer.datasetSelector.advancedSelector.configurator.languageLabel',
+              'data.explorer.datasetSelector.advancedSelector.configurator.timeFieldLabel',
               {
-                defaultMessage: 'Language',
+                defaultMessage: 'Time field',
               }
             )}
           >
             <EuiSelect
-              options={supportedLanguages.map((language: any) => ({
-                text: language,
-                value: language,
-              }))}
-              value={selectedLanguage}
-              onChange={(e) => setSelectedLanguage(e.target.value)}
+              options={[
+                ...timeFields.map((field) => ({ text: field, value: field })),
+                { text: '-----', value: '', disabled: true },
+                { text: 'No time field', value: 'undefined' },
+              ]}
+              value={timeField}
+              onChange={(e) => {
+                const value = e.target.value === 'undefined' ? undefined : e.target.value;
+                setTimeField(value);
+              }}
+              disabled={isDataset || loading}
+              isLoading={loading}
             />
-          </EuiFormRow> */}
+          </EuiFormRow>
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
@@ -146,8 +141,7 @@ export const Configurator = ({
             defaultMessage="Previous"
           />
         </EuiButton>
-        <EuiButton onClick={() => onConfirm({ ...finalDataset })} fill>
-          {/* <EuiButton onClick={() => onConfirm({ ...finalDataset, language: selectedLanguage })} fill> */}
+        <EuiButton onClick={handleConfirm} fill>
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"
             defaultMessage="Select Data"
