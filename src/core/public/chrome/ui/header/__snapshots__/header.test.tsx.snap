@@ -1397,6 +1397,34 @@ exports[`Header handles visibility and lock changes 1`] = `
     }
   }
   homeHref="/"
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "anonymousPaths": Object {
+        "isAnonymous": [MockFunction],
+        "register": [MockFunction],
+      },
+      "basePath": BasePath {
+        "basePath": "/test",
+        "clientBasePath": "",
+        "get": [Function],
+        "getBasePath": [Function],
+        "prepend": [Function],
+        "remove": [Function],
+        "serverBasePath": "/test",
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -7759,6 +7787,34 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
     }
   }
   homeHref="/"
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "anonymousPaths": Object {
+        "isAnonymous": [MockFunction],
+        "register": [MockFunction],
+      },
+      "basePath": BasePath {
+        "basePath": "/test",
+        "clientBasePath": "",
+        "get": [Function],
+        "getBasePath": [Function],
+        "prepend": [Function],
+        "remove": [Function],
+        "serverBasePath": "/test",
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -8234,43 +8290,6 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
           "syncErrorThrown": false,
           "syncErrorValue": null,
         },
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
-              "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
-            },
-          ],
-          "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
-              "next": [Function],
-            },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
-          },
-          "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
-        },
       ],
       "thrownError": null,
     }
@@ -8605,102 +8624,33 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                     className="euiHeaderSectionItem"
                   >
                     <RecentItems
-                      basePath={
-                        BasePath {
-                          "basePath": "/test",
-                          "clientBasePath": "",
-                          "get": [Function],
-                          "getBasePath": [Function],
-                          "prepend": [Function],
-                          "remove": [Function],
-                          "serverBasePath": "/test",
-                        }
-                      }
                       buttonSize="s"
-                      navLinks$={
-                        BehaviorSubject {
-                          "_isScalar": false,
-                          "_value": Array [],
-                          "closed": false,
-                          "hasError": false,
-                          "isStopped": false,
-                          "observers": Array [
-                            Subscriber {
-                              "_parentOrParents": null,
-                              "_subscriptions": Array [
-                                SubjectSubscription {
-                                  "_parentOrParents": [Circular],
-                                  "_subscriptions": null,
-                                  "closed": false,
-                                  "subject": [Circular],
-                                  "subscriber": [Circular],
-                                },
-                              ],
-                              "closed": false,
-                              "destination": SafeSubscriber {
-                                "_complete": undefined,
-                                "_context": [Circular],
-                                "_error": undefined,
-                                "_next": [Function],
-                                "_parentOrParents": null,
-                                "_parentSubscriber": [Circular],
-                                "_subscriptions": null,
-                                "closed": false,
-                                "destination": Object {
-                                  "closed": true,
-                                  "complete": [Function],
-                                  "error": [Function],
-                                  "next": [Function],
-                                },
-                                "isStopped": false,
-                                "syncErrorThrowable": false,
-                                "syncErrorThrown": false,
-                                "syncErrorValue": null,
-                              },
-                              "isStopped": false,
-                              "syncErrorThrowable": true,
-                              "syncErrorThrown": false,
-                              "syncErrorValue": null,
-                            },
-                            Subscriber {
-                              "_parentOrParents": null,
-                              "_subscriptions": Array [
-                                SubjectSubscription {
-                                  "_parentOrParents": [Circular],
-                                  "_subscriptions": null,
-                                  "closed": false,
-                                  "subject": [Circular],
-                                  "subscriber": [Circular],
-                                },
-                              ],
-                              "closed": false,
-                              "destination": SafeSubscriber {
-                                "_complete": undefined,
-                                "_context": [Circular],
-                                "_error": undefined,
-                                "_next": [Function],
-                                "_parentOrParents": null,
-                                "_parentSubscriber": [Circular],
-                                "_subscriptions": null,
-                                "closed": false,
-                                "destination": Object {
-                                  "closed": true,
-                                  "complete": [Function],
-                                  "error": [Function],
-                                  "next": [Function],
-                                },
-                                "isStopped": false,
-                                "syncErrorThrowable": false,
-                                "syncErrorThrown": false,
-                                "syncErrorValue": null,
-                              },
-                              "isStopped": false,
-                              "syncErrorThrowable": true,
-                              "syncErrorThrown": false,
-                              "syncErrorValue": null,
-                            },
-                          ],
-                          "thrownError": null,
+                      http={
+                        Object {
+                          "addLoadingCountSource": [MockFunction],
+                          "anonymousPaths": Object {
+                            "isAnonymous": [MockFunction],
+                            "register": [MockFunction],
+                          },
+                          "basePath": BasePath {
+                            "basePath": "/test",
+                            "clientBasePath": "",
+                            "get": [Function],
+                            "getBasePath": [Function],
+                            "prepend": [Function],
+                            "remove": [Function],
+                            "serverBasePath": "/test",
+                          },
+                          "delete": [MockFunction],
+                          "fetch": [MockFunction],
+                          "get": [MockFunction],
+                          "getLoadingCount$": [MockFunction],
+                          "head": [MockFunction],
+                          "intercept": [MockFunction],
+                          "options": [MockFunction],
+                          "patch": [MockFunction],
+                          "post": [MockFunction],
+                          "put": [MockFunction],
                         }
                       }
                       navigateToUrl={[MockFunction]}
@@ -8928,7 +8878,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                         anchorPosition="downCenter"
                         button={
                           <EuiToolTip
-                            content="Recents"
+                            content="Recent"
                             delay="long"
                             position="bottom"
                           >
@@ -8951,7 +8901,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                         initialFocus={false}
                         isOpen={false}
                         ownFocus={true}
-                        panelPaddingSize="s"
+                        panelPaddingSize="m"
                         repositionOnScroll={true}
                       >
                         <div
@@ -8961,7 +8911,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                             className="euiPopover__anchor"
                           >
                             <EuiToolTip
-                              content="Recents"
+                              content="Recent"
                               delay="long"
                               position="bottom"
                             >
@@ -9511,43 +9461,6 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
           "hasError": false,
           "isStopped": false,
           "observers": Array [
-            Subscriber {
-              "_parentOrParents": null,
-              "_subscriptions": Array [
-                SubjectSubscription {
-                  "_parentOrParents": [Circular],
-                  "_subscriptions": null,
-                  "closed": false,
-                  "subject": [Circular],
-                  "subscriber": [Circular],
-                },
-              ],
-              "closed": false,
-              "destination": SafeSubscriber {
-                "_complete": undefined,
-                "_context": [Circular],
-                "_error": undefined,
-                "_next": [Function],
-                "_parentOrParents": null,
-                "_parentSubscriber": [Circular],
-                "_subscriptions": null,
-                "closed": false,
-                "destination": Object {
-                  "closed": true,
-                  "complete": [Function],
-                  "error": [Function],
-                  "next": [Function],
-                },
-                "isStopped": false,
-                "syncErrorThrowable": false,
-                "syncErrorThrown": false,
-                "syncErrorValue": null,
-              },
-              "isStopped": false,
-              "syncErrorThrowable": true,
-              "syncErrorThrown": false,
-              "syncErrorValue": null,
-            },
             Subscriber {
               "_parentOrParents": null,
               "_subscriptions": Array [
@@ -11048,6 +10961,34 @@ exports[`Header renders condensed header 1`] = `
     }
   }
   homeHref="/"
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "anonymousPaths": Object {
+        "isAnonymous": [MockFunction],
+        "register": [MockFunction],
+      },
+      "basePath": BasePath {
+        "basePath": "/test",
+        "clientBasePath": "",
+        "get": [Function],
+        "getBasePath": [Function],
+        "prepend": [Function],
+        "remove": [Function],
+        "serverBasePath": "/test",
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -16023,6 +15964,34 @@ exports[`Header renders page header with application title 1`] = `
     }
   }
   homeHref="/"
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "anonymousPaths": Object {
+        "isAnonymous": [MockFunction],
+        "register": [MockFunction],
+      },
+      "basePath": BasePath {
+        "basePath": "/test",
+        "clientBasePath": "",
+        "get": [Function],
+        "getBasePath": [Function],
+        "prepend": [Function],
+        "remove": [Function],
+        "serverBasePath": "/test",
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -16612,43 +16581,6 @@ exports[`Header renders page header with application title 1`] = `
           "syncErrorThrown": false,
           "syncErrorValue": null,
         },
-        Subscriber {
-          "_parentOrParents": null,
-          "_subscriptions": Array [
-            SubjectSubscription {
-              "_parentOrParents": [Circular],
-              "_subscriptions": null,
-              "closed": false,
-              "subject": [Circular],
-              "subscriber": [Circular],
-            },
-          ],
-          "closed": false,
-          "destination": SafeSubscriber {
-            "_complete": undefined,
-            "_context": [Circular],
-            "_error": undefined,
-            "_next": [Function],
-            "_parentOrParents": null,
-            "_parentSubscriber": [Circular],
-            "_subscriptions": null,
-            "closed": false,
-            "destination": Object {
-              "closed": true,
-              "complete": [Function],
-              "error": [Function],
-              "next": [Function],
-            },
-            "isStopped": false,
-            "syncErrorThrowable": false,
-            "syncErrorThrown": false,
-            "syncErrorValue": null,
-          },
-          "isStopped": false,
-          "syncErrorThrowable": true,
-          "syncErrorThrown": false,
-          "syncErrorValue": null,
-        },
       ],
       "thrownError": null,
     }
@@ -16982,102 +16914,33 @@ exports[`Header renders page header with application title 1`] = `
                     className="euiHeaderSectionItem"
                   >
                     <RecentItems
-                      basePath={
-                        BasePath {
-                          "basePath": "/test",
-                          "clientBasePath": "",
-                          "get": [Function],
-                          "getBasePath": [Function],
-                          "prepend": [Function],
-                          "remove": [Function],
-                          "serverBasePath": "/test",
-                        }
-                      }
                       buttonSize="xs"
-                      navLinks$={
-                        BehaviorSubject {
-                          "_isScalar": false,
-                          "_value": Array [],
-                          "closed": false,
-                          "hasError": false,
-                          "isStopped": false,
-                          "observers": Array [
-                            Subscriber {
-                              "_parentOrParents": null,
-                              "_subscriptions": Array [
-                                SubjectSubscription {
-                                  "_parentOrParents": [Circular],
-                                  "_subscriptions": null,
-                                  "closed": false,
-                                  "subject": [Circular],
-                                  "subscriber": [Circular],
-                                },
-                              ],
-                              "closed": false,
-                              "destination": SafeSubscriber {
-                                "_complete": undefined,
-                                "_context": [Circular],
-                                "_error": undefined,
-                                "_next": [Function],
-                                "_parentOrParents": null,
-                                "_parentSubscriber": [Circular],
-                                "_subscriptions": null,
-                                "closed": false,
-                                "destination": Object {
-                                  "closed": true,
-                                  "complete": [Function],
-                                  "error": [Function],
-                                  "next": [Function],
-                                },
-                                "isStopped": false,
-                                "syncErrorThrowable": false,
-                                "syncErrorThrown": false,
-                                "syncErrorValue": null,
-                              },
-                              "isStopped": false,
-                              "syncErrorThrowable": true,
-                              "syncErrorThrown": false,
-                              "syncErrorValue": null,
-                            },
-                            Subscriber {
-                              "_parentOrParents": null,
-                              "_subscriptions": Array [
-                                SubjectSubscription {
-                                  "_parentOrParents": [Circular],
-                                  "_subscriptions": null,
-                                  "closed": false,
-                                  "subject": [Circular],
-                                  "subscriber": [Circular],
-                                },
-                              ],
-                              "closed": false,
-                              "destination": SafeSubscriber {
-                                "_complete": undefined,
-                                "_context": [Circular],
-                                "_error": undefined,
-                                "_next": [Function],
-                                "_parentOrParents": null,
-                                "_parentSubscriber": [Circular],
-                                "_subscriptions": null,
-                                "closed": false,
-                                "destination": Object {
-                                  "closed": true,
-                                  "complete": [Function],
-                                  "error": [Function],
-                                  "next": [Function],
-                                },
-                                "isStopped": false,
-                                "syncErrorThrowable": false,
-                                "syncErrorThrown": false,
-                                "syncErrorValue": null,
-                              },
-                              "isStopped": false,
-                              "syncErrorThrowable": true,
-                              "syncErrorThrown": false,
-                              "syncErrorValue": null,
-                            },
-                          ],
-                          "thrownError": null,
+                      http={
+                        Object {
+                          "addLoadingCountSource": [MockFunction],
+                          "anonymousPaths": Object {
+                            "isAnonymous": [MockFunction],
+                            "register": [MockFunction],
+                          },
+                          "basePath": BasePath {
+                            "basePath": "/test",
+                            "clientBasePath": "",
+                            "get": [Function],
+                            "getBasePath": [Function],
+                            "prepend": [Function],
+                            "remove": [Function],
+                            "serverBasePath": "/test",
+                          },
+                          "delete": [MockFunction],
+                          "fetch": [MockFunction],
+                          "get": [MockFunction],
+                          "getLoadingCount$": [MockFunction],
+                          "head": [MockFunction],
+                          "intercept": [MockFunction],
+                          "options": [MockFunction],
+                          "patch": [MockFunction],
+                          "post": [MockFunction],
+                          "put": [MockFunction],
                         }
                       }
                       navigateToUrl={[MockFunction]}
@@ -17418,7 +17281,7 @@ exports[`Header renders page header with application title 1`] = `
                         anchorPosition="downCenter"
                         button={
                           <EuiToolTip
-                            content="Recents"
+                            content="Recent"
                             delay="long"
                             position="bottom"
                           >
@@ -17441,7 +17304,7 @@ exports[`Header renders page header with application title 1`] = `
                         initialFocus={false}
                         isOpen={false}
                         ownFocus={true}
-                        panelPaddingSize="s"
+                        panelPaddingSize="m"
                         repositionOnScroll={true}
                       >
                         <div
@@ -17451,7 +17314,7 @@ exports[`Header renders page header with application title 1`] = `
                             className="euiPopover__anchor"
                           >
                             <EuiToolTip
-                              content="Recents"
+                              content="Recent"
                               delay="long"
                               position="bottom"
                             >
@@ -18849,43 +18712,6 @@ exports[`Header renders page header with application title 1`] = `
           "hasError": false,
           "isStopped": false,
           "observers": Array [
-            Subscriber {
-              "_parentOrParents": null,
-              "_subscriptions": Array [
-                SubjectSubscription {
-                  "_parentOrParents": [Circular],
-                  "_subscriptions": null,
-                  "closed": false,
-                  "subject": [Circular],
-                  "subscriber": [Circular],
-                },
-              ],
-              "closed": false,
-              "destination": SafeSubscriber {
-                "_complete": undefined,
-                "_context": [Circular],
-                "_error": undefined,
-                "_next": [Function],
-                "_parentOrParents": null,
-                "_parentSubscriber": [Circular],
-                "_subscriptions": null,
-                "closed": false,
-                "destination": Object {
-                  "closed": true,
-                  "complete": [Function],
-                  "error": [Function],
-                  "next": [Function],
-                },
-                "isStopped": false,
-                "syncErrorThrowable": false,
-                "syncErrorThrown": false,
-                "syncErrorValue": null,
-              },
-              "isStopped": false,
-              "syncErrorThrowable": true,
-              "syncErrorThrown": false,
-              "syncErrorValue": null,
-            },
             Subscriber {
               "_parentOrParents": null,
               "_subscriptions": Array [
@@ -20386,6 +20212,34 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
     }
   }
   homeHref="/"
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "anonymousPaths": Object {
+        "isAnonymous": [MockFunction],
+        "register": [MockFunction],
+      },
+      "basePath": BasePath {
+        "basePath": "/test",
+        "clientBasePath": "",
+        "get": [Function],
+        "getBasePath": [Function],
+        "prepend": [Function],
+        "remove": [Function],
+        "serverBasePath": "/test",
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},

@@ -79,6 +79,7 @@ import { HomeLoader } from './home_loader';
 import { RecentItems } from './recent_items';
 
 export interface HeaderProps {
+  http: HttpStart;
   opensearchDashboardsVersion: string;
   application: InternalApplicationStart;
   appTitle$: Observable<string>;
@@ -120,6 +121,7 @@ export interface HeaderProps {
 }
 
 export function Header({
+  http,
   opensearchDashboardsVersion,
   opensearchDashboardsDocLink,
   application,
@@ -351,11 +353,12 @@ export function Header({
   const renderRecentItems = () => (
     <EuiHeaderSectionItem border={useUpdatedHeader ? 'none' : 'right'}>
       <RecentItems
+        http={http}
         recentlyAccessed$={observables.recentlyAccessed$}
         workspaceList$={observables.workspaceList$}
         navigateToUrl={application.navigateToUrl}
-        navLinks$={observables.navLinks$}
-        basePath={basePath}
+        // navLinks$={observables.navLinks$}
+        // basePath={basePath}
         renderBreadcrumbs={renderBreadcrumbs(true)}
         buttonSize={useApplicationHeader ? 's' : 'xs'}
       />

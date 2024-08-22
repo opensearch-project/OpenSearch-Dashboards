@@ -43,6 +43,7 @@ import {
 } from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { EuiLink } from '@elastic/eui';
+import { CoreStart } from 'opensearch-dashboards/public';
 import { mountReactNode } from '../utils/mount';
 import { InternalApplicationStart } from '../application';
 import { DocLinksStart } from '../doc_links';
@@ -115,6 +116,7 @@ export interface StartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
   http: HttpStart;
+  // core: CoreStart;
   injectedMetadata: InjectedMetadataStart;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
@@ -349,6 +351,7 @@ export class ChromeService {
 
       getHeaderComponent: () => (
         <Header
+          http={http}
           loadingCount$={http.getLoadingCount$()}
           application={application}
           appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
