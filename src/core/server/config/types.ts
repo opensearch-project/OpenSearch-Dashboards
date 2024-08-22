@@ -5,6 +5,7 @@
 
 import { ApiResponse } from '@opensearch-project/opensearch/.';
 import { ConfigPath } from '@osd/config';
+import { OpenSearchDashboardsRequest } from '../http';
 
 /**
  * Setup allows core services and plugins to register config stores and any context to passed into async local store
@@ -25,6 +26,9 @@ export type DynamicConfigServiceSetup = Pick<
 export interface InternalDynamicConfigServiceStart {
   getClient: () => IDynamicConfigurationClient;
   getAsyncLocalStore: () => AsyncLocalStorageContext | undefined;
+  createStoreFromRequest: (
+    request: OpenSearchDashboardsRequest
+  ) => AsyncLocalStorageContext | undefined;
 }
 
 export type IDynamicConfigurationClient = Pick<

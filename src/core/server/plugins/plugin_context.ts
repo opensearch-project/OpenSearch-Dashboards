@@ -276,5 +276,10 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     auditTrail: deps.auditTrail,
     coreUsageData: deps.coreUsageData,
     crossCompatibility: deps.crossCompatibility,
+    dynamicConfig: {
+      getAsyncLocalStore: deps.dynamicConfig.getAsyncLocalStore,
+      getClient: deps.dynamicConfig.getClient,
+      createStoreFromRequest: deps.dynamicConfig.createStoreFromRequest,
+    },
   };
 }

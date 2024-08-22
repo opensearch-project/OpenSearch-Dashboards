@@ -8,6 +8,7 @@ import { Logger } from '@osd/logging';
 import { Request } from 'hapi__hapi';
 import { ConfigIdentifier } from '../types';
 import { DYNAMIC_APP_CONFIG_INDEX_PREFIX } from './constants';
+import { OpenSearchDashboardsRequest } from '../../http';
 
 /**
  * Given a configIdentifier:
@@ -58,4 +59,25 @@ export const createLocalStore = (logger: Logger, request: Request, headers: stri
 
 export const getDynamicConfigIndexName = (n: number) => {
   return `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_${n}`;
+};
+
+export const createLocalStoreFromOsdRequest = (
+  logger: Logger,
+  request: OpenSearchDashboardsRequest,
+  headers: string[]
+) => {
+  if (!request.auth.isAuthenticated) {
+    return undefined;
+  }
+  return new Map(
+    headers.map((header: string) => {
+      try {
+        logger.debug(`${header}: ${request.headers[header]}`);
+        return [header, request.headers[header]];
+      } catch (err) {
+        logger.warn(`Header ${header} not found in request`);
+        return [header, undefined];
+      }
+    })
+  );
 };

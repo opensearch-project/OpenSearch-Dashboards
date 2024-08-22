@@ -52,6 +52,22 @@ const createInternalSetupContractMock = () => {
 
   return mocked;
 };
+const createStartContractMock = (
+  mockClientReturnValues?: DynamicConfigurationClientMockProps,
+  mockAsyncLocalStoreValues?: AsyncLocalStorageContext
+) => {
+  const client = mockClientReturnValues
+    ? dynamicConfigurationClientMock.create(mockClientReturnValues)
+    : dynamicConfigurationClientMock.create();
+
+  const mocked: jest.Mocked<DynamicConfigServiceStart> = {
+    getClient: jest.fn().mockReturnValue(client),
+    getAsyncLocalStore: jest.fn().mockReturnValue(mockAsyncLocalStoreValues),
+    createStoreFromRequest: jest.fn().mockRejectedValue(mockAsyncLocalStoreValues),
+  };
+
+  return mocked;
+};
 const createInternalStartContractMock = (
   mockClientReturnValues?: DynamicConfigurationClientMockProps,
   mockAsyncLocalStoreValues?: AsyncLocalStorageContext
@@ -63,6 +79,7 @@ const createInternalStartContractMock = (
   const mocked: jest.Mocked<InternalDynamicConfigServiceStart> = {
     getClient: jest.fn().mockReturnValue(client),
     getAsyncLocalStore: jest.fn().mockReturnValue(mockAsyncLocalStoreValues),
+    createStoreFromRequest: jest.fn().mockRejectedValue(mockAsyncLocalStoreValues),
   };
 
   return mocked;

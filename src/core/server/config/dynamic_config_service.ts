@@ -9,7 +9,7 @@ import { PublicMethodsOf } from '@osd/utility-types';
 import { AsyncLocalStorage } from 'async_hooks';
 import { first } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { InternalHttpServiceSetup } from '../http';
+import { InternalHttpServiceSetup, OpenSearchDashboardsRequest } from '../http';
 import { CoreService } from '../../types';
 import {
   AsyncLocalStorageContext,
@@ -21,7 +21,7 @@ import {
 } from './types';
 import { InternalDynamicConfigurationClient } from './service/internal_dynamic_configuration_client';
 import { Logger, LoggerFactory } from '../logging';
-import { createLocalStore, pathToString } from './utils/utils';
+import { createLocalStoreFromOsdRequest, pathToString } from './utils/utils';
 import { DynamicConfigurationClient } from './service/dynamic_configuration_client';
 import { OpenSearchDynamicConfigStoreFactory } from './service/config_store_client/opensearch_config_store_factory';
 import { InternalOpenSearchServiceStart } from '../opensearch';
@@ -132,6 +132,9 @@ export class DynamicConfigService
       getAsyncLocalStore: () => {
         return this.#asyncLocalStorage.getStore();
       },
+      createStoreFromRequest: (request: OpenSearchDashboardsRequest) => {
+        return createLocalStoreFromOsdRequest(this.#logger, request, this.#requestHeaders);
+      },
     };
 
     this.#logger.info('finished start()');
@@ -164,12 +167,21 @@ export class DynamicConfigService
      *    - bulkDelete
      */
 
-    this.#logger.info('registering middleware');
-    // Register the async local storage with all the registered localStorage
-    http.server.ext('onPreAuth', (request, h) => {
-      const localStore = createLocalStore(this.#logger, request, this.#requestHeaders);
-      this.#asyncLocalStorage.enterWith(localStore);
-      return h.continue;
+    // FIXME: This seems not working as expected, as sometimes the context is not available to request handlers after registering
+    //        in the PostAuth handler. Needs to do more research.
+    //        For now, we can use DynamicConfigService.createStoreFromRequest(request) to create context store when it needs to
+    //        fetch configrations from DynamicConfigStore.
+    this.#logger.info('registering middleware to inject context to AsyncLocalStorage');
+    http.registerOnPostAuth((request, response, context) => {
+      if (request.auth.isAuthenticated) {
+        const localStore = createLocalStoreFromOsdRequest(
+          this.#logger,
+          request,
+          this.#requestHeaders
+        ) as AsyncLocalStorageContext;
+        this.#asyncLocalStorage.enterWith(localStore);
+      }
+      return context.next();
     });
   }
 
