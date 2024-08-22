@@ -66,7 +66,7 @@ export const HeaderUserThemeMenu = () => {
       : screenModeOptions[0].value
   );
 
-  const legacyAppearance = !uiSettings.get('home:useNewHomePage');
+  const useLegacyAppearance = !uiSettings.get('home:useNewHomePage');
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -105,7 +105,7 @@ export const HeaderUserThemeMenu = () => {
     setPopover(false);
   };
 
-  const innerButton = legacyAppearance ? (
+  const innerButton = useLegacyAppearance ? (
     <EuiHeaderSectionItemButton
       aria-expanded="false"
       aria-haspopup="true"
@@ -193,7 +193,7 @@ export const HeaderUserThemeMenu = () => {
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      anchorPosition={legacyAppearance ? 'downLeft' : 'rightDown'}
+      anchorPosition={useLegacyAppearance ? 'downLeft' : 'rightDown'}
       panelPaddingSize="s"
     >
       <EuiPopoverTitle>
