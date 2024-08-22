@@ -217,6 +217,7 @@ export const VisualizeListing = () => {
         findItems={fetchItems}
         deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
         editItem={visualizeCapabilities.save ? editItem : undefined}
+        visbuilderEditItem={visbuilderEditItem}
         tableColumns={tableColumns}
         listingLimit={listingLimit}
         initialPageSize={savedObjectsPublic.settings.getPerPage()}
