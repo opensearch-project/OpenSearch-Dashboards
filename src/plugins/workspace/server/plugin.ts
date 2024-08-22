@@ -126,7 +126,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
           if (workspaceList.length === 1) {
             return response.redirected({
               headers: {
-                location: `${basePath}/app/${WORKSPACE_NAVIGATION_APP_ID}/?workspaceId=${workspaceList[0].id}`,
+                location: `${basePath}/w/${workspaceList[0].id}/app/${WORKSPACE_NAVIGATION_APP_ID}`,
               },
             });
           }
@@ -144,7 +144,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
           if (defaultWorkspace) {
             return response.redirected({
               headers: {
-                location: `${basePath}/app/${WORKSPACE_NAVIGATION_APP_ID}/?workspaceId=${defaultWorkspace.id}`,
+                location: `${basePath}/w/${defaultWorkspace.id}/app/${WORKSPACE_NAVIGATION_APP_ID}`,
               },
             });
           } else {

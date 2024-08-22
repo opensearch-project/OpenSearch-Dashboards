@@ -386,10 +386,7 @@ export class WorkspacePlugin
       async mount() {
         const [coreStart] = await core.getStartServices();
         const { application, http, workspaces } = coreStart;
-        const urlParams = new URLSearchParams(location.search);
-        const navigateWorkspaceId = urlParams.get('workspaceId');
-        const workspaceList = workspaces.workspaceList$.getValue();
-        const workspace = workspaceList.find((ws) => ws.id === navigateWorkspaceId);
+        const workspace = workspaces.currentWorkspace$.getValue();
         if (workspace) {
           const availableUseCases = registeredUseCases$.getValue();
           const currentUseCase = availableUseCases.find(
@@ -402,7 +399,7 @@ export class WorkspacePlugin
         }
         return () => {};
       },
-      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
     });
 
     // workspace list

@@ -3,8 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { OnPostAuthHandler, OnPreRoutingHandler } from 'src/core/server';
-import { coreMock, httpServerMock } from '../../../core/server/mocks';
+import {
+  OnPostAuthHandler,
+  OnPreRoutingHandler,
+  SavedObjectsClientContract,
+} from 'src/core/server';
+import { coreMock, httpServerMock, savedObjectsClientMock } from '../../../core/server/mocks';
 import { WorkspacePlugin } from './plugin';
 import { getWorkspaceState, updateWorkspaceState } from '../../../core/server/utils';
 import * as utilsExports from './utils';
@@ -240,7 +244,7 @@ describe('Workspace server plugin', () => {
       await registerOnPostAuthFn(request, response, toolKitMock);
       expect(response.redirected).toBeCalledWith({
         headers: {
-          location: '/mock-server-basepath/app/workspace_navigation/?workspaceId=workspace-1',
+          location: '/mock-server-basepath/w/workspace-1/app/workspace_navigation',
         },
       });
     });
@@ -277,13 +281,14 @@ describe('Workspace server plugin', () => {
       const request = httpServerMock.createOpenSearchDashboardsRequest({
         path: '/',
       });
+      const savedObjectsClient: jest.Mocked<SavedObjectsClientContract> = savedObjectsClientMock.create();
       const mockUiSettings = {
         get: jest.fn().mockResolvedValue('default'),
       };
       setupMock.getStartServices.mockResolvedValue([
         {
           uiSettings: { asScopedToClient: () => mockUiSettings },
-          savedObjects: { getScopedClient: () => null },
+          savedObjects: { getScopedClient: () => savedObjectsClient },
         },
         {},
         {},
@@ -307,7 +312,7 @@ describe('Workspace server plugin', () => {
       await registerOnPostAuthFn(request, response, toolKitMock);
       expect(response.redirected).toBeCalledWith({
         headers: {
-          location: '/mock-server-basepath/app/workspace_navigation/?workspaceId=default',
+          location: '/mock-server-basepath/w/default/app/workspace_navigation',
         },
       });
     });
