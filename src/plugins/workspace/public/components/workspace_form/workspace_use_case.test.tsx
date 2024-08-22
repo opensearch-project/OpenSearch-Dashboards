@@ -5,41 +5,31 @@
 
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { WORKSPACE_USE_CASES } from '../../../common/constants';
+import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
 import { WorkspaceUseCase, WorkspaceUseCaseProps } from './workspace_use_case';
 import { WorkspaceFormErrors } from './types';
-import { coreMock } from '../../../../../core/public/mocks';
-import { WorkspaceOperationType } from './constants';
-import { getIsOnlyAllowEssentialUseCase } from '../../utils';
-
-jest.mock('../../utils', () => ({
-  getIsOnlyAllowEssentialUseCase: jest.fn().mockResolvedValue(false),
-}));
-const mockCoreStart = coreMock.createStart();
 
 const setup = (options?: Partial<WorkspaceUseCaseProps>) => {
   const onChangeMock = jest.fn();
   const formErrors: WorkspaceFormErrors = {};
-  const savedObjects = mockCoreStart.savedObjects;
   const renderResult = render(
     <WorkspaceUseCase
       availableUseCases={[
-        WORKSPACE_USE_CASES.observability,
-        WORKSPACE_USE_CASES['security-analytics'],
-        WORKSPACE_USE_CASES.essentials,
-        WORKSPACE_USE_CASES.search,
+        { ...DEFAULT_NAV_GROUPS.observability, features: [] },
+        { ...DEFAULT_NAV_GROUPS['security-analytics'], features: [] },
+        { ...DEFAULT_NAV_GROUPS.essentials, features: [] },
+        { ...DEFAULT_NAV_GROUPS.search, features: [] },
         {
           id: 'system-use-case',
           title: 'System use case',
           description: 'System use case description',
           systematic: true,
+          features: [],
         },
       ]}
       value=""
       onChange={onChangeMock}
       formErrors={formErrors}
-      operationType={WorkspaceOperationType.Create}
-      savedObjects={savedObjects}
       {...options}
     />
   );
@@ -50,7 +40,7 @@ const setup = (options?: Partial<WorkspaceUseCaseProps>) => {
 };
 
 describe('WorkspaceUseCase', () => {
-  it('should render four use cases', () => {
+  it('should render passed use cases', () => {
     const { renderResult } = setup();
 
     expect(renderResult.getByText('Observability')).toBeInTheDocument();
@@ -74,13 +64,87 @@ describe('WorkspaceUseCase', () => {
     fireEvent.click(renderResult.getByText('Observability'));
     expect(onChangeMock).not.toHaveBeenCalled();
   });
-  it('should only display essential use case when creating workspace if getIsOnlyAllowEssentialUseCase returns true', async () => {
-    (getIsOnlyAllowEssentialUseCase as jest.Mock).mockResolvedValue(true);
 
-    const { renderResult } = setup();
+  it('should render disabled essential use case card', async () => {
+    const { renderResult } = setup({
+      availableUseCases: [
+        {
+          ...DEFAULT_NAV_GROUPS.essentials,
+          features: [],
+          disabled: true,
+        },
+      ],
+    });
     await waitFor(() => {
-      expect(renderResult.queryByText('Essentials')).toBeInTheDocument();
-      expect(renderResult.queryByText('Observability')).not.toBeInTheDocument();
+      expect(renderResult.getByText('Essentials')).toHaveClass(
+        'euiCheckableCard__label-isDisabled'
+      );
+    });
+  });
+
+  it('should be able to toggle use case features', async () => {
+    const { renderResult } = setup({
+      availableUseCases: [
+        {
+          ...DEFAULT_NAV_GROUPS.observability,
+          features: [
+            { id: 'feature1', title: 'Feature 1' },
+            { id: 'feature2', title: 'Feature 2' },
+          ],
+        },
+      ],
+    });
+    await waitFor(() => {
+      expect(renderResult.getByText('See more....')).toBeInTheDocument();
+      expect(renderResult.queryByText('Feature 1')).toBe(null);
+      expect(renderResult.queryByText('Feature 2')).toBe(null);
+    });
+
+    fireEvent.click(renderResult.getByText('See more....'));
+
+    await waitFor(() => {
+      expect(renderResult.getByText('See less....')).toBeInTheDocument();
+      expect(renderResult.getByText('Feature 1')).toBeInTheDocument();
+      expect(renderResult.getByText('Feature 2')).toBeInTheDocument();
+    });
+
+    fireEvent.click(renderResult.getByText('See less....'));
+
+    await waitFor(() => {
+      expect(renderResult.getByText('See more....')).toBeInTheDocument();
+      expect(renderResult.queryByText('Feature 1')).toBe(null);
+      expect(renderResult.queryByText('Feature 2')).toBe(null);
+    });
+  });
+
+  it('should show static all use case features', async () => {
+    const { renderResult } = setup({
+      availableUseCases: [
+        {
+          ...DEFAULT_NAV_GROUPS.all,
+          features: [
+            { id: 'feature1', title: 'Feature 1' },
+            { id: 'feature2', title: 'Feature 2' },
+          ],
+        },
+      ],
+    });
+
+    fireEvent.click(renderResult.getByText('See more....'));
+
+    await waitFor(() => {
+      expect(renderResult.getByText('Discover')).toBeInTheDocument();
+      expect(renderResult.getByText('Dashboards')).toBeInTheDocument();
+      expect(renderResult.getByText('Visualize')).toBeInTheDocument();
+      expect(
+        renderResult.getByText('Observability services, metrics, traces, and more')
+      ).toBeInTheDocument();
+      expect(
+        renderResult.getByText('Security analytics threat alerts, findings, correlations, and more')
+      ).toBeInTheDocument();
+      expect(
+        renderResult.getByText('Search studio, relevance tuning, vector search, and more')
+      ).toBeInTheDocument();
     });
   });
 });

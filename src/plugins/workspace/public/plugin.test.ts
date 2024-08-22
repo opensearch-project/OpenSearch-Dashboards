@@ -301,7 +301,7 @@ describe('Workspace plugin', () => {
       {
         id: 'foo',
         title: 'Foo',
-        features: ['system-feature'],
+        features: [{ id: 'system-feature', title: 'System feature' }],
         systematic: true,
         description: '',
       },

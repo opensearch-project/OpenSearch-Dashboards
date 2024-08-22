@@ -132,7 +132,8 @@ export class WorkspacePlugin
           }
           if (
             registeredUseCases.some(
-              (useCase) => useCase.systematic && useCase.features.includes(app.id)
+              (useCase) =>
+                useCase.systematic && useCase.features.some((feature) => feature.id === app.id)
             )
           ) {
             return;

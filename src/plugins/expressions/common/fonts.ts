@@ -29,7 +29,7 @@
  */
 
 /**
- * This type contains a unions of all supported font labels, or the the name of
+ * This type contains a unions of all supported font labels, or the name of
  * the font the user would see in a UI.
  */
 export type FontLabel = typeof fonts[number]['label'];
