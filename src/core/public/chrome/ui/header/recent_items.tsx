@@ -118,7 +118,7 @@ export const RecentItems = ({
     setIsPopoverOpen(false);
   };
 
-  const preferencesPopover = (
+  const preferencePopover = (
     <EuiPopover
       data-test-subj="preferencesSettingPopover"
       ownFocus={false}
@@ -273,7 +273,7 @@ export const RecentItems = ({
         )}
         <EuiSpacer size="s" />
       </EuiPanel>
-      {preferencesPopover}
+      {preferencePopover}
     </EuiPopover>
   );
 };
