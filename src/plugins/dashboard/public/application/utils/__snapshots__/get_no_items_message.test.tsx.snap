@@ -712,6 +712,7 @@ exports[`dashboard listing table with no item and with write controls 1`] = `
           >
             <EuiButtonContent
               className="euiButton__content"
+              iconGap="m"
               iconSide="left"
               iconType="plus"
               textProps={

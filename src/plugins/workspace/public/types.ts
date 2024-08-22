@@ -20,7 +20,7 @@ export interface WorkspaceUseCase {
   id: string;
   title: string;
   description: string;
-  features: string[];
+  features: Array<{ id: string; title?: string }>;
   systematic?: boolean;
   order?: number;
 }
