@@ -22,7 +22,6 @@ export function getIgnoredTokens(): number[] {
   const firstOperatorIndex = OpenSearchPPLParser.MATCH;
   const lastOperatorIndex = OpenSearchPPLParser.ERROR_RECOGNITION;
   for (let i = firstOperatorIndex; i <= lastOperatorIndex; i++) {
-    // We actually want Star to appear in autocomplete
     tokens.push(i);
   }
 
@@ -32,13 +31,13 @@ export function getIgnoredTokens(): number[] {
     tokens.push(i);
   }
 
+  // ignore pipe
   tokens.push(OpenSearchPPLParser.PIPE);
 
   return tokens;
 }
 
 const ignoredTokens = new Set(getIgnoredTokens());
-// const tokenDictionary: TokenDictionary = {
 const tokenDictionary: any = {
   SPACE: OpenSearchPPLParser.SPACE,
   FROM: OpenSearchPPLParser.FROM,
