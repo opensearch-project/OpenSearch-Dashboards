@@ -243,6 +243,7 @@ export class WorkspacePlugin
   ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
+    core.workspaces.setClient(workspaceClient);
 
     this.useCase.setup({
       chrome: core.chrome,
