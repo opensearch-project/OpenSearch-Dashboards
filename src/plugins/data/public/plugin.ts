@@ -168,10 +168,10 @@ export class DataPublicPlugin
 
     const uiService = this.uiService.setup(core, {});
 
-    const autoComnplete = this.autocomplete.setup(core);
-    autoComnplete.addQuerySuggestionProvider('SQL', getSQLSuggestions);
-    autoComnplete.addQuerySuggestionProvider('kuery', getDQLSuggestions);
-    autoComnplete.addQuerySuggestionProvider('PPL', getPPLSuggestions);
+    const autoComplete = this.autocomplete.setup(core);
+    autoComplete.addQuerySuggestionProvider('SQL', getSQLSuggestions);
+    autoComplete.addQuerySuggestionProvider('kuery', getDQLSuggestions);
+    autoComplete.addQuerySuggestionProvider('PPL', getPPLSuggestions);
 
     return {
       // TODO: MQL
