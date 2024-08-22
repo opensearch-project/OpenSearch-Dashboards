@@ -11,7 +11,9 @@ import { IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginSetup, DataPublicPluginStart, IndexPattern } from '../../data/public';
 import { Store } from './utils/state_management';
 
-export type DataExplorerPluginSetup = ViewServiceSetup;
+export type DataExplorerPluginSetup = ViewServiceSetup & {
+  registerDiscoverAction: (discoverAction: DiscoverAction) => void;
+};
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataExplorerPluginStart {}
@@ -34,7 +36,7 @@ export interface DataExplorerServices extends CoreStart {
   data: DataPublicPluginStart;
   scopedHistory: ScopedHistory;
   osdUrlStateStorage: IOsdUrlStateStorage;
-  discoverActions?: DiscoverAction[];
+  actions?: DiscoverAction[];
 }
 
 export interface DiscoverActionContext {

@@ -49,7 +49,7 @@ export class DataExplorerPlugin
   public setup(
     core: CoreSetup<DataExplorerPluginStartDependencies, DataExplorerPluginStart>,
     { data }: DataExplorerPluginSetupDependencies
-  ) {
+  ): DataExplorerPluginSetup {
     const viewService = this.viewService;
 
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
@@ -107,7 +107,7 @@ export class DataExplorerPlugin
             ...withNotifyOnErrors(coreStart.notifications.toasts),
           }),
           viewRegistry: viewService.start(),
-          discoverActions: this.discoverActions,
+          actions: this.discoverActions,
         };
 
         // Get start services as specified in opensearch_dashboards.json

@@ -53,7 +53,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
     },
   } = useOpenSearchDashboards<DiscoverViewServices>();
   const {
-    services: { discoverActions },
+    services: { actions },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
   const { columns } = useSelector((state) => {
@@ -175,10 +175,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
         <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
           <MemoizedDiscoverChartContainer {...fetchState} />
           <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
-          <DiscoverActions
-            actions={discoverActions as DiscoverAction[]}
-            context={{ indexPattern }}
-          />
+          <DiscoverActions actions={actions as DiscoverAction[]} context={{ indexPattern }} />
         </EuiPanel>
       )}
     </EuiPanel>
