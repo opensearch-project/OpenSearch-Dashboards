@@ -58,7 +58,7 @@ export interface IUiSettingsClient {
   /**
    * Returns the overridden uiSettings value if one exists, or the registered default if one exists {@link UiSettingsParams}
    */
-  getOverrideOrDefault: (key: string) => unknown;
+  getOverrideOrDefault: <T = unknown>(key: string) => T;
   /**
    * Returns the registered default if one exists {@link UiSettingsParams}
    */
