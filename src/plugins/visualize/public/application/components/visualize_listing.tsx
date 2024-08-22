@@ -44,6 +44,7 @@ import { VisualizeConstants } from '../visualize_constants';
 import { getTableColumns, getNoItemsMessage } from '../utils';
 import { getUiActions } from '../../services';
 import { SAVED_OBJECT_DELETE_TRIGGER } from '../../../../saved_objects_management/public';
+import { HeaderVariant } from '../../../../../core/public/index';
 
 export const VisualizeListing = () => {
   const {
@@ -58,11 +59,15 @@ export const VisualizeListing = () => {
       savedObjectsPublic,
       uiSettings,
       visualizeCapabilities,
+      navigation,
     },
   } = useOpenSearchDashboards<VisualizeServices>();
   const { pathname } = useLocation();
   const closeNewVisModal = useRef(() => {});
   const listingLimit = savedObjectsPublic.settings.getListingLimit();
+  const showUpdatedUx = uiSettings?.get('home:useNewHomePage');
+  const { HeaderControl } = navigation.ui;
+  const { setAppRightControls } = application;
 
   useEffect(() => {
     if (pathname === '/new') {
@@ -80,13 +85,24 @@ export const VisualizeListing = () => {
   }, [history, pathname, visualizations]);
 
   useMount(() => {
-    chrome.setBreadcrumbs([
-      {
-        text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
-          defaultMessage: 'Visualize',
-        }),
-      },
-    ]);
+    if (showUpdatedUx) {
+      chrome.setBreadcrumbs([
+        {
+          text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
+            defaultMessage: 'Visualizations',
+          }),
+        },
+      ]);
+    } else {
+      chrome.setBreadcrumbs([
+        {
+          text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
+            defaultMessage: 'Visualize',
+          }),
+        },
+      ]);
+    }
+
     chrome.docTitle.change(
       i18n.translate('visualize.listingPageTitle', { defaultMessage: 'Visualize' })
     );
@@ -163,29 +179,48 @@ export const VisualizeListing = () => {
   );
 
   return (
-    <TableListView
-      headingId="visualizeListingHeading"
-      // we allow users to create visualizations even if they can't save them
-      // for data exploration purposes
-      createItem={createNewVis}
-      findItems={fetchItems}
-      deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
-      editItem={visualizeCapabilities.save ? editItem : undefined}
-      tableColumns={tableColumns}
-      listingLimit={listingLimit}
-      initialPageSize={savedObjectsPublic.settings.getPerPage()}
-      initialFilter={''}
-      noItemsFragment={noItemsFragment}
-      entityName={i18n.translate('visualize.listing.table.entityName', {
-        defaultMessage: 'visualization',
-      })}
-      entityNamePlural={i18n.translate('visualize.listing.table.entityNamePlural', {
-        defaultMessage: 'visualizations',
-      })}
-      tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
-        defaultMessage: 'Visualizations',
-      })}
-      toastNotifications={toastNotifications}
-    />
+    <>
+      {showUpdatedUx && (
+        <HeaderControl
+          setMountPoint={setAppRightControls}
+          controls={[
+            {
+              id: 'visualize.createVisualization',
+              label: 'Create visualization',
+              testId: 'createVisualizationButton',
+              run: createNewVis,
+              fill: true,
+              iconType: 'plus',
+              controlType: 'button',
+            },
+          ]}
+        />
+      )}
+      <TableListView
+        headingId="visualizeListingHeading"
+        // we allow users to create visualizations even if they can't save them
+        // for data exploration purposes
+        createItem={createNewVis}
+        findItems={fetchItems}
+        deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
+        editItem={visualizeCapabilities.save ? editItem : undefined}
+        tableColumns={tableColumns}
+        listingLimit={listingLimit}
+        initialPageSize={savedObjectsPublic.settings.getPerPage()}
+        initialFilter={''}
+        noItemsFragment={noItemsFragment}
+        entityName={i18n.translate('visualize.listing.table.entityName', {
+          defaultMessage: 'visualization',
+        })}
+        entityNamePlural={i18n.translate('visualize.listing.table.entityNamePlural', {
+          defaultMessage: 'visualizations',
+        })}
+        tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
+          defaultMessage: 'Visualizations',
+        })}
+        toastNotifications={toastNotifications}
+        showUpdatedUx={showUpdatedUx}
+      />
+    </>
   );
 };
