@@ -59,10 +59,7 @@ type DetailedRecentlyAccessedItem = ChromeRecentlyAccessedHistoryItem &
     workspaceName?: string;
   };
 
-export const bulkGetDetail = (
-  savedObjects: Array<Pick<SavedObject, 'type' | 'id'>>,
-  http: HttpStart
-) => {
+const bulkGetDetail = (savedObjects: Array<Pick<SavedObject, 'type' | 'id'>>, http: HttpStart) => {
   return Promise.all(
     savedObjects.map((obj) =>
       http
@@ -86,15 +83,15 @@ export const bulkGetDetail = (
 
 const recentsRadios = [
   {
-    id: 'recent_5',
+    id: '5',
     label: '5 pages',
   },
   {
-    id: 'recent_10',
+    id: '10',
     label: '10 pages',
   },
   {
-    id: 'recent_15',
+    id: '15',
     label: '15 pages',
   },
 ];
@@ -110,7 +107,7 @@ export const RecentItems = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isPreferencesPopoverOpen, setIsPreferencesPopoverOpen] = useState(false);
   const recentlyAccessedItems = useObservable(recentlyAccessed$, []);
-  const [recentsRadioIdSelected, setRecentsRadioIdSelected] = useState('recent_5');
+  const [recentsRadioIdSelected, setRecentsRadioIdSelected] = useState(recentsRadios[0].id);
   const workspaceList = useObservable(workspaceList$, []);
   const [detailedSavedObjects, setDetailedSavedObjects] = useState<DetailedRecentlyAccessedItem[]>(
     []
@@ -121,6 +118,44 @@ export const RecentItems = ({
     setIsPopoverOpen(false);
   };
 
+  const preferencesPopover = (
+    <EuiPopover
+      data-test-subj="preferencesSettingPopover"
+      ownFocus={false}
+      panelPaddingSize="m"
+      button={
+        <EuiButtonEmpty
+          data-test-subj="preferencesSettingButton"
+          flush="left"
+          color="primary"
+          onClick={() => {
+            setIsPreferencesPopoverOpen((IsPreferencesPopoverOpe) => !IsPreferencesPopoverOpe);
+          }}
+        >
+          Preferences
+        </EuiButtonEmpty>
+      }
+      isOpen={isPreferencesPopoverOpen}
+      anchorPosition="downLeft"
+      closePopover={() => {
+        setIsPreferencesPopoverOpen(false);
+      }}
+    >
+      <EuiPopoverTitle>Preferences</EuiPopoverTitle>
+      <EuiRadioGroup
+        options={recentsRadios}
+        idSelected={recentsRadioIdSelected}
+        onChange={(id) => {
+          setRecentsRadioIdSelected(id);
+          setIsPreferencesPopoverOpen(false);
+        }}
+        name="radio group"
+        legend={{
+          children: <span>Recents</span>,
+        }}
+      />
+    </EuiPopover>
+  );
   const recentButton = (
     <EuiToolTip
       content={i18n.translate('core.ui.chrome.headerGlobalNav.viewRecentItemsTooltip', {
@@ -180,7 +215,7 @@ export const RecentItems = ({
   }, [recentlyAccessedItems, http, workspaceList]);
 
   const selectedRecentsItems = useMemo(() => {
-    return detailedSavedObjects.slice(0, Number(recentsRadioIdSelected.split('recent_')[1]));
+    return detailedSavedObjects.slice(0, Number(recentsRadioIdSelected));
   }, [detailedSavedObjects, recentsRadioIdSelected]);
 
   return (
@@ -232,47 +267,13 @@ export const RecentItems = ({
             ))}
           </EuiListGroup>
         ) : (
-          <EuiText color="subdued">No recently viewed items</EuiText>
+          <EuiText color="subdued" size="s">
+            No recently viewed items
+          </EuiText>
         )}
         <EuiSpacer size="s" />
-
-        <EuiPopover
-          data-test-subj="preferencesSettingPopover"
-          ownFocus={false}
-          panelPaddingSize="m"
-          button={
-            <EuiButtonEmpty
-              data-test-subj="preferencesSettingButton"
-              flush="left"
-              color="primary"
-              onClick={() => {
-                setIsPreferencesPopoverOpen((IsPreferencesPopoverOpe) => !IsPreferencesPopoverOpe);
-              }}
-            >
-              Preferences
-            </EuiButtonEmpty>
-          }
-          isOpen={isPreferencesPopoverOpen}
-          anchorPosition="downLeft"
-          closePopover={() => {
-            setIsPreferencesPopoverOpen(false);
-          }}
-        >
-          <EuiPopoverTitle>Preferences</EuiPopoverTitle>
-          <EuiRadioGroup
-            options={recentsRadios}
-            idSelected={recentsRadioIdSelected}
-            onChange={(id) => {
-              setRecentsRadioIdSelected(id);
-              setIsPreferencesPopoverOpen(false);
-            }}
-            name="radio group"
-            legend={{
-              children: <span>Recents</span>,
-            }}
-          />
-        </EuiPopover>
       </EuiPanel>
+      {preferencesPopover}
     </EuiPopover>
   );
 };
