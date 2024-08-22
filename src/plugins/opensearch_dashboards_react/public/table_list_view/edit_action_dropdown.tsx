@@ -4,8 +4,16 @@
  */
 
 import React, { useState } from 'react';
-import { EuiIcon, EuiPopover, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import {
+  EuiIcon,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiText,
+  EuiConfirmModal,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { useOpenSearchDashboards } from '../context';
 
 // TODO: include more types once VisBuilder supports more visualization types
 const types = ['Area', 'Vertical Bar', 'Line', 'Metric', 'Table'];
@@ -14,6 +22,7 @@ export interface VisualizationItem {
   typeTitle: string;
   id?: string;
   version?: number;
+  overlays?: any;
 }
 
 interface EditActionDropdownProps {
@@ -27,6 +36,7 @@ export const EditActionDropdown: React.FC<EditActionDropdownProps> = ({
   editItem,
   visbuilderEditItem,
 }) => {
+  const { overlays } = useOpenSearchDashboards();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const onButtonClick = () => {
     setPopoverOpen(!isPopoverOpen);
@@ -41,6 +51,34 @@ export const EditActionDropdown: React.FC<EditActionDropdownProps> = ({
   const itemVersion = item.version;
   const isVisBuilderCompatible =
     types.includes(typeName) && itemVersion !== undefined && itemVersion <= 1;
+
+  const handleImportToVisBuilder = () => {
+    closePopover(); // Close the popover first
+
+    const modal = overlays.openModal(
+      <EuiConfirmModal
+        title="Partial Import"
+        onCancel={() => modal.close()}
+        onConfirm={async () => {
+          modal.close();
+          // Call visbuilderEditItem with the item
+          if (visbuilderEditItem) {
+            await visbuilderEditItem(item);
+          }
+        }}
+        cancelButtonText="Cancel"
+        confirmButtonText="Import"
+      >
+        <EuiText>
+          <p>
+            {' '}
+            Note that not all settings have been migrated from the original visualization. More will
+            be included as VisBuilder supports additional settings.{' '}
+          </p>
+        </EuiText>
+      </EuiConfirmModal>
+    );
+  };
 
   const items = [
     <EuiContextMenuItem
@@ -60,10 +98,7 @@ export const EditActionDropdown: React.FC<EditActionDropdownProps> = ({
       <EuiContextMenuItem
         key="importToVisBuilder"
         icon={<EuiIcon type="importAction" />}
-        onClick={() => {
-          closePopover();
-          visbuilderEditItem?.(item);
-        }}
+        onClick={handleImportToVisBuilder}
         data-test-subj="dashboardImportToVisBuilder"
       >
         {i18n.translate('editActionDropdown.importToVisBuilder', {
