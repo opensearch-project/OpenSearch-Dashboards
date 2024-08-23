@@ -108,14 +108,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
   };
 
   const currentWorkspaceButton = currentWorkspace ? (
-    <EuiButtonEmpty
-      onClick={openPopover}
-      data-test-subj="current-workspace-button"
-      // deduplicate padding in left bottom
-      contentProps={{
-        style: { padding: 0 },
-      }}
-    >
+    <EuiButtonEmpty onClick={openPopover} data-test-subj="current-workspace-button" flush="both">
       <EuiAvatar
         size="s"
         type="space"
