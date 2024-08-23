@@ -48,9 +48,8 @@ function getOwners(currentWorkspace: WorkspaceAttributeWithPermission) {
   if (currentWorkspace.permissions) {
     const { groups = [], users = [] } = currentWorkspace.permissions.write;
     return [...groups, ...users];
-  } else {
-    return [];
   }
+  return [];
 }
 
 interface WorkspaceDetailPanelProps {
