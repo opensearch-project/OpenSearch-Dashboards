@@ -36,11 +36,10 @@ import { DetailTab } from '../workspace_form/constants';
 import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
-import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
+import { getFirstUseCaseOfFeatureConfigs, getDataSourcesList } from '../../utils';
 import { WorkspaceUseCase } from '../../types';
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
 import { WorkspacePermissionMode } from '../../../common/constants';
-import { getDataSourcesList } from '../../utils';
 import { DataSourceAttributesWithWorkspaces } from '../../types';
 
 export interface WorkspaceListProps {
@@ -221,6 +220,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
           iconOnClick={() => handleSwitchWorkspace(workspaceId, tab)}
           iconOnClickAriaLabel="Open workspace detail"
           onClickAriaLabel="Open workspace detail"
+          data-test-subj={`workspaceList-more-${tab}-badge`}
         >
           + {amount - maxDisplayedAmount} more
         </EuiBadge>
