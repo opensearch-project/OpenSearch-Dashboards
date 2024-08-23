@@ -154,9 +154,7 @@ export class HomePublicPlugin
     core.application.register({
       id: PLUGIN_ID,
       title: 'Home',
-      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
-        ? undefined
-        : AppNavLinkStatus.hidden,
+      navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
         setCommonService();
@@ -168,13 +166,6 @@ export class HomePublicPlugin
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: PLUGIN_ID,
-        title: 'Home',
-      },
-    ]);
 
     // Register import sample data as a standalone app so that it is available inside workspace.
     core.application.register({
