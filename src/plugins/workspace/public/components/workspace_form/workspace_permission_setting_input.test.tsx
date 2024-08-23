@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, within } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import {
   WorkspacePermissionSettingInput,
   WorkspacePermissionSettingInputProps,
@@ -127,10 +127,7 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult, onPermissionModesChangeMock } = setup({});
 
     expect(onPermissionModesChangeMock).not.toHaveBeenCalled();
-    const permissionToggleListButton = within(
-      renderResult.getAllByTestId('workspace-permissionModeOptions')[0]
-    ).getByTestId('comboBoxToggleListButton');
-    fireEvent.click(permissionToggleListButton);
+    fireEvent.click(renderResult.getAllByTestId('workspace-permissionModeOptions')[0]);
     fireEvent.click(renderResult.getByText('Owner'));
     expect(onPermissionModesChangeMock).toHaveBeenCalledWith(['library_write', 'write'], 0);
   });
@@ -148,7 +145,7 @@ describe('WorkspacePermissionSettingInput', () => {
     expect(onTypeChangeMock).not.toHaveBeenCalled();
 
     fireEvent.click(renderResult.getByTestId('workspace-typeOptions'));
-    fireEvent.click(renderResult.getByText('Group'));
+    fireEvent.click(renderResult.getByText('User Group'));
     expect(onTypeChangeMock).toHaveBeenCalledWith('group', 0);
   });
 });
