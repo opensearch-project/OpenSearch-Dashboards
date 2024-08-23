@@ -71,6 +71,7 @@ import {
 } from '../../content_management/public';
 import { initHome, setupHome } from './application/home_render';
 import { registerSampleDataCard } from './application/components/sample_data/sample_data_card';
+import { registerHomeListCardToPage } from './application/components/home_list_card';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -241,6 +242,9 @@ export class HomePublicPlugin
 
     // register sample data card to use case overview page
     registerSampleDataCard(contentManagement, core);
+
+    // register what's new learn opensearch card to use case overview page
+    registerHomeListCardToPage(contentManagement);
 
     this.featuresCatalogueRegistry.start({ capabilities });
     this.sectionTypeService.start({ core, data });

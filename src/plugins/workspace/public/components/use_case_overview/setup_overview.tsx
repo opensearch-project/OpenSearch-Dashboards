@@ -17,11 +17,6 @@ import {
   SECTIONS,
 } from '../../../../content_management/public';
 import { getStartedCards } from './get_started_cards';
-import {
-  HomeListCard,
-  LEARN_OPENSEARCH_CONFIG,
-  WHATS_NEW_CONFIG,
-} from '../../../../../plugins/home/public';
 import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
 import { Content } from '../../../../../plugins/content_management/public';
 
@@ -92,37 +87,6 @@ export const registerEssentialOverviewContent = (
       }),
     });
   });
-
-  // card
-  contentManagement.registerContentProvider({
-    id: 'whats_new_cards_essential_overview',
-    getContent: () => ({
-      id: 'whats_new',
-      kind: 'custom',
-      order: 10,
-      width: 24,
-      render: () =>
-        React.createElement(HomeListCard, {
-          config: WHATS_NEW_CONFIG,
-        }),
-    }),
-    getTargetArea: () => ESSENTIAL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
-  });
-
-  contentManagement.registerContentProvider({
-    id: 'learn_opensearch_cards_essential_overview',
-    getContent: () => ({
-      id: 'learn_opensearch',
-      kind: 'custom',
-      order: 20,
-      width: 24,
-      render: () =>
-        React.createElement(HomeListCard, {
-          config: LEARN_OPENSEARCH_CONFIG,
-        }),
-    }),
-    getTargetArea: () => ESSENTIAL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
-  });
 };
 
 // Analytics(All) overview part
@@ -186,36 +150,5 @@ export const registerAnalyticsAllOverviewContent = (
         },
       }),
     });
-  });
-
-  // card
-  contentManagement.registerContentProvider({
-    id: 'whats_new_cards_essential_overview',
-    getContent: () => ({
-      id: 'whats_new',
-      kind: 'custom',
-      order: 30,
-      width: 12,
-      render: () =>
-        React.createElement(HomeListCard, {
-          config: WHATS_NEW_CONFIG,
-        }),
-    }),
-    getTargetArea: () => ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
-  });
-
-  contentManagement.registerContentProvider({
-    id: 'learn_opensearch_cards_essential_overview',
-    getContent: () => ({
-      id: 'learn_opensearch',
-      kind: 'custom',
-      order: 40,
-      width: 12,
-      render: () =>
-        React.createElement(HomeListCard, {
-          config: LEARN_OPENSEARCH_CONFIG,
-        }),
-    }),
-    getTargetArea: () => ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
   });
 };

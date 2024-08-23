@@ -68,7 +68,7 @@ describe('Setup use case overview', () => {
     registerEssentialOverviewContent(contentManagementStartMock, coreStart);
 
     const calls = registerContentProviderMock.mock.calls;
-    expect(calls.length).toBe(5);
+    expect(calls.length).toBe(3);
 
     const firstCall = calls[0];
     expect(firstCall[0].getTargetArea()).toMatchInlineSnapshot(`"analytics_overview/get_started"`);
@@ -89,32 +89,6 @@ describe('Setup use case overview', () => {
         "kind": "card",
         "order": 20,
         "title": "Discover insights",
-      }
-    `);
-
-    const whatsNew = calls[3];
-    expect(whatsNew[0].getTargetArea()).toMatchInlineSnapshot(`"analytics_overview/service_cards"`);
-    expect(whatsNew[0].getContent()).toMatchInlineSnapshot(`
-      Object {
-        "id": "whats_new",
-        "kind": "custom",
-        "order": 10,
-        "render": [Function],
-        "width": 24,
-      }
-    `);
-
-    const learnOpenSearch = calls[4];
-    expect(learnOpenSearch[0].getTargetArea()).toMatchInlineSnapshot(
-      `"analytics_overview/service_cards"`
-    );
-    expect(learnOpenSearch[0].getContent()).toMatchInlineSnapshot(`
-      Object {
-        "id": "learn_opensearch",
-        "kind": "custom",
-        "order": 20,
-        "render": [Function],
-        "width": 24,
       }
     `);
   });
@@ -154,7 +128,7 @@ describe('Setup use case overview', () => {
     registerAnalyticsAllOverviewContent(contentManagementStartMock, coreStart);
 
     const calls = registerContentProviderMock.mock.calls;
-    expect(calls.length).toBe(5);
+    expect(calls.length).toBe(3);
 
     const firstCall = calls[0];
     expect(firstCall[0].getTargetArea()).toMatchInlineSnapshot(`"all_overview/get_started"`);
@@ -170,32 +144,6 @@ describe('Setup use case overview', () => {
         "onClick": [Function],
         "order": 4000,
         "title": "Observability",
-      }
-    `);
-
-    const whatsNew = calls[3];
-    expect(whatsNew[0].getTargetArea()).toMatchInlineSnapshot(`"all_overview/service_cards"`);
-    expect(whatsNew[0].getContent()).toMatchInlineSnapshot(`
-      Object {
-        "id": "whats_new",
-        "kind": "custom",
-        "order": 30,
-        "render": [Function],
-        "width": 12,
-      }
-    `);
-
-    const learnOpenSearch = calls[4];
-    expect(learnOpenSearch[0].getTargetArea()).toMatchInlineSnapshot(
-      `"all_overview/service_cards"`
-    );
-    expect(learnOpenSearch[0].getContent()).toMatchInlineSnapshot(`
-      Object {
-        "id": "learn_opensearch",
-        "kind": "custom",
-        "order": 40,
-        "render": [Function],
-        "width": 12,
       }
     `);
   });
