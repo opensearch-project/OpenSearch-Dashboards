@@ -228,7 +228,7 @@ export class VisualizePlugin
       },
     });
 
-    const titleInLeftNav = i18n.translate('visualize..leftNav.visualizeTitle', {
+    const titleInLeftNav = i18n.translate('visualize.leftNav.visualizeTitle', {
       defaultMessage: 'Visualizations',
     });
 
