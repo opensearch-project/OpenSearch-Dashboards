@@ -5,7 +5,7 @@
 
 .newTopNavHeader {
   z-index: 1000;
-  padding: 0 $euiSizeL $euiSizeS;
+  padding: 0 $euiSize $euiSizeS;
   box-shadow: none;
   border-bottom: none;
   background: none;
@@ -93,13 +93,13 @@
 .newAppTopNavExpander {
   position: fixed;
   left: 0;
-  top: $euiSizeL - $euiSizeXS;
+  top: $euiSize;
 }
 
 .newPageTopNavExpander {
   position: fixed;
   left: 0;
-  top: $euiSizeL - $euiSizeXS;
+  top: $euiSize;
 }
 
 .stretchedActionMenu {
