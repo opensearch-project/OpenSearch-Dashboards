@@ -109,9 +109,13 @@ const SavedObjectsTablePage = ({
       perPageConfig={itemsPerPage}
       goInspectObject={(savedObject) => {
         const { editUrl } = savedObject.meta;
-        if (editUrl) {
+        let finalEditUrl = editUrl;
+        if (useUpdatedUX && finalEditUrl) {
+          finalEditUrl = finalEditUrl.replace(/^\/management\/opensearch-dashboards/, '');
+        }
+        if (finalEditUrl) {
           return coreStart.application.navigateToUrl(
-            coreStart.http.basePath.prepend(`/app${editUrl}`)
+            coreStart.http.basePath.prepend(`/app${finalEditUrl}`)
           );
         }
       }}
