@@ -614,6 +614,7 @@ export class WorkspacePlugin
           id: 'workspace_list',
           kind: 'custom',
           order: 0,
+          width: 16,
           render: () => React.createElement(WorkspaceListCard, { core }),
         }),
         getTargetArea: () => HOME_CONTENT_AREAS.SERVICE_CARDS,

@@ -12,12 +12,12 @@ type Core = Pick<CoreStart, 'application' | 'http'>;
 
 export const navigateToWorkspaceDetail = (
   { application, http }: Core,
-  id: string,
+  workspaceId: string,
   tabId: string = DetailTab.Details
 ) => {
   navigateToAppWithinWorkspace(
     { application, http },
-    id,
+    workspaceId,
     WORKSPACE_DETAIL_APP_ID,
     `/?tab=${tabId}`
   );
@@ -27,7 +27,7 @@ export const navigateToAppWithinWorkspace = (
   { application, http }: Core,
   workspaceId: string,
   appId: string,
-  hash: string
+  hash?: string
 ) => {
   const newUrl = formatUrlWithWorkspaceId(
     application.getUrlForApp(appId, {
@@ -38,7 +38,9 @@ export const navigateToAppWithinWorkspace = (
   );
   if (newUrl) {
     const url = new URL(newUrl);
-    url.hash = hash;
+    if (hash) {
+      url.hash = hash;
+    }
     application.navigateToUrl(url.toString());
   }
 };

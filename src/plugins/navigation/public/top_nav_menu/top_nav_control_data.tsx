@@ -35,6 +35,7 @@ export type TopNavControlLinkData = TopNavControlButtonOrLinkOrIconData &
       iconSide?: EuiHeaderLinkProps['iconSide'];
       iconGap?: EuiHeaderLinkProps['iconGap'];
       color?: EuiHeaderLinkProps['color'];
+      flush?: EuiHeaderLinkProps['flush'];
       controlType: 'link';
     },
     'href' | 'run'
