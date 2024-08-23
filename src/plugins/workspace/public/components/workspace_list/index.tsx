@@ -31,6 +31,7 @@ import {
 } from '../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { navigateToWorkspaceDetail } from '../utils/workspace';
+import { DetailTab } from '../workspace_form/constants';
 
 import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 
@@ -46,8 +47,9 @@ export interface WorkspaceListProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
 }
 
-interface WorkspaceAttributeWithUseCaseID extends WorkspaceAttribute {
+interface WorkspaceAttributeWithUseCaseIDAndDataSources extends WorkspaceAttribute {
   useCase?: string;
+  dataSources?: string[];
 }
 
 export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
@@ -76,6 +78,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
   });
   const [deletedWorkspaces, setDeletedWorkspaces] = useState<WorkspaceAttribute[]>([]);
   const [selection, setSelection] = useState<WorkspaceAttribute[]>([]);
+  const [allDataSources, setAllDataSources] = useState<DataSourceAttributesWithWorkspaces[]>([]);
 
   const dateFormat = uiSettings?.get('dateFormat');
 
@@ -96,14 +99,28 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     [registeredUseCases]
   );
 
-  const newWorkspaceList: WorkspaceAttributeWithUseCaseID[] = useMemo(() => {
+  useEffect(() => {
+    if (savedObjects) {
+      getDataSourcesList(savedObjects.client, ['*']).then((data) => {
+        setAllDataSources(data);
+      });
+    }
+  }, [savedObjects]);
+
+  const newWorkspaceList: WorkspaceAttributeWithUseCaseIDAndDataSources[] = useMemo(() => {
     return workspaceList.map(
-      (workspace): WorkspaceAttributeWithUseCaseID => ({
-        ...workspace,
-        useCase: extractUseCaseFromFeatures(workspace.features ?? []),
-      })
+      (workspace): WorkspaceAttributeWithUseCaseIDAndDataSources => {
+        const associatedDataSourcesTitles = allDataSources
+          .filter((ds) => ds.workspaces && ds.workspaces.includes(workspace.id))
+          .map((ds) => ds.title as string);
+        return {
+          ...workspace,
+          useCase: extractUseCaseFromFeatures(workspace.features ?? []),
+          dataSources: associatedDataSourcesTitles,
+        };
+      }
     );
-  }, [workspaceList, extractUseCaseFromFeatures]);
+  }, [workspaceList, extractUseCaseFromFeatures, allDataSources]);
   const workspaceCreateUrl = useMemo(() => {
     if (!application) {
       return '';
@@ -174,24 +191,42 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     copyToClipboard(id);
   };
 
-  const [allDataSources, setAllDataSources] = useState<DataSourceAttributesWithWorkspaces[]>([]);
-
-  useEffect(() => {
-    if (savedObjects) {
-      getDataSourcesList(savedObjects.client, ['*']).then((data) => {
-        setAllDataSources(data);
-      });
-    }
-  }, [savedObjects]);
-
   const handleSwitchWorkspace = useCallback(
-    (id: string) => {
+    (id: string, tab?: DetailTab) => {
       if (application && http) {
-        navigateToWorkspaceDetail({ application, http }, id);
+        navigateToWorkspaceDetail({ application, http }, id, tab);
       }
     },
     [application, http]
   );
+
+  const renderDataWithMoreBadge = (
+    data: string[],
+    maxDisplayedAmount: number,
+    workspaceId: string,
+    tab: DetailTab
+  ) => {
+    const amount = data.length;
+    const mostDisplayedTitles = data.slice(0, maxDisplayedAmount).join(',');
+    return amount <= maxDisplayedAmount ? (
+      mostDisplayedTitles
+    ) : (
+      <>
+        {mostDisplayedTitles}&nbsp;
+        <EuiBadge
+          color="hollow"
+          iconType="popout"
+          iconSide="right"
+          onClick={() => handleSwitchWorkspace(workspaceId, tab)}
+          iconOnClick={() => handleSwitchWorkspace(workspaceId, tab)}
+          iconOnClickAriaLabel="Open workspace detail"
+          onClickAriaLabel="Open workspace detail"
+        >
+          + {amount - maxDisplayedAmount} more
+        </EuiBadge>
+      </>
+    );
+  };
 
   const renderToolsLeft = () => {
     if (selection.length === 0) {
@@ -260,19 +295,11 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     toolsLeft: renderToolsLeft(),
   };
 
-  const renderMoreAmountBadge = (amount: number) => {
-    return (
-      <EuiBadge color="hollow" iconType="cross" iconSide="right">
-        + {amount} more
-      </EuiBadge>
-    );
-  };
-
   const columns = [
     {
       field: 'name',
       name: 'Name',
-      width: '25%',
+      width: '15%',
       sortable: true,
       render: (name: string, item: WorkspaceAttributeWithPermission) => (
         <span>
@@ -286,13 +313,13 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     {
       field: 'useCase',
       name: 'Use case',
-      width: '20%',
+      width: '15%',
     },
 
     {
       field: 'description',
       name: 'Description',
-      width: '20%',
+      width: '15%',
       render: (description: string) => (
         <EuiToolTip
           position="bottom"
@@ -307,32 +334,32 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
       ),
     },
     {
+      field: 'permissions',
+      name: 'Owners',
+      width: '15%',
+      render: (
+        permissions: WorkspaceAttributeWithPermission['permissions'],
+        item: WorkspaceAttributeWithPermission
+      ) => {
+        const owners = permissions?.[WorkspacePermissionMode.Write]?.users ?? [];
+        return renderDataWithMoreBadge(owners, 1, item.id, DetailTab.Collaborators);
+      },
+    },
+    {
       field: 'lastUpdatedTime',
       name: 'Last updated',
-      width: '25%',
+      width: '15%',
       truncateText: false,
       render: (lastUpdatedTime: string) => {
         return moment(lastUpdatedTime).format(dateFormat);
       },
     },
     {
-      field: 'permissions',
-      name: 'Owners',
-      render: (permissions: WorkspaceAttributeWithPermission['permissions']) => {
-        const owners = permissions?.[WorkspacePermissionMode.Write]?.users ?? [];
-        return owners;
-      },
-    },
-
-    {
-      field: 'id',
+      field: 'dataSources',
+      width: '15%',
       name: 'Data sources',
-      render: (id: string) => {
-        const associatedDataSources = allDataSources.filter(
-          (ds) => ds.workspaces && ds.workspaces.includes(id)
-        );
-        const dataSourcesTitles = associatedDataSources.map((ds) => ds.title);
-        return dataSourcesTitles;
+      render: (dataSources: string[], item: WorkspaceAttributeWithPermission) => {
+        return renderDataWithMoreBadge(dataSources, 2, item.id, DetailTab.DataSources);
       },
     },
     {
