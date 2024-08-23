@@ -67,6 +67,11 @@ jest.spyOn(defaultMockProps.http, 'get').mockImplementation(
 );
 
 describe('Recent items', () => {
+  it('should render base element normally', () => {
+    const { baseElement } = render(<RecentItems {...defaultMockProps} />);
+    expect(baseElement).toMatchSnapshot();
+  });
+
   it('render with empty recent work', () => {
     const { getByText, getByTestId } = render(<RecentItems {...defaultMockProps} />);
     const mockRecentButton = getByTestId('recentItemsSectionButton');
