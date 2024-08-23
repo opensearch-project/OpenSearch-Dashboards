@@ -118,7 +118,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
                 'You will be added as an owner to the workspace. Select additional users and user groups as workspace collaborators with different access levels.',
             })}
           </EuiText>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="l" />
           <WorkspacePermissionSettingPanel
             errors={formErrors.permissionSettings?.fields}
             onChange={setPermissionSettings}
