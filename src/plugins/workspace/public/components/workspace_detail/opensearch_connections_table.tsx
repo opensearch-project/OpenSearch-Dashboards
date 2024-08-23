@@ -45,6 +45,43 @@ export const OpenSearchConnectionTable = ({
   const [assignItems, setAssignItems] = useState<DataSource[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
 
+  const renderToolsLeft = () => {
+    return SelectedItems.length > 0 && !modalVisible
+      ? [
+          <EuiButton
+            color="danger"
+            onClick={() => setModalVisible(true)}
+            data-test-subj="workspace-detail-dataSources-table-bulkRemove"
+          >
+            {i18n.translate('workspace.detail.dataSources.table.remove.button', {
+              defaultMessage: 'Remove {numberOfSelect} association(s)',
+              values: { numberOfSelect: SelectedItems.length },
+            })}
+          </EuiButton>,
+        ]
+      : [];
+  };
+
+  const search = {
+    toolsLeft: renderToolsLeft(),
+    box: {
+      schema: true,
+    },
+    filters: [
+      {
+        type: 'field_value_selection',
+        field: 'dataSourceEngineType',
+        name: 'Type',
+        multiSelect: 'or',
+        options: assignedDataSources.map((ds) => ({
+          value: ds.dataSourceEngineType,
+          name: ds.dataSourceEngineType,
+          view: `${ds.dataSourceEngineType}`,
+        })),
+      },
+    ],
+  };
+
   const filteredDataSources = useMemo(
     () =>
       assignedDataSources.filter((dataSource) =>
@@ -159,38 +196,13 @@ export const OpenSearchConnectionTable = ({
   };
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        {SelectedItems.length > 0 && !modalVisible && (
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              color="danger"
-              onClick={() => setModalVisible(true)}
-              data-test-subj="workspace-detail-dataSources-table-bulkRemove"
-            >
-              {i18n.translate('workspace.detail.dataSources.table.remove.button', {
-                defaultMessage: 'Remove {numberOfSelect} association(s)',
-                values: { numberOfSelect: SelectedItems.length },
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem>
-          <EuiFieldSearch
-            placeholder="Search"
-            value={searchTerm}
-            onChange={handleSearch}
-            isClearable={true}
-            fullWidth
-            aria-label="Search data sources"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
       <EuiInMemoryTable
         items={filteredDataSources}
         itemId="id"
         columns={columns}
         selection={selection}
+        search={search}
+        isSelectable={true}
         pagination={{
           initialPageSize: 10,
           pageSizeOptions: [10, 20, 30],

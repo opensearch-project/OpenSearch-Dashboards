@@ -15,6 +15,8 @@ import {
   EuiSmallButton,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiButtonGroup,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from 'react-intl';
@@ -47,6 +49,32 @@ export const SelectDataSourceDetailPanel = ({
   const { formData, setSelectedDataSources } = useWorkspaceFormContext();
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [toggleIdSelected, setToggleIdSelected] = useState('all');
+
+  const toggleButtons = [
+    {
+      id: 'all',
+      label: i18n.translate('workspace.detail.dataSources.all', {
+        defaultMessage: 'All',
+      }),
+    },
+    {
+      id: 'openSearchConnections',
+      label: i18n.translate('workspace.detail.dataSources.openSearchConnections', {
+        defaultMessage: 'OpenSearch connections',
+      }),
+    },
+    {
+      id: 'directQueryConnections',
+      label: i18n.translate('workspace.detail.dataSources.directQueryConnections', {
+        defaultMessage: 'Direct query connections',
+      }),
+    },
+  ];
+
+  const onChange = (optionId: string) => {
+    setToggleIdSelected(optionId);
+  };
 
   const handleAssignDataSources = async (dataSources: DataSource[]) => {
     try {
@@ -90,7 +118,7 @@ export const SelectDataSourceDetailPanel = ({
       data-test-subj="workspace-detail-dataSources-assign-button"
     >
       {i18n.translate('workspace.detail.dataSources.assign.button', {
-        defaultMessage: 'Association OpenSearch Connections',
+        defaultMessage: 'Associate data sources',
       })}
     </EuiSmallButton>
   );
@@ -110,11 +138,13 @@ export const SelectDataSourceDetailPanel = ({
 
   const noAssociationMessage = (
     <EuiTextAlign textAlign="center">
+      <EuiIcon type="unlink" size="xl" />
+      <EuiSpacer />
       <EuiTitle>
         <h3>
           <FormattedMessage
             id="workspace.detail.dataSources.noAssociation.title"
-            defaultMessage="No associated data sources"
+            defaultMessage="No data sources to display"
           />
         </h3>
       </EuiTitle>
@@ -122,7 +152,7 @@ export const SelectDataSourceDetailPanel = ({
       <EuiText color="subdued">
         <FormattedMessage
           id="workspace.detail.dataSources.noAssociation.message"
-          defaultMessage="No OpenSearch connections are available in this workspace."
+          defaultMessage="There are no data sources associated with the workspace."
         />
       </EuiText>
       {isDashboardAdmin ? (
@@ -166,8 +196,22 @@ export const SelectDataSourceDetailPanel = ({
             <h2>{detailTitle}</h2>
           </EuiTitle>
         </EuiFlexItem>
-        {isDashboardAdmin && <EuiFlexItem grow={false}>{associationButton}</EuiFlexItem>}
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem style={{ width: 600 }}>
+              <EuiButtonGroup
+                legend="dataSourceGroup"
+                options={toggleButtons}
+                idSelected={toggleIdSelected}
+                onChange={(id) => onChange(id)}
+                isFullWidth
+              />
+            </EuiFlexItem>
+            {isDashboardAdmin && <EuiFlexItem grow={false}>{associationButton}</EuiFlexItem>}
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
+
       <EuiHorizontalRule />
       {renderTableContent()}
       {isVisible && (
