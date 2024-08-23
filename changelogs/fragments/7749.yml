@@ -1,0 +1,2 @@
+fix:
+- Breadcrumb is not correct when clicking inspect / edit in Assets page ([#7749](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7749))

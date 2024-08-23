@@ -832,6 +832,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         close={this.onHideRelationships}
         goInspectObject={this.props.goInspectObject}
         canGoInApp={this.props.canGoInApp}
+        useUpdatedUX={this.props.useUpdatedUX}
       />
     );
   }
