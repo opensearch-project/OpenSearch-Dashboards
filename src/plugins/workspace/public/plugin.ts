@@ -132,7 +132,8 @@ export class WorkspacePlugin
           }
           if (
             registeredUseCases.some(
-              (useCase) => useCase.systematic && useCase.features.includes(app.id)
+              (useCase) =>
+                useCase.systematic && useCase.features.some((feature) => feature.id === app.id)
             )
           ) {
             return;
@@ -518,6 +519,7 @@ export class WorkspacePlugin
           id: 'workspace_list',
           kind: 'custom',
           order: 0,
+          width: 16,
           render: () => React.createElement(WorkspaceListCard, { core }),
         }),
         getTargetArea: () => HOME_CONTENT_AREAS.SERVICE_CARDS,

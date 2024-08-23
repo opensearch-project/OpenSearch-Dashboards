@@ -56,7 +56,7 @@ export const UseCaseFooter = ({
   const closePopover = () => setPopover(false);
 
   const appId =
-    availableUseCases?.find((useCase) => useCase.id === useCaseId)?.features[0] ??
+    availableUseCases?.find((useCase) => useCase.id === useCaseId)?.features[0].id ??
     WORKSPACE_DETAIL_APP_ID;
 
   const filterWorkspaces = useMemo(

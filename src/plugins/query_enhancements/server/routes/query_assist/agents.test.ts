@@ -110,4 +110,27 @@ describe('Agents helper functions', () => {
     );
     expect(response.body.inference_results[0].output[0].result).toEqual('test response');
   });
+
+  it('searches for agent id and response contains ml_configuration', async () => {
+    mockedTransport
+      .mockResolvedValueOnce({
+        body: {
+          type: 'agent',
+          ml_configuration: { agent_id: 'new-id' },
+        },
+      })
+      .mockResolvedValueOnce({
+        body: { inference_results: [{ output: [{ result: 'test response' }] }] },
+      });
+    const response = await requestAgentByConfig({
+      context,
+      configName: 'new_agent',
+      body: { parameters: { param1: 'value1' } },
+    });
+    expect(mockedTransport).toBeCalledWith(
+      expect.objectContaining({ path: '/_plugins/_ml/agents/new-id/_execute' }),
+      expect.anything()
+    );
+    expect(response.body.inference_results[0].output[0].result).toEqual('test response');
+  });
 });
