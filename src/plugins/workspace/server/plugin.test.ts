@@ -3,12 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  OnPostAuthHandler,
-  OnPreRoutingHandler,
-  SavedObjectsClientContract,
-} from 'src/core/server';
-import { coreMock, httpServerMock, savedObjectsClientMock } from '../../../core/server/mocks';
+import { OnPostAuthHandler, OnPreRoutingHandler } from 'src/core/server';
+import { coreMock, httpServerMock, uiSettingsServiceMock } from '../../../core/server/mocks';
 import { WorkspacePlugin } from './plugin';
 import { getWorkspaceState, updateWorkspaceState } from '../../../core/server/utils';
 import * as utilsExports from './utils';
@@ -186,6 +182,24 @@ describe('Workspace server plugin', () => {
 
   describe('#setUpRedirectPage', () => {
     const setupMock = coreMock.createSetup();
+    const uiSettingsMock = uiSettingsServiceMock.createClient();
+    setupMock.getStartServices.mockResolvedValue([
+      {
+        ...coreMock.createStart(),
+        uiSettings: {
+          asScopedToClient: () => ({
+            ...uiSettingsMock,
+            get: jest.fn().mockImplementation((key) => {
+              if (key === 'home:useNewHomePage') {
+                return Promise.resolve(true);
+              }
+            }),
+          }),
+        },
+      },
+      {},
+      {},
+    ]);
     const initializerContextConfigMock = coreMock.createPluginInitializerContext({
       enabled: true,
       permission: {
@@ -281,14 +295,21 @@ describe('Workspace server plugin', () => {
       const request = httpServerMock.createOpenSearchDashboardsRequest({
         path: '/',
       });
-      const savedObjectsClient: jest.Mocked<SavedObjectsClientContract> = savedObjectsClientMock.create();
-      const mockUiSettings = {
-        get: jest.fn().mockResolvedValue('default'),
-      };
       setupMock.getStartServices.mockResolvedValue([
         {
-          uiSettings: { asScopedToClient: () => mockUiSettings },
-          savedObjects: { getScopedClient: () => savedObjectsClient },
+          ...coreMock.createStart(),
+          uiSettings: {
+            asScopedToClient: () => ({
+              ...uiSettingsMock,
+              get: jest.fn().mockImplementation((key) => {
+                if (key === 'defaultWorkspace') {
+                  return Promise.resolve('defaultWorkspace');
+                } else if (key === 'home:useNewHomePage') {
+                  return Promise.resolve('true');
+                }
+              }),
+            }),
+          },
         },
         {},
         {},
@@ -302,7 +323,7 @@ describe('Workspace server plugin', () => {
           per_page: 100,
           page: 1,
           workspaces: [
-            { id: 'default', name: 'default-workspace' },
+            { id: 'defaultWorkspace', name: 'default-workspace' },
             { id: 'workspace-2', name: 'workspace-2' },
           ],
         },
@@ -312,9 +333,32 @@ describe('Workspace server plugin', () => {
       await registerOnPostAuthFn(request, response, toolKitMock);
       expect(response.redirected).toBeCalledWith({
         headers: {
-          location: '/mock-server-basepath/w/default/app/workspace_navigation',
+          location: '/mock-server-basepath/w/defaultWorkspace/app/workspace_navigation',
         },
       });
+    });
+
+    it('with / request path and home:useNewHomePage is false', async () => {
+      const request = httpServerMock.createOpenSearchDashboardsRequest({
+        path: '/',
+      });
+      setupMock.getStartServices.mockResolvedValue([
+        {
+          ...coreMock.createStart(),
+          uiSettings: {
+            asScopedToClient: () => ({
+              ...uiSettingsMock,
+              get: jest.fn().mockResolvedValue(false),
+            }),
+          },
+        },
+        {},
+        {},
+      ]);
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(request, response, toolKitMock);
+      expect(toolKitMock.next).toBeCalledTimes(1);
     });
   });
 

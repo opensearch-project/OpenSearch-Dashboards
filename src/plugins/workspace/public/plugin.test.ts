@@ -22,6 +22,9 @@ import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.moc
 import { WorkspacePlugin, WorkspacePluginStartDeps } from './plugin';
 import { contentManagementPluginMocks } from '../../content_management/public';
 
+// Expect 6 app registrations: create, fatal error, detail, initial, navigation, and list apps.
+const registrationAppNumber = 6;
+
 describe('Workspace plugin', () => {
   const mockDependencies: WorkspacePluginStartDeps = {
     contentManagement: contentManagementPluginMocks.createStartContract(),
@@ -40,7 +43,7 @@ describe('Workspace plugin', () => {
       savedObjectsManagement: savedObjectManagementSetupMock,
       management: managementPluginMock.createSetupContract(),
     });
-    expect(setupMock.application.register).toBeCalledTimes(6);
+    expect(setupMock.application.register).toBeCalledTimes(registrationAppNumber);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(savedObjectManagementSetupMock.columns.register).toBeCalledTimes(1);
   });
@@ -53,7 +56,7 @@ describe('Workspace plugin', () => {
     workspacePlugin.start(coreStart, mockDependencies);
     coreStart.workspaces.currentWorkspaceId$.next('foo');
     expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
-    expect(setupMock.application.register).toBeCalledTimes(6);
+    expect(setupMock.application.register).toBeCalledTimes(registrationAppNumber);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(0);
   });
@@ -90,7 +93,7 @@ describe('Workspace plugin', () => {
     await workspacePlugin.setup(setupMock, {
       management: managementPluginMock.createSetupContract(),
     });
-    expect(setupMock.application.register).toBeCalledTimes(6);
+    expect(setupMock.application.register).toBeCalledTimes(registrationAppNumber);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
     expect(setupMock.getStartServices).toBeCalledTimes(2);
