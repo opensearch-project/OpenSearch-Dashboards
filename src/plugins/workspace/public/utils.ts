@@ -264,8 +264,9 @@ const compareFeatures = (
   features1: WorkspaceUseCaseFeature[],
   features2: WorkspaceUseCaseFeature[]
 ) => {
-  const features1Set = new Set(features1.map(({ id, title }) => `${id}-${title}`));
-  const features2Set = new Set(features2.map(({ id, title }) => `${id}-${title}`));
+  const featureSerialize = ({ id, title }: WorkspaceUseCaseFeature) => `${id}-${title}`;
+  const features1Set = new Set(features1.map(featureSerialize));
+  const features2Set = new Set(features2.map(featureSerialize));
   if (features1Set.size !== features2Set.size) {
     return false;
   }
