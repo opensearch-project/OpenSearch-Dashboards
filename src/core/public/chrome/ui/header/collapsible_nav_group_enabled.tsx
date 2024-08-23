@@ -130,8 +130,10 @@ export function CollapsibleNavGroupEnabled({
       const result: ChromeNavLink[] = [];
       Object.values(navGroupsMap)
         .sort(sortBy('order'))
-        .filter((navGroup) => navGroup.type === NavGroupType.SYSTEM)
         .forEach((navGroup) => {
+          if (navGroup.type !== NavGroupType.SYSTEM) {
+            return;
+          }
           const visibleNavLinksWithinNavGroup = fulfillRegistrationLinksToChromeNavLinks(
             navGroup.navLinks,
             navLinks
@@ -159,14 +161,15 @@ export function CollapsibleNavGroupEnabled({
       const linkIdsWithUseGroupInfo = Object.values(navGroupsMap).reduce((total, navGroup) => {
         return [...total, ...navGroup.navLinks.map((navLink) => navLink.id)];
       }, [] as string[]);
-      navLinks
-        .filter((link) => !linkIdsWithUseGroupInfo.includes(link.id))
-        .forEach((navLink) => {
-          navLinksResult.push({
-            ...navLink,
-            category: customCategory,
-          });
+      navLinks.forEach((navLink) => {
+        if (linkIdsWithUseGroupInfo.includes(navLink.id)) {
+          return;
+        }
+        navLinksResult.push({
+          ...navLink,
+          category: customCategory,
         });
+      });
 
       // Append all the links registered to all use case
       navGroupsMap[ALL_USE_CASE_ID]?.navLinks.forEach((navLink) => {
@@ -174,54 +177,60 @@ export function CollapsibleNavGroupEnabled({
       });
 
       // Append use case section into left navigation
-      Object.values(navGroupsMap)
-        .filter((group) => !group.type)
-        .forEach((group) => {
-          const categoryInfo = {
-            id: group.id,
-            label: group.title,
-            order: group.order,
-          };
+      Object.values(navGroupsMap).forEach((group) => {
+        if (group.type) {
+          return;
+        }
+        const categoryInfo = {
+          id: group.id,
+          label: group.title,
+          order: group.order,
+        };
 
-          const fulfilledLinksOfNavGroup = fulfillRegistrationLinksToChromeNavLinks(
-            group.navLinks,
-            navLinks
-          );
+        const fulfilledLinksOfNavGroup = fulfillRegistrationLinksToChromeNavLinks(
+          group.navLinks,
+          navLinks
+        );
 
-          const linksForAllUseCaseWithinNavGroup = fulfilledLinksOfNavGroup
-            .filter((navLink) => navLink.showInAllNavGroup)
-            .map((navLink) => ({
-              ...navLink,
-              category: categoryInfo,
-            }));
+        const linksForAllUseCaseWithinNavGroup: ChromeRegistrationNavLink[] = [];
 
-          navLinksResult.push(...linksForAllUseCaseWithinNavGroup);
-
-          if (linksForAllUseCaseWithinNavGroup.length) {
-            navLinksResult.push({
-              id: fulfilledLinksOfNavGroup[0].id,
-              title: titleForSeeAll,
-              order: Number.MAX_SAFE_INTEGER,
-              category: categoryInfo,
-            });
-          } else {
-            /**
-             * Find if there are any links inside a use case but without a `see all` entry.
-             * If so, append these features into custom category as a fallback
-             */
-            fulfillRegistrationLinksToChromeNavLinks(group.navLinks, navLinks)
-              // Filter out links that already exists in all use case
-              .filter(
-                (navLink) => !navLinksResult.find((navLinkInAll) => navLinkInAll.id === navLink.id)
-              )
-              .forEach((navLink) => {
-                navLinksResult.push({
-                  ...navLink,
-                  category: customCategory,
-                });
-              });
+        fulfilledLinksOfNavGroup.forEach((navLink) => {
+          if (!navLink.showInAllNavGroup) {
+            return;
           }
+
+          linksForAllUseCaseWithinNavGroup.push({
+            ...navLink,
+            category: categoryInfo,
+          });
         });
+
+        navLinksResult.push(...linksForAllUseCaseWithinNavGroup);
+
+        if (linksForAllUseCaseWithinNavGroup.length) {
+          navLinksResult.push({
+            id: fulfilledLinksOfNavGroup[0].id,
+            title: titleForSeeAll,
+            order: Number.MAX_SAFE_INTEGER,
+            category: categoryInfo,
+          });
+        } else {
+          /**
+           * Find if there are any links inside a use case but without a `see all` entry.
+           * If so, append these features into custom category as a fallback
+           */
+          fulfillRegistrationLinksToChromeNavLinks(group.navLinks, navLinks).forEach((navLink) => {
+            // Links that already exists in all use case do not need to reappend
+            if (navLinksResult.find((navLinkInAll) => navLinkInAll.id === navLink.id)) {
+              return;
+            }
+            navLinksResult.push({
+              ...navLink,
+              category: customCategory,
+            });
+          });
+        }
+      });
     }
 
     if (shouldAppendManageCategory) {

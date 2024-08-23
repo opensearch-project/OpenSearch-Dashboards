@@ -261,26 +261,29 @@ export class ChromeNavGroupService {
     ]).subscribe(([appId, navGroupMap]) => {
       if (appId && navGroupMap) {
         const appIdNavGroupMap = new Map<string, Set<string>>();
-        let visibleNavGroups: NavGroupItemInMap[] = [];
         const visibleUseCases = getVisibleUseCases(navGroupMap);
-        if (visibleUseCases.length === 1 && visibleUseCases[0].id === ALL_USE_CASE_ID) {
-          // If the only visible use case is all use case
-          // All the other nav groups will be visible because all use case can visit all of the nav groups.
-          visibleNavGroups = Object.values(navGroupMap);
-        } else {
-          // Nav group of Hidden status should be filtered out when counting navGroups the currentApp belongs to
-          visibleNavGroups = Object.values(navGroupMap).filter(
-            (navGroup) => navGroup.status !== NavGroupStatus.Hidden
-          );
-        }
-        visibleNavGroups.forEach((navGroup) => {
+        const mapAppIdToNavGroup = (navGroup: NavGroupItemInMap) => {
           navGroup.navLinks.forEach((navLink) => {
             const navLinkId = navLink.id;
             const navGroupSet = appIdNavGroupMap.get(navLinkId) || new Set();
             navGroupSet.add(navGroup.id);
             appIdNavGroupMap.set(navLinkId, navGroupSet);
           });
-        });
+        };
+        if (visibleUseCases.length === 1 && visibleUseCases[0].id === ALL_USE_CASE_ID) {
+          // If the only visible use case is all use case
+          // All the other nav groups will be visible because all use case can visit all of the nav groups.
+          Object.values(navGroupMap).forEach((navGroup) => mapAppIdToNavGroup(navGroup));
+        } else {
+          // Nav group of Hidden status should be filtered out when counting navGroups the currentApp belongs to
+          Object.values(navGroupMap).forEach((navGroup) => {
+            if (navGroup.status === NavGroupStatus.Hidden) {
+              return;
+            }
+
+            mapAppIdToNavGroup(navGroup);
+          });
+        }
 
         const navGroups = appIdNavGroupMap.get(appId);
         if (navGroups && navGroups.size === 1) {

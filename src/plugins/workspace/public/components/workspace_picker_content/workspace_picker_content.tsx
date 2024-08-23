@@ -67,7 +67,6 @@ export const WorkspacePickerContent = ({
       return (
         <EuiListGroupItem
           key={workspace.id}
-          style={{ paddingLeft: '0' }}
           className="eui-textTruncate"
           size="s"
           data-test-subj={`workspace-menu-item-${itemType}-${workspace.id}`}
@@ -89,14 +88,16 @@ export const WorkspacePickerContent = ({
       );
     });
     return (
-      <>
-        <EuiTitle size="xxs">
-          <h4>{itemType === 'all' ? allWorkspacesTitle : recentWorkspacesTitle}</h4>
-        </EuiTitle>
-        <EuiListGroup showToolTips flush gutterSize="none" wrapText maxWidth={240}>
-          {listItems}
-        </EuiListGroup>
-      </>
+      <EuiListGroup showToolTips flush gutterSize="none" wrapText maxWidth={240}>
+        <EuiListGroupItem
+          label={
+            <EuiTitle size="xxs">
+              <h4>{itemType === 'all' ? allWorkspacesTitle : recentWorkspacesTitle}</h4>
+            </EuiTitle>
+          }
+        />
+        {listItems}
+      </EuiListGroup>
     );
   };
 
