@@ -17,7 +17,6 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiListGroup,
-  EuiButtonIcon,
   EuiButtonEmpty,
   EuiSmallButton,
   EuiSmallButtonIcon,
@@ -111,7 +110,11 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
   };
 
   const currentWorkspaceButton = currentWorkspace ? (
-    <EuiSmallButtonEmpty onClick={openPopover} data-test-subj="current-workspace-button">
+    <EuiSmallButtonEmpty
+      onClick={openPopover}
+      data-test-subj="current-workspace-button"
+      flush="both"
+    >
       <EuiAvatar
         size="s"
         type="space"

@@ -113,19 +113,7 @@ export class WorkspacePlugin
       this.registeredUseCases$,
     ]).subscribe(([currentWorkspace, registeredUseCases]) => {
       if (currentWorkspace) {
-        const isAllUseCase =
-          getFirstUseCaseOfFeatureConfigs(currentWorkspace.features || []) === ALL_USE_CASE_ID;
         this.appUpdater$.next((app) => {
-          // When in all workspace, the home should be replaced by workspace detail page
-          if (app.id === 'home' && isAllUseCase) {
-            return { navLinkStatus: AppNavLinkStatus.hidden };
-          }
-
-          // show the overview page in all use case
-          if (app.id === WORKSPACE_DETAIL_APP_ID && isAllUseCase) {
-            return { navLinkStatus: AppNavLinkStatus.visible };
-          }
-
           if (isAppAccessibleInWorkspace(app, currentWorkspace, registeredUseCases)) {
             return;
           }
@@ -355,7 +343,6 @@ export class WorkspacePlugin
       title: i18n.translate('workspace.settings.workspaceDetail', {
         defaultMessage: 'Workspace Detail',
       }),
-      navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderDetailApp } = await import('./application');
         return mountWorkspaceApp(params, renderDetailApp);
@@ -424,16 +411,6 @@ export class WorkspacePlugin
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: WORKSPACE_DETAIL_APP_ID,
-        order: 100,
-        title: i18n.translate('workspace.nav.workspaceDetail.title', {
-          defaultMessage: 'Overview',
-        }),
-      },
-    ]);
-
     /**
      * register workspace column into saved objects table
      */
@@ -445,9 +422,9 @@ export class WorkspacePlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
       {
         id: WORKSPACE_LIST_APP_ID,
-        order: 150,
-        title: i18n.translate('workspace.settings.workspaceSettings', {
-          defaultMessage: 'Workspace settings',
+        order: 350,
+        title: i18n.translate('workspace.settings.workspaces', {
+          defaultMessage: 'Workspaces',
         }),
       },
     ]);

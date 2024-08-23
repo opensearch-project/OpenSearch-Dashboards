@@ -173,14 +173,14 @@ describe('Workspace plugin', () => {
       expect.arrayContaining([
         {
           id: 'workspace_list',
-          order: 150,
-          title: 'Workspace settings',
+          order: 350,
+          title: 'Workspaces',
         },
       ])
     );
   });
 
-  it('#setup should register workspace detail with a visible application and register to all nav group', async () => {
+  it('#setup should register workspace detail', async () => {
     const setupMock = coreMock.createSetup();
     setupMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     const workspacePlugin = new WorkspacePlugin();
@@ -189,19 +189,7 @@ describe('Workspace plugin', () => {
     expect(setupMock.application.register).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'workspace_detail',
-        navLinkStatus: AppNavLinkStatus.hidden,
       })
-    );
-
-    expect(setupMock.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
-      DEFAULT_NAV_GROUPS.all,
-      expect.arrayContaining([
-        {
-          id: 'workspace_detail',
-          title: 'Overview',
-          order: 100,
-        },
-      ])
     );
   });
 
