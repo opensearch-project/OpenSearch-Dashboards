@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './workspace_detail_form.scss';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiSpacer,
@@ -23,7 +22,7 @@ import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_
 import { DetailTab, usersAndPermissionsTitle } from './constants';
 import { WorkspaceFormErrorCallout } from './workspace_form_error_callout';
 import { useWorkspaceFormContext } from './workspace_form_context';
-import { WorkspaceDetailFormDetailsProps } from './workspace_detail_form_details';
+import { WorkspaceDetailFormDetails } from './workspace_detail_form_details';
 
 interface FormGroupProps {
   title: React.ReactNode;
@@ -34,7 +33,7 @@ interface FormGroupProps {
 const FormGroup = ({ title, children, describe }: FormGroupProps) => (
   <>
     <EuiFlexGroup gutterSize="xl">
-      <EuiFlexItem grow={false} className="workspace-detail-form-group">
+      <EuiFlexItem grow={false} style={{ width: '15%' }}>
         <EuiTitle size="xs">
           <h3>{title}</h3>
         </EuiTitle>
@@ -132,7 +131,7 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
         </EuiFlexGroup>
         <EuiHorizontalRule />
         {detailTab === DetailTab.Details && (
-          <WorkspaceDetailFormDetailsProps availableUseCases={availableUseCases} />
+          <WorkspaceDetailFormDetails availableUseCases={availableUseCases} />
         )}
         {detailTab === DetailTab.Collaborators && (
           <FormGroup title={usersAndPermissionsTitle}>

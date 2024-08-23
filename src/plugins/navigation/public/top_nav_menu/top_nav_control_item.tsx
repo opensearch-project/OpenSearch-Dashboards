@@ -60,6 +60,7 @@ export function TopNavControlItem(props: TopNavControlData) {
         {props.description}
         {links?.map((linkProps) => (
           <>
+            {' '}
             {/* @ts-ignore using an undefined property to prevent abuse */}
             <TopNavControlItem {...linkProps} sizeOverride="xs" />
           </>
@@ -127,6 +128,7 @@ export function TopNavControlItem(props: TopNavControlData) {
           iconGap={iconGap}
           iconSize={props.iconSize}
           color={props.color}
+          flush={props.flush}
           className={props.className}
           href={props.href}
           target={props.target}

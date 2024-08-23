@@ -22,6 +22,9 @@ import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.moc
 import { WorkspacePlugin, WorkspacePluginStartDeps } from './plugin';
 import { contentManagementPluginMocks } from '../../content_management/public';
 
+// Expect 6 app registrations: create, fatal error, detail, initial, navigation, and list apps.
+const registrationAppNumber = 6;
+
 describe('Workspace plugin', () => {
   const mockDependencies: WorkspacePluginStartDeps = {
     contentManagement: contentManagementPluginMocks.createStartContract(),
@@ -41,7 +44,7 @@ describe('Workspace plugin', () => {
       savedObjectsManagement: savedObjectManagementSetupMock,
       management: managementPluginMock.createSetupContract(),
     });
-    expect(setupMock.application.register).toBeCalledTimes(5);
+    expect(setupMock.application.register).toBeCalledTimes(registrationAppNumber);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(savedObjectManagementSetupMock.columns.register).toBeCalledTimes(1);
   });
@@ -54,7 +57,7 @@ describe('Workspace plugin', () => {
     workspacePlugin.start(coreStart, mockDependencies);
     coreStart.workspaces.currentWorkspaceId$.next('foo');
     expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
-    expect(setupMock.application.register).toBeCalledTimes(5);
+    expect(setupMock.application.register).toBeCalledTimes(registrationAppNumber);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(0);
   });
@@ -91,7 +94,7 @@ describe('Workspace plugin', () => {
     await workspacePlugin.setup(setupMock, {
       management: managementPluginMock.createSetupContract(),
     });
-    expect(setupMock.application.register).toBeCalledTimes(5);
+    expect(setupMock.application.register).toBeCalledTimes(registrationAppNumber);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
     expect(setupMock.getStartServices).toBeCalledTimes(2);
@@ -229,6 +232,19 @@ describe('Workspace plugin', () => {
     const startMock = coreMock.createStart();
     await workspacePlugin.start(startMock, mockDependencies);
     expect(collapsibleNavHeaderImplementation()).not.toEqual(null);
+  });
+
+  it('#setup should register workspace navigation with a visible application', async () => {
+    const setupMock = coreMock.createSetup();
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock, {});
+
+    expect(setupMock.application.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'workspace_navigation',
+        navLinkStatus: AppNavLinkStatus.hidden,
+      })
+    );
   });
 
   it('#start add workspace detail page to breadcrumbs when start', async () => {
