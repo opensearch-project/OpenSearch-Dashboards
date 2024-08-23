@@ -7,7 +7,10 @@ import { CoreStart } from 'opensearch-dashboards/public';
 import React from 'react';
 import { EuiI18n } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { ContentManagementPluginStart } from '../../../../../content_management/public';
+import {
+  ContentManagementPluginStart,
+  ESSENTIAL_OVERVIEW_CONTENT_AREAS,
+} from '../../../../../content_management/public';
 import { IMPORT_SAMPLE_DATA_APP_ID } from '../../../../common/constants';
 
 export const registerSampleDataCard = (
@@ -16,13 +19,13 @@ export const registerSampleDataCard = (
 ) => {
   contentManagement.registerContentProvider({
     id: `get_start_sample_data`,
-    getTargetArea: () => ['analytics_overview/get_started'],
+    getTargetArea: () => [ESSENTIAL_OVERVIEW_CONTENT_AREAS.GET_STARTED],
     getContent: () => ({
       id: 'sample_data',
       kind: 'card',
       order: 0,
       description: i18n.translate('home.sampleData.card.description', {
-        defaultMessage: 'Explore sample data before adding your own.',
+        defaultMessage: 'You can install sample data to experiment with OpenSearch Dashboards.',
       }),
       title: i18n.translate('home.sampleData.card.title', {
         defaultMessage: 'Try openSearch',

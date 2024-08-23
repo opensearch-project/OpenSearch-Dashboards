@@ -31,8 +31,6 @@ import {
   WORKSPACE_LIST_APP_ID,
   WORKSPACE_USE_CASES,
   WORKSPACE_INITIAL_APP_ID,
-  ESSENTIAL_OVERVIEW_PAGE_ID,
-  ANALYTICS_ALL_OVERVIEW_PAGE_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services, WorkspaceUseCase } from './types';
@@ -40,8 +38,10 @@ import { WorkspaceClient } from './workspace_client';
 import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
 import { ManagementSetup } from '../../../plugins/management/public';
 import {
+  ANALYTICS_ALL_OVERVIEW_PAGE_ID,
   ContentManagementPluginSetup,
   ContentManagementPluginStart,
+  ESSENTIAL_OVERVIEW_PAGE_ID,
 } from '../../../plugins/content_management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
@@ -59,7 +59,7 @@ import { UseCaseService } from './services/use_case_service';
 import { WorkspaceListCard } from './components/service_card';
 import { UseCaseFooter } from './components/home_get_start_card';
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
-import { HOME_CONTENT_AREAS } from '../../../plugins/home/public';
+import { HOME_CONTENT_AREAS } from '../../../plugins/content_management/public';
 import {
   registerEssentialOverviewContent,
   setEssentialOverviewSection,

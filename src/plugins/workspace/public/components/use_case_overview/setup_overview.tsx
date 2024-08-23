@@ -10,14 +10,12 @@ import { first } from 'rxjs/operators';
 import {
   ContentManagementPluginSetup,
   ContentManagementPluginStart,
-} from '../../../../content_management/public';
-import {
   ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS,
   ANALYTICS_ALL_OVERVIEW_PAGE_ID,
   ESSENTIAL_OVERVIEW_CONTENT_AREAS,
   ESSENTIAL_OVERVIEW_PAGE_ID,
   SECTIONS,
-} from '../../../common/constants';
+} from '../../../../content_management/public';
 import { getStartedCards } from './get_started_cards';
 import {
   HomeListCard,

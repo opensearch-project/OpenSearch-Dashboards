@@ -8,8 +8,10 @@ import { CoreStart } from 'opensearch-dashboards/public';
 import {
   ContentManagementPluginSetup,
   ContentManagementPluginStart,
+  HOME_PAGE_ID,
+  SECTIONS,
+  HOME_CONTENT_AREAS,
 } from '../../../../plugins/content_management/public';
-import { HOME_PAGE_ID, SECTIONS, HOME_CONTENT_AREAS } from '../../common/constants';
 import {
   WHATS_NEW_CONFIG,
   LEARN_OPENSEARCH_CONFIG,

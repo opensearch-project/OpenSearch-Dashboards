@@ -16,5 +16,5 @@
     "contentManagement"
   ],
   "extraPublicDirs": ["public/lib"],
-  "requiredBundles": ["opensearchDashboardsReact", "home"]
+  "requiredBundles": ["opensearchDashboardsReact", "home", "contentManagement"]
 }

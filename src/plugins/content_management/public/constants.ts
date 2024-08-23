@@ -1,0 +1,36 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+// central place for all content ids rendered by content management
+
+// page ids
+export const ESSENTIAL_OVERVIEW_PAGE_ID = 'analytics_overview';
+export const ANALYTICS_ALL_OVERVIEW_PAGE_ID = 'all_overview';
+export const HOME_PAGE_ID = 'osd_homepage';
+
+// section ids
+export enum SECTIONS {
+  GET_STARTED = `get_started`,
+  SERVICE_CARDS = `service_cards`,
+  RECENTLY_VIEWED = `recently_viewed`,
+}
+
+export enum HOME_CONTENT_AREAS {
+  GET_STARTED = `${HOME_PAGE_ID}/${SECTIONS.GET_STARTED}`,
+  SERVICE_CARDS = `${HOME_PAGE_ID}/${SECTIONS.SERVICE_CARDS}`,
+  RECENTLY_VIEWED = `${HOME_PAGE_ID}/${SECTIONS.RECENTLY_VIEWED}`,
+}
+
+export enum ESSENTIAL_OVERVIEW_CONTENT_AREAS {
+  GET_STARTED = `${ESSENTIAL_OVERVIEW_PAGE_ID}/${SECTIONS.GET_STARTED}`,
+  SERVICE_CARDS = `${ESSENTIAL_OVERVIEW_PAGE_ID}/${SECTIONS.SERVICE_CARDS}`,
+  RECENTLY_VIEWED = `${ESSENTIAL_OVERVIEW_PAGE_ID}/${SECTIONS.RECENTLY_VIEWED}`,
+}
+
+export enum ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS {
+  GET_STARTED = `${ANALYTICS_ALL_OVERVIEW_PAGE_ID}/${SECTIONS.GET_STARTED}`,
+  SERVICE_CARDS = `${ANALYTICS_ALL_OVERVIEW_PAGE_ID}/${SECTIONS.SERVICE_CARDS}`,
+  RECENTLY_VIEWED = `${ANALYTICS_ALL_OVERVIEW_PAGE_ID}/${SECTIONS.RECENTLY_VIEWED}`,
+}

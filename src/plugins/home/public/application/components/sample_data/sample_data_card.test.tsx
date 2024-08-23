@@ -33,7 +33,7 @@ describe('Sample data card', () => {
             "onClick": [Function],
           },
         },
-        "description": "Explore sample data before adding your own.",
+        "description": "You can install sample data to experiment with OpenSearch Dashboards.",
         "id": "sample_data",
         "kind": "card",
         "order": 0,

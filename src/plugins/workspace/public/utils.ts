@@ -24,15 +24,14 @@ import {
   WorkspaceObject,
   WorkspaceAvailability,
 } from '../../../core/public';
-import {
-  ANALYTICS_ALL_OVERVIEW_PAGE_ID,
-  DEFAULT_SELECTED_FEATURES_IDS,
-  ESSENTIAL_OVERVIEW_PAGE_ID,
-  WORKSPACE_DETAIL_APP_ID,
-} from '../common/constants';
+import { DEFAULT_SELECTED_FEATURES_IDS, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
 import { WorkspaceUseCase } from './types';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
 import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
+import {
+  ANALYTICS_ALL_OVERVIEW_PAGE_ID,
+  ESSENTIAL_OVERVIEW_PAGE_ID,
+} from '../../../plugins/content_management/public';
 
 export const USE_CASE_PREFIX = 'use-case-';
 
