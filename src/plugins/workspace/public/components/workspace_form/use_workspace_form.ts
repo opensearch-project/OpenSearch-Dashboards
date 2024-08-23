@@ -136,7 +136,7 @@ export const useWorkspaceForm = ({
   const handleResetForm = useCallback(() => {
     const resetValues = defaultValuesRef.current;
     setName(resetValues?.name ?? '');
-    setDescription(resetValues?.description);
+    setDescription(resetValues?.description ?? '');
     setColor(resetValues?.color);
     setFeatureConfigs(appendDefaultFeatureIds(resetValues?.features ?? []));
     setPermissionSettings(initialPermissionSettingsRef.current);
