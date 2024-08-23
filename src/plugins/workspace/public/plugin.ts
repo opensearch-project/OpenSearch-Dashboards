@@ -558,14 +558,12 @@ export class WorkspacePlugin
     core: CoreStart,
     contentManagement: ContentManagementPluginStart
   ) {
-    const useCases = [
-      WORKSPACE_USE_CASES.observability,
-      WORKSPACE_USE_CASES['security-analytics'],
-      WORKSPACE_USE_CASES.search,
-      WORKSPACE_USE_CASES.essentials,
-    ];
+    const registeredUseCases = this.registeredUseCases$.getValue();
 
-    useCases.forEach((useCase, index) => {
+    registeredUseCases.forEach((useCase, index) => {
+      if (useCase.systematic) {
+        return;
+      }
       contentManagement.registerContentProvider({
         id: `home_get_start_${useCase.id}`,
         getTargetArea: () => [HOME_CONTENT_AREAS.GET_STARTED],
@@ -575,7 +573,8 @@ export class WorkspacePlugin
           order: (index + 1) * 1000,
           description: useCase.description,
           title: useCase.title,
-          getIcon: () => React.createElement(EuiIcon, { size: 'xl', type: 'logoOpenSearch' }),
+          getIcon: () =>
+            React.createElement(EuiIcon, { size: 'xl', type: useCase.icon || 'logoOpenSearch' }),
           getFooter: () =>
             React.createElement(UseCaseFooter, {
               useCaseId: useCase.id,
