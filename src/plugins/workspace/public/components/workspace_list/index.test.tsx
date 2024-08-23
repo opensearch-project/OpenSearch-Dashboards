@@ -36,6 +36,20 @@ jest.mock('../delete_workspace_modal', () => ({
   ),
 }));
 
+jest.mock('../../utils', () => {
+  const original = jest.requireActual('../../utils');
+  return {
+    ...original,
+    getDataSourcesList: jest.fn().mockResolvedValue(() => [
+      {
+        id: 'id1',
+        title: 'title1',
+        workspaces: 'id1',
+      },
+    ]),
+  };
+});
+
 function getWrapWorkspaceListInContext(
   workspaceList = [
     {
