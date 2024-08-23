@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import React, { useMemo } from 'react';
 import { useObservable } from 'react-use';
-import { EuiTitle, EuiAvatar, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
+import { EuiTitle, EuiListGroup, EuiListGroupItem, EuiIcon } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { MAX_WORKSPACE_PICKER_NUM } from '../../../common/constants';
 import { CoreStart, WorkspaceObject } from '../../../../../core/public';
@@ -71,12 +71,9 @@ export const WorkspacePickerContent = ({
           size="s"
           data-test-subj={`workspace-menu-item-${itemType}-${workspace.id}`}
           icon={
-            <EuiAvatar
-              size="s"
-              type="space"
-              name={workspace.name}
+            <EuiIcon
+              type={useCase?.icon || 'wsSelector'}
               color={getValidWorkspaceColor(workspace.color)}
-              initialsLength={2}
             />
           }
           label={workspace.name}

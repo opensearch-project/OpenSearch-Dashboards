@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Logos, WorkspacesStart } from 'opensearch-dashboards/public';
 import {
@@ -12,19 +12,20 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { InternalApplicationStart } from 'src/core/public/application';
-import { i18n } from '@osd/i18n';
 import { createEuiListItem } from './nav_link';
 import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
 import { ChromeNavLink } from '../../nav_links';
 import { ALL_USE_CASE_ID } from '../../../../../core/utils';
+import { fulfillRegistrationLinksToChromeNavLinks } from '../../utils';
 
 export interface CollapsibleNavTopProps {
   homeLink?: ChromeNavLink;
-  firstVisibleNavLinkOfAllUseCase?: ChromeNavLink;
+  navGroupsMap: Record<string, NavGroupItemInMap>;
   currentNavGroup?: NavGroupItemInMap;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   logos: Logos;
@@ -33,6 +34,7 @@ export interface CollapsibleNavTopProps {
   visibleUseCases: NavGroupItemInMap[];
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
+  navLinks: ChromeNavLink[];
 }
 
 export const CollapsibleNavTop = ({
@@ -45,9 +47,19 @@ export const CollapsibleNavTop = ({
   currentWorkspace$,
   setCurrentNavGroup,
   homeLink,
-  firstVisibleNavLinkOfAllUseCase,
+  navGroupsMap,
+  navLinks,
 }: CollapsibleNavTopProps) => {
   const currentWorkspace = useObservable(currentWorkspace$);
+
+  const firstVisibleNavLinkFirstVisibleUseCase = useMemo(
+    () =>
+      fulfillRegistrationLinksToChromeNavLinks(
+        navGroupsMap[visibleUseCases[0]?.id]?.navLinks || [],
+        navLinks
+      )[0],
+    [navGroupsMap, navLinks, visibleUseCases]
+  );
 
   /**
    * We can ensure that left nav is inside second level once all the following conditions are met:
@@ -59,6 +71,12 @@ export const CollapsibleNavTop = ({
     !!currentWorkspace &&
     visibleUseCases[0].id === ALL_USE_CASE_ID &&
     currentNavGroup?.id !== ALL_USE_CASE_ID;
+
+  const homeIcon = logos.Mark.url;
+  const icon =
+    !!currentWorkspace && visibleUseCases.length === 1
+      ? visibleUseCases[0].icon || homeIcon
+      : homeIcon;
 
   const shouldShowBackButton = !shouldShrinkNavigation && isInsideSecondLevelOfAllWorkspace;
   const shouldShowHomeLink = !shouldShrinkNavigation && !shouldShowBackButton;
@@ -74,39 +92,42 @@ export const CollapsibleNavTop = ({
       return {
         'data-test-subj': propsForHomeIcon['data-test-subj'],
         onClick: propsForHomeIcon.onClick,
-        href: propsForHomeIcon.href,
       };
     }
 
     return {};
   }, [homeLink, navigateToApp]);
 
+  const onIconClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      if (shouldShowBackButton || visibleUseCases.length === 1) {
+        if (firstVisibleNavLinkFirstVisibleUseCase) {
+          navigateToApp(firstVisibleNavLinkFirstVisibleUseCase.id);
+        }
+
+        setCurrentNavGroup(visibleUseCases[0].id);
+      } else if (shouldShowHomeLink) {
+        homeLinkProps.onClick?.(e);
+      }
+    },
+    [
+      homeLinkProps,
+      shouldShowBackButton,
+      firstVisibleNavLinkFirstVisibleUseCase,
+      navigateToApp,
+      setCurrentNavGroup,
+      visibleUseCases,
+      shouldShowHomeLink,
+    ]
+  );
+
   return (
-    <div>
+    <EuiPanel hasBorder={false} hasShadow={false}>
       <EuiFlexGroup responsive={false} alignItems="center" justifyContent="spaceBetween">
-        {shouldShowHomeLink ? (
+        {!shouldShrinkNavigation ? (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="l" {...homeLinkProps}>
-              <EuiIcon type={logos.Mark.url} size="l" />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        ) : null}
-        {shouldShowBackButton ? (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="l"
-              onClick={() => {
-                if (firstVisibleNavLinkOfAllUseCase) {
-                  navigateToApp(firstVisibleNavLinkOfAllUseCase.id);
-                }
-                setCurrentNavGroup(ALL_USE_CASE_ID);
-              }}
-              data-test-subj="collapsibleNavBackButton"
-            >
-              <EuiIcon type="arrowLeft" />
-              {i18n.translate('core.ui.primaryNav.backButtonLabel', {
-                defaultMessage: 'Back',
-              })}
+            <EuiButtonEmpty flush="both" color="text" {...homeLinkProps} onClick={onIconClick}>
+              <EuiIcon type={icon} size="l" />
             </EuiButtonEmpty>
           </EuiFlexItem>
         ) : null}
@@ -125,12 +146,10 @@ export const CollapsibleNavTop = ({
         <>
           <EuiSpacer />
           <EuiText>
-            <div className="nav-link-item" style={{ fontWeight: 'normal' }}>
-              {currentNavGroup?.title}
-            </div>
+            <div style={{ fontWeight: 'normal' }}>{currentNavGroup?.title}</div>
           </EuiText>
         </>
       )}
-    </div>
+    </EuiPanel>
   );
 };

@@ -14,9 +14,9 @@ import {
   EuiToolTip,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiButtonIcon,
   EuiSmallButtonEmpty,
   EuiSmallButton,
+  EuiSmallButtonIcon,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
@@ -79,23 +79,9 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
     setPopover(false);
   };
 
-  const currentWorkspaceButton = currentWorkspace ? (
-    <EuiSmallButtonEmpty
-      onClick={openPopover}
-      data-test-subj="current-workspace-button"
-      flush="both"
-    >
-      <EuiAvatar
-        size="s"
-        type="space"
-        name={currentWorkspace.name}
-        color={getValidWorkspaceColor(currentWorkspace.color)}
-        initialsLength={2}
-      />
-    </EuiSmallButtonEmpty>
-  ) : (
-    <EuiButtonIcon
-      iconType="spacesApp"
+  const currentWorkspaceButton = (
+    <EuiSmallButtonIcon
+      iconType="wsSelector"
       onClick={openPopover}
       aria-label="workspace-select-button"
       data-test-subj="workspace-select-button"
