@@ -70,7 +70,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
     <EuiFlexItem>
       <EuiFlexGroup direction={layout === 'horizontal' ? 'row' : 'column'}>
         <EuiFlexItem>
-          <EuiText>
+          <EuiText size="s">
             <h3>Query permissions</h3>
           </EuiText>
           <EuiText size="s">

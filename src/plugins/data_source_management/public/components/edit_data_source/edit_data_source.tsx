@@ -47,6 +47,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     http,
     notifications: { toasts },
     application,
+    navigation,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
   const dataSourceID: string = props.match.params.id;
 
@@ -54,6 +55,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   const [dataSource, setDataSource] = useState<DataSourceAttributes>(defaultDataSource);
   const [existingDatasourceNamesList, setExistingDatasourceNamesList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const useNewUX = uiSettings.get('home:useNewHomePage');
 
   /* Fetch data source by id*/
   useEffectOnce(() => {
@@ -155,6 +157,9 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
       <>
         {dataSource && dataSource.endpoint ? (
           <EditDataSourceForm
+            navigation={navigation}
+            application={application}
+            useNewUX={useNewUX}
             existingDataSource={dataSource}
             existingDatasourceNamesList={existingDatasourceNamesList}
             isDefault={isDefaultDataSource}
