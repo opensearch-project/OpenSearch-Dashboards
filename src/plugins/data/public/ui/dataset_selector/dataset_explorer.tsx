@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { DATA_STRUCTURE_META_TYPES, Dataset, DataStructure, DEFAULT_DATA } from '../../../common';
+import { DATA_STRUCTURE_META_TYPES, DataStructure, DEFAULT_DATA } from '../../../common';
 import { DatasetContract } from '../../query';
 
 export const DatasetExplorer = ({
@@ -35,6 +35,7 @@ export const DatasetExplorer = ({
   onCancel: () => void;
 }) => {
   const [loading, setLoading] = useState<boolean>(false);
+  const [categories, setCategories] = useState<DataStructure[]>([]);
   const [currentDataStructure, setCurrentDataStructure] = useState<DataStructure>(
     DEFAULT_DATA.STRUCTURES.ROOT
   );
@@ -42,24 +43,34 @@ export const DatasetExplorer = ({
 
   useEffect(() => {
     const loadCategories = async () => {
-      if (!datasetManager.isLeafDataStructure(currentDataStructure)) {
-        setLoading(true);
-        try {
-          const children = await datasetManager.fetchOptions(savedObjects, currentDataStructure);
-          setCurrentDataStructure({ ...currentDataStructure, children });
-        } finally {
-          setLoading(false);
-        }
+      try {
+        const fetchedCategories = await datasetManager.fetchCategoryDataStructures(
+          savedObjects,
+          DEFAULT_DATA.STRUCTURES.ROOT
+        );
+        setCategories(fetchedCategories);
+        setCurrentDataStructure({ ...DEFAULT_DATA.STRUCTURES.ROOT, children: fetchedCategories });
+      } finally {
+        setLoading(false);
       }
     };
 
     loadCategories();
-  }, [currentDataStructure, datasetManager, savedObjects]);
+  }, [datasetManager, savedObjects]);
 
   const selectDataStructure = async (item: DataStructure) => {
-    if (!datasetManager.isLeafDataStructure(item)) {
-      setCurrentDataStructure(item);
-      setDataStructures([...dataStructures, currentDataStructure]);
+    if (datasetManager.isLeafDataStructure(item)) {
+      const dataset = datasetManager.toDataset(item);
+      onNext(dataset);
+    } else {
+      setLoading(true);
+      try {
+        const children = await datasetManager.fetchOptions(savedObjects, item);
+        setCurrentDataStructure({ ...item, children });
+        setDataStructures([...dataStructures, item]);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -144,7 +155,7 @@ export const DatasetExplorer = ({
           Back
         </EuiButtonEmpty>
         <EuiButton
-          disabled={!isLeaf}
+          disabled={!datasetManager.isLeafDataStructure(currentDataStructure)}
           onClick={() => onNext(currentDataStructure)}
           iconType="arrowRight"
           iconSide="right"

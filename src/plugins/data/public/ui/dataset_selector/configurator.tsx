@@ -32,7 +32,7 @@ export const Configurator = ({
 }: {
   savedObjects: SavedObjectsClientContract;
   currentDataStructure: DataStructure;
-  onConfirm: (dataStructure: DataStructure) => void;
+  onConfirm: (dataset: Dataset) => void;
   onCancel: () => void;
   onPrevious: () => void;
 }) => {
