@@ -62,6 +62,7 @@
   .bottom-container {
     padding: 0 $euiSize;
     display: flex;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
 
     &.bottom-container-collapsed {
       flex-direction: column;
