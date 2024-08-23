@@ -264,10 +264,12 @@ const compareFeatures = (
   features1: WorkspaceUseCaseFeature[],
   features2: WorkspaceUseCaseFeature[]
 ) => {
-  const featureSerialize = ({ id, title }: WorkspaceUseCaseFeature) => `${id}-${title}`;
-  return (
-    features1.map(featureSerialize).sort().join() === features2.map(featureSerialize).sort().join()
-  );
+  const featuresSerializer = (features: WorkspaceUseCaseFeature[]) =>
+    features
+      .map(({ id, title }) => `${id}-${title}`)
+      .sort()
+      .join();
+  return featuresSerializer(features1) === featuresSerializer(features2);
 };
 
 export const isEqualWorkspaceUseCase = (a: WorkspaceUseCase, b: WorkspaceUseCase) => {
