@@ -309,7 +309,7 @@ describe('useRequest hook', () => {
         hookResult.resendRequest();
       });
 
-      // The original quest resolves but it's been marked as outdated by the the manual resendRequest
+      // The original quest resolves but it's been marked as outdated by the manual resendRequest
       // call "interrupts", so data is left undefined.
       await advanceTime(HALF_REQUEST_TIME);
       expect(getSendRequestSpy().callCount).toBe(1);

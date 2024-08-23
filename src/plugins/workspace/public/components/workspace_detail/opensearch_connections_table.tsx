@@ -41,8 +41,7 @@ export const OpenSearchConnectionTable = ({
   } = useOpenSearchDashboards<{ CoreStart: CoreStart; workspaceClient: WorkspaceClient }>();
   const { formData, setSelectedDataSources } = useWorkspaceFormContext();
   const [searchTerm, setSearchTerm] = useState('');
-  const [SelectedItems, setSelectedItems] = useState<DataSource[]>([]);
-  const [assignItems, setAssignItems] = useState<DataSource[]>([]);
+  const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
 
   const filteredDataSources = useMemo(
@@ -53,9 +52,8 @@ export const OpenSearchConnectionTable = ({
     [searchTerm, assignedDataSources]
   );
 
-  const onSelectionChange = (selectedItems: DataSource[]) => {
-    setSelectedItems(selectedItems);
-    setAssignItems(selectedItems);
+  const onSelectionChange = (selectedDataSources: DataSource[]) => {
+    setSelectedItems(selectedDataSources);
   };
 
   const handleUnassignDataSources = async (dataSources: DataSource[]) => {
@@ -138,7 +136,7 @@ export const OpenSearchConnectionTable = ({
                 icon: 'unlink',
                 type: 'icon',
                 onClick: (item: DataSource) => {
-                  setAssignItems([item]);
+                  setSelectedItems([item]);
                   setModalVisible(true);
                 },
                 'data-test-subj': 'workspace-detail-dataSources-table-actions-remove',
@@ -160,7 +158,7 @@ export const OpenSearchConnectionTable = ({
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        {SelectedItems.length > 0 && !modalVisible && (
+        {selectedItems.length > 0 && !modalVisible && (
           <EuiFlexItem grow={false}>
             <EuiButton
               color="danger"
@@ -169,7 +167,7 @@ export const OpenSearchConnectionTable = ({
             >
               {i18n.translate('workspace.detail.dataSources.table.remove.button', {
                 defaultMessage: 'Remove {numberOfSelect} association(s)',
-                values: { numberOfSelect: SelectedItems.length },
+                values: { numberOfSelect: selectedItems.length },
               })}
             </EuiButton>
           </EuiFlexItem>
@@ -205,9 +203,10 @@ export const OpenSearchConnectionTable = ({
           })}
           onCancel={() => {
             setModalVisible(false);
+            setSelectedItems([]);
           }}
           onConfirm={() => {
-            handleUnassignDataSources(assignItems);
+            handleUnassignDataSources(selectedItems);
           }}
           cancelButtonText={i18n.translate('workspace.detail.dataSources.modal.cancelButton', {
             defaultMessage: 'Cancel',

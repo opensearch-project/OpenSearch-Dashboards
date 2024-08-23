@@ -48,7 +48,7 @@ export const isFeatureIdInsideUseCase = (
   useCases: WorkspaceUseCase[]
 ) => {
   const availableFeatures = useCases.find(({ id }) => id === useCaseId)?.features ?? [];
-  return availableFeatures.includes(featureId);
+  return availableFeatures.some((feature) => feature.id === featureId);
 };
 
 export const isNavGroupInFeatureConfigs = (navGroupId: string, featureConfigs: string[]) =>
@@ -255,7 +255,7 @@ export const convertNavGroupToWorkspaceUseCase = ({
   id,
   title,
   description,
-  features: navLinks.map((item) => item.id),
+  features: navLinks.map((item) => ({ id: item.id, title: item.title })),
   systematic: type === NavGroupType.SYSTEM || id === ALL_USE_CASE_ID,
   order,
 });
@@ -278,7 +278,11 @@ export const isEqualWorkspaceUseCase = (a: WorkspaceUseCase, b: WorkspaceUseCase
   }
   if (
     a.features.length !== b.features.length ||
-    a.features.some((featureId) => !b.features.includes(featureId))
+    a.features.some((aFeature) =>
+      b.features.some(
+        (bFeature) => aFeature.id !== bFeature.id || aFeature.title !== bFeature.title
+      )
+    )
   ) {
     return false;
   }
@@ -377,7 +381,7 @@ export const getUseCaseUrl = (
   http: HttpSetup
 ): string => {
   const appId =
-    (useCase?.id !== ALL_USE_CASE_ID && useCase?.features?.[0]) || WORKSPACE_DETAIL_APP_ID;
+    (useCase?.id !== ALL_USE_CASE_ID && useCase?.features?.[0].id) || WORKSPACE_DETAIL_APP_ID;
   const useCaseURL = formatUrlWithWorkspaceId(
     application.getUrlForApp(appId, {
       absolute: false,

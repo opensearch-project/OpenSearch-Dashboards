@@ -4,24 +4,17 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { UseCaseFooter as UseCaseFooterComponent, UseCaseFooterProps } from './use_case_footer';
-import { coreMock, httpServiceMock } from '../../../../../core/public/mocks';
 import { IntlProvider } from 'react-intl';
-import { WorkspaceUseCase } from '../../types';
-import { CoreStart } from 'opensearch-dashboards/public';
-import { BehaviorSubject } from 'rxjs';
-import { WORKSPACE_USE_CASES } from '../../../common/constants';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { coreMock } from '../../../../../core/public/mocks';
+import { createMockedRegisteredUseCases$ } from '../../mocks';
+
+import { UseCaseFooter as UseCaseFooterComponent, UseCaseFooterProps } from './use_case_footer';
 
 describe('UseCaseFooter', () => {
   // let coreStartMock: CoreStart;
   const navigateToApp = jest.fn();
-  const registeredUseCases$ = new BehaviorSubject([
-    WORKSPACE_USE_CASES.observability,
-    WORKSPACE_USE_CASES['security-analytics'],
-    WORKSPACE_USE_CASES.essentials,
-    WORKSPACE_USE_CASES.search,
-  ]);
+  const registeredUseCases$ = createMockedRegisteredUseCases$();
 
   const getMockCore = (isDashboardAdmin: boolean = true) => {
     const coreStartMock = coreMock.createStart();
