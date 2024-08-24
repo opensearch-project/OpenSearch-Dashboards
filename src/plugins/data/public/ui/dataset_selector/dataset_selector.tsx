@@ -40,9 +40,8 @@ export const DatasetSelector = ({
   const queryService = getQueryService();
   const datasetManager = queryService.queryString.getDatasetManager();
 
-  const datasetIcon = selectedDataset
-    ? datasetManager.getCachedDataStructure(selectedDataset.id)?.meta?.icon || 'database'
-    : 'database';
+  const datasetIcon =
+    datasetManager.getDatasetHandlerById(selectedDataset?.type || '')?.meta.icon.type || 'database';
 
   useEffect(() => {
     const init = async () => {

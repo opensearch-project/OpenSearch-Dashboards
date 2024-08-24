@@ -4,34 +4,15 @@
  */
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import {
-  DEFAULT_DATA,
-  DataStructure,
-  DATA_STRUCTURE_META_TYPES,
-  DataStructureFeatureMeta,
-  DatasetField,
-  Dataset,
-} from '../../../../../common';
+import { DEFAULT_DATA, DataStructure, DatasetField, Dataset } from '../../../../../common';
 import { DatasetHandlerConfig } from '../types';
 import { getIndexPatterns } from '../../../../services';
-
-const INDEX_PATTERN_INFO = {
-  ID: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-  TITLE: 'Index Patterns',
-  ICON: 'indexPattern',
-};
-
-const meta = {
-  type: DATA_STRUCTURE_META_TYPES.FEATURE,
-  icon: INDEX_PATTERN_INFO.ICON,
-  tooltip: INDEX_PATTERN_INFO.TITLE,
-} as DataStructureFeatureMeta;
 
 export const indexPatternHandlerConfig: DatasetHandlerConfig = {
   id: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
   title: 'Index Patterns',
   meta: {
-    icon: { type: 'indexPattern' },
+    icon: { type: 'indexPatternApp' },
     tooltip: 'OpenSearch Index Patterns',
   },
 
@@ -88,7 +69,6 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
     id: savedObject.id,
     title: savedObject.attributes.title,
     type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-    meta,
     isLeaf: true,
   }));
 };
