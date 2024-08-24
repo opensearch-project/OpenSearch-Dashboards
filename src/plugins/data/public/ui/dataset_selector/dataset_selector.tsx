@@ -46,13 +46,13 @@ export const DatasetSelector = ({
 
   useEffect(() => {
     const init = async () => {
-      // setDatasets(
-      //   (
-      //     await datasetManager
-      //       .getDatasetHandlerById(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN)
-      //       ?.fetch(savedObjects.client, [DEFAULT_DATA.STRUCTURES.NULL])!
-      //   ).children
-      // );
+      setDatasets(
+        (
+          await datasetManager
+            .getDatasetHandlerById(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN)
+            ?.fetch(savedObjects.client, [])!
+        ).children || []
+      );
     };
 
     init();
