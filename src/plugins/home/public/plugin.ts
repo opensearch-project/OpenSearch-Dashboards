@@ -37,6 +37,7 @@ import {
 } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { first } from 'rxjs/operators';
+import React from 'react';
 
 import { Branding } from 'src/core/types';
 import {
@@ -72,6 +73,8 @@ import {
 import { initHome, setupHome } from './application/home_render';
 import { registerSampleDataCard } from './application/components/sample_data/sample_data_card';
 import { registerHomeListCardToPage } from './application/components/home_list_card';
+import { toMountPoint } from '../../opensearch_dashboards_react/public';
+import { HomeIcon } from './application/components/home_icon';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -153,9 +156,7 @@ export class HomePublicPlugin
     core.application.register({
       id: PLUGIN_ID,
       title: 'Home',
-      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
-        ? undefined
-        : AppNavLinkStatus.hidden,
+      navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
         setCommonService();
@@ -167,14 +168,6 @@ export class HomePublicPlugin
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: PLUGIN_ID,
-        title: 'Home',
-        order: 0,
-      },
-    ]);
 
     // Register import sample data as a standalone app so that it is available inside workspace.
     core.application.register({
@@ -261,6 +254,18 @@ export class HomePublicPlugin
           // This doesn't do anything as along as the default settings are kept.
           urlForwarding.navigateToDefaultApp({ overwriteHash: false });
         }
+      });
+    }
+
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.chrome.navControls.registerLeftBottom({
+        order: 0,
+        mount: toMountPoint(
+          React.createElement(HomeIcon, {
+            core,
+            appId: PLUGIN_ID,
+          })
+        ),
       });
     }
 

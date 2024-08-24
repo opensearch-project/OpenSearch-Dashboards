@@ -38,6 +38,7 @@ import { columnServiceMock } from '../../../services/column_service.mock';
 import { SavedObjectsManagementAction } from '../../..';
 import { Table, TableProps } from './table';
 import { WorkspaceAttribute } from 'opensearch-dashboards/public';
+import { render } from '@testing-library/react';
 
 const defaultProps: TableProps = {
   basePath: httpServiceMock.createSetupContract().basePath,
@@ -256,5 +257,37 @@ describe('Table', () => {
     expect(onDuplicateSingle).not.toHaveBeenCalled();
     duplicateAction.onClick();
     expect(onDuplicateSingle).toHaveBeenCalled();
+  });
+
+  it('should replace legacy path to standard application path when useUpdatedUX is true', () => {
+    const showDuplicate = true;
+    const customizedProps = {
+      ...defaultProps,
+      showDuplicate,
+      useUpdatedUX: true,
+      items: [
+        {
+          id: '1',
+          type: 'index-pattern',
+          attributes: {},
+          references: [],
+          meta: {
+            title: `MyIndexPattern*`,
+            icon: 'indexPatternApp',
+            editUrl: '#/management/opensearch-dashboards/indexPatterns/patterns/1',
+            inAppUrl: {
+              path: '/app/management/opensearch-dashboards/indexPatterns/patterns/1',
+              uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
+            },
+          },
+        },
+      ],
+    };
+    const { getByTestId } = render(<Table {...customizedProps} />);
+    expect(
+      getByTestId('savedObjectsTableRowTitle').querySelector(
+        '[href="/app/indexPatterns/patterns/1"]'
+      )
+    ).toBeInTheDocument();
   });
 });

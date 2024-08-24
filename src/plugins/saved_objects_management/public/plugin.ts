@@ -202,7 +202,7 @@ export class SavedObjectsManagementPlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
       {
         id: APP_ID,
-        order: 300,
+        order: 400,
       },
     ]);
 

@@ -31,6 +31,7 @@ import {
   WORKSPACE_LIST_APP_ID,
   WORKSPACE_USE_CASES,
   WORKSPACE_INITIAL_APP_ID,
+  WORKSPACE_NAVIGATION_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services, WorkspaceUseCase } from './types';
@@ -50,6 +51,7 @@ import {
   enrichBreadcrumbsWithWorkspace,
   filterWorkspaceConfigurableApps,
   getFirstUseCaseOfFeatureConfigs,
+  getUseCaseUrl,
   isAppAccessibleInWorkspace,
   isNavGroupInFeatureConfigs,
 } from './utils';
@@ -125,27 +127,7 @@ export class WorkspacePlugin
       this.registeredUseCases$,
     ]).subscribe(([currentWorkspace, registeredUseCases]) => {
       if (currentWorkspace) {
-        const workspaceUseCase = getFirstUseCaseOfFeatureConfigs(currentWorkspace.features || []);
-        const isAllUseCase = workspaceUseCase === ALL_USE_CASE_ID;
         this.appUpdater$.next((app) => {
-          // When in all workspace, the home should be replaced by workspace overview page
-          if (app.id === 'home' && isAllUseCase) {
-            return { navLinkStatus: AppNavLinkStatus.hidden };
-          }
-
-          // disable essential overview page for workspace use case is not essential
-          if (
-            app.id === ESSENTIAL_OVERVIEW_PAGE_ID &&
-            workspaceUseCase !== WORKSPACE_USE_CASES.essentials.id
-          ) {
-            return { status: AppStatus.inaccessible };
-          }
-
-          // disable analytics(All) overview page for workspace use case is not analytics(All)
-          if (app.id === ANALYTICS_ALL_OVERVIEW_PAGE_ID && workspaceUseCase !== ALL_USE_CASE_ID) {
-            return { status: AppStatus.inaccessible };
-          }
-
           if (isAppAccessibleInWorkspace(app, currentWorkspace, registeredUseCases)) {
             return;
           }
@@ -381,7 +363,6 @@ export class WorkspacePlugin
       title: i18n.translate('workspace.settings.workspaceDetail', {
         defaultMessage: 'Workspace Detail',
       }),
-      navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderDetailApp } = await import('./application');
         return mountWorkspaceApp(params, renderDetailApp);
@@ -400,6 +381,32 @@ export class WorkspacePlugin
         return mountWorkspaceApp(params, renderInitialApp);
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+    });
+
+    const registeredUseCases$ = this.registeredUseCases$;
+    // register workspace navigation
+    core.application.register({
+      id: WORKSPACE_NAVIGATION_APP_ID,
+      title: '',
+      chromeless: true,
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount() {
+        const [coreStart] = await core.getStartServices();
+        const { application, http, workspaces } = coreStart;
+        const workspace = workspaces.currentWorkspace$.getValue();
+        if (workspace) {
+          const availableUseCases = registeredUseCases$.getValue();
+          const currentUseCase = availableUseCases.find(
+            (useCase) => useCase.id === getFirstUseCaseOfFeatureConfigs(workspace?.features ?? [])
+          );
+          const useCaseUrl = getUseCaseUrl(currentUseCase, workspace, application, http);
+          application.navigateToUrl(useCaseUrl);
+        } else {
+          application.navigateToApp('home');
+        }
+        return () => {};
+      },
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
     });
 
     // workspace list
@@ -507,9 +514,9 @@ export class WorkspacePlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
       {
         id: WORKSPACE_LIST_APP_ID,
-        order: 150,
-        title: i18n.translate('workspace.settings.workspaceSettings', {
-          defaultMessage: 'Workspace settings',
+        order: 350,
+        title: i18n.translate('workspace.settings.workspaces', {
+          defaultMessage: 'Workspaces',
         }),
       },
     ]);

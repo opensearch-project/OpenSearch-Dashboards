@@ -5,14 +5,17 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { chromeServiceMock } from '../../../../core/public/mocks';
+import { chromeServiceMock, coreMock } from '../../../../core/public/mocks';
 import {
   ALL_USE_CASE_ID,
+  DEFAULT_APP_CATEGORIES,
   DEFAULT_NAV_GROUPS,
   NavGroupItemInMap,
   NavGroupType,
 } from '../../../../core/public';
 import { UseCaseService } from './use_case_service';
+import { waitFor } from '@testing-library/dom';
+import { WORKSPACE_DETAIL_APP_ID } from '../../common/constants';
 
 const mockNavGroupsMap = {
   system: {
@@ -61,6 +64,54 @@ const setupUseCaseStart = (options?: { navGroupEnabled?: boolean }) => {
 };
 
 describe('UseCaseService', () => {
+  describe('#setup', () => {
+    it('should add manage workspace category to current use case', async () => {
+      const useCaseService = new UseCaseService();
+      const coreSetup = coreMock.createSetup();
+      const navGroupMap$ = new BehaviorSubject<Record<string, NavGroupItemInMap>>({});
+      const coreStartMock = coreMock.createStart();
+      coreSetup.getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
+      coreStartMock.chrome.navGroup.getNavGroupsMap$.mockReturnValue(navGroupMap$);
+      useCaseService.setup(coreSetup);
+      const navGroupInfo = {
+        ...DEFAULT_NAV_GROUPS.all,
+        navLinks: [],
+      };
+      navGroupMap$.next({
+        [ALL_USE_CASE_ID]: navGroupInfo,
+      });
+      coreSetup.workspaces.currentWorkspace$.next({
+        id: ALL_USE_CASE_ID,
+        name: ALL_USE_CASE_ID,
+        features: [`use-case-${ALL_USE_CASE_ID}`],
+      });
+      await waitFor(() => {
+        expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toBeCalledWith(navGroupInfo, [
+          {
+            id: 'dataSources',
+            category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+            order: 100,
+          },
+          {
+            id: 'indexPatterns',
+            category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+            order: 200,
+          },
+          {
+            id: 'objects',
+            category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+            order: 300,
+          },
+          {
+            id: WORKSPACE_DETAIL_APP_ID,
+            category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+            order: 400,
+            title: 'Workspace settings',
+          },
+        ]);
+      });
+    });
+  });
   describe('#start', () => {
     it('should return built in use cases when nav group disabled', async () => {
       const { useCaseStart } = setupUseCaseStart({
