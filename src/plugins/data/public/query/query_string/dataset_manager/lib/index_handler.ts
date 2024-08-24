@@ -6,14 +6,15 @@
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { map } from 'rxjs/operators';
 import {
-  Dataset,
   DEFAULT_DATA,
   DataStructure,
   DATA_STRUCTURE_META_TYPES,
   DataStructureFeatureMeta,
+  DatasetField,
+  Dataset,
 } from '../../../../../common';
 import { DatasetHandlerConfig } from '../types';
-import { getIndexPatterns, getSearchService } from '../../../../services';
+import { getSearchService, getIndexPatterns } from '../../../../services';
 
 const INDEX_INFO = {
   ID: DEFAULT_DATA.SET_TYPES.INDEX,
@@ -22,9 +23,10 @@ const INDEX_INFO = {
   LOCAL_DATASOURCE: {
     id: '',
     title: 'Local Cluster',
-    type: 'data-source',
+    type: 'DATA_SOURCE',
   },
 };
+
 const meta = {
   type: DATA_STRUCTURE_META_TYPES.FEATURE,
   icon: INDEX_INFO.ICON,
@@ -32,100 +34,76 @@ const meta = {
 } as DataStructureFeatureMeta;
 
 export const indexHandlerConfig: DatasetHandlerConfig = {
-  toDataset: (dataStructure: DataStructure): Dataset => ({
-    id: dataStructure.id,
-    title: dataStructure.title,
-    type: DEFAULT_DATA.SET_TYPES.INDEX,
-    dataSource: dataStructure.parent
-      ? {
-          id: dataStructure.parent.id,
-          title: dataStructure.parent.title,
-          type: dataStructure.parent.type,
-        }
-      : undefined,
-  }),
-
-  toDataStructure: (dataset: Dataset): DataStructure => ({
-    id: dataset.id,
-    title: dataset.title,
-    type: DEFAULT_DATA.SET_TYPES.INDEX,
-    parent: dataset.dataSource
-      ? {
-          id: dataset.dataSource.id!,
-          title: dataset.dataSource.title,
-          type: dataset.dataSource.type,
-        }
-      : undefined,
-    meta,
-  }),
-
-  fetchOptions: async (
-    savedObjects: SavedObjectsClientContract,
-    dataStructure: DataStructure
-  ): Promise<DataStructure[]> => {
-    switch (dataStructure.type) {
-      case DEFAULT_DATA.STRUCTURES.ROOT.type: {
-        const dataSources = await fetchDataSources(savedObjects);
-        return [
-          {
-            id: INDEX_INFO.ID,
-            title: INDEX_INFO.TITLE,
-            type: DEFAULT_DATA.STRUCTURES.CATEGORY.type,
-            children: dataSources,
-          } as DataStructure,
-        ];
-      }
-      case DEFAULT_DATA.STRUCTURES.CATEGORY.type: {
-        return dataStructure.children || [];
-      }
-      case DEFAULT_DATA.STRUCTURES.DATA_SOURCE.type: {
-        const indices = await fetchIndices(dataStructure);
-        dataStructure.children = indices;
-        return indices;
-      }
-      case DEFAULT_DATA.STRUCTURES.INDEX.type: {
-        const fields = await getIndexPatterns().getFieldsForWildcard({
-          pattern: dataStructure.title,
-          dataSourceId: dataStructure.parent!.id,
-        });
-
-        dataStructure.children = fields.map(
-          (field: any) =>
-            ({
-              id: `${dataStructure.id}-${field.name}`,
-              title: field.name,
-              type:
-                field.type === 'date'
-                  ? DEFAULT_DATA.STRUCTURES.TIME_FIELD.type
-                  : DEFAULT_DATA.STRUCTURES.FIELD.type,
-              parent: dataStructure,
-              meta:
-                field.type === 'date'
-                  ? DEFAULT_DATA.STRUCTURES.TIME_FIELD.meta
-                  : DEFAULT_DATA.STRUCTURES.FIELD.meta,
-            } as DataStructure)
-        );
-
-        return dataStructure.children || [];
-      }
-      case DEFAULT_DATA.STRUCTURES.FIELD.type:
-      case DEFAULT_DATA.STRUCTURES.TIME_FIELD.type: {
-        return [
-          {
-            id: dataStructure.parent!.id,
-            title: dataStructure.parent!.title,
-            type: DEFAULT_DATA.STRUCTURES.DATASET.type,
-            parent: dataStructure,
-            meta: DEFAULT_DATA.STRUCTURES.DATASET.meta,
-          } as DataStructure,
-        ];
-      }
-    }
-    return [dataStructure];
+  id: DEFAULT_DATA.SET_TYPES.INDEX,
+  title: 'Indexes',
+  meta: {
+    icon: { type: 'logoOpenSearch' },
+    tooltip: 'OpenSearch Indexes',
   },
 
-  isLeaf: (dataStructure: DataStructure) => {
-    return dataStructure.type === DEFAULT_DATA.STRUCTURES.DATASET.type;
+  toDataset: (path: DataStructure[]): Dataset => {
+    const index = path[path.length - 1];
+    const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
+
+    return {
+      id: index.id,
+      title: index.title,
+      type: DEFAULT_DATA.SET_TYPES.INDEX,
+      dataSource: dataSource
+        ? {
+            id: dataSource.id,
+            title: dataSource.title,
+            type: dataSource.type,
+          }
+        : INDEX_INFO.LOCAL_DATASOURCE,
+    };
+  },
+
+  fetch: async (
+    savedObjects: SavedObjectsClientContract,
+    path: DataStructure[]
+  ): Promise<DataStructure> => {
+    const dataStructure = path[path.length - 1];
+    switch (dataStructure.type) {
+      case 'DATA_SOURCE': {
+        const indices = await fetchIndices(dataStructure);
+        return {
+          ...dataStructure,
+          isLeaf: true,
+          columnHeader: 'Indices',
+          children: indices.map((indexName) => ({
+            id: `${dataStructure.id}::${indexName}`,
+            title: indexName,
+            type: DEFAULT_DATA.STRUCTURES.INDEX.type,
+          })),
+        };
+      }
+
+      default: {
+        const dataSources = await fetchDataSources(savedObjects);
+        return {
+          ...dataStructure,
+          columnHeader: 'Cluster',
+          isLeaf: false,
+          children: dataSources,
+        };
+      }
+    }
+  },
+
+  fetchFields: async (dataset: Dataset): Promise<DatasetField[]> => {
+    const fields = await getIndexPatterns().getFieldsForWildcard({
+      pattern: dataset.title,
+      dataSourceId: dataset.dataSource?.id,
+    });
+    return fields.map((field: any) => ({
+      name: field.name,
+      type: field.type,
+    }));
+  },
+
+  supportedLanguages: async (): Promise<string[]> => {
+    return ['SQL', 'PPL'];
   },
 };
 
@@ -135,45 +113,36 @@ const fetchDataSources = async (client: SavedObjectsClientContract) => {
     perPage: 10000,
   });
   const dataSources: DataStructure[] = [INDEX_INFO.LOCAL_DATASOURCE];
-  return dataSources.concat([
-    ...(resp.savedObjects.map((savedObject) => ({
+  return dataSources.concat(
+    resp.savedObjects.map((savedObject) => ({
       id: savedObject.id,
       title: savedObject.attributes.title,
-      type: 'data-source',
-    })) as DataStructure[]),
-  ]);
+      type: 'DATA_SOURCE',
+    }))
+  );
 };
 
-/**
- * Fetches indices and converts them to DataStructures.
- * @param client - The SavedObjectsClientContract for accessing index information.
- * @returns A promise that resolves to an array of DataStructures representing indices.
- */
-const fetchIndices = async (dataStructure: DataStructure) => {
+const fetchIndices = async (dataStructure: DataStructure): Promise<string[]> => {
   const search = getSearchService();
-  const buildSearchRequest = () => {
-    const request = {
-      params: {
-        ignoreUnavailable: true,
-        expand_wildcards: 'all',
-        index: '*',
-        body: {
-          size: 0, // no hits
-          aggs: {
-            indices: {
-              terms: {
-                field: '_index',
-                size: 100,
-              },
+  const buildSearchRequest = () => ({
+    params: {
+      ignoreUnavailable: true,
+      expand_wildcards: 'all',
+      index: '*',
+      body: {
+        size: 0,
+        aggs: {
+          indices: {
+            terms: {
+              field: '_index',
+              size: 100,
             },
           },
         },
       },
-      dataSourceId: dataStructure.id,
-    };
-
-    return request;
-  };
+    },
+    dataSourceId: dataStructure.id,
+  });
 
   const searchResponseToArray = (response: any) => {
     const { rawResponse } = response;

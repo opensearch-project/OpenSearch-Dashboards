@@ -20,71 +20,54 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { DATA_STRUCTURE_META_TYPES, DataStructure, DEFAULT_DATA } from '../../../common';
+import {
+  BaseDataset,
+  DATA_STRUCTURE_META_TYPES,
+  Dataset,
+  DataStructure,
+  DEFAULT_DATA,
+} from '../../../common';
 import { DatasetContract } from '../../query';
 
 export const DatasetExplorer = ({
   savedObjects,
   datasetManager,
+  path,
+  setPath,
   onNext,
   onCancel,
 }: {
   savedObjects: SavedObjectsClientContract;
   datasetManager: DatasetContract;
-  onNext: (dataStructure: DataStructure) => void;
+  path: DataStructure[];
+  setPath: (path: DataStructure[]) => void;
+  onNext: (dataset: BaseDataset) => void;
   onCancel: () => void;
 }) => {
+  const [explorerDataset, setExplorerDataset] = useState<BaseDataset | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
-  const [categories, setCategories] = useState<DataStructure[]>([]);
-  const [currentDataStructure, setCurrentDataStructure] = useState<DataStructure>(
-    DEFAULT_DATA.STRUCTURES.ROOT
-  );
-  const [dataStructures, setDataStructures] = useState<DataStructure[]>([]);
 
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const fetchedCategories = await datasetManager.fetchCategoryDataStructures(
-          savedObjects,
-          DEFAULT_DATA.STRUCTURES.ROOT
-        );
-        setCategories(fetchedCategories);
-        setCurrentDataStructure({ ...DEFAULT_DATA.STRUCTURES.ROOT, children: fetchedCategories });
-      } finally {
-        setLoading(false);
-      }
-    };
+  const selectDataStructure = async (item: DataStructure, newPath: DataStructure[]) => {
+    const lastPathItem = newPath[newPath.length - 1];
+    const nextPath = [...newPath, item];
 
-    loadCategories();
-  }, [datasetManager, savedObjects]);
+    const handler = datasetManager.getDatasetHandlerById(nextPath[1].id);
+    if (!handler) return;
 
-  const selectDataStructure = async (item: DataStructure) => {
-    if (datasetManager.isLeafDataStructure(item)) {
-      const dataset = datasetManager.toDataset(item);
-      onNext(dataset);
-    } else {
-      setLoading(true);
-      try {
-        const children = await datasetManager.fetchOptions(savedObjects, item);
-        setCurrentDataStructure({ ...item, children });
-        setDataStructures([...dataStructures, item]);
-      } finally {
-        setLoading(false);
-      }
+    if (lastPathItem.isLeaf) {
+      const dataset = handler!.toDataset(nextPath);
+      setExplorerDataset(dataset as BaseDataset);
+      return;
     }
+
+    setLoading(true);
+    const nextDataStructure = await handler.fetch(savedObjects, nextPath);
+    setLoading(false);
+
+    setPath([...newPath, nextDataStructure]);
   };
 
-  const goBack = () => {
-    if (dataStructures.length > 0) {
-      const newStack = dataStructures.slice(0, -1);
-      setDataStructures(newStack);
-      const previousStructure = newStack[newStack.length - 1] || DEFAULT_DATA.STRUCTURES.ROOT;
-      setCurrentDataStructure(previousStructure);
-    }
-  };
-
-  const isLeaf = datasetManager.isLeafDataStructure(currentDataStructure);
-  const columnCount = dataStructures.length + (isLeaf ? 1 : 2); // +1 for current, +1 for next (if not leaf)
+  const columnCount = path[path.length - 1]?.isLeaf ? path.length + 1 : path.length;
 
   return (
     <>
@@ -118,26 +101,57 @@ export const DatasetExplorer = ({
             }, minmax(200px, 240px)) minmax(300px, 1fr)`,
           }}
         >
-          {dataStructures.map((structure, index) => (
-            <DataStructureColumn
-              key={structure.id}
-              dataStructure={structure}
-              onSelect={(item) => {
-                setDataStructures(dataStructures.slice(0, index + 1));
-                setCurrentDataStructure(item);
-                selectDataStructure(item);
-              }}
-              isActive={false}
-            />
-          ))}
-          <DataStructureColumn
-            dataStructure={currentDataStructure}
-            onSelect={selectDataStructure}
-            isActive={true}
-            isLoading={loading}
-            isLeaf={isLeaf}
-          />
-          {!isLeaf && <EmptyColumn />}
+          {path.map((current, index) => {
+            const isLast = index === path.length - 1;
+            const isFinal = isLast && (!current.children || current.children.length === 0);
+            return (
+              <div
+                key={current.id}
+                className={`datasetExplorer__column ${
+                  isFinal ? ' datasetExplorer__column--leaf' : ''
+                }`}
+              >
+                <EuiTitle size="xxs" className="datasetExplorer__columnTitle">
+                  <h3>{current.columnHeader}</h3>
+                </EuiTitle>
+                <EuiSelectable
+                  options={(current.children || []).map((child) => ({
+                    label: child.title,
+                    value: child.id,
+                    prepend: child.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE &&
+                      child.meta?.icon && <EuiIcon {...child.meta.icon} />,
+                    append: appendIcon(child),
+                    checked: isChecked(child, index, path, explorerDataset),
+                  }))}
+                  onChange={(options) => {
+                    const selected = options.find((option) => option.checked);
+                    if (selected) {
+                      const item = current.children?.find((child) => child.id === selected.value);
+                      if (item) {
+                        selectDataStructure(item, path.slice(0, index + 1));
+                      }
+                    }
+                  }}
+                  singleSelection
+                  {...(isFinal && {
+                    searchProps: {
+                      compressed: true,
+                    },
+                    searchable: true,
+                  })}
+                  className="datasetSelector__selectable"
+                >
+                  {(list, search) => (
+                    <>
+                      {isFinal && search}
+                      {list}
+                    </>
+                  )}
+                </EuiSelectable>
+              </div>
+            );
+          })}
+          {path[path.length - 1]?.isLeaf && <LoadingEmptyColumn isLoading={loading} />}
         </div>
       </EuiModalBody>
       <EuiModalFooter>
@@ -147,16 +161,9 @@ export const DatasetExplorer = ({
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
-        <EuiButtonEmpty
-          onClick={goBack}
-          disabled={dataStructures.length === 0}
-          iconType="arrowLeft"
-        >
-          Back
-        </EuiButtonEmpty>
         <EuiButton
-          disabled={!datasetManager.isLeafDataStructure(currentDataStructure)}
-          onClick={() => onNext(currentDataStructure)}
+          disabled={explorerDataset === undefined}
+          onClick={() => onNext(explorerDataset!)}
           iconType="arrowRight"
           iconSide="right"
           fill
@@ -171,63 +178,23 @@ export const DatasetExplorer = ({
   );
 };
 
-const DataStructureColumn = ({
-  dataStructure,
-  onSelect,
-  isActive,
-  isLoading = false,
-  isLeaf = false,
-}: {
-  dataStructure: DataStructure;
-  onSelect: (item: DataStructure) => void;
-  isActive: boolean;
-  isLoading?: boolean;
-  isLeaf?: boolean;
-}) => (
-  <div className={`datasetExplorer__column ${isActive ? 'datasetExplorer__column--active' : ''}`}>
-    <EuiTitle size="xxs" className="datasetExplorer__columnTitle">
-      <h3>{dataStructure.title}</h3>
-    </EuiTitle>
-    <EuiSelectable
-      options={(dataStructure.children || []).map((child) => ({
-        label: child.title,
-        value: child.id,
-        prepend: child.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE && child.meta?.icon && (
-          <EuiIcon {...child.meta.icon} />
-        ),
-        append: appendIcon(child),
-        disabled: isLeaf,
-      }))}
-      onChange={(options) => {
-        if (!isLeaf) {
-          const selected = options.find((option) => option.checked);
-          if (selected) {
-            const item = dataStructure.children?.find((child) => child.id === selected.value);
-            if (item) {
-              onSelect(item);
-            }
-          }
-        }
-      }}
-      singleSelection
-      searchable={isActive}
-      isLoading={isLoading}
-      className="datasetSelector__selectable"
-    >
-      {(list, search) => (
-        <>
-          {search}
-          {list}
-        </>
-      )}
-    </EuiSelectable>
-  </div>
-);
-
 const EmptyColumn = () => (
   <div className="datasetExplorer__column datasetExplorer__column--empty" />
 );
 
+const LoadingEmptyColumn = ({ isLoading }: { isLoading: boolean }) =>
+  isLoading ? (
+    <div className="datasetExplorer__column">
+      <EuiTitle size="xxs" className="datasetExplorer__columnTitle">
+        <h3>...</h3>
+      </EuiTitle>
+      <EuiSelectable options={[]} singleSelection className="datasetSelector__selectable" isLoading>
+        {(list) => <>{list}</>}
+      </EuiSelectable>
+    </div>
+  ) : (
+    <EmptyColumn />
+  );
 const appendIcon = (item: DataStructure) => {
   if (item.meta?.type === DATA_STRUCTURE_META_TYPES.FEATURE) {
     if (item.meta?.icon && item.meta?.tooltip) {
@@ -250,4 +217,18 @@ const appendIcon = (item: DataStructure) => {
   }
 
   return null;
+};
+
+const isChecked = (
+  child: DataStructure,
+  index: number,
+  path: DataStructure[],
+  explorerDataset?: BaseDataset
+) => {
+  if (index === path.length - 1) {
+    // For the last level, check against the selectedDataSet
+    return child.id === explorerDataset?.id ? 'on' : undefined;
+  }
+  // For other levels, check against the next item in the path
+  return child.id === path[index + 1]?.id ? 'on' : undefined;
 };

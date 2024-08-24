@@ -76,7 +76,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
       await data.indexPatterns.ensureDefaultIndexPattern();
       const defaultIndexPattern = await data.indexPatterns.getDefault();
       const datasetManager = data.query.queryString.getDatasetManager();
-      datasetManager.initWithIndexPattern(defaultIndexPattern);
+      datasetManager.fetchDefaultDataset();
       const defaultDataset = datasetManager.getDefaultDataset();
 
       if (!isMounted) return;

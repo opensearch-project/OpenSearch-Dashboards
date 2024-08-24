@@ -145,7 +145,7 @@ export const DEFAULT_DATA = {
 
   SET_TYPES: {
     INDEX_PATTERN: 'INDEX_PATTERN',
-    INDEX: 'INDEX',
+    INDEX: 'INDEXES',
   },
 
   SOURCE_TYPES: {

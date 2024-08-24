@@ -3,45 +3,45 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { Dataset, DataStructure } from '../../../../common';
+import { EuiIconProps } from '@elastic/eui';
+import { BaseDataset, Dataset, DatasetField, DataStructure } from '../../../../common';
 
 /**
- * TODO: SEAN - supportedLanguages, and more here.
  * Configuration for handling dataset operations.
  */
 export interface DatasetHandlerConfig {
+  /** Unique identifier for the dataset handler */
+  id: string;
+  /** Human-readable title for the dataset type */
+  title: string;
+  /** Metadata for UI representation */
+  meta: {
+    /** Icon to represent the dataset type */
+    icon: EuiIconProps;
+    /** Optional tooltip text */
+    tooltip?: string;
+  };
   /**
-   * Converts a DataStructure to a Dataset which will be used for search and
-   * analytics.
-   *
-   * @param {DataStructure} dataStructure - The DataStructure to convert.
-   * @returns {Dataset} The resulting Dataset.
+   * Converts a DataStructure to a Dataset.
+   * @param {DataStructure} dataStructure - The data structure to convert.
+   * @returns {Dataset} Dataset.
    */
-  toDataset: (dataStructure: DataStructure) => Dataset;
-  /**
-   * TODO: SEAN - not sure if we need this, remove if not needed
-   * Converts a Dataset to a DataStructure.
-   *
-   * @param {Dataset} dataset - The Dataset to convert.
-   * @returns {DataStructure} The resulting DataStructure.
-   */
-  toDataStructure: (dataset: Dataset) => DataStructure;
+  toDataset: (path: DataStructure[]) => Dataset;
   /**
    * Fetches child options for a given DataStructure.
-   *
+   * @param {SavedObjectsClientContract} client - The saved objects client.
    * @param {DataStructure} dataStructure - The parent DataStructure.
-   * @param {IndexPatternsContract} indexPatterns - The IndexPatternsContract for accessing index pattern information.
-   * @returns {Promise<DataStructure[]>} A promise that resolves to an array of child DataStructures.
+   * @returns {Promise<DatasetHandlerFetchResponse>} A promise that resolves to a DatasetHandlerFetchResponse.
    */
-  fetchOptions: (
-    client: SavedObjectsClientContract,
-    dataStructure: DataStructure
-  ) => Promise<DataStructure[]>;
+  fetch: (client: SavedObjectsClientContract, path: DataStructure[]) => Promise<DataStructure>;
   /**
-   * Determines if a DataStructure is a leaf node (i.e., has no children).
-   *
-   * @param {DataStructure} dataStructure - The DataStructure to check.
-   * @returns {boolean} True if the DataStructure is a leaf node, false otherwise.
+   * Fetches fields for the dataset.
+   * @returns {Promise<DatasetField[]>} A promise that resolves to an array of DatasetFields.
    */
-  isLeaf: (dataStructure: DataStructure) => boolean;
+  fetchFields: (dataset: Dataset) => Promise<DatasetField[]>;
+  /**
+   * Retrieves the supported query languages for this dataset type.
+   * @returns {Promise<string[]>} A promise that resolves to an array of supported language names.
+   */
+  supportedLanguages: () => Promise<string[]>;
 }

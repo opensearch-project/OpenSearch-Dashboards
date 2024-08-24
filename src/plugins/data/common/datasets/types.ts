@@ -119,6 +119,10 @@ export interface DataStructure {
   parent?: DataStructure;
   /** Optional array of child data structures */
   children?: DataStructure[];
+  /** Optional array of data structures of ancestors */
+  path?: DataStructure[];
+  isLeaf?: boolean;
+  columnHeader?: string;
   /** Optional metadata for the data structure */
   meta?: DataStructureMeta;
 }
@@ -148,6 +152,7 @@ export interface DataStructureDataTypeMeta {
   type: DATA_STRUCTURE_META_TYPES.TYPE;
   icon: EuiIconProps;
   tooltip: string;
+  isLeaf?: boolean;
 }
 
 /**
@@ -189,6 +194,18 @@ export interface CachedDataStructure extends Omit<DataStructure, 'parent' | 'chi
   children: string[];
 }
 
+export interface BaseDataset {
+  /** Unique identifier for the dataset, for non-index pattern based datasets, we will append the data source ID if present */
+  id: string;
+  /** Human-readable name of the dataset that is used to query */
+  title: string;
+  /** The type of the dataset, registered by other classes */
+  type: string;
+  /** Optional reference to the data source */
+  dataSource?: DataSource;
+  fields: DatasetField[];
+}
+
 /**
  * Defines the structure of a dataset, including its type and reference to a data source.
  * NOTE: For non-index pattern datasets we will append the data source ID to the front of
@@ -223,17 +240,16 @@ export interface CachedDataStructure extends Omit<DataStructure, 'parent' | 'chi
  *   },
  * };
  */
-export interface Dataset {
-  /** Unique identifier for the dataset, for non-index pattern based datasets, we will append the data source ID if present */
-  id: string;
-  /** Human-readable name of the dataset that is used to query */
-  title: string;
-  /** The type of the dataset, registered by other classes */
-  type: string;
+export interface Dataset extends Omit<BaseDataset, 'fields'> {
   /** Optional name of the field used for time-based operations */
   timeFieldName?: string;
   /** Optional language to default to from the language selector */
   language?: string;
-  /** Optional reference to the data source */
-  dataSource?: DataSource;
+}
+
+export interface DatasetField {
+  name: string;
+  type: string;
+  displayName?: string;
+  // TODO:  osdFieldType?
 }

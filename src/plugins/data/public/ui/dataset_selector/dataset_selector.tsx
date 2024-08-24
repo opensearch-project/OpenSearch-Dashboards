@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
-import { Dataset, DataStructure, DEFAULT_DATA } from '../../../common';
+import { Dataset, DEFAULT_DATA } from '../../../common';
 import { IDataPluginServices } from '../../types';
 import { AdvancedSelector } from './advanced_selector';
 import { getQueryService } from '../../services';
@@ -32,55 +32,51 @@ export const DatasetSelector = ({
   services,
 }: DatasetSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [datasets, setDatasets] = useState<Dataset[]>([]);
   const togglePopover = () => setIsOpen(!isOpen);
   const closePopover = () => setIsOpen(false);
-  const [categories, setCategories] = useState<DataStructure[]>([]);
   const { overlays, savedObjects } = services;
 
   const queryService = getQueryService();
   const datasetManager = queryService.queryString.getDatasetManager();
 
-  // Load the category data structures
-  useEffect(() => {
-    const loadCategories = async () => {
-      const dataStructures = await datasetManager.fetchOptions(
-        savedObjects.client,
-        DEFAULT_DATA.STRUCTURES.ROOT
-      );
-      setCategories(dataStructures);
-    };
-
-    loadCategories();
-  }, [datasetManager, savedObjects.client]);
-
   const datasetIcon = selectedDataset
     ? datasetManager.getCachedDataStructure(selectedDataset.id)?.meta?.icon || 'database'
     : 'database';
 
-  // Memoize the options
+  useEffect(() => {
+    const init = async () => {
+      // setDatasets(
+      //   (
+      //     await datasetManager
+      //       .getDatasetHandlerById(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN)
+      //       ?.fetch(savedObjects.client, [DEFAULT_DATA.STRUCTURES.NULL])!
+      //   ).children
+      // );
+    };
+
+    init();
+  }, [datasetManager, savedObjects.client]);
+
   const options = useMemo(() => {
     const newOptions: EuiSelectableOption[] = [];
+    // Add index pattern datasets
+    newOptions.push({
+      label: 'Index patterns',
+      isGroupLabel: true,
+    });
 
-    categories.forEach((category) => {
+    datasets.forEach(({ id, title, type }) => {
       newOptions.push({
-        label: category.title,
-        isGroupLabel: true,
+        label: title,
+        checked: id === selectedDataset?.id ? 'on' : undefined,
+        key: id,
+        prepend: <EuiIcon type={datasetManager.getDatasetHandlerById(type)!.meta.icon.type} />,
       });
-
-      if (category.children) {
-        category.children.forEach((child) => {
-          newOptions.push({
-            label: child.title,
-            checked: child.id === selectedDataset?.id ? 'on' : undefined,
-            key: child.id,
-            prepend: <EuiIcon type={child.meta?.icon || 'database'} />,
-          });
-        });
-      }
     });
 
     return newOptions;
-  }, [categories, selectedDataset?.id]);
+  }, [datasetManager, datasets, selectedDataset?.id]);
 
   // Handle option change
   const handleOptionChange = (newOptions: EuiSelectableOption[]) => {
@@ -91,15 +87,10 @@ export const DatasetSelector = ({
       return;
     }
 
-    const selectedDataStructure = categories
-      .flatMap((category) => category.children || [])
-      .find((child) => child.id === selectedOption.key);
+    const foundDataset = datasets.find((dataset) => dataset.id === selectedOption.key);
 
-    if (selectedDataStructure) {
-      const dataset = datasetManager.toDataset(selectedDataStructure);
-      closePopover();
-      setSelectedDataset(dataset);
-    }
+    closePopover();
+    setSelectedDataset(foundDataset || undefined);
   };
 
   return (
@@ -112,7 +103,7 @@ export const DatasetSelector = ({
             iconSide="right"
             onClick={togglePopover}
           >
-            <EuiIcon type={datasetIcon} className="datasetSelector__icon" />
+            <EuiIcon type={datasetIcon} className="dataSetNavigator__icon" />
             {selectedDataset?.title ?? 'Select data'}
           </EuiButtonEmpty>
         </EuiToolTip>
@@ -149,7 +140,7 @@ export const DatasetSelector = ({
         >
           <FormattedMessage
             id="data.datasetSelector.advancedButton"
-            defaultMessage="View all available categories"
+            defaultMessage="View all available data"
           />
         </EuiButtonEmpty>
       </EuiPopoverTitle>

@@ -2,14 +2,11 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
 import { BehaviorSubject } from 'rxjs';
 import { CoreStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { skip } from 'rxjs/operators';
 import {
   Dataset,
-  IndexPattern,
-  UI_SETTINGS,
   DEFAULT_DATA,
   DataStructure,
   CachedDataStructure,
@@ -21,6 +18,9 @@ import { IndexPatternsContract } from '../../../index_patterns';
 import { indexPatternHandlerConfig, indexHandlerConfig } from './lib';
 import { DatasetHandlerConfig } from './types';
 
+/**
+ * Manages datasets and their associated handlers.
+ */
 export class DatasetManager {
   private dataset$: BehaviorSubject<Dataset | undefined>;
   private indexPatterns?: IndexPatternsContract;
@@ -28,8 +28,12 @@ export class DatasetManager {
   private dataStructureCache: DataStructureCache;
   private datasetHandlers: Map<string, DatasetHandlerConfig>;
   private dataStructuresMap: Map<string, DataStructure>;
-  private categoryDataStructures: DataStructure[] = [];
 
+  /**
+   * Creates an instance of DatasetManager.
+   * @param uiSettings - The CoreStart's uiSettings.
+   * @param savedObjects - The SavedObjectsClientContract.
+   */
   constructor(private readonly uiSettings: CoreStart['uiSettings']) {
     this.dataset$ = new BehaviorSubject<Dataset | undefined>(undefined);
     this.dataStructureCache = createDataStructureCache();
@@ -42,140 +46,90 @@ export class DatasetManager {
    * Registers default handlers for index patterns and indices.
    */
   private registerDefaultHandlers() {
-    this.registerDatasetHandler(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN, indexPatternHandlerConfig);
-    this.registerDatasetHandler(DEFAULT_DATA.SET_TYPES.INDEX, indexHandlerConfig);
+    this.registerDatasetHandler(indexPatternHandlerConfig);
+    this.registerDatasetHandler(indexHandlerConfig);
   }
 
   /**
-   * Registers a dataset handler for a specific type.
-   * @param {string} type - The type of dataset.
-   * @param {DatasetHandlerConfig} handler - The handler configuration.
+   * Registers a dataset handler.
+   * @param handler - The dataset handler configuration.
    */
-  public registerDatasetHandler(type: string, handler: DatasetHandlerConfig) {
-    this.datasetHandlers.set(type, handler);
+  public registerDatasetHandler(handler: DatasetHandlerConfig) {
+    this.datasetHandlers.set(handler.id, handler);
   }
 
   /**
-   * Gets all CATEGORY type data structures.
-   * @returns {DataStructure[]} An array of CATEGORY type data structures.
+   * Gets all registered dataset handlers.
+   * @returns An array of dataset handler configurations.
    */
-  public getCategoryDataStructures(): DataStructure[] {
-    return this.categoryDataStructures;
+  public getDatasetHandlers(): DatasetHandlerConfig[] {
+    return Array.from(this.datasetHandlers.values());
   }
 
   /**
-   * Fetch all CATEGORY type data structures.
-   * @returns {DataStructure[]} An array of CATEGORY type data structures.
+   * Gets a dataset handler by its ID.
+   * @param id - The ID of the dataset handler.
+   * @returns The dataset handler configuration, or undefined if not found.
    */
-  public async fetchCategoryDataStructures(
-    savedObjects: SavedObjectsClientContract,
-    rootDataStructure: DataStructure
-  ): Promise<DataStructure[]> {
-    const categoryPromises = Array.from(this.datasetHandlers.values()).map((datasetHandler) => {
-      const category = datasetHandler.fetchOptions(savedObjects, rootDataStructure);
-      return category;
-    });
-    const categories = await Promise.all(categoryPromises);
-    this.categoryDataStructures = categories.flat();
-    return this.categoryDataStructures;
-  }
-
-  /**
-   * @returns {boolean} if the data structure is the leaf data structure, where it has no children
-   */
-  public isLeafDataStructure(dataStructure: DataStructure): boolean {
-    if (
-      dataStructure.type === DEFAULT_DATA.STRUCTURES.ROOT.type ||
-      dataStructure.type === DEFAULT_DATA.STRUCTURES.CATEGORY.type
-    ) {
-      return false;
-    }
-    const handler = this.datasetHandlers.get(dataStructure.type);
-
-    if (!handler) {
-      throw new Error(`No handler found for type: ${dataStructure.type}`);
-    }
-
-    return handler.isLeaf(dataStructure);
-  }
-
-  /**
-   * @returns {boolean} if the data structure is the leaf data structure, where it has no children
-   */
-  public toDataset(dataStructure: DataStructure): Dataset {
-    const handler = this.datasetHandlers.get(dataStructure.type);
-
-    if (!handler) {
-      throw new Error(`No handler found for type: ${dataStructure.type}`);
-    }
-
-    return handler.toDataset(dataStructure);
+  public getDatasetHandlerById(id: string): DatasetHandlerConfig | undefined {
+    return this.datasetHandlers.get(id);
   }
 
   /**
    * Fetches options for a given data structure.
-   * @param {DataStructure} dataStructure - The data structure to fetch options for.
-   * @returns {Promise<DataStructure[]>} A promise that resolves to an array of child data structures.
+   * @param dataStructure - The data structure to fetch options for.
+   * @returns A promise that resolves to a DatasetHandlerFetchResponse.
    */
-  public async fetchOptions(
+  public fetchOptions(
     savedObjects: SavedObjectsClientContract,
-    dataStructure: DataStructure
-  ): Promise<DataStructure[]> {
-    switch (dataStructure.type) {
-      case DEFAULT_DATA.STRUCTURES.ROOT.type: {
-        const categories = await this.fetchCategoryDataStructures(savedObjects, dataStructure);
-        return categories;
-      }
-      case DEFAULT_DATA.STRUCTURES.CATEGORY.type: {
-        return dataStructure.children || [];
-      }
-      case DEFAULT_DATA.STRUCTURES.DATASET.type:
-        const category = this.findDataStructureCategory(dataStructure);
-
-        if (!category) {
-          throw new Error(`No category found for dataset: ${dataStructure.id}`);
-        }
-
-        const dataset = this.datasetHandlers.get(dataStructure.type)?.toDataset(dataStructure);
-        this.setDataset(dataset);
-        return [DEFAULT_DATA.STRUCTURES.NULL];
-      default:
-        const handler = this.datasetHandlers.get(dataStructure.type);
-        if (!handler) {
-          throw new Error(`No handler registered for type: ${dataStructure.type}`);
-        }
-
-        if (handler.isLeaf(dataStructure)) {
-          return [DEFAULT_DATA.STRUCTURES.NULL];
-        }
-
-        const cachedChildren = this.getCachedChildren(dataStructure.id);
-        if (cachedChildren.length > 0) {
-          return cachedChildren;
-        }
-
-        if (!this.indexPatterns) {
-          throw new Error('IndexPatterns not initialized');
-        }
-
-        const children = await handler.fetchOptions(savedObjects, dataStructure);
-        this.cacheDataStructures(children);
-        return children;
-    }
+    path: DataStructure[]
+  ): Promise<DataStructure> {
+    const dataStructure = path[path.length - 1];
+    const handler = this.getHandlerForDataStructure(dataStructure);
+    return handler.fetch(savedObjects, path);
   }
 
-  private findDataStructureCategory(dataStructure: DataStructure): DataStructure | null {
-    let current: DataStructure | undefined = dataStructure;
-    while (current && current.type !== DEFAULT_DATA.STRUCTURES.CATEGORY.type) {
-      current = current.parent;
+  /**
+   * Checks if a given data structure is a leaf node.
+   * @param dataStructure - The data structure to check.
+   * @returns True if the data structure is a leaf node, false otherwise.
+   */
+  public isLeafDataStructure(dataStructure: DataStructure): boolean {
+    const handler = this.getHandlerForDataStructure(dataStructure);
+    return handler.id === dataStructure.type;
+  }
+
+  /**
+   * Converts a data structure to a dataset.
+   * @param dataStructure - The data structure to convert.
+   * @returns A promise that resolves to a BaseDataset.
+   */
+  public toDataset(path: DataStructure[]): Dataset {
+    const dataStructure = path[path.length - 1];
+    const handler = this.getHandlerForDataStructure(dataStructure);
+    return handler.toDataset(path);
+  }
+
+  /**
+   * Gets the appropriate handler for a given data structure.
+   * @param dataStructure - The data structure to get the handler for.
+   * @returns The dataset handler configuration.
+   * @throws Error if no handler is found.
+   */
+  private getHandlerForDataStructure(dataStructure: DataStructure): DatasetHandlerConfig {
+    const handler =
+      this.datasetHandlers.get(dataStructure.type) ||
+      this.datasetHandlers.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
+    if (!handler) {
+      throw new Error(`No handler found for type: ${dataStructure.type}`);
     }
-    return current || null;
+    return handler;
   }
 
   /**
    * Gets cached children for a given parent ID.
-   * @param {string} parentId - The ID of the parent data structure.
-   * @returns {DataStructure[]} An array of child data structures.
+   * @param parentId - The ID of the parent data structure.
+   * @returns An array of child data structures.
    */
   private getCachedChildren(parentId: string): DataStructure[] {
     const cachedStructure = this.dataStructureCache.get(parentId);
@@ -188,7 +142,7 @@ export class DatasetManager {
 
   /**
    * Caches an array of data structures.
-   * @param {DataStructure[]} dataStructures - The data structures to cache.
+   * @param dataStructures - The data structures to cache.
    */
   private cacheDataStructures(dataStructures: DataStructure[]) {
     dataStructures.forEach((ds) => {
@@ -196,11 +150,6 @@ export class DatasetManager {
       this.dataStructuresMap.set(fullId, ds);
       const cachedDs = toCachedDataStructure(ds);
       this.dataStructureCache.set(fullId, cachedDs);
-
-      // If the data structure is a CATEGORY type, add it to the categoryDataStructures array
-      if (ds.type === 'CATEGORY') {
-        this.categoryDataStructures.push(ds);
-      }
     });
   }
 
@@ -210,40 +159,26 @@ export class DatasetManager {
    * @returns The full ID of the data structure.
    */
   private getFullId(dataStructure: DataStructure): string {
-    switch (dataStructure.type) {
-      case DEFAULT_DATA.STRUCTURES.ROOT.type:
-      case DEFAULT_DATA.STRUCTURES.CATEGORY.type:
-        return dataStructure.id;
-      default:
-        if (!dataStructure.parent) {
-          return dataStructure.id;
-        }
-        const parentId = this.getFullId(dataStructure.parent);
-        const separator =
-          dataStructure.parent.type === DEFAULT_DATA.STRUCTURES.DATA_SOURCE.type ? '::' : '.';
-        return `${parentId}${separator}${dataStructure.id}`;
+    if (!dataStructure.parent) {
+      return dataStructure.id;
     }
+    const parentId = this.getFullId(dataStructure.parent);
+    const separator =
+      dataStructure.parent.type === DEFAULT_DATA.STRUCTURES.DATA_SOURCE.type ? '::' : '.';
+    return `${parentId}${separator}${dataStructure.id}`;
   }
+
   /**
    * Sets the current dataset.
-   * @param {Dataset | undefined} dataset - The dataset to set.
+   * @param dataset - The dataset to set.
    */
   public setDataset(dataset: Dataset | undefined) {
-    if (!this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) return;
     this.dataset$.next(dataset);
-
-    if (dataset) {
-      const handler = this.datasetHandlers.get(dataset.type);
-      if (handler) {
-        const dataStructure = handler.toDataStructure(dataset);
-        this.cacheDataStructures([dataStructure]);
-      }
-    }
   }
 
   /**
    * Gets the current dataset.
-   * @returns {Dataset | undefined} The current dataset.
+   * @returns The current dataset, or undefined if not set.
    */
   public getDataset(): Dataset | undefined {
     return this.dataset$.getValue();
@@ -251,7 +186,7 @@ export class DatasetManager {
 
   /**
    * Gets an observable of dataset updates.
-   * @returns {Observable<Dataset | undefined>} An observable of dataset updates.
+   * @returns An observable of dataset updates.
    */
   public getUpdates$() {
     return this.dataset$.asObservable().pipe(skip(1));
@@ -259,8 +194,8 @@ export class DatasetManager {
 
   /**
    * Gets a cached data structure by ID.
-   * @param {string} id - The ID of the data structure to retrieve.
-   * @returns {CachedDataStructure | undefined} The cached data structure, if found.
+   * @param id - The ID of the data structure to retrieve.
+   * @returns The cached data structure, if found.
    */
   public getCachedDataStructure(id: string): CachedDataStructure | undefined {
     return this.dataStructureCache.get(id);
@@ -268,53 +203,30 @@ export class DatasetManager {
 
   /**
    * Clears the data structure cache.
-   * @param {string} [id] - The ID of the specific data structure to clear. If not provided, clears all.
+   * @param id - The ID of the specific data structure to clear. If not provided, clears all.
    */
   public clearDataStructureCache(id?: string) {
     if (id) {
       this.dataStructureCache.clear(id);
       this.dataStructuresMap.delete(id);
-      this.categoryDataStructures = this.categoryDataStructures.filter((ds) => ds.id !== id);
     } else {
       this.dataStructureCache.clearAll();
       this.dataStructuresMap.clear();
-      this.categoryDataStructures = [];
     }
   }
 
   /**
    * Initializes the DatasetManager with index patterns.
-   * @param {IndexPatternsContract} indexPatterns - The index patterns contract.
+   * @param indexPatterns - The index patterns contract.
    */
   public init = async (indexPatterns: IndexPatternsContract) => {
-    if (!this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) return;
     this.indexPatterns = indexPatterns;
     this.defaultDataset = await this.fetchDefaultDataset();
   };
 
   /**
-   * Initializes the DatasetManager with an index pattern.
-   * @param {IndexPattern | null} indexPattern - The index pattern to initialize with.
-   */
-  public initWithIndexPattern = (indexPattern: IndexPattern | null) => {
-    if (!this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) return;
-    if (!indexPattern || !indexPattern.id) {
-      return undefined;
-    }
-
-    const handler = this.datasetHandlers.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
-    if (handler) {
-      this.defaultDataset = handler.toDataset({
-        id: indexPattern.id,
-        title: indexPattern.title,
-        type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-      });
-    }
-  };
-
-  /**
    * Gets the default dataset.
-   * @returns {Dataset | undefined} The default dataset.
+   * @returns The default dataset, or undefined if not set.
    */
   public getDefaultDataset = () => {
     return this.defaultDataset;
@@ -322,7 +234,7 @@ export class DatasetManager {
 
   /**
    * Fetches the default dataset.
-   * @returns {Promise<Dataset | undefined>} A promise that resolves to the default dataset.
+   * @returns A promise that resolves to the default dataset, or undefined if not found.
    */
   public fetchDefaultDataset = async (): Promise<Dataset | undefined> => {
     const defaultIndexPatternId = this.uiSettings.get('defaultIndex');
@@ -337,11 +249,14 @@ export class DatasetManager {
 
     const handler = this.datasetHandlers.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
     if (handler) {
-      return handler.toDataset({
-        id: indexPattern.id,
-        title: indexPattern.title,
-        type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-      });
+      const dataset = await handler.toDataset([
+        {
+          id: indexPattern.id,
+          title: indexPattern.title,
+          type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+        },
+      ]);
+      return { ...dataset, timeFieldName: indexPattern.timeFieldName };
     }
 
     return undefined;
