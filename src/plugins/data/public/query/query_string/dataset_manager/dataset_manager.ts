@@ -13,6 +13,7 @@ import {
   DataStructureCache,
   toCachedDataStructure,
   createDataStructureCache,
+  DatasetField,
 } from '../../../../common';
 import { IndexPatternsContract } from '../../../index_patterns';
 import { indexPatternHandlerConfig, indexHandlerConfig } from './lib';
@@ -172,7 +173,22 @@ export class DatasetManager {
    * Sets the current dataset.
    * @param dataset - The dataset to set.
    */
-  public setDataset(dataset: Dataset | undefined) {
+  public async setDataset(dataset: Dataset | undefined, fields?: DatasetField[]) {
+    if (dataset) {
+      const spec = {
+        ...dataset,
+        fields: undefined,
+        dataSourceRef: dataset.dataSource
+          ? {
+              id: dataset.dataSource.id!,
+              name: dataset.dataSource.title,
+              type: dataset.dataSource.type,
+            }
+          : undefined,
+      };
+      const temporaryIndexPattern = await this.indexPatterns!.create(spec, true);
+      this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
+    }
     this.dataset$.next(dataset);
   }
 
@@ -249,7 +265,7 @@ export class DatasetManager {
 
     const handler = this.datasetHandlers.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
     if (handler) {
-      const dataset = await handler.toDataset([
+      const dataset = handler.toDataset([
         {
           id: indexPattern.id,
           title: indexPattern.title,

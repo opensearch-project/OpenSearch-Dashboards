@@ -32,6 +32,7 @@ export const AdvancedSelector = ({
     {
       ...DEFAULT_DATA.STRUCTURES.ROOT,
       columnHeader: 'Select Data',
+      isLeaf: false,
       children: datasetManager.getDatasetHandlers().map(
         (handler) =>
           ({

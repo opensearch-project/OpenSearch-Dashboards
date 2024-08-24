@@ -67,7 +67,7 @@ export const DatasetExplorer = ({
     setPath([...newPath, nextDataStructure]);
   };
 
-  const columnCount = path[path.length - 1]?.isLeaf ? path.length + 1 : path.length;
+  const columnCount = !path[path.length - 1]?.isLeaf ? path.length + 1 : path.length;
 
   return (
     <>
@@ -103,7 +103,7 @@ export const DatasetExplorer = ({
         >
           {path.map((current, index) => {
             const isLast = index === path.length - 1;
-            const isFinal = isLast && (!current.children || current.children.length === 0);
+            const isFinal = isLast && current.isLeaf;
             return (
               <div
                 key={current.id}
@@ -151,7 +151,7 @@ export const DatasetExplorer = ({
               </div>
             );
           })}
-          {path[path.length - 1]?.isLeaf && <LoadingEmptyColumn isLoading={loading} />}
+          {!!!path[path.length - 1]?.isLeaf && <LoadingEmptyColumn isLoading={loading} />}
         </div>
       </EuiModalBody>
       <EuiModalFooter>
