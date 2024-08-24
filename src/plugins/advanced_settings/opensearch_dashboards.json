@@ -4,6 +4,6 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["management","navigation"],
-  "optionalPlugins": ["home"],
+  "optionalPlugins": ["home", "contentManagement"],
   "requiredBundles": ["opensearchDashboardsReact", "home"]
 }

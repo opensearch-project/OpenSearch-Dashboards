@@ -71,6 +71,7 @@ import {
   registerAnalyticsAllOverviewContent,
   setAnalyticsAllOverviewSection,
 } from './components/use_case_overview/setup_overview';
+import { DefaultWorkspaceList } from './components/workspace_list/default_workspace';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -628,6 +629,9 @@ export class WorkspacePlugin
       // register get started card in new home page
       this.registerGetStartedCardToNewHome(core, contentManagement);
 
+      // register workspace list to user settings page
+      this.registerWorkspaceListToUserSettings(core, contentManagement, navigation);
+
       // set breadcrumbs enricher for workspace
       this.breadcrumbsSubscription = enrichBreadcrumbsWithWorkspace(core);
 
@@ -655,6 +659,34 @@ export class WorkspacePlugin
           render: () => React.createElement(WorkspaceListCard, { core }),
         }),
         getTargetArea: () => HOME_CONTENT_AREAS.SERVICE_CARDS,
+      });
+    }
+  }
+
+  private async registerWorkspaceListToUserSettings(
+    coreStart: CoreStart,
+    contentManagement: ContentManagementPluginStart,
+    navigation: NavigationPublicPluginStart
+  ) {
+    if (contentManagement) {
+      const services: Services = {
+        ...coreStart,
+        workspaceClient: undefined,
+        navigationUI: navigation.ui,
+      };
+      contentManagement.registerContentProvider({
+        id: 'default_workspace_list',
+        getContent: () => ({
+          id: 'default_workspace_list',
+          kind: 'custom',
+          order: 0,
+          render: () =>
+            React.createElement(DefaultWorkspaceList, {
+              services,
+              registeredUseCases$: this.registeredUseCases$,
+            }),
+        }),
+        getTargetArea: () => 'user_settings/default_workspace',
       });
     }
   }

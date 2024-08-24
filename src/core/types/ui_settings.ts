@@ -56,6 +56,8 @@ export interface DeprecationSettings {
   docLinksKey: string;
 }
 
+export type SettingScope = 'global' | 'user';
+
 /**
  * UiSettings parameters defined by the plugins.
  * @public
@@ -63,6 +65,10 @@ export interface DeprecationSettings {
 export interface UiSettingsParams<T = unknown> {
   /** title in the UI */
   name?: string;
+  /**
+   * scope of the setting item
+   */
+  scope?: SettingScope | SettingScope[];
   /** default value to fall back to if a user doesn't provide any */
   value?: T;
   /** description provided to a user in UI */

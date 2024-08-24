@@ -172,6 +172,7 @@ export class AdvancedSettingsComponent extends Component<
     const all = config.getAll();
     const userSettingsEnabled = config.get('theme:enableUserControl');
     return Object.entries(all)
+      .filter((setting) => setting[1].scope !== 'user')
       .map((setting) => {
         return toEditableConfig({
           def: setting[1],

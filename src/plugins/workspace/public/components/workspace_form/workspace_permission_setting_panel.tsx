@@ -13,16 +13,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { WorkspaceFormError, WorkspacePermissionSetting } from './types';
-import {
-  WorkspacePermissionItemType,
-  optionIdToWorkspacePermissionModesMap,
-  PermissionModeId,
-} from './constants';
+import { WorkspacePermissionItemType, optionIdToWorkspacePermissionModesMap } from './constants';
 import {
   WorkspacePermissionSettingInput,
   WorkspacePermissionSettingInputProps,
 } from './workspace_permission_setting_input';
 import { generateNextPermissionSettingsId } from './utils';
+import { PermissionModeId } from '../../../common/types';
 
 export interface WorkspacePermissionSettingPanelProps {
   errors?: { [key: number]: WorkspaceFormError };

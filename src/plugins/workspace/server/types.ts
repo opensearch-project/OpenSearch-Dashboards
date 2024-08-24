@@ -14,9 +14,10 @@ import {
   Permissions,
   UiSettingsServiceStart,
 } from '../../../core/server';
-
+import { PermissionModeId } from '../common/types';
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
+  permissionMode?: PermissionModeId;
 }
 import { WorkspacePermissionMode } from '../common/constants';
 
@@ -82,7 +83,7 @@ export interface IWorkspaceClientImpl {
   ): Promise<
     IResponse<
       {
-        workspaces: WorkspaceAttribute[];
+        workspaces: WorkspaceAttributeWithPermission[];
       } & Pick<SavedObjectsFindResponse, 'page' | 'per_page' | 'total'>
     >
   >;

@@ -11,7 +11,7 @@ import { ContentManagementPluginStart } from '../../../plugins/content_managemen
 import { DataSourceAttributes } from '../../../plugins/data_source/common/data_sources';
 
 export type Services = CoreStart & {
-  workspaceClient: WorkspaceClient;
+  workspaceClient: WorkspaceClient | undefined;
   dataSourceManagement?: DataSourceManagementPluginSetup;
   navigationUI?: NavigationPublicPluginStart['ui'];
   contentManagement?: ContentManagementPluginStart;

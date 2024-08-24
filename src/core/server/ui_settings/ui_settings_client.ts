@@ -36,6 +36,7 @@ import { Logger } from '../logging';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 import { IUiSettingsClient, UiSettingsParams, PublicUiSettingsParams } from './types';
 import { CannotOverrideError } from './ui_settings_errors';
+import { HttpServiceStart } from '..';
 
 export interface UiSettingsServiceOptions {
   type: string;
@@ -45,11 +46,13 @@ export interface UiSettingsServiceOptions {
   overrides?: Record<string, any>;
   defaults?: Record<string, UiSettingsParams>;
   log: Logger;
+  httpStart?: HttpServiceStart;
 }
 
 interface ReadOptions {
   ignore401Errors?: boolean;
   autoCreateOrUpgradeIfMissing?: boolean;
+  userLevel?: boolean;
 }
 
 interface UserProvidedValue<T = unknown> {
@@ -61,6 +64,9 @@ type UiSettingsRawValue = UiSettingsParams & UserProvidedValue;
 
 type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
 type UiSettingsRaw = Record<string, UiSettingsRawValue>;
+
+// identifier for current user
+export const CURRENT_USER = '<current_user>';
 
 export class UiSettingsClient implements IUiSettingsClient {
   private readonly type: UiSettingsServiceOptions['type'];
@@ -116,21 +122,36 @@ export class UiSettingsClient implements IUiSettingsClient {
   }
 
   async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
+    // user provided for global
     const userProvided: UserProvided<T> = this.onReadHook<T>(await this.read());
+    // personal level settings
+    const personalLevelProvided: UserProvided<T> = this.onReadHook<T>(
+      await this.read({ userLevel: true })
+    );
 
     // write all overridden keys, dropping the userValue is override is null and
     // adding keys for overrides that are not in saved object
     for (const [key, value] of Object.entries(this.overrides)) {
       userProvided[key] =
         value === null ? { isOverridden: true } : { isOverridden: true, userValue: value };
+
+      personalLevelProvided[key] =
+        value === null ? { isOverridden: true } : { isOverridden: true, userValue: value };
     }
 
-    return userProvided;
+    return { ...userProvided, ...personalLevelProvided };
   }
 
   async setMany(changes: Record<string, any>) {
     this.onWriteHook(changes);
-    await this.write({ changes });
+    // group changes into by different scope
+    const [global, personal] = this.groupChanges(changes);
+    if (global && Object.keys(global).length > 0) {
+      await this.write({ changes: global });
+    }
+    if (personal && Object.keys(personal).length > 0) {
+      await this.write({ changes: personal, userLevel: true });
+    }
   }
 
   async set(key: string, value: any) {
@@ -201,16 +222,45 @@ export class UiSettingsClient implements IUiSettingsClient {
     return filteredValues;
   }
 
+  /**
+   * group change into different scopes
+   * @param changes ui setting changes
+   * @returns [global, user]
+   */
+  private groupChanges(changes: Record<string, any>) {
+    const userLevelKeys = [] as string[];
+    Object.entries(this.defaults).forEach(([key, value]) => {
+      if (value.scope === 'user' || (Array.isArray(value.scope) && value.scope.includes('user'))) {
+        userLevelKeys.push(key);
+      }
+    });
+    const userChanges = {} as Record<string, any>;
+    const globalChanges = {} as Record<string, any>;
+
+    Object.entries(changes).forEach(([key, val]) => {
+      if (userLevelKeys.includes(key)) {
+        userChanges[key] = val;
+      } else {
+        globalChanges[key] = val;
+      }
+    });
+
+    return [globalChanges, userChanges];
+  }
+
   private async write({
     changes,
     autoCreateOrUpgradeIfMissing = true,
+    userLevel = false,
   }: {
     changes: Record<string, any>;
     autoCreateOrUpgradeIfMissing?: boolean;
+    userLevel?: boolean;
   }) {
     changes = this.translateChanges(changes, 'timeline', 'timelion');
     try {
-      await this.savedObjectsClient.update(this.type, this.id, changes);
+      const docId = userLevel ? `${CURRENT_USER}_${this.id}` : this.id;
+      await this.savedObjectsClient.update(this.type, docId, changes);
     } catch (error) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(error) || !autoCreateOrUpgradeIfMissing) {
         throw error;
@@ -222,11 +272,13 @@ export class UiSettingsClient implements IUiSettingsClient {
         buildNum: this.buildNum,
         log: this.log,
         handleWriteErrors: false,
+        userLevel,
       });
 
       await this.write({
         changes,
         autoCreateOrUpgradeIfMissing: false,
+        userLevel,
       });
     }
   }
@@ -234,9 +286,14 @@ export class UiSettingsClient implements IUiSettingsClient {
   private async read({
     ignore401Errors = false,
     autoCreateOrUpgradeIfMissing = true,
+    userLevel = false,
   }: ReadOptions = {}): Promise<Record<string, any>> {
+    let docId = this.id;
+    if (userLevel) {
+      docId = `${CURRENT_USER}_${this.id}`;
+    }
     try {
-      const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, this.id);
+      const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, docId);
       return this.translateChanges(resp.attributes, 'timelion', 'timeline');
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error) && autoCreateOrUpgradeIfMissing) {
@@ -246,12 +303,14 @@ export class UiSettingsClient implements IUiSettingsClient {
           buildNum: this.buildNum,
           log: this.log,
           handleWriteErrors: true,
+          userLevel,
         });
 
         if (!failedUpgradeAttributes) {
           return await this.read({
             ignore401Errors,
             autoCreateOrUpgradeIfMissing: false,
+            userLevel,
           });
         }
 

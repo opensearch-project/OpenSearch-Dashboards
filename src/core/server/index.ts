@@ -358,6 +358,7 @@ export {
   StringValidation,
   StringValidationRegex,
   StringValidationRegexString,
+  CURRENT_USER,
 } from './ui_settings';
 
 export {

@@ -14,12 +14,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { WorkspacePermissionMode } from '../../../common/constants';
-import {
-  WorkspacePermissionItemType,
-  optionIdToWorkspacePermissionModesMap,
-  PermissionModeId,
-} from './constants';
+import { WorkspacePermissionItemType, optionIdToWorkspacePermissionModesMap } from './constants';
 import { getPermissionModeId } from './utils';
+import { PermissionModeId } from '../../../common/types';
 
 const permissionModeOptions: Array<EuiSuperSelectOption<any>> = [
   {
