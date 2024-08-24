@@ -61,7 +61,7 @@ export const indexPatternHandlerConfig: DatasetHandlerConfig = {
       ...dataStructure,
       columnHeader: 'Index patterns',
       children: indexPatterns,
-      isLeaf: false,
+      isLeaf: true,
     };
   },
 
