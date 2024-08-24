@@ -43,40 +43,12 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     data.indexPatterns,
   ]);
 
-  const createTempIndexPattern = useCallback(
-    async (dataSetFromState: Dataset) => {
-      try {
-        const tempIndexPattern = await data.indexPatterns.create(
-          {
-            id: `${dataSetFromState.dataSource?.id || ''}::${dataSetFromState.title}`,
-            title: dataSetFromState.title,
-            dataSourceRef: dataSetFromState.dataSource as SavedObjectReference,
-            type: dataSetFromState.type,
-            timeFieldName: dataSetFromState.timeFieldName,
-          },
-          true
-        );
-        data.indexPatterns.saveToCache(tempIndexPattern.id!, tempIndexPattern);
-        return tempIndexPattern;
-      } catch (error) {
-        return null;
-      }
-    },
-    [data.indexPatterns]
-  );
-
   useEffect(() => {
     let isMounted = true;
 
     const handleIndexPattern = async () => {
       if (isQueryEnhancementEnabled && dataset) {
-        let pattern;
-
-        if (dataset.type === DEFAULT_QUERY.DATASET.TYPE) {
-          pattern = await fetchIndexPatternDetails(dataset.id);
-        } else {
-          pattern = await createTempIndexPattern(dataset);
-        }
+        const pattern = await data.indexPatterns.get(dataset.id, true);
 
         if (isMounted && pattern) {
           setIndexPattern(pattern);
@@ -117,7 +89,6 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     isQueryEnhancementEnabled,
     indexPatternIdFromState,
     fetchIndexPatternDetails,
-    createTempIndexPattern,
     data.indexPatterns,
     store,
     toastNotifications,
