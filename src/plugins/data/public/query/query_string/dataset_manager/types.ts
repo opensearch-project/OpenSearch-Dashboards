@@ -9,7 +9,7 @@ import { BaseDataset, Dataset, DatasetField, DataStructure } from '../../../../c
 /**
  * Configuration for handling dataset operations.
  */
-export interface DatasetHandlerConfig {
+export interface DatasetTypeConfig {
   /** Unique identifier for the dataset handler */
   id: string;
   /** Human-readable title for the dataset type */

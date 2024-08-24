@@ -18,7 +18,7 @@ import {
 } from '../../../../common';
 import { IndexPatternsContract } from '../../../index_patterns';
 import { indexPatternHandlerConfig, indexHandlerConfig } from './lib';
-import { DatasetHandlerConfig } from './types';
+import { DatasetTypeConfig } from './types';
 
 /**
  * Manages datasets and their associated handlers.
@@ -28,7 +28,7 @@ export class DatasetManager {
   private indexPatterns?: IndexPatternsContract;
   private defaultDataset?: Dataset;
   private dataStructureCache: DataStructureCache;
-  private datasetHandlers: Map<string, DatasetHandlerConfig>;
+  private datasetHandlers: Map<string, DatasetTypeConfig>;
   private dataStructuresMap: Map<string, DataStructure>;
 
   /**
@@ -56,7 +56,7 @@ export class DatasetManager {
    * Registers a dataset handler.
    * @param handler - The dataset handler configuration.
    */
-  public registerDatasetHandler(handler: DatasetHandlerConfig) {
+  public registerDatasetHandler(handler: DatasetTypeConfig) {
     this.datasetHandlers.set(handler.id, handler);
   }
 
@@ -64,7 +64,7 @@ export class DatasetManager {
    * Gets all registered dataset handlers.
    * @returns An array of dataset handler configurations.
    */
-  public getDatasetHandlers(): DatasetHandlerConfig[] {
+  public getDatasetHandlers(): DatasetTypeConfig[] {
     return Array.from(this.datasetHandlers.values());
   }
 
@@ -73,7 +73,7 @@ export class DatasetManager {
    * @param id - The ID of the dataset handler.
    * @returns The dataset handler configuration, or undefined if not found.
    */
-  public getDatasetHandlerById(id: string): DatasetHandlerConfig | undefined {
+  public getDatasetHandlerById(id: string): DatasetTypeConfig | undefined {
     return this.datasetHandlers.get(id);
   }
 
@@ -118,7 +118,7 @@ export class DatasetManager {
    * @returns The dataset handler configuration.
    * @throws Error if no handler is found.
    */
-  private getHandlerForDataStructure(dataStructure: DataStructure): DatasetHandlerConfig {
+  private getHandlerForDataStructure(dataStructure: DataStructure): DatasetTypeConfig {
     const handler =
       this.datasetHandlers.get(dataStructure.type) ||
       this.datasetHandlers.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);

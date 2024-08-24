@@ -5,10 +5,10 @@
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { DEFAULT_DATA, DataStructure, DatasetField, Dataset } from '../../../../../common';
-import { DatasetHandlerConfig } from '../types';
+import { DatasetTypeConfig } from '../types';
 import { getIndexPatterns } from '../../../../services';
 
-export const indexPatternHandlerConfig: DatasetHandlerConfig = {
+export const indexPatternHandlerConfig: DatasetTypeConfig = {
   id: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
   title: 'Index Patterns',
   meta: {

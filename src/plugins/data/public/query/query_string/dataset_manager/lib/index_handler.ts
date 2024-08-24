@@ -13,7 +13,7 @@ import {
   DatasetField,
   Dataset,
 } from '../../../../../common';
-import { DatasetHandlerConfig } from '../types';
+import { DatasetTypeConfig } from '../types';
 import { getSearchService, getIndexPatterns } from '../../../../services';
 
 const INDEX_INFO = {
@@ -33,7 +33,7 @@ const meta = {
   tooltip: INDEX_INFO.TITLE,
 } as DataStructureFeatureMeta;
 
-export const indexHandlerConfig: DatasetHandlerConfig = {
+export const indexHandlerConfig: DatasetTypeConfig = {
   id: DEFAULT_DATA.SET_TYPES.INDEX,
   title: 'Indexes',
   meta: {
