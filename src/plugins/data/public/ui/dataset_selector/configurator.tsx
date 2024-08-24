@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { BaseDataset, Dataset, DataStructure } from '../../../common';
+import { BaseDataset, Dataset, DatasetField, DataStructure } from '../../../common';
 import { getQueryService, getIndexPatterns } from '../../services';
 
 export const Configurator = ({
@@ -39,7 +39,8 @@ export const Configurator = ({
   const indexPatternsService = getIndexPatterns();
 
   const [dataset, setDataset] = useState<Dataset>(baseDataset);
-  const [timeFields, setTimeFields] = useState<string[]>();
+  const [fields, setFields] = useState<DatasetField[]>();
+  const [timeFields, setTimeFields] = useState<DatasetField[]>();
   const [timeField, setTimeField] = useState<string | undefined>(dataset.timeFieldName);
   // const [selectedLanguage, setSelectedLanguage] = useState<string>(
   //   languageManager.getDefaultLanguage(dataset.type)
@@ -47,11 +48,13 @@ export const Configurator = ({
 
   useEffect(() => {
     const fetchFields = async () => {
-      const fields = await datasetManager
+      const datasetFields = await datasetManager
         .getDatasetHandlerById(baseDataset.type)
         ?.fetchFields(baseDataset);
-      const dateFields = fields?.filter((field) => field.type === 'date');
-      setTimeFields(!dateFields ? [] : dateFields.map((field) => field.name));
+
+      setFields(datasetFields);
+      const dateFields = datasetFields?.filter((field) => field.type === 'date');
+      setTimeFields(dateFields || []);
     };
 
     fetchFields();
@@ -102,7 +105,10 @@ export const Configurator = ({
             >
               <EuiSelect
                 options={[
-                  ...timeFields.map((field) => ({ text: field, value: field })),
+                  ...timeFields.map((field) => ({
+                    text: field.displayName || field.name,
+                    value: field.name,
+                  })),
                   { text: '-----', value: '', disabled: true },
                   { text: 'No time field', value: undefined },
                 ]}
@@ -147,7 +153,7 @@ export const Configurator = ({
             defaultMessage="Previous"
           />
         </EuiButton>
-        <EuiButton onClick={() => onConfirm(dataset)} fill>
+        <EuiButton onClick={() => onConfirm({ ...dataset, fields })} fill>
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"
             defaultMessage="Select Data"

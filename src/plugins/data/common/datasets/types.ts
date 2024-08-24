@@ -203,7 +203,7 @@ export interface BaseDataset {
   type: string;
   /** Optional reference to the data source */
   dataSource?: DataSource;
-  fields: DatasetField[];
+  fields?: DatasetField[];
 }
 
 /**
@@ -240,7 +240,7 @@ export interface BaseDataset {
  *   },
  * };
  */
-export interface Dataset extends Omit<BaseDataset, 'fields'> {
+export interface Dataset extends BaseDataset {
   /** Optional name of the field used for time-based operations */
   timeFieldName?: string;
   /** Optional language to default to from the language selector */
