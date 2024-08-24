@@ -20,7 +20,6 @@ import { useDiscoverContext } from '../context';
 import { useDispatch, setSavedQuery, useSelector } from '../../utils/state_management';
 
 import './discover_canvas.scss';
-import { useDatasetManager } from '../utils/use_dataset_manager';
 import { TopNavMenuItemRenderType } from '../../../../../navigation/public';
 
 export interface TopNavProps {

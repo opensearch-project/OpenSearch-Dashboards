@@ -39,11 +39,11 @@ export const sqlAsyncSearchStrategyProvider = (
     search: async (context, request: any, options) => {
       try {
         // Create job: this should return a queryId and sessionId
-        if (request?.body?.query?.qs) {
+        if (request?.body?.query?.query) {
           const df = request.body?.df;
           request.body = {
-            query: request.body.query.qs,
-            datasource: df?.meta?.queryConfig?.dataSourceName,
+            query: request.body.query.query,
+            datasource: request.body.query.dataset?.dataSource?.title,
             lang: SEARCH_STRATEGY.SQL,
             sessionId: df?.meta?.sessionId,
           };

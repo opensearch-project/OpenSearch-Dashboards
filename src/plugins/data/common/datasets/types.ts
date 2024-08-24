@@ -122,7 +122,7 @@ export interface DataStructure {
   /** Optional array of data structures of ancestors */
   path?: DataStructure[];
   hasNext?: boolean;
-  groupName?: string;
+  columnHeader?: string;
   /** Optional metadata for the data structure */
   meta?: DataStructureMeta;
 }
@@ -152,7 +152,6 @@ export interface DataStructureDataTypeMeta {
   type: DATA_STRUCTURE_META_TYPES.TYPE;
   icon: EuiIconProps;
   tooltip: string;
-  isLeaf?: boolean;
 }
 
 /**

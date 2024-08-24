@@ -34,22 +34,20 @@ export const Configurator = ({
   onPrevious: () => void;
 }) => {
   const queryService = getQueryService();
-  const datasetManager = queryService.queryString.getDatasetManager();
-  // const languageManager = queryService.queryString.getLanguageManager();
+  const queryString = queryService.queryString;
   const indexPatternsService = getIndexPatterns();
+  const languages = queryString.getDatasetType(baseDataset.type)?.supportedLanguages() || [];
 
   const [dataset, setDataset] = useState<Dataset>(baseDataset);
   const [fields, setFields] = useState<DatasetField[]>();
   const [timeFields, setTimeFields] = useState<DatasetField[]>();
   const [timeField, setTimeField] = useState<string | undefined>(dataset.timeFieldName);
-  // const [selectedLanguage, setSelectedLanguage] = useState<string>(
-  //   languageManager.getDefaultLanguage(dataset.type)
-  // );
+  const [language, setLanguage] = useState<string>(languages[0]);
 
   useEffect(() => {
     const fetchFields = async () => {
-      const datasetFields = await datasetManager
-        .getDatasetHandlerById(baseDataset.type)
+      const datasetFields = await queryString
+        .getDatasetType(baseDataset.type)
         ?.fetchFields(baseDataset);
 
       setFields(datasetFields);
@@ -58,9 +56,7 @@ export const Configurator = ({
     };
 
     fetchFields();
-  }, [baseDataset, datasetManager, indexPatternsService]);
-
-  // const supportedLanguages = languageManager.getSupportedLanguages(dataset.type);
+  }, [baseDataset, indexPatternsService, queryString]);
 
   return (
     <>
@@ -121,7 +117,7 @@ export const Configurator = ({
               />
             </EuiFormRow>
           )}
-          {/* <EuiFormRow
+          <EuiFormRow
             label={i18n.translate(
               'data.explorer.datasetSelector.advancedSelector.configurator.languageLabel',
               {
@@ -130,14 +126,14 @@ export const Configurator = ({
             )}
           >
             <EuiSelect
-              options={supportedLanguages.map((language) => ({
-                text: language,
-                value: language,
+              options={languages.map((languageId) => ({
+                text: languageId,
+                value: languageId,
               }))}
-              value={selectedLanguage}
-              onChange={(e) => setSelectedLanguage(e.target.value)}
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
             />
-          </EuiFormRow> */}
+          </EuiFormRow>
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
@@ -153,7 +149,7 @@ export const Configurator = ({
             defaultMessage="Previous"
           />
         </EuiButton>
-        <EuiButton onClick={() => onConfirm({ ...dataset, fields })} fill>
+        <EuiButton onClick={() => onConfirm(dataset)} fill>
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"
             defaultMessage="Select Data"

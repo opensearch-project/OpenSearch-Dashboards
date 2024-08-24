@@ -71,14 +71,9 @@ export const pplSearchStrategyProvider = (
       );
 
       try {
-        const requestParams = parseRequest(request.body.query.qs);
-        const source = requestParams?.map.get('source');
-        const { schema, meta } = request.body.df;
+        const { meta } = request.body.df;
 
-        request.body.query =
-          !schema || dataFrameHydrationStrategy === 'perQuery'
-            ? `source=${source} | head`
-            : requestParams.search;
+        request.body.query = request.query.query;
         const rawResponse: any = await pplFacet.describeQuery(context, request);
 
         if (!rawResponse.success) {
@@ -90,8 +85,8 @@ export const pplSearchStrategyProvider = (
         }
 
         const dataFrame = createDataFrame({
-          name: source,
-          schema: schema ?? rawResponse.data.schema,
+          name: request.query.dataset?.id,
+          schema: rawResponse.data.schema,
           meta,
           fields: getFields(rawResponse),
         });

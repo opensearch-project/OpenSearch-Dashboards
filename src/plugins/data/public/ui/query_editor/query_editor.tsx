@@ -97,8 +97,7 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   private getQueryString = () => {
     if (!this.props.query.query) {
-      const language = this.queryService.queryString.getLanguage(this.props.query.language);
-      return this.props.getQueryStringInitialValue?.(language!) ?? '';
+      return '';
     }
     return toUser(this.props.query.query);
   };
@@ -298,7 +297,7 @@ export default class QueryEditorUI extends Component<Props, State> {
 
     const languageSelector = (
       <QueryLanguageSelector
-        language={this.props.query.language}
+        query={this.props.query}
         anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
         onSelectLanguage={this.onSelectLanguage}
         appName={this.services.appName}

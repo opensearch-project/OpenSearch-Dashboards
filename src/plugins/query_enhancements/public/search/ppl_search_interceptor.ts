@@ -5,16 +5,14 @@
 
 import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
-import { catchError, concatMap } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import {
   DataFrameAggConfig,
-  getAggConfig,
   getRawDataFrame,
-  getRawQueryString,
   formatTimePickerDate,
   getUniqueValuesForRawAggs,
   updateDataFrameMeta,
-  getRawAggs,
+  Query,
 } from '../../../data/common';
 import {
   DataPublicPluginStart,
@@ -73,17 +71,17 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     };
 
     const getAggQsFn = ({
-      qs,
+      query,
       aggConfig,
       timeField,
       timeFilter,
     }: {
-      qs: string;
+      query: Query;
       aggConfig: DataFrameAggConfig;
       timeField: any;
       timeFilter: string;
     }) => {
-      return removeKeyword(`${qs} ${getAggString(timeField, aggConfig)} ${timeFilter}`);
+      return removeKeyword(`${query.query} ${getAggString(timeField, aggConfig)} ${timeFilter}`);
     };
 
     const getAggString = (timeField: any, aggsConfig?: DataFrameAggConfig) => {
@@ -138,27 +136,24 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     };
 
     const dataFrame = getRawDataFrame(searchRequest);
-
-    let queryString = dataFrame.meta?.queryConfig?.qs ?? getRawQueryString(searchRequest) ?? '';
-    const dataset = this.queryService.queryString.getDatasetManager().getDataset();
-
-    const timeField = dataset?.timeFieldName;
+    const query = this.queryService.queryString.getQuery();
+    const timeField = query.dataset?.timeFieldName;
     const aggConfig = dataFrame.meta?.aggConfig;
     if (timeField && aggConfig) {
       const timeFilter = getTimeFilter(timeField);
-      const newQuery = insertTimeFilter(queryString, timeFilter);
+      const newQuery = insertTimeFilter(query.query as string, timeFilter);
       updateDataFrameMeta({
         dataFrame,
-        qs: newQuery,
+        query: { ...query, query: newQuery },
         aggConfig: dataFrame.meta?.aggConfig,
         timeField,
         timeFilter,
         getAggQsFn: getAggQsFn.bind(this),
       });
-      queryString += timeFilter;
+      query.query += timeFilter;
     }
 
-    return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
+    return fetchDataFrame(dfContext, query, dataFrame).pipe(
       catchError((error) => {
         return throwError(error);
       })

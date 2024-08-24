@@ -4,9 +4,10 @@
  */
 
 import { CoreStart } from 'opensearch-dashboards/public';
-import { UI_SETTINGS } from 'src/plugins/data/common';
+import { UI_SETTINGS } from '../../../../common';
 import { LanguageConfig } from './types';
-import { dqlLanguageConfig, luceneLanguageConfig } from './lib';
+import { getDQLLanguageConfig, getLuceneLanguageConfig } from './lib';
+import { getSearchService } from '../../../services';
 
 export class LanguageService {
   private languages: Map<string, LanguageConfig> = new Map();
@@ -22,8 +23,8 @@ export class LanguageService {
    * Registers default handlers for index patterns and indices.
    */
   private registerDefaultLanguages() {
-    this.registerLanguage(dqlLanguageConfig);
-    this.registerLanguage(luceneLanguageConfig);
+    this.registerLanguage(getDQLLanguageConfig(getSearchService()));
+    this.registerLanguage(getLuceneLanguageConfig(getSearchService()));
   }
 
   public registerLanguage(config: LanguageConfig): void {

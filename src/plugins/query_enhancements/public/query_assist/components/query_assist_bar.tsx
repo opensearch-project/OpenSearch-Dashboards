@@ -26,7 +26,7 @@ interface QueryAssistInputProps {
 
 export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
-  const datasetManager = services.data.query.queryString.getDatasetManager();
+  const queryString = services.data.query.queryString;
   const inputRef = useRef<HTMLInputElement>(null);
   const storage = getStorage();
   const persistedLog: PersistedLog = useMemo(
@@ -37,17 +37,17 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
   const dismissCallout = () => setCallOutType(undefined);
   const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(
-    datasetManager.getDataset()
+    queryString.getQuery().dataset
   );
   const selectedIndex = selectedDataset?.title;
   const previousQuestionRef = useRef<string>();
 
   useEffect(() => {
-    const subscription = datasetManager.getUpdates$().subscribe((dataset) => {
-      setSelectedDataset(dataset);
+    const subscription = queryString.getUpdates$().subscribe((query) => {
+      setSelectedDataset(query.dataset);
     });
     return () => subscription.unsubscribe();
-  }, [datasetManager]);
+  }, [queryString]);
 
   const onSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -79,6 +79,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
       services.data.query.queryString.setQuery({
         query: response.query,
         language: params.language,
+        dataset: selectedDataset,
       });
       if (response.timeRange) services.data.query.timefilter.timefilter.setTime(response.timeRange);
       setCallOutType('query_generated');

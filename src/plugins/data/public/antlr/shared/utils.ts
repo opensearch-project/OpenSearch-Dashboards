@@ -5,7 +5,7 @@
 
 import { from } from 'rxjs';
 import { distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
-import { DatasetContract } from '../../query';
+import { QueryStringContract } from '../../query';
 
 export interface IDataSourceRequestHandlerParams {
   dataSourceId: string;
@@ -14,22 +14,22 @@ export interface IDataSourceRequestHandlerParams {
 
 // Function to get raw suggestion data
 export const getRawSuggestionData$ = (
-  datasetManager: DatasetContract,
+  queryString: QueryStringContract,
   dataSourceRequestHandler: ({
     dataSourceId,
     title,
   }: IDataSourceRequestHandlerParams) => Promise<any>,
   defaultRequestHandler: () => Promise<any>
 ) =>
-  datasetManager.getUpdates$().pipe(
-    startWith(datasetManager.getDataset()),
+  queryString.getUpdates$().pipe(
+    startWith(queryString.getQuery()),
     distinctUntilChanged(),
-    switchMap((dataset) => {
-      if (!dataset) {
+    switchMap((query) => {
+      if (!query) {
         return from(defaultRequestHandler());
       }
-      const dataSourceId = dataset?.dataSource?.id;
-      const title = dataset?.dataSource?.title;
+      const dataSourceId = query.dataset?.dataSource?.id;
+      const title = query.dataset?.dataSource?.title;
       return from(dataSourceRequestHandler({ dataSourceId, title }));
     })
   );
@@ -52,11 +52,11 @@ export const fetchData = (
   tables: string[],
   queryFormatter: (table: string, dataSourceId?: string, title?: string) => any,
   api: any,
-  datasetManager: DatasetContract
+  queryString: QueryStringContract
 ) => {
   return new Promise((resolve, reject) => {
     getRawSuggestionData$(
-      datasetManager,
+      queryString,
       ({ dataSourceId, title }) => {
         const requests = tables.map(async (table) => {
           const body = JSON.stringify(queryFormatter(table, dataSourceId, title));
@@ -82,11 +82,11 @@ export const fetchData = (
 };
 
 // Specific fetch function for table schemas
-export const fetchTableSchemas = (tables: string[], api: any, datasetManager: DatasetContract) => {
+export const fetchTableSchemas = (tables: string[], api: any, queryString: QueryStringContract) => {
   return fetchData(
     tables,
     (table, dataSourceId, title) => ({
-      query: { qs: `DESCRIBE TABLES LIKE ${table}`, format: 'jdbc' },
+      query: { query: `DESCRIBE TABLES LIKE ${table}`, format: 'jdbc' },
       df: {
         meta: {
           queryConfig: {
@@ -97,6 +97,6 @@ export const fetchTableSchemas = (tables: string[], api: any, datasetManager: Da
       },
     }),
     api,
-    datasetManager
+    queryString
   );
 };

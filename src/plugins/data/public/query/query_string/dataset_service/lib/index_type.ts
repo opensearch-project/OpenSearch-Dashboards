@@ -54,7 +54,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
         return {
           ...dataStructure,
           hasNext: true,
-          groupName: 'Indexes',
+          columnHeader: 'Indexes',
           children: indices.map((indexName) => ({
             id: `${dataStructure.id}::${indexName}`,
             title: indexName,
@@ -67,7 +67,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
         const dataSources = await fetchDataSources(savedObjects);
         return {
           ...dataStructure,
-          groupName: 'Cluster',
+          columnHeader: 'Cluster',
           hasNext: false,
           children: dataSources,
         };
@@ -87,7 +87,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
   },
 
   supportedLanguages: (): string[] => {
-    return ['sql', 'ppl'];
+    return ['SQL', 'PPL', 'kuery', 'lucene'];
   },
 };
 

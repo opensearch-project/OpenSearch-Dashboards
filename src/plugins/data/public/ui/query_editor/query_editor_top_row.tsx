@@ -26,7 +26,7 @@ import { getQueryLog, LanguageConfig, PersistedLog } from '../../query';
 import { Settings } from '../types';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
-import { useDatasetManager } from '../search_bar/lib/use_dataset_manager';
+import { useQueryStringManager } from '../search_bar/lib/use_query_string_manager';
 
 const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 
@@ -73,8 +73,9 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       query: { queryString },
     },
   } = opensearchDashboards.services;
-  const datasetManager = queryString.getDatasetManager();
-  const { dataset } = useDatasetManager({ datasetManager });
+  const {
+    query: { dataset },
+  } = useQueryStringManager({ queryStringManager: queryString });
 
   const queryLanguageId = props.query && props.query.language;
   const queryLanguage = queryString.getLanguage(queryLanguageId!) || null;
@@ -195,7 +196,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function getQueryStringInitialValue(language: LanguageConfig) {
-    const input = language.searchBar?.queryStringInput?.initialValue;
+    const input = language?.searchBar?.queryStringInput?.initialValue;
 
     if (!input) return '';
 

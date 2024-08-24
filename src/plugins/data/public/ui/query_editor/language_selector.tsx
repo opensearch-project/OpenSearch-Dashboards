@@ -3,6 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState, useEffect } from 'react';
 import {
   PopoverAnchorPosition,
   EuiContextMenuPanel,
@@ -10,13 +16,12 @@ import {
   EuiButtonEmpty,
   EuiContextMenuItem,
 } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
-import React, { useState } from 'react';
 import { getQueryService, getUiService } from '../../services';
 import { LanguageConfig } from '../../query';
+import { Query } from '../..';
 
 export interface QueryLanguageSelectorProps {
-  language: string;
+  query: Query;
   onSelectLanguage: (newLanguage: string) => void;
   anchorPosition?: PopoverAnchorPosition;
   appName?: string;
@@ -24,38 +29,36 @@ export interface QueryLanguageSelectorProps {
 
 const mapExternalLanguageToOptions = (language: LanguageConfig) => {
   return {
-    label: language.id,
-    value: language.title,
+    label: language.title,
+    value: language.id,
   };
 };
 
 export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState(props.query.language);
+
+  const uiService = getUiService();
+  const queryService = getQueryService();
+
+  useEffect(() => {
+    const subscription = queryService.queryString.getUpdates$().subscribe((query: Query) => {
+      if (query.language !== currentLanguage) {
+        setCurrentLanguage(query.language);
+        props.onSelectLanguage(query.language);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [queryService, currentLanguage, props.onSelectLanguage, props]);
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
   };
 
-  const dqlLabel = i18n.translate('data.query.queryEditor.dqlLanguageName', {
-    defaultMessage: 'DQL',
-  });
-  const luceneLabel = i18n.translate('data.query.queryEditor.luceneLanguageName', {
-    defaultMessage: 'Lucene',
-  });
-
-  const languageOptions = [
-    {
-      label: dqlLabel,
-      value: 'kuery',
-    },
-    {
-      label: luceneLabel,
-      value: 'lucene',
-    },
-  ];
-
-  const uiService = getUiService();
-  const queryService = getQueryService();
+  const languageOptions: Array<{ label: string; value: string }> = [];
 
   const languages = queryService.queryString.getLanguages();
   languages.forEach((languageId) => {
@@ -71,16 +74,34 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
   const selectedLanguage = {
     label:
       (languageOptions.find(
-        (option) => (option.value as string).toLowerCase() === props.language.toLowerCase()
+        (option) => (option.value as string).toLowerCase() === currentLanguage.toLowerCase()
       )?.label as string) ?? languageOptions[0].label,
   };
 
   const handleLanguageChange = (newLanguage: string) => {
+    setCurrentLanguage(newLanguage);
     props.onSelectLanguage(newLanguage);
     uiService.Settings.setUserQueryLanguage(newLanguage);
+
+    // Update the query in the QueryStringManager
+    const currentQuery = queryService.queryString.getQuery();
+    const input = queryService.queryString.getLanguage(newLanguage)?.searchBar?.queryStringInput
+      ?.initialValue;
+
+    if (!input) return '';
+    const newQuery = input?.replace(
+      '<data_source>',
+      currentQuery.dataset?.title ?? currentQuery.dataset?.title ?? ''
+    );
+
+    queryService.queryString.setQuery({
+      query: newQuery,
+      language: newLanguage,
+      dataset: currentQuery.dataset,
+    });
   };
 
-  uiService.Settings.setUserQueryLanguage(props.language);
+  uiService.Settings.setUserQueryLanguage(currentLanguage);
 
   const languageOptionsMenu = languageOptions
     .sort((a, b) => {
@@ -101,6 +122,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
         </EuiContextMenuItem>
       );
     });
+
   return (
     <EuiPopover
       className="languageSelector"

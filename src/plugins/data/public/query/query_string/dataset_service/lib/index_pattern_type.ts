@@ -40,7 +40,7 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     const indexPatterns = await fetchIndexPatterns(savedObjects);
     return {
       ...dataStructure,
-      groupName: 'Index patterns',
+      columnHeader: 'Index patterns',
       children: indexPatterns,
       hasNext: false,
     };
@@ -55,7 +55,7 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
   },
 
   supportedLanguages: (): string[] => {
-    return ['sql', 'ppl', 'kuery', 'lucene'];
+    return ['SQL', 'PPL', 'kuery', 'lucene'];
   },
 };
 
@@ -69,6 +69,6 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
     id: savedObject.id,
     title: savedObject.attributes.title,
     type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-    isLeaf: true,
+    hasNext: true,
   }));
 };

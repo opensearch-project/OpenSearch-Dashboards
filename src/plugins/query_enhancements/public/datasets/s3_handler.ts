@@ -3,146 +3,111 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// import { Dataset, DataStructure, DEFAULT_DATA, DataStructureFeatureMeta } from '../../../../common';
-// import { IndexPatternsContract } from '../../../index_patterns';
-// import { DatasetHandlerConfig } from '../types';
+import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { DataStructure, Dataset, DatasetField } from 'src/plugins/data/common';
+import { DatasetTypeConfig } from 'src/plugins/data/public';
 
-// const S3_ICON = './assets/s3_mark.svg';
+const S3_ICON = 'visTable';
+const S3_ID = 'S3';
 
-// export const s3HandlerConfig: DatasetHandlerConfig = {
-//   toDataset: (dataStructure: DataStructure): Dataset => ({
-//     id: dataStructure.id,
-//     title: dataStructure.title,
-//     type: DEFAULT_DATA.SET_TYPES.S3,
-//     dataSource: dataStructure.parent
-//       ? {
-//           id: dataStructure.parent.id,
-//           title: dataStructure.parent.title,
-//           type: dataStructure.parent.type,
-//         }
-//       : undefined,
-//   }),
+export const s3TypeConfig: DatasetTypeConfig = {
+  id: S3_ID,
+  title: S3_ID,
+  meta: {
+    icon: { type: S3_ICON },
+    tooltip: 'S3 Data Source',
+  },
 
-//   toDataStructure: (dataset: Dataset): DataStructure => ({
-//     id: dataset.id,
-//     title: dataset.title,
-//     type: DEFAULT_DATA.SET_TYPES.S3,
-//     parent: dataset.dataSource
-//       ? {
-//           id: dataset.dataSource.id!,
-//           title: dataset.dataSource.title,
-//           type: dataset.dataSource.type,
-//         }
-//       : undefined,
-//     meta: {
-//       type: DEFAULT_DATA.STRUCTURE_META_TYPES.FEATURE,
-//       icon: S3_ICON,
-//       tooltip: 'S3 Data Source',
-//     } as DataStructureFeatureMeta,
-//   }),
+  toDataset: (path: DataStructure[]): Dataset => {
+    const s3 = path[path.length - 1];
+    const dataSource = path.find((ds) => ds.type === S3_ID);
 
-//   fetchOptions: async (
-//     dataStructure: DataStructure,
-//     indexPatterns: IndexPatternsContract
-//   ): Promise<DataStructure[]> => {
-//     // This is a placeholder implementation. You'll need to implement
-//     // the actual logic to fetch S3 data structures.
-//     if (dataStructure.type === DEFAULT_DATA.SOURCE_TYPES.S3) {
-//       // Fetch connections
-//       return [
-//         {
-//           id: `${dataStructure.id}::mys3`,
-//           title: 'mys3',
-//           type: DEFAULT_DATA.STRUCTURE_TYPES.CONNECTION,
-//           parent: dataStructure,
-//           meta: {
-//             type: DEFAULT_DATA.STRUCTURE_META_TYPES.FEATURE,
-//             icon: S3_ICON,
-//             tooltip: 'S3 Connection',
-//           } as DataStructureFeatureMeta,
-//         },
-//       ];
-//     } else if (dataStructure.type === DEFAULT_DATA.STRUCTURE_TYPES.CONNECTION) {
-//       // Fetch databases
-//       return [
-//         {
-//           id: `${dataStructure.id}.defaultDb`,
-//           title: 'defaultDb',
-//           type: DEFAULT_DATA.STRUCTURE_TYPES.DATABASE,
-//           parent: dataStructure,
-//           meta: {
-//             type: DEFAULT_DATA.STRUCTURE_META_TYPES.FEATURE,
-//             icon: S3_ICON,
-//             tooltip: 'S3 Connections',
-//           } as DataStructureFeatureMeta,
-//         },
-//       ];
-//     } else if (dataStructure.type === DEFAULT_DATA.STRUCTURE_TYPES.DATABASE) {
-//       // Fetch tables
-//       return [
-//         {
-//           id: `${dataStructure.id}.table1`,
-//           title: 'table1',
-//           type: DEFAULT_DATA.STRUCTURE_TYPES.TABLE,
-//           parent: dataStructure,
-//           meta: {
-//             type: DEFAULT_DATA.STRUCTURE_META_TYPES.FEATURE,
-//             icon: S3_ICON,
-//             tooltip: 'S3 Table',
-//           } as DataStructureFeatureMeta,
-//         },
-//         {
-//           id: `${dataStructure.id}.table2`,
-//           title: 'table2',
-//           type: DEFAULT_DATA.STRUCTURE_TYPES.TABLE,
-//           parent: dataStructure,
-//           meta: {
-//             type: DEFAULT_DATA.STRUCTURE_META_TYPES.FEATURE,
-//             icon: S3_ICON,
-//             tooltip: 'S3 Table',
-//           } as DataStructureFeatureMeta,
-//         },
-//       ];
-//     }
-//     return [];
-//   },
+    return {
+      id: s3.id,
+      title: s3.title,
+      type: S3_ID,
+      dataSource: dataSource
+        ? {
+            id: dataSource.id,
+            title: dataSource.title,
+            type: dataSource.type,
+          }
+        : undefined,
+    };
+  },
 
-//   isLeaf: (dataStructure: DataStructure): boolean => {
-//     return dataStructure.type === DEFAULT_DATA.STRUCTURE_TYPES.TABLE;
-//   },
-// };
+  fetch: async (
+    savedObjects: SavedObjectsClientContract,
+    path: DataStructure[]
+  ): Promise<DataStructure> => {
+    const dataStructure = path[path.length - 1];
+    switch (dataStructure.type) {
+      case S3_ID:
+        return {
+          ...dataStructure,
+          columnHeader: 'Connections',
+          hasNext: true,
+          children: [
+            {
+              id: `${dataStructure.id}::mys3`,
+              title: 'mys3',
+              type: 'CONNECTION',
+            },
+          ],
+        };
+      case 'CONNECTION':
+        return {
+          ...dataStructure,
+          columnHeader: 'Databases',
+          hasNext: true,
+          children: [
+            {
+              id: `${dataStructure.id}.defaultDb`,
+              title: 'defaultDb',
+              type: 'DATABASE',
+            },
+          ],
+        };
+      case 'DATABASE':
+        return {
+          ...dataStructure,
+          columnHeader: 'Tables',
+          hasNext: false,
+          children: [
+            {
+              id: `${dataStructure.id}.table1`,
+              title: 'table1',
+              type: 'TABLE',
+            },
+            {
+              id: `${dataStructure.id}.table2`,
+              title: 'table2',
+              type: 'TABLE',
+            },
+          ],
+        };
+      default:
+        const s3DataSources = await fetchS3DataSources(savedObjects);
+        return {
+          ...dataStructure,
+          columnHeader: 'S3 Data Sources',
+          hasNext: false,
+          children: s3DataSources,
+        };
+    }
+  },
 
-// export function s3ToDataStructure(dataset: Dataset): DataStructure {
-//   return {
-//     id: dataset.id,
-//     title: dataset.title,
-//     type: DEFAULT_DATA.SET_TYPES.S3,
-//     parent: dataset.dataSource
-//       ? {
-//           id: dataset.dataSource.id!,
-//           title: dataset.dataSource.title!,
-//           type: DEFAULT_DATA.SOURCE_TYPES.S3,
-//         }
-//       : undefined,
-//     meta: {
-//       type: DEFAULT_DATA.STRUCTURE_META_TYPES.FEATURE,
-//       icon: S3_ICON,
-//       tooltip: 'S3 Data Source',
-//     } as DataStructureFeatureMeta,
-//   };
-// }
+  fetchFields: async (dataset: Dataset): Promise<DatasetField[]> => {
+    // This is a placeholder. You'll need to implement the actual logic to fetch S3 fields.
+    // For now, we'll return an empty array.
+    return [];
+  },
 
-// export function s3ToDataset(s3: DataStructure): Dataset {
-//   return {
-//     id: s3.id,
-//     title: s3.title,
-//     type: DEFAULT_DATA.SET_TYPES.S3,
-//     dataSource: s3.parent
-//       ? {
-//           id: s3.parent.id,
-//           title: s3.parent.title,
-//           type: s3.parent.type,
-//         }
-//       : undefined,
-//   };
-// }
+  supportedLanguages: (): string[] => {
+    return ['sql']; // Assuming S3 only supports SQL queries
+  },
+};
+
+const fetchS3DataSources = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
+  return [];
+};

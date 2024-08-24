@@ -320,16 +320,9 @@ export class SearchSource {
    * @return {undefined|IDataFrame}
    */
   async createDataFrame(searchRequest: SearchRequest) {
-    const rawQueryString = this.getRawQueryStringFromRequest(searchRequest);
     const dataFrame = createDataFrame({
       name: searchRequest.index.title || searchRequest.index,
       fields: [],
-      ...(rawQueryString && {
-        meta: {
-          queryConfig: { qs: rawQueryString },
-          ...(searchRequest.dataSourceId && { dataSource: searchRequest.dataSourceId }),
-        },
-      }),
     });
     await this.setDataFrame(dataFrame);
     return this.getDataFrame();

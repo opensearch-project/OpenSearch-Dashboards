@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import {
   BaseDataset,
@@ -25,26 +25,25 @@ export const AdvancedSelector = ({
   onSelect: (dataset: Dataset) => void;
   onCancel: () => void;
 }) => {
-  const queryService = getQueryService();
-  const datasetManager = queryService.queryString.getDatasetManager();
+  const queryString = getQueryService().queryString;
 
   const [path, setPath] = useState<DataStructure[]>([
     {
       ...DEFAULT_DATA.STRUCTURES.ROOT,
-      columnHeader: 'Select Data',
-      isLeaf: false,
-      children: datasetManager.getDatasetHandlers().map(
-        (handler) =>
-          ({
-            id: handler.id,
-            title: handler.title,
-            type: handler.id,
-            meta: {
-              ...handler.meta,
-              type: DATA_STRUCTURE_META_TYPES.TYPE,
-            },
-          } as DataStructure)
-      ),
+      columnHeader: 'Select data',
+      hasNext: false,
+      children: queryString.getDatasetTypes().map((typeId) => {
+        const type = queryString.getDatasetType(typeId);
+        return {
+          id: type!.id,
+          title: type!.title,
+          type: type!.id,
+          meta: {
+            ...type!.meta,
+            type: DATA_STRUCTURE_META_TYPES.TYPE,
+          },
+        } as DataStructure;
+      }),
     },
   ]);
   const [selectedDataset, setSelectedDataset] = useState<BaseDataset | undefined>();
@@ -59,7 +58,7 @@ export const AdvancedSelector = ({
   ) : (
     <DatasetExplorer
       savedObjects={savedObjects}
-      datasetManager={datasetManager}
+      queryString={queryString}
       path={path}
       setPath={setPath}
       onNext={(dataset) => setSelectedDataset(dataset)}

@@ -5,12 +5,11 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { DEFAULT_QUERY, Dataset, SavedObjectReference } from '../../../../../data/common';
 import { IndexPattern } from '../../../../../data/public';
 import { useSelector, updateIndexPattern } from '../../utils/state_management';
 import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
-import { useDatasetManager } from './use_dataset_manager';
+import { useQueryStringManager } from './use_query_manager';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 
 /**
@@ -29,8 +28,8 @@ import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
  */
 export const useIndexPattern = (services: DiscoverViewServices) => {
   const { data, toastNotifications, uiSettings, store } = services;
-  const { dataset } = useDatasetManager({
-    datasetManager: data.query.queryString.getDatasetManager(),
+  const { query } = useQueryStringManager({
+    queryString: data.query.queryString,
   });
   const indexPatternIdFromState = useSelector((state) => state.metadata.indexPattern);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
@@ -47,8 +46,8 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     let isMounted = true;
 
     const handleIndexPattern = async () => {
-      if (isQueryEnhancementEnabled && dataset) {
-        const pattern = await data.indexPatterns.get(dataset.id, true);
+      if (isQueryEnhancementEnabled && query?.dataset) {
+        const pattern = await data.indexPatterns.get(query.dataset.id, true);
 
         if (isMounted && pattern) {
           setIndexPattern(pattern);
@@ -93,7 +92,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     store,
     toastNotifications,
     uiSettings,
-    dataset,
+    query?.dataset,
   ]);
 
   return indexPattern;

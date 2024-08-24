@@ -461,6 +461,8 @@ export {
   QueryState,
   getDefaultQuery,
   FilterManager,
+  QueryStringContract,
+  QueryStringManager,
   DatasetTypeConfig,
   DatasetService,
   DatasetServiceContract,

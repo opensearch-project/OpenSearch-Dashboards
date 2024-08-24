@@ -13,23 +13,24 @@ import { IDataPluginServices } from '../../types';
 const ConnectedDatasetSelector = () => {
   const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>();
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
-  const datasetManager = services.data.query.queryString.getDatasetManager();
+  const queryString = services.data.query.queryString;
 
   useEffect(() => {
-    const initialDataset = datasetManager.getDataset() || datasetManager.getDefaultDataset();
+    const initialDataset = queryString.getQuery().dataset || queryString.getDefaultQuery().dataset;
     setSelectedDataset(initialDataset);
 
-    const subscription = datasetManager.getUpdates$().subscribe((updatedDataset) => {
-      setSelectedDataset(updatedDataset);
+    const subscription = queryString.getUpdates$().subscribe((query) => {
+      setSelectedDataset(query.dataset);
     });
 
     return () => subscription.unsubscribe();
-  }, [datasetManager]);
+  }, [queryString]);
 
   const handleDatasetChange = (dataset?: Dataset) => {
     setSelectedDataset(dataset);
     if (dataset) {
-      datasetManager.setDataset(dataset);
+      const query = queryString.getQuery();
+      queryString.setQuery({ ...query, dataset });
     }
   };
 

@@ -83,12 +83,6 @@ export class Settings {
       this.search.df.clear();
     }
     this.storage.set('userQueryLanguage', languageId);
-    const queryEnhancement = this.query.queryString.getLanguage(languageId);
-    this.search.__enhance({
-      searchInterceptor: queryEnhancement
-        ? queryEnhancement.search
-        : this.search.getDefaultSearchInterceptor(),
-    });
     this.setUiOverridesByUserQueryLanguage(languageId);
 
     return true;

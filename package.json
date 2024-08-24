@@ -65,7 +65,7 @@
     "start": "scripts/use_node scripts/opensearch_dashboards --dev",
     "start:docker": "scripts/use_node scripts/opensearch_dashboards --dev --opensearch.hosts=$OPENSEARCH_HOSTS --opensearch.ignoreVersionMismatch=true --server.host=$SERVER_HOST",
     "start:security": "scripts/use_node scripts/opensearch_dashboards --dev --security",
-    "start:enhancements": "scripts/use_node scripts/opensearch_dashboards --dev --uiSettings.overrides['query:enhancements:enabled']=true --uiSettings.overrides['home:useNewHomePage']=true --uiSettings.overrides['state:storeInSessionStorage']=true",
+    "start:enhancements": "scripts/use_node scripts/opensearch_dashboards --dev --uiSettings.overrides['query:enhancements:enabled']=true --uiSettings.overrides['home:useNewHomePage']=true",
     "debug": "scripts/use_node --nolazy --inspect scripts/opensearch_dashboards --dev",
     "debug-break": "scripts/use_node --nolazy --inspect-brk scripts/opensearch_dashboards --dev",
     "lint": "yarn run lint:es && yarn run lint:style",

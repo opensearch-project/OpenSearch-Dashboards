@@ -9,7 +9,7 @@ import {
   DatasetTypeConfig,
   DataSource,
   DataStructure,
-} from '../../../../common/data_sets';
+} from '../../../../common/datasets';
 
 interface DatasetVariations {
   dataSourceTypes: string[];

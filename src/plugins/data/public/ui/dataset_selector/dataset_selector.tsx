@@ -37,25 +37,24 @@ export const DatasetSelector = ({
   const closePopover = () => setIsOpen(false);
   const { overlays, savedObjects } = services;
 
-  const queryService = getQueryService();
-  const datasetManager = queryService.queryString.getDatasetManager();
+  const queryString = getQueryService().queryString;
 
   const datasetIcon =
-    datasetManager.getDatasetHandlerById(selectedDataset?.type || '')?.meta.icon.type || 'database';
+    queryString.getDatasetType(selectedDataset?.type || '')?.meta.icon.type || 'database';
 
   useEffect(() => {
     const init = async () => {
       setDatasets(
         (
-          await datasetManager
-            .getDatasetHandlerById(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN)
+          await queryString
+            .getDatasetType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN)
             ?.fetch(savedObjects.client, [])!
         ).children || []
       );
     };
 
     init();
-  }, [datasetManager, savedObjects.client]);
+  }, [queryString, savedObjects.client]);
 
   const options = useMemo(() => {
     const newOptions: EuiSelectableOption[] = [];
@@ -70,12 +69,12 @@ export const DatasetSelector = ({
         label: title,
         checked: id === selectedDataset?.id ? 'on' : undefined,
         key: id,
-        prepend: <EuiIcon type={datasetManager.getDatasetHandlerById(type)!.meta.icon.type} />,
+        prepend: <EuiIcon type={queryString.getDatasetType(type)!.meta.icon.type} />,
       });
     });
 
     return newOptions;
-  }, [datasetManager, datasets, selectedDataset?.id]);
+  }, [queryString, datasets, selectedDataset?.id]);
 
   // Handle option change
   const handleOptionChange = (newOptions: EuiSelectableOption[]) => {

@@ -161,25 +161,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         if (this.dfCache.get() && this.dfCache.get()?.name !== dataFrame.name) {
           indexPatterns.clearCache(this.dfCache.get()!.name, false);
         }
-
-        if (
-          dataFrame.meta &&
-          dataFrame.meta.queryConfig &&
-          'dataSource' in dataFrame.meta.queryConfig
-        ) {
-          const dataSource = await indexPatterns.findDataSourceByTitle(
-            dataFrame.meta.queryConfig.dataSource
-          );
-          dataFrame.meta.queryConfig.dataSourceId = dataSource?.id;
-        }
         this.dfCache.set(dataFrame);
-        const dataSetName = `${dataFrame.meta?.queryConfig?.dataSourceId ?? ''}.${dataFrame.name}`;
-        const existingIndexPattern = await indexPatterns.get(dataSetName, true);
-        const dataSet = await indexPatterns.create(
-          dataFrameToSpec(dataFrame, existingIndexPattern?.id ?? dataSetName),
+        const existingIndexPattern = await indexPatterns.get(dataFrame.name!, true);
+        const dataset = await indexPatterns.create(
+          dataFrameToSpec(dataFrame, existingIndexPattern?.id),
           !existingIndexPattern?.id
         );
-        indexPatterns.saveToCache(dataSetName, dataSet);
+        indexPatterns.saveToCache(dataset.id!, dataset);
       },
       clear: () => {
         if (this.dfCache.get() === undefined) return;

@@ -4,27 +4,29 @@
  */
 
 import { LanguageConfig } from '../types';
-import { getSearchService } from '../../../../services';
+import { ISearchStart } from '../../../../search';
 
-export const dqlLanguageConfig: LanguageConfig = {
-  id: 'kuery',
-  title: 'DQL',
-  search: getSearchService().getDefaultSearchInterceptor(),
-  searchBar: {
-    showDataSetsSelector: true,
-    showDataSourcesSelector: false,
-    showQueryInput: true,
-    showFilterBar: true,
-    showDatePicker: true,
-    showAutoRefreshOnly: false,
-    queryStringInput: {
-      initialValue: '',
+export const getDQLLanguageConfig = (search: ISearchStart): LanguageConfig => {
+  return {
+    id: 'kuery',
+    title: 'DQL',
+    search: search.getDefaultSearchInterceptor(),
+    searchBar: {
+      showDataSetsSelector: true,
+      showDataSourcesSelector: false,
+      showQueryInput: true,
+      showFilterBar: true,
+      showDatePicker: true,
+      showAutoRefreshOnly: false,
+      queryStringInput: {
+        initialValue: '',
+      },
     },
-  },
-  fields: {
-    filterable: true,
-    visualizable: true,
-  },
-  showDocLinks: true,
-  supportedAppNames: ['discover'],
+    fields: {
+      filterable: true,
+      visualizable: true,
+    },
+    showDocLinks: true,
+    supportedAppNames: ['discover'],
+  };
 };

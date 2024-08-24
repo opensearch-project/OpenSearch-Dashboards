@@ -33,8 +33,8 @@ import { skip } from 'rxjs/operators';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { Dataset, DataStorage, Query, TimeRange, UI_SETTINGS } from '../../../common';
 import { createHistory, QueryHistory } from './query_history';
-import { DatasetContract, DatasetManager } from './dataset_manager';
-import { DatasetService, DatasetServiceContract } from './dataset_service';
+import { DatasetContract } from './dataset_manager';
+import { DatasetService, DatasetServiceContract, DatasetTypeConfig } from './dataset_service';
 import { LanguageConfig, LanguageService, LanguageServiceContract } from './language_service';
 
 export class QueryStringManager {
@@ -50,7 +50,7 @@ export class QueryStringManager {
   ) {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
     this.queryHistory = createHistory({ storage });
-    this.datasetManager = new DatasetManager(uiSettings);
+    // this.datasetManager = new DatasetManager(uiSettings);
     this.datasetService = new DatasetService(uiSettings);
     this.languageService = new LanguageService(uiSettings);
   }
@@ -65,7 +65,7 @@ export class QueryStringManager {
       language: this.getDefaultLanguage(),
       ...(this.uiSettings &&
         this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) && {
-          dataset: this.datasetService.getDefault(),
+          dataset: this.datasetService?.getDefault(),
         }),
     };
   }
@@ -79,7 +79,7 @@ export class QueryStringManager {
         language: this.getDefaultLanguage(),
         ...(this.uiSettings &&
           this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) && {
-            dataset: this.datasetService.getDefault(),
+            dataset: this.datasetService?.getDefault(),
           }),
       };
     } else {
@@ -140,6 +140,22 @@ export class QueryStringManager {
    */
   public getDatasetManager = () => {
     return this.datasetManager;
+  };
+
+  public initDataset = async () => {
+    await this.datasetService.init();
+  };
+
+  public registerType = (type: DatasetTypeConfig) => {
+    this.datasetService.registerType(type);
+  };
+
+  public getDatasetType = (type: string) => {
+    return this.datasetService.getType(type);
+  };
+
+  public getDatasetTypes = () => {
+    return this.datasetService.getTypes();
   };
 
   public getLanguage = (language: string) => {
