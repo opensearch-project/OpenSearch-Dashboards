@@ -127,7 +127,16 @@ export class WorkspacePlugin
       this.registeredUseCases$,
     ]).subscribe(([currentWorkspace, registeredUseCases]) => {
       if (currentWorkspace) {
+        const workspaceUseCase = currentWorkspace.features
+          ? getFirstUseCaseOfFeatureConfigs(currentWorkspace.features)
+          : undefined;
+
         this.appUpdater$.next((app) => {
+          // essential use overview is only available in essential workspace
+          if (app.id === ESSENTIAL_OVERVIEW_PAGE_ID && workspaceUseCase === ALL_USE_CASE_ID) {
+            return { status: AppStatus.inaccessible };
+          }
+
           if (isAppAccessibleInWorkspace(app, currentWorkspace, registeredUseCases)) {
             return;
           }
