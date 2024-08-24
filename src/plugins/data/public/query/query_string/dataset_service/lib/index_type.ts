@@ -10,9 +10,6 @@ import { DatasetTypeConfig } from '../types';
 import { getSearchService, getIndexPatterns } from '../../../../services';
 
 const INDEX_INFO = {
-  ID: DEFAULT_DATA.SET_TYPES.INDEX,
-  TITLE: 'Indexes',
-  ICON: 'logoOpenSearch',
   LOCAL_DATASOURCE: {
     id: '',
     title: 'Local Cluster',
@@ -20,7 +17,7 @@ const INDEX_INFO = {
   },
 };
 
-export const indexHandlerConfig: DatasetTypeConfig = {
+export const indexTypeConfig: DatasetTypeConfig = {
   id: DEFAULT_DATA.SET_TYPES.INDEX,
   title: 'Indexes',
   meta: {
@@ -89,8 +86,8 @@ export const indexHandlerConfig: DatasetTypeConfig = {
     }));
   },
 
-  supportedLanguages: async (): Promise<string[]> => {
-    return ['SQL', 'PPL'];
+  supportedLanguages: (): string[] => {
+    return ['sql', 'ppl'];
   },
 };
 

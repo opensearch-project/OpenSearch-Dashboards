@@ -445,7 +445,6 @@ export {
   QueryEditorTopRow,
   // for BWC, keeping the old name
   IUiStart as DataPublicPluginStartUi,
-  DataSetNavigator,
 } from './ui';
 
 /**
@@ -462,9 +461,12 @@ export {
   QueryState,
   getDefaultQuery,
   FilterManager,
-  DatasetContract,
-  DatasetManager,
-  DatasetHandlerConfig,
+  DatasetTypeConfig,
+  DatasetService,
+  DatasetServiceContract,
+  LanguageConfig,
+  LanguageService,
+  LanguageServiceContract,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,

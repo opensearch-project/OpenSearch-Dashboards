@@ -11,9 +11,7 @@ import {
   DataStructure,
   CachedDataStructure,
   DataStructureCache,
-  toCachedDataStructure,
   createDataStructureCache,
-  DatasetField,
   IndexPatternSpec,
 } from '../../../../common';
 import { IndexPatternsContract } from '../../../index_patterns';
@@ -126,48 +124,6 @@ export class DatasetManager {
       throw new Error(`No handler found for type: ${dataStructure.type}`);
     }
     return handler;
-  }
-
-  /**
-   * Gets cached children for a given parent ID.
-   * @param parentId - The ID of the parent data structure.
-   * @returns An array of child data structures.
-   */
-  private getCachedChildren(parentId: string): DataStructure[] {
-    const cachedStructure = this.dataStructureCache.get(parentId);
-    if (!cachedStructure) return [];
-
-    return cachedStructure.children
-      .map((childId) => this.dataStructuresMap.get(childId))
-      .filter((child): child is DataStructure => !!child);
-  }
-
-  /**
-   * Caches an array of data structures.
-   * @param dataStructures - The data structures to cache.
-   */
-  private cacheDataStructures(dataStructures: DataStructure[]) {
-    dataStructures.forEach((ds) => {
-      const fullId = this.getFullId(ds);
-      this.dataStructuresMap.set(fullId, ds);
-      const cachedDs = toCachedDataStructure(ds);
-      this.dataStructureCache.set(fullId, cachedDs);
-    });
-  }
-
-  /**
-   * Gets the full ID for a data structure, including its parent's ID.
-   * @param dataStructure - The data structure to get the full ID for.
-   * @returns The full ID of the data structure.
-   */
-  private getFullId(dataStructure: DataStructure): string {
-    if (!dataStructure.parent) {
-      return dataStructure.id;
-    }
-    const parentId = this.getFullId(dataStructure.parent);
-    const separator =
-      dataStructure.parent.type === DEFAULT_DATA.STRUCTURES.DATA_SOURCE.type ? '::' : '.';
-    return `${parentId}${separator}${dataStructure.id}`;
   }
 
   /**

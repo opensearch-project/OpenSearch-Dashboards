@@ -12,7 +12,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useState } from 'react';
-import { getUiService } from '../../services';
+import { getQueryService, getUiService } from '../../services';
+import { LanguageConfig } from '../../query';
 
 export interface QueryLanguageSelectorProps {
   language: string;
@@ -21,10 +22,10 @@ export interface QueryLanguageSelectorProps {
   appName?: string;
 }
 
-const mapExternalLanguageToOptions = (language: string) => {
+const mapExternalLanguageToOptions = (language: LanguageConfig) => {
   return {
-    label: language,
-    value: language,
+    label: language.id,
+    value: language.title,
   };
 };
 
@@ -54,19 +55,17 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
   ];
 
   const uiService = getUiService();
+  const queryService = getQueryService();
 
-  const queryEnhancements = uiService.Settings.getAllQueryEnhancements();
-  queryEnhancements.forEach((enhancement) => {
+  const languages = queryService.queryString.getLanguages();
+  languages.forEach((languageId) => {
+    const language = queryService.queryString.getLanguage(languageId);
     if (
-      (enhancement.supportedAppNames &&
-        props.appName &&
-        !enhancement.supportedAppNames.includes(props.appName)) ||
-      uiService.Settings.getUserQueryLanguageBlocklist().includes(
-        enhancement.language.toLowerCase()
-      )
+      (language && props.appName && !language.supportedAppNames.includes(props.appName)) ||
+      uiService.Settings.getUserQueryLanguageBlocklist().includes(language?.id)
     )
       return;
-    languageOptions.unshift(mapExternalLanguageToOptions(enhancement.language));
+    languageOptions.unshift(mapExternalLanguageToOptions(language!));
   });
 
   const selectedLanguage = {

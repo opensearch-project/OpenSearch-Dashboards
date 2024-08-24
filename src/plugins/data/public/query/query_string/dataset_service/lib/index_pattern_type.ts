@@ -8,7 +8,7 @@ import { DEFAULT_DATA, DataStructure, DatasetField, Dataset } from '../../../../
 import { DatasetTypeConfig } from '../types';
 import { getIndexPatterns } from '../../../../services';
 
-export const indexPatternHandlerConfig: DatasetTypeConfig = {
+export const indexPatternTypeConfig: DatasetTypeConfig = {
   id: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
   title: 'Index Patterns',
   meta: {
@@ -54,8 +54,8 @@ export const indexPatternHandlerConfig: DatasetTypeConfig = {
     }));
   },
 
-  supportedLanguages: async (): Promise<string[]> => {
-    return ['SQL', 'PPL', 'KQL', 'Lucene'];
+  supportedLanguages: (): string[] => {
+    return ['sql', 'ppl', 'kuery', 'lucene'];
   },
 };
 

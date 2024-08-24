@@ -4,15 +4,32 @@
  */
 
 import { CoreStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { Dataset, UI_SETTINGS, DataStructure, IndexPatternSpec } from 'src/plugins/data/common';
-import { DatasetTypeConfig } from '../dataset_manager';
+import {
+  Dataset,
+  UI_SETTINGS,
+  DataStructure,
+  IndexPatternSpec,
+  DEFAULT_DATA,
+} from '../../../../common';
 import { getIndexPatterns } from '../../../services';
+import { DatasetTypeConfig } from './types';
+import { indexPatternTypeConfig, indexTypeConfig } from './lib';
 
 export class DatasetService {
   private defaultDataset?: Dataset;
   private typesRegistry: Map<string, DatasetTypeConfig> = new Map();
 
-  constructor(private readonly uiSettings: CoreStart['uiSettings']) {}
+  constructor(private readonly uiSettings: CoreStart['uiSettings']) {
+    this.registerDefaultTypes();
+  }
+
+  /**
+   * Registers default handlers for index patterns and indices.
+   */
+  private registerDefaultTypes() {
+    this.registerType(indexPatternTypeConfig);
+    this.registerType(indexTypeConfig);
+  }
 
   public async init(): Promise<void> {
     if (!this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) return;
@@ -55,7 +72,6 @@ export class DatasetService {
     path: DataStructure[],
     dataType: string
   ): Promise<DataStructure> {
-    // ROOT is the zero index
     const type = this.typesRegistry.get(dataType);
     if (!type) {
       throw new Error(`No handler found for type: ${path[0]}`);
@@ -78,13 +94,13 @@ export class DatasetService {
       return undefined;
     }
 
-    const handler = this.typesRegistry.get('INDEX_PATTERNS');
+    const handler = this.typesRegistry.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
     if (handler) {
       const dataset = handler.toDataset([
         {
           id: indexPattern.id,
           title: indexPattern.title,
-          type: 'INDEX_PATTERNS',
+          type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
         },
       ]);
       return { ...dataset, timeFieldName: indexPattern.timeFieldName };

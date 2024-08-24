@@ -121,8 +121,8 @@ export interface DataStructure {
   children?: DataStructure[];
   /** Optional array of data structures of ancestors */
   path?: DataStructure[];
-  isLeaf?: boolean;
-  columnHeader?: string;
+  hasNext?: boolean;
+  groupName?: string;
   /** Optional metadata for the data structure */
   meta?: DataStructureMeta;
 }

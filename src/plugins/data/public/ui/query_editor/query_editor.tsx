@@ -12,7 +12,7 @@ import { Settings } from '..';
 import { IDataPluginServices, IFieldType, IIndexPattern, Query, TimeRange } from '../..';
 import { OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
 import { QuerySuggestion } from '../../autocomplete';
-import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
+import { fromUser, getQueryLog, LanguageConfig, PersistedLog, toUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { DataSettings } from '../types';
 import { QueryLanguageSelector } from './language_selector';
@@ -44,7 +44,7 @@ export interface QueryEditorProps {
   onChange?: (query: Query, dateRange?: TimeRange) => void;
   onChangeQueryEditorFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query, dateRange?: TimeRange) => void;
-  getQueryStringInitialValue?: (language: string) => string;
+  getQueryStringInitialValue?: (language: LanguageConfig) => string;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
   className?: string;
@@ -97,7 +97,8 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   private getQueryString = () => {
     if (!this.props.query.query) {
-      return this.props.getQueryStringInitialValue?.(this.props.query.language) ?? '';
+      const language = this.queryService.queryString.getLanguage(this.props.query.language);
+      return this.props.getQueryStringInitialValue?.(language!) ?? '';
     }
     return toUser(this.props.query.query);
   };
@@ -173,21 +174,21 @@ export default class QueryEditorUI extends Component<Props, State> {
   };
 
   // TODO: MQL consider moving language select language of setting search source here
-  private onSelectLanguage = (language: string) => {
+  private onSelectLanguage = (languageId: string) => {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
     // UI component's change handler.
     this.services.http.post('/api/opensearch-dashboards/dql_opt_in_stats', {
-      body: JSON.stringify({ opt_in: language === 'kuery' }),
+      body: JSON.stringify({ opt_in: languageId === 'kuery' }),
     });
 
+    const language = this.queryService.queryString.getLanguage(this.props.query.language);
     const newQuery = {
-      query: this.props.getQueryStringInitialValue?.(language) ?? '',
-      language,
+      query: this.props.getQueryStringInitialValue?.(language!) ?? '',
+      language: language?.id || languageId,
     };
 
-    const enhancement = this.props.settings.getQueryEnhancements(newQuery.language);
-    const fields = enhancement?.fields;
+    const fields = language?.fields;
     const newSettings: DataSettings = {
       userQueryLanguage: newQuery.language,
       userQueryString: newQuery.query,
@@ -195,7 +196,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     };
     this.props.settings?.updateSettings(newSettings);
 
-    const dateRangeEnhancement = enhancement?.searchBar?.dateRange;
+    const dateRangeEnhancement = language?.searchBar?.dateRange;
     const dateRange = dateRangeEnhancement
       ? {
           from: dateRangeEnhancement.initialFrom!,

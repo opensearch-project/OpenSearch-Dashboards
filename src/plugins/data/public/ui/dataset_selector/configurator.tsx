@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { BaseDataset, Dataset, DatasetField, DataStructure } from '../../../common';
+import { BaseDataset, Dataset, DatasetField } from '../../../common';
 import { getQueryService, getIndexPatterns } from '../../services';
 
 export const Configurator = ({

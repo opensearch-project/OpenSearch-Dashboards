@@ -34,11 +34,15 @@ import { CoreStart } from 'opensearch-dashboards/public';
 import { Dataset, DataStorage, Query, TimeRange, UI_SETTINGS } from '../../../common';
 import { createHistory, QueryHistory } from './query_history';
 import { DatasetContract, DatasetManager } from './dataset_manager';
+import { DatasetService, DatasetServiceContract } from './dataset_service';
+import { LanguageConfig, LanguageService, LanguageServiceContract } from './language_service';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;
   private queryHistory: QueryHistory;
   private datasetManager!: DatasetContract;
+  private datasetService!: DatasetServiceContract;
+  private languageService!: LanguageServiceContract;
 
   constructor(
     private readonly storage: DataStorage,
@@ -47,28 +51,22 @@ export class QueryStringManager {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
     this.queryHistory = createHistory({ storage });
     this.datasetManager = new DatasetManager(uiSettings);
+    this.datasetService = new DatasetService(uiSettings);
+    this.languageService = new LanguageService(uiSettings);
   }
 
   private getDefaultQueryString() {
     return this.storage.get('userQueryString') || '';
   }
 
-  private getDefaultLanguage() {
-    return (
-      this.storage.get('userQueryLanguage') ||
-      this.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE)
-    );
-  }
-
   public getDefaultQuery() {
     return {
       query: this.getDefaultQueryString(),
       language: this.getDefaultLanguage(),
-      //   ...(this.uiSettings &&
-      //     this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) && {
-      //       dataset: this.getDatasetManager().getDefaultDataset(),
-      //     }),
-      // };
+      ...(this.uiSettings &&
+        this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) && {
+          dataset: this.datasetService.getDefault(),
+        }),
     };
   }
 
@@ -79,6 +77,10 @@ export class QueryStringManager {
       return {
         query,
         language: this.getDefaultLanguage(),
+        ...(this.uiSettings &&
+          this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) && {
+            dataset: this.datasetService.getDefault(),
+          }),
       };
     } else {
       return query;
@@ -99,7 +101,11 @@ export class QueryStringManager {
    */
   public setQuery = (query: Query) => {
     const curQuery = this.query$.getValue();
-    if (query?.language !== curQuery.language || query?.query !== curQuery.query) {
+    if (
+      query?.language !== curQuery.language ||
+      query?.query !== curQuery.query ||
+      query?.dataset !== curQuery.dataset
+    ) {
       this.query$.next(query);
     }
   };
@@ -134,6 +140,25 @@ export class QueryStringManager {
    */
   public getDatasetManager = () => {
     return this.datasetManager;
+  };
+
+  public getLanguage = (language: string) => {
+    return this.languageService.getLanguage(language);
+  };
+
+  private getDefaultLanguage() {
+    return (
+      this.storage.get('userQueryLanguage') ||
+      this.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE)
+    );
+  }
+
+  public getLanguages = () => {
+    return this.languageService.getLanguages();
+  };
+
+  public registerLanguage = (languageConfig: LanguageConfig) => {
+    this.languageService.registerLanguage(languageConfig);
   };
 }
 

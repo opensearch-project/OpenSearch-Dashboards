@@ -29,38 +29,26 @@
  */
 
 import { share } from 'rxjs/operators';
-import { IUiSettingsClient, SavedObjectsClientContract } from 'src/core/public';
 import { FilterManager } from './filter_manager';
 import { createAddToQueryLog } from './lib';
 import { TimefilterService, TimefilterSetup } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
 import { createQueryStateObservable } from './state_sync/create_global_query_observable';
 import { QueryStringManager, QueryStringContract } from './query_string';
-import {
-  buildOpenSearchQuery,
-  DataStorage,
-  getOpenSearchQueryConfig,
-  IndexPatternsService,
-} from '../../common';
+import { buildOpenSearchQuery, getOpenSearchQueryConfig } from '../../common';
 import { getUiSettings } from '../services';
 import { IndexPattern } from '..';
+import {
+  IQuerySetup,
+  IQueryStart,
+  QueryServiceSetupDependencies,
+  QueryServiceStartDependencies,
+} from './types';
 
 /**
  * Query Service
  * @internal
  */
-
-interface QueryServiceSetupDependencies {
-  storage: DataStorage;
-  uiSettings: IUiSettingsClient;
-}
-
-interface QueryServiceStartDependencies {
-  savedObjectsClient: SavedObjectsClientContract;
-  storage: DataStorage;
-  uiSettings: IUiSettingsClient;
-  indexPatterns: IndexPatternsService;
-}
 
 export class QueryService {
   filterManager!: FilterManager;
@@ -69,7 +57,7 @@ export class QueryService {
 
   state$!: ReturnType<typeof createQueryStateObservable>;
 
-  public setup({ storage, uiSettings }: QueryServiceSetupDependencies) {
+  public setup({ storage, uiSettings }: QueryServiceSetupDependencies): IQuerySetup {
     this.filterManager = new FilterManager(uiSettings);
 
     const timefilterService = new TimefilterService();
@@ -99,7 +87,7 @@ export class QueryService {
     storage,
     uiSettings,
     indexPatterns,
-  }: QueryServiceStartDependencies) {
+  }: QueryServiceStartDependencies): IQueryStart {
     this.queryStringManager.getDatasetManager().init(indexPatterns);
     return {
       addToQueryLog: createAddToQueryLog({

@@ -12,7 +12,7 @@ import { QueryEditorExtensionConfig } from './query_editor';
 import { createSearchBar } from './search_bar/create_search_bar';
 import { createSettings } from './settings';
 import { SuggestionsComponent } from './typeahead';
-import { IUiSetup, IUiStart, QueryEnhancement, UiEnhancements } from './types';
+import { IUiSetup, IUiStart, UiEnhancements } from './types';
 import { DataStorage } from '../../common';
 
 /** @internal */
@@ -27,7 +27,6 @@ export interface UiServiceStartDependencies {
 
 export class UiService implements Plugin<IUiSetup, IUiStart> {
   enhancementsConfig: ConfigSchema['enhancements'];
-  private queryEnhancements: Map<string, QueryEnhancement> = new Map();
   private queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig> = {};
   private dataSetContainer$ = new BehaviorSubject<HTMLDivElement | null>(null);
 
@@ -41,9 +40,6 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
     return {
       __enhance: (enhancements?: UiEnhancements) => {
         if (!enhancements) return;
-        if (enhancements.query && enhancements.query.language) {
-          this.queryEnhancements.set(enhancements.query.language, enhancements.query);
-        }
         if (enhancements.queryEditorExtension) {
           this.queryEditorExtensionMap[enhancements.queryEditorExtension.id] =
             enhancements.queryEditorExtension;
@@ -56,8 +52,8 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
     const Settings = createSettings({
       config: this.enhancementsConfig,
       search: dataServices.search,
+      query: dataServices.query,
       storage,
-      queryEnhancements: this.queryEnhancements,
       queryEditorExtensionMap: this.queryEditorExtensionMap,
     });
 
