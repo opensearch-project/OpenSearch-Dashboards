@@ -250,15 +250,19 @@ export class Table extends PureComponent<TableProps, TableState> {
           if (!canGoInApp) {
             return <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>;
           }
-          let inAppUrl = basePath.prepend(path);
+          let finalPath = path;
+          if (this.props.useUpdatedUX && finalPath) {
+            finalPath = finalPath.replace(/^\/app\/management\/opensearch-dashboards/, '/app');
+          }
+          let inAppUrl = basePath.prepend(finalPath);
           if (object.workspaces?.length) {
             if (currentWorkspaceId) {
-              inAppUrl = formatUrlWithWorkspaceId(path, currentWorkspaceId, basePath);
+              inAppUrl = formatUrlWithWorkspaceId(finalPath, currentWorkspaceId, basePath);
             } else {
               // find first workspace user have permission
               const workspaceId = object.workspaces.find((wsId) => visibleWsIds.includes(wsId));
               if (workspaceId) {
-                inAppUrl = formatUrlWithWorkspaceId(path, workspaceId, basePath);
+                inAppUrl = formatUrlWithWorkspaceId(finalPath, workspaceId, basePath);
               }
             }
           }

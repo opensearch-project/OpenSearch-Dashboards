@@ -146,17 +146,9 @@ export class DataSourceManagementPlugin
       },
     });
 
-    /**
-     * The data sources features in observability has the same name as `DSM_APP_ID`
-     * Add a suffix to avoid duplication
-     *
-     * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
-     */
-    const DSM_APP_ID_FOR_STANDARD_APPLICATION = `${DSM_APP_ID}_core`;
-
     if (core.chrome.navGroup.getNavGroupEnabled()) {
       core.application.register({
-        id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
+        id: DSM_APP_ID,
         title: PLUGIN_NAME,
         order: 100,
         description: i18n.translate('data_source_management.description', {
@@ -184,7 +176,7 @@ export class DataSourceManagementPlugin
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.dataAdministration, [
       {
-        id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
+        id: DSM_APP_ID,
         category: DEFAULT_APP_CATEGORIES.manageData,
         order: 100,
       },

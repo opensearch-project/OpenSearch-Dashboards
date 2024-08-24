@@ -54,8 +54,13 @@ export default function ({ getService, getPageObjects }) {
 
     it('should be able to navigate to edit dashboard', async () => {
       await listingTable.searchForItemWithName(dashboardName);
-      const editBttn = await testSubjects.find('edit-dashboard-action');
-      await editBttn.click();
+      // Find and click the edit button
+      const editBtn = await testSubjects.find('dashboardEditBtn');
+      await editBtn.click();
+
+      // Find and click the edit option in the dropdown
+      const editOption = await testSubjects.find('dashboardEditDashboard');
+      await editOption.click();
       await PageObjects.dashboard.clickCancelOutOfEditMode();
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
