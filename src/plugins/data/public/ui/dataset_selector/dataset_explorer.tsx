@@ -45,23 +45,23 @@ export const DatasetExplorer = ({
     const lastPathItem = newPath[newPath.length - 1];
     const nextPath = [...newPath, item];
 
-    const handler = queryString.getDatasetType(nextPath[1].id);
-    if (!handler) return;
+    const typeConfig = queryString.getDatasetService().getType(nextPath[1].id);
+    if (!typeConfig) return;
 
-    if (lastPathItem.hasNext) {
-      const dataset = handler!.toDataset(nextPath);
+    if (!lastPathItem.hasNext) {
+      const dataset = typeConfig!.toDataset(nextPath);
       setExplorerDataset(dataset as BaseDataset);
       return;
     }
 
     setLoading(true);
-    const nextDataStructure = await handler.fetch(savedObjects, nextPath);
+    const nextDataStructure = await typeConfig.fetch(savedObjects, nextPath);
     setLoading(false);
 
     setPath([...newPath, nextDataStructure]);
   };
 
-  const columnCount = !path[path.length - 1]?.hasNext ? path.length + 1 : path.length;
+  const columnCount = path[path.length - 1]?.hasNext ? path.length + 1 : path.length;
 
   return (
     <>
@@ -97,7 +97,7 @@ export const DatasetExplorer = ({
         >
           {path.map((current, index) => {
             const isLast = index === path.length - 1;
-            const isFinal = isLast && current.hasNext;
+            const isFinal = isLast && !current.hasNext;
             return (
               <div
                 key={current.id}
@@ -106,7 +106,7 @@ export const DatasetExplorer = ({
                 }`}
               >
                 <EuiTitle size="xxs" className="datasetExplorer__columnTitle">
-                  <h3>{current.hasNext}</h3>
+                  <h3>{current.columnHeader}</h3>
                 </EuiTitle>
                 <EuiSelectable
                   options={(current.children || []).map((child) => ({
@@ -145,7 +145,7 @@ export const DatasetExplorer = ({
               </div>
             );
           })}
-          {!!!path[path.length - 1]?.hasNext && <LoadingEmptyColumn isLoading={loading} />}
+          {!!path[path.length - 1]?.hasNext && <LoadingEmptyColumn isLoading={loading} />}
         </div>
       </EuiModalBody>
       <EuiModalFooter>

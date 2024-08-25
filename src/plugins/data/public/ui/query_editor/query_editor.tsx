@@ -86,7 +86,7 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   public inputRef: monaco.editor.IStandaloneCodeEditor | null = null;
 
-  private queryService = getQueryService();
+  private queryString = getQueryService().queryString;
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
@@ -181,7 +181,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: languageId === 'kuery' }),
     });
 
-    const language = this.queryService.queryString.getLanguage(this.props.query.language);
+    const language = this.queryString.getLanguageService().getLanguage(this.props.query.language);
     const newQuery = {
       query: this.props.getQueryStringInitialValue?.(language!) ?? '',
       language: language?.id || languageId,
@@ -246,9 +246,9 @@ export default class QueryEditorUI extends Component<Props, State> {
   };
 
   private fetchIndexPattern = async () => {
-    const dataSetTitle = this.queryService.queryString.getDatasetManager().getDataset()?.title;
-    if (!dataSetTitle) return undefined;
-    return getIndexPatterns().getByTitle(dataSetTitle);
+    const dataset = this.queryString.getQuery().dataset;
+    if (!dataset) return undefined;
+    return getIndexPatterns().getByTitle(dataset.title);
   };
 
   provideCompletionItems = async (

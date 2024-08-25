@@ -36,7 +36,8 @@ export const Configurator = ({
   const queryService = getQueryService();
   const queryString = queryService.queryString;
   const indexPatternsService = getIndexPatterns();
-  const languages = queryString.getDatasetType(baseDataset.type)?.supportedLanguages() || [];
+  const languages =
+    queryString.getDatasetService().getType(baseDataset.type)?.supportedLanguages() || [];
 
   const [dataset, setDataset] = useState<Dataset>(baseDataset);
   const [fields, setFields] = useState<DatasetField[]>();
@@ -47,7 +48,8 @@ export const Configurator = ({
   useEffect(() => {
     const fetchFields = async () => {
       const datasetFields = await queryString
-        .getDatasetType(baseDataset.type)
+        .getDatasetService()
+        .getType(baseDataset.type)
         ?.fetchFields(baseDataset);
 
       setFields(datasetFields);

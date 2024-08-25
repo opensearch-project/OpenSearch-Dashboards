@@ -53,7 +53,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
         const indices = await fetchIndices(dataStructure);
         return {
           ...dataStructure,
-          hasNext: true,
+          hasNext: false,
           columnHeader: 'Indexes',
           children: indices.map((indexName) => ({
             id: `${dataStructure.id}::${indexName}`,
@@ -68,7 +68,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
         return {
           ...dataStructure,
           columnHeader: 'Cluster',
-          hasNext: false,
+          hasNext: true,
           children: dataSources,
         };
       }

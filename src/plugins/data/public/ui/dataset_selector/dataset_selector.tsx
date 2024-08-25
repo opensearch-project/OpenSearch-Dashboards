@@ -37,24 +37,24 @@ export const DatasetSelector = ({
   const closePopover = () => setIsOpen(false);
   const { overlays, savedObjects } = services;
 
-  const queryString = getQueryService().queryString;
+  const datasetService = getQueryService().queryString.getDatasetService();
 
   const datasetIcon =
-    queryString.getDatasetType(selectedDataset?.type || '')?.meta.icon.type || 'database';
+    datasetService.getType(selectedDataset?.type || '')?.meta.icon.type || 'database';
 
   useEffect(() => {
     const init = async () => {
       setDatasets(
         (
-          await queryString
-            .getDatasetType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN)
+          await datasetService
+            .getType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN)
             ?.fetch(savedObjects.client, [])!
         ).children || []
       );
     };
 
     init();
-  }, [queryString, savedObjects.client]);
+  }, [datasetService, savedObjects.client]);
 
   const options = useMemo(() => {
     const newOptions: EuiSelectableOption[] = [];
@@ -69,12 +69,12 @@ export const DatasetSelector = ({
         label: title,
         checked: id === selectedDataset?.id ? 'on' : undefined,
         key: id,
-        prepend: <EuiIcon type={queryString.getDatasetType(type)!.meta.icon.type} />,
+        prepend: <EuiIcon type={datasetService.getType(type)!.meta.icon.type} />,
       });
     });
 
     return newOptions;
-  }, [queryString, datasets, selectedDataset?.id]);
+  }, [datasets, selectedDataset?.id, datasetService]);
 
   // Handle option change
   const handleOptionChange = (newOptions: EuiSelectableOption[]) => {

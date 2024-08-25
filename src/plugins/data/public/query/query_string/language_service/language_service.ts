@@ -35,8 +35,8 @@ export class LanguageService {
     return this.languages.get(language);
   }
 
-  public getLanguages(): string[] {
-    return Array.from(this.languages.keys());
+  public getLanguages(): LanguageConfig[] {
+    return Array.from(this.languages.values());
   }
 
   public getDefaultLanguage(): LanguageConfig {

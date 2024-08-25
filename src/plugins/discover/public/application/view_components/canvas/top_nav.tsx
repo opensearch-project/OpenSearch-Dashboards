@@ -74,16 +74,16 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     const initializeDataset = async () => {
       await data.indexPatterns.ensureDefaultIndexPattern();
       const defaultIndexPattern = await data.indexPatterns.getDefault();
-      const datasetManager = data.query.queryString.getDatasetManager();
-      datasetManager.fetchDefaultDataset();
-      const defaultDataset = datasetManager.getDefaultDataset();
+      // TODO: ROCKY do we need this?
+      // const queryString = data.query.queryString;
+      // const defaultDataset = queryString.getDatasetService().getDefault();
 
       if (!isMounted) return;
 
       setIndexPatterns(defaultIndexPattern ? [defaultIndexPattern] : undefined);
-      if (defaultDataset) {
-        datasetManager.setDataset(defaultDataset);
-      }
+      // if (defaultDataset) {
+      //   datasetManager.setDataset(defaultDataset);
+      // }
     };
 
     initializeDataset();

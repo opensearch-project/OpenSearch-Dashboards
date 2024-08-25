@@ -88,7 +88,7 @@ export class QueryService {
     uiSettings,
     indexPatterns,
   }: QueryServiceStartDependencies): IQueryStart {
-    this.queryStringManager.initDataset();
+    this.queryStringManager.getDatasetService().init();
     return {
       addToQueryLog: createAddToQueryLog({
         storage,

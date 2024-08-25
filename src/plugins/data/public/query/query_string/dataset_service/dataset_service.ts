@@ -4,13 +4,7 @@
  */
 
 import { CoreStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import {
-  Dataset,
-  UI_SETTINGS,
-  DataStructure,
-  IndexPatternSpec,
-  DEFAULT_DATA,
-} from '../../../../common';
+import { Dataset, DataStructure, IndexPatternSpec, DEFAULT_DATA } from '../../../../common';
 import { getIndexPatterns } from '../../../services';
 import { DatasetTypeConfig } from './types';
 import { indexPatternTypeConfig, indexTypeConfig } from './lib';
@@ -32,7 +26,6 @@ export class DatasetService {
   }
 
   public async init(): Promise<void> {
-    if (!this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) return;
     this.defaultDataset = await this.fetchDefaultDataset();
   }
 
@@ -42,6 +35,10 @@ export class DatasetService {
 
   public getType(type: string): DatasetTypeConfig | undefined {
     return this.typesRegistry.get(type);
+  }
+
+  public getTypes(): DatasetTypeConfig[] {
+    return Array.from(this.typesRegistry.values());
   }
 
   public getDefault(): Dataset | undefined {
@@ -77,10 +74,6 @@ export class DatasetService {
       throw new Error(`No handler found for type: ${path[0]}`);
     }
     return type.fetch(savedObjects, path);
-  }
-
-  public getTypes(): string[] {
-    return Array.from(this.typesRegistry.keys());
   }
 
   private async fetchDefaultDataset(): Promise<Dataset | undefined> {

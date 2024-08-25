@@ -52,7 +52,6 @@ export function createQueryStateObservable({
       refreshInterval: timefilter.getRefreshInterval(),
       filters: filterManager.getFilters(),
       query: queryString.getQuery(),
-      dataset: queryString.getDatasetManager().getDataset(),
     });
 
     let currentChange: QueryStateChange = {};
@@ -61,13 +60,6 @@ export function createQueryStateObservable({
         currentChange.query = true;
         state.set({ ...state.get(), query: queryString.getQuery() });
       }),
-      queryString
-        .getDatasetManager()
-        .getUpdates$()
-        .subscribe(() => {
-          currentChange.dataset = true;
-          state.set({ ...state.get(), dataset: queryString.getDatasetManager().getDataset() });
-        }),
       timefilter.getTimeUpdate$().subscribe(() => {
         currentChange.time = true;
         state.set({ ...state.get(), time: timefilter.getTime() });

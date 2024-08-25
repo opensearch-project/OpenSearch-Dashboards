@@ -22,11 +22,10 @@ import {
   withOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
 import { UI_SETTINGS } from '../../../common';
-import { getQueryLog, LanguageConfig, PersistedLog } from '../../query';
+import { getQueryLog, PersistedLog } from '../../query';
 import { Settings } from '../types';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
-import { useQueryStringManager } from '../search_bar/lib/use_query_string_manager';
 
 const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 
@@ -73,26 +72,20 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       query: { queryString },
     },
   } = opensearchDashboards.services;
-  const {
-    query: { dataset },
-  } = useQueryStringManager({ queryStringManager: queryString });
 
-  const queryLanguageId = props.query && props.query.language;
-  const queryLanguage = queryString.getLanguage(queryLanguageId!) || null;
+  const language = props.query && props.query.language;
   const parsedQuery =
-    !queryLanguageId || isValidQuery(props.query)
-      ? props.query!
-      : { query: getQueryStringInitialValue(queryLanguage!), language: queryLanguageId! };
+    !language || isValidQuery(props.query) ? props.query! : queryString.getInitialQuery();
   if (!isEqual(parsedQuery?.query, props.query?.query)) {
     onQueryChange(parsedQuery);
     onSubmit({ query: parsedQuery, dateRange: getDateRange() });
   }
   const persistedLog: PersistedLog | undefined = React.useMemo(
     () =>
-      queryLanguage && uiSettings && storage && appName
-        ? getQueryLog(uiSettings!, storage, appName, queryLanguageId!)
+      language && uiSettings && storage && appName
+        ? getQueryLog(uiSettings!, storage, appName, language!)
         : undefined,
-    [queryLanguage, uiSettings, storage, appName, queryLanguageId]
+    [language, uiSettings, storage, appName]
   );
 
   function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
@@ -105,20 +98,22 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
 
   function getDateRange() {
     const defaultTimeSetting = uiSettings!.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
+    const languageConfig = queryString.getLanguageService().getLanguage(language!);
     return {
       from:
         props.dateRangeFrom ||
-        queryLanguage?.searchBar?.dateRange?.initialFrom ||
+        languageConfig?.searchBar?.dateRange?.initialFrom ||
         defaultTimeSetting.from,
       to:
         props.dateRangeTo ||
-        queryLanguage?.searchBar?.dateRange?.initialTo ||
+        languageConfig?.searchBar?.dateRange?.initialTo ||
         defaultTimeSetting.to,
     };
   }
 
   function onQueryChange(query: Query, dateRange?: TimeRange) {
-    if (queryLanguage && !isValidQuery(query)) return;
+    const languageConfig = queryString.getLanguageService().getLanguage(language!);
+    if (languageConfig && !isValidQuery(query)) return;
     props.onChange({
       query,
       dateRange: dateRange ?? getDateRange(),
@@ -195,21 +190,12 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     if (query && query.query) return true;
   }
 
-  function getQueryStringInitialValue(language: LanguageConfig) {
-    const input = language?.searchBar?.queryStringInput?.initialValue;
-
-    if (!input) return '';
-
-    return input.replace('<data_source>', dataset?.title ?? dataset?.title ?? '');
-  }
-
   function renderQueryEditor() {
     if (!shouldRenderQueryEditor()) return;
     return (
       <EuiFlexItem>
         <QueryEditor
           disableAutoFocus={props.disableAutoFocus}
-          dataset={dataset}
           queryActions={props.prepend}
           query={parsedQuery}
           settings={props.settings!}
@@ -217,7 +203,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           onChange={onQueryChange}
           onChangeQueryEditorFocus={onChangeQueryEditorFocus}
           onSubmit={onInputSubmit}
-          getQueryStringInitialValue={getQueryStringInitialValue}
           persistedLog={persistedLog}
           className="osdQueryEditor"
           dataTestSubj={props.dataTestSubj}
@@ -244,11 +229,10 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function shouldRenderDatePicker(): boolean {
-    const languageId = queryString.getQuery().language;
-    const language = queryString.getLanguage(languageId);
+    const languageConfig = queryString.getLanguageService().getLanguage(language!);
     return Boolean(
-      (props.showDatePicker && (language?.searchBar?.showDatePicker ?? true)) ??
-        (props.showAutoRefreshOnly && (language?.searchBar?.showAutoRefreshOnly ?? true))
+      (props.showDatePicker && (languageConfig?.searchBar?.showDatePicker ?? true)) ??
+        (props.showAutoRefreshOnly && (languageConfig?.searchBar?.showAutoRefreshOnly ?? true))
     );
   }
 

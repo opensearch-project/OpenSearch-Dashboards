@@ -55,7 +55,7 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
   },
 
   supportedLanguages: (): string[] => {
-    return ['SQL', 'PPL', 'kuery', 'lucene'];
+    return ['SQL', 'PPL', 'DQL', 'Lucene'];
   },
 };
 
@@ -69,6 +69,5 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
     id: savedObject.id,
     title: savedObject.attributes.title,
     type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
-    hasNext: true,
   }));
 };

@@ -3,11 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/*
- * Copyright OpenSearch Contributors
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React, { useState, useEffect } from 'react';
 import {
   PopoverAnchorPosition,
@@ -39,10 +34,11 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
   const [currentLanguage, setCurrentLanguage] = useState(props.query.language);
 
   const uiService = getUiService();
-  const queryService = getQueryService();
+  const queryString = getQueryService().queryString;
+  const languageService = queryString.getLanguageService();
 
   useEffect(() => {
-    const subscription = queryService.queryString.getUpdates$().subscribe((query: Query) => {
+    const subscription = queryString.getUpdates$().subscribe((query: Query) => {
       if (query.language !== currentLanguage) {
         setCurrentLanguage(query.language);
         props.onSelectLanguage(query.language);
@@ -52,7 +48,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [queryService, currentLanguage, props.onSelectLanguage, props]);
+  }, [queryString, currentLanguage, props.onSelectLanguage, props]);
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -60,9 +56,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
 
   const languageOptions: Array<{ label: string; value: string }> = [];
 
-  const languages = queryService.queryString.getLanguages();
-  languages.forEach((languageId) => {
-    const language = queryService.queryString.getLanguage(languageId);
+  languageService.getLanguages().forEach((language) => {
     if (
       (language && props.appName && !language.supportedAppNames.includes(props.appName)) ||
       uiService.Settings.getUserQueryLanguageBlocklist().includes(language?.id)
@@ -84,8 +78,8 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
     uiService.Settings.setUserQueryLanguage(newLanguage);
 
     // Update the query in the QueryStringManager
-    const currentQuery = queryService.queryString.getQuery();
-    const input = queryService.queryString.getLanguage(newLanguage)?.searchBar?.queryStringInput
+    const currentQuery = queryString.getQuery();
+    const input = languageService.getLanguage(newLanguage)?.searchBar?.queryStringInput
       ?.initialValue;
 
     if (!input) return '';
@@ -94,7 +88,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
       currentQuery.dataset?.title ?? currentQuery.dataset?.title ?? ''
     );
 
-    queryService.queryString.setQuery({
+    queryString.setQuery({
       query: newQuery,
       language: newLanguage,
       dataset: currentQuery.dataset,

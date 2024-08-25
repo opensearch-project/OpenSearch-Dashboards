@@ -113,7 +113,7 @@ export class Settings {
   }
 
   setUiOverridesByUserQueryLanguage(languageId: string) {
-    const language = this.query.queryString.getLanguage(languageId);
+    const language = this.query.queryString.getLanguageService().getLanguage(languageId);
     if (language) {
       const { fields = {}, showDocLinks } = language;
       this.setUiOverrides({ fields, showDocLinks });

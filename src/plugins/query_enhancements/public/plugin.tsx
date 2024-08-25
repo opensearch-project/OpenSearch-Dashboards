@@ -16,7 +16,6 @@ import {
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
-import { UI_SETTINGS } from '../common';
 import { LanguageConfig } from '../../data/public';
 import { s3TypeConfig } from './datasets';
 
@@ -40,6 +39,7 @@ export class QueryEnhancementsPlugin
     core: CoreSetup<QueryEnhancementsPluginStartDependencies>,
     { data }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
+    const { queryString } = data.query;
     const pplSearchInterceptor = new PPLSearchInterceptor({
       toasts: core.notifications.toasts,
       http: core.http,
@@ -78,7 +78,7 @@ export class QueryEnhancementsPlugin
       showDocLinks: false,
       supportedAppNames: ['discover'],
     };
-    data.query.queryString.registerLanguage(pplLanguageConfig);
+    queryString.getLanguageService().registerLanguage(pplLanguageConfig);
 
     // Register SQL language
     const sqlLanguageConfig: LanguageConfig = {
@@ -99,7 +99,7 @@ export class QueryEnhancementsPlugin
       showDocLinks: false,
       supportedAppNames: ['discover'],
     };
-    data.query.queryString.registerLanguage(sqlLanguageConfig);
+    queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
 
     data.__enhance({
       ui: {
@@ -107,7 +107,7 @@ export class QueryEnhancementsPlugin
       },
     });
 
-    data.query.queryString.registerType(s3TypeConfig);
+    queryString.getDatasetService().registerType(s3TypeConfig);
 
     return {};
   }

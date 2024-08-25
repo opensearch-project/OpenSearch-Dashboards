@@ -31,19 +31,21 @@ export const AdvancedSelector = ({
     {
       ...DEFAULT_DATA.STRUCTURES.ROOT,
       columnHeader: 'Select data',
-      hasNext: false,
-      children: queryString.getDatasetTypes().map((typeId) => {
-        const type = queryString.getDatasetType(typeId);
-        return {
-          id: type!.id,
-          title: type!.title,
-          type: type!.id,
-          meta: {
-            ...type!.meta,
-            type: DATA_STRUCTURE_META_TYPES.TYPE,
-          },
-        } as DataStructure;
-      }),
+      hasNext: true,
+      children: queryString
+        .getDatasetService()
+        .getTypes()
+        .map((type) => {
+          return {
+            id: type!.id,
+            title: type!.title,
+            type: type!.id,
+            meta: {
+              ...type!.meta,
+              type: DATA_STRUCTURE_META_TYPES.TYPE,
+            },
+          } as DataStructure;
+        }),
     },
   ]);
   const [selectedDataset, setSelectedDataset] = useState<BaseDataset | undefined>();
