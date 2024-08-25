@@ -1,0 +1,10 @@
+.datasetSelector {
+  &__icon {
+    margin-right: 4px;
+  }
+
+  &__selectable {
+    width: 365px;
+    padding: $euiSizeXS;
+  }
+}

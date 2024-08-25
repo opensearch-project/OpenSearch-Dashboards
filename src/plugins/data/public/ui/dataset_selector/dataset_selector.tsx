@@ -110,7 +110,7 @@ export const DatasetSelector = ({
             iconSide="right"
             onClick={togglePopover}
           >
-            <EuiIcon type={datasetIcon} className="dataSetNavigator__icon" />
+            <EuiIcon type={datasetIcon} className="datasetSelector__icon" />
             {selectedDataset?.title ?? 'Select data'}
           </EuiButtonEmpty>
         </EuiToolTip>
