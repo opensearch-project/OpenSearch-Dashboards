@@ -7,7 +7,7 @@ import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { concatMap, map } from 'rxjs/operators';
-import { DATA_FRAME_TYPES, getRawDataFrame, getRawQueryString } from '../../../data/common';
+import { DATA_FRAME_TYPES, getRawDataFrame } from '../../../data/common';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,

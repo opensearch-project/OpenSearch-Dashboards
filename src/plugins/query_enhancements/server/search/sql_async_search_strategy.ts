@@ -12,6 +12,7 @@ import {
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
   PartialDataFrame,
+  Query,
   createDataFrame,
 } from '../../../data/common';
 import { Facet } from '../utils';
@@ -38,12 +39,13 @@ export const sqlAsyncSearchStrategyProvider = (
   return {
     search: async (context, request: any, options) => {
       try {
+        const query: Query = request?.body?.query;
         // Create job: this should return a queryId and sessionId
-        if (request?.body?.query?.query) {
+        if (query) {
           const df = request.body?.df;
           request.body = {
-            query: request.body.query.query,
-            datasource: request.body.query.dataset?.dataSource?.title,
+            query: query.query,
+            datasource: query.dataset?.dataSource?.title,
             lang: SEARCH_STRATEGY.SQL,
             sessionId: df?.meta?.sessionId,
           };
@@ -60,13 +62,13 @@ export const sqlAsyncSearchStrategyProvider = (
           const sessionId = rawResponse.data?.sessionId;
 
           const partial: PartialDataFrame = {
-            ...request.body.df,
+            ...df,
             fields: rawResponse?.data?.schema || [],
           };
           const dataFrame = createDataFrame(partial);
           dataFrame.meta = {
             ...dataFrame.meta,
-            query: request.body.query,
+            query: query.query,
             queryId,
             sessionId,
           };

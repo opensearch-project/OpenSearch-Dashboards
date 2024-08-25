@@ -181,13 +181,10 @@ export default class QueryEditorUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: languageId === 'kuery' }),
     });
 
-    const language = this.queryString.getLanguageService().getLanguage(this.props.query.language);
-    const newQuery = {
-      query: this.props.getQueryStringInitialValue?.(language!) ?? '',
-      language: language?.id || languageId,
-    };
+    const languageConfig = this.queryString.getLanguageService().getLanguage(languageId);
+    const newQuery = this.queryString.getInitialQueryByLanguage(languageId);
 
-    const fields = language?.fields;
+    const fields = languageConfig?.fields;
     const newSettings: DataSettings = {
       userQueryLanguage: newQuery.language,
       userQueryString: newQuery.query,
@@ -195,7 +192,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     };
     this.props.settings?.updateSettings(newSettings);
 
-    const dateRangeEnhancement = language?.searchBar?.dateRange;
+    const dateRangeEnhancement = languageConfig?.searchBar?.dateRange;
     const dateRange = dateRangeEnhancement
       ? {
           from: dateRangeEnhancement.initialFrom!,

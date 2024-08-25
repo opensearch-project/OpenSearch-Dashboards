@@ -43,6 +43,7 @@ const createSetupContractMock = () => {
     clearQueryHistory: jest.fn(),
     changeQueryHistory: jest.fn(),
     getInitialQuery: jest.fn(),
+    getInitialQueryByLanguage: jest.fn(),
     getDatasetService: jest.fn(),
     getLanguageService: jest.fn(),
   };

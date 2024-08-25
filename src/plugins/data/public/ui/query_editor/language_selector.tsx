@@ -41,14 +41,13 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
     const subscription = queryString.getUpdates$().subscribe((query: Query) => {
       if (query.language !== currentLanguage) {
         setCurrentLanguage(query.language);
-        props.onSelectLanguage(query.language);
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [queryString, currentLanguage, props.onSelectLanguage, props]);
+  }, [queryString, currentLanguage, props]);
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -75,24 +74,6 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
   const handleLanguageChange = (newLanguage: string) => {
     setCurrentLanguage(newLanguage);
     props.onSelectLanguage(newLanguage);
-    uiService.Settings.setUserQueryLanguage(newLanguage);
-
-    // Update the query in the QueryStringManager
-    const currentQuery = queryString.getQuery();
-    const input = languageService.getLanguage(newLanguage)?.searchBar?.queryStringInput
-      ?.initialValue;
-
-    if (!input) return '';
-    const newQuery = input?.replace(
-      '<data_source>',
-      currentQuery.dataset?.title ?? currentQuery.dataset?.title ?? ''
-    );
-
-    queryString.setQuery({
-      query: newQuery,
-      language: newLanguage,
-      dataset: currentQuery.dataset,
-    });
   };
 
   uiService.Settings.setUserQueryLanguage(currentLanguage);

@@ -142,14 +142,18 @@ export class QueryStringManager {
   };
 
   public getInitialQuery = () => {
+    return this.getInitialQueryByLanguage(this.query$.getValue().language);
+  };
+
+  public getInitialQueryByLanguage = (languageId: string) => {
     const curQuery = this.query$.getValue();
-    const language = this.languageService.getLanguage(curQuery.language);
+    const language = this.languageService.getLanguage(languageId);
     const dataset = curQuery.dataset;
     const input = language?.searchBar?.queryStringInput?.initialValue || '';
 
     return {
       query: input || input.replace('<data_source>', dataset?.title ?? ''),
-      language: curQuery.language,
+      language: languageId,
       dataset: curQuery.dataset,
     };
   };

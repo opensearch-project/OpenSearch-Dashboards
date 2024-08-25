@@ -237,8 +237,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       (!this.useNewHeader || this.props.filters.length > 0) &&
       this.props.indexPatterns &&
       compact(this.props.indexPatterns).length > 0 &&
-      (this.queryService.queryString.getLanguage(this.state.query?.language!)?.searchBar
-        ?.showFilterBar ??
+      (this.queryService.queryString.getLanguageService().getLanguage(this.state.query?.language!)
+        ?.searchBar?.showFilterBar ??
         true)
     );
   }

@@ -32,7 +32,9 @@ function defineRoute(
       validate: {
         body: schema.object({
           query: schema.object({
-            query: schema.object({}, { unknowns: 'allow' }),
+            query: schema.string(),
+            language: schema.string(),
+            dataset: schema.nullable(schema.object({}, { unknowns: 'allow' })),
             format: schema.string(),
           }),
           df: schema.nullable(schema.object({}, { unknowns: 'allow' })),
