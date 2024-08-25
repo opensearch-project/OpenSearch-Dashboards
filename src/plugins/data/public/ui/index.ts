@@ -47,5 +47,10 @@ export {
   QueryEditorExtensionDependencies,
   QueryEditorExtensionConfig,
 } from './query_editor';
-export { SearchBar, SearchBarProps, StatefulSearchBarProps } from './search_bar';
+export {
+  SearchBar,
+  SearchBarProps,
+  StatefulSearchBarProps,
+  useQueryStringManager,
+} from './search_bar';
 export { SuggestionsComponent } from './typeahead';

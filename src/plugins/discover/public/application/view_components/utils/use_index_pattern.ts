@@ -5,11 +5,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { IndexPattern } from '../../../../../data/public';
+import { IndexPattern, useQueryStringManager } from '../../../../../data/public';
 import { useSelector, updateIndexPattern } from '../../utils/state_management';
 import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
-import { useQueryStringManager } from './use_query_manager';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 
 /**
@@ -55,7 +54,11 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
       } else if (!isQueryEnhancementEnabled) {
         if (!indexPatternIdFromState) {
           const indexPatternList = await data.indexPatterns.getCache();
-          const newId = getIndexPatternId('', indexPatternList, uiSettings.get('defaultIndex'));
+          const newId = getIndexPatternId(
+            '',
+            indexPatternList || [],
+            uiSettings.get('defaultIndex')
+          );
           if (isMounted) {
             store!.dispatch(updateIndexPattern(newId));
             handleIndexPattern();
