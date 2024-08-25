@@ -4,24 +4,18 @@
  */
 
 import { ISearchInterceptor } from '../../../search';
+import { Query } from '../../../../public';
 
 export interface LanguageConfig {
   id: string;
   title: string;
   search: ISearchInterceptor;
-  // Leave blank to support all data sources
-  // supportedDataSourceTypes?: Record<string, GenericDataSource>;
+  getQueryString: (query: Query) => string;
   searchBar?: {
-    showDataSetsSelector?: boolean;
-    showDataSourcesSelector?: boolean;
     showQueryInput?: boolean;
     showFilterBar?: boolean;
     showDatePicker?: boolean;
     showAutoRefreshOnly?: boolean;
-    queryStringInput?: {
-      // will replace '<data_source>' with the data source name
-      initialValue?: string;
-    };
     dateRange?: {
       initialFrom?: string;
       initialTo?: string;

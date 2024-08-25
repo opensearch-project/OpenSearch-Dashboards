@@ -11,16 +11,14 @@ export const getDQLLanguageConfig = (search: ISearchInterceptor): LanguageConfig
     id: 'kuery',
     title: 'DQL',
     search,
+    getQueryString(_) {
+      return '';
+    },
     searchBar: {
-      showDataSetsSelector: true,
-      showDataSourcesSelector: false,
       showQueryInput: true,
       showFilterBar: true,
       showDatePicker: true,
       showAutoRefreshOnly: false,
-      queryStringInput: {
-        initialValue: '',
-      },
     },
     fields: {
       filterable: true,

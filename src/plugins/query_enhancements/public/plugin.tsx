@@ -16,7 +16,7 @@ import {
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
-import { LanguageConfig } from '../../data/public';
+import { LanguageConfig, Query } from '../../data/public';
 import { s3TypeConfig } from './datasets';
 
 export class QueryEnhancementsPlugin
@@ -61,15 +61,15 @@ export class QueryEnhancementsPlugin
       id: 'PPL',
       title: 'PPL',
       search: pplSearchInterceptor,
+      getQueryString: (query: Query) => {
+        return `source = ${query.dataset?.title}`;
+      },
       searchBar: {
-        queryStringInput: { initialValue: 'source=<data_source>' },
         dateRange: {
           initialFrom: moment().subtract(2, 'days').toISOString(),
           initialTo: moment().add(2, 'days').toISOString(),
         },
         showFilterBar: false,
-        showDataSetsSelector: true,
-        showDataSourcesSelector: true,
       },
       fields: {
         filterable: false,
@@ -85,12 +85,12 @@ export class QueryEnhancementsPlugin
       id: 'SQL',
       title: 'SQL',
       search: sqlSearchInterceptor,
+      getQueryString: (query: Query) => {
+        return `SELECT * FROM ${queryString.getQuery().dataset?.title} LIMIT 10`;
+      },
       searchBar: {
         showDatePicker: false,
         showFilterBar: false,
-        showDataSetsSelector: true,
-        showDataSourcesSelector: true,
-        queryStringInput: { initialValue: 'SELECT * FROM <data_source> LIMIT 10' },
       },
       fields: {
         filterable: false,

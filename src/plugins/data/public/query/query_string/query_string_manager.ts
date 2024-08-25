@@ -148,12 +148,12 @@ export class QueryStringManager {
     const curQuery = this.query$.getValue();
     const language = this.languageService.getLanguage(languageId);
     const dataset = curQuery.dataset;
-    const input = language?.searchBar?.queryStringInput?.initialValue || '';
+    const input = language?.getQueryString(curQuery) || '';
 
     return {
-      query: input || input.replace('<data_source>', dataset?.title ?? ''),
+      query: input,
       language: languageId,
-      dataset: curQuery.dataset,
+      dataset,
     };
   };
 

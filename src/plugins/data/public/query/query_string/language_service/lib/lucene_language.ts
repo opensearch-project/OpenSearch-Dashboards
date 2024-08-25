@@ -11,16 +11,14 @@ export const getLuceneLanguageConfig = (search: ISearchInterceptor): LanguageCon
     id: 'lucene',
     title: 'Lucene',
     search,
+    getQueryString(_) {
+      return '';
+    },
     searchBar: {
-      showDataSetsSelector: true,
-      showDataSourcesSelector: false,
       showQueryInput: true,
       showFilterBar: true,
       showDatePicker: true,
       showAutoRefreshOnly: false,
-      queryStringInput: {
-        initialValue: '',
-      },
     },
     fields: {
       filterable: true,

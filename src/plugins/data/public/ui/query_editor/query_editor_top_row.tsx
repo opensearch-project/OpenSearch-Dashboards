@@ -13,7 +13,6 @@ import {
   prettyDuration,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { isEqual } from 'lodash';
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { IDataPluginServices, IIndexPattern, Query, TimeHistoryContract, TimeRange } from '../..';
