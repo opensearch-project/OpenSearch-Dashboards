@@ -155,6 +155,11 @@
   align-items: center;
   padding: $euiSizeXS;
 
+  > * {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
   .osdQueryEditor__collapseBtn {
     padding-right: $euiSizeXS;
     border-right: $euiBorderThin;
