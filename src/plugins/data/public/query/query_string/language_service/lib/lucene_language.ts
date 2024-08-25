@@ -4,13 +4,13 @@
  */
 
 import { LanguageConfig } from '../types';
-import { ISearchStart } from '../../../../search';
+import { ISearchInterceptor } from '../../../../search';
 
-export const getLuceneLanguageConfig = (search: ISearchStart): LanguageConfig => {
+export const getLuceneLanguageConfig = (search: ISearchInterceptor): LanguageConfig => {
   return {
     id: 'lucene',
     title: 'Lucene',
-    search: search.getDefaultSearchInterceptor(),
+    search,
     searchBar: {
       showDataSetsSelector: true,
       showDataSourcesSelector: false,

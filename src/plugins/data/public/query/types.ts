@@ -7,6 +7,7 @@ import { IUiSettingsClient, SavedObjectsClientContract } from 'opensearch-dashbo
 import { Observable } from 'rxjs';
 import { DataStorage } from '../../common';
 import { IndexPattern, IndexPatternsService } from '../index_patterns';
+import { ISearchInterceptor } from '../search';
 import { FilterManager } from './filter_manager';
 import { QueryStringContract } from './query_string';
 import { QueryStateChange, QueryState } from './state_sync';
@@ -35,6 +36,7 @@ export interface IQueryStart {
 export interface QueryServiceSetupDependencies {
   storage: DataStorage;
   uiSettings: IUiSettingsClient;
+  defaultSearchInterceptor: ISearchInterceptor;
 }
 
 /** @internal */

@@ -3,19 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CoreStart } from 'opensearch-dashboards/public';
-import { UI_SETTINGS } from '../../../../common';
 import { LanguageConfig } from './types';
 import { getDQLLanguageConfig, getLuceneLanguageConfig } from './lib';
-import { getSearchService } from '../../../services';
+import { ISearchInterceptor } from '../../../search';
 
 export class LanguageService {
   private languages: Map<string, LanguageConfig> = new Map();
 
-  constructor(private readonly uiSettings: CoreStart['uiSettings']) {}
-
-  public async init(): Promise<void> {
-    if (!this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) return;
+  constructor(private readonly defaultSearchInterceptor: ISearchInterceptor) {
     this.registerDefaultLanguages();
   }
 
@@ -23,8 +18,8 @@ export class LanguageService {
    * Registers default handlers for index patterns and indices.
    */
   private registerDefaultLanguages() {
-    this.registerLanguage(getDQLLanguageConfig(getSearchService()));
-    this.registerLanguage(getLuceneLanguageConfig(getSearchService()));
+    this.registerLanguage(getDQLLanguageConfig(this.defaultSearchInterceptor));
+    this.registerLanguage(getLuceneLanguageConfig(this.defaultSearchInterceptor));
   }
 
   public registerLanguage(config: LanguageConfig): void {

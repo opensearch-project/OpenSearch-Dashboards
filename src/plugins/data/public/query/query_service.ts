@@ -57,7 +57,11 @@ export class QueryService {
 
   state$!: ReturnType<typeof createQueryStateObservable>;
 
-  public setup({ storage, uiSettings }: QueryServiceSetupDependencies): IQuerySetup {
+  public setup({
+    storage,
+    uiSettings,
+    defaultSearchInterceptor,
+  }: QueryServiceSetupDependencies): IQuerySetup {
     this.filterManager = new FilterManager(uiSettings);
 
     const timefilterService = new TimefilterService();
@@ -66,7 +70,7 @@ export class QueryService {
       storage,
     });
 
-    this.queryStringManager = new QueryStringManager(storage, uiSettings);
+    this.queryStringManager = new QueryStringManager(storage, uiSettings, defaultSearchInterceptor);
 
     this.state$ = createQueryStateObservable({
       filterManager: this.filterManager,

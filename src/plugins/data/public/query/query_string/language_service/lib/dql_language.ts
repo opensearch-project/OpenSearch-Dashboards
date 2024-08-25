@@ -4,13 +4,13 @@
  */
 
 import { LanguageConfig } from '../types';
-import { ISearchStart } from '../../../../search';
+import { ISearchInterceptor } from '../../../../search';
 
-export const getDQLLanguageConfig = (search: ISearchStart): LanguageConfig => {
+export const getDQLLanguageConfig = (search: ISearchInterceptor): LanguageConfig => {
   return {
     id: 'kuery',
     title: 'DQL',
-    search: search.getDefaultSearchInterceptor(),
+    search,
     searchBar: {
       showDataSetsSelector: true,
       showDataSourcesSelector: false,
