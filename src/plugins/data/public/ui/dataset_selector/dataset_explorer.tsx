@@ -133,7 +133,7 @@ export const DatasetExplorer = ({
                     },
                     searchable: true,
                   })}
-                  className="datasetSelector__selectable"
+                  className="datasetExplorer__selectable"
                 >
                   {(list, search) => (
                     <>
