@@ -394,7 +394,7 @@ export const updateDataFrameMeta = ({
   getAggQsFn: GetDataFrameAggQsFn;
 }) => {
   dataFrame.meta = {
-    ...dataFrame.meta,
+    ...dataFrame?.meta,
     aggs: aggConfig,
     aggsQs: {
       [aggConfig.id]: getAggQsFn({

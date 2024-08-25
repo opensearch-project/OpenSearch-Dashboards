@@ -4,7 +4,13 @@
  */
 
 import { CoreStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { Dataset, DataStructure, IndexPatternSpec, DEFAULT_DATA } from '../../../../common';
+import {
+  Dataset,
+  DataStructure,
+  IndexPatternSpec,
+  DEFAULT_DATA,
+  IFieldType,
+} from '../../../../common';
 import { getIndexPatterns } from '../../../services';
 import { DatasetTypeConfig } from './types';
 import { indexPatternTypeConfig, indexTypeConfig } from './lib';
@@ -49,7 +55,12 @@ export class DatasetService {
     const type = this.getType(dataset.type);
     if (dataset) {
       const spec = {
-        ...dataset,
+        id: dataset.id,
+        title: dataset.title,
+        timeFieldName: {
+          name: dataset.timeFieldName,
+          type: 'date',
+        } as Partial<IFieldType>,
         fields: await type?.fetchFields(dataset),
         dataSourceRef: dataset.dataSource
           ? {
@@ -59,7 +70,7 @@ export class DatasetService {
             }
           : undefined,
       } as IndexPatternSpec;
-      const temporaryIndexPattern = await getIndexPatterns().create(spec, true);
+      const temporaryIndexPattern = await getIndexPatterns().create(spec);
       getIndexPatterns().saveToCache(dataset.id, temporaryIndexPattern);
     }
   }

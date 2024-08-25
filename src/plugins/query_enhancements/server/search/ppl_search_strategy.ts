@@ -67,9 +67,7 @@ export const pplSearchStrategyProvider = (
 
       try {
         const query: Query = request.body.query;
-        const {
-          df: { meta },
-        } = request.body;
+        const { df } = request.body;
 
         const rawResponse: any = await pplFacet.describeQuery(context, request);
 
@@ -84,7 +82,7 @@ export const pplSearchStrategyProvider = (
         const dataFrame = createDataFrame({
           name: query.dataset?.id,
           schema: rawResponse.data.schema,
-          meta,
+          meta: df?.meta,
           fields: getFields(rawResponse),
         });
 
@@ -92,8 +90,8 @@ export const pplSearchStrategyProvider = (
 
         if (usage) usage.trackSuccess(rawResponse.took);
 
-        if (dataFrame.meta?.aggsQs) {
-          for (const [key, aggQueryString] of Object.entries(dataFrame.meta.aggsQs)) {
+        if (dataFrame?.meta?.aggsQs) {
+          for (const [key, aggQueryString] of Object.entries(dataFrame?.meta?.aggsQs)) {
             const aggRequest = parseRequest(aggQueryString as string);
             request.body.query = aggRequest.aggs;
             const rawAggs: any = await pplFacet.describeQuery(context, request);

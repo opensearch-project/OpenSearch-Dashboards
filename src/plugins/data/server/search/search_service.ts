@@ -78,7 +78,6 @@ import {
   IDataFrame,
   IDataFrameResponse,
   createDataFrameCache,
-  dataFrameToSpec,
 } from '../../common';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
@@ -215,16 +214,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           const dfService: DataFrameService = {
             get: () => this.dfCache.get(),
             set: async (dataFrame: IDataFrame) => {
-              if (this.dfCache.get() && this.dfCache.get()?.name !== dataFrame.name) {
-                scopedIndexPatterns.clearCache(this.dfCache.get()!.name, false);
-              }
               this.dfCache.set(dataFrame);
-              const existingIndexPattern = await scopedIndexPatterns.get(dataFrame.name!, true);
-              const dataset = await scopedIndexPatterns.create(
-                dataFrameToSpec(dataFrame, existingIndexPattern?.id),
-                !existingIndexPattern?.id
-              );
-              scopedIndexPatterns.saveToCache(dataset.id!, dataset);
             },
             clear: () => {
               if (this.dfCache.get() === undefined) return;

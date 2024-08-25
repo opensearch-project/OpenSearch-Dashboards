@@ -138,14 +138,14 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     const dataFrame = getRawDataFrame(searchRequest);
     const query = this.queryService.queryString.getQuery();
     const timeField = query.dataset?.timeFieldName;
-    const aggConfig = dataFrame.meta?.aggConfig;
+    const aggConfig = dataFrame?.meta?.aggConfig;
     if (timeField && aggConfig) {
       const timeFilter = getTimeFilter(timeField);
       const newQuery = insertTimeFilter(query.query as string, timeFilter);
       updateDataFrameMeta({
         dataFrame,
         query: { ...query, query: newQuery },
-        aggConfig: dataFrame.meta?.aggConfig,
+        aggConfig: dataFrame?.meta?.aggConfig,
         timeField,
         timeFilter,
         getAggQsFn: getAggQsFn.bind(this),

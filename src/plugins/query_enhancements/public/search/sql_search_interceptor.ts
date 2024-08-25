@@ -72,9 +72,6 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     };
 
     const dataFrame = getRawDataFrame(searchRequest);
-    if (!dataFrame) {
-      return throwError(this.handleSearchError('DataFrame is not defined', request, signal!));
-    }
     const query = this.queryService.queryString.getQuery();
 
     const dataSourceRef = query.dataset
@@ -85,9 +82,9 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       : {};
 
     dataFrame.meta = {
-      ...dataFrame.meta,
+      ...dataFrame?.meta,
       queryConfig: {
-        ...dataFrame.meta.queryConfig,
+        ...dataFrame?.meta.queryConfig,
         ...dataSourceRef,
       },
       sessionId: dataSourceRef

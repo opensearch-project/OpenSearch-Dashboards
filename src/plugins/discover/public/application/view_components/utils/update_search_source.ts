@@ -32,21 +32,10 @@ export const updateSearchSource = async ({
   const { uiSettings, data } = services;
   const queryDataset = data.query.queryString.getQuery().dataset;
 
-  let dataset =
+  const dataset =
     indexPattern.id === queryDataset?.id
       ? await data.indexPatterns.get(queryDataset?.id!, true)
       : indexPattern;
-  const dataFrame = searchSource?.getDataFrame();
-  if (
-    searchSource &&
-    dataFrame &&
-    dataFrame.name &&
-    dataFrame.name !== '' &&
-    dataset.title !== dataFrame.name
-  ) {
-    dataset = data.indexPatterns.getByTitle(dataFrame.name, true) ?? dataset;
-    searchSource.setField('index', dataset);
-  }
 
   const sortForSearchSource = getSortForSearchSource(
     sort,

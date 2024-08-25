@@ -62,7 +62,6 @@ import {
   IDataFrame,
   IDataFrameResponse,
   createDataFrameCache,
-  dataFrameToSpec,
 } from '../../common/data_frames';
 import { getQueryService, getUiService } from '../services';
 import { UI_SETTINGS } from '../../common';
@@ -159,16 +158,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const dfService: DataFrameService = {
       get: () => this.dfCache.get(),
       set: async (dataFrame: IDataFrame) => {
-        if (this.dfCache.get() && this.dfCache.get()?.name !== dataFrame.name) {
-          indexPatterns.clearCache(this.dfCache.get()!.name, false);
-        }
         this.dfCache.set(dataFrame);
-        const existingIndexPattern = await indexPatterns.get(dataFrame.name!, true);
-        const dataset = await indexPatterns.create(
-          dataFrameToSpec(dataFrame, existingIndexPattern?.id),
-          !existingIndexPattern?.id
-        );
-        indexPatterns.saveToCache(dataset.id!, dataset);
       },
       clear: () => {
         if (this.dfCache.get() === undefined) return;
