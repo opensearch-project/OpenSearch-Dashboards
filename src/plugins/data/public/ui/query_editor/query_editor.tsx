@@ -92,9 +92,6 @@ export default class QueryEditorUI extends Component<Props, State> {
   private extensionMap = this.props.settings?.getQueryEditorExtensionMap();
 
   private getQueryString = () => {
-    if (!this.props.query.query) {
-      return '';
-    }
     return toUser(this.props.query.query);
   };
 
@@ -231,6 +228,17 @@ export default class QueryEditorUI extends Component<Props, State> {
   }
 
   public componentDidUpdate(prevProps: Props) {
+    const prevQuery = prevProps.query;
+
+    if (!isEqual(this.props.query.dataset, prevQuery.dataset)) {
+      if (this.inputRef) {
+        const newQueryString = this.queryString.getInitialQuery().query;
+        if (this.inputRef.getValue() !== newQueryString) {
+          this.inputRef.setValue(newQueryString);
+        }
+      }
+    }
+
     const parsedQuery = fromUser(toUser(this.props.query.query));
     if (!isEqual(this.props.query.query, parsedQuery)) {
       this.onChange({ ...this.props.query, query: parsedQuery });
@@ -336,7 +344,6 @@ export default class QueryEditorUI extends Component<Props, State> {
       onChange: (value: string) => {
         // Replace new lines with an empty string to prevent multi-line input
         this.onQueryStringChange(value.replace(/[\r\n]+/gm, ''));
-
         this.setState({ lineCount: undefined });
       },
       editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   EuiButtonEmpty,
   EuiIcon,
@@ -22,7 +22,7 @@ import { getQueryService } from '../../services';
 
 interface DatasetSelectorProps {
   selectedDataset?: Dataset;
-  setSelectedDataset: (dataset?: Dataset) => void;
+  setSelectedDataset: (dataset: Dataset) => void;
   services: IDataPluginServices;
 }
 
@@ -33,7 +33,6 @@ export const DatasetSelector = ({
 }: DatasetSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
-  const closePopover = () => setIsOpen(false);
   const { overlays, savedObjects } = services;
 
   const datasetService = getQueryService().queryString.getDatasetService();
@@ -45,8 +44,14 @@ export const DatasetSelector = ({
     const fetchedDatasets = await datasetService
       .getType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN)
       ?.fetch(savedObjects.client, []);
-    setDatasets(fetchedDatasets?.children || []);
-  }, [datasetService, savedObjects.client]);
+    const newDatasets = fetchedDatasets?.children || [];
+    setDatasets(newDatasets);
+
+    // If no dataset is selected, select the first one
+    if (!selectedDataset && newDatasets.length > 0) {
+      setSelectedDataset(newDatasets[0]);
+    }
+  }, [datasetService, savedObjects.client, selectedDataset, setSelectedDataset]);
 
   useEffect(() => {
     fetchDatasets();
@@ -59,13 +64,15 @@ export const DatasetSelector = ({
     setIsOpen(!isOpen);
   }, [isOpen, fetchDatasets]);
 
+  const closePopover = useCallback(() => setIsOpen(false), []);
+
   const options = useMemo(() => {
-    const newOptions: EuiSelectableOption[] = [];
-    // Add index pattern datasets
-    newOptions.push({
-      label: 'Index patterns',
-      isGroupLabel: true,
-    });
+    const newOptions: EuiSelectableOption[] = [
+      {
+        label: 'Index patterns',
+        isGroupLabel: true,
+      },
+    ];
 
     datasets.forEach(({ id, title, type }) => {
       newOptions.push({
@@ -79,22 +86,19 @@ export const DatasetSelector = ({
     return newOptions;
   }, [datasets, selectedDataset?.id, datasetService]);
 
-  const handleOptionChange = (newOptions: EuiSelectableOption[]) => {
-    const selectedOption = newOptions.find((option) => option.checked === 'on');
-
-    if (selectedOption) {
-      const foundDataset = datasets.find((dataset) => dataset.id === selectedOption.key);
-      if (foundDataset) {
-        closePopover();
-        setSelectedDataset(foundDataset);
+  const handleOptionChange = useCallback(
+    (newOptions: EuiSelectableOption[]) => {
+      const selectedOption = newOptions.find((option) => option.checked === 'on');
+      if (selectedOption) {
+        const foundDataset = datasets.find((dataset) => dataset.id === selectedOption.key);
+        if (foundDataset) {
+          closePopover();
+          setSelectedDataset(foundDataset);
+        }
       }
-    } else {
-      // Only clear the selection if there was a previously selected dataset
-      if (selectedDataset) {
-        setSelectedDataset(undefined);
-      }
-    }
-  };
+    },
+    [datasets, setSelectedDataset, closePopover]
+  );
 
   return (
     <EuiPopover
@@ -133,7 +137,9 @@ export const DatasetSelector = ({
                   savedObjects={savedObjects.client}
                   onSelect={(dataset?: Dataset) => {
                     overlay?.close();
-                    setSelectedDataset(dataset);
+                    if (dataset) {
+                      setSelectedDataset(dataset);
+                    }
                   }}
                   onCancel={() => overlay?.close()}
                 />
@@ -150,7 +156,7 @@ export const DatasetSelector = ({
       <EuiSelectable
         className="datasetSelector__selectable"
         options={options}
-        singleSelection={true}
+        singleSelection="always"
         searchable={true}
         onChange={handleOptionChange}
         listProps={{
