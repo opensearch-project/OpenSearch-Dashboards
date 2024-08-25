@@ -135,6 +135,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       nextQuery = {
         query: nextProps.query.query,
         language: nextProps.query.language,
+        dataset: nextProps.query.dataset,
       };
     } else if (
       nextProps.query &&
@@ -144,6 +145,17 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       nextQuery = {
         query: '',
         language: nextProps.query.language,
+        dataset: nextProps.query.dataset,
+      };
+    } else if (
+      nextProps.query &&
+      prevState.query &&
+      nextProps.query.dataset !== prevState.query.dataset
+    ) {
+      nextQuery = {
+        query: nextProps.query.query,
+        language: nextProps.query.language,
+        dataset: nextProps.query.dataset,
       };
     }
 

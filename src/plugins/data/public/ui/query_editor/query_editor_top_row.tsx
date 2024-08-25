@@ -73,19 +73,19 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     },
   } = opensearchDashboards.services;
 
-  const language = props.query && props.query.language;
-  const parsedQuery =
-    !language || isValidQuery(props.query) ? props.query! : queryString.getInitialQuery();
-  if (!isEqual(parsedQuery?.query, props.query?.query)) {
-    onQueryChange(parsedQuery);
-    onSubmit({ query: parsedQuery, dateRange: getDateRange() });
-  }
+  const queryLanguage = props.query && props.query.language;
+  // const parsedQuery =
+  //   !language || isValidQuery(props.query) ? props.query! : queryString.getInitialQuery();
+  // if (!isEqual(parsedQuery?.query, props.query?.query)) {
+  //   onQueryChange(parsedQuery);
+  //   onSubmit({ query: parsedQuery, dateRange: getDateRange() });
+  // }
   const persistedLog: PersistedLog | undefined = React.useMemo(
     () =>
-      language && uiSettings && storage && appName
-        ? getQueryLog(uiSettings!, storage, appName, language!)
+      queryLanguage && uiSettings && storage && appName
+        ? getQueryLog(uiSettings!, storage, appName, queryLanguage)
         : undefined,
-    [language, uiSettings, storage, appName]
+    [queryLanguage, uiSettings, storage, appName]
   );
 
   function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
@@ -98,7 +98,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
 
   function getDateRange() {
     const defaultTimeSetting = uiSettings!.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
-    const languageConfig = queryString.getLanguageService().getLanguage(language!);
+    const languageConfig = queryString.getLanguageService().getLanguage(queryLanguage!);
     return {
       from:
         props.dateRangeFrom ||
@@ -112,8 +112,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function onQueryChange(query: Query, dateRange?: TimeRange) {
-    const languageConfig = queryString.getLanguageService().getLanguage(language!);
-    if (languageConfig && !isValidQuery(query)) return;
     props.onChange({
       query,
       dateRange: dateRange ?? getDateRange(),
@@ -186,10 +184,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     return valueAsMoment.toISOString();
   }
 
-  function isValidQuery(query: Query | undefined) {
-    if (query && query.query) return true;
-  }
-
   function renderQueryEditor() {
     if (!shouldRenderQueryEditor()) return;
     return (
@@ -197,7 +191,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
         <QueryEditor
           disableAutoFocus={props.disableAutoFocus}
           queryActions={props.prepend}
-          query={parsedQuery}
+          query={props.query!}
           settings={props.settings!}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
@@ -229,7 +223,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function shouldRenderDatePicker(): boolean {
-    const languageConfig = queryString.getLanguageService().getLanguage(language!);
+    const languageConfig = queryString.getLanguageService().getLanguage(queryLanguage!);
     return Boolean(
       (props.showDatePicker && (languageConfig?.searchBar?.showDatePicker ?? true)) ??
         (props.showAutoRefreshOnly && (languageConfig?.searchBar?.showAutoRefreshOnly ?? true))

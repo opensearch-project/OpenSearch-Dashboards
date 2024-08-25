@@ -12,13 +12,12 @@ import { Settings } from '..';
 import { IDataPluginServices, IFieldType, IIndexPattern, Query, TimeRange } from '../..';
 import { OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
 import { QuerySuggestion } from '../../autocomplete';
-import { fromUser, getQueryLog, LanguageConfig, PersistedLog, toUser } from '../../query';
+import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { DataSettings } from '../types';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
-import { Dataset } from '../../../common';
 import { createDQLEditor, createDefaultEditor } from './editors';
 import { getQueryService, getIndexPatterns } from '../../services';
 import { DatasetSelector } from '../dataset_selector';
@@ -30,7 +29,6 @@ const LANGUAGE_ID_KUERY = 'kuery';
 monaco.languages.register({ id: LANGUAGE_ID_KUERY });
 
 export interface QueryEditorProps {
-  dataset?: Dataset;
   query: Query;
   settings: Settings;
   disableAutoFocus?: boolean;
@@ -44,12 +42,10 @@ export interface QueryEditorProps {
   onChange?: (query: Query, dateRange?: TimeRange) => void;
   onChangeQueryEditorFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query, dateRange?: TimeRange) => void;
-  getQueryStringInitialValue?: (language: LanguageConfig) => string;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
   className?: string;
   isInvalid?: boolean;
-  queryLanguage?: string;
   headerClassName?: string;
   bannerClassName?: string;
   footerClassName?: string;
@@ -111,7 +107,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       !(
         this.headerRef.current &&
         this.bannerRef.current &&
-        this.props.queryLanguage &&
+        this.props.query.language &&
         this.extensionMap &&
         Object.keys(this.extensionMap).length > 0
       )
@@ -120,7 +116,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
     return (
       <QueryEditorExtensions
-        language={this.props.queryLanguage}
+        language={this.props.query.language}
         onSelectLanguage={this.onSelectLanguage}
         isCollapsed={this.state.isCollapsed}
         setIsCollapsed={this.setIsCollapsed}
@@ -137,13 +133,20 @@ export default class QueryEditorUI extends Component<Props, State> {
         this.persistedLog.add(query.query);
       }
 
-      this.props.onSubmit({ query: fromUser(query.query), language: query.language });
+      this.props.onSubmit({
+        query: fromUser(query.query),
+        language: query.language,
+        dataset: query.dataset,
+      });
     }
   };
 
   private onChange = (query: Query, dateRange?: TimeRange) => {
     if (this.props.onChange) {
-      this.props.onChange({ query: fromUser(query.query), language: query.language }, dateRange);
+      this.props.onChange(
+        { query: fromUser(query.query), language: query.language, dataset: query.dataset },
+        dateRange
+      );
     }
   };
 
@@ -153,7 +156,11 @@ export default class QueryEditorUI extends Component<Props, State> {
       index: null,
     });
 
-    this.onChange({ query: value, language: this.props.query.language });
+    this.onChange({
+      query: value,
+      language: this.props.query.language,
+      dataset: this.props.query.dataset,
+    });
   };
 
   private onInputChange = (value: string) => {
@@ -245,7 +252,8 @@ export default class QueryEditorUI extends Component<Props, State> {
   private fetchIndexPattern = async () => {
     const dataset = this.queryString.getQuery().dataset;
     if (!dataset) return undefined;
-    return getIndexPatterns().getByTitle(dataset.title);
+    const indexPattern = await getIndexPatterns().get(dataset.id);
+    return indexPattern;
   };
 
   provideCompletionItems = async (
@@ -317,7 +325,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       footerItems: {
         start: [
           `${this.state.lineCount} ${this.state.lineCount === 1 ? 'line' : 'lines'}`,
-          this.props.dataset?.timeFieldName || '',
+          this.props.query.dataset?.timeFieldName || '',
         ],
       },
       provideCompletionItems: this.provideCompletionItems,

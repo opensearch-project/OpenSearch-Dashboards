@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiIcon,
@@ -33,7 +33,6 @@ export const DatasetSelector = ({
 }: DatasetSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
-  const togglePopover = () => setIsOpen(!isOpen);
   const closePopover = () => setIsOpen(false);
   const { overlays, savedObjects } = services;
 
@@ -42,19 +41,23 @@ export const DatasetSelector = ({
   const datasetIcon =
     datasetService.getType(selectedDataset?.type || '')?.meta.icon.type || 'database';
 
-  useEffect(() => {
-    const init = async () => {
-      setDatasets(
-        (
-          await datasetService
-            .getType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN)
-            ?.fetch(savedObjects.client, [])!
-        ).children || []
-      );
-    };
-
-    init();
+  const fetchDatasets = useCallback(async () => {
+    const fetchedDatasets = await datasetService
+      .getType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN)
+      ?.fetch(savedObjects.client, []);
+    setDatasets(fetchedDatasets?.children || []);
   }, [datasetService, savedObjects.client]);
+
+  useEffect(() => {
+    fetchDatasets();
+  }, [fetchDatasets]);
+
+  const togglePopover = useCallback(async () => {
+    if (!isOpen) {
+      await fetchDatasets();
+    }
+    setIsOpen(!isOpen);
+  }, [isOpen, fetchDatasets]);
 
   const options = useMemo(() => {
     const newOptions: EuiSelectableOption[] = [];
@@ -76,19 +79,21 @@ export const DatasetSelector = ({
     return newOptions;
   }, [datasets, selectedDataset?.id, datasetService]);
 
-  // Handle option change
   const handleOptionChange = (newOptions: EuiSelectableOption[]) => {
     const selectedOption = newOptions.find((option) => option.checked === 'on');
 
-    if (!selectedOption) {
-      setSelectedDataset(undefined);
-      return;
+    if (selectedOption) {
+      const foundDataset = datasets.find((dataset) => dataset.id === selectedOption.key);
+      if (foundDataset) {
+        closePopover();
+        setSelectedDataset(foundDataset);
+      }
+    } else {
+      // Only clear the selection if there was a previously selected dataset
+      if (selectedDataset) {
+        setSelectedDataset(undefined);
+      }
     }
-
-    const foundDataset = datasets.find((dataset) => dataset.id === selectedOption.key);
-
-    closePopover();
-    setSelectedDataset(foundDataset || undefined);
   };
 
   return (
