@@ -395,7 +395,7 @@ export default class QueryEditorUI extends Component<Props, State> {
             onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}
             isCollapsed={!this.state.isCollapsed}
           />
-          <DatasetSelector />
+          <DatasetSelector onSubmit={this.props.onSubmit} />
           <div className="osdQueryEditor__input">
             {this.state.isCollapsed
               ? languageEditor.TopBar.Collapsed()

@@ -157,6 +157,19 @@ export class QueryStringManager {
     };
   };
 
+  public getInitialQueryByDataset = (newDataset: Dataset) => {
+    const curQuery = this.query$.getValue();
+    const languageId = curQuery.language;
+    const language = this.languageService.getLanguage(languageId);
+    const newQuery = { ...curQuery, dataset: newDataset };
+    const input = language?.getQueryString(newQuery) || '';
+
+    return {
+      ...newQuery,
+      query: input,
+    };
+  };
+
   private getDefaultLanguage() {
     return (
       this.storage.get('userQueryLanguage') ||

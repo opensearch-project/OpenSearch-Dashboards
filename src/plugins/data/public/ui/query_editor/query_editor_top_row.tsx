@@ -73,12 +73,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   } = opensearchDashboards.services;
 
   const queryLanguage = props.query && props.query.language;
-  // const parsedQuery =
-  //   !language || isValidQuery(props.query) ? props.query! : queryString.getInitialQuery();
-  // if (!isEqual(parsedQuery?.query, props.query?.query)) {
-  //   onQueryChange(parsedQuery);
-  //   onSubmit({ query: parsedQuery, dateRange: getDateRange() });
-  // }
   const persistedLog: PersistedLog | undefined = React.useMemo(
     () =>
       queryLanguage && uiSettings && storage && appName

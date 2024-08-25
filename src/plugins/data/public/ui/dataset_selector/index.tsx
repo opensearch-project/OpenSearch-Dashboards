@@ -5,12 +5,16 @@
 
 import { useEffect, useState } from 'react';
 import React from 'react';
-import { Dataset } from '../../../common/datasets';
+import { Dataset, Query, TimeRange } from '../../../common';
 import { DatasetSelector } from './dataset_selector';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IDataPluginServices } from '../../types';
 
-const ConnectedDatasetSelector = () => {
+interface ConnectedDatasetSelectorProps {
+  onSubmit: ((query: Query, dateRange?: TimeRange | undefined) => void) | undefined;
+}
+
+const ConnectedDatasetSelector = ({ onSubmit }: ConnectedDatasetSelectorProps) => {
   const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>();
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const queryString = services.data.query.queryString;
@@ -29,8 +33,9 @@ const ConnectedDatasetSelector = () => {
   const handleDatasetChange = (dataset?: Dataset) => {
     setSelectedDataset(dataset);
     if (dataset) {
-      const query = queryString.getQuery();
-      queryString.setQuery({ ...query, dataset });
+      const query = queryString.getInitialQueryByDataset(dataset);
+      queryString.setQuery(query);
+      onSubmit!(queryString.getQuery());
     }
   };
 
