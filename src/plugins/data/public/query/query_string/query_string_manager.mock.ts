@@ -46,6 +46,7 @@ const createSetupContractMock = () => {
     getInitialQueryByLanguage: jest.fn(),
     getDatasetService: jest.fn(),
     getLanguageService: jest.fn(),
+    getInitialQueryByDataset: jest.fn(),
   };
   return queryStringManagerMock;
 };

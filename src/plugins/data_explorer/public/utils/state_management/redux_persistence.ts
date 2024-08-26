@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DEFAULT_DATA } from '../../../../data/common';
+import { Dataset, DEFAULT_DATA } from '../../../../data/common';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../components/constants';
 import { DataExplorerServices } from '../../types';
 import { getPreloadedState } from './preload';
@@ -21,20 +21,23 @@ export const loadReduxState = async (services: DataExplorerServices) => {
           serializedState.metadata.indexPattern
         );
 
-        const dataset = {
+        const dataset: Dataset = {
           id: serializedState.metadata.indexPattern,
           title: indexPattern.title,
           type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
         };
 
-        // TODO: This is a temporary fix since indexpattern.get does not modify the title like the other list based methods. This should be handeled in a better way: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/7837
         if (indexPattern.dataSourceRef) {
           const dataSource = await services.data.indexPatterns.getDataSource(
             indexPattern.dataSourceRef.id
           );
 
           if (dataSource) {
-            dataset.title = `${dataSource.attributes.title}::${dataset.title}`;
+            dataset.dataSource = {
+              id: dataSource.id,
+              title: dataSource.attributes.title,
+              type: dataSource.attributes.dataSourceEngineType || '',
+            };
           }
         }
         services.data.query.queryString.setQuery({
@@ -51,6 +54,7 @@ export const loadReduxState = async (services: DataExplorerServices) => {
     console.error(err);
   }
 
+  // If state is not found, load the default state
   return await getPreloadedState(services);
 };
 

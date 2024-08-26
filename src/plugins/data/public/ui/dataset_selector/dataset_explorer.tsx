@@ -110,7 +110,7 @@ export const DatasetExplorer = ({
                 </EuiTitle>
                 <EuiSelectable
                   options={(current.children || []).map((child) => ({
-                    label: child.title,
+                    label: child.parent ? `${child.parent.title}::${child.title}` : child.title,
                     value: child.id,
                     prepend: child.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE &&
                       child.meta?.icon && <EuiIcon {...child.meta.icon} />,

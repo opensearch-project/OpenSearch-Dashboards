@@ -5,7 +5,7 @@
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { map } from 'rxjs/operators';
-import { DEFAULT_DATA, DataStructure, DatasetField, Dataset } from '../../../../../common';
+import { DEFAULT_DATA, DataStructure, Dataset } from '../../../../../common';
 import { DatasetTypeConfig } from '../types';
 import { getSearchService, getIndexPatterns } from '../../../../services';
 
@@ -25,7 +25,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
     tooltip: 'OpenSearch Indexes',
   },
 
-  toDataset: (path: DataStructure[]): Dataset => {
+  toDataset: (path) => {
     const index = path[path.length - 1];
     const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
 
@@ -43,10 +43,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
     };
   },
 
-  fetch: async (
-    savedObjects: SavedObjectsClientContract,
-    path: DataStructure[]
-  ): Promise<DataStructure> => {
+  fetch: async (savedObjects, path) => {
     const dataStructure = path[path.length - 1];
     switch (dataStructure.type) {
       case 'DATA_SOURCE': {
@@ -75,7 +72,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
     }
   },
 
-  fetchFields: async (dataset: Dataset): Promise<DatasetField[]> => {
+  fetchFields: async (dataset) => {
     const fields = await getIndexPatterns().getFieldsForWildcard({
       pattern: dataset.title,
       dataSourceId: dataset.dataSource?.id,
@@ -86,7 +83,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
     }));
   },
 
-  supportedLanguages: (): string[] => {
+  supportedLanguages: (dataset: Dataset): string[] => {
     return ['SQL', 'PPL', 'DQL', 'Lucene'];
   },
 };

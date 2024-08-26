@@ -43,5 +43,5 @@ export interface DatasetTypeConfig {
    * Retrieves the supported query languages for this dataset type.
    * @returns {Promise<string[]>} A promise that resolves to an array of supported language names.
    */
-  supportedLanguages: () => string[];
+  supportedLanguages: (dataset: Dataset) => string[];
 }

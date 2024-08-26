@@ -41,15 +41,22 @@ export const DatasetSelector = ({
     datasetService.getType(selectedDataset?.type || '')?.meta.icon.type || 'database';
 
   const fetchDatasets = useCallback(async () => {
-    const fetchedDatasets = await datasetService
-      .getType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN)
-      ?.fetch(savedObjects.client, []);
-    const newDatasets = fetchedDatasets?.children || [];
-    setDatasets(newDatasets);
+    const typeConfig = datasetService.getType(selectedDataset?.type || '');
+    if (!typeConfig || typeConfig.id !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
+      return;
+    }
+
+    const fetchedIndexPatternDataStructures = await typeConfig.fetch(savedObjects.client, []);
+
+    const fetchedDatasets =
+      fetchedIndexPatternDataStructures.children?.map((pattern) =>
+        typeConfig.toDataset([pattern])
+      ) ?? [];
+    setDatasets(fetchedDatasets);
 
     // If no dataset is selected, select the first one
-    if (!selectedDataset && newDatasets.length > 0) {
-      setSelectedDataset(newDatasets[0]);
+    if (!selectedDataset && fetchedDatasets.length > 0) {
+      setSelectedDataset(fetchedDatasets[0]);
     }
   }, [datasetService, savedObjects.client, selectedDataset, setSelectedDataset]);
 
@@ -74,9 +81,10 @@ export const DatasetSelector = ({
       },
     ];
 
-    datasets.forEach(({ id, title, type }) => {
+    datasets.forEach(({ id, title, type, dataSource }) => {
+      const label = dataSource ? `${dataSource.title}::${title}` : title;
       newOptions.push({
-        label: title,
+        label,
         checked: id === selectedDataset?.id ? 'on' : undefined,
         key: id,
         prepend: <EuiIcon type={datasetService.getType(type)!.meta.icon.type} />,
@@ -100,6 +108,18 @@ export const DatasetSelector = ({
     [datasets, setSelectedDataset, closePopover]
   );
 
+  const datasetTitle = useMemo(() => {
+    if (!selectedDataset) {
+      return 'Select data';
+    }
+
+    if (selectedDataset.dataSource) {
+      return `${selectedDataset.dataSource.title}::${selectedDataset.title}`;
+    }
+
+    return selectedDataset.title;
+  }, [selectedDataset]);
+
   return (
     <EuiPopover
       button={
@@ -111,7 +131,7 @@ export const DatasetSelector = ({
             onClick={togglePopover}
           >
             <EuiIcon type={datasetIcon} className="datasetSelector__icon" />
-            {selectedDataset?.title ?? 'Select data'}
+            {datasetTitle}
           </EuiButtonEmpty>
         </EuiToolTip>
       }

@@ -119,8 +119,6 @@ export interface DataStructure {
   parent?: DataStructure;
   /** Optional array of child data structures */
   children?: DataStructure[];
-  /** Optional array of data structures of ancestors */
-  path?: DataStructure[];
   hasNext?: boolean;
   columnHeader?: string;
   /** Optional metadata for the data structure */
@@ -212,12 +210,16 @@ export interface BaseDataset {
  *
  * @example
  * Example of a Dataset for an OpenSearch index pattern
- * Index patterns have a reference to the data source and their title is pre appended with the data source they belong to so we dont need to append the data source to the dataset object
  * const logsIndexDataset: Dataset = {
  *   id: "2e1b1b80-9c4d-11ee-8c90-0242ac120001",
- *   title: "Cluster1::logs-*",
+ *   title: "logs-*",
  *   type: "INDEX_PATTERN",
  *   timeFieldName: "@timestamp",
+ *   dataSource: {
+ *     id: "2e1b1b80-9c4d-11ee-8c90-0242ac120001",
+ *     title: "Cluster1",
+ *     type: "OpenSearch"
+ *   }
  * };
  *
  * @example

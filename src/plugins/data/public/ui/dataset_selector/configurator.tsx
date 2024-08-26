@@ -36,11 +36,10 @@ export const Configurator = ({
   const queryService = getQueryService();
   const queryString = queryService.queryString;
   const indexPatternsService = getIndexPatterns();
-  const languages =
-    queryString.getDatasetService().getType(baseDataset.type)?.supportedLanguages() || [];
+  const type = queryString.getDatasetService().getType(baseDataset.type);
+  const languages = type?.supportedLanguages(baseDataset) || [];
 
   const [dataset, setDataset] = useState<Dataset>(baseDataset);
-  const [fields, setFields] = useState<DatasetField[]>();
   const [timeFields, setTimeFields] = useState<DatasetField[]>();
   const [timeField, setTimeField] = useState<string | undefined>(dataset.timeFieldName);
   const [language, setLanguage] = useState<string>(languages[0]);
@@ -52,7 +51,6 @@ export const Configurator = ({
         .getType(baseDataset.type)
         ?.fetchFields(baseDataset);
 
-      setFields(datasetFields);
       const dateFields = datasetFields?.filter((field) => field.type === 'date');
       setTimeFields(dateFields || []);
     };

@@ -98,9 +98,9 @@ export class DatasetService {
       return undefined;
     }
 
-    const handler = this.typesRegistry.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
-    if (handler) {
-      const dataset = handler.toDataset([
+    const dataType = this.typesRegistry.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
+    if (dataType) {
+      const dataset = dataType.toDataset([
         {
           id: indexPattern.id,
           title: indexPattern.title,
