@@ -41,10 +41,8 @@ export const DatasetSelector = ({
     datasetService.getType(selectedDataset?.type || '')?.meta.icon.type || 'database';
 
   const fetchDatasets = useCallback(async () => {
-    const typeConfig = datasetService.getType(selectedDataset?.type || '');
-    if (!typeConfig || typeConfig.id !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
-      return;
-    }
+    const typeConfig = datasetService.getType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
+    if (!typeConfig) return;
 
     const fetchedIndexPatternDataStructures = await typeConfig.fetch(savedObjects.client, []);
 
