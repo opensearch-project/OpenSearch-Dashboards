@@ -29,7 +29,6 @@
  */
 
 import { share } from 'rxjs/operators';
-import { PluginInitializerContext } from 'opensearch-dashboards/public';
 import { FilterManager } from './filter_manager';
 import { createAddToQueryLog } from './lib';
 import { TimefilterService, TimefilterSetup } from './timefilter';
@@ -45,7 +44,6 @@ import {
   QueryServiceSetupDependencies,
   QueryServiceStartDependencies,
 } from './types';
-import { ConfigSchema } from '../../config';
 
 /**
  * Query Service
@@ -58,8 +56,6 @@ export class QueryService {
   queryStringManager!: QueryStringContract;
 
   state$!: ReturnType<typeof createQueryStateObservable>;
-
-  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup({
     storage,
@@ -74,13 +70,7 @@ export class QueryService {
       storage,
     });
 
-    const { enhancements: supportedAppNames } = this.initializerContext.config.get<ConfigSchema>();
-    this.queryStringManager = new QueryStringManager(
-      storage,
-      uiSettings,
-      defaultSearchInterceptor,
-      supportedAppNames
-    );
+    this.queryStringManager = new QueryStringManager(storage, uiSettings, defaultSearchInterceptor);
 
     this.state$ = createQueryStateObservable({
       filterManager: this.filterManager,

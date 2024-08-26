@@ -36,7 +36,6 @@ import { createHistory, QueryHistory } from './query_history';
 import { DatasetService, DatasetServiceContract } from './dataset_service';
 import { LanguageService, LanguageServiceContract } from './language_service';
 import { ISearchInterceptor } from '../../search';
-import { ConfigSchema } from '../../../config';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;
@@ -47,17 +46,12 @@ export class QueryStringManager {
   constructor(
     private readonly storage: DataStorage,
     private readonly uiSettings: CoreStart['uiSettings'],
-    private readonly defaultSearchInterceptor: ISearchInterceptor,
-    private readonly supportedAppNames: ConfigSchema['enhancements']
+    private readonly defaultSearchInterceptor: ISearchInterceptor
   ) {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
     this.queryHistory = createHistory({ storage });
     this.datasetService = new DatasetService(uiSettings);
-    this.languageService = new LanguageService(
-      this.defaultSearchInterceptor,
-      this.supportedAppNames,
-      this.storage
-    );
+    this.languageService = new LanguageService(this.defaultSearchInterceptor, this.storage);
   }
 
   private getDefaultQueryString() {

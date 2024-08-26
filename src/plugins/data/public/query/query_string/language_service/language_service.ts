@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { LanguageConfig } from './types';
 import { getDQLLanguageConfig, getLuceneLanguageConfig } from './lib';
 import { ISearchInterceptor } from '../../../search';
@@ -14,7 +13,6 @@ import {
   SingleLineInput,
   UiEnhancements,
 } from '../../../ui';
-import { ConfigSchema } from '../../../../config';
 import { DataStorage, setOverrides as setFieldOverrides } from '../../../../common';
 
 export interface DataSettings {
@@ -33,18 +31,10 @@ export class LanguageService {
   private languages: Map<string, LanguageConfig> = new Map();
   private queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>;
 
-  private isEnabled = false;
-  private enabledQueryEnhancementsUpdated$ = new BehaviorSubject<boolean>(this.isEnabled);
-  private enhancedAppNames: string[] = [];
-
   constructor(
     private readonly defaultSearchInterceptor: ISearchInterceptor,
-    private readonly config: ConfigSchema['enhancements'],
     private readonly storage: DataStorage
   ) {
-    this.isEnabled = true;
-    this.setUserQueryEnhancementsEnabled(this.isEnabled);
-    this.enhancedAppNames = this.isEnabled ? this.config.supportedAppNames : [];
     this.registerDefaultLanguages();
     this.queryEditorExtensionMap = {};
   }
@@ -85,23 +75,9 @@ export class LanguageService {
     return this.queryEditorExtensionMap;
   }
 
-  supportsEnhancementsEnabled(appName: string) {
-    return this.enhancedAppNames.includes(appName);
-  }
-
-  getEnabledQueryEnhancementsUpdated$ = () => {
-    return this.enabledQueryEnhancementsUpdated$.asObservable();
-  };
-
-  setUserQueryEnhancementsEnabled(enabled: boolean) {
-    // If previously enabled and now disabled, reset query to kuery
-    if (this.isEnabled && !enabled) {
-      this.setUserQueryLanguage('kuery');
-      this.setUserQueryString('');
-    }
-    this.isEnabled = enabled;
-    this.enabledQueryEnhancementsUpdated$.next(this.isEnabled);
-    return true;
+  resetUserQuery() {
+    this.setUserQueryLanguage('kuery');
+    this.setUserQueryString('');
   }
 
   getUserQueryLanguageBlocklist() {

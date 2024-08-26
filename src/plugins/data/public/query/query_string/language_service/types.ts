@@ -27,5 +27,5 @@ export interface LanguageConfig {
     visualizable?: boolean;
   };
   showDocLinks?: boolean;
-  supportedAppNames: string[];
+  editorSupportedAppNames: string[];
 }

@@ -217,10 +217,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   };
 
-  private supportsEnhancements() {
-    return this.languageService.supportsEnhancementsEnabled(this.services.appName);
-  }
-
   private shouldRenderQueryEditor(isEnhancementsEnabledOverride: boolean) {
     // TODO: MQL handle no index patterns?
     if (!isEnhancementsEnabledOverride) return false;
@@ -424,14 +420,13 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   public render() {
-    const isEnhancementsEnabledOverride =
-      this.supportsEnhancements() &&
-      this.services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
+    const isEnhancementsEnabledOverride = this.services.uiSettings.get(
+      UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED
+    );
 
     this.languageService.setUserQueryLanguageBlocklist(
       this.services.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE_BLOCKLIST)
     );
-    this.languageService.setUserQueryEnhancementsEnabled(isEnhancementsEnabledOverride);
 
     const searchBarMenu = (useSaveQueryMenu: boolean = false) => {
       return (

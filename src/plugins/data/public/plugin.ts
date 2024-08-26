@@ -119,7 +119,7 @@ export class DataPublicPlugin
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
     this.uiService = new UiService(initializerContext);
-    this.queryService = new QueryService(initializerContext);
+    this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
     this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = createStorage({ engine: window.localStorage, prefix: 'opensearch_dashboards.' });
