@@ -27,7 +27,7 @@ import { AssociationDataSourceModal } from './association_data_source_modal';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { CoreStart, SavedObjectsStart, WorkspaceObject } from '../../../../../core/public';
 import { convertPermissionSettingsToPermissions, useWorkspaceFormContext } from '../workspace_form';
-import { getDirectQueryConnections, mergeDataSourcesWithConnections } from '../../utils';
+import { useFetchDQC } from '../../hooks';
 
 export interface SelectDataSourcePanelProps {
   savedObjects: SavedObjectsStart;
@@ -52,31 +52,14 @@ export const SelectDataSourceDetailPanel = ({
   const [isVisible, setIsVisible] = useState(false);
   const [dataSourceConnections, setDataSourceConnections] = useState<DataSourceConnection[]>([]);
   const [toggleIdSelected, setToggleIdSelected] = useState('all');
-
-  const fetchDQC = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const directQueryConnectionsPromises = assignedDataSources.map((ds) =>
-        getDirectQueryConnections(ds.id, http!)
-      );
-      const directQueryConnectionsResult = await Promise.all(directQueryConnectionsPromises);
-      const directQueryConnections = directQueryConnectionsResult.flat();
-      setDataSourceConnections(
-        mergeDataSourcesWithConnections(assignedDataSources, directQueryConnections)
-      );
-    } catch (error) {
-      notifications?.toasts.addDanger(
-        i18n.translate('workspace.detail.dataSources.error.message', {
-          defaultMessage: 'Can not fetch direct query connections',
-        })
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [assignedDataSources, http, notifications?.toasts]);
+  const fetchDQC = useFetchDQC(assignedDataSources, http, notifications);
 
   useEffect(() => {
-    fetchDQC();
+    setIsLoading(true);
+    fetchDQC().then((res) => {
+      setDataSourceConnections(res);
+      setIsLoading(false);
+    });
   }, [fetchDQC]);
 
   const toggleButtons = [
@@ -99,10 +82,6 @@ export const SelectDataSourceDetailPanel = ({
       }),
     },
   ];
-
-  const onChange = (optionId: string) => {
-    setToggleIdSelected(optionId);
-  };
 
   const handleAssignDataSources = async (dataSources: DataSource[]) => {
     try {
@@ -139,41 +118,44 @@ export const SelectDataSourceDetailPanel = ({
     }
   };
 
-  const handleUnassignDataSources = async (dataSources: DataSourceConnection[]) => {
-    try {
-      setIsLoading(true);
-      const { permissionSettings, selectedDataSources, useCase, ...attributes } = formData;
-      const savedDataSources = (selectedDataSources ?? [])?.filter(
-        ({ id }: DataSource) => !dataSources.some((item) => item.id === id)
-      );
-
-      const result = await workspaceClient.update(currentWorkspace.id, attributes, {
-        dataSources: savedDataSources.map(({ id }: DataSource) => id),
-        permissions: convertPermissionSettingsToPermissions(permissionSettings),
-      });
-      if (result?.success) {
-        notifications?.toasts.addSuccess({
-          title: i18n.translate('workspace.detail.dataSources.unassign.success', {
-            defaultMessage: 'Remove associated OpenSearch connections successfully',
-          }),
-        });
-        setSelectedDataSources(savedDataSources);
-      } else {
-        throw new Error(
-          result?.error ? result?.error : 'Remove associated OpenSearch connections failed'
+  const handleUnassignDataSources = useCallback(
+    async (dataSources: DataSourceConnection[]) => {
+      try {
+        setIsLoading(true);
+        const { permissionSettings, selectedDataSources, useCase, ...attributes } = formData;
+        const savedDataSources = (selectedDataSources ?? [])?.filter(
+          ({ id }: DataSource) => !dataSources.some((item) => item.id === id)
         );
+
+        const result = await workspaceClient.update(currentWorkspace.id, attributes, {
+          dataSources: savedDataSources.map(({ id }: DataSource) => id),
+          permissions: convertPermissionSettingsToPermissions(permissionSettings),
+        });
+        if (result?.success) {
+          notifications?.toasts.addSuccess({
+            title: i18n.translate('workspace.detail.dataSources.unassign.success', {
+              defaultMessage: 'Remove associated OpenSearch connections successfully',
+            }),
+          });
+          setSelectedDataSources(savedDataSources);
+        } else {
+          throw new Error(
+            result?.error ? result?.error : 'Remove associated OpenSearch connections failed'
+          );
+        }
+      } catch (error) {
+        notifications?.toasts.addDanger({
+          title: i18n.translate('workspace.detail.dataSources.unassign.failed', {
+            defaultMessage: 'Failed to remove associated OpenSearch connections',
+          }),
+          text: error instanceof Error ? error.message : JSON.stringify(error),
+        });
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      notifications?.toasts.addDanger({
-        title: i18n.translate('workspace.detail.dataSources.unassign.failed', {
-          defaultMessage: 'Failed to remove associated OpenSearch connections',
-        }),
-        text: error instanceof Error ? error.message : JSON.stringify(error),
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [currentWorkspace.id, formData, notifications?.toasts, setSelectedDataSources, workspaceClient]
+  );
 
   const associationButton = (
     <EuiSmallButton
@@ -267,7 +249,7 @@ export const SelectDataSourceDetailPanel = ({
                 legend="dataSourceGroup"
                 options={toggleButtons}
                 idSelected={toggleIdSelected}
-                onChange={(id) => onChange(id)}
+                onChange={(id) => setToggleIdSelected(id)}
                 isFullWidth
               />
             </EuiFlexItem>

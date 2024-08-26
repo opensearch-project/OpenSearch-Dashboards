@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiSpacer,
   EuiInMemoryTable,
@@ -43,6 +43,11 @@ export const OpenSearchConnectionTable = ({
   const [selectedItems, setSelectedItems] = useState<DataSourceConnection[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [popoversState, setPopoversState] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    // Reset selected items when connectionType changes
+    setSelectedItems([]);
+  }, [connectionType, setSelectedItems]);
 
   const filteredDataSources = useMemo(() => {
     // Reset the item when switching connectionType.
@@ -180,7 +185,11 @@ export const OpenSearchConnectionTable = ({
               </EuiButtonEmpty>
             }
           >
-            <EuiPopoverTitle>RELATED CONNECTIONS</EuiPopoverTitle>
+            <EuiPopoverTitle>
+              {i18n.translate('workspace.detail.dataSources.recentConnections.title', {
+                defaultMessage: 'RELATED CONNECTIONS',
+              })}
+            </EuiPopoverTitle>
             <EuiListGroup
               flush
               maxWidth={200}
