@@ -66,12 +66,12 @@ export class QueryEnhancementsPlugin
       getQueryString: (query: Query) => {
         return `source = ${query.dataset?.title}`;
       },
-      queryEditor: enhancedQueryEditor,
       fields: {
         filterable: false,
         visualizable: false,
       },
       showDocLinks: false,
+      editor: enhancedQueryEditor,
       editorSupportedAppNames: ['discover'],
     };
     queryString.getLanguageService().registerLanguage(pplLanguageConfig);
@@ -81,7 +81,6 @@ export class QueryEnhancementsPlugin
       id: 'SQL',
       title: 'SQL',
       search: sqlSearchInterceptor,
-      queryEditor: enhancedQueryEditor,
       getQueryString: (query: Query) => {
         return `SELECT * FROM ${queryString.getQuery().dataset?.title} LIMIT 10`;
       },
@@ -90,6 +89,7 @@ export class QueryEnhancementsPlugin
         visualizable: false,
       },
       showDocLinks: false,
+      editor: enhancedQueryEditor,
       editorSupportedAppNames: ['discover'],
     };
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);

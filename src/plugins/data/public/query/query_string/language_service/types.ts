@@ -5,13 +5,18 @@
 
 import { ISearchInterceptor } from '../../../search';
 import { Query } from '../../../../public';
+import { EditorInstance } from '../../../ui/query_editor/editors';
 
 export interface LanguageConfig {
   id: string;
   title: string;
   search: ISearchInterceptor;
   getQueryString: (query: Query) => string;
-  queryEditor: (collapsedProps: any, expandedProps: any, bodyProps: any) => any;
+  editor: (
+    collapsedProps: any,
+    expandedProps: any,
+    bodyProps: any
+  ) => EditorInstance<any, any, any>;
   fields?: {
     filterable?: boolean;
     visualizable?: boolean;

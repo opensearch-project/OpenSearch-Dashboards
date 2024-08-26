@@ -17,7 +17,7 @@ export const getLuceneLanguageConfig = (
     getQueryString(_) {
       return '';
     },
-    queryEditor: defaultEditor,
+    editor: defaultEditor,
     fields: {
       filterable: true,
       visualizable: true,
