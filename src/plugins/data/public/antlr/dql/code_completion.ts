@@ -7,7 +7,12 @@ import { CharStream, CommonTokenStream, TokenStream } from 'antlr4ng';
 import { CodeCompletionCore } from 'antlr4-c3';
 import { monaco } from '@osd/monaco';
 import { DQLLexer } from './.generated/DQLLexer';
-import { DQLParser, KeyValueExpressionContext } from './.generated/DQLParser';
+import {
+  DQLParser,
+  GroupContentContext,
+  GroupExpressionContext,
+  KeyValueExpressionContext,
+} from './.generated/DQLParser';
 import { getTokenPosition } from '../shared/cursor';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
@@ -20,14 +25,12 @@ const findCursorIndex = (
   cursorColumn: number,
   cursorLine: number
 ): number | undefined => {
-  const actualCursorCol = cursorColumn - 1;
-
   for (let i = 0; i < tokenStream.size; i++) {
     const token = tokenStream.get(i);
     const { startLine, endColumn, endLine } = getTokenPosition(token, DQLParser.WS);
 
     const moveToNextToken = [DQLParser.WS, DQLParser.EQ, DQLParser.LPAREN];
-    if (endLine > cursorLine || (startLine === cursorLine && endColumn >= actualCursorCol)) {
+    if (endLine > cursorLine || (startLine === cursorLine && endColumn >= cursorColumn)) {
       if (moveToNextToken.includes(tokenStream.get(i).type)) {
         return i + 1;
       }
@@ -89,28 +92,6 @@ const findValueSuggestions = async (
   });
 };
 
-// visitor for parsing the current query
-class QueryVisitor extends DQLParserVisitor<{ field: string; value: string }> {
-  public visitKeyValueExpression = (ctx: KeyValueExpressionContext) => {
-    let foundValue = '';
-    const getTextWithoutQuotes = (text: string | undefined) => text?.replace(/^["']|["']$/g, '');
-
-    if (ctx.value()?.PHRASE()) {
-      const phraseText = getTextWithoutQuotes(ctx.value()?.PHRASE()?.getText());
-      if (phraseText) foundValue = phraseText;
-    } else if (ctx.value()?.tokenSearch()) {
-      const valueText = ctx.value()?.getText();
-      if (valueText) foundValue = valueText;
-    } else if (ctx.groupExpression()) {
-      const lastGroupContent = getTextWithoutQuotes(
-        ctx.groupExpression()?.groupContent().at(-1)?.getText()
-      );
-      if (lastGroupContent) foundValue = lastGroupContent;
-    }
-    return { field: ctx.field().getText(), value: foundValue };
-  };
-}
-
 export const getSuggestions = async ({
   query,
   indexPattern,
@@ -136,10 +117,8 @@ export const getSuggestions = async ({
     parser.removeErrorListeners();
     const tree = parser.query();
 
-    const visitor = new QueryVisitor();
-
     // find token index
-    const cursorColumn = position?.column ?? selectionEnd;
+    const cursorColumn = position?.column !== undefined ? position.column - 1 : selectionEnd;
     const cursorLine = position?.lineNumber ?? 1;
 
     const cursorIndex = findCursorIndex(tokenStream, cursorColumn, cursorLine) ?? 0;
@@ -175,6 +154,91 @@ export const getSuggestions = async ({
       completions.push(...findFieldSuggestions(indexPattern));
     }
 
+    interface FoundLastValue {
+      field: string | undefined;
+      value: string | undefined;
+    }
+
+    // visitor for parsing the current query
+    class QueryVisitor extends DQLParserVisitor<FoundLastValue> {
+      public defaultResult = () => {
+        return { field: undefined, value: undefined };
+      };
+
+      public aggregateResult = (aggregate: FoundLastValue, nextResult: FoundLastValue) => {
+        if (nextResult.field) {
+          return nextResult;
+        }
+        return aggregate;
+      };
+
+      public visitKeyValueExpression = (ctx: KeyValueExpressionContext) => {
+        const startPos = ctx.start?.start ?? -1;
+        let endPos = ctx.stop?.stop ?? -1;
+
+        // find the WS token after the last KV token, pushing endPos out if applicable
+        const { stop: lastKVToken } = ctx.getSourceInterval();
+        if (tokenStream.get(lastKVToken + 1).type === DQLParser.WS) {
+          endPos = tokenStream.get(lastKVToken + 1).stop;
+        }
+
+        // early return if the cursor is not within the bounds of this KV pair
+        if (!(startPos <= cursorColumn && endPos + 1 >= cursorColumn))
+          return { field: undefined, value: undefined };
+
+        // keep as empty string to intentionally return so if no value is found in value()
+        let foundValue = '';
+        const getTextWithoutQuotes = (text: string | undefined) =>
+          text?.replace(/^["']|["']$/g, '');
+
+        if (ctx.value()?.PHRASE()) {
+          const phraseText = getTextWithoutQuotes(ctx.value()?.PHRASE()?.getText());
+          if (phraseText) foundValue = phraseText;
+        } else if (ctx.value()?.tokenSearch()) {
+          const valueText = ctx.value()?.getText();
+          if (valueText) foundValue = valueText;
+        } else if (ctx.groupExpression()) {
+          // continue calls down the tree for value group expressions
+          const groupRes = this.visitGroupExpression(ctx.groupExpression()!);
+          // only pull value off of groupRes, field should be undefined
+          const lastGroupContent = getTextWithoutQuotes(groupRes.value);
+          if (lastGroupContent) foundValue = lastGroupContent;
+        }
+        return { field: ctx.field().getText(), value: foundValue };
+      };
+
+      public visitGroupExpression = (ctx: GroupExpressionContext) => {
+        let foundValue = '';
+
+        // within the multiple group contents, call visitor on each one
+        ctx.groupContent().forEach((child) => {
+          const ret = this.visitGroupContent(child);
+          if (ret.value) foundValue = ret.value;
+        });
+
+        return { field: undefined, value: foundValue };
+      };
+
+      public visitGroupContent = (ctx: GroupContentContext) => {
+        const startPos = ctx.start?.start ?? -1;
+        const endPos = ctx.stop?.stop ?? -1;
+
+        // NOTE: currently there is no support to look for tokens after whitespace, only
+        // returning if the cursor is directly touching a token
+
+        if (!(startPos <= cursorColumn && endPos + 1 >= cursorColumn))
+          return { field: undefined, value: undefined };
+
+        // trigger group expression to find content within
+        const foundValue = !!ctx.groupExpression()
+          ? this.visitGroupExpression(ctx.groupExpression()!).value
+          : ctx.getText();
+
+        return { field: undefined, value: foundValue };
+      };
+    }
+
+    const visitor = new QueryVisitor();
     // find suggested values for the last found field (only for kvexpression rule)
     const { field: lastField = '', value: lastValue = '' } = visitor.visit(tree) ?? {};
     if (!!lastField && candidates.tokens.has(DQLParser.PHRASE)) {
@@ -219,7 +283,7 @@ export const getSuggestions = async ({
     });
 
     return completions;
-  } catch {
+  } catch (e) {
     return [];
   }
 };
