@@ -16,11 +16,16 @@ export type Services = CoreStart & {
   contentManagement?: ContentManagementPluginStart;
 };
 
+export interface WorkspaceUseCaseFeature {
+  id: string;
+  title?: string;
+}
+
 export interface WorkspaceUseCase {
   id: string;
   title: string;
   description: string;
-  features: Array<{ id: string; title?: string }>;
+  features: WorkspaceUseCaseFeature[];
   systematic?: boolean;
   order?: number;
 }

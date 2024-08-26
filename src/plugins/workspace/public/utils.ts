@@ -25,7 +25,7 @@ import {
   WorkspaceAvailability,
 } from '../../../core/public';
 import { DEFAULT_SELECTED_FEATURES_IDS, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
-import { WorkspaceUseCase } from './types';
+import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
 import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
 import {
@@ -265,6 +265,18 @@ export const convertNavGroupToWorkspaceUseCase = ({
   order,
 });
 
+const compareFeatures = (
+  features1: WorkspaceUseCaseFeature[],
+  features2: WorkspaceUseCaseFeature[]
+) => {
+  const featuresSerializer = (features: WorkspaceUseCaseFeature[]) =>
+    features
+      .map(({ id, title }) => `${id}-${title}`)
+      .sort()
+      .join();
+  return featuresSerializer(features1) === featuresSerializer(features2);
+};
+
 export const isEqualWorkspaceUseCase = (a: WorkspaceUseCase, b: WorkspaceUseCase) => {
   if (a.id !== b.id) {
     return false;
@@ -281,14 +293,7 @@ export const isEqualWorkspaceUseCase = (a: WorkspaceUseCase, b: WorkspaceUseCase
   if (a.order !== b.order) {
     return false;
   }
-  if (
-    a.features.length !== b.features.length ||
-    a.features.some((aFeature) =>
-      b.features.some(
-        (bFeature) => aFeature.id !== bFeature.id || aFeature.title !== bFeature.title
-      )
-    )
-  ) {
+  if (a.features.length !== b.features.length || !compareFeatures(a.features, b.features)) {
     return false;
   }
   return true;
