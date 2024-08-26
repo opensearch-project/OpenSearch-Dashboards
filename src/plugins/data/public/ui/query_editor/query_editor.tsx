@@ -60,6 +60,7 @@ interface State {
   isCollapsed: boolean;
   timeStamp: IFieldType | null;
   lineCount: number | undefined;
+  isExtensionsReady: boolean;
 }
 
 // Needed for React.lazy
@@ -74,6 +75,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     isCollapsed: false, // default to expand mode
     timeStamp: null,
     lineCount: undefined,
+    isExtensionsReady: false,
   };
 
   public inputRef: monaco.editor.IStandaloneCodeEditor | null = null;
@@ -99,6 +101,7 @@ export default class QueryEditorUI extends Component<Props, State> {
   private renderQueryEditorExtensions() {
     if (
       !(
+        this.state.isExtensionsReady &&
         this.headerRef.current &&
         this.bannerRef.current &&
         this.props.query.language &&
@@ -206,6 +209,10 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
 
     this.initPersistedLog();
+
+    if (this.bannerRef.current && this.headerRef.current) {
+      this.setState({ isExtensionsReady: true });
+    }
   }
 
   public componentDidUpdate(prevProps: Props) {
