@@ -27,7 +27,7 @@ interface DefaultInputProps extends React.JSX.IntrinsicAttributes {
   provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
 }
 
-const DefaultInput: React.FC<DefaultInputProps> = ({
+export const DefaultInput: React.FC<DefaultInputProps> = ({
   languageId,
   value,
   onChange,

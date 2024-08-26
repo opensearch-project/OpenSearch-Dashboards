@@ -6,7 +6,10 @@
 import { LanguageConfig } from '../types';
 import { ISearchInterceptor } from '../../../../search';
 
-export const getDQLLanguageConfig = (search: ISearchInterceptor): LanguageConfig => {
+export const getDQLLanguageConfig = (
+  search: ISearchInterceptor,
+  defaultEditor: any
+): LanguageConfig => {
   return {
     id: 'kuery',
     title: 'DQL',
@@ -14,17 +17,12 @@ export const getDQLLanguageConfig = (search: ISearchInterceptor): LanguageConfig
     getQueryString(_) {
       return '';
     },
-    searchBar: {
-      showQueryInput: true,
-      showFilterBar: true,
-      showDatePicker: true,
-      showAutoRefreshOnly: false,
-    },
+    editor: defaultEditor,
     fields: {
       filterable: true,
       visualizable: true,
     },
     showDocLinks: true,
-    supportedAppNames: ['discover'],
+    editorSupportedAppNames: ['discover'],
   };
 };

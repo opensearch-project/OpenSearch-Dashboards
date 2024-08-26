@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { IStorageWrapper, Storage } from '../../opensearch_dashboards_utils/public';
 import { ConfigSchema } from '../common/config';
@@ -18,6 +17,7 @@ import {
 } from './types';
 import { LanguageConfig, Query } from '../../data/public';
 import { s3TypeConfig } from './datasets';
+import { createEditor, DefaultInput, SingleLineInput } from '../../data/public';
 
 export class QueryEnhancementsPlugin
   implements
@@ -56,6 +56,8 @@ export class QueryEnhancementsPlugin
       usageCollector: data.search.usageCollector,
     });
 
+    const enhancedQueryEditor = createEditor(SingleLineInput, null, DefaultInput);
+
     // Register PPL language
     const pplLanguageConfig: LanguageConfig = {
       id: 'PPL',
@@ -64,19 +66,13 @@ export class QueryEnhancementsPlugin
       getQueryString: (query: Query) => {
         return `source = ${query.dataset?.title}`;
       },
-      searchBar: {
-        dateRange: {
-          initialFrom: moment().subtract(2, 'days').toISOString(),
-          initialTo: moment().add(2, 'days').toISOString(),
-        },
-        showFilterBar: false,
-      },
       fields: {
         filterable: false,
         visualizable: false,
       },
       showDocLinks: false,
-      supportedAppNames: ['discover'],
+      editor: enhancedQueryEditor,
+      editorSupportedAppNames: ['discover'],
     };
     queryString.getLanguageService().registerLanguage(pplLanguageConfig);
 
@@ -88,16 +84,13 @@ export class QueryEnhancementsPlugin
       getQueryString: (query: Query) => {
         return `SELECT * FROM ${queryString.getQuery().dataset?.title} LIMIT 10`;
       },
-      searchBar: {
-        showDatePicker: false,
-        showFilterBar: false,
-      },
       fields: {
         filterable: false,
         visualizable: false,
       },
       showDocLinks: false,
-      supportedAppNames: ['discover'],
+      editor: enhancedQueryEditor,
+      editorSupportedAppNames: ['discover'],
     };
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
 

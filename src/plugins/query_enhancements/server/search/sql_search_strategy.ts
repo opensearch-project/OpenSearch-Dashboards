@@ -12,7 +12,6 @@ import {
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
   PartialDataFrame,
-  Query,
   createDataFrame,
 } from '../../../data/common';
 import { Facet } from '../utils';
