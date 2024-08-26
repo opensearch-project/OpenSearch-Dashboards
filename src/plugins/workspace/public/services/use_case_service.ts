@@ -61,7 +61,7 @@ export class UseCaseService {
         if (navGroupInfo) {
           setupDeps.chrome.navGroup.addNavLinksToGroup(navGroupInfo, [
             {
-              id: 'dataSources_core',
+              id: 'dataSources',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 100,
             },
