@@ -27,6 +27,11 @@ import { DEFAULT_SELECTED_FEATURES_IDS, WORKSPACE_DETAIL_APP_ID } from '../commo
 import { WorkspaceUseCase } from './types';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
 import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
+import {
+  DirectQueryDatasourceDetails,
+  DATACONNECTIONS_BASE,
+} from '../../data_source_management/public';
+import { DataSource, DataSourceConnection, DataSourceConnectionType } from '../common/types';
 
 export const USE_CASE_PREFIX = 'use-case-';
 
@@ -231,6 +236,46 @@ export const getDataSourcesList = (client: SavedObjectsStart['client'], workspac
         return [];
       }
     });
+};
+
+export const getDirectQueryConnections = async (dataSourceId: string, http: HttpSetup) => {
+  const endpoint = `${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceId}`;
+  const res = await http.get(endpoint);
+  const directQueryConnections: DataSourceConnection[] = res.map(
+    (dataConnection: DirectQueryDatasourceDetails) => ({
+      id: `${dataSourceId}-${dataConnection.name}`,
+      name: dataConnection.name,
+      type: dataConnection.connector,
+      connectionType: DataSourceConnectionType.DirectQueryConnection,
+      description: dataConnection.description,
+      parentId: dataSourceId,
+    })
+  );
+  return directQueryConnections;
+};
+
+// Helper function to merge data sources with direct query connections
+export const mergeDataSourcesWithConnections = (
+  assignedDataSources: DataSource[],
+  directQueryConnections: DataSourceConnection[]
+): DataSourceConnection[] => {
+  const dataSources: DataSourceConnection[] = [];
+  assignedDataSources.forEach((ds) => {
+    const relatedConnections = directQueryConnections.filter(
+      (directQueryConnection) => directQueryConnection.parentId === ds.id
+    );
+
+    dataSources.push({
+      id: ds.id,
+      type: ds.dataSourceEngineType,
+      connectionType: DataSourceConnectionType.OpenSearchConnection,
+      name: ds.title,
+      description: ds.description,
+      relatedConnections,
+    });
+  });
+
+  return [...dataSources, ...directQueryConnections];
 };
 
 // If all connected data sources are serverless, will only allow to select essential use case.

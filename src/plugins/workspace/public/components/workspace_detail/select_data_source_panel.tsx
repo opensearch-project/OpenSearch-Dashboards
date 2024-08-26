@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiText,
   EuiTitle,
@@ -20,13 +20,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from 'react-intl';
-import { DataSource } from '../../../common/types';
+import { DataSource, DataSourceConnection } from '../../../common/types';
 import { WorkspaceClient } from '../../workspace_client';
 import { OpenSearchConnectionTable } from './opensearch_connections_table';
 import { AssociationDataSourceModal } from './association_data_source_modal';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { CoreStart, SavedObjectsStart, WorkspaceObject } from '../../../../../core/public';
 import { convertPermissionSettingsToPermissions, useWorkspaceFormContext } from '../workspace_form';
+import { getDirectQueryConnections, mergeDataSourcesWithConnections } from '../../utils';
 
 export interface SelectDataSourcePanelProps {
   savedObjects: SavedObjectsStart;
@@ -44,12 +45,39 @@ export const SelectDataSourceDetailPanel = ({
   currentWorkspace,
 }: SelectDataSourcePanelProps) => {
   const {
-    services: { notifications, workspaceClient },
+    services: { notifications, workspaceClient, http },
   } = useOpenSearchDashboards<{ CoreStart: CoreStart; workspaceClient: WorkspaceClient }>();
   const { formData, setSelectedDataSources } = useWorkspaceFormContext();
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [dataSourceConnections, setDataSourceConnections] = useState<DataSourceConnection[]>([]);
   const [toggleIdSelected, setToggleIdSelected] = useState('all');
+
+  const fetchDQC = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const directQueryConnectionsPromises = assignedDataSources.map((ds) =>
+        getDirectQueryConnections(ds.id, http!)
+      );
+      const directQueryConnectionsResult = await Promise.all(directQueryConnectionsPromises);
+      const directQueryConnections = directQueryConnectionsResult.flat();
+      setDataSourceConnections(
+        mergeDataSourcesWithConnections(assignedDataSources, directQueryConnections)
+      );
+    } catch (error) {
+      notifications?.toasts.addDanger(
+        i18n.translate('workspace.detail.dataSources.error.message', {
+          defaultMessage: 'Can not fetch direct query connections',
+        })
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [assignedDataSources, http, notifications?.toasts]);
+
+  useEffect(() => {
+    fetchDQC();
+  }, [fetchDQC]);
 
   const toggleButtons = [
     {
@@ -130,7 +158,7 @@ export const SelectDataSourceDetailPanel = ({
       <EuiText>
         <FormattedMessage
           id="workspace.detail.dataSources.noAssociation.message"
-          defaultMessage="Loading OpenSearch connections..."
+          defaultMessage="Loading data sources..."
         />
       </EuiText>
     </div>
@@ -182,8 +210,9 @@ export const SelectDataSourceDetailPanel = ({
       <OpenSearchConnectionTable
         isDashboardAdmin={isDashboardAdmin}
         currentWorkspace={currentWorkspace}
-        assignedDataSources={assignedDataSources}
         setIsLoading={setIsLoading}
+        connectionType={toggleIdSelected}
+        dataSourceConnections={dataSourceConnections}
       />
     );
   };
