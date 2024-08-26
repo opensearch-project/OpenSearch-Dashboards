@@ -243,12 +243,12 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     );
   })();
 
-  const description = (
+  const description = ((
     <FormattedMessage
       id="indexPatternManagement.indexPatternTable.indexPatternExplanation"
       defaultMessage="Create and manage the index patterns that help you retrieve your data from OpenSearch."
     />
-  );
+  ) as unknown) as string;
   const pageTitleAndDescription = showActionsInHeader ? (
     <HeaderControl
       controls={[{ description }]}

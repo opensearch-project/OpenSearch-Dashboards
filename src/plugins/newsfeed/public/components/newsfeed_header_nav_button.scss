@@ -1,0 +1,14 @@
+/*
+* Copyright OpenSearch Contributors
+* SPDX-License-Identifier: Apache-2.0
+*/
+
+.osdNewsfeedButtonWrapper {
+  position: relative;
+
+  &--dot {
+    position: absolute;
+    right: -1 * $euiSizeXS;
+    top: -1 * $euiSizeXS;
+  }
+}

@@ -4,11 +4,10 @@
  */
 
 import {
-  EuiSuperSelect,
-  EuiColorPicker,
+  EuiCompressedSuperSelect,
+  EuiCompressedColorPicker,
   EuiCompressedFormRow,
   EuiDescribedFormGroup,
-  EuiCompressedTextArea,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useObservable } from 'react-use';
@@ -17,7 +16,6 @@ import {
   detailsColorLabel,
   detailsUseCaseLabel,
   detailsColorHelpText,
-  detailsDescriptionPlaceholder,
   detailsDescriptionIntroduction,
   detailsUseCaseHelpText,
 } from './constants';
@@ -36,7 +34,7 @@ interface WorkspaceDetailFormDetailsProps {
   >;
 }
 
-export const WorkspaceDetailFormDetailsProps = ({
+export const WorkspaceDetailFormDetails = ({
   availableUseCases,
 }: WorkspaceDetailFormDetailsProps) => {
   const {
@@ -106,7 +104,7 @@ export const WorkspaceDetailFormDetailsProps = ({
           error={formErrors.features?.message}
           helpText={detailsUseCaseHelpText}
         >
-          <EuiSuperSelect
+          <EuiCompressedSuperSelect
             options={options}
             valueOfSelected={value}
             onChange={(id) => {
@@ -127,7 +125,7 @@ export const WorkspaceDetailFormDetailsProps = ({
           isInvalid={!!formErrors.color}
           error={formErrors.color?.message}
         >
-          <EuiColorPicker
+          <EuiCompressedColorPicker
             color={formData.color}
             onChange={handleColorChange}
             readOnly={!isEditing}

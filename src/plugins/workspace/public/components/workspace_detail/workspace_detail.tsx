@@ -6,14 +6,9 @@
 import React, { useEffect, useState } from 'react';
 import {
   EuiPage,
-  EuiText,
   EuiSpacer,
-  EuiFlexItem,
   EuiPageBody,
-  EuiFlexGroup,
-  EuiPageHeader,
   EuiPageContent,
-  EuiSmallButton,
   EuiConfirmModal,
   EuiTabbedContent,
 } from '@elastic/eui';
@@ -34,6 +29,11 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { SelectDataSourceDetailPanel } from './select_data_source_panel';
 import { WorkspaceBottomBar } from './workspace_bottom_bar';
+import {
+  NavigationPublicPluginStart,
+  TopNavControlDescriptionData,
+  TopNavControlIconData,
+} from '../../../../navigation/public';
 
 export interface WorkspaceDetailProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -41,10 +41,19 @@ export interface WorkspaceDetailProps {
 
 export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
   const {
-    services: { workspaces, application, http, savedObjects, dataSourceManagement, uiSettings },
+    services: {
+      workspaces,
+      application,
+      http,
+      savedObjects,
+      dataSourceManagement,
+      uiSettings,
+      navigationUI: { HeaderControl },
+    },
   } = useOpenSearchDashboards<{
     CoreStart: CoreStart;
     dataSourceManagement?: DataSourceManagementPluginSetup;
+    navigationUI: NavigationPublicPluginStart['ui'];
   }>();
 
   const {
@@ -146,25 +155,35 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
       : []),
   ];
 
-  const deleteButton = (
-    <EuiSmallButton
-      color="danger"
-      iconType="trash"
-      onClick={() => setDeletedWorkspace(currentWorkspace)}
-    >
-      {i18n.translate('workspace.detail.delete', {
-        defaultMessage: 'delete',
-      })}
-    </EuiSmallButton>
-  );
-
   return (
     <>
       <EuiPage direction="column">
-        <EuiPageHeader rightSideItems={[deleteButton]} alignItems="center" />
-        <EuiPageBody>
-          <EuiText color="subdued">{currentWorkspace.description}</EuiText>
-        </EuiPageBody>
+        {currentWorkspace.description && (
+          <HeaderControl
+            controls={[
+              {
+                description: currentWorkspace.description,
+              } as TopNavControlDescriptionData,
+            ]}
+            setMountPoint={application.setAppDescriptionControls}
+          />
+        )}
+        <HeaderControl
+          controls={[
+            {
+              run: () => setDeletedWorkspace(currentWorkspace),
+              color: 'danger',
+              iconType: 'trash',
+              ariaLabel: i18n.translate('workspace.detail.delete.button', {
+                defaultMessage: 'Delete',
+              }),
+              testId: 'workspace-detail-delete-button',
+              controlType: 'icon',
+              display: 'base',
+            } as TopNavControlIconData,
+          ]}
+          setMountPoint={application.setAppRightControls}
+        />
         <EuiSpacer />
         <EuiPageContent>
           <WorkspaceDetailPanel
@@ -187,7 +206,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
         </EuiPageBody>
         {deletedWorkspace && (
           <DeleteWorkspaceModal
-            selectedWorkspace={deletedWorkspace}
+            selectedWorkspaces={[deletedWorkspace]}
             onClose={() => setDeletedWorkspace(null)}
             onDeleteSuccess={() => {
               window.setTimeout(() => {

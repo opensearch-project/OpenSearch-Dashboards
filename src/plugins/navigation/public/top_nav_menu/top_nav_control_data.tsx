@@ -33,7 +33,9 @@ export type TopNavControlLinkData = TopNavControlButtonOrLinkOrIconData &
       run?: TopNavControlAction;
       iconType?: EuiHeaderLinkProps['iconType'];
       iconSide?: EuiHeaderLinkProps['iconSide'];
+      iconGap?: EuiHeaderLinkProps['iconGap'];
       color?: EuiHeaderLinkProps['color'];
+      flush?: EuiHeaderLinkProps['flush'];
       controlType: 'link';
     },
     'href' | 'run'
@@ -48,6 +50,7 @@ export type TopNavControlButtonData = TopNavControlButtonOrLinkOrIconData &
       run?: TopNavControlAction;
       iconType?: EuiButtonProps['iconType'];
       iconSide?: EuiButtonProps['iconSide'];
+      iconGap?: EuiHeaderLinkProps['iconGap'];
       color?: EuiButtonProps['color'];
       fill?: EuiButtonProps['fill'];
       controlType?: 'button';

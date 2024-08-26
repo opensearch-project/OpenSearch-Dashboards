@@ -3353,6 +3353,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                       >
                         <EuiButtonContent
                           className="euiButtonEmpty__content"
+                          iconGap="m"
                           iconSide="left"
                           iconSize="m"
                           textProps={
@@ -3915,6 +3916,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButtonEmpty__content"
+                                iconGap="m"
                                 iconSide="left"
                                 iconSize="m"
                                 textProps={
@@ -6261,6 +6263,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                     >
                                       <EuiButtonContent
                                         className="euiButtonEmpty__content"
+                                        iconGap="m"
                                         iconSide="left"
                                         iconSize="m"
                                         textProps={
@@ -8552,6 +8555,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButtonEmpty__content"
+                    iconGap="m"
                     iconSide="left"
                     iconSize="m"
                     textProps={
@@ -11890,6 +11894,7 @@ exports[`Header renders condensed header 1`] = `
                       >
                         <EuiButtonContent
                           className="euiButtonEmpty__content"
+                          iconGap="m"
                           iconSide="left"
                           iconSize="m"
                           textProps={
@@ -12375,6 +12380,7 @@ exports[`Header renders condensed header 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButtonEmpty__content"
+                                iconGap="m"
                                 iconSide="left"
                                 iconSize="m"
                                 textProps={
@@ -14721,6 +14727,7 @@ exports[`Header renders condensed header 1`] = `
                                     >
                                       <EuiButtonContent
                                         className="euiButtonEmpty__content"
+                                        iconGap="m"
                                         iconSide="left"
                                         iconSize="m"
                                         textProps={
@@ -16926,6 +16933,7 @@ exports[`Header renders page header with application title 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButtonEmpty__content"
+                    iconGap="m"
                     iconSide="left"
                     iconSize="m"
                     textProps={
@@ -21224,6 +21232,7 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                       >
                         <EuiButtonContent
                           className="euiButtonEmpty__content"
+                          iconGap="m"
                           iconSide="left"
                           iconSize="m"
                           textProps={
@@ -21709,6 +21718,7 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButtonEmpty__content"
+                                iconGap="m"
                                 iconSide="left"
                                 iconSize="m"
                                 textProps={
@@ -24055,6 +24065,7 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                                     >
                                       <EuiButtonContent
                                         className="euiButtonEmpty__content"
+                                        iconGap="m"
                                         iconSide="left"
                                         iconSize="m"
                                         textProps={

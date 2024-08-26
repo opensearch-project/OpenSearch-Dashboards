@@ -140,6 +140,7 @@ exports[`DataSourceTable should get datasources failed should render empty table
                 >
                   <EuiButtonContent
                     className="euiButton__content"
+                    iconGap="m"
                     iconSide="left"
                     textProps={
                       Object {
@@ -584,6 +585,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
+                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {
@@ -841,6 +843,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                       >
                                         <EuiButtonContent
                                           className="euiButtonEmpty__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconSize="s"
                                           iconType="arrowDown"
@@ -1202,6 +1205,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="left"
                                       iconSize="s"
                                       textProps={
@@ -1355,6 +1359,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="left"
                                       iconSize="s"
                                       textProps={
@@ -1508,6 +1513,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="left"
                                       iconSize="s"
                                       textProps={
@@ -1701,6 +1707,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="left"
                                       iconSize="s"
                                       textProps={
@@ -1870,6 +1877,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="right"
                                       iconSize="s"
                                       iconType="arrowDown"
@@ -2040,6 +2048,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                             >
                                               <EuiButtonContent
                                                 className="euiButtonEmpty__content"
+                                                iconGap="m"
                                                 iconSide="left"
                                                 iconSize="m"
                                                 textProps={

@@ -47,6 +47,7 @@ import {
   EuiTableFieldDataColumnType,
   EuiTableActionsColumnType,
   EuiSearchBarProps,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -90,6 +91,8 @@ export interface TableProps {
   availableWorkspaces?: WorkspaceAttribute[];
   currentWorkspaceId?: string;
   showDuplicate: boolean;
+  useUpdatedUX: boolean;
+  onRefresh: () => void;
 }
 
 interface TableState {
@@ -189,6 +192,8 @@ export class Table extends PureComponent<TableProps, TableState> {
       availableWorkspaces,
       currentWorkspaceId,
       showDuplicate,
+      useUpdatedUX,
+      onRefresh,
     } = this.props;
 
     const visibleWsIds = availableWorkspaces?.map((ws) => ws.id) || [];
@@ -245,15 +250,19 @@ export class Table extends PureComponent<TableProps, TableState> {
           if (!canGoInApp) {
             return <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>;
           }
-          let inAppUrl = basePath.prepend(path);
+          let finalPath = path;
+          if (this.props.useUpdatedUX && finalPath) {
+            finalPath = finalPath.replace(/^\/app\/management\/opensearch-dashboards/, '/app');
+          }
+          let inAppUrl = basePath.prepend(finalPath);
           if (object.workspaces?.length) {
             if (currentWorkspaceId) {
-              inAppUrl = formatUrlWithWorkspaceId(path, currentWorkspaceId, basePath);
+              inAppUrl = formatUrlWithWorkspaceId(finalPath, currentWorkspaceId, basePath);
             } else {
               // find first workspace user have permission
               const workspaceId = object.workspaces.find((wsId) => visibleWsIds.includes(wsId));
               if (workspaceId) {
-                inAppUrl = formatUrlWithWorkspaceId(path, workspaceId, basePath);
+                inAppUrl = formatUrlWithWorkspaceId(finalPath, workspaceId, basePath);
               }
             }
           }
@@ -417,6 +426,17 @@ export class Table extends PureComponent<TableProps, TableState> {
           filters={filters}
           onChange={this.onChange}
           toolsRight={[
+            <>
+              {useUpdatedUX && (
+                <EuiButtonIcon
+                  iconType="refresh"
+                  size="s"
+                  display="base"
+                  type="base"
+                  onClick={onRefresh}
+                />
+              )}
+            </>,
             <>{showDuplicate && duplicateButton}</>,
             <EuiSmallButton
               key="deleteSO"
