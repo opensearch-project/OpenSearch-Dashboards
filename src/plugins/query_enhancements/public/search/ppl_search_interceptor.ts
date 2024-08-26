@@ -74,13 +74,17 @@ export class PPLSearchInterceptor extends SearchInterceptor {
   private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {
     const { aggs } = request.params.body;
     if (!aggs || !query.dataset || !query.dataset.timeFieldName) return;
-    const aggsConfig: QueryAggConfig = {};
+    let aggsConfig: QueryAggConfig = { qs: {} };
     const { fromDate, toDate } = formatTimePickerDate(
       this.queryService.timefilter.timefilter.getTime(),
       'YYYY-MM-DD HH:mm:ss.SSS'
     );
     Object.entries(aggs as Record<number, any>).forEach(([key, value]) => {
-      aggsConfig[key] = `${query.query} | stats count() by span(${query.dataset!.timeFieldName}, ${
+      const aggType = this.aggsService.types.get(key);
+      aggsConfig = { ...aggsConfig, aggType };
+      aggsConfig.qs[key] = `${query.query} | stats count() by span(${
+        query.dataset!.timeFieldName
+      }, ${
         value.date_histogram.fixed_interval ??
         value.date_histogram.calendar_interval ??
         this.aggsService.calculateAutoTimeExpression({

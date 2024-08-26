@@ -57,6 +57,7 @@ export const pplSearchStrategyProvider = (
         const dataFrame = createDataFrame({
           name: query.dataset?.id,
           schema: rawResponse.data.schema,
+          meta: aggConfig,
           fields: getFields(rawResponse),
         });
 
@@ -65,7 +66,7 @@ export const pplSearchStrategyProvider = (
         if (usage) usage.trackSuccess(rawResponse.took);
 
         if (aggConfig) {
-          for (const [key, aggQueryString] of Object.entries(aggConfig)) {
+          for (const [key, aggQueryString] of Object.entries(aggConfig.qs)) {
             request.body.query.query = aggQueryString;
             const rawAggs: any = await pplFacet.describeQuery(context, request);
             (dataFrame as IDataFrameWithAggs).aggs = {};
