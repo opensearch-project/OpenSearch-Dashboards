@@ -30,8 +30,8 @@ const getAvailableLanguages$ = (
     distinctUntilChanged(),
     switchMap(async (query) => {
       // currently query assist tool relies on opensearch API to get index
-      // mappings, external data source types (e.g. s3) are not supported
-      if (query.dataset?.dataSource?.type !== DEFAULT_QUERY.DATASET.DATASOURCE.TYPE) return [];
+      // mappings, only {@link DataSourceEngineType.OpenSearch} is supported.
+      if (query.dataset?.dataSource?.type !== 'OpenSearch') return [];
 
       const dataSourceId = query.dataset?.dataSource?.id;
       const cached = availableLanguagesByDataSource.get(dataSourceId);
