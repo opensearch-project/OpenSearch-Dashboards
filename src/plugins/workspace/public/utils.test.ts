@@ -19,21 +19,17 @@ import {
 } from './utils';
 import { WorkspaceAvailability } from '../../../core/public';
 import { coreMock } from '../../../core/public/mocks';
-import { WORKSPACE_DETAIL_APP_ID, WORKSPACE_USE_CASES } from '../common/constants';
+import { WORKSPACE_DETAIL_APP_ID } from '../common/constants';
 import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
+import { createMockedRegisteredUseCases } from './mocks';
 
 const startMock = coreMock.createStart();
-const STATIC_USE_CASES = [
-  WORKSPACE_USE_CASES.observability,
-  WORKSPACE_USE_CASES['security-analytics'],
-  WORKSPACE_USE_CASES.search,
-  WORKSPACE_USE_CASES.essentials,
-];
+const STATIC_USE_CASES = createMockedRegisteredUseCases();
 const useCaseMock = {
   id: 'foo',
   title: 'Foo',
   description: 'Foo description',
-  features: ['bar'],
+  features: [{ id: 'bar' }],
   systematic: false,
   order: 1,
 };
@@ -349,7 +345,7 @@ describe('workspace utils: isFeatureIdInsideUseCase', () => {
           id: 'foo',
           title: 'Foo',
           description: 'Foo description',
-          features: ['discover'],
+          features: [{ id: 'discover' }],
         },
       ])
     ).toBe(true);
@@ -469,13 +465,13 @@ describe('workspace utils: convertNavGroupToWorkspaceUseCase', () => {
         id: 'foo',
         title: 'Foo',
         description: 'Foo description',
-        navLinks: [{ id: 'bar' }],
+        navLinks: [{ id: 'bar', title: 'Bar' }],
       })
     ).toEqual({
       id: 'foo',
       title: 'Foo',
       description: 'Foo description',
-      features: ['bar'],
+      features: [{ id: 'bar', title: 'Bar' }],
       systematic: false,
     });
 
@@ -484,14 +480,14 @@ describe('workspace utils: convertNavGroupToWorkspaceUseCase', () => {
         id: 'foo',
         title: 'Foo',
         description: 'Foo description',
-        navLinks: [{ id: 'bar' }],
+        navLinks: [{ id: 'bar', title: 'Bar' }],
         type: NavGroupType.SYSTEM,
       })
     ).toEqual({
       id: 'foo',
       title: 'Foo',
       description: 'Foo description',
-      features: ['bar'],
+      features: [{ id: 'bar', title: 'Bar' }],
       systematic: true,
     });
   });
@@ -546,11 +542,19 @@ describe('workspace utils: isEqualWorkspaceUseCase', () => {
       })
     ).toEqual(false);
   });
-  it('should return false when features content not equal', () => {
+  it('should return false when features id not equal', () => {
     expect(
       isEqualWorkspaceUseCase(useCaseMock, {
         ...useCaseMock,
-        features: ['baz'],
+        features: [{ id: 'baz' }],
+      })
+    ).toEqual(false);
+  });
+  it('should return false when features title not equal', () => {
+    expect(
+      isEqualWorkspaceUseCase(useCaseMock, {
+        ...useCaseMock,
+        features: [{ id: 'bar', title: 'Baz' }],
       })
     ).toEqual(false);
   });

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle, EuiForm, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { WorkspaceFormProps } from './types';
@@ -29,7 +29,6 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     permissionEnabled,
     dataSourceManagement: isDataSourceEnabled,
     availableUseCases,
-    operationType,
   } = props;
   const {
     formId,
@@ -40,15 +39,33 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     setDescription,
     handleFormSubmit,
     handleColorChange,
-    handleUseCaseChange,
+    handleUseCaseChange: handleUseCaseChangeInHook,
     setPermissionSettings,
     setSelectedDataSources,
   } = useWorkspaceForm(props);
+  const nameManualChangedRef = useRef(false);
 
   const disabledUserOrGroupInputIdsRef = useRef(
     defaultValues?.permissionSettings?.map((item) => item.id) ?? []
   );
   const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin ?? false;
+  const handleNameInputChange = useCallback(
+    (newName) => {
+      setName(newName);
+      nameManualChangedRef.current = true;
+    },
+    [setName]
+  );
+  const handleUseCaseChange = useCallback(
+    (newUseCase) => {
+      handleUseCaseChangeInHook(newUseCase);
+      const useCase = availableUseCases.find((item) => newUseCase === item.id);
+      if (!nameManualChangedRef.current && useCase) {
+        setName(useCase.title);
+      }
+    },
+    [handleUseCaseChangeInHook, availableUseCases, setName]
+  );
 
   return (
     <EuiForm id={formId} onSubmit={handleFormSubmit} component="form">
@@ -71,7 +88,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           color={formData.color}
           readOnly={!!defaultValues?.reserved}
           handleColorChange={handleColorChange}
-          onNameChange={setName}
+          onNameChange={handleNameInputChange}
           onDescriptionChange={setDescription}
         />
       </EuiPanel>
@@ -86,8 +103,6 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           onChange={handleUseCaseChange}
           formErrors={formErrors}
           availableUseCases={availableUseCases}
-          savedObjects={savedObjects}
-          operationType={operationType}
         />
       </EuiPanel>
       <EuiSpacer />
