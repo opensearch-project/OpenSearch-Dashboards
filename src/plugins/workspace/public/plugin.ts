@@ -31,6 +31,7 @@ import {
   WORKSPACE_LIST_APP_ID,
   WORKSPACE_USE_CASES,
   WORKSPACE_INITIAL_APP_ID,
+  WORKSPACE_NAVIGATION_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services, WorkspaceUseCase } from './types';
@@ -45,6 +46,7 @@ import {
   enrichBreadcrumbsWithWorkspace,
   filterWorkspaceConfigurableApps,
   getFirstUseCaseOfFeatureConfigs,
+  getUseCaseUrl,
   isAppAccessibleInWorkspace,
   isNavGroupInFeatureConfigs,
 } from './utils';
@@ -372,6 +374,32 @@ export class WorkspacePlugin
         return mountWorkspaceApp(params, renderInitialApp);
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+    });
+
+    const registeredUseCases$ = this.registeredUseCases$;
+    // register workspace navigation
+    core.application.register({
+      id: WORKSPACE_NAVIGATION_APP_ID,
+      title: '',
+      chromeless: true,
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount() {
+        const [coreStart] = await core.getStartServices();
+        const { application, http, workspaces } = coreStart;
+        const workspace = workspaces.currentWorkspace$.getValue();
+        if (workspace) {
+          const availableUseCases = registeredUseCases$.getValue();
+          const currentUseCase = availableUseCases.find(
+            (useCase) => useCase.id === getFirstUseCaseOfFeatureConfigs(workspace?.features ?? [])
+          );
+          const useCaseUrl = getUseCaseUrl(currentUseCase, workspace, application, http);
+          application.navigateToUrl(useCaseUrl);
+        } else {
+          application.navigateToApp('home');
+        }
+        return () => {};
+      },
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
     });
 
     // workspace list
