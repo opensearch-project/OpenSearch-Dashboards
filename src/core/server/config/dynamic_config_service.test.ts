@@ -9,9 +9,6 @@ import { loggerMock } from '../logging/logger.mock';
 import { LoggerFactory } from '@osd/logging';
 import { schema, Type } from '@osd/config-schema';
 import { IDynamicConfigStoreClient } from 'opensearch-dashboards/server';
-import { AsyncLocalStorage } from 'async_hooks';
-import { Request } from 'hapi__hapi';
-import { ResponseToolkit } from '@hapi/hapi';
 
 describe('DynamicConfigService', () => {
   let dynamicConfigService: IDynamicConfigService;
@@ -55,18 +52,8 @@ describe('DynamicConfigService', () => {
   describe('After http is setup', () => {
     it('setupHTTP() should add the async local store preAuth middleware', () => {
       const httpSetupMock = httpServiceMock.createInternalSetupContract();
-      const extFunction = jest.spyOn(httpSetupMock.server, 'ext');
       dynamicConfigService.registerRoutesAndHandlers({ http: httpSetupMock });
-      expect(httpSetupMock.server.ext).toHaveBeenCalled();
-
-      // Test the enterWith
-      const enterWith = jest.spyOn(AsyncLocalStorage.prototype, 'enterWith');
-      const returnedFunction = extFunction.mock.calls[0][1];
-      returnedFunction(
-        ({ headers: {} } as unknown) as Request,
-        { continue: Symbol() } as ResponseToolkit
-      );
-      expect(enterWith).toHaveBeenCalled();
+      expect(httpSetupMock.registerOnPostAuth).toHaveBeenCalled();
     });
   });
 

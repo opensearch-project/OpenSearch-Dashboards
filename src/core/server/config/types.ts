@@ -15,13 +15,10 @@ import { OpenSearchDashboardsRequest } from '../http';
 export interface InternalDynamicConfigServiceSetup {
   registerDynamicConfigClientFactory: (factory: IDynamicConfigStoreClientFactory) => void;
   registerAsyncLocalStoreRequestHeader: (key: string | string[]) => void;
-  getStartService: () => Promise<InternalDynamicConfigServiceStart>;
+  getStartService: () => Promise<DynamicConfigServiceStart>;
 }
 
-export type DynamicConfigServiceSetup = Pick<
-  InternalDynamicConfigServiceSetup,
-  'registerDynamicConfigClientFactory' | 'registerAsyncLocalStoreRequestHeader'
->;
+export type DynamicConfigServiceSetup = InternalDynamicConfigServiceSetup;
 
 export interface InternalDynamicConfigServiceStart {
   getClient: () => IDynamicConfigurationClient;
@@ -30,6 +27,8 @@ export interface InternalDynamicConfigServiceStart {
     request: OpenSearchDashboardsRequest
   ) => AsyncLocalStorageContext | undefined;
 }
+
+export type DynamicConfigServiceStart = InternalDynamicConfigServiceStart;
 
 export type IDynamicConfigurationClient = Pick<
   IInternalDynamicConfigurationClient,

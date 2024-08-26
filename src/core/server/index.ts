@@ -73,6 +73,7 @@ import {
 import {
   AsyncLocalStorageContext,
   DynamicConfigServiceSetup,
+  DynamicConfigServiceStart,
   IDynamicConfigurationClient,
 } from './config';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
@@ -516,6 +517,8 @@ export interface CoreStart {
   coreUsageData: CoreUsageDataStart;
   /** {@link CrossCompatibilityServiceStart} */
   crossCompatibility: CrossCompatibilityServiceStart;
+  /** {@link DynamicConfigServiceStart} */
+  dynamicConfig: DynamicConfigServiceStart;
 }
 
 export {

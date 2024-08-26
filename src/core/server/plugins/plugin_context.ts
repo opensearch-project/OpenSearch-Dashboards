@@ -224,6 +224,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     dynamicConfigService: {
       registerDynamicConfigClientFactory: deps.dynamicConfig.registerDynamicConfigClientFactory,
       registerAsyncLocalStoreRequestHeader: deps.dynamicConfig.registerAsyncLocalStoreRequestHeader,
+      getStartService: deps.dynamicConfig.getStartService,
     },
   };
 }

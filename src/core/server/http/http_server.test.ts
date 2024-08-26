@@ -86,7 +86,6 @@ beforeEach(() => {
       allowFromAnyIp: true,
       ipAllowlist: [],
     },
-    updateConfigs: jest.fn(),
   } as any;
 
   configWithSSL = {
@@ -130,7 +129,6 @@ test('log listening address after started when configured with BasePath and rewr
 
   await server.setup({
     ...config,
-    updateConfigs: config.updateConfigs,
     basePath: '/bar',
     rewriteBasePath: false,
   });
@@ -151,7 +149,6 @@ test('log listening address after started when configured with BasePath and rewr
 
   await server.setup({
     ...config,
-    updateConfigs: config.updateConfigs,
     basePath: '/bar',
     rewriteBasePath: true,
   });
@@ -779,7 +776,6 @@ test('returns server and connection options on start', async () => {
   const configWithPort = {
     ...config,
     port: 12345,
-    updateConfigs: config.updateConfigs,
   };
   const { server: innerServer } = await server.setup(configWithPort);
 
@@ -861,7 +857,6 @@ describe('conditional compression', () => {
     const listener = await setupServer({
       ...config,
       compression: { enabled: false },
-      updateConfigs: config.updateConfigs,
     });
 
     const response = await supertest(listener).get('/').set('accept-encoding', 'gzip');
@@ -875,7 +870,6 @@ describe('conditional compression', () => {
       listener = await setupServer({
         ...config,
         compression: { enabled: true, referrerWhitelist: ['foo'] },
-        updateConfigs: config.updateConfigs,
       });
     });
 
@@ -918,7 +912,6 @@ describe('conditional compression', () => {
       const { registerRouter, server: innerServer } = await server.setup({
         ...config,
         keepaliveTimeout: 100_000,
-        updateConfigs: config.updateConfigs,
       });
 
       const router = new Router('', logger, enhanceWithContext);
@@ -1233,7 +1226,6 @@ describe('timeout options', () => {
       const { registerRouter, server: innerServer } = await server.setup({
         ...config,
         socketTimeout: 11000,
-        updateConfigs: config.updateConfigs,
       });
 
       const router = new Router('', logger, enhanceWithContext);
@@ -1267,7 +1259,6 @@ describe('timeout options', () => {
       const { registerRouter, server: innerServer } = await server.setup({
         ...config,
         socketTimeout: 11000,
-        updateConfigs: config.updateConfigs,
       });
 
       const router = new Router('', logger, enhanceWithContext);
@@ -1395,7 +1386,6 @@ describe('setup contract', () => {
         port: 12345,
         name: 'custom-name',
         host: 'localhost',
-        updateConfigs: config.updateConfigs,
       }));
 
       expect(getServerInfo()).toEqual({

@@ -11,6 +11,7 @@ import {
 import {
   AsyncLocalStorageContext,
   DynamicConfigServiceSetup,
+  DynamicConfigServiceStart,
   InternalDynamicConfigServiceSetup,
   InternalDynamicConfigServiceStart,
 } from './types';
@@ -39,6 +40,7 @@ const createSetupContractMock = () => {
   const mocked: jest.Mocked<DynamicConfigServiceSetup> = {
     registerDynamicConfigClientFactory: jest.fn(),
     registerAsyncLocalStoreRequestHeader: jest.fn(),
+    getStartService: jest.fn(),
   };
 
   return mocked;
@@ -90,4 +92,5 @@ export const dynamicConfigServiceMock = {
   createInternalSetupContract: createInternalSetupContractMock,
   createInternalStartContract: createInternalStartContractMock,
   createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };

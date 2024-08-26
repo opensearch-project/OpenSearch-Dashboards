@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { config, CspConfigType } from './config';
+import { config } from './config';
 
 const DEFAULT_CONFIG = Object.freeze(config.schema.validate({}));
 
@@ -60,22 +60,18 @@ export interface ICspConfig {
    */
   readonly header: string;
 }
-export interface ICspConfigImpl {
-  new (rawCspConfig?: Partial<Omit<ICspConfig, 'header'>>): ICspConfig;
-  DEFAULT: Pick<CspConfigImpl, 'rules' | 'strict' | 'warnLegacyBrowsers' | 'header'>;
-}
 
 /**
- * CSP configuration implementation that exposes a method to update the configs. Only visible to core
- * @internal
- * */
-export class CspConfigImpl implements ICspConfig {
-  static readonly DEFAULT = new CspConfigImpl();
+ * CSP configuration for use in OpenSearch Dashboards.
+ * @public
+ */
+export class CspConfig implements ICspConfig {
+  static readonly DEFAULT = new CspConfig();
 
-  #rules: string[];
-  #strict: boolean;
-  #warnLegacyBrowsers: boolean;
-  #header: string;
+  public readonly rules: string[];
+  public readonly strict: boolean;
+  public readonly warnLegacyBrowsers: boolean;
+  public readonly header: string;
 
   /**
    * Returns the default CSP configuration when passed with no config
@@ -84,38 +80,9 @@ export class CspConfigImpl implements ICspConfig {
   constructor(rawCspConfig: Partial<Omit<ICspConfig, 'header'>> = {}) {
     const source = { ...DEFAULT_CONFIG, ...rawCspConfig };
 
-    this.#rules = source.rules;
-    this.#strict = source.strict;
-    this.#warnLegacyBrowsers = source.warnLegacyBrowsers;
-    this.#header = source.rules.join('; ');
-  }
-
-  public updateCSPConfig(newCspConfig: CspConfigType) {
-    this.#rules = newCspConfig.rules;
-    this.#strict = newCspConfig.strict;
-    this.#warnLegacyBrowsers = newCspConfig.warnLegacyBrowsers;
-    this.#header = newCspConfig.rules.join('; ');
-  }
-
-  public get rules() {
-    return this.#rules;
-  }
-
-  public get strict() {
-    return this.#strict;
-  }
-
-  public get warnLegacyBrowsers() {
-    return this.#warnLegacyBrowsers;
-  }
-
-  public get header() {
-    return this.#header;
+    this.rules = source.rules;
+    this.strict = source.strict;
+    this.warnLegacyBrowsers = source.warnLegacyBrowsers;
+    this.header = source.rules.join('; ');
   }
 }
-
-/**
- * CSP configuration for use in OpenSearch Dashboards.
- * @public
- */
-export const CspConfig: ICspConfigImpl = CspConfigImpl;

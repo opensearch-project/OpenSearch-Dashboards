@@ -185,6 +185,7 @@ function createCoreStartMock() {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     coreUsageData: coreUsageDataServiceMock.createStartContract(),
     crossCompatibility: crossCompatibilityServiceMock.createStartContract(),
+    dynamicConfig: dynamicConfigServiceMock.createStartContract(),
   };
 
   return mock;
