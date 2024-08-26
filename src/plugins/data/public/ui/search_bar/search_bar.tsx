@@ -44,7 +44,6 @@ import { FilterBar } from '../filter_bar/filter_bar';
 import { QueryEditorTopRow } from '../query_editor';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
-import { Settings } from '../types';
 import { FilterOptions } from '../filter_bar/filter_options';
 
 interface SearchBarInjectedDeps {
@@ -78,7 +77,6 @@ export interface SearchBarOwnProps {
   datePickerRef?: React.RefObject<HTMLDivElement>;
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
-  settings?: Settings;
   dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
@@ -120,6 +118,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   private services = this.props.opensearchDashboards.services;
   private queryService = this.services.data.query;
+  private languageService = this.queryService.queryString.getLanguageService();
   private savedQueryService = this.queryService.savedQueries;
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
@@ -218,10 +217,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   };
 
-  private supportsEnhancements() {
-    return this.props.settings?.supportsEnhancementsEnabled(this.services.appName);
-  }
-
   private shouldRenderQueryEditor(isEnhancementsEnabledOverride: boolean) {
     // TODO: MQL handle no index patterns?
     if (!isEnhancementsEnabledOverride) return false;
@@ -249,9 +244,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       (!this.useNewHeader || this.props.filters.length > 0) &&
       this.props.indexPatterns &&
       compact(this.props.indexPatterns).length > 0 &&
-      (this.queryService.queryString.getLanguageService().getLanguage(this.state.query?.language!)
-        ?.searchBar?.showFilterBar ??
-        true)
+      this.queryService.queryString.getLanguageService().getLanguage(this.state.query?.language!)!
+        .fields?.filterable
     );
   }
 
@@ -426,13 +420,14 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   public render() {
     const isEnhancementsEnabledOverride =
-      this.supportsEnhancements() &&
-      this.services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
+      this.services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) &&
+      this.languageService
+        .getLanguage(this.state.query?.language!)
+        ?.editorSupportedAppNames?.includes(this.services.appName);
 
-    this.props.settings?.setUserQueryLanguageBlocklist(
+    this.languageService.setUserQueryLanguageBlocklist(
       this.services.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE_BLOCKLIST)
     );
-    this.props.settings?.setUserQueryEnhancementsEnabled(isEnhancementsEnabledOverride);
 
     const searchBarMenu = (useSaveQueryMenu: boolean = false) => {
       return (
@@ -523,7 +518,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       queryEditor = (
         <QueryEditorTopRow
           timeHistory={this.props.timeHistory}
-          settings={this.props.settings}
           query={this.state.query}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}

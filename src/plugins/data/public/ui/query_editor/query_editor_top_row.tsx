@@ -22,7 +22,6 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { UI_SETTINGS } from '../../../common';
 import { getQueryLog, PersistedLog } from '../../query';
-import { Settings } from '../types';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
 
@@ -31,7 +30,6 @@ const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 // @internal
 export interface QueryEditorTopRowProps {
   query?: Query;
-  settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
@@ -91,16 +89,9 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
 
   function getDateRange() {
     const defaultTimeSetting = uiSettings!.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
-    const languageConfig = queryString.getLanguageService().getLanguage(queryLanguage!);
     return {
-      from:
-        props.dateRangeFrom ||
-        languageConfig?.searchBar?.dateRange?.initialFrom ||
-        defaultTimeSetting.from,
-      to:
-        props.dateRangeTo ||
-        languageConfig?.searchBar?.dateRange?.initialTo ||
-        defaultTimeSetting.to,
+      from: props.dateRangeFrom || defaultTimeSetting.from,
+      to: props.dateRangeTo || defaultTimeSetting.to,
     };
   }
 
@@ -185,7 +176,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           disableAutoFocus={props.disableAutoFocus}
           queryActions={props.prepend}
           query={props.query!}
-          settings={props.settings!}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
           onChangeQueryEditorFocus={onChangeQueryEditorFocus}
@@ -216,15 +206,11 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function shouldRenderDatePicker(): boolean {
-    const languageConfig = queryString.getLanguageService().getLanguage(queryLanguage!);
-    return Boolean(
-      (props.showDatePicker && (languageConfig?.searchBar?.showDatePicker ?? true)) ??
-        (props.showAutoRefreshOnly && (languageConfig?.searchBar?.showAutoRefreshOnly ?? true))
-    );
+    return Boolean(props.showDatePicker ?? true) ?? (props.showAutoRefreshOnly && true);
   }
 
   function shouldRenderQueryEditor(): boolean {
-    return Boolean(props.showQueryEditor && props.settings && props.query && storage);
+    return Boolean(props.showQueryEditor && props.query && storage);
   }
 
   function renderUpdateButton() {

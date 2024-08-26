@@ -51,7 +51,7 @@ export class QueryStringManager {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
     this.queryHistory = createHistory({ storage });
     this.datasetService = new DatasetService(uiSettings);
-    this.languageService = new LanguageService(this.defaultSearchInterceptor);
+    this.languageService = new LanguageService(this.defaultSearchInterceptor, this.storage);
   }
 
   private getDefaultQueryString() {
