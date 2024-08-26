@@ -70,4 +70,4 @@ snapshots.js
 .yarn-local-mirror
 
 # Ignore the generated antlr files
-/src/plugins/data/public/antlr/opensearch_sql/grammar/.antlr
+/src/plugins/data/public/antlr/**/grammar/.antlr/
