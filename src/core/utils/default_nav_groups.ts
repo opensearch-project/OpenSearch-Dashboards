@@ -7,6 +7,10 @@ import { i18n } from '@osd/i18n';
 import { ChromeNavGroup, NavGroupType } from '../types';
 
 export const ALL_USE_CASE_ID = 'all';
+export const OBSERVABILITY_USE_CASE_ID = 'observability';
+export const SECURITY_ANALYTICS_USE_CASE_ID = 'security-analytics';
+export const ESSENTIAL_USE_CASE_ID = 'analytics';
+export const SEARCH_USE_CASE_ID = 'search';
 
 const defaultNavGroups = {
   dataAdministration: {
@@ -43,7 +47,7 @@ const defaultNavGroups = {
     icon: 'wsAnalytics',
   },
   observability: {
-    id: 'observability',
+    id: OBSERVABILITY_USE_CASE_ID,
     title: i18n.translate('core.ui.group.observability.title', {
       defaultMessage: 'Observability',
     }),
@@ -55,7 +59,7 @@ const defaultNavGroups = {
     icon: 'wsObservability',
   },
   'security-analytics': {
-    id: 'security-analytics',
+    id: SECURITY_ANALYTICS_USE_CASE_ID,
     title: i18n.translate('core.ui.group.security.analytics.title', {
       defaultMessage: 'Security Analytics',
     }),
@@ -67,7 +71,7 @@ const defaultNavGroups = {
     icon: 'wsSecurityAnalytics',
   },
   essentials: {
-    id: 'analytics',
+    id: ESSENTIAL_USE_CASE_ID,
     title: i18n.translate('core.ui.group.essential.title', {
       defaultMessage: 'Essentials',
     }),
@@ -79,7 +83,7 @@ const defaultNavGroups = {
     icon: 'wsEssentials',
   },
   search: {
-    id: 'search',
+    id: SEARCH_USE_CASE_ID,
     title: i18n.translate('core.ui.group.search.title', {
       defaultMessage: 'Search',
     }),
