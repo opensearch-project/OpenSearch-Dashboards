@@ -15,18 +15,6 @@ import {
 } from '../../../ui';
 import { DataStorage, setOverrides as setFieldOverrides } from '../../../../common';
 
-export interface DataSettings {
-  userQueryLanguage: string;
-  userQueryString: string;
-  uiOverrides?: {
-    fields?: {
-      filterable?: boolean;
-      visualizable?: boolean;
-    };
-    showDocLinks?: boolean;
-  };
-}
-
 export class LanguageService {
   private languages: Map<string, LanguageConfig> = new Map();
   private queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>;
@@ -151,20 +139,6 @@ export class LanguageService {
   getUserQuerySessionId = (dataSourceName: string) => {
     return sessionStorage.getItem(`async-query-session-id_${dataSourceName}`);
   };
-
-  toJSON(): DataSettings {
-    return {
-      userQueryLanguage: this.getUserQueryLanguage(),
-      userQueryString: this.getUserQueryString(),
-      uiOverrides: this.getUiOverrides(),
-    };
-  }
-
-  updateSettings({ userQueryLanguage, userQueryString, uiOverrides }: DataSettings) {
-    this.setUserQueryLanguage(userQueryLanguage);
-    this.setUserQueryString(userQueryString);
-    this.setUiOverrides(uiOverrides);
-  }
 }
 
 export type LanguageServiceContract = PublicMethodsOf<LanguageService>;

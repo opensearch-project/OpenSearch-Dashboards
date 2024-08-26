@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { IStorageWrapper, Storage } from '../../opensearch_dashboards_utils/public';
 import { ConfigSchema } from '../common/config';
@@ -68,19 +67,12 @@ export class QueryEnhancementsPlugin
         return `source = ${query.dataset?.title}`;
       },
       queryEditor: enhancedQueryEditor,
-      searchBar: {
-        dateRange: {
-          initialFrom: moment().subtract(2, 'days').toISOString(),
-          initialTo: moment().add(2, 'days').toISOString(),
-        },
-        showFilterBar: false,
-      },
       fields: {
         filterable: false,
         visualizable: false,
       },
       showDocLinks: false,
-      supportedAppNames: ['discover'],
+      editorSupportedAppNames: ['discover'],
     };
     queryString.getLanguageService().registerLanguage(pplLanguageConfig);
 
@@ -93,16 +85,12 @@ export class QueryEnhancementsPlugin
       getQueryString: (query: Query) => {
         return `SELECT * FROM ${queryString.getQuery().dataset?.title} LIMIT 10`;
       },
-      searchBar: {
-        showDatePicker: false,
-        showFilterBar: false,
-      },
       fields: {
         filterable: false,
         visualizable: false,
       },
       showDocLinks: false,
-      supportedAppNames: ['discover'],
+      editorSupportedAppNames: ['discover'],
     };
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
 

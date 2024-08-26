@@ -56,7 +56,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
 
   languageService.getLanguages().forEach((language) => {
     if (
-      (language && props.appName && !language.supportedAppNames.includes(props.appName)) ||
+      (language && props.appName && !language.editorSupportedAppNames?.includes(props.appName)) ||
       languageService.getUserQueryLanguageBlocklist().includes(language?.id)
     )
       return;

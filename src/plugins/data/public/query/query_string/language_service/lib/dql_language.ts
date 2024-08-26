@@ -18,17 +18,11 @@ export const getDQLLanguageConfig = (
       return '';
     },
     queryEditor: defaultEditor,
-    searchBar: {
-      showQueryInput: true,
-      showFilterBar: true,
-      showDatePicker: true,
-      showAutoRefreshOnly: false,
-    },
     fields: {
       filterable: true,
       visualizable: true,
     },
     showDocLinks: true,
-    supportedAppNames: ['discover'],
+    editorSupportedAppNames: ['discover'],
   };
 };

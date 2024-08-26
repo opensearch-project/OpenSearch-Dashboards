@@ -12,20 +12,10 @@ export interface LanguageConfig {
   search: ISearchInterceptor;
   getQueryString: (query: Query) => string;
   queryEditor: (collapsedProps: any, expandedProps: any, bodyProps: any) => any;
-  searchBar?: {
-    showQueryInput?: boolean;
-    showFilterBar?: boolean;
-    showDatePicker?: boolean;
-    showAutoRefreshOnly?: boolean;
-    dateRange?: {
-      initialFrom?: string;
-      initialTo?: string;
-    };
-  };
   fields?: {
     filterable?: boolean;
     visualizable?: boolean;
   };
   showDocLinks?: boolean;
-  editorSupportedAppNames: string[];
+  editorSupportedAppNames?: string[];
 }

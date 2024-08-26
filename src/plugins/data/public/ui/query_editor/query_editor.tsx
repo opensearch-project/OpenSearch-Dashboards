@@ -182,18 +182,10 @@ export default class QueryEditorUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: languageId === 'kuery' }),
     });
 
-    const languageConfig = this.queryString.getLanguageService().getLanguage(languageId);
     const newQuery = this.queryString.getInitialQueryByLanguage(languageId);
 
-    const dateRangeEnhancement = languageConfig?.searchBar?.dateRange;
-    const dateRange = dateRangeEnhancement
-      ? {
-          from: dateRangeEnhancement.initialFrom!,
-          to: dateRangeEnhancement.initialTo!,
-        }
-      : undefined;
-    this.onChange(newQuery, dateRange);
-    this.onSubmit(newQuery, dateRange);
+    this.onChange(newQuery);
+    this.onSubmit(newQuery);
   };
 
   private initPersistedLog = () => {

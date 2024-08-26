@@ -244,9 +244,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       (!this.useNewHeader || this.props.filters.length > 0) &&
       this.props.indexPatterns &&
       compact(this.props.indexPatterns).length > 0 &&
-      (this.queryService.queryString.getLanguageService().getLanguage(this.state.query?.language!)
-        ?.searchBar?.showFilterBar ??
-        true)
+      this.queryService.queryString.getLanguageService().getLanguage(this.state.query?.language!)!
+        .fields?.filterable
     );
   }
 
@@ -420,9 +419,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   public render() {
-    const isEnhancementsEnabledOverride = this.services.uiSettings.get(
-      UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED
-    );
+    const isEnhancementsEnabledOverride =
+      this.services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) &&
+      this.languageService
+        .getLanguage(this.state.query?.language!)
+        ?.editorSupportedAppNames?.includes(this.services.appName);
 
     this.languageService.setUserQueryLanguageBlocklist(
       this.services.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE_BLOCKLIST)

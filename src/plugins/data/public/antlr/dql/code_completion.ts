@@ -132,9 +132,10 @@ export const getSuggestions = async ({
   if (
     !services ||
     !services.appName ||
-    !getQueryService()
-      .queryString.getLanguageService()
-      .supportsEnhancementsEnabled(services.appName) ||
+    // TODO: might need to get language then pass here paul needs this to prevent this failing on other pages
+    // !getQueryService()
+    //   .queryString.getLanguageService()
+    //   .supportsEnhancementsEnabled(services.appName) ||
     !indexPattern
   ) {
     return [];

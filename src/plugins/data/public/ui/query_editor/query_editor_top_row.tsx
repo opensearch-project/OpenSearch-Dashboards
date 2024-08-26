@@ -89,16 +89,9 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
 
   function getDateRange() {
     const defaultTimeSetting = uiSettings!.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
-    const languageConfig = queryString.getLanguageService().getLanguage(queryLanguage!);
     return {
-      from:
-        props.dateRangeFrom ||
-        languageConfig?.searchBar?.dateRange?.initialFrom ||
-        defaultTimeSetting.from,
-      to:
-        props.dateRangeTo ||
-        languageConfig?.searchBar?.dateRange?.initialTo ||
-        defaultTimeSetting.to,
+      from: props.dateRangeFrom || defaultTimeSetting.from,
+      to: props.dateRangeTo || defaultTimeSetting.to,
     };
   }
 
@@ -213,11 +206,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function shouldRenderDatePicker(): boolean {
-    const languageConfig = queryString.getLanguageService().getLanguage(queryLanguage!);
-    return Boolean(
-      (props.showDatePicker && (languageConfig?.searchBar?.showDatePicker ?? true)) ??
-        (props.showAutoRefreshOnly && (languageConfig?.searchBar?.showAutoRefreshOnly ?? true))
-    );
+    return Boolean(props.showDatePicker ?? true) ?? (props.showAutoRefreshOnly && true);
   }
 
   function shouldRenderQueryEditor(): boolean {
