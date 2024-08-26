@@ -135,6 +135,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options) => {
+      debugger;
       const selectedLanguage = getQueryService().queryString.getQuery().language;
       const uiService = getUiService();
       const enhancement = uiService.Settings.getQueryEnhancements(selectedLanguage);
