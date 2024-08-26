@@ -58,15 +58,16 @@ export const useQueryStringManager = (props: UseQueryStringProps) => {
     return () => {
       subscriptions.unsubscribe();
     };
-  }, [props.queryString]); // Remove query from dependencies
+  }, [props.queryString]);
 
   // Use callback to memoize the function
   const updateQuery = useCallback(
-    (newQuery) => {
-      props.queryString.setQuery(newQuery);
-      setQuery(newQuery);
+    (newQueryPartial: Partial<Query>) => {
+      const updatedQuery = { ...query, ...newQueryPartial };
+      props.queryString.setQuery(updatedQuery);
+      setQuery(updatedQuery);
     },
-    [props.queryString]
+    [query, props.queryString]
   );
 
   return {

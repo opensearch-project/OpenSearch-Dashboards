@@ -95,15 +95,10 @@ export class QueryStringManager {
    * Updates the query.
    * @param {Query} query
    */
-  public setQuery = (query: Query) => {
+  public setQuery = (query: Partial<Query>) => {
     const curQuery = this.query$.getValue();
-    if (
-      query?.language !== curQuery.language ||
-      query?.query !== curQuery.query ||
-      query?.dataset !== curQuery.dataset
-    ) {
-      this.query$.next(query);
-    }
+    const newQuery = { ...curQuery, ...query };
+    this.query$.next(newQuery);
   };
 
   /**

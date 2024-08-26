@@ -60,14 +60,11 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
 };
 
 const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
-  const resp = await client.find<any>({
-    type: 'index-pattern',
-    fields: ['title'],
-    perPage: 10000,
-  });
-  return resp.savedObjects.map((savedObject) => ({
-    id: savedObject.id,
-    title: savedObject.attributes.title,
+  const indexPatterns = await getIndexPatterns().getIdsWithTitle();
+
+  return indexPatterns.map((indexPattern) => ({
+    id: indexPattern.id,
+    title: indexPattern.title,
     type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
   }));
 };

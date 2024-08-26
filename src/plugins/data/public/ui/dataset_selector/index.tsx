@@ -15,14 +15,12 @@ interface ConnectedDatasetSelectorProps {
 }
 
 const ConnectedDatasetSelector = ({ onSubmit }: ConnectedDatasetSelectorProps) => {
-  const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>();
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const queryString = services.data.query.queryString;
+  const initialDataset = queryString.getQuery().dataset || queryString.getDefaultQuery().dataset;
+  const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(initialDataset);
 
   useEffect(() => {
-    const initialDataset = queryString.getQuery().dataset || queryString.getDefaultQuery().dataset;
-    setSelectedDataset(initialDataset);
-
     const subscription = queryString.getUpdates$().subscribe((query) => {
       setSelectedDataset(query.dataset);
     });
