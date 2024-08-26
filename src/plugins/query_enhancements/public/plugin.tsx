@@ -18,6 +18,7 @@ import {
 } from './types';
 import { LanguageConfig, Query } from '../../data/public';
 import { s3TypeConfig } from './datasets';
+import { createEditor, DefaultInput, SingleLineInput } from '../../data/public';
 
 export class QueryEnhancementsPlugin
   implements
@@ -56,6 +57,8 @@ export class QueryEnhancementsPlugin
       usageCollector: data.search.usageCollector,
     });
 
+    const enhancedQueryEditor = createEditor(SingleLineInput, null, DefaultInput);
+
     // Register PPL language
     const pplLanguageConfig: LanguageConfig = {
       id: 'PPL',
@@ -64,6 +67,7 @@ export class QueryEnhancementsPlugin
       getQueryString: (query: Query) => {
         return `source = ${query.dataset?.title}`;
       },
+      queryEditor: enhancedQueryEditor,
       searchBar: {
         dateRange: {
           initialFrom: moment().subtract(2, 'days').toISOString(),
@@ -85,6 +89,7 @@ export class QueryEnhancementsPlugin
       id: 'SQL',
       title: 'SQL',
       search: sqlSearchInterceptor,
+      queryEditor: enhancedQueryEditor,
       getQueryString: (query: Query) => {
         return `SELECT * FROM ${queryString.getQuery().dataset?.title} LIMIT 10`;
       },

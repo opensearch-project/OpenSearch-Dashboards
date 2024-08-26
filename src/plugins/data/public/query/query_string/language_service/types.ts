@@ -11,6 +11,7 @@ export interface LanguageConfig {
   title: string;
   search: ISearchInterceptor;
   getQueryString: (query: Query) => string;
+  queryEditor: (collapsedProps: any, expandedProps: any, bodyProps: any) => any;
   searchBar?: {
     showQueryInput?: boolean;
     showFilterBar?: boolean;

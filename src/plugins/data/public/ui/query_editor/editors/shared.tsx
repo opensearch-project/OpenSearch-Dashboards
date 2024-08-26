@@ -27,7 +27,7 @@ export interface Editor<TCollapsed, TExpanded, TBody> {
   Body: BodyComponent<TBody>;
 }
 
-interface EditorInstance<TCollapsed, TExpanded, TBody> {
+export interface EditorInstance<TCollapsed, TExpanded, TBody> {
   TopBar: {
     Collapsed: () => React.ReactElement;
     Expanded: (() => React.ReactElement) | null;

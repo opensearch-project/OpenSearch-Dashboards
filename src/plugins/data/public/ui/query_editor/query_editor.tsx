@@ -8,13 +8,11 @@ import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
 import { monaco } from '@osd/monaco';
-import { Settings } from '..';
 import { IDataPluginServices, IFieldType, IIndexPattern, Query, TimeRange } from '../..';
 import { OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
 import { QuerySuggestion } from '../../autocomplete';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
-import { DataSettings } from '../types';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
@@ -30,7 +28,6 @@ monaco.languages.register({ id: LANGUAGE_ID_KUERY });
 
 export interface QueryEditorProps {
   query: Query;
-  settings: Settings;
   disableAutoFocus?: boolean;
   screenTitle?: string;
   queryActions?: any;
@@ -83,13 +80,14 @@ export default class QueryEditorUI extends Component<Props, State> {
   public inputRef: monaco.editor.IStandaloneCodeEditor | null = null;
 
   private queryString = getQueryService().queryString;
+  private languageManager = this.queryString.getLanguageService();
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
   private services = this.props.opensearchDashboards.services;
   private headerRef: RefObject<HTMLDivElement> = createRef();
   private bannerRef: RefObject<HTMLDivElement> = createRef();
-  private extensionMap = this.props.settings?.getQueryEditorExtensionMap();
+  private extensionMap = this.languageManager.getQueryEditorExtensionMap();
 
   private getQueryString = () => {
     return toUser(this.props.query.query);
@@ -187,14 +185,6 @@ export default class QueryEditorUI extends Component<Props, State> {
 
     const languageConfig = this.queryString.getLanguageService().getLanguage(languageId);
     const newQuery = this.queryString.getInitialQueryByLanguage(languageId);
-
-    const fields = languageConfig?.fields;
-    const newSettings: DataSettings = {
-      userQueryLanguage: newQuery.language,
-      userQueryString: newQuery.query,
-      ...(fields && { uiOverrides: { fields } }),
-    };
-    this.props.settings?.updateSettings(newSettings);
 
     const dateRangeEnhancement = languageConfig?.searchBar?.dateRange;
     const dateRange = dateRangeEnhancement
