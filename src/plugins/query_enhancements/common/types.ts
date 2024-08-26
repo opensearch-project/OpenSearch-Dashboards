@@ -5,9 +5,13 @@
 
 import { CoreSetup } from 'opensearch-dashboards/public';
 import { Observable } from 'rxjs';
+import { IAggConfig } from 'src/plugins/data/common';
 
-export interface QueryAggConfig {
-  [x: string]: string;
+export interface QueryAggConfig extends Partial<IAggConfig> {
+  [key: string]: any;
+  qs: {
+    [x: string]: string;
+  };
 }
 
 export interface EnhancedFetchContext {
