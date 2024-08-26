@@ -84,7 +84,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
   },
 
   supportedLanguages: (dataset: Dataset): string[] => {
-    return ['SQL', 'PPL', 'DQL', 'Lucene'];
+    return ['SQL', 'PPL'];
   },
 };
 
