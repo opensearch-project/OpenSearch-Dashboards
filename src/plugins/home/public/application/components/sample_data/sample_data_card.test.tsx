@@ -4,17 +4,16 @@
  */
 
 import { registerSampleDataCard } from './sample_data_card';
-import { ContentManagementPluginStart } from '../../../../../../plugins/content_management/public';
 import { coreMock } from '../../../../../../core/public/mocks';
+import { contentManagementPluginMocks } from '../../../../../content_management/public';
 
 describe('Sample data card', () => {
   const coreStart = coreMock.createStart();
   const registerContentProviderMock = jest.fn();
 
-  const contentManagement: ContentManagementPluginStart = {
+  const contentManagement = {
+    ...contentManagementPluginMocks.createStartContract(),
     registerContentProvider: registerContentProviderMock,
-    renderPage: jest.fn(),
-    updatePageSection: jest.fn(),
   };
 
   it('should call the getTargetArea function with the correct arguments', () => {
