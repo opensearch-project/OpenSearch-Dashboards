@@ -6,7 +6,10 @@
 import { LanguageConfig } from '../types';
 import { ISearchInterceptor } from '../../../../search';
 
-export const getLuceneLanguageConfig = (search: ISearchInterceptor): LanguageConfig => {
+export const getLuceneLanguageConfig = (
+  search: ISearchInterceptor,
+  defaultEditor: any
+): LanguageConfig => {
   return {
     id: 'lucene',
     title: 'Lucene',
@@ -14,6 +17,7 @@ export const getLuceneLanguageConfig = (search: ISearchInterceptor): LanguageCon
     getQueryString(_) {
       return '';
     },
+    queryEditor: defaultEditor,
     searchBar: {
       showQueryInput: true,
       showFilterBar: true,

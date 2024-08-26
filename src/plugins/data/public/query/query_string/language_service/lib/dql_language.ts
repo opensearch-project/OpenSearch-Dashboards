@@ -6,7 +6,10 @@
 import { LanguageConfig } from '../types';
 import { ISearchInterceptor } from '../../../../search';
 
-export const getDQLLanguageConfig = (search: ISearchInterceptor): LanguageConfig => {
+export const getDQLLanguageConfig = (
+  search: ISearchInterceptor,
+  defaultEditor: any
+): LanguageConfig => {
   return {
     id: 'kuery',
     title: 'DQL',
@@ -14,6 +17,7 @@ export const getDQLLanguageConfig = (search: ISearchInterceptor): LanguageConfig
     getQueryString(_) {
       return '';
     },
+    queryEditor: defaultEditor,
     searchBar: {
       showQueryInput: true,
       showFilterBar: true,

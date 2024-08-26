@@ -49,10 +49,6 @@ export class LanguageService {
     this.queryEditorExtensionMap = {};
   }
 
-  public createDefaultQueryEditor() {
-    return createEditor(SingleLineInput, SingleLineInput, DQLBody);
-  }
-
   public __enhance = (enhancements: UiEnhancements) => {
     if (enhancements.queryEditorExtension) {
       this.queryEditorExtensionMap[enhancements.queryEditorExtension.id] =
@@ -64,8 +60,9 @@ export class LanguageService {
    * Registers default handlers for index patterns and indices.
    */
   private registerDefaultLanguages() {
-    this.registerLanguage(getDQLLanguageConfig(this.defaultSearchInterceptor));
-    this.registerLanguage(getLuceneLanguageConfig(this.defaultSearchInterceptor));
+    const defaultEditor = createEditor(SingleLineInput, SingleLineInput, DQLBody);
+    this.registerLanguage(getDQLLanguageConfig(this.defaultSearchInterceptor, defaultEditor));
+    this.registerLanguage(getLuceneLanguageConfig(this.defaultSearchInterceptor, defaultEditor));
   }
 
   public registerLanguage(config: LanguageConfig): void {
