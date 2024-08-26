@@ -37,6 +37,8 @@ const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => 
   renameFromRoot('server.defaultRoute', 'uiSettings.overrides.defaultRoute'),
 ];
 
+export const DEFAULT_THEME_VERSION = 'v8';
+
 /* There are 4 levels of uiSettings:
  *   1) defaults hardcoded in code
  *   2) defaults provided in the opensearch_dashboards.yml
@@ -56,7 +58,11 @@ const configSchema = schema.object({
   overrides: schema.object({}, { unknowns: 'allow' }),
   defaults: schema.object({
     'theme:darkMode': schema.maybe(schema.boolean({ defaultValue: false })),
-    'theme:version': schema.maybe(schema.string({ defaultValue: 'v8' })),
+    'theme:version': schema.maybe(
+      schema.oneOf([schema.literal('v7'), schema.literal('Next (preview)')], {
+        defaultValue: 'Next (preview)',
+      })
+    ),
   }),
 });
 

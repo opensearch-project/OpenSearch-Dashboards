@@ -18,12 +18,13 @@ export class Page {
     this.config = pageConfig;
   }
 
-  createSection(section: Section) {
-    if (this.sections.has(section.id)) {
-      throw new Error(`Section id exists: ${section.id}`);
-    }
+  private setSection(section: Section) {
     this.sections.set(section.id, section);
     this.sections$.next(this.getSections());
+  }
+
+  createSection(section: Section) {
+    this.setSection(section);
   }
 
   getSections() {
@@ -34,11 +35,38 @@ export class Page {
     return this.sections$;
   }
 
+  updateSectionInput(
+    sectionId: string,
+    callback: (section: Section | null, err?: Error) => Section | null
+  ) {
+    const section = this.sections.get(sectionId);
+    if (!section) {
+      callback(null, new Error(`Section id ${sectionId} not found`));
+      return;
+    }
+
+    const updated = callback(section);
+    if (updated) {
+      if (updated.kind === 'dashboard' && section.kind === 'dashboard') {
+        this.setSection({ ...section, input: updated.input });
+      }
+      if (updated.kind === 'card' && section.kind === 'card') {
+        this.setSection({ ...section, input: updated.input });
+      }
+      // TODO: we may need to support update input of `custom` section
+    }
+  }
+
   addContent(sectionId: string, content: Content) {
     const sectionContents = this.contents.get(sectionId);
     if (sectionContents) {
-      if (content.kind === 'dashboard' && sectionContents.length > 0) {
-        throw new Error('Section type "dashboard" can only have one content type of "dashboard"');
+      /**
+       * `dashboard` type of content is exclusive, one section can only hold one `dashboard`
+       * if adding a `dashboard` to an existing section, it will replace the contents of section
+       * if adding a non-dashboard content to an section with `dashboard`, it will replace the dashboard
+       */
+      if (content.kind === 'dashboard' || sectionContents.some((c) => c.kind === 'dashboard')) {
+        sectionContents.length = 0;
       }
       sectionContents.push(content);
       // sort content by order
@@ -48,7 +76,7 @@ export class Page {
     }
 
     if (this.contentObservables.get(sectionId)) {
-      this.contentObservables.get(sectionId)?.next(this.contents.get(sectionId) ?? []);
+      this.contentObservables.get(sectionId)?.next([...(this.contents.get(sectionId) ?? [])]);
     } else {
       this.contentObservables.set(
         sectionId,

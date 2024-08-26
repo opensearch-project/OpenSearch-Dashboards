@@ -6,116 +6,140 @@ exports[`workspace list card render normally should show workspace list card cor
     class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
   >
     <div
-      class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+      class="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionColumn euiFlexGroup--responsive"
+      style="height: 100%;"
     >
       <div
-        class="euiFlexItem euiFlexItem--flexGrow3"
-      >
-        <h4
-          class="euiTitle euiTitle--medium"
-        >
-          Workspaces
-        </h4>
-      </div>
-      <div
-        class="euiFlexItem euiFlexItem--flexGrow1"
-      >
-        <span
-          class="euiToolTipAnchor"
-        >
-          <span
-            aria-label="workspace list card description"
-            data-euiicon-type="iInCircle"
-          />
-        </span>
-      </div>
-      <div
-        class="euiFlexItem euiFlexItem--flexGrow5"
+        class="euiFlexItem euiFlexItem--flexGrowZero"
       >
         <div
-          class="euiFormControlLayout"
+          class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
           <div
-            class="euiFormControlLayout__childrenWrapper"
+            class="euiFlexItem euiFlexItem--flexGrow4"
           >
-            <select
-              class="euiSelect"
-              data-test-subj="workspace_filter"
-            >
-              <option
-                value="viewed"
-              >
-                Recently viewed
-              </option>
-              <option
-                value="updated"
-              >
-                Recently updated
-              </option>
-            </select>
             <div
-              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+              class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
-              <span
-                class="euiFormControlLayoutCustomIcon"
+              <div
+                class="euiFlexItem"
+              >
+                <h4
+                  class="euiTitle euiTitle--medium"
+                >
+                  Workspaces
+                </h4>
+              </div>
+              <div
+                class="euiFlexItem"
               >
                 <span
-                  aria-hidden="true"
-                  class="euiFormControlLayoutCustomIcon__icon"
-                  data-euiicon-type="arrowDown"
-                />
-              </span>
+                  class="euiToolTipAnchor"
+                >
+                  <span
+                    aria-label="workspace list card description"
+                    data-euiicon-type="iInCircle"
+                  />
+                </span>
+              </div>
+              <div
+                class="euiFlexItem"
+              />
+            </div>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrow3"
+          >
+            <div
+              class="euiFormControlLayout euiFormControlLayout--compressed"
+            >
+              <div
+                class="euiFormControlLayout__childrenWrapper"
+              >
+                <select
+                  class="euiSelect euiSelect--compressed"
+                  data-test-subj="workspace_filter"
+                >
+                  <option
+                    value="viewed"
+                  >
+                    Recently viewed
+                  </option>
+                  <option
+                    value="updated"
+                  >
+                    Recently updated
+                  </option>
+                </select>
+                <div
+                  class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                >
+                  <span
+                    class="euiFormControlLayoutCustomIcon"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="arrowDown"
+                    />
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    <div
-      class="euiSpacer euiSpacer--l"
-    />
-    <ul
-      class="euiListGroup euiListGroup-flush euiListGroup--gutterSmall euiListGroup-maxWidthDefault"
-      style="min-height: 300px;"
-    >
       <div
-        class="euiEmptyPrompt"
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiFlexItem"
       >
-        <span
-          color="subdued"
-          data-euiicon-type="database"
-        />
         <div
-          class="euiSpacer euiSpacer--m"
-        />
-        <p
-          class="euiTitle euiTitle--xsmall"
+          class="euiEmptyPrompt"
         >
-          No Workspaces found
-        </p>
-        <span
-          class="euiTextColor euiTextColor--subdued"
-        >
+          <span
+            color="subdued"
+            data-euiicon-type="spacesApp"
+          />
           <div
             class="euiSpacer euiSpacer--m"
           />
           <div
-            class="euiText euiText--medium"
+            class="euiText euiText--medium euiTitle euiTitle--small euiTitle euiTitle--xsmall"
           >
-            Workspaces you have recently viewed will appear here.
+            <div
+              class="euiTextColor euiTextColor--subdued"
+            >
+              No Workspaces available
+            </div>
           </div>
-        </span>
+          <span
+            class="euiTextColor euiTextColor--subdued"
+          >
+            <div
+              class="euiSpacer euiSpacer--m"
+            />
+            <div
+              class="euiText euiText--medium"
+            >
+              <div
+                class="euiText euiText--small"
+              >
+                <div
+                  class="euiTextColor euiTextColor--subdued"
+                >
+                  Contact your administrator to create a workspace or to be added to an existing one.
+                </div>
+              </div>
+            </div>
+          </span>
+        </div>
       </div>
-    </ul>
-    <button
-      class="euiLink euiLink--primary"
-      type="button"
-    >
       <div
-        class="euiText euiText--small"
-      >
-        View all
-      </div>
-    </button>
+        class="euiSpacer euiSpacer--l"
+      />
+    </div>
   </div>
 </div>
 `;

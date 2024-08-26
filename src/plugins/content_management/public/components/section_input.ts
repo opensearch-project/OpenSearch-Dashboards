@@ -10,10 +10,12 @@ import { Content, Section } from '../services';
 import { ViewMode } from '../../../embeddable/public';
 import { DashboardContainerInput, SavedObjectDashboard } from '../../../dashboard/public';
 import { CUSTOM_CONTENT_EMBEDDABLE } from './custom_content_embeddable';
-import { CardContainerInput } from './card_container/card_container';
 import { CARD_EMBEDDABLE } from './card_container/card_embeddable';
+import { CardContainerInput } from './card_container/types';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
+export const DASHBOARD_PANEL_WIDTH = 12;
+export const DASHBOARD_PANEL_HEIGHT = 15;
 
 export const createCardInput = (
   section: Section,
@@ -30,7 +32,10 @@ export const createCardInput = (
     title: section.title ?? '',
     hidePanelTitles: true,
     viewMode: ViewMode.VIEW,
+    columns: section.columns,
+    wrap: section.wrap,
     panels,
+    ...section.input,
   };
 
   contents.forEach((content) => {
@@ -69,12 +74,26 @@ export const createDashboardInput = async (
   const panels: DashboardContainerInput['panels'] = {};
   let x = 0;
   let y = 0;
-  const w = 12;
-  const h = 15;
   const counter = new BehaviorSubject(0);
 
-  contents.forEach(async (content, i) => {
+  contents.forEach(async (content) => {
     counter.next(counter.value + 1);
+
+    let w = DASHBOARD_PANEL_WIDTH;
+    let h = DASHBOARD_PANEL_HEIGHT;
+
+    if ('width' in content && typeof content.width === 'number') {
+      if (content.width > 0 && content.width <= DASHBOARD_GRID_COLUMN_COUNT) {
+        w = content.width;
+      }
+    }
+
+    if ('height' in content && typeof content.height === 'number') {
+      if (content.height > 0) {
+        h = content.height;
+      }
+    }
+
     try {
       if (content.kind === 'dashboard') {
         let dashboardId = '';
@@ -102,11 +121,11 @@ export const createDashboardInput = async (
                 }
                 const reference = references.find((ref) => ref.name === panel.panelRefName);
                 if (reference) {
-                  panels[panel.panelIndex] = {
-                    gridData: panel.gridData,
+                  panels[reference.id] = {
+                    gridData: { ...panel.gridData, i: reference.id },
                     type: reference.type,
                     explicitInput: {
-                      id: panel.panelIndex,
+                      id: reference.id,
                       savedObjectId: reference.id,
                     },
                   };
@@ -118,7 +137,13 @@ export const createDashboardInput = async (
         return;
       }
 
-      const config: DashboardContainerInput['panels'][string] = {
+      // If current panel exceed the max dashboard container width, add the panel to the next row
+      if (x + w > DASHBOARD_GRID_COLUMN_COUNT) {
+        x = 0;
+        y = y + h;
+      }
+
+      const panelConfig: DashboardContainerInput['panels'][string] = {
         gridData: {
           w,
           h,
@@ -133,28 +158,25 @@ export const createDashboardInput = async (
         },
       };
 
+      // The new x starts from the current panel x + current panel width
       x = x + w;
-      if (x >= DASHBOARD_GRID_COLUMN_COUNT) {
-        x = 0;
-        y = y + h;
-      }
 
       if (content.kind === 'visualization') {
-        config.type = 'visualization';
+        panelConfig.type = 'visualization';
         if (content.input.kind === 'dynamic') {
-          config.explicitInput.savedObjectId = await content.input.get();
+          panelConfig.explicitInput.savedObjectId = await content.input.get();
         }
         if (content.input.kind === 'static') {
-          config.explicitInput.savedObjectId = content.input.id;
+          panelConfig.explicitInput.savedObjectId = content.input.id;
         }
       }
 
       if (content.kind === 'custom') {
-        config.type = CUSTOM_CONTENT_EMBEDDABLE;
-        config.explicitInput.render = content.render;
+        panelConfig.type = CUSTOM_CONTENT_EMBEDDABLE;
+        panelConfig.explicitInput.render = content.render;
       }
 
-      panels[content.id] = config;
+      panels[content.id] = panelConfig;
     } catch (e) {
       // eslint-disable-next-line
       console.log(e);
@@ -163,29 +185,27 @@ export const createDashboardInput = async (
     }
   });
 
-  /**
-   * TODO: the input should be hooked with query input
-   */
   const input: DashboardContainerInput = {
-    viewMode: ViewMode.VIEW,
     panels,
+    id: section.id,
+    title: section.title ?? '',
+    viewMode: ViewMode.VIEW,
+    useMargins: true,
     isFullScreenMode: false,
     filters: [],
-    useMargins: true,
-    id: section.id,
     timeRange: {
       to: 'now',
       from: 'now-7d',
     },
-    title: section.title ?? 'test',
     query: {
       query: '',
-      language: 'lucene',
+      language: 'kuery',
     },
     refreshConfig: {
       pause: true,
       value: 15,
     },
+    ...section.input,
   };
 
   return new Promise<DashboardContainerInput>((resolve) => {

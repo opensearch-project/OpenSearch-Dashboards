@@ -148,13 +148,17 @@ exports[`ConfigureS3DatasourcePanel renders correctly 1`] = `
             <div
               className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
             >
-              <EuiTitle>
-                <h1
-                  className="euiTitle euiTitle--medium"
+              <EuiText
+                size="s"
+              >
+                <div
+                  className="euiText euiText--small"
                 >
-                  Configure Amazon S3 data source
-                </h1>
-              </EuiTitle>
+                  <h1>
+                    Configure Amazon S3 data source
+                  </h1>
+                </div>
+              </EuiText>
               <EuiSpacer
                 size="s"
               >

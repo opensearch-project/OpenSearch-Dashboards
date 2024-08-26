@@ -43,7 +43,7 @@ export const Header = () => (
         />
       </h3>
     </EuiTitle>
-    <EuiText>
+    <EuiText size="s">
       <p>
         <FormattedMessage
           id="indexPatternManagement.editIndexPattern.sourceLabel"

@@ -1084,6 +1084,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                       >
                                         <EuiButtonContent
                                           className="euiButton__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconType="popout"
                                           textProps={
@@ -2152,6 +2153,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                       >
                                         <EuiButtonContent
                                           className="euiButton__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconType="popout"
                                           textProps={

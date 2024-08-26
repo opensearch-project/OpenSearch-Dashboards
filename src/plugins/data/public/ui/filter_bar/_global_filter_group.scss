@@ -1,14 +1,25 @@
 // SASSTODO: Probably not the right file for this selector, but temporary until the files get re-organized
-.globalQueryBar {
+.globalQueryBar,
+.globalDatePicker {
   padding: 0 $euiSizeS $euiSizeS $euiSizeS;
+
+  &:first-child {
+    padding-top: $euiSizeS;
+  }
+
+  &:not(:empty) {
+    padding-bottom: $euiSizeS;
+  }
 }
 
-.globalQueryBar:first-child {
-  padding-top: $euiSizeS;
+.globalDatePicker {
+  text-align: right;
 }
 
-.globalQueryBar:not(:empty) {
-  padding-bottom: $euiSizeS;
+.headerAppActionMenu .globalQueryBar,
+.headerAppActionMenu .globalDatePicker {
+  // The left-padding is a magic number just to add some space to the left that reduces with screen width
+  padding: 0 0 0 calc(100vw - 1600px);
 }
 
 .globalFilterGroup__filterBar {
@@ -44,4 +55,13 @@
     // EUI Flexbox adds too much margin between responded items, this just moves it up
     margin-top: $euiSize * -1;
   }
+}
+
+.globalFilterGroup__removeAllFilters {
+  color: $euiColorDangerText;
+}
+
+.globalFilterGroup__filterPrefix {
+  padding-top: $euiSizeS;
+  padding-right: $euiSizeS;
 }

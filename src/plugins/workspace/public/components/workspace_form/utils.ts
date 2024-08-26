@@ -6,11 +6,7 @@
 import { i18n } from '@osd/i18n';
 
 import type { SavedObjectPermissions } from '../../../../../core/types';
-import {
-  CURRENT_USER_PLACEHOLDER,
-  DEFAULT_SELECTED_FEATURES_IDS,
-  WorkspacePermissionMode,
-} from '../../../common/constants';
+import { CURRENT_USER_PLACEHOLDER, WorkspacePermissionMode } from '../../../common/constants';
 import { isUseCaseFeatureConfig } from '../../utils';
 import {
   optionIdToWorkspacePermissionModesMap,
@@ -30,11 +26,7 @@ import {
   WorkspaceUserPermissionSetting,
 } from './types';
 import { DataSource } from '../../../common/types';
-
-export const appendDefaultFeatureIds = (ids: string[]) => {
-  // concat default checked ids and unique the result
-  return Array.from(new Set(ids.concat(DEFAULT_SELECTED_FEATURES_IDS)));
-};
+import { validateWorkspaceColor } from '../../../common/utils';
 
 export const isValidFormTextInput = (input?: string) => {
   /**
@@ -60,6 +52,9 @@ export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
     numberOfErrors += Object.keys(formErrors.selectedDataSources).length;
   }
   if (formErrors.features) {
+    numberOfErrors += 1;
+  }
+  if (formErrors.color) {
     numberOfErrors += 1;
   }
   return numberOfErrors;
@@ -308,8 +303,8 @@ export const validateWorkspaceForm = (
   isPermissionEnabled: boolean
 ) => {
   const formErrors: WorkspaceFormErrors = {};
-  const { name, permissionSettings, features, selectedDataSources } = formData;
-  if (name) {
+  const { name, permissionSettings, color, features, selectedDataSources } = formData;
+  if (name && name.trim()) {
     if (!isValidFormTextInput(name)) {
       formErrors.name = {
         code: WorkspaceFormErrorCode.InvalidWorkspaceName,
@@ -331,6 +326,14 @@ export const validateWorkspaceForm = (
       code: WorkspaceFormErrorCode.UseCaseMissing,
       message: i18n.translate('workspace.form.features.empty', {
         defaultMessage: 'Use case is required. Select a use case.',
+      }),
+    };
+  }
+  if (color && !validateWorkspaceColor(color)) {
+    formErrors.color = {
+      code: WorkspaceFormErrorCode.InvalidColor,
+      message: i18n.translate('workspace.form.features.empty', {
+        defaultMessage: 'Color is invalid. Enter a valid color.',
       }),
     };
   }
@@ -449,18 +452,21 @@ const isSamePermissionSetting = (a: PermissionSettingLike, b: PermissionSettingL
 };
 
 export const getNumberOfChanges = (
-  newFormData: Omit<Partial<WorkspaceFormSubmitData>, 'permissionSettings'> & {
+  newFormData: Partial<Omit<WorkspaceFormSubmitData, 'permissionSettings'>> & {
     permissionSettings?: Array<
       Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
     >;
   },
-  initialFormData: Omit<WorkspaceFormData, 'id'>
+  initialFormData: Partial<Omit<WorkspaceFormData, 'id'>>
 ) => {
   let count = 0;
   if (newFormData.name !== initialFormData.name) {
     count++;
   }
   if (newFormData.description !== initialFormData.description) {
+    count++;
+  }
+  if (newFormData.color !== initialFormData.color) {
     count++;
   }
   if (

@@ -56,9 +56,11 @@ exports[`DataSourceTable should get datasources failed should render empty table
           }
         }
       >
-        <EuiText>
+        <EuiText
+          size="s"
+        >
           <div
-            className="euiText euiText--medium"
+            className="euiText euiText--small"
           >
             <FormattedMessage
               defaultMessage="No Data Source Connections have been created yet."
@@ -138,6 +140,7 @@ exports[`DataSourceTable should get datasources failed should render empty table
                 >
                   <EuiButtonContent
                     className="euiButton__content"
+                    iconGap="m"
                     iconSide="left"
                     textProps={
                       Object {
@@ -582,6 +585,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                             >
                               <EuiButtonContent
                                 className="euiButton__content"
+                                iconGap="m"
                                 iconSide="left"
                                 textProps={
                                   Object {
@@ -839,6 +843,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                       >
                                         <EuiButtonContent
                                           className="euiButtonEmpty__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconSize="s"
                                           iconType="arrowDown"
@@ -1200,6 +1205,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="left"
                                       iconSize="s"
                                       textProps={
@@ -1353,6 +1359,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="left"
                                       iconSize="s"
                                       textProps={
@@ -1506,6 +1513,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="left"
                                       iconSize="s"
                                       textProps={
@@ -1699,6 +1707,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="left"
                                       iconSize="s"
                                       textProps={
@@ -1868,6 +1877,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="right"
                                       iconSize="s"
                                       iconType="arrowDown"
@@ -2038,6 +2048,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                             >
                                               <EuiButtonContent
                                                 className="euiButtonEmpty__content"
+                                                iconGap="m"
                                                 iconSide="left"
                                                 iconSize="m"
                                                 textProps={
@@ -3198,9 +3209,11 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
           }
         }
       >
-        <EuiText>
+        <EuiText
+          size="s"
+        >
           <div
-            className="euiText euiText--medium"
+            className="euiText euiText--small"
           >
             <FormattedMessage
               defaultMessage="No Data Source Connections have been created yet."

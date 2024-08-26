@@ -72,6 +72,7 @@ function renderTasks(tasks: MultiTaskTodoInput['tasks'], search?: string) {
       key={task}
       data-test-subj="multiTaskTodoTask"
       label={wrapSearchTerms(task, search)}
+      size="s"
     />
   ));
 }

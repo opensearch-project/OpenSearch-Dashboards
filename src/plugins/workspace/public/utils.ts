@@ -11,6 +11,8 @@ import {
   ALL_USE_CASE_ID,
   CoreStart,
   ChromeBreadcrumb,
+  ApplicationStart,
+  HttpSetup,
 } from '../../../core/public';
 import {
   App,
@@ -21,8 +23,10 @@ import {
   WorkspaceObject,
   WorkspaceAvailability,
 } from '../../../core/public';
-import { DEFAULT_SELECTED_FEATURES_IDS, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
-import { WorkspaceUseCase } from './types';
+import { WORKSPACE_DETAIL_APP_ID } from '../common/constants';
+import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
+import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
+import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
 
 export const USE_CASE_PREFIX = 'use-case-';
 
@@ -44,7 +48,7 @@ export const isFeatureIdInsideUseCase = (
   useCases: WorkspaceUseCase[]
 ) => {
   const availableFeatures = useCases.find(({ id }) => id === useCaseId)?.features ?? [];
-  return availableFeatures.includes(featureId);
+  return availableFeatures.some((feature) => feature.id === featureId);
 };
 
 export const isNavGroupInFeatureConfigs = (navGroupId: string, featureConfigs: string[]) =>
@@ -184,7 +188,6 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
       const filterCondition =
         navLinkStatus !== AppNavLinkStatus.hidden &&
         !chromeless &&
-        !DEFAULT_SELECTED_FEATURES_IDS.includes(id) &&
         workspaceAvailability !== WorkspaceAvailability.outsideWorkspace;
       // If the category is management, only retain Dashboards Management which contains saved objets and index patterns.
       // Saved objets can show all saved objects in the current workspace and index patterns is at workspace level.
@@ -202,7 +205,7 @@ export const getDataSourcesList = (client: SavedObjectsStart['client'], workspac
   return client
     .find({
       type: 'data-source',
-      fields: ['id', 'title'],
+      fields: ['id', 'title', 'auth', 'description', 'dataSourceEngineType'],
       perPage: 10000,
       workspaces,
     })
@@ -212,15 +215,32 @@ export const getDataSourcesList = (client: SavedObjectsStart['client'], workspac
         return objects.map((source) => {
           const id = source.id;
           const title = source.get('title');
+          const auth = source.get('auth');
+          const description = source.get('description');
+          const dataSourceEngineType = source.get('dataSourceEngineType');
           return {
             id,
             title,
+            auth,
+            description,
+            dataSourceEngineType,
           };
         });
       } else {
         return [];
       }
     });
+};
+
+// If all connected data sources are serverless, will only allow to select essential use case.
+export const getIsOnlyAllowEssentialUseCase = async (client: SavedObjectsStart['client']) => {
+  const allDataSources = await getDataSourcesList(client, ['*']);
+  if (allDataSources.length > 0) {
+    return allDataSources.every(
+      (ds) => ds?.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless
+    );
+  }
+  return false;
 };
 
 export const convertNavGroupToWorkspaceUseCase = ({
@@ -234,10 +254,22 @@ export const convertNavGroupToWorkspaceUseCase = ({
   id,
   title,
   description,
-  features: navLinks.map((item) => item.id),
-  systematic: type === NavGroupType.SYSTEM,
+  features: navLinks.map((item) => ({ id: item.id, title: item.title })),
+  systematic: type === NavGroupType.SYSTEM || id === ALL_USE_CASE_ID,
   order,
 });
+
+const compareFeatures = (
+  features1: WorkspaceUseCaseFeature[],
+  features2: WorkspaceUseCaseFeature[]
+) => {
+  const featuresSerializer = (features: WorkspaceUseCaseFeature[]) =>
+    features
+      .map(({ id, title }) => `${id}-${title}`)
+      .sort()
+      .join();
+  return featuresSerializer(features1) === featuresSerializer(features2);
+};
 
 export const isEqualWorkspaceUseCase = (a: WorkspaceUseCase, b: WorkspaceUseCase) => {
   if (a.id !== b.id) {
@@ -255,10 +287,7 @@ export const isEqualWorkspaceUseCase = (a: WorkspaceUseCase, b: WorkspaceUseCase
   if (a.order !== b.order) {
     return false;
   }
-  if (
-    a.features.length !== b.features.length ||
-    a.features.some((featureId) => !b.features.includes(featureId))
-  ) {
+  if (a.features.length !== b.features.length || !compareFeatures(a.features, b.features)) {
     return false;
   }
   return true;
@@ -348,3 +377,21 @@ export function prependWorkspaceToBreadcrumbs(
     });
   }
 }
+
+export const getUseCaseUrl = (
+  useCase: WorkspaceUseCase | undefined,
+  workspace: WorkspaceObject,
+  application: ApplicationStart,
+  http: HttpSetup
+): string => {
+  const appId =
+    (useCase?.id !== ALL_USE_CASE_ID && useCase?.features?.[0].id) || WORKSPACE_DETAIL_APP_ID;
+  const useCaseURL = formatUrlWithWorkspaceId(
+    application.getUrlForApp(appId, {
+      absolute: false,
+    }),
+    workspace.id,
+    http.basePath
+  );
+  return useCaseURL;
+};

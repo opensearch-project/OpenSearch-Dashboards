@@ -8,7 +8,6 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
   EuiSmallButton,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFormRow,
@@ -18,30 +17,21 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiCompressedSelect,
-  EuiSpacer,
   EuiToolTip,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { CoreStart } from 'opensearch-dashboards/public';
+import { themeVersionLabelMap, themeVersionValueMap } from '@osd/ui-shared-deps/theme_config';
 import { useOpenSearchDashboards, useUiSetting$ } from '../../opensearch_dashboards_react/public';
 
 export const HeaderUserThemeMenu = () => {
   const {
-    services: {
-      http: { basePath },
-      uiSettings,
-    },
+    services: { uiSettings },
   } = useOpenSearchDashboards<CoreStart>();
-  // TODO: move to central location?
-  const themeOptions = [
-    {
-      value: 'v7',
-      text: 'v7',
-    },
-    {
-      value: 'next',
-      text: 'Next (preview)',
-    },
-  ];
+  const themeOptions = Object.keys(themeVersionLabelMap).map((v) => ({
+    value: v,
+    text: themeVersionLabelMap[v],
+  }));
   const screenModeOptions = [
     {
       value: 'light',
@@ -56,13 +46,18 @@ export const HeaderUserThemeMenu = () => {
       text: 'Use browser settings',
     },
   ];
+  const defaultTheme = uiSettings.getDefault('theme:version');
+  const defaultScreenMode = uiSettings.getDefault('theme:darkMode');
   const prefersAutomatic =
     (window.localStorage.getItem('useBrowserColorScheme') && window.matchMedia) || false;
   const [darkMode, setDarkMode] = useUiSetting$<boolean>('theme:darkMode');
   const [themeVersion, setThemeVersion] = useUiSetting$<string>('theme:version');
   const [isPopoverOpen, setPopover] = useState(false);
   // TODO: improve naming?
-  const [theme, setTheme] = useState(themeOptions.find((t) => t.text === themeVersion)?.value);
+  const [theme, setTheme] = useState(
+    themeOptions.find((t) => t.value === themeVersionValueMap[themeVersion])?.value ||
+      themeVersionValueMap[defaultTheme]
+  );
   const [screenMode, setScreenMode] = useState(
     prefersAutomatic
       ? screenModeOptions[2].value
@@ -70,9 +65,8 @@ export const HeaderUserThemeMenu = () => {
       ? screenModeOptions[1].value
       : screenModeOptions[0].value
   );
-  const allSettings = uiSettings.getAll();
-  const defaultTheme = allSettings['theme:version'].value;
-  const defaultScreenMode = allSettings['theme:darkMode'].value;
+
+  const useLegacyAppearance = !uiSettings.get('home:useNewHomePage');
 
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -87,7 +81,7 @@ export const HeaderUserThemeMenu = () => {
   };
 
   const onAppearanceSubmit = async (e: SyntheticEvent) => {
-    const actions = [setThemeVersion(themeOptions.find((t) => theme === t.value)?.text ?? '')];
+    const actions = [setThemeVersion(themeOptions.find((t) => theme === t.value)?.value ?? '')];
 
     if (screenMode === 'automatic') {
       const browserMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -111,6 +105,31 @@ export const HeaderUserThemeMenu = () => {
     setPopover(false);
   };
 
+  const innerButton = useLegacyAppearance ? (
+    <EuiHeaderSectionItemButton
+      aria-expanded="false"
+      aria-haspopup="true"
+      aria-label={i18n.translate('advancedSettings.headerGlobalNav.themeMenuButtonAriaLabel', {
+        defaultMessage: 'Appearance menu',
+      })}
+      onClick={onButtonClick}
+    >
+      <EuiIcon type="color" size="m" />
+    </EuiHeaderSectionItemButton>
+  ) : (
+    <EuiButtonIcon
+      iconType="color"
+      color="primary"
+      size="xs"
+      aria-expanded="false"
+      aria-haspopup="true"
+      aria-label={i18n.translate('advancedSettings.headerGlobalNav.themeMenuButtonAriaLabel', {
+        defaultMessage: 'Appearance menu',
+      })}
+      onClick={onButtonClick}
+    />
+  );
+
   const button = (
     <EuiToolTip
       content={i18n.translate('advancedSettings.headerGlobalNav.themeMenuButtonTitle', {
@@ -119,16 +138,7 @@ export const HeaderUserThemeMenu = () => {
       delay="long"
       position="bottom"
     >
-      <EuiHeaderSectionItemButton
-        aria-expanded="false"
-        aria-haspopup="true"
-        aria-label={i18n.translate('advancedSettings.headerGlobalNav.themeMenuButtonAriaLabel', {
-          defaultMessage: 'Appearance menu',
-        })}
-        onClick={onButtonClick}
-      >
-        <EuiIcon type="color" size="m" />
-      </EuiHeaderSectionItemButton>
+      {innerButton}
     </EuiToolTip>
   );
 
@@ -168,7 +178,7 @@ export const HeaderUserThemeMenu = () => {
         <EuiFlexItem grow={false}>
           <EuiCompressedFormRow hasEmptyLabelSpace>
             {/* TODO: disable submit until changes */}
-            <EuiSmallButton fill onClick={onAppearanceSubmit} type="submit">
+            <EuiSmallButton onClick={onAppearanceSubmit} type="submit">
               Apply
             </EuiSmallButton>
           </EuiCompressedFormRow>
@@ -183,7 +193,7 @@ export const HeaderUserThemeMenu = () => {
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      anchorPosition="downLeft"
+      anchorPosition={useLegacyAppearance ? 'downLeft' : 'rightDown'}
       panelPaddingSize="s"
     >
       <EuiPopoverTitle>

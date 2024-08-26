@@ -465,6 +465,7 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
         "get": [MockFunction],
         "get$": [MockFunction],
         "getAll": [MockFunction],
+        "getDefault": [MockFunction],
         "getSaved$": [MockFunction],
         "getUpdate$": [MockFunction],
         "getUpdateErrors$": [MockFunction],
@@ -526,6 +527,7 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
             >
               <EuiButtonContent
                 className="euiButtonEmpty__content"
+                iconGap="m"
                 iconSide="right"
                 iconSize="m"
                 iconType="arrowDown"
@@ -1032,6 +1034,7 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
         "get": [MockFunction],
         "get$": [MockFunction],
         "getAll": [MockFunction],
+        "getDefault": [MockFunction],
         "getSaved$": [MockFunction],
         "getUpdate$": [MockFunction],
         "getUpdateErrors$": [MockFunction],
@@ -1093,6 +1096,7 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
             >
               <EuiButtonContent
                 className="euiButtonEmpty__content"
+                iconGap="m"
                 iconSide="right"
                 iconSize="m"
                 iconType="arrowDown"

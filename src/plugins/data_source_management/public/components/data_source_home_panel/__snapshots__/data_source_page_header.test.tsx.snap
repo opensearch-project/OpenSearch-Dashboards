@@ -8,19 +8,23 @@ exports[`DataSourceHeader renders correctly 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <EuiTitle>
-      <h2>
+    <EuiText
+      size="s"
+    >
+      <h1>
         <FormattedMessage
           defaultMessage="Data Sources"
           id="dataSourcesManagement.dataSourcesTable.title"
           values={Object {}}
         />
-      </h2>
-    </EuiTitle>
+      </h1>
+    </EuiText>
     <EuiSpacer
       size="s"
     />
-    <EuiText>
+    <EuiText
+      size="s"
+    >
       <p>
         <FormattedMessage
           defaultMessage="Create and manage data source connections."

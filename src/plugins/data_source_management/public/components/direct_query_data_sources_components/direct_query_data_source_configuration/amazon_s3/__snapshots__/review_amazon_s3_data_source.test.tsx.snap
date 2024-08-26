@@ -57,14 +57,19 @@ exports[`ReviewS3Datasource renders correctly 1`] = `
           <div
             className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
           >
-            <EuiTitle>
-              <h1
-                className="euiTitle euiTitle--medium"
-                data-test-subj="reviewTitle"
+            <EuiText
+              size="s"
+            >
+              <div
+                className="euiText euiText--small"
               >
-                Review Amazon S3 data source configuration
-              </h1>
-            </EuiTitle>
+                <h1
+                  data-test-subj="reviewTitle"
+                >
+                  Review Amazon S3 data source configuration
+                </h1>
+              </div>
+            </EuiText>
             <EuiSpacer
               size="s"
             >
@@ -139,6 +144,7 @@ exports[`ReviewS3Datasource renders correctly 1`] = `
                           >
                             <EuiButtonContent
                               className="euiButton__content"
+                              iconGap="m"
                               iconSide="left"
                               textProps={
                                 Object {

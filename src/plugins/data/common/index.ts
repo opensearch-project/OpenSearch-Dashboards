@@ -40,6 +40,7 @@ export * from './query';
 export * from './search';
 export * from './types';
 export * from './utils';
+export * from './storage';
 
 /**
  * Use data plugin interface instead

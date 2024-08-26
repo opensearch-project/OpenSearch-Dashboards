@@ -3,275 +3,882 @@
 exports[`WorkspaceList should render title and table normally 1`] = `
 <div>
   <div
-    class="euiPage euiPage--grow"
+    class="euiPage euiPage--paddingMedium euiPage--grow"
   >
-    <div
-      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--hasShadow euiPageBody euiPageBody--borderRadiusNone euiPageBody--paddingLarge"
+    Organize collaborative projects with use-case-specific workspaces.
+    <button
+      class="euiButton euiButton--primary euiButton--small"
+      data-test-subj="workspaceList-create-workspace"
+      type="button"
     >
-      <header
-        class="euiPageHeader euiPageHeader--responsive euiPage--restrictWidth-default euiPageHeader--center"
-        style="padding-bottom: 0px; border-bottom: 0;"
+      <span
+        class="euiButtonContent euiButton__content"
       >
+        <span
+          class="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="plus"
+        />
+        <span
+          class="euiButton__text"
+        >
+          Create workspace
+        </span>
+      </span>
+    </button>
+    <div
+      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+      role="main"
+    >
+      <div>
         <div
-          class="euiPageHeaderContent"
+          class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
         >
           <div
-            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+            class="euiFlexItem euiSearchBar__searchHolder"
           >
             <div
-              class="euiFlexItem"
-            >
-              <h1
-                class="euiTitle euiTitle--large"
-              >
-                Workspaces
-              </h1>
-              <div
-                class="euiSpacer euiSpacer--l"
-              />
-              <div
-                class="euiText euiText--medium euiText--constrainedWidth"
-              >
-                <p>
-                  Workspace allow you to save and organize library items, such as index patterns, visualizations, dashboards, saved searches, and share them with other OpenSearch Dashboards users. You can control which features are visible in each workspace, and which users and groups have read and write access to the library items in the workspace.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
-      <div
-        class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
-        role="main"
-        style="width: 100%; max-width: 1000px;"
-      >
-        <div>
-          <div
-            class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
-          >
-            <div
-              class="euiFlexItem euiSearchBar__searchHolder"
+              class="euiFormControlLayout euiFormControlLayout--fullWidth"
             >
               <div
-                class="euiFormControlLayout euiFormControlLayout--fullWidth"
+                class="euiFormControlLayout__childrenWrapper"
               >
+                <input
+                  aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
+                  class="euiFieldSearch euiFieldSearch--fullWidth"
+                  placeholder="Search..."
+                  type="search"
+                  value=""
+                />
                 <div
-                  class="euiFormControlLayout__childrenWrapper"
+                  class="euiFormControlLayoutIcons"
                 >
-                  <input
-                    aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-                    class="euiFieldSearch euiFieldSearch--fullWidth"
-                    placeholder="Search..."
-                    type="search"
-                    value=""
-                  />
-                  <div
-                    class="euiFormControlLayoutIcons"
+                  <span
+                    class="euiFormControlLayoutCustomIcon"
                   >
                     <span
-                      class="euiFormControlLayoutCustomIcon"
-                    >
-                      <span
-                        aria-hidden="true"
-                        class="euiFormControlLayoutCustomIcon__icon"
-                        data-euiicon-type="search"
-                      />
-                    </span>
-                  </div>
+                      aria-hidden="true"
+                      class="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="search"
+                    />
+                  </span>
                 </div>
               </div>
             </div>
           </div>
           <div
-            class="euiSpacer euiSpacer--l"
-          />
-          <div
-            class="euiBasicTable"
+            class="euiFlexItem euiFlexItem--flexGrowZero euiSearchBar__filtersHolder"
           >
-            <div>
+            <div
+              class="euiFilterGroup"
+            >
               <div
-                class="euiTableHeaderMobile"
+                class="euiPopover euiPopover--anchorDownCenter"
+                id="field_value_selection_0"
               >
                 <div
-                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                  class="euiPopover__anchor"
+                >
+                  <button
+                    class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--hasIcon"
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                    >
+                      <span
+                        class="euiButtonContent__icon"
+                        color="inherit"
+                        data-euiicon-type="arrowDown"
+                      />
+                      <span
+                        class="euiButtonEmpty__text"
+                      >
+                        <span
+                          class="euiFilterButton__textShift"
+                          data-text="Use Case"
+                          title="Use Case"
+                        >
+                          Use Case
+                        </span>
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="euiBasicTable"
+        >
+          <div>
+            <div
+              class="euiTableHeaderMobile"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
-                  />
+                    class="euiCheckbox"
+                  >
+                    <input
+                      aria-label="Select all rows"
+                      class="euiCheckbox__input"
+                      id="_selection_column-checkbox_generated-id"
+                      type="checkbox"
+                    />
+                    <div
+                      class="euiCheckbox__square"
+                    />
+                    <label
+                      class="euiCheckbox__label"
+                      for="_selection_column-checkbox_generated-id"
+                    >
+                      Select all rows
+                    </label>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
                   <div
-                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                    class="euiTableSortMobile"
                   >
                     <div
-                      class="euiTableSortMobile"
+                      class="euiPopover euiPopover--anchorDownRight"
                     >
                       <div
-                        class="euiPopover euiPopover--anchorDownRight"
+                        class="euiPopover__anchor"
                       >
-                        <div
-                          class="euiPopover__anchor"
+                        <button
+                          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                          type="button"
                         >
-                          <button
-                            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
-                            type="button"
+                          <span
+                            class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                           >
                             <span
-                              class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                              class="euiButtonContent__icon"
+                              color="inherit"
+                              data-euiicon-type="arrowDown"
+                            />
+                            <span
+                              class="euiButtonEmpty__text"
                             >
-                              <span
-                                class="euiButtonContent__icon"
-                                color="inherit"
-                                data-euiicon-type="arrowDown"
-                              />
-                              <span
-                                class="euiButtonEmpty__text"
-                              >
-                                Sorting
-                              </span>
+                              Sorting
                             </span>
-                          </button>
-                        </div>
+                          </span>
+                        </button>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <table
-                class="euiTable euiTable--responsive"
-                id="__table_generated-id"
-                tabindex="-1"
-              >
-                <caption
-                  class="euiScreenReaderOnly euiTableCaption"
-                />
-                <thead>
-                  <tr>
-                    <th
-                      aria-live="polite"
-                      aria-sort="ascending"
-                      class="euiTableHeaderCell"
-                      data-test-subj="tableHeaderCell_name_0"
-                      role="columnheader"
-                      scope="col"
-                    >
-                      <button
-                        class="euiTableHeaderButton euiTableHeaderButton-isSorted"
-                        data-test-subj="tableHeaderSortButton"
-                        type="button"
-                      >
-                        <span
-                          class="euiTableCellContent"
-                        >
-                          <span
-                            class="euiTableCellContent__text"
-                            title="Name"
-                          >
-                            Name
-                          </span>
-                          <span
-                            class="euiTableSortIcon"
-                            data-euiicon-type="sortUp"
-                          />
-                        </span>
-                      </button>
-                    </th>
-                    <th
-                      aria-live="polite"
-                      aria-sort="none"
-                      class="euiTableHeaderCell"
-                      data-test-subj="tableHeaderCell_id_1"
-                      role="columnheader"
-                      scope="col"
-                    >
-                      <button
-                        class="euiTableHeaderButton"
-                        data-test-subj="tableHeaderSortButton"
-                        type="button"
-                      >
-                        <span
-                          class="euiTableCellContent"
-                        >
-                          <span
-                            class="euiTableCellContent__text"
-                            title="ID"
-                          >
-                            ID
-                          </span>
-                        </span>
-                      </button>
-                    </th>
-                    <th
-                      class="euiTableHeaderCell"
-                      data-test-subj="tableHeaderCell_description_2"
-                      role="columnheader"
-                      scope="col"
-                    >
-                      <span
-                        class="euiTableCellContent"
-                      >
-                        <span
-                          class="euiTableCellContent__text"
-                          title="Description"
-                        >
-                          Description
-                        </span>
-                      </span>
-                    </th>
-                    <th
-                      class="euiTableHeaderCell"
-                      data-test-subj="tableHeaderCell_features_3"
-                      role="columnheader"
-                      scope="col"
-                    >
-                      <span
-                        class="euiTableCellContent"
-                      >
-                        <span
-                          class="euiTableCellContent__text"
-                          title="Use case"
-                        >
-                          Use case
-                        </span>
-                      </span>
-                    </th>
-                    <th
-                      class="euiTableHeaderCell"
-                      role="columnheader"
-                      scope="col"
-                    >
-                      <span
-                        class="euiTableCellContent euiTableCellContent--alignRight"
-                      >
-                        <span
-                          class="euiTableCellContent__text"
-                          title="Actions"
-                        >
-                          Actions
-                        </span>
-                      </span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    class="euiTableRow"
+            </div>
+            <table
+              class="euiTable euiTable--responsive"
+              id="__table_generated-id"
+              tabindex="-1"
+            >
+              <caption
+                class="euiScreenReaderOnly euiTableCaption"
+              />
+              <thead>
+                <tr>
+                  <th
+                    class="euiTableHeaderCellCheckbox"
+                    scope="col"
                   >
-                    <td
-                      class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-                      colspan="5"
+                    <div
+                      class="euiTableCellContent"
                     >
                       <div
-                        class="euiTableCellContent euiTableCellContent--alignCenter"
+                        class="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                      >
+                        <input
+                          aria-label="Select all rows"
+                          class="euiCheckbox__input"
+                          data-test-subj="checkboxSelectAll"
+                          id="_selection_column-checkbox_generated-id"
+                          type="checkbox"
+                        />
+                        <div
+                          class="euiCheckbox__square"
+                        />
+                      </div>
+                    </div>
+                  </th>
+                  <th
+                    aria-live="polite"
+                    aria-sort="ascending"
+                    class="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_name_0"
+                    role="columnheader"
+                    scope="col"
+                    style="width: 25%;"
+                  >
+                    <button
+                      class="euiTableHeaderButton euiTableHeaderButton-isSorted"
+                      data-test-subj="tableHeaderSortButton"
+                      type="button"
+                    >
+                      <span
+                        class="euiTableCellContent"
                       >
                         <span
                           class="euiTableCellContent__text"
+                          title="Name"
                         >
-                          No items found
+                          Name
                         </span>
+                        <span
+                          class="euiTableSortIcon"
+                          data-euiicon-type="sortUp"
+                        />
+                      </span>
+                    </button>
+                  </th>
+                  <th
+                    class="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_useCase_1"
+                    role="columnheader"
+                    scope="col"
+                    style="width: 20%;"
+                  >
+                    <span
+                      class="euiTableCellContent"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                        title="Use case"
+                      >
+                        Use case
+                      </span>
+                    </span>
+                  </th>
+                  <th
+                    class="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_description_2"
+                    role="columnheader"
+                    scope="col"
+                    style="width: 20%;"
+                  >
+                    <span
+                      class="euiTableCellContent"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                        title="Description"
+                      >
+                        Description
+                      </span>
+                    </span>
+                  </th>
+                  <th
+                    class="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_lastUpdatedTime_3"
+                    role="columnheader"
+                    scope="col"
+                    style="width: 25%;"
+                  >
+                    <span
+                      class="euiTableCellContent"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                        title="Last updated"
+                      >
+                        Last updated
+                      </span>
+                    </span>
+                  </th>
+                  <th
+                    class="euiTableHeaderCell"
+                    role="columnheader"
+                    scope="col"
+                  >
+                    <span
+                      class="euiTableCellContent euiTableCellContent--alignRight"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                        title="Actions"
+                      >
+                        Actions
+                      </span>
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                >
+                  <td
+                    class="euiTableRowCellCheckbox"
+                  >
+                    <div
+                      class="euiTableCellContent"
+                    >
+                      <div
+                        class="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                      >
+                        <input
+                          aria-label="Select this row"
+                          class="euiCheckbox__input"
+                          data-test-subj="checkboxSelectRow-id1"
+                          id="_selection_column_id1-checkbox"
+                          title="Select this row"
+                          type="checkbox"
+                        />
+                        <div
+                          class="euiCheckbox__square"
+                        />
                       </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 25%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Name
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      <span
+                        class=""
+                      >
+                        <button
+                          class="euiLink euiLink--primary"
+                          type="button"
+                        >
+                          <button
+                            class="euiLink euiLink--primary"
+                            type="button"
+                          >
+                            name1
+                          </button>
+                        </button>
+                      </span>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 20%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Use case
+                    </div>
+                    <div
+                      class="euiTableCellContent"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                      >
+                        Analytics (All)
+                      </span>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 20%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Description
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      <span
+                        class="euiToolTipAnchor"
+                      >
+                        <div
+                          class="euiText euiText--small eui-textTruncate"
+                          style="max-width: 150px;"
+                        >
+                          should be able to see the description tooltip when hovering over the description
+                        </div>
+                      </span>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 25%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Last updated
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      Aug 5, 1999 @ 22:00:00.000
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell euiTableRowCell--hasActions"
+                  >
+                    <div
+                      class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                    >
+                      <div
+                        class="euiTableCellContent__hoverItem"
+                      >
+                        <div
+                          class="euiPopover euiPopover--anchorLeftCenter"
+                          id="id1-actions"
+                        >
+                          <div
+                            class="euiPopover__anchor"
+                          >
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="All actions"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="euiCollapsedItemActionsButton"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="boxesHorizontal"
+                                />
+                              </button>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr
+                  class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                >
+                  <td
+                    class="euiTableRowCellCheckbox"
+                  >
+                    <div
+                      class="euiTableCellContent"
+                    >
+                      <div
+                        class="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                      >
+                        <input
+                          aria-label="Select this row"
+                          class="euiCheckbox__input"
+                          data-test-subj="checkboxSelectRow-id2"
+                          id="_selection_column_id2-checkbox"
+                          title="Select this row"
+                          type="checkbox"
+                        />
+                        <div
+                          class="euiCheckbox__square"
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 25%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Name
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      <span
+                        class=""
+                      >
+                        <button
+                          class="euiLink euiLink--primary"
+                          type="button"
+                        >
+                          <button
+                            class="euiLink euiLink--primary"
+                            type="button"
+                          >
+                            name2
+                          </button>
+                        </button>
+                      </span>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 20%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Use case
+                    </div>
+                    <div
+                      class="euiTableCellContent"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                      >
+                        Observability
+                      </span>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 20%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Description
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      <span
+                        class="euiToolTipAnchor"
+                      >
+                        <div
+                          class="euiText euiText--small eui-textTruncate"
+                          style="max-width: 150px;"
+                        >
+                          should be able to see the description tooltip when hovering over the description
+                        </div>
+                      </span>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 25%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Last updated
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      Aug 5, 1999 @ 20:00:00.000
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell euiTableRowCell--hasActions"
+                  >
+                    <div
+                      class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                    >
+                      <div
+                        class="euiTableCellContent__hoverItem"
+                      >
+                        <div
+                          class="euiPopover euiPopover--anchorLeftCenter"
+                          id="id2-actions"
+                        >
+                          <div
+                            class="euiPopover__anchor"
+                          >
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="All actions"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="euiCollapsedItemActionsButton"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="boxesHorizontal"
+                                />
+                              </button>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr
+                  class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                >
+                  <td
+                    class="euiTableRowCellCheckbox"
+                  >
+                    <div
+                      class="euiTableCellContent"
+                    >
+                      <div
+                        class="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                      >
+                        <input
+                          aria-label="Select this row"
+                          class="euiCheckbox__input"
+                          data-test-subj="checkboxSelectRow-id3"
+                          id="_selection_column_id3-checkbox"
+                          title="Select this row"
+                          type="checkbox"
+                        />
+                        <div
+                          class="euiCheckbox__square"
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 25%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Name
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      <span
+                        class=""
+                      >
+                        <button
+                          class="euiLink euiLink--primary"
+                          type="button"
+                        >
+                          <button
+                            class="euiLink euiLink--primary"
+                            type="button"
+                          >
+                            name3
+                          </button>
+                        </button>
+                      </span>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 20%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Use case
+                    </div>
+                    <div
+                      class="euiTableCellContent"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                      >
+                        Search
+                      </span>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 20%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Description
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      <span
+                        class="euiToolTipAnchor"
+                      >
+                        <div
+                          class="euiText euiText--small eui-textTruncate"
+                          style="max-width: 150px;"
+                        />
+                      </span>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 25%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Last updated
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      Aug 5, 1999 @ 21:00:00.000
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell euiTableRowCell--hasActions"
+                  >
+                    <div
+                      class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                    >
+                      <div
+                        class="euiTableCellContent__hoverItem"
+                      >
+                        <div
+                          class="euiPopover euiPopover--anchorLeftCenter"
+                          id="id3-actions"
+                        >
+                          <div
+                            class="euiPopover__anchor"
+                          >
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="All actions"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="euiCollapsedItemActionsButton"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="boxesHorizontal"
+                                />
+                              </button>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <div
+              class="euiSpacer euiSpacer--m"
+            />
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiPopover euiPopover--anchorUpRight"
+                >
+                  <div
+                    class="euiPopover__anchor"
+                  >
+                    <button
+                      class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+                      data-test-subj="tablePaginationPopoverButton"
+                      type="button"
+                    >
+                      <span
+                        class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                      >
+                        <span
+                          class="euiButtonContent__icon"
+                          color="inherit"
+                          data-euiicon-type="arrowDown"
+                        />
+                        <span
+                          class="euiButtonEmpty__text"
+                        >
+                          Rows per page
+                          : 
+                          5
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <nav
+                  class="euiPagination"
+                >
+                  <button
+                    aria-label="Previous page"
+                    class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                    data-test-subj="pagination-button-previous"
+                    disabled=""
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      color="inherit"
+                      data-euiicon-type="arrowLeft"
+                    />
+                  </button>
+                  <ul
+                    class="euiPagination__list"
+                  >
+                    <li
+                      class="euiPagination__item"
+                    >
+                      <button
+                        aria-controls="__table_generated-id"
+                        aria-current="true"
+                        aria-label="Page 1 of 1"
+                        class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                        data-test-subj="pagination-button-0"
+                        disabled=""
+                        type="button"
+                      >
+                        <span
+                          class="euiButtonContent euiButtonEmpty__content"
+                        >
+                          <span
+                            class="euiButtonEmpty__text"
+                          >
+                            1
+                          </span>
+                        </span>
+                      </button>
+                    </li>
+                  </ul>
+                  <button
+                    aria-label="Next page"
+                    class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                    data-test-subj="pagination-button-next"
+                    disabled=""
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      color="inherit"
+                      data-euiicon-type="arrowRight"
+                    />
+                  </button>
+                </nav>
+              </div>
             </div>
           </div>
         </div>

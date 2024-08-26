@@ -27,23 +27,25 @@ exports[`ImportFlyout Component renders correctly 1`] = `
           <div
             className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
           >
-            <EuiTitle
-              size="m"
+            <EuiText
+              size="s"
             >
-              <h2
-                className="euiTitle euiTitle--medium"
+              <div
+                className="euiText euiText--small"
               >
-                <FormattedMessage
-                  defaultMessage="Import queries"
-                  id="console.ImportFlyout.importQueriesTitle"
-                  values={Object {}}
-                >
-                  <span>
-                    Import queries
-                  </span>
-                </FormattedMessage>
-              </h2>
-            </EuiTitle>
+                <h2>
+                  <FormattedMessage
+                    defaultMessage="Import queries"
+                    id="console.ImportFlyout.importQueriesTitle"
+                    values={Object {}}
+                  >
+                    <span>
+                      Import queries
+                    </span>
+                  </FormattedMessage>
+                </h2>
+              </div>
+            </EuiText>
           </div>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -397,6 +399,7 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                       >
                         <EuiButtonContent
                           className="euiButtonEmpty__content"
+                          iconGap="m"
                           iconSide="left"
                           iconSize="m"
                           textProps={
@@ -467,6 +470,7 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                         >
                           <EuiButtonContent
                             className="euiButton__content"
+                            iconGap="m"
                             iconSide="left"
                             isLoading={false}
                             textProps={

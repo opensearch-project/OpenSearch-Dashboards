@@ -1,2 +1,0 @@
-fix:
-- Update recent items icon from SVG to react component ([#7478](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7478))

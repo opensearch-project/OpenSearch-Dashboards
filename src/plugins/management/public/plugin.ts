@@ -56,14 +56,22 @@ import {
 import { ManagementOverViewPluginSetup } from '../../management_overview/public';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { SettingsIcon } from './components/settings_icon';
-import { fulfillRegistrationLinksToChromeNavLinks } from '../../../core/public';
+import {
+  fulfillRegistrationLinksToChromeNavLinks,
+  LinkItemType,
+  getSortedNavLinks,
+} from '../../../core/public';
+import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
 
 interface ManagementSetupDependencies {
   home?: HomePublicPluginSetup;
   managementOverview?: ManagementOverViewPluginSetup;
 }
-
-export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart> {
+interface ManagementStartDependencies {
+  navigation: NavigationPublicPluginStart;
+}
+export class ManagementPlugin
+  implements Plugin<ManagementSetup, ManagementStart, {}, ManagementStartDependencies> {
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
@@ -76,7 +84,10 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
     defaultMessage: 'Dashboards Management',
   });
 
-  public setup(core: CoreSetup, { home, managementOverview }: ManagementSetupDependencies) {
+  public setup(
+    core: CoreSetup<ManagementStartDependencies>,
+    { home, managementOverview }: ManagementSetupDependencies
+  ) {
     const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
 
     core.application.register({
@@ -99,6 +110,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           opensearchDashboardsVersion,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
           hideInAppNavigation,
+          uiSettings: coreStart.uiSettings,
         });
       },
     });
@@ -106,21 +118,103 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
     const settingsLandingPageId = 'settings_landing';
 
     const settingsLandingPageTitle = i18n.translate('management.settings.landingPage.title', {
-      defaultMessage: 'Settings and setup',
+      defaultMessage: 'Settings and setup overview',
     });
+
+    const settingsLandingPageDescription = i18n.translate(
+      'management.settings.landingPage.description',
+      {
+        defaultMessage:
+          'Customize the appearance of the application, change feature behavior, and more.',
+      }
+    );
+
+    const settingsLandingPageTitleForLeftNav = i18n.translate(
+      'management.settings.landingPage.leftNav.title',
+      {
+        defaultMessage: 'Overview',
+      }
+    );
 
     const dataAdministrationLandingPageId = 'data_administration_landing';
 
     const dataAdministrationPageTitle = i18n.translate(
       'management.dataAdministration.landingPage.title',
       {
-        defaultMessage: 'Data administration',
+        defaultMessage: 'Data administration overview',
       }
     );
 
+    const dataAdministrationPageTitleForLeftNav = i18n.translate(
+      'management.dataAdministration.landingPage.leftNav.title',
+      {
+        defaultMessage: 'Overview',
+      }
+    );
+
+    const dataAdministrationPageDescription = i18n.translate(
+      'management.dataAdministration.landingPage.description',
+      {
+        defaultMessage: 'Configure automation and access control policies to manage your data.',
+      }
+    );
+
+    const getNavLinksByNavGroupId = async (navGroupId: string) => {
+      const [coreStart] = await core.getStartServices();
+      const navGroupMap = await coreStart.chrome.navGroup
+        .getNavGroupsMap$()
+        .pipe(first())
+        .toPromise();
+      const navLinks = navGroupMap[navGroupId]?.navLinks;
+      return getSortedNavLinks(
+        fulfillRegistrationLinksToChromeNavLinks(
+          navLinks || [],
+          coreStart.chrome.navLinks.getAll()
+        ).filter((item) => !item.hidden),
+        (currentItem, parentItem) => {
+          // Hide all the sub items because we will only show parent item in landing page.
+          if (
+            currentItem.itemType === LinkItemType.LINK &&
+            parentItem?.itemType === LinkItemType.PARENT_LINK
+          ) {
+            return {
+              ...currentItem,
+              link: {
+                ...currentItem.link,
+                hidden: true,
+              },
+            };
+          }
+
+          /**
+           * Jump to first sub items when click on parent item in landing page
+           */
+          if (currentItem.itemType === LinkItemType.PARENT_LINK) {
+            let payload = currentItem.link;
+            if (payload) {
+              if (currentItem.links?.[0].itemType === LinkItemType.LINK) {
+                payload = {
+                  ...payload,
+                  ...currentItem.links?.[0].link,
+                  title: payload.title,
+                };
+              }
+            }
+
+            return {
+              ...currentItem,
+              link: payload,
+            };
+          }
+
+          return currentItem;
+        }
+      ).filter((navLink) => !navLink.hidden);
+    };
+
     core.application.register({
       id: settingsLandingPageId,
-      title: settingsLandingPageTitle,
+      title: settingsLandingPageTitleForLeftNav,
       order: 100,
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.visible
@@ -128,24 +222,24 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
       mount: async (params: AppMountParameters) => {
         const { renderApp } = await import('./landing_page_application');
-        const [coreStart] = await core.getStartServices();
-        const navGroupMap = await coreStart.chrome.navGroup
-          .getNavGroupsMap$()
-          .pipe(first())
-          .toPromise();
-        const navLinks = navGroupMap[DEFAULT_NAV_GROUPS.settingsAndSetup.id]?.navLinks;
-        const fulfilledNavLink = fulfillRegistrationLinksToChromeNavLinks(
-          navLinks || [],
-          coreStart.chrome.navLinks.getAll()
-        ).filter((navLink) => navLink.id !== settingsLandingPageId && !navLink.hidden);
+        const [coreStart, { navigation }] = await core.getStartServices();
+        const navLinks = (
+          await getNavLinksByNavGroupId(DEFAULT_NAV_GROUPS.settingsAndSetup.id)
+        ).filter((navLink) => navLink.id !== settingsLandingPageId);
 
+        coreStart.chrome.setBreadcrumbs([
+          {
+            text: settingsLandingPageTitle,
+          },
+        ]);
         return renderApp({
           mountElement: params.element,
           props: {
             navigateToApp: coreStart.application.navigateToApp,
-            navLinks: fulfilledNavLink,
-            pageTitle: settingsLandingPageTitle,
-            getStartedCards: [],
+            setAppDescriptionControls: coreStart.application.setAppDescriptionControls,
+            navLinks,
+            pageDescription: settingsLandingPageDescription,
+            navigationUI: navigation.ui,
           },
         });
       },
@@ -153,7 +247,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
 
     core.application.register({
       id: dataAdministrationLandingPageId,
-      title: dataAdministrationPageTitle,
+      title: dataAdministrationPageTitleForLeftNav,
       order: 100,
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.visible
@@ -161,24 +255,25 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
       mount: async (params: AppMountParameters) => {
         const { renderApp } = await import('./landing_page_application');
-        const [coreStart] = await core.getStartServices();
-        const navGroupMap = await coreStart.chrome.navGroup
-          .getNavGroupsMap$()
-          .pipe(first())
-          .toPromise();
-        const navLinks = navGroupMap[DEFAULT_NAV_GROUPS.dataAdministration.id]?.navLinks;
-        const fulfilledNavLink = fulfillRegistrationLinksToChromeNavLinks(
-          navLinks || [],
-          coreStart.chrome.navLinks.getAll()
-        ).filter((navLink) => navLink.id !== dataAdministrationLandingPageId && !navLink.hidden);
+        const [coreStart, { navigation }] = await core.getStartServices();
+        const navLinks = (
+          await getNavLinksByNavGroupId(DEFAULT_NAV_GROUPS.dataAdministration.id)
+        ).filter((navLink) => navLink.id !== dataAdministrationLandingPageId);
+
+        coreStart.chrome.setBreadcrumbs([
+          {
+            text: dataAdministrationPageTitle,
+          },
+        ]);
 
         return renderApp({
           mountElement: params.element,
           props: {
             navigateToApp: coreStart.application.navigateToApp,
-            navLinks: fulfilledNavLink,
-            pageTitle: dataAdministrationPageTitle,
-            getStartedCards: [],
+            navLinks,
+            pageDescription: dataAdministrationPageDescription,
+            navigationUI: navigation.ui,
+            setAppDescriptionControls: coreStart.application.setAppDescriptionControls,
           },
         });
       },

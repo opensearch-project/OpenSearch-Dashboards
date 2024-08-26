@@ -42,7 +42,7 @@ export type ArgumentType<T> =
   | UnresolvedMultipleArgumentType<T>;
 
 /**
- * Map the type within the the generic array to a string-based
+ * Map the type within the generic array to a string-based
  * representation of the type.
  */
 // prettier-ignore

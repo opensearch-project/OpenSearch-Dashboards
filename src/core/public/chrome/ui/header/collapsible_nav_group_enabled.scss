@@ -8,10 +8,6 @@
     margin-bottom: 0;
     margin-top: 0;
 
-    &::after {
-      display: none;
-    }
-
     .nav-link-item-btn {
       margin-bottom: 0;
 
@@ -21,7 +17,32 @@
     }
   }
 
+  .nav-link-parent-item-button {
+    > span {
+      flex-direction: row-reverse;
+
+      > * {
+        margin-right: $euiSizeS;
+        margin-left: 2px;
+      }
+    }
+  }
+
+  .nav-link-fake-item {
+    margin-top: 0;
+  }
+
+  .nav-link-fake-item-button {
+    display: none;
+  }
+
   .nav-nested-item {
+    margin-bottom: 4px;
+
+    &::after {
+      height: unset;
+    }
+
     .nav-link-item-btn {
       padding-left: 0;
       padding-right: 0;
@@ -31,28 +52,34 @@
   .left-navigation-wrapper {
     display: flex;
     flex-direction: column;
-    border-right: $ouiBorderThin;
+    border-right: $euiBorderThin;
   }
 
-  .scrollable-container {
+  .flex-1-container {
     flex: 1;
   }
 
   .bottom-container {
     padding: 0 $euiSize;
     display: flex;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
 
     &.bottom-container-collapsed {
       flex-direction: column;
       align-items: center;
+      gap: $euiSize;
+      padding-top: $euiSizeS;
+      padding-bottom: $euiSizeS;
 
       > * {
-        margin: $euiSizeS 0;
+        justify-content: center;
       }
     }
-  }
 
-  .nav-controls-padding {
-    padding: $euiSize;
+    &.bottom-container-expanded {
+      gap: 16px;
+      padding-top: $euiSize;
+      padding-bottom: $euiSize;
+    }
   }
 }

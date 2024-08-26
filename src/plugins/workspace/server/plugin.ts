@@ -22,6 +22,8 @@ import {
   PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER,
   WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID,
   PRIORITY_FOR_WORKSPACE_UI_SETTINGS_WRAPPER,
+  WORKSPACE_INITIAL_APP_ID,
+  WORKSPACE_NAVIGATION_APP_ID,
 } from '../common/constants';
 import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
 import { WorkspaceClient } from './workspace_client';
@@ -101,6 +103,68 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
       this.workspaceSavedObjectsClientWrapper.wrapperFactory
     );
+
+    core.http.registerOnPreResponse((request, _response, toolkit) => {
+      this.permissionControl?.clearSavedObjectsCache(request);
+      return toolkit.next();
+    });
+  }
+
+  private setUpRedirectPage(core: CoreSetup) {
+    core.http.registerOnPostAuth(async (request, response, toolkit) => {
+      const path = request.url.pathname;
+      if (path === '/') {
+        const [coreStart] = await core.getStartServices();
+        const uiSettings = coreStart.uiSettings.asScopedToClient(
+          coreStart.savedObjects.getScopedClient(request)
+        );
+        const useNewHomePage = await uiSettings.get('home:useNewHomePage');
+        if (!useNewHomePage) {
+          return toolkit.next();
+        }
+
+        const workspaceListResponse = await this.client?.list(
+          { request, logger: this.logger },
+          { page: 1, perPage: 100 }
+        );
+        const basePath = core.http.basePath.serverBasePath;
+
+        if (workspaceListResponse?.success && workspaceListResponse.result.total > 0) {
+          const workspaceList = workspaceListResponse.result.workspaces;
+          // If user only has one workspace, go to overview page of that workspace
+          if (workspaceList.length === 1) {
+            return response.redirected({
+              headers: {
+                location: `${basePath}/w/${workspaceList[0].id}/app/${WORKSPACE_NAVIGATION_APP_ID}`,
+              },
+            });
+          }
+          // Temporarily use defaultWorkspace as a placeholder
+          const defaultWorkspaceId = await uiSettings.get('defaultWorkspace');
+          const defaultWorkspace = workspaceList.find(
+            (workspace) => workspace.id === defaultWorkspaceId
+          );
+          // If user has a default workspace configured, go to overview page of that workspace
+          // If user has more than one workspaces, go to homepage
+          if (defaultWorkspace) {
+            return response.redirected({
+              headers: {
+                location: `${basePath}/w/${defaultWorkspace.id}/app/${WORKSPACE_NAVIGATION_APP_ID}`,
+              },
+            });
+          } else {
+            return response.redirected({
+              headers: { location: `${basePath}/app/home` },
+            });
+          }
+        }
+        // If user has no workspaces, go to initial page
+        return response.redirected({
+          headers: { location: `${basePath}/app/${WORKSPACE_INITIAL_APP_ID}` },
+        });
+      }
+      return toolkit.next();
+    });
   }
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -166,6 +230,8 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       const isDashboardAdmin = getWorkspaceState(request).isDashboardAdmin !== false;
       return { dashboards: { isDashboardAdmin } };
     });
+
+    this.setUpRedirectPage(core);
 
     return {
       client: this.client,

@@ -31,7 +31,6 @@
 import _ from 'lodash';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import { QueryStart, SavedQuery } from '../../query';
 import { SearchBar, SearchBarOwnProps } from './';
@@ -39,14 +38,14 @@ import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { DataPublicPluginStart } from '../../types';
-import { Filter, Query, TimeRange } from '../../../common';
+import { DataStorage, Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
 import { Settings } from '../types';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
-  storage: IStorageWrapper;
+  storage: DataStorage;
   settings: Settings;
   setDataSetContainerRef: (ref: HTMLDivElement | null) => void;
 }

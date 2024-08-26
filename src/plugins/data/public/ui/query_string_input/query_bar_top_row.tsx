@@ -255,6 +255,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         aria-label={i18n.translate('data.query.queryBar.querySubmitButtonLabel', {
           defaultMessage: 'Submit query',
         })}
+        compressed={true}
       />
     );
 
@@ -320,6 +321,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           dateFormat={uiSettings!.get('dateFormat')}
           isAutoRefreshOnly={props.showAutoRefreshOnly}
           className="osdQueryBar__datePicker"
+          compressed={true}
         />
       </EuiFlexItem>
     );
@@ -331,7 +333,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     if (
       language === 'kuery' &&
       typeof query === 'string' &&
-      (!storage || !storage.get('opensearchDashboards.luceneSyntaxWarningOptOut')) &&
+      (!storage || !storage.get('luceneSyntaxWarningOptOut')) &&
       doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {
       const toast = notifications!.toasts.addWarning({
@@ -377,13 +379,18 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
 
   function onLuceneSyntaxWarningOptOut(toast: Toast) {
     if (!storage) return;
-    storage.set('opensearchDashboards.luceneSyntaxWarningOptOut', true);
+    storage.set('luceneSyntaxWarningOptOut', true);
     notifications!.toasts.remove(toast);
   }
 
   const classes = classNames('osdQueryBar', {
     'osdQueryBar--withDatePicker': props.showDatePicker,
   });
+
+  const shouldUseDatePickerRef =
+    props?.datePickerRef?.current &&
+    (uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) ||
+      uiSettings.get('home:useNewHomePage'));
 
   return (
     <>
@@ -396,8 +403,8 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         {renderQueryInput()}
         {renderSharingMetaFields()}
         <EuiFlexItem grow={false}>
-          {props?.datePickerRef?.current && uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)
-            ? createPortal(renderUpdateButton(), props.datePickerRef.current)
+          {shouldUseDatePickerRef
+            ? createPortal(renderUpdateButton(), props.datePickerRef!.current!)
             : renderUpdateButton()}
         </EuiFlexItem>
       </EuiFlexGroup>

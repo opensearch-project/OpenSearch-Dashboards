@@ -30,8 +30,11 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiFlexGroup, EuiToolTip, EuiFlexItem, EuiTitle, EuiSmallButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiToolTip, EuiFlexItem, EuiSmallButtonIcon, EuiText } from '@elastic/eui';
 import { IIndexPattern } from 'src/plugins/data/public';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { IndexPatternManagmentContext } from '../../../types';
+import { TopNavControlButtonData, TopNavControlIconData } from '../../../../../navigation/public';
 
 interface IndexHeaderProps {
   indexPattern: IIndexPattern;
@@ -78,12 +81,74 @@ export function IndexHeader({
   refreshFields,
   deleteIndexPatternClick,
 }: IndexHeaderProps) {
-  return (
+  const {
+    uiSettings,
+    navigationUI: { HeaderControl },
+    application,
+  } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
+
+  const useUpdatedUX = uiSettings.get('home:useNewHomePage');
+
+  return useUpdatedUX ? (
+    <HeaderControl
+      controls={[
+        ...(deleteIndexPatternClick
+          ? [
+              {
+                color: 'danger',
+                run: deleteIndexPatternClick,
+                iconType: 'trash',
+                ariaLabel: removeAriaLabel,
+                testId: 'deleteIndexPatternButton',
+                display: 'base',
+                controlType: 'icon',
+                tooltip: removeTooltip,
+              } as TopNavControlIconData,
+            ]
+          : []),
+        ...(defaultIndex !== indexPattern.id && setDefault
+          ? [
+              {
+                run: setDefault,
+                ariaLabel: setDefaultAriaLabel,
+                testId: 'setDefaultIndexPatternButton',
+                label: i18n.translate(
+                  'indexPatternManagement.editIndexPattern.setDefaultButton.text',
+                  {
+                    defaultMessage: 'Set as default index',
+                  }
+                ),
+                controlType: 'button',
+              } as TopNavControlButtonData,
+            ]
+          : []),
+        ...(refreshFields
+          ? [
+              {
+                run: refreshFields,
+                iconType: 'refresh',
+                ariaLabel: refreshAriaLabel,
+                testId: 'refreshFieldsIndexPatternButton',
+                fill: true,
+                label: i18n.translate(
+                  'indexPatternManagement.editIndexPattern.refreshFieldsButton.text',
+                  {
+                    defaultMessage: 'Refresh field list',
+                  }
+                ),
+                controlType: 'button',
+              } as TopNavControlButtonData,
+            ]
+          : []),
+      ]}
+      setMountPoint={application.setAppRightControls}
+    />
+  ) : (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem>
-        <EuiTitle>
+        <EuiText size="s">
           <h1 data-test-subj="indexPatternTitle">{indexPattern.title}</h1>
-        </EuiTitle>
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup responsive={false}>

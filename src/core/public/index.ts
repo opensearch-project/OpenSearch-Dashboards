@@ -77,6 +77,9 @@ import {
   NavGroupItemInMap,
   fulfillRegistrationLinksToChromeNavLinks,
   createRecentNavLink,
+  HeaderVariant,
+  LinkItemType,
+  getSortedNavLinks,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -381,10 +384,19 @@ export {
   NavGroupItemInMap,
   fulfillRegistrationLinksToChromeNavLinks,
   createRecentNavLink,
+  HeaderVariant,
+  LinkItemType,
+  getSortedNavLinks,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';
 
-export { WorkspacesStart, WorkspacesSetup, WorkspacesService, WorkspaceObject } from './workspace';
+export {
+  WorkspacesStart,
+  WorkspacesSetup,
+  WorkspacesService,
+  WorkspaceObject,
+  IWorkspaceClient,
+} from './workspace';
 
 export { debounce } from './utils';

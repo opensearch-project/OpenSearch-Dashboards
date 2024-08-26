@@ -3,22 +3,6 @@
 exports[`<FeatureCards /> render with complex navLinks 1`] = `
 <div>
   <div
-    class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--hasShadow euiPageContent euiPageContent--borderRadiusNone"
-    role="main"
-  >
-    <header
-      class="euiPageHeader euiPageHeader--responsive euiPageHeader--center"
-    >
-      <div
-        class="euiPageHeaderSection"
-      >
-        <h1
-          class="euiTitle euiTitle--large"
-        />
-      </div>
-    </header>
-  </div>
-  <div
     class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiPageContent"
     role="main"
   >

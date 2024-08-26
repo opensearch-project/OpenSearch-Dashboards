@@ -173,6 +173,7 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
       },
       "get$": [MockFunction],
       "getAll": [MockFunction],
+      "getDefault": [MockFunction],
       "getSaved$": [MockFunction],
       "getUpdate$": [MockFunction],
       "getUpdateErrors$": [MockFunction],
@@ -520,6 +521,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
       },
       "get$": [MockFunction],
       "getAll": [MockFunction],
+      "getDefault": [MockFunction],
       "getSaved$": [MockFunction],
       "getUpdate$": [MockFunction],
       "getUpdateErrors$": [MockFunction],
@@ -706,6 +708,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButton__content"
+                    iconGap="m"
                     iconSide="left"
                     iconType="plus"
                     textProps={
@@ -906,6 +909,7 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
       },
       "get$": [MockFunction],
       "getAll": [MockFunction],
+      "getDefault": [MockFunction],
       "getSaved$": [MockFunction],
       "getUpdate$": [MockFunction],
       "getUpdateErrors$": [MockFunction],

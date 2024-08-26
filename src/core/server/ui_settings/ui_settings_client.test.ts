@@ -346,7 +346,7 @@ describe('ui settings', () => {
       const value = chance.word();
       const override = chance.word();
       const defaults = { key: { value } };
-      const overrides = { key: { value: override } };
+      const overrides = { key: override };
       const { uiSettings } = setup({ defaults, overrides });
       expect(uiSettings.getOverrideOrDefault('key')).toEqual(override);
     });
@@ -598,6 +598,25 @@ describe('ui settings', () => {
         foo: 'bax',
         bar: 'user-provided',
       });
+    });
+  });
+
+  describe('#getDefault()', () => {
+    it(`returns the promised value for a key`, async () => {
+      const opensearchDocSource = {};
+      const defaults = { dateFormat: { value: chance.word() } };
+      const { uiSettings } = setup({ opensearchDocSource, defaults });
+      const result = uiSettings.getDefault('dateFormat');
+
+      expect(result).toBe(defaults.dateFormat.value);
+    });
+
+    it(`returns undefined for undefined defaults`, async () => {
+      const opensearchDocSource = { custom: 'value' };
+      const { uiSettings } = setup({ opensearchDocSource });
+      const result = uiSettings.getDefault('custom');
+
+      expect(result).toBe(undefined);
     });
   });
 
