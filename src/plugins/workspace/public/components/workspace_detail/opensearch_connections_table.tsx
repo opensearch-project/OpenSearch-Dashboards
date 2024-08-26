@@ -6,7 +6,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   EuiSpacer,
-  EuiButton,
+  EuiSmallButton,
   EuiFlexItem,
   EuiFlexGroup,
   EuiFieldSearch,
@@ -160,7 +160,7 @@ export const OpenSearchConnectionTable = ({
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         {selectedItems.length > 0 && !modalVisible && (
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               color="danger"
               onClick={() => setModalVisible(true)}
               data-test-subj="workspace-detail-dataSources-table-bulkRemove"
@@ -169,7 +169,7 @@ export const OpenSearchConnectionTable = ({
                 defaultMessage: 'Remove {numberOfSelect} association(s)',
                 values: { numberOfSelect: selectedItems.length },
               })}
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         )}
         <EuiFlexItem>

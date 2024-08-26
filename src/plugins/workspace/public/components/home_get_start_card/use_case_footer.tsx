@@ -10,7 +10,6 @@ import {
   EuiPanel,
   EuiAvatar,
   EuiSpacer,
-  EuiButton,
   EuiPopover,
   EuiFlexItem,
   EuiModalBody,
@@ -20,6 +19,7 @@ import {
   EuiModalHeader,
   EuiContextMenu,
   EuiModalHeaderTitle,
+  EuiSmallButton,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
@@ -88,7 +88,7 @@ export const UseCaseFooter = ({
 
     return (
       <>
-        <EuiButton
+        <EuiSmallButton
           iconType="plus"
           onClick={showModal}
           data-test-subj="useCase.footer.createWorkspace.button"
@@ -96,7 +96,7 @@ export const UseCaseFooter = ({
           {i18n.translate('workspace.useCase.footer.createWorkspace', {
             defaultMessage: 'Create workspace',
           })}
-        </EuiButton>
+        </EuiSmallButton>
         {isModalVisible && (
           <EuiModal onClose={closeModal} style={{ width: '450px' }}>
             <EuiModalHeader>
@@ -108,13 +108,16 @@ export const UseCaseFooter = ({
             </EuiModalBody>
 
             <EuiModalFooter>
-              <EuiButton onClick={closeModal} data-test-subj="useCase.footer.modal.close.button">
+              <EuiSmallButton
+                onClick={closeModal}
+                data-test-subj="useCase.footer.modal.close.button"
+              >
                 {i18n.translate('workspace.useCase.footer.modal.close', {
                   defaultMessage: 'Close',
                 })}
-              </EuiButton>
+              </EuiSmallButton>
               {isDashboardAdmin && (
-                <EuiButton
+                <EuiSmallButton
                   href={core.application.getUrlForApp('workspace_create', { absolute: false })}
                   data-test-subj="useCase.footer.modal.create.button"
                   fill
@@ -122,7 +125,7 @@ export const UseCaseFooter = ({
                   {i18n.translate('workspace.useCase.footer.modal.create', {
                     defaultMessage: 'Create workspace',
                   })}
-                </EuiButton>
+                </EuiSmallButton>
               )}
             </EuiModalFooter>
           </EuiModal>
@@ -138,9 +141,9 @@ export const UseCaseFooter = ({
       basePath
     );
     return (
-      <EuiButton href={useCaseURL} data-test-subj="useCase.footer.openWorkspace.button">
+      <EuiSmallButton href={useCaseURL} data-test-subj="useCase.footer.openWorkspace.button">
         {i18n.translate('workspace.useCase.footer.openWorkspace', { defaultMessage: 'Open' })}
-      </EuiButton>
+      </EuiSmallButton>
     );
   }
 
@@ -176,11 +179,11 @@ export const UseCaseFooter = ({
   };
 
   const button = (
-    <EuiButton iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
+    <EuiSmallButton iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
       {i18n.translate('workspace.useCase.footer.selectWorkspace', {
         defaultMessage: 'Select workspace',
       })}
-    </EuiButton>
+    </EuiSmallButton>
   );
   const panels = [
     {
@@ -195,7 +198,7 @@ export const UseCaseFooter = ({
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       anchorPosition="downCenter"
     >
       <EuiPanel hasBorder={false} color="transparent" paddingSize="s">

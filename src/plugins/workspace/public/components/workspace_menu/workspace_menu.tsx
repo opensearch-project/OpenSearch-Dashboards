@@ -11,17 +11,15 @@ import {
   EuiPanel,
   EuiTitle,
   EuiAvatar,
-  EuiButton,
   EuiPopover,
   EuiToolTip,
   EuiFlexItem,
   EuiFlexGroup,
   EuiListGroup,
-  EuiButtonEmpty,
-  EuiSmallButton,
   EuiSmallButtonIcon,
   EuiSmallButtonEmpty,
   EuiListGroupItem,
+  EuiSmallButton,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import {
@@ -179,7 +177,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
       button={currentWorkspaceButton}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       anchorPosition="downCenter"
     >
       <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
@@ -257,8 +255,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
       <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
+            <EuiSmallButtonEmpty
               flush="left"
               key={WORKSPACE_LIST_APP_ID}
               data-test-subj="workspace-menu-view-all-button"
@@ -268,14 +265,13 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
               }}
             >
               {viewAllButton}
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiFlexItem>
           {isDashboardAdmin && (
             <EuiFlexItem grow={false}>
-              <EuiButton
+              <EuiSmallButton
                 color="text"
                 iconType="plus"
-                size="s"
                 key={WORKSPACE_CREATE_APP_ID}
                 data-test-subj="workspace-menu-create-workspace-button"
                 onClick={() => {
@@ -284,7 +280,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                 }}
               >
                 {createWorkspaceButton}
-              </EuiButton>
+              </EuiSmallButton>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
