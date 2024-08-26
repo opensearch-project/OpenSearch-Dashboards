@@ -20,35 +20,26 @@ import {
   EuiButtonEmpty,
   EuiPopoverTitle,
   EuiSmallButton,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { CoreStart, WorkspaceObject } from '../../../../../core/public';
-import { DataSource, DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
-import { WorkspaceClient } from '../../workspace_client';
-import { convertPermissionSettingsToPermissions, useWorkspaceFormContext } from '../workspace_form';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import PrometheusLogo from '../../assets/prometheus_logo.svg';
 import S3Logo from '../../assets/s3_logo.svg';
 
 interface OpenSearchConnectionTableProps {
   isDashboardAdmin: boolean;
-  currentWorkspace: WorkspaceObject;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   connectionType: string;
   dataSourceConnections: DataSourceConnection[];
+  handleUnassignDataSources: (dataSources: DataSourceConnection[]) => Promise<void>;
 }
 
 export const OpenSearchConnectionTable = ({
   isDashboardAdmin,
-  currentWorkspace,
-  setIsLoading,
   connectionType,
   dataSourceConnections,
+  handleUnassignDataSources,
 }: OpenSearchConnectionTableProps) => {
-  const {
-    services: { notifications, workspaceClient },
-  } = useOpenSearchDashboards<{ CoreStart: CoreStart; workspaceClient: WorkspaceClient }>();
-  const { formData, setSelectedDataSources } = useWorkspaceFormContext();
   const [selectedItems, setSelectedItems] = useState<DataSourceConnection[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [popoversState, setPopoversState] = useState<Record<string, boolean>>({});
@@ -110,43 +101,6 @@ export const OpenSearchConnectionTable = ({
     ],
   };
 
-  const handleUnassignDataSources = async (dataSources: DataSourceConnection[]) => {
-    try {
-      setIsLoading(true);
-      setModalVisible(false);
-      const { permissionSettings, selectedDataSources, useCase, ...attributes } = formData;
-      const savedDataSources = (selectedDataSources ?? [])?.filter(
-        ({ id }: DataSource) => !dataSources.some((item) => item.id === id)
-      );
-
-      const result = await workspaceClient.update(currentWorkspace.id, attributes, {
-        dataSources: savedDataSources.map(({ id }: DataSource) => id),
-        permissions: convertPermissionSettingsToPermissions(permissionSettings),
-      });
-      if (result?.success) {
-        notifications?.toasts.addSuccess({
-          title: i18n.translate('workspace.detail.dataSources.unassign.success', {
-            defaultMessage: 'Remove associated OpenSearch connections successfully',
-          }),
-        });
-        setSelectedDataSources(savedDataSources);
-      } else {
-        throw new Error(
-          result?.error ? result?.error : 'Remove associated OpenSearch connections failed'
-        );
-      }
-    } catch (error) {
-      notifications?.toasts.addDanger({
-        title: i18n.translate('workspace.detail.dataSources.unassign.failed', {
-          defaultMessage: 'Failed to remove associated OpenSearch connections',
-        }),
-        text: error instanceof Error ? error.message : JSON.stringify(error),
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const directQueryConnectionIcon = (connector: string | undefined) => {
     switch (connector) {
       case 'S3GLUE':
@@ -171,6 +125,20 @@ export const OpenSearchConnectionTable = ({
         defaultMessage: 'Title',
       }),
       truncateText: true,
+      render: (name: string, record) => {
+        const origin = window.location.origin;
+        let url: string;
+        if (record.connectionType === DataSourceConnectionType.OpenSearchConnection) {
+          url = `${origin}/app/dataSources_core/${record.id}`;
+        } else {
+          url = `${origin}/app/dataSources_core/manage/${name}?dataSourceMDSId=${record.parentId}`;
+        }
+        return (
+          <EuiLink href={url} className="eui-textTruncate">
+            {name}
+          </EuiLink>
+        );
+      },
     },
     {
       field: 'type',
@@ -298,6 +266,7 @@ export const OpenSearchConnectionTable = ({
             setSelectedItems([]);
           }}
           onConfirm={() => {
+            setModalVisible(false);
             handleUnassignDataSources(selectedItems);
           }}
           cancelButtonText={i18n.translate('workspace.detail.dataSources.modal.cancelButton', {

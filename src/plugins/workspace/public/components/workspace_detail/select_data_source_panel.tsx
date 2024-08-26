@@ -139,6 +139,42 @@ export const SelectDataSourceDetailPanel = ({
     }
   };
 
+  const handleUnassignDataSources = async (dataSources: DataSourceConnection[]) => {
+    try {
+      setIsLoading(true);
+      const { permissionSettings, selectedDataSources, useCase, ...attributes } = formData;
+      const savedDataSources = (selectedDataSources ?? [])?.filter(
+        ({ id }: DataSource) => !dataSources.some((item) => item.id === id)
+      );
+
+      const result = await workspaceClient.update(currentWorkspace.id, attributes, {
+        dataSources: savedDataSources.map(({ id }: DataSource) => id),
+        permissions: convertPermissionSettingsToPermissions(permissionSettings),
+      });
+      if (result?.success) {
+        notifications?.toasts.addSuccess({
+          title: i18n.translate('workspace.detail.dataSources.unassign.success', {
+            defaultMessage: 'Remove associated OpenSearch connections successfully',
+          }),
+        });
+        setSelectedDataSources(savedDataSources);
+      } else {
+        throw new Error(
+          result?.error ? result?.error : 'Remove associated OpenSearch connections failed'
+        );
+      }
+    } catch (error) {
+      notifications?.toasts.addDanger({
+        title: i18n.translate('workspace.detail.dataSources.unassign.failed', {
+          defaultMessage: 'Failed to remove associated OpenSearch connections',
+        }),
+        text: error instanceof Error ? error.message : JSON.stringify(error),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const associationButton = (
     <EuiSmallButton
       onClick={() => setIsVisible(true)}
@@ -209,10 +245,9 @@ export const SelectDataSourceDetailPanel = ({
     return (
       <OpenSearchConnectionTable
         isDashboardAdmin={isDashboardAdmin}
-        currentWorkspace={currentWorkspace}
-        setIsLoading={setIsLoading}
         connectionType={toggleIdSelected}
         dataSourceConnections={dataSourceConnections}
+        handleUnassignDataSources={handleUnassignDataSources}
       />
     );
   };
