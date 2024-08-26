@@ -28,26 +28,45 @@
  * under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { QueryStringContract } from '.';
+import { Query, Dataset } from '../../../common';
+import { datasetServiceMock } from './dataset_service/dataset_service.mock';
+import { languageServiceMock } from './language_service/language_service.mock';
 
 const createSetupContractMock = () => {
+  const datasetService = datasetServiceMock.createSetupContract();
+  const languageService = languageServiceMock.createSetupContract();
+  const defaultQuery: Query = {
+    query: '',
+    language: 'kuery',
+    dataset: datasetService.getDefault(),
+  };
+  const query$ = new BehaviorSubject<Query>(defaultQuery);
+
   const queryStringManagerMock: jest.Mocked<QueryStringContract> = {
-    getQuery: jest.fn(),
-    setQuery: jest.fn(),
-    getUpdates$: jest.fn(),
-    getDefaultQuery: jest.fn(),
+    getQuery: jest.fn().mockImplementation(() => query$.getValue()),
+    setQuery: jest.fn().mockImplementation((newQuery: Partial<Query>) => {
+      query$.next({ ...query$.getValue(), ...newQuery });
+    }),
+    getUpdates$: jest.fn().mockReturnValue(query$.asObservable()),
+    getDefaultQuery: jest.fn().mockReturnValue(defaultQuery),
     formatQuery: jest.fn(),
     clearQuery: jest.fn(),
     addToQueryHistory: jest.fn(),
-    getQueryHistory: jest.fn(),
+    getQueryHistory: jest.fn().mockReturnValue([]),
     clearQueryHistory: jest.fn(),
-    changeQueryHistory: jest.fn(),
-    getInitialQuery: jest.fn(),
-    getInitialQueryByLanguage: jest.fn(),
-    getDatasetService: jest.fn(),
-    getLanguageService: jest.fn(),
-    getInitialQueryByDataset: jest.fn(),
+    changeQueryHistory: jest.fn().mockReturnValue(() => {}),
+    getInitialQuery: jest.fn().mockReturnValue(defaultQuery),
+    getInitialQueryByLanguage: jest.fn().mockReturnValue(defaultQuery),
+    getDatasetService: jest.fn().mockReturnValue(datasetService),
+    getLanguageService: jest.fn().mockReturnValue(languageService),
+    getInitialQueryByDataset: jest.fn().mockImplementation((newDataset: Dataset) => ({
+      ...query$.getValue(),
+      dataset: newDataset,
+    })),
   };
+
   return queryStringManagerMock;
 };
 
