@@ -4,7 +4,13 @@
  */
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { DEFAULT_DATA, DataStructure, DatasetField, Dataset } from '../../../../../common';
+import {
+  DEFAULT_DATA,
+  DataStructure,
+  DatasetField,
+  Dataset,
+  IIndexPattern,
+} from '../../../../../common';
 import { DatasetTypeConfig } from '../types';
 import { getIndexPatterns } from '../../../../services';
 
@@ -60,11 +66,26 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
 };
 
 const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
-  const indexPatterns = await getIndexPatterns().getIdsWithTitle();
-
-  return indexPatterns.map((indexPattern) => ({
-    id: indexPattern.id,
-    title: indexPattern.title,
+  const resp = await client.find<IIndexPattern>({
+    type: 'index-pattern',
+    fields: ['title', 'timeFieldName', 'references'],
+    search: `*`,
+    searchFields: ['title'],
+    perPage: 100,
+  });
+  return resp.savedObjects.map((savedObject) => ({
+    id: savedObject.id,
+    title: savedObject.attributes.title,
+    timeFieldName: savedObject.attributes.timeFieldName,
     type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+    ...(savedObject.references[0]
+      ? {
+          dataSource: {
+            id: savedObject.references[0]?.id,
+            name: savedObject.references[0]?.name,
+            type: 'data-source',
+          },
+        }
+      : {}),
   }));
 };

@@ -46,7 +46,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
 
     const handleIndexPattern = async () => {
       if (isQueryEnhancementEnabled && query?.dataset) {
-        const pattern = await data.indexPatterns.get(query.dataset.id, true);
+        const pattern = await data.indexPatterns.get(query.dataset.id);
 
         if (isMounted && pattern) {
           setIndexPattern(pattern);
