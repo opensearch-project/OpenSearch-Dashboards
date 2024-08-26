@@ -6,7 +6,7 @@
 import { IDataFrame, Query } from 'src/plugins/data/common';
 import { Observable, Subscription, from, throwError, timer } from 'rxjs';
 import { catchError, concatMap, last, takeWhile, tap } from 'rxjs/operators';
-import { FetchDataFrameContext, FetchFunction } from './types';
+import { EnhancedFetchContext, FetchFunction, QueryAggConfig } from './types';
 
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -133,7 +133,20 @@ export const handleDataFrameError = (response: any) => {
   }
 };
 
-export const fetchDataFrame = (context: FetchDataFrameContext, query: Query, df: IDataFrame) => {
+export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: QueryAggConfig) => {
+  const { http, path, signal } = context;
+  const body = JSON.stringify({ query: { ...query, format: 'jdbc' }, aggConfig });
+  return from(
+    http.fetch({
+      method: 'POST',
+      path,
+      body,
+      signal,
+    })
+  ).pipe(tap(handleDataFrameError));
+};
+
+export const fetchDataFrame = (context: EnhancedFetchContext, query: Query, df: IDataFrame) => {
   const { http, path, signal } = context;
   const body = JSON.stringify({ query: { ...query, format: 'jdbc' }, df });
   return from(
@@ -146,7 +159,7 @@ export const fetchDataFrame = (context: FetchDataFrameContext, query: Query, df:
   ).pipe(tap(handleDataFrameError));
 };
 
-export const fetchDataFramePolling = (context: FetchDataFrameContext, df: IDataFrame) => {
+export const fetchDataFramePolling = (context: EnhancedFetchContext, df: IDataFrame) => {
   const { http, path, signal } = context;
   const queryId = df.meta?.queryId;
   const dataSourceId = df.meta?.queryConfig?.dataSourceId;
