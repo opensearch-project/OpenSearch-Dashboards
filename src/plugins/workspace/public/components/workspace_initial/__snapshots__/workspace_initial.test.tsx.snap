@@ -63,7 +63,7 @@ exports[`WorkspaceInitial render workspace initial page normally when theme is d
                 class="euiFlexItem euiFlexItem--flexGrowZero eui-displayInline"
               >
                 <a
-                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft"
                   data-test-subj="workspace-initial-button-openSearch"
                   href="https://www.opensearch.org/"
                   rel="noreferrer"
@@ -327,7 +327,7 @@ exports[`WorkspaceInitial render workspace initial page normally when theme is d
             </div>
           </div>
           <button
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft"
             data-test-subj="workspace-initial-button-settingsAndSetup"
             type="button"
           >
@@ -420,7 +420,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is da
                 class="euiFlexItem euiFlexItem--flexGrowZero eui-displayInline"
               >
                 <a
-                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft"
                   data-test-subj="workspace-initial-button-openSearch"
                   href="https://www.opensearch.org/"
                   rel="noreferrer"
@@ -684,7 +684,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is da
             </div>
           </div>
           <button
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft"
             data-test-subj="workspace-initial-button-settingsAndSetup"
             type="button"
           >
@@ -777,7 +777,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                 class="euiFlexItem euiFlexItem--flexGrowZero eui-displayInline"
               >
                 <a
-                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft"
                   data-test-subj="workspace-initial-button-openSearch"
                   href="https://www.opensearch.org/"
                   rel="noreferrer"
@@ -1017,7 +1017,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
             </div>
           </div>
           <button
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft"
             data-test-subj="workspace-initial-button-settingsAndSetup"
             type="button"
           >

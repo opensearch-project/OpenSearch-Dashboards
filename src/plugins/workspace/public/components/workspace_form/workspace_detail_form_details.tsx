@@ -4,8 +4,8 @@
  */
 
 import {
-  EuiSuperSelect,
-  EuiColorPicker,
+  EuiCompressedSuperSelect,
+  EuiCompressedColorPicker,
   EuiCompressedFormRow,
   EuiDescribedFormGroup,
 } from '@elastic/eui';
@@ -104,7 +104,7 @@ export const WorkspaceDetailFormDetails = ({
           error={formErrors.features?.message}
           helpText={detailsUseCaseHelpText}
         >
-          <EuiSuperSelect
+          <EuiCompressedSuperSelect
             options={options}
             valueOfSelected={value}
             onChange={(id) => {
@@ -125,7 +125,7 @@ export const WorkspaceDetailFormDetails = ({
           isInvalid={!!formErrors.color}
           error={formErrors.color?.message}
         >
-          <EuiColorPicker
+          <EuiCompressedColorPicker
             color={formData.color}
             onChange={handleColorChange}
             readOnly={!isEditing}
