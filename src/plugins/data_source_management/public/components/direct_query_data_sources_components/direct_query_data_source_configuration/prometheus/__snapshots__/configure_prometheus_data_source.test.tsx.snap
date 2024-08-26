@@ -106,17 +106,25 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                   <div
                     className="euiTextColor euiTextColor--subdued"
                   >
-                    Connect to Prometheus with OpenSearch and OpenSearch Dashboards. 
+                    <FormattedMessage
+                      defaultMessage="Connect to Prometheus with OpenSearch and OpenSearch Dashboards. "
+                      id="dataSourcesManagement.configurePrometheusDataSource.description"
+                      values={Object {}}
+                    >
+                      <span>
+                        Connect to Prometheus with OpenSearch and OpenSearch Dashboards. 
+                      </span>
+                    </FormattedMessage>
                     <EuiLink
                       external={true}
                       href="https://opensearch.org/docs/latest/dashboards/management/data-sources/"
-                      target="_blank"
+                      target="blank"
                     >
                       <a
                         className="euiLink euiLink--primary"
                         href="https://opensearch.org/docs/latest/dashboards/management/data-sources/"
-                        rel="noopener noreferrer"
-                        target="_blank"
+                        rel="noreferrer"
+                        target="blank"
                       >
                         Learn more
                         <EuiIcon
@@ -132,18 +140,6 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                             size="s"
                           />
                         </EuiIcon>
-                        <EuiScreenReaderOnly>
-                          <span
-                            className="euiScreenReaderOnly"
-                          >
-                            <EuiI18n
-                              default="(opens in a new tab or window)"
-                              token="euiLink.newTarget.screenReaderOnlyText"
-                            >
-                              (opens in a new tab or window)
-                            </EuiI18n>
-                          </span>
-                        </EuiScreenReaderOnly>
                       </a>
                     </EuiLink>
                   </div>
@@ -161,9 +157,11 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
               <form
                 className="euiForm"
               >
-                <EuiText>
+                <EuiText
+                  size="s"
+                >
                   <div
-                    className="euiText euiText--medium"
+                    className="euiText euiText--small"
                   >
                     <h3>
                       Data source details
@@ -371,9 +369,11 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                     className="euiSpacer euiSpacer--l"
                   />
                 </EuiSpacer>
-                <EuiText>
+                <EuiText
+                  size="s"
+                >
                   <div
-                    className="euiText euiText--medium"
+                    className="euiText euiText--small"
                   >
                     <h3>
                       Prometheus data location
@@ -483,9 +483,11 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                     className="euiSpacer euiSpacer--l"
                   />
                 </EuiSpacer>
-                <EuiText>
+                <EuiText
+                  size="s"
+                >
                   <div
-                    className="euiText euiText--medium"
+                    className="euiText euiText--small"
                   >
                     <h3>
                       Authentication details
@@ -947,9 +949,11 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                             <div
                               className="euiFlexItem"
                             >
-                              <EuiText>
+                              <EuiText
+                                size="s"
+                              >
                                 <div
-                                  className="euiText euiText--medium"
+                                  className="euiText euiText--small"
                                 >
                                   <h3>
                                     Query permissions

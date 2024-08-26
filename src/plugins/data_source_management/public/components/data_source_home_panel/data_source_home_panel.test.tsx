@@ -10,9 +10,9 @@ import { EuiTab } from '@elastic/eui';
 import { DataSourceHomePanel } from './data_source_home_panel';
 import { DataSourceTableWithRouter } from '../data_source_table/data_source_table';
 import { ManageDirectQueryDataConnectionsTable } from '../direct_query_data_sources_components/direct_query_data_connection/manage_direct_query_data_connections_table';
-import { CreateButton } from '../create_button';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { getListBreadcrumbs } from '../breadcrumbs';
+import { navigationPluginMock } from 'src/plugins/navigation/public/mocks';
 
 jest.mock('../../../../opensearch_dashboards_react/public');
 jest.mock('../breadcrumbs');
@@ -42,6 +42,16 @@ describe('DataSourceHomePanel', () => {
       savedObjects: {},
       uiSettings: {},
       application: { capabilities: { dataSource: { canManage: true } } },
+      docLinks: {
+        links: {
+          opensearchDashboards: {
+            dataSource: {
+              guide: 'https://opensearch.org/docs/latest/dashboards/discover/multi-data-sources/',
+            },
+          },
+        },
+      },
+      navigation: navigationPluginMock.createStartContract(),
     },
   };
 

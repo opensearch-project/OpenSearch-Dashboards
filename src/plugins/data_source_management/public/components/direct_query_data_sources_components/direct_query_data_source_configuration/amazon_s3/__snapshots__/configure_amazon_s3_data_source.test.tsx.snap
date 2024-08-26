@@ -225,7 +225,7 @@ exports[`ConfigureS3DatasourcePanel renders correctly 1`] = `
                                 <div
                                   className="euiTextColor euiTextColor--subdued"
                                 >
-                                  Connect to Amazon S3 via AWS Glue Data Catalog with Amazon EMR as an execution engine. 
+                                  Make sure you connected to Amazon S3 via AWS Glue Data Catalog with Amazon EMR as an execution engine. 
                                 </div>
                               </EuiTextColor>
                             </div>
@@ -236,14 +236,17 @@ exports[`ConfigureS3DatasourcePanel renders correctly 1`] = `
                   </EuiText>
                 </div>
               </EuiCallOut>
+               
               <EuiSpacer>
                 <div
                   className="euiSpacer euiSpacer--l"
                 />
               </EuiSpacer>
-              <EuiText>
+              <EuiText
+                size="s"
+              >
                 <div
-                  className="euiText euiText--medium"
+                  className="euiText euiText--small"
                 >
                   <h3>
                     Data source details
@@ -448,9 +451,11 @@ exports[`ConfigureS3DatasourcePanel renders correctly 1`] = `
                   className="euiSpacer euiSpacer--l"
                 />
               </EuiSpacer>
-              <EuiText>
+              <EuiText
+                size="s"
+              >
                 <div
-                  className="euiText euiText--medium"
+                  className="euiText euiText--small"
                 >
                   <h3>
                     AWS Glue Data Catalog authentication details
@@ -645,9 +650,11 @@ exports[`ConfigureS3DatasourcePanel renders correctly 1`] = `
                   className="euiSpacer euiSpacer--l"
                 />
               </EuiSpacer>
-              <EuiText>
+              <EuiText
+                size="s"
+              >
                 <div
-                  className="euiText euiText--medium"
+                  className="euiText euiText--small"
                 >
                   <h3>
                     AWS Glue Data Catalog index store details
@@ -1199,9 +1206,11 @@ exports[`ConfigureS3DatasourcePanel renders correctly 1`] = `
                           <div
                             className="euiFlexItem"
                           >
-                            <EuiText>
+                            <EuiText
+                              size="s"
+                            >
                               <div
-                                className="euiText euiText--medium"
+                                className="euiText euiText--small"
                               >
                                 <h3>
                                   Query permissions
