@@ -18,9 +18,9 @@ import { DataSettings } from '../types';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
-import { Dataset } from '../../../common';
 import { createDQLEditor, createDefaultEditor } from './editors';
 import { getQueryService, getIndexPatterns } from '../../services';
+import { DatasetSelector } from '../dataset_selector';
 
 const LANGUAGE_ID_SQL = 'SQL';
 monaco.languages.register({ id: LANGUAGE_ID_SQL });
@@ -29,9 +29,7 @@ const LANGUAGE_ID_KUERY = 'kuery';
 monaco.languages.register({ id: LANGUAGE_ID_KUERY });
 
 export interface QueryEditorProps {
-  dataSet?: Dataset;
   query: Query;
-  dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
   settings: Settings;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -44,12 +42,10 @@ export interface QueryEditorProps {
   onChange?: (query: Query, dateRange?: TimeRange) => void;
   onChangeQueryEditorFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query, dateRange?: TimeRange) => void;
-  getQueryStringInitialValue?: (language: string) => string;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
   className?: string;
   isInvalid?: boolean;
-  queryLanguage?: string;
   headerClassName?: string;
   bannerClassName?: string;
   footerClassName?: string;
@@ -70,18 +66,6 @@ interface State {
   lineCount: number | undefined;
 }
 
-const KEY_CODES = {
-  LEFT: 37,
-  UP: 38,
-  RIGHT: 39,
-  DOWN: 40,
-  ENTER: 13,
-  ESC: 27,
-  TAB: 9,
-  HOME: 36,
-  END: 35,
-};
-
 // Needed for React.lazy
 // TODO: MQL export this and let people extended this
 // eslint-disable-next-line import/no-default-export
@@ -98,7 +82,7 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   public inputRef: monaco.editor.IStandaloneCodeEditor | null = null;
 
-  private queryService = getQueryService();
+  private queryString = getQueryService().queryString;
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
@@ -108,9 +92,6 @@ export default class QueryEditorUI extends Component<Props, State> {
   private extensionMap = this.props.settings?.getQueryEditorExtensionMap();
 
   private getQueryString = () => {
-    if (!this.props.query.query) {
-      return this.props.getQueryStringInitialValue?.(this.props.query.language) ?? '';
-    }
     return toUser(this.props.query.query);
   };
 
@@ -123,7 +104,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       !(
         this.headerRef.current &&
         this.bannerRef.current &&
-        this.props.queryLanguage &&
+        this.props.query.language &&
         this.extensionMap &&
         Object.keys(this.extensionMap).length > 0
       )
@@ -132,7 +113,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
     return (
       <QueryEditorExtensions
-        language={this.props.queryLanguage}
+        language={this.props.query.language}
         onSelectLanguage={this.onSelectLanguage}
         isCollapsed={this.state.isCollapsed}
         setIsCollapsed={this.setIsCollapsed}
@@ -149,13 +130,20 @@ export default class QueryEditorUI extends Component<Props, State> {
         this.persistedLog.add(query.query);
       }
 
-      this.props.onSubmit({ query: fromUser(query.query), language: query.language });
+      this.props.onSubmit({
+        query: fromUser(query.query),
+        language: query.language,
+        dataset: query.dataset,
+      });
     }
   };
 
   private onChange = (query: Query, dateRange?: TimeRange) => {
     if (this.props.onChange) {
-      this.props.onChange({ query: fromUser(query.query), language: query.language }, dateRange);
+      this.props.onChange(
+        { query: fromUser(query.query), language: query.language, dataset: query.dataset },
+        dateRange
+      );
     }
   };
 
@@ -165,7 +153,11 @@ export default class QueryEditorUI extends Component<Props, State> {
       index: null,
     });
 
-    this.onChange({ query: value, language: this.props.query.language });
+    this.onChange({
+      query: value,
+      language: this.props.query.language,
+      dataset: this.props.query.dataset,
+    });
   };
 
   private onInputChange = (value: string) => {
@@ -185,21 +177,18 @@ export default class QueryEditorUI extends Component<Props, State> {
   };
 
   // TODO: MQL consider moving language select language of setting search source here
-  private onSelectLanguage = (language: string) => {
+  private onSelectLanguage = (languageId: string) => {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
     // UI component's change handler.
     this.services.http.post('/api/opensearch-dashboards/dql_opt_in_stats', {
-      body: JSON.stringify({ opt_in: language === 'kuery' }),
+      body: JSON.stringify({ opt_in: languageId === 'kuery' }),
     });
 
-    const newQuery = {
-      query: this.props.getQueryStringInitialValue?.(language) ?? '',
-      language,
-    };
+    const languageConfig = this.queryString.getLanguageService().getLanguage(languageId);
+    const newQuery = this.queryString.getInitialQueryByLanguage(languageId);
 
-    const enhancement = this.props.settings.getQueryEnhancements(newQuery.language);
-    const fields = enhancement?.fields;
+    const fields = languageConfig?.fields;
     const newSettings: DataSettings = {
       userQueryLanguage: newQuery.language,
       userQueryString: newQuery.query,
@@ -207,7 +196,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     };
     this.props.settings?.updateSettings(newSettings);
 
-    const dateRangeEnhancement = enhancement?.searchBar?.dateRange;
+    const dateRangeEnhancement = languageConfig?.searchBar?.dateRange;
     const dateRange = dateRangeEnhancement
       ? {
           from: dateRangeEnhancement.initialFrom!,
@@ -239,6 +228,19 @@ export default class QueryEditorUI extends Component<Props, State> {
   }
 
   public componentDidUpdate(prevProps: Props) {
+    const prevQuery = prevProps.query;
+
+    if (!isEqual(this.props.query.dataset, prevQuery.dataset)) {
+      if (this.inputRef) {
+        const newQuery = this.queryString.getInitialQuery();
+        const newQueryString = newQuery.query;
+        if (this.inputRef.getValue() !== newQueryString) {
+          this.inputRef.setValue(newQueryString);
+          this.onSubmit(newQuery);
+        }
+      }
+    }
+
     const parsedQuery = fromUser(toUser(this.props.query.query));
     if (!isEqual(this.props.query.query, parsedQuery)) {
       this.onChange({ ...this.props.query, query: parsedQuery });
@@ -258,9 +260,10 @@ export default class QueryEditorUI extends Component<Props, State> {
   };
 
   private fetchIndexPattern = async () => {
-    const dataSetTitle = this.queryService.dataSetManager.getDataSet()?.title;
-    if (!dataSetTitle) return undefined;
-    return getIndexPatterns().getByTitle(dataSetTitle);
+    const dataset = this.queryString.getQuery().dataset;
+    if (!dataset) return undefined;
+    const indexPattern = await getIndexPatterns().get(dataset.id);
+    return indexPattern;
   };
 
   provideCompletionItems = async (
@@ -309,7 +312,7 @@ export default class QueryEditorUI extends Component<Props, State> {
 
     const languageSelector = (
       <QueryLanguageSelector
-        language={this.props.query.language}
+        query={this.props.query}
         anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
         onSelectLanguage={this.onSelectLanguage}
         appName={this.services.appName}
@@ -332,7 +335,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       footerItems: {
         start: [
           `${this.state.lineCount} ${this.state.lineCount === 1 ? 'line' : 'lines'}`,
-          this.props.dataSet?.timeFieldName || '',
+          this.props.query.dataset?.timeFieldName || '',
         ],
       },
       provideCompletionItems: this.provideCompletionItems,
@@ -343,7 +346,6 @@ export default class QueryEditorUI extends Component<Props, State> {
       onChange: (value: string) => {
         // Replace new lines with an empty string to prevent multi-line input
         this.onQueryStringChange(value.replace(/[\r\n]+/gm, ''));
-
         this.setState({ lineCount: undefined });
       },
       editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -393,7 +395,7 @@ export default class QueryEditorUI extends Component<Props, State> {
             onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}
             isCollapsed={!this.state.isCollapsed}
           />
-          <div ref={this.props.dataSetContainerRef} className="osdQueryEditor__dataSetPicker" />
+          <DatasetSelector onSubmit={this.props.onSubmit} />
           <div className="osdQueryEditor__input">
             {this.state.isCollapsed
               ? languageEditor.TopBar.Collapsed()

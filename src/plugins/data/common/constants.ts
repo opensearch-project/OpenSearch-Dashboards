@@ -9,6 +9,8 @@
  * GitHub history for details.
  */
 
+import { DATA_STRUCTURE_META_TYPES, DataStructure } from './types';
+
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -28,10 +30,41 @@
  * under the License.
  */
 
+export const DEFAULT_DATA = {
+  STRUCTURES: {
+    ROOT: {
+      id: 'ROOT',
+      title: 'Data',
+      type: 'ROOT',
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.FEATURE,
+        icon: 'folderOpen',
+        tooltip: 'Root Data Structure',
+      },
+    } as DataStructure,
+  },
+
+  SET_TYPES: {
+    INDEX_PATTERN: 'INDEX_PATTERN',
+    INDEX: 'INDEXES',
+  },
+
+  SOURCE_TYPES: {
+    OPENSEARCH: 'OPENSEARCH',
+    LEGACY: 'LEGACY',
+  },
+};
+
+export const DEFAULT_QUERY_LANGUAGE = 'kuery';
+
 export const DEFAULT_QUERY = {
-  LANGUAGE: 'kuery',
-  DATASET_TYPE: 'INDEX_PATTERN',
-  ENGINE_TYPE: 'OPENSEARCH',
+  LANGUAGE: DEFAULT_QUERY_LANGUAGE,
+  DATASET: {
+    TYPE: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+    DATASOURCE: {
+      TYPE: DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+    },
+  },
 };
 
 export const UI_SETTINGS = {

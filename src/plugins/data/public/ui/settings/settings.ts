@@ -8,7 +8,7 @@ import { DataStorage, setOverrides as setFieldOverrides } from '../../../common'
 import { ConfigSchema } from '../../../config';
 import { ISearchStart } from '../../search';
 import { QueryEditorExtensionConfig } from '../query_editor/query_editor_extensions';
-import { QueryEnhancement } from '../types';
+import { IQueryStart } from '../../query';
 
 export interface DataSettings {
   userQueryLanguage: string;
@@ -30,8 +30,8 @@ export class Settings {
   constructor(
     private readonly config: ConfigSchema['enhancements'],
     private readonly search: ISearchStart,
+    private readonly query: IQueryStart,
     private readonly storage: DataStorage,
-    private readonly queryEnhancements: Map<string, QueryEnhancement>,
     private readonly queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>
   ) {
     this.isEnabled = true;
@@ -58,14 +58,6 @@ export class Settings {
     return true;
   }
 
-  getAllQueryEnhancements() {
-    return this.queryEnhancements;
-  }
-
-  getQueryEnhancements(language: string) {
-    return this.queryEnhancements.get(language);
-  }
-
   getQueryEditorExtensionMap() {
     return this.queryEditorExtensionMap;
   }
@@ -86,18 +78,12 @@ export class Settings {
     return this.storage.get('userQueryLanguage') || 'kuery';
   }
 
-  setUserQueryLanguage(language: string) {
-    if (language !== this.getUserQueryLanguage()) {
+  setUserQueryLanguage(languageId: string) {
+    if (languageId !== this.getUserQueryLanguage()) {
       this.search.df.clear();
     }
-    this.storage.set('userQueryLanguage', language);
-    const queryEnhancement = this.queryEnhancements.get(language);
-    this.search.__enhance({
-      searchInterceptor: queryEnhancement
-        ? queryEnhancement.search
-        : this.search.getDefaultSearchInterceptor(),
-    });
-    this.setUiOverridesByUserQueryLanguage(language);
+    this.storage.set('userQueryLanguage', languageId);
+    this.setUiOverridesByUserQueryLanguage(languageId);
 
     return true;
   }
@@ -126,10 +112,10 @@ export class Settings {
     return true;
   }
 
-  setUiOverridesByUserQueryLanguage(language: string) {
-    const queryEnhancement = this.queryEnhancements.get(language);
-    if (queryEnhancement) {
-      const { fields = {}, showDocLinks } = queryEnhancement;
+  setUiOverridesByUserQueryLanguage(languageId: string) {
+    const language = this.query.queryString.getLanguageService().getLanguage(languageId);
+    if (language) {
+      const { fields = {}, showDocLinks } = language;
       this.setUiOverrides({ fields, showDocLinks });
     } else {
       this.setUiOverrides({ fields: undefined, showDocLinks: undefined });
@@ -170,17 +156,11 @@ export class Settings {
 interface Deps {
   config: ConfigSchema['enhancements'];
   search: ISearchStart;
+  query: IQueryStart;
   storage: DataStorage;
-  queryEnhancements: Map<string, QueryEnhancement>;
   queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>;
 }
 
-export function createSettings({
-  config,
-  search,
-  storage,
-  queryEnhancements,
-  queryEditorExtensionMap,
-}: Deps) {
-  return new Settings(config, search, storage, queryEnhancements, queryEditorExtensionMap);
+export function createSettings({ config, search, query, storage, queryEditorExtensionMap }: Deps) {
+  return new Settings(config, search, query, storage, queryEditorExtensionMap);
 }

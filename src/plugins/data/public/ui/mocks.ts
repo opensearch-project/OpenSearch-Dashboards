@@ -38,7 +38,6 @@ function createStartContract(
   const queryEnhancements = new Map();
   return {
     IndexPatternSelect: jest.fn(),
-    DataSetNavigator: jest.fn(), // Add the missing property
     SearchBar: jest.fn(),
     SuggestionsComponent: jest.fn(), // Add the missing property
     Settings: new SettingsMock(

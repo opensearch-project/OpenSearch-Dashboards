@@ -154,8 +154,7 @@ export function createSearchBar({
       filterManager: data.query.filterManager,
     });
     const { query } = useQueryStringManager({
-      query: props.query,
-      queryStringManager: data.query.queryString,
+      queryString: data.query.queryString,
     });
 
     const { timeRange, refreshInterval } = useTimefilter({

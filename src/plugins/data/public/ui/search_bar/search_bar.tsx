@@ -119,9 +119,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   private services = this.props.opensearchDashboards.services;
-  private dataSetService = this.services.data.query.dataSetManager;
-  private queryStringService = this.services.data.query.queryString;
-  private savedQueryService = this.services.data.query.savedQueries;
+  private queryService = this.services.data.query;
+  private savedQueryService = this.queryService.savedQueries;
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
   private useNewHeader = Boolean(this.services.uiSettings.get(UI_SETTINGS.NEW_HOME_PAGE));
@@ -136,6 +135,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       nextQuery = {
         query: nextProps.query.query,
         language: nextProps.query.language,
+        dataset: nextProps.query.dataset,
       };
     } else if (
       nextProps.query &&
@@ -145,6 +145,17 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       nextQuery = {
         query: '',
         language: nextProps.query.language,
+        dataset: nextProps.query.dataset,
+      };
+    } else if (
+      nextProps.query &&
+      prevState.query &&
+      nextProps.query.dataset !== prevState.query.dataset
+    ) {
+      nextQuery = {
+        query: nextProps.query.query,
+        language: nextProps.query.language,
+        dataset: nextProps.query.dataset,
       };
     }
 
@@ -238,8 +249,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       (!this.useNewHeader || this.props.filters.length > 0) &&
       this.props.indexPatterns &&
       compact(this.props.indexPatterns).length > 0 &&
-      (this.props.settings?.getQueryEnhancements(this.state.query?.language!)?.searchBar
-        ?.showFilterBar ??
+      (this.queryService.queryString.getLanguageService().getLanguage(this.state.query?.language!)
+        ?.searchBar?.showFilterBar ??
         true)
     );
   }
@@ -374,10 +385,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         }
       }
     );
-    const dataSet = this.dataSetService.getDataSet();
-    if (dataSet && queryAndDateRange.query) {
-      this.queryStringService.addToQueryHistory(
-        dataSet,
+    const dataset = this.queryService.queryString.getQuery().dataset;
+    if (dataset && queryAndDateRange.query) {
+      this.queryService.queryString.addToQueryHistory(
+        dataset,
         queryAndDateRange.query,
         queryAndDateRange.dateRange
       );
@@ -512,7 +523,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       queryEditor = (
         <QueryEditorTopRow
           timeHistory={this.props.timeHistory}
-          dataSetContainerRef={this.props.dataSetContainerRef}
           settings={this.props.settings}
           query={this.state.query}
           screenTitle={this.props.screenTitle}
