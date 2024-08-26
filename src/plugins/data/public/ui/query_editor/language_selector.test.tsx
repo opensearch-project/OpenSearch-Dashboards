@@ -8,18 +8,11 @@ import { QueryLanguageSelector } from './language_selector';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { QueryEnhancement } from '../types';
 
 const startMock = coreMock.createStart();
 
 jest.mock('../../services', () => ({
-  getUiService: () => ({
-    Settings: {
-      getAllQueryEnhancements: () => new Map<string, QueryEnhancement>(),
-      setUserQueryLanguage: jest.fn(),
-      setUiOverridesByUserQueryLanguage: jest.fn(),
-    },
-  }),
+  getUiService: () => ({}),
   getSearchService: () => ({
     __enhance: jest.fn(),
     df: {

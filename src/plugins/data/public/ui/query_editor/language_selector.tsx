@@ -11,7 +11,7 @@ import {
   EuiButtonEmpty,
   EuiContextMenuItem,
 } from '@elastic/eui';
-import { getQueryService, getUiService } from '../../services';
+import { getQueryService } from '../../services';
 import { LanguageConfig } from '../../query';
 import { Query } from '../..';
 
@@ -33,7 +33,6 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState(props.query.language);
 
-  const uiService = getUiService();
   const queryString = getQueryService().queryString;
   const languageService = queryString.getLanguageService();
 
@@ -58,7 +57,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
   languageService.getLanguages().forEach((language) => {
     if (
       (language && props.appName && !language.supportedAppNames.includes(props.appName)) ||
-      uiService.Settings.getUserQueryLanguageBlocklist().includes(language?.id)
+      languageService.getUserQueryLanguageBlocklist().includes(language?.id)
     )
       return;
     languageOptions.unshift(mapExternalLanguageToOptions(language!));
@@ -76,7 +75,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
     props.onSelectLanguage(newLanguage);
   };
 
-  uiService.Settings.setUserQueryLanguage(currentLanguage);
+  languageService.setUserQueryLanguage(currentLanguage);
 
   const languageOptionsMenu = languageOptions
     .sort((a, b) => {

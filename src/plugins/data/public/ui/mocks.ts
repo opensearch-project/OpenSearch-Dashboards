@@ -4,7 +4,6 @@
  */
 
 import { Observable } from 'rxjs';
-import { SettingsMock } from './settings/mocks';
 import { IUiSetup, IUiStart } from './types';
 import { ISearchStart } from '../search/types';
 
@@ -35,18 +34,10 @@ function createStartContract(
   isEnhancementsEnabled: boolean = false,
   searchServiceMock: jest.Mocked<ISearchStart>
 ): jest.Mocked<IUiStart> {
-  const queryEnhancements = new Map();
   return {
     IndexPatternSelect: jest.fn(),
     SearchBar: jest.fn(),
     SuggestionsComponent: jest.fn(), // Add the missing property
-    Settings: new SettingsMock(
-      { supportedAppNames: ['discover'] },
-      searchServiceMock,
-      createMockStorage(),
-      queryEnhancements,
-      {} // Add the missing argument here
-    ),
     dataSetContainer$: new Observable(),
   };
 }

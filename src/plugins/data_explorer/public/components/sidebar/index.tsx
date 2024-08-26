@@ -24,23 +24,29 @@ export const Sidebar: FC = ({ children }) => {
 
   const {
     services: {
-      data: { indexPatterns, dataSources, ui },
+      data: {
+        indexPatterns,
+        dataSources,
+        ui,
+        query: { queryString },
+      },
       notifications: { toasts },
       application,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
   useEffect(() => {
-    const subscriptions = ui.Settings.getEnabledQueryEnhancementsUpdated$().subscribe(
-      (enabledQueryEnhancements) => {
+    const subscriptions = queryString
+      .getLanguageService()
+      .getEnabledQueryEnhancementsUpdated$()
+      .subscribe((enabledQueryEnhancements) => {
         setIsEnhancementsEnabled(enabledQueryEnhancements);
-      }
-    );
+      });
 
     return () => {
       subscriptions.unsubscribe();
     };
-  }, [ui.Settings]);
+  }, [queryString]);
 
   const setContainerRef = useCallback((uiContainerRef) => {
     uiContainerRef.appendChild(containerRef.current);

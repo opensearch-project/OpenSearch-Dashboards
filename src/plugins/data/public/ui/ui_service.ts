@@ -8,11 +8,9 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core
 import { ConfigSchema } from '../../config';
 import { DataPublicPluginStart } from '../types';
 import { createIndexPatternSelect } from './index_pattern_select';
-import { QueryEditorExtensionConfig } from './query_editor';
 import { createSearchBar } from './search_bar/create_search_bar';
-import { createSettings } from './settings';
 import { SuggestionsComponent } from './typeahead';
-import { IUiSetup, IUiStart, UiEnhancements } from './types';
+import { IUiSetup, IUiStart } from './types';
 import { DataStorage } from '../../common';
 
 /** @internal */
@@ -27,7 +25,6 @@ export interface UiServiceStartDependencies {
 
 export class UiService implements Plugin<IUiSetup, IUiStart> {
   enhancementsConfig: ConfigSchema['enhancements'];
-  private queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig> = {};
   private dataSetContainer$ = new BehaviorSubject<HTMLDivElement | null>(null);
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -36,27 +33,9 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
     this.enhancementsConfig = enhancements;
   }
 
-  public setup(core: CoreSetup, {}: UiServiceSetupDependencies): IUiSetup {
-    return {
-      __enhance: (enhancements?: UiEnhancements) => {
-        if (!enhancements) return;
-        if (enhancements.queryEditorExtension) {
-          this.queryEditorExtensionMap[enhancements.queryEditorExtension.id] =
-            enhancements.queryEditorExtension;
-        }
-      },
-    };
-  }
+  public setup(core: CoreSetup, {}: UiServiceSetupDependencies): any {}
 
   public start(core: CoreStart, { dataServices, storage }: UiServiceStartDependencies): IUiStart {
-    const Settings = createSettings({
-      config: this.enhancementsConfig,
-      search: dataServices.search,
-      query: dataServices.query,
-      storage,
-      queryEditorExtensionMap: this.queryEditorExtensionMap,
-    });
-
     const setDataSetContainerRef = (ref: HTMLDivElement | null) => {
       this.dataSetContainer$.next(ref);
     };
@@ -65,7 +44,6 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       core,
       data: dataServices,
       storage,
-      settings: Settings,
       setDataSetContainerRef,
     });
 
@@ -73,7 +51,6 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
       SearchBar,
       SuggestionsComponent,
-      Settings,
       dataSetContainer$: this.dataSetContainer$,
     };
   }

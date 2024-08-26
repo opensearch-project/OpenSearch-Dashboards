@@ -63,7 +63,7 @@ import {
   IDataFrameResponse,
   createDataFrameCache,
 } from '../../common/data_frames';
-import { getQueryService, getUiService } from '../services';
+import { getQueryService } from '../services';
 import { UI_SETTINGS } from '../../common';
 
 /** @internal */
@@ -138,7 +138,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       const queryStringManager = getQueryService().queryString;
       const language = queryStringManager.getQuery().language;
       const languageConfig = queryStringManager.getLanguageService().getLanguage(language);
-      getUiService().Settings.setUiOverridesByUserQueryLanguage(language);
+      queryStringManager.getLanguageService().setUiOverridesByUserQueryLanguage(language);
       const isEnhancedEnabled = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
 
       if (languageConfig) {
