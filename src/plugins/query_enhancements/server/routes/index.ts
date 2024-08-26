@@ -37,6 +37,7 @@ function defineRoute(
             dataset: schema.nullable(schema.object({}, { unknowns: 'allow' })),
             format: schema.string(),
           }),
+          aggConfig: schema.nullable(schema.object({}, { unknowns: 'allow' })),
           df: schema.nullable(schema.object({}, { unknowns: 'allow' })),
         }),
       },
