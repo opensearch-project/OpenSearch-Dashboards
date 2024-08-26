@@ -6,12 +6,9 @@
 import { firstValueFrom } from '@osd/std';
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
-import { of } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
-import { Dataset } from '../../../../data/common';
 import { QueryEditorExtensionDependencies } from '../../../../data/public';
 import { dataPluginMock } from '../../../../data/public/mocks';
-import { DataSetContract } from '../../../../data/public/query';
 import { ConfigSchema } from '../../../common/config';
 import { createQueryAssistExtension } from './create_extension';
 
@@ -24,18 +21,6 @@ const coreSetupMock = coreMock.createSetup({
 });
 const httpMock = coreSetupMock.http;
 const dataMock = dataPluginMock.createSetupContract();
-const dataSetMock = (dataMock.query.dataSetManager as unknown) as jest.Mocked<DataSetContract>;
-
-const mockDataset = {
-  id: 'mock-data-set-id',
-  title: 'mock-title',
-  dataSource: {
-    id: 'mock-data-source-id',
-  },
-} as Dataset;
-
-dataSetMock.getDataSet.mockReturnValue(mockDataset);
-dataSetMock.getUpdates$.mockReturnValue(of(mockDataset));
 
 jest.mock('../components', () => ({
   QueryAssistBar: jest.fn(() => <div>QueryAssistBar</div>),

@@ -62,7 +62,6 @@ import {
   IDataFrame,
   IDataFrameResponse,
   createDataFrameCache,
-  dataFrameToSpec,
 } from '../../common/data_frames';
 import { getQueryService, getUiService } from '../services';
 import { UI_SETTINGS } from '../../common';
@@ -127,6 +126,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       __enhance: (enhancements: SearchEnhancements) => {
         this.searchInterceptor = enhancements.searchInterceptor;
       },
+      getDefaultSearchInterceptor: () => this.defaultSearchInterceptor,
     };
   }
 
@@ -135,19 +135,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options) => {
-      const selectedLanguage = getQueryService().queryString.getQuery().language;
-      const uiService = getUiService();
-      const enhancement = uiService.Settings.getQueryEnhancements(selectedLanguage);
-      uiService.Settings.setUiOverridesByUserQueryLanguage(selectedLanguage);
+      const queryStringManager = getQueryService().queryString;
+      const language = queryStringManager.getQuery().language;
+      const languageConfig = queryStringManager.getLanguageService().getLanguage(language);
+      getUiService().Settings.setUiOverridesByUserQueryLanguage(language);
       const isEnhancedEnabled = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
 
-      if (enhancement) {
+      if (languageConfig) {
         if (!isEnhancedEnabled) {
           notifications.toasts.addWarning(
-            `Query enhancements are disabled. Please enable to use: ${selectedLanguage}.`
+            `Query enhancements are disabled. Please enable to use: ${languageConfig.id}.`
           );
         }
-        return enhancement.search.search(request, options);
+        return languageConfig.search.search(request, options);
       }
       return this.defaultSearchInterceptor.search(request, options);
     }) as ISearchGeneric;
@@ -158,28 +158,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const dfService: DataFrameService = {
       get: () => this.dfCache.get(),
       set: async (dataFrame: IDataFrame) => {
-        if (this.dfCache.get() && this.dfCache.get()?.name !== dataFrame.name) {
-          indexPatterns.clearCache(this.dfCache.get()!.name, false);
-        }
-
-        if (
-          dataFrame.meta &&
-          dataFrame.meta.queryConfig &&
-          'dataSource' in dataFrame.meta.queryConfig
-        ) {
-          const dataSource = await indexPatterns.findDataSourceByTitle(
-            dataFrame.meta.queryConfig.dataSource
-          );
-          dataFrame.meta.queryConfig.dataSourceId = dataSource?.id;
-        }
         this.dfCache.set(dataFrame);
-        const dataSetName = `${dataFrame.meta?.queryConfig?.dataSourceId ?? ''}.${dataFrame.name}`;
-        const existingIndexPattern = await indexPatterns.get(dataSetName, true);
-        const dataSet = await indexPatterns.create(
-          dataFrameToSpec(dataFrame, existingIndexPattern?.id ?? dataSetName),
-          !existingIndexPattern?.id
-        );
-        indexPatterns.saveToCache(dataSetName, dataSet);
       },
       clear: () => {
         if (this.dfCache.get() === undefined) return;

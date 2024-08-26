@@ -134,9 +134,15 @@ export class DataPublicPlugin
     expressions.registerFunction(opensearchaggs);
     expressions.registerFunction(indexPatternLoad);
 
+    const searchService = this.searchService.setup(core, {
+      usageCollection,
+      expressions,
+    });
+
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
       storage: this.storage,
+      defaultSearchInterceptor: searchService.getDefaultSearchInterceptor(),
     });
 
     uiActions.registerAction(
@@ -156,11 +162,6 @@ export class DataPublicPlugin
         uiActions: startServices().plugins.uiActions,
       }))
     );
-
-    const searchService = this.searchService.setup(core, {
-      usageCollection,
-      expressions,
-    });
 
     const uiService = this.uiService.setup(core, {});
 

@@ -5,13 +5,12 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DataExplorerServices } from '../../types';
-import { Dataset } from '../../../../data/common';
+import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../components/constants';
 
 export interface MetadataState {
   indexPattern?: string;
   originatingApp?: string;
   view?: string;
-  dataSet?: Omit<Dataset, 'id'>;
 }
 
 const initialState: MetadataState = {};
@@ -20,12 +19,16 @@ export const getPreloadedState = async ({
   embeddable,
   scopedHistory,
   data,
+  uiSettings,
 }: DataExplorerServices): Promise<MetadataState> => {
   const { originatingApp } =
     embeddable
       .getStateTransfer(scopedHistory)
       .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
-  const defaultIndexPattern = await data.indexPatterns.getDefault();
+  const isQueryEnhancementEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
+  const defaultIndexPattern = isQueryEnhancementEnabled
+    ? undefined
+    : await data.indexPatterns.getDefault();
   const preloadedState: MetadataState = {
     ...initialState,
     originatingApp,
@@ -39,11 +42,8 @@ export const slice = createSlice({
   name: 'metadata',
   initialState,
   reducers: {
-    setIndexPattern: (state, action: PayloadAction<string>) => {
+    setIndexPattern: (state, action: PayloadAction<string | undefined>) => {
       state.indexPattern = action.payload;
-    },
-    setDataSet: (state, action: PayloadAction<Omit<Dataset, 'id'>>) => {
-      state.dataSet = action.payload;
     },
     setOriginatingApp: (state, action: PayloadAction<string | undefined>) => {
       state.originatingApp = action.payload;
@@ -58,4 +58,4 @@ export const slice = createSlice({
 });
 
 export const { reducer } = slice;
-export const { setIndexPattern, setDataSet, setOriginatingApp, setView, setState } = slice.actions;
+export const { setIndexPattern, setOriginatingApp, setView, setState } = slice.actions;

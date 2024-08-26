@@ -4,7 +4,7 @@
  */
 
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiPageSideBar, EuiPortal, EuiSplitPanel } from '@elastic/eui';
+import { EuiPageSideBar, EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSource, DataSourceGroup, DataSourceSelectable } from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
@@ -29,8 +29,6 @@ export const Sidebar: FC = ({ children }) => {
       application,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
-
-  const { DataSetNavigator } = ui;
 
   useEffect(() => {
     const subscriptions = ui.Settings.getEnabledQueryEnhancementsUpdated$().subscribe(
@@ -144,15 +142,6 @@ export const Sidebar: FC = ({ children }) => {
         borderRadius="none"
         color="transparent"
       >
-        {isEnhancementsEnabled && (
-          <EuiPortal
-            portalRef={(node) => {
-              containerRef.current = node;
-            }}
-          >
-            <DataSetNavigator />
-          </EuiPortal>
-        )}
         {!isEnhancementsEnabled && (
           <EuiSplitPanel.Inner
             paddingSize="s"

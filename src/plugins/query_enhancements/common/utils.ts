@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IDataFrame } from 'src/plugins/data/common';
+import { IDataFrame, Query } from 'src/plugins/data/common';
 import { Observable, Subscription, from, throwError, timer } from 'rxjs';
 import { catchError, concatMap, last, takeWhile, tap } from 'rxjs/operators';
 import { FetchDataFrameContext, FetchFunction } from './types';
@@ -133,13 +133,9 @@ export const handleDataFrameError = (response: any) => {
   }
 };
 
-export const fetchDataFrame = (
-  context: FetchDataFrameContext,
-  queryString: string,
-  df: IDataFrame
-) => {
+export const fetchDataFrame = (context: FetchDataFrameContext, query: Query, df: IDataFrame) => {
   const { http, path, signal } = context;
-  const body = JSON.stringify({ query: { qs: queryString, format: 'jdbc' }, df });
+  const body = JSON.stringify({ query: { ...query, format: 'jdbc' }, df });
   return from(
     http.fetch({
       method: 'POST',

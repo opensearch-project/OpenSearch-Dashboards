@@ -20,7 +20,6 @@ import { useDiscoverContext } from '../context';
 import { useDispatch, setSavedQuery, useSelector } from '../../utils/state_management';
 
 import './discover_canvas.scss';
-import { useDataSetManager } from '../utils/use_dataset_manager';
 import { TopNavMenuItemRenderType } from '../../../../../navigation/public';
 
 export interface TopNavProps {
@@ -72,22 +71,22 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
 
   useEffect(() => {
     let isMounted = true;
-    const initializeDataSet = async () => {
+    const initializeDataset = async () => {
       await data.indexPatterns.ensureDefaultIndexPattern();
       const defaultIndexPattern = await data.indexPatterns.getDefault();
-      const { dataSetManager } = data.query;
-      dataSetManager.initWithIndexPattern(defaultIndexPattern);
-      const defaultDataSet = dataSetManager.getDefaultDataSet();
+      // TODO: ROCKY do we need this?
+      // const queryString = data.query.queryString;
+      // const defaultDataset = queryString.getDatasetService().getDefault();
 
       if (!isMounted) return;
 
       setIndexPatterns(defaultIndexPattern ? [defaultIndexPattern] : undefined);
-      if (defaultDataSet) {
-        dataSetManager.setDataSet(defaultDataSet);
-      }
+      // if (defaultDataset) {
+      //   datasetManager.setDataset(defaultDataset);
+      // }
     };
 
-    initializeDataSet();
+    initializeDataset();
 
     return () => {
       isMounted = false;

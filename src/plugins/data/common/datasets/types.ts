@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { EuiIconProps } from '@elastic/eui';
+export * from './_structure_cache';
+
 /**
  * Describes a data source with its properties.
  */
@@ -116,15 +119,10 @@ export interface DataStructure {
   parent?: DataStructure;
   /** Optional array of child data structures */
   children?: DataStructure[];
+  hasNext?: boolean;
+  columnHeader?: string;
   /** Optional metadata for the data structure */
   meta?: DataStructureMeta;
-}
-
-/**
- * Metadata for a data structure, used for additional properties like icons or tooltips.
- */
-export interface DataStructureMeta {
-  type: DATA_STRUCTURE_META_TYPES;
 }
 
 /**
@@ -132,25 +130,43 @@ export interface DataStructureMeta {
  */
 export enum DATA_STRUCTURE_META_TYPES {
   FEATURE = 'FEATURE',
+  TYPE = 'TYPE',
   CUSTOM = 'CUSTOM',
 }
 
 /**
  * Metadata for a data structure, used for additional properties like icons or tooltips.
  */
-export interface DataStructureFeatureMeta extends DataStructureMeta {
+export interface DataStructureFeatureMeta {
   type: DATA_STRUCTURE_META_TYPES.FEATURE;
-  icon: string;
+  icon?: string;
+  tooltip?: string;
+}
+
+/**
+ * Metadata for dataset type
+ */
+export interface DataStructureDataTypeMeta {
+  type: DATA_STRUCTURE_META_TYPES.TYPE;
+  icon: EuiIconProps;
   tooltip: string;
 }
 
 /**
  * Metadata for a data structure with CUSTOM type, allowing any additional fields.
  */
-export interface DataStructureCustomMeta extends DataStructureMeta {
+export interface DataStructureCustomMeta {
   type: DATA_STRUCTURE_META_TYPES.CUSTOM;
   [key: string]: any;
 }
+
+/**
+ * Union type for DataStructureMeta
+ */
+export type DataStructureMeta =
+  | DataStructureFeatureMeta
+  | DataStructureDataTypeMeta
+  | DataStructureCustomMeta;
 
 /**
  * Represents a cached version of DataStructure with string references instead of object references.
@@ -168,11 +184,22 @@ export interface DataStructureCustomMeta extends DataStructureMeta {
  *   ]
  * };
  */
-export interface CachedDataStructure extends Omit<DataStructure, 'parent' | 'children' | 'meta'> {
+export interface CachedDataStructure extends Omit<DataStructure, 'parent' | 'children'> {
   /** ID of the parent data structure */
   parent: string;
   /** Array of child data structure IDs */
   children: string[];
+}
+
+export interface BaseDataset {
+  /** Unique identifier for the dataset, for non-index pattern based datasets, we will append the data source ID if present */
+  id: string;
+  /** Human-readable name of the dataset that is used to query */
+  title: string;
+  /** The type of the dataset, registered by other classes */
+  type: string;
+  /** Optional reference to the data source */
+  dataSource?: DataSource;
 }
 
 /**
@@ -189,10 +216,10 @@ export interface CachedDataStructure extends Omit<DataStructure, 'parent' | 'chi
  *   type: "INDEX_PATTERN",
  *   timeFieldName: "@timestamp",
  *   dataSource: {
- *     id: "main-cluster",
- *     title: "Main OpenSearch Cluster",
- *     type: "OPENSEARCH"
- *   },
+ *     id: "2e1b1b80-9c4d-11ee-8c90-0242ac120001",
+ *     title: "Cluster1",
+ *     type: "OpenSearch"
+ *   }
  * };
  *
  * @example
@@ -209,15 +236,16 @@ export interface CachedDataStructure extends Omit<DataStructure, 'parent' | 'chi
  *   },
  * };
  */
-export interface Dataset {
-  /** Unique identifier for the dataset, for non-index pattern based datasets, we will append the data source ID if present */
-  id: string;
-  /** Human-readable name of the dataset that is used to query */
-  title: string;
-  /** The type of the dataset, registered by other classes */
-  type: string;
+export interface Dataset extends BaseDataset {
   /** Optional name of the field used for time-based operations */
   timeFieldName?: string;
-  /** Optional reference to the data source */
-  dataSource?: DataSource;
+  /** Optional language to default to from the language selector */
+  language?: string;
+}
+
+export interface DatasetField {
+  name: string;
+  type: string;
+  displayName?: string;
+  // TODO:  osdFieldType?
 }

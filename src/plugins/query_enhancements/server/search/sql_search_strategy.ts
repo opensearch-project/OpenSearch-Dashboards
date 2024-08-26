@@ -12,6 +12,7 @@ import {
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
   PartialDataFrame,
+  Query,
   createDataFrame,
 } from '../../../data/common';
 import { Facet } from '../utils';
@@ -27,7 +28,6 @@ export const sqlSearchStrategyProvider = (
   return {
     search: async (context, request: any, _options) => {
       try {
-        request.body.query = request.body.query.qs;
         const rawResponse: any = await sqlFacet.describeQuery(context, request);
 
         if (!rawResponse.success) {

@@ -16,7 +16,8 @@ import {
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
-import { UI_SETTINGS } from '../common';
+import { LanguageConfig, Query } from '../../data/public';
+import { s3TypeConfig } from './datasets';
 
 export class QueryEnhancementsPlugin
   implements
@@ -38,19 +39,7 @@ export class QueryEnhancementsPlugin
     core: CoreSetup<QueryEnhancementsPluginStartDependencies>,
     { data }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
-    core.uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
-      if (key === UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) {
-        if (newValue) {
-          core.uiSettings.set(UI_SETTINGS.STATE_STORE_IN_SESSION_STORAGE, true);
-        }
-      }
-      if (key === UI_SETTINGS.STATE_STORE_IN_SESSION_STORAGE) {
-        if (!newValue) {
-          core.uiSettings.set(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED, false);
-        }
-      }
-    });
-
+    const { queryString } = data.query;
     const pplSearchInterceptor = new PPLSearchInterceptor({
       toasts: core.notifications.toasts,
       http: core.http,
@@ -67,58 +56,58 @@ export class QueryEnhancementsPlugin
       usageCollector: data.search.usageCollector,
     });
 
-    data.__enhance({
-      ui: {
-        query: {
-          language: 'PPL',
-          search: pplSearchInterceptor,
-          searchBar: {
-            queryStringInput: { initialValue: 'source=<data_source>' },
-            dateRange: {
-              initialFrom: moment().subtract(2, 'days').toISOString(),
-              initialTo: moment().add(2, 'days').toISOString(),
-            },
-            showFilterBar: false,
-            showDataSetsSelector: true,
-            showDataSourcesSelector: true,
-          },
-          fields: {
-            filterable: false,
-            visualizable: false,
-          },
-          showDocLinks: false,
-          supportedAppNames: ['discover'],
-        },
+    // Register PPL language
+    const pplLanguageConfig: LanguageConfig = {
+      id: 'PPL',
+      title: 'PPL',
+      search: pplSearchInterceptor,
+      getQueryString: (query: Query) => {
+        return `source = ${query.dataset?.title}`;
       },
-    });
+      searchBar: {
+        dateRange: {
+          initialFrom: moment().subtract(2, 'days').toISOString(),
+          initialTo: moment().add(2, 'days').toISOString(),
+        },
+        showFilterBar: false,
+      },
+      fields: {
+        filterable: false,
+        visualizable: false,
+      },
+      showDocLinks: false,
+      supportedAppNames: ['discover'],
+    };
+    queryString.getLanguageService().registerLanguage(pplLanguageConfig);
 
-    data.__enhance({
-      ui: {
-        query: {
-          language: 'SQL',
-          search: sqlSearchInterceptor,
-          searchBar: {
-            showDatePicker: false,
-            showFilterBar: false,
-            showDataSetsSelector: true,
-            showDataSourcesSelector: true,
-            queryStringInput: { initialValue: 'SELECT * FROM <data_source> LIMIT 10' },
-          },
-          fields: {
-            filterable: false,
-            visualizable: false,
-          },
-          showDocLinks: false,
-          supportedAppNames: ['discover'],
-        },
+    // Register SQL language
+    const sqlLanguageConfig: LanguageConfig = {
+      id: 'SQL',
+      title: 'SQL',
+      search: sqlSearchInterceptor,
+      getQueryString: (query: Query) => {
+        return `SELECT * FROM ${queryString.getQuery().dataset?.title} LIMIT 10`;
       },
-    });
+      searchBar: {
+        showDatePicker: false,
+        showFilterBar: false,
+      },
+      fields: {
+        filterable: false,
+        visualizable: false,
+      },
+      showDocLinks: false,
+      supportedAppNames: ['discover'],
+    };
+    queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
 
     data.__enhance({
       ui: {
         queryEditorExtension: createQueryAssistExtension(core.http, data, this.config.queryAssist),
       },
     });
+
+    queryString.getDatasetService().registerType(s3TypeConfig);
 
     return {};
   }

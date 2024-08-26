@@ -29,6 +29,7 @@
  */
 
 import { DataFrameAggConfig, IDataFrame } from './data_frames';
+import { Query } from './query';
 import { BucketAggType, MetricAggType } from './search';
 
 export * from './query/types';
@@ -50,12 +51,12 @@ export * from './datasets/types';
 export type GetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
 export type GetDataFrameFn = () => IDataFrame | undefined;
 export type GetDataFrameAggQsFn = ({
-  qs,
+  query,
   aggConfig,
   timeField,
   timeFilter,
 }: {
-  qs: string;
+  query: Query;
   aggConfig: DataFrameAggConfig;
   timeField: any;
   timeFilter: any;
