@@ -14,11 +14,16 @@ export type Services = CoreStart & {
   navigationUI?: NavigationPublicPluginStart['ui'];
 };
 
+export interface WorkspaceUseCaseFeature {
+  id: string;
+  title?: string;
+}
+
 export interface WorkspaceUseCase {
   id: string;
   title: string;
   description: string;
-  features: string[];
+  features: WorkspaceUseCaseFeature[];
   systematic?: boolean;
   order?: number;
 }

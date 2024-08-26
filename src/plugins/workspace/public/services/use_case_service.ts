@@ -13,6 +13,8 @@ import {
   DEFAULT_APP_CATEGORIES,
   PublicAppInfo,
   WorkspacesSetup,
+  DEFAULT_NAV_GROUPS,
+  ALL_USE_CASE_ID,
 } from '../../../../core/public';
 import { WORKSPACE_DETAIL_APP_ID, WORKSPACE_USE_CASES } from '../../common/constants';
 import {
@@ -20,6 +22,7 @@ import {
   getFirstUseCaseOfFeatureConfigs,
   isEqualWorkspaceUseCase,
 } from '../utils';
+import { WorkspaceUseCase } from '../types';
 
 export interface UseCaseServiceSetupDeps {
   chrome: CoreSetup['chrome'];
@@ -129,10 +132,18 @@ export class UseCaseService {
             )
             .pipe(
               map((useCases) =>
-                useCases.sort(
-                  (a, b) =>
+                useCases.sort((a, b) => {
+                  // Make sure all use case should be the latest
+                  if (a.id === ALL_USE_CASE_ID) {
+                    return 1;
+                  }
+                  if (b.id === ALL_USE_CASE_ID) {
+                    return -1;
+                  }
+                  return (
                     (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER)
-                )
+                  );
+                })
               )
             );
         }
@@ -146,9 +157,21 @@ export class UseCaseService {
               WORKSPACE_USE_CASES['security-analytics'],
               WORKSPACE_USE_CASES.essentials,
               WORKSPACE_USE_CASES.search,
-            ].filter((useCase) => {
-              return useCase.features.some((featureId) => configurableAppsId.includes(featureId));
-            });
+            ]
+              .filter((useCase) => {
+                return useCase.features.some((featureId) => configurableAppsId.includes(featureId));
+              })
+              .map((item) => ({
+                ...item,
+                features: item.features.map((featureId) => ({
+                  title: configurableApps.find((app) => app.id === featureId)?.title,
+                  id: featureId,
+                })),
+              }))
+              .concat({
+                ...DEFAULT_NAV_GROUPS.all,
+                features: configurableApps.map((app) => ({ id: app.id, title: app.title })),
+              }) as WorkspaceUseCase[];
           })
         );
       },
