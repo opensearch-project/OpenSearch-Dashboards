@@ -122,7 +122,7 @@ export const RecentItems = ({
     <EuiPopover
       data-test-subj="preferencesSettingPopover"
       ownFocus={false}
-      panelPaddingSize="m"
+      panelPaddingSize="s"
       button={
         <EuiButtonEmpty
           data-test-subj="preferencesSettingButton"

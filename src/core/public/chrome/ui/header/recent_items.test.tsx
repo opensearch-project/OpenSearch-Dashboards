@@ -10,14 +10,6 @@ import { applicationServiceMock, httpServiceMock } from '../../../mocks';
 import { SavedObjectWithMetadata } from './recent_items';
 import { RecentItems } from './recent_items';
 
-jest.mock('./nav_link', () => ({
-  createRecentNavLink: jest.fn().mockImplementation(() => {
-    return {
-      href: '/recent_nav_link',
-    };
-  }),
-}));
-
 const mockRecentlyAccessed = new BehaviorSubject([
   {
     id: '6ef856c0-5f86-11ef-b7df-1bb1cf26ce5b',
