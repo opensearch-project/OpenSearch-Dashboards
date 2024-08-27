@@ -163,14 +163,9 @@ export const AssociationDataSourceModal = ({
               );
               const isParentCheckedThisTime = newCheckedConnectionIds.includes(parentConnection.id);
 
-              // Parent change to checked this time
-              if (!isParentCheckedLastTime && isParentCheckedThisTime) {
-                option.checked = 'on';
-              }
-
-              // This won't be executed since checked options already been filter out
-              if (isParentCheckedLastTime && isParentCheckedThisTime) {
-                option.checked = undefined;
+              // Update checked status if parent checked status changed this time
+              if (isParentCheckedLastTime !== isParentCheckedThisTime) {
+                option.checked = isParentCheckedThisTime ? 'on' : undefined;
               }
             }
           }
