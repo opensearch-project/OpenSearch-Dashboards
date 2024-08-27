@@ -58,7 +58,7 @@ describe('QueryStringManager', () => {
     });
     expect(emittedValues).toHaveLength(0);
 
-    const newQuery = { query: 'new query', language: 'kuery' };
+    const newQuery = { query: 'new query', language: 'kquery' };
     service.setQuery(newQuery);
     expect(emittedValues).toHaveLength(1);
     expect(emittedValues[0]).toEqual(newQuery);

@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { QueryStringContract } from '.';
 import { Query, Dataset } from '../../../common';
 import { datasetServiceMock } from './dataset_service/dataset_service.mock';
@@ -37,20 +36,18 @@ import { languageServiceMock } from './language_service/language_service.mock';
 const createSetupContractMock = (isEnhancementsEnabled: boolean = false) => {
   const datasetService = datasetServiceMock.createSetupContract();
   const languageService = languageServiceMock.createSetupContract();
+
   const defaultQuery: Query = {
     query: '',
     language: 'kuery',
     ...(isEnhancementsEnabled ? { dataset: datasetService.getDefault() } : {}),
   };
-  const query$ = new BehaviorSubject<Query>(defaultQuery);
 
   const queryStringManagerMock: jest.Mocked<QueryStringContract> = {
-    getQuery: jest.fn().mockImplementation(() => query$.getValue()),
-    setQuery: jest.fn().mockImplementation((newQuery: Partial<Query>) => {
-      query$.next({ ...query$.getValue(), ...newQuery });
-    }),
-    getUpdates$: jest.fn().mockReturnValue(query$.asObservable()),
-    getDefaultQuery: jest.fn().mockReturnValue(defaultQuery),
+    getQuery: jest.fn(),
+    setQuery: jest.fn(),
+    getUpdates$: jest.fn(),
+    getDefaultQuery: jest.fn(),
     formatQuery: jest.fn(),
     clearQuery: jest.fn(),
     addToQueryHistory: jest.fn(),
@@ -62,7 +59,7 @@ const createSetupContractMock = (isEnhancementsEnabled: boolean = false) => {
     getDatasetService: jest.fn().mockReturnValue(datasetService),
     getLanguageService: jest.fn().mockReturnValue(languageService),
     getInitialQueryByDataset: jest.fn().mockImplementation((newDataset: Dataset) => ({
-      ...query$.getValue(),
+      ...defaultQuery,
       dataset: newDataset,
     })),
   };
