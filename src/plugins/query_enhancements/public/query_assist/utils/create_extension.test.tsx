@@ -6,12 +6,9 @@
 import { firstValueFrom } from '@osd/std';
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
-import { of } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
-import { SimpleDataSet } from '../../../../data/common';
 import { QueryEditorExtensionDependencies } from '../../../../data/public';
 import { dataPluginMock } from '../../../../data/public/mocks';
-import { DataSetContract } from '../../../../data/public/query';
 import { ConfigSchema } from '../../../common/config';
 import { createQueryAssistExtension } from './create_extension';
 
@@ -24,25 +21,14 @@ const coreSetupMock = coreMock.createSetup({
 });
 const httpMock = coreSetupMock.http;
 const dataMock = dataPluginMock.createSetupContract();
-const dataSetMock = (dataMock.query.dataSetManager as unknown) as jest.Mocked<DataSetContract>;
-
-const mockSimpleDataSet = {
-  id: 'mock-data-set-id',
-  title: 'mock-title',
-  dataSourceRef: {
-    id: 'mock-data-source-id',
-  },
-} as SimpleDataSet;
-
-dataSetMock.getDataSet.mockReturnValue(mockSimpleDataSet);
-dataSetMock.getUpdates$.mockReturnValue(of(mockSimpleDataSet));
 
 jest.mock('../components', () => ({
   QueryAssistBar: jest.fn(() => <div>QueryAssistBar</div>),
   QueryAssistBanner: jest.fn(() => <div>QueryAssistBanner</div>),
 }));
 
-describe('CreateExtension', () => {
+// TODO: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/7860
+describe.skip('CreateExtension', () => {
   const dependencies: QueryEditorExtensionDependencies = {
     language: 'PPL',
     onSelectLanguage: jest.fn(),

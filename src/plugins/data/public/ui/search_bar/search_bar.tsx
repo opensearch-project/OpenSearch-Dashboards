@@ -44,7 +44,6 @@ import { FilterBar } from '../filter_bar/filter_bar';
 import { QueryEditorTopRow } from '../query_editor';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
-import { Settings } from '../types';
 import { FilterOptions } from '../filter_bar/filter_options';
 
 interface SearchBarInjectedDeps {
@@ -78,8 +77,6 @@ export interface SearchBarOwnProps {
   datePickerRef?: React.RefObject<HTMLDivElement>;
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
-  settings?: Settings;
-  dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
@@ -119,8 +116,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   private services = this.props.opensearchDashboards.services;
-  private dataSetService = this.services.data.query.dataSetManager;
-  private queryStringService = this.services.data.query.queryString;
+  private queryStringManager = this.services.data.query.queryString;
   private savedQueryService = this.services.data.query.savedQueries;
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
@@ -136,6 +132,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       nextQuery = {
         query: nextProps.query.query,
         language: nextProps.query.language,
+        dataset: nextProps.query.dataset,
       };
     } else if (
       nextProps.query &&
@@ -145,6 +142,17 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       nextQuery = {
         query: '',
         language: nextProps.query.language,
+        dataset: nextProps.query.dataset,
+      };
+    } else if (
+      nextProps.query &&
+      prevState.query &&
+      nextProps.query.dataset !== prevState.query.dataset
+    ) {
+      nextQuery = {
+        query: nextProps.query.query,
+        language: nextProps.query.language,
+        dataset: nextProps.query.dataset,
       };
     }
 
@@ -207,10 +215,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   };
 
-  private supportsEnhancements() {
-    return this.props.settings?.supportsEnhancementsEnabled(this.services.appName);
-  }
-
   private shouldRenderQueryEditor(isEnhancementsEnabledOverride: boolean) {
     // TODO: MQL handle no index patterns?
     if (!isEnhancementsEnabledOverride) return false;
@@ -230,17 +234,19 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     return this.props.showQueryBar && (showDatePicker || showQueryInput);
   }
 
-  private shouldRenderFilterBar() {
-    // TODO: MQL handle no index patterns?
+  private shouldRenderFilterBar(isEnhancementsEnabledOverride: boolean) {
+    const language = this.queryStringManager
+      .getLanguageService()
+      .getLanguage(this.state.query?.language!);
+    const isFilterable = language?.fields?.filterable !== false; // Render if undefined or true
+
     return (
       this.props.showFilterBar &&
       this.props.filters &&
       (!this.useNewHeader || this.props.filters.length > 0) &&
       this.props.indexPatterns &&
       compact(this.props.indexPatterns).length > 0 &&
-      (this.props.settings?.getQueryEnhancements(this.state.query?.language!)?.searchBar
-        ?.showFilterBar ??
-        true)
+      (!isEnhancementsEnabledOverride || (isEnhancementsEnabledOverride && isFilterable))
     );
   }
 
@@ -374,10 +380,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         }
       }
     );
-    const dataSet = this.dataSetService.getDataSet();
-    if (dataSet && queryAndDateRange.query) {
-      this.queryStringService.addToQueryHistory(
-        dataSet,
+    const dataset = this.queryStringManager.getQuery().dataset;
+    if (dataset && queryAndDateRange.query) {
+      this.queryStringManager.addToQueryHistory(
+        dataset,
         queryAndDateRange.query,
         queryAndDateRange.dateRange
       );
@@ -415,13 +421,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   public render() {
     const isEnhancementsEnabledOverride =
-      this.supportsEnhancements() &&
-      this.services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
-
-    this.props.settings?.setUserQueryLanguageBlocklist(
-      this.services.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE_BLOCKLIST)
-    );
-    this.props.settings?.setUserQueryEnhancementsEnabled(isEnhancementsEnabledOverride);
+      this.services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) &&
+      this.queryStringManager
+        .getLanguageService()
+        .getLanguage(this.state.query?.language!)
+        ?.editorSupportedAppNames?.includes(this.services.appName);
 
     const searchBarMenu = (useSaveQueryMenu: boolean = false) => {
       return (
@@ -446,7 +450,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     };
 
     let filterBar;
-    if (this.shouldRenderFilterBar()) {
+    if (this.shouldRenderFilterBar(isEnhancementsEnabledOverride)) {
       const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,
@@ -512,8 +516,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       queryEditor = (
         <QueryEditorTopRow
           timeHistory={this.props.timeHistory}
-          dataSetContainerRef={this.props.dataSetContainerRef}
-          settings={this.props.settings}
           query={this.state.query}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}

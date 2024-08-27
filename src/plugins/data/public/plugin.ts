@@ -134,9 +134,15 @@ export class DataPublicPlugin
     expressions.registerFunction(opensearchaggs);
     expressions.registerFunction(indexPatternLoad);
 
+    const searchService = this.searchService.setup(core, {
+      usageCollection,
+      expressions,
+    });
+
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
       storage: this.storage,
+      defaultSearchInterceptor: searchService.getDefaultSearchInterceptor(),
     });
 
     uiActions.registerAction(
@@ -157,13 +163,6 @@ export class DataPublicPlugin
       }))
     );
 
-    const searchService = this.searchService.setup(core, {
-      usageCollection,
-      expressions,
-    });
-
-    const uiService = this.uiService.setup(core, {});
-
     const ac = this.autocomplete.setup(core);
     ac.addQuerySuggestionProvider('SQL', getSQLSuggestions);
     ac.addQuerySuggestionProvider('kuery', getDQLSuggestions);
@@ -176,7 +175,8 @@ export class DataPublicPlugin
       query: queryService,
       __enhance: (enhancements: DataPublicPluginEnhancements) => {
         if (enhancements.search) searchService.__enhance(enhancements.search);
-        if (enhancements.ui) uiService.__enhance(enhancements.ui);
+        if (enhancements.editor)
+          queryService.queryString.getLanguageService().__enhance(enhancements.editor);
       },
     };
   }

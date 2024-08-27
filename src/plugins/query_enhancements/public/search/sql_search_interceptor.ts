@@ -7,12 +7,7 @@ import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { concatMap, map } from 'rxjs/operators';
-import {
-  DATA_FRAME_TYPES,
-  getRawDataFrame,
-  getRawQueryString,
-  SIMPLE_DATA_SET_TYPES,
-} from '../../../data/common';
+import { DATA_FRAME_TYPES, getRawDataFrame } from '../../../data/common';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -60,34 +55,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
 
     const dataFrame = getRawDataFrame(searchRequest);
 
-    const queryString = dataFrame.meta?.queryConfig?.qs ?? getRawQueryString(searchRequest) ?? '';
-
-    dataFrame.meta = {
-      ...dataFrame.meta,
-      queryConfig: {
-        ...dataFrame.meta.queryConfig,
-        ...(this.queryService.dataSetManager.getDataSet() && {
-          dataSourceId: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.id,
-          dataSourceName: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.name,
-          timeFieldName: this.queryService.dataSetManager.getDataSet()?.timeFieldName,
-        }),
-      },
-    };
-
-    if (!dataFrame.schema) {
-      return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
-        concatMap((response) => {
-          const df = response.body;
-          if (df.error) {
-            const jsError = new Error(df.error.response);
-            return throwError(jsError);
-          }
-          return fetchDataFrame(dfContext, queryString, df);
-        })
-      );
-    }
-
-    return fetchDataFrame(dfContext, queryString, dataFrame);
+    return fetchDataFrame(dfContext, this.queryService.queryString.getQuery(), dataFrame);
   }
 
   protected runSearchAsync(
@@ -104,22 +72,19 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     };
 
     const dataFrame = getRawDataFrame(searchRequest);
-    if (!dataFrame) {
-      return throwError(this.handleSearchError('DataFrame is not defined', request, signal!));
-    }
+    const query = this.queryService.queryString.getQuery();
 
-    const queryString = getRawQueryString(searchRequest) ?? '';
-    const dataSourceRef = this.queryService.dataSetManager.getDataSet()
+    const dataSourceRef = query.dataset
       ? {
-          dataSourceId: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.id,
-          dataSourceName: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.name,
+          dataSourceId: query.dataset.dataSource?.id,
+          dataSourceName: query.dataset.dataSource?.title,
         }
       : {};
 
     dataFrame.meta = {
-      ...dataFrame.meta,
+      ...dataFrame?.meta,
       queryConfig: {
-        ...dataFrame.meta.queryConfig,
+        ...dataFrame?.meta.queryConfig,
         ...dataSourceRef,
       },
       sessionId: dataSourceRef
@@ -160,7 +125,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
         defaultMessage: 'Starting query job...',
       }),
     });
-    return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
+    return fetchDataFrame(dfContext, query, dataFrame).pipe(
       concatMap((jobResponse) => {
         const df = jobResponse.body;
         if (dataSourceRef?.dataSourceName && df?.meta?.sessionId) {
@@ -187,8 +152,8 @@ export class SQLSearchInterceptor extends SearchInterceptor {
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    const dataSet = this.queryService.dataSetManager.getDataSet();
-    if (dataSet?.type === SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC) {
+    const dataset = this.queryService.queryString.getQuery().dataset;
+    if (dataset?.type === 'S3') {
       return this.runSearchAsync(request, options.abortSignal, SEARCH_STRATEGY.SQL_ASYNC);
     }
     return this.runSearch(request, options.abortSignal, SEARCH_STRATEGY.SQL);
