@@ -28,6 +28,8 @@ import { SavedObjectsNamespaceType } from 'src/core/public';
 import { ChromeRecentlyAccessedHistoryItem, SavedObject } from 'opensearch-dashboards/public';
 import { WorkspaceObject } from '../../../workspace';
 import { HttpStart } from '../../../http';
+import { createRecentNavLink } from './nav_link';
+import { ChromeNavLink } from '../../../';
 import './recent_items.scss';
 
 const widthForRightMargin = 8;
@@ -36,6 +38,8 @@ export interface Props {
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   workspaceList$: Rx.Observable<WorkspaceObject[]>;
   navigateToUrl: (url: string) => Promise<void>;
+  basePath: HttpStart['basePath'];
+  navLinks$: Rx.Observable<ChromeNavLink[]>;
   renderBreadcrumbs: React.JSX.Element;
   buttonSize?: EuiHeaderSectionItemButtonProps['size'];
   http: HttpStart;
@@ -100,6 +104,8 @@ export const RecentItems = ({
   recentlyAccessed$,
   workspaceList$,
   navigateToUrl,
+  navLinks$,
+  basePath,
   renderBreadcrumbs,
   buttonSize = 's',
   http,
@@ -112,6 +118,7 @@ export const RecentItems = ({
   const [detailedSavedObjects, setDetailedSavedObjects] = useState<DetailedRecentlyAccessedItem[]>(
     []
   );
+  const navLinks = useObservable(navLinks$, []).filter((link) => !link.hidden);
 
   const handleItemClick = (link: string) => {
     navigateToUrl(link);
@@ -200,19 +207,30 @@ export const RecentItems = ({
           const findWorkspace = workspaceList.find(
             (workspace) => workspace.id === recentAccessItem.workspaceId
           );
-
           return {
             ...recentAccessItem,
             ...obj,
             ...recentAccessItem.meta,
             updatedAt: moment(obj?.updated_at).valueOf(),
             workspaceName: findWorkspace?.name,
+            link: createRecentNavLink(recentAccessItem, navLinks, basePath, navigateToUrl).href,
           };
         });
-        setDetailedSavedObjects(formatDetailedSavedObjects);
+        // here I write this argument to avoid Unnecessary re-rendering
+        if (JSON.stringify(formatDetailedSavedObjects) !== JSON.stringify(detailedSavedObjects)) {
+          setDetailedSavedObjects(formatDetailedSavedObjects);
+        }
       });
     }
-  }, [recentlyAccessedItems, http, workspaceList]);
+  }, [
+    navLinks,
+    basePath,
+    navigateToUrl,
+    recentlyAccessedItems,
+    http,
+    workspaceList,
+    detailedSavedObjects,
+  ]);
 
   const selectedRecentsItems = useMemo(() => {
     return detailedSavedObjects.slice(0, Number(recentsRadioIdSelected));

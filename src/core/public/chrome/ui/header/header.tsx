@@ -354,6 +354,8 @@ export function Header({
     <EuiHeaderSectionItem border={useUpdatedHeader ? 'none' : 'right'}>
       <RecentItems
         http={http}
+        navLinks$={observables.navLinks$}
+        basePath={basePath}
         recentlyAccessed$={observables.recentlyAccessed$}
         workspaceList$={observables.workspaceList$}
         navigateToUrl={application.navigateToUrl}

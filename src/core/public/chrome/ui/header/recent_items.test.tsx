@@ -10,6 +10,14 @@ import { applicationServiceMock, httpServiceMock } from '../../../mocks';
 import { SavedObjectWithMetadata } from './recent_items';
 import { RecentItems } from './recent_items';
 
+jest.mock('./nav_link', () => ({
+  createRecentNavLink: jest.fn().mockImplementation(() => {
+    return {
+      href: '/recent_nav_link',
+    };
+  }),
+}));
+
 const mockRecentlyAccessed = new BehaviorSubject([
   {
     id: '6ef856c0-5f86-11ef-b7df-1bb1cf26ce5b',
@@ -41,6 +49,8 @@ const defaultMockProps = {
   navigateToUrl: applicationServiceMock.createStartContract().navigateToUrl,
   workspaceList$: new BehaviorSubject([]),
   recentlyAccessed$: new BehaviorSubject([]),
+  navLinks$: new BehaviorSubject([]),
+  basePath: httpServiceMock.createStartContract().basePath,
   http: httpServiceMock.createSetupContract(),
   renderBreadcrumbs: <></>,
 };
@@ -120,7 +130,7 @@ describe('Recent items', () => {
     const item = screen.getByText('visualizeMock');
     expect(navigateToUrl).not.toHaveBeenCalled();
     fireEvent.click(item);
-    expect(navigateToUrl).toHaveBeenCalledWith('/app/visualize');
+    expect(navigateToUrl).toHaveBeenCalledWith('/recent_nav_link');
   });
 
   it('should be able to display the preferences popover setting when clicking Preferences button', async () => {
