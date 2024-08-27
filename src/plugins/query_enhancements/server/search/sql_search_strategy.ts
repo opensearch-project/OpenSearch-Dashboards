@@ -27,7 +27,6 @@ export const sqlSearchStrategyProvider = (
   return {
     search: async (context, request: any, _options) => {
       try {
-        request.body.query = request.body.query.qs;
         const rawResponse: any = await sqlFacet.describeQuery(context, request);
 
         if (!rawResponse.success) {

@@ -102,7 +102,7 @@
   }
 }
 
-.osdQueryEditor__dataSetNavigatorWrapper {
+.osdQueryEditor__datasetSelectorWrapper {
   :first-child {
     border-bottom: $euiBorderThin !important;
   }
@@ -154,6 +154,11 @@
   display: flex;
   align-items: center;
   padding: $euiSizeXS;
+
+  > * {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
 
   .osdQueryEditor__collapseBtn {
     padding-right: $euiSizeXS;

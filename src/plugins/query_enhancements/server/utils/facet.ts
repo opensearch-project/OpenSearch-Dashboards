@@ -6,6 +6,7 @@
 import { Logger } from 'opensearch-dashboards/server';
 import { FacetResponse, IPPLEventsDataSource, IPPLVisualizationDataSource } from '../types';
 import { shimSchemaRow, shimStats } from '.';
+import { Query } from '../../../data/common';
 
 export interface FacetProps {
   client: any;
@@ -36,12 +37,13 @@ export class Facet {
     endpoint: string
   ): Promise<FacetResponse> => {
     try {
-      const { format, df, dataSourceId, ...query } = request.body;
+      const query: Query = request.body.query;
+      const { format, df } = request.body;
       const params = {
         body: { ...query },
         ...(format !== 'jdbc' && { format }),
       };
-      const clientId = dataSourceId ?? df?.meta?.queryConfig?.dataSourceId;
+      const clientId = query.dataset?.dataSource?.id ?? df?.meta?.queryConfig?.dataSourceId;
       const client = clientId
         ? context.dataSource.opensearch.legacy.getClient(clientId).callAPI
         : this.defaultClient.asScoped(request).callAsCurrentUser;

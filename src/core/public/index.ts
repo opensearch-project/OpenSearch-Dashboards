@@ -112,6 +112,10 @@ export {
   cleanWorkspaceId,
   DEFAULT_NAV_GROUPS,
   ALL_USE_CASE_ID,
+  SEARCH_USE_CASE_ID,
+  ESSENTIAL_USE_CASE_ID,
+  OBSERVABILITY_USE_CASE_ID,
+  SECURITY_ANALYTICS_USE_CASE_ID,
 } from '../utils';
 export {
   AppCategory,
@@ -126,6 +130,7 @@ export {
   ChromeNavGroup,
   NavGroupType,
   NavGroupStatus,
+  WorkspaceAttributeWithPermission,
 } from '../types';
 
 export {

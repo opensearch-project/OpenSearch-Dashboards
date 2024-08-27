@@ -29,10 +29,10 @@
  */
 
 export * from './lib';
-
+export * from './types';
 export * from './query_service';
 export * from './filter_manager';
-export * from './dataset_manager';
+export * from './query_string';
 export * from './timefilter';
 export * from './saved_query';
 export * from './persisted_log';

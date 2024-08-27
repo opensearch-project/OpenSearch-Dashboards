@@ -17,8 +17,8 @@ import { getTokenPosition } from '../shared/cursor';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './.generated/DQLParserVisitor';
-import { getUiService } from '../../services';
 import { IDataPluginServices } from '../..';
+import { getQueryService } from '../../services';
 
 const findCursorIndex = (
   tokenStream: TokenStream,
@@ -104,7 +104,10 @@ export const getSuggestions = async ({
   if (
     !services ||
     !services.appName ||
-    !getUiService().Settings.supportsEnhancementsEnabled(services.appName) ||
+    // TODO: might need to get language then pass here paul needs this to prevent this failing on other pages
+    // !getQueryService()
+    //   .queryString.getLanguageService()
+    //   .supportsEnhancementsEnabled(services.appName) ||
     !indexPattern
   ) {
     return [];

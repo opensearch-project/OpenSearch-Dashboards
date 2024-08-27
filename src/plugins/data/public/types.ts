@@ -35,16 +35,16 @@ import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
-import { QuerySetup, QueryStart } from './query';
+import { EditorEnhancements, QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { DataSourceStart } from './data_sources/datasource_services/types';
-import { IUiStart, UiEnhancements } from './ui';
+import { IUiStart } from './ui';
 import { DataStorage } from '../common';
 
 export interface DataPublicPluginEnhancements {
   search?: SearchEnhancements;
-  ui?: UiEnhancements;
+  editor?: EditorEnhancements;
 }
 
 export interface DataSetupDependencies {

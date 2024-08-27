@@ -1,0 +1,2 @@
+refactor:
+- Multi-datasources and multi-query languages features to use generic structured types, abstract data querying, and the language service ([#7731](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7731))
