@@ -50,7 +50,7 @@ export const DEFAULT_DATA = {
   },
 
   SOURCE_TYPES: {
-    OPENSEARCH: 'OPENSEARCH',
+    OPENSEARCH: 'OpenSearch',
     LEGACY: 'LEGACY',
   },
 };

@@ -116,7 +116,7 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
         indexPatternDataStructure.parent = {
           id: dataSourceId!, // Since we know it exists
           title: dataSource.title,
-          type: dataSource.dataSourceEngineType ?? 'OpenSearch',
+          type: dataSource.dataSourceEngineType ?? DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
         };
       }
       return indexPatternDataStructure;
