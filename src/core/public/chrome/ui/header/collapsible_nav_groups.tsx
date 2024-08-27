@@ -139,7 +139,7 @@ export function NavGroups({
   const orderedLinksOrCategories = getOrderedLinksOrCategories(navLinks);
   const sideNavItems = orderedLinksOrCategories
     .map((navLink) => createSideNavItem(navLink, LEVEL_FOR_ROOT_ITEMS))
-    .filter((navItem) => !!navItem.name);
+    .filter((navItem) => !!navItem.id);
 
   return (
     <EuiFlexItem style={style}>
