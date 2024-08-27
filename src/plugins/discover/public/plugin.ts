@@ -202,7 +202,9 @@ export class DiscoverPlugin
       generateCb: (renderProps: any) => {
         const globalFilters: any = getServices().filterManager.getGlobalFilters();
         const appFilters: any = getServices().filterManager.getAppFilters();
-        const showDocLinks = getServices().data.ui.Settings.getUiOverrides().showDocLinks;
+        const showDocLinks = getServices()
+          .data.query.queryString.getLanguageService()
+          .getUiOverrides().showDocLinks;
 
         const hash = stringify(
           url.encodeQuery({
@@ -236,7 +238,9 @@ export class DiscoverPlugin
         defaultMessage: 'View single document',
       }),
       generateCb: (renderProps) => {
-        const showDocLinks = getServices().data.ui.Settings.getUiOverrides().showDocLinks;
+        const showDocLinks = getServices()
+          .data.query.queryString.getLanguageService()
+          .getUiOverrides().showDocLinks;
 
         const docUrl = `#/doc/${renderProps.indexPattern.id}/${
           renderProps.hit._index

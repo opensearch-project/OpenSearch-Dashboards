@@ -36,6 +36,7 @@ function createSetupContract(): jest.Mocked<ISearchSetup> {
   return {
     aggs: searchAggsSetupMock(),
     __enhance: jest.fn(),
+    getDefaultSearchInterceptor: jest.fn(),
   };
 }
 

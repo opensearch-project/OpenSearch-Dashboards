@@ -28,14 +28,7 @@
  * under the License.
  */
 
-export {
-  UiEnhancements,
-  IUiStart,
-  IUiSetup,
-  createSettings,
-  Settings,
-  DataSettings,
-} from './types';
+export { UiEnhancements, IUiStart, IUiSetup } from './types';
 export { IndexPatternSelectProps } from './index_pattern_select';
 export { FilterLabel } from './filter_bar';
 export { QueryStringInput, QueryStringInputProps } from './query_string_input';
@@ -46,12 +39,15 @@ export {
   QueryEditorExtensions,
   QueryEditorExtensionDependencies,
   QueryEditorExtensionConfig,
+  createEditor,
+  DefaultInput,
+  DQLBody,
+  SingleLineInput,
 } from './query_editor';
-export { SearchBar, SearchBarProps, StatefulSearchBarProps } from './search_bar';
-export { SuggestionsComponent } from './typeahead';
 export {
-  DataSetNavigator,
-  setAsyncSessionId,
-  getAsyncSessionId,
-  setAsyncSessionIdByObj,
-} from './dataset_navigator';
+  SearchBar,
+  SearchBarProps,
+  StatefulSearchBarProps,
+  useQueryStringManager,
+} from './search_bar';
+export { SuggestionsComponent } from './typeahead';

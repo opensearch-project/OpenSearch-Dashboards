@@ -12,6 +12,7 @@ import {
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
   PartialDataFrame,
+  Query,
   createDataFrame,
 } from '../../../data/common';
 import { Facet } from '../utils';
@@ -33,13 +34,14 @@ export const sqlAsyncSearchStrategyProvider = (
   return {
     search: async (context, request: any, options) => {
       try {
+        const query: Query = request?.body?.query;
         // Create job: this should return a queryId and sessionId
-        if (request?.body?.query?.qs) {
+        if (query) {
           const df = request.body?.df;
           request.body = {
-            query: request.body.query.qs,
-            datasource: df?.meta?.queryConfig?.dataSourceName,
-            lang: 'sql',
+            query: query.query,
+            datasource: query.dataset?.dataSource?.title,
+            lang: SEARCH_STRATEGY.SQL,
             sessionId: df?.meta?.sessionId,
           };
           const rawResponse: any = await sqlAsyncFacet.describeQuery(context, request);
@@ -55,12 +57,13 @@ export const sqlAsyncSearchStrategyProvider = (
           const sessionId = rawResponse.data?.sessionId;
 
           const partial: PartialDataFrame = {
-            ...request.body.df,
+            ...df,
             fields: rawResponse?.data?.schema || [],
           };
           const dataFrame = createDataFrame(partial);
           dataFrame.meta = {
-            query: request.body.query,
+            ...dataFrame?.meta,
+            query: query.query,
             queryId,
             sessionId,
           };
@@ -87,6 +90,7 @@ export const sqlAsyncSearchStrategyProvider = (
           dataFrame.size = asyncResponse?.data?.datarows?.length || 0;
 
           dataFrame.meta = {
+            ...dataFrame?.meta,
             status,
             queryId,
             error: status === 'FAILED' && asyncResponse.data?.error,

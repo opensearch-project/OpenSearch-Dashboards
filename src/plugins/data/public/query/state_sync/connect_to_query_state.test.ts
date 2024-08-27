@@ -52,6 +52,7 @@ import { TimefilterContract } from '../timefilter';
 import { QueryState } from './types';
 import { createBrowserHistory, History } from 'history';
 import { QueryStringContract } from '../query_string';
+import { ISearchInterceptor } from '../../search';
 
 const connectStorageToQueryStateFn = (
   query: QueryStart,
@@ -112,12 +113,15 @@ describe('connect_storage_to_query_state', () => {
   let aF1: Filter;
   let aF2: Filter;
   let q1: Query;
+  let mockSearchInterceptor: jest.Mocked<ISearchInterceptor>;
 
   beforeEach(() => {
     const queryService = new QueryService();
+    mockSearchInterceptor = {} as jest.Mocked<ISearchInterceptor>;
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
+      defaultSearchInterceptor: mockSearchInterceptor,
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
@@ -215,6 +219,7 @@ describe('connect_to_global_state', () => {
   let filterManagerChangeSub: Subscription;
   let filterManagerChangeTriggered = jest.fn();
   let indexPatternsMock: IndexPatternsService;
+  let mockSearchInterceptor: jest.Mocked<ISearchInterceptor>;
 
   let gF1: Filter;
   let gF2: Filter;
@@ -223,9 +228,11 @@ describe('connect_to_global_state', () => {
 
   beforeEach(() => {
     const queryService = new QueryService();
+    mockSearchInterceptor = {} as jest.Mocked<ISearchInterceptor>;
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
+      defaultSearchInterceptor: mockSearchInterceptor,
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
@@ -453,6 +460,7 @@ describe('connect_to_app_state', () => {
   let filterManagerChangeSub: Subscription;
   let filterManagerChangeTriggered = jest.fn();
   let indexPatternsMock: IndexPatternsService;
+  let mockSearchInterceptor;
 
   let gF1: Filter;
   let gF2: Filter;
@@ -461,9 +469,11 @@ describe('connect_to_app_state', () => {
 
   beforeEach(() => {
     const queryService = new QueryService();
+    mockSearchInterceptor = {} as jest.Mocked<ISearchInterceptor>;
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
+      defaultSearchInterceptor: mockSearchInterceptor,
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
@@ -639,14 +649,17 @@ describe('filters with different state', () => {
   let filterManagerChangeSub: Subscription;
   let filterManagerChangeTriggered = jest.fn();
   let indexPatternsMock: IndexPatternsService;
+  let mockSearchInterceptor;
 
   let filter: Filter;
 
   beforeEach(() => {
     const queryService = new QueryService();
+    mockSearchInterceptor = {} as jest.Mocked<ISearchInterceptor>;
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
+      defaultSearchInterceptor: mockSearchInterceptor,
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,

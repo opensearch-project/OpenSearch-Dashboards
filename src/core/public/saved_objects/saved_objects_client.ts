@@ -457,14 +457,14 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  public bulkGet = (objects: Array<{ id: string; type: string }> = []) => {
+  public bulkGet = <T = unknown>(objects: Array<{ id: string; type: string }> = []) => {
     const filteredObjects = objects.map((obj) => pick(obj, ['id', 'type']));
     return this.performBulkGet(filteredObjects).then((resp) => {
       resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkGet']>>,
-        SavedObjectsBatchResponse
-      >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
+        SavedObjectsBatchResponse<T>
+      >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse<T>;
     });
   };
 

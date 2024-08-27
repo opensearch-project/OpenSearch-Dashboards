@@ -30,27 +30,16 @@ export const updateSearchSource = async ({
   histogramConfigs,
 }: Props) => {
   const { uiSettings, data } = services;
-  const queryDataSet = data.query.dataSetManager.getDataSet();
+  const queryDataset = data.query.queryString.getQuery().dataset;
 
-  let dataSet =
-    indexPattern.id === queryDataSet?.id
-      ? await data.indexPatterns.get(queryDataSet?.id!, true)
+  const dataset =
+    indexPattern.id === queryDataset?.id
+      ? await data.indexPatterns.get(queryDataset?.id!, true)
       : indexPattern;
-  const dataFrame = searchSource?.getDataFrame();
-  if (
-    searchSource &&
-    dataFrame &&
-    dataFrame.name &&
-    dataFrame.name !== '' &&
-    dataSet.title !== dataFrame.name
-  ) {
-    dataSet = data.indexPatterns.getByTitle(dataFrame.name, true) ?? dataSet;
-    searchSource.setField('index', dataSet);
-  }
 
   const sortForSearchSource = getSortForSearchSource(
     sort,
-    dataSet,
+    dataset,
     uiSettings.get(SORT_DEFAULT_ORDER_SETTING)
   );
   const size = uiSettings.get(SAMPLE_SIZE_SETTING);
@@ -61,18 +50,18 @@ export const updateSearchSource = async ({
   // searchSource which applies time range
   const timeRangeSearchSource = await data.search.searchSource.create();
   const { isDefault } = indexPatternUtils;
-  if (isDefault(dataSet)) {
+  if (isDefault(dataset)) {
     const timefilter = data.query.timefilter.timefilter;
 
     timeRangeSearchSource.setField('filter', () => {
-      return timefilter.createFilter(dataSet);
+      return timefilter.createFilter(dataset);
     });
   }
 
   searchSourceInstance.setParent(timeRangeSearchSource);
 
   searchSourceInstance.setFields({
-    index: dataSet,
+    index: dataset,
     sort: sortForSearchSource,
     size,
     query: data.query.queryString.getQuery() || null,
