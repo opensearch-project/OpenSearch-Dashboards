@@ -20,7 +20,6 @@ import {
   EuiFlexGroup,
   EuiPageContent,
   EuiSmallButton,
-  EuiToolTip,
   EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -40,11 +39,6 @@ export const WorkspaceInitial = () => {
   const isDarkTheme = uiSettings.get('theme:darkMode');
   const backGroundUrl = isDarkTheme ? BackgroundDarkSVG : BackgroundLightSVG;
 
-  const noAdminToolTip = i18n.translate('workspace.initial.card.createWorkspace.toolTip', {
-    defaultMessage:
-      'Contact your administrator to create a workspace or to be added to an existing one.',
-  });
-
   const createButton = (
     <EuiSmallButton
       fill
@@ -59,90 +53,66 @@ export const WorkspaceInitial = () => {
     </EuiSmallButton>
   );
 
+  const noAdminText = (
+    <EuiText style={{ maxWidth: '340px' }} size="s">
+      {i18n.translate('workspace.initial.card.createWorkspace.text', {
+        defaultMessage:
+          'Contact your administrator to create a workspace or to be added to an existing one.',
+      })}
+    </EuiText>
+  );
+
   const cards = (
-    <EuiFlexGroup className="eui-xScrollWithShadows">
+    <EuiFlexGroup>
       <EuiFlexItem grow={false}>
         <EuiCard
-          style={{ width: '270px' }}
-          textAlign="left"
-          title={i18n.translate('workspace.initial.card.createWorkspace.title', {
-            defaultMessage: 'Create a workspace',
+          style={{ width: '270px', height: '137px' }}
+          layout="horizontal"
+          icon={<EuiIcon color="subdued" size="xl" type="wsObservability" />}
+          title={i18n.translate('workspace.initial.card.observability.title', {
+            defaultMessage: 'Observability',
           })}
-          description={
-            <EuiToolTip content={isDashboardAdmin ? null : noAdminToolTip}>
-              <>
-                {i18n.translate('workspace.initial.card.createWorkspace.description', {
-                  defaultMessage: 'Organize projects by use case in a collaborative workspace.',
-                })}
-              </>
-            </EuiToolTip>
-          }
-          footer={isDashboardAdmin && createButton}
+          description={i18n.translate('workspace.initial.card.observability.description', {
+            defaultMessage: 'Gain visibility into your applications and infrastructure',
+          })}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiCard
-          style={{ width: '270px', height: '162px' }}
-          textAlign="left"
-          title={i18n.translate('workspace.initial.card.tryOpenSearch.title', {
-            defaultMessage: 'Try OpenSearch',
+          style={{ width: '270px', height: '137px' }}
+          layout="horizontal"
+          icon={<EuiIcon color="subdued" size="xl" type="wsSecurityAnalytics" />}
+          title={i18n.translate('workspace.initial.card.securityAnalytics.title', {
+            defaultMessage: 'Security Analytics',
           })}
-          description={i18n.translate('workspace.initial.card.tryOpenSearch.description', {
-            defaultMessage: 'Explore sample data before adding your own.',
+          description={i18n.translate('workspace.initial.card.securityAnalytics.description', {
+            defaultMessage: 'Enhance your security posture with advanced analytics',
           })}
-          footer={
-            <EuiText color="subdued" style={{ fontSize: '18px' }}>
-              {i18n.translate('workspace.initial.card.tryOpenSearch.footer', {
-                defaultMessage: 'with Sample Datasets',
-              })}
-            </EuiText>
-          }
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiCard
-          style={{ width: '270px', height: '162px' }}
-          textAlign="left"
-          title={i18n.translate('workspace.initial.card.addData.title', {
-            defaultMessage: 'Add your data',
+          style={{ width: '270px', height: '137px' }}
+          layout="horizontal"
+          icon={<EuiIcon color="subdued" size="xl" type="wsSearch" />}
+          title={i18n.translate('workspace.initial.card.search.title', {
+            defaultMessage: 'Search',
           })}
-          description={i18n.translate('workspace.initial.card.addData.description', {
-            defaultMessage: 'Start collecting and analyzing your data.',
+          description={i18n.translate('workspace.initial.card.search.description', {
+            defaultMessage: 'Discover and query your data with ease',
           })}
-          footer={
-            <EuiText color="subdued" style={{ fontSize: '18px' }}>
-              {i18n.translate('workspace.initial.card.addData.footer', {
-                defaultMessage: 'with Getting Started Guide',
-              })}
-            </EuiText>
-          }
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiCard
-          style={{ width: '270px', height: '162px' }}
-          textAlign="left"
-          title={i18n.translate('workspace.initial.card.discoverInsights.title', {
-            defaultMessage: 'Discover insights',
+          style={{ width: '270px', height: '137px' }}
+          layout="horizontal"
+          icon={<EuiIcon color="subdued" size="xl" type="wsEssentials" />}
+          title={i18n.translate('workspace.initial.card.essentials.title', {
+            defaultMessage: 'Essentials',
           })}
-          description={i18n.translate('workspace.initial.card.discoverInsights.description', {
-            defaultMessage: 'Explore data interactively to uncover insights.',
-          })}
-          footer={
-            <EuiText color="subdued" style={{ fontSize: '18px' }}>
-              {i18n.translate('workspace.initial.card.discoverInsights.footer', {
-                defaultMessage: 'with Discover',
-              })}
-            </EuiText>
-          }
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiCard
-          style={{ width: '270px', height: '162px' }}
-          title={''}
-          description={i18n.translate('workspace.initial.card.muchMore.description', {
-            defaultMessage: 'And much more...',
+          description={i18n.translate('workspace.initial.card.essentials.description', {
+            defaultMessage: 'Just the basics for exploring and analyzing data',
           })}
         />
       </EuiFlexItem>
@@ -160,8 +130,8 @@ export const WorkspaceInitial = () => {
           </h1>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ maxWidth: '650px' }}>
-        <EuiText grow={false}>
+      <EuiFlexItem grow={false} style={{ maxWidth: '730px' }}>
+        <EuiText size="s">
           {i18n.translate('workspace.initial.description', {
             defaultMessage:
               'OpenSearch is a flexible, scalable, open-source way to build solutions for data-intensive search and analytics applications. Explore, enrich, and visualize your data, using developer-friendly tools and powerful integrations for machine learning, data processing, and more.',
@@ -176,24 +146,44 @@ export const WorkspaceInitial = () => {
           flush="left"
           data-test-subj="workspace-initial-button-openSearch"
         >
-          <EuiText>
+          <EuiText size="s">
             {i18n.translate('workspace.initial.button.openSearch', {
-              defaultMessage: 'Learn more from documentation and more.',
+              defaultMessage: 'Learn more from documentation',
             })}
           </EuiText>
         </EuiSmallButtonEmpty>
       </EuiFlexItem>
-
-      <EuiFlexItem grow={false} style={{ maxWidth: '540px' }}>
-        <EuiPanel color="subdued" borderRadius="none" hasShadow={false} hasBorder={false}>
-          <EuiText>
-            <EuiIcon type="dashboardApp" size="l" />
-            &nbsp;&nbsp;Explore live demo environment at{' '}
-            <EuiLink href="https://playground.opensearch.org/">playground.opensearch.org</EuiLink>
-          </EuiText>
-        </EuiPanel>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="m">
+          <h2>
+            {i18n.translate('workspace.initial.createWorkspace.title', {
+              defaultMessage: 'Create a workspace',
+            })}
+          </h2>
+        </EuiTitle>
+        <EuiText size="s">
+          {i18n.translate('workspace.initial.createWorkspace.describe', {
+            defaultMessage: 'Organize projects by use case in a collaborative workspace',
+          })}
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>{cards}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem grow={false}>{isDashboardAdmin ? createButton : noAdminText}</EuiFlexItem>
+          <EuiFlexItem grow={false} style={{ maxWidth: '540px' }}>
+            <EuiPanel color="subdued" paddingSize="s" hasShadow={false} hasBorder={false}>
+              <EuiText size="s">
+                <EuiIcon type="dashboardApp" size="l" />
+                &nbsp;&nbsp;Explore live demo environment at{' '}
+                <EuiLink href="https://playground.opensearch.org/">
+                  playground.opensearch.org
+                </EuiLink>
+              </EuiText>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 
@@ -205,7 +195,7 @@ export const WorkspaceInitial = () => {
             <EuiImage size="l" alt="OpenSearch" src={logos.OpenSearch.url} />
           </EuiFlexItem>
           <EuiSpacer />
-          <EuiFlexItem grow={false} style={{ width: '1122px' }} className="eui-displayInline">
+          <EuiFlexItem grow={false} style={{ width: '1200px' }} className="eui-displayInline">
             <EuiPageContent
               style={{
                 backgroundImage: `url(${backGroundUrl})`,
@@ -223,7 +213,7 @@ export const WorkspaceInitial = () => {
               href={settingsAndSetupUrl}
               data-test-subj="workspace-initial-button-settingsAndSetup"
             >
-              <EuiText>
+              <EuiText size="s">
                 {i18n.translate('workspace.initial.button.settingsAndSetup', {
                   defaultMessage: 'Settings and setup',
                 })}
