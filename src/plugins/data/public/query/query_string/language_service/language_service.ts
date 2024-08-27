@@ -72,6 +72,7 @@ export class LanguageService {
     return this.storage.get('userQueryLanguageBlocklist') || [];
   }
 
+  // TODO: MQL just filtered return languages here
   setUserQueryLanguageBlocklist(languages: string[]) {
     this.storage.set(
       'userQueryLanguageBlocklist',

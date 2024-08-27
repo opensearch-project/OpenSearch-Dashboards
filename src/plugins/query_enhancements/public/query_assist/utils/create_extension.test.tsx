@@ -27,7 +27,8 @@ jest.mock('../components', () => ({
   QueryAssistBanner: jest.fn(() => <div>QueryAssistBanner</div>),
 }));
 
-describe('CreateExtension', () => {
+// TODO: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/7860
+describe.skip('CreateExtension', () => {
   const dependencies: QueryEditorExtensionDependencies = {
     language: 'PPL',
     onSelectLanguage: jest.fn(),

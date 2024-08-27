@@ -116,9 +116,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   private services = this.props.opensearchDashboards.services;
-  private queryService = this.services.data.query;
-  private languageService = this.queryService.queryString.getLanguageService();
-  private savedQueryService = this.queryService.savedQueries;
+  private queryStringManager = this.services.data.query.queryString;
+  private savedQueryService = this.services.data.query.savedQueries;
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
   private useNewHeader = Boolean(this.services.uiSettings.get(UI_SETTINGS.NEW_HOME_PAGE));
@@ -235,16 +234,19 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     return this.props.showQueryBar && (showDatePicker || showQueryInput);
   }
 
-  private shouldRenderFilterBar() {
-    // TODO: MQL handle no index patterns?
+  private shouldRenderFilterBar(isEnhancementsEnabledOverride: boolean) {
+    const language = this.queryStringManager
+      .getLanguageService()
+      .getLanguage(this.state.query?.language!);
+    const isFilterable = language?.fields?.filterable !== false; // Render if undefined or true
+
     return (
       this.props.showFilterBar &&
       this.props.filters &&
       (!this.useNewHeader || this.props.filters.length > 0) &&
       this.props.indexPatterns &&
       compact(this.props.indexPatterns).length > 0 &&
-      this.queryService.queryString.getLanguageService().getLanguage(this.state.query?.language!)!
-        .fields?.filterable
+      (!isEnhancementsEnabledOverride || (isEnhancementsEnabledOverride && isFilterable))
     );
   }
 
@@ -378,9 +380,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         }
       }
     );
-    const dataset = this.queryService.queryString.getQuery().dataset;
+    const dataset = this.queryStringManager.getQuery().dataset;
     if (dataset && queryAndDateRange.query) {
-      this.queryService.queryString.addToQueryHistory(
+      this.queryStringManager.addToQueryHistory(
         dataset,
         queryAndDateRange.query,
         queryAndDateRange.dateRange
@@ -420,13 +422,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   public render() {
     const isEnhancementsEnabledOverride =
       this.services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) &&
-      this.languageService
+      this.queryStringManager
+        .getLanguageService()
         .getLanguage(this.state.query?.language!)
         ?.editorSupportedAppNames?.includes(this.services.appName);
-
-    this.languageService.setUserQueryLanguageBlocklist(
-      this.services.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE_BLOCKLIST)
-    );
 
     const searchBarMenu = (useSaveQueryMenu: boolean = false) => {
       return (
@@ -451,7 +450,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     };
 
     let filterBar;
-    if (this.shouldRenderFilterBar()) {
+    if (this.shouldRenderFilterBar(isEnhancementsEnabledOverride)) {
       const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         'globalFilterGroup__wrapper-isVisible': this.state.isFiltersVisible,

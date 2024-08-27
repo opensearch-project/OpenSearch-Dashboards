@@ -34,9 +34,11 @@ export const Sidebar: FC = ({ children }) => {
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
-  const [isEnhancementEnabled, setIsEnhancementEnabled] = useState<boolean>(
-    uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)
-  );
+  const [isEnhancementEnabled, setIsEnhancementEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsEnhancementEnabled(uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED));
+  }, [uiSettings]);
 
   useEffect(() => {
     let isMounted = true;
