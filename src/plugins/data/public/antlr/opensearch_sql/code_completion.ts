@@ -47,7 +47,7 @@ export const getSuggestions = async ({
   services,
 }: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
   const { api } = services.uiSettings;
-  const dataSetManager = services.data.query.dataSetManager;
+  const queryString = services.data.query.queryString;
   const { lineNumber, column } = position || {};
   const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
     line: lineNumber || selectionStart,
@@ -60,7 +60,7 @@ export const getSuggestions = async ({
     // Fetch columns and values
     if (suggestions.suggestColumns?.tables?.length) {
       const tableNames = suggestions.suggestColumns.tables.map((table) => table.name);
-      const schemas = await fetchTableSchemas(tableNames, api, dataSetManager);
+      const schemas = await fetchTableSchemas(tableNames, api, queryString);
 
       (schemas as IDataFrameResponse[]).forEach((schema: IDataFrameResponse) => {
         if ('body' in schema && schema.body && 'fields' in schema.body) {

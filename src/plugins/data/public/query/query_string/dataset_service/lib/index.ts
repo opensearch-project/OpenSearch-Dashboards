@@ -3,4 +3,5 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { Settings, DataSettings, createSettings } from './settings';
+export * from './index_type';
+export * from './index_pattern_type';

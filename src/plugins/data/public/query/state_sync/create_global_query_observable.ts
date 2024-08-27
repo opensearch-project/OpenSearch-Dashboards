@@ -36,18 +36,15 @@ import { QueryState, QueryStateChange } from './index';
 import { createStateContainer } from '../../../../opensearch_dashboards_utils/public';
 import { isFilterPinned, compareFilters, COMPARE_ALL_OPTIONS } from '../../../common';
 import { QueryStringContract } from '../query_string';
-import { DataSetContract } from '../dataset_manager';
 
 export function createQueryStateObservable({
   timefilter: { timefilter },
   filterManager,
   queryString,
-  dataSetManager,
 }: {
   timefilter: TimefilterSetup;
   filterManager: FilterManager;
   queryString: QueryStringContract;
-  dataSetManager: DataSetContract;
 }): Observable<{ changes: QueryStateChange; state: QueryState }> {
   return new Observable((subscriber) => {
     const state = createStateContainer<QueryState>({
@@ -55,7 +52,6 @@ export function createQueryStateObservable({
       refreshInterval: timefilter.getRefreshInterval(),
       filters: filterManager.getFilters(),
       query: queryString.getQuery(),
-      dataSet: dataSetManager.getDataSet(),
     });
 
     let currentChange: QueryStateChange = {};
@@ -63,10 +59,6 @@ export function createQueryStateObservable({
       queryString.getUpdates$().subscribe(() => {
         currentChange.query = true;
         state.set({ ...state.get(), query: queryString.getQuery() });
-      }),
-      dataSetManager.getUpdates$().subscribe(() => {
-        currentChange.dataSet = true;
-        state.set({ ...state.get(), dataSet: dataSetManager.getDataSet() });
       }),
       timefilter.getTimeUpdate$().subscribe(() => {
         currentChange.time = true;
