@@ -10,27 +10,28 @@ import {
   EuiDescriptionList,
   EuiIcon,
   EuiFlexItem,
-  EuiSelect,
-  EuiButtonIcon,
   EuiText,
   EuiSpacer,
   EuiPanel,
   EuiTitle,
   EuiToolTip,
   EuiEmptyPrompt,
+  EuiSmallButton,
+  EuiCompressedSelect,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import { orderBy } from 'lodash';
+import { useObservable } from 'react-use';
 import { CoreStart, WorkspaceObject } from '../../../../../core/public';
-import { navigateToWorkspaceDetail } from '../utils/workspace';
 
 import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
+import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
+import { navigateToAppWithinWorkspace } from '../utils/workspace';
 
 const WORKSPACE_LIST_CARD_DESCRIPTION = i18n.translate('workspace.list.card.description', {
-  defaultMessage:
-    'Workspaces are dedicated environments for organizing and collaborating on your data, dashboards, and analytics workflows. Each Workspace acts as a self-contained space with its own set of saved objects and access controls.',
+  defaultMessage: 'Dedicated environments for organizing, sharing and collaborating.',
 });
 
 const MAX_ITEM_IN_LIST = 5;
@@ -42,6 +43,7 @@ export interface WorkspaceListCardProps {
 export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
   const [availableWorkspaces, setAvailableWorkspaces] = useState<WorkspaceObject[]>([]);
   const [filter, setFilter] = useState('viewed');
+  const navGroups = useObservable(props.core.chrome.navGroup.getNavGroupsMap$());
 
   useEffect(() => {
     const workspaceSub = props.core.workspaces.workspaceList$.subscribe((list) => {
@@ -75,16 +77,79 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
     return [];
   }, [filter, availableWorkspaces]);
 
-  const handleSwitchWorkspace = (id: string) => {
+  const handleSwitchWorkspace = (workspaceId: string) => {
     const { application, http } = props.core;
-    if (application && http) {
-      navigateToWorkspaceDetail({ application, http }, id);
+    const workspaceObj = availableWorkspaces.find((item) => item.id === workspaceId);
+    const useCase = getFirstUseCaseOfFeatureConfigs(workspaceObj?.features || []);
+    if (useCase && navGroups) {
+      // should be workspace use case overview page
+      const appId = navGroups[useCase].navLinks?.[0].id;
+      navigateToAppWithinWorkspace({ application, http }, workspaceId, appId);
     }
   };
 
   const { application } = props.core;
 
   const isDashboardAdmin = application.capabilities.dashboards?.isDashboardAdmin;
+
+  const createWorkspace = i18n.translate('workspace.list.card.createWorkspace', {
+    defaultMessage: 'Create workspace',
+  });
+
+  const workspaceAvailable = workspaceList && workspaceList.length > 0;
+
+  const createWorkspaceButton = (
+    <EuiSmallButton
+      iconType="plus"
+      iconSize="s"
+      contentProps={{ style: { padding: '0 4px' } }}
+      data-test-subj="create_workspace"
+      aria-label="create workspace"
+      onClick={() => {
+        application.navigateToApp(WORKSPACE_CREATE_APP_ID);
+      }}
+    >
+      {createWorkspace}
+    </EuiSmallButton>
+  );
+
+  let emptyStateBody: JSX.Element = (
+    <EuiText color="subdued" size="s">
+      {i18n.translate('workspace.list.card.empty.readOnly', {
+        defaultMessage:
+          'Contact your administrator to create a workspace or to be added to an existing one.',
+      })}
+    </EuiText>
+  );
+
+  if (isDashboardAdmin) {
+    emptyStateBody = (
+      <>
+        <EuiText color="subdued" size="s">
+          {i18n.translate('workspace.list.card.empty', {
+            defaultMessage: 'Create a workspace to get started.',
+          })}
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexItem>
+            <EuiLink
+              onClick={() => {
+                application.navigateToApp(WORKSPACE_LIST_APP_ID);
+              }}
+            >
+              <EuiText size="s">
+                {i18n.translate('workspace.list.card.manageWorkspaces', {
+                  defaultMessage: 'Manage workspaces',
+                })}
+              </EuiText>
+            </EuiLink>
+          </EuiFlexItem>
+          <EuiFlexItem>{createWorkspaceButton}</EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    );
+  }
 
   return (
     <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
@@ -96,18 +161,23 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
       >
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={4}>
+              <EuiFlexGroup gutterSize="xs" alignItems="center">
+                <EuiFlexItem>
+                  <EuiTitle>
+                    <h4>Workspaces</h4>
+                  </EuiTitle>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiToolTip position="bottom" content={WORKSPACE_LIST_CARD_DESCRIPTION}>
+                    <EuiIcon type="iInCircle" aria-label="workspace list card description" />
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem />
+              </EuiFlexGroup>
+            </EuiFlexItem>
             <EuiFlexItem grow={3}>
-              <EuiTitle>
-                <h4>Workspaces</h4>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={1}>
-              <EuiToolTip position="bottom" content={WORKSPACE_LIST_CARD_DESCRIPTION}>
-                <EuiIcon type="iInCircle" aria-label="workspace list card description" />
-              </EuiToolTip>
-            </EuiFlexItem>
-            <EuiFlexItem grow={5}>
-              <EuiSelect
+              <EuiCompressedSelect
                 value={filter}
                 data-test-subj="workspace_filter"
                 onChange={(e) => {
@@ -129,19 +199,10 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
                 ]}
               />
             </EuiFlexItem>
-            {isDashboardAdmin && (
+            {isDashboardAdmin && workspaceAvailable && (
               <EuiFlexItem grow={false}>
-                <EuiToolTip position="top" content="Create workspace">
-                  <EuiButtonIcon
-                    data-test-subj="create_workspace"
-                    aria-label="create workspace"
-                    display="base"
-                    iconType="plus"
-                    size="m"
-                    onClick={() => {
-                      application.navigateToApp(WORKSPACE_CREATE_APP_ID);
-                    }}
-                  />
+                <EuiToolTip position="top" content={createWorkspace}>
+                  {createWorkspaceButton}
                 </EuiToolTip>
               </EuiFlexItem>
             )}
@@ -149,17 +210,16 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
         </EuiFlexItem>
         <EuiSpacer />
         <EuiFlexItem grow={true}>
-          {workspaceList && workspaceList.length === 0 ? (
+          {!workspaceList || workspaceList.length === 0 ? (
             <EuiEmptyPrompt
-              iconType="database"
+              iconType="spacesApp"
               titleSize="xs"
-              title={<p>No Workspaces found</p>}
-              body={i18n.translate('workspace.list.card.empty', {
-                values: {
-                  filter,
-                },
-                defaultMessage: 'Workspaces you have recently {filter} will appear here.',
-              })}
+              title={
+                <EuiTitle size="s">
+                  <EuiText color="subdued">No Workspaces available</EuiText>
+                </EuiTitle>
+              }
+              body={emptyStateBody}
             />
           ) : (
             <EuiDescriptionList
@@ -186,19 +246,21 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
           )}
         </EuiFlexItem>
         <EuiSpacer />
-        <EuiFlexItem grow={false}>
-          <EuiLink
-            onClick={() => {
-              application.navigateToApp(WORKSPACE_LIST_APP_ID);
-            }}
-          >
-            <EuiText size="s">
-              {i18n.translate('workspace.list.card.view_all', {
-                defaultMessage: 'View all',
-              })}
-            </EuiText>
-          </EuiLink>
-        </EuiFlexItem>
+        {workspaceAvailable && (
+          <EuiFlexItem grow={false}>
+            <EuiLink
+              onClick={() => {
+                application.navigateToApp(WORKSPACE_LIST_APP_ID);
+              }}
+            >
+              <EuiText size="s">
+                {i18n.translate('workspace.list.card.view_all', {
+                  defaultMessage: 'View all',
+                })}
+              </EuiText>
+            </EuiLink>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );

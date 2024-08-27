@@ -15,12 +15,12 @@ import {
   EuiSmallButton,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { DataSource } from '../../../common/types';
+import { DataSourceConnection } from '../../../common/types';
 
 interface OpenSearchConnectionTableProps {
-  assignedDataSources: DataSource[];
+  assignedDataSources: DataSourceConnection[];
   isDashboardAdmin: boolean;
-  setAssignedDataSources: (value: DataSource[]) => void;
+  setAssignedDataSources: (value: DataSourceConnection[]) => void;
   setModalVisible: Dispatch<SetStateAction<boolean>>;
 }
 
@@ -30,21 +30,21 @@ export const CreatePageOpenSearchConnectionTable = ({
   isDashboardAdmin,
   setModalVisible,
 }: OpenSearchConnectionTableProps) => {
-  const [selectedItems, setSelectedItems] = useState<DataSource[]>([]);
+  const [selectedItems, setSelectedItems] = useState<DataSourceConnection[]>([]);
 
-  const onSelectionChange = (currentSelectedItems: DataSource[]) => {
+  const onSelectionChange = (currentSelectedItems: DataSourceConnection[]) => {
     setSelectedItems(currentSelectedItems);
   };
 
-  const handleUnassignDataSources = (dataSources: DataSource[]) => {
+  const handleUnassignDataSources = (dataSources: DataSourceConnection[]) => {
     const savedDataSources = (assignedDataSources ?? [])?.filter(
-      ({ id }: DataSource) => !dataSources.some((item) => item.id === id)
+      ({ id }: DataSourceConnection) => !dataSources.some((item) => item.id === id)
     );
     setAssignedDataSources(savedDataSources);
     setSelectedItems(savedDataSources);
   };
 
-  const columns: Array<EuiBasicTableColumn<DataSource>> = [
+  const columns: Array<EuiBasicTableColumn<DataSourceConnection>> = [
     {
       field: 'title',
       name: i18n.translate('workspace.creator.dataSources.table.title', {
@@ -86,7 +86,7 @@ export const CreatePageOpenSearchConnectionTable = ({
                 ),
                 icon: 'unlink',
                 type: 'icon',
-                onClick: (item: DataSource) => {
+                onClick: (item: DataSourceConnection) => {
                   handleUnassignDataSources([item]);
                 },
                 'data-test-subj': 'workspace-creator-dataSources-table-actions-remove',
@@ -97,13 +97,14 @@ export const CreatePageOpenSearchConnectionTable = ({
       : []),
   ];
 
-  const selection: EuiTableSelectionType<DataSource> = {
+  const selection: EuiTableSelectionType<DataSourceConnection> = {
     selectable: () => isDashboardAdmin,
     onSelectionChange,
   };
 
   const associationButton = (
     <EuiSmallButton
+      iconType="plusInCircle"
       onClick={() => setModalVisible(true)}
       data-test-subj="workspace-creator-dataSources-assign-button"
     >
@@ -115,6 +116,7 @@ export const CreatePageOpenSearchConnectionTable = ({
 
   const removeButton = (
     <EuiSmallButton
+      iconType="unlink"
       color="danger"
       onClick={() => {
         handleUnassignDataSources(selectedItems);

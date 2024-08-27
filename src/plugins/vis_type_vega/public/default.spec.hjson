@@ -15,7 +15,7 @@
       /*
       An object instead of a string for the "url" param is treated as an OpenSearch query. Anything inside this object is not part of the Vega language, but only understood by OpenSearch Dashboards and OpenSearch server. This query counts the number of documents per time interval, assuming you have a @timestamp field in your data.
 
-      OpenSearch Dashboards has a special handling for the fields surrounded by "%".  They are processed before the the query is sent to OpenSearch. This way the query becomes context aware, and can use the time range and the dashboard filters.
+      OpenSearch Dashboards has a special handling for the fields surrounded by "%".  They are processed before the query is sent to OpenSearch. This way the query becomes context aware, and can use the time range and the dashboard filters.
       */
 
       // Apply dashboard context filters when set

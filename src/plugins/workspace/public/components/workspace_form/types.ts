@@ -6,7 +6,7 @@
 import type { ApplicationStart, SavedObjectsStart } from '../../../../../core/public';
 import type { WorkspacePermissionMode } from '../../../common/constants';
 import type { DetailTab, WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
-import { DataSource } from '../../../common/types';
+import { DataSourceConnection } from '../../../common/types';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { WorkspaceUseCase } from '../../types';
 
@@ -34,7 +34,7 @@ export interface WorkspaceFormSubmitData {
   features?: string[];
   color?: string;
   permissionSettings?: WorkspacePermissionSetting[];
-  selectedDataSources?: DataSource[];
+  selectedDataSources?: DataSourceConnection[];
 }
 
 export interface WorkspaceFormData extends WorkspaceFormSubmitData {
@@ -91,4 +91,9 @@ export interface WorkspaceFormProps {
 
 export interface WorkspaceDetailedFormProps extends WorkspaceFormProps {
   defaultValues?: WorkspaceFormData;
+}
+
+export interface AvailableUseCaseItem
+  extends Pick<WorkspaceUseCase, 'id' | 'title' | 'features' | 'description' | 'systematic'> {
+  disabled?: boolean;
 }

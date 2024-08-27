@@ -1,0 +1,2 @@
+feat:
+- [Workspace]Fix click on workspace name not navigates to use case overview page ([#7748](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7748))

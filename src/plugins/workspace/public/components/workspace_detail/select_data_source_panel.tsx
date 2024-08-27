@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from 'react-intl';
-import { DataSource } from '../../../common/types';
+import { DataSourceConnection } from '../../../common/types';
 import { WorkspaceClient } from '../../workspace_client';
 import { OpenSearchConnectionTable } from './opensearch_connections_table';
 import { AssociationDataSourceModal } from './association_data_source_modal';
@@ -28,7 +28,7 @@ import { convertPermissionSettingsToPermissions, useWorkspaceFormContext } from 
 
 export interface SelectDataSourcePanelProps {
   savedObjects: SavedObjectsStart;
-  assignedDataSources: DataSource[];
+  assignedDataSources: DataSourceConnection[];
   detailTitle: string;
   isDashboardAdmin: boolean;
   currentWorkspace: WorkspaceObject;
@@ -48,12 +48,12 @@ export const SelectDataSourceDetailPanel = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
-  const handleAssignDataSources = async (dataSources: DataSource[]) => {
+  const handleAssignDataSources = async (dataSources: DataSourceConnection[]) => {
     try {
       setIsLoading(true);
       setIsVisible(false);
       const { permissionSettings, selectedDataSources, useCase, ...attributes } = formData;
-      const savedDataSources: DataSource[] = [...selectedDataSources, ...dataSources];
+      const savedDataSources: DataSourceConnection[] = [...selectedDataSources, ...dataSources];
 
       const result = await workspaceClient.update(currentWorkspace.id, attributes, {
         dataSources: savedDataSources.map((ds) => {

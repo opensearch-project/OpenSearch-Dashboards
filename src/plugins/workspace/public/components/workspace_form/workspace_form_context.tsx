@@ -5,7 +5,7 @@
 
 import React, { createContext, useContext, FormEventHandler, ReactNode } from 'react';
 import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/color_picker';
-import { DataSource } from '../../../common/types';
+import { DataSourceConnection } from '../../../common/types';
 import { WorkspaceFormProps, WorkspaceFormErrors, WorkspacePermissionSetting } from './types';
 import { PublicAppInfo } from '../../../../../core/public';
 import { useWorkspaceForm } from './use_workspace_form';
@@ -30,7 +30,7 @@ interface WorkspaceFormContextProps {
       Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
     >
   >;
-  setSelectedDataSources: React.Dispatch<React.SetStateAction<DataSource[]>>;
+  setSelectedDataSources: React.Dispatch<React.SetStateAction<DataSourceConnection[]>>;
 }
 
 const initialContextValue: WorkspaceFormContextProps = {} as WorkspaceFormContextProps;

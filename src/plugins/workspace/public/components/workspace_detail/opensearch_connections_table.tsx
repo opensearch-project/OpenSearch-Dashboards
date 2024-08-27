@@ -18,13 +18,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { CoreStart, WorkspaceObject } from '../../../../../core/public';
-import { DataSource } from '../../../common/types';
+import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceClient } from '../../workspace_client';
 import { convertPermissionSettingsToPermissions, useWorkspaceFormContext } from '../workspace_form';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
 interface OpenSearchConnectionTableProps {
-  assignedDataSources: DataSource[];
+  assignedDataSources: DataSourceConnection[];
   isDashboardAdmin: boolean;
   currentWorkspace: WorkspaceObject;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -41,34 +41,32 @@ export const OpenSearchConnectionTable = ({
   } = useOpenSearchDashboards<{ CoreStart: CoreStart; workspaceClient: WorkspaceClient }>();
   const { formData, setSelectedDataSources } = useWorkspaceFormContext();
   const [searchTerm, setSearchTerm] = useState('');
-  const [SelectedItems, setSelectedItems] = useState<DataSource[]>([]);
-  const [assignItems, setAssignItems] = useState<DataSource[]>([]);
+  const [selectedItems, setSelectedItems] = useState<DataSourceConnection[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
 
   const filteredDataSources = useMemo(
     () =>
       assignedDataSources.filter((dataSource) =>
-        dataSource.title.toLowerCase().includes(searchTerm.toLowerCase())
+        dataSource.name.toLowerCase().includes(searchTerm.toLowerCase())
       ),
     [searchTerm, assignedDataSources]
   );
 
-  const onSelectionChange = (selectedItems: DataSource[]) => {
-    setSelectedItems(selectedItems);
-    setAssignItems(selectedItems);
+  const onSelectionChange = (selectedDataSources: DataSourceConnection[]) => {
+    setSelectedItems(selectedDataSources);
   };
 
-  const handleUnassignDataSources = async (dataSources: DataSource[]) => {
+  const handleUnassignDataSources = async (dataSources: DataSourceConnection[]) => {
     try {
       setIsLoading(true);
       setModalVisible(false);
       const { permissionSettings, selectedDataSources, useCase, ...attributes } = formData;
       const savedDataSources = (selectedDataSources ?? [])?.filter(
-        ({ id }: DataSource) => !dataSources.some((item) => item.id === id)
+        ({ id }: DataSourceConnection) => !dataSources.some((item) => item.id === id)
       );
 
       const result = await workspaceClient.update(currentWorkspace.id, attributes, {
-        dataSources: savedDataSources.map(({ id }: DataSource) => id),
+        dataSources: savedDataSources.map(({ id }: DataSourceConnection) => id),
         permissions: convertPermissionSettingsToPermissions(permissionSettings),
       });
       if (result?.success) {
@@ -95,7 +93,7 @@ export const OpenSearchConnectionTable = ({
     }
   };
 
-  const columns: Array<EuiBasicTableColumn<DataSource>> = [
+  const columns: Array<EuiBasicTableColumn<DataSourceConnection>> = [
     {
       field: 'title',
       name: i18n.translate('workspace.detail.dataSources.table.title', {
@@ -137,8 +135,8 @@ export const OpenSearchConnectionTable = ({
                 ),
                 icon: 'unlink',
                 type: 'icon',
-                onClick: (item: DataSource) => {
-                  setAssignItems([item]);
+                onClick: (item: DataSourceConnection) => {
+                  setSelectedItems([item]);
                   setModalVisible(true);
                 },
                 'data-test-subj': 'workspace-detail-dataSources-table-actions-remove',
@@ -149,7 +147,7 @@ export const OpenSearchConnectionTable = ({
       : []),
   ];
 
-  const selection: EuiTableSelectionType<DataSource> = {
+  const selection: EuiTableSelectionType<DataSourceConnection> = {
     selectable: () => isDashboardAdmin,
     onSelectionChange,
   };
@@ -160,7 +158,7 @@ export const OpenSearchConnectionTable = ({
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        {SelectedItems.length > 0 && !modalVisible && (
+        {selectedItems.length > 0 && !modalVisible && (
           <EuiFlexItem grow={false}>
             <EuiButton
               color="danger"
@@ -169,7 +167,7 @@ export const OpenSearchConnectionTable = ({
             >
               {i18n.translate('workspace.detail.dataSources.table.remove.button', {
                 defaultMessage: 'Remove {numberOfSelect} association(s)',
-                values: { numberOfSelect: SelectedItems.length },
+                values: { numberOfSelect: selectedItems.length },
               })}
             </EuiButton>
           </EuiFlexItem>
@@ -205,9 +203,10 @@ export const OpenSearchConnectionTable = ({
           })}
           onCancel={() => {
             setModalVisible(false);
+            setSelectedItems([]);
           }}
           onConfirm={() => {
-            handleUnassignDataSources(assignItems);
+            handleUnassignDataSources(selectedItems);
           }}
           cancelButtonText={i18n.translate('workspace.detail.dataSources.modal.cancelButton', {
             defaultMessage: 'Cancel',

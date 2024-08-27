@@ -12,7 +12,7 @@ import {
   getUseCaseFeatureConfig,
   isUseCaseFeatureConfig,
 } from '../../utils';
-import { DataSource } from '../../../common/types';
+import { DataSourceConnection } from '../../../common/types';
 import { WorkspaceFormProps, WorkspaceFormErrors, WorkspacePermissionSetting } from './types';
 import {
   appendDefaultFeatureIds,
@@ -52,7 +52,7 @@ export const useWorkspaceForm = ({
     Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
   >(initialPermissionSettingsRef.current);
 
-  const [selectedDataSources, setSelectedDataSources] = useState<DataSource[]>(
+  const [selectedDataSources, setSelectedDataSources] = useState<DataSourceConnection[]>(
     defaultValues?.selectedDataSources && defaultValues.selectedDataSources.length > 0
       ? defaultValues.selectedDataSources
       : []
@@ -136,7 +136,7 @@ export const useWorkspaceForm = ({
   const handleResetForm = useCallback(() => {
     const resetValues = defaultValuesRef.current;
     setName(resetValues?.name ?? '');
-    setDescription(resetValues?.description);
+    setDescription(resetValues?.description ?? '');
     setColor(resetValues?.color);
     setFeatureConfigs(appendDefaultFeatureIds(resetValues?.features ?? []));
     setPermissionSettings(initialPermissionSettingsRef.current);

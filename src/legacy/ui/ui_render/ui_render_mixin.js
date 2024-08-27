@@ -205,15 +205,16 @@ export function uiRenderMixin(osdServer, server, config) {
       );
       const uiSettings = osdServer.newPlatform.start.core.uiSettings.asScopedToClient(soClient);
 
+      // coerce to booleans just in case, to make sure template vars render correctly
       const configEnableUserControl =
         !authEnabled || request.auth.isAuthenticated
-          ? await uiSettings.get('theme:enableUserControl')
-          : uiSettings.getOverrideOrDefault('theme:enableUserControl');
+          ? !!(await uiSettings.get('theme:enableUserControl'))
+          : !!uiSettings.getOverrideOrDefault('theme:enableUserControl');
 
       const configDarkMode =
         !authEnabled || request.auth.isAuthenticated
-          ? await uiSettings.get('theme:darkMode')
-          : uiSettings.getOverrideOrDefault('theme:darkMode');
+          ? !!(await uiSettings.get('theme:darkMode'))
+          : !!uiSettings.getOverrideOrDefault('theme:darkMode');
 
       const configThemeVersion =
         !authEnabled || request.auth.isAuthenticated

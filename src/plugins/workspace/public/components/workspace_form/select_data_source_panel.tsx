@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { EuiSpacer, EuiFormLabel, EuiText, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { SavedObjectsStart } from '../../../../../core/public';
-import { DataSource } from '../../../common/types';
+import { DataSourceConnection } from '../../../common/types';
 import { WorkspaceFormError } from './types';
 import { AssociationDataSourceModal } from '../workspace_detail/association_data_source_modal';
 import { CreatePageOpenSearchConnectionTable } from './createpage_opensearch_connections_table';
@@ -15,8 +15,8 @@ import { CreatePageOpenSearchConnectionTable } from './createpage_opensearch_con
 export interface SelectDataSourcePanelProps {
   errors?: { [key: number]: WorkspaceFormError };
   savedObjects: SavedObjectsStart;
-  assignedDataSources: DataSource[];
-  onChange: (value: DataSource[]) => void;
+  assignedDataSources: DataSourceConnection[];
+  onChange: (value: DataSourceConnection[]) => void;
   isDashboardAdmin: boolean;
 }
 
@@ -29,9 +29,9 @@ export const SelectDataSourcePanel = ({
 }: SelectDataSourcePanelProps) => {
   const [modalVisible, setModalVisible] = useState(false);
 
-  const handleAssignDataSources = async (dataSources: DataSource[]) => {
+  const handleAssignDataSources = async (dataSources: DataSourceConnection[]) => {
     setModalVisible(false);
-    const savedDataSources: DataSource[] = [...assignedDataSources, ...dataSources];
+    const savedDataSources: DataSourceConnection[] = [...assignedDataSources, ...dataSources];
     onChange(savedDataSources);
   };
 

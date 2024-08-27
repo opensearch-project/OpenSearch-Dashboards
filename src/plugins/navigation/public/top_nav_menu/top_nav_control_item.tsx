@@ -28,7 +28,14 @@
  * under the License.
  */
 
-import { EuiButton, EuiHeaderLink, EuiButtonIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiHeaderLink,
+  EuiButtonIcon,
+  EuiText,
+  EuiToolTip,
+  EuiHeaderLinkProps,
+} from '@elastic/eui';
 import { upperFirst } from 'lodash';
 import React, { MouseEvent } from 'react';
 import { TopNavControlData } from './top_nav_control_data';
@@ -53,6 +60,7 @@ export function TopNavControlItem(props: TopNavControlData) {
         {props.description}
         {links?.map((linkProps) => (
           <>
+            {' '}
             {/* @ts-ignore using an undefined property to prevent abuse */}
             <TopNavControlItem {...linkProps} sizeOverride="xs" />
           </>
@@ -103,14 +111,24 @@ export function TopNavControlItem(props: TopNavControlData) {
       break;
 
     case 'link':
+      let { iconType, iconSide } = props;
+      let iconGap: EuiHeaderLinkProps['iconGap'];
+      if (props.target === '_blank') {
+        iconType = 'popout';
+        iconSide = 'right';
+        iconGap = 's';
+      }
+
       component = (
         <EuiHeaderLink
           // @ts-ignore using an undefined property to prevent abuse
           size={props.sizeOverride || 's'}
-          iconType={props.iconType}
-          iconSide={props.iconSide}
+          iconType={iconType}
+          iconSide={iconSide}
+          iconGap={iconGap}
           iconSize={props.iconSize}
           color={props.color}
+          flush={props.flush}
           className={props.className}
           href={props.href}
           target={props.target}

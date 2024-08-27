@@ -9,7 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import { PublicAppInfo, WorkspaceObject } from 'opensearch-dashboards/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
-import { WORKSPACE_USE_CASES } from '../../../common/constants';
+import { createMockedRegisteredUseCases$ } from '../../mocks';
 import { WorkspaceDetail } from './workspace_detail';
 import { WorkspaceFormProvider, WorkspaceOperationType } from '../workspace_form';
 import { MemoryRouter } from 'react-router-dom';
@@ -119,15 +119,19 @@ const WorkspaceDetailPage = (props: any) => {
         },
       },
       dataSourceManagement,
+      navigationUI: {
+        HeaderControl: ({ controls }) => {
+          if (props.showDeleteModal) {
+            controls?.[0]?.run?.();
+          }
+          return null;
+        },
+      },
     },
   });
 
-  const registeredUseCases$ = new BehaviorSubject([
-    WORKSPACE_USE_CASES.observability,
-    WORKSPACE_USE_CASES['security-analytics'],
-    WORKSPACE_USE_CASES.essentials,
-    WORKSPACE_USE_CASES.search,
-  ]);
+  const registeredUseCases$ = createMockedRegisteredUseCases$();
+
   return (
     <MemoryRouter>
       <WorkspaceFormProvider
@@ -198,16 +202,15 @@ describe('WorkspaceDetail', () => {
     expect(document.querySelector('#dataSources')).toHaveClass('euiTab-isSelected');
   });
 
-  it('click on delete button will show delete modal', async () => {
+  it('delete button will been shown at page header', async () => {
     const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
-    const { getByText, getByTestId, queryByText } = render(
-      WorkspaceDetailPage({ workspacesService: workspaceService })
+    const { getByText, getByTestId } = render(
+      WorkspaceDetailPage({
+        workspacesService: workspaceService,
+        showDeleteModal: true,
+      })
     );
-    fireEvent.click(getByText('delete'));
     expect(getByText('Delete workspace')).toBeInTheDocument();
-    fireEvent.click(getByText('Cancel'));
-    expect(queryByText('Delete workspace')).toBeNull();
-    fireEvent.click(getByText('delete'));
     const input = getByTestId('delete-workspace-modal-input');
     fireEvent.change(input, {
       target: { value: 'delete' },
@@ -281,13 +284,16 @@ describe('WorkspaceDetail', () => {
 
   it('will not render xss content', async () => {
     const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
-    const workspaceService = createWorkspacesSetupContractMockWithValue({
-      ...workspaceObject,
-      name: '<script>alert("name")</script>',
-      description: '<script>alert("description")</script>',
-    });
-    const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
-    expect(getByText('<script>alert("description")</script>')).toBeInTheDocument();
+    const workspaceService = createWorkspacesSetupContractMockWithValue();
+    const { getByTestId } = render(
+      WorkspaceDetailPage({
+        workspacesService: workspaceService,
+        defaultValues: { ...defaultValues, description: '<script>alert("description")</script>' },
+      })
+    );
+    expect(getByTestId('workspaceForm-workspaceDetails-descriptionInputText').value).toEqual(
+      '<script>alert("description")</script>'
+    );
     expect(alertSpy).toBeCalledTimes(0);
     alertSpy.mockRestore();
   });

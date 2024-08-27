@@ -49,6 +49,11 @@ export const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndP
   defaultMessage: 'Workspaces access',
 });
 
+export const usersAndPermissionsCreatePageTitle = i18n.translate(
+  'workspace.form.usersAndPermissions.createPage.title',
+  { defaultMessage: 'Add collaborators' }
+);
+
 export const detailsName = i18n.translate('workspace.form.workspaceDetails.name.label', {
   defaultMessage: 'Name',
 });
