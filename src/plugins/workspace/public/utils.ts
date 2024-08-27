@@ -23,7 +23,7 @@ import {
   WorkspaceObject,
   WorkspaceAvailability,
 } from '../../../core/public';
-import { DEFAULT_SELECTED_FEATURES_IDS, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
+import { WORKSPACE_DETAIL_APP_ID } from '../common/constants';
 import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
 import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
@@ -188,7 +188,6 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
       const filterCondition =
         navLinkStatus !== AppNavLinkStatus.hidden &&
         !chromeless &&
-        !DEFAULT_SELECTED_FEATURES_IDS.includes(id) &&
         workspaceAvailability !== WorkspaceAvailability.outsideWorkspace;
       // If the category is management, only retain Dashboards Management which contains saved objets and index patterns.
       // Saved objets can show all saved objects in the current workspace and index patterns is at workspace level.
