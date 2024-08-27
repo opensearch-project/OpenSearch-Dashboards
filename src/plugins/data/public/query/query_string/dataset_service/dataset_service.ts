@@ -70,8 +70,8 @@ export class DatasetService {
             }
           : undefined,
       } as IndexPatternSpec;
-      const temporaryIndexPattern = await getIndexPatterns().create(spec);
-      getIndexPatterns().saveToCache(dataset.id, temporaryIndexPattern);
+      const temporaryIndexPattern = await getIndexPatterns()?.create(spec);
+      getIndexPatterns()?.saveToCache(dataset.id, temporaryIndexPattern);
     }
   }
 
@@ -93,7 +93,7 @@ export class DatasetService {
       return undefined;
     }
 
-    const indexPattern = await getIndexPatterns().get(defaultIndexPatternId);
+    const indexPattern = await getIndexPatterns()?.get(defaultIndexPatternId);
     if (!indexPattern || !indexPattern.id) {
       return undefined;
     }
