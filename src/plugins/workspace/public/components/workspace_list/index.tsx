@@ -430,7 +430,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
   ];
 
   return (
-    <EuiPage paddingSize="m">
+    <EuiPage>
       <HeaderControl
         controls={[
           {
@@ -442,14 +442,9 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
         setMountPoint={application?.setAppDescriptionControls}
       />
       {isDashboardAdmin && renderCreateWorkspaceButton()}
-      <EuiPageContent
-        verticalPosition="center"
-        horizontalPosition="center"
-        paddingSize="m"
-        panelPaddingSize="l"
-        hasShadow={false}
-      >
+      <EuiPageContent verticalPosition="center" horizontalPosition="center" hasShadow={false}>
         <EuiInMemoryTable
+          compressed={true}
           items={newWorkspaceList}
           columns={columns}
           itemId="id"
