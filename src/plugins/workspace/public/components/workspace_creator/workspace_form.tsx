@@ -6,20 +6,21 @@
 import React, { useCallback, useRef } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle, EuiForm, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { WorkspaceFormProps } from './types';
-import { useWorkspaceForm } from './use_workspace_form';
-import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
-import { WorkspaceUseCase } from './workspace_use_case';
-import { WorkspaceFormErrorCallout } from './workspace_form_error_callout';
-import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
-import { SelectDataSourcePanel } from './select_data_source_panel';
-import { EnterDetailsPanel } from './workspace_enter_details_panel';
 import {
-  selectDataSourceTitle,
+  useWorkspaceForm,
+  WorkspacePermissionSettingPanel,
+  WorkspaceUseCase,
+  WorkspaceFormErrorCallout,
+  SelectDataSourcePanel,
+  EnterDetailsPanel,
   usersAndPermissionsCreatePageTitle,
+  selectDataSourceTitle,
   workspaceDetailsTitle,
   workspaceUseCaseTitle,
-} from './constants';
+  WorkspaceFormProps,
+} from '../workspace_form';
+
+import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
 
 export const WorkspaceForm = (props: WorkspaceFormProps) => {
   const {

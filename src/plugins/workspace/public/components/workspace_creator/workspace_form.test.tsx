@@ -8,7 +8,7 @@ import { fireEvent, render } from '@testing-library/react';
 import { coreMock } from '../../../../../core/public/mocks';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { createMockedRegisteredUseCases } from '../../mocks';
-import { WorkspaceOperationType } from './constants';
+import { WorkspaceOperationType } from '../workspace_form';
 import { WorkspaceForm } from './workspace_form';
 
 const mockCoreStart = coreMock.createStart();

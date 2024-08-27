@@ -7,8 +7,8 @@ import { EuiSmallButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useState, useCallback } from 'react';
 import type { ApplicationStart } from 'opensearch-dashboards/public';
-import type { WorkspaceFormData } from './types';
-import { WorkspaceCancelModal } from './workspace_cancel_modal';
+import type { WorkspaceFormSubmitData } from '../workspace_form';
+import { WorkspaceCancelModal } from '../workspace_form';
 import {
   MAX_WORKSPACE_DESCRIPTION_LENGTH,
   MAX_WORKSPACE_NAME_LENGTH,
@@ -16,7 +16,7 @@ import {
 
 interface WorkspaceCreateActionPanelProps {
   formId: string;
-  formData: Partial<Pick<WorkspaceFormData, 'name' | 'description'>>;
+  formData: Partial<Pick<WorkspaceFormSubmitData, 'name' | 'description'>>;
   application: ApplicationStart;
 }
 
