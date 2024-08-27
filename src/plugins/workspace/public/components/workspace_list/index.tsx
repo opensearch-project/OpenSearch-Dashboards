@@ -177,6 +177,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
             testId: 'workspaceList-create-workspace',
             iconType: 'plus',
             href: workspaceCreateUrl,
+            fill: true,
           },
         ]}
         setMountPoint={application?.setAppRightControls}
