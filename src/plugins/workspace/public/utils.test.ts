@@ -398,6 +398,7 @@ describe('workspace utils: getDataSourcesList', () => {
         auth: 'mock_value',
         description: 'description1',
         dataSourceEngineType: 'dataSourceEngineType1',
+        workspaces: [],
       },
     ]);
   });
