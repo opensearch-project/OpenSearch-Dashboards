@@ -47,7 +47,12 @@ const CardListInner = ({ embeddable, input, embeddableServices }: Props) => {
     const child = embeddable.getChild(panel.explicitInput.id);
     return (
       <EuiFlexItem key={panel.explicitInput.id}>
-        <embeddableServices.EmbeddablePanel embeddable={child} />
+        <embeddableServices.EmbeddablePanel
+          embeddable={child}
+          hideHeader
+          hasBorder={false}
+          hasShadow={false}
+        />
       </EuiFlexItem>
     );
   });
