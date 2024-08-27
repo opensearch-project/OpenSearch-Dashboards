@@ -95,7 +95,7 @@ export class QueryEnhancementsPlugin
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
 
     data.__enhance({
-      ui: {
+      editor: {
         queryEditorExtension: createQueryAssistExtension(core.http, data, this.config.queryAssist),
       },
     });
