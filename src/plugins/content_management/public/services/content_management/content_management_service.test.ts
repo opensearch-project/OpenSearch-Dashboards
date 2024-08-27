@@ -47,6 +47,29 @@ test('it register content provider', () => {
   expect(cms.getPage('page1')?.getContents('section1')).toHaveLength(1);
 });
 
+test('it register content provider to multiple destination', () => {
+  const cms = new ContentManagementService();
+  cms.registerPage({ id: 'page1', sections: [{ id: 'section1', kind: 'card', order: 0 }] });
+  cms.registerPage({ id: 'page2', sections: [{ id: 'section1', kind: 'card', order: 0 }] });
+  cms.registerContentProvider({
+    id: 'content_provider1',
+    getTargetArea() {
+      return ['page1/section1', 'page2/section1'];
+    },
+    getContent() {
+      return {
+        kind: 'card',
+        id: 'content1',
+        title: 'card',
+        description: 'descriptions',
+        order: 0,
+      };
+    },
+  });
+  expect(cms.getPage('page1')?.getContents('section1')).toHaveLength(1);
+  expect(cms.getPage('page2')?.getContents('section1')).toHaveLength(1);
+});
+
 test('it should throw error when register content provider with invalid target area', () => {
   const cms = new ContentManagementService();
   cms.registerPage({ id: 'page1', sections: [{ id: 'section1', kind: 'card', order: 0 }] });
