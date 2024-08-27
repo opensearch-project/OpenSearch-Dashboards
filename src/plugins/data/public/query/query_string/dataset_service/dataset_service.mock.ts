@@ -7,6 +7,16 @@ import { DatasetServiceContract } from './dataset_service';
 import { Dataset, DataStructure, DEFAULT_DATA } from '../../../../common';
 import { DatasetTypeConfig } from './types';
 
+jest.mock('../../../services', () => ({
+  getIndexPatterns: () => ({
+    get: (id: string) => ({
+      toSpec: () => ({
+        title: 'value',
+      }),
+    }),
+  }),
+}));
+
 const createSetupDatasetServiceMock = (): jest.Mocked<DatasetServiceContract> => {
   const mockIndexPatternType: DatasetTypeConfig = {
     id: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
