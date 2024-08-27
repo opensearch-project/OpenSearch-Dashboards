@@ -126,6 +126,7 @@ export {
   ChromeNavGroup,
   NavGroupType,
   NavGroupStatus,
+  WorkspaceAttributeWithPermission,
 } from '../types';
 
 export {
