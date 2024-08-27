@@ -39,7 +39,18 @@ export const Configurator = ({
   const type = queryString.getDatasetService().getType(baseDataset.type);
   const languages = type?.supportedLanguages(baseDataset) || [];
 
-  const [dataset, setDataset] = useState<Dataset>(baseDataset);
+  const [dataset, setDataset] = useState<Dataset>(() => {
+    const enrichedDataset = { ...baseDataset } as Dataset;
+
+    if (enrichedDataset.type === 'INDEX_PATTERN') {
+      // Populate the timeField of dataset with the timeField of Index pattern
+      const indexPattern = indexPatternsService?.getByTitle(enrichedDataset.title);
+      if (indexPattern) enrichedDataset.timeFieldName = indexPattern.timeFieldName;
+    }
+
+    return enrichedDataset;
+  });
+
   const [timeFields, setTimeFields] = useState<DatasetField[]>();
   const [timeField, setTimeField] = useState<string | undefined>(dataset.timeFieldName);
   const [language, setLanguage] = useState<string>(languages[0]);
@@ -99,22 +110,26 @@ export const Configurator = ({
                 }
               )}
             >
-              <EuiSelect
-                options={[
-                  ...timeFields.map((field) => ({
-                    text: field.displayName || field.name,
-                    value: field.name,
-                  })),
-                  { text: '-----', value: '', disabled: true },
-                  { text: 'No time field', value: undefined },
-                ]}
-                value={timeField}
-                onChange={(e) => {
-                  const value = e.target.value === 'undefined' ? undefined : e.target.value;
-                  setTimeField(value);
-                  setDataset({ ...dataset, timeFieldName: value });
-                }}
-              />
+              {!timeField ? (
+                <EuiSelect
+                  options={[
+                    ...timeFields.map((field) => ({
+                      text: field.displayName || field.name,
+                      value: field.name,
+                    })),
+                    { text: '-----', value: '', disabled: true },
+                    { text: 'No time field', value: undefined },
+                  ]}
+                  value={timeField}
+                  onChange={(e) => {
+                    const value = e.target.value === 'undefined' ? undefined : e.target.value;
+                    setTimeField(value);
+                    setDataset({ ...dataset, timeFieldName: value });
+                  }}
+                />
+              ) : (
+                <EuiFieldText disabled value={timeField} />
+              )}
             </EuiFormRow>
           )}
           <EuiFormRow
