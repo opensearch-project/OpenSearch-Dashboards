@@ -15,7 +15,6 @@ import {
 import { DataSource } from '../../../common/types';
 import { WorkspaceFormProps, WorkspaceFormErrors, WorkspacePermissionSetting } from './types';
 import {
-  appendDefaultFeatureIds,
   generatePermissionSettingsState,
   getNumberOfChanges,
   getNumberOfErrors,
@@ -42,9 +41,7 @@ export const useWorkspaceForm = ({
     generatePermissionSettingsState(operationType, defaultValues?.permissionSettings)
   );
 
-  const [featureConfigs, setFeatureConfigs] = useState(
-    appendDefaultFeatureIds(defaultValues?.features ?? [])
-  );
+  const [featureConfigs, setFeatureConfigs] = useState<string[]>(defaultValues?.features ?? []);
   const selectedUseCase = useMemo(() => getFirstUseCaseOfFeatureConfigs(featureConfigs), [
     featureConfigs,
   ]);
@@ -138,7 +135,7 @@ export const useWorkspaceForm = ({
     setName(resetValues?.name ?? '');
     setDescription(resetValues?.description ?? '');
     setColor(resetValues?.color);
-    setFeatureConfigs(appendDefaultFeatureIds(resetValues?.features ?? []));
+    setFeatureConfigs(resetValues?.features ?? []);
     setPermissionSettings(initialPermissionSettingsRef.current);
     setFormErrors({});
     setIsEditing(false);

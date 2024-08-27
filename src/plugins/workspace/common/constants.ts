@@ -12,11 +12,6 @@ export const WORKSPACE_DETAIL_APP_ID = 'workspace_detail';
 export const WORKSPACE_INITIAL_APP_ID = 'workspace_initial';
 export const WORKSPACE_NAVIGATION_APP_ID = 'workspace_navigation';
 
-/**
- * Since every workspace always have overview and update page, these features will be selected by default
- * and can't be changed in the workspace form feature selector
- */
-export const DEFAULT_SELECTED_FEATURES_IDS = [WORKSPACE_DETAIL_APP_ID];
 export const WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID = 'workspace';
 export const WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID =
   'workspace_conflict_control';

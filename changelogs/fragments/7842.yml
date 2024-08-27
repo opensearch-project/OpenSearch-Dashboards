@@ -1,0 +1,2 @@
+refactor:
+- [Workspace] Use small button, small padding and compressed. ([#7842](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7842))
