@@ -123,7 +123,7 @@ describe('useWorkspaceForm', () => {
     expect(onSubmitMock).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'test-workspace-name',
-        features: ['use-case-observability', 'workspace_detail'],
+        features: ['use-case-observability'],
       })
     );
   });

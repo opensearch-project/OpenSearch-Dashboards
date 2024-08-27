@@ -23,8 +23,8 @@ import {
   WorkspaceObject,
   WorkspaceAvailability,
 } from '../../../core/public';
-import { DEFAULT_SELECTED_FEATURES_IDS, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
-import { WorkspaceUseCase } from './types';
+import { WORKSPACE_DETAIL_APP_ID } from '../common/constants';
+import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
 import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
 
@@ -188,7 +188,6 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
       const filterCondition =
         navLinkStatus !== AppNavLinkStatus.hidden &&
         !chromeless &&
-        !DEFAULT_SELECTED_FEATURES_IDS.includes(id) &&
         workspaceAvailability !== WorkspaceAvailability.outsideWorkspace;
       // If the category is management, only retain Dashboards Management which contains saved objets and index patterns.
       // Saved objets can show all saved objects in the current workspace and index patterns is at workspace level.
@@ -202,13 +201,16 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
   return visibleApplications;
 };
 
-export const getDataSourcesList = (client: SavedObjectsStart['client'], workspaces: string[]) => {
+export const getDataSourcesList = (
+  client: SavedObjectsStart['client'],
+  targetWorkspaces: string[]
+) => {
   return client
     .find({
       type: 'data-source',
       fields: ['id', 'title', 'auth', 'description', 'dataSourceEngineType'],
       perPage: 10000,
-      workspaces,
+      workspaces: targetWorkspaces,
     })
     .then((response) => {
       const objects = response?.savedObjects;
@@ -216,6 +218,7 @@ export const getDataSourcesList = (client: SavedObjectsStart['client'], workspac
         return objects.map((source) => {
           const id = source.id;
           const title = source.get('title');
+          const workspaces = source.workspaces ?? [];
           const auth = source.get('auth');
           const description = source.get('description');
           const dataSourceEngineType = source.get('dataSourceEngineType');
@@ -225,6 +228,7 @@ export const getDataSourcesList = (client: SavedObjectsStart['client'], workspac
             auth,
             description,
             dataSourceEngineType,
+            workspaces,
           };
         });
       } else {
@@ -260,6 +264,18 @@ export const convertNavGroupToWorkspaceUseCase = ({
   order,
 });
 
+const compareFeatures = (
+  features1: WorkspaceUseCaseFeature[],
+  features2: WorkspaceUseCaseFeature[]
+) => {
+  const featuresSerializer = (features: WorkspaceUseCaseFeature[]) =>
+    features
+      .map(({ id, title }) => `${id}-${title}`)
+      .sort()
+      .join();
+  return featuresSerializer(features1) === featuresSerializer(features2);
+};
+
 export const isEqualWorkspaceUseCase = (a: WorkspaceUseCase, b: WorkspaceUseCase) => {
   if (a.id !== b.id) {
     return false;
@@ -276,14 +292,7 @@ export const isEqualWorkspaceUseCase = (a: WorkspaceUseCase, b: WorkspaceUseCase
   if (a.order !== b.order) {
     return false;
   }
-  if (
-    a.features.length !== b.features.length ||
-    a.features.some((aFeature) =>
-      b.features.some(
-        (bFeature) => aFeature.id !== bFeature.id || aFeature.title !== bFeature.title
-      )
-    )
-  ) {
+  if (a.features.length !== b.features.length || !compareFeatures(a.features, b.features)) {
     return false;
   }
   return true;

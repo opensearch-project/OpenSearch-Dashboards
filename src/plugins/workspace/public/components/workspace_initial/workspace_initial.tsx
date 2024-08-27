@@ -18,10 +18,10 @@ import {
   EuiPageBody,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiButtonEmpty,
   EuiPageContent,
   EuiSmallButton,
   EuiToolTip,
+  EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import BackgroundLightSVG from '../../assets/background_light.svg';
@@ -169,7 +169,7 @@ export const WorkspaceInitial = () => {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="eui-displayInline">
-        <EuiButtonEmpty
+        <EuiSmallButtonEmpty
           href="https://www.opensearch.org/"
           iconType="popout"
           iconSide="right"
@@ -181,7 +181,7 @@ export const WorkspaceInitial = () => {
               defaultMessage: 'Learn more from documentation and more.',
             })}
           </EuiText>
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false} style={{ maxWidth: '540px' }}>
@@ -216,7 +216,7 @@ export const WorkspaceInitial = () => {
             >
               {content}
             </EuiPageContent>
-            <EuiButtonEmpty
+            <EuiSmallButtonEmpty
               iconType="gear"
               iconSide="left"
               flush="left"
@@ -228,7 +228,7 @@ export const WorkspaceInitial = () => {
                   defaultMessage: 'Settings and setup',
                 })}
               </EuiText>
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPageBody>

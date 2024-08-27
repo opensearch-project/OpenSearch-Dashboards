@@ -398,6 +398,7 @@ describe('workspace utils: getDataSourcesList', () => {
         auth: 'mock_value',
         description: 'description1',
         dataSourceEngineType: 'dataSourceEngineType1',
+        workspaces: [],
       },
     ]);
   });
@@ -557,6 +558,38 @@ describe('workspace utils: isEqualWorkspaceUseCase', () => {
         features: [{ id: 'bar', title: 'Baz' }],
       })
     ).toEqual(false);
+  });
+  it('should return false for duplicate features', () => {
+    expect(
+      isEqualWorkspaceUseCase(
+        { ...useCaseMock, features: [useCaseMock.features[0], useCaseMock.features[0]] },
+        {
+          ...useCaseMock,
+          features: [
+            useCaseMock.features[0],
+            {
+              id: 'another',
+              title: 'Another',
+            },
+          ],
+        }
+      )
+    ).toEqual(false);
+  });
+  it('should return true for multi same features', () => {
+    const anotherFeature = {
+      id: 'another',
+      title: 'Another',
+    };
+    expect(
+      isEqualWorkspaceUseCase(
+        { ...useCaseMock, features: [useCaseMock.features[0], anotherFeature] },
+        {
+          ...useCaseMock,
+          features: [useCaseMock.features[0], anotherFeature],
+        }
+      )
+    ).toEqual(true);
   });
   it('should return true when all properties equal', () => {
     expect(

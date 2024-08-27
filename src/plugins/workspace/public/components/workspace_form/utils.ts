@@ -6,11 +6,7 @@
 import { i18n } from '@osd/i18n';
 
 import type { SavedObjectPermissions } from '../../../../../core/types';
-import {
-  CURRENT_USER_PLACEHOLDER,
-  DEFAULT_SELECTED_FEATURES_IDS,
-  WorkspacePermissionMode,
-} from '../../../common/constants';
+import { CURRENT_USER_PLACEHOLDER, WorkspacePermissionMode } from '../../../common/constants';
 import { isUseCaseFeatureConfig } from '../../utils';
 import {
   optionIdToWorkspacePermissionModesMap,
@@ -31,11 +27,6 @@ import {
 } from './types';
 import { DataSource } from '../../../common/types';
 import { validateWorkspaceColor } from '../../../common/utils';
-
-export const appendDefaultFeatureIds = (ids: string[]) => {
-  // concat default checked ids and unique the result
-  return Array.from(new Set(ids.concat(DEFAULT_SELECTED_FEATURES_IDS)));
-};
 
 export const isValidFormTextInput = (input?: string) => {
   /**
