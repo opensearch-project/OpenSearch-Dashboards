@@ -168,6 +168,12 @@ export class IndexPatternManagementPlugin
     });
 
     core.getStartServices().then(([coreStart]) => {
+      /**
+       * The `capabilities.workspaces.enabled` indicates
+       * if workspace feature flag is turned on or not and
+       * the global index pattern management page should only be registered
+       * to settings and setup when workspace is turned off,
+       */
       if (!coreStart.application.capabilities.workspaces.enabled) {
         core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
           {

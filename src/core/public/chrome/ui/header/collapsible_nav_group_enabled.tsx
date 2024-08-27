@@ -120,10 +120,8 @@ export function CollapsibleNavGroupEnabled({
     ? !currentNavGroupId
     : currentNavGroupId === ALL_USE_CASE_ID;
 
-  const shouldShowCollapsedNavHeaderContent = useMemo(
-    () => isNavOpen && collapsibleNavHeaderRender && !currentNavGroupId,
-    [collapsibleNavHeaderRender, isNavOpen, currentNavGroupId]
-  );
+  const shouldShowCollapsedNavHeaderContent =
+    isNavOpen && !!collapsibleNavHeaderRender && !currentNavGroupId;
 
   const navLinksForRender: ChromeNavLink[] = useMemo(() => {
     const getSystemNavGroups = () => {
@@ -138,6 +136,11 @@ export function CollapsibleNavGroupEnabled({
             navGroup.navLinks,
             navLinks
           );
+          /**
+           * We will take the first visible app inside the system nav groups
+           * when customers click the menu. If there is not a visible nav links,
+           * we should not show the nav group.
+           */
           if (visibleNavLinksWithinNavGroup[0]) {
             result.push({
               ...visibleNavLinksWithinNavGroup[0],
@@ -158,11 +161,11 @@ export function CollapsibleNavGroupEnabled({
 
     if (currentNavGroupId === ALL_USE_CASE_ID) {
       // Append all the links that do not have use case info to keep backward compatible
-      const linkIdsWithUseGroupInfo = Object.values(navGroupsMap).reduce((total, navGroup) => {
+      const linkIdsWithNavGroupInfo = Object.values(navGroupsMap).reduce((total, navGroup) => {
         return [...total, ...navGroup.navLinks.map((navLink) => navLink.id)];
       }, [] as string[]);
       navLinks.forEach((navLink) => {
-        if (linkIdsWithUseGroupInfo.includes(navLink.id)) {
+        if (linkIdsWithNavGroupInfo.includes(navLink.id)) {
           return;
         }
         navLinksResult.push({

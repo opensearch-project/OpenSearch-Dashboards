@@ -137,9 +137,10 @@ export function NavGroups({
     return {} as EuiSideNavItemType<{}>;
   };
   const orderedLinksOrCategories = getOrderedLinksOrCategories(navLinks);
-  const sideNavItems = orderedLinksOrCategories
-    .map((navLink) => createSideNavItem(navLink, LEVEL_FOR_ROOT_ITEMS))
-    .filter((item): item is EuiSideNavItemType<{}> => !!item);
+  const sideNavItems = orderedLinksOrCategories.map((navLink) =>
+    createSideNavItem(navLink, LEVEL_FOR_ROOT_ITEMS)
+  );
+
   return (
     <EuiFlexItem style={style}>
       <EuiSideNav items={sideNavItems} isOpenOnMobile />
