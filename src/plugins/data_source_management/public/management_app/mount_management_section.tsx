@@ -112,7 +112,7 @@ export async function mountManagementSection(
     <OpenSearchDashboardsContextProvider services={deps}>
       <I18nProvider>
         {params.wrapInPage ? (
-          <EuiPageContent hasShadow={false} hasBorder={false} color="transparent">
+          <EuiPageContent hasShadow={false} hasBorder={false} color="transparent" paddingSize="m">
             {content}
           </EuiPageContent>
         ) : (

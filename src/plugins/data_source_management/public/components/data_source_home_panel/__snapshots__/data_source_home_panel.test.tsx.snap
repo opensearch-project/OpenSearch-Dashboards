@@ -61,9 +61,6 @@ exports[`DataSourceHomePanel renders correctly 1`] = `
       </EuiTabs>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiSpacer
-        size="s"
-      />
       <DataSourceTableWithRouter
         history={
           Object {

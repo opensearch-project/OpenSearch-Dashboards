@@ -163,9 +163,9 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                   <div
                     className="euiText euiText--small"
                   >
-                    <h3>
+                    <h2>
                       Data source details
-                    </h3>
+                    </h2>
                   </div>
                 </EuiText>
                 <EuiSpacer
@@ -375,9 +375,9 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                   <div
                     className="euiText euiText--small"
                   >
-                    <h3>
+                    <h2>
                       Prometheus data location
-                    </h3>
+                    </h2>
                   </div>
                 </EuiText>
                 <EuiSpacer
@@ -489,9 +489,9 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                   <div
                     className="euiText euiText--small"
                   >
-                    <h3>
+                    <h2>
                       Authentication details
-                    </h3>
+                    </h2>
                   </div>
                 </EuiText>
                 <EuiSpacer
@@ -955,9 +955,9 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                                 <div
                                   className="euiText euiText--small"
                                 >
-                                  <h3>
+                                  <h2>
                                     Query permissions
-                                  </h3>
+                                  </h2>
                                 </div>
                               </EuiText>
                               <EuiText

@@ -152,7 +152,7 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
           </>
         )}
         <EuiText size="s">
-          <h3>Data source details</h3>
+          <h2>Data source details</h2>
         </EuiText>
         <EuiSpacer size="m" />
         <NameRow
@@ -176,7 +176,7 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
         <EuiSpacer />
 
         <EuiText size="s">
-          <h3>AWS Glue Data Catalog authentication details</h3>
+          <h2>AWS Glue Data Catalog authentication details</h2>
         </EuiText>
         <EuiSpacer size="m" />
 
@@ -218,7 +218,7 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
         <EuiSpacer />
 
         <EuiText size="s">
-          <h3>AWS Glue Data Catalog index store details</h3>
+          <h2>AWS Glue Data Catalog index store details</h2>
         </EuiText>
         <EuiSpacer size="m" />
 

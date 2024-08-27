@@ -404,9 +404,9 @@ export class CreateDataSourceForm extends React.Component<
     return (
       <>
         <EuiText grow={false} size="s">
-          <h3>
+          <h2>
             <FormattedMessage id={i18nId} defaultMessage={defaultMessage} />
-          </h3>
+          </h2>
         </EuiText>
       </>
     );
@@ -773,7 +773,7 @@ export class CreateDataSourceForm extends React.Component<
             >
               <FormattedMessage
                 id="dataSourcesManagement.createDataSource.createButtonLabel"
-                defaultMessage="Create data source"
+                defaultMessage="Connect to OpenSearch Cluster"
               />
             </EuiButton>
           </EuiFlexItem>

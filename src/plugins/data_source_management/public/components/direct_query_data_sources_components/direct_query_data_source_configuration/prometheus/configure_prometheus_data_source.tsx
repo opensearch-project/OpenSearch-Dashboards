@@ -122,7 +122,7 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
         )}
         <EuiForm component="form">
           <EuiText size="s">
-            <h3>Data source details</h3>
+            <h2>Data source details</h2>
           </EuiText>
           <EuiSpacer size="m" />
           <NameRow
@@ -147,7 +147,7 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
           <EuiSpacer />
 
           <EuiText size="s">
-            <h3>Prometheus data location</h3>
+            <h2>Prometheus data location</h2>
           </EuiText>
           <EuiSpacer size="m" />
 
@@ -172,7 +172,7 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
           <EuiSpacer />
 
           <EuiText size="s">
-            <h3>Authentication details</h3>
+            <h2>Authentication details</h2>
           </EuiText>
           <EuiSpacer size="m" />
 

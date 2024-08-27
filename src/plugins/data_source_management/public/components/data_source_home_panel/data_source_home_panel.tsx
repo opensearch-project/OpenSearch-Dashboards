@@ -101,6 +101,7 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
       renderComponent: (
         <EuiButtonGroup
           legend="connection type"
+          buttonSize="compressed"
           options={[
             { id: 'manageOpensearchDataSources', label: 'OpenSearch connections' },
             { id: 'manageDirectQueryDataSources', label: 'Direct query connections' },
@@ -183,7 +184,6 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
           </>
         )}
         <EuiFlexItem>
-          <EuiSpacer size="s" />
           {selectedTabId === 'manageOpensearchDataSources' && featureFlagStatus && (
             <DataSourceTableWithRouter {...props} />
           )}

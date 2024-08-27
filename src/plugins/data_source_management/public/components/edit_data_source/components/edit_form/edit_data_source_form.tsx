@@ -686,14 +686,14 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     return (
       <EuiPanel paddingSize="m">
         <EuiText size="s">
-          <h3>
+          <h2>
             {
               <FormattedMessage
                 id="dataSourcesManagement.editDataSource.connectionDetailsText"
                 defaultMessage="Connection Details"
               />
             }
-          </h3>
+          </h2>
         </EuiText>
 
         <EuiHorizontalRule margin="m" />
@@ -701,14 +701,14 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         <EuiDescribedFormGroup
           title={
             <EuiText size="s">
-              <h4>
+              <h3>
                 {
                   <FormattedMessage
                     id="dataSourcesManagement.editDataSource.objectDetailsText"
                     defaultMessage="Object Details"
                   />
                 }
-              </h4>
+              </h3>
             </EuiText>
           }
           description={
@@ -774,14 +774,14 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     return (
       <EuiPanel paddingSize="m">
         <EuiText size="s">
-          <h3>
+          <h2>
             {
               <FormattedMessage
                 id="dataSourcesManagement.editDataSource.endpointTitle"
                 defaultMessage="Endpoint"
               />
             }
-          </h3>
+          </h2>
         </EuiText>
 
         <EuiHorizontalRule margin="m" />
@@ -810,14 +810,14 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     return (
       <EuiPanel paddingSize="m">
         <EuiText size="s">
-          <h3>
+          <h2>
             {
               <FormattedMessage
                 id="dataSourcesManagement.editDataSource.authenticationTitle"
                 defaultMessage="Authentication"
               />
             }
-          </h3>
+          </h2>
         </EuiText>
 
         <EuiHorizontalRule margin="m" />
@@ -825,14 +825,14 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         <EuiDescribedFormGroup
           title={
             <EuiText size="s">
-              <h4>
+              <h3>
                 {
                   <FormattedMessage
                     id="dataSourcesManagement.editDataSource.authenticationMethod"
                     defaultMessage="Authentication Method"
                   />
                 }
-              </h4>
+              </h3>
             </EuiText>
           }
         >
