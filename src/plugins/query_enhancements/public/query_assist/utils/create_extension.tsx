@@ -6,7 +6,7 @@
 import { HttpSetup } from 'opensearch-dashboards/public';
 import React, { useEffect, useState } from 'react';
 import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
-import { DEFAULT_DATA } from '../../../../data/common';
+import { DATA_STRUCTURE_META_TYPES, DEFAULT_DATA } from '../../../../data/common';
 import {
   DataPublicPluginSetup,
   QueryEditorExtensionConfig,
@@ -15,16 +15,32 @@ import {
 import { API } from '../../../common';
 import { ConfigSchema } from '../../../common/config';
 import { QueryAssistBanner, QueryAssistBar } from '../components';
+import assistantMark from '../../assets/query_assist_mark.svg';
+
+/**
+ * @returns list of query assist supported languages for the given data source.
+ */
+const getAvailableLanguagesForDataSource = (() => {
+  const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
+  return async (http: HttpSetup, dataSourceId: string | undefined) => {
+    const cached = availableLanguagesByDataSource.get(dataSourceId);
+    if (cached !== undefined) return cached;
+    const languages = await http
+      .get<{ configuredLanguages: string[] }>(API.QUERY_ASSIST.LANGUAGES, {
+        query: { dataSourceId },
+      })
+      .then((response) => response.configuredLanguages)
+      .catch(() => []);
+    availableLanguagesByDataSource.set(dataSourceId, languages);
+    return languages;
+  };
+})();
 
 /**
  * @returns observable list of query assist agent configured languages in the
  * selected data source.
  */
-const getAvailableLanguages$ = (
-  availableLanguagesByDataSource: Map<string | undefined, string[]>,
-  http: HttpSetup,
-  data: DataPublicPluginSetup
-) =>
+const getAvailableLanguages$ = (http: HttpSetup, data: DataPublicPluginSetup) =>
   data.query.queryString.getUpdates$().pipe(
     startWith(data.query.queryString.getQuery()),
     distinctUntilChanged(),
@@ -34,16 +50,7 @@ const getAvailableLanguages$ = (
       if (query.dataset?.dataSource?.type !== DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH) return [];
 
       const dataSourceId = query.dataset?.dataSource?.id;
-      const cached = availableLanguagesByDataSource.get(dataSourceId);
-      if (cached !== undefined) return cached;
-      const languages = await http
-        .get<{ configuredLanguages: string[] }>(API.QUERY_ASSIST.LANGUAGES, {
-          query: { dataSourceId },
-        })
-        .then((response) => response.configuredLanguages)
-        .catch(() => []);
-      availableLanguagesByDataSource.set(dataSourceId, languages);
-      return languages;
+      return getAvailableLanguagesForDataSource(http, dataSourceId);
     })
   );
 
@@ -52,24 +59,27 @@ export const createQueryAssistExtension = (
   data: DataPublicPluginSetup,
   config: ConfigSchema['queryAssist']
 ): QueryEditorExtensionConfig => {
-  const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
-
   return {
     id: 'query-assist',
     order: 1000,
+    getDataStructureMeta: async (dataSourceId) => {
+      const isEnabled = await getAvailableLanguagesForDataSource(http, dataSourceId).then(
+        (languages) => languages.length > 0
+      );
+      if (isEnabled) {
+        return {
+          type: DATA_STRUCTURE_META_TYPES.TYPE,
+          icon: { type: assistantMark },
+          tooltip: 'Query assist is available',
+        };
+      }
+    },
     isEnabled$: () =>
-      getAvailableLanguages$(availableLanguagesByDataSource, http, data).pipe(
-        map((languages) => languages.length > 0)
-      ),
+      getAvailableLanguages$(http, data).pipe(map((languages) => languages.length > 0)),
     getComponent: (dependencies) => {
       // only show the component if user is on a supported language.
       return (
-        <QueryAssistWrapper
-          availableLanguagesByDataSource={availableLanguagesByDataSource}
-          dependencies={dependencies}
-          http={http}
-          data={data}
-        >
+        <QueryAssistWrapper dependencies={dependencies} http={http} data={data}>
           <QueryAssistBar dependencies={dependencies} />
         </QueryAssistWrapper>
       );
@@ -77,13 +87,7 @@ export const createQueryAssistExtension = (
     getBanner: (dependencies) => {
       // advertise query assist if user is not on a supported language.
       return (
-        <QueryAssistWrapper
-          availableLanguagesByDataSource={availableLanguagesByDataSource}
-          dependencies={dependencies}
-          http={http}
-          data={data}
-          invert
-        >
+        <QueryAssistWrapper dependencies={dependencies} http={http} data={data} invert>
           <QueryAssistBanner
             dependencies={dependencies}
             languages={config.supportedLanguages.map((conf) => conf.language)}
@@ -95,7 +99,6 @@ export const createQueryAssistExtension = (
 };
 
 interface QueryAssistWrapperProps {
-  availableLanguagesByDataSource: Map<string | undefined, string[]>;
   dependencies: QueryEditorExtensionDependencies;
   http: HttpSetup;
   data: DataPublicPluginSetup;
@@ -108,11 +111,7 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
   useEffect(() => {
     let mounted = true;
 
-    const subscription = getAvailableLanguages$(
-      props.availableLanguagesByDataSource,
-      props.http,
-      props.data
-    ).subscribe((languages) => {
+    const subscription = getAvailableLanguages$(props.http, props.data).subscribe((languages) => {
       const available = languages.includes(props.dependencies.language);
       if (mounted) setVisible(props.invert ? !available : available);
     });

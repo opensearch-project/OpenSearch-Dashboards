@@ -8,6 +8,7 @@ import { map } from 'rxjs/operators';
 import { DEFAULT_DATA, DataStructure, Dataset } from '../../../../../common';
 import { DatasetTypeConfig } from '../types';
 import { getSearchService, getIndexPatterns } from '../../../../services';
+import { injectMetaToDataStructures } from './utils';
 
 const INDEX_INFO = {
   LOCAL_DATASOURCE: {
@@ -93,14 +94,15 @@ const fetchDataSources = async (client: SavedObjectsClientContract) => {
     type: 'data-source',
     perPage: 10000,
   });
-  const dataSources: DataStructure[] = [INDEX_INFO.LOCAL_DATASOURCE];
-  return dataSources.concat(
+  const dataSources: DataStructure[] = [INDEX_INFO.LOCAL_DATASOURCE].concat(
     resp.savedObjects.map((savedObject) => ({
       id: savedObject.id,
       title: savedObject.attributes.title,
       type: 'DATA_SOURCE',
     }))
   );
+
+  return injectMetaToDataStructures(dataSources);
 };
 
 const fetchIndices = async (dataStructure: DataStructure): Promise<string[]> => {
