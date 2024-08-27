@@ -101,7 +101,7 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
   const createWorkspaceButton = (
     <EuiSmallButton
       iconType="plus"
-      iconSize="s"
+      iconGap="s"
       contentProps={{ style: { padding: '0 4px' } }}
       data-test-subj="create_workspace"
       aria-label="create workspace"
@@ -223,6 +223,7 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
             />
           ) : (
             <EuiDescriptionList
+              compressed
               type="column"
               titleProps={{ style: { width: '70%' } }}
               descriptionProps={{ style: { width: '30%' } }}
