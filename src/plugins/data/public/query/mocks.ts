@@ -47,11 +47,11 @@ const createSetupContractMock = () => {
   return setupContract;
 };
 
-const createStartContractMock = () => {
+const createStartContractMock = (isEnhancementsEnabled: boolean = false) => {
   const startContract: jest.Mocked<QueryStart> = {
     addToQueryLog: jest.fn(),
     filterManager: createFilterManagerMock(),
-    queryString: queryStringManagerMock.createStartContract(),
+    queryString: queryStringManagerMock.createStartContract(isEnhancementsEnabled),
     savedQueries: jest.fn() as any,
     state$: new Observable(),
     timefilter: timefilterServiceMock.createStartContract(),

@@ -62,7 +62,7 @@ const createSetupContract = (): Setup => {
 };
 
 const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
-  const queryStartMock = queryServiceMock.createStartContract();
+  const queryStartMock = queryServiceMock.createStartContract(isEnhancementsEnabled);
   return {
     actions: {
       createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
@@ -72,10 +72,7 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
     search: searchServiceMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
-    ui: uiServiceMock.createStartContract(
-      isEnhancementsEnabled,
-      searchServiceMock.createStartContract()
-    ),
+    ui: uiServiceMock.createStartContract(),
     indexPatterns: ({
       find: jest.fn((search) => [{ id: search, title: search }]),
       createField: jest.fn(() => {}),
