@@ -5,12 +5,15 @@
 
 import { CoreSetup } from 'opensearch-dashboards/public';
 import { Observable } from 'rxjs';
-import { IAggConfig } from 'src/plugins/data/common';
 
-export interface QueryAggConfig extends Partial<IAggConfig> {
-  [key: string]: any;
-  qs: {
-    [x: string]: string;
+export interface QueryAggConfig {
+  [key: string]: {
+    field?: string;
+    fixed_interval?: string;
+    calendar_interval?: string;
+    min_doc_count?: number;
+    time_zone?: string;
+    [x: number]: string;
   };
 }
 

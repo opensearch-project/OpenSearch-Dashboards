@@ -199,45 +199,30 @@ export const convertResult = (response: IDataFrameResponse): SearchResponse<any>
   if (data.hasOwnProperty('aggs')) {
     const dataWithAggs = data as IDataFrameWithAggs;
     if (!dataWithAggs.aggs) {
-      // TODO: MQL best guess, get timestamp field and caculate it here
       return searchResponse;
     }
-    searchResponse.aggregations = Object.entries(dataWithAggs.aggs).reduce(
-      (acc: Record<string, unknown>, [id, value]) => {
-        const aggConfig = dataWithAggs.meta?.aggs;
-        if (id === 'other-filter') {
-          const buckets = value as DataFrameBucketAgg[];
-          buckets.forEach((bucket) => {
-            const bucketValue = bucket.value;
-            searchResponse.hits.total += bucketValue;
-          });
-          acc[id] = {
-            buckets: [{ '': { doc_count: 0 } }],
-          };
-          return acc;
-        }
-        if (aggConfig && aggConfig.type === 'buckets') {
-          const buckets = value as DataFrameBucketAgg[];
-          acc[id] = {
-            buckets: buckets.map((bucket) => {
-              const bucketValue = bucket.value;
-              searchResponse.hits.total += bucketValue;
-              return {
-                key_as_string: bucket.key,
-                key: (aggConfig as DataFrameAggConfig).date_histogram
-                  ? new Date(bucket.key).getTime()
-                  : bucket.key,
-                doc_count: bucketValue,
-              };
-            }),
-          };
-          return acc;
-        }
-        acc[id] = Array.isArray(value) ? value[0] : value;
-        return acc;
-      },
-      {}
-    );
+    searchResponse.aggregations = {};
+
+    const aggConfig = dataWithAggs.meta;
+    Object.entries(dataWithAggs.aggs).forEach(([id, value]) => {
+      if (aggConfig && aggConfig.date_histogram) {
+        const buckets = value as Array<{ key: string; value: number }>;
+        searchResponse.aggregations[id] = {
+          buckets: buckets.map((bucket) => {
+            const timestamp = new Date(bucket.key).getTime();
+            searchResponse.hits.total += bucket.value;
+            return {
+              key_as_string: bucket.key,
+              key: timestamp,
+              doc_count: bucket.value,
+            };
+          }),
+        };
+      } else {
+        // Handle other aggregation types here if needed
+        searchResponse.aggregations[id] = value;
+      }
+    });
   }
 
   return searchResponse;

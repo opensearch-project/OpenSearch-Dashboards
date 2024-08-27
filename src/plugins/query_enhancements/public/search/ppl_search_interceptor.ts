@@ -74,26 +74,35 @@ export class PPLSearchInterceptor extends SearchInterceptor {
   private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {
     const { aggs } = request.params.body;
     if (!aggs || !query.dataset || !query.dataset.timeFieldName) return;
-    let aggsConfig: QueryAggConfig = { qs: {} };
+    const aggsConfig: QueryAggConfig = {};
     const { fromDate, toDate } = formatTimePickerDate(
       this.queryService.timefilter.timefilter.getTime(),
       'YYYY-MM-DD HH:mm:ss.SSS'
     );
     Object.entries(aggs as Record<number, any>).forEach(([key, value]) => {
-      const aggType = this.aggsService.types.get(key);
-      aggsConfig = { ...aggsConfig, aggType };
-      aggsConfig.qs[key] = `${query.query} | stats count() by span(${
-        query.dataset!.timeFieldName
-      }, ${
-        value.date_histogram.fixed_interval ??
-        value.date_histogram.calendar_interval ??
-        this.aggsService.calculateAutoTimeExpression({
-          from: fromDate,
-          to: toDate,
-          mode: 'absolute',
-        })
-      })`;
+      const aggTypeKeys = Object.keys(value);
+      if (aggTypeKeys.length === 0) {
+        return aggsConfig;
+      }
+      const aggTypeKey = aggTypeKeys[0];
+      if (aggTypeKey === 'date_histogram') {
+        aggsConfig[aggTypeKey] = {
+          ...value[aggTypeKey],
+        };
+        aggsConfig.qs = {
+          [key]: `${query.query} | stats count() by span(${query.dataset!.timeFieldName}, ${
+            value[aggTypeKey].fixed_interval ??
+            value[aggTypeKey].calendar_interval ??
+            this.aggsService.calculateAutoTimeExpression({
+              from: fromDate,
+              to: toDate,
+              mode: 'absolute',
+            })
+          })`,
+        };
+      }
     });
+
     return aggsConfig;
   }
 
