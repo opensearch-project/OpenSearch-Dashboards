@@ -22,25 +22,60 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
 import { i18n } from '@osd/i18n';
-import { getDataSourcesList } from '../../utils';
+
+import { getDataSourcesList, fetchDataSourceConnections } from '../../utils';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
-import { SavedObjectsStart } from '../../../../../core/public';
+import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../../core/public';
+
+type DataSourceModalOption = EuiSelectableOption<{ connection: DataSourceConnection }>;
+
+const convertConnectionsToOptions = (
+  connections: DataSourceConnection[],
+  assignedConnections: DataSourceConnection[]
+) => {
+  const assignedConnectionIds = assignedConnections.map(({ id }) => id);
+  return connections
+    .filter((connection) => !assignedConnectionIds.includes(connection.id))
+    .map((connection) => ({
+      label: connection.name,
+      key: connection.id,
+      append:
+        connection.relatedConnections && connection.relatedConnections.length > 0 ? (
+          <EuiBadge>
+            {i18n.translate('workspace.form.selectDataSource.optionBadge', {
+              defaultMessage: '+ {relatedConnections} related',
+              values: {
+                relatedConnections: connection.relatedConnections.length,
+              },
+            })}
+          </EuiBadge>
+        ) : undefined,
+      connection,
+      checked: undefined,
+    }));
+};
+
+enum AssociationDataSourceModalTab {
+  All = 'all',
+  OpenSearchConnections = 'opensearch-connections',
+  DirectQueryConnections = 'direction-query-connections',
+}
 
 const tabOptions: EuiButtonGroupOptionProps[] = [
   {
-    id: 'all',
+    id: AssociationDataSourceModalTab.All,
     label: i18n.translate('workspace.form.selectDataSource.subTitle', {
       defaultMessage: 'All',
     }),
   },
   {
-    id: 'opensearch-connections',
+    id: AssociationDataSourceModalTab.OpenSearchConnections,
     label: i18n.translate('workspace.form.selectDataSource.subTitle', {
       defaultMessage: 'OpenSearch connections',
     }),
   },
   {
-    id: 'direct-query-connections',
+    id: AssociationDataSourceModalTab.DirectQueryConnections,
     label: i18n.translate('workspace.form.selectDataSource.subTitle', {
       defaultMessage: 'Direct query connections',
     }),
@@ -48,147 +83,92 @@ const tabOptions: EuiButtonGroupOptionProps[] = [
 ];
 
 export interface AssociationDataSourceModalProps {
+  http: HttpStart | undefined;
+  notifications: NotificationsStart | undefined;
   savedObjects: SavedObjectsStart;
-  assignedDataSources: DataSourceConnection[];
+  assignedConnections: DataSourceConnection[];
   closeModal: () => void;
-  handleAssignDataSources: (dataSources: DataSourceConnection[]) => Promise<void>;
+  handleAssignDataSourceConnections: (connections: DataSourceConnection[]) => Promise<void>;
 }
 
 export const AssociationDataSourceModal = ({
+  http,
+  notifications,
   closeModal,
   savedObjects,
-  assignedDataSources,
-  handleAssignDataSources,
+  assignedConnections,
+  handleAssignDataSourceConnections,
 }: AssociationDataSourceModalProps) => {
-  // const [options, setOptions] = useState<Array<EuiSelectableOption<any>>>([]);
-  // const [allOptions, setAlloptions] = useState<EuiSelectableOption[]>([]);
-  const [allDataSources, setAllDataSources] = useState<DataSourceConnection[]>([]);
+  const [allConnections, setAllConnections] = useState<DataSourceConnection[]>([]);
   const [currentTab, setCurrentTab] = useState('all');
-  const [allOptions, setAllOptions] = useState<Array<EuiSelectableOption<any>>>([]);
-
-  useEffect(() => {
-    getDataSourcesList(savedObjects.client, ['*']).then((result) => {
-      const filteredDataSources: DataSourceConnection[] = result
-        .filter(({ id }) => !assignedDataSources.some((ds) => ds.id === id))
-        .map((datasource) => {
-          return {
-            ...datasource,
-            name: datasource.title,
-            type: datasource.dataSourceEngineType,
-            connectionType: DataSourceConnectionType.OpenSearchConnection,
-          };
-        });
-
-      // dqc
-      filteredDataSources.push({
-        name: 's3 connection1',
-        description: 'this is a s3',
-        id: filteredDataSources[0].id + '-' + 's3 connection1',
-        parentId: filteredDataSources[0].id,
-        type: 's3',
-        connectionType: DataSourceConnectionType.DirectQueryConnection,
-      });
-      filteredDataSources.push({
-        name: 's3 connection2',
-        description: 'this is a s3',
-        id: filteredDataSources[0].id + '-' + 's3 connection2',
-        parentId: filteredDataSources[0].id,
-        type: 's3',
-        connectionType: DataSourceConnectionType.DirectQueryConnection,
-      });
-      filteredDataSources[0].relatedConnections = [
-        filteredDataSources[filteredDataSources.length - 1],
-        filteredDataSources[filteredDataSources.length - 2],
-      ];
-
-      setAllDataSources(filteredDataSources);
-      setAllOptions(
-        filteredDataSources.map((dataSource) => ({
-          ...dataSource,
-          label: dataSource.name,
-          key: dataSource.id,
-          append: dataSource.relatedConnections ? (
-            <EuiBadge>
-              {i18n.translate('workspace.form.selectDataSource.optionBadge', {
-                defaultMessage: '+' + dataSource.relatedConnections.length + ' related',
-              })}
-            </EuiBadge>
-          ) : undefined,
-        }))
-      );
-    });
-  }, [assignedDataSources, savedObjects]);
-
-  const selectedDataSources = useMemo(() => {
-    const selectedIds = allOptions
-      .filter((option: EuiSelectableOption) => option.checked)
-      .map((option: EuiSelectableOption) => option.key);
-
-    return allDataSources.filter((ds) => selectedIds.includes(ds.id));
-  }, [allOptions, allDataSources]);
+  const [allOptions, setAllOptions] = useState<DataSourceModalOption[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const options = useMemo(() => {
-    if (currentTab === 'all') {
-      return allOptions;
-    }
-    if (currentTab === 'opensearch-connections') {
+    if (currentTab === AssociationDataSourceModalTab.OpenSearchConnections) {
       return allOptions.filter(
-        (dataSource) => dataSource.connectionType === DataSourceConnectionType.OpenSearchConnection
+        ({ connection }) =>
+          connection.connectionType === DataSourceConnectionType.OpenSearchConnection
       );
     }
-    if (currentTab === 'direct-query-connections') {
+    if (currentTab === AssociationDataSourceModalTab.DirectQueryConnections) {
       return allOptions.filter(
-        (dataSource) => dataSource.connectionType === DataSourceConnectionType.DirectQueryConnection
+        ({ connection }) =>
+          connection.connectionType === DataSourceConnectionType.DirectQueryConnection
       );
     }
+    return allOptions;
   }, [allOptions, currentTab]);
 
+  const selectedConnections = useMemo(
+    () => allOptions.filter(({ checked }) => checked === 'on').map(({ connection }) => connection),
+    [allOptions]
+  );
+
   const handleSelectionChange = useCallback(
-    (newOptions: Array<EuiSelectableOption<any>>) => {
-      const newCheckedOptionIds = newOptions
+    (newOptions: DataSourceModalOption[]) => {
+      const newCheckedConnectionIds = newOptions
         .filter(({ checked }) => checked === 'on')
-        .map(({ value }) => value);
+        .map(({ connection }) => connection.id);
 
       setAllOptions((prevOptions) => {
         return prevOptions.map((option) => {
-          const checkedInNewOptions = newCheckedOptionIds.includes(option.value);
-          const connection = allDataSources.find(({ id }) => id === option.value);
+          option = { ...option };
+          const checkedInNewOptions = newCheckedConnectionIds.includes(option.connection.id);
+          const connection = option.connection;
           option.checked = checkedInNewOptions ? 'on' : undefined;
 
-          if (!connection) {
-            return option;
-          }
-
-          if (connection.type === 'DS') {
-            const childDQCIds = allDataSources
-              .find(({ parentId }) => parentId === connection.id)
-              ?.relatedConnections?.map(({ id }) => id);
+          if (connection.connectionType === DataSourceConnectionType.OpenSearchConnection) {
+            const childDQCIds = allConnections
+              .filter(({ parentId }) => parentId === connection.id)
+              .map(({ id }) => id);
             // Check if there any DQC change to checked status this time, set to "on" if exists.
             if (
-              newCheckedOptionIds.some(
+              newCheckedConnectionIds.some(
                 (id) =>
                   childDQCIds.includes(id) &&
                   // This child DQC not checked before
-                  !prevOptions.find(({ value, checked }) => value === id && checked === 'on')
+                  !prevOptions.find((item) => item.connection.id === id && item.checked === 'on')
               )
             ) {
               option.checked = 'on';
             }
           }
 
-          if (connection.type === 'DQC') {
-            const parentConnection = allDataSources.find(({ id }) => id === connection.id);
+          if (connection.connectionType === DataSourceConnectionType.DirectQueryConnection) {
+            const parentConnection = allConnections.find(({ id }) => id === connection.parentId);
             if (parentConnection) {
-              const isParentCheckedLastTime = prevOptions.find(
-                ({ value, checked }) => value === parentConnection.id && checked === 'on'
+              const isParentCheckedLastTime = !!prevOptions.find(
+                (item) => item.connection.id === parentConnection.id && item.checked === 'on'
               );
-              const isParentCheckedThisTime = newCheckedOptionIds.includes(parentConnection.id);
+              const isParentCheckedThisTime = newCheckedConnectionIds.includes(parentConnection.id);
 
               // Parent change to checked this time
               if (!isParentCheckedLastTime && isParentCheckedThisTime) {
                 option.checked = 'on';
               }
 
+              // This won't be executed since checked options already been filter out
               if (isParentCheckedLastTime && isParentCheckedThisTime) {
                 option.checked = undefined;
               }
@@ -199,8 +179,24 @@ export const AssociationDataSourceModal = ({
         });
       });
     },
-    [allDataSources]
+    [allConnections]
   );
+
+  useEffect(() => {
+    setIsLoading(true);
+    getDataSourcesList(savedObjects.client, ['*'])
+      .then((dataSourcesList) => fetchDataSourceConnections(dataSourcesList, http, notifications))
+      .then((connections) => {
+        setAllConnections(connections);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [savedObjects.client, http, notifications]);
+
+  useEffect(() => {
+    setAllOptions(convertConnectionsToOptions(allConnections, assignedConnections));
+  }, [allConnections, assignedConnections]);
 
   return (
     <EuiModal onClose={closeModal} style={{ width: 900 }}>
@@ -226,7 +222,6 @@ export const AssociationDataSourceModal = ({
           idSelected={currentTab}
           onChange={(id) => setCurrentTab(id)}
           buttonSize="compressed"
-          // isFullWidth={true}
         />
         <EuiSpacer size="s" />
         <EuiSelectable
@@ -238,6 +233,7 @@ export const AssociationDataSourceModal = ({
           }}
           options={options}
           onChange={handleSelectionChange}
+          isLoading={isLoading}
         >
           {(list, search) => (
             <Fragment>
@@ -256,8 +252,8 @@ export const AssociationDataSourceModal = ({
           />
         </EuiButton>
         <EuiButton
-          onClick={() => handleAssignDataSources(selectedDataSources)}
-          isDisabled={!selectedDataSources || selectedDataSources.length === 0}
+          onClick={() => handleAssignDataSourceConnections(selectedConnections)}
+          isDisabled={!selectedConnections || selectedConnections.length === 0}
           fill
         >
           <FormattedMessage

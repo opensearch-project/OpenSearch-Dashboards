@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import { i18n } from '@osd/i18n';
 import { combineLatest } from 'rxjs';
 import {
   NavGroupType,
@@ -13,6 +13,7 @@ import {
   ChromeBreadcrumb,
   ApplicationStart,
   HttpSetup,
+  NotificationsStart,
 } from '../../../core/public';
 import {
   App,
@@ -435,4 +436,26 @@ export const getUseCaseUrl = (
     http.basePath
   );
   return useCaseURL;
+};
+
+export const fetchDataSourceConnections = async (
+  assignedDataSources: DataSource[],
+  http: HttpSetup | undefined,
+  notifications: NotificationsStart | undefined
+) => {
+  try {
+    const directQueryConnectionsPromises = assignedDataSources.map((ds) =>
+      getDirectQueryConnections(ds.id, http!).catch(() => [])
+    );
+    const directQueryConnectionsResult = await Promise.all(directQueryConnectionsPromises);
+    const directQueryConnections = directQueryConnectionsResult.flat();
+    return mergeDataSourcesWithConnections(assignedDataSources, directQueryConnections);
+  } catch (error) {
+    notifications?.toasts.addDanger(
+      i18n.translate('workspace.detail.dataSources.error.message', {
+        defaultMessage: 'Cannot fetch direct query connections',
+      })
+    );
+    return [];
+  }
 };

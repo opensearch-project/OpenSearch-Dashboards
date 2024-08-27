@@ -25,29 +25,3 @@ export function useApplications(applicationInstance: ApplicationStart) {
     return apps;
   }, [applications]);
 }
-
-export const useFetchDQC = (
-  assignedDataSources: DataSource[],
-  http: HttpSetup | undefined,
-  notifications: NotificationsStart | undefined
-) => {
-  const fetchDQC = useCallback(async () => {
-    try {
-      const directQueryConnectionsPromises = assignedDataSources.map((ds) =>
-        getDirectQueryConnections(ds.id, http!)
-      );
-      const directQueryConnectionsResult = await Promise.all(directQueryConnectionsPromises);
-      const directQueryConnections = directQueryConnectionsResult.flat();
-      return mergeDataSourcesWithConnections(assignedDataSources, directQueryConnections);
-    } catch (error) {
-      notifications?.toasts.addDanger(
-        i18n.translate('workspace.detail.dataSources.error.message', {
-          defaultMessage: 'Cannot fetch direct query connections',
-        })
-      );
-      return [];
-    }
-  }, [assignedDataSources, http, notifications?.toasts]);
-
-  return fetchDQC;
-};
