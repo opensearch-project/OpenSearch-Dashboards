@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiText,
   EuiTitle,
@@ -20,14 +20,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from 'react-intl';
-import { DataSource, DataSourceConnection } from '../../../common/types';
+import { DataSource, DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceClient } from '../../workspace_client';
 import { OpenSearchConnectionTable } from './opensearch_connections_table';
 import { AssociationDataSourceModal } from './association_data_source_modal';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { CoreStart, SavedObjectsStart, WorkspaceObject } from '../../../../../core/public';
 import { convertPermissionSettingsToPermissions, useWorkspaceFormContext } from '../workspace_form';
-import { useFetchDQC } from '../../hooks';
+import { fetchDataSourceConnections } from '../../utils';
 
 export interface SelectDataSourcePanelProps {
   savedObjects: SavedObjectsStart;
@@ -50,17 +50,18 @@ export const SelectDataSourceDetailPanel = ({
   const { formData, setSelectedDataSources } = useWorkspaceFormContext();
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [dataSourceConnections, setDataSourceConnections] = useState<DataSourceConnection[]>([]);
+  const [assignedDataSourceConnections, setAssignedDataSourceConnections] = useState<
+    DataSourceConnection[]
+  >([]);
   const [toggleIdSelected, setToggleIdSelected] = useState('all');
-  const fetchDQC = useFetchDQC(assignedDataSources, http, notifications);
 
   useEffect(() => {
     setIsLoading(true);
-    fetchDQC().then((res) => {
-      setDataSourceConnections(res);
+    fetchDataSourceConnections(assignedDataSources, http, notifications).then((connections) => {
+      setAssignedDataSourceConnections(connections);
       setIsLoading(false);
     });
-  }, [fetchDQC]);
+  }, [assignedDataSources, http, notifications]);
 
   const toggleButtons = [
     {
@@ -83,7 +84,19 @@ export const SelectDataSourceDetailPanel = ({
     },
   ];
 
-  const handleAssignDataSources = async (dataSources: DataSource[]) => {
+  const handleAssignDataSourceConnections = async (
+    dataSourceConnections: DataSourceConnection[]
+  ) => {
+    const dataSources = dataSourceConnections
+      .filter(
+        ({ connectionType }) => connectionType === DataSourceConnectionType.OpenSearchConnection
+      )
+      .map(({ id, type, name, description }) => ({
+        id,
+        title: name,
+        description,
+        dataSourceEngineType: type,
+      }));
     try {
       setIsLoading(true);
       setIsVisible(false);
@@ -228,7 +241,7 @@ export const SelectDataSourceDetailPanel = ({
       <OpenSearchConnectionTable
         isDashboardAdmin={isDashboardAdmin}
         connectionType={toggleIdSelected}
-        dataSourceConnections={dataSourceConnections}
+        dataSourceConnections={assignedDataSourceConnections}
         handleUnassignDataSources={handleUnassignDataSources}
       />
     );
@@ -262,10 +275,12 @@ export const SelectDataSourceDetailPanel = ({
       {renderTableContent()}
       {isVisible && (
         <AssociationDataSourceModal
+          http={http}
+          notifications={notifications}
           savedObjects={savedObjects}
-          assignedDataSources={assignedDataSources}
           closeModal={() => setIsVisible(false)}
-          handleAssignDataSources={handleAssignDataSources}
+          assignedConnections={assignedDataSourceConnections}
+          handleAssignDataSourceConnections={handleAssignDataSourceConnections}
         />
       )}
     </EuiPanel>

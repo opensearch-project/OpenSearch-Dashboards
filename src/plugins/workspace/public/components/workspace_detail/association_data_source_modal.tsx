@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState, useCallback } from 'react';
 import React from 'react';
 import {
   EuiText,
@@ -15,79 +15,225 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSelectableOption,
+  EuiSpacer,
+  EuiButtonGroup,
+  EuiButtonGroupOptionProps,
+  EuiBadge,
 } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
-import { getDataSourcesList } from '../../utils';
-import { DataSource } from '../../../common/types';
-import { SavedObjectsStart } from '../../../../../core/public';
+import { i18n } from '@osd/i18n';
+
+import { getDataSourcesList, fetchDataSourceConnections } from '../../utils';
+import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
+import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../../core/public';
+
+type DataSourceModalOption = EuiSelectableOption<{ connection: DataSourceConnection }>;
+
+const convertConnectionsToOptions = (
+  connections: DataSourceConnection[],
+  assignedConnections: DataSourceConnection[]
+) => {
+  const assignedConnectionIds = assignedConnections.map(({ id }) => id);
+  return connections
+    .filter((connection) => !assignedConnectionIds.includes(connection.id))
+    .map((connection) => ({
+      label: connection.name,
+      key: connection.id,
+      append:
+        connection.relatedConnections && connection.relatedConnections.length > 0 ? (
+          <EuiBadge>
+            {i18n.translate('workspace.form.selectDataSource.optionBadge', {
+              defaultMessage: '+ {relatedConnections} related',
+              values: {
+                relatedConnections: connection.relatedConnections.length,
+              },
+            })}
+          </EuiBadge>
+        ) : undefined,
+      connection,
+      checked: undefined,
+    }));
+};
+
+enum AssociationDataSourceModalTab {
+  All = 'all',
+  OpenSearchConnections = 'opensearch-connections',
+  DirectQueryConnections = 'direction-query-connections',
+}
+
+const tabOptions: EuiButtonGroupOptionProps[] = [
+  {
+    id: AssociationDataSourceModalTab.All,
+    label: i18n.translate('workspace.form.selectDataSource.subTitle', {
+      defaultMessage: 'All',
+    }),
+  },
+  {
+    id: AssociationDataSourceModalTab.OpenSearchConnections,
+    label: i18n.translate('workspace.form.selectDataSource.subTitle', {
+      defaultMessage: 'OpenSearch connections',
+    }),
+  },
+  {
+    id: AssociationDataSourceModalTab.DirectQueryConnections,
+    label: i18n.translate('workspace.form.selectDataSource.subTitle', {
+      defaultMessage: 'Direct query connections',
+    }),
+  },
+];
 
 export interface AssociationDataSourceModalProps {
+  http: HttpStart | undefined;
+  notifications: NotificationsStart | undefined;
   savedObjects: SavedObjectsStart;
-  assignedDataSources: DataSource[];
+  assignedConnections: DataSourceConnection[];
   closeModal: () => void;
-  handleAssignDataSources: (dataSources: DataSource[]) => Promise<void>;
+  handleAssignDataSourceConnections: (connections: DataSourceConnection[]) => Promise<void>;
 }
 
 export const AssociationDataSourceModal = ({
+  http,
+  notifications,
   closeModal,
   savedObjects,
-  assignedDataSources,
-  handleAssignDataSources,
+  assignedConnections,
+  handleAssignDataSourceConnections,
 }: AssociationDataSourceModalProps) => {
-  const [options, setOptions] = useState<EuiSelectableOption[]>([]);
-  const [allDataSources, setAllDataSources] = useState<DataSource[]>([]);
+  const [allConnections, setAllConnections] = useState<DataSourceConnection[]>([]);
+  const [currentTab, setCurrentTab] = useState('all');
+  const [allOptions, setAllOptions] = useState<DataSourceModalOption[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const options = useMemo(() => {
+    if (currentTab === AssociationDataSourceModalTab.OpenSearchConnections) {
+      return allOptions.filter(
+        ({ connection }) =>
+          connection.connectionType === DataSourceConnectionType.OpenSearchConnection
+      );
+    }
+    if (currentTab === AssociationDataSourceModalTab.DirectQueryConnections) {
+      return allOptions.filter(
+        ({ connection }) =>
+          connection.connectionType === DataSourceConnectionType.DirectQueryConnection
+      );
+    }
+    return allOptions;
+  }, [allOptions, currentTab]);
+
+  const selectedConnections = useMemo(
+    () => allOptions.filter(({ checked }) => checked === 'on').map(({ connection }) => connection),
+    [allOptions]
+  );
+
+  const handleSelectionChange = useCallback(
+    (newOptions: DataSourceModalOption[]) => {
+      const newCheckedConnectionIds = newOptions
+        .filter(({ checked }) => checked === 'on')
+        .map(({ connection }) => connection.id);
+
+      setAllOptions((prevOptions) => {
+        return prevOptions.map((option) => {
+          option = { ...option };
+          const checkedInNewOptions = newCheckedConnectionIds.includes(option.connection.id);
+          const connection = option.connection;
+          option.checked = checkedInNewOptions ? 'on' : undefined;
+
+          if (connection.connectionType === DataSourceConnectionType.OpenSearchConnection) {
+            const childDQCIds = allConnections
+              .filter(({ parentId }) => parentId === connection.id)
+              .map(({ id }) => id);
+            // Check if there any DQC change to checked status this time, set to "on" if exists.
+            if (
+              newCheckedConnectionIds.some(
+                (id) =>
+                  childDQCIds.includes(id) &&
+                  // This child DQC not checked before
+                  !prevOptions.find((item) => item.connection.id === id && item.checked === 'on')
+              )
+            ) {
+              option.checked = 'on';
+            }
+          }
+
+          if (connection.connectionType === DataSourceConnectionType.DirectQueryConnection) {
+            const parentConnection = allConnections.find(({ id }) => id === connection.parentId);
+            if (parentConnection) {
+              const isParentCheckedLastTime = !!prevOptions.find(
+                (item) => item.connection.id === parentConnection.id && item.checked === 'on'
+              );
+              const isParentCheckedThisTime = newCheckedConnectionIds.includes(parentConnection.id);
+
+              // Parent change to checked this time
+              if (!isParentCheckedLastTime && isParentCheckedThisTime) {
+                option.checked = 'on';
+              }
+
+              // This won't be executed since checked options already been filter out
+              if (isParentCheckedLastTime && isParentCheckedThisTime) {
+                option.checked = undefined;
+              }
+            }
+          }
+
+          return option;
+        });
+      });
+    },
+    [allConnections]
+  );
 
   useEffect(() => {
-    getDataSourcesList(savedObjects.client, ['*']).then((result) => {
-      const filteredDataSources = result.filter(
-        ({ id }: DataSource) => !assignedDataSources.some((ds) => ds.id === id)
-      );
-      setAllDataSources(filteredDataSources);
-      setOptions(
-        filteredDataSources.map((dataSource) => ({
-          label: dataSource.title,
-          key: dataSource.id,
-        }))
-      );
-    });
-  }, [assignedDataSources, savedObjects]);
+    setIsLoading(true);
+    getDataSourcesList(savedObjects.client, ['*'])
+      .then((dataSourcesList) => fetchDataSourceConnections(dataSourcesList, http, notifications))
+      .then((connections) => {
+        setAllConnections(connections);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [savedObjects.client, http, notifications]);
 
-  const selectedDataSources = useMemo(() => {
-    const selectedIds = options
-      .filter((option: EuiSelectableOption) => option.checked)
-      .map((option: EuiSelectableOption) => option.key);
-
-    return allDataSources.filter((ds) => selectedIds.includes(ds.id));
-  }, [options, allDataSources]);
+  useEffect(() => {
+    setAllOptions(convertConnectionsToOptions(allConnections, assignedConnections));
+  }, [allConnections, assignedConnections]);
 
   return (
-    <EuiModal onClose={closeModal}>
+    <EuiModal onClose={closeModal} style={{ width: 900 }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h1>
-            <FormattedMessage
-              id="workspace.detail.dataSources.associateModal.title"
-              defaultMessage="Associate OpenSearch connections"
-            />
-          </h1>
+          <FormattedMessage
+            id="workspace.detail.dataSources.associateModal.title"
+            defaultMessage="Associate OpenSearch connections"
+          />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiText size="s" color="subdued">
+        <EuiText size="xs" color="subdued">
           <FormattedMessage
             id="workspace.detail.dataSources.associateModal.message"
             defaultMessage="Add OpenSearch connections that will be available in the workspace."
           />
         </EuiText>
+        <EuiSpacer />
+        <EuiButtonGroup
+          legend="Data source tab"
+          options={tabOptions}
+          idSelected={currentTab}
+          onChange={(id) => setCurrentTab(id)}
+          buttonSize="compressed"
+        />
+        <EuiSpacer size="s" />
         <EuiSelectable
           aria-label="Searchable"
           searchable
-          listProps={{ bordered: true }}
+          listProps={{ bordered: true, onFocusBadge: false }}
           searchProps={{
             'data-test-subj': 'workspace-detail-dataSources-associateModal-search',
           }}
           options={options}
-          onChange={(newOptions) => setOptions(newOptions)}
+          onChange={handleSelectionChange}
+          isLoading={isLoading}
         >
           {(list, search) => (
             <Fragment>
@@ -99,20 +245,20 @@ export const AssociationDataSourceModal = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButton onClick={closeModal} fill>
+        <EuiButton onClick={closeModal}>
           <FormattedMessage
             id="workspace.detail.dataSources.associateModal.close.button"
             defaultMessage="Close"
           />
         </EuiButton>
         <EuiButton
-          onClick={() => handleAssignDataSources(selectedDataSources)}
-          isDisabled={!selectedDataSources || selectedDataSources.length === 0}
+          onClick={() => handleAssignDataSourceConnections(selectedConnections)}
+          isDisabled={!selectedConnections || selectedConnections.length === 0}
           fill
         >
           <FormattedMessage
             id="workspace.detail.dataSources.associateModal.save.button"
-            defaultMessage="Save changes"
+            defaultMessage="Associate data sources"
           />
         </EuiButton>
       </EuiModalFooter>
