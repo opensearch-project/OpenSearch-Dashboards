@@ -1,0 +1,2 @@
+fix:
+- Nav bar layout in Discover when Query Enhancement Flag is On ([#7853](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7853))
