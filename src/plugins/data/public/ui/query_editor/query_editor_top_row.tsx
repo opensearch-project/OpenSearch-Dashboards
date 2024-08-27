@@ -53,6 +53,7 @@ export interface QueryEditorTopRowProps {
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
   datePickerRef?: React.RefObject<HTMLDivElement>;
+  savedQueryManagement?: any;
 }
 
 // Needed for React.lazy
@@ -174,7 +175,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       <EuiFlexItem>
         <QueryEditor
           disableAutoFocus={props.disableAutoFocus}
-          queryActions={props.prepend}
+          prepend={props.prepend}
           query={props.query!}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
@@ -184,6 +185,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           className="osdQueryEditor"
           dataTestSubj={props.dataTestSubj}
           filterBar={props.filterBar}
+          savedQueryManagement={props.savedQueryManagement}
         />
       </EuiFlexItem>
     );

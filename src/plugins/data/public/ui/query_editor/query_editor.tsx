@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PopoverAnchorPosition } from '@elastic/eui';
+import { EuiCompressedFieldText, EuiText, PopoverAnchorPosition } from '@elastic/eui';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
@@ -15,9 +15,11 @@ import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
-import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
 import { getQueryService, getIndexPatterns } from '../../services';
 import { DatasetSelector } from '../dataset_selector';
+import { QueryControls } from '../../query/query_string/language_service/get_query_control_links';
+import { RecentQuery } from '../../query/query_string/language_service/recent_query';
+import { DefaultInputProps } from './editors';
 
 const LANGUAGE_ID_SQL = 'SQL';
 monaco.languages.register({ id: LANGUAGE_ID_SQL });
@@ -46,6 +48,8 @@ export interface QueryEditorProps {
   bannerClassName?: string;
   footerClassName?: string;
   filterBar?: any;
+  prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
+  savedQueryManagement?: any;
 }
 
 interface Props extends QueryEditorProps {
@@ -155,6 +159,10 @@ export default class QueryEditorUI extends Component<Props, State> {
       language: this.props.query.language,
       dataset: this.props.query.dataset,
     });
+  };
+
+  private onClickRecentQuery = (query: Query, timeRange?: TimeRange) => {
+    this.onSubmit(query, timeRange);
   };
 
   private onInputChange = (value: string) => {
@@ -285,6 +293,21 @@ export default class QueryEditorUI extends Component<Props, State> {
     };
   };
 
+  public onToggleCollapse = () => {
+    this.setState({ isCollapsed: !this.state.isCollapsed });
+  };
+
+  private renderQueryControls = () => {
+    return (
+      <QueryControls
+        services={this.services}
+        queryLanguage={this.props.query.language}
+        onToggleCollapse={this.onToggleCollapse}
+        savedQueryManagement={this.props.savedQueryManagement}
+      />
+    );
+  };
+
   public render() {
     const className = classNames(this.props.className);
 
@@ -305,7 +328,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       value: this.getQueryString(),
     };
 
-    const defaultInputProps = {
+    const defaultInputProps: DefaultInputProps = {
       ...baseInputProps,
       onChange: this.onInputChange,
       editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -315,8 +338,19 @@ export default class QueryEditorUI extends Component<Props, State> {
       },
       footerItems: {
         start: [
-          `${this.state.lineCount} ${this.state.lineCount === 1 ? 'line' : 'lines'}`,
-          this.props.query.dataset?.timeFieldName || '',
+          <EuiText size="xs" color="subdued">
+            {`${this.state.lineCount} ${this.state.lineCount === 1 ? 'line' : 'lines'}`}
+          </EuiText>,
+          <EuiText size="xs" color="subdued">
+            {this.props.query.dataset?.timeFieldName || ''}
+          </EuiText>,
+        ],
+        end: [
+          <RecentQuery
+            queryString={this.queryString}
+            query={this.props.query}
+            onClickRecentQuery={this.onClickRecentQuery}
+          />,
         ],
       },
       provideCompletionItems: this.provideCompletionItems,
@@ -350,6 +384,7 @@ export default class QueryEditorUI extends Component<Props, State> {
         };
       },
       provideCompletionItems: this.provideCompletionItems,
+      prepend: this.props.prepend,
     };
 
     const languageEditorFunc = this.languageManager.getLanguage(this.props.query.language)!.editor;
@@ -374,10 +409,6 @@ export default class QueryEditorUI extends Component<Props, State> {
           className={classNames('osdQueryEditor__banner', this.props.bannerClassName)}
         />
         <div className="osdQueryEditor__topBar">
-          <QueryEditorBtnCollapse
-            onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}
-            isCollapsed={!this.state.isCollapsed}
-          />
           <DatasetSelector onSubmit={this.props.onSubmit} />
           <div className="osdQueryEditor__input">
             {this.state.isCollapsed
@@ -385,7 +416,7 @@ export default class QueryEditorUI extends Component<Props, State> {
               : languageEditor.TopBar.Expanded && languageEditor.TopBar.Expanded()}
           </div>
           {languageSelector}
-          {this.props.queryActions}
+          <div className="osdQueryEditor__querycontrols">{this.renderQueryControls()}</div>
         </div>
         <div
           ref={this.headerRef}

@@ -27,6 +27,10 @@ export class LanguageService {
     this.queryEditorExtensionMap = {};
   }
 
+  public createDefaultQueryEditor() {
+    return createEditor(SingleLineInput, SingleLineInput, DQLBody);
+  }
+
   public __enhance = (enhancements: UiEnhancements) => {
     if (enhancements.queryEditorExtension) {
       this.queryEditorExtensionMap[enhancements.queryEditorExtension.id] =
