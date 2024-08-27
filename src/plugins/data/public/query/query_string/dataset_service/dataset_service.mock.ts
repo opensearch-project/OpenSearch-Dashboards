@@ -10,10 +10,13 @@ import { DatasetTypeConfig } from './types';
 jest.mock('../../../services', () => ({
   getIndexPatterns: () => ({
     get: (id: string) => ({
+      id,
       toSpec: () => ({
         title: 'value',
       }),
     }),
+    create: jest.fn(),
+    saveToCache: jest.fn(),
   }),
 }));
 
