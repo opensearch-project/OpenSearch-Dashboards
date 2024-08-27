@@ -202,13 +202,16 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
   return visibleApplications;
 };
 
-export const getDataSourcesList = (client: SavedObjectsStart['client'], workspaces: string[]) => {
+export const getDataSourcesList = (
+  client: SavedObjectsStart['client'],
+  targetWorkspaces: string[]
+) => {
   return client
     .find({
       type: 'data-source',
       fields: ['id', 'title', 'auth', 'description', 'dataSourceEngineType'],
       perPage: 10000,
-      workspaces,
+      workspaces: targetWorkspaces,
     })
     .then((response) => {
       const objects = response?.savedObjects;
@@ -216,6 +219,7 @@ export const getDataSourcesList = (client: SavedObjectsStart['client'], workspac
         return objects.map((source) => {
           const id = source.id;
           const title = source.get('title');
+          const workspaces = source.workspaces ?? [];
           const auth = source.get('auth');
           const description = source.get('description');
           const dataSourceEngineType = source.get('dataSourceEngineType');
@@ -225,6 +229,7 @@ export const getDataSourcesList = (client: SavedObjectsStart['client'], workspac
             auth,
             description,
             dataSourceEngineType,
+            workspaces,
           };
         });
       } else {
