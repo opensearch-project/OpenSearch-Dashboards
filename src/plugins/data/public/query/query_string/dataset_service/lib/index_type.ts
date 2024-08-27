@@ -5,11 +5,13 @@
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { map } from 'rxjs/operators';
+import { EuiIconProps } from '@elastic/eui';
 import {
   DEFAULT_DATA,
   DataStructure,
   DataStructureCustomMeta,
   Dataset,
+  DatasetField,
 } from '../../../../../common';
 import { DatasetTypeConfig } from '../types';
 import { getSearchService, getIndexPatterns } from '../../../../services';
@@ -22,15 +24,15 @@ const INDEX_INFO = {
   },
 };
 
-export const indexTypeConfig: DatasetTypeConfig = {
-  id: DEFAULT_DATA.SET_TYPES.INDEX,
-  title: 'Indexes',
-  meta: {
+class IndexDatasetTypeConfig extends DatasetTypeConfig {
+  id = DEFAULT_DATA.SET_TYPES.INDEX;
+  title = 'Indexes';
+  meta: { icon: EuiIconProps; tooltip: string } = {
     icon: { type: 'logoOpenSearch' },
     tooltip: 'OpenSearch Indexes',
-  },
+  };
 
-  toDataset: (path) => {
+  toDataset(path: DataStructure[]): Dataset {
     const index = path[path.length - 1];
     const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
     const indexMeta = index.meta as DataStructureCustomMeta;
@@ -48,13 +50,13 @@ export const indexTypeConfig: DatasetTypeConfig = {
           }
         : INDEX_INFO.LOCAL_DATASOURCE,
     };
-  },
+  }
 
-  fetch: async (savedObjects, path) => {
+  async fetch(client: SavedObjectsClientContract, path: DataStructure[]): Promise<DataStructure> {
     const dataStructure = path[path.length - 1];
     switch (dataStructure.type) {
       case 'DATA_SOURCE': {
-        const indices = await fetchIndices(dataStructure);
+        const indices = await this.fetchIndices(dataStructure);
         return {
           ...dataStructure,
           hasNext: false,
@@ -68,18 +70,18 @@ export const indexTypeConfig: DatasetTypeConfig = {
       }
 
       default: {
-        const dataSources = await fetchDataSources(savedObjects);
+        const dataSources = await this.fetchDataSources(client);
         return {
           ...dataStructure,
-          columnHeader: 'Cluster',
+          columnHeader: 'Clusters',
           hasNext: true,
           children: dataSources,
         };
       }
     }
-  },
+  }
 
-  fetchFields: async (dataset) => {
+  async fetchFields(dataset: Dataset): Promise<DatasetField[]> {
     const fields = await getIndexPatterns().getFieldsForWildcard({
       pattern: dataset.title,
       dataSourceId: dataset.dataSource?.id,
@@ -88,60 +90,62 @@ export const indexTypeConfig: DatasetTypeConfig = {
       name: field.name,
       type: field.type,
     }));
-  },
+  }
 
-  supportedLanguages: (dataset: Dataset): string[] => {
+  supportedLanguages(dataset: Dataset): string[] {
     return ['SQL', 'PPL'];
-  },
-};
+  }
 
-const fetchDataSources = async (client: SavedObjectsClientContract) => {
-  const resp = await client.find<any>({
-    type: 'data-source',
-    perPage: 10000,
-  });
-  const dataSources: DataStructure[] = [INDEX_INFO.LOCAL_DATASOURCE];
-  return dataSources.concat(
-    resp.savedObjects.map((savedObject) => ({
-      id: savedObject.id,
-      title: savedObject.attributes.title,
-      type: 'DATA_SOURCE',
-    }))
-  );
-};
+  private async fetchDataSources(client: SavedObjectsClientContract): Promise<DataStructure[]> {
+    const resp = await client.find<any>({
+      type: 'data-source',
+      perPage: 10000,
+    });
+    const dataSources: DataStructure[] = [INDEX_INFO.LOCAL_DATASOURCE];
+    return dataSources.concat(
+      resp.savedObjects.map((savedObject) => ({
+        id: savedObject.id,
+        title: savedObject.attributes.title,
+        type: 'DATA_SOURCE',
+      }))
+    );
+  }
 
-const fetchIndices = async (dataStructure: DataStructure): Promise<string[]> => {
-  const search = getSearchService();
-  const buildSearchRequest = () => ({
-    params: {
-      ignoreUnavailable: true,
-      expand_wildcards: 'all',
-      index: '*',
-      body: {
-        size: 0,
-        aggs: {
-          indices: {
-            terms: {
-              field: '_index',
-              size: 100,
+  private async fetchIndices(dataStructure: DataStructure): Promise<string[]> {
+    const search = getSearchService();
+    const buildSearchRequest = () => ({
+      params: {
+        ignoreUnavailable: true,
+        expand_wildcards: 'all',
+        index: '*',
+        body: {
+          size: 0,
+          aggs: {
+            indices: {
+              terms: {
+                field: '_index',
+                size: 100,
+              },
             },
           },
         },
       },
-    },
-    dataSourceId: dataStructure.id,
-  });
+      dataSourceId: dataStructure.id,
+    });
 
-  const searchResponseToArray = (response: any) => {
-    const { rawResponse } = response;
-    return rawResponse.aggregations
-      ? rawResponse.aggregations.indices.buckets.map((bucket: { key: any }) => bucket.key)
-      : [];
-  };
+    const searchResponseToArray = (response: any) => {
+      const { rawResponse } = response;
+      return rawResponse.aggregations
+        ? rawResponse.aggregations.indices.buckets.map((bucket: { key: any }) => bucket.key)
+        : [];
+    };
 
-  return search
-    .getDefaultSearchInterceptor()
-    .search(buildSearchRequest())
-    .pipe(map(searchResponseToArray))
-    .toPromise();
-};
+    return search
+      .getDefaultSearchInterceptor()
+      .search(buildSearchRequest())
+      .pipe(map(searchResponseToArray))
+      .toPromise();
+  }
+}
+
+export const indexTypeConfig = new IndexDatasetTypeConfig();

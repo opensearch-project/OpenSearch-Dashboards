@@ -16,8 +16,8 @@ import {
   QueryEnhancementsPluginStartDependencies,
 } from './types';
 import { LanguageConfig, Query } from '../../data/public';
-import { s3TypeConfig } from './datasets';
 import { createEditor, DefaultInput, SingleLineInput } from '../../data/public';
+import { S3DatasetTypeConfig } from './datasets';
 
 export class QueryEnhancementsPlugin
   implements
@@ -95,12 +95,12 @@ export class QueryEnhancementsPlugin
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
 
     data.__enhance({
-      ui: {
+      editor: {
         queryEditorExtension: createQueryAssistExtension(core.http, data, this.config.queryAssist),
       },
     });
 
-    queryString.getDatasetService().registerType(s3TypeConfig);
+    queryString.getDatasetService().registerType(new S3DatasetTypeConfig(core.http));
 
     return {};
   }
