@@ -286,7 +286,7 @@ export const getSuggestions = async ({
     });
 
     return completions;
-  } catch (e) {
+  } catch {
     return [];
   }
 };
