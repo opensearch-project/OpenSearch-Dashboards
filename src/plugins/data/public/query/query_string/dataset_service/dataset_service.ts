@@ -10,17 +10,21 @@ import {
   IndexPatternSpec,
   DEFAULT_DATA,
   IFieldType,
+  UI_SETTINGS,
 } from '../../../../common';
-import { getIndexPatterns } from '../../../services';
 import { DatasetTypeConfig } from './types';
 import { indexPatternTypeConfig, indexTypeConfig } from './lib';
+import { IndexPatternsContract } from '../../../index_patterns';
 
 export class DatasetService {
+  private indexPatterns?: IndexPatternsContract;
   private defaultDataset?: Dataset;
   private typesRegistry: Map<string, DatasetTypeConfig> = new Map();
 
   constructor(private readonly uiSettings: CoreStart['uiSettings']) {
-    this.registerDefaultTypes();
+    if (this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) {
+      this.registerDefaultTypes();
+    }
   }
 
   /**
@@ -31,7 +35,8 @@ export class DatasetService {
     this.registerType(indexTypeConfig);
   }
 
-  public async init(): Promise<void> {
+  public async init(indexPatterns: IndexPatternsContract): Promise<void> {
+    this.indexPatterns = indexPatterns;
     this.defaultDataset = await this.fetchDefaultDataset();
   }
 
@@ -70,8 +75,10 @@ export class DatasetService {
             }
           : undefined,
       } as IndexPatternSpec;
-      const temporaryIndexPattern = await getIndexPatterns()?.create(spec);
-      getIndexPatterns()?.saveToCache(dataset.id, temporaryIndexPattern);
+      const temporaryIndexPattern = await this.indexPatterns?.create(spec);
+      if (temporaryIndexPattern) {
+        this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
+      }
     }
   }
 
@@ -93,7 +100,7 @@ export class DatasetService {
       return undefined;
     }
 
-    const indexPattern = await getIndexPatterns()?.get(defaultIndexPatternId);
+    const indexPattern = await this.indexPatterns?.get(defaultIndexPatternId);
     if (!indexPattern || !indexPattern.id) {
       return undefined;
     }

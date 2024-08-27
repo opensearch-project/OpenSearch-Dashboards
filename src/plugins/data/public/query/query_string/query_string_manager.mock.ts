@@ -34,17 +34,6 @@ import { Query, Dataset } from '../../../common';
 import { datasetServiceMock } from './dataset_service/dataset_service.mock';
 import { languageServiceMock } from './language_service/language_service.mock';
 
-jest.mock('../../services', () => ({
-  getIndexPatterns: () => ({
-    get: (id: string) => ({
-      id,
-      toSpec: () => ({
-        title: 'value',
-      }),
-    }),
-  }),
-}));
-
 const createSetupContractMock = (isEnhancementsEnabled: boolean = false) => {
   const datasetService = datasetServiceMock.createSetupContract();
   const languageService = languageServiceMock.createSetupContract();

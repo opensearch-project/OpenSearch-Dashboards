@@ -50,8 +50,8 @@ const autocompleteStartMock: jest.Mocked<AutocompleteStart> = {
   hasQuerySuggestions: jest.fn(),
 };
 
-const createSetupContract = (): Setup => {
-  const querySetupMock = queryServiceMock.createSetupContract();
+const createSetupContract = (isEnhancementsEnabled: boolean = false): Setup => {
+  const querySetupMock = queryServiceMock.createSetupContract(isEnhancementsEnabled);
   return {
     autocomplete: automcompleteSetupMock,
     search: searchServiceMock.createSetupContract(),

@@ -163,8 +163,6 @@ export class DataPublicPlugin
       }))
     );
 
-    const uiService = this.uiService.setup(core, {});
-
     const ac = this.autocomplete.setup(core);
     ac.addQuerySuggestionProvider('SQL', getSQLSuggestions);
     ac.addQuerySuggestionProvider('kuery', getDQLSuggestions);
@@ -177,8 +175,8 @@ export class DataPublicPlugin
       query: queryService,
       __enhance: (enhancements: DataPublicPluginEnhancements) => {
         if (enhancements.search) searchService.__enhance(enhancements.search);
-        if (enhancements.ui)
-          queryService.queryString.getLanguageService().__enhance(enhancements.ui);
+        if (enhancements.editor)
+          queryService.queryString.getLanguageService().__enhance(enhancements.editor);
       },
     };
   }

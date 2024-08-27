@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject } from 'rxjs';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { ConfigSchema } from '../../config';
 import { DataPublicPluginStart } from '../types';
@@ -25,7 +24,6 @@ export interface UiServiceStartDependencies {
 
 export class UiService implements Plugin<IUiSetup, IUiStart> {
   enhancementsConfig: ConfigSchema['enhancements'];
-  private dataSetContainer$ = new BehaviorSubject<HTMLDivElement | null>(null);
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     const { enhancements } = initializerContext.config.get<ConfigSchema>();
@@ -33,25 +31,21 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
     this.enhancementsConfig = enhancements;
   }
 
-  public setup(core: CoreSetup, {}: UiServiceSetupDependencies): any {}
+  public setup(core: CoreSetup, {}: UiServiceSetupDependencies): IUiSetup {
+    return {};
+  }
 
   public start(core: CoreStart, { dataServices, storage }: UiServiceStartDependencies): IUiStart {
-    const setDataSetContainerRef = (ref: HTMLDivElement | null) => {
-      this.dataSetContainer$.next(ref);
-    };
-
     const SearchBar = createSearchBar({
       core,
       data: dataServices,
       storage,
-      setDataSetContainerRef,
     });
 
     return {
       IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
       SearchBar,
       SuggestionsComponent,
-      dataSetContainer$: this.dataSetContainer$,
     };
   }
 
