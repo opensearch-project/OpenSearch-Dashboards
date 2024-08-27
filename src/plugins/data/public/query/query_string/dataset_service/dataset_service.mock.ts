@@ -4,21 +4,8 @@
  */
 
 import { DatasetServiceContract } from './dataset_service';
-import { Dataset, DataStructure, DEFAULT_DATA } from '../../../../common';
+import { Dataset, DEFAULT_DATA } from '../../../../common';
 import { DatasetTypeConfig } from './types';
-
-jest.mock('../../../services', () => ({
-  getIndexPatterns: () => ({
-    get: (id: string) => ({
-      id,
-      toSpec: () => ({
-        title: 'value',
-      }),
-    }),
-    create: jest.fn(),
-    saveToCache: jest.fn(),
-  }),
-}));
 
 const createSetupDatasetServiceMock = (): jest.Mocked<DatasetServiceContract> => {
   const mockIndexPatternType: DatasetTypeConfig = {
@@ -47,13 +34,13 @@ const createSetupDatasetServiceMock = (): jest.Mocked<DatasetServiceContract> =>
   };
 
   return {
-    init: jest.fn().mockResolvedValue(undefined),
+    init: jest.fn(),
     registerType: jest.fn(),
     getType: jest.fn().mockReturnValue(mockIndexPatternType),
     getTypes: jest.fn().mockReturnValue([mockIndexPatternType]),
     getDefault: jest.fn().mockReturnValue(defaultDataset),
-    cacheDataset: jest.fn().mockResolvedValue(undefined),
-    fetchOptions: jest.fn().mockResolvedValue({} as DataStructure),
+    cacheDataset: jest.fn(),
+    fetchOptions: jest.fn(),
   };
 };
 

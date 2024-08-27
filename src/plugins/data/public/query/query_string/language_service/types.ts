@@ -4,8 +4,12 @@
  */
 
 import { ISearchInterceptor } from '../../../search';
-import { Query } from '../../../../public';
+import { Query, QueryEditorExtensionConfig } from '../../../../public';
 import { EditorInstance } from '../../../ui/query_editor/editors';
+
+export interface EditorEnhancements {
+  queryEditorExtension?: QueryEditorExtensionConfig;
+}
 
 export interface LanguageConfig {
   id: string;

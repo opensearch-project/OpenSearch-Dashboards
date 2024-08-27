@@ -30,4 +30,9 @@
 
 export { QueryStringContract, QueryStringManager } from './query_string_manager';
 export { DatasetServiceContract, DatasetService, DatasetTypeConfig } from './dataset_service';
-export { LanguageServiceContract, LanguageService, LanguageConfig } from './language_service';
+export {
+  LanguageServiceContract,
+  LanguageService,
+  LanguageConfig,
+  EditorEnhancements,
+} from './language_service';

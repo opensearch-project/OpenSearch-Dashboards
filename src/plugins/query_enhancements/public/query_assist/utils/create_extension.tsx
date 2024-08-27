@@ -6,7 +6,7 @@
 import { HttpSetup } from 'opensearch-dashboards/public';
 import React, { useEffect, useState } from 'react';
 import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
-import { DEFAULT_DATA, DEFAULT_QUERY } from '../../../../data/common';
+import { DEFAULT_DATA } from '../../../../data/common';
 import {
   DataPublicPluginSetup,
   QueryEditorExtensionConfig,

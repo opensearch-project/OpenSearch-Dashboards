@@ -94,7 +94,6 @@ import {
   IDataFrameResponse,
   convertResult,
   createDataFrame,
-  getRawQueryString,
 } from '../../data_frames';
 import { IOpenSearchSearchRequest, IOpenSearchSearchResponse, ISearchOptions } from '../..';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
@@ -148,7 +147,7 @@ export interface SearchSourceDependencies extends FetchHandlers {
   ) => Promise<SearchStrategyResponse>;
   df: {
     get: () => IDataFrame | undefined;
-    set: (dataFrame: IDataFrame) => Promise<void>;
+    set: (dataFrame: IDataFrame) => void;
     clear: () => void;
   };
 }
@@ -474,10 +473,6 @@ export class SearchSource {
 
   private isUnsupportedRequest(request: SearchRequest): boolean {
     return request.body!.query.hasOwnProperty('type') && request.body!.query.type === 'unsupported';
-  }
-
-  private getRawQueryStringFromRequest(request: SearchRequest): string | undefined {
-    return getRawQueryString({ params: request });
   }
 
   /**

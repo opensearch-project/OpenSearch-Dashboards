@@ -3,26 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Observable } from 'rxjs';
 import { IUiSetup, IUiStart } from './types';
-import { ISearchStart } from '../search/types';
-
-const createMockWebStorage = () => ({
-  clear: jest.fn(),
-  getItem: jest.fn(),
-  key: jest.fn(),
-  removeItem: jest.fn(),
-  setItem: jest.fn(),
-  length: 0,
-});
-
-const createMockStorage = () => ({
-  storage: createMockWebStorage(),
-  get: jest.fn(),
-  set: jest.fn(),
-  remove: jest.fn(),
-  clear: jest.fn(),
-});
 
 function createSetupContract(): jest.Mocked<IUiSetup> {
   return {
@@ -30,15 +11,11 @@ function createSetupContract(): jest.Mocked<IUiSetup> {
   };
 }
 
-function createStartContract(
-  isEnhancementsEnabled: boolean = false,
-  searchServiceMock: jest.Mocked<ISearchStart>
-): jest.Mocked<IUiStart> {
+function createStartContract(): jest.Mocked<IUiStart> {
   return {
     IndexPatternSelect: jest.fn(),
     SearchBar: jest.fn(),
-    SuggestionsComponent: jest.fn(), // Add the missing property
-    dataSetContainer$: new Observable(),
+    SuggestionsComponent: jest.fn(),
   };
 }
 

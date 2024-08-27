@@ -213,7 +213,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
           const dfService: DataFrameService = {
             get: () => this.dfCache.get(),
-            set: async (dataFrame: IDataFrame) => {
+            set: (dataFrame: IDataFrame) => {
               this.dfCache.set(dataFrame);
             },
             clear: () => {

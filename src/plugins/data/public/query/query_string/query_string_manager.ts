@@ -31,6 +31,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { CoreStart } from 'opensearch-dashboards/public';
+import { isEqual } from 'lodash';
 import { Dataset, DataStorage, Query, TimeRange, UI_SETTINGS } from '../../../common';
 import { createHistory, QueryHistory } from './query_history';
 import { DatasetService, DatasetServiceContract } from './dataset_service';
@@ -98,7 +99,9 @@ export class QueryStringManager {
   public setQuery = (query: Partial<Query>) => {
     const curQuery = this.query$.getValue();
     const newQuery = { ...curQuery, ...query };
-    this.query$.next(newQuery);
+    if (!isEqual(curQuery, newQuery)) {
+      this.query$.next(newQuery);
+    }
   };
 
   /**
