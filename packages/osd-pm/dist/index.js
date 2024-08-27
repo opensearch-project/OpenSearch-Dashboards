@@ -26026,7 +26026,7 @@ const YARN_EXEC = process.env.npm_execpath || 'yarn';
  * Install all dependencies in the given directory
  */
 async function installInDir(directory, extraArgs = [], useAdd = false) {
-  const options = [useAdd ? 'add' : 'install', '--non-interactive', ...extraArgs];
+  const options = [useAdd ? 'add' : 'install', '--non-interactive', '--ignore-engines', ...extraArgs];
 
   // We pass the mutex flag to ensure only one instance of yarn runs at any
   // given time (e.g. to avoid conflicts).
