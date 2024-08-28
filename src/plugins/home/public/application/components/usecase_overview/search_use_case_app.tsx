@@ -12,7 +12,7 @@ import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import {
   ContentManagementPluginStart,
-  SEARCH_OVERVIEW_ID,
+  SEARCH_OVERVIEW_PAGE_ID,
 } from '../../../../../content_management/public';
 
 interface Props {
@@ -39,7 +39,7 @@ export const SearchUseCaseOverviewApp = ({ contentManagement }: Props) => {
 
   return (
     <I18nProvider>
-      {contentManagement ? contentManagement.renderPage(SEARCH_OVERVIEW_ID) : null}
+      {contentManagement ? contentManagement.renderPage(SEARCH_OVERVIEW_PAGE_ID) : null}
     </I18nProvider>
   );
 };

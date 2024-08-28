@@ -10,14 +10,14 @@ import { i18n } from '@osd/i18n';
 import {
   ContentManagementPluginSetup,
   ContentManagementPluginStart,
-  SEARCH_OVERVIEW_ID,
+  SEARCH_OVERVIEW_PAGE_ID,
   SECTIONS,
   SEARCH_OVERVIEW_CONTENT_AREAS,
 } from '../../../../../content_management/public';
 
 export const setupSearchUseCase = (contentManagement: ContentManagementPluginSetup) => {
   contentManagement.registerPage({
-    id: SEARCH_OVERVIEW_ID,
+    id: SEARCH_OVERVIEW_PAGE_ID,
     title: 'Overview',
     sections: [
       {
