@@ -56,7 +56,9 @@ export const CollapsibleNavTop = ({
    * 3. current nav group is not all use case
    */
   const isInsideSecondLevelOfAllWorkspace =
-    visibleUseCases.length > 1 && !!currentWorkspace && currentNavGroup?.id !== ALL_USE_CASE_ID;
+    !!currentWorkspace &&
+    visibleUseCases[0].id === ALL_USE_CASE_ID &&
+    currentNavGroup?.id !== ALL_USE_CASE_ID;
 
   const shouldShowBackButton = !shouldShrinkNavigation && isInsideSecondLevelOfAllWorkspace;
   const shouldShowHomeLink = !shouldShrinkNavigation && !shouldShowBackButton;
