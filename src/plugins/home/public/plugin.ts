@@ -65,7 +65,6 @@ import { PLUGIN_ID, HOME_APP_BASE_PATH, IMPORT_SAMPLE_DATA_APP_ID } from '../com
 import { DataSourcePluginStart } from '../../data_source/public';
 import { workWithDataSection } from './application/components/homepage/sections/work_with_data';
 import { learnBasicsSection } from './application/components/homepage/sections/learn_basics';
-import { DEFAULT_NAV_GROUPS } from '../../../core/public';
 import {
   ContentManagementPluginSetup,
   ContentManagementPluginStart,

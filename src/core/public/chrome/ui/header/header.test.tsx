@@ -194,24 +194,6 @@ describe('Header', () => {
     expect(component.find('CollapsibleNavGroupEnabled').exists()).toBeTruthy();
   });
 
-  it('show hide expand icon in top left navigation when workspace enabled + homepage + new navigation enabled', () => {
-    const branding = {
-      useExpandedHeader: false,
-    };
-    const props = {
-      ...mockProps(),
-      branding,
-    };
-    props.application.currentAppId$ = new BehaviorSubject('home');
-    props.application.capabilities = { ...props.application.capabilities };
-    (props.application.capabilities.workspaces as Record<string, unknown>) = {};
-    (props.application.capabilities.workspaces as Record<string, unknown>).enabled = true;
-
-    const component = mountWithIntl(<Header {...props} navGroupEnabled />);
-
-    expect(component.find('.header__toggleNavButtonSection').exists()).toBeFalsy();
-  });
-
   it('toggles primary navigation menu when clicked', () => {
     const branding = {
       useExpandedHeader: false,

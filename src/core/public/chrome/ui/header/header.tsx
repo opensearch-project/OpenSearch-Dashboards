@@ -138,17 +138,9 @@ export function Header({
   const isVisible = useObservable(observables.isVisible$, false);
   const headerVariant = useObservable(observables.headerVariant$, HeaderVariant.PAGE);
   const isLocked = useObservable(observables.isLocked$, false);
-  const appId = useObservable(application.currentAppId$, '');
   const [isNavOpen, setIsNavOpen] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
   const breadcrumbs = useObservable(observables.breadcrumbs$, []);
-
-  /**
-   * This is a workaround on 2.16 to hide the navigation items within left navigation
-   * when user is in homepage with workspace enabled + new navigation enabled
-   */
-  const shouldHideExpandIcon =
-    navGroupEnabled && appId === 'home' && application.capabilities.workspaces.enabled;
 
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
@@ -365,11 +357,9 @@ export function Header({
   const renderLegacyHeader = () => (
     <EuiHeader position="fixed" className="primaryHeader" style={sidecarPaddingStyle}>
       <EuiHeaderSection grow={false}>
-        {shouldHideExpandIcon ? null : (
-          <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
-            {renderNavToggle()}
-          </EuiHeaderSectionItem>
-        )}
+        <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
+          {renderNavToggle()}
+        </EuiHeaderSectionItem>
 
         {renderLeftControls()}
 
@@ -402,7 +392,7 @@ export function Header({
   const renderPageHeader = () => (
     <div>
       <EuiHeader className="primaryHeader newTopNavHeader" style={sidecarPaddingStyle}>
-        {shouldHideExpandIcon || isNavOpen ? null : renderNavToggle()}
+        {isNavOpen ? null : renderNavToggle()}
 
         <EuiHeaderSection grow={false}>{renderRecentItems()}</EuiHeaderSection>
 
@@ -450,7 +440,7 @@ export function Header({
   const renderApplicationHeader = () => (
     <div>
       <EuiHeader className="primaryApplicationHeader newTopNavHeader" style={sidecarPaddingStyle}>
-        {shouldHideExpandIcon || isNavOpen ? null : renderNavToggle()}
+        {isNavOpen ? null : renderNavToggle()}
         <EuiHeaderSection side="left" grow={true}>
           {renderRecentItems()}
           {renderActionMenu()}
@@ -475,10 +465,11 @@ export function Header({
         {navGroupEnabled ? (
           <CollapsibleNavGroupEnabled
             appId$={application.currentAppId$}
+            collapsibleNavHeaderRender={collapsibleNavHeaderRender}
             id={navId}
             isLocked={isLocked}
             navLinks$={observables.navLinks$}
-            isNavOpen={shouldHideExpandIcon ? false : isNavOpen}
+            isNavOpen={isNavOpen}
             basePath={basePath}
             navigateToApp={application.navigateToApp}
             navigateToUrl={application.navigateToUrl}
