@@ -12,6 +12,7 @@ import {
   ManagementAppMountParams,
   RegisterManagementAppArgs,
 } from 'src/plugins/management/public';
+import { waitFor } from '@testing-library/dom';
 
 describe('DiscoverPlugin', () => {
   it('setup successfully', () => {
@@ -25,7 +26,9 @@ describe('DiscoverPlugin', () => {
       })
     ).not.toThrow();
     expect(setupMock.application.register).toBeCalledTimes(1);
-    expect(setupMock.chrome.navGroup.addNavLinksToGroup).toBeCalledTimes(1);
+    waitFor(() => {
+      expect(setupMock.chrome.navGroup.addNavLinksToGroup).toBeCalledTimes(1);
+    });
   });
 
   it('when new navigation is enabled, should navigate to standard IPM app', async () => {
