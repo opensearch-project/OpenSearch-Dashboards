@@ -111,7 +111,9 @@ export interface OverlayModalStart {
 /**
  * @public
  */
-export interface OverlayModalOpenOptions extends Omit<EuiModalProps, 'children' | 'onClose'> {
+export interface OverlayModalOpenOptions extends Pick<EuiModalProps, 'maxWidth'> {
+  className?: string;
+  closeButtonAriaLabel?: string;
   'data-test-subj'?: string;
 }
 
