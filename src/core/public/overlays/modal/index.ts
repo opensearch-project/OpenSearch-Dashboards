@@ -28,4 +28,4 @@
  * under the License.
  */
 
-export { ModalService, OverlayModalStart } from './modal_service';
+export { ModalService, OverlayModalStart, OverlayModalOpenOptions } from './modal_service';
