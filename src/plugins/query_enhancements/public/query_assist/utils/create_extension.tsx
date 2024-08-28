@@ -22,15 +22,25 @@ import assistantMark from '../../assets/query_assist_mark.svg';
  */
 const getAvailableLanguagesForDataSource = (() => {
   const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
+  const pendingRequests: Map<string | undefined, Promise<string[]>> = new Map();
+
   return async (http: HttpSetup, dataSourceId: string | undefined) => {
     const cached = availableLanguagesByDataSource.get(dataSourceId);
     if (cached !== undefined) return cached;
-    const languages = await http
+
+    const pendingRequest = pendingRequests.get(dataSourceId);
+    if (pendingRequest !== undefined) return pendingRequest;
+
+    const languagesPromise = http
       .get<{ configuredLanguages: string[] }>(API.QUERY_ASSIST.LANGUAGES, {
         query: { dataSourceId },
       })
       .then((response) => response.configuredLanguages)
-      .catch(() => []);
+      .catch(() => [])
+      .finally(() => pendingRequests.delete(dataSourceId));
+    pendingRequests.set(dataSourceId, languagesPromise);
+
+    const languages = await languagesPromise;
     availableLanguagesByDataSource.set(dataSourceId, languages);
     return languages;
   };
