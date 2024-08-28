@@ -90,7 +90,7 @@ export function HeaderBreadcrumbs({
       breadcrumbs={renderFullLength ? crumbs : remainingCrumbs}
       max={10}
       data-test-subj="breadcrumbs"
-      simplify={useUpdatedHeader ? true : false}
+      simplify={!!useUpdatedHeader}
     />
   );
 }
