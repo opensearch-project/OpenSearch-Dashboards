@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiText,
   EuiTitle,
@@ -251,13 +251,12 @@ export const SelectDataSourceDetailPanel = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexItem style={{ width: 600 }}>
+            <EuiFlexItem>
               <EuiButtonGroup
                 legend="dataSourceGroup"
                 options={toggleButtons}
                 idSelected={toggleIdSelected}
                 onChange={(id) => setToggleIdSelected(id)}
-                isFullWidth
               />
             </EuiFlexItem>
             {isDashboardAdmin && <EuiFlexItem grow={false}>{associationButton}</EuiFlexItem>}
