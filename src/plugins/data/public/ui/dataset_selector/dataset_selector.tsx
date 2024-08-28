@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiIcon,
   EuiPopover,
-  EuiPopoverTitle,
+  EuiPopoverFooter,
   EuiSelectable,
   EuiSelectableOption,
   EuiToolTip,
@@ -35,6 +36,14 @@ export const DatasetSelector = ({
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const { overlays, savedObjects } = services;
 
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
   const datasetService = getQueryService().queryString.getDatasetService();
 
   const datasetIcon =
@@ -45,6 +54,8 @@ export const DatasetSelector = ({
     if (!typeConfig) return;
 
     const fetchedIndexPatternDataStructures = await typeConfig.fetch(savedObjects.client, []);
+
+    if (!isMounted.current) return;
 
     const fetchedDatasets =
       fetchedIndexPatternDataStructures.children?.map((pattern) =>
@@ -139,13 +150,33 @@ export const DatasetSelector = ({
       display="block"
       panelPaddingSize="none"
     >
-      <EuiPopoverTitle paddingSize="s">
-        <EuiButtonEmpty
+      <EuiSelectable
+        className="datasetSelector__selectable"
+        options={options}
+        singleSelection="always"
+        searchable={true}
+        onChange={handleOptionChange}
+        listProps={{
+          showIcons: false,
+        }}
+        searchProps={{
+          compressed: true,
+        }}
+      >
+        {(list, search) => (
+          <>
+            {search}
+            {list}
+          </>
+        )}
+      </EuiSelectable>
+      <EuiPopoverFooter paddingSize="none" className="datasetSelector__footer">
+        <EuiButton
           className="datasetSelector__advancedButton"
           iconType="gear"
           iconSide="right"
           iconSize="s"
-          size="xs"
+          size="s"
           isSelected={false}
           onClick={() => {
             closePopover();
@@ -169,28 +200,8 @@ export const DatasetSelector = ({
             id="data.datasetSelector.advancedButton"
             defaultMessage="View all available data"
           />
-        </EuiButtonEmpty>
-      </EuiPopoverTitle>
-      <EuiSelectable
-        className="datasetSelector__selectable"
-        options={options}
-        singleSelection="always"
-        searchable={true}
-        onChange={handleOptionChange}
-        listProps={{
-          showIcons: false,
-        }}
-        searchProps={{
-          compressed: true,
-        }}
-      >
-        {(list, search) => (
-          <>
-            {search}
-            {list}
-          </>
-        )}
-      </EuiSelectable>
+        </EuiButton>
+      </EuiPopoverFooter>
     </EuiPopover>
   );
 };
