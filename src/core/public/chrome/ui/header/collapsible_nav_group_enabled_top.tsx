@@ -53,7 +53,7 @@ export const CollapsibleNavTop = ({
 }: CollapsibleNavTopProps) => {
   const currentWorkspace = useObservable(currentWorkspace$);
 
-  const firstVisibleNavLinkFirstVisibleUseCase = useMemo(
+  const firstVisibleNavLinkInFirstVisibleUseCase = useMemo(
     () =>
       fulfillRegistrationLinksToChromeNavLinks(
         navGroupsMap[visibleUseCases[0]?.id]?.navLinks || [],
@@ -102,8 +102,8 @@ export const CollapsibleNavTop = ({
   const onIconClick = useCallback(
     (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
       if (shouldShowBackButton || visibleUseCases.length === 1) {
-        if (firstVisibleNavLinkFirstVisibleUseCase) {
-          navigateToApp(firstVisibleNavLinkFirstVisibleUseCase.id);
+        if (firstVisibleNavLinkInFirstVisibleUseCase) {
+          navigateToApp(firstVisibleNavLinkInFirstVisibleUseCase.id);
         }
 
         setCurrentNavGroup(visibleUseCases[0].id);
@@ -114,7 +114,7 @@ export const CollapsibleNavTop = ({
     [
       homeLinkProps,
       shouldShowBackButton,
-      firstVisibleNavLinkFirstVisibleUseCase,
+      firstVisibleNavLinkInFirstVisibleUseCase,
       navigateToApp,
       setCurrentNavGroup,
       visibleUseCases,
@@ -128,7 +128,12 @@ export const CollapsibleNavTop = ({
         {!shouldShrinkNavigation ? (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty flush="both" {...homeLinkProps} onClick={onIconClick}>
-              <EuiIcon type={icon} size="l" className="leftNavTopIcon" />
+              <EuiIcon
+                type={icon}
+                size="l"
+                className="leftNavTopIcon"
+                data-test-subj={`collapsibleNavIcon-${icon}`}
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         ) : null}
