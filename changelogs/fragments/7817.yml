@@ -1,0 +1,2 @@
+fix:
+- [Workspace] maximum call stack error in use case service ([#7817](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7817))

@@ -7,7 +7,7 @@ import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { map } from 'rxjs/operators';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiPanel } from '@elastic/eui';
 import {
   Plugin,
   CoreStart,
@@ -31,13 +31,19 @@ import {
   WORKSPACE_LIST_APP_ID,
   WORKSPACE_USE_CASES,
   WORKSPACE_INITIAL_APP_ID,
+  WORKSPACE_NAVIGATION_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services, WorkspaceUseCase } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
 import { ManagementSetup } from '../../../plugins/management/public';
-import { ContentManagementPluginStart } from '../../../plugins/content_management/public';
+import {
+  ANALYTICS_ALL_OVERVIEW_PAGE_ID,
+  ContentManagementPluginSetup,
+  ContentManagementPluginStart,
+  ESSENTIAL_OVERVIEW_PAGE_ID,
+} from '../../../plugins/content_management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
 import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
@@ -45,6 +51,7 @@ import {
   enrichBreadcrumbsWithWorkspace,
   filterWorkspaceConfigurableApps,
   getFirstUseCaseOfFeatureConfigs,
+  getUseCaseUrl,
   isAppAccessibleInWorkspace,
   isNavGroupInFeatureConfigs,
 } from './utils';
@@ -53,8 +60,17 @@ import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { UseCaseService } from './services/use_case_service';
 import { WorkspaceListCard } from './components/service_card';
 import { UseCaseFooter } from './components/home_get_start_card';
-import { HOME_CONTENT_AREAS } from '../../home/public';
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
+import { WorkspacePickerContent } from './components/workspace_picker_content/workspace_picker_content';
+import { HOME_CONTENT_AREAS } from '../../../plugins/content_management/public';
+import {
+  registerEssentialOverviewContent,
+  setEssentialOverviewSection,
+} from './components/use_case_overview';
+import {
+  registerAnalyticsAllOverviewContent,
+  setAnalyticsAllOverviewSection,
+} from './components/use_case_overview/setup_overview';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -66,6 +82,7 @@ interface WorkspacePluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
   management?: ManagementSetup;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  contentManagement?: ContentManagementPluginSetup;
 }
 
 export interface WorkspacePluginStartDeps {
@@ -111,17 +128,14 @@ export class WorkspacePlugin
       this.registeredUseCases$,
     ]).subscribe(([currentWorkspace, registeredUseCases]) => {
       if (currentWorkspace) {
-        const isAllUseCase =
-          getFirstUseCaseOfFeatureConfigs(currentWorkspace.features || []) === ALL_USE_CASE_ID;
-        this.appUpdater$.next((app) => {
-          // When in all workspace, the home should be replaced by workspace detail page
-          if (app.id === 'home' && isAllUseCase) {
-            return { navLinkStatus: AppNavLinkStatus.hidden };
-          }
+        const workspaceUseCase = currentWorkspace.features
+          ? getFirstUseCaseOfFeatureConfigs(currentWorkspace.features)
+          : undefined;
 
-          // show the overview page in all use case
-          if (app.id === WORKSPACE_DETAIL_APP_ID && isAllUseCase) {
-            return { navLinkStatus: AppNavLinkStatus.visible };
+        this.appUpdater$.next((app) => {
+          // essential use overview is only available in essential workspace
+          if (app.id === ESSENTIAL_OVERVIEW_PAGE_ID && workspaceUseCase === ALL_USE_CASE_ID) {
+            return { status: AppStatus.inaccessible };
           }
 
           if (isAppAccessibleInWorkspace(app, currentWorkspace, registeredUseCases)) {
@@ -156,15 +170,13 @@ export class WorkspacePlugin
            * It checks the following conditions:
            * 1. The navigation group is not a system-level group.
            * 2. The current workspace has feature configurations set up.
-           * 3. The current workspace's use case is not "All use case".
-           * 4. The current navigation group is not included in the feature configurations of the workspace.
+           * 3. The current navigation group is not included in the feature configurations of the workspace.
            *
            * If all these conditions are true, it means that the navigation group should be hidden.
            */
           if (
             navGroup.type !== NavGroupType.SYSTEM &&
             currentWorkspace.features &&
-            getFirstUseCaseOfFeatureConfigs(currentWorkspace.features) !== ALL_USE_CASE_ID &&
             !isNavGroupInFeatureConfigs(navGroup.id, currentWorkspace.features)
           ) {
             return {
@@ -240,7 +252,12 @@ export class WorkspacePlugin
 
   public async setup(
     core: CoreSetup<WorkspacePluginStartDeps>,
-    { savedObjectsManagement, management, dataSourceManagement }: WorkspacePluginSetupDeps
+    {
+      savedObjectsManagement,
+      management,
+      dataSourceManagement,
+      contentManagement,
+    }: WorkspacePluginSetupDeps
   ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
@@ -354,7 +371,6 @@ export class WorkspacePlugin
       title: i18n.translate('workspace.settings.workspaceDetail', {
         defaultMessage: 'Workspace Detail',
       }),
-      navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderDetailApp } = await import('./application');
         return mountWorkspaceApp(params, renderDetailApp);
@@ -373,6 +389,32 @@ export class WorkspacePlugin
         return mountWorkspaceApp(params, renderInitialApp);
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+    });
+
+    const registeredUseCases$ = this.registeredUseCases$;
+    // register workspace navigation
+    core.application.register({
+      id: WORKSPACE_NAVIGATION_APP_ID,
+      title: '',
+      chromeless: true,
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount() {
+        const [coreStart] = await core.getStartServices();
+        const { application, http, workspaces } = coreStart;
+        const workspace = workspaces.currentWorkspace$.getValue();
+        if (workspace) {
+          const availableUseCases = registeredUseCases$.getValue();
+          const currentUseCase = availableUseCases.find(
+            (useCase) => useCase.id === getFirstUseCaseOfFeatureConfigs(workspace?.features ?? [])
+          );
+          const useCaseUrl = getUseCaseUrl(currentUseCase, workspace, application, http);
+          application.navigateToUrl(useCaseUrl);
+        } else {
+          application.navigateToApp('home');
+        }
+        return () => {};
+      },
+      workspaceAvailability: WorkspaceAvailability.insideWorkspace,
     });
 
     // workspace list
@@ -397,15 +439,77 @@ export class WorkspacePlugin
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: WORKSPACE_DETAIL_APP_ID,
-        order: 100,
-        title: i18n.translate('workspace.nav.workspaceDetail.title', {
-          defaultMessage: 'Overview',
-        }),
-      },
-    ]);
+    if (core.chrome.navGroup.getNavGroupEnabled() && contentManagement) {
+      // workspace essential use case overview
+      core.application.register({
+        id: ESSENTIAL_OVERVIEW_PAGE_ID,
+        title: '',
+        async mount(params: AppMountParameters) {
+          const { renderUseCaseOverviewApp } = await import('./application');
+          const [
+            coreStart,
+            { contentManagement: contentManagementStart },
+          ] = await core.getStartServices();
+          const services = {
+            ...coreStart,
+            workspaceClient,
+            dataSourceManagement,
+            contentManagement: contentManagementStart,
+          };
+
+          return renderUseCaseOverviewApp(params, services, ESSENTIAL_OVERVIEW_PAGE_ID);
+        },
+        workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+      });
+
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
+        {
+          id: ESSENTIAL_OVERVIEW_PAGE_ID,
+          order: -1,
+          title: i18n.translate('workspace.nav.essential_overview.title', {
+            defaultMessage: 'Overview',
+          }),
+        },
+      ]);
+
+      // initial the page structure
+      setEssentialOverviewSection(contentManagement);
+
+      // register workspace Analytics(all) use case overview app
+      core.application.register({
+        id: ANALYTICS_ALL_OVERVIEW_PAGE_ID,
+        title: '',
+        async mount(params: AppMountParameters) {
+          const { renderUseCaseOverviewApp } = await import('./application');
+          const [
+            coreStart,
+            { contentManagement: contentManagementStart },
+          ] = await core.getStartServices();
+          const services = {
+            ...coreStart,
+            workspaceClient,
+            dataSourceManagement,
+            contentManagement: contentManagementStart,
+          };
+
+          return renderUseCaseOverviewApp(params, services, ANALYTICS_ALL_OVERVIEW_PAGE_ID);
+        },
+        workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+      });
+
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+        {
+          id: ANALYTICS_ALL_OVERVIEW_PAGE_ID,
+          order: -1,
+          title: i18n.translate('workspace.nav.analyticsAll_overview.title', {
+            defaultMessage: 'Overview',
+          }),
+        },
+      ]);
+
+      // initial the page structure
+      setAnalyticsAllOverviewSection(contentManagement);
+    }
 
     /**
      * register workspace column into saved objects table
@@ -418,12 +522,34 @@ export class WorkspacePlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
       {
         id: WORKSPACE_LIST_APP_ID,
-        order: 150,
-        title: i18n.translate('workspace.settings.workspaceSettings', {
-          defaultMessage: 'Workspace settings',
+        order: 350,
+        title: i18n.translate('workspace.settings.workspaces', {
+          defaultMessage: 'Workspaces',
         }),
       },
     ]);
+
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      /**
+       * Show workspace picker content when outside of workspace and not in any nav group
+       */
+      core.chrome.registerCollapsibleNavHeader(() => {
+        if (!this.coreStart) {
+          return null;
+        }
+        return React.createElement(EuiPanel, {
+          hasShadow: false,
+          hasBorder: false,
+          children: [
+            React.createElement(WorkspacePickerContent, {
+              key: 'workspacePickerContent',
+              coreStart: this.coreStart,
+              registeredUseCases$: this.registeredUseCases$,
+            }),
+          ],
+        });
+      });
+    }
 
     return {};
   }
@@ -442,7 +568,7 @@ export class WorkspacePlugin
     useCases.forEach((useCase, index) => {
       contentManagement.registerContentProvider({
         id: `home_get_start_${useCase.id}`,
-        getTargetArea: () => HOME_CONTENT_AREAS.GET_STARTED,
+        getTargetArea: () => [HOME_CONTENT_AREAS.GET_STARTED],
         getContent: () => ({
           id: useCase.id,
           kind: 'card',
@@ -504,6 +630,12 @@ export class WorkspacePlugin
 
       // set breadcrumbs enricher for workspace
       this.breadcrumbsSubscription = enrichBreadcrumbsWithWorkspace(core);
+
+      // register content to essential overview page
+      registerEssentialOverviewContent(contentManagement, core);
+
+      // register content to analytics(All) overview page
+      registerAnalyticsAllOverviewContent(contentManagement, core);
     }
     return {};
   }

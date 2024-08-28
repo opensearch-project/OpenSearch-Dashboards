@@ -37,6 +37,7 @@ import {
 } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { first } from 'rxjs/operators';
+import React from 'react';
 
 import { Branding } from 'src/core/types';
 import {
@@ -64,12 +65,15 @@ import { PLUGIN_ID, HOME_APP_BASE_PATH, IMPORT_SAMPLE_DATA_APP_ID } from '../com
 import { DataSourcePluginStart } from '../../data_source/public';
 import { workWithDataSection } from './application/components/homepage/sections/work_with_data';
 import { learnBasicsSection } from './application/components/homepage/sections/learn_basics';
-import { DEFAULT_NAV_GROUPS } from '../../../core/public';
 import {
   ContentManagementPluginSetup,
   ContentManagementPluginStart,
 } from '../../content_management/public';
 import { initHome, setupHome } from './application/home_render';
+import { registerSampleDataCard } from './application/components/sample_data/sample_data_card';
+import { registerHomeListCardToPage } from './application/components/home_list_card';
+import { toMountPoint } from '../../opensearch_dashboards_react/public';
+import { HomeIcon } from './application/components/home_icon';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -151,9 +155,7 @@ export class HomePublicPlugin
     core.application.register({
       id: PLUGIN_ID,
       title: 'Home',
-      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
-        ? undefined
-        : AppNavLinkStatus.hidden,
+      navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
         setCommonService();
@@ -165,13 +167,6 @@ export class HomePublicPlugin
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
-
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: PLUGIN_ID,
-        title: 'Home',
-      },
-    ]);
 
     // Register import sample data as a standalone app so that it is available inside workspace.
     core.application.register({
@@ -237,6 +232,12 @@ export class HomePublicPlugin
     // initialize homepage
     initHome(contentManagement, core);
 
+    // register sample data card to use case overview page
+    registerSampleDataCard(contentManagement, core);
+
+    // register what's new learn opensearch card to use case overview page
+    registerHomeListCardToPage(contentManagement);
+
     this.featuresCatalogueRegistry.start({ capabilities });
     this.sectionTypeService.start({ core, data });
 
@@ -252,6 +253,18 @@ export class HomePublicPlugin
           // This doesn't do anything as along as the default settings are kept.
           urlForwarding.navigateToDefaultApp({ overwriteHash: false });
         }
+      });
+    }
+
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.chrome.navControls.registerLeftBottom({
+        order: 0,
+        mount: toMountPoint(
+          React.createElement(HomeIcon, {
+            core,
+            appId: PLUGIN_ID,
+          })
+        ),
       });
     }
 

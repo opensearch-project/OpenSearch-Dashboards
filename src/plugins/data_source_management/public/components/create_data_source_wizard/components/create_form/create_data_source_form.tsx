@@ -23,6 +23,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+import { ApplicationStart } from 'opensearch-dashboards/public';
 import { AuthenticationMethodRegistry } from '../../../../auth_registry';
 import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import {
@@ -47,6 +49,9 @@ import {
 } from '../../../utils';
 
 export interface CreateDataSourceProps {
+  useNewUX: boolean;
+  navigation: NavigationPublicPluginStart;
+  application: ApplicationStart;
   existingDatasourceNamesList: string[];
   handleSubmit: (formValues: DataSourceAttributes) => void;
   handleTestConnection: (formValues: DataSourceAttributes) => void;
@@ -367,21 +372,41 @@ export class CreateDataSourceForm extends React.Component<
     return null;
   };
 
+  description = [
+    {
+      renderComponent: (
+        <EuiText size="s" color="subdued">
+          <FormattedMessage
+            id="dataSourcesManagement.createDataSource.description"
+            defaultMessage="Create a new data source connection to help you retrieve data from an external OpenSearch compatible source."
+          />
+        </EuiText>
+      ),
+    },
+  ];
+
   /* Render methods */
 
   /* Render header*/
   renderHeader = () => {
-    return <Header />;
+    return this.props.useNewUX ? (
+      <this.props.navigation.ui.HeaderControl
+        setMountPoint={this.props.application.setAppDescriptionControls}
+        controls={this.description}
+      />
+    ) : (
+      <Header />
+    );
   };
 
   /* Render Section header*/
   renderSectionHeader = (i18nId: string, defaultMessage: string) => {
     return (
       <>
-        <EuiText grow={false}>
-          <h4>
+        <EuiText grow={false} size="s">
+          <h2>
             <FormattedMessage id={i18nId} defaultMessage={defaultMessage} />
-          </h4>
+          </h2>
         </EuiText>
       </>
     );
@@ -554,7 +579,6 @@ export class CreateDataSourceForm extends React.Component<
       <>
         <EuiPageContent>
           {this.renderHeader()}
-          <EuiSpacer size="m" />
           <EuiForm data-test-subj="data-source-creation">
             {/* Endpoint section */}
             {this.renderSectionHeader(
@@ -749,7 +773,7 @@ export class CreateDataSourceForm extends React.Component<
             >
               <FormattedMessage
                 id="dataSourcesManagement.createDataSource.createButtonLabel"
-                defaultMessage="Create data source"
+                defaultMessage="Connect to OpenSearch Cluster"
               />
             </EuiButton>
           </EuiFlexItem>

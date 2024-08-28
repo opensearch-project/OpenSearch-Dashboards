@@ -5,16 +5,14 @@
 
 import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
-import { catchError, concatMap } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import {
   DataFrameAggConfig,
-  getAggConfig,
   getRawDataFrame,
-  getRawQueryString,
   formatTimePickerDate,
   getUniqueValuesForRawAggs,
   updateDataFrameMeta,
-  getRawAggs,
+  Query,
 } from '../../../data/common';
 import {
   DataPublicPluginStart,
@@ -73,17 +71,17 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     };
 
     const getAggQsFn = ({
-      qs,
+      query,
       aggConfig,
       timeField,
       timeFilter,
     }: {
-      qs: string;
+      query: Query;
       aggConfig: DataFrameAggConfig;
       timeField: any;
       timeFilter: string;
     }) => {
-      return removeKeyword(`${qs} ${getAggString(timeField, aggConfig)} ${timeFilter}`);
+      return removeKeyword(`${query.query} ${getAggString(timeField, aggConfig)} ${timeFilter}`);
     };
 
     const getAggString = (timeField: any, aggsConfig?: DataFrameAggConfig) => {
@@ -138,77 +136,24 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     };
 
     const dataFrame = getRawDataFrame(searchRequest);
-
-    let queryString = dataFrame.meta?.queryConfig?.qs ?? getRawQueryString(searchRequest) ?? '';
-
-    dataFrame.meta = {
-      ...dataFrame.meta,
-      aggConfig: {
-        ...dataFrame.meta.aggConfig,
-        ...(getRawAggs(searchRequest) &&
-          this.aggsService.types.get.bind(this) &&
-          getAggConfig(searchRequest, {}, this.aggsService.types.get.bind(this))),
-      },
-      queryConfig: {
-        ...dataFrame.meta.queryConfig,
-        ...(this.queryService.dataSetManager.getDataSet() && {
-          dataSourceId: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.id,
-          dataSourceName: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.name,
-          timeFieldName: this.queryService.dataSetManager.getDataSet()?.timeFieldName,
-        }),
-      },
-    };
-
-    if (!dataFrame.schema) {
-      return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
-        concatMap((response) => {
-          const df = response.body;
-          if (df.error) {
-            const jsError = new Error(df.error.response);
-            return throwError(jsError);
-          }
-          const timeField = dataFrame.meta?.queryConfig?.timeFieldName;
-          const aggConfig = dataFrame.meta?.aggConfig;
-          if (timeField && aggConfig) {
-            const timeFilter = getTimeFilter(timeField);
-            const newQuery = insertTimeFilter(queryString, timeFilter);
-            updateDataFrameMeta({
-              dataFrame: df,
-              qs: newQuery,
-              aggConfig,
-              timeField,
-              timeFilter,
-              getAggQsFn: getAggQsFn.bind(this),
-            });
-            return fetchDataFrame(dfContext, newQuery, df);
-          }
-          return fetchDataFrame(dfContext, queryString, df);
-        }),
-        catchError((error) => {
-          return throwError(error);
-        })
-      );
+    const query = this.queryService.queryString.getQuery();
+    const timeField = query.dataset?.timeFieldName;
+    const aggConfig = dataFrame?.meta?.aggConfig;
+    if (timeField && aggConfig) {
+      const timeFilter = getTimeFilter(timeField);
+      const newQuery = insertTimeFilter(query.query as string, timeFilter);
+      updateDataFrameMeta({
+        dataFrame,
+        query: { ...query, query: newQuery },
+        aggConfig: dataFrame?.meta?.aggConfig,
+        timeField,
+        timeFilter,
+        getAggQsFn: getAggQsFn.bind(this),
+      });
+      query.query += timeFilter;
     }
 
-    if (dataFrame.schema) {
-      const timeField = dataFrame.meta?.queryConfig?.timeFieldName;
-      const aggConfig = dataFrame.meta?.aggConfig;
-      if (timeField && aggConfig) {
-        const timeFilter = getTimeFilter(timeField);
-        const newQuery = insertTimeFilter(queryString, timeFilter);
-        updateDataFrameMeta({
-          dataFrame,
-          qs: newQuery,
-          aggConfig: dataFrame.meta?.aggConfig,
-          timeField,
-          timeFilter,
-          getAggQsFn: getAggQsFn.bind(this),
-        });
-        queryString += timeFilter;
-      }
-    }
-
-    return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
+    return fetchDataFrame(dfContext, query, dataFrame).pipe(
       catchError((error) => {
         return throwError(error);
       })

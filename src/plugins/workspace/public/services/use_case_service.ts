@@ -5,6 +5,7 @@
 
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
+import { i18n } from '@osd/i18n';
 
 import {
   ChromeStart,
@@ -15,7 +16,7 @@ import {
   DEFAULT_NAV_GROUPS,
   ALL_USE_CASE_ID,
 } from '../../../../core/public';
-import { WORKSPACE_USE_CASES } from '../../common/constants';
+import { WORKSPACE_DETAIL_APP_ID, WORKSPACE_USE_CASES } from '../../common/constants';
 import {
   convertNavGroupToWorkspaceUseCase,
   getFirstUseCaseOfFeatureConfigs,
@@ -64,7 +65,7 @@ export class UseCaseService {
         if (navGroupInfo) {
           setupDeps.chrome.navGroup.addNavLinksToGroup(navGroupInfo, [
             {
-              id: 'dataSources_core',
+              id: 'dataSources',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 100,
             },
@@ -77,6 +78,14 @@ export class UseCaseService {
               id: 'objects',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 300,
+            },
+            {
+              id: WORKSPACE_DETAIL_APP_ID,
+              category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+              order: 400,
+              title: i18n.translate('workspace.settings.workspaceSettings', {
+                defaultMessage: 'Workspace settings',
+              }),
             },
           ]);
         }

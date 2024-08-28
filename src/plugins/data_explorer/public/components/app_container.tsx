@@ -54,7 +54,7 @@ export const AppContainer = React.memo(
         {isEnhancementsEnabled && (
           <EuiFlexGroup
             direction="row"
-            className={`mainPage ${showActionsInGroup ? '' : 'navBar'}"`}
+            className={showActionsInGroup ? '' : 'mainPage navBar'}
             gutterSize="none"
             alignItems="center"
             justifyContent="spaceBetween"

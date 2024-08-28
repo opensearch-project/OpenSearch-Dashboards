@@ -35,6 +35,7 @@ import {
   EuiGlobalToastListToast,
   EuiPageContent,
   EuiHorizontalRule,
+  EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
@@ -65,6 +66,7 @@ import { DataSourceRef, IndexPatternManagmentContextValue } from '../../types';
 import { MatchedItem } from './types';
 import { DuplicateIndexPatternError, IndexPattern } from '../../../../data/public';
 import { StepDataSource } from './components/step_data_source';
+import { TopNavControlDescriptionData } from '../../../../navigation/public';
 
 interface CreateIndexPatternWizardState {
   step: StepType;
@@ -298,6 +300,38 @@ export class CreateIndexPatternWizard extends Component<
 
     const header = this.renderHeader();
 
+    const descriptionHeaderControl = useUpdatedUX ? (
+      <HeaderControl
+        controls={[
+          {
+            description: ((
+              <FormattedMessage
+                id="indexPatternManagement.createIndexPattern.description"
+                defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
+                values={{
+                  multiple: <strong>multiple</strong>,
+                  single: <EuiCode>filebeat-4-3-22</EuiCode>,
+                  star: <EuiCode>filebeat-*</EuiCode>,
+                }}
+              />
+            ) as unknown) as string,
+            links: [
+              {
+                href: docLinks.links.noDocumentation.indexPatterns.introduction,
+                controlType: 'link',
+                flush: 'both',
+                target: '_blank',
+                label: i18n.translate('indexPatternManagement.createIndexPattern.documentation', {
+                  defaultMessage: 'Read documentation',
+                }),
+              },
+            ],
+          } as TopNavControlDescriptionData,
+        ]}
+        setMountPoint={application.setAppDescriptionControls}
+      />
+    ) : null;
+
     if (step === DATA_SOURCE_STEP) {
       const component = (
         <StepDataSource
@@ -306,17 +340,11 @@ export class CreateIndexPatternWizard extends Component<
           hideLocalCluster={hideLocalCluster}
         />
       );
+
       return useUpdatedUX ? (
         <>
           {component}
-          <HeaderControl
-            controls={[
-              {
-                renderComponent: <Description docLinks={docLinks} />,
-              },
-            ]}
-            setMountPoint={application.setAppDescriptionControls}
-          />
+          {descriptionHeaderControl}
         </>
       ) : (
         <EuiPageContent>
@@ -346,18 +374,12 @@ export class CreateIndexPatternWizard extends Component<
           catchAndWarn={this.catchAndWarn}
         />
       );
+
       return useUpdatedUX ? (
         <>
           {/* Except StepDataSource, other components need to use PageContent to wrap when using new UX */}
           <EuiPageContent>{component}</EuiPageContent>
-          <HeaderControl
-            controls={[
-              {
-                renderComponent: <Description docLinks={docLinks} />,
-              },
-            ]}
-            setMountPoint={application.setAppDescriptionControls}
-          />
+          {descriptionHeaderControl}
         </>
       ) : (
         <EuiPageContent>
@@ -380,18 +402,12 @@ export class CreateIndexPatternWizard extends Component<
           stepInfo={stepInfo}
         />
       );
+
       return useUpdatedUX ? (
         <>
           {/* Except StepDataSource, other components need to use PageContent to wrap when using new UX */}
           <EuiPageContent>{component}</EuiPageContent>
-          <HeaderControl
-            controls={[
-              {
-                renderComponent: <Description docLinks={docLinks} />,
-              },
-            ]}
-            setMountPoint={application.setAppDescriptionControls}
-          />
+          {descriptionHeaderControl}
         </>
       ) : (
         <EuiPageContent>

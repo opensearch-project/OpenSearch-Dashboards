@@ -38,9 +38,9 @@ import {
 } from '../../../../saved_objects/public';
 import { VisBuilderServices } from '../..';
 import { VisBuilderSavedObject } from '../../types';
-import { AppDispatch } from './state_management';
+import { AppDispatch, setMetadataState } from './state_management';
 import { EDIT_PATH, VISBUILDER_SAVED_OBJECT } from '../../../common';
-import { setEditorState } from './state_management/metadata_slice';
+
 export interface TopNavConfigParams {
   visualizationIdFromUrl: string;
   savedVisBuilderVis: VisBuilderSavedObject;
@@ -243,7 +243,14 @@ export const getOnSave = (
             pathname: `${EDIT_PATH}/${id}`,
           });
         }
-        dispatch(setEditorState({ state: 'clean' }));
+        dispatch(
+          setMetadataState({
+            editor: {
+              state: 'clean',
+            },
+            isMigrated: false,
+          })
+        );
       } else {
         // reset title if save not successful
         savedVisBuilderVis.title = currentTitle;

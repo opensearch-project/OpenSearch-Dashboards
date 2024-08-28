@@ -22,6 +22,9 @@ import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.moc
 import { WorkspacePlugin, WorkspacePluginStartDeps } from './plugin';
 import { contentManagementPluginMocks } from '../../content_management/public';
 
+// Expect 6 app registrations: create, fatal error, detail, initial, navigation, and list apps.
+const registrationAppNumber = 6;
+
 describe('Workspace plugin', () => {
   const mockDependencies: WorkspacePluginStartDeps = {
     contentManagement: contentManagementPluginMocks.createStartContract(),
@@ -32,6 +35,7 @@ describe('Workspace plugin', () => {
     WorkspaceClientMock.mockClear();
     Object.values(workspaceClientMock).forEach((item) => item.mockClear());
   });
+
   it('#setup', async () => {
     const setupMock = getSetupMock();
     const savedObjectManagementSetupMock = savedObjectsManagementPluginMock.createSetupContract();
@@ -40,7 +44,7 @@ describe('Workspace plugin', () => {
       savedObjectsManagement: savedObjectManagementSetupMock,
       management: managementPluginMock.createSetupContract(),
     });
-    expect(setupMock.application.register).toBeCalledTimes(5);
+    expect(setupMock.application.register).toBeCalledTimes(registrationAppNumber);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(savedObjectManagementSetupMock.columns.register).toBeCalledTimes(1);
   });
@@ -53,7 +57,7 @@ describe('Workspace plugin', () => {
     workspacePlugin.start(coreStart, mockDependencies);
     coreStart.workspaces.currentWorkspaceId$.next('foo');
     expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
-    expect(setupMock.application.register).toBeCalledTimes(5);
+    expect(setupMock.application.register).toBeCalledTimes(registrationAppNumber);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(0);
   });
@@ -90,7 +94,7 @@ describe('Workspace plugin', () => {
     await workspacePlugin.setup(setupMock, {
       management: managementPluginMock.createSetupContract(),
     });
-    expect(setupMock.application.register).toBeCalledTimes(5);
+    expect(setupMock.application.register).toBeCalledTimes(registrationAppNumber);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
     expect(setupMock.getStartServices).toBeCalledTimes(2);
@@ -170,14 +174,14 @@ describe('Workspace plugin', () => {
       expect.arrayContaining([
         {
           id: 'workspace_list',
-          order: 150,
-          title: 'Workspace settings',
+          order: 350,
+          title: 'Workspaces',
         },
       ])
     );
   });
 
-  it('#setup should register workspace detail with a visible application and register to all nav group', async () => {
+  it('#setup should register workspace detail with a hidden application and not register to all nav group', async () => {
     const setupMock = coreMock.createSetup();
     setupMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     const workspacePlugin = new WorkspacePlugin();
@@ -186,11 +190,11 @@ describe('Workspace plugin', () => {
     expect(setupMock.application.register).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'workspace_detail',
-        navLinkStatus: AppNavLinkStatus.hidden,
       })
     );
 
-    expect(setupMock.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
+    // not register to all nav group
+    expect(setupMock.chrome.navGroup.addNavLinksToGroup).not.toHaveBeenCalledWith(
       DEFAULT_NAV_GROUPS.all,
       expect.arrayContaining([
         {
@@ -210,6 +214,107 @@ describe('Workspace plugin', () => {
     expect(setupMock.application.register).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'workspace_initial',
+        navLinkStatus: AppNavLinkStatus.hidden,
+      })
+    );
+  });
+
+  it('#setup should register registerCollapsibleNavHeader when new left nav is turned on', async () => {
+    const setupMock = coreMock.createSetup();
+    let collapsibleNavHeaderImplementation = () => null;
+    setupMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+    setupMock.chrome.registerCollapsibleNavHeader.mockImplementation(
+      (func) => (collapsibleNavHeaderImplementation = func)
+    );
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock, {});
+    expect(collapsibleNavHeaderImplementation()).toEqual(null);
+    const startMock = coreMock.createStart();
+    await workspacePlugin.start(startMock, mockDependencies);
+    expect(collapsibleNavHeaderImplementation()).not.toEqual(null);
+  });
+
+  it('#setup should register workspace essential use case when new home is disabled', async () => {
+    const setupMock = {
+      ...coreMock.createSetup(),
+      chrome: {
+        ...coreMock.createSetup().chrome,
+        navGroup: {
+          ...coreMock.createSetup().chrome.navGroup,
+          getNavGroupEnabled: jest.fn().mockReturnValue(false),
+        },
+      },
+    };
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock, {
+      contentManagement: {
+        registerPage: jest.fn(),
+      },
+    });
+
+    expect(setupMock.application.register).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'essential_overview',
+      })
+    );
+    expect(setupMock.application.register).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'analytics_all_overview',
+      })
+    );
+  });
+
+  it('#setup should register workspace essential use case when new nav is enabled', async () => {
+    const setupMock = {
+      ...coreMock.createSetup(),
+      chrome: {
+        ...coreMock.createSetup().chrome,
+        navGroup: {
+          ...coreMock.createSetup().chrome.navGroup,
+          getNavGroupEnabled: jest.fn().mockReturnValue(true),
+        },
+      },
+    };
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock, {
+      contentManagement: {
+        registerPage: jest.fn(),
+      },
+    });
+
+    expect(setupMock.application.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'analytics_overview',
+      })
+    );
+  });
+
+  it('#setup should register workspace analytics(All) use case when new nav is enabled', async () => {
+    const setupMock = {
+      ...coreMock.createSetup(),
+      chrome: {
+        ...coreMock.createSetup().chrome,
+        navGroup: {
+          ...coreMock.createSetup().chrome.navGroup,
+          getNavGroupEnabled: jest.fn().mockReturnValue(true),
+        },
+      },
+    };
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock, {
+      contentManagement: {
+        registerPage: jest.fn(),
+      },
+    });
+  });
+
+  it('#setup should register workspace navigation with a visible application', async () => {
+    const setupMock = coreMock.createSetup();
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock, {});
+    expect(setupMock.application.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'workspace_navigation',
         navLinkStatus: AppNavLinkStatus.hidden,
       })
     );

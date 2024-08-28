@@ -6,7 +6,7 @@
 import React from 'react';
 import moment from 'moment';
 import { of } from 'rxjs';
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import { coreMock } from '../../../../../core/public/mocks';
 import { navigateToWorkspaceDetail } from '../utils/workspace';
@@ -36,6 +36,30 @@ jest.mock('../delete_workspace_modal', () => ({
   ),
 }));
 
+jest.mock('../../utils', () => {
+  const original = jest.requireActual('../../utils');
+  return {
+    ...original,
+    getDataSourcesList: jest.fn().mockResolvedValue(() => [
+      {
+        id: 'ds_id1',
+        title: 'ds_title1',
+        workspaces: 'id1',
+      },
+      {
+        id: 'ds_id2',
+        title: 'ds_title2',
+        workspaces: 'id1',
+      },
+      {
+        id: 'ds_id3',
+        title: 'ds_title3',
+        workspaces: 'id1',
+      },
+    ]),
+  };
+});
+
 function getWrapWorkspaceListInContext(
   workspaceList = [
     {
@@ -45,6 +69,11 @@ function getWrapWorkspaceListInContext(
       description:
         'should be able to see the description tooltip when hovering over the description',
       lastUpdatedTime: '1999-08-06T02:00:00.00Z',
+      permissions: {
+        write: {
+          users: ['admin', 'nonadmin'],
+        },
+      },
     },
     {
       id: 'id2',
@@ -104,6 +133,10 @@ function getWrapWorkspaceListInContext(
 }
 
 describe('WorkspaceList', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should render title and table normally', () => {
     const { getByText, getByRole, container } = render(getWrapWorkspaceListInContext());
     expect(
@@ -267,5 +300,27 @@ describe('WorkspaceList', () => {
   it('should hide create workspace button for non dashboard admin', async () => {
     const { queryByText } = render(getWrapWorkspaceListInContext([], false));
     expect(queryByText('Create workspace')).toBeNull();
+  });
+
+  it('should render data source badge when more than two data sources', async () => {
+    const { getByTestId } = render(getWrapWorkspaceListInContext());
+    expect(navigateToWorkspaceDetail).not.toHaveBeenCalled();
+    await waitFor(() => {
+      const badge = getByTestId('workspaceList-more-dataSources-badge');
+      expect(badge).toBeInTheDocument();
+      fireEvent.click(badge);
+    });
+    expect(navigateToWorkspaceDetail).toHaveBeenCalledTimes(1);
+  });
+
+  it('should render owners badge when more than one owners', async () => {
+    const { getByTestId } = render(getWrapWorkspaceListInContext());
+    expect(navigateToWorkspaceDetail).not.toHaveBeenCalled();
+    await waitFor(() => {
+      const badge = getByTestId('workspaceList-more-collaborators-badge');
+      expect(badge).toBeInTheDocument();
+      fireEvent.click(badge);
+    });
+    expect(navigateToWorkspaceDetail).toHaveBeenCalledTimes(1);
   });
 });

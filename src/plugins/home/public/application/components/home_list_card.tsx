@@ -17,6 +17,11 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import {
+  ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS,
+  ContentManagementPluginStart,
+  ESSENTIAL_OVERVIEW_CONTENT_AREAS,
+} from '../../../../content_management/public';
 
 export const LEARN_OPENSEARCH_CONFIG = {
   title: i18n.translate('homepage.card.learnOpenSearch.title', {
@@ -68,7 +73,7 @@ interface Config {
 export const HomeListCard = ({ config }: { config: Config }) => {
   return (
     <>
-      <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
+      <EuiPanel hasBorder={false} hasShadow={false}>
         <EuiFlexGroup
           direction="column"
           justifyContent="spaceBetween"
@@ -76,8 +81,8 @@ export const HomeListCard = ({ config }: { config: Config }) => {
           gutterSize="none"
         >
           <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h4>{config.title}</h4>
+            <EuiTitle size="s">
+              <h2>{config.title}</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiSpacer />
@@ -115,4 +120,67 @@ export const HomeListCard = ({ config }: { config: Config }) => {
       </EuiPanel>
     </>
   );
+};
+
+export const registerHomeListCard = (
+  contentManagement: ContentManagementPluginStart,
+  {
+    target,
+    order,
+    width,
+    config,
+    id,
+  }: {
+    target: string;
+    order: number;
+    width?: number;
+    config: Config;
+    id: string;
+  }
+) => {
+  contentManagement.registerContentProvider({
+    id: `${id}_${target}_cards`,
+    getContent: () => ({
+      id,
+      kind: 'custom',
+      order,
+      width,
+      render: () =>
+        React.createElement(HomeListCard, {
+          config,
+        }),
+    }),
+    getTargetArea: () => target,
+  });
+};
+export const registerHomeListCardToPage = (contentManagement: ContentManagementPluginStart) => {
+  registerHomeListCard(contentManagement, {
+    id: 'whats_new',
+    order: 10,
+    config: WHATS_NEW_CONFIG,
+    target: ESSENTIAL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
+    width: 24,
+  });
+
+  registerHomeListCard(contentManagement, {
+    id: 'learn_opensearch_new',
+    order: 20,
+    config: LEARN_OPENSEARCH_CONFIG,
+    target: ESSENTIAL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
+    width: 24,
+  });
+
+  registerHomeListCard(contentManagement, {
+    id: 'whats_new',
+    order: 30,
+    config: WHATS_NEW_CONFIG,
+    target: ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
+  });
+
+  registerHomeListCard(contentManagement, {
+    id: 'learn_opensearch_new',
+    order: 40,
+    config: LEARN_OPENSEARCH_CONFIG,
+    target: ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
+  });
 };

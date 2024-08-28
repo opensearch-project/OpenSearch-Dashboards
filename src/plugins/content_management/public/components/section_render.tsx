@@ -41,7 +41,12 @@ const DashboardSection = ({ section, embeddable, contents$, savedObjectsClient }
 
   if (section.kind === 'dashboard' && factory && input) {
     // const input = createDashboardSection(section, contents ?? []);
-    return <EmbeddableRenderer factory={factory} input={input} />;
+    return (
+      // to make dashboard section align with others add margin left and right -8px
+      <div style={{ margin: '-8px -8px 0 -8px' }}>
+        <EmbeddableRenderer factory={factory} input={input} />
+      </div>
+    );
   }
 
   return null;
@@ -61,21 +66,23 @@ const CardSection = ({ section, embeddable, contents$ }: Props) => {
 
   if (section.kind === 'card' && factory && input) {
     return (
-      <EuiPanel>
-        <EuiTitle size="s">
-          <h2>
-            <EuiButtonIcon
-              iconType={isCardVisible ? 'arrowDown' : 'arrowUp'}
-              onClick={toggleCardVisibility}
-              color="text"
-              aria-label={isCardVisible ? 'Show panel' : 'Hide panel'}
-            />
-            {section.title}
-          </h2>
-        </EuiTitle>
+      <EuiPanel paddingSize="none" hasBorder={false} hasShadow={false} color="transparent">
+        {section.title ? (
+          <EuiTitle size="s">
+            <h2>
+              <EuiButtonIcon
+                iconType={isCardVisible ? 'arrowDown' : 'arrowUp'}
+                onClick={toggleCardVisibility}
+                color="text"
+                aria-label={isCardVisible ? 'Show panel' : 'Hide panel'}
+              />
+              {section.title}
+            </h2>
+          </EuiTitle>
+        ) : null}
         {isCardVisible && (
           <>
-            <EuiSpacer size="m" /> <EmbeddableRenderer factory={factory} input={input} />
+            <EuiSpacer size="s" /> <EmbeddableRenderer factory={factory} input={input} />
           </>
         )}
       </EuiPanel>

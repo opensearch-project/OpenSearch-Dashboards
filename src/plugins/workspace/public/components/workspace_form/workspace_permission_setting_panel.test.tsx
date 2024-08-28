@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import {
   WorkspacePermissionSettingPanel,
   WorkspacePermissionSettingPanelProps,
@@ -87,10 +87,7 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult, onChangeMock } = setup();
 
     expect(onChangeMock).not.toHaveBeenCalled();
-    const permissionToggleListButton = within(
-      renderResult.getAllByTestId('workspace-permissionModeOptions')[0]
-    ).getByTestId('comboBoxToggleListButton');
-    fireEvent.click(permissionToggleListButton);
+    fireEvent.click(renderResult.getAllByTestId('workspace-permissionModeOptions')[0]);
     fireEvent.click(renderResult.getAllByText('Read & Write')[1]);
     expect(onChangeMock).toHaveBeenCalledWith([
       {
@@ -111,10 +108,8 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult, onChangeMock } = setup();
 
     expect(onChangeMock).not.toHaveBeenCalled();
-    const permissionToggleListButton = within(
-      renderResult.getAllByTestId('workspace-permissionModeOptions')[1]
-    ).getByTestId('comboBoxToggleListButton');
-    fireEvent.click(permissionToggleListButton);
+
+    fireEvent.click(renderResult.getAllByTestId('workspace-permissionModeOptions')[1]);
     fireEvent.click(renderResult.getByText('Owner'));
     expect(onChangeMock).toHaveBeenCalledWith([
       {

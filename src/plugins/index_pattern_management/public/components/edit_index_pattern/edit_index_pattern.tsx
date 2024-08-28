@@ -50,6 +50,7 @@ import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
 import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
+import { TopNavControlDescriptionData } from '../../../../navigation/public';
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: IndexPattern;
@@ -201,32 +202,41 @@ export const EditIndexPattern = withRouter(
     const useUpdatedUX = uiSettings.get('home:useNewHomePage');
 
     const renderDescription = () => {
-      const component = (
-        <EuiText size="s">
-          <p>
-            <FormattedMessage
-              id="indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail"
-              defaultMessage="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by OpenSearch. To change a field type, use the OpenSearch"
-              values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
-            />{' '}
-            <EuiLink href={docLinks.links.opensearch.indexTemplates.base} target="_blank" external>
-              {mappingAPILink}
-            </EuiLink>
-          </p>
-        </EuiText>
+      const descriptionText = (
+        <FormattedMessage
+          id="indexPatternManagement.editIndexPattern.timeFilterLabel.timeFilterDetail"
+          defaultMessage="This page lists every field in the {indexPatternTitle} index and the field's associated core type as recorded by OpenSearch. To change a field type, use the OpenSearch"
+          values={{ indexPatternTitle: <strong>{indexPattern.title}</strong> }}
+        />
       );
 
       return useUpdatedUX ? (
         <HeaderControl
           controls={[
             {
-              renderComponent: component,
-            },
+              description: (descriptionText as unknown) as string,
+              links: [
+                {
+                  href: docLinks.links.opensearch.indexTemplates.base,
+                  controlType: 'link',
+                  target: '_blank',
+                  flush: 'both',
+                  label: mappingAPILink,
+                },
+              ],
+            } as TopNavControlDescriptionData,
           ]}
           setMountPoint={application.setAppDescriptionControls}
         />
       ) : (
-        component
+        <EuiText size="s">
+          <p>
+            {descriptionText}{' '}
+            <EuiLink href={docLinks.links.opensearch.indexTemplates.base} target="_blank" external>
+              {mappingAPILink}
+            </EuiLink>
+          </p>
+        </EuiText>
       );
     };
 

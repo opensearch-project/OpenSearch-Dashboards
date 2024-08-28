@@ -8,19 +8,15 @@ import {
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
-  EuiSpacer,
-  EuiSteps,
-  EuiPageSideBar,
   EuiBottomBar,
   EuiButtonEmpty,
   EuiButton,
+  EuiSpacer,
 } from '@elastic/eui';
 import React, { useEffect, useState, useCallback } from 'react';
 import { RouteComponentProps, useParams, withRouter } from 'react-router-dom';
 import { ConfigureS3DatasourcePanel } from './amazon_s3/configure_amazon_s3_data_source';
 import { ConfigurePrometheusDatasourcePanel } from './prometheus/configure_prometheus_data_source';
-import { ReviewS3Datasource } from './amazon_s3/review_amazon_s3_data_source';
-import { ReviewPrometheusDatasource } from './prometheus/review_prometheus_data_source';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext, DirectQueryDatasourceType, Role } from '../../../types';
 import { DatasourceTypeToDisplayName, UrlToDatasourceType } from '../../../constants';
@@ -35,10 +31,12 @@ import { DATACONNECTIONS_BASE } from '../../../constants';
 
 interface ConfigureDatasourceProps extends RouteComponentProps {
   notifications: NotificationsStart;
+  useNewUX: boolean;
 }
 
 export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({
   notifications,
+  useNewUX,
   history,
 }) => {
   const { type: urlType } = useParams<{ type: string }>();
@@ -47,6 +45,8 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
     setBreadcrumbs,
     notifications: { toasts },
     http,
+    navigation,
+    application,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   const [error, setError] = useState<string>('');
@@ -63,17 +63,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
   const [roles, setRoles] = useState<Role[]>([]);
   const [hasSecurityAccess, setHasSecurityAccess] = useState(true);
   const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<Role[]>([]);
-  const [page, setPage] = useState<'configure' | 'review'>('configure');
   const type = UrlToDatasourceType[urlType];
-  const ConfigureDatasourceSteps = [
-    {
-      title: 'Configure data source',
-      status: page === 'review' ? 'complete' : undefined,
-    },
-    {
-      title: 'Review configuration',
-    },
-  ];
 
   const formatError = (errorName: string, errorMessage: string, errorDetails: string) => {
     return {
@@ -159,7 +149,6 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
         notifications.toasts.addError(formattedError, {
           title: 'Could not create data source',
         });
-        setPage('configure');
       });
   }, [
     authMethod,
@@ -196,16 +185,16 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
     let breadcrumbs;
     switch (urlType) {
       case 'AmazonS3AWSGlue':
-        breadcrumbs = getCreateAmazonS3DataSourceBreadcrumbs();
+        breadcrumbs = getCreateAmazonS3DataSourceBreadcrumbs(useNewUX);
         break;
       case 'Prometheus':
-        breadcrumbs = getCreatePrometheusDataSourceBreadcrumbs();
+        breadcrumbs = getCreatePrometheusDataSourceBreadcrumbs(useNewUX);
         break;
       default:
         breadcrumbs = getCreateBreadcrumbs();
     }
     setBreadcrumbs(breadcrumbs);
-  }, [urlType, setBreadcrumbs, http]);
+  }, [urlType, setBreadcrumbs, http, useNewUX]);
 
   const ConfigureDatasource = (configurationProps: {
     datasourceType: DirectQueryDatasourceType;
@@ -215,6 +204,9 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
       case 'S3GLUE':
         return (
           <ConfigureS3DatasourcePanel
+            useNewUX={useNewUX}
+            navigation={navigation}
+            application={application}
             currentName={name}
             currentDetails={details}
             setNameForRequest={setName}
@@ -241,6 +233,9 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
       case 'PROMETHEUS':
         return (
           <ConfigurePrometheusDatasourcePanel
+            useNewUX={useNewUX}
+            navigation={navigation}
+            application={application}
             currentName={name}
             currentDetails={details}
             setNameForRequest={setName}
@@ -272,39 +267,6 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
     }
   };
 
-  const ReviewDatasourceConfiguration = (configurationProps: { datasourceType: string }) => {
-    const { datasourceType } = configurationProps;
-    switch (datasourceType) {
-      case 'S3GLUE':
-        return (
-          <ReviewS3Datasource
-            currentName={name}
-            currentDetails={details}
-            currentArn={arn}
-            currentStore={storeURI}
-            selectedQueryPermissionRoles={selectedQueryPermissionRoles}
-            currentAuthMethod={authMethod}
-            goBack={() => setPage('configure')}
-          />
-        );
-      case 'PROMETHEUS':
-        return (
-          <ReviewPrometheusDatasource
-            currentName={name}
-            currentDetails={details}
-            currentArn={arn}
-            currentStore={storeURI}
-            currentUsername={username}
-            selectedQueryPermissionRoles={selectedQueryPermissionRoles}
-            currentAuthMethod={authMethod}
-            goBack={() => setPage('configure')}
-          />
-        );
-      default:
-        return <></>;
-    }
-  };
-
   const ReviewSaveOrCancel = useCallback(() => {
     return (
       <EuiBottomBar data-test-subj="reviewSaveOrCancel">
@@ -324,44 +286,25 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              onClick={() => setPage('configure')}
-              color="ghost"
+              onClick={() => createDatasource()}
               size="s"
-              iconType="arrowLeft"
-              data-test-subj="previousButton"
-            >
-              Previous
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={() => (page === 'review' ? createDatasource() : setPage('review'))}
-              size="s"
-              iconType="arrowRight"
+              iconType="check"
+              color="secondary"
               fill
-              data-test-subj="nextButton"
+              data-test-subj="createButton"
             >
-              {page === 'configure'
-                ? `Review Configuration`
-                : `Connect to ${DatasourceTypeToDisplayName[type]}`}
+              {`Connect to ${DatasourceTypeToDisplayName[type]}`}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>
     );
-  }, [page, history, createDatasource, type]);
+  }, [history, createDatasource, type]);
 
   return (
-    <EuiPage>
-      <EuiPageSideBar>
-        <EuiSteps titleSize="xs" steps={ConfigureDatasourceSteps} data-test-subj="configureSteps" />
-      </EuiPageSideBar>
+    <EuiPage paddingSize="none">
       <EuiPageBody>
-        {page === 'configure' ? (
-          <ConfigureDatasource datasourceType={type} />
-        ) : (
-          <ReviewDatasourceConfiguration datasourceType={type} />
-        )}
+        <ConfigureDatasource datasourceType={type} />
         <EuiSpacer size="xl" />
         <EuiSpacer size="xl" />
         <ReviewSaveOrCancel />

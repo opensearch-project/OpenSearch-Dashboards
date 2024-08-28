@@ -118,8 +118,8 @@ export const useSearch = (services: DiscoverViewServices) => {
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
   const fetch = useCallback(async () => {
-    let dataSet = indexPattern;
-    if (!dataSet) {
+    let dataset = indexPattern;
+    if (!dataset) {
       data$.next({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
       });
@@ -136,18 +136,18 @@ export const useSearch = (services: DiscoverViewServices) => {
     // Abort any in-progress requests before fetching again
     if (fetchStateRef.current.abortController) fetchStateRef.current.abortController.abort();
     fetchStateRef.current.abortController = new AbortController();
-    const histogramConfigs = dataSet.timeFieldName
-      ? createHistogramConfigs(dataSet, interval || 'auto', data)
+    const histogramConfigs = dataset.timeFieldName
+      ? createHistogramConfigs(dataset, interval || 'auto', data)
       : undefined;
     const searchSource = await updateSearchSource({
-      indexPattern: dataSet,
+      indexPattern: dataset,
       services,
       sort,
       searchSource: savedSearch?.searchSource,
       histogramConfigs,
     });
 
-    dataSet = searchSource.getField('index');
+    dataset = searchSource.getField('index');
 
     try {
       // Only show loading indicator if we are fetching when the rows are empty
@@ -183,7 +183,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       let bucketInterval = {};
       let chartData;
       for (const row of rows) {
-        const fields = Object.keys(dataSet!.flattenHit(row));
+        const fields = Object.keys(dataset!.flattenHit(row));
         for (const fieldName of fields) {
           fetchStateRef.current.fieldCounts[fieldName] =
             (fetchStateRef.current.fieldCounts[fieldName] || 0) + 1;
@@ -251,8 +251,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       timefilter.getFetch$(),
       timefilter.getTimeUpdate$(),
       timefilter.getAutoRefreshFetch$(),
-      data.query.queryString.getUpdates$(),
-      data.query.dataSetManager.getUpdates$()
+      data.query.queryString.getUpdates$()
     ).pipe(debounceTime(100));
 
     const subscription = fetch$.subscribe(() => {
@@ -282,7 +281,6 @@ export const useSearch = (services: DiscoverViewServices) => {
     fetch,
     core.fatalErrors,
     shouldSearchOnPageLoad,
-    data.query.dataSetManager,
   ]);
 
   // Get savedSearch if it exists

@@ -47,8 +47,6 @@ export class AutocompleteService {
     this.autocompleteConfig = autocomplete;
   }
 
-  private core: CoreSetup | undefined;
-
   private readonly querySuggestionProviders: Map<string, QuerySuggestionGetFn> = new Map();
   private getValueSuggestions?: ValueSuggestionsGetFn;
 
@@ -63,7 +61,7 @@ export class AutocompleteService {
     const provider = this.querySuggestionProviders.get(language);
 
     if (provider) {
-      return provider({ core: this.core, ...args });
+      return provider(args);
     }
   };
 
@@ -74,8 +72,6 @@ export class AutocompleteService {
     this.getValueSuggestions = this.autocompleteConfig.valueSuggestions.enabled
       ? setupValueSuggestionProvider(core)
       : getEmptyValueSuggestions;
-
-    this.core = core;
 
     return {
       addQuerySuggestionProvider: this.addQuerySuggestionProvider,

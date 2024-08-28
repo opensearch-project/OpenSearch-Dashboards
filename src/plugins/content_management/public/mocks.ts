@@ -9,6 +9,7 @@ const createStartContract = (): ContentManagementPluginStart => {
   return {
     registerContentProvider: jest.fn(),
     renderPage: jest.fn(),
+    updatePageSection: jest.fn(),
   };
 };
 

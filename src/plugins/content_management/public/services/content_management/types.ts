@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { EuiCardProps } from '@elastic/eui';
 import { CardContainerExplicitInput } from '../../components/card_container/types';
 import { DashboardContainerExplicitInput } from '../../components/types';
 
@@ -74,6 +75,7 @@ export type Content =
       onClick?: () => void;
       getIcon?: () => React.ReactElement;
       getFooter?: () => React.ReactElement;
+      cardProps?: Omit<EuiCardProps, 'title' | 'description'>;
     };
 
 export type SavedObjectInput =
@@ -95,5 +97,5 @@ export type SavedObjectInput =
 export interface ContentProvider {
   id: string;
   getContent: () => Content;
-  getTargetArea: () => string;
+  getTargetArea: () => string | string[];
 }

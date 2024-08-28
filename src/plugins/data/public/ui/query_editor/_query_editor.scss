@@ -102,7 +102,7 @@
   }
 }
 
-.osdQueryEditor__dataSetNavigatorWrapper {
+.osdQueryEditor__datasetSelectorWrapper {
   :first-child {
     border-bottom: $euiBorderThin !important;
   }
@@ -155,9 +155,14 @@
   align-items: center;
   padding: $euiSizeXS;
 
-  .osdQueryEditor__collapseBtn {
-    padding-right: $euiSizeXS;
-    border-right: $euiBorderThin;
+  > * {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .osdQueryEditor__querycontrols {
+    float: right;
+    margin: $euiSizeS $euiSizeS;
   }
 
   .osdQueryEditor__dataSetPicker {

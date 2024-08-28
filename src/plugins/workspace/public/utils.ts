@@ -14,6 +14,7 @@ import {
   ApplicationStart,
   HttpSetup,
   NotificationsStart,
+  DEFAULT_NAV_GROUPS,
 } from '../../../core/public';
 import {
   App,
@@ -24,8 +25,8 @@ import {
   WorkspaceObject,
   WorkspaceAvailability,
 } from '../../../core/public';
-import { DEFAULT_SELECTED_FEATURES_IDS, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
-import { WorkspaceUseCase } from './types';
+import { WORKSPACE_DETAIL_APP_ID } from '../common/constants';
+import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
 import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
 import {
@@ -33,6 +34,10 @@ import {
   DATACONNECTIONS_BASE,
 } from '../../data_source_management/public';
 import { DataSource, DataSourceConnection, DataSourceConnectionType } from '../common/types';
+import {
+  ANALYTICS_ALL_OVERVIEW_PAGE_ID,
+  ESSENTIAL_OVERVIEW_PAGE_ID,
+} from '../../../plugins/content_management/public';
 
 export const USE_CASE_PREFIX = 'use-case-';
 
@@ -194,7 +199,6 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
       const filterCondition =
         navLinkStatus !== AppNavLinkStatus.hidden &&
         !chromeless &&
-        !DEFAULT_SELECTED_FEATURES_IDS.includes(id) &&
         workspaceAvailability !== WorkspaceAvailability.outsideWorkspace;
       // If the category is management, only retain Dashboards Management which contains saved objets and index patterns.
       // Saved objets can show all saved objects in the current workspace and index patterns is at workspace level.
@@ -208,13 +212,16 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
   return visibleApplications;
 };
 
-export const getDataSourcesList = (client: SavedObjectsStart['client'], workspaces: string[]) => {
+export const getDataSourcesList = (
+  client: SavedObjectsStart['client'],
+  targetWorkspaces: string[]
+) => {
   return client
     .find({
       type: 'data-source',
       fields: ['id', 'title', 'auth', 'description', 'dataSourceEngineType'],
       perPage: 10000,
-      workspaces,
+      workspaces: targetWorkspaces,
     })
     .then((response) => {
       const objects = response?.savedObjects;
@@ -222,6 +229,7 @@ export const getDataSourcesList = (client: SavedObjectsStart['client'], workspac
         return objects.map((source) => {
           const id = source.id;
           const title = source.get('title');
+          const workspaces = source.workspaces ?? [];
           const auth = source.get('auth');
           const description = source.get('description');
           const dataSourceEngineType = source.get('dataSourceEngineType');
@@ -231,6 +239,7 @@ export const getDataSourcesList = (client: SavedObjectsStart['client'], workspac
             auth,
             description,
             dataSourceEngineType,
+            workspaces,
           };
         });
       } else {
@@ -306,6 +315,18 @@ export const convertNavGroupToWorkspaceUseCase = ({
   order,
 });
 
+const compareFeatures = (
+  features1: WorkspaceUseCaseFeature[],
+  features2: WorkspaceUseCaseFeature[]
+) => {
+  const featuresSerializer = (features: WorkspaceUseCaseFeature[]) =>
+    features
+      .map(({ id, title }) => `${id}-${title}`)
+      .sort()
+      .join();
+  return featuresSerializer(features1) === featuresSerializer(features2);
+};
+
 export const isEqualWorkspaceUseCase = (a: WorkspaceUseCase, b: WorkspaceUseCase) => {
   if (a.id !== b.id) {
     return false;
@@ -322,14 +343,7 @@ export const isEqualWorkspaceUseCase = (a: WorkspaceUseCase, b: WorkspaceUseCase
   if (a.order !== b.order) {
     return false;
   }
-  if (
-    a.features.length !== b.features.length ||
-    a.features.some((aFeature) =>
-      b.features.some(
-        (bFeature) => aFeature.id !== bFeature.id || aFeature.title !== bFeature.title
-      )
-    )
-  ) {
+  if (a.features.length !== b.features.length || !compareFeatures(a.features, b.features)) {
     return false;
   }
   return true;
@@ -362,7 +376,11 @@ export function prependWorkspaceToBreadcrumbs(
   currentNavGroup: NavGroupItemInMap | undefined,
   navGroupsMap: Record<string, NavGroupItemInMap>
 ) {
-  if (appId === WORKSPACE_DETAIL_APP_ID) {
+  if (
+    appId === WORKSPACE_DETAIL_APP_ID ||
+    appId === ESSENTIAL_OVERVIEW_PAGE_ID ||
+    appId === ANALYTICS_ALL_OVERVIEW_PAGE_ID
+  ) {
     core.chrome.setBreadcrumbsEnricher(undefined);
     return;
   }
@@ -408,7 +426,7 @@ export function prependWorkspaceToBreadcrumbs(
         },
       };
       if (useCase === ALL_USE_CASE_ID) {
-        if (currentNavGroup) {
+        if (currentNavGroup && currentNavGroup.id !== DEFAULT_NAV_GROUPS.all.id) {
           return [homeBreadcrumb, workspaceBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
         } else {
           return [homeBreadcrumb, workspaceBreadcrumb, ...breadcrumbs];
@@ -426,8 +444,7 @@ export const getUseCaseUrl = (
   application: ApplicationStart,
   http: HttpSetup
 ): string => {
-  const appId =
-    (useCase?.id !== ALL_USE_CASE_ID && useCase?.features?.[0].id) || WORKSPACE_DETAIL_APP_ID;
+  const appId = useCase?.features?.[0].id || WORKSPACE_DETAIL_APP_ID;
   const useCaseURL = formatUrlWithWorkspaceId(
     application.getUrlForApp(appId, {
       absolute: false,

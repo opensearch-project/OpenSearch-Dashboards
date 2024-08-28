@@ -9,5 +9,5 @@
     "navigation"
   ],
   "optionalPlugins": ["savedObjectsManagement","management","dataSourceManagement","contentManagement"],
-  "requiredBundles": ["opensearchDashboardsReact", "home","dataSource", "dataSourceManagement"]
+  "requiredBundles": ["opensearchDashboardsReact","dataSource", "dataSourceManagement","contentManagement"]
 }

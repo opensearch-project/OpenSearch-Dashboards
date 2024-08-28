@@ -18,7 +18,7 @@ import {
 import { IFieldType } from './fields';
 import { IndexPatternFieldMap, IndexPatternSpec } from '../index_patterns';
 import { IOpenSearchDashboardsSearchRequest } from '../search';
-import { GetAggTypeFn, GetDataFrameAggQsFn, TimeRange } from '../types';
+import { GetAggTypeFn, GetDataFrameAggQsFn, Query, TimeRange } from '../types';
 
 /**
  * Returns the raw data frame from the search request.
@@ -380,25 +380,25 @@ export const createDataFrame = (partial: PartialDataFrame): IDataFrame | IDataFr
  */
 export const updateDataFrameMeta = ({
   dataFrame,
-  qs,
+  query,
   aggConfig,
   timeField,
   timeFilter,
   getAggQsFn,
 }: {
   dataFrame: IDataFrame;
-  qs: string;
+  query: Query;
   aggConfig: DataFrameAggConfig;
   timeField: any;
   timeFilter: string;
   getAggQsFn: GetDataFrameAggQsFn;
 }) => {
   dataFrame.meta = {
-    ...dataFrame.meta,
+    ...dataFrame?.meta,
     aggs: aggConfig,
     aggsQs: {
       [aggConfig.id]: getAggQsFn({
-        qs,
+        query,
         aggConfig,
         timeField,
         timeFilter,
@@ -411,7 +411,7 @@ export const updateDataFrameMeta = ({
     for (const [key, subAgg] of Object.entries(subAggs)) {
       const subAggConfig: Record<string, any> = { [key]: subAgg };
       dataFrame.meta.aggsQs[subAgg.id] = getAggQsFn({
-        qs,
+        query,
         aggConfig: subAggConfig as DataFrameAggConfig,
         timeField,
         timeFilter,

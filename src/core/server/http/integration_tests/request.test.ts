@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import { dynamicConfigServiceMock } from '../../config/dynamic_config_service.mock';
+
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
 }));
@@ -49,6 +51,7 @@ const contextSetup = contextServiceMock.createSetupContract();
 const setupDeps = {
   context: contextSetup,
 };
+const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
 
 beforeEach(() => {
   logger = loggingSystemMock.create();
@@ -71,7 +74,7 @@ describe('OpenSearchDashboardsRequest', () => {
           { path: '/', validate: false, options: { authRequired: true } },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(200, {
           isAuthenticated: false,
@@ -85,7 +88,7 @@ describe('OpenSearchDashboardsRequest', () => {
           { path: '/', validate: false, options: { authRequired: 'optional' } },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(200, {
           isAuthenticated: false,
@@ -99,7 +102,7 @@ describe('OpenSearchDashboardsRequest', () => {
           { path: '/', validate: false, options: { authRequired: 'optional' } },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(200, {
           isAuthenticated: false,
@@ -113,7 +116,7 @@ describe('OpenSearchDashboardsRequest', () => {
           { path: '/', validate: false, options: { authRequired: 'optional' } },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(200, {
           isAuthenticated: true,
@@ -127,7 +130,7 @@ describe('OpenSearchDashboardsRequest', () => {
           { path: '/', validate: false, options: { authRequired: true } },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(200, {
           isAuthenticated: true,
@@ -146,7 +149,7 @@ describe('OpenSearchDashboardsRequest', () => {
           { path: '/', validate: false, options: { authRequired: false } },
           (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(200, {
           authRequired: false,
@@ -160,7 +163,7 @@ describe('OpenSearchDashboardsRequest', () => {
           { path: '/', validate: false, options: { authRequired: 'optional' } },
           (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(200, {
           authRequired: 'optional',
@@ -174,7 +177,7 @@ describe('OpenSearchDashboardsRequest', () => {
           { path: '/', validate: false, options: { authRequired: true } },
           (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(200, {
           authRequired: true,
@@ -205,7 +208,7 @@ describe('OpenSearchDashboardsRequest', () => {
           });
         });
 
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         const incomingRequest = supertest(innerServer.listener)
           .get('/')
@@ -232,7 +235,7 @@ describe('OpenSearchDashboardsRequest', () => {
           return res.ok({ body: 'ok' });
         });
 
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/');
 
@@ -255,7 +258,7 @@ describe('OpenSearchDashboardsRequest', () => {
           return res.badRequest();
         });
 
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/');
 
@@ -288,7 +291,7 @@ describe('OpenSearchDashboardsRequest', () => {
           }
         );
 
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).post('/').send({ data: 'test' }).expect(200);
 
@@ -316,7 +319,7 @@ describe('OpenSearchDashboardsRequest', () => {
           return res.ok({ body: 'ok' });
         });
 
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(200);
         expect(nextSpy).toHaveBeenCalledTimes(1);
@@ -343,7 +346,7 @@ describe('OpenSearchDashboardsRequest', () => {
           });
         });
 
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         const incomingRequest = supertest(innerServer.listener)
           .get('/')
@@ -377,7 +380,7 @@ describe('OpenSearchDashboardsRequest', () => {
           );
         });
 
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         const incomingRequest = supertest(innerServer.listener)
           .post('/')
@@ -398,7 +401,7 @@ describe('OpenSearchDashboardsRequest', () => {
       router.get({ path: '/', validate: false }, async (context, req, res) => {
         return res.ok({ body: { requestId: req.id } });
       });
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const st = supertest(innerServer.listener);
 
@@ -417,7 +420,7 @@ describe('OpenSearchDashboardsRequest', () => {
       router.get({ path: '/', validate: false }, async (context, req, res) => {
         return res.ok({ body: { requestUuid: req.uuid } });
       });
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const st = supertest(innerServer.listener);
 
