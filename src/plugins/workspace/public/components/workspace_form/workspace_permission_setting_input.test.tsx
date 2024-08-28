@@ -75,7 +75,7 @@ describe('WorkspacePermissionSettingInput', () => {
       modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
     });
 
-    expect(renderResult.getByText('foo')).toBeInTheDocument();
+    expect(renderResult.getByDisplayValue('foo')).toBeInTheDocument();
     expect(renderResult.getByText('Read')).toBeInTheDocument();
   });
   it('should render consistent group id and permission modes', () => {
@@ -85,18 +85,17 @@ describe('WorkspacePermissionSettingInput', () => {
       modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Read],
     });
 
-    expect(renderResult.getByText('bar')).toBeInTheDocument();
+    expect(renderResult.getByDisplayValue('bar')).toBeInTheDocument();
     expect(renderResult.getByText('Read & Write')).toBeInTheDocument();
   });
   it('should call onGroupOrUserIdChange with user id', () => {
     const { renderResult, onGroupOrUserIdChangeMock } = setup();
 
     expect(onGroupOrUserIdChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(renderResult.getByText('Select a user'));
-    fireEvent.input(renderResult.getAllByTestId('comboBoxSearchInput')[0], {
+    fireEvent.change(renderResult.getAllByTestId('fieldtextInput')[0], {
       target: { value: 'user1' },
     });
-    fireEvent.blur(renderResult.getAllByTestId('comboBoxSearchInput')[0]);
+    fireEvent.blur(renderResult.getAllByTestId('fieldtextInput')[0]);
     expect(onGroupOrUserIdChangeMock).toHaveBeenCalledWith({ type: 'user', userId: 'user1' }, 0);
   });
   it('should call onGroupOrUserIdChange with group', () => {
@@ -105,22 +104,11 @@ describe('WorkspacePermissionSettingInput', () => {
     });
 
     expect(onGroupOrUserIdChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(renderResult.getByText('Select a user group'));
-    fireEvent.input(renderResult.getAllByTestId('comboBoxSearchInput')[0], {
+    fireEvent.change(renderResult.getAllByTestId('fieldtextInput')[0], {
       target: { value: 'group' },
     });
-    fireEvent.blur(renderResult.getAllByTestId('comboBoxSearchInput')[0]);
+    fireEvent.blur(renderResult.getAllByTestId('fieldtextInput')[0]);
     expect(onGroupOrUserIdChangeMock).toHaveBeenCalledWith({ type: 'group', group: 'group' }, 0);
-  });
-
-  it('should call onGroupOrUserIdChange without user id after clear button clicked', () => {
-    const { renderResult, onGroupOrUserIdChangeMock } = setup({
-      userId: 'foo',
-    });
-
-    expect(onGroupOrUserIdChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(renderResult.getByTestId('comboBoxClearButton'));
-    expect(onGroupOrUserIdChangeMock).toHaveBeenCalledWith({ type: 'user' }, 0);
   });
 
   it('should call onPermissionModesChange with permission modes after permission modes changed', () => {

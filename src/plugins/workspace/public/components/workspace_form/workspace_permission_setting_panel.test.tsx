@@ -76,10 +76,10 @@ describe('WorkspacePermissionSettingInput', () => {
   it('should render consistent user and group permissions', () => {
     const { renderResult } = setup();
 
-    expect(renderResult.getByText('foo')).toBeInTheDocument();
+    expect(renderResult.getByDisplayValue('foo')).toBeInTheDocument();
     expect(renderResult.getByText('Read')).toBeInTheDocument();
 
-    expect(renderResult.getByText('bar')).toBeInTheDocument();
+    expect(renderResult.getByDisplayValue('bar')).toBeInTheDocument();
     expect(renderResult.getByText('Read & Write')).toBeInTheDocument();
   });
 
@@ -202,11 +202,12 @@ describe('WorkspacePermissionSettingInput', () => {
     ]);
   });
 
-  it('should call onGroupOrUserIdChange without user id after clear button clicked', () => {
+  it('should call onGroupOrUserIdChange after user value changed', () => {
     const { renderResult, onChangeMock } = setup();
 
     expect(onChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(renderResult.getAllByTestId('comboBoxClearButton')[0]);
+    const inputElement = renderResult.getByDisplayValue('foo');
+    fireEvent.change(inputElement, { target: { value: 'fooo' } });
     expect(onChangeMock).toHaveBeenCalled();
   });
 
@@ -229,12 +230,8 @@ describe('WorkspacePermissionSettingInput', () => {
       disabledUserOrGroupInputIds: [0, 1],
     });
 
-    expect(renderResult.getByText('user-1')?.closest('div[role="combobox"]')).toHaveClass(
-      'euiComboBox-isDisabled'
-    );
-    expect(renderResult.getByText('user-group-1')?.closest('div[role="combobox"]')).toHaveClass(
-      'euiComboBox-isDisabled'
-    );
+    expect(renderResult.getByDisplayValue('user-1')).toBeDisabled();
+    expect(renderResult.getByDisplayValue('user-group-1')).toBeDisabled();
   });
 
   it('should render consistent errors', () => {

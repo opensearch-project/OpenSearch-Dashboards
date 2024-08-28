@@ -7,11 +7,10 @@ import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiComboBox,
   EuiButtonIcon,
-  EuiComboBoxOptionOption,
   EuiSuperSelect,
   EuiSuperSelectOption,
+  EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { WorkspacePermissionMode } from '../../../common/constants';
@@ -104,33 +103,22 @@ export const WorkspacePermissionSettingInput = ({
   onPermissionModesChange,
   onTypeChange,
 }: WorkspacePermissionSettingInputProps) => {
-  const groupOrUserIdSelectedOptions = useMemo(
-    () => (group || userId ? [{ label: (group || userId) as string }] : []),
-    [group, userId]
-  );
-
   const permissionModesSelected = useMemo(
     () => getPermissionModeId(modes ?? []),
 
     [modes]
   );
 
-  const handleGroupOrUserIdCreate = useCallback(
-    (groupOrUserId) => {
-      onGroupOrUserIdChange(
-        type === WorkspacePermissionItemType.Group
-          ? { type, group: groupOrUserId }
-          : { type, userId: groupOrUserId },
-        index
-      );
-    },
-    [index, type, onGroupOrUserIdChange]
-  );
-
   const handleGroupOrUserIdChange = useCallback(
-    (options: Array<EuiComboBoxOptionOption<any>>) => {
-      if (options.length === 0) {
-        onGroupOrUserIdChange({ type }, index);
+    (event) => {
+      if (event.target.value) {
+        const groupOrUserId = event.target.value;
+        onGroupOrUserIdChange(
+          type === WorkspacePermissionItemType.Group
+            ? { type, group: groupOrUserId }
+            : { type, userId: groupOrUserId },
+          index
+        );
       }
     },
     [index, type, onGroupOrUserIdChange]
@@ -165,12 +153,12 @@ export const WorkspacePermissionSettingInput = ({
         />
       </EuiFlexItem>
       <EuiFlexItem style={{ maxWidth: 400 }}>
-        <EuiComboBox
+        <EuiFieldText
           compressed={true}
-          singleSelection={{ asPlainText: true }}
-          selectedOptions={groupOrUserIdSelectedOptions}
-          onCreateOption={handleGroupOrUserIdCreate}
+          disabled={userOrGroupDisabled || !isEditing}
           onChange={handleGroupOrUserIdChange}
+          value={type === WorkspacePermissionItemType.User ? userId ?? '' : group ?? ''}
+          data-test-subj="fieldtextInput"
           placeholder={
             type === WorkspacePermissionItemType.User
               ? i18n.translate('workspaceForm.permissionSetting.selectUser', {
@@ -180,7 +168,6 @@ export const WorkspacePermissionSettingInput = ({
                   defaultMessage: 'Select a user group',
                 })
           }
-          isDisabled={userOrGroupDisabled || !isEditing}
         />
       </EuiFlexItem>
       <EuiFlexItem style={{ maxWidth: 150 }}>
