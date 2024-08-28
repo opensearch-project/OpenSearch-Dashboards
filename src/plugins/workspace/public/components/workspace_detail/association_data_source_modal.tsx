@@ -56,18 +56,11 @@ const convertConnectionsToOptions = (
 };
 
 enum AssociationDataSourceModalTab {
-  All = 'all',
   OpenSearchConnections = 'opensearch-connections',
   DirectQueryConnections = 'direction-query-connections',
 }
 
 const tabOptions: EuiButtonGroupOptionProps[] = [
-  {
-    id: AssociationDataSourceModalTab.All,
-    label: i18n.translate('workspace.form.selectDataSource.subTitle', {
-      defaultMessage: 'All',
-    }),
-  },
   {
     id: AssociationDataSourceModalTab.OpenSearchConnections,
     label: i18n.translate('workspace.form.selectDataSource.subTitle', {
@@ -100,7 +93,7 @@ export const AssociationDataSourceModal = ({
   handleAssignDataSourceConnections,
 }: AssociationDataSourceModalProps) => {
   const [allConnections, setAllConnections] = useState<DataSourceConnection[]>([]);
-  const [currentTab, setCurrentTab] = useState('all');
+  const [currentTab, setCurrentTab] = useState(tabOptions[0].id);
   const [allOptions, setAllOptions] = useState<DataSourceModalOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
