@@ -21,6 +21,10 @@ import {
   EuiPopoverTitle,
   EuiSmallButton,
   EuiLink,
+  EuiSmallButtonIcon,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiBasicTable,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
@@ -43,26 +47,22 @@ export const OpenSearchConnectionTable = ({
   const [selectedItems, setSelectedItems] = useState<DataSourceConnection[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [popoversState, setPopoversState] = useState<Record<string, boolean>>({});
+  // const [selectedItems, setSelectedItems] = useState([]);
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+    Record<string, React.ReactNode>
+  >({});
 
   useEffect(() => {
     // Reset selected items when connectionType changes
     setSelectedItems([]);
+    setItemIdToExpandedRowMap({});
   }, [connectionType, setSelectedItems]);
 
   const filteredDataSources = useMemo(() => {
-    // Reset the item when switching connectionType.
-    setSelectedItems([]);
-    if (connectionType === 'openSearchConnections') {
-      return dataSourceConnections.filter(
-        (dqc) => dqc.connectionType === DataSourceConnectionType.OpenSearchConnection
-      );
-    } else if (connectionType === 'directQueryConnections') {
-      return dataSourceConnections.filter(
-        (dqc) => dqc.connectionType === DataSourceConnectionType.DirectQueryConnection
-      );
-    }
-    return dataSourceConnections;
-  }, [connectionType, dataSourceConnections]);
+    return dataSourceConnections.filter(
+      (dqc) => dqc.connectionType === DataSourceConnectionType.OpenSearchConnection
+    );
+  }, [dataSourceConnections]);
 
   const renderToolsLeft = useCallback(() => {
     return selectedItems.length > 0 && !modalVisible
@@ -123,7 +123,107 @@ export const OpenSearchConnectionTable = ({
     }));
   };
 
+  const toggleDetails = (item: DataSourceConnection) => {
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    if (itemIdToExpandedRowMapValues[item.id]) {
+      delete itemIdToExpandedRowMapValues[item.id];
+    } else {
+      const { relatedConnections } = item;
+      // itemIdToExpandedRowMapValues[item.id] = (
+      //   <EuiListGroup maxWidth={1000}>
+      //     {relatedConnections?.map((relatedConnection) => (
+      //       <EuiListGroupItem
+      //         label={
+      //           <EuiFlexGroup>
+      //             <EuiFlexItem>{relatedConnection.name}</EuiFlexItem>
+      //             <EuiFlexItem>{relatedConnection.type}</EuiFlexItem>
+      //             <EuiFlexItem>{relatedConnection.description}</EuiFlexItem>
+      //             <EuiFlexItem>-</EuiFlexItem>
+      //           </EuiFlexGroup>
+      //         }
+      //       />
+      //     ))}
+      //   </EuiListGroup>
+      // );
+      itemIdToExpandedRowMapValues[item.id] = (
+        <EuiBasicTable
+          items={relatedConnections}
+          itemId="id"
+          columns={columns1}
+          hasActions={false}
+        tableLayout="auto"
+          // style={{ padding: 0 }}
+          showTableHeader={false}
+          style={{
+            padding: '0', // 消除所有内边距
+            margin: '0',  // 可选：消除所有外边距
+          }}
+        />
+      );
+    }
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
+
+  const columns1: Array<EuiBasicTableColumn<DataSourceConnection>> = [
+    {
+      field: 'name',
+      name: i18n.translate('workspace.detail.dataSources.table.title', {
+        defaultMessage: 'Title',
+      }),
+      truncateText: true,
+      render: (name: string, record) => {
+        const origin = window.location.origin;
+        let url: string;
+        if (record.connectionType === DataSourceConnectionType.OpenSearchConnection) {
+          url = `${origin}/app/dataSources_core/${record.id}`;
+        } else {
+          url = `${origin}/app/dataSources_core/manage/${name}?dataSourceMDSId=${record.parentId}`;
+        }
+        return (
+          <EuiLink href={url} className="eui-textTruncate">
+            {name}
+          </EuiLink>
+        );
+      },
+    },
+    {
+      field: 'type',
+      name: i18n.translate('workspace.detail.dataSources.table.type', {
+        defaultMessage: 'Type',
+      }),
+      truncateText: true,
+    },
+    {
+      field: 'description',
+      name: i18n.translate('workspace.detail.dataSources.table.description', {
+        defaultMessage: 'Description',
+      }),
+      truncateText: true,
+    },
+    {
+      field: 'relatedConnections',
+      name: i18n.translate('workspace.detail.dataSources.table.relatedConnections', {
+        defaultMessage: 'Related connections',
+      }),
+      align: 'right',
+      truncateText: true,
+      render: (relatedConnections: DataSourceConnection[], record) => <EuiText>—</EuiText>,
+    },
+  ];
+
   const columns: Array<EuiBasicTableColumn<DataSourceConnection>> = [
+    {
+      width: '40px',
+      isExpander: true,
+      render: (item: DataSourceConnection) =>
+        connectionType === 'directQueryConnections' && item?.relatedConnections?.length ? (
+          <EuiSmallButtonIcon
+            onClick={() => toggleDetails(item)}
+            aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+            iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+          />
+        ) : null,
+    },
     {
       field: 'name',
       name: i18n.translate('workspace.detail.dataSources.table.title', {
@@ -258,6 +358,8 @@ export const OpenSearchConnectionTable = ({
         search={search}
         key={connectionType}
         isSelectable={true}
+        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+        isExpandable={true}
         pagination={{
           initialPageSize: 10,
           pageSizeOptions: [10, 20, 30],

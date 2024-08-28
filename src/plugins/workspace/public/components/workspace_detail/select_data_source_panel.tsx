@@ -53,7 +53,7 @@ export const SelectDataSourceDetailPanel = ({
   const [assignedDataSourceConnections, setAssignedDataSourceConnections] = useState<
     DataSourceConnection[]
   >([]);
-  const [toggleIdSelected, setToggleIdSelected] = useState('all');
+  const [toggleIdSelected, setToggleIdSelected] = useState('openSearchConnections');
 
   useEffect(() => {
     setIsLoading(true);
@@ -64,12 +64,6 @@ export const SelectDataSourceDetailPanel = ({
   }, [assignedDataSources, http, notifications]);
 
   const toggleButtons = [
-    {
-      id: 'all',
-      label: i18n.translate('workspace.detail.dataSources.all', {
-        defaultMessage: 'All',
-      }),
-    },
     {
       id: 'openSearchConnections',
       label: i18n.translate('workspace.detail.dataSources.openSearchConnections', {
