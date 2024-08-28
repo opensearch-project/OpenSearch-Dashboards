@@ -28,19 +28,10 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
-import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
+import React from 'react';
+import { I18nProvider } from '@osd/i18n/react';
 
-import {
-  EuiCallOut,
-  EuiCode,
-  EuiDescriptionList,
-  EuiLink,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import { getServices } from '../../../opensearch_dashboards_services';
+import { EuiEmptyPrompt, EuiPanel, EuiText } from '@elastic/eui';
 
 interface Props {
   timeFieldName?: string;
@@ -48,164 +39,143 @@ interface Props {
 }
 
 export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
-  let timeFieldMessage;
-
-  if (timeFieldName) {
-    timeFieldMessage = (
-      <Fragment>
-        <EuiSpacer size="xl" />
-
-        <EuiText size="s">
-          <h2 data-test-subj="discoverNoResultsTimefilter">
-            <FormattedMessage
-              id="discover.noResults.expandYourTimeRangeTitle"
-              defaultMessage="Expand your time range"
-            />
-          </h2>
-
-          <p>
-            <FormattedMessage
-              id="discover.noResults.queryMayNotMatchTitle"
-              defaultMessage="One or more of the indices you&rsquo;re looking at contains a date field. Your query may
-                  not match anything in the current time range, or there may not be any data at all in
-                  the currently selected time range. You can try changing the time range to one which contains data."
-            />
-          </p>
-        </EuiText>
-      </Fragment>
-    );
-  }
-
-  let luceneQueryMessage;
-
-  if (queryLanguage === 'lucene') {
-    const searchExamples = [
-      {
-        description: <EuiCode>200</EuiCode>,
-        title: (
-          <EuiText size="s">
-            <strong>
-              <FormattedMessage
-                id="discover.noResults.searchExamples.anyField200StatusCodeExampleTitle"
-                defaultMessage="Find requests that contain the number 200, in any field"
-              />
-            </strong>
-          </EuiText>
-        ),
-      },
-      {
-        description: <EuiCode>status:200</EuiCode>,
-        title: (
-          <EuiText size="s">
-            <strong>
-              <FormattedMessage
-                id="discover.noResults.searchExamples.statusField200StatusCodeExampleTitle"
-                defaultMessage="Find 200 in the status field"
-              />
-            </strong>
-          </EuiText>
-        ),
-      },
-      {
-        description: <EuiCode>status:[400 TO 499]</EuiCode>,
-        title: (
-          <EuiText size="s">
-            <strong>
-              <FormattedMessage
-                id="discover.noResults.searchExamples.400to499StatusCodeExampleTitle"
-                defaultMessage="Find all status codes between 400-499"
-              />
-            </strong>
-          </EuiText>
-        ),
-      },
-      {
-        description: <EuiCode>status:[400 TO 499] AND extension:PHP</EuiCode>,
-        title: (
-          <EuiText size="s">
-            <strong>
-              <FormattedMessage
-                id="discover.noResults.searchExamples.400to499StatusCodeWithPhpExtensionExampleTitle"
-                defaultMessage="Find status codes 400-499 with the extension php"
-              />
-            </strong>
-          </EuiText>
-        ),
-      },
-      {
-        description: <EuiCode>status:[400 TO 499] AND (extension:php OR extension:html)</EuiCode>,
-        title: (
-          <EuiText size="s">
-            <strong>
-              <FormattedMessage
-                id="discover.noResults.searchExamples.400to499StatusCodeWithPhpOrHtmlExtensionExampleTitle"
-                defaultMessage="Find status codes 400-499 with the extension php or html"
-              />
-            </strong>
-          </EuiText>
-        ),
-      },
-    ];
-
-    luceneQueryMessage = (
-      <Fragment>
-        <EuiSpacer size="xl" />
-
-        <EuiText size="s">
-          <h3>
-            <FormattedMessage
-              id="discover.noResults.searchExamples.refineYourQueryTitle"
-              defaultMessage="Refine your query"
-            />
-          </h3>
-
-          <p>
-            <FormattedMessage
-              id="discover.noResults.searchExamples.howTosearchForWebServerLogsDescription"
-              defaultMessage="The search bar at the top uses OpenSearch&rsquo;s support for Lucene {queryStringSyntaxLink}.
-                Here are some examples of how you can search for web server logs that have been parsed into a few fields."
-              values={{
-                queryStringSyntaxLink: (
-                  <EuiLink
-                    target="_blank"
-                    href={getServices().docLinks.links.opensearch.queryDSL.base}
-                  >
-                    <FormattedMessage
-                      id="discover.noResults.searchExamples.queryStringSyntaxLinkText"
-                      defaultMessage="Query String syntax"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </EuiText>
-
-        <EuiSpacer size="m" />
-
-        <EuiDescriptionList type="column" listItems={searchExamples} />
-
-        <EuiSpacer size="xl" />
-      </Fragment>
-    );
-  }
+  // Commented out due to no usage in code
+  // See: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8149
+  //
+  // let luceneQueryMessage;
+  //
+  // if (queryLanguage === 'lucene') {
+  //   const searchExamples = [
+  //     {
+  //       description: <EuiCode>200</EuiCode>,
+  //       title: (
+  //         <EuiText size="s">
+  //           <strong>
+  //             <FormattedMessage
+  //               id="discover.noResults.searchExamples.anyField200StatusCodeExampleTitle"
+  //               defaultMessage="Find requests that contain the number 200, in any field"
+  //             />
+  //           </strong>
+  //         </EuiText>
+  //       ),
+  //     },
+  //     {
+  //       description: <EuiCode>status:200</EuiCode>,
+  //       title: (
+  //         <EuiText size="s">
+  //           <strong>
+  //             <FormattedMessage
+  //               id="discover.noResults.searchExamples.statusField200StatusCodeExampleTitle"
+  //               defaultMessage="Find 200 in the status field"
+  //             />
+  //           </strong>
+  //         </EuiText>
+  //       ),
+  //     },
+  //     {
+  //       description: <EuiCode>status:[400 TO 499]</EuiCode>,
+  //       title: (
+  //         <EuiText size="s">
+  //           <strong>
+  //             <FormattedMessage
+  //               id="discover.noResults.searchExamples.400to499StatusCodeExampleTitle"
+  //               defaultMessage="Find all status codes between 400-499"
+  //             />
+  //           </strong>
+  //         </EuiText>
+  //       ),
+  //     },
+  //     {
+  //       description: <EuiCode>status:[400 TO 499] AND extension:PHP</EuiCode>,
+  //       title: (
+  //         <EuiText size="s">
+  //           <strong>
+  //             <FormattedMessage
+  //               id="discover.noResults.searchExamples.400to499StatusCodeWithPhpExtensionExampleTitle"
+  //               defaultMessage="Find status codes 400-499 with the extension php"
+  //             />
+  //           </strong>
+  //         </EuiText>
+  //       ),
+  //     },
+  //     {
+  //       description: <EuiCode>status:[400 TO 499] AND (extension:php OR extension:html)</EuiCode>,
+  //       title: (
+  //         <EuiText size="s">
+  //           <strong>
+  //             <FormattedMessage
+  //               id="discover.noResults.searchExamples.400to499StatusCodeWithPhpOrHtmlExtensionExampleTitle"
+  //               defaultMessage="Find status codes 400-499 with the extension php or html"
+  //             />
+  //           </strong>
+  //         </EuiText>
+  //       ),
+  //     },
+  //   ];
+  //
+  //   luceneQueryMessage = (
+  //     <Fragment>
+  //       <EuiSpacer size="xl" />
+  //
+  //       <EuiText size="s">
+  //         <h3>
+  //           <FormattedMessage
+  //             id="discover.noResults.searchExamples.refineYourQueryTitle"
+  //             defaultMessage="Refine your query"
+  //           />
+  //         </h3>
+  //
+  //         <p>
+  //           <FormattedMessage
+  //             id="discover.noResults.searchExamples.howTosearchForWebServerLogsDescription"
+  //             defaultMessage="The search bar at the top uses OpenSearch&rsquo;s support for Lucene {queryStringSyntaxLink}.
+  //               Here are some examples of how you can search for web server logs that have been parsed into a few fields."
+  //             values={{
+  //               queryStringSyntaxLink: (
+  //                 <EuiLink
+  //                   target="_blank"
+  //                   href={getServices().docLinks.links.opensearch.queryDSL.base}
+  //                 >
+  //                   <FormattedMessage
+  //                     id="discover.noResults.searchExamples.queryStringSyntaxLinkText"
+  //                     defaultMessage="Query String syntax"
+  //                   />
+  //                 </EuiLink>
+  //               ),
+  //             }}
+  //           />
+  //         </p>
+  //       </EuiText>
+  //
+  //       <EuiSpacer size="m" />
+  //
+  //       <EuiDescriptionList type="column" listItems={searchExamples} />
+  //
+  //       <EuiSpacer size="xl" />
+  //     </Fragment>
+  //   );
+  // }
 
   return (
     <I18nProvider>
       <EuiPanel hasBorder={false} hasShadow={false} color="transparent">
-        <EuiCallOut
+        <EuiEmptyPrompt
+          iconType="alert"
+          iconColor="default"
           title={
-            <FormattedMessage
-              id="discover.noResults.searchExamples.noResultsMatchSearchCriteriaTitle"
-              defaultMessage="No results match your search criteria"
-            />
+            <EuiText size="s">
+              <h2>No results</h2>
+            </EuiText>
           }
-          color="warning"
-          iconType="help"
-          data-test-subj="discoverNoResults"
+          body={
+            <EuiText size="s">
+              <p>
+                Try selecting a different data source, expanding your time range or modifying the
+                query &amp; filters.
+              </p>
+            </EuiText>
+          }
         />
-        {timeFieldMessage}
-        {luceneQueryMessage}
       </EuiPanel>
     </I18nProvider>
   );
