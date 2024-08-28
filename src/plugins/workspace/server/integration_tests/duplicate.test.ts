@@ -12,6 +12,8 @@ import { setupServer } from '../../../../core/server/test_utils';
 import { registerDuplicateRoute } from '../routes/duplicate';
 import { createListStream } from '../../../../core/server/utils/streams';
 import Boom from '@hapi/boom';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { dynamicConfigServiceMock } from '../../../../core/server/config';
 
 jest.mock('../../../../core/server/saved_objects/export', () => ({
   exportSavedObjectsToStream: jest.fn(),
@@ -84,6 +86,7 @@ describe(`duplicate saved objects among workspaces`, () => {
     attributes: { title: 'Look at my dashboard' },
     references: [],
   };
+  const mockDynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
@@ -104,7 +107,7 @@ describe(`duplicate saved objects among workspaces`, () => {
 
     registerDuplicateRoute(router, logger.get(), clientMock, 10000);
 
-    await server.start();
+    await server.start({ dynamicConfigService: mockDynamicConfigService });
   });
 
   afterEach(async () => {

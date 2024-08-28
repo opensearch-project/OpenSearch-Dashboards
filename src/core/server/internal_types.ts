@@ -31,7 +31,11 @@
 import { Type } from '@osd/config-schema';
 
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { ConfigDeprecationProvider } from './config';
+import {
+  ConfigDeprecationProvider,
+  InternalDynamicConfigServiceSetup,
+  InternalDynamicConfigServiceStart,
+} from './config';
 import { ContextSetup } from './context';
 import { InternalOpenSearchServiceSetup, InternalOpenSearchServiceStart } from './opensearch';
 import { InternalHttpServiceSetup, InternalHttpServiceStart } from './http';
@@ -67,6 +71,7 @@ export interface InternalCoreSetup {
   logging: InternalLoggingServiceSetup;
   metrics: InternalMetricsServiceSetup;
   security: InternalSecurityServiceSetup;
+  dynamicConfig: InternalDynamicConfigServiceSetup;
 }
 
 /**
@@ -82,6 +87,7 @@ export interface InternalCoreStart {
   auditTrail: AuditTrailStart;
   coreUsageData: CoreUsageDataStart;
   crossCompatibility: CrossCompatibilityServiceStart;
+  dynamicConfig: InternalDynamicConfigServiceStart;
 }
 
 /**

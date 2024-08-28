@@ -48,6 +48,7 @@ import { HttpServer } from './http_server';
 import { Readable } from 'stream';
 import { RequestHandlerContext } from 'opensearch-dashboards/server';
 import { OSD_CERT_PATH, OSD_KEY_PATH } from '@osd/dev-utils';
+import { dynamicConfigServiceMock } from '../config/dynamic_config_service.mock';
 
 const cookieOptions = {
   name: 'sid',
@@ -63,6 +64,7 @@ let configWithSSL: HttpConfig;
 const loggingService = loggingSystemMock.create();
 const logger = loggingService.get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
+const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
 
 let certificate: string;
 let key: string;
@@ -110,7 +112,7 @@ test('log listening address after started', async () => {
   expect(server.isListening()).toBe(false);
 
   await server.setup(config);
-  await server.start();
+  await server.start(dynamicConfigService);
 
   expect(server.isListening()).toBe(true);
   expect(loggingSystemMock.collect(loggingService).info).toMatchInlineSnapshot(`
@@ -125,8 +127,12 @@ test('log listening address after started', async () => {
 test('log listening address after started when configured with BasePath and rewriteBasePath = false', async () => {
   expect(server.isListening()).toBe(false);
 
-  await server.setup({ ...config, basePath: '/bar', rewriteBasePath: false });
-  await server.start();
+  await server.setup({
+    ...config,
+    basePath: '/bar',
+    rewriteBasePath: false,
+  });
+  await server.start(dynamicConfigService);
 
   expect(server.isListening()).toBe(true);
   expect(loggingSystemMock.collect(loggingService).info).toMatchInlineSnapshot(`
@@ -141,8 +147,12 @@ test('log listening address after started when configured with BasePath and rewr
 test('log listening address after started when configured with BasePath and rewriteBasePath = true', async () => {
   expect(server.isListening()).toBe(false);
 
-  await server.setup({ ...config, basePath: '/bar', rewriteBasePath: true });
-  await server.start();
+  await server.setup({
+    ...config,
+    basePath: '/bar',
+    rewriteBasePath: true,
+  });
+  await server.start(dynamicConfigService);
 
   expect(server.isListening()).toBe(true);
   expect(loggingSystemMock.collect(loggingService).info).toMatchInlineSnapshot(`
@@ -174,7 +184,7 @@ test('valid params', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
 
   await supertest(innerServer.listener)
     .get('/foo/some-string')
@@ -204,7 +214,7 @@ test('invalid params', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
 
   await supertest(innerServer.listener)
     .get('/foo/some-string')
@@ -239,7 +249,7 @@ test('valid query', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
 
   await supertest(innerServer.listener)
     .get('/foo/?bar=test&quux=123')
@@ -269,7 +279,7 @@ test('invalid query', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
 
   await supertest(innerServer.listener)
     .get('/foo/?bar=test')
@@ -304,7 +314,7 @@ test('valid body', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
 
   await supertest(innerServer.listener)
     .post('/foo/')
@@ -342,7 +352,7 @@ test('valid body with validate function', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
 
   await supertest(innerServer.listener)
     .post('/foo/')
@@ -385,7 +395,7 @@ test('not inline validation - specifying params', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
 
   await supertest(innerServer.listener)
     .post('/foo/')
@@ -428,7 +438,7 @@ test('not inline validation - specifying validation handler', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
 
   await supertest(innerServer.listener)
     .post('/foo/')
@@ -478,7 +488,7 @@ test('not inline handler - OpenSearchDashboardsRequest', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
 
   await supertest(innerServer.listener)
     .post('/foo/')
@@ -527,7 +537,7 @@ test('not inline handler - RequestHandler', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
 
   await supertest(innerServer.listener)
     .post('/foo/')
@@ -561,7 +571,7 @@ test('invalid body', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
 
   await supertest(innerServer.listener)
     .post('/foo/')
@@ -596,7 +606,7 @@ test('handles putting', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
 
   await supertest(innerServer.listener)
     .put('/foo/')
@@ -627,7 +637,7 @@ test('handles deleting', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
 
   await supertest(innerServer.listener)
     .delete('/foo/3')
@@ -657,7 +667,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
     const { registerRouter, server: innerServer } = await server.setup(configWithBasePath);
     registerRouter(router);
 
-    await server.start();
+    await server.start(dynamicConfigService);
     innerServerListener = innerServer.listener;
   });
 
@@ -712,7 +722,7 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
     const { registerRouter, server: innerServer } = await server.setup(configWithBasePath);
     registerRouter(router);
 
-    await server.start();
+    await server.start(dynamicConfigService);
     innerServerListener = innerServer.listener;
   });
 
@@ -759,7 +769,7 @@ test('with defined `redirectHttpFromPort`', async () => {
   const { registerRouter } = await server.setup(configWithSSL);
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
 });
 
 test('returns server and connection options on start', async () => {
@@ -774,7 +784,7 @@ test('returns server and connection options on start', async () => {
 });
 
 test('throws an error if starts without set up', async () => {
-  await expect(server.start()).rejects.toThrowErrorMatchingInlineSnapshot(
+  await expect(server.start(dynamicConfigService)).rejects.toThrowErrorMatchingInlineSnapshot(
     `"Http server is not setup up yet"`
   );
 });
@@ -792,7 +802,7 @@ test('allows attaching metadata to attach meta-data tag strings to a route', asy
   );
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
   await supertest(innerServer.listener).get('/with-tags').expect(200, { tags });
 
   await supertest(innerServer.listener).get('/without-tags').expect(200, { tags: [] });
@@ -805,7 +815,7 @@ test('exposes route details of incoming request to a route handler', async () =>
   router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: req.route }));
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
   await supertest(innerServer.listener)
     .get('/')
     .expect(200, {
@@ -831,7 +841,7 @@ describe('conditional compression', () => {
     };
     router.get({ path: '/', validate: false }, (_context, _req, res) => res.ok(largeRequest));
     registerRouter(router);
-    await server.start();
+    await server.start(dynamicConfigService);
     return innerServer.listener;
   }
 
@@ -910,7 +920,7 @@ describe('conditional compression', () => {
       );
       registerRouter(router);
 
-      await server.start();
+      await server.start(dynamicConfigService);
       const response = await supertest(innerServer.listener)
         .get('/')
         .set('Connection', 'keep-alive')
@@ -929,7 +939,7 @@ describe('conditional compression', () => {
       );
       registerRouter(router);
 
-      await server.start();
+      await server.start(dynamicConfigService);
       const response = await supertest(innerServer.listener).get('/').expect(200);
 
       const restHeaders = omit(response.header, ['date', 'content-length']);
@@ -959,7 +969,7 @@ test('exposes route details of incoming request to a route handler (POST + paylo
   );
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
   await supertest(innerServer.listener)
     .post('/')
     .send({ test: 1 })
@@ -998,7 +1008,7 @@ describe('body options', () => {
     );
     registerRouter(router);
 
-    await server.start();
+    await server.start(dynamicConfigService);
     await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(415, {
       statusCode: 415,
       error: 'Unsupported Media Type',
@@ -1020,7 +1030,7 @@ describe('body options', () => {
     );
     registerRouter(router);
 
-    await server.start();
+    await server.start(dynamicConfigService);
     await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(413, {
       statusCode: 413,
       error: 'Request Entity Too Large',
@@ -1050,7 +1060,7 @@ describe('body options', () => {
     );
     registerRouter(router);
 
-    await server.start();
+    await server.start(dynamicConfigService);
     await supertest(innerServer.listener).post('/').send({ test: 1 }).expect(200, {
       parse: false,
       maxBytes: 1024, // hapi populates the default
@@ -1088,7 +1098,7 @@ describe('timeout options', () => {
         }
       );
       registerRouter(router);
-      await server.start();
+      await server.start(dynamicConfigService);
       await supertest(innerServer.listener)
         .post('/')
         .send({ test: 1 })
@@ -1126,7 +1136,7 @@ describe('timeout options', () => {
         }
       );
       registerRouter(router);
-      await server.start();
+      await server.start(dynamicConfigService);
       await supertest(innerServer.listener)
         .delete('/')
         .expect(200, {
@@ -1163,7 +1173,7 @@ describe('timeout options', () => {
         }
       );
       registerRouter(router);
-      await server.start();
+      await server.start(dynamicConfigService);
       await supertest(innerServer.listener)
         .put('/')
         .expect(200, {
@@ -1200,7 +1210,7 @@ describe('timeout options', () => {
         }
       );
       registerRouter(router);
-      await server.start();
+      await server.start(dynamicConfigService);
       await supertest(innerServer.listener)
         .patch('/')
         .expect(200, {
@@ -1234,7 +1244,7 @@ describe('timeout options', () => {
       );
       registerRouter(router);
 
-      await server.start();
+      await server.start(dynamicConfigService);
       await supertest(innerServer.listener)
         .get('/')
         .send()
@@ -1268,7 +1278,7 @@ describe('timeout options', () => {
       );
       registerRouter(router);
 
-      await server.start();
+      await server.start(dynamicConfigService);
       await supertest(innerServer.listener)
         .get('/')
         .send()
@@ -1302,7 +1312,7 @@ describe('timeout options', () => {
 
     registerRouter(router);
 
-    await server.start();
+    await server.start(dynamicConfigService);
   });
 });
 
@@ -1327,7 +1337,7 @@ test('should return a stream in the body', async () => {
   );
   registerRouter(router);
 
-  await server.start();
+  await server.start(dynamicConfigService);
   await supertest(innerServer.listener).put('/').send({ test: 1 }).expect(200, {
     parse: true,
     maxBytes: 1024, // hapi populates the default
