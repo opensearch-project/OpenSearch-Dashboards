@@ -47,7 +47,11 @@ const getAvailableLanguages$ = (http: HttpSetup, data: DataPublicPluginSetup) =>
     switchMap(async (query) => {
       // currently query assist tool relies on opensearch API to get index
       // mappings, external data source types (e.g. s3) are not supported
-      if (query.dataset?.dataSource?.type !== DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH) return [];
+      if (
+        query.dataset?.dataSource?.type !== DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH &&
+        query.dataset?.dataSource?.type !== 'DATA_SOURCE'
+      )
+        return [];
 
       const dataSourceId = query.dataset?.dataSource?.id;
       return getAvailableLanguagesForDataSource(http, dataSourceId);
