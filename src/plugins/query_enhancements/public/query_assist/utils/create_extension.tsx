@@ -17,34 +17,40 @@ import { ConfigSchema } from '../../../common/config';
 import { QueryAssistBanner, QueryAssistBar } from '../components';
 import assistantMark from '../../assets/query_assist_mark.svg';
 
-/**
- * @returns list of query assist supported languages for the given data source.
- */
-const getAvailableLanguagesForDataSource = (() => {
+const [getAvailableLanguagesForDataSource, clearCache] = (() => {
   const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
   const pendingRequests: Map<string | undefined, Promise<string[]>> = new Map();
 
-  return async (http: HttpSetup, dataSourceId: string | undefined) => {
-    const cached = availableLanguagesByDataSource.get(dataSourceId);
-    if (cached !== undefined) return cached;
+  return [
+    async (http: HttpSetup, dataSourceId: string | undefined) => {
+      const cached = availableLanguagesByDataSource.get(dataSourceId);
+      if (cached !== undefined) return cached;
 
-    const pendingRequest = pendingRequests.get(dataSourceId);
-    if (pendingRequest !== undefined) return pendingRequest;
+      const pendingRequest = pendingRequests.get(dataSourceId);
+      if (pendingRequest !== undefined) return pendingRequest;
 
-    const languagesPromise = http
-      .get<{ configuredLanguages: string[] }>(API.QUERY_ASSIST.LANGUAGES, {
-        query: { dataSourceId },
-      })
-      .then((response) => response.configuredLanguages)
-      .catch(() => [])
-      .finally(() => pendingRequests.delete(dataSourceId));
-    pendingRequests.set(dataSourceId, languagesPromise);
+      const languagesPromise = http
+        .get<{ configuredLanguages: string[] }>(API.QUERY_ASSIST.LANGUAGES, {
+          query: { dataSourceId },
+        })
+        .then((response) => response.configuredLanguages)
+        .catch(() => [])
+        .finally(() => pendingRequests.delete(dataSourceId));
+      pendingRequests.set(dataSourceId, languagesPromise);
 
-    const languages = await languagesPromise;
-    availableLanguagesByDataSource.set(dataSourceId, languages);
-    return languages;
-  };
+      const languages = await languagesPromise;
+      availableLanguagesByDataSource.set(dataSourceId, languages);
+      return languages;
+    },
+    () => {
+      availableLanguagesByDataSource.clear();
+      pendingRequests.clear();
+    },
+  ];
 })();
+
+// visible for testing
+export { clearCache };
 
 /**
  * @returns observable list of query assist agent configured languages in the
