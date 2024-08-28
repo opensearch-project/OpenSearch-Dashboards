@@ -9,7 +9,6 @@ import { useObservable } from 'react-use';
 import {
   EuiText,
   EuiPanel,
-  EuiAvatar,
   EuiPopover,
   EuiToolTip,
   EuiFlexItem,
@@ -17,6 +16,7 @@ import {
   EuiSmallButtonEmpty,
   EuiSmallButton,
   EuiButtonIcon,
+  EuiIcon,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
@@ -108,12 +108,10 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
           {currentWorkspace ? (
             <>
               <EuiFlexItem grow={false}>
-                <EuiAvatar
-                  size="m"
-                  type="space"
-                  name={currentWorkspaceName}
-                  color={getValidWorkspaceColor(currentWorkspace?.color)}
-                  initialsLength={2}
+                <EuiIcon
+                  size="l"
+                  type={getUseCase(currentWorkspace)?.icon || 'wsSelector'}
+                  color={getValidWorkspaceColor(currentWorkspace.color)}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="workspace-menu-current-workspace-name">
@@ -145,7 +143,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
           ) : (
             <>
               <EuiFlexItem grow={false}>
-                <EuiAvatar size="m" color="plain" name="spacesApp" iconType="spacesApp" />
+                <EuiIcon size="l" type="wsSelector" />
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="workspace-menu-current-workspace-name">
                 {currentWorkspaceName}
