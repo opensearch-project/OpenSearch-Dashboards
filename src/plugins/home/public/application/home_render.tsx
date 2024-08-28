@@ -50,7 +50,7 @@ export const setupHome = (contentManagement: ContentManagementPluginSetup) => {
       {
         id: SECTIONS.GET_STARTED,
         order: 1000,
-        title: 'Define your path forward with OpenSearch',
+        title: 'Get started with OpenSearch’s powerful features',
         kind: 'card',
       },
     ],
