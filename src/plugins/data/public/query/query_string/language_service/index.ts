@@ -5,4 +5,3 @@
 
 export * from './types';
 export { LanguageServiceContract, LanguageService } from './language_service';
-export { QueryControl } from './get_query_control_links';

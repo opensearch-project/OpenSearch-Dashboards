@@ -35,6 +35,10 @@ export class LanguageService {
     }
   };
 
+  public createDefaultLanguageReference = () => {
+    return createDefaultLanguageReference();
+  };
+
   /**
    * Registers default handlers for index patterns and indices.
    */
@@ -42,7 +46,7 @@ export class LanguageService {
     const defaultEditor = createEditor(
       SingleLineInput,
       SingleLineInput,
-      [createDefaultLanguageReference()],
+      [this.createDefaultLanguageReference()],
       DQLBody
     );
     this.registerLanguage(getDQLLanguageConfig(this.defaultSearchInterceptor, defaultEditor));

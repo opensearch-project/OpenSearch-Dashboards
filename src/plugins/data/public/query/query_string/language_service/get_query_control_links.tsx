@@ -9,8 +9,10 @@ import { EuiFlexItem } from '@elastic/eui';
 export const QueryControls = (props: { queryControls: React.ReactElement[] }) => {
   return (
     <>
-      {props.queryControls.map((queryControl) => (
-        <EuiFlexItem grow={false}>{queryControl}</EuiFlexItem>
+      {props.queryControls.map((queryControl, idx) => (
+        <EuiFlexItem grow={false} key={idx}>
+          {queryControl}
+        </EuiFlexItem>
       ))}
     </>
   );

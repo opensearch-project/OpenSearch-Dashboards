@@ -35,5 +35,4 @@ export {
   LanguageService,
   LanguageConfig,
   EditorEnhancements,
-  QueryControl,
 } from './language_service';

@@ -56,8 +56,7 @@ export const DefaultLanguageReference = () => {
           <p>
             <FormattedMessage
               id="data.query.queryBar.syntaxOptionsDescription"
-              defaultMessage="The {docsLink} (DQL) offers a simplified query
-                      syntax and support for scripted fields."
+              defaultMessage="The {docsLink} (DQL) offers a simplified query syntax and support for scripted fields."
               values={{
                 docsLink: (
                   <EuiLink href={osdDQLDocs} target="_blank">

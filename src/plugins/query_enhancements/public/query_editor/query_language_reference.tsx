@@ -36,7 +36,7 @@ export class QueryLanguageReference {
             toMountPoint(
               <OpenSearchDashboardsContextProvider services={this.coreStart}>
                 <PPLReferenceFlyout
-                  onClose={() => flyoutSession?.close?.().then()}
+                  onClose={() => flyoutSession?.close()}
                   makeUrl={(searchId: any) => `#/view/${encodeURIComponent(searchId)}`}
                 />
               </OpenSearchDashboardsContextProvider>
