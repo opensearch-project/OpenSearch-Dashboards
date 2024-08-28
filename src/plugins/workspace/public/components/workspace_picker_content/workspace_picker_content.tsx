@@ -90,8 +90,7 @@ export const WorkspacePickerContent = ({
   const getEmptyStatePrompt = () => {
     return (
       <EuiEmptyPrompt
-        style={{ width: '250px' }}
-        iconType="spacesApp"
+        iconType="wsSelector"
         title={
           <EuiText size="m">
             <p>No workspace available</p>

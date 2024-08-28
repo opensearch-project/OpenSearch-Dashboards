@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, getByTestId, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { WorkspaceMenu } from './workspace_menu';
 import { coreMock } from '../../../../../core/public/mocks';
@@ -12,7 +12,6 @@ import { CoreStart, DEFAULT_NAV_GROUPS } from '../../../../../core/public';
 import { BehaviorSubject } from 'rxjs';
 import { IntlProvider } from 'react-intl';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
-import { WORKSPACE_USE_CASES } from '../../../common/constants';
 
 describe('<WorkspaceMenu />', () => {
   let coreStartMock: CoreStart;
