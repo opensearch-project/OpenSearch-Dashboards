@@ -21,7 +21,7 @@ import { WorkspaceFormData } from '../workspace_form/types';
 import { getUseCaseFeatureConfig } from '../../utils';
 import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
-import { WorkspaceForm } from './workspace_form';
+import { WorkspaceCreatorForm } from './workspace_creator_form';
 
 export interface WorkspaceCreatorProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -138,7 +138,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           hasShadow={false}
         >
           {isFormReadyToRender && (
-            <WorkspaceForm
+            <WorkspaceCreatorForm
               application={application}
               savedObjects={savedObjects}
               onSubmit={handleWorkspaceFormSubmit}

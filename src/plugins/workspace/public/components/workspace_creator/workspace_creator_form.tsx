@@ -31,7 +31,7 @@ import {
 
 import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
 
-export const WorkspaceForm = (props: WorkspaceFormProps) => {
+export const WorkspaceCreatorForm = (props: WorkspaceFormProps) => {
   const {
     application,
     savedObjects,

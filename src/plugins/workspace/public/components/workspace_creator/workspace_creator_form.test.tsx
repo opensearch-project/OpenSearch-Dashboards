@@ -9,7 +9,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { createMockedRegisteredUseCases } from '../../mocks';
 import { WorkspaceOperationType } from '../workspace_form';
-import { WorkspaceForm } from './workspace_form';
+import { WorkspaceCreatorForm } from './workspace_creator_form';
 
 const mockCoreStart = coreMock.createStart();
 
@@ -37,7 +37,7 @@ const setup = (
   };
 
   return render(
-    <WorkspaceForm
+    <WorkspaceCreatorForm
       application={application}
       savedObjects={savedObjects}
       operationType={WorkspaceOperationType.Create}
