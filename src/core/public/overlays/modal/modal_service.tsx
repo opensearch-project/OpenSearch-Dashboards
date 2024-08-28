@@ -111,7 +111,9 @@ export interface OverlayModalStart {
 /**
  * @public
  */
-export type OverlayModalOpenOptions = Omit<EuiModalProps, 'children' | 'onClose'>;
+export interface OverlayModalOpenOptions extends Omit<EuiModalProps, 'children' | 'onClose'> {
+  'data-test-subj'?: string;
+}
 
 interface StartDeps {
   i18n: I18nStart;
