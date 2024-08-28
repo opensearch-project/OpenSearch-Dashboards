@@ -5,7 +5,12 @@
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { map } from 'rxjs/operators';
-import { DEFAULT_DATA, DataStructure, Dataset } from '../../../../../common';
+import {
+  DEFAULT_DATA,
+  DataStructure,
+  DataStructureCustomMeta,
+  Dataset,
+} from '../../../../../common';
 import { DatasetTypeConfig } from '../types';
 import { getSearchService, getIndexPatterns } from '../../../../services';
 import { injectMetaToDataStructures } from './utils';
@@ -29,11 +34,13 @@ export const indexTypeConfig: DatasetTypeConfig = {
   toDataset: (path) => {
     const index = path[path.length - 1];
     const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
+    const indexMeta = index.meta as DataStructureCustomMeta;
 
     return {
       id: index.id,
       title: index.title,
       type: DEFAULT_DATA.SET_TYPES.INDEX,
+      timeFieldName: indexMeta?.timeFieldName,
       dataSource: dataSource
         ? {
             id: dataSource.id,
