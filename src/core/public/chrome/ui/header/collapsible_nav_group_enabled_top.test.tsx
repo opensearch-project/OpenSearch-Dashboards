@@ -88,8 +88,11 @@ describe('<CollapsibleNavTop />', () => {
   });
 
   it('should render home icon when not in a workspace', async () => {
-    const { findByTestId } = render(<CollapsibleNavTop {...getMockedProps()} />);
+    const props = getMockedProps();
+    const { findByTestId, getByTestId } = render(<CollapsibleNavTop {...props} />);
     await findByTestId('collapsibleNavHome');
+    fireEvent.click(getByTestId('collapsibleNavHome'));
+    expect(props.navigateToApp).toBeCalledWith('home');
   });
 
   it('should render expand icon when collapsed', async () => {
