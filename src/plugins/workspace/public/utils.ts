@@ -449,7 +449,10 @@ export const fetchDataSourceConnections = async (
     );
     const directQueryConnectionsResult = await Promise.all(directQueryConnectionsPromises);
     const directQueryConnections = directQueryConnectionsResult.flat();
-    return mergeDataSourcesWithConnections(assignedDataSources, directQueryConnections);
+    return mergeDataSourcesWithConnections(
+      assignedDataSources,
+      directQueryConnections
+    ).sort((a, b) => a.name.localeCompare(b.name));
   } catch (error) {
     notifications?.toasts.addDanger(
       i18n.translate('workspace.detail.dataSources.error.message', {
