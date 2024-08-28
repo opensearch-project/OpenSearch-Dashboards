@@ -31,15 +31,10 @@ export type WorkspacePermissionSetting =
 export interface WorkspaceFormSubmitData {
   name: string;
   description?: string;
-  features?: string[];
+  features: string[];
   color?: string;
   permissionSettings?: WorkspacePermissionSetting[];
   selectedDataSources?: DataSource[];
-}
-
-export interface WorkspaceFormData extends WorkspaceFormSubmitData {
-  id: string;
-  reserved?: boolean;
 }
 
 export enum WorkspaceFormErrorCode {
@@ -65,7 +60,7 @@ export interface WorkspaceFormError {
 
 export type WorkspaceFormErrors = {
   [key in keyof Omit<
-    WorkspaceFormData,
+    WorkspaceFormSubmitData,
     'permissionSettings' | 'description' | 'selectedDataSources'
   >]?: WorkspaceFormError;
 } & {
@@ -80,20 +75,24 @@ export interface WorkspaceFormProps {
   application: ApplicationStart;
   savedObjects: SavedObjectsStart;
   onSubmit?: (formData: WorkspaceFormSubmitData) => void;
-  defaultValues?: Partial<WorkspaceFormData>;
+  defaultValues?: Partial<WorkspaceFormSubmitData>;
   operationType: WorkspaceOperationType;
   permissionEnabled?: boolean;
-  detailTab?: DetailTab;
   dataSourceManagement?: DataSourceManagementPluginSetup;
   availableUseCases: WorkspaceUseCase[];
-  detailTitle?: string;
-}
-
-export interface WorkspaceDetailedFormProps extends WorkspaceFormProps {
-  defaultValues?: WorkspaceFormData;
 }
 
 export interface AvailableUseCaseItem
   extends Pick<WorkspaceUseCase, 'id' | 'title' | 'features' | 'description' | 'systematic'> {
   disabled?: boolean;
+}
+
+export interface WorkspaceFormDataState
+  extends Omit<WorkspaceFormSubmitData, 'name' | 'permissionSettings'> {
+  name: string;
+  useCase: string | undefined;
+  selectedDataSources: DataSource[];
+  permissionSettings: Array<
+    Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
+  >;
 }

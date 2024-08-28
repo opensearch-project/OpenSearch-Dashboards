@@ -17,7 +17,6 @@ import { convertPermissionSettingsToPermissions } from '../workspace_form';
 import { DataSource } from '../../../common/types';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { WorkspaceUseCase } from '../../types';
-import { WorkspaceFormData } from '../workspace_form/types';
 import { getUseCaseFeatureConfig } from '../../utils';
 import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
@@ -53,7 +52,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   });
 
   const defaultSelectedUseCase = availableUseCases?.[0];
-  const defaultWorkspaceFormValues: Partial<WorkspaceFormData> = {
+  const defaultWorkspaceFormValues: Partial<WorkspaceFormSubmitData> = {
     color: euiPaletteColorBlind()[0],
     ...(defaultSelectedUseCase
       ? {

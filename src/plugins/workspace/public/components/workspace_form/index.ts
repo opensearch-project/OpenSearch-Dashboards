@@ -11,7 +11,7 @@ export { WorkspacePermissionSettingPanel } from './workspace_permission_setting_
 export { WorkspaceCancelModal } from './workspace_cancel_modal';
 export { WorkspaceNameField, WorkspaceDescriptionField } from './fields';
 
-export { WorkspaceFormSubmitData, WorkspaceFormData, WorkspaceFormProps } from './types';
+export { WorkspaceFormSubmitData, WorkspaceFormProps, WorkspaceFormDataState } from './types';
 export {
   WorkspaceOperationType,
   DetailTab,

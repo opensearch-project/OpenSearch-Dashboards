@@ -50,7 +50,12 @@ const FormGroup = ({ title, children, describe }: FormGroupProps) => (
   </>
 );
 
-export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
+interface WorkspaceDetailedFormProps extends WorkspaceFormProps {
+  detailTab?: DetailTab;
+  detailTitle?: string;
+}
+
+export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
   const { detailTab, detailTitle, defaultValues, availableUseCases } = props;
   const {
     formId,
