@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import { HttpSetup } from 'opensearch-dashboards/public';
 import React, { useEffect, useState } from 'react';
 import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
@@ -14,8 +15,8 @@ import {
 } from '../../../../data/public';
 import { API } from '../../../common';
 import { ConfigSchema } from '../../../common/config';
-import { QueryAssistBanner, QueryAssistBar } from '../components';
 import assistantMark from '../../assets/query_assist_mark.svg';
+import { QueryAssistBanner, QueryAssistBar } from '../components';
 
 const [getAvailableLanguagesForDataSource, clearCache] = (() => {
   const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
@@ -90,7 +91,9 @@ export const createQueryAssistExtension = (
         return {
           type: DATA_STRUCTURE_META_TYPES.FEATURE,
           icon: { type: assistantMark },
-          tooltip: 'Query assist is available',
+          tooltip: i18n.translate('queryAssist.meta.icon.tooltip', {
+            defaultMessage: 'Query assist is available',
+          }),
         };
       }
     },
