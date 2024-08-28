@@ -3,7 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiCompressedFieldText, EuiText, PopoverAnchorPosition } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+
+import {
+  EuiButtonIcon,
+  EuiCompressedFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  PopoverAnchorPosition,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
@@ -293,19 +302,22 @@ export default class QueryEditorUI extends Component<Props, State> {
     };
   };
 
-  public onToggleCollapse = () => {
-    this.setState({ isCollapsed: !this.state.isCollapsed });
+  private renderToggleIcon = () => {
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType={this.state.isCollapsed ? 'expand' : 'minimize'}
+          aria-label={i18n.translate('discover.queryControls.languageToggle', {
+            defaultMessage: `Language Toggle`,
+          })}
+          onClick={() => this.setIsCollapsed(!this.state.isCollapsed)}
+        />
+      </EuiFlexItem>
+    );
   };
 
-  private renderQueryControls = () => {
-    return (
-      <QueryControls
-        services={this.services}
-        queryLanguage={this.props.query.language}
-        onToggleCollapse={this.onToggleCollapse}
-        savedQueryManagement={this.props.savedQueryManagement}
-      />
-    );
+  private renderQueryControls = (queryControls: React.ReactElement[]) => {
+    return <QueryControls queryControls={queryControls} />;
   };
 
   public render() {
@@ -416,7 +428,13 @@ export default class QueryEditorUI extends Component<Props, State> {
               : languageEditor.TopBar.Expanded && languageEditor.TopBar.Expanded()}
           </div>
           {languageSelector}
-          <div className="osdQueryEditor__querycontrols">{this.renderQueryControls()}</div>
+          <div className="osdQueryEditor__querycontrols">
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              {this.renderQueryControls(languageEditor.TopBar.Controls)}
+              {!languageEditor.TopBar.Expanded && this.renderToggleIcon()}
+              {this.props.savedQueryManagement}
+            </EuiFlexGroup>
+          </div>
         </div>
         <div
           ref={this.headerRef}

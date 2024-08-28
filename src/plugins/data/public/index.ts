@@ -481,6 +481,7 @@ export {
   QueryStateChange,
   QueryStart,
   PersistedLog,
+  QueryControl,
 } from './query';
 
 export { AggsStart } from './search/aggs';

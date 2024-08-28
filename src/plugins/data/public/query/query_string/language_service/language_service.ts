@@ -14,6 +14,7 @@ import {
   UiEnhancements,
 } from '../../../ui';
 import { DataStorage, setOverrides as setFieldOverrides } from '../../../../common';
+import { createDefaultLanguageReference } from './default_language_reference';
 
 export class LanguageService {
   private languages: Map<string, LanguageConfig> = new Map();
@@ -27,10 +28,6 @@ export class LanguageService {
     this.queryEditorExtensionMap = {};
   }
 
-  public createDefaultQueryEditor() {
-    return createEditor(SingleLineInput, SingleLineInput, DQLBody);
-  }
-
   public __enhance = (enhancements: UiEnhancements) => {
     if (enhancements.queryEditorExtension) {
       this.queryEditorExtensionMap[enhancements.queryEditorExtension.id] =
@@ -42,7 +39,12 @@ export class LanguageService {
    * Registers default handlers for index patterns and indices.
    */
   private registerDefaultLanguages() {
-    const defaultEditor = createEditor(SingleLineInput, SingleLineInput, DQLBody);
+    const defaultEditor = createEditor(
+      SingleLineInput,
+      SingleLineInput,
+      [createDefaultLanguageReference()],
+      DQLBody
+    );
     this.registerLanguage(getDQLLanguageConfig(this.defaultSearchInterceptor, defaultEditor));
     this.registerLanguage(getLuceneLanguageConfig(this.defaultSearchInterceptor, defaultEditor));
   }
