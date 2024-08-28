@@ -13,7 +13,6 @@ import {
   prettyDuration,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { isEqual } from 'lodash';
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { IDataPluginServices, IIndexPattern, Query, TimeHistoryContract, TimeRange } from '../..';
@@ -23,18 +22,14 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { UI_SETTINGS } from '../../../common';
 import { getQueryLog, PersistedLog } from '../../query';
-import { Settings } from '../types';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
-import { useDataSetManager } from '../search_bar/lib/use_dataset_manager';
 
 const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 
 // @internal
 export interface QueryEditorTopRowProps {
   query?: Query;
-  dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
-  settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
@@ -58,6 +53,7 @@ export interface QueryEditorTopRowProps {
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
   datePickerRef?: React.RefObject<HTMLDivElement>;
+  savedQueryManagement?: any;
 }
 
 // Needed for React.lazy
@@ -71,31 +67,17 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     storage,
     appName,
     data: {
-      query: { dataSetManager: dataSetManager },
+      query: { queryString },
     },
   } = opensearchDashboards.services;
-  const { dataSet } = useDataSetManager({ dataSetManager: dataSetManager! });
 
   const queryLanguage = props.query && props.query.language;
-  const queryUiEnhancement =
-    (queryLanguage &&
-      props.settings &&
-      props.settings.getQueryEnhancements(queryLanguage)?.searchBar) ||
-    null;
-  const parsedQuery =
-    !queryUiEnhancement || isValidQuery(props.query)
-      ? props.query!
-      : { query: getQueryStringInitialValue(queryLanguage!), language: queryLanguage! };
-  if (!isEqual(parsedQuery?.query, props.query?.query)) {
-    onQueryChange(parsedQuery);
-    onSubmit({ query: parsedQuery, dateRange: getDateRange() });
-  }
   const persistedLog: PersistedLog | undefined = React.useMemo(
     () =>
       queryLanguage && uiSettings && storage && appName
         ? getQueryLog(uiSettings!, storage, appName, queryLanguage)
         : undefined,
-    [appName, queryLanguage, uiSettings, storage]
+    [queryLanguage, uiSettings, storage, appName]
   );
 
   function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
@@ -109,16 +91,12 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   function getDateRange() {
     const defaultTimeSetting = uiSettings!.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
     return {
-      from:
-        props.dateRangeFrom ||
-        queryUiEnhancement?.dateRange?.initialFrom ||
-        defaultTimeSetting.from,
-      to: props.dateRangeTo || queryUiEnhancement?.dateRange?.initialTo || defaultTimeSetting.to,
+      from: props.dateRangeFrom || defaultTimeSetting.from,
+      to: props.dateRangeTo || defaultTimeSetting.to,
     };
   }
 
   function onQueryChange(query: Query, dateRange?: TimeRange) {
-    if (queryUiEnhancement && !isValidQuery(query)) return;
     props.onChange({
       query,
       dateRange: dateRange ?? getDateRange(),
@@ -191,41 +169,23 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     return valueAsMoment.toISOString();
   }
 
-  function isValidQuery(query: Query | undefined) {
-    if (query && query.query) return true;
-  }
-
-  function getQueryStringInitialValue(language: string) {
-    const { settings } = props;
-    const input = settings?.getQueryEnhancements(language)?.searchBar?.queryStringInput
-      ?.initialValue;
-
-    if (!input) return '';
-
-    return input.replace('<data_source>', dataSet?.title ?? dataSet?.title ?? '');
-  }
-
   function renderQueryEditor() {
     if (!shouldRenderQueryEditor()) return;
     return (
       <EuiFlexItem>
         <QueryEditor
           disableAutoFocus={props.disableAutoFocus}
-          dataSet={dataSet}
-          queryActions={props.prepend}
-          query={parsedQuery}
-          dataSetContainerRef={props.dataSetContainerRef}
-          settings={props.settings!}
+          prepend={props.prepend}
+          query={props.query!}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
           onChangeQueryEditorFocus={onChangeQueryEditorFocus}
           onSubmit={onInputSubmit}
-          getQueryStringInitialValue={getQueryStringInitialValue}
           persistedLog={persistedLog}
           className="osdQueryEditor"
           dataTestSubj={props.dataTestSubj}
-          queryLanguage={queryLanguage}
           filterBar={props.filterBar}
+          savedQueryManagement={props.savedQueryManagement}
         />
       </EuiFlexItem>
     );
@@ -248,14 +208,11 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function shouldRenderDatePicker(): boolean {
-    return Boolean(
-      (props.showDatePicker && (queryUiEnhancement?.showDatePicker ?? true)) ??
-        (props.showAutoRefreshOnly && (queryUiEnhancement?.showAutoRefreshOnly ?? true))
-    );
+    return Boolean(props.showDatePicker ?? true) ?? (props.showAutoRefreshOnly && true);
   }
 
   function shouldRenderQueryEditor(): boolean {
-    return Boolean(props.showQueryEditor && props.settings && props.query && storage);
+    return Boolean(props.showQueryEditor && props.query && storage);
   }
 
   function renderUpdateButton() {
@@ -270,6 +227,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
         className="euiSuperUpdateButton"
         iconType="play"
         fill
+        size={'s'}
       >
         Run
       </EuiButton>
@@ -337,6 +295,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           dateFormat={uiSettings!.get('dateFormat')}
           isAutoRefreshOnly={props.showAutoRefreshOnly}
           className="osdQueryEditor__datePicker"
+          compressed={true}
         />
       </EuiFlexItem>
     );

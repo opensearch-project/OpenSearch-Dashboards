@@ -122,6 +122,7 @@ export class IndexPatternsService {
 
     this.savedObjectsCache = await Promise.all(
       this.savedObjectsCache.map(async (obj) => {
+        // TODO: This behaviour will cause the index pattern title to be resolved differently depending on how its fetched since the get method in this service will not append the datasource title
         if (obj.type === 'index-pattern') {
           const result = { ...obj };
           result.attributes.title = await getIndexPatternTitle(

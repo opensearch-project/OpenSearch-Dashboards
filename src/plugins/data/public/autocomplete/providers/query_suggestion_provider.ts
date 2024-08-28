@@ -29,7 +29,6 @@
  */
 
 import { monaco } from '@osd/monaco';
-import { CoreSetup } from 'opensearch-dashboards/public';
 import { IFieldType, IndexPattern } from '../../../common/index_patterns';
 import { IDataPluginServices } from '../../types';
 
@@ -56,7 +55,6 @@ export interface QuerySuggestionGetFnArgs {
   boolFilter?: any;
   position?: monaco.Position;
   services?: IDataPluginServices;
-  core?: CoreSetup;
 }
 
 /** @public **/
@@ -66,7 +64,7 @@ export interface QuerySuggestionBasic {
   end: number;
   start: number;
   text: string;
-  insertText: string;
+  insertText?: string;
   cursorIndex?: number;
 }
 

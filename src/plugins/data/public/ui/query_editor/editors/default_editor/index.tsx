@@ -4,30 +4,25 @@
  */
 
 import React from 'react';
-import { EuiText, EuiTextColorProps } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { createEditor, SingleLineInput } from '../shared';
 
-interface FooterItem {
-  text: string;
-  color?: EuiTextColorProps['color'];
-}
-
-interface DefaultInputProps extends React.JSX.IntrinsicAttributes {
+export interface DefaultInputProps extends React.JSX.IntrinsicAttributes {
   languageId: string;
   value: string;
   onChange: (value: string) => void;
   editorDidMount: (editor: any) => void;
   footerItems?: {
-    start?: Array<FooterItem | string>;
-    end?: Array<FooterItem | string>;
+    start?: any[];
+    end?: any[];
   };
   headerRef?: React.RefObject<HTMLDivElement>;
   provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
 }
 
-const DefaultInput: React.FC<DefaultInputProps> = ({
+export const DefaultInput: React.FC<DefaultInputProps> = ({
   languageId,
   value,
   onChange,
@@ -72,27 +67,22 @@ const DefaultInput: React.FC<DefaultInputProps> = ({
         }}
       />
       {footerItems && (
-        <div className="defaultEditor__footer">
-          {footerItems.start?.map((item, index) => (
-            <FooterItem key={index} item={item} />
-          ))}
-          <div className="defaultEditor__footerSpacer" />
-          {footerItems.end?.map((item, index) => (
-            <FooterItem key={index} item={item} />
-          ))}
-        </div>
+        <EuiFlexGroup direction="row" className="defaultEditor__footer">
+          <EuiFlexGroup direction="row">
+            {footerItems.start?.map((item) => (
+              <EuiFlexItem grow={false} color="red" className="defaultEditor__footerItem">
+                {item}
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+          <EuiFlexGroup direction="row" className="defaultEditor__footerItem__end">
+            {footerItems.end?.map((item) => (
+              <EuiFlexItem grow={false}>{item}</EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </EuiFlexGroup>
       )}
     </div>
-  );
-};
-
-const FooterItem: React.FC<{ item: FooterItem | string }> = ({ item }) => {
-  const color = typeof item === 'string' ? ('subdued' as const) : item.color;
-  const text = typeof item === 'string' ? item : item.text;
-  return (
-    <EuiText size="xs" className="defaultEditor__footerItem" color={color}>
-      {text}
-    </EuiText>
   );
 };
 

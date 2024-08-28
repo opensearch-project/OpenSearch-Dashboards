@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DataStorage, SimpleDataSet } from 'src/plugins/data/common';
 import { BehaviorSubject } from 'rxjs';
+import { DataStorage, Dataset } from '../../../common';
 import { Query, TimeRange } from '../..';
 
 // Todo: Implement a more advanced QueryHistory class when needed for recent query history
@@ -35,7 +35,7 @@ export class QueryHistory {
     return () => subscription.unsubscribe();
   }
 
-  addQueryToHistory(dataSet: SimpleDataSet, query: Query, dateRange?: TimeRange) {
+  addQueryToHistory(query: Query, dateRange?: TimeRange) {
     const keys = this.getHistoryKeys();
     keys.splice(0, 500); // only maintain most recent X;
     keys.forEach((key) => {
@@ -45,7 +45,6 @@ export class QueryHistory {
     const timestamp = new Date().getTime();
     const k = 'query_' + timestamp;
     this.storage.set(k, {
-      dataSet,
       time: timestamp,
       query,
       dateRange,

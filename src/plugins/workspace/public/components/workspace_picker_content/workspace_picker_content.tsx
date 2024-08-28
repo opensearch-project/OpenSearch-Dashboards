@@ -72,6 +72,7 @@ export const WorkspacePickerContent = ({
           data-test-subj={`workspace-menu-item-${itemType}-${workspace.id}`}
           icon={
             <EuiIcon
+              size="s"
               type={useCase?.icon || 'wsSelector'}
               color={getValidWorkspaceColor(workspace.color)}
             />

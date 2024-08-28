@@ -17,7 +17,7 @@ export enum DATA_FRAME_TYPES {
 
 export interface DataFrameService {
   get: () => IDataFrame | undefined;
-  set: (dataFrame: IDataFrame) => Promise<void>;
+  set: (dataFrame: IDataFrame) => void;
   clear: () => void;
 }
 

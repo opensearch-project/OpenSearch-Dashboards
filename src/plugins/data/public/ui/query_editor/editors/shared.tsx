@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { EuiCompressedFieldText } from '@elastic/eui';
 import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../opensearch_dashboards_react/public';
 
@@ -13,6 +14,7 @@ interface SingleLineInputProps extends React.JSX.IntrinsicAttributes {
   onChange: (value: string) => void;
   editorDidMount: (editor: any) => void;
   provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
+  prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
 }
 
 type CollapsedComponent<T> = React.ComponentType<T>;
@@ -27,7 +29,7 @@ export interface Editor<TCollapsed, TExpanded, TBody> {
   Body: BodyComponent<TBody>;
 }
 
-interface EditorInstance<TCollapsed, TExpanded, TBody> {
+export interface EditorInstance<TCollapsed, TExpanded, TBody> {
   TopBar: {
     Collapsed: () => React.ReactElement;
     Expanded: (() => React.ReactElement) | null;
@@ -63,51 +65,55 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
   onChange,
   editorDidMount,
   provideCompletionItems,
+  prepend,
 }) => (
-  <div className="osdQuerEditor__singleLine">
-    <CodeEditor
-      height={20} // Adjusted to match lineHeight for a single line
-      languageId={languageId}
-      value={value}
-      onChange={onChange}
-      editorDidMount={editorDidMount}
-      options={{
-        lineNumbers: 'off', // Disabled line numbers
-        // lineHeight: 40,
-        fontSize: 14,
-        fontFamily: 'Roboto Mono',
-        minimap: {
-          enabled: false,
-        },
-        scrollBeyondLastLine: false,
-        wordWrap: 'off', // Disabled word wrapping
-        wrappingIndent: 'none', // No indent since wrapping is off
-        folding: false,
-        glyphMargin: false,
-        lineDecorationsWidth: 0,
-        scrollbar: {
-          vertical: 'hidden',
-        },
-        overviewRulerLanes: 0,
-        hideCursorInOverviewRuler: true,
-        cursorStyle: 'line',
-        wordBasedSuggestions: false,
-      }}
-      suggestionProvider={{
-        provideCompletionItems,
-      }}
-      languageConfiguration={{
-        autoClosingPairs: [
-          {
-            open: '(',
-            close: ')',
+  <div className="euiFormControlLayout euiFormControlLayout--group euiFormControlLayout--compressed osdQueryBar__wrap">
+    {prepend}
+    <div className="osdQuerEditor__singleLine euiFormControlLayout__childrenWrapper">
+      <CodeEditor
+        height={20} // Adjusted to match lineHeight for a single line
+        languageId={languageId}
+        value={value}
+        onChange={onChange}
+        editorDidMount={editorDidMount}
+        options={{
+          lineNumbers: 'off', // Disabled line numbers
+          // lineHeight: 40,
+          fontSize: 14,
+          fontFamily: 'Roboto Mono',
+          minimap: {
+            enabled: false,
           },
-          {
-            open: '"',
-            close: '"',
+          scrollBeyondLastLine: false,
+          wordWrap: 'off', // Disabled word wrapping
+          wrappingIndent: 'none', // No indent since wrapping is off
+          folding: false,
+          glyphMargin: false,
+          lineDecorationsWidth: 0,
+          scrollbar: {
+            vertical: 'hidden',
           },
-        ],
-      }}
-    />
+          overviewRulerLanes: 0,
+          hideCursorInOverviewRuler: true,
+          cursorStyle: 'line',
+          wordBasedSuggestions: false,
+        }}
+        suggestionProvider={{
+          provideCompletionItems,
+        }}
+        languageConfiguration={{
+          autoClosingPairs: [
+            {
+              open: '(',
+              close: ')',
+            },
+            {
+              open: '"',
+              close: '"',
+            },
+          ],
+        }}
+      />
+    </div>
   </div>
 );

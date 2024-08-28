@@ -77,7 +77,13 @@ describe('createPluginInitializerContext', () => {
     const config$ = rawConfigServiceMock.create({ rawConfig: {} });
     server = new Server(config$, env, logger);
     await server.setupCoreConfig();
-    coreContext = { coreId, env, logger, configService: server.configService };
+    coreContext = {
+      coreId,
+      env,
+      logger,
+      configService: server.configService,
+      dynamicConfigService: server.dynamicConfigService,
+    };
   });
 
   it('should return a globalConfig handler in the context', async () => {

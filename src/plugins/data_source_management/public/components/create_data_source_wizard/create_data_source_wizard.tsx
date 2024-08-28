@@ -37,15 +37,18 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
     http,
     notifications: { toasts },
     uiSettings,
+    navigation,
+    application,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   /* State Variables */
   const [existingDatasourceNamesList, setExistingDatasourceNamesList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const useNewUX = uiSettings.get('home:useNewHomePage');
 
   /* Set breadcrumb */
   useEffectOnce(() => {
-    setBreadcrumbs(getCreateOpenSearchDataSourceBreadcrumbs());
+    setBreadcrumbs(getCreateOpenSearchDataSourceBreadcrumbs(useNewUX));
     getExistingDataSourceNames();
   });
 
@@ -128,6 +131,9 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
     return (
       <>
         <CreateDataSourceForm
+          useNewUX={useNewUX}
+          navigation={navigation}
+          application={application}
           handleSubmit={handleSubmit}
           handleTestConnection={handleTestConnection}
           handleCancel={() => props.history.push('/create')}
