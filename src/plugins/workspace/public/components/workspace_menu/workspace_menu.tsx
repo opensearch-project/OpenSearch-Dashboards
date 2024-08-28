@@ -135,7 +135,12 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
           {currentWorkspace ? (
             <>
               <EuiFlexItem grow={false}>
-                <EuiIcon size="xl" color="success" type="wsObservability" />
+                <EuiIcon
+                  size="xl"
+                  color="success"
+                  data-test-subj={`current-workspace-icon-${getUseCase(currentWorkspace)?.id}`}
+                  type={`ws${getUseCase(currentWorkspace)?.title}`}
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="workspace-menu-current-workspace-name">
                 <EuiToolTip
@@ -160,14 +165,6 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                   {getUseCase(currentWorkspace)?.title ?? ''}
                 </EuiText>
               </EuiFlexItem>
-
-              <EuiFlexItem grow={false} style={{ width: '100%' }}>
-                <EuiFieldSearch
-                  value={querySearch}
-                  onChange={(e) => handleSearchInput({ text: e.target.value })}
-                  placeholder={searchFieldPlaceholder}
-                />
-              </EuiFlexItem>
             </>
           ) : (
             <>
@@ -177,16 +174,15 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
               <EuiFlexItem grow={false} data-test-subj="workspace-menu-current-workspace-name">
                 <EuiText textAlign="center">{currentWorkspaceName}</EuiText>
               </EuiFlexItem>
-
-              <EuiFlexItem grow={false} style={{ width: '100%' }}>
-                <EuiFieldSearch
-                  value={querySearch}
-                  onChange={(e) => handleSearchInput({ text: e.target.value })}
-                  placeholder={searchFieldPlaceholder}
-                />
-              </EuiFlexItem>
             </>
           )}
+          <EuiFlexItem grow={false} style={{ width: '100%' }}>
+            <EuiFieldSearch
+              value={querySearch}
+              onChange={(e) => handleSearchInput({ text: e.target.value })}
+              placeholder={searchFieldPlaceholder}
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
 

@@ -56,27 +56,26 @@ export const WorkspacePickerContent = ({
       .filter((workspace): workspace is WorkspaceObject => workspace !== undefined);
   }, [workspaceList]);
 
-  const queryedWorkspace = useMemo(() => {
-    if (searchQuery) {
-      const normalizedQuery = searchQuery.toLowerCase();
-      const result = workspaceList.filter((item) => {
-        return item.name.toLowerCase().indexOf(normalizedQuery) > -1;
-      });
+  const queryFromList = ({ list, query }: { list: WorkspaceObject[]; query: string }) => {
+    if (!list || list.length === 0) {
+      return [];
+    }
+
+    if (query && query.trim() !== '') {
+      const normalizedQuery = query.toLowerCase();
+      const result = list.filter((item) => item.name.toLowerCase().includes(normalizedQuery));
       return result;
     }
-    return workspaceList;
+
+    return list;
+  };
+  const queriedWorkspace = useMemo(() => {
+    return queryFromList({ list: workspaceList, query: searchQuery });
   }, [workspaceList, searchQuery]);
 
-  const queryedRecentWorkspace = useMemo(() => {
-    if (searchQuery) {
-      const normalizedQuery = searchQuery.toLowerCase();
-      const result = filteredRecentWorkspaces.filter((item) => {
-        return item.name.toLowerCase().indexOf(normalizedQuery) > -1;
-      });
-      return result;
-    }
-    return workspaceList;
-  }, [filteredRecentWorkspaces, searchQuery, workspaceList]);
+  const queriedRecentWorkspace = useMemo(() => {
+    return queryFromList({ list: filteredRecentWorkspaces, query: searchQuery });
+  }, [filteredRecentWorkspaces, searchQuery]);
 
   const getUseCase = (workspace: WorkspaceObject) => {
     if (!workspace.features) {
@@ -90,17 +89,27 @@ export const WorkspacePickerContent = ({
     return (
       <EuiEmptyPrompt
         iconType="wsSelector"
+        data-test-subj="empty-workspace-prompt"
         title={
           <EuiText size="m">
-            <p>No workspace available</p>
+            <p>
+              {i18n.translate('workspace.picker.empty.state.title', {
+                defaultMessage: 'No workspace available',
+              })}
+            </p>
           </EuiText>
         }
         body={
           <EuiText size="s">
             <p>
               {isDashboardAdmin
-                ? 'Create a workspace to get start'
-                : 'Contact your administrator to create a workspace or to be added to an existing one'}
+                ? i18n.translate('workspace.picker.empty.state.description.admin', {
+                    defaultMessage: 'Create a workspace to get start',
+                  })
+                : i18n.translate('workspace.picker.empty.state.description.noAdmin', {
+                    defaultMessage:
+                      'Contact your administrator to create a workspace or to be added to an existing one',
+                  })}
             </p>
           </EuiText>
         }
@@ -112,6 +121,7 @@ export const WorkspacePickerContent = ({
     const listItems = filterWorkspaceList.map((workspace: WorkspaceObject) => {
       const useCase = getUseCase(workspace);
       const useCaseURL = getUseCaseUrl(useCase, workspace, coreStart.application, coreStart.http);
+
       return (
         <EuiListGroupItem
           key={workspace.id}
@@ -151,11 +161,11 @@ export const WorkspacePickerContent = ({
   return (
     <>
       {searchQuery ? (
-        queryedWorkspace && queryedWorkspace.length > 0 ? (
+        queriedWorkspace && queriedWorkspace.length > 0 ? (
           <>
             {filteredRecentWorkspaces.length > 0 &&
-              getWorkspaceListGroup(queryedRecentWorkspace, 'recent')}
-            {workspaceList.length > 0 && getWorkspaceListGroup(queryedWorkspace, 'all')}
+              getWorkspaceListGroup(queriedRecentWorkspace, 'recent')}
+            {workspaceList.length > 0 && getWorkspaceListGroup(queriedWorkspace, 'all')}
           </>
         ) : (
           getEmptyStatePrompt()

@@ -69,6 +69,27 @@ describe('<WorkspaceMenu />', () => {
     expect(screen.getByTestId('workspace-menu-item-all-workspace-2')).toBeInTheDocument();
   });
 
+  it('should display a list of recent workspaces in the dropdown', () => {
+    jest.spyOn(recentWorkspaceManager, 'getRecentWorkspaces').mockReturnValue([
+      { id: 'workspace-1', timestamp: 1234567890 },
+      { id: 'workspace-2', timestamp: 1234567899 },
+    ]);
+
+    coreStartMock.workspaces.workspaceList$.next([
+      { id: 'workspace-1', name: 'workspace 1', features: [] },
+      { id: 'workspace-2', name: 'workspace 2', features: [] },
+    ]);
+
+    render(<WorkspaceMenuCreatorComponent />);
+
+    const selectButton = screen.getByTestId('workspace-select-button');
+    fireEvent.click(selectButton);
+
+    expect(screen.getByText(/recent workspaces/i)).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-item-recent-workspace-1')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-item-recent-workspace-2')).toBeInTheDocument();
+  });
+
   it('should be able to display empty state when the workspace list is empty', () => {
     coreStartMock.workspaces.workspaceList$.next([]);
     render(<WorkspaceMenuCreatorComponent />);
@@ -96,28 +117,7 @@ describe('<WorkspaceMenu />', () => {
     expect(screen.getByTestId('workspace-menu-item-recent-workspace-1')).toBeInTheDocument();
   });
 
-  it('should display a list of recent workspaces in the dropdown', () => {
-    jest.spyOn(recentWorkspaceManager, 'getRecentWorkspaces').mockReturnValue([
-      { id: 'workspace-1', timestamp: 1234567890 },
-      { id: 'workspace-2', timestamp: 1234567899 },
-    ]);
-
-    coreStartMock.workspaces.workspaceList$.next([
-      { id: 'workspace-1', name: 'workspace 1', features: [] },
-      { id: 'workspace-2', name: 'workspace 2', features: [] },
-    ]);
-
-    render(<WorkspaceMenuCreatorComponent />);
-
-    const selectButton = screen.getByTestId('workspace-select-button');
-    fireEvent.click(selectButton);
-
-    expect(screen.getByText(/recent workspaces/i)).toBeInTheDocument();
-    expect(screen.getByTestId('workspace-menu-item-recent-workspace-1')).toBeInTheDocument();
-    expect(screen.getByTestId('workspace-menu-item-recent-workspace-2')).toBeInTheDocument();
-  });
-
-  it('should display current workspace name and use case name', () => {
+  it('should display current workspace name, use case name and associated icon', () => {
     coreStartMock.workspaces.currentWorkspace$.next({
       id: 'workspace-1',
       name: 'workspace 1',
@@ -128,6 +128,7 @@ describe('<WorkspaceMenu />', () => {
     fireEvent.click(screen.getByTestId('current-workspace-button'));
     expect(screen.getByTestId('workspace-menu-current-workspace-name')).toBeInTheDocument();
     expect(screen.getByTestId('workspace-menu-current-use-case')).toBeInTheDocument();
+    expect(screen.getByTestId('current-workspace-icon-observability')).toBeInTheDocument();
     expect(screen.getByText('Observability')).toBeInTheDocument();
   });
 
