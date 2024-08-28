@@ -49,7 +49,7 @@ export const QueryControls = (props: {
     setIsLanguageReferenceOpen(false);
   };
 
-  const osdDQLDocs = 'https://opensearch.org/docs/2.16/dashboards/dql)';
+  const osdDQLDocs = props.services.docLinks?.links.opensearchDashboards.dql.base;
   const dqlFullName = (
     <FormattedMessage
       id="data.query.queryBar.dqlFullLanguageName"
