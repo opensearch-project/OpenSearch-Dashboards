@@ -15,6 +15,7 @@ import {
 } from '../../../../../common';
 import { DatasetTypeConfig } from '../types';
 import { getIndexPatterns } from '../../../../services';
+import { injectMetaToDataStructures } from './utils';
 
 export const indexPatternTypeConfig: DatasetTypeConfig = {
   id: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
@@ -97,7 +98,7 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
     });
   }
 
-  return resp.savedObjects.map(
+  const dataStructures = resp.savedObjects.map(
     (savedObject): DataStructure => {
       const dataSourceId = savedObject.references.find((ref) => ref.type === 'data-source')?.id;
       const dataSource = dataSourceId ? dataSourceMap[dataSourceId] : undefined;
@@ -122,4 +123,6 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
       return indexPatternDataStructure;
     }
   );
+
+  return injectMetaToDataStructures(dataStructures, (dataStructure) => dataStructure.parent?.id);
 };

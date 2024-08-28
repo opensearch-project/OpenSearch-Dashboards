@@ -190,24 +190,22 @@ const LoadingEmptyColumn = ({ isLoading }: { isLoading: boolean }) =>
     <EmptyColumn />
   );
 const appendIcon = (item: DataStructure) => {
-  if (item.meta?.type === DATA_STRUCTURE_META_TYPES.FEATURE) {
-    if (item.meta?.icon && item.meta?.tooltip) {
-      return (
-        <EuiToolTip content={item.meta.tooltip}>
-          <EuiIcon type={item.meta.icon} />
-        </EuiToolTip>
-      );
-    } else if (item.meta?.icon) {
-      return <EuiIcon type={item.meta.icon} />;
-    }
-  }
-
   if (item.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE) {
     return (
       <EuiToolTip content={item.meta.tooltip}>
         <EuiIcon type="iInCircle" />
       </EuiToolTip>
     );
+  } else {
+    if (item.meta?.icon && item.meta?.tooltip) {
+      return (
+        <EuiToolTip content={item.meta.tooltip}>
+          <EuiIcon {...item.meta.icon} />
+        </EuiToolTip>
+      );
+    } else if (item.meta?.icon) {
+      return <EuiIcon {...item.meta.icon} />;
+    }
   }
 
   return null;
