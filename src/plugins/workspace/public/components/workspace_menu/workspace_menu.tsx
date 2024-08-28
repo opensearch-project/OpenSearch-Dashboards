@@ -165,7 +165,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
           )}
         </EuiFlexGroup>
       </EuiPanel>
-      <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
+      <EuiPanel paddingSize="none" hasBorder={false} color="transparent">
         <WorkspacePickerContent
           coreStart={coreStart}
           registeredUseCases$={registeredUseCases$}
