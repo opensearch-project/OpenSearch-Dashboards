@@ -31,6 +31,9 @@ import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sourc
 import {
   ANALYTICS_ALL_OVERVIEW_PAGE_ID,
   ESSENTIAL_OVERVIEW_PAGE_ID,
+  OBSERVABILITY_OVERVIEW_PAGE_ID,
+  SEARCH_OVERVIEW_PAGE_ID,
+  SECURITY_ANALYTICS_OVERVIEW_PAGE_ID,
 } from '../../../plugins/content_management/public';
 
 export const USE_CASE_PREFIX = 'use-case-';
@@ -335,6 +338,13 @@ export function prependWorkspaceToBreadcrumbs(
     return;
   }
 
+  const homeBreadcrumb: ChromeBreadcrumb = {
+    text: 'Home',
+    onClick: () => {
+      core.application.navigateToApp('home');
+    },
+  };
+
   /**
    * There has 3 cases
    * nav group is enable + workspace enable + in a workspace -> workspace enricher
@@ -347,13 +357,16 @@ export function prependWorkspaceToBreadcrumbs(
   if (currentWorkspace) {
     // use case overview page only show workspace name
     if (
-      appId === `${DEFAULT_NAV_GROUPS.search.id}_overview` ||
-      appId === `${DEFAULT_NAV_GROUPS.observability.id}_overview` ||
-      appId === `${DEFAULT_NAV_GROUPS['security-analytics'].id}_overview` ||
+      appId === SEARCH_OVERVIEW_PAGE_ID ||
+      appId === OBSERVABILITY_OVERVIEW_PAGE_ID ||
+      appId === SECURITY_ANALYTICS_OVERVIEW_PAGE_ID ||
       appId === ESSENTIAL_OVERVIEW_PAGE_ID ||
       appId === ANALYTICS_ALL_OVERVIEW_PAGE_ID
     ) {
-      core.chrome.setBreadcrumbsEnricher((breadcrumbs) => [{ text: currentWorkspace.name }]);
+      core.chrome.setBreadcrumbsEnricher((breadcrumbs) => [
+        homeBreadcrumb,
+        { text: currentWorkspace.name },
+      ]);
       return;
     }
     const useCase = getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features || []);
@@ -370,22 +383,20 @@ export function prependWorkspaceToBreadcrumbs(
         }
       },
     };
-    const homeBreadcrumb: ChromeBreadcrumb = {
-      text: 'Home',
+
+    const workspaceBreadcrumb: ChromeBreadcrumb = {
+      text: currentWorkspace.name,
       onClick: () => {
-        core.application.navigateToApp('home');
+        if (useCase) {
+          const allNavGroups = navGroupsMap[useCase];
+          core.application.navigateToApp(allNavGroups?.navLinks[0].id);
+        }
       },
     };
 
     core.chrome.setBreadcrumbsEnricher((breadcrumbs) => {
       if (!breadcrumbs || !breadcrumbs.length) return breadcrumbs;
 
-      const workspaceBreadcrumb: ChromeBreadcrumb = {
-        text: currentWorkspace.name,
-        onClick: () => {
-          core.application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
-        },
-      };
       if (useCase === ALL_USE_CASE_ID) {
         if (currentNavGroup && currentNavGroup.id !== DEFAULT_NAV_GROUPS.all.id) {
           return [homeBreadcrumb, workspaceBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
@@ -393,7 +404,7 @@ export function prependWorkspaceToBreadcrumbs(
           return [homeBreadcrumb, workspaceBreadcrumb, ...breadcrumbs];
         }
       } else {
-        return [homeBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
+        return [homeBreadcrumb, workspaceBreadcrumb, ...breadcrumbs];
       }
     });
   }
