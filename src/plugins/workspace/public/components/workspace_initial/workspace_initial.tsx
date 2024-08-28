@@ -134,7 +134,7 @@ export const WorkspaceInitial = () => {
         <EuiText size="s">
           {i18n.translate('workspace.initial.description', {
             defaultMessage:
-              'OpenSearch is a flexible, scalable, open-source way to build solutions for data-intensive search and analytics applications. Explore, enrich, and visualize your data, using developer-friendly tools and powerful integrations for machine learning, data processing, and more.',
+              'Welcome to OpenSearch! This interface supports you to easily explore, enrich and visualize your data with developer-friendly tools and powerful integrations for machine learning, data process, and more. To begin, create a workspace for your use case.',
           })}
         </EuiText>
       </EuiFlexItem>
