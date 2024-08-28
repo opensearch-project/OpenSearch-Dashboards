@@ -445,7 +445,7 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
                                 value="observability"
                               />
                               <div
-                                class="euiFormControlLayout"
+                                class="euiFormControlLayout euiFormControlLayout--compressed"
                               >
                                 <div
                                   class="euiFormControlLayout__childrenWrapper"
@@ -460,7 +460,7 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
                                     aria-describedby="generated-id-help-0"
                                     aria-haspopup="true"
                                     aria-labelledby="generated-id generated-id"
-                                    class="euiSuperSelectControl"
+                                    class="euiSuperSelectControl euiSuperSelectControl--compressed"
                                     disabled=""
                                     readonly=""
                                     type="button"
@@ -549,14 +549,14 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
                             class="euiPopover__anchor"
                           >
                             <div
-                              class="euiFormControlLayout euiFormControlLayout--readOnly"
+                              class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--readOnly"
                             >
                               <div
                                 class="euiFormControlLayout__childrenWrapper"
                               >
                                 <div>
                                   <div
-                                    class="euiFormControlLayout euiFormControlLayout--readOnly"
+                                    class="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--readOnly"
                                   >
                                     <div
                                       class="euiFormControlLayout__childrenWrapper"
@@ -564,7 +564,7 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
                                       <input
                                         aria-label="Press the down key to open a popover containing color options"
                                         autocomplete="off"
-                                        class="euiFieldText euiColorPicker__input euiFieldText--withIcon"
+                                        class="euiFieldText euiColorPicker__input euiFieldText--withIcon euiFieldText--compressed"
                                         data-test-subj="euiColorPickerAnchor workspaceForm-workspaceDetails-colorPicker"
                                         id="generated-id"
                                         placeholder="Transparent"

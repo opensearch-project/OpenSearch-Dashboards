@@ -8,7 +8,7 @@ import React from 'react';
 import {
   EuiText,
   EuiModal,
-  EuiButton,
+  EuiSmallButton,
   EuiModalBody,
   EuiSelectable,
   EuiModalFooter,
@@ -99,13 +99,13 @@ export const AssociationDataSourceModal = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButton onClick={closeModal} fill>
+        <EuiSmallButton onClick={closeModal} fill>
           <FormattedMessage
             id="workspace.detail.dataSources.associateModal.close.button"
             defaultMessage="Close"
           />
-        </EuiButton>
-        <EuiButton
+        </EuiSmallButton>
+        <EuiSmallButton
           onClick={() => handleAssignDataSources(selectedDataSources)}
           isDisabled={!selectedDataSources || selectedDataSources.length === 0}
           fill
@@ -114,7 +114,7 @@ export const AssociationDataSourceModal = ({
             id="workspace.detail.dataSources.associateModal.save.button"
             defaultMessage="Save changes"
           />
-        </EuiButton>
+        </EuiSmallButton>
       </EuiModalFooter>
     </EuiModal>
   );
