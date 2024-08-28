@@ -35,6 +35,7 @@ describe('Workspace plugin', () => {
     WorkspaceClientMock.mockClear();
     Object.values(workspaceClientMock).forEach((item) => item.mockClear());
   });
+
   it('#setup', async () => {
     const setupMock = getSetupMock();
     const savedObjectManagementSetupMock = savedObjectsManagementPluginMock.createSetupContract();
@@ -216,6 +217,21 @@ describe('Workspace plugin', () => {
         navLinkStatus: AppNavLinkStatus.hidden,
       })
     );
+  });
+
+  it('#setup should register registerCollapsibleNavHeader when new left nav is turned on', async () => {
+    const setupMock = coreMock.createSetup();
+    let collapsibleNavHeaderImplementation = () => null;
+    setupMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+    setupMock.chrome.registerCollapsibleNavHeader.mockImplementation(
+      (func) => (collapsibleNavHeaderImplementation = func)
+    );
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock, {});
+    expect(collapsibleNavHeaderImplementation()).toEqual(null);
+    const startMock = coreMock.createStart();
+    await workspacePlugin.start(startMock, mockDependencies);
+    expect(collapsibleNavHeaderImplementation()).not.toEqual(null);
   });
 
   it('#setup should register workspace essential use case when new home is disabled', async () => {

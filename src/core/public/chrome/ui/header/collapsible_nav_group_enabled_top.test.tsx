@@ -44,15 +44,9 @@ describe('<CollapsibleNavTop />', () => {
       currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>({ id: 'foo', name: 'foo' }),
       visibleUseCases: [
         {
-          id: 'navGroupFoo',
+          id: ALL_USE_CASE_ID,
           title: 'navGroupFoo',
           description: 'navGroupFoo',
-          navLinks: [],
-        },
-        {
-          id: 'navGroupBar',
-          title: 'navGroupBar',
-          description: 'navGroupBar',
           navLinks: [],
         },
       ],

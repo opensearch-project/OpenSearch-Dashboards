@@ -10,13 +10,17 @@ import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import {
   CollapsibleNavGroupEnabled,
   CollapsibleNavGroupEnabledProps,
-  NavGroups,
 } from './collapsible_nav_group_enabled';
 import { ChromeNavLink } from '../../nav_links';
-import { ChromeRegistrationNavLink, NavGroupItemInMap } from '../../nav_group';
+import { NavGroupItemInMap } from '../../nav_group';
 import { httpServiceMock } from '../../../mocks';
 import { getLogos } from '../../../../common';
-import { ALL_USE_CASE_ID, DEFAULT_NAV_GROUPS, WorkspaceObject } from '../../../../public';
+import {
+  ALL_USE_CASE_ID,
+  DEFAULT_APP_CATEGORIES,
+  DEFAULT_NAV_GROUPS,
+  WorkspaceObject,
+} from '../../../../public';
 import { capabilitiesServiceMock } from '../../../application/capabilities/capabilities_service.mock';
 
 jest.mock('./collapsible_nav_group_enabled_top', () => ({
@@ -24,75 +28,6 @@ jest.mock('./collapsible_nav_group_enabled_top', () => ({
 }));
 
 const mockBasePath = httpServiceMock.createSetupContract({ basePath: '/test' }).basePath;
-
-describe('<NavGroups />', () => {
-  const getMockedNavLink = (
-    navLink: Partial<ChromeNavLink & ChromeRegistrationNavLink>
-  ): ChromeNavLink & ChromeRegistrationNavLink => ({
-    baseUrl: '',
-    href: '',
-    id: '',
-    title: '',
-    ...navLink,
-  });
-  it('should render correctly', () => {
-    const navigateToApp = jest.fn();
-    const onNavItemClick = jest.fn();
-    const { container, getByTestId, queryByTestId } = render(
-      <NavGroups
-        navLinks={[
-          getMockedNavLink({
-            id: 'pure',
-            title: 'pure link',
-          }),
-          getMockedNavLink({
-            id: 'subLink',
-            title: 'subLink',
-            parentNavLinkId: 'pure',
-          }),
-          getMockedNavLink({
-            id: 'link-in-category',
-            title: 'link-in-category',
-            category: {
-              id: 'category-1',
-              label: 'category-1',
-            },
-          }),
-          getMockedNavLink({
-            id: 'link-in-category-2',
-            title: 'link-in-category-2',
-            category: {
-              id: 'category-1',
-              label: 'category-1',
-            },
-          }),
-          getMockedNavLink({
-            id: 'sub-link-in-category',
-            title: 'sub-link-in-category',
-            parentNavLinkId: 'link-in-category',
-            category: {
-              id: 'category-1',
-              label: 'category-1',
-            },
-          }),
-        ]}
-        navigateToApp={navigateToApp}
-        onNavItemClick={onNavItemClick}
-      />
-    );
-    expect(container).toMatchSnapshot();
-    expect(container.querySelectorAll('.nav-link-item-btn').length).toEqual(5);
-    fireEvent.click(getByTestId('collapsibleNavAppLink-pure'));
-    expect(navigateToApp).toBeCalledTimes(0);
-    // The accordion is collapsed
-    expect(queryByTestId('collapsibleNavAppLink-subLink')).toBeNull();
-
-    // Expand the accordion
-    fireEvent.click(getByTestId('collapsibleNavAppLink-pure'));
-    fireEvent.click(getByTestId('collapsibleNavAppLink-subLink'));
-    expect(navigateToApp).toBeCalledWith('subLink');
-  });
-});
 
 const defaultNavGroupMap = {
   [ALL_USE_CASE_ID]: {
@@ -341,5 +276,34 @@ describe('<CollapsibleNavGroupEnabled />', () => {
     expect(getByText('Custom')).toBeInTheDocument();
     expect(getByTestId('collapsibleNavAppLink-link-in-essentials')).toBeInTheDocument();
     expect(queryAllByTestId('collapsibleNavAppLink-link-in-all').length).toEqual(1);
+  });
+
+  it('should render manage category when in all use case if workspace disabled', () => {
+    const props = mockProps({
+      currentNavGroupId: ALL_USE_CASE_ID,
+      navGroupsMap: {
+        ...defaultNavGroupMap,
+        [DEFAULT_NAV_GROUPS.dataAdministration.id]: {
+          ...DEFAULT_NAV_GROUPS.dataAdministration,
+          navLinks: [
+            {
+              id: 'link-in-dataAdministration',
+              title: 'link-in-dataAdministration',
+            },
+          ],
+        },
+      },
+      navLinks: [
+        {
+          id: 'link-in-dataAdministration',
+          title: 'link-in-dataAdministration',
+          baseUrl: '',
+          href: '',
+        },
+      ],
+    });
+    const { getByText } = render(<CollapsibleNavGroupEnabled {...props} isNavOpen />);
+    // Should render manage category
+    expect(getByText(DEFAULT_APP_CATEGORIES.manage.label)).toBeInTheDocument();
   });
 });
