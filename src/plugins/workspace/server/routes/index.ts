@@ -42,9 +42,33 @@ const settingsSchema = schema.object({
   dataSources: schema.maybe(dataSourceIds),
 });
 
+const featuresSchema = schema.arrayOf(schema.string(), {
+  minSize: 1,
+  validate: (featureConfigs) => {
+    const validateUseCaseConfigs = [
+      'all',
+      'observability',
+      'security-analytics',
+      'analytics',
+      'search',
+    ].map((id) => `use-case-${id}`);
+
+    const useCaseConfigCount = featureConfigs.filter((config) =>
+      validateUseCaseConfigs.includes(config)
+    ).length;
+
+    if (useCaseConfigCount === 0) {
+      return `At least one use case is required. Valid options: ${validateUseCaseConfigs.join(
+        ', '
+      )}`;
+    } else if (useCaseConfigCount > 1) {
+      return 'Only one use case is allowed per workspace.';
+    }
+  },
+});
+
 const workspaceOptionalAttributesSchema = {
   description: schema.maybe(schema.string({ maxLength: MAX_WORKSPACE_DESCRIPTION_LENGTH })),
-  features: schema.maybe(schema.arrayOf(schema.string())),
   color: schema.maybe(
     schema.string({
       validate: (color) => {
@@ -70,11 +94,13 @@ const workspaceNameSchema = schema.string({
 
 const createWorkspaceAttributesSchema = schema.object({
   name: workspaceNameSchema,
+  features: featuresSchema,
   ...workspaceOptionalAttributesSchema,
 });
 
 const updateWorkspaceAttributesSchema = schema.object({
   name: schema.maybe(workspaceNameSchema),
+  features: schema.maybe(featuresSchema),
   ...workspaceOptionalAttributesSchema,
 });
 
