@@ -35,7 +35,7 @@ export class QueryHistory {
     return () => subscription.unsubscribe();
   }
 
-  addQueryToHistory(dataset: Dataset, query: Query, dateRange?: TimeRange) {
+  addQueryToHistory(query: Query, dateRange?: TimeRange) {
     const keys = this.getHistoryKeys();
     keys.splice(0, 500); // only maintain most recent X;
     keys.forEach((key) => {
@@ -45,7 +45,6 @@ export class QueryHistory {
     const timestamp = new Date().getTime();
     const k = 'query_' + timestamp;
     this.storage.set(k, {
-      dataset,
       time: timestamp,
       query,
       dateRange,

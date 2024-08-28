@@ -55,6 +55,7 @@ import {
   unpinFilter,
   UI_SETTINGS,
   IIndexPattern,
+  isQueryStringFilter,
 } from '../../../common';
 import { FilterEditor } from './filter_editor';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -75,6 +76,7 @@ interface Props {
   onFiltersUpdated?: (filters: Filter[]) => void;
   loadedSavedQuery?: SavedQuery;
   useSaveQueryMenu: boolean;
+  isQueryEditorControl: boolean;
 }
 const maxFilterWidth = 600;
 
@@ -371,7 +373,10 @@ const FilterOptionsUI = (props: Props) => {
       className="osdSavedQueryManagement__popoverButton"
       title={label}
     >
-      <EuiIcon type="save" className="euiQuickSelectPopover__buttonText" />
+      <EuiIcon
+        type={props.isQueryEditorControl ? 'folderOpen' : 'save'}
+        className="euiQuickSelectPopover__buttonText"
+      />
     </EuiSmallButtonEmpty>
   );
 
@@ -397,6 +402,25 @@ const FilterOptionsUI = (props: Props) => {
       </EuiSmallButtonEmpty>
     </EuiToolTip>
   );
+
+  if (props.isQueryEditorControl) {
+    return (
+      <EuiPopover
+        id="popoverForAllFilters"
+        className="globalFilterGroup__allFiltersPopover"
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        button={savedQueryPopoverButton}
+        anchorPosition="downLeft"
+        panelPaddingSize="none"
+        ownFocus
+        buffer={-8}
+        repositionOnScroll
+      >
+        {saveQueryPanel}
+      </EuiPopover>
+    );
+  }
 
   return (
     <EuiPopover

@@ -160,9 +160,9 @@
     min-width: 0;
   }
 
-  .osdQueryEditor__collapseBtn {
-    padding-right: $euiSizeXS;
-    border-right: $euiBorderThin;
+  .osdQueryEditor__querycontrols {
+    float: right;
+    margin: $euiSizeS $euiSizeS;
   }
 
   .osdQueryEditor__dataSetPicker {
