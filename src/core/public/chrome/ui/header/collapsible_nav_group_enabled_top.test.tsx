@@ -33,6 +33,8 @@ describe('<CollapsibleNavTop />', () => {
       logos: getLogos({}, mockBasePath.serverBasePath),
       shouldShrinkNavigation: false,
       visibleUseCases: [],
+      navGroupsMap: {},
+      navLinks: [],
       currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>(null),
       setCurrentNavGroup: jest.fn(),
     };
