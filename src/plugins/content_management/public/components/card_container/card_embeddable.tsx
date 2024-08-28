@@ -5,7 +5,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiCard } from '@elastic/eui';
+import { EuiCard, EuiCardProps } from '@elastic/eui';
 
 import { Embeddable, EmbeddableInput, IContainer } from '../../../../embeddable/public';
 
@@ -15,6 +15,7 @@ export type CardEmbeddableInput = EmbeddableInput & {
   onClick?: () => void;
   getIcon?: () => React.ReactElement;
   getFooter?: () => React.ReactElement;
+  cardProps?: Omit<EuiCardProps, 'title' | 'description'>;
 };
 
 export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
@@ -30,18 +31,21 @@ export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
       ReactDOM.unmountComponentAtNode(this.node);
     }
     this.node = node;
-    ReactDOM.render(
-      <EuiCard
-        textAlign="left"
-        title={this.input.title ?? ''}
-        description={this.input.description}
-        display="plain"
-        onClick={this.input.onClick}
-        icon={this.input?.getIcon?.()}
-        footer={this.input?.getFooter?.()}
-      />,
-      node
-    );
+
+    const cardProps: EuiCardProps = {
+      ...this.input.cardProps,
+      title: this.input.title ?? '',
+      description: this.input.description,
+      onClick: this.input.onClick,
+      icon: this.input?.getIcon?.(),
+    };
+
+    if (!cardProps.layout || cardProps.layout === 'vertical') {
+      cardProps.textAlign = 'left';
+      cardProps.footer = this.input?.getFooter?.();
+    }
+
+    ReactDOM.render(<EuiCard {...cardProps} />, node);
   }
 
   public destroy() {
