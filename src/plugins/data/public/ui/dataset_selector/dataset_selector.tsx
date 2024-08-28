@@ -192,7 +192,11 @@ export const DatasetSelector = ({
                   }}
                   onCancel={() => overlay?.close()}
                 />
-              )
+              ),
+              {
+                maxWidth: false,
+                className: 'datasetSelector__advancedModal',
+              }
             );
           }}
         >
