@@ -21,6 +21,7 @@ test('it should create card section input', () => {
     id: 'section1',
     title: '',
     hidePanelTitles: true,
+    hidePanelActions: true,
     viewMode: 'view',
     panels: {
       content1: {
@@ -55,6 +56,7 @@ test('it should create card section input with explicit input specified', () => 
     id: 'section1',
     title: 'new title',
     hidePanelTitles: true,
+    hidePanelActions: true,
     viewMode: 'view',
     columns: 4,
     panels: {
@@ -189,6 +191,7 @@ test('it should create dashboard input', async () => {
     content3: {
       explicitInput: {
         disabledActions: ['togglePanel'],
+        hidePanelActions: true,
         id: 'content3',
         render: renderFn,
       },
@@ -257,6 +260,7 @@ test('it should create dashboard input without the content which throws error', 
     content3: {
       explicitInput: {
         disabledActions: ['togglePanel'],
+        hidePanelActions: true,
         id: 'content3',
         render: renderFn,
       },

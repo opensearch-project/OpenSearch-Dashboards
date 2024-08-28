@@ -152,7 +152,7 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
   }
 
   return (
-    <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
+    <EuiPanel hasBorder={false} hasShadow={false}>
       <EuiFlexGroup
         direction="column"
         justifyContent="spaceBetween"
@@ -164,8 +164,8 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
             <EuiFlexItem grow={4}>
               <EuiFlexGroup gutterSize="xs" alignItems="center">
                 <EuiFlexItem>
-                  <EuiTitle>
-                    <h4>Workspaces</h4>
+                  <EuiTitle size="s">
+                    <h2>Workspaces</h2>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem>
