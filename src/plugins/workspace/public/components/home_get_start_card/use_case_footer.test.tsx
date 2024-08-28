@@ -47,7 +47,7 @@ describe('UseCaseFooter', () => {
   it('renders create workspace button for admin when no workspaces within use case exist', () => {
     const { getByTestId } = render(
       <UseCaseFooter
-        useCaseId="analytics"
+        useCaseId="essentials"
         useCaseTitle="Analytics"
         core={getMockCore()}
         registeredUseCases$={registeredUseCases$}
@@ -67,7 +67,7 @@ describe('UseCaseFooter', () => {
   it('renders create workspace button for non-admin when no workspaces within use case exist', () => {
     const { getByTestId } = render(
       <UseCaseFooter
-        useCaseId="analytics"
+        useCaseId="essentials"
         useCaseTitle="Analytics"
         core={getMockCore(false)}
         registeredUseCases$={registeredUseCases$}

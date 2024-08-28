@@ -38,7 +38,7 @@ The above object defines a workspace with name `Observability team` that's creat
 1. `use-case-observability`
 2. `use-case-security-analytics`
 3. `use-case-search`
-4. `use-case-analytics`
+4. `use-case-essentials`
 5. `use-case-all`
 
 ## Associate saved objects with workspaces

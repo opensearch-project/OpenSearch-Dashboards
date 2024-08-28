@@ -39,7 +39,7 @@ describe('Setup use case overview', () => {
     const call = registerPageMock.mock.calls[0];
     expect(call[0]).toMatchInlineSnapshot(`
       Object {
-        "id": "analytics_overview",
+        "id": "essentials_overview",
         "sections": Array [
           Object {
             "id": "service_cards",
@@ -71,7 +71,7 @@ describe('Setup use case overview', () => {
     expect(calls.length).toBe(3);
 
     const firstCall = calls[0];
-    expect(firstCall[0].getTargetArea()).toMatchInlineSnapshot(`"analytics_overview/get_started"`);
+    expect(firstCall[0].getTargetArea()).toMatchInlineSnapshot(`"essentials_overview/get_started"`);
     expect(firstCall[0].getContent()).toMatchInlineSnapshot(`
       Object {
         "cardProps": Object {
@@ -99,7 +99,7 @@ describe('Setup use case overview', () => {
     const call = registerPageMock.mock.calls[0];
     expect(call[0]).toMatchInlineSnapshot(`
       Object {
-        "id": "analytics_overview",
+        "id": "essentials_overview",
         "sections": Array [
           Object {
             "id": "service_cards",
