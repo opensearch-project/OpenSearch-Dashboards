@@ -6,13 +6,13 @@
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { DataStructure, Dataset, DatasetField } from 'src/plugins/data/common';
 import { DatasetTypeConfig } from 'src/plugins/data/public';
+import { DATASET } from '../../common';
 
 const S3_ICON = 'visTable';
-const S3_ID = 'S3';
 
 export const s3TypeConfig: DatasetTypeConfig = {
-  id: S3_ID,
-  title: S3_ID,
+  id: DATASET.S3,
+  title: DATASET.S3,
   meta: {
     icon: { type: S3_ICON },
     tooltip: 'S3 Data Source',
@@ -20,12 +20,12 @@ export const s3TypeConfig: DatasetTypeConfig = {
 
   toDataset: (path: DataStructure[]): Dataset => {
     const s3 = path[path.length - 1];
-    const dataSource = path.find((ds) => ds.type === S3_ID);
+    const dataSource = path.find((ds) => ds.type === DATASET.S3);
 
     return {
       id: s3.id,
       title: s3.title,
-      type: S3_ID,
+      type: DATASET.S3,
       dataSource: dataSource
         ? {
             id: dataSource.id,
@@ -42,7 +42,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
   ): Promise<DataStructure> => {
     const dataStructure = path[path.length - 1];
     switch (dataStructure.type) {
-      case S3_ID:
+      case DATASET.S3:
         return {
           ...dataStructure,
           columnHeader: 'Connections',

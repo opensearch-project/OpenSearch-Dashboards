@@ -5,7 +5,7 @@
 
 import { SharedGlobalConfig, Logger, ILegacyClusterClient } from 'opensearch-dashboards/server';
 import { Observable } from 'rxjs';
-import { ISearchStrategy, getDefaultSearchParams, SearchUsage } from '../../../data/server';
+import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import {
   DATA_FRAME_TYPES,
   IDataFrameError,
@@ -35,12 +35,6 @@ export const pplSearchStrategyProvider = (
 
   return {
     search: async (context, request: any, options) => {
-      const uiSettingsClient = await context.core.uiSettings.client;
-
-      const { dataFrameHydrationStrategy, ...defaultParams } = await getDefaultSearchParams(
-        uiSettingsClient
-      );
-
       try {
         const query: Query = request.body.query;
         const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
