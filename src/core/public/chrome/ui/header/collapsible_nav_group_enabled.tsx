@@ -319,7 +319,7 @@ export function CollapsibleNavGroupEnabled({
             {shouldShowCollapsedNavHeaderContent && collapsibleNavHeaderRender ? (
               <>
                 {collapsibleNavHeaderRender()}
-                <EuiSpacer size="l" />
+                <EuiSpacer />
               </>
             ) : null}
             <NavGroups
