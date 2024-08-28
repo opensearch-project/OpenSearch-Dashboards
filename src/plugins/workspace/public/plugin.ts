@@ -29,7 +29,6 @@ import {
   WORKSPACE_DETAIL_APP_ID,
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
-  WORKSPACE_USE_CASES,
   WORKSPACE_INITIAL_APP_ID,
   WORKSPACE_NAVIGATION_APP_ID,
 } from '../common/constants';
@@ -71,6 +70,7 @@ import {
   registerAnalyticsAllOverviewContent,
   setAnalyticsAllOverviewSection,
 } from './components/use_case_overview/setup_overview';
+import './home_get_start_workspace_card.scss';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -575,7 +575,11 @@ export class WorkspacePlugin
           description: useCase.description,
           title: useCase.title,
           getIcon: () =>
-            React.createElement(EuiIcon, { size: 'xl', type: useCase.icon || 'logoOpenSearch' }),
+            React.createElement(EuiIcon, {
+              size: 'xl',
+              type: useCase.icon || 'logoOpenSearch',
+              className: 'homeGettingStartedWorkspaceCardsIcon',
+            }),
           getFooter: () =>
             React.createElement(UseCaseFooter, {
               useCaseId: useCase.id,

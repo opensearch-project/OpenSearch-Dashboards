@@ -22,6 +22,7 @@ import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav
 import { ChromeNavLink } from '../../nav_links';
 import { ALL_USE_CASE_ID } from '../../../../../core/utils';
 import { fulfillRegistrationLinksToChromeNavLinks } from '../../utils';
+import './collapsible_nav_group_enabled_top.scss';
 
 export interface CollapsibleNavTopProps {
   homeLink?: ChromeNavLink;
@@ -126,8 +127,8 @@ export const CollapsibleNavTop = ({
       <EuiFlexGroup responsive={false} alignItems="center" justifyContent="spaceBetween">
         {!shouldShrinkNavigation ? (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="both" color="text" {...homeLinkProps} onClick={onIconClick}>
-              <EuiIcon type={icon} size="l" />
+            <EuiButtonEmpty flush="both" {...homeLinkProps} onClick={onIconClick}>
+              <EuiIcon type={icon} size="l" className="leftNavTopIcon" />
             </EuiButtonEmpty>
           </EuiFlexItem>
         ) : null}
@@ -135,7 +136,7 @@ export const CollapsibleNavTop = ({
           <EuiButtonIcon
             onClick={onClickShrink}
             iconType={shouldShrinkNavigation ? 'menu' : 'menuLeft'}
-            color="text"
+            color="subdued"
             display={shouldShrinkNavigation ? 'empty' : 'base'}
             aria-label="shrink-button"
             data-test-subj="collapsibleNavShrinkButton"
