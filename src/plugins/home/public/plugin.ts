@@ -68,6 +68,7 @@ import { learnBasicsSection } from './application/components/homepage/sections/l
 import {
   ContentManagementPluginSetup,
   ContentManagementPluginStart,
+  SEARCH_OVERVIEW_PAGE_ID,
 } from '../../content_management/public';
 import { initHome, setupHome } from './application/home_render';
 import { registerSampleDataCard } from './application/components/sample_data/sample_data_card';
@@ -78,6 +79,7 @@ import {
   registerContentToSearchUseCasePage,
   setupSearchUseCase,
 } from './application/components/usecase_overview/search_use_case_setup';
+import { DEFAULT_NAV_GROUPS } from '../../../core/public';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -172,18 +174,10 @@ export class HomePublicPlugin
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: PLUGIN_ID,
-        title: 'Home',
-        order: 0,
-      },
-    ]);
-
     if (core.chrome.navGroup.getNavGroupEnabled()) {
       // register search use case overview page
       core.application.register({
-        id: 'search_overview',
+        id: SEARCH_OVERVIEW_PAGE_ID,
         title: 'Overview',
         mount: async (params: AppMountParameters) => {
           const [
@@ -204,7 +198,7 @@ export class HomePublicPlugin
       // add to search group
       core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
         {
-          id: 'search_overview',
+          id: SEARCH_OVERVIEW_PAGE_ID,
           order: -1,
         },
       ]);

@@ -11,6 +11,7 @@ import {
   ContentManagementPluginStart,
   ContentProvider,
   ESSENTIAL_OVERVIEW_CONTENT_AREAS,
+  SEARCH_OVERVIEW_CONTENT_AREAS,
 } from '../../../../../content_management/public';
 import { IMPORT_SAMPLE_DATA_APP_ID } from '../../../../common/constants';
 
@@ -47,5 +48,7 @@ export const registerSampleDataCard = (
   contentManagement.registerContentProvider(
     sampleDataCard(0, ESSENTIAL_OVERVIEW_CONTENT_AREAS.GET_STARTED)
   );
-  contentManagement.registerContentProvider(sampleDataCard(30, 'search_overview/get_started'));
+  contentManagement.registerContentProvider(
+    sampleDataCard(30, SEARCH_OVERVIEW_CONTENT_AREAS.GET_STARTED)
+  );
 };
