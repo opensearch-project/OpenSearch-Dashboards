@@ -24,8 +24,8 @@ export const PageRender = ({ page, embeddable, savedObjectsClient }: Props) => {
   return (
     <EuiPage direction="column" className="contentManagement-page">
       {sections.map((section, i) => (
-        <>
-          <EuiFlexItem key={section.id}>
+        <React.Fragment key={section.id}>
+          <EuiFlexItem>
             <SectionRender
               key={section.id}
               embeddable={embeddable}
@@ -34,13 +34,8 @@ export const PageRender = ({ page, embeddable, savedObjectsClient }: Props) => {
               contents$={page.getContents$(section.id)}
             />
           </EuiFlexItem>
-          {i < sections.length - 1 && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiSpacer size="s" />
-            </>
-          )}
-        </>
+          {i < sections.length - 1 && <EuiSpacer size="m" />}
+        </React.Fragment>
       ))}
     </EuiPage>
   );
