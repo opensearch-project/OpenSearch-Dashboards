@@ -234,19 +234,22 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     return this.props.showQueryBar && (showDatePicker || showQueryInput);
   }
 
-  private shouldRenderFilterBar(isEnhancementsEnabledOverride: boolean) {
-    const language = this.queryStringManager
-      .getLanguageService()
-      .getLanguage(this.state.query?.language!);
-    const isFilterable = language?.fields?.filterable !== false; // Render if undefined or true
+  private isQueryLanguageFilterable() {
+    return (
+      this.queryStringManager.getLanguageService().getLanguage(this.state.query?.language!)?.fields
+        ?.filterable ?? true // Render if undefined or true
+    );
+  }
 
+  private shouldRenderFilterBar(isEnhancementsEnabledOverride: boolean) {
     return (
       this.props.showFilterBar &&
       this.props.filters &&
       (!this.useNewHeader || this.props.filters.length > 0) &&
       this.props.indexPatterns &&
       compact(this.props.indexPatterns).length > 0 &&
-      (!isEnhancementsEnabledOverride || (isEnhancementsEnabledOverride && isFilterable))
+      (!isEnhancementsEnabledOverride ||
+        (isEnhancementsEnabledOverride && this.isQueryLanguageFilterable))
     );
   }
 
@@ -380,10 +383,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         }
       }
     );
-    const dataset = this.queryStringManager.getQuery().dataset;
-    if (dataset && queryAndDateRange.query) {
+
+    if (queryAndDateRange.query) {
       this.queryStringManager.addToQueryHistory(
-        dataset,
         queryAndDateRange.query,
         queryAndDateRange.dateRange
       );
@@ -427,7 +429,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         .getLanguage(this.state.query?.language!)
         ?.editorSupportedAppNames?.includes(this.services.appName);
 
-    const searchBarMenu = (useSaveQueryMenu: boolean = false) => {
+    const searchBarMenu = (
+      useSaveQueryMenu: boolean = false,
+      isQueryEditorControl: boolean = false
+    ) => {
       return (
         this.state.query &&
         this.props.onClearSavedQuery && (
@@ -444,6 +449,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             savedQueryService={this.savedQueryService}
             onClearSavedQuery={this.props.onClearSavedQuery}
             useSaveQueryMenu={useSaveQueryMenu}
+            isQueryEditorControl={isQueryEditorControl}
           />
         )
       );
@@ -480,6 +486,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
 
     let queryBar;
+
     if (this.shouldRenderQueryBar(isEnhancementsEnabledOverride)) {
       queryBar = (
         <QueryBarTopRow
@@ -489,7 +496,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
           isLoading={this.props.isLoading}
-          prepend={this.props.showFilterBar ? searchBarMenu(!this.useNewHeader) : undefined}
+          prepend={this.props.showFilterBar ? searchBarMenu(!this.useNewHeader, false) : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}
@@ -521,7 +528,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
           isLoading={this.props.isLoading}
-          prepend={this.props.showFilterBar ? searchBarMenu(!this.useNewHeader) : undefined}
+          prepend={this.isQueryLanguageFilterable() ? searchBarMenu() : undefined}
           showDatePicker={this.props.showDatePicker}
           dateRangeFrom={this.state.dateRangeFrom}
           dateRangeTo={this.state.dateRangeTo}
@@ -540,6 +547,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
           datePickerRef={this.props.datePickerRef}
+          savedQueryManagement={searchBarMenu(false, true)}
         />
       );
     }
