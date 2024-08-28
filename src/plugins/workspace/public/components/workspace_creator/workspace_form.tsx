@@ -4,7 +4,15 @@
  */
 
 import React, { useCallback, useRef } from 'react';
-import { EuiPanel, EuiSpacer, EuiTitle, EuiForm, EuiText } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiSpacer,
+  EuiTitle,
+  EuiForm,
+  EuiText,
+  EuiCompressedFormRow,
+  EuiColorPicker,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
   useWorkspaceForm,
@@ -12,12 +20,13 @@ import {
   WorkspaceUseCase,
   WorkspaceFormErrorCallout,
   SelectDataSourcePanel,
-  EnterDetailsPanel,
   usersAndPermissionsCreatePageTitle,
   selectDataSourceTitle,
   workspaceDetailsTitle,
   workspaceUseCaseTitle,
   WorkspaceFormProps,
+  WorkspaceNameField,
+  WorkspaceDescriptionField,
 } from '../workspace_form';
 
 import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
@@ -82,16 +91,38 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           <h2>{workspaceDetailsTitle}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EnterDetailsPanel
-          formErrors={formErrors}
-          name={formData.name}
-          description={formData.description}
-          color={formData.color}
-          readOnly={!!defaultValues?.reserved}
-          handleColorChange={handleColorChange}
-          onNameChange={handleNameInputChange}
-          onDescriptionChange={setDescription}
+        <WorkspaceNameField
+          value={formData.name}
+          onChange={handleNameInputChange}
+          error={formErrors.name?.message}
         />
+        <WorkspaceDescriptionField
+          value={formData.description}
+          onChange={setDescription}
+          error={formErrors.name?.message}
+        />
+        <EuiCompressedFormRow
+          label={i18n.translate('workspace.form.workspaceDetails.color.label', {
+            defaultMessage: 'Workspace icon color',
+          })}
+          isInvalid={!!formErrors.color}
+          error={formErrors.color?.message}
+        >
+          <div>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('workspace.form.workspaceDetails.color.description', {
+                defaultMessage:
+                  'Select a background color for the icon representing this workspace.',
+              })}
+            </EuiText>
+            <EuiSpacer size={'s'} />
+            <EuiColorPicker
+              color={formData.color}
+              onChange={handleColorChange}
+              data-test-subj="workspaceForm-workspaceDetails-colorPicker"
+            />
+          </div>
+        </EuiCompressedFormRow>
       </EuiPanel>
       <EuiSpacer />
       <EuiPanel>
