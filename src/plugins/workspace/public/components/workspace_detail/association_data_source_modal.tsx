@@ -26,6 +26,7 @@ import { i18n } from '@osd/i18n';
 import { getDataSourcesList, fetchDataSourceConnections } from '../../utils';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../../core/public';
+import { AssociationDataSourceModalTab } from '../../../common/constants';
 
 type DataSourceModalOption = EuiSelectableOption<{ connection: DataSourceConnection }>;
 
@@ -54,11 +55,6 @@ const convertConnectionsToOptions = (
       checked: undefined,
     }));
 };
-
-enum AssociationDataSourceModalTab {
-  OpenSearchConnections = 'opensearch-connections',
-  DirectQueryConnections = 'direction-query-connections',
-}
 
 const tabOptions: EuiButtonGroupOptionProps[] = [
   {

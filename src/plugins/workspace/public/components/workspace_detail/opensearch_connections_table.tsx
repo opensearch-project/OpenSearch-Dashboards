@@ -28,6 +28,7 @@ import { i18n } from '@osd/i18n';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import PrometheusLogo from '../../assets/prometheus_logo.svg';
 import S3Logo from '../../assets/s3_logo.svg';
+import { AssociationDataSourceModalTab } from '../../../common/constants';
 
 interface OpenSearchConnectionTableProps {
   isDashboardAdmin: boolean;
@@ -45,7 +46,6 @@ export const OpenSearchConnectionTable = ({
   const [selectedItems, setSelectedItems] = useState<DataSourceConnection[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [popoversState, setPopoversState] = useState<Record<string, boolean>>({});
-  // const [selectedItems, setSelectedItems] = useState([]);
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
   >({});
@@ -106,9 +106,9 @@ export const OpenSearchConnectionTable = ({
 
   const directQueryConnectionIcon = (connector: string | undefined) => {
     switch (connector) {
-      case 'S3GLUE':
+      case 'Amazon S3':
         return <EuiIcon type={S3Logo} />;
-      case 'PROMETHEUS':
+      case 'Prometheus':
         return <EuiIcon type={PrometheusLogo} />;
       default:
         return <></>;
@@ -142,7 +142,7 @@ export const OpenSearchConnectionTable = ({
   };
 
   const baseColumns: Array<EuiBasicTableColumn<DataSourceConnection>> = [
-    ...(connectionType === 'directQueryConnections'
+    ...(connectionType === AssociationDataSourceModalTab.DirectQueryConnections
       ? [
           {
             width: '40px',
@@ -169,9 +169,9 @@ export const OpenSearchConnectionTable = ({
         const origin = window.location.origin;
         let url: string;
         if (record.connectionType === DataSourceConnectionType.OpenSearchConnection) {
-          url = `${origin}/app/dataSources_core/${record.id}`;
+          url = `${origin}/app/dataSources/${record.id}`;
         } else {
-          url = `${origin}/app/dataSources_core/manage/${name}?dataSourceMDSId=${record.parentId}`;
+          url = `${origin}/app/dataSources/manage/${name}?dataSourceMDSId=${record.parentId}`;
         }
         return (
           <EuiLink href={url} className="eui-textTruncate">

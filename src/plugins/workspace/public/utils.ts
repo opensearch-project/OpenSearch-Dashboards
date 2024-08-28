@@ -32,6 +32,7 @@ import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sourc
 import {
   DirectQueryDatasourceDetails,
   DATACONNECTIONS_BASE,
+  DatasourceTypeToDisplayName,
 } from '../../data_source_management/public';
 import { DataSource, DataSourceConnection, DataSourceConnectionType } from '../common/types';
 import {
@@ -255,7 +256,7 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
     (dataConnection: DirectQueryDatasourceDetails) => ({
       id: `${dataSourceId}-${dataConnection.name}`,
       name: dataConnection.name,
-      type: dataConnection.connector,
+      type: DatasourceTypeToDisplayName[dataConnection.connector],
       connectionType: DataSourceConnectionType.DirectQueryConnection,
       description: dataConnection.description,
       parentId: dataSourceId,

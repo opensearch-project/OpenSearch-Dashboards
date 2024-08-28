@@ -26,4 +26,4 @@ export {
 } from './components/data_source_menu';
 export { DataSourceSelectionService } from './service/data_source_selection_service';
 export { getDefaultDataSourceId, getDefaultDataSourceId$ } from './components/utils';
-export { DATACONNECTIONS_BASE } from './constants';
+export { DATACONNECTIONS_BASE, DatasourceTypeToDisplayName } from './constants';

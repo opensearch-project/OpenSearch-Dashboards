@@ -17,6 +17,7 @@ import {
   EuiLoadingSpinner,
   EuiButtonGroup,
   EuiIcon,
+  EuiButtonGroupOptionProps,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from 'react-intl';
@@ -28,7 +29,22 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { CoreStart, SavedObjectsStart, WorkspaceObject } from '../../../../../core/public';
 import { convertPermissionSettingsToPermissions, useWorkspaceFormContext } from '../workspace_form';
 import { fetchDataSourceConnections } from '../../utils';
+import { AssociationDataSourceModalTab } from '../../../common/constants';
 
+const toggleButtons: EuiButtonGroupOptionProps[] = [
+  {
+    id: AssociationDataSourceModalTab.OpenSearchConnections,
+    label: i18n.translate('workspace.detail.dataSources.openSearchConnections', {
+      defaultMessage: 'OpenSearch connections',
+    }),
+  },
+  {
+    id: AssociationDataSourceModalTab.DirectQueryConnections,
+    label: i18n.translate('workspace.detail.dataSources.directQueryConnections', {
+      defaultMessage: 'Direct query connections',
+    }),
+  },
+];
 export interface SelectDataSourcePanelProps {
   savedObjects: SavedObjectsStart;
   assignedDataSources: DataSource[];
@@ -53,7 +69,7 @@ export const SelectDataSourceDetailPanel = ({
   const [assignedDataSourceConnections, setAssignedDataSourceConnections] = useState<
     DataSourceConnection[]
   >([]);
-  const [toggleIdSelected, setToggleIdSelected] = useState('openSearchConnections');
+  const [toggleIdSelected, setToggleIdSelected] = useState(toggleButtons[0].id);
 
   useEffect(() => {
     setIsLoading(true);
@@ -62,21 +78,6 @@ export const SelectDataSourceDetailPanel = ({
       setIsLoading(false);
     });
   }, [assignedDataSources, http, notifications]);
-
-  const toggleButtons = [
-    {
-      id: 'openSearchConnections',
-      label: i18n.translate('workspace.detail.dataSources.openSearchConnections', {
-        defaultMessage: 'OpenSearch connections',
-      }),
-    },
-    {
-      id: 'directQueryConnections',
-      label: i18n.translate('workspace.detail.dataSources.directQueryConnections', {
-        defaultMessage: 'Direct query connections',
-      }),
-    },
-  ];
 
   const handleAssignDataSourceConnections = async (
     dataSourceConnections: DataSourceConnection[]
