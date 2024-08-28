@@ -7,7 +7,7 @@ import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { map } from 'rxjs/operators';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiPanel } from '@elastic/eui';
 import {
   Plugin,
   CoreStart,
@@ -61,6 +61,7 @@ import { UseCaseService } from './services/use_case_service';
 import { WorkspaceListCard } from './components/service_card';
 import { UseCaseFooter } from './components/home_get_start_card';
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
+import { WorkspacePickerContent } from './components/workspace_picker_content/workspace_picker_content';
 import { HOME_CONTENT_AREAS } from '../../../plugins/content_management/public';
 import {
   registerEssentialOverviewContent,
@@ -169,15 +170,13 @@ export class WorkspacePlugin
            * It checks the following conditions:
            * 1. The navigation group is not a system-level group.
            * 2. The current workspace has feature configurations set up.
-           * 3. The current workspace's use case is not "All use case".
-           * 4. The current navigation group is not included in the feature configurations of the workspace.
+           * 3. The current navigation group is not included in the feature configurations of the workspace.
            *
            * If all these conditions are true, it means that the navigation group should be hidden.
            */
           if (
             navGroup.type !== NavGroupType.SYSTEM &&
             currentWorkspace.features &&
-            getFirstUseCaseOfFeatureConfigs(currentWorkspace.features) !== ALL_USE_CASE_ID &&
             !isNavGroupInFeatureConfigs(navGroup.id, currentWorkspace.features)
           ) {
             return {
@@ -529,6 +528,28 @@ export class WorkspacePlugin
         }),
       },
     ]);
+
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      /**
+       * Show workspace picker content when outside of workspace and not in any nav group
+       */
+      core.chrome.registerCollapsibleNavHeader(() => {
+        if (!this.coreStart) {
+          return null;
+        }
+        return React.createElement(EuiPanel, {
+          hasShadow: false,
+          hasBorder: false,
+          children: [
+            React.createElement(WorkspacePickerContent, {
+              key: 'workspacePickerContent',
+              coreStart: this.coreStart,
+              registeredUseCases$: this.registeredUseCases$,
+            }),
+          ],
+        });
+      });
+    }
 
     return {};
   }
