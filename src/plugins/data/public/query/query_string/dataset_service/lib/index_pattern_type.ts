@@ -12,6 +12,7 @@ import {
   Dataset,
   IIndexPattern,
   DATA_STRUCTURE_META_TYPES,
+  DataStructureCustomMeta,
 } from '../../../../../common';
 import { DatasetTypeConfig } from '../types';
 import { getIndexPatterns } from '../../../../services';
@@ -27,10 +28,12 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
 
   toDataset: (path) => {
     const pattern = path[path.length - 1];
+    const patternMeta = pattern.meta as DataStructureCustomMeta;
     return {
       id: pattern.id,
       title: pattern.title,
       type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+      timeFieldName: patternMeta?.timeFieldName,
       dataSource: pattern.parent
         ? {
             id: pattern.parent.id,
