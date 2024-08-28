@@ -41,10 +41,13 @@ import { ConfigService, Env } from '../config';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { contextServiceMock } from '../context/context_service.mock';
 import { config as cspConfig } from '../csp';
+import { dynamicConfigServiceMock } from '../config/dynamic_config_service.mock';
 
 const logger = loggingSystemMock.create();
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 const coreId = Symbol();
+const dynamicConfigService = dynamicConfigServiceMock.create();
+const dynamicConfigServiceStart = dynamicConfigServiceMock.createInternalStartContract();
 
 const createConfigService = (value: Partial<HttpConfigType> = {}) => {
   const configService = new ConfigService(
@@ -90,7 +93,7 @@ test('creates and sets up http server', async () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService({ coreId, configService, env, logger });
+  const service = new HttpService({ coreId, configService, env, logger, dynamicConfigService });
 
   expect(mockHttpServer.mock.instances.length).toBe(1);
 
@@ -100,7 +103,7 @@ test('creates and sets up http server', async () => {
   expect(httpServer.setup).toHaveBeenCalled();
   expect(httpServer.start).not.toHaveBeenCalled();
 
-  await service.start();
+  await service.start({ dynamicConfigService: dynamicConfigServiceStart });
   expect(httpServer.start).toHaveBeenCalled();
 });
 
@@ -129,6 +132,7 @@ test('spins up notReady server until started if configured with `autoListen:true
     configService,
     env: Env.createDefault(REPO_ROOT, getEnvOptions()),
     logger,
+    dynamicConfigService,
   });
 
   await service.setup(setupDeps);
@@ -150,7 +154,7 @@ test('spins up notReady server until started if configured with `autoListen:true
     header: mockResponse.header.mock.calls,
   }).toMatchSnapshot('503 response');
 
-  await service.start();
+  await service.start({ dynamicConfigService: dynamicConfigServiceStart });
 
   expect(httpServer.start).toBeCalledTimes(1);
   expect(notReadyHapiServer.stop).toBeCalledTimes(1);
@@ -167,7 +171,7 @@ test('logs error if already set up', async () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService({ coreId, configService, env, logger });
+  const service = new HttpService({ coreId, configService, env, logger, dynamicConfigService });
 
   await service.setup(setupDeps);
 
@@ -185,10 +189,10 @@ test('stops http server', async () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService({ coreId, configService, env, logger });
+  const service = new HttpService({ coreId, configService, env, logger, dynamicConfigService });
 
   await service.setup(setupDeps);
-  await service.start();
+  await service.start({ dynamicConfigService: dynamicConfigServiceStart });
 
   expect(httpServer.stop).toHaveBeenCalledTimes(0);
 
@@ -212,7 +216,7 @@ test('stops not ready server if it is running', async () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService({ coreId, configService, env, logger });
+  const service = new HttpService({ coreId, configService, env, logger, dynamicConfigService });
 
   await service.setup(setupDeps);
 
@@ -235,7 +239,7 @@ test('register route handler', async () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService({ coreId, configService, env, logger });
+  const service = new HttpService({ coreId, configService, env, logger, dynamicConfigService });
 
   const { createRouter } = await service.setup(setupDeps);
   const router = createRouter('/foo');
@@ -254,7 +258,7 @@ test('returns http server contract on setup', async () => {
     stop: noop,
   }));
 
-  const service = new HttpService({ coreId, configService, env, logger });
+  const service = new HttpService({ coreId, configService, env, logger, dynamicConfigService });
   const setupContract = await service.setup(setupDeps);
   expect(setupContract).toMatchObject(httpServer);
   expect(setupContract).toMatchObject({
@@ -283,10 +287,11 @@ test('does not start http server if process is dev cluster master (deprecated) o
       })
     ),
     logger,
+    dynamicConfigService,
   });
 
   await service.setup(setupDeps);
-  await service.start();
+  await service.start({ dynamicConfigService: dynamicConfigServiceStart });
 
   expect(httpServer.start).not.toHaveBeenCalled();
 });
@@ -312,10 +317,11 @@ test('does not start http server if process is dev cluster manager', async () =>
       })
     ),
     logger,
+    dynamicConfigService,
   });
 
   await service.setup(setupDeps);
-  await service.start();
+  await service.start({ dynamicConfigService: dynamicConfigServiceStart });
 
   expect(httpServer.start).not.toHaveBeenCalled();
 });
@@ -341,10 +347,11 @@ test('does not start http server if process is dev cluster master (deprecated)',
       })
     ),
     logger,
+    dynamicConfigService,
   });
 
   await service.setup(setupDeps);
-  await service.start();
+  await service.start({ dynamicConfigService: dynamicConfigServiceStart });
 
   expect(httpServer.start).not.toHaveBeenCalled();
 });
@@ -366,10 +373,11 @@ test('does not start http server if configured with `autoListen:false`', async (
     configService,
     env: Env.createDefault(REPO_ROOT, getEnvOptions()),
     logger,
+    dynamicConfigService,
   });
 
   await service.setup(setupDeps);
-  await service.start();
+  await service.start({ dynamicConfigService: dynamicConfigServiceStart });
 
   expect(httpServer.start).not.toHaveBeenCalled();
 });
