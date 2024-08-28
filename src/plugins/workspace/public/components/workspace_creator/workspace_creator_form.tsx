@@ -5,13 +5,14 @@
 
 import React, { useCallback, useRef } from 'react';
 import {
-  EuiPanel,
   EuiSpacer,
   EuiTitle,
   EuiForm,
   EuiText,
   EuiCompressedFormRow,
   EuiColorPicker,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -21,15 +22,17 @@ import {
   WorkspaceFormErrorCallout,
   SelectDataSourcePanel,
   usersAndPermissionsCreatePageTitle,
-  selectDataSourceTitle,
-  workspaceDetailsTitle,
-  workspaceUseCaseTitle,
   WorkspaceFormProps,
   WorkspaceNameField,
   WorkspaceDescriptionField,
 } from '../workspace_form';
 
 import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
+import { WorkspaceFaqPanel } from './workspace_faq_panel';
+import { WorkspaceFormSummaryPanel } from './workspace_form_summary_panel';
+import { generateRightSidebarScrollProps, RightSidebarScrollField } from './utils';
+
+import './workspace_creator_form.scss';
 
 export const WorkspaceCreatorForm = (props: WorkspaceFormProps) => {
   const {
@@ -78,107 +81,146 @@ export const WorkspaceCreatorForm = (props: WorkspaceFormProps) => {
   );
 
   return (
-    <EuiForm id={formId} onSubmit={handleFormSubmit} component="form">
-      {numberOfErrors > 0 && (
-        <>
-          <WorkspaceFormErrorCallout errors={formErrors} />
-          <EuiSpacer />
-        </>
-      )}
-
-      <EuiPanel>
-        <EuiTitle size="s">
-          <h2>{workspaceDetailsTitle}</h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <WorkspaceNameField
-          value={formData.name}
-          onChange={handleNameInputChange}
-          error={formErrors.name?.message}
-        />
-        <WorkspaceDescriptionField
-          value={formData.description}
-          onChange={setDescription}
-          error={formErrors.name?.message}
-        />
-        <EuiCompressedFormRow
-          label={i18n.translate('workspace.form.workspaceDetails.color.label', {
-            defaultMessage: 'Workspace icon color',
-          })}
-          isInvalid={!!formErrors.color}
-          error={formErrors.color?.message}
-        >
-          <div>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('workspace.form.workspaceDetails.color.description', {
-                defaultMessage:
-                  'Select a background color for the icon representing this workspace.',
+    <EuiFlexGroup className="workspaceCreateFormContainer">
+      <EuiFlexItem style={{ maxWidth: 650 }}>
+        <EuiForm id={formId} onSubmit={handleFormSubmit} component="form">
+          {numberOfErrors > 0 && (
+            <>
+              <WorkspaceFormErrorCallout errors={formErrors} />
+              <EuiSpacer />
+            </>
+          )}
+          <EuiTitle size="xs">
+            <h3>
+              {i18n.translate('workspace.creator.form.customizeTitle', {
+                defaultMessage: 'Customize the workspace',
               })}
-            </EuiText>
-            <EuiSpacer size={'s'} />
-            <EuiColorPicker
-              color={formData.color}
-              onChange={handleColorChange}
-              data-test-subj="workspaceForm-workspaceDetails-colorPicker"
+            </h3>
+          </EuiTitle>
+          <div {...generateRightSidebarScrollProps(RightSidebarScrollField.UseCase)}>
+            <WorkspaceUseCase
+              value={formData.useCase}
+              onChange={handleUseCaseChange}
+              formErrors={formErrors}
+              availableUseCases={availableUseCases}
             />
           </div>
-        </EuiCompressedFormRow>
-      </EuiPanel>
-      <EuiSpacer />
-      <EuiPanel>
-        <EuiTitle size="s">
-          <h2>{workspaceUseCaseTitle}</h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <WorkspaceUseCase
-          value={formData.useCase}
-          onChange={handleUseCaseChange}
-          formErrors={formErrors}
-          availableUseCases={availableUseCases}
-        />
-      </EuiPanel>
-      <EuiSpacer />
-      {permissionEnabled && (
-        <EuiPanel>
-          <EuiTitle size="s">
-            <h2>{usersAndPermissionsCreatePageTitle}</h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="xs" color="default">
-            {i18n.translate('workspace.form.usersAndPermissions.description', {
-              defaultMessage:
-                'You will be added as an owner to the workspace. Select additional users and user groups as workspace collaborators with different access levels.',
+          <EuiSpacer size="m" />
+          <div {...generateRightSidebarScrollProps(RightSidebarScrollField.Name)} />
+          <WorkspaceNameField
+            value={formData.name}
+            onChange={handleNameInputChange}
+            error={formErrors.name?.message}
+          />
+          <EuiSpacer size="m" />
+          <div {...generateRightSidebarScrollProps(RightSidebarScrollField.Description)} />
+          <WorkspaceDescriptionField
+            value={formData.description}
+            onChange={setDescription}
+            error={formErrors.name?.message}
+          />
+          <EuiSpacer size="m" />
+          <EuiCompressedFormRow
+            label={i18n.translate('workspace.form.workspaceDetails.color.label', {
+              defaultMessage: 'Workspace icon color',
             })}
-          </EuiText>
-          <EuiSpacer size="l" />
-          <WorkspacePermissionSettingPanel
-            errors={formErrors.permissionSettings?.fields}
-            onChange={setPermissionSettings}
-            permissionSettings={formData.permissionSettings}
-            disabledUserOrGroupInputIds={disabledUserOrGroupInputIdsRef.current}
-            data-test-subj={`workspaceForm-permissionSettingPanel`}
-          />
-        </EuiPanel>
-      )}
-      <EuiSpacer />
-
-      {/* SelectDataSourcePanel is only visible for dashboard admin and when data source is enabled*/}
-      {isDashboardAdmin && isDataSourceEnabled && (
-        <EuiPanel>
-          <EuiTitle size="s">
-            <h2>{selectDataSourceTitle}</h2>
-          </EuiTitle>
-          <SelectDataSourcePanel
-            errors={formErrors.selectedDataSources}
-            onChange={setSelectedDataSources}
-            savedObjects={savedObjects}
-            selectedDataSources={formData.selectedDataSources}
-            data-test-subj={`workspaceForm-dataSourcePanel`}
-          />
-        </EuiPanel>
-      )}
-      <EuiSpacer />
-      <WorkspaceCreateActionPanel formData={formData} formId={formId} application={application} />
-    </EuiForm>
+            isInvalid={!!formErrors.color}
+            error={formErrors.color?.message}
+            {...generateRightSidebarScrollProps(RightSidebarScrollField.Color)}
+          >
+            <div>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('workspace.form.workspaceDetails.color.description', {
+                  defaultMessage:
+                    'Select a background color for the icon representing this workspace.',
+                })}
+              </EuiText>
+              <EuiSpacer size={'s'} />
+              <EuiColorPicker
+                color={formData.color}
+                onChange={handleColorChange}
+                data-test-subj="workspaceForm-workspaceDetails-colorPicker"
+              />
+            </div>
+          </EuiCompressedFormRow>
+          <EuiSpacer />
+          {/* SelectDataSourcePanel is only visible for dashboard admin and when data source is enabled*/}
+          {isDashboardAdmin && isDataSourceEnabled && (
+            <>
+              <EuiTitle
+                {...generateRightSidebarScrollProps(RightSidebarScrollField.DataSource)}
+                size="s"
+              >
+                <h3>
+                  {i18n.translate('workspace.creator.form.associateDataSourceTitle', {
+                    defaultMessage: 'Associate data sources',
+                  })}
+                </h3>
+              </EuiTitle>
+              <EuiText size="xs">
+                {i18n.translate('workspace.creator.form.associateDataSourceDescription', {
+                  defaultMessage:
+                    'Add data sources that will be available in the workspace. If a selected OpenSearch connection has embedded Direct Query connection, they will also be available in the workspace.',
+                })}
+              </EuiText>
+              <SelectDataSourcePanel
+                errors={formErrors.selectedDataSources}
+                onChange={setSelectedDataSources}
+                savedObjects={savedObjects}
+                selectedDataSources={formData.selectedDataSources}
+                data-test-subj={`workspaceForm-dataSourcePanel`}
+              />
+              <EuiSpacer size="s" />
+              <EuiSpacer size="s" />
+            </>
+          )}
+          {permissionEnabled && (
+            <>
+              <EuiTitle
+                {...generateRightSidebarScrollProps(RightSidebarScrollField.Member)}
+                size="s"
+              >
+                <h3>{usersAndPermissionsCreatePageTitle}</h3>
+              </EuiTitle>
+              <EuiText size="xs">
+                {i18n.translate('workspace.creator.form.usersAndPermissionsDescription', {
+                  defaultMessage:
+                    'You will be added as an owner to the workspace. Select additional users and user groups as workspace collaborators with different access levels.',
+                })}
+              </EuiText>
+              <EuiSpacer size="m" />
+              <WorkspacePermissionSettingPanel
+                errors={formErrors.permissionSettings?.fields}
+                onChange={setPermissionSettings}
+                permissionSettings={formData.permissionSettings}
+                disabledUserOrGroupInputIds={disabledUserOrGroupInputIdsRef.current}
+                data-test-subj={`workspaceForm-permissionSettingPanel`}
+              />
+            </>
+          )}
+        </EuiForm>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <div className="workspaceCreateRightSidebar">
+          <div className="workspaceCreateRightSideBarContentWrapper">
+            <WorkspaceFaqPanel />
+            <EuiSpacer size="m" />
+            <WorkspaceFormSummaryPanel
+              formData={formData}
+              availableUseCases={availableUseCases}
+              permissionEnabled={permissionEnabled}
+            />
+          </div>
+          <EuiSpacer size="m" />
+          <div className="workspaceCreateRightSideBarActionsWrapper">
+            <WorkspaceCreateActionPanel
+              formData={formData}
+              formId={formId}
+              application={application}
+            />
+          </div>
+        </div>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
