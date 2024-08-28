@@ -112,9 +112,9 @@ export class QueryStringManager {
   };
 
   // Todo: update this function to use the Query object when it is udpated, Query object should include time range and dataset
-  public addToQueryHistory(dataSet: Dataset, query: Query, timeRange?: TimeRange) {
+  public addToQueryHistory(query: Query, timeRange?: TimeRange) {
     if (query.query) {
-      this.queryHistory.addQueryToHistory(dataSet, query, timeRange);
+      this.queryHistory.addQueryToHistory(query, timeRange);
     }
   }
 

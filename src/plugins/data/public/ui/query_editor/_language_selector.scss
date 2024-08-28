@@ -4,6 +4,8 @@
  */
 .languageSelector {
   height: 100%;
+  padding-right: $euiSizeXS;
+  border-right: $euiBorderThin;
 
   .languageSelector__button {
     &:hover {
