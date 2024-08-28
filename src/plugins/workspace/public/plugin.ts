@@ -29,7 +29,6 @@ import {
   WORKSPACE_DETAIL_APP_ID,
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
-  WORKSPACE_USE_CASES,
   WORKSPACE_INITIAL_APP_ID,
   WORKSPACE_NAVIGATION_APP_ID,
 } from '../common/constants';
@@ -52,6 +51,7 @@ import {
   filterWorkspaceConfigurableApps,
   getFirstUseCaseOfFeatureConfigs,
   getUseCaseUrl,
+  getUseCaseFromFeatureConfig,
   isAppAccessibleInWorkspace,
   isNavGroupInFeatureConfigs,
 } from './utils';
@@ -554,18 +554,67 @@ export class WorkspacePlugin
     return {};
   }
 
+  private createContentCard(useCase: WorkspaceUseCase, index: number, core: CoreStart) {
+    const workspaceList = core.workspaces.workspaceList$.getValue();
+    const isDashboardAdmin = core.application.capabilities?.dashboards?.isDashboardAdmin;
+    const filterWorkspaces = workspaceList.filter(
+      (workspace) =>
+        workspace.features?.map(getUseCaseFromFeatureConfig).filter(Boolean)[0] === useCase.id
+    );
+    if (filterWorkspaces.length === 0 && !isDashboardAdmin) {
+      // if (isDashboardAdmin) {
+      //   return {
+      //     onClick: () => {
+      //       core.application.navigateToApp('workspace_create');
+      //     },
+      //     title: useCase.title,
+      //   };
+      // } else {
+      //   return {
+      //     title: useCase.title,
+      //     showToolTip: true,
+      //     toolTipContent:
+      //       'Contact your administrator to create a workspace or to be added to an existing one.',
+      //   };
+      // }
+
+      return {
+        title: useCase.title,
+        showToolTip: true,
+        toolTipContent:
+          'Contact your administrator to create a workspace or to be added to an existing one.',
+      };
+    }
+    if (filterWorkspaces.length === 1) {
+      return {
+        onClick: () => {
+          core.application.navigateToApp('workspace_create');
+        },
+        title: useCase.title,
+      };
+    }
+    return {
+      getTitle: () =>
+        React.createElement(UseCaseFooter, {
+          useCaseId: useCase.id,
+          useCaseTitle: useCase.title,
+          core,
+          registeredUseCases$: this.registeredUseCases$, // 假设这是一个 BehaviorSubject 或类似的
+        }),
+      getIcon: () => React.createElement(EuiIcon, { size: 'xl', type: 'logoOpenSearch' }),
+    };
+  }
+
   private registerGetStartedCardToNewHome(
     core: CoreStart,
     contentManagement: ContentManagementPluginStart
   ) {
-    const useCases = [
-      WORKSPACE_USE_CASES.observability,
-      WORKSPACE_USE_CASES['security-analytics'],
-      WORKSPACE_USE_CASES.search,
-      WORKSPACE_USE_CASES.essentials,
-    ];
+    const availableUseCases = this.registeredUseCases$
+      .getValue()
+      .filter((item) => !item.systematic);
 
-    useCases.forEach((useCase, index) => {
+    availableUseCases.forEach((useCase, index) => {
+      const content = this.createContentCard(useCase, index, core);
       contentManagement.registerContentProvider({
         id: `home_get_start_${useCase.id}`,
         getTargetArea: () => [HOME_CONTENT_AREAS.GET_STARTED],
@@ -574,15 +623,20 @@ export class WorkspacePlugin
           kind: 'card',
           order: (index + 1) * 1000,
           description: useCase.description,
-          title: useCase.title,
+          ...content,
+          // title: 'a',
+          // getTitle: () =>
+          //   React.createElement(UseCaseFooter, {
+          //     useCaseId: useCase.id,
+          //     useCaseTitle: useCase.title,
+          //     core,
+          //     registeredUseCases$: this.registeredUseCases$,
+          //   }),
           getIcon: () => React.createElement(EuiIcon, { size: 'xl', type: 'logoOpenSearch' }),
-          getFooter: () =>
-            React.createElement(UseCaseFooter, {
-              useCaseId: useCase.id,
-              useCaseTitle: useCase.title,
-              core,
-              registeredUseCases$: this.registeredUseCases$,
-            }),
+          cardProps: {
+            layout: 'horizontal',
+          },
+          // onClick: () => {},
         }),
       });
     });

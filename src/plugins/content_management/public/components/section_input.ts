@@ -44,8 +44,11 @@ export const createCardInput = (
         type: CARD_EMBEDDABLE,
         explicitInput: {
           id: content.id,
-          title: content.title,
+          title: content?.title,
           description: content.description,
+          showToolTip: content?.showToolTip,
+          toolTipContent: content?.toolTipContent,
+          getTitle: content?.getTitle,
           onClick: content.onClick,
           getIcon: content?.getIcon,
           getFooter: content?.getFooter,

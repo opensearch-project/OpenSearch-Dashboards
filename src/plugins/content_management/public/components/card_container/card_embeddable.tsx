@@ -5,13 +5,16 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiCard, EuiCardProps } from '@elastic/eui';
+import { EuiCard, EuiCardProps, EuiToolTip } from '@elastic/eui';
 
 import { Embeddable, EmbeddableInput, IContainer } from '../../../../embeddable/public';
 
 export const CARD_EMBEDDABLE = 'card_embeddable';
 export type CardEmbeddableInput = EmbeddableInput & {
   description: string;
+  showToolTip?: boolean;
+  toolTipContent?: string;
+  getTitle?: () => React.ReactElement;
   onClick?: () => void;
   getIcon?: () => React.ReactElement;
   getFooter?: () => React.ReactElement;
@@ -34,7 +37,7 @@ export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
 
     const cardProps: EuiCardProps = {
       ...this.input.cardProps,
-      title: this.input.title ?? '',
+      title: (this.input?.getTitle?.() || this.input?.title) ?? '',
       description: this.input.description,
       onClick: this.input.onClick,
       icon: this.input?.getIcon?.(),
@@ -45,7 +48,38 @@ export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
       cardProps.footer = this.input?.getFooter?.();
     }
 
-    ReactDOM.render(<EuiCard {...cardProps} />, node);
+    const card = <EuiCard {...cardProps} />;
+
+    ReactDOM.render(
+      this.input?.showToolTip ? (
+        <EuiToolTip position="top" content={this.input?.toolTipContent}>
+          {card}
+        </EuiToolTip>
+      ) : (
+        card
+      ),
+      node
+    );
+    // const card = (
+    //   <EuiCard
+    //     layout="horizontal"
+    //     title={(this.input?.getTitle?.() || this.input?.title) ?? ''}
+    //     description={this.input.description}
+    //     display="plain"
+    //     onClick={this.input.onClick}
+    //     icon={this.input?.getIcon?.()}
+    //   />
+    // );
+    // ReactDOM.render(
+    //   this.input?.showToolTip ? (
+    //     <EuiToolTip position="top" content={this.input?.toolTipContent}>
+    //       {card}
+    //     </EuiToolTip>
+    //   ) : (
+    //     card
+    //   ),
+    //   node
+    // );
   }
 
   public destroy() {
