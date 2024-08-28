@@ -4,7 +4,7 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { CoreSetup, Logger, PrincipalType, ACL } from '../../../../core/server';
+import { IRouter, Logger, PrincipalType, ACL } from '../../../../core/server';
 import {
   WorkspacePermissionMode,
   MAX_WORKSPACE_NAME_LENGTH,
@@ -107,19 +107,18 @@ const updateWorkspaceAttributesSchema = schema.object({
 export function registerRoutes({
   client,
   logger,
-  http,
+  router,
   maxImportExportSize,
   permissionControlClient,
   isPermissionControlEnabled,
 }: {
   client: IWorkspaceClientImpl;
   logger: Logger;
-  http: CoreSetup['http'];
+  router: IRouter;
   maxImportExportSize: number;
   permissionControlClient?: SavedObjectsPermissionControlContract;
   isPermissionControlEnabled: boolean;
 }) {
-  const router = http.createRouter();
   router.post(
     {
       path: `${WORKSPACES_API_BASE_URL}/_list`,
