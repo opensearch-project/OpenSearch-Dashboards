@@ -11,7 +11,6 @@ import {
   EuiPanel,
   EuiFlexGrid,
   EuiFlexGroup,
-  EuiTitle,
   EuiFilterGroup,
   EuiFilterButton,
   EuiComboBox,
@@ -21,6 +20,7 @@ import {
   EuiToolTip,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -167,12 +167,12 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiTitle>
-                <h3>
+              <EuiTitle size="s">
+                <h2>
                   {i18n.translate('savedObjectsManagement.recentWorkSection.title', {
                     defaultMessage: 'Assets',
                   })}
-                </h3>
+                </h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
