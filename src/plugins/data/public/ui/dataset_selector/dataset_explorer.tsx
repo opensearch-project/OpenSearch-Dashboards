@@ -133,6 +133,7 @@ export const DatasetExplorer = ({
                     },
                     searchable: true,
                   })}
+                  height="full"
                   className="datasetExplorer__selectable"
                 >
                   {(list, search) => (
@@ -182,7 +183,7 @@ const LoadingEmptyColumn = ({ isLoading }: { isLoading: boolean }) =>
       <EuiTitle size="xxs" className="datasetExplorer__columnTitle">
         <h3>...</h3>
       </EuiTitle>
-      <EuiSelectable options={[]} singleSelection className="datasetSelector__selectable" isLoading>
+      <EuiSelectable options={[]} singleSelection className="datasetExplorer__selectable" isLoading>
         {(list) => <>{list}</>}
       </EuiSelectable>
     </div>
