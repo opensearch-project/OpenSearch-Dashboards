@@ -66,22 +66,23 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
           ],
         }}
       />
-      {footerItems && (
-        <EuiFlexGroup direction="row" className="defaultEditor__footer">
-          <EuiFlexGroup direction="row">
+      <div className="defaultEditor__footer">
+        {footerItems && (
+          <EuiFlexGroup direction="row" alignItems="center">
             {footerItems.start?.map((item) => (
-              <EuiFlexItem grow={false} color="red" className="defaultEditor__footerItem">
+              <EuiFlexItem grow={false} className="defaultEditor__footerItem">
+                {item}
+              </EuiFlexItem>
+            ))}
+            <EuiFlexItem grow />
+            {footerItems.end?.map((item) => (
+              <EuiFlexItem grow={false} className="defaultEditor__footerItem">
                 {item}
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>
-          <EuiFlexGroup direction="row" className="defaultEditor__footerItem__end">
-            {footerItems.end?.map((item) => (
-              <EuiFlexItem grow={false}>{item}</EuiFlexItem>
-            ))}
-          </EuiFlexGroup>
-        </EuiFlexGroup>
-      )}
+        )}
+      </div>
     </div>
   );
 };
