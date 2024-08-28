@@ -1,26 +1,9 @@
-.defaultEditor__footer {
-  display: flex;
-  align-items: center;
-  flex-wrap: nowrap;
-  background-color: $euiColorLightestShade;
-  gap: $euiSizeS;
-  margin-top: 1px;
-  margin-left: $euiSizeS;
-  margin-right: $euiSizeS;
-
-  .defaultEditor__footerItem {
-    padding: 0 $euiSizeXS;
-    display: flex;
-    align-items: center;
-  }
-
-  .defaultEditor__footerItem__end {
-    justify-content: flex-end;
-  }
-}
-
 .defaultEditor {
   border: $euiBorderThin;
   border-radius: $euiSizeXS;
   margin: 0 $euiSizeXS $euiSizeXS;
+
+  &__footer {
+    margin-left: $euiSizeXS;
+  }
 }
