@@ -68,7 +68,7 @@ export const createQueryAssistExtension = (
       );
       if (isEnabled) {
         return {
-          type: DATA_STRUCTURE_META_TYPES.TYPE,
+          type: DATA_STRUCTURE_META_TYPES.FEATURE,
           icon: { type: assistantMark },
           tooltip: 'Query assist is available',
         };

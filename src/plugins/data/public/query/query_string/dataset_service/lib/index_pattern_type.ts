@@ -124,5 +124,5 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
     }
   );
 
-  return injectMetaToDataStructures(dataStructures);
+  return injectMetaToDataStructures(dataStructures, (dataStructure) => dataStructure.parent?.id);
 };
