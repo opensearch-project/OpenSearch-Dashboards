@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './data_source_table.scss';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiSpacer,
@@ -21,10 +22,7 @@ import {
   EuiPopoverTitle,
   EuiSmallButton,
   EuiLink,
-  EuiSmallButtonIcon,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiBasicTable,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
@@ -128,35 +126,14 @@ export const OpenSearchConnectionTable = ({
     if (itemIdToExpandedRowMapValues[item.id]) {
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
-      const { relatedConnections } = item;
-      // itemIdToExpandedRowMapValues[item.id] = (
-      //   <EuiListGroup maxWidth={1000}>
-      //     {relatedConnections?.map((relatedConnection) => (
-      //       <EuiListGroupItem
-      //         label={
-      //           <EuiFlexGroup>
-      //             <EuiFlexItem>{relatedConnection.name}</EuiFlexItem>
-      //             <EuiFlexItem>{relatedConnection.type}</EuiFlexItem>
-      //             <EuiFlexItem>{relatedConnection.description}</EuiFlexItem>
-      //             <EuiFlexItem>-</EuiFlexItem>
-      //           </EuiFlexGroup>
-      //         }
-      //       />
-      //     ))}
-      //   </EuiListGroup>
-      // );
       itemIdToExpandedRowMapValues[item.id] = (
-        <EuiBasicTable
-          items={relatedConnections}
+        <EuiInMemoryTable
+          items={item?.relatedConnections ?? []}
           itemId="id"
-          columns={columns1}
-          hasActions={false}
-        tableLayout="auto"
-          // style={{ padding: 0 }}
-          showTableHeader={false}
-          style={{
-            padding: '0', // 消除所有内边距
-            margin: '0',  // 可选：消除所有外边距
+          columns={baseColumns}
+          className="customized-table"
+          rowProps={{
+            className: 'customized-row',
           }}
         />
       );
@@ -164,8 +141,25 @@ export const OpenSearchConnectionTable = ({
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
 
-  const columns1: Array<EuiBasicTableColumn<DataSourceConnection>> = [
+  const baseColumns: Array<EuiBasicTableColumn<DataSourceConnection>> = [
+    ...(connectionType === 'directQueryConnections'
+      ? [
+          {
+            width: '40px',
+            isExpander: true,
+            render: (item: DataSourceConnection) =>
+              item?.relatedConnections?.length ? (
+                <EuiButtonIcon
+                  onClick={() => toggleDetails(item)}
+                  aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+                  iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
+                />
+              ) : null,
+          },
+        ]
+      : []),
     {
+      width: '25%',
       field: 'name',
       name: i18n.translate('workspace.detail.dataSources.table.title', {
         defaultMessage: 'Title',
@@ -187,6 +181,7 @@ export const OpenSearchConnectionTable = ({
       },
     },
     {
+      width: '10%',
       field: 'type',
       name: i18n.translate('workspace.detail.dataSources.table.type', {
         defaultMessage: 'Type',
@@ -194,65 +189,7 @@ export const OpenSearchConnectionTable = ({
       truncateText: true,
     },
     {
-      field: 'description',
-      name: i18n.translate('workspace.detail.dataSources.table.description', {
-        defaultMessage: 'Description',
-      }),
-      truncateText: true,
-    },
-    {
-      field: 'relatedConnections',
-      name: i18n.translate('workspace.detail.dataSources.table.relatedConnections', {
-        defaultMessage: 'Related connections',
-      }),
-      align: 'right',
-      truncateText: true,
-      render: (relatedConnections: DataSourceConnection[], record) => <EuiText>—</EuiText>,
-    },
-  ];
-
-  const columns: Array<EuiBasicTableColumn<DataSourceConnection>> = [
-    {
-      width: '40px',
-      isExpander: true,
-      render: (item: DataSourceConnection) =>
-        connectionType === 'directQueryConnections' && item?.relatedConnections?.length ? (
-          <EuiSmallButtonIcon
-            onClick={() => toggleDetails(item)}
-            aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
-            iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
-          />
-        ) : null,
-    },
-    {
-      field: 'name',
-      name: i18n.translate('workspace.detail.dataSources.table.title', {
-        defaultMessage: 'Title',
-      }),
-      truncateText: true,
-      render: (name: string, record) => {
-        const origin = window.location.origin;
-        let url: string;
-        if (record.connectionType === DataSourceConnectionType.OpenSearchConnection) {
-          url = `${origin}/app/dataSources_core/${record.id}`;
-        } else {
-          url = `${origin}/app/dataSources_core/manage/${name}?dataSourceMDSId=${record.parentId}`;
-        }
-        return (
-          <EuiLink href={url} className="eui-textTruncate">
-            {name}
-          </EuiLink>
-        );
-      },
-    },
-    {
-      field: 'type',
-      name: i18n.translate('workspace.detail.dataSources.table.type', {
-        defaultMessage: 'Type',
-      }),
-      truncateText: true,
-    },
-    {
+      width: '35%',
       field: 'description',
       name: i18n.translate('workspace.detail.dataSources.table.description', {
         defaultMessage: 'Description',
@@ -311,6 +248,10 @@ export const OpenSearchConnectionTable = ({
           <EuiText>—</EuiText>
         ),
     },
+  ];
+
+  const columns: Array<EuiBasicTableColumn<DataSourceConnection>> = [
+    ...baseColumns,
     ...(isDashboardAdmin
       ? [
           {
@@ -338,7 +279,7 @@ export const OpenSearchConnectionTable = ({
                 'data-test-subj': 'workspace-detail-dataSources-table-actions-remove',
               },
             ],
-          } as EuiTableActionsColumnType<any>,
+          } as EuiTableActionsColumnType<DataSourceConnection>,
         ]
       : []),
   ];
