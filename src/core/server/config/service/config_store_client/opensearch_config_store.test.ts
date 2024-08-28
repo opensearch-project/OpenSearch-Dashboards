@@ -71,6 +71,7 @@ describe('OpenSearchConfigStoreClient', () => {
               hits: mockHits.map((hit) => ({
                 _index: getDynamicConfigIndexName(1),
                 _id: JSON.stringify(hit),
+                _version: 1,
                 _source: hit,
               })),
             },
@@ -299,6 +300,11 @@ describe('OpenSearchConfigStoreClient', () => {
           {
             create: {
               _id: itemId,
+              _index: DYNAMIC_APP_CONFIG_ALIAS,
+              retry_on_conflict: 2,
+              routing: '',
+              version: 1,
+              version_type: 'external',
             },
           },
           {
@@ -314,6 +320,11 @@ describe('OpenSearchConfigStoreClient', () => {
           {
             update: {
               _id: JSON.stringify(configDocument),
+              _index: DYNAMIC_APP_CONFIG_ALIAS,
+              retry_on_conflict: 2,
+              routing: '',
+              version: 2,
+              version_type: 'external',
             },
           },
           {
@@ -483,6 +494,11 @@ describe('OpenSearchConfigStoreClient', () => {
             {
               update: {
                 _id: JSON.stringify(oldConfig),
+                _index: DYNAMIC_APP_CONFIG_ALIAS,
+                retry_on_conflict: 2,
+                routing: '',
+                version: 2,
+                version_type: 'external',
               },
             },
             {
@@ -503,6 +519,11 @@ describe('OpenSearchConfigStoreClient', () => {
             {
               create: {
                 _id: JSON.stringify(config),
+                _index: DYNAMIC_APP_CONFIG_ALIAS,
+                retry_on_conflict: 2,
+                routing: '',
+                version: 1,
+                version_type: 'external',
               },
             },
             {
