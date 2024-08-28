@@ -22,15 +22,25 @@ import assistantMark from '../../assets/query_assist_mark.svg';
  */
 const getAvailableLanguagesForDataSource = (() => {
   const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
+  const pendingRequests: Map<string | undefined, Promise<string[]>> = new Map();
+
   return async (http: HttpSetup, dataSourceId: string | undefined) => {
     const cached = availableLanguagesByDataSource.get(dataSourceId);
     if (cached !== undefined) return cached;
-    const languages = await http
+
+    const pendingRequest = pendingRequests.get(dataSourceId);
+    if (pendingRequest !== undefined) return pendingRequest;
+
+    const languagesPromise = http
       .get<{ configuredLanguages: string[] }>(API.QUERY_ASSIST.LANGUAGES, {
         query: { dataSourceId },
       })
       .then((response) => response.configuredLanguages)
-      .catch(() => []);
+      .catch(() => [])
+      .finally(() => pendingRequests.delete(dataSourceId));
+    pendingRequests.set(dataSourceId, languagesPromise);
+
+    const languages = await languagesPromise;
     availableLanguagesByDataSource.set(dataSourceId, languages);
     return languages;
   };
@@ -47,7 +57,11 @@ const getAvailableLanguages$ = (http: HttpSetup, data: DataPublicPluginSetup) =>
     switchMap(async (query) => {
       // currently query assist tool relies on opensearch API to get index
       // mappings, external data source types (e.g. s3) are not supported
-      if (query.dataset?.dataSource?.type !== DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH) return [];
+      if (
+        query.dataset?.dataSource?.type !== DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH &&
+        query.dataset?.dataSource?.type !== 'DATA_SOURCE'
+      )
+        return [];
 
       const dataSourceId = query.dataset?.dataSource?.id;
       return getAvailableLanguagesForDataSource(http, dataSourceId);
