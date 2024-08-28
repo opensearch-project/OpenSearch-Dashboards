@@ -120,6 +120,7 @@ export const AssociationDataSourceModal = ({
 
   const handleSelectionChange = useCallback(
     (newOptions: DataSourceModalOption[]) => {
+      const displayedConnectionIds = newOptions.map(({ connection }) => connection.id);
       const newCheckedConnectionIds = newOptions
         .filter(({ checked }) => checked === 'on')
         .map(({ connection }) => connection.id);
@@ -129,12 +130,18 @@ export const AssociationDataSourceModal = ({
           option = { ...option };
           const checkedInNewOptions = newCheckedConnectionIds.includes(option.connection.id);
           const connection = option.connection;
-          option.checked = checkedInNewOptions ? 'on' : undefined;
+          // Some connections may hidden by different tab, we should not update checked status for these connections
+          if (displayedConnectionIds.includes(connection.id)) {
+            option.checked = checkedInNewOptions ? 'on' : undefined;
+          }
 
+          // Set option to 'on' if checked status of any child DQC become 'on' this time
           if (connection.connectionType === DataSourceConnectionType.OpenSearchConnection) {
             const childDQCIds = allConnections
               .filter(({ parentId }) => parentId === connection.id)
-              .map(({ id }) => id);
+              .map(({ id }) => id)
+              // Ensure all child DQCs has been displayed, or the checked status should not been updated
+              .filter((id) => displayedConnectionIds.includes(id));
             // Check if there any DQC change to checked status this time, set to "on" if exists.
             if (
               newCheckedConnectionIds.some(
@@ -148,9 +155,11 @@ export const AssociationDataSourceModal = ({
             }
           }
 
+          // Set option to 'on' if checked status of parent data source become 'on' this time
           if (connection.connectionType === DataSourceConnectionType.DirectQueryConnection) {
             const parentConnection = allConnections.find(({ id }) => id === connection.parentId);
-            if (parentConnection) {
+            // Ensure parent connection has been displayed, or the checked status should not been changed.
+            if (parentConnection && displayedConnectionIds.includes(parentConnection.id)) {
               const isParentCheckedLastTime = !!prevOptions.find(
                 (item) => item.connection.id === parentConnection.id && item.checked === 'on'
               );
