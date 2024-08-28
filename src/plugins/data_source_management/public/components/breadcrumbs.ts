@@ -28,14 +28,14 @@ export function getCreateBreadcrumbs() {
     },
   ];
 }
-export function getCreateOpenSearchDataSourceBreadcrumbs() {
+export function getCreateOpenSearchDataSourceBreadcrumbs(useNewUX: boolean) {
   return [
     ...getCreateBreadcrumbs(),
     {
       text: i18n.translate(
         'dataSourcesManagement.dataSources.createOpenSearchDataSourceBreadcrumbs',
         {
-          defaultMessage: 'Open Search',
+          defaultMessage: useNewUX ? 'Connect OpenSearch Cluster' : 'Open Search',
         }
       ),
       href: `/configure/OpenSearch`,
@@ -43,14 +43,14 @@ export function getCreateOpenSearchDataSourceBreadcrumbs() {
   ];
 }
 
-export function getCreateAmazonS3DataSourceBreadcrumbs() {
+export function getCreateAmazonS3DataSourceBreadcrumbs(useNewUX: boolean) {
   return [
     ...getCreateBreadcrumbs(),
     {
       text: i18n.translate(
         'dataSourcesManagement.dataSources.createAmazonS3DataSourceBreadcrumbs',
         {
-          defaultMessage: 'Amazon S3',
+          defaultMessage: useNewUX ? 'Connect Amazon S3' : 'Amazon S3',
         }
       ),
       href: `/configure/AmazonS3AWSGlue`,
@@ -58,14 +58,14 @@ export function getCreateAmazonS3DataSourceBreadcrumbs() {
   ];
 }
 
-export function getCreatePrometheusDataSourceBreadcrumbs() {
+export function getCreatePrometheusDataSourceBreadcrumbs(useNewUX: boolean) {
   return [
     ...getCreateBreadcrumbs(),
     {
       text: i18n.translate(
         'dataSourcesManagement.dataSources.createPrometheusDataSourceBreadcrumbs',
         {
-          defaultMessage: 'Prometheus',
+          defaultMessage: useNewUX ? 'Connect Prometheus' : 'Prometheus',
         }
       ),
       href: `/configure/Prometheus`,
