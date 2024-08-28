@@ -111,15 +111,13 @@ export const WorkspacePermissionSettingInput = ({
 
   const handleGroupOrUserIdChange = useCallback(
     (event) => {
-      if (event.target.value) {
-        const groupOrUserId = event.target.value;
-        onGroupOrUserIdChange(
-          type === WorkspacePermissionItemType.Group
-            ? { type, group: groupOrUserId }
-            : { type, userId: groupOrUserId },
-          index
-        );
-      }
+      const groupOrUserId = event.target.value;
+      onGroupOrUserIdChange(
+        type === WorkspacePermissionItemType.Group
+          ? { type, group: groupOrUserId }
+          : { type, userId: groupOrUserId },
+        index
+      );
     },
     [index, type, onGroupOrUserIdChange]
   );
@@ -162,10 +160,10 @@ export const WorkspacePermissionSettingInput = ({
           placeholder={
             type === WorkspacePermissionItemType.User
               ? i18n.translate('workspaceForm.permissionSetting.selectUser', {
-                  defaultMessage: 'Select a user',
+                  defaultMessage: 'Enter user name or uer ID',
                 })
               : i18n.translate('workspaceForm.permissionSetting.selectUserGroup', {
-                  defaultMessage: 'Select a user group',
+                  defaultMessage: 'Enter group name or group ID',
                 })
           }
         />
