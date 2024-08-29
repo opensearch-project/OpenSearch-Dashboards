@@ -64,17 +64,19 @@ const CardSection = ({ section, embeddable, contents$ }: Props) => {
   if (section.kind === 'card' && factory && input) {
     return (
       <>
-        <EuiTitle size="s">
-          <h2>
-            <EuiButtonIcon
-              iconType={isCardVisible ? 'arrowDown' : 'arrowUp'}
-              onClick={() => setIsCardVisible(!isCardVisible)}
-              color="text"
-              aria-label={isCardVisible ? 'Show panel' : 'Hide panel'}
-            />
-            {section.title}
-          </h2>
-        </EuiTitle>
+        {section.title ? (
+          <EuiTitle size="s">
+            <h2>
+              <EuiButtonIcon
+                iconType={isCardVisible ? 'arrowDown' : 'arrowUp'}
+                onClick={() => setIsCardVisible(!isCardVisible)}
+                color="text"
+                aria-label={isCardVisible ? 'Show panel' : 'Hide panel'}
+              />
+              {section.title}
+            </h2>
+          </EuiTitle>
+        ) : null}
         {isCardVisible && (
           <>
             <EuiSpacer size="s" /> <EmbeddableRenderer factory={factory} input={input} />
