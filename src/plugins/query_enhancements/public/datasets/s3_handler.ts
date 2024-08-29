@@ -97,12 +97,11 @@ export const s3TypeConfig: DatasetTypeConfig = {
   },
 
   fetchFields: async (dataset: Dataset): Promise<DatasetField[]> => {
-    // Implement field fetching logic here
     return [];
   },
 
   supportedLanguages: (dataset: Dataset): string[] => {
-    return ['SQL']; // Assuming S3 only supports SQL queries
+    return ['SQL'];
   },
 };
 
