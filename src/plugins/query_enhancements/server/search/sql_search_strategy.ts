@@ -11,22 +11,30 @@ import {
   IDataFrameError,
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
-  PartialDataFrame,
+  Query,
   createDataFrame,
 } from '../../../data/common';
+import { getFields } from '../../common/utils';
 import { Facet } from '../utils';
 
 export const sqlSearchStrategyProvider = (
-  _config$: Observable<SharedGlobalConfig>,
+  config$: Observable<SharedGlobalConfig>,
   logger: Logger,
   client: ILegacyClusterClient,
   usage?: SearchUsage
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
-  const sqlFacet = new Facet({ client, logger, endpoint: 'ppl.sqlQuery' });
+  const sqlFacet = new Facet({
+    client,
+    logger,
+    endpoint: 'enhancements.sqlQuery',
+    useJobs: false,
+    shimResponse: true,
+  });
 
   return {
-    search: async (context, request: any, _options) => {
+    search: async (context, request: any, options) => {
       try {
+        const query: Query = request.body.query;
         const rawResponse: any = await sqlFacet.describeQuery(context, request);
 
         if (!rawResponse.success) {
@@ -37,16 +45,13 @@ export const sqlSearchStrategyProvider = (
           } as IDataFrameError;
         }
 
-        const partial: PartialDataFrame = {
-          ...request.body.df,
-          fields: rawResponse.data?.schema || [],
-        };
-        const dataFrame = createDataFrame(partial);
-        dataFrame.fields?.forEach((field, index) => {
-          field.values = rawResponse.data.datarows.map((row: any) => row[index]);
+        const dataFrame = createDataFrame({
+          name: query.dataset?.id,
+          schema: rawResponse.data.schema,
+          fields: getFields(rawResponse),
         });
 
-        dataFrame.size = rawResponse.data.datarows?.length || 0;
+        dataFrame.size = rawResponse.data.datarows.length;
 
         if (usage) usage.trackSuccess(rawResponse.took);
 

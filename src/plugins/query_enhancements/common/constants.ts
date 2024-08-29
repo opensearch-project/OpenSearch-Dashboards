@@ -8,6 +8,10 @@ export const PLUGIN_NAME = 'queryEnhancements';
 
 export const BASE_API = '/api/enhancements';
 
+export const DATASET = {
+  S3: 'S3',
+};
+
 export const SEARCH_STRATEGY = {
   PPL: 'ppl',
   PPL_RAW: 'pplraw',

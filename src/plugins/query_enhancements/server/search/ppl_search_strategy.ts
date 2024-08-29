@@ -5,7 +5,7 @@
 
 import { SharedGlobalConfig, Logger, ILegacyClusterClient } from 'opensearch-dashboards/server';
 import { Observable } from 'rxjs';
-import { ISearchStrategy, getDefaultSearchParams, SearchUsage } from '../../../data/server';
+import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import {
   DATA_FRAME_TYPES,
   IDataFrameError,
@@ -17,6 +17,7 @@ import {
 } from '../../../data/common';
 import { getFields } from '../../common/utils';
 import { Facet } from '../utils';
+import { QueryAggConfig } from '../../common';
 
 export const pplSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -32,43 +33,11 @@ export const pplSearchStrategyProvider = (
     shimResponse: true,
   });
 
-  const parseRequest = (query: string) => {
-    const pipeMap = new Map<string, string>();
-    const pipeArray = query.split('|');
-    pipeArray.forEach((pipe, index) => {
-      const splitChar = index === 0 ? '=' : ' ';
-      const split = pipe.trim().split(splitChar);
-      const key = split[0];
-      const value = pipe.replace(index === 0 ? `${key}=` : key, '').trim();
-      pipeMap.set(key, value);
-    });
-
-    const source = pipeMap.get('source');
-
-    const filters = pipeMap.get('where');
-
-    const stats = pipeMap.get('stats');
-    const aggsQuery = stats
-      ? `source=${source} ${filters ? `| where ${filters}` : ''} | stats ${stats}`
-      : undefined;
-
-    return {
-      aggs: aggsQuery,
-    };
-  };
-
   return {
     search: async (context, request: any, options) => {
-      const uiSettingsClient = await context.core.uiSettings.client;
-
-      const { dataFrameHydrationStrategy, ...defaultParams } = await getDefaultSearchParams(
-        uiSettingsClient
-      );
-
       try {
         const query: Query = request.body.query;
-        const { df } = request.body;
-
+        const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
         const rawResponse: any = await pplFacet.describeQuery(context, request);
 
         if (!rawResponse.success) {
@@ -82,7 +51,7 @@ export const pplSearchStrategyProvider = (
         const dataFrame = createDataFrame({
           name: query.dataset?.id,
           schema: rawResponse.data.schema,
-          meta: df?.meta,
+          meta: aggConfig,
           fields: getFields(rawResponse),
         });
 
@@ -90,10 +59,9 @@ export const pplSearchStrategyProvider = (
 
         if (usage) usage.trackSuccess(rawResponse.took);
 
-        if (dataFrame?.meta?.aggsQs) {
-          for (const [key, aggQueryString] of Object.entries(dataFrame?.meta?.aggsQs)) {
-            const aggRequest = parseRequest(aggQueryString as string);
-            request.body.query = aggRequest.aggs;
+        if (aggConfig) {
+          for (const [key, aggQueryString] of Object.entries(aggConfig.qs)) {
+            request.body.query.query = aggQueryString;
             const rawAggs: any = await pplFacet.describeQuery(context, request);
             (dataFrame as IDataFrameWithAggs).aggs = {};
             (dataFrame as IDataFrameWithAggs).aggs[key] = rawAggs.data.datarows?.map((hit: any) => {
