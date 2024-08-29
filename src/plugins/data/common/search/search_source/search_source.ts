@@ -591,6 +591,7 @@ export class SearchSource {
 
     body.stored_fields = computedFields.storedFields;
     body.script_fields = body.script_fields || {};
+    body.fields = ['*'];
     extend(body.script_fields, computedFields.scriptFields);
 
     const defaultDocValueFields = computedFields.docvalueFields
