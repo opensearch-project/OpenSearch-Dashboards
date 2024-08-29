@@ -357,15 +357,11 @@ describe('WorkspaceCreator', () => {
     await waitFor(() => {
       expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
     });
-    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
-    fireEvent.input(nameInput, {
-      target: { value: 'test workspace name' },
-    });
-    fireEvent.click(getByTestId('workspaceUseCase-observability'));
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).toHaveBeenCalledTimes(1);
 
-    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    // Since create button was been disabled, fire form submit event by form directly
+    fireEvent.submit(getByTestId('workspaceCreatorForm'));
     expect(workspaceClientCreate).toHaveBeenCalledTimes(1);
 
     await waitFor(() => {

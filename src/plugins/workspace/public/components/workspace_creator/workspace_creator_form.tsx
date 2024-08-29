@@ -87,7 +87,12 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
   return (
     <EuiFlexGroup className="workspaceCreateFormContainer">
       <EuiFlexItem style={{ maxWidth: 650 }}>
-        <EuiForm id={formId} onSubmit={handleFormSubmit} component="form">
+        <EuiForm
+          id={formId}
+          onSubmit={handleFormSubmit}
+          component="form"
+          data-test-subj="workspaceCreatorForm"
+        >
           {numberOfErrors > 0 && (
             <>
               <WorkspaceFormErrorCallout errors={formErrors} />
