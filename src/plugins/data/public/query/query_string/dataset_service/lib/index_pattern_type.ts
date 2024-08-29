@@ -44,9 +44,9 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     } as Dataset;
   },
 
-  fetch: async (savedObjects, path) => {
+  fetch: async (services, path) => {
     const dataStructure = path[path.length - 1];
-    const indexPatterns = await fetchIndexPatterns(savedObjects);
+    const indexPatterns = await fetchIndexPatterns(services.savedObjects.client);
     return {
       ...dataStructure,
       columnHeader: 'Index patterns',
