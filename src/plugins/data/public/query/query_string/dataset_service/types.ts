@@ -2,9 +2,9 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { EuiIconProps } from '@elastic/eui';
 import { Dataset, DatasetField, DataStructure } from '../../../../common';
+import { IDataPluginServices } from '../../../types';
 
 /**
  * Configuration for handling dataset operations.
@@ -29,11 +29,11 @@ export interface DatasetTypeConfig {
   toDataset: (path: DataStructure[]) => Dataset;
   /**
    * Fetches child options for a given DataStructure.
-   * @param {SavedObjectsClientContract} client - The saved objects client.
+   * @param {IDataPluginServices} services - The data plugin services.
    * @param {DataStructure} dataStructure - The parent DataStructure.
    * @returns {Promise<DatasetHandlerFetchResponse>} A promise that resolves to a DatasetHandlerFetchResponse.
    */
-  fetch: (client: SavedObjectsClientContract, path: DataStructure[]) => Promise<DataStructure>;
+  fetch: (services: IDataPluginServices, path: DataStructure[]) => Promise<DataStructure>;
   /**
    * Fetches fields for the dataset.
    * @returns {Promise<DatasetField[]>} A promise that resolves to an array of DatasetFields.
