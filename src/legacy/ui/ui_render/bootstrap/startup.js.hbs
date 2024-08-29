@@ -14,12 +14,7 @@ try {
   if (!urlThemeParam && window.location.hash.includes('?')) {
     urlThemeParam = new URLSearchParams(window.location.hash.split('?')[1]).get('theme');
   }
-  if (
-    urlThemeParam !== null &&
-    urlThemeParam !== 'dark' &&
-    urlThemeParam !== 'light' &&
-    urlThemeParam !== 'browser'
-  ) {
+  if (![null, 'dark', 'light', 'browser'].includes(urlThemeParam)) {
     throw new Error('theme must be "browser", "light", or "dark", received ' + urlThemeParam);
     urlThemeParam = null;
   }
