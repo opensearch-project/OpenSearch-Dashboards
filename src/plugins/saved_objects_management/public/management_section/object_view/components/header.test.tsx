@@ -63,7 +63,9 @@ describe('Intro component', () => {
     onDeleteClick: () => undefined,
     useUpdatedUX: false,
     navigationUI: ({
-      HeaderControl: () => null,
+      HeaderControl: ({ controls }) => {
+        return controls?.[0].ariaLabel ?? controls?.[0].label ?? null;
+      },
     } as unknown) as NavigationPublicPluginStart['ui'],
     application: coreMock.createStart().application,
   };
@@ -143,5 +145,31 @@ describe('Intro component', () => {
       canViewInApp: false,
     });
     expect(mounted.exists(`a[data-test-subj='savedObjectEditViewInApp']`)).toBe(false);
+  });
+
+  it('renders correctly when use new UX', () => {
+    const mounted = mountHeader({
+      ...defaultProps,
+      useUpdatedUX: true,
+    });
+    expect(mounted).toMatchSnapshot();
+  });
+
+  it('renders correctly when use new UX and canViewInApp is true', () => {
+    const mounted = mountHeader({
+      ...defaultProps,
+      useUpdatedUX: true,
+      canViewInApp: true,
+    });
+    expect(mounted).toMatchSnapshot();
+  });
+
+  it('renders correctly when use new UX and canDelete is true', () => {
+    const mounted = mountHeader({
+      ...defaultProps,
+      useUpdatedUX: true,
+      canDelete: true,
+    });
+    expect(mounted).toMatchSnapshot();
   });
 });
