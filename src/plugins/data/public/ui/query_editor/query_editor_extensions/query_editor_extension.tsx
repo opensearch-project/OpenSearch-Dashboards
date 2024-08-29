@@ -7,6 +7,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { Observable } from 'rxjs';
+import { DataStructureMeta } from '../../../../common';
 
 interface QueryEditorExtensionProps {
   config: QueryEditorExtensionConfig;
@@ -48,6 +49,12 @@ export interface QueryEditorExtensionConfig {
    * @returns whether the extension is enabled.
    */
   isEnabled$: (dependencies: QueryEditorExtensionDependencies) => Observable<boolean>;
+  /**
+   * @returns DataStructureMeta for a given data source id.
+   */
+  getDataStructureMeta?: (
+    dataSourceId: string | undefined
+  ) => Promise<DataStructureMeta | undefined>;
   /**
    * A function that returns the query editor extension component. The component
    * will be displayed on top of the query editor in the search bar.

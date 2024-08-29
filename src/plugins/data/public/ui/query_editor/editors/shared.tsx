@@ -67,7 +67,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
   provideCompletionItems,
   prepend,
 }) => (
-  <div className="euiFormControlLayout euiFormControlLayout--group euiFormControlLayout--compressed osdQueryBar__wrap">
+  <div className="euiFormControlLayout euiFormControlLayout--group osdQueryBar__wrap">
     {prepend}
     <div className="osdQuerEditor__singleLine euiFormControlLayout__childrenWrapper">
       <CodeEditor

@@ -17,8 +17,14 @@ import {
   IDataFrameError,
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
+  Query,
 } from '../../../data/common';
 import * as facet from '../utils/facet';
+import * as utils from '../../common/utils';
+
+jest.mock('../../common/utils', () => ({
+  getFields: jest.fn(),
+}));
 
 describe('sqlSearchStrategyProvider', () => {
   let config$: Observable<SharedGlobalConfig>;
@@ -64,12 +70,16 @@ describe('sqlSearchStrategyProvider', () => {
       describeQuery: jest.fn().mockResolvedValue(mockResponse),
     } as unknown) as facet.Facet;
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([
+      { name: 'field1', type: 'long' },
+      { name: 'field2', type: 'text' },
+    ]);
 
     const strategy = sqlSearchStrategyProvider(config$, logger, client, usage);
     const result = await strategy.search(
       emptyRequestHandlerContext,
       ({
-        body: { query: { qs: 'SELECT * FROM table' }, df: { name: 'table' } },
+        body: { query: { query: 'SELECT * FROM table', dataset: { id: 'test-dataset' } } },
       } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
       {}
     );
@@ -77,15 +87,19 @@ describe('sqlSearchStrategyProvider', () => {
     expect(result).toEqual({
       type: DATA_FRAME_TYPES.DEFAULT,
       body: {
-        name: 'table',
+        name: 'test-dataset',
         fields: [
-          { name: 'field1', type: 'long', values: [1, 2] },
-          { name: 'field2', type: 'text', values: ['value1', 'value2'] },
+          { name: 'field1', type: 'long', values: [] },
+          { name: 'field2', type: 'text', values: [] },
+        ],
+        schema: [
+          { name: 'field1', type: 'long', values: [] },
+          { name: 'field2', type: 'text', values: [] },
         ],
         size: 2,
       },
       took: 100,
-    } as IDataFrameResponse);
+    });
     expect(usage.trackSuccess).toHaveBeenCalledWith(100);
   });
 
@@ -104,16 +118,16 @@ describe('sqlSearchStrategyProvider', () => {
     const result = await strategy.search(
       emptyRequestHandlerContext,
       ({
-        body: { query: { qs: 'SELECT * FROM table' } },
+        body: { query: { query: 'SELECT * FROM table' } },
       } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
       {}
     );
 
-    expect(result).toEqual(({
+    expect(result).toEqual({
       type: DATA_FRAME_TYPES.ERROR,
       body: { error: { cause: 'Query failed' } },
       took: 50,
-    } as unknown) as IDataFrameError);
+    } as IDataFrameError);
   });
 
   it('should handle exceptions', async () => {
@@ -128,12 +142,61 @@ describe('sqlSearchStrategyProvider', () => {
       strategy.search(
         emptyRequestHandlerContext,
         ({
-          body: { query: { qs: 'SELECT * FROM table' } },
+          body: { query: { query: 'SELECT * FROM table' } },
         } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
         {}
       )
     ).rejects.toThrow(mockError);
     expect(logger.error).toHaveBeenCalledWith(`sqlSearchStrategy: ${mockError.message}`);
     expect(usage.trackError).toHaveBeenCalled();
+  });
+
+  it('should handle empty search response', async () => {
+    const mockResponse = {
+      success: true,
+      data: {
+        schema: [
+          { name: 'field1', type: 'long' },
+          { name: 'field2', type: 'text' },
+        ],
+        datarows: [],
+      },
+      took: 10,
+    };
+    const mockFacet = ({
+      describeQuery: jest.fn().mockResolvedValue(mockResponse),
+    } as unknown) as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+    (utils.getFields as jest.Mock).mockReturnValue([
+      { name: 'field1', type: 'long' },
+      { name: 'field2', type: 'text' },
+    ]);
+
+    const strategy = sqlSearchStrategyProvider(config$, logger, client, usage);
+    const result = await strategy.search(
+      emptyRequestHandlerContext,
+      ({
+        body: { query: { query: 'SELECT * FROM empty_table', dataset: { id: 'empty-dataset' } } },
+      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+      {}
+    );
+
+    expect(result).toEqual({
+      type: DATA_FRAME_TYPES.DEFAULT,
+      body: {
+        name: 'empty-dataset',
+        fields: [
+          { name: 'field1', type: 'long', values: [] },
+          { name: 'field2', type: 'text', values: [] },
+        ],
+        schema: [
+          { name: 'field1', type: 'long', values: [] },
+          { name: 'field2', type: 'text', values: [] },
+        ],
+        size: 0,
+      },
+      took: 10,
+    });
+    expect(usage.trackSuccess).toHaveBeenCalledWith(10);
   });
 });
