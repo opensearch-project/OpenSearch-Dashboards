@@ -135,13 +135,13 @@ export const getUpdatedOptions = ({
 const tabOptions: EuiButtonGroupOptionProps[] = [
   {
     id: AssociationDataSourceModalTab.OpenSearchConnections,
-    label: i18n.translate('workspace.form.selectDataSource.subTitle', {
+    label: i18n.translate('workspace.form.dataSourceModal.tab.openSearchConnections', {
       defaultMessage: 'OpenSearch connections',
     }),
   },
   {
     id: AssociationDataSourceModalTab.DirectQueryConnections,
-    label: i18n.translate('workspace.form.selectDataSource.subTitle', {
+    label: i18n.translate('workspace.form.dataSourceModal.tab.directQueryConnections', {
       defaultMessage: 'Direct query connections',
     }),
   },
@@ -153,7 +153,7 @@ export interface AssociationDataSourceModalProps {
   savedObjects: SavedObjectsStart;
   assignedConnections: DataSourceConnection[];
   closeModal: () => void;
-  handleAssignDataSourceConnections: (connections: DataSourceConnection[]) => Promise<void>;
+  handleAssignDataSourceConnections: (connections: DataSourceConnection[]) => void;
 }
 
 export const AssociationDataSourceModal = ({
@@ -229,10 +229,14 @@ export const AssociationDataSourceModal = ({
         </EuiText>
         <EuiSpacer />
         <EuiButtonGroup
-          legend="Data source tab"
+          legend={i18n.translate('workspace.form.dataSourceModal.connectionTypeTab', {
+            defaultMessage: 'Connection type tab',
+          })}
           options={tabOptions}
           idSelected={currentTab}
-          onChange={(id) => setCurrentTab(id)}
+          onChange={(id) => {
+            setCurrentTab(id);
+          }}
           buttonSize="compressed"
         />
         <EuiSpacer size="s" />
