@@ -40,6 +40,7 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { stringify } from '@osd/std';
 
 import { FilterEditor } from './filter_editor';
@@ -55,6 +56,7 @@ interface Props {
   className: string;
   indexPatterns: IIndexPattern[];
   intl: InjectedIntl;
+  isFilterBarPortable?: boolean;
 }
 
 const maxFilterWidth = 600;
@@ -171,12 +173,15 @@ function FilterBarUI(props: Props) {
 
   const classes = classNames('globalFilterBar', props.className);
   const filterBarPrefixText = i18n.translate('data.search.filterBar.filterBarPrefixText', {
-    defaultMessage: 'Filters: ',
+    defaultMessage: 'Filters',
+  });
+  const filterGroupClassName = classNames('globalFilterGroup', {
+    'globalFilterGroup--compressed': useNewHeader && props.isFilterBarPortable,
   });
 
-  return (
+  const filterBar = (
     <EuiFlexGroup
-      className="globalFilterGroup"
+      className={filterGroupClassName}
       gutterSize="none"
       alignItems="flexStart"
       responsive={false}
@@ -195,7 +200,6 @@ function FilterBarUI(props: Props) {
           />
         )}
       </EuiFlexItem>
-
       <EuiFlexItem className="globalFilterGroup__filterFlexItem">
         <EuiFlexGroup
           className={classes}
@@ -210,6 +214,9 @@ function FilterBarUI(props: Props) {
       </EuiFlexItem>
     </EuiFlexGroup>
   );
+  return useNewHeader && props.isFilterBarPortable
+    ? createPortal(filterBar, document.getElementById('applicationHeaderFilterBar')!)
+    : filterBar;
 }
 
 export const FilterBar = injectI18n(FilterBarUI);

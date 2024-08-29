@@ -284,7 +284,7 @@ describe('Workspace plugin', () => {
 
     expect(setupMock.application.register).toHaveBeenCalledWith(
       expect.objectContaining({
-        id: 'analytics_overview',
+        id: 'essentials_overview',
       })
     );
   });
