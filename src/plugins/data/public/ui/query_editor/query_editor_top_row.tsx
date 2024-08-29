@@ -15,6 +15,7 @@ import {
 import classNames from 'classnames';
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { BehaviorSubject } from 'rxjs';
 import { IDataPluginServices, IIndexPattern, Query, TimeHistoryContract, TimeRange } from '../..';
 import {
   useOpenSearchDashboards,
@@ -24,6 +25,7 @@ import { UI_SETTINGS } from '../../../common';
 import { getQueryLog, PersistedLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
+import { SearchBarControl } from '../types';
 
 const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 
@@ -54,6 +56,7 @@ export interface QueryEditorTopRowProps {
   indicateNoData?: boolean;
   datePickerRef?: React.RefObject<HTMLDivElement>;
   savedQueryManagement?: any;
+  additionalControls$?: BehaviorSubject<SearchBarControl[]>;
 }
 
 // Needed for React.lazy
@@ -186,6 +189,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           dataTestSubj={props.dataTestSubj}
           filterBar={props.filterBar}
           savedQueryManagement={props.savedQueryManagement}
+          additionalControls$={props.additionalControls$}
         />
       </EuiFlexItem>
     );

@@ -30,6 +30,7 @@
 
 import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import { QueryStart, SavedQuery } from '../../query';
@@ -40,11 +41,13 @@ import { useSavedQuery } from './lib/use_saved_query';
 import { DataPublicPluginStart } from '../../types';
 import { DataStorage, Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
+import { SearchBarControl } from '../types';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: DataStorage;
+  searchBarControls$: BehaviorSubject<SearchBarControl[]>;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -129,7 +132,12 @@ const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
   return props.useDefaultBehaviors ? {} : props;
 };
 
-export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) {
+export function createSearchBar({
+  core,
+  storage,
+  data,
+  searchBarControls$,
+}: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
@@ -210,6 +218,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           datePickerRef={props.datePickerRef}
           isFilterBarPortable={props.isFilterBarPortable}
+          searchBarControls$={searchBarControls$}
           {...overrideDefaultBehaviors(props)}
         />
       </OpenSearchDashboardsContextProvider>

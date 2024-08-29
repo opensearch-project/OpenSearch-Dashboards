@@ -32,6 +32,7 @@ import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
 import { compact, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import ResizeObserver from 'resize-observer-polyfill';
 import {
   OpenSearchDashboardsReactContextValue,
@@ -45,6 +46,7 @@ import { QueryEditorTopRow } from '../query_editor';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { FilterOptions } from '../filter_bar/filter_options';
+import { SearchBarControl } from '../types';
 
 interface SearchBarInjectedDeps {
   opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
@@ -91,6 +93,7 @@ export interface SearchBarOwnProps {
   onClearSavedQuery?: () => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  searchBarControls$?: BehaviorSubject<SearchBarControl[]>;
   indicateNoData?: boolean;
 }
 
@@ -550,6 +553,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           indicateNoData={this.props.indicateNoData}
           datePickerRef={this.props.datePickerRef}
           savedQueryManagement={searchBarMenu(false, true)}
+          additionalControls$={this.props.searchBarControls$}
         />
       );
     }

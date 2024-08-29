@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import React, { Component, createRef, RefObject } from 'react';
 import { monaco } from '@osd/monaco';
 import {
@@ -37,6 +38,7 @@ import { QueryControls } from '../../query/query_string/language_service/get_que
 import { RecentQueriesTable } from '../../query/query_string/language_service/recent_query';
 import { DefaultInputProps } from './editors';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
+import { SearchBarControl } from '../types';
 
 export interface QueryEditorProps {
   query: Query;
@@ -61,6 +63,7 @@ export interface QueryEditorProps {
   filterBar?: any;
   prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   savedQueryManagement?: any;
+  additionalControls$?: BehaviorSubject<SearchBarControl[]>;
 }
 
 interface Props extends QueryEditorProps {
@@ -76,6 +79,7 @@ interface State {
   timeStamp: IFieldType | null;
   lineCount: number | undefined;
   isRecentQueryVisible: boolean;
+  additionalControls?: SearchBarControl[];
 }
 
 // Needed for React.lazy
@@ -91,6 +95,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     timeStamp: null,
     lineCount: undefined,
     isRecentQueryVisible: false,
+    additionalControls: [],
   };
 
   public inputRef: monaco.editor.IStandaloneCodeEditor | null = null;
@@ -104,6 +109,7 @@ export default class QueryEditorUI extends Component<Props, State> {
   private headerRef: RefObject<HTMLDivElement> = createRef();
   private bannerRef: RefObject<HTMLDivElement> = createRef();
   private extensionMap = this.languageManager.getQueryEditorExtensionMap();
+  private additionalControlsSubscription?: Subscription;
 
   private getQueryString = () => {
     return toUser(this.props.query.query);
@@ -228,6 +234,12 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
 
     this.initPersistedLog();
+
+    if (this.props.additionalControls$) {
+      this.additionalControlsSubscription = this.props.additionalControls$.subscribe((controls) => {
+        this.setState({ additionalControls: controls });
+      });
+    }
   }
 
   public componentDidUpdate(prevProps: Props) {
@@ -254,6 +266,7 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   public componentWillUnmount() {
     if (this.abortController) this.abortController.abort();
+    if (this.additionalControlsSubscription) this.additionalControlsSubscription.unsubscribe();
   }
 
   handleOnFocus = () => {
@@ -328,6 +341,18 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   private renderQueryControls = (queryControls: React.ReactElement[]) => {
     return <QueryControls queryControls={queryControls} />;
+  };
+
+  private renderAdditionalControls = () => {
+    if (!this.state.additionalControls) return null;
+    const sorted = this.state.additionalControls.sort((c1, c2) => c1.order - c2.order);
+    return (
+      <>
+        {sorted.map((control, i) => {
+          return <React.Fragment key={i}>{control.render()}</React.Fragment>;
+        })}
+      </>
+    );
   };
 
   public render() {
@@ -446,6 +471,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           <div className="osdQueryEditor__querycontrols">
             <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
               {this.renderQueryControls(languageEditor.TopBar.Controls)}
+              {this.renderAdditionalControls()}
               {!languageEditor.TopBar.Expanded && this.renderToggleIcon()}
               {this.props.savedQueryManagement}
             </EuiFlexGroup>
