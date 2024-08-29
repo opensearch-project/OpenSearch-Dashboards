@@ -47,7 +47,6 @@ export const createCardInput = (
           id: content.id,
           title: content?.title,
           description: content.description,
-          showToolTip: content?.showToolTip,
           toolTipContent: content?.toolTipContent,
           getTitle: content?.getTitle,
           onClick: content.onClick,

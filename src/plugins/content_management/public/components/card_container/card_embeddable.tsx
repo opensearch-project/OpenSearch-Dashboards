@@ -12,7 +12,6 @@ import { Embeddable, EmbeddableInput, IContainer } from '../../../../embeddable/
 export const CARD_EMBEDDABLE = 'card_embeddable';
 export type CardEmbeddableInput = EmbeddableInput & {
   description: string;
-  showToolTip?: boolean;
   toolTipContent?: string;
   getTitle?: () => React.ReactElement;
   onClick?: () => void;
@@ -38,7 +37,11 @@ export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
     const cardProps: EuiCardProps = {
       ...this.input.cardProps,
       title: (this.input?.getTitle?.() || this.input?.title) ?? '',
-      description: this.input.description,
+      description: (
+        <EuiToolTip position="top" content={this.input?.toolTipContent}>
+          <>{this.input.description}</>
+        </EuiToolTip>
+      ),
       onClick: this.input.onClick,
       icon: this.input?.getIcon?.(),
     };
@@ -48,38 +51,7 @@ export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
       cardProps.footer = this.input?.getFooter?.();
     }
 
-    const card = <EuiCard {...cardProps} />;
-
-    ReactDOM.render(
-      this.input?.showToolTip ? (
-        <EuiToolTip position="top" content={this.input?.toolTipContent}>
-          {card}
-        </EuiToolTip>
-      ) : (
-        card
-      ),
-      node
-    );
-    // const card = (
-    //   <EuiCard
-    //     layout="horizontal"
-    //     title={(this.input?.getTitle?.() || this.input?.title) ?? ''}
-    //     description={this.input.description}
-    //     display="plain"
-    //     onClick={this.input.onClick}
-    //     icon={this.input?.getIcon?.()}
-    //   />
-    // );
-    // ReactDOM.render(
-    //   this.input?.showToolTip ? (
-    //     <EuiToolTip position="top" content={this.input?.toolTipContent}>
-    //       {card}
-    //     </EuiToolTip>
-    //   ) : (
-    //     card
-    //   ),
-    //   node
-    // );
+    ReactDOM.render(<EuiCard {...cardProps} />, node);
   }
 
   public destroy() {

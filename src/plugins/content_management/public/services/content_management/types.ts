@@ -72,7 +72,6 @@ export type Content =
       order: number;
       title?: string;
       description: string;
-      showToolTip?: boolean;
       toolTipContent?: string;
       getTitle?: () => React.ReactElement;
       onClick?: () => void;

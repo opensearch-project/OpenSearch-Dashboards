@@ -9,7 +9,6 @@ import { ContainerInput } from '../../../../embeddable/public';
 export interface CardExplicitInput {
   title?: string;
   description: string;
-  showToolTip?: boolean;
   toolTipContent?: string;
   getTitle?: () => React.ReactElement;
   onClick?: () => void;
