@@ -27,12 +27,16 @@ export function getIgnoredTokens(): number[] {
 
   const firstFunctionIndex = OpenSearchPPLParser.CASE;
   const lastFunctionIndex = OpenSearchPPLParser.CAST;
+  const operatorsToInclude = [
+    OpenSearchPPLParser.PIPE,
+    OpenSearchPPLParser.EQUAL,
+    OpenSearchPPLParser.COMMA,
+  ];
   for (let i = firstFunctionIndex; i <= lastFunctionIndex; i++) {
-    tokens.push(i);
+    if (!operatorsToInclude.includes(i)) {
+      tokens.push(i);
+    }
   }
-
-  // ignore pipe
-  tokens.push(OpenSearchPPLParser.PIPE);
 
   return tokens;
 }
