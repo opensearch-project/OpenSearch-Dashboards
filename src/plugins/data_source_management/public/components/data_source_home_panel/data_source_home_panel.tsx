@@ -14,11 +14,11 @@ import {
   EuiPageHeader,
   EuiPanel,
   EuiButtonGroup,
-  EuiText,
-  EuiLink,
 } from '@elastic/eui';
 import { TopNavControlButtonData, TopNavControlComponentData } from 'src/plugins/navigation/public';
-import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
+import { useObservable } from 'react-use';
+import { of } from 'rxjs';
 import { DataSourceHeader } from './data_source_page_header';
 import { DataSourceTableWithRouter } from '../data_source_table/data_source_table';
 import { ManageDirectQueryDataConnectionsTable } from '../direct_query_data_sources_components/direct_query_data_connection/manage_direct_query_data_connections_table';
@@ -26,6 +26,7 @@ import { CreateButton } from '../create_button';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { DataSourceManagementContext } from '../../types';
+import { TopNavControlDescriptionData } from '../../../../navigation/public';
 
 interface DataSourceHomePanelProps extends RouteComponentProps {
   featureFlagStatus: boolean;
@@ -44,6 +45,7 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
     savedObjects,
     uiSettings,
     application,
+    workspaces,
     docLinks,
     navigation,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
@@ -54,6 +56,7 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
   const [selectedTabId, setSelectedTabId] = useState(defaultTabId);
   const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
   const { HeaderControl } = navigation.ui;
+  const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
 
   useEffect(() => {
     setBreadcrumbs(getListBreadcrumbs());
@@ -62,27 +65,6 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
   const onSelectedTabChanged = (id: string) => {
     setSelectedTabId(id);
   };
-
-  const description = [
-    {
-      renderComponent: (
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="dataSourcesManagement.dataSourcesTable.description"
-            defaultMessage="Create and manage data source connections. "
-          />
-          <EuiLink
-            external={true}
-            href={docLinks.links.opensearchDashboards.dataSource.guide}
-            target="_blank"
-            className="external-link-inline-block"
-          >
-            Learn more
-          </EuiLink>
-        </EuiText>
-      ),
-    },
-  ];
 
   const createDataSourceButton = [
     {
@@ -156,7 +138,42 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
           )}
           <HeaderControl
             setMountPoint={application.setAppDescriptionControls}
-            controls={description}
+            controls={[
+              currentWorkspace?.name
+                ? {
+                    description: i18n.translate(
+                      'dataSourcesManagement.dataSourcesTable.workspace.description',
+                      {
+                        defaultMessage: 'View associated data sources for {name}.',
+                        values: {
+                          name: currentWorkspace.name,
+                        },
+                      }
+                    ),
+                  }
+                : ({
+                    description: i18n.translate(
+                      'dataSourcesManagement.dataSourcesTable.description',
+                      {
+                        defaultMessage: 'Create and manage data source connections.',
+                      }
+                    ),
+                    links: [
+                      {
+                        href: docLinks.links.opensearchDashboards.dataSource.guide,
+                        controlType: 'link',
+                        target: '_blank',
+                        className: 'external-link-inline-block',
+                        label: i18n.translate(
+                          'dataSourcesManagement.dataSourcesTable.documentation',
+                          {
+                            defaultMessage: 'Learn more',
+                          }
+                        ),
+                      },
+                    ],
+                  } as TopNavControlDescriptionData),
+            ]}
           />
         </>
       )}
