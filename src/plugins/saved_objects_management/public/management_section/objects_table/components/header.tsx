@@ -216,9 +216,9 @@ export const Header = ({
         {title}
         {rightControls}
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      {!useUpdatedUX ? <EuiSpacer size="m" /> : <EuiSpacer size="l" />}
       {description}
-      <EuiSpacer size="m" />
+      {!useUpdatedUX && <EuiSpacer size="m" />}
     </Fragment>
   );
 };

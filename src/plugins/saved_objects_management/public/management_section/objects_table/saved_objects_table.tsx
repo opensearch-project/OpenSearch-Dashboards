@@ -1167,7 +1167,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           applications={applications}
           currentWorkspaceName={currentWorkspace?.name}
         />
-        <EuiSpacer size="xs" />
+        {!useUpdatedUX && <EuiSpacer size="xs" />}
         <RedirectAppLinks application={applications}>
           <Table
             basePath={http.basePath}
