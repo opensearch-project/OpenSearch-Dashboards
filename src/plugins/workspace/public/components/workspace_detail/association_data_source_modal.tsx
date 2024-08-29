@@ -28,7 +28,7 @@ import { DataSourceConnection, DataSourceConnectionType } from '../../../common/
 import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../../core/public';
 import { AssociationDataSourceModalTab } from '../../../common/constants';
 
-type DataSourceModalOption = EuiSelectableOption<{ connection: DataSourceConnection }>;
+export type DataSourceModalOption = EuiSelectableOption<{ connection: DataSourceConnection }>;
 
 const convertConnectionsToOptions = (
   connections: DataSourceConnection[],
@@ -54,6 +54,82 @@ const convertConnectionsToOptions = (
       connection,
       checked: undefined,
     }));
+};
+
+export const getUpdatedOptions = ({
+  prevAllOptions,
+  newOptions,
+}: {
+  prevAllOptions: DataSourceModalOption[];
+  newOptions: DataSourceModalOption[];
+}) => {
+  let updatedOptions = prevAllOptions;
+  const newCheckedOptions: DataSourceModalOption[] = [];
+  const newUncheckedOptions: DataSourceModalOption[] = [];
+
+  for (const option of newOptions) {
+    const previousOption = prevAllOptions.find(
+      ({ connection }) => connection.id === option.connection.id
+    );
+
+    if (previousOption?.checked === option.checked) {
+      continue;
+    }
+    if (option.checked === 'on') {
+      newCheckedOptions.push(option);
+    } else {
+      newUncheckedOptions.push(option);
+    }
+  }
+
+  // Update checked status if option checked this time
+  for (const newCheckedOption of newCheckedOptions) {
+    switch (newCheckedOption.connection.connectionType) {
+      case DataSourceConnectionType.OpenSearchConnection:
+        // Set data source and its DQC checked status to 'on'
+        updatedOptions = updatedOptions.map((option) =>
+          option.connection.parentId === newCheckedOption.connection.id ||
+          option.connection.id === newCheckedOption.connection.id
+            ? { ...option, checked: 'on' }
+            : option
+        );
+        break;
+      case DataSourceConnectionType.DirectQueryConnection:
+        // Set DQC and its parent data source checked status to 'on'
+        updatedOptions = updatedOptions.map((option) =>
+          option.connection.id === newCheckedOption.connection.id ||
+          option.connection.id === newCheckedOption.connection.parentId
+            ? { ...option, checked: 'on' }
+            : option
+        );
+        break;
+    }
+  }
+
+  // Update checked status if option unchecked this time
+  for (const newUncheckedOption of newUncheckedOptions) {
+    switch (newUncheckedOption.connection.connectionType) {
+      case DataSourceConnectionType.OpenSearchConnection:
+        // Set data source and its DQC checked status to undefined
+        updatedOptions = updatedOptions.map((option) =>
+          option.connection.parentId === newUncheckedOption.connection.id ||
+          option.connection.id === newUncheckedOption.connection.id
+            ? { ...option, checked: undefined }
+            : option
+        );
+        break;
+      case DataSourceConnectionType.DirectQueryConnection:
+        // Set DQC checked status to 'undefined'
+        updatedOptions = updatedOptions.map((option) =>
+          option.connection.id === newUncheckedOption.connection.id
+            ? { ...option, checked: undefined }
+            : option
+        );
+        break;
+    }
+  }
+
+  return updatedOptions;
 };
 
 const tabOptions: EuiButtonGroupOptionProps[] = [
@@ -114,66 +190,9 @@ export const AssociationDataSourceModal = ({
     [allOptions]
   );
 
-  const handleSelectionChange = useCallback(
-    (newOptions: DataSourceModalOption[]) => {
-      const displayedConnectionIds = newOptions.map(({ connection }) => connection.id);
-      const newCheckedConnectionIds = newOptions
-        .filter(({ checked }) => checked === 'on')
-        .map(({ connection }) => connection.id);
-
-      setAllOptions((prevOptions) => {
-        return prevOptions.map((option) => {
-          option = { ...option };
-          const checkedInNewOptions = newCheckedConnectionIds.includes(option.connection.id);
-          const connection = option.connection;
-          // Some connections may hidden by different tab, we should not update checked status for these connections
-          if (displayedConnectionIds.includes(connection.id)) {
-            option.checked = checkedInNewOptions ? 'on' : undefined;
-          }
-
-          // Set option to 'on' if checked status of any child DQC become 'on' this time
-          if (connection.connectionType === DataSourceConnectionType.OpenSearchConnection) {
-            const childDQCIds = allConnections
-              .filter(({ parentId }) => parentId === connection.id)
-              .map(({ id }) => id)
-              // Ensure all child DQCs has been displayed, or the checked status should not been updated
-              .filter((id) => displayedConnectionIds.includes(id));
-            // Check if there any DQC change to checked status this time, set to "on" if exists.
-            if (
-              newCheckedConnectionIds.some(
-                (id) =>
-                  childDQCIds.includes(id) &&
-                  // This child DQC not checked before
-                  !prevOptions.find((item) => item.connection.id === id && item.checked === 'on')
-              )
-            ) {
-              option.checked = 'on';
-            }
-          }
-
-          // Set option to 'on' if checked status of parent data source become 'on' this time
-          if (connection.connectionType === DataSourceConnectionType.DirectQueryConnection) {
-            const parentConnection = allConnections.find(({ id }) => id === connection.parentId);
-            // Ensure parent connection has been displayed, or the checked status should not been changed.
-            if (parentConnection && displayedConnectionIds.includes(parentConnection.id)) {
-              const isParentCheckedLastTime = !!prevOptions.find(
-                (item) => item.connection.id === parentConnection.id && item.checked === 'on'
-              );
-              const isParentCheckedThisTime = newCheckedConnectionIds.includes(parentConnection.id);
-
-              // Update checked status if parent checked status changed this time
-              if (isParentCheckedLastTime !== isParentCheckedThisTime) {
-                option.checked = isParentCheckedThisTime ? 'on' : undefined;
-              }
-            }
-          }
-
-          return option;
-        });
-      });
-    },
-    [allConnections]
-  );
+  const handleSelectionChange = useCallback((newOptions: DataSourceModalOption[]) => {
+    setAllOptions((prevAllOptions) => getUpdatedOptions({ prevAllOptions, newOptions }));
+  }, []);
 
   useEffect(() => {
     setIsLoading(true);
