@@ -258,8 +258,7 @@ export const getSuggestions = async ({
             return {
               text: val,
               type: monaco.languages.CompletionItemKind.Value,
-              start: -1,
-              end: -1,
+              detail: '',
             };
           })
         );
@@ -278,8 +277,7 @@ export const getSuggestions = async ({
         completions.push({
           text: tokenSymbolName,
           type: monaco.languages.CompletionItemKind.Keyword,
-          start: -1,
-          end: -1,
+          detail: '',
         });
       }
     });
