@@ -46,7 +46,7 @@ exports[`WorkspaceInitial render workspace initial page normally when theme is d
                 <h1
                   class="euiTitle euiTitle--large"
                 >
-                  Getting started with OpenSearch
+                  Create a workspace to get started
                 </h1>
               </div>
               <div
@@ -65,7 +65,7 @@ exports[`WorkspaceInitial render workspace initial page normally when theme is d
                 <a
                   class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft"
                   data-test-subj="workspace-initial-button-openSearch"
-                  href="https://www.opensearch.org/"
+                  href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html"
                   rel="noreferrer"
                 >
                   <span
@@ -390,7 +390,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is da
                 <h1
                   class="euiTitle euiTitle--large"
                 >
-                  Getting started with OpenSearch
+                  Create a workspace to get started
                 </h1>
               </div>
               <div
@@ -409,7 +409,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is da
                 <a
                   class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft"
                   data-test-subj="workspace-initial-button-openSearch"
-                  href="https://www.opensearch.org/"
+                  href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html"
                   rel="noreferrer"
                 >
                   <span
@@ -734,7 +734,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                 <h1
                   class="euiTitle euiTitle--large"
                 >
-                  Getting started with OpenSearch
+                  Create a workspace to get started
                 </h1>
               </div>
               <div
@@ -753,7 +753,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                 <a
                   class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft"
                   data-test-subj="workspace-initial-button-openSearch"
-                  href="https://www.opensearch.org/"
+                  href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html"
                   rel="noreferrer"
                 >
                   <span

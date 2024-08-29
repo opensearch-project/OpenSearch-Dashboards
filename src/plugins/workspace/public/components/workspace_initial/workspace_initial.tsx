@@ -125,7 +125,7 @@ export const WorkspaceInitial = () => {
         <EuiTitle size="l">
           <h1>
             {i18n.translate('workspace.initial.title', {
-              defaultMessage: 'Getting started with OpenSearch',
+              defaultMessage: 'Create a workspace to get started',
             })}
           </h1>
         </EuiTitle>
@@ -140,7 +140,7 @@ export const WorkspaceInitial = () => {
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="eui-displayInline">
         <EuiSmallButtonEmpty
-          href="https://www.opensearch.org/"
+          href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html"
           iconType="popout"
           iconSide="right"
           flush="left"
