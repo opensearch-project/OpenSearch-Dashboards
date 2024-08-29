@@ -64,7 +64,11 @@ export const WorkspaceDetailFormDetails = ({
       // Essential can be changed to other use cases;
       // Analytics (all) cannot be changed back to a single use case;
       // Other use cases can only be changed to Analytics (all) use case.
-      return currentUseCase === 'analytics' || id === 'all' || id === currentUseCase;
+      return (
+        currentUseCase === DEFAULT_NAV_GROUPS.essentials.id ||
+        id === DEFAULT_NAV_GROUPS.all.id ||
+        id === currentUseCase
+      );
     })
     .map((useCase) => ({
       value: useCase.id,
