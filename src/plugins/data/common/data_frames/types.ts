@@ -105,6 +105,11 @@ export interface IDataFrameResponse extends SearchResponse<any> {
   took: number;
 }
 
+export interface IDataFrameResponseError {
+  status: number;
+  message: string;
+}
+
 export interface IDataFrameError extends IDataFrameResponse {
   error: Error;
 }

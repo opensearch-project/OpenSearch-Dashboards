@@ -226,7 +226,9 @@ export const useSearch = (services: DiscoverViewServices) => {
         rows: [],
       });
 
-      data.search.showError(error as Error);
+      console.log('error', error.body);
+
+      data.search.showError((error.body || error) as Error);
     } finally {
       initalSearchComplete.current = true;
     }

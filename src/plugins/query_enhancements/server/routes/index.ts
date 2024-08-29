@@ -15,6 +15,7 @@ import { ISearchStrategy } from '../../../data/server';
 import { API, SEARCH_STRATEGY } from '../../common';
 import { registerQueryAssistRoutes } from './query_assist';
 import { registerDataSourceConnectionsRoutes } from './data_source_connection';
+import { instance } from '../../../console/public/application/contexts/editor_context/editor_registry';
 
 /**
  * Defines a route for a specific search strategy.
@@ -85,10 +86,9 @@ function defineRoute(
         );
         return res.ok({ body: { ...queryRes } });
       } catch (err) {
-        logger.error(err);
         return res.custom({
-          statusCode: err.status ?? 500,
-          body: err,
+          statusCode: err.name,
+          body: err.message,
         });
       }
     }
