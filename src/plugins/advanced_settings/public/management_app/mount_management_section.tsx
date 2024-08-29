@@ -103,10 +103,22 @@ export async function mountManagementSection(
     </Router>
   );
 
+  const pagePaddingSize = useUpdatedUX
+    ? // When useUpdatedUX is enabled, page should align with header vertically.
+      {
+        paddingSize: 'm' as const,
+      }
+    : {};
+
   ReactDOM.render(
     <I18nProvider>
       {params.wrapInPage ? (
-        <EuiPageContent hasShadow={false} hasBorder={false} color="transparent">
+        <EuiPageContent
+          hasShadow={false}
+          hasBorder={false}
+          color="transparent"
+          {...pagePaddingSize}
+        >
           {content}
         </EuiPageContent>
       ) : (
