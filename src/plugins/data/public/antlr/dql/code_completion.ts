@@ -53,8 +53,7 @@ const findFieldSuggestions = (indexPattern: IndexPattern) => {
       text: field,
       type: monaco.languages.CompletionItemKind.Field,
       insertText: `${field}: `,
-      start: -1,
-      end: -1,
+      detail: '',
     };
   });
 

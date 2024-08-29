@@ -13,7 +13,7 @@ import { monaco } from '@osd/monaco';
 import { CursorPosition, AutocompleteResultBase } from '../shared/types';
 import { parseQuery } from '../shared/utils';
 import { openSearchPplAutocompleteData } from './opensearch_ppl_autocomplete';
-import { QuerySuggestion } from '../../autocomplete';
+import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 
 const fetchFieldSuggestions = (
@@ -54,10 +54,9 @@ export const getSuggestions = async ({
   position,
   query,
   services,
-}) => {
+}: QuerySuggestionGetFnArgs) => {
+  if (!services || !services.appName || !indexPattern) return [];
   try {
-    const { api } = services.uiSettings;
-    const dataSetManager = services.data.query.dataSetManager;
     const { lineNumber, column } = position || {};
     const suggestions = getOpenSearchPplAutoCompleteSuggestions(query, {
       line: lineNumber || selectionStart,
@@ -77,7 +76,6 @@ export const getSuggestions = async ({
           text: sk.value,
           type: monaco.languages.CompletionItemKind.Keyword,
           detail: '',
-          insertText: sk.value,
         }))
       );
     }

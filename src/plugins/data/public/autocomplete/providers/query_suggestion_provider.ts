@@ -64,7 +64,6 @@ export interface QuerySuggestionBasic {
   end: number;
   start: number;
   text: string;
-  insertText?: string;
   cursorIndex?: number;
 }
 
@@ -74,15 +73,16 @@ export interface QuerySuggestionField extends QuerySuggestionBasic {
   field: IFieldType;
 }
 
-export interface SqlMonacoCompatibleQuerySuggestion
-  extends Pick<QuerySuggestionBasic, 'description' | 'insertText' | 'cursorIndex'> {
+export interface MonacoCompatibleQuerySuggestion
+  extends Pick<QuerySuggestionBasic, 'description' | 'cursorIndex'> {
   type: monaco.languages.CompletionItemKind;
   text: string;
   detail: string;
+  insertText?: string;
 }
 
 /** @public **/
 export type QuerySuggestion =
   | QuerySuggestionBasic
   | QuerySuggestionField
-  | SqlMonacoCompatibleQuerySuggestion;
+  | MonacoCompatibleQuerySuggestion;
