@@ -66,6 +66,7 @@ export interface SearchBarOwnProps {
   showQueryBar?: boolean;
   showQueryInput?: boolean;
   showFilterBar?: boolean;
+  isFilterBarPortable?: boolean;
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
   filters?: Filter[];
@@ -479,6 +480,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
               filters={this.props.filters!}
               onFiltersUpdated={this.props.onFiltersUpdated}
               indexPatterns={this.props.indexPatterns!}
+              isFilterBarPortable={this.props.isFilterBarPortable}
             />
           </div>
         </div>
