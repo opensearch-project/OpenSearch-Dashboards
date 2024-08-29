@@ -89,12 +89,12 @@ export const indexTypeConfig: DatasetTypeConfig = {
 };
 
 const fetchDataSources = async (client: SavedObjectsClientContract) => {
-  const resp = await client.find<any>({
+  const response = await client.find<any>({
     type: 'data-source',
     perPage: 10000,
   });
   const dataSources: DataStructure[] = [DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE].concat(
-    resp.savedObjects.map((savedObject) => ({
+    response.savedObjects.map((savedObject) => ({
       id: savedObject.id,
       title: savedObject.attributes.title,
       type: 'DATA_SOURCE',

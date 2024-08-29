@@ -3,9 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { DEFAULT_DATA, DataStructure, Dataset, DatasetField } from 'src/plugins/data/common';
-import { DatasetTypeConfig, IDataPluginServices } from 'src/plugins/data/public';
+import { Observable, Subscription, timer } from 'rxjs';
+import { filter, map, mergeMap, takeWhile } from 'rxjs/operators';
+import {
+  DATA_STRUCTURE_META_TYPES,
+  DEFAULT_DATA,
+  DataStructure,
+  DataStructureCustomMeta,
+  Dataset,
+  DatasetField,
+} from '../../../data/common';
+import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
 import { DATASET } from '../../common';
 
 const S3_ICON = 'visTable';
@@ -54,29 +68,21 @@ export const s3TypeConfig: DatasetTypeConfig = {
         };
       }
       case 'CONNECTION': {
-        const databases = await fetchDatabases(http, dataStructure);
+        const databases = await fetchDatabases(http, path);
         return {
           ...dataStructure,
           columnHeader: 'Databases',
           hasNext: true,
-          children: databases.map((db) => ({
-            id: `${dataStructure.id}.${db}`,
-            title: db,
-            type: 'DATABASE',
-          })),
+          children: databases,
         };
       }
       case 'DATABASE': {
-        const tables = await fetchTables(http, dataStructure);
+        const tables = await fetchTables(http, path);
         return {
           ...dataStructure,
           columnHeader: 'Tables',
           hasNext: false,
-          children: tables.map((table) => ({
-            id: `${dataStructure.id}.${table}`,
-            title: table,
-            type: 'TABLE',
-          })),
+          children: tables,
         };
       }
       default: {
@@ -92,14 +98,51 @@ export const s3TypeConfig: DatasetTypeConfig = {
   },
 
   fetchFields: async (dataset: Dataset): Promise<DatasetField[]> => {
-    // This is a placeholder. You'll need to implement the actual logic to fetch S3 fields.
-    // For now, we'll return an empty array.
+    // Implement field fetching logic here
     return [];
   },
 
-  supportedLanguages: (): string[] => {
-    return ['sql']; // Assuming S3 only supports SQL queries
+  supportedLanguages: (dataset: Dataset): string[] => {
+    return ['SQL']; // Assuming S3 only supports SQL queries
   },
+};
+
+const fetch = (
+  http: HttpSetup,
+  path: DataStructure[],
+  type: 'DATABASE' | 'TABLE'
+): Observable<DataStructure[]> => {
+  const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
+  const parent = path[path.length - 1];
+  const meta = parent.meta as DataStructureCustomMeta;
+
+  return timer(0, 5000).pipe(
+    mergeMap(() =>
+      http.fetch('../../api/enhancements/datasource/jobs', {
+        query: {
+          id: dataSource?.id,
+          queryId: meta.query.id,
+        },
+      })
+    ),
+    takeWhile((response) => response.status !== 'SUCCESS' && response.status !== 'FAILED', true),
+    filter((response) => response.status === 'SUCCESS'),
+    map((response) => {
+      if (response.status === 'FAILED') {
+        throw new Error('Job failed');
+      }
+      return response.datarows.map((item: string[]) => ({
+        id: `${parent.id}.${item[type === 'DATABASE' ? 0 : 1]}`,
+        title: item[type === 'DATABASE' ? 0 : 1],
+        type,
+        meta: {
+          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+          query: meta.query,
+          session: meta.session,
+        } as DataStructureCustomMeta,
+      }));
+    })
+  );
 };
 
 const fetchDataSources = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
@@ -113,6 +156,12 @@ const fetchDataSources = async (client: SavedObjectsClientContract): Promise<Dat
       id: savedObject.id,
       title: savedObject.attributes.title,
       type: 'DATA_SOURCE',
+      meta: {
+        query: {
+          id: savedObject.id,
+        },
+        type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+      } as DataStructureCustomMeta,
     }))
   );
 };
@@ -121,33 +170,95 @@ const fetchConnections = async (
   http: HttpSetup,
   dataSource: DataStructure
 ): Promise<DataStructure[]> => {
+  const query = (dataSource.meta as DataStructureCustomMeta).query;
   const response = await http.fetch(`../../api/enhancements/datasource/external`, {
-    query: {
-      id: dataSource.id,
-    },
+    query,
   });
 
   return response
-    .filter((cluster: { connector: string }) => cluster.connector === 'S3GLUE')
-    .map((cluster: { name: any }) => ({
-      id: `${dataSource.id}::${cluster.name}`,
-      title: cluster.name,
+    .filter((ds: any) => ds.connector === 'S3GLUE')
+    .map((ds: any) => ({
+      id: `${dataSource.id}::${ds.name}`,
+      title: ds.name,
       type: 'CONNECTION',
-      dataSource,
+      meta: {
+        query,
+        type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+      } as DataStructureCustomMeta,
     }));
 };
 
-const fetchDatabases = async (http: HttpSetup, connection: DataStructure): Promise<string[]> => {
-  const response = await http.fetch(`../../api/enhancements/datasource/external`, {
-    query: {
-      id: `SHOW DATABASES IN ${connection}`,
-    },
+const fetchDatabases = async (http: HttpSetup, path: DataStructure[]): Promise<DataStructure[]> => {
+  const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
+  const connection = path[path.length - 1];
+  const query = (connection.meta as DataStructureCustomMeta).query;
+  const jobResponse = await http.post(`../../api/enhancements/datasource/jobs`, {
+    body: JSON.stringify({
+      lang: 'sql',
+      query: `SHOW DATABASES in ${connection.title}`,
+      datasource: dataSource?.title,
+    }),
+    query,
   });
-  return ['database1', 'database2'];
+
+  connection.meta = {
+    ...connection.meta,
+    query: {
+      id: jobResponse.queryId,
+    },
+    session: {
+      id: jobResponse.sessionId,
+    },
+  } as DataStructureCustomMeta;
+
+  return new Promise((resolve, reject) => {
+    const subscription: Subscription = fetch(http, path, 'DATABASE').subscribe({
+      next: (dataStructures) => {
+        subscription.unsubscribe();
+        resolve(dataStructures);
+      },
+      error: (error) => {
+        subscription.unsubscribe();
+        reject(error);
+      },
+    });
+  });
 };
 
-const fetchTables = async (http: HttpSetup, database: DataStructure): Promise<string[]> => {
-  // Implement logic to fetch tables for the given S3 database
-  // This might involve querying the S3 metadata or a catalog service
-  return ['table1', 'table2']; // Placeholder
+const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<DataStructure[]> => {
+  const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
+  const database = path[path.length - 1];
+  const jobResponse = await http.post(`../../api/enhancements/datasource/jobs`, {
+    body: JSON.stringify({
+      lang: 'sql',
+      query: `SHOW TABLES in ${database.title}`,
+      datasource: dataSource?.title,
+    }),
+    query: {
+      id: dataSource?.id,
+    },
+  });
+
+  database.meta = {
+    ...database.meta,
+    query: {
+      id: jobResponse.queryId,
+    },
+    session: {
+      id: jobResponse.sessionId,
+    },
+  } as DataStructureCustomMeta;
+
+  return new Promise((resolve, reject) => {
+    const subscription: Subscription = fetch(http, path, 'TABLE').subscribe({
+      next: (dataStructures) => {
+        subscription.unsubscribe();
+        resolve(dataStructures);
+      },
+      error: (error) => {
+        subscription.unsubscribe();
+        reject(error);
+      },
+    });
+  });
 };
