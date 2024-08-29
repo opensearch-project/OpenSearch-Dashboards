@@ -1,0 +1,2 @@
+feat:
+- Update the collaborator input from a combobox to a text field ([#7879](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7879))
