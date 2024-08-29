@@ -157,14 +157,14 @@ export class QueryStringManager {
 
   public getInitialQueryByDataset = (newDataset: Dataset) => {
     const curQuery = this.query$.getValue();
-    const languageId = curQuery.language;
+    const languageId = newDataset.language || curQuery.language;
     const language = this.languageService.getLanguage(languageId);
-    const newQuery = { ...curQuery, dataset: newDataset };
-    const input = language?.getQueryString(newQuery) || '';
+    const newQuery = { ...curQuery, language: languageId, dataset: newDataset };
+    const newQueryString = language?.getQueryString(newQuery) || '';
 
     return {
       ...newQuery,
-      query: input,
+      query: newQueryString,
     };
   };
 
