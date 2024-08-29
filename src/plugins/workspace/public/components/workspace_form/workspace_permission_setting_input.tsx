@@ -155,8 +155,8 @@ export const WorkspacePermissionSettingInput = ({
           compressed={true}
           disabled={userOrGroupDisabled || !isEditing}
           onChange={handleGroupOrUserIdChange}
-          value={type === WorkspacePermissionItemType.User ? userId ?? '' : group ?? ''}
-          data-test-subj="fieldtextInput"
+          value={(type === WorkspacePermissionItemType.User ? userId : group) ?? ''}
+          data-test-subj="workspaceFormUserIdOrGroupInput"
           placeholder={
             type === WorkspacePermissionItemType.User
               ? i18n.translate('workspaceForm.permissionSetting.selectUser', {

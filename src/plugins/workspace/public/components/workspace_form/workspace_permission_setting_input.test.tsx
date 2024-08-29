@@ -92,10 +92,10 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult, onGroupOrUserIdChangeMock } = setup();
 
     expect(onGroupOrUserIdChangeMock).not.toHaveBeenCalled();
-    fireEvent.change(renderResult.getAllByTestId('fieldtextInput')[0], {
+    fireEvent.change(renderResult.getAllByTestId('workspaceFormUserIdOrGroupInput')[0], {
       target: { value: 'user1' },
     });
-    fireEvent.blur(renderResult.getAllByTestId('fieldtextInput')[0]);
+    fireEvent.blur(renderResult.getAllByTestId('workspaceFormUserIdOrGroupInput')[0]);
     expect(onGroupOrUserIdChangeMock).toHaveBeenCalledWith({ type: 'user', userId: 'user1' }, 0);
   });
   it('should call onGroupOrUserIdChange with group', () => {
@@ -104,10 +104,10 @@ describe('WorkspacePermissionSettingInput', () => {
     });
 
     expect(onGroupOrUserIdChangeMock).not.toHaveBeenCalled();
-    fireEvent.change(renderResult.getAllByTestId('fieldtextInput')[0], {
+    fireEvent.change(renderResult.getAllByTestId('workspaceFormUserIdOrGroupInput')[0], {
       target: { value: 'group' },
     });
-    fireEvent.blur(renderResult.getAllByTestId('fieldtextInput')[0]);
+    fireEvent.blur(renderResult.getAllByTestId('workspaceFormUserIdOrGroupInput')[0]);
     expect(onGroupOrUserIdChangeMock).toHaveBeenCalledWith({ type: 'group', group: 'group' }, 0);
   });
 
