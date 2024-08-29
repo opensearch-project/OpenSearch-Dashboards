@@ -9171,6 +9171,9 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
             </EuiHeaderSection>
           </div>
         </EuiHeader>
+        <div
+          id="applicationHeaderFilterBar"
+        />
       </div>
     </div>
     <CollapsibleNav

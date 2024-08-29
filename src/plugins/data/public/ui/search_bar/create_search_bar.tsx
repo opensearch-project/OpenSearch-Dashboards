@@ -209,6 +209,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           datePickerRef={props.datePickerRef}
+          isFilterBarPortable={props.isFilterBarPortable}
           {...overrideDefaultBehaviors(props)}
         />
       </OpenSearchDashboardsContextProvider>
