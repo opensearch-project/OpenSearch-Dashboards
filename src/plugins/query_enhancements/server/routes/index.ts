@@ -16,6 +16,40 @@ import { API, SEARCH_STRATEGY } from '../../common';
 import { registerQueryAssistRoutes } from './query_assist';
 import { registerDataSourceConnectionsRoutes } from './data_source_connection';
 
+/**
+ * Defines a route for a specific search strategy.
+ *
+ * @experimental This function is experimental and might change in future releases.
+ *
+ * @param logger - The logger instance.
+ * @param router - The router instance.
+ * @param searchStrategies - The available search strategies.
+ * @param searchStrategyId - The ID of the search strategy to use.
+ *
+ * @example
+ * API Request Body:
+ * ```json
+ * {
+ *   "query": {
+ *     "query": "SELECT * FROM my_index",
+ *     "language": "sql",
+ *     "dataset": {
+ *       "id": "my_dataset_id",
+ *       "title": "My Dataset"
+ *     },
+ *     "format": "json"
+ *   },
+ *   @experimental
+ *   "aggConfig": {
+ *     // Optional aggregation configuration
+ *   },
+ *   @deprecated
+ *   "df": {
+ *     // Optional data frame configuration
+ *   }
+ * }
+ * ```
+ */
 function defineRoute(
   logger: Logger,
   router: IRouter,
@@ -37,6 +71,7 @@ function defineRoute(
             dataset: schema.nullable(schema.object({}, { unknowns: 'allow' })),
             format: schema.string(),
           }),
+          aggConfig: schema.nullable(schema.object({}, { unknowns: 'allow' })),
           df: schema.nullable(schema.object({}, { unknowns: 'allow' })),
         }),
       },
@@ -125,6 +160,16 @@ function defineRoute(
   );
 }
 
+/**
+ * Defines routes for various search strategies and registers additional routes.
+ *
+ * @experimental This function is experimental and might change in future releases.
+ *
+ * @param logger - The logger instance.
+ * @param router - The router instance.
+ * @param client - The client instance.
+ * @param searchStrategies - The available search strategies.
+ */
 export function defineRoutes(
   logger: Logger,
   router: IRouter,
