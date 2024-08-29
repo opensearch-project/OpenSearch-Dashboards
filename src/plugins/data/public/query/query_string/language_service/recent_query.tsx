@@ -5,22 +5,11 @@
 
 import './_recent_query.scss';
 
-import {
-  EuiBasicTable,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCopy,
-  EuiPopover,
-  EuiText,
-} from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiCopy } from '@elastic/eui';
 import moment from 'moment';
-
-import React, { useCallback, useEffect, useState } from 'react';
 import { Query, TimeRange } from 'src/plugins/data/common';
 import { QueryStringContract } from '../query_string_manager';
-
-// TODO: Need to confirm this number
-export const MAX_RECENT_QUERY_SIZE = 10;
 
 interface RecentQueryItem {
   query: Query;
@@ -28,142 +17,103 @@ interface RecentQueryItem {
   timeRange?: TimeRange;
 }
 
-export function RecentQuery(props: {
+interface RecentQueryTableItem {
+  id: number;
+  query: Query['query'];
+  time: string;
+}
+
+interface RecentQueriesTableProps {
   queryString: QueryStringContract;
-  query: Query;
   onClickRecentQuery: (query: Query, timeRange?: TimeRange) => void;
-}) {
+  isVisible: boolean;
+}
+
+export const MAX_RECENT_QUERY_SIZE = 10;
+
+export function RecentQueriesTable({
+  queryString,
+  onClickRecentQuery,
+  isVisible,
+}: RecentQueriesTableProps) {
+  const currentLanguage = queryString.getQuery().language;
   const [recentQueries, setRecentQueries] = useState<RecentQueryItem[]>(
-    props.queryString.getQueryHistory()
+    queryString.getQueryHistory()
   );
-  const [isPopoverOpen, setPopover] = useState(false);
-  const onButtonClick = () => {
-    setPopover(!isPopoverOpen);
-  };
-
-  const clearHistory = useCallback(() => {
-    props.queryString?.clearQueryHistory();
-    setRecentQueries(props.queryString?.getQueryHistory());
-  }, [props.queryString]);
-
-  const clear = () => {
-    clearHistory();
-  };
 
   useEffect(() => {
-    const done = props.queryString.changeQueryHistory(setRecentQueries);
+    const done = queryString.changeQueryHistory(setRecentQueries);
     return () => done();
-  }, [props.queryString]);
+  }, [queryString]);
 
-  const getRowProps = (item: any) => {
-    const { id } = item;
-    return {
-      'data-test-subj': `row-${id}`,
-      className: 'customRowClass',
-      onClick: () => {},
-    };
-  };
+  const getRowProps = (item: any) => ({
+    'data-test-subj': `row-${item.id}`,
+    className: 'customRowClass',
+    onClick: () => {},
+  });
 
-  const getCellProps = (item: any, column: any) => {
-    const { id } = item;
-    const { field } = column;
-    return {
-      className: 'customCellClass',
-      'data-test-subj': `cell-${id}-${field}`,
-      textOnly: true,
-    };
-  };
+  const getCellProps = (item: any, column: any) => ({
+    className: 'customCellClass',
+    'data-test-subj': `cell-${item.id}-${column.field}`,
+    textOnly: true,
+  });
 
-  const actions = [
+  const tableColumns: Array<EuiBasicTableColumn<RecentQueryTableItem>> = [
+    { field: 'query', name: 'Recent query' },
+    { field: 'time', name: 'Last run', width: '200px' },
     {
-      name: 'Run',
-      description: 'Run recent query',
-      icon: 'play',
-      type: 'icon',
-      onClick: (item) => {
-        props.onClickRecentQuery(recentQueries[item.id].query, recentQueries[item.id].timeRange);
-        setPopover(false);
-      },
-      'data-test-subj': 'action-run',
-    },
-    {
-      render: (item) => {
-        return (
-          <EuiCopy textToCopy={item.query}>
-            {(copy) => (
-              <EuiButtonIcon
-                onClick={copy}
-                iconType="copyClipboard"
-                aria-label="Copy recent query"
-              />
-            )}
-          </EuiCopy>
-        );
-      },
+      name: 'Actions',
+      actions: [
+        {
+          name: 'Run',
+          description: 'Run recent query',
+          icon: 'play',
+          type: 'icon',
+          onClick: (item: RecentQueryTableItem) => {
+            onClickRecentQuery(recentQueries[item.id].query, recentQueries[item.id].timeRange);
+          },
+          'data-test-subj': 'action-run',
+        },
+        {
+          render: (item: RecentQueryTableItem) => (
+            <EuiCopy textToCopy={item.query as string}>
+              {(copy) => (
+                <EuiButtonIcon
+                  onClick={copy}
+                  iconType="copyClipboard"
+                  aria-label="Copy recent query"
+                />
+              )}
+            </EuiCopy>
+          ),
+        },
+      ],
+      width: '70px',
     },
   ];
 
-  const tableColumns = [
-    {
-      field: 'query',
-      name: 'Recent query',
-    },
-    {
-      field: 'language',
-      name: 'Language',
-    },
-    {
-      field: 'time',
-      name: 'Last run',
-    },
-    { name: 'Actions', actions },
-  ];
-
-  const recentQueryItems = recentQueries
+  const recentQueryItems: RecentQueryTableItem[] = recentQueries
     .filter((item, idx) => idx < MAX_RECENT_QUERY_SIZE)
-    .map((query, idx) => {
-      const date = moment(query.time);
+    .filter((item) => item.query.language === currentLanguage)
+    .map((query, idx) => ({
+      id: idx,
+      query: query.query.query,
+      timeRange: query.timeRange,
+      time: moment(query.time).format('MMM D, YYYY HH:mm:ss'),
+    }));
 
-      const formattedDate = date.format('MMM D, YYYY HH:mm:ss');
-
-      let queryLanguage = query.query.language;
-      if (queryLanguage === 'kuery') {
-        queryLanguage = 'DQL';
-      }
-
-      const tableItem = {
-        id: idx,
-        query: query.query.query,
-        timeRange: query.timeRange,
-        language: queryLanguage,
-        time: formattedDate,
-      };
-
-      return tableItem;
-    });
+  if (!isVisible) return null;
 
   return (
-    <EuiPopover
-      button={
-        <EuiButtonEmpty iconSide="left" iconType="clock" size="xs" onClick={onButtonClick}>
-          <EuiText size="xs" color="subdued">
-            {'Recent queries'}
-          </EuiText>
-        </EuiButtonEmpty>
-      }
-      isOpen={isPopoverOpen}
-      closePopover={() => setPopover(false)}
-      panelPaddingSize="none"
-      anchorPosition={'downRight'}
-    >
-      <EuiBasicTable
-        items={recentQueryItems}
-        rowHeader="query"
-        columns={tableColumns}
-        rowProps={getRowProps}
-        cellProps={getCellProps}
-        className="recentQuery__table"
-      />
-    </EuiPopover>
+    <EuiBasicTable
+      items={recentQueryItems}
+      rowHeader="query"
+      columns={tableColumns}
+      rowProps={getRowProps}
+      cellProps={getCellProps}
+      className="recentQuery__table"
+      tableLayout="fixed"
+      compressed
+    />
   );
 }
