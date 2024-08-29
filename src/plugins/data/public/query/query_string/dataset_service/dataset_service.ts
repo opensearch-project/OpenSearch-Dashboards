@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CoreStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { CoreStart } from 'opensearch-dashboards/public';
 import {
   Dataset,
   DataStructure,
@@ -15,6 +15,7 @@ import {
 import { DatasetTypeConfig } from './types';
 import { indexPatternTypeConfig, indexTypeConfig } from './lib';
 import { IndexPatternsContract } from '../../../index_patterns';
+import { IDataPluginServices } from '../../../types';
 
 export class DatasetService {
   private indexPatterns?: IndexPatternsContract;
@@ -83,7 +84,7 @@ export class DatasetService {
   }
 
   public fetchOptions(
-    savedObjects: SavedObjectsClientContract,
+    services: IDataPluginServices,
     path: DataStructure[],
     dataType: string
   ): Promise<DataStructure> {
@@ -91,7 +92,7 @@ export class DatasetService {
     if (!type) {
       throw new Error(`No handler found for type: ${path[0]}`);
     }
-    return type.fetch(savedObjects, path);
+    return type.fetch(services, path);
   }
 
   private async fetchDefaultDataset(): Promise<Dataset | undefined> {
