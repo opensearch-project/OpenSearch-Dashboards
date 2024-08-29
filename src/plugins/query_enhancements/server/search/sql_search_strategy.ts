@@ -23,9 +23,6 @@ export const sqlSearchStrategyProvider = (
   client: ILegacyClusterClient,
   usage?: SearchUsage
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
-<<<<<<< HEAD
-  const sqlFacet = new Facet({ client, logger, endpoint: 'ppl.sqlQuery' });
-=======
   const sqlFacet = new Facet({
     client,
     logger,
@@ -33,7 +30,6 @@ export const sqlSearchStrategyProvider = (
     useJobs: false,
     shimResponse: true,
   });
->>>>>>> 9b8266f178... [discover] registered languages interceptor clean up and aggs (#7870)
 
   return {
     search: async (context, request: any, options) => {
