@@ -41,11 +41,7 @@ export const pplSearchStrategyProvider = (
         const rawResponse: any = await pplFacet.describeQuery(context, request);
 
         if (!rawResponse.success) {
-          return {
-            type: DATA_FRAME_TYPES.ERROR,
-            body: { error: rawResponse.data },
-            took: rawResponse.took,
-          } as IDataFrameError;
+          throw new Error(rawResponse.data.body);
         }
 
         const dataFrame = createDataFrame({

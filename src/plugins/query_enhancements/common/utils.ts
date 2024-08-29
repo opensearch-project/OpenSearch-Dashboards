@@ -125,14 +125,6 @@ export class DataFramePolling<T, P = void> {
   }
 }
 
-export const handleDataFrameError = (response: any) => {
-  const df = response.body;
-  if (df.error) {
-    const jsError = new Error(df.error.response);
-    return throwError(jsError);
-  }
-};
-
 export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: QueryAggConfig) => {
   const { http, path, signal } = context;
   const body = JSON.stringify({ query: { ...query, format: 'jdbc' }, aggConfig });
@@ -143,7 +135,7 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
       body,
       signal,
     })
-  ).pipe(tap(handleDataFrameError));
+  );
 };
 
 export const fetchDataFrame = (context: EnhancedFetchContext, query: Query, df: IDataFrame) => {
@@ -156,7 +148,7 @@ export const fetchDataFrame = (context: EnhancedFetchContext, query: Query, df: 
       body,
       signal,
     })
-  ).pipe(tap(handleDataFrameError));
+  );
 };
 
 export const fetchDataFramePolling = (context: EnhancedFetchContext, df: IDataFrame) => {

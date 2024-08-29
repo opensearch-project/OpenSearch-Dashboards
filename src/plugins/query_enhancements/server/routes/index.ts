@@ -87,7 +87,7 @@ function defineRoute(
       } catch (err) {
         logger.error(err);
         return res.custom({
-          statusCode: 500,
+          statusCode: err.status ?? 500,
           body: err,
         });
       }
