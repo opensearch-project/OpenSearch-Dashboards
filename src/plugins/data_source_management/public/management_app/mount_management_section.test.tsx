@@ -49,11 +49,21 @@ const mockStartServices: StartServicesAccessor<DataSourceManagementStartDependen
       chrome: { docTitle: { reset: jest.fn() } },
       application: {},
       savedObjects: {},
-      uiSettings: {},
+      uiSettings: {
+        get: jest.fn((key) => {
+          if (key === 'home:useNewHomePage') {
+            return false;
+          }
+          return 'default';
+        }),
+      },
       notifications: {},
       overlays: {},
       http: {},
       docLinks: {},
+    },
+    {
+      navigation: {},
     },
   ]);
 
@@ -128,11 +138,21 @@ describe('mountManagementSection', () => {
           chrome: { docTitle: { reset: jest.fn() } },
           application: { capabilities: { dataSource: { canManage: false } } },
           savedObjects: {},
-          uiSettings: {},
+          uiSettings: {
+            get: jest.fn((key) => {
+              if (key === 'home:useNewHomePage') {
+                return false;
+              }
+              return 'default';
+            }),
+          },
           notifications: {},
           overlays: {},
           http: {},
           docLinks: {},
+        },
+        {
+          navigation: {},
         },
       ]);
 

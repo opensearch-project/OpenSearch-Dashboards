@@ -31,6 +31,7 @@ export const createCardInput = (
     id: section.id,
     title: section.title ?? '',
     hidePanelTitles: true,
+    hidePanelActions: true,
     viewMode: ViewMode.VIEW,
     columns: section.columns,
     wrap: section.wrap,
@@ -178,6 +179,8 @@ export const createDashboardInput = async (
       if (content.kind === 'custom') {
         panelConfig.type = CUSTOM_CONTENT_EMBEDDABLE;
         panelConfig.explicitInput.render = content.render;
+        // Currently, for custom content, there is no case that requires panel actions, so hide it
+        panelConfig.explicitInput.hidePanelActions = true;
       }
 
       panels[content.id] = panelConfig;

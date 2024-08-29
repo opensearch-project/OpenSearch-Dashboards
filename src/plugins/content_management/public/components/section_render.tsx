@@ -43,7 +43,7 @@ const DashboardSection = ({ section, embeddable, contents$, savedObjectsClient }
     // const input = createDashboardSection(section, contents ?? []);
     return (
       // to make dashboard section align with others add margin left and right -8px
-      <div style={{ margin: '0 -8px' }}>
+      <div style={{ margin: '-8px -8px 0 -8px' }}>
         <EmbeddableRenderer factory={factory} input={input} />
       </div>
     );
@@ -77,7 +77,7 @@ const CardSection = ({ section, embeddable, contents$ }: Props) => {
         </EuiTitle>
         {isCardVisible && (
           <>
-            <EuiSpacer size="m" /> <EmbeddableRenderer factory={factory} input={input} />
+            <EuiSpacer size="s" /> <EmbeddableRenderer factory={factory} input={input} />
           </>
         )}
       </>

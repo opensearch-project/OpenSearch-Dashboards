@@ -3,7 +3,7 @@
 exports[`workspace list card render normally should show workspace list card correctly 1`] = `
 <div>
   <div
-    class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
+    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
   >
     <div
       class="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -24,11 +24,11 @@ exports[`workspace list card render normally should show workspace list card cor
               <div
                 class="euiFlexItem"
               >
-                <h4
-                  class="euiTitle euiTitle--medium"
+                <h2
+                  class="euiTitle euiTitle--small"
                 >
                   Workspaces
-                </h4>
+                </h2>
               </div>
               <div
                 class="euiFlexItem"

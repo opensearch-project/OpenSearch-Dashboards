@@ -177,7 +177,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                       <EuiText size="s">{screenTitle}</EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>{renderMenu(menuClassName)}</EuiFlexItem>
-                    <EuiFlexItem>{renderSearchBar()}</EuiFlexItem>
+                    <EuiFlexItem>{renderSearchBar({ isFilterBarPortable: true })}</EuiFlexItem>
                   </EuiFlexGroup>
                 </MountPointPortal>
               </>

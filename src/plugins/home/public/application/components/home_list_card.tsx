@@ -73,7 +73,7 @@ interface Config {
 export const HomeListCard = ({ config }: { config: Config }) => {
   return (
     <>
-      <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
+      <EuiPanel hasBorder={false} hasShadow={false}>
         <EuiFlexGroup
           direction="column"
           justifyContent="spaceBetween"
@@ -81,8 +81,8 @@ export const HomeListCard = ({ config }: { config: Config }) => {
           gutterSize="none"
         >
           <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h4>{config.title}</h4>
+            <EuiTitle size="s">
+              <h2>{config.title}</h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiSpacer />

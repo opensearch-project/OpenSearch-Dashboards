@@ -37,11 +37,11 @@ export const AdvancedSelector = ({
         .getTypes()
         .map((type) => {
           return {
-            id: type!.id,
-            title: type!.title,
-            type: type!.id,
+            id: type.id,
+            title: type.title,
+            type: type.id,
             meta: {
-              ...type!.meta,
+              ...type.meta,
               type: DATA_STRUCTURE_META_TYPES.TYPE,
             },
           } as DataStructure;

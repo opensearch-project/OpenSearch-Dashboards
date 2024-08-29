@@ -6,14 +6,7 @@
 import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import {
-  DataFrameAggConfig,
-  getRawDataFrame,
-  formatTimePickerDate,
-  getUniqueValuesForRawAggs,
-  updateDataFrameMeta,
-  Query,
-} from '../../../data/common';
+import { formatTimePickerDate, Query } from '../../../data/common';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -25,10 +18,10 @@ import {
 import {
   formatDate,
   SEARCH_STRATEGY,
-  removeKeyword,
   API,
-  FetchDataFrameContext,
-  fetchDataFrame,
+  EnhancedFetchContext,
+  fetch,
+  QueryAggConfig,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
@@ -51,109 +44,15 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
     const { id, ...searchRequest } = request;
-    const dfContext: FetchDataFrameContext = {
+    const context: EnhancedFetchContext = {
       http: this.deps.http,
       path: trimEnd(API.PPL_SEARCH),
       signal,
     };
-    const { timefilter } = this.queryService;
-    const dateRange = timefilter.timefilter.getTime();
-    const { fromDate, toDate } = formatTimePickerDate(dateRange, 'YYYY-MM-DD HH:mm:ss.SSS');
 
-    const getTimeFilter = (timeField: any) => {
-      return ` | where \`${timeField}\` >= '${formatDate(
-        fromDate
-      )}' and \`${timeField}\` <= '${formatDate(toDate)}'`;
-    };
+    const query = this.buildQuery();
 
-    const insertTimeFilter = (query: string, filter: string) => {
-      return `${query}${filter}`;
-    };
-
-    const getAggQsFn = ({
-      query,
-      aggConfig,
-      timeField,
-      timeFilter,
-    }: {
-      query: Query;
-      aggConfig: DataFrameAggConfig;
-      timeField: any;
-      timeFilter: string;
-    }) => {
-      return removeKeyword(`${query.query} ${getAggString(timeField, aggConfig)} ${timeFilter}`);
-    };
-
-    const getAggString = (timeField: any, aggsConfig?: DataFrameAggConfig) => {
-      if (!aggsConfig) {
-        return ` | stats count() by span(${timeField}, ${this.aggsService.calculateAutoTimeExpression(
-          {
-            from: fromDate,
-            to: toDate,
-            mode: 'absolute',
-          }
-        )})`;
-      }
-      if (aggsConfig.date_histogram) {
-        return ` | stats count() by span(${timeField}, ${
-          aggsConfig.date_histogram.fixed_interval ??
-          aggsConfig.date_histogram.calendar_interval ??
-          this.aggsService.calculateAutoTimeExpression({
-            from: fromDate,
-            to: toDate,
-            mode: 'absolute',
-          })
-        })`;
-      }
-      if (aggsConfig.avg) {
-        return ` | stats avg(${aggsConfig.avg.field})`;
-      }
-      if (aggsConfig.cardinality) {
-        return ` | dedup ${aggsConfig.cardinality.field} | stats count()`;
-      }
-      if (aggsConfig.terms) {
-        return ` | stats count() by ${aggsConfig.terms.field}`;
-      }
-      if (aggsConfig.id === 'other-filter') {
-        const uniqueConfig = getUniqueValuesForRawAggs(aggsConfig);
-        if (
-          !uniqueConfig ||
-          !uniqueConfig.field ||
-          !uniqueConfig.values ||
-          uniqueConfig.values.length === 0
-        ) {
-          return '';
-        }
-
-        let otherQueryString = ` | stats count() by ${uniqueConfig.field}`;
-        uniqueConfig.values.forEach((value, index) => {
-          otherQueryString += ` ${index === 0 ? '| where' : 'and'} ${
-            uniqueConfig.field
-          }<>'${value}'`;
-        });
-        return otherQueryString;
-      }
-    };
-
-    const dataFrame = getRawDataFrame(searchRequest);
-    const query = this.queryService.queryString.getQuery();
-    const timeField = query.dataset?.timeFieldName;
-    const aggConfig = dataFrame?.meta?.aggConfig;
-    if (timeField && aggConfig) {
-      const timeFilter = getTimeFilter(timeField);
-      const newQuery = insertTimeFilter(query.query as string, timeFilter);
-      updateDataFrameMeta({
-        dataFrame,
-        query: { ...query, query: newQuery },
-        aggConfig: dataFrame?.meta?.aggConfig,
-        timeField,
-        timeFilter,
-        getAggQsFn: getAggQsFn.bind(this),
-      });
-      query.query += timeFilter;
-    }
-
-    return fetchDataFrame(dfContext, query, dataFrame).pipe(
+    return fetch(context, query, this.getAggConfig(searchRequest, query)).pipe(
       catchError((error) => {
         return throwError(error);
       })
@@ -162,5 +61,58 @@ export class PPLSearchInterceptor extends SearchInterceptor {
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
     return this.runSearch(request, options.abortSignal, SEARCH_STRATEGY.PPL);
+  }
+
+  private buildQuery() {
+    const query: Query = this.queryService.queryString.getQuery();
+    const dataset = query.dataset;
+    if (!dataset || !dataset.timeFieldName) return query;
+    const timeFilter = this.getTimeFilter(dataset.timeFieldName);
+    return { ...query, query: query.query + timeFilter };
+  }
+
+  private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {
+    const { aggs } = request.params.body;
+    if (!aggs || !query.dataset || !query.dataset.timeFieldName) return;
+    const aggsConfig: QueryAggConfig = {};
+    const { fromDate, toDate } = formatTimePickerDate(
+      this.queryService.timefilter.timefilter.getTime(),
+      'YYYY-MM-DD HH:mm:ss.SSS'
+    );
+    Object.entries(aggs as Record<number, any>).forEach(([key, value]) => {
+      const aggTypeKeys = Object.keys(value);
+      if (aggTypeKeys.length === 0) {
+        return aggsConfig;
+      }
+      const aggTypeKey = aggTypeKeys[0];
+      if (aggTypeKey === 'date_histogram') {
+        aggsConfig[aggTypeKey] = {
+          ...value[aggTypeKey],
+        };
+        aggsConfig.qs = {
+          [key]: `${query.query} | stats count() by span(${query.dataset!.timeFieldName}, ${
+            value[aggTypeKey].fixed_interval ??
+            value[aggTypeKey].calendar_interval ??
+            this.aggsService.calculateAutoTimeExpression({
+              from: fromDate,
+              to: toDate,
+              mode: 'absolute',
+            })
+          })`,
+        };
+      }
+    });
+
+    return aggsConfig;
+  }
+
+  private getTimeFilter(timeFieldName: string) {
+    const { fromDate, toDate } = formatTimePickerDate(
+      this.queryService.timefilter.timefilter.getTime(),
+      'YYYY-MM-DD HH:mm:ss.SSS'
+    );
+    return ` | where \`${timeFieldName}\` >= '${formatDate(
+      fromDate
+    )}' and \`${timeFieldName}\` <= '${formatDate(toDate)}'`;
   }
 }

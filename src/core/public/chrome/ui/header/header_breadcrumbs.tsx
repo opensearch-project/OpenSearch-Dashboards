@@ -34,7 +34,6 @@ import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { ChromeBreadcrumb, ChromeBreadcrumbEnricher } from '../../chrome_service';
-import './header_breadcrumbs.scss';
 
 interface Props {
   appTitle$: Observable<string>;
@@ -85,14 +84,13 @@ export function HeaderBreadcrumbs({
   }));
 
   const remainingCrumbs = useUpdatedHeader ? crumbs.slice(0, -1) : crumbs;
-  const className = useUpdatedHeader ? 'headerBreadcrumbs' : '';
 
   return (
     <EuiHeaderBreadcrumbs
       breadcrumbs={renderFullLength ? crumbs : remainingCrumbs}
       max={10}
       data-test-subj="breadcrumbs"
-      className={className}
+      simplify={!!useUpdatedHeader}
     />
   );
 }

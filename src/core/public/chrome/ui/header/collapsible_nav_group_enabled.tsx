@@ -350,7 +350,7 @@ export function CollapsibleNavGroupEnabled({
         <div
           className={classNames({
             'bottom-container': true,
-            'eui-xScroll': true,
+            'eui-xScroll': isNavOpen,
             'bottom-container-collapsed': !isNavOpen,
             'bottom-container-expanded': isNavOpen,
           })}
