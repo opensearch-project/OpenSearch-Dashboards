@@ -183,23 +183,6 @@ describe('Workspace server plugin', () => {
   describe('#setUpRedirectPage', () => {
     const setupMock = coreMock.createSetup();
     const uiSettingsMock = uiSettingsServiceMock.createClient();
-    setupMock.getStartServices.mockResolvedValue([
-      {
-        ...coreMock.createStart(),
-        uiSettings: {
-          asScopedToClient: () => ({
-            ...uiSettingsMock,
-            get: jest.fn().mockImplementation((key) => {
-              if (key === 'home:useNewHomePage') {
-                return Promise.resolve(true);
-              }
-            }),
-          }),
-        },
-      },
-      {},
-      {},
-    ]);
     const initializerContextConfigMock = coreMock.createPluginInitializerContext({
       enabled: true,
       permission: {
@@ -304,8 +287,6 @@ describe('Workspace server plugin', () => {
               get: jest.fn().mockImplementation((key) => {
                 if (key === 'defaultWorkspace') {
                   return Promise.resolve('defaultWorkspace');
-                } else if (key === 'home:useNewHomePage') {
-                  return Promise.resolve('true');
                 }
               }),
             }),
@@ -336,29 +317,6 @@ describe('Workspace server plugin', () => {
           location: '/mock-server-basepath/w/defaultWorkspace/app/workspace_navigation',
         },
       });
-    });
-
-    it('with / request path and home:useNewHomePage is false', async () => {
-      const request = httpServerMock.createOpenSearchDashboardsRequest({
-        path: '/',
-      });
-      setupMock.getStartServices.mockResolvedValue([
-        {
-          ...coreMock.createStart(),
-          uiSettings: {
-            asScopedToClient: () => ({
-              ...uiSettingsMock,
-              get: jest.fn().mockResolvedValue(false),
-            }),
-          },
-        },
-        {},
-        {},
-      ]);
-      const toolKitMock = httpServerMock.createToolkit();
-
-      await registerOnPostAuthFn(request, response, toolKitMock);
-      expect(toolKitMock.next).toBeCalledTimes(1);
     });
   });
 
