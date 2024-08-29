@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useObservable } from 'react-use';
 import {
   EuiText,
@@ -15,7 +15,6 @@ import {
   EuiPopover,
   EuiToolTip,
   EuiFlexItem,
-  EuiFieldSearch,
   EuiIcon,
   EuiFlexGroup,
   EuiButtonIcon,
@@ -24,7 +23,7 @@ import {
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
-import { CoreStart, WorkspaceObject, debounce } from '../../../../../core/public';
+import { CoreStart, WorkspaceObject } from '../../../../../core/public';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { WorkspaceUseCase } from '../../types';
 import { validateWorkspaceColor } from '../../../common/utils';
@@ -36,10 +35,6 @@ const defaultHeaderName = i18n.translate('workspace.menu.defaultHeaderName', {
 
 const createWorkspaceButton = i18n.translate('workspace.menu.button.createWorkspace', {
   defaultMessage: 'Create workspace',
-});
-
-const searchFieldPlaceholder = i18n.translate('workspace.menu.search.placeholder', {
-  defaultMessage: 'Search workspace name',
 });
 
 const manageWorkspacesButton = i18n.translate('workspace.menu.button.manageWorkspaces', {
@@ -62,8 +57,6 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
 
   const currentWorkspaceName = currentWorkspace?.name ?? defaultHeaderName;
 
-  const [querySearch, setQuerySearch] = useState('');
-
   const getUseCase = (workspace: WorkspaceObject) => {
     if (!workspace.features) {
       return;
@@ -79,17 +72,6 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
   const closePopover = () => {
     setPopover(false);
   };
-
-  const debouncedSetQueryInput = useMemo(() => {
-    return debounce(setQuerySearch, 100);
-  }, [setQuerySearch]);
-
-  const handleSearchInput = useCallback(
-    (query) => {
-      debouncedSetQueryInput(query?.text ?? '');
-    },
-    [debouncedSetQueryInput]
-  );
 
   const currentWorkspaceButton = currentWorkspace ? (
     <EuiSmallButtonEmpty
@@ -176,24 +158,11 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
               </EuiFlexItem>
             </>
           )}
-          <EuiFlexItem grow={false} style={{ width: '100%' }}>
-            <EuiFieldSearch
-              value={querySearch}
-              onChange={(e) => handleSearchInput({ text: e.target.value })}
-              placeholder={searchFieldPlaceholder}
-            />
-          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
 
-      <EuiPanel
-        paddingSize="s"
-        hasBorder={false}
-        color="transparent"
-        style={{ height: '30vh', overflow: 'auto' }}
-      >
+      <EuiPanel paddingSize="s" hasBorder={false} color="transparent" style={{ height: '30vh' }}>
         <WorkspacePickerContent
-          searchQuery={querySearch}
           coreStart={coreStart}
           registeredUseCases$={registeredUseCases$}
           onClickWorkspace={() => setPopover(false)}

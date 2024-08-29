@@ -3,19 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { useObservable } from 'react-use';
 import {
   EuiTitle,
   EuiAvatar,
+  EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiFieldSearch,
   EuiListGroup,
   EuiListGroupItem,
+  EuiFlexGroup,
   EuiEmptyPrompt,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
-import { CoreStart, WorkspaceObject } from '../../../../../core/public';
+import { CoreStart, WorkspaceObject, debounce } from '../../../../../core/public';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 import { WorkspaceUseCase } from '../../types';
 import { validateWorkspaceColor } from '../../../common/utils';
@@ -23,6 +27,10 @@ import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
 
 const allWorkspacesTitle = i18n.translate('workspace.menu.title.allWorkspaces', {
   defaultMessage: 'All workspaces',
+});
+
+const searchFieldPlaceholder = i18n.translate('workspace.menu.search.placeholder', {
+  defaultMessage: 'Search workspace name',
 });
 
 const recentWorkspacesTitle = i18n.translate('workspace.menu.title.recentWorkspaces', {
@@ -33,14 +41,12 @@ const getValidWorkspaceColor = (color?: string) =>
   validateWorkspaceColor(color) ? color : undefined;
 
 interface Props {
-  searchQuery: string;
   coreStart: CoreStart;
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
   onClickWorkspace?: () => void;
 }
 
 export const WorkspacePickerContent = ({
-  searchQuery,
   coreStart,
   registeredUseCases$,
   onClickWorkspace,
@@ -48,6 +54,18 @@ export const WorkspacePickerContent = ({
   const workspaceList = useObservable(coreStart.workspaces.workspaceList$, []);
   const isDashboardAdmin = coreStart.application.capabilities?.dashboards?.isDashboardAdmin;
   const availableUseCases = useObservable(registeredUseCases$, []);
+  const [search, setSearch] = useState('');
+
+  const debouncedSetQueryInput = useMemo(() => {
+    return debounce(setSearch, 100);
+  }, [setSearch]);
+
+  const handleSearchInput = useCallback(
+    (query) => {
+      debouncedSetQueryInput(query?.text ?? '');
+    },
+    [debouncedSetQueryInput]
+  );
 
   const filteredRecentWorkspaces = useMemo(() => {
     return recentWorkspaceManager
@@ -70,12 +88,12 @@ export const WorkspacePickerContent = ({
     return list;
   };
   const queriedWorkspace = useMemo(() => {
-    return queryFromList({ list: workspaceList, query: searchQuery });
-  }, [workspaceList, searchQuery]);
+    return queryFromList({ list: workspaceList, query: search });
+  }, [workspaceList, search]);
 
   const queriedRecentWorkspace = useMemo(() => {
-    return queryFromList({ list: filteredRecentWorkspaces, query: searchQuery });
-  }, [filteredRecentWorkspaces, searchQuery]);
+    return queryFromList({ list: filteredRecentWorkspaces, query: search });
+  }, [filteredRecentWorkspaces, search]);
 
   const getUseCase = (workspace: WorkspaceObject) => {
     if (!workspace.features) {
@@ -88,6 +106,7 @@ export const WorkspacePickerContent = ({
   const getEmptyStatePrompt = () => {
     return (
       <EuiEmptyPrompt
+        style={{ width: '100%', height: '100%' }}
         iconType="wsSelector"
         data-test-subj="empty-workspace-prompt"
         title={
@@ -150,35 +169,59 @@ export const WorkspacePickerContent = ({
         <EuiTitle size="xxs">
           <h4>{itemType === 'all' ? allWorkspacesTitle : recentWorkspacesTitle}</h4>
         </EuiTitle>
+        <EuiSpacer size="s" />
         <EuiListGroup showToolTips flush gutterSize="none" wrapText maxWidth={240}>
           {listItems}
         </EuiListGroup>
-        <EuiSpacer />
+        <EuiSpacer size="s" />
       </>
     );
   };
 
   return (
     <>
-      {searchQuery ? (
-        queriedWorkspace && queriedWorkspace.length > 0 ? (
-          <>
-            {filteredRecentWorkspaces.length > 0 &&
-              getWorkspaceListGroup(queriedRecentWorkspace, 'recent')}
-            {workspaceList.length > 0 && getWorkspaceListGroup(queriedWorkspace, 'all')}
-          </>
-        ) : (
-          getEmptyStatePrompt()
-        )
-      ) : (
-        <>
-          {filteredRecentWorkspaces.length > 0 &&
-            getWorkspaceListGroup(filteredRecentWorkspaces, 'recent')}
+      <EuiFlexGroup
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        style={{ height: '100%' }}
+        gutterSize="none"
+      >
+        <EuiFlexItem grow={false} style={{ position: 'sticky', width: '100%' }}>
+          <EuiFieldSearch
+            compressed={true}
+            fullWidth={true}
+            value={search}
+            onChange={(e) => handleSearchInput({ text: e.target.value })}
+            placeholder={searchFieldPlaceholder}
+          />
+          <EuiSpacer />
+        </EuiFlexItem>
 
-          {workspaceList.length > 0 && getWorkspaceListGroup(workspaceList, 'all')}
-          {workspaceList.length === 0 && <>{getEmptyStatePrompt()}</>}
-        </>
-      )}
+        <EuiFlexItem grow={true} style={{ width: '100%', overflowY: 'auto' }}>
+          <EuiPanel paddingSize="none" color="transparent" hasBorder={false}>
+            {search ? (
+              queriedWorkspace && queriedWorkspace.length > 0 ? (
+                <>
+                  {filteredRecentWorkspaces.length > 0 &&
+                    getWorkspaceListGroup(queriedRecentWorkspace, 'recent')}
+                  {workspaceList.length > 0 && getWorkspaceListGroup(queriedWorkspace, 'all')}
+                </>
+              ) : (
+                getEmptyStatePrompt()
+              )
+            ) : (
+              <>
+                {filteredRecentWorkspaces.length > 0 &&
+                  getWorkspaceListGroup(filteredRecentWorkspaces, 'recent')}
+
+                {workspaceList.length > 0 && getWorkspaceListGroup(workspaceList, 'all')}
+                {workspaceList.length === 0 && <>{getEmptyStatePrompt()}</>}
+              </>
+            )}
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };
