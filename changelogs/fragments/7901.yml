@@ -1,0 +1,2 @@
+fix:
+- Fix bootstrap errors in 2.x ([#7901](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7901))
