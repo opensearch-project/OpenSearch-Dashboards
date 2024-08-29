@@ -74,7 +74,7 @@ describe('Register HomeListCardToPages', () => {
     expect(contentManagementStartMock.registerContentProvider).toHaveBeenCalledTimes(4);
 
     let whatsNewCall = registerContentProviderFn.mock.calls[0];
-    expect(whatsNewCall[0].getTargetArea()).toEqual('analytics_overview/service_cards');
+    expect(whatsNewCall[0].getTargetArea()).toEqual('essentials_overview/service_cards');
     expect(whatsNewCall[0].getContent()).toMatchInlineSnapshot(`
       Object {
         "id": "whats_new",
@@ -86,7 +86,7 @@ describe('Register HomeListCardToPages', () => {
     `);
 
     let learnOpenSearchCall = registerContentProviderFn.mock.calls[1];
-    expect(learnOpenSearchCall[0].getTargetArea()).toEqual('analytics_overview/service_cards');
+    expect(learnOpenSearchCall[0].getTargetArea()).toEqual('essentials_overview/service_cards');
     expect(learnOpenSearchCall[0].getContent()).toMatchInlineSnapshot(`
       Object {
         "id": "learn_opensearch_new",
