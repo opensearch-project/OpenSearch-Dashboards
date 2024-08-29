@@ -2,11 +2,57 @@
 
 exports[`Intro component renders correctly 1`] = `
 <Header
+  application={
+    Object {
+      "applications$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Map {},
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "capabilities": Object {
+        "catalogue": Object {},
+        "management": Object {},
+        "navLinks": Object {},
+        "workspaces": Object {},
+      },
+      "currentAppId$": Observable {
+        "_isScalar": false,
+        "source": Subject {
+          "_isScalar": false,
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+      },
+      "getUrlForApp": [MockFunction],
+      "navigateToApp": [MockFunction],
+      "navigateToUrl": [MockFunction],
+      "registerMountContext": [MockFunction],
+      "setAppBadgeControls": [MockFunction],
+      "setAppBottomControls": [MockFunction],
+      "setAppCenterControls": [MockFunction],
+      "setAppDescriptionControls": [MockFunction],
+      "setAppLeftControls": [MockFunction],
+      "setAppRightControls": [MockFunction],
+    }
+  }
   canDelete={true}
   canEdit={true}
   canViewInApp={true}
+  navigationUI={
+    Object {
+      "HeaderControl": [Function],
+    }
+  }
   onDeleteClick={[Function]}
   type="search"
+  useUpdatedUX={false}
   viewUrl="/some-url"
 >
   <EuiPageContentHeader>

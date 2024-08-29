@@ -32,6 +32,9 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@osd/i18n/react';
 import { Header } from './header';
+import { coreMock } from '../../../../../../core/public/mocks';
+import { ApplicationStart } from '../../../../../../core/public';
+import { NavigationPublicPluginStart } from '../../../../../navigation/public';
 
 describe('Intro component', () => {
   const mountHeader = (props: {
@@ -41,6 +44,9 @@ describe('Intro component', () => {
     type: string;
     viewUrl: string;
     onDeleteClick: () => void;
+    useUpdatedUX: boolean;
+    application: ApplicationStart;
+    navigationUI: NavigationPublicPluginStart['ui'];
   }) =>
     mount(
       <I18nProvider>
@@ -55,6 +61,11 @@ describe('Intro component', () => {
     canViewInApp: true,
     viewUrl: '/some-url',
     onDeleteClick: () => undefined,
+    useUpdatedUX: false,
+    navigationUI: ({
+      HeaderControl: () => null,
+    } as unknown) as NavigationPublicPluginStart['ui'],
+    application: coreMock.createStart().application,
   };
 
   it('renders correctly', () => {
