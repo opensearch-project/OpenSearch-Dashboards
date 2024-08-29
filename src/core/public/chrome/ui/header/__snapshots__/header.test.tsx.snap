@@ -4308,9 +4308,9 @@ exports[`Header handles visibility and lock changes 1`] = `
                   },
                 ]
               }
-              className=""
               data-test-subj="breadcrumbs"
               max={10}
+              simplify={false}
             >
               <EuiBreadcrumbs
                 breadcrumbs={
@@ -12624,9 +12624,9 @@ exports[`Header renders condensed header 1`] = `
                   },
                 ]
               }
-              className=""
               data-test-subj="breadcrumbs"
               max={10}
+              simplify={false}
             >
               <EuiBreadcrumbs
                 breadcrumbs={
@@ -17457,11 +17457,11 @@ exports[`Header renders page header with application title 1`] = `
                     },
                   ]
                 }
-                className="headerBreadcrumbs"
                 data-test-subj="breadcrumbs"
                 max={10}
+                simplify={true}
               >
-                <EuiBreadcrumbs
+                <EuiSimplifiedBreadcrumbs
                   breadcrumbs={
                     Array [
                       Object {
@@ -17470,26 +17470,26 @@ exports[`Header renders page header with application title 1`] = `
                       },
                     ]
                   }
-                  className="euiHeaderBreadcrumbs headerBreadcrumbs"
+                  className="euiHeaderBreadcrumbs euiHeaderBreadcrumbs--simplified"
                   data-test-subj="breadcrumbs"
                   max={10}
                   truncate={true}
                 >
                   <nav
                     aria-label="breadcrumb"
-                    className="euiBreadcrumbs euiHeaderBreadcrumbs headerBreadcrumbs euiBreadcrumbs--truncate"
+                    className="euiSimplifiedBreadcrumbs euiHeaderBreadcrumbs euiHeaderBreadcrumbs--simplified euiSimplifiedBreadcrumbs--truncate"
                     data-test-subj="breadcrumbs"
                   >
                     <div
-                      className="euiBreadcrumbWall euiBreadcrumbWall--single"
+                      className="euiSimplifiedBreadcrumbWall euiSimplifiedBreadcrumbWall--single"
                     >
                       <div
-                        className="euiBreadcrumbWrapper euiBreadcrumbWrapper--first euiBreadcrumbWrapper--last"
+                        className="euiSimplifiedBreadcrumbWrapper euiSimplifiedBreadcrumbWrapper--first euiSimplifiedBreadcrumbWrapper--last"
                       >
                         <EuiInnerText>
                           <span
                             aria-current="page"
-                            className="euiBreadcrumb euiBreadcrumb--last"
+                            className="euiSimplifiedBreadcrumb euiSimplifiedBreadcrumb--last"
                             data-test-subj="breadcrumb first"
                             title="test"
                           >
@@ -17498,8 +17498,13 @@ exports[`Header renders page header with application title 1`] = `
                         </EuiInnerText>
                       </div>
                     </div>
+                    <EuiBreadcrumbSeparator>
+                      <div
+                        className="euiBreadcrumbSeparator"
+                      />
+                    </EuiBreadcrumbSeparator>
                   </nav>
-                </EuiBreadcrumbs>
+                </EuiSimplifiedBreadcrumbs>
               </EuiHeaderBreadcrumbs>
             </HeaderBreadcrumbs>
           </div>
@@ -21814,9 +21819,9 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                   },
                 ]
               }
-              className=""
               data-test-subj="breadcrumbs"
               max={10}
+              simplify={false}
             >
               <EuiBreadcrumbs
                 breadcrumbs={
