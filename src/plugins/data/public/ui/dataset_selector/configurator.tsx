@@ -42,7 +42,13 @@ export const Configurator = ({
 
   const [timeFields, setTimeFields] = useState<DatasetField[]>();
   const [timeFieldName, setTimeFieldName] = useState<string | undefined>();
-  const [language, setLanguage] = useState<string>(languages[0]);
+  const [language, setLanguage] = useState<string>(() => {
+    const currentLanguage = queryString.getQuery().language;
+    if (languages.includes(currentLanguage)) {
+      return currentLanguage;
+    }
+    return languages[0];
+  });
 
   useEffect(() => {
     const fetchFields = async () => {
