@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { DataStructure, Dataset, DatasetField } from 'src/plugins/data/common';
-import { DatasetTypeConfig } from 'src/plugins/data/public';
+import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { DEFAULT_DATA, DataStructure, Dataset, DatasetField } from 'src/plugins/data/common';
+import { DatasetTypeConfig, IDataPluginServices } from 'src/plugins/data/public';
 import { DATASET } from '../../common';
 
 const S3_ICON = 'visTable';
@@ -36,64 +36,58 @@ export const s3TypeConfig: DatasetTypeConfig = {
     };
   },
 
-  fetch: async (
-    savedObjects: SavedObjectsClientContract,
-    path: DataStructure[]
-  ): Promise<DataStructure> => {
+  fetch: async (services: IDataPluginServices, path: DataStructure[]): Promise<DataStructure> => {
     const dataStructure = path[path.length - 1];
+    const {
+      http,
+      savedObjects: { client },
+    } = services;
+
     switch (dataStructure.type) {
-      case DATASET.S3:
+      case 'DATA_SOURCE': {
+        const connections = await fetchConnections(http, dataStructure);
         return {
           ...dataStructure,
-          columnHeader: 'Connections',
           hasNext: true,
-          children: [
-            {
-              id: `${dataStructure.id}::mys3`,
-              title: 'mys3',
-              type: 'CONNECTION',
-            },
-          ],
+          columnHeader: 'Connections',
+          children: connections,
         };
-      case 'CONNECTION':
+      }
+      case 'CONNECTION': {
+        const databases = await fetchDatabases(http, dataStructure);
         return {
           ...dataStructure,
           columnHeader: 'Databases',
           hasNext: true,
-          children: [
-            {
-              id: `${dataStructure.id}.defaultDb`,
-              title: 'defaultDb',
-              type: 'DATABASE',
-            },
-          ],
+          children: databases.map((db) => ({
+            id: `${dataStructure.id}.${db}`,
+            title: db,
+            type: 'DATABASE',
+          })),
         };
-      case 'DATABASE':
+      }
+      case 'DATABASE': {
+        const tables = await fetchTables(http, dataStructure);
         return {
           ...dataStructure,
           columnHeader: 'Tables',
           hasNext: false,
-          children: [
-            {
-              id: `${dataStructure.id}.table1`,
-              title: 'table1',
-              type: 'TABLE',
-            },
-            {
-              id: `${dataStructure.id}.table2`,
-              title: 'table2',
-              type: 'TABLE',
-            },
-          ],
+          children: tables.map((table) => ({
+            id: `${dataStructure.id}.${table}`,
+            title: table,
+            type: 'TABLE',
+          })),
         };
-      default:
-        const s3DataSources = await fetchS3DataSources(savedObjects);
+      }
+      default: {
+        const dataSources = await fetchDataSources(client);
         return {
           ...dataStructure,
-          columnHeader: 'S3 Data Sources',
-          hasNext: false,
-          children: s3DataSources,
+          columnHeader: 'Clusters',
+          hasNext: true,
+          children: dataSources,
         };
+      }
     }
   },
 
@@ -108,6 +102,52 @@ export const s3TypeConfig: DatasetTypeConfig = {
   },
 };
 
-const fetchS3DataSources = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
-  return [];
+const fetchDataSources = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {
+  const resp = await client.find<any>({
+    type: 'data-source',
+    perPage: 10000,
+  });
+  const dataSources: DataStructure[] = [DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE];
+  return dataSources.concat(
+    resp.savedObjects.map((savedObject) => ({
+      id: savedObject.id,
+      title: savedObject.attributes.title,
+      type: 'DATA_SOURCE',
+    }))
+  );
+};
+
+const fetchConnections = async (
+  http: HttpSetup,
+  dataSource: DataStructure
+): Promise<DataStructure[]> => {
+  const response = await http.fetch(`../../api/enhancements/datasource/external`, {
+    query: {
+      id: dataSource.id,
+    },
+  });
+
+  return response
+    .filter((cluster: { connector: string }) => cluster.connector === 'S3GLUE')
+    .map((cluster: { name: any }) => ({
+      id: `${dataSource.id}::${cluster.name}`,
+      title: cluster.name,
+      type: 'CONNECTION',
+      dataSource,
+    }));
+};
+
+const fetchDatabases = async (http: HttpSetup, connection: DataStructure): Promise<string[]> => {
+  const response = await http.fetch(`../../api/enhancements/datasource/external`, {
+    query: {
+      id: `SHOW DATABASES IN ${connection}`,
+    },
+  });
+  return ['database1', 'database2'];
+};
+
+const fetchTables = async (http: HttpSetup, database: DataStructure): Promise<string[]> => {
+  // Implement logic to fetch tables for the given S3 database
+  // This might involve querying the S3 metadata or a catalog service
+  return ['table1', 'table2']; // Placeholder
 };
