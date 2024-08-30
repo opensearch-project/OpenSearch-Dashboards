@@ -35,7 +35,7 @@ export const UseCaseCardTitle = ({ filterWorkspaces, useCase, core }: UseCaseCar
   const onButtonClick = () => setPopover(!isPopoverOpen);
   const closePopover = () => setPopover(false);
 
-  const searchWorkspaces = useMemo(
+  const filteredWorkspaces = useMemo(
     () =>
       filterWorkspaces.filter((workspace) =>
         workspace.name.toLowerCase().includes(searchValue.toLowerCase())
@@ -52,7 +52,7 @@ export const UseCaseCardTitle = ({ filterWorkspaces, useCase, core }: UseCaseCar
   const iconButton = (
     <EuiButtonIcon
       aria-label={i18n.translate(`workspace.getStartCard.${useCase.id}.icon.button`, {
-        defaultMessage: 'drop down icon button',
+        defaultMessage: `show available workspace menu for ${useCase}`,
       })}
       size="xs"
       iconType="arrowDown"
@@ -133,7 +133,7 @@ export const UseCaseCardTitle = ({ filterWorkspaces, useCase, core }: UseCaseCar
   const panels = [
     {
       id: 0,
-      items: searchWorkspaces.map(workspaceToItem),
+      items: filteredWorkspaces.map(workspaceToItem),
       width: 340,
     },
   ];

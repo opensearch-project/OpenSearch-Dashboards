@@ -12,7 +12,7 @@ import {
   HOME_CONTENT_AREAS,
 } from '../../../../content_management/public';
 import { WorkspaceUseCase } from '../../types';
-import { getUseCaseFromFeatureConfig, getUseCaseUrl } from '../../utils';
+import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
 import { UseCaseCardTitle } from './use_case_card_title';
 
 const createContentCard = (useCase: WorkspaceUseCase, core: CoreStart) => {
@@ -20,8 +20,7 @@ const createContentCard = (useCase: WorkspaceUseCase, core: CoreStart) => {
   const workspaceList = workspaces.workspaceList$.getValue();
   const isDashboardAdmin = application.capabilities?.dashboards?.isDashboardAdmin;
   const filterWorkspaces = workspaceList.filter(
-    (workspace) =>
-      workspace.features?.map(getUseCaseFromFeatureConfig).filter(Boolean)[0] === useCase.id
+    (workspace) => getFirstUseCaseOfFeatureConfigs(workspace?.features || []) === useCase.id
   );
   if (filterWorkspaces.length === 0 && !isDashboardAdmin) {
     return {
