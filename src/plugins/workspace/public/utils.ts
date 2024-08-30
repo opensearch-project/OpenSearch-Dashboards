@@ -28,7 +28,6 @@ import {
 import { WORKSPACE_DETAIL_APP_ID, USE_CASE_PREFIX } from '../common/constants';
 import { getUseCaseFeatureConfig } from '../common/utils';
 import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
-import { WORKSPACE_DETAIL_APP_ID, WORKSPACE_CREATE_APP_ID } from '../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
 import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
 import {
@@ -332,7 +331,7 @@ export function prependWorkspaceToBreadcrumbs(
   currentNavGroup: NavGroupItemInMap | undefined,
   navGroupsMap: Record<string, NavGroupItemInMap>
 ) {
-  if (appId === WORKSPACE_DETAIL_APP_ID || appId === WORKSPACE_CREATE_APP_ID) {
+  if (appId === WORKSPACE_DETAIL_APP_ID) {
     core.chrome.setBreadcrumbsEnricher(undefined);
     return;
   }
