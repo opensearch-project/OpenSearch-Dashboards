@@ -15,14 +15,6 @@ import { DatasetTypeConfig } from '../types';
 import { getSearchService, getIndexPatterns } from '../../../../services';
 import { injectMetaToDataStructures } from './utils';
 
-const INDEX_INFO = {
-  LOCAL_DATASOURCE: {
-    id: '',
-    title: 'Local Cluster',
-    type: 'DATA_SOURCE',
-  },
-};
-
 export const indexTypeConfig: DatasetTypeConfig = {
   id: DEFAULT_DATA.SET_TYPES.INDEX,
   title: 'Indexes',
@@ -47,11 +39,11 @@ export const indexTypeConfig: DatasetTypeConfig = {
             title: dataSource.title,
             type: dataSource.type,
           }
-        : INDEX_INFO.LOCAL_DATASOURCE,
+        : DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE,
     };
   },
 
-  fetch: async (savedObjects, path) => {
+  fetch: async (services, path) => {
     const dataStructure = path[path.length - 1];
     switch (dataStructure.type) {
       case 'DATA_SOURCE': {
@@ -69,7 +61,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
       }
 
       default: {
-        const dataSources = await fetchDataSources(savedObjects);
+        const dataSources = await fetchDataSources(services.savedObjects.client);
         return {
           ...dataStructure,
           columnHeader: 'Cluster',
@@ -97,12 +89,12 @@ export const indexTypeConfig: DatasetTypeConfig = {
 };
 
 const fetchDataSources = async (client: SavedObjectsClientContract) => {
-  const resp = await client.find<any>({
+  const response = await client.find<any>({
     type: 'data-source',
     perPage: 10000,
   });
-  const dataSources: DataStructure[] = [INDEX_INFO.LOCAL_DATASOURCE].concat(
-    resp.savedObjects.map((savedObject) => ({
+  const dataSources: DataStructure[] = [DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE].concat(
+    response.savedObjects.map((savedObject) => ({
       id: savedObject.id,
       title: savedObject.attributes.title,
       type: 'DATA_SOURCE',

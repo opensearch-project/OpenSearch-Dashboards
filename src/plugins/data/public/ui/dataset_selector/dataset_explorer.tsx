@@ -19,19 +19,19 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { BaseDataset, DATA_STRUCTURE_META_TYPES, DataStructure } from '../../../common';
 import { QueryStringContract } from '../../query';
+import { IDataPluginServices } from '../../types';
 
 export const DatasetExplorer = ({
-  savedObjects,
+  services,
   queryString,
   path,
   setPath,
   onNext,
   onCancel,
 }: {
-  savedObjects: SavedObjectsClientContract;
+  services: IDataPluginServices;
   queryString: QueryStringContract;
   path: DataStructure[];
   setPath: (path: DataStructure[]) => void;
@@ -55,7 +55,7 @@ export const DatasetExplorer = ({
     }
 
     setLoading(true);
-    const nextDataStructure = await typeConfig.fetch(savedObjects, nextPath);
+    const nextDataStructure = await typeConfig.fetch(services, nextPath);
     setLoading(false);
 
     setPath([...newPath, nextDataStructure]);
