@@ -114,15 +114,6 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     core.http.registerOnPostAuth(async (request, response, toolkit) => {
       const path = request.url.pathname;
       if (path === '/') {
-        const [coreStart] = await core.getStartServices();
-        const uiSettings = coreStart.uiSettings.asScopedToClient(
-          coreStart.savedObjects.getScopedClient(request)
-        );
-        const useNewHomePage = await uiSettings.get('home:useNewHomePage');
-        if (!useNewHomePage) {
-          return toolkit.next();
-        }
-
         const workspaceListResponse = await this.client?.list(
           { request, logger: this.logger },
           { page: 1, perPage: 100 }
@@ -139,6 +130,10 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
               },
             });
           }
+          const [coreStart] = await core.getStartServices();
+          const uiSettings = coreStart.uiSettings.asScopedToClient(
+            coreStart.savedObjects.getScopedClient(request)
+          );
           // Temporarily use defaultWorkspace as a placeholder
           const defaultWorkspaceId = await uiSettings.get('defaultWorkspace');
           const defaultWorkspace = workspaceList.find(
