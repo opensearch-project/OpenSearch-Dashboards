@@ -11,9 +11,9 @@ import s3Logo from '../../assets/s3_logo.svg';
 
 export const DirectQueryConnectionIcon = ({ type }: { type?: string }) => {
   switch (type) {
-    case 'S3GLUE':
+    case 'Amazon S3':
       return <EuiIcon type={s3Logo} />;
-    case 'PROMETHEUS':
+    case 'Prometheus':
       return <EuiIcon type={prometheusLogo} />;
     default:
       return null;

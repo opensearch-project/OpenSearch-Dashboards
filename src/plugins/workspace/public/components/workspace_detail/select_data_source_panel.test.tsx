@@ -53,7 +53,7 @@ const dataSourceConnectionsMock = [
         name: 'dqc1',
         parentId: 'ds1',
         connectionType: DataSourceConnectionType.DirectQueryConnection,
-        type: 'S3',
+        type: 'Amazon S3',
       },
     ],
   },
@@ -62,7 +62,7 @@ const dataSourceConnectionsMock = [
     name: 'dqc1',
     parentId: 'ds1',
     connectionType: DataSourceConnectionType.DirectQueryConnection,
-    type: 'S3',
+    type: 'Amazon S3',
   },
   {
     id: 'ds2',

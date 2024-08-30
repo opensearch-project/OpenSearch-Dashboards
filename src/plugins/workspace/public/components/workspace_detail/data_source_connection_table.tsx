@@ -26,7 +26,6 @@ import {
 import { i18n } from '@osd/i18n';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
-import { DatasourceTypeToDisplayName } from '../../../../data_source_management/public';
 import { DirectQueryConnectionIcon } from '../workspace_form';
 
 interface DataSourceConnectionTableProps {
@@ -181,7 +180,6 @@ export const DataSourceConnectionTable = ({
         defaultMessage: 'Type',
       }),
       truncateText: true,
-      render: (type: string) => (DatasourceTypeToDisplayName as { [key: string]: string })[type],
     },
     {
       width: '35%',
