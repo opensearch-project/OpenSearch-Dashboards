@@ -5,6 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter, Logger, PrincipalType, ACL } from '../../../../core/server';
+import { DEFAULT_NAV_GROUPS } from '../../../../core/public';
 import {
   WorkspacePermissionMode,
   MAX_WORKSPACE_NAME_LENGTH,
@@ -46,12 +47,12 @@ const featuresSchema = schema.arrayOf(schema.string(), {
   minSize: 1,
   validate: (featureConfigs) => {
     const validateUseCaseConfigs = [
-      'all',
-      'observability',
-      'security-analytics',
-      'analytics',
-      'search',
-    ].map((id) => `use-case-${id}`);
+      DEFAULT_NAV_GROUPS.all,
+      DEFAULT_NAV_GROUPS.observability,
+      DEFAULT_NAV_GROUPS['security-analytics'],
+      DEFAULT_NAV_GROUPS.essentials,
+      DEFAULT_NAV_GROUPS.search,
+    ].map(({ id }) => `use-case-${id}`);
 
     const useCaseConfigCount = featureConfigs.filter((config) =>
       validateUseCaseConfigs.includes(config)
