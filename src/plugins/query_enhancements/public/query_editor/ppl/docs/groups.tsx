@@ -17,15 +17,14 @@ import {
   syntaxCmd,
   topCmd,
   whereCmd,
-} from './commands';
-import {
   mathFunction,
   datetimeFunction,
   stringFunction,
   conditionFunction,
   fullTextSearchFunction,
-} from './functions';
-import { pplDatatypes, pplIdentifiers } from './language_structure';
+  pplDatatypes,
+  pplIdentifiers,
+} from '.';
 
 export const Group1 = {
   label: 'Commands',

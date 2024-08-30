@@ -57,9 +57,11 @@ export class QueryEnhancementsPlugin
       usageCollector: data.search.usageCollector,
     });
 
-    const queryLanguageReference = new QueryLanguageReference(core.getStartServices());
-    const pplControls = [queryLanguageReference.createPPLLanguageReference()];
-    const sqlControls = [queryLanguageReference.createPPLLanguageReference()];
+    const queryLanguageReference = new QueryLanguageReference({
+      startServices: core.getStartServices(),
+    });
+    const pplControls = [queryLanguageReference.createReference('PPL')!];
+    const sqlControls = [queryLanguageReference.createReference('SQL')!];
 
     const enhancedPPLQueryEditor = createEditor(SingleLineInput, null, pplControls, DefaultInput);
 

@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React, { useState } from 'react';
 import {
-  EuiComboBoxOptionOption,
-  EuiCompressedComboBox,
+  EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -18,29 +18,26 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import React, { useState } from 'react';
-import { FlyoutContainers } from './flyout_containers';
-import { Group1, Group2, Group3 } from './ppl_docs/groups';
-import { overview } from './ppl_docs/overview';
+import { FlyoutContainers } from './reference_flyout_container';
+import { LanguageConfig } from './languageRegistry';
 
 interface Props {
-  module: string;
+  language: LanguageConfig;
   onClose: () => void;
 }
 
-export const PPLReferenceFlyout = ({ module, onClose }: Props) => {
-  const allOptionsStatic = [{ label: 'Overview', value: overview }, Group1, Group2, Group3];
+export const ReferenceFlyout: React.FC<Props> = ({ language, onClose }) => {
+  const allOptionsStatic = [{ label: 'Overview', value: language.overview }, ...language.groups];
   const defaultOption = [allOptionsStatic[0]];
   const [selectedOptions, setSelected] = useState(defaultOption);
   const [flyoutContent, setFlyoutContent] = useState(
     <EuiMarkdownFormat>{defaultOption[0].value}</EuiMarkdownFormat>
   );
 
-  const onChange = (SelectedOptions: any) => {
-    setSelected(SelectedOptions);
-
-    const newContent = SelectedOptions.map((option: EuiComboBoxOptionOption<string>) => (
-      <EuiMarkdownFormat>{option.value}</EuiMarkdownFormat>
+  const onChange = (selectedOptions: any) => {
+    setSelected(selectedOptions);
+    const newContent = selectedOptions.map((option: any) => (
+      <EuiMarkdownFormat key={option.label}>{option.value}</EuiMarkdownFormat>
     ));
     setFlyoutContent(newContent);
   };
@@ -48,27 +45,26 @@ export const PPLReferenceFlyout = ({ module, onClose }: Props) => {
   const flyoutHeader = (
     <EuiFlyoutHeader hasBorder>
       <EuiTitle size="m">
-        <h2 id="pplReferenceFlyout">OpenSearch PPL Reference Manual</h2>
+        <h2 id="languageReferenceFlyout">OpenSearch {language.displayName} Reference Manual</h2>
       </EuiTitle>
     </EuiFlyoutHeader>
   );
-
-  const PPL_DOCUMENTATION_URL = 'https://opensearch.org/docs/latest/search-plugins/sql/ppl/index';
 
   const flyoutBody = (
     <EuiFlyoutBody>
       <EuiFlexGroup component="span">
         <EuiFlexItem>
-          <EuiCompressedComboBox
-            placeholder="Refer commands, functions and language structures"
+          <EuiComboBox
+            placeholder={`Refer ${language.displayName} commands, functions and language structures`}
             options={allOptionsStatic}
             selectedOptions={selectedOptions}
             onChange={onChange}
+            singleSelection
           />
         </EuiFlexItem>
-        <EuiFlexItem style={{ justifyContent: 'center' }}>
+        <EuiFlexItem grow={false}>
           <EuiText size="s" color="subdued">
-            <EuiLink target="_blank" href={PPL_DOCUMENTATION_URL} external>
+            <EuiLink target="_blank" href={language.documentationUrl} external>
               Learn More
             </EuiLink>
           </EuiText>
@@ -95,7 +91,7 @@ export const PPLReferenceFlyout = ({ module, onClose }: Props) => {
       flyoutHeader={flyoutHeader}
       flyoutBody={flyoutBody}
       flyoutFooter={flyoutFooter}
-      ariaLabel="pplReferenceFlyout"
+      ariaLabel="languageReferenceFlyout"
     />
   );
 };

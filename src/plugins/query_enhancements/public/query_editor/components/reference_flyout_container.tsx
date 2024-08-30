@@ -17,19 +17,19 @@ import React from 'react';
  */
 
 interface Props {
-  closeFlyout: () => void;
-  flyoutHeader: JSX.Element;
-  flyoutBody: JSX.Element;
-  flyoutFooter: JSX.Element;
+  onClose: () => void;
+  header: JSX.Element;
+  body: JSX.Element | null;
+  footer: JSX.Element;
   ariaLabel: string;
   size?: string;
 }
 
-export const FlyoutContainers = ({
-  closeFlyout,
-  flyoutHeader,
-  flyoutBody,
-  flyoutFooter,
+export const ReferenceFlyoutContainer = ({
+  onClose,
+  header,
+  body,
+  footer,
   ariaLabel,
   size,
 }: Props) => {
@@ -38,13 +38,13 @@ export const FlyoutContainers = ({
       <EuiFlyout
         className="observability-flyout"
         ownFocus={false}
-        onClose={() => closeFlyout()}
+        onClose={onClose}
         size={size ? size : 'm'}
         aria-labelledby={ariaLabel}
       >
-        {flyoutHeader}
-        {flyoutBody}
-        {flyoutFooter}
+        {header}
+        {body}
+        {footer}
       </EuiFlyout>
     </div>
   );
