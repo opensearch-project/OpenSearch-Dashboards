@@ -153,3 +153,4 @@ export enum AssociationDataSourceModalTab {
   OpenSearchConnections = 'opensearch-connections',
   DirectQueryConnections = 'direction-query-connections',
 }
+export const USE_CASE_PREFIX = 'use-case-';

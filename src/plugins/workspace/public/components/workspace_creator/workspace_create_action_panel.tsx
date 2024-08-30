@@ -3,12 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiSmallButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSmallButton, EuiFlexGroup, EuiFlexItem, EuiSmallButtonEmpty } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useState, useCallback } from 'react';
 import type { ApplicationStart } from 'opensearch-dashboards/public';
-import type { WorkspaceFormData } from './types';
-import { WorkspaceCancelModal } from './workspace_cancel_modal';
+import { WorkspaceFormDataState, WorkspaceCancelModal } from '../workspace_form';
 import {
   MAX_WORKSPACE_DESCRIPTION_LENGTH,
   MAX_WORKSPACE_NAME_LENGTH,
@@ -16,14 +15,16 @@ import {
 
 interface WorkspaceCreateActionPanelProps {
   formId: string;
-  formData: Partial<Pick<WorkspaceFormData, 'name' | 'description'>>;
+  formData: Pick<WorkspaceFormDataState, 'name' | 'description'>;
   application: ApplicationStart;
+  isSubmitting: boolean;
 }
 
 export const WorkspaceCreateActionPanel = ({
   formId,
   formData,
   application,
+  isSubmitting,
 }: WorkspaceCreateActionPanelProps) => {
   const [isCancelModalVisible, setIsCancelModalVisible] = useState(false);
   const closeCancelModal = useCallback(() => setIsCancelModalVisible(false), []);
@@ -34,26 +35,28 @@ export const WorkspaceCreateActionPanel = ({
 
   return (
     <>
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+      <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiSmallButton
+          <EuiSmallButtonEmpty
             data-test-subj="workspaceForm-bottomBar-cancelButton"
             onClick={showCancelModal}
+            disabled={isSubmitting}
           >
-            {i18n.translate('workspace.form.bottomBar.cancel', {
+            {i18n.translate('workspace.form.right.sidebar.buttons.cancelText', {
               defaultMessage: 'Cancel',
             })}
-          </EuiSmallButton>
+          </EuiSmallButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSmallButton
-            fill
             type="submit"
             form={formId}
             data-test-subj="workspaceForm-bottomBar-createButton"
-            disabled={createButtonDisabled}
+            fill
+            disabled={createButtonDisabled || isSubmitting}
+            isLoading={isSubmitting}
           >
-            {i18n.translate('workspace.form.bottomBar.createWorkspace', {
+            {i18n.translate('workspace.form.right.sidebar.buttons.createWorkspaceText', {
               defaultMessage: 'Create workspace',
             })}
           </EuiSmallButton>

@@ -25,7 +25,8 @@ import {
   WorkspaceObject,
   WorkspaceAvailability,
 } from '../../../core/public';
-import { WORKSPACE_DETAIL_APP_ID } from '../common/constants';
+import { WORKSPACE_DETAIL_APP_ID, USE_CASE_PREFIX } from '../common/constants';
+import { getUseCaseFeatureConfig } from '../common/utils';
 import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
 import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
@@ -39,10 +40,6 @@ import {
   ANALYTICS_ALL_OVERVIEW_PAGE_ID,
   ESSENTIAL_OVERVIEW_PAGE_ID,
 } from '../../../plugins/content_management/public';
-
-export const USE_CASE_PREFIX = 'use-case-';
-
-export const getUseCaseFeatureConfig = (useCaseId: string) => `${USE_CASE_PREFIX}${useCaseId}`;
 
 export const isUseCaseFeatureConfig = (featureConfig: string) =>
   featureConfig.startsWith(USE_CASE_PREFIX);
