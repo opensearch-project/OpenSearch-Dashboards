@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Fragment, useEffect, useMemo, useState, useCallback } from 'react';
+import { Fragment, useEffect, useState, useCallback } from 'react';
 import React from 'react';
 import {
   EuiText,
@@ -16,9 +16,11 @@ import {
   EuiModalHeaderTitle,
   EuiSelectableOption,
   EuiSpacer,
-  EuiButtonGroup,
-  EuiButtonGroupOptionProps,
   EuiBadge,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
 import { i18n } from '@osd/i18n';
@@ -26,173 +28,172 @@ import { i18n } from '@osd/i18n';
 import { getDataSourcesList, fetchDataSourceConnections } from '../../utils';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../../core/public';
-import { AssociationDataSourceModalTab } from '../../../common/constants';
+import { AssociationDataSourceModalMode } from '../../../common/constants';
+import { Logos } from '../../../../../core/common';
+import { DirectQueryConnectionIcon } from '../workspace_form';
 
-export type DataSourceModalOption = EuiSelectableOption<{ connection: DataSourceConnection }>;
+const ConnectionIcon = ({
+  connection: { connectionType, type },
+  logos,
+}: {
+  connection: DataSourceConnection;
+  logos: Logos;
+}) => {
+  if (connectionType === DataSourceConnectionType.OpenSearchConnection) {
+    return <EuiIcon type={logos.Mark.url} />;
+  }
+  if (connectionType === DataSourceConnectionType.DirectQueryConnection) {
+    return <DirectQueryConnectionIcon type={type} />;
+  }
+  return null;
+};
 
-const convertConnectionsToOptions = (
-  connections: DataSourceConnection[],
-  assignedConnections: DataSourceConnection[]
-) => {
+export type DataSourceModalOption = EuiSelectableOption<{
+  description?: string;
+  parentId?: string;
+}>;
+
+const renderOption = (option: DataSourceModalOption) => {
+  const label = (
+    <EuiTextColor color={!!option.parentId ? 'subdued' : undefined}>
+      <EuiText className="eui-textTruncate" size={!!option.parentId ? 'xs' : 's'}>
+        {option.label}
+      </EuiText>
+    </EuiTextColor>
+  );
+  if (option.description) {
+    return (
+      <EuiFlexGroup alignItems="center" style={{ overflow: 'hidden' }}>
+        <EuiFlexItem style={{ overflow: 'hidden' }}>{label}</EuiFlexItem>
+        <EuiFlexItem style={{ overflow: 'hidden' }}>
+          {option.description && (
+            <EuiTextColor color="subdued">
+              <EuiText className="eui-textTruncate" size="xs">
+                {option.description}
+              </EuiText>
+            </EuiTextColor>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+  return label;
+};
+
+const convertConnectionToOption = ({
+  connection,
+  selectedConnectionIds,
+  logos,
+}: {
+  connection: DataSourceConnection;
+  selectedConnectionIds: string[];
+  logos: Logos;
+}) => ({
+  label: connection.name,
+  key: connection.id,
+  description: connection.description,
+  append:
+    connection.relatedConnections && connection.relatedConnections.length > 0 ? (
+      <EuiBadge>
+        {i18n.translate('workspace.form.selectDataSource.optionBadge', {
+          defaultMessage: '+ {relatedConnections} related',
+          values: {
+            relatedConnections: connection.relatedConnections.length,
+          },
+        })}
+      </EuiBadge>
+    ) : undefined,
+  disabled: connection.connectionType === DataSourceConnectionType.DirectQueryConnection,
+  checked:
+    connection.connectionType !== DataSourceConnectionType.DirectQueryConnection &&
+    selectedConnectionIds.includes(connection.id)
+      ? ('on' as const)
+      : undefined,
+  prepend:
+    connection.connectionType === DataSourceConnectionType.DirectQueryConnection ? (
+      <>
+        <div style={{ width: 16 }} />
+        <ConnectionIcon connection={connection} logos={logos} />
+      </>
+    ) : (
+      <ConnectionIcon connection={connection} logos={logos} />
+    ),
+  parentId: connection.parentId,
+});
+
+const convertConnectionsToOptions = ({
+  connections,
+  showDirectQueryConnections,
+  selectedConnectionIds,
+  assignedConnections,
+  logos,
+}: {
+  connections: DataSourceConnection[];
+  assignedConnections: DataSourceConnection[];
+  showDirectQueryConnections: boolean;
+  selectedConnectionIds: string[];
+  logos: Logos;
+}) => {
   const assignedConnectionIds = assignedConnections.map(({ id }) => id);
   return connections
-    .filter((connection) => !assignedConnectionIds.includes(connection.id))
-    .map((connection) => ({
-      label: connection.name,
-      key: connection.id,
-      append:
-        connection.relatedConnections && connection.relatedConnections.length > 0 ? (
-          <EuiBadge>
-            {i18n.translate('workspace.form.selectDataSource.optionBadge', {
-              defaultMessage: '+ {relatedConnections} related',
-              values: {
-                relatedConnections: connection.relatedConnections.length,
-              },
-            })}
-          </EuiBadge>
-        ) : undefined,
-      connection,
-      checked: undefined,
-    }));
+    .flatMap((connection) => {
+      if (
+        assignedConnectionIds.includes(connection.id) ||
+        connection.connectionType === DataSourceConnectionType.DirectQueryConnection
+      ) {
+        return [];
+      }
+      if (showDirectQueryConnections) {
+        if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
+          return [];
+        }
+        return [
+          connection,
+          ...(selectedConnectionIds.includes(connection.id) ? connection.relatedConnections : []),
+        ];
+      }
+      return [connection];
+    })
+    .map((connection) => convertConnectionToOption({ connection, selectedConnectionIds, logos }));
 };
-
-export const getUpdatedOptions = ({
-  prevAllOptions,
-  newOptions,
-}: {
-  prevAllOptions: DataSourceModalOption[];
-  newOptions: DataSourceModalOption[];
-}) => {
-  let updatedOptions = prevAllOptions;
-  const newCheckedOptions: DataSourceModalOption[] = [];
-  const newUncheckedOptions: DataSourceModalOption[] = [];
-
-  for (const option of newOptions) {
-    const previousOption = prevAllOptions.find(
-      ({ connection }) => connection.id === option.connection.id
-    );
-
-    if (previousOption?.checked === option.checked) {
-      continue;
-    }
-    if (option.checked === 'on') {
-      newCheckedOptions.push(option);
-    } else {
-      newUncheckedOptions.push(option);
-    }
-  }
-
-  // Update checked status if option checked this time
-  for (const newCheckedOption of newCheckedOptions) {
-    switch (newCheckedOption.connection.connectionType) {
-      case DataSourceConnectionType.OpenSearchConnection:
-        // Set data source and its DQC checked status to 'on'
-        updatedOptions = updatedOptions.map((option) =>
-          option.connection.parentId === newCheckedOption.connection.id ||
-          option.connection.id === newCheckedOption.connection.id
-            ? { ...option, checked: 'on' }
-            : option
-        );
-        break;
-      case DataSourceConnectionType.DirectQueryConnection:
-        // Set DQC and its parent data source checked status to 'on'
-        updatedOptions = updatedOptions.map((option) =>
-          option.connection.id === newCheckedOption.connection.id ||
-          option.connection.id === newCheckedOption.connection.parentId
-            ? { ...option, checked: 'on' }
-            : option
-        );
-        break;
-    }
-  }
-
-  // Update checked status if option unchecked this time
-  for (const newUncheckedOption of newUncheckedOptions) {
-    switch (newUncheckedOption.connection.connectionType) {
-      case DataSourceConnectionType.OpenSearchConnection:
-        // Set data source and its DQC checked status to undefined
-        updatedOptions = updatedOptions.map((option) =>
-          option.connection.parentId === newUncheckedOption.connection.id ||
-          option.connection.id === newUncheckedOption.connection.id
-            ? { ...option, checked: undefined }
-            : option
-        );
-        break;
-      case DataSourceConnectionType.DirectQueryConnection:
-        // Set DQC checked status to 'undefined'
-        updatedOptions = updatedOptions.map((option) =>
-          option.connection.id === newUncheckedOption.connection.id
-            ? { ...option, checked: undefined }
-            : option
-        );
-        break;
-    }
-  }
-
-  return updatedOptions;
-};
-
-const tabOptions: EuiButtonGroupOptionProps[] = [
-  {
-    id: AssociationDataSourceModalTab.OpenSearchConnections,
-    label: i18n.translate('workspace.form.dataSourceModal.tab.openSearchConnections', {
-      defaultMessage: 'OpenSearch connections',
-    }),
-  },
-  {
-    id: AssociationDataSourceModalTab.DirectQueryConnections,
-    label: i18n.translate('workspace.form.dataSourceModal.tab.directQueryConnections', {
-      defaultMessage: 'Direct query connections',
-    }),
-  },
-];
 
 export interface AssociationDataSourceModalProps {
   http: HttpStart | undefined;
   notifications: NotificationsStart | undefined;
   savedObjects: SavedObjectsStart;
   assignedConnections: DataSourceConnection[];
+  mode: AssociationDataSourceModalMode;
   closeModal: () => void;
   handleAssignDataSourceConnections: (connections: DataSourceConnection[]) => void;
+  logos: Logos;
 }
 
 export const AssociationDataSourceModal = ({
+  mode,
   http,
   notifications,
   closeModal,
   savedObjects,
   assignedConnections,
   handleAssignDataSourceConnections,
+  logos,
 }: AssociationDataSourceModalProps) => {
   const [allConnections, setAllConnections] = useState<DataSourceConnection[]>([]);
-  const [currentTab, setCurrentTab] = useState(tabOptions[0].id);
-  const [allOptions, setAllOptions] = useState<DataSourceModalOption[]>([]);
+  const [selectedConnectionIds, setSelectedConnectionIds] = useState<string[]>([]);
+  const [options, setOptions] = useState<DataSourceModalOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const options = useMemo(() => {
-    if (currentTab === AssociationDataSourceModalTab.OpenSearchConnections) {
-      return allOptions.filter(
-        ({ connection }) =>
-          connection.connectionType === DataSourceConnectionType.OpenSearchConnection
-      );
-    }
-    if (currentTab === AssociationDataSourceModalTab.DirectQueryConnections) {
-      return allOptions.filter(
-        ({ connection }) =>
-          connection.connectionType === DataSourceConnectionType.DirectQueryConnection
-      );
-    }
-    return allOptions;
-  }, [allOptions, currentTab]);
-
-  const selectedConnections = useMemo(
-    () => allOptions.filter(({ checked }) => checked === 'on').map(({ connection }) => connection),
-    [allOptions]
-  );
-
   const handleSelectionChange = useCallback((newOptions: DataSourceModalOption[]) => {
-    setAllOptions((prevAllOptions) => getUpdatedOptions({ prevAllOptions, newOptions }));
+    setSelectedConnectionIds(
+      newOptions.flatMap(({ checked, key }) => (checked === 'on' && key ? [key] : []))
+    );
   }, []);
+
+  const handleSaveButtonClick = useCallback(() => {
+    handleAssignDataSourceConnections(
+      allConnections.filter((connection) => selectedConnectionIds.includes(connection.id))
+    );
+  }, [selectedConnectionIds, allConnections, handleAssignDataSourceConnections]);
 
   useEffect(() => {
     setIsLoading(true);
@@ -204,20 +205,35 @@ export const AssociationDataSourceModal = ({
       .finally(() => {
         setIsLoading(false);
       });
-  }, [savedObjects.client, http, notifications]);
+  }, [savedObjects.client, http, notifications, mode]);
 
   useEffect(() => {
-    setAllOptions(convertConnectionsToOptions(allConnections, assignedConnections));
-  }, [allConnections, assignedConnections]);
+    setOptions(
+      convertConnectionsToOptions({
+        connections: allConnections,
+        assignedConnections,
+        selectedConnectionIds,
+        showDirectQueryConnections: mode === AssociationDataSourceModalMode.DirectQueryConnections,
+        logos,
+      })
+    );
+  }, [allConnections, assignedConnections, selectedConnectionIds, mode, logos]);
 
   return (
-    <EuiModal onClose={closeModal} style={{ width: 900 }}>
+    <EuiModal onClose={closeModal} style={{ width: 630 }}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <FormattedMessage
-            id="workspace.detail.dataSources.associateModal.title"
-            defaultMessage="Associate data sources"
-          />
+          {mode === AssociationDataSourceModalMode.OpenSearchConnections ? (
+            <FormattedMessage
+              id="workspace.detail.dataSources.associateModal.title.openSearchConnections"
+              defaultMessage="Associate OpenSearch connections"
+            />
+          ) : (
+            <FormattedMessage
+              id="workspace.detail.dataSources.associateModal.title.directQueryConnections"
+              defaultMessage="Associate direct query connections"
+            />
+          )}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
@@ -227,18 +243,6 @@ export const AssociationDataSourceModal = ({
             defaultMessage="Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace."
           />
         </EuiText>
-        <EuiSpacer />
-        <EuiButtonGroup
-          legend={i18n.translate('workspace.form.dataSourceModal.connectionTypeTab', {
-            defaultMessage: 'Connection type tab',
-          })}
-          options={tabOptions}
-          idSelected={currentTab}
-          onChange={(id) => {
-            setCurrentTab(id);
-          }}
-          buttonSize="compressed"
-        />
         <EuiSpacer size="s" />
         <EuiSelectable
           aria-label="Searchable"
@@ -246,10 +250,15 @@ export const AssociationDataSourceModal = ({
           listProps={{ bordered: true, onFocusBadge: false }}
           searchProps={{
             'data-test-subj': 'workspace-detail-dataSources-associateModal-search',
+            placeholder: i18n.translate(
+              'workspace.detail.dataSources.associateModal.searchPlaceholder',
+              { defaultMessage: 'Search' }
+            ),
           }}
           options={options}
           onChange={handleSelectionChange}
           isLoading={isLoading}
+          renderOption={renderOption}
         >
           {(list, search) => (
             <Fragment>
@@ -269,8 +278,8 @@ export const AssociationDataSourceModal = ({
         </EuiSmallButton>
         <EuiSmallButton
           data-test-subj="workspace-detail-dataSources-associateModal-save-button"
-          onClick={() => handleAssignDataSourceConnections(selectedConnections)}
-          isDisabled={!selectedConnections || selectedConnections.length === 0}
+          onClick={handleSaveButtonClick}
+          isDisabled={selectedConnectionIds.length === 0}
           fill
         >
           <FormattedMessage

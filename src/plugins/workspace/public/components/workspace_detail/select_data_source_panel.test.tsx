@@ -126,7 +126,7 @@ const selectDataSourceDetailPanel = (props: any) => {
         availableUseCases={[]}
       >
         <Provider>
-          <SelectDataSourceDetailPanel {...props} />
+          <SelectDataSourceDetailPanel {...props} chrome={mockCoreStart.chrome} />
         </Provider>
       </WorkspaceFormProvider>
     </IntlProvider>
@@ -146,7 +146,7 @@ describe('SelectDataSourceDetailPanel', () => {
       expect(
         getByText('There are no data sources associated with the workspace.')
       ).toBeInTheDocument();
-      expect(getAllByText('Associate data sources')).toHaveLength(2);
+      expect(getAllByText('Associate OpenSearch connections')).toHaveLength(2);
     });
   });
 
@@ -162,7 +162,7 @@ describe('SelectDataSourceDetailPanel', () => {
       expect(
         getByText('Contact your administrator to associate data sources with the workspace.')
       ).toBeInTheDocument();
-      expect(queryByText('Association data sources')).toBeNull();
+      expect(queryByText('Associate OpenSearch connections')).toBeNull();
     });
   });
 
@@ -210,7 +210,9 @@ describe('SelectDataSourceDetailPanel', () => {
         action: success,
       })
     );
-    const associationButton = getAllByRole('button', { name: 'Associate data sources' })[0];
+    const associationButton = getAllByRole('button', {
+      name: 'Associate OpenSearch connections',
+    })[0];
     await waitFor(() => {
       expect(associationButton).toBeInTheDocument();
     });
@@ -253,7 +255,9 @@ describe('SelectDataSourceDetailPanel', () => {
         action: failed,
       })
     );
-    const associationButton = getAllByRole('button', { name: 'Associate data sources' })[0];
+    const associationButton = getAllByRole('button', {
+      name: 'Associate OpenSearch connections',
+    })[0];
     await waitFor(() => {
       expect(associationButton).toBeInTheDocument();
     });
@@ -290,7 +294,9 @@ describe('SelectDataSourceDetailPanel', () => {
     const { getByText, queryByText, getAllByRole } = render(
       selectDataSourceDetailPanel(defaultProps)
     );
-    const associationButton = getAllByRole('button', { name: 'Associate data sources' })[0];
+    const associationButton = getAllByRole('button', {
+      name: 'Associate OpenSearch connections',
+    })[0];
     await waitFor(() => {
       expect(associationButton).toBeInTheDocument();
     });

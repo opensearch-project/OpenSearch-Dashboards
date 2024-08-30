@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 export const WORKSPACE_FATAL_ERROR_APP_ID = 'workspace_fatal_error';
@@ -149,7 +148,7 @@ export const CURRENT_USER_PLACEHOLDER = '%me%';
 export const MAX_WORKSPACE_NAME_LENGTH = 40;
 export const MAX_WORKSPACE_DESCRIPTION_LENGTH = 200;
 
-export enum AssociationDataSourceModalTab {
+export enum AssociationDataSourceModalMode {
   OpenSearchConnections = 'opensearch-connections',
   DirectQueryConnections = 'direction-query-connections',
 }
