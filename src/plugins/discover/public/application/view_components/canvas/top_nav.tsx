@@ -21,6 +21,8 @@ import { useDispatch, setSavedQuery, useSelector } from '../../utils/state_manag
 
 import './discover_canvas.scss';
 import { TopNavMenuItemRenderType } from '../../../../../navigation/public';
+import { SearchData } from '../utils';
+import { query } from '../../../../../console/server/lib/spec_definitions/js/query/dsl';
 
 export interface TopNavProps {
   opts: {
@@ -37,6 +39,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   const { data$, inspectorAdapters, savedSearch, indexPattern } = useDiscoverContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
   const [screenTitle, setScreenTitle] = useState<string>('');
+  const [queryResult, setQueryResult] = useState<SearchData | undefined>(undefined);
   const state = useSelector((s) => s.discover);
   const dispatch = useDispatch();
 
@@ -113,6 +116,15 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     );
   }, [savedSearch?.title]);
 
+  useEffect(() => {
+    if (!data$) {
+      return;
+    }
+    const subscription = data$.subscribe((d) => {
+      setQueryResult(d);
+    });
+  }, [data$]);
+
   const showDatePicker = useMemo(() => (indexPattern ? indexPattern.isTimeBased() : false), [
     indexPattern,
   ]);
@@ -160,7 +172,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
         datePickerRef={opts?.optionalRef?.datePickerRef}
         groupActions={showActionsInGroup}
         screenTitle={screenTitle}
-        data$={data$}
+        queryResult={queryResult}
       />
     </>
   );

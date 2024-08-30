@@ -144,9 +144,8 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
       filters: props.filters,
       filterManager: data.query.filterManager,
     });
-    const { query, queryResult } = useQueryStringManager({
+    const { query } = useQueryStringManager({
       queryString: data.query.queryString,
-      data$: props.data$,
     });
 
     const { timeRange, refreshInterval } = useTimefilter({
@@ -212,7 +211,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           datePickerRef={props.datePickerRef}
           isFilterBarPortable={props.isFilterBarPortable}
           {...overrideDefaultBehaviors(props)}
-          queryResult={queryResult}
+          queryResult={props.queryResult}
         />
       </OpenSearchDashboardsContextProvider>
     );

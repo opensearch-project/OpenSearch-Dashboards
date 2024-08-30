@@ -29,21 +29,18 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { Query } from '../../..';
 import { QueryStringContract } from '../../../query/query_string';
-import { SearchData } from '../../../../../discover/public';
 
 interface UseQueryStringProps {
   query?: Query;
   queryString: QueryStringContract;
-  data$?: BehaviorSubject<SearchData>;
 }
 
 export const useQueryStringManager = (props: UseQueryStringProps) => {
   // Filters should be either what's passed in the initial state or the current state of the filter manager
   const [query, setQuery] = useState(() => props.query || props.queryString.getQuery());
-  const [queryResult, setQueryResult] = useState<SearchData | undefined>(undefined);
 
   useEffect(() => {
     const subscriptions = new Subscription();
@@ -63,15 +60,6 @@ export const useQueryStringManager = (props: UseQueryStringProps) => {
     };
   }, [props.queryString]);
 
-  useEffect(() => {
-    if (!props.data$) {
-      return;
-    }
-    const subscription = props.data$.subscribe((d) => {
-      setQueryResult(d);
-    });
-  }, [props.data$]);
-
   // Use callback to memoize the function
   const updateQuery = useCallback(
     (newQueryPartial: Partial<Query>) => {
@@ -85,6 +73,5 @@ export const useQueryStringManager = (props: UseQueryStringProps) => {
   return {
     query,
     updateQuery,
-    queryResult,
   };
 };

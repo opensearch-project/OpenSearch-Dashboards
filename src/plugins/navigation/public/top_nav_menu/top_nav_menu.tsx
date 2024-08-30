@@ -84,7 +84,7 @@ export type TopNavMenuProps = Omit<StatefulSearchBarProps, 'showDatePicker'> &
      * ```
      */
     setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
-    data$?: BehaviorSubject<SearchData>;
+    queryResult?: SearchData;
   };
 
 /*
@@ -105,7 +105,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     dataSourceMenuConfig,
     groupActions,
     screenTitle,
-    data$,
+    queryResult,
     ...searchBarProps
   } = props;
 
@@ -160,7 +160,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
       <SearchBar
         {...searchBarProps}
         showDatePicker={![TopNavMenuItemRenderType.OMITTED, false].includes(showDatePicker!)}
-        data$={props.data$}
+        queryResult={queryResult}
         {...overrides}
       />
     );
