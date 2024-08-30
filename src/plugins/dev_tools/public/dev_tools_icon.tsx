@@ -10,9 +10,11 @@ import {
   EuiFlexItem,
   EuiOverlayMask,
   EuiPanel,
+  EuiSmallButton,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { MemoryRouter } from 'react-router-dom';
 import { MainApp } from './application';
@@ -69,7 +71,6 @@ export function DevToolsIcon({
               hasShadow={false}
             >
               <EuiFlexGroup direction="column" className="eui-fullHeight devToolsModalContent">
-                <EuiSpacer size="s" />
                 <EuiFlexItem grow={false}>
                   <EuiSpacer />
                   <EuiFlexGroup justifyContent="spaceBetween">
@@ -94,6 +95,19 @@ export function DevToolsIcon({
                     setMenuMountPoint={setMountPoint}
                     RouterComponent={MemoryRouter}
                   />
+                  <EuiSpacer size="s" />
+                  <EuiSmallButton
+                    iconType="cross"
+                    iconGap="s"
+                    fullWidth={false}
+                    onClick={() => setModalVisible(false)}
+                    className="devToolsCloseButton"
+                    minWidth="unset"
+                  >
+                    {i18n.translate('dev_tools.modal.close.label', {
+                      defaultMessage: 'Close',
+                    })}
+                  </EuiSmallButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>

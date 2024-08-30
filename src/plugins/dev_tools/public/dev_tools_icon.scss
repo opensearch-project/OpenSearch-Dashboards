@@ -12,9 +12,14 @@
   .devApp {
     overflow: hidden;
   }
+
+  .devToolsCloseButton {
+    align-self: flex-end;
+  }
 }
 
 .devToolsModalContent {
   padding-left: $euiSize;
   padding-right: $euiSize;
+  margin-top: 0;
 }
