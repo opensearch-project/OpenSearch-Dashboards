@@ -23,7 +23,7 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from 'react-intl';
 import { DataSource, DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceClient } from '../../workspace_client';
-import { OpenSearchConnectionTable } from './opensearch_connections_table';
+import { DataSourceConnectionTable } from './data_source_connection_table';
 import { AssociationDataSourceModal } from './association_data_source_modal';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { CoreStart, SavedObjectsStart, WorkspaceObject } from '../../../../../core/public';
@@ -233,7 +233,7 @@ export const SelectDataSourceDetailPanel = ({
       return noAssociationMessage;
     }
     return (
-      <OpenSearchConnectionTable
+      <DataSourceConnectionTable
         isDashboardAdmin={isDashboardAdmin}
         connectionType={toggleIdSelected}
         dataSourceConnections={assignedDataSourceConnections}

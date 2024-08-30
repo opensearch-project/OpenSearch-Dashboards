@@ -216,7 +216,7 @@ export const AssociationDataSourceModal = ({
         <EuiModalHeaderTitle>
           <FormattedMessage
             id="workspace.detail.dataSources.associateModal.title"
-            defaultMessage="Associate OpenSearch connections"
+            defaultMessage="Associate data sources"
           />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -224,7 +224,7 @@ export const AssociationDataSourceModal = ({
         <EuiText size="xs" color="subdued">
           <FormattedMessage
             id="workspace.detail.dataSources.associateModal.message"
-            defaultMessage="Add OpenSearch connections that will be available in the workspace."
+            defaultMessage="Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace."
           />
         </EuiText>
         <EuiSpacer />
@@ -268,6 +268,7 @@ export const AssociationDataSourceModal = ({
           />
         </EuiSmallButton>
         <EuiSmallButton
+          data-test-subj="workspace-detail-dataSources-associateModal-save-button"
           onClick={() => handleAssignDataSourceConnections(selectedConnections)}
           isDisabled={!selectedConnections || selectedConnections.length === 0}
           fill

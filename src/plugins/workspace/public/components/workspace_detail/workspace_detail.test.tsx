@@ -195,10 +195,10 @@ describe('WorkspaceDetail', () => {
     expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
   });
 
-  it('click on Data Sources tab when dataSource enabled', async () => {
+  it('click on Data sources tab when dataSource enabled', async () => {
     const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
     const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
-    fireEvent.click(getByText('Data Sources'));
+    fireEvent.click(getByText('Data sources'));
     expect(document.querySelector('#dataSources')).toHaveClass('euiTab-isSelected');
   });
 

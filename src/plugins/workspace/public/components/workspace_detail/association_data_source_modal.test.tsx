@@ -396,7 +396,11 @@ describe('AssociationDataSourceModal', () => {
 
   it('should display data sources options by default', async () => {
     setupAssociationDataSourceModal();
-    expect(screen.getByText('Associate OpenSearch connections')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
+      )
+    ).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByRole('option', { name: 'Data Source 1' })).toBeInTheDocument();
       expect(screen.getByRole('option', { name: 'Data Source 2' })).toBeInTheDocument();
@@ -414,7 +418,11 @@ describe('AssociationDataSourceModal', () => {
         },
       ],
     });
-    expect(screen.getByText('Associate OpenSearch connections')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
+      )
+    ).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByRole('option', { name: 'Data Source 1' })).toBeInTheDocument();
       expect(screen.queryByRole('option', { name: 'Data Source 2' })).not.toBeInTheDocument();

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './data_source_table.scss';
+import './data_source_connection_table.scss';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiSpacer,
@@ -30,19 +30,19 @@ import PrometheusLogo from '../../assets/prometheus_logo.svg';
 import S3Logo from '../../assets/s3_logo.svg';
 import { AssociationDataSourceModalTab } from '../../../common/constants';
 
-interface OpenSearchConnectionTableProps {
+interface DataSourceConnectionTableProps {
   isDashboardAdmin: boolean;
   connectionType: string;
   dataSourceConnections: DataSourceConnection[];
   handleUnassignDataSources: (dataSources: DataSourceConnection[]) => Promise<void>;
 }
 
-export const OpenSearchConnectionTable = ({
+export const DataSourceConnectionTable = ({
   isDashboardAdmin,
   connectionType,
   dataSourceConnections,
   handleUnassignDataSources,
-}: OpenSearchConnectionTableProps) => {
+}: DataSourceConnectionTableProps) => {
   const [selectedItems, setSelectedItems] = useState<DataSourceConnection[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [popoversState, setPopoversState] = useState<Record<string, boolean>>({});
@@ -57,10 +57,12 @@ export const OpenSearchConnectionTable = ({
   }, [connectionType, setSelectedItems]);
 
   const filteredDataSources = useMemo(() => {
-    return dataSourceConnections.filter(
-      (dqc) => dqc.connectionType === DataSourceConnectionType.OpenSearchConnection
+    return dataSourceConnections.filter((dsc) =>
+      connectionType === AssociationDataSourceModalTab.OpenSearchConnections
+        ? dsc.connectionType === DataSourceConnectionType.OpenSearchConnection
+        : dsc?.relatedConnections && dsc.relatedConnections?.length > 0
     );
-  }, [dataSourceConnections]);
+  }, [connectionType, dataSourceConnections]);
 
   const renderToolsLeft = useCallback(() => {
     return selectedItems.length > 0 && !modalVisible
