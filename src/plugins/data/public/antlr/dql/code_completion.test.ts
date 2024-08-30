@@ -174,32 +174,31 @@ const testingIndex = ({
 } as unknown) as IndexPattern;
 
 const booleanOperatorSuggestions = [
-  { end: -1, start: -1, text: 'or', type: 17 },
-  { end: -1, start: -1, text: 'and', type: 17 },
+  { text: 'or', type: 17, detail: 'Keyword' },
+  { text: 'and', type: 17, detail: 'Keyword' },
 ];
 
-const notOperatorSuggestion = { text: 'not', type: 17, end: -1, start: -1 };
+const notOperatorSuggestion = { text: 'not', type: 17, detail: 'Keyword' };
 
 const fieldNameSuggestions: Array<{
   text: string;
   type: number;
   insertText?: string;
-  end: number;
-  start: number;
+  detail: string;
 }> = [
-  { text: 'Carrier', type: 3, insertText: 'Carrier: ', end: -1, start: -1 },
-  { text: 'DestCityName', type: 3, insertText: 'DestCityName: ', end: -1, start: -1 },
-  { text: 'DestCountry', type: 3, insertText: 'DestCountry: ', end: -1, start: -1 },
-  { text: 'DestWeather', type: 3, insertText: 'DestWeather: ', end: -1, start: -1 },
-  { text: 'DistanceMiles', type: 3, insertText: 'DistanceMiles: ', end: -1, start: -1 },
-  { text: 'FlightDelay', type: 3, insertText: 'FlightDelay: ', end: -1, start: -1 },
-  { text: 'FlightNum', type: 3, insertText: 'FlightNum: ', end: -1, start: -1 },
-  { text: 'OriginWeather', type: 3, insertText: 'OriginWeather: ', end: -1, start: -1 },
-  { text: '_id', type: 3, insertText: '_id: ', end: -1, start: -1 },
-  { text: '_index', type: 3, insertText: '_index: ', end: -1, start: -1 },
-  { text: '_score', type: 3, insertText: '_score: ', end: -1, start: -1 },
-  { text: '_source', type: 3, insertText: '_source: ', end: -1, start: -1 },
-  { text: '_type', type: 3, insertText: '_type: ', end: -1, start: -1 },
+  { text: 'Carrier', type: 3, insertText: 'Carrier: ', detail: 'Field: keyword' },
+  { text: 'DestCityName', type: 3, insertText: 'DestCityName: ', detail: 'Field: keyword' },
+  { text: 'DestCountry', type: 3, insertText: 'DestCountry: ', detail: 'Field: keyword' },
+  { text: 'DestWeather', type: 3, insertText: 'DestWeather: ', detail: 'Field: keyword' },
+  { text: 'DistanceMiles', type: 3, insertText: 'DistanceMiles: ', detail: 'Field: float' },
+  { text: 'FlightDelay', type: 3, insertText: 'FlightDelay: ', detail: 'Field: boolean' },
+  { text: 'FlightNum', type: 3, insertText: 'FlightNum: ', detail: 'Field: keyword' },
+  { text: 'OriginWeather', type: 3, insertText: 'OriginWeather: ', detail: 'Field: keyword' },
+  { text: '_id', type: 3, insertText: '_id: ', detail: 'Field: _id' },
+  { text: '_index', type: 3, insertText: '_index: ', detail: 'Field: _index' },
+  { text: '_score', type: 3, insertText: '_score: ', detail: 'Field: number' },
+  { text: '_source', type: 3, insertText: '_source: ', detail: 'Field: _source' },
+  { text: '_type', type: 3, insertText: '_type: ', detail: 'Field: _type' },
 ];
 
 const fieldNameWithNotSuggestions = fieldNameSuggestions.concat(notOperatorSuggestion);
@@ -212,30 +211,33 @@ const carrierValues = [
 ];
 
 const allCarrierValueSuggestions = [
-  { text: 'Logstash Airways', type: 13, start: -1, end: -1 },
-  { text: 'BeatsWest', type: 13, start: -1, end: -1 },
+  { text: 'Logstash Airways', type: 13, detail: 'Value' },
+  { text: 'BeatsWest', type: 13, detail: 'Value' },
   {
     text: 'OpenSearch Dashboards Airlines',
     type: 13,
-    start: -1,
-    end: -1,
+    detail: 'Value',
   },
-  { text: 'OpenSearch-Air', type: 13, start: -1, end: -1 },
+  { text: 'OpenSearch-Air', type: 13, detail: 'Value' },
 ];
 
 const carrierWithNotSuggestions = allCarrierValueSuggestions.concat(notOperatorSuggestion);
 
-const logCarrierValueSuggestion = [{ text: 'Logstash Airways', type: 13, start: -1, end: -1 }];
+const logCarrierValueSuggestion = [{ text: 'Logstash Airways', type: 13, detail: 'Value' }];
 
 const openCarrierValueSuggestion = [
   {
     text: 'OpenSearch Dashboards Airlines',
     type: 13,
-    start: -1,
-    end: -1,
+    detail: 'Value',
   },
-  { text: 'OpenSearch-Air', type: 13, start: -1, end: -1 },
+  { text: 'OpenSearch-Air', type: 13, detail: 'Value' },
 ];
+
+const addPositionToValue = (vals: any, start: number, end: number) =>
+  vals.map((val: any) => {
+    return { ...val, replacePosition: new monaco.Range(1, start, 1, end) };
+  });
 
 /**
  * Actual Tests
@@ -388,32 +390,40 @@ describe('Test basic value suggestions', () => {
   });
 
   it('suggest token search value for field', async () => {
-    expect(await getSuggestionsAtEnd('Carrier: ')).toStrictEqual(allCarrierValueSuggestions);
+    expect(await getSuggestionsAtEnd('Carrier: ')).toStrictEqual(
+      addPositionToValue(allCarrierValueSuggestions, 10, 10)
+    );
   });
 
   it('suggest value for field without surrounding space', async () => {
-    expect(await getSuggestionsAtEnd('Carrier:')).toStrictEqual(allCarrierValueSuggestions);
+    expect(await getSuggestionsAtEnd('Carrier:')).toStrictEqual(
+      addPositionToValue(allCarrierValueSuggestions, 9, 9)
+    );
   });
 
   it('suggest value from partial value', async () => {
-    expect(await getSuggestionsAtEnd('Carrier: Log')).toStrictEqual(logCarrierValueSuggestion);
+    expect(await getSuggestionsAtEnd('Carrier: Log')).toStrictEqual(
+      addPositionToValue(logCarrierValueSuggestion, 10, 13)
+    );
   });
 
   it('suggest multiple values from partial value', async () => {
-    expect(await getSuggestionsAtEnd('Carrier: Open')).toStrictEqual(openCarrierValueSuggestion);
+    expect(await getSuggestionsAtEnd('Carrier: Open')).toStrictEqual(
+      addPositionToValue(openCarrierValueSuggestion, 10, 14)
+    );
   });
 
   testAroundClosing(
     'Carrier: ',
     ['"', '"'],
     'should suggest within phrase',
-    allCarrierValueSuggestions
+    addPositionToValue(allCarrierValueSuggestions, 11, 11)
   );
 
   it('suggest rest of partial value within quotes', async () => {
     const query = 'Carrier: "OpenSearch"';
     expect(await getSuggestionsAtPos(query, query.length)).toStrictEqual(
-      openCarrierValueSuggestion
+      addPositionToValue(openCarrierValueSuggestion, 11, 21)
     );
   });
 
@@ -421,17 +431,22 @@ describe('Test basic value suggestions', () => {
 });
 
 describe('Test value suggestion with multiple terms', () => {
+  it('should suggest after one field value expression', async () => {
+    expect(await getSuggestionsAtEnd('Carrier: BeatsWest or Carrier: ')).toStrictEqual(
+      addPositionToValue(allCarrierValueSuggestions, 32, 32)
+    );
+  });
+
   testAroundClosing(
     'Carrier: BeatsWest or Carrier: ',
     ['"', '"'],
     'should suggest after one field value expression',
-    allCarrierValueSuggestions,
-    true
+    addPositionToValue(allCarrierValueSuggestions, 33, 33)
   );
 
   it('should suggest after field value expression and partial value', async () => {
     expect(await getSuggestionsAtEnd('Carrier: BeatsWest or Carrier: Open')).toStrictEqual(
-      openCarrierValueSuggestion
+      addPositionToValue(openCarrierValueSuggestion, 32, 36)
     );
   });
 
@@ -439,7 +454,7 @@ describe('Test value suggestion with multiple terms', () => {
     'Carrier: BeatsWest or Carrier: "Open',
     [undefined, '"'],
     'should suggest after field value expression in partial value quotes',
-    openCarrierValueSuggestion,
+    addPositionToValue(openCarrierValueSuggestion, 33, 37),
     true
   );
 });
@@ -449,50 +464,64 @@ describe('Test group value suggestions', () => {
     'Carrier: ',
     ['(', ')'],
     'should suggest within grouping',
-    carrierWithNotSuggestions
+    addPositionToValue(allCarrierValueSuggestions, 11, 11).concat(notOperatorSuggestion)
   );
 
   testAroundClosing(
     'Carrier: (',
     ['"', '"'],
     'should suggest within grouping and phrase',
-    allCarrierValueSuggestions
+    addPositionToValue(allCarrierValueSuggestions, 12, 12)
   );
 
   testAroundClosing(
     'Carrier: ("',
     [undefined, '")'],
     'should suggest within closed grouping and phrase',
-    allCarrierValueSuggestions
+    addPositionToValue(allCarrierValueSuggestions, 13, 13)
   );
 
   testAroundClosing(
     'Carrier: (BeatsWest or ',
     [undefined, ')'],
     'should suggest after grouping with term',
-    carrierWithNotSuggestions,
+    addPositionToValue(allCarrierValueSuggestions, 24, 24).concat(notOperatorSuggestion),
     true
   );
 
-  testAroundClosing(
-    'Carrier: (BeatsWest or ',
-    ['"', '")'],
-    'should suggest in phrase after grouping with term',
-    allCarrierValueSuggestions
-  );
+  it('should suggest in phrase after grouping with term - opened', async () => {
+    const currQuery = 'Carrier: (BeatsWest or "';
+    expect(await getSuggestionsAtEnd(currQuery)).toStrictEqual(
+      addPositionToValue(allCarrierValueSuggestions, 25, 25)
+    );
+  });
+
+  it('should suggest in phrase after grouping with term - closed', async () => {
+    const currQuery = 'Carrier: (BeatsWest or "")';
+    expect(await getSuggestionsAtPos(currQuery, 25)).toStrictEqual(
+      addPositionToValue(allCarrierValueSuggestions, 25, 25)
+    );
+  });
 
   testAroundClosing(
     'Carrier: ("BeatsWest" or ',
     [undefined, ')'],
     'should suggest after grouping with phrase',
-    carrierWithNotSuggestions,
+    addPositionToValue(allCarrierValueSuggestions, 26, 26).concat(notOperatorSuggestion),
     true
   );
 
-  testAroundClosing(
-    'Carrier: ("BeatsWest" or ',
-    ['"', '")'],
-    'should suggest in phrase after grouping with phrase',
-    allCarrierValueSuggestions
-  );
+  it('should suggest in phrase after grouping with phrase - opened', async () => {
+    const currQuery = 'Carrier: ("BeatsWest" or "';
+    expect(await getSuggestionsAtEnd(currQuery)).toStrictEqual(
+      addPositionToValue(allCarrierValueSuggestions, 27, 27)
+    );
+  });
+
+  it('should suggest in phrase after grouping with phrase - closed', async () => {
+    const currQuery = 'Carrier: ("BeatsWest" or "")';
+    expect(await getSuggestionsAtPos(currQuery, 27)).toStrictEqual(
+      addPositionToValue(allCarrierValueSuggestions, 27, 27)
+    );
+  });
 });
