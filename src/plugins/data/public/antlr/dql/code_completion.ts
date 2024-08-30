@@ -19,6 +19,7 @@ import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './.generated/DQLParserVisitor';
 import { IDataPluginServices } from '../..';
 import { fetchFieldSuggestions } from '../shared/utils';
+import { SuggestionItemDetailsTags } from '../shared/constants';
 
 const findCursorIndex = (
   tokenStream: TokenStream,
@@ -134,7 +135,7 @@ export const getSuggestions = async ({
 
     // check to see if field rule is a candidate. if so, suggest field names
     if (candidates.rules.has(DQLParser.RULE_field)) {
-      completions.push(...fetchFieldSuggestions(indexPattern, (f) => `${f}help: `));
+      completions.push(...fetchFieldSuggestions(indexPattern, (f) => `${f}: `));
     }
 
     interface FoundLastValue {
@@ -239,7 +240,7 @@ export const getSuggestions = async ({
             return {
               text: val,
               type: monaco.languages.CompletionItemKind.Value,
-              detail: '',
+              detail: SuggestionItemDetailsTags.Value,
             };
           })
         );
@@ -258,7 +259,7 @@ export const getSuggestions = async ({
         completions.push({
           text: tokenSymbolName,
           type: monaco.languages.CompletionItemKind.Keyword,
-          detail: '',
+          detail: SuggestionItemDetailsTags.Keyword,
         });
       }
     });

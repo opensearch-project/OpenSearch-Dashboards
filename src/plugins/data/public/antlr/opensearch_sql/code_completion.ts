@@ -23,7 +23,7 @@ import { findCursorTokenIndex } from '../shared/cursor';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
 import { SQL_SYMBOLS } from './constants';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
-import { fetchTableSchemas, parseQuery } from '../shared/utils';
+import { fetchFieldSuggestions, fetchTableSchemas, parseQuery } from '../shared/utils';
 import { IDataFrameResponse, IFieldType } from '../../../common';
 import { SuggestionItemDetailsTags } from '../shared/constants';
 
@@ -41,45 +41,26 @@ export interface ISuggestionItem {
 export const getSuggestions = async ({
   selectionStart,
   selectionEnd,
+  indexPattern,
   position,
   query,
   services,
 }: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
-  const { api } = services.uiSettings;
-  const queryString = services.data.query.queryString;
-  const { lineNumber, column } = position || {};
-  const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
-    line: lineNumber || selectionStart,
-    column: column || selectionEnd,
-  });
-
-  const finalSuggestions: QuerySuggestion[] = [];
-
+  if (!services || !services.appName || !indexPattern) return [];
   try {
+    const { lineNumber, column } = position || {};
+    const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
+      line: lineNumber || selectionStart,
+      column: column || selectionEnd,
+    });
+
+    const finalSuggestions: QuerySuggestion[] = [];
+
     // Fetch columns and values
     if (suggestions.suggestColumns?.tables?.length) {
-      const tableNames = suggestions.suggestColumns.tables.map((table) => table.name);
-      const schemas = await fetchTableSchemas(tableNames, api, queryString);
-
-      (schemas as IDataFrameResponse[]).forEach((schema: IDataFrameResponse) => {
-        if ('body' in schema && schema.body && 'fields' in schema.body) {
-          const columns = schema.body.fields.find((col: IFieldType) => col.name === 'COLUMN_NAME');
-          const fieldTypes = schema.body.fields.find((col: IFieldType) => col.name === 'TYPE_NAME');
-
-          if (columns && fieldTypes) {
-            finalSuggestions.push(
-              ...columns.values.map((col: string, index: number) => ({
-                text: col,
-                type: monaco.languages.CompletionItemKind.Field,
-                insertText: col,
-                detail: fieldTypes.values[index],
-                start: 0,
-                end: 0,
-              }))
-            );
-          }
-        }
-      });
+      // NOTE:  currently the suggestions return the table present in the query, but since the
+      //        parameters already provide that, it may not be needed anymore
+      finalSuggestions.push(...fetchFieldSuggestions(indexPattern));
     }
 
     // Fill in aggregate functions
@@ -109,12 +90,11 @@ export const getSuggestions = async ({
         }))
       );
     }
+    return finalSuggestions;
   } catch (error) {
     // TODO: Handle errors appropriately, possibly logging or displaying a message to the user
     return [];
   }
-
-  return finalSuggestions;
 };
 
 export const getOpenSearchSqlAutoCompleteSuggestions = (
