@@ -14,6 +14,7 @@ import { CursorPosition, AutocompleteResultBase } from '../shared/types';
 import { fetchFieldSuggestions, parseQuery } from '../shared/utils';
 import { openSearchPplAutocompleteData } from './opensearch_ppl_autocomplete';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
+import { SuggestionItemDetailsTags } from '../shared/constants';
 
 export const getSuggestions = async ({
   selectionStart,
@@ -43,7 +44,7 @@ export const getSuggestions = async ({
         ...suggestions.suggestKeywords.map((sk) => ({
           text: sk.value,
           type: monaco.languages.CompletionItemKind.Keyword,
-          detail: '',
+          detail: SuggestionItemDetailsTags.Keyword,
         }))
       );
     }
