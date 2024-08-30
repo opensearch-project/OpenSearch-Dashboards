@@ -131,7 +131,7 @@ export const searchSourceRequiredUiSettings = [
   UI_SETTINGS.SEARCH_INCLUDE_FROZEN,
   UI_SETTINGS.SORT_OPTIONS,
   UI_SETTINGS.QUERY_DATAFRAME_HYDRATION_STRATEGY,
-  UI_SETTINGS.SEARCH_USE_FIELDS,
+  UI_SETTINGS.SEARCH_INCLUDE_ALL_FIELDS,
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
@@ -593,7 +593,7 @@ export class SearchSource {
 
     body.stored_fields = computedFields.storedFields;
     body.script_fields = body.script_fields || {};
-    if (getConfig(UI_SETTINGS.SEARCH_USE_FIELDS)) {
+    if (getConfig(UI_SETTINGS.SEARCH_INCLUDE_ALL_FIELDS)) {
       body.fields = ['*'];
     }
     extend(body.script_fields, computedFields.scriptFields);
