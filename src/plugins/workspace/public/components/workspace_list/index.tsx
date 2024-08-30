@@ -327,7 +327,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
           data-test-subj="workspaceList-hover-description"
         >
           {/* Here I need to set width mannuly as the tooltip will ineffect the property : truncateText ',  */}
-          <EuiText size="s" className="eui-textTruncate" style={{ maxWidth: 150 }}>
+          <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: 150 }}>
             {description}
           </EuiText>
         </EuiToolTip>
@@ -379,7 +379,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
                 iconType="copy"
                 color="text"
               >
-                <EuiText size="m">Copy ID</EuiText>
+                Copy ID
               </EuiButtonEmpty>
             );
           },
@@ -400,7 +400,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
                 size="xs"
                 color="text"
               >
-                <EuiText size="m">Edit</EuiText>
+                Edit
               </EuiButtonEmpty>
             );
           },
@@ -416,11 +416,12 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
                 onClick={() => {
                   setDeletedWorkspaces([item]);
                 }}
-                size="xs"
+                size="s"
                 iconType="trash"
                 color="danger"
+                style={{ padding: 0 }}
               >
-                <EuiText size="m">Delete</EuiText>
+                Delete
               </EuiButtonEmpty>
             );
           },
@@ -445,11 +446,12 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
       <EuiPageContent
         verticalPosition="center"
         horizontalPosition="center"
-        paddingSize="m"
         panelPaddingSize="l"
+        paddingSize="m"
         hasShadow={false}
       >
         <EuiInMemoryTable
+          compressed={true}
           items={newWorkspaceList}
           columns={columns}
           itemId="id"
