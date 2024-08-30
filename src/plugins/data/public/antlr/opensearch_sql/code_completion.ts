@@ -4,27 +4,11 @@
  */
 
 import { monaco } from '@osd/monaco';
-import { Lexer as LexerType, ParserRuleContext, Parser as ParserType } from 'antlr4ng';
-import { CodeCompletionCore } from 'antlr4-c3';
-import {
-  AutocompleteResultBase,
-  CursorPosition,
-  EnrichAutocompleteResult,
-  GetParseTree,
-  KeywordSuggestion,
-  LexerConstructor,
-  OpenSearchSqlAutocompleteResult,
-  ParserConstructor,
-} from '../shared/types';
-import { TokenDictionary } from './table';
-import { createParser } from './parse';
-import { SqlErrorListener } from './sql_error_listerner';
-import { findCursorTokenIndex } from '../shared/cursor';
+import { CursorPosition, OpenSearchSqlAutocompleteResult } from '../shared/types';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
 import { SQL_SYMBOLS } from './constants';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
-import { fetchFieldSuggestions, fetchTableSchemas, parseQuery } from '../shared/utils';
-import { IDataFrameResponse, IFieldType } from '../../../common';
+import { fetchFieldSuggestions, parseQuery } from '../shared/utils';
 import { SuggestionItemDetailsTags } from '../shared/constants';
 
 export interface SuggestionParams {
@@ -71,8 +55,6 @@ export const getSuggestions = async ({
           type: monaco.languages.CompletionItemKind.Function,
           insertText: af,
           detail: SuggestionItemDetailsTags.AggregateFunction,
-          start: 0,
-          end: 0,
         }))
       );
     }
@@ -85,8 +67,6 @@ export const getSuggestions = async ({
           type: monaco.languages.CompletionItemKind.Keyword,
           insertText: sk.value,
           detail: SuggestionItemDetailsTags.Keyword,
-          start: 0,
-          end: 0,
         }))
       );
     }

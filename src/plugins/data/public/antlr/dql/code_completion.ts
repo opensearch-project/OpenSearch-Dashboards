@@ -241,6 +241,12 @@ export const getSuggestions = async ({
               text: val,
               type: monaco.languages.CompletionItemKind.Value,
               detail: SuggestionItemDetailsTags.Value,
+              replacePosition: new monaco.Range(
+                cursorLine,
+                cursorColumn - lastValue.length + 1,
+                cursorLine,
+                cursorColumn + 1
+              ),
             };
           })
         );

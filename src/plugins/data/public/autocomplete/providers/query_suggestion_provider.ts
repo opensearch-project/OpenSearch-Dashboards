@@ -79,6 +79,7 @@ export interface MonacoCompatibleQuerySuggestion
   text: string;
   detail: string;
   insertText?: string;
+  replacePosition?: monaco.Range;
 }
 
 /** @public **/
