@@ -223,7 +223,7 @@ export const DataSourceConnectionTable = ({
             </EuiPopoverTitle>
             <EuiListGroup
               flush
-              maxWidth={200}
+              maxWidth={217}
               className="eui-yScrollWithShadows"
               style={{ maxHeight: '90px' }}
             >
@@ -232,7 +232,7 @@ export const DataSourceConnectionTable = ({
                   key={item.id}
                   size="xs"
                   label={item.name}
-                  icon={<DirectQueryConnectionIcon type={record.type} />}
+                  icon={<DirectQueryConnectionIcon type={item.type} />}
                   style={{ maxHeight: '30px' }}
                 />
               ))}
