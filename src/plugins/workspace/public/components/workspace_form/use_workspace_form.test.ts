@@ -8,10 +8,10 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { applicationServiceMock } from '../../../../../core/public/mocks';
 import { WorkspacePermissionMode } from '../../../common/constants';
 import { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
-import { WorkspaceFormData, WorkspaceFormErrorCode } from './types';
+import { WorkspaceFormSubmitData, WorkspaceFormErrorCode } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
 
-const setup = (defaultValues?: WorkspaceFormData, permissionEnabled = false) => {
+const setup = (defaultValues?: WorkspaceFormSubmitData, permissionEnabled = false) => {
   const onSubmitMock = jest.fn();
   const renderResult = renderHook(useWorkspaceForm, {
     initialProps: {
