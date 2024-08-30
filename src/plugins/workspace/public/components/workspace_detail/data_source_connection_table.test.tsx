@@ -3,12 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
+import { fireEvent, render } from '@testing-library/react';
 import { DataSourceConnectionType } from '../../../common/types';
 import React from 'react';
 import { DataSourceConnectionTable } from './data_source_connection_table';
-import { AssociationDataSourceModalTab } from '../../../common/constants';
+import { AssociationDataSourceModalMode } from '../../../common/constants';
 
 const handleUnassignDataSources = jest.fn();
 const dataSourceConnectionsMock = [
@@ -67,7 +66,7 @@ describe('DataSourceConnectionTable', () => {
       const { getByText, queryByText } = render(
         <DataSourceConnectionTable
           isDashboardAdmin={true}
-          connectionType={AssociationDataSourceModalTab.OpenSearchConnections}
+          connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
           dataSourceConnections={dataSourceConnectionsMock}
           handleUnassignDataSources={handleUnassignDataSources}
         />
@@ -87,7 +86,7 @@ describe('DataSourceConnectionTable', () => {
       const { getByText } = render(
         <DataSourceConnectionTable
           isDashboardAdmin={true}
-          connectionType={AssociationDataSourceModalTab.OpenSearchConnections}
+          connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
           dataSourceConnections={dataSourceConnectionsMock}
           handleUnassignDataSources={handleUnassignDataSources}
         />
@@ -103,7 +102,7 @@ describe('DataSourceConnectionTable', () => {
       const { getByText, queryByTestId, getAllByRole, getByRole } = render(
         <DataSourceConnectionTable
           isDashboardAdmin={true}
-          connectionType={AssociationDataSourceModalTab.OpenSearchConnections}
+          connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
           dataSourceConnections={dataSourceConnectionsMock}
           handleUnassignDataSources={handleUnassignDataSources}
         />
@@ -125,7 +124,7 @@ describe('DataSourceConnectionTable', () => {
       const { queryAllByTestId, getByText, getByRole } = render(
         <DataSourceConnectionTable
           isDashboardAdmin={true}
-          connectionType={AssociationDataSourceModalTab.OpenSearchConnections}
+          connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
           dataSourceConnections={dataSourceConnectionsMock}
           handleUnassignDataSources={handleUnassignDataSources}
         />
@@ -145,7 +144,7 @@ describe('DataSourceConnectionTable', () => {
       const { queryByText, queryByTestId, getAllByRole } = render(
         <DataSourceConnectionTable
           isDashboardAdmin={false}
-          connectionType={AssociationDataSourceModalTab.OpenSearchConnections}
+          connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
           dataSourceConnections={dataSourceConnectionsMock}
           handleUnassignDataSources={handleUnassignDataSources}
         />
@@ -163,7 +162,7 @@ describe('DataSourceConnectionTable', () => {
       const { getByText, queryByText, getByTestId } = render(
         <DataSourceConnectionTable
           isDashboardAdmin={true}
-          connectionType={AssociationDataSourceModalTab.DirectQueryConnections}
+          connectionType={AssociationDataSourceModalMode.DirectQueryConnections}
           dataSourceConnections={dataSourceConnectionsMock}
           handleUnassignDataSources={handleUnassignDataSources}
         />

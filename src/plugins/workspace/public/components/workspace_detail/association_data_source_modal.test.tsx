@@ -7,313 +7,17 @@ import React from 'react';
 import { IntlProvider } from 'react-intl';
 
 import { DataSourceConnectionType } from '../../../common/types';
-import { coreMock } from '../../../../../core/public/mocks';
+import { chromeServiceMock, coreMock } from '../../../../../core/public/mocks';
 import * as utilsExports from '../../utils';
 
 import {
-  getUpdatedOptions,
-  DataSourceModalOption,
   AssociationDataSourceModal,
   AssociationDataSourceModalProps,
 } from './association_data_source_modal';
-
-const mockPrevAllOptions = [
-  {
-    connection: {
-      id: 'ds1',
-      connectionType: DataSourceConnectionType.OpenSearchConnection,
-    },
-    checked: undefined,
-  },
-  {
-    connection: {
-      id: 'dqc1',
-      connectionType: DataSourceConnectionType.DirectQueryConnection,
-      parentId: 'ds1',
-    },
-    checked: undefined,
-  },
-  {
-    connection: {
-      id: 'ds2',
-      connectionType: DataSourceConnectionType.OpenSearchConnection,
-    },
-    checked: 'on',
-  },
-  {
-    connection: {
-      id: 'dqc2',
-      connectionType: DataSourceConnectionType.DirectQueryConnection,
-      parentId: 'ds2',
-    },
-    checked: 'on',
-  },
-] as DataSourceModalOption[];
-
-describe('AssociationDataSourceModal utils: getUpdatedOptions', () => {
-  it('should not update checked status when an option remains unchanged', () => {
-    const newOptions = [
-      {
-        connection: {
-          id: 'ds1',
-          connectionType: DataSourceConnectionType.OpenSearchConnection,
-          parentId: null,
-        },
-        checked: undefined,
-      },
-      {
-        connection: {
-          id: 'dqc1',
-          connectionType: DataSourceConnectionType.DirectQueryConnection,
-          parentId: 'ds1',
-        },
-        checked: undefined,
-      },
-      {
-        connection: {
-          id: 'ds2',
-          connectionType: DataSourceConnectionType.OpenSearchConnection,
-          parentId: null,
-        },
-        checked: 'on',
-      },
-      {
-        connection: {
-          id: 'dqc2',
-          connectionType: DataSourceConnectionType.DirectQueryConnection,
-          parentId: 'ds2',
-        },
-        checked: 'on',
-      },
-    ] as DataSourceModalOption[];
-
-    const updatedOptions = getUpdatedOptions({ prevAllOptions: mockPrevAllOptions, newOptions });
-
-    expect(updatedOptions).toEqual(mockPrevAllOptions);
-  });
-
-  it('should update checked status when a data source option is checked', () => {
-    const newOptions = [
-      {
-        connection: {
-          id: 'ds1',
-          connectionType: DataSourceConnectionType.OpenSearchConnection,
-        },
-        checked: 'on',
-      },
-      {
-        connection: {
-          id: 'ds2',
-          connectionType: DataSourceConnectionType.OpenSearchConnection,
-        },
-        checked: 'on',
-      },
-    ] as DataSourceModalOption[];
-
-    const updatedOptions = getUpdatedOptions({ prevAllOptions: mockPrevAllOptions, newOptions });
-
-    expect(updatedOptions).toEqual([
-      {
-        connection: {
-          id: 'ds1',
-          connectionType: DataSourceConnectionType.OpenSearchConnection,
-        },
-        checked: 'on',
-      },
-      {
-        connection: {
-          id: 'dqc1',
-          connectionType: DataSourceConnectionType.DirectQueryConnection,
-          parentId: 'ds1',
-        },
-        checked: 'on',
-      },
-      {
-        connection: {
-          id: 'ds2',
-          connectionType: DataSourceConnectionType.OpenSearchConnection,
-        },
-        checked: 'on',
-      },
-      {
-        connection: {
-          id: 'dqc2',
-          connectionType: DataSourceConnectionType.DirectQueryConnection,
-          parentId: 'ds2',
-        },
-        checked: 'on',
-      },
-    ]);
-  });
-
-  it('should update checked status when a direct query connection option is checked', () => {
-    const newOptions = [
-      {
-        connection: {
-          id: 'dqc1',
-          connectionType: DataSourceConnectionType.DirectQueryConnection,
-          parentId: 'ds1',
-        },
-        checked: 'on',
-      },
-      {
-        connection: {
-          id: 'dqc2',
-          connectionType: DataSourceConnectionType.DirectQueryConnection,
-          parentId: 'ds2',
-        },
-        checked: 'on',
-      },
-    ] as DataSourceModalOption[];
-
-    const updatedOptions = getUpdatedOptions({ prevAllOptions: mockPrevAllOptions, newOptions });
-
-    expect(updatedOptions).toEqual([
-      {
-        connection: {
-          id: 'ds1',
-          connectionType: DataSourceConnectionType.OpenSearchConnection,
-        },
-        checked: 'on',
-      },
-      {
-        connection: {
-          id: 'dqc1',
-          connectionType: DataSourceConnectionType.DirectQueryConnection,
-          parentId: 'ds1',
-        },
-        checked: 'on',
-      },
-      {
-        connection: {
-          id: 'ds2',
-          connectionType: DataSourceConnectionType.OpenSearchConnection,
-        },
-        checked: 'on',
-      },
-      {
-        connection: {
-          id: 'dqc2',
-          connectionType: DataSourceConnectionType.DirectQueryConnection,
-          parentId: 'ds2',
-        },
-        checked: 'on',
-      },
-    ]);
-  });
-
-  it('should update checked status when a data source option is unchecked', () => {
-    const newOptions = [
-      {
-        connection: {
-          id: 'ds1',
-          connectionType: DataSourceConnectionType.OpenSearchConnection,
-        },
-        checked: undefined,
-      },
-      {
-        connection: {
-          id: 'ds2',
-          connectionType: DataSourceConnectionType.OpenSearchConnection,
-        },
-        checked: undefined,
-      },
-    ] as DataSourceModalOption[];
-
-    const updatedOptions = getUpdatedOptions({ prevAllOptions: mockPrevAllOptions, newOptions });
-
-    expect(updatedOptions).toEqual([
-      {
-        connection: {
-          id: 'ds1',
-          connectionType: DataSourceConnectionType.OpenSearchConnection,
-        },
-        checked: undefined,
-      },
-      {
-        connection: {
-          id: 'dqc1',
-          connectionType: DataSourceConnectionType.DirectQueryConnection,
-          parentId: 'ds1',
-        },
-        checked: undefined,
-      },
-      {
-        connection: {
-          id: 'ds2',
-          connectionType: DataSourceConnectionType.OpenSearchConnection,
-        },
-        checked: undefined,
-      },
-      {
-        connection: {
-          id: 'dqc2',
-          connectionType: DataSourceConnectionType.DirectQueryConnection,
-          parentId: 'ds2',
-        },
-        checked: undefined,
-      },
-    ]);
-  });
-
-  it('should update checked status when a direct query connection option is unchecked', () => {
-    const newOptions = [
-      {
-        connection: {
-          id: 'dqc1',
-          connectionType: DataSourceConnectionType.DirectQueryConnection,
-          parentId: 'ds1',
-        },
-        checked: undefined,
-      },
-      {
-        connection: {
-          id: 'dqc2',
-          connectionType: DataSourceConnectionType.DirectQueryConnection,
-          parentId: 'ds2',
-        },
-        checked: undefined,
-      },
-    ] as DataSourceModalOption[];
-
-    const updatedOptions = getUpdatedOptions({ prevAllOptions: mockPrevAllOptions, newOptions });
-
-    expect(updatedOptions).toEqual([
-      {
-        connection: {
-          id: 'ds1',
-          connectionType: DataSourceConnectionType.OpenSearchConnection,
-        },
-        checked: undefined,
-      },
-      {
-        connection: {
-          id: 'dqc1',
-          connectionType: DataSourceConnectionType.DirectQueryConnection,
-          parentId: 'ds1',
-        },
-        checked: undefined,
-      },
-      {
-        connection: {
-          id: 'ds2',
-          connectionType: DataSourceConnectionType.OpenSearchConnection,
-        },
-        checked: 'on',
-      },
-      {
-        connection: {
-          id: 'dqc2',
-          connectionType: DataSourceConnectionType.DirectQueryConnection,
-          parentId: 'ds2',
-        },
-        checked: undefined,
-      },
-    ]);
-  });
-});
+import { AssociationDataSourceModalMode } from 'src/plugins/workspace/common/constants';
 
 const setupAssociationDataSourceModal = ({
+  mode,
   assignedConnections,
   handleAssignDataSourceConnections,
 }: Partial<AssociationDataSourceModalProps> = {}) => {
@@ -331,7 +35,7 @@ const setupAssociationDataSourceModal = ({
           name: 'dqc1',
           parentId: 'ds1',
           connectionType: DataSourceConnectionType.DirectQueryConnection,
-          type: 'S3',
+          type: 'Amazon S3',
         },
       ],
     },
@@ -340,7 +44,7 @@ const setupAssociationDataSourceModal = ({
       name: 'dqc1',
       parentId: 'ds1',
       connectionType: DataSourceConnectionType.DirectQueryConnection,
-      type: 'S3',
+      type: 'Amazon S3',
     },
     {
       id: 'ds2',
@@ -349,15 +53,18 @@ const setupAssociationDataSourceModal = ({
       type: 'OpenSearch',
     },
   ]);
+  const { logos } = chromeServiceMock.createStartContract();
   render(
     <IntlProvider locale="en">
       <AssociationDataSourceModal
+        logos={logos}
+        mode={mode ?? AssociationDataSourceModalMode.OpenSearchConnections}
         http={coreServices.http}
         notifications={coreServices.notifications}
         savedObjects={coreServices.savedObjects}
         closeModal={jest.fn()}
-        assignedConnections={assignedConnections || []}
-        handleAssignDataSourceConnections={handleAssignDataSourceConnections || jest.fn()}
+        assignedConnections={assignedConnections ?? []}
+        handleAssignDataSourceConnections={handleAssignDataSourceConnections ?? jest.fn()}
       />
     </IntlProvider>
   );
@@ -394,8 +101,9 @@ describe('AssociationDataSourceModal', () => {
     );
   });
 
-  it('should display data sources options by default', async () => {
+  it('should display opensearch connections', async () => {
     setupAssociationDataSourceModal();
+    expect(screen.getByText('Associate OpenSearch connections')).toBeInTheDocument();
     expect(
       screen.getByText(
         'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
@@ -407,7 +115,19 @@ describe('AssociationDataSourceModal', () => {
     });
   });
 
-  it('should hide associated data sources', async () => {
+  it('should display direct query connections after opensearch connection selected', async () => {
+    setupAssociationDataSourceModal({
+      mode: AssociationDataSourceModalMode.DirectQueryConnections,
+    });
+    expect(screen.getByText('Associate direct query connections')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole('option', { name: 'dqc1' })).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole('option', { name: 'Data Source 1' }));
+      expect(screen.getByRole('option', { name: 'dqc1' })).toBeInTheDocument();
+    });
+  });
+
+  it('should hide associated connections', async () => {
     setupAssociationDataSourceModal({
       assignedConnections: [
         {
@@ -429,7 +149,7 @@ describe('AssociationDataSourceModal', () => {
     });
   });
 
-  it('should call handleAssignDataSourceConnections with data source and DQCs after data source assigned', async () => {
+  it('should call handleAssignDataSourceConnections with opensearch connections after assigned', async () => {
     const handleAssignDataSourceConnectionsMock = jest.fn();
     setupAssociationDataSourceModal({
       handleAssignDataSourceConnections: handleAssignDataSourceConnectionsMock,
@@ -452,16 +172,9 @@ describe('AssociationDataSourceModal', () => {
             name: 'dqc1',
             parentId: 'ds1',
             connectionType: DataSourceConnectionType.DirectQueryConnection,
-            type: 'S3',
+            type: 'Amazon S3',
           },
         ],
-      },
-      {
-        id: 'ds1-dqc1',
-        name: 'dqc1',
-        parentId: 'ds1',
-        connectionType: DataSourceConnectionType.DirectQueryConnection,
-        type: 'S3',
       },
     ]);
   });

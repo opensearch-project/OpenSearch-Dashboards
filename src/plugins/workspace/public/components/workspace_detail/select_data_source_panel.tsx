@@ -26,20 +26,25 @@ import { WorkspaceClient } from '../../workspace_client';
 import { DataSourceConnectionTable } from './data_source_connection_table';
 import { AssociationDataSourceModal } from './association_data_source_modal';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { CoreStart, SavedObjectsStart, WorkspaceObject } from '../../../../../core/public';
+import {
+  CoreStart,
+  SavedObjectsStart,
+  WorkspaceObject,
+  ChromeStart,
+} from '../../../../../core/public';
 import { convertPermissionSettingsToPermissions, useWorkspaceFormContext } from '../workspace_form';
 import { fetchDataSourceConnections } from '../../utils';
-import { AssociationDataSourceModalTab } from '../../../common/constants';
+import { AssociationDataSourceModalMode } from '../../../common/constants';
 
 const toggleButtons: EuiButtonGroupOptionProps[] = [
   {
-    id: AssociationDataSourceModalTab.OpenSearchConnections,
+    id: AssociationDataSourceModalMode.OpenSearchConnections,
     label: i18n.translate('workspace.detail.dataSources.openSearchConnections', {
       defaultMessage: 'OpenSearch connections',
     }),
   },
   {
-    id: AssociationDataSourceModalTab.DirectQueryConnections,
+    id: AssociationDataSourceModalMode.DirectQueryConnections,
     label: i18n.translate('workspace.detail.dataSources.directQueryConnections', {
       defaultMessage: 'Direct query connections',
     }),
@@ -51,6 +56,7 @@ export interface SelectDataSourcePanelProps {
   detailTitle: string;
   isDashboardAdmin: boolean;
   currentWorkspace: WorkspaceObject;
+  chrome: ChromeStart;
 }
 
 export const SelectDataSourceDetailPanel = ({
@@ -59,6 +65,7 @@ export const SelectDataSourceDetailPanel = ({
   detailTitle,
   isDashboardAdmin,
   currentWorkspace,
+  chrome,
 }: SelectDataSourcePanelProps) => {
   const {
     services: { notifications, workspaceClient, http },
@@ -171,9 +178,13 @@ export const SelectDataSourceDetailPanel = ({
       isLoading={isLoading}
       data-test-subj="workspace-detail-dataSources-assign-button"
     >
-      {i18n.translate('workspace.detail.dataSources.assign.button', {
-        defaultMessage: 'Associate data sources',
-      })}
+      {toggleIdSelected === AssociationDataSourceModalMode.OpenSearchConnections
+        ? i18n.translate('workspace.detail.dataSources.opensearchConnections.assign.button', {
+            defaultMessage: 'Associate OpenSearch connections',
+          })
+        : i18n.translate('workspace.detail.dataSources.directQueryConnections.assign.button', {
+            defaultMessage: 'Associate direct query connections',
+          })}
     </EuiSmallButton>
   );
 
@@ -275,6 +286,8 @@ export const SelectDataSourceDetailPanel = ({
           closeModal={() => setIsVisible(false)}
           assignedConnections={assignedDataSourceConnections}
           handleAssignDataSourceConnections={handleAssignDataSourceConnections}
+          mode={toggleIdSelected as AssociationDataSourceModalMode}
+          logos={chrome.logos}
         />
       )}
     </EuiPanel>

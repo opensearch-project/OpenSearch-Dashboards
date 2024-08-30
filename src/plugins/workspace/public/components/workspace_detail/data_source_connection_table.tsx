@@ -16,7 +16,6 @@ import {
   EuiText,
   EuiListGroup,
   EuiListGroupItem,
-  EuiIcon,
   EuiPopover,
   EuiButtonEmpty,
   EuiPopoverTitle,
@@ -26,9 +25,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
-import PrometheusLogo from '../../assets/prometheus_logo.svg';
-import S3Logo from '../../assets/s3_logo.svg';
-import { AssociationDataSourceModalTab } from '../../../common/constants';
+import { AssociationDataSourceModalMode } from '../../../common/constants';
+import { DirectQueryConnectionIcon } from '../workspace_form';
 
 interface DataSourceConnectionTableProps {
   isDashboardAdmin: boolean;
@@ -58,7 +56,7 @@ export const DataSourceConnectionTable = ({
 
   const openSearchConnections = useMemo(() => {
     return dataSourceConnections.filter((dsc) =>
-      connectionType === AssociationDataSourceModalTab.OpenSearchConnections
+      connectionType === AssociationDataSourceModalMode.OpenSearchConnections
         ? dsc.connectionType === DataSourceConnectionType.OpenSearchConnection
         : dsc?.relatedConnections && dsc.relatedConnections?.length > 0
     );
@@ -106,16 +104,6 @@ export const DataSourceConnectionTable = ({
     ],
   };
 
-  const directQueryConnectionIcon = (connector: string | undefined) => {
-    switch (connector) {
-      case 'Amazon S3':
-        return <EuiIcon type={S3Logo} />;
-      case 'Prometheus':
-        return <EuiIcon type={PrometheusLogo} />;
-      default:
-        return <></>;
-    }
-  };
   const togglePopover = (itemId: string) => {
     setPopoversState((prevState) => ({
       ...prevState,
@@ -146,7 +134,7 @@ export const DataSourceConnectionTable = ({
   };
 
   const baseColumns: Array<EuiBasicTableColumn<DataSourceConnection>> = [
-    ...(connectionType === AssociationDataSourceModalTab.DirectQueryConnections
+    ...(connectionType === AssociationDataSourceModalMode.DirectQueryConnections
       ? [
           {
             width: '40px',
@@ -244,7 +232,7 @@ export const DataSourceConnectionTable = ({
                   key={item.id}
                   size="xs"
                   label={item.name}
-                  icon={directQueryConnectionIcon(item.type)}
+                  icon={<DirectQueryConnectionIcon type={record.type} />}
                   style={{ maxHeight: '30px' }}
                 />
               ))}
