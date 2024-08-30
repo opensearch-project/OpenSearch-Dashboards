@@ -75,6 +75,7 @@ export interface DevToolsSetup {
 export class DevToolsPlugin implements Plugin<DevToolsSetup> {
   private readonly devTools = new Map<string, DevToolApp>();
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private setupDeps: DevToolsSetupDependencies | undefined;
 
   private getSortedDevTools(): readonly DevToolApp[] {
     return sortBy([...this.devTools.values()], 'order');
@@ -89,6 +90,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
   public setup(coreSetup: CoreSetup, deps: DevToolsSetupDependencies) {
     const { application: applicationSetup, getStartServices } = coreSetup;
     const { urlForwarding, managementOverview } = deps;
+    this.setupDeps = deps;
 
     applicationSetup.register({
       id: this.id,
@@ -145,6 +147,9 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
           React.createElement(DevToolsIcon, {
             core,
             appId: this.id,
+            devTools: this.getSortedDevTools(),
+            deps: this.setupDeps as DevToolsSetupDependencies,
+            title: this.title,
           })
         ),
       });
