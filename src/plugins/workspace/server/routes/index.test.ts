@@ -84,7 +84,7 @@ describe(`Workspace routes`, () => {
         })
         .expect(400);
       expect(result.body.message).toEqual(
-        '[request body.attributes.features]: At least one use case is required. Valid options: use-case-all, use-case-observability, use-case-security-analytics, use-case-analytics, use-case-search'
+        '[request body.attributes.features]: At least one use case is required. Valid options: use-case-all, use-case-observability, use-case-security-analytics, use-case-essentials, use-case-search'
       );
     });
     it('returns 400 when multiple use cases are provided during workspace creation', async () => {
@@ -112,7 +112,7 @@ describe(`Workspace routes`, () => {
         })
         .expect(400);
       expect(result.body.message).toEqual(
-        '[request body.attributes.features]: At least one use case is required. Valid options: use-case-all, use-case-observability, use-case-security-analytics, use-case-analytics, use-case-search'
+        '[request body.attributes.features]: At least one use case is required. Valid options: use-case-all, use-case-observability, use-case-security-analytics, use-case-essentials, use-case-search'
       );
     });
     it('updates workspace name successfully without modifying features', async () => {
