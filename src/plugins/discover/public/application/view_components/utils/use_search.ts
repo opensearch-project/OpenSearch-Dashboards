@@ -39,6 +39,7 @@ export enum ResultStatus {
   LOADING = 'loading', // initial data load
   READY = 'ready', // results came back
   NO_RESULTS = 'none', // no results came back
+  ERROR = 'error', // error occurred
 }
 
 export interface SearchData {
@@ -50,6 +51,7 @@ export interface SearchData {
   bucketInterval?: TimechartHeaderBucketInterval | {};
   chartData?: Chart;
   title?: string;
+  errorMsg?: any;
 }
 
 export type SearchRefetch = 'refetch' | undefined;
@@ -222,13 +224,14 @@ export const useSearch = (services: DiscoverViewServices) => {
       if (error instanceof Error && error.name === 'AbortError') return;
 
       data$.next({
-        status: ResultStatus.NO_RESULTS,
+        status: ResultStatus.ERROR,
         rows: [],
+        errorMsg: error.body || error,
       });
 
       console.log('error', error.body);
 
-      data.search.showError((error.body || error) as Error);
+      //data.search.showError((error.body || error) as Error);
     } finally {
       initalSearchComplete.current = true;
     }

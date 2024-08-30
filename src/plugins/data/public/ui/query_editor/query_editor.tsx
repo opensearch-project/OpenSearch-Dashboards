@@ -29,6 +29,8 @@ import { DatasetSelector } from '../dataset_selector';
 import { QueryControls } from '../../query/query_string/language_service/get_query_control_links';
 import { RecentQuery } from '../../query/query_string/language_service/recent_query';
 import { DefaultInputProps } from './editors';
+import { SearchData } from '../../../../discover/public';
+import { QueryResult } from '../../query/query_string/language_service/query_result';
 
 const LANGUAGE_ID_SQL = 'SQL';
 monaco.languages.register({ id: LANGUAGE_ID_SQL });
@@ -59,6 +61,7 @@ export interface QueryEditorProps {
   filterBar?: any;
   prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   savedQueryManagement?: any;
+  queryResult?: SearchData;
 }
 
 interface Props extends QueryEditorProps {
@@ -356,6 +359,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           <EuiText size="xs" color="subdued">
             {this.props.query.dataset?.timeFieldName || ''}
           </EuiText>,
+          <QueryResult queryResult={this.props.queryResult!} />,
         ],
         end: [
           <RecentQuery
