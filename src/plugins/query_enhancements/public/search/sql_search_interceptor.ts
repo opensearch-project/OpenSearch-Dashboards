@@ -6,7 +6,6 @@
 import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Query } from '../../../data/common';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -15,7 +14,7 @@ import {
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../data/public';
-import { API, DATASET, EnhancedFetchContext, SEARCH_STRATEGY, fetch } from '../../common';
+import { DATASET, EnhancedFetchContext, SEARCH_STRATEGY, fetch } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
@@ -34,16 +33,13 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     signal?: AbortSignal,
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
-    const { id, ...searchRequest } = request;
     const context: EnhancedFetchContext = {
       http: this.deps.http,
-      path: trimEnd(API.SQL_SEARCH),
+      path: trimEnd(strategy),
       signal,
     };
 
-    const query = this.buildQuery(strategy);
-
-    return fetch(context, query).pipe(
+    return fetch(context, this.queryService.queryString.getQuery()).pipe(
       catchError((error) => {
         return throwError(error);
       })
@@ -54,28 +50,5 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     const dataset = this.queryService.queryString.getQuery().dataset;
     const strategy = dataset?.type === DATASET.S3 ? SEARCH_STRATEGY.SQL_ASYNC : SEARCH_STRATEGY.SQL;
     return this.runSearch(request, options.abortSignal, strategy);
-  }
-
-  private buildQuery(strategy?: string): Query {
-    const query: Query = this.queryService.queryString.getQuery();
-    // TODO:  MQL keeping here for S3
-    // const dataset = query.dataset;
-
-    // if (strategy === SEARCH_STRATEGY.SQL_ASYNC && dataset?.dataSource) {
-    //   const sessionId = this.queryService.queryString
-    //     .getLanguageService()
-    //     .getUserQuerySessionId(dataset.dataSource.title);
-    //   if (sessionId) {
-    //     return {
-    //       ...query,
-    //       meta: {
-    //         ...query.meta,
-    //         sessionId,
-    //       },
-    //     };
-    //   }
-    // }
-
-    return query;
   }
 }

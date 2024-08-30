@@ -68,10 +68,10 @@ export class Facet {
   ): Promise<FacetResponse> => {
     try {
       const params = request.params;
-      const { df, dataSourceId } = request.body;
-      const clientId = dataSourceId ?? df?.meta?.queryConfig?.dataSourceId;
-      const client = clientId
-        ? context.dataSource.opensearch.legacy.getClient(clientId).callAPI
+      const { df } = request.body;
+      const dataSourceId = df?.meta?.queryConfig?.dataSourceId;
+      const client = dataSourceId
+        ? context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI
         : this.defaultClient.asScoped(request).callAsCurrentUser;
       const queryRes = await client(endpoint, params);
       return {

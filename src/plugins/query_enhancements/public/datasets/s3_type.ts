@@ -129,7 +129,7 @@ const fetch = (
           (response) => response.status !== 'SUCCESS' && response.status !== 'FAILED',
           true
         ),
-        filter((response) => response.status === 'SUCCESS'),
+        filter((response) => response.status === 'SUCCESS' || response.status === 'FAILED'),
         map((response) => {
           if (response.status === 'FAILED') {
             throw new Error('Job failed');

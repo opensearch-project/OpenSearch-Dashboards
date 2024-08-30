@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IDataFrame, Query } from 'src/plugins/data/common';
-import { Observable, Subscription, from, throwError, timer } from 'rxjs';
-import { catchError, concatMap, last, takeWhile, tap } from 'rxjs/operators';
-import { EnhancedFetchContext, FetchFunction, QueryAggConfig } from './types';
+import { Query } from 'src/plugins/data/common';
+import { from, throwError } from 'rxjs';
+import { tap } from 'rxjs/operators';
+import { EnhancedFetchContext, FetchFunction, QueryAggConfig, QueryStatusConfig } from './types';
 
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -36,100 +36,16 @@ export const removeKeyword = (queryString: string | undefined) => {
   return queryString?.replace(new RegExp('.keyword'), '') ?? '';
 };
 
-export class DataFramePolling<T, P = void> {
-  public data: T | null = null;
-  public error: Error | null = null;
-  public loading: boolean = true;
-  private shouldPoll: boolean = false;
-  private intervalRef?: NodeJS.Timeout;
-  private subscription?: Subscription;
+export const handleFacetError = (response: any) => {
+  const error = new Error(response.data);
+  error.name = response.status;
+  return throwError(error);
+};
 
-  constructor(
-    private fetchFunction: FetchFunction<T, P>,
-    private interval: number = 5000,
-    private onPollingSuccess: (data: T) => boolean,
-    private onPollingError: (error: Error) => boolean
-  ) {}
-
-  fetch(): Observable<T> {
-    return timer(0, this.interval).pipe(
-      concatMap(() => this.fetchFunction()),
-      takeWhile((resp) => this.onPollingSuccess(resp), true),
-      tap((resp: T) => {
-        this.data = resp;
-      }),
-      last(),
-      catchError((error: Error) => {
-        this.onPollingError(error);
-        return throwError(error);
-      })
-    );
-  }
-
-  fetchData(params?: P) {
-    this.loading = true;
-    this.subscription = this.fetchFunction(params).subscribe({
-      next: (result: any) => {
-        this.data = result;
-        this.loading = false;
-
-        if (this.onPollingSuccess && this.onPollingSuccess(result)) {
-          this.stopPolling();
-        }
-      },
-      error: (err: any) => {
-        this.error = err as Error;
-        this.loading = false;
-
-        if (this.onPollingError && this.onPollingError(this.error)) {
-          this.stopPolling();
-        }
-      },
-    });
-  }
-
-  startPolling(params?: P) {
-    this.shouldPoll = true;
-    if (!this.intervalRef) {
-      this.intervalRef = setInterval(() => {
-        if (this.shouldPoll) {
-          this.fetchData(params);
-        }
-      }, this.interval);
-    }
-  }
-
-  stopPolling() {
-    this.shouldPoll = false;
-    if (this.intervalRef) {
-      clearInterval(this.intervalRef);
-      this.intervalRef = undefined;
-    }
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = undefined;
-    }
-  }
-
-  waitForPolling(): Promise<void> {
-    return new Promise<any>((resolve) => {
-      const checkLoading = () => {
-        if (!this.loading) {
-          resolve(this.data);
-        } else {
-          setTimeout(checkLoading, this.interval);
-        }
-      };
-      checkLoading();
-    });
-  }
-}
-
-export const handleDataFrameError = (response: any) => {
-  const df = response.body;
-  if (df.error) {
-    const jsError = new Error(df.error.response);
-    return throwError(jsError);
+export const handleFetchError = (response: any) => {
+  if (response.body.error) {
+    const error = new Error(response.body.error.response);
+    return throwError(error);
   }
 };
 
@@ -143,31 +59,37 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
       body,
       signal,
     })
-  ).pipe(tap(handleDataFrameError));
+  ).pipe(tap(handleFetchError));
 };
 
-export const fetchDataFrame = (context: EnhancedFetchContext, query: Query, df: IDataFrame) => {
-  const { http, path, signal } = context;
-  const body = JSON.stringify({ query: { ...query, format: 'jdbc' }, df });
-  return from(
-    http.fetch({
-      method: 'POST',
-      path,
-      body,
-      signal,
-    })
-  ).pipe(tap(handleDataFrameError));
+export const handleQueryStatusPolling = <T, P = void>(
+  fetchQueryStatus: FetchFunction<T, P>,
+  interval: number = 5000
+): Promise<T> => {
+  return new Promise((resolve, reject) => {
+    const pollQueryStatus = async () => {
+      try {
+        const response: any = await fetchQueryStatus();
+
+        if (response.status === 'SUCCESS') {
+          resolve(response);
+        } else if (response.status === 'FAILED') {
+          reject(new Error('Job failed'));
+        } else {
+          setTimeout(pollQueryStatus, interval);
+        }
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    pollQueryStatus();
+  });
 };
 
-export const fetchDataFramePolling = (context: EnhancedFetchContext, df: IDataFrame) => {
-  const { http, path, signal } = context;
-  const queryId = df.meta?.queryId;
-  const dataSourceId = df.meta?.queryConfig?.dataSourceId;
-  return from(
-    http.fetch({
-      method: 'GET',
-      path: `${path}/${queryId}${dataSourceId ? `/${dataSourceId}` : ''}`,
-      signal,
-    })
-  );
+export const buildQueryStatusConfig = (response: any) => {
+  return {
+    queryId: response.data.queryId,
+    sessionId: response.data.sessionId,
+  } as QueryStatusConfig;
 };
