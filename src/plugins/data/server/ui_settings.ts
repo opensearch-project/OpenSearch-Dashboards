@@ -774,7 +774,6 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.boolean(),
       category: ['search'],
-      requiresPageReload: true,
     },
   };
 }
