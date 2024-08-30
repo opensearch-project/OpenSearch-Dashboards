@@ -242,6 +242,7 @@ function setBreadcrumbs(chrome: ChromeStart) {
 export function MainApp(
   props: {
     devTools: readonly DevToolApp[];
+    RouterComponent?: React.ComponentClass;
   } & Pick<
     DevToolsWrapperProps,
     | 'savedObjects'
@@ -260,10 +261,11 @@ export function MainApp(
     dataSourceManagement,
     useUpdatedUX,
     setMenuMountPoint,
+    RouterComponent = Router,
   } = props;
   return (
     <I18nProvider>
-      <Router>
+      <RouterComponent>
         <Switch>
           {devTools
             // Only create routes for devtools that are not disabled
@@ -292,7 +294,7 @@ export function MainApp(
             <Redirect to={`/${devTools[0].id}`} />
           </Route>
         </Switch>
-      </Router>
+      </RouterComponent>
     </I18nProvider>
   );
 }

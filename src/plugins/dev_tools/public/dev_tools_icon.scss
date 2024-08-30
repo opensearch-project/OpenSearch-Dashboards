@@ -1,3 +1,20 @@
 .devToolsOverlayMask {
   padding-bottom: 0;
+
+  .devApp__container {
+    overflow-y: auto;
+    flex-shrink: 1;
+  }
+
+  // Make the parents of devApp__container as overflow hidden
+  // so that devApp__container can be scrollable
+  .devAppWrapper,
+  .devApp {
+    overflow: hidden;
+  }
+}
+
+.devToolsModalContent {
+  padding-left: $euiSize;
+  padding-right: $euiSize;
 }

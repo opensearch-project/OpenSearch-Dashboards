@@ -14,6 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { CoreStart } from 'opensearch-dashboards/public';
+import { MemoryRouter } from 'react-router-dom';
 import { MainApp } from './application';
 import { DevToolApp } from './dev_tool';
 import { DevToolsSetupDependencies } from './plugin';
@@ -61,8 +62,14 @@ export function DevToolsIcon({
               className="euiModal__closeIcon"
               color="text"
             />
-            <EuiPanel className="eui-fullHeight">
-              <EuiFlexGroup direction="column" className="eui-fullHeight">
+            <EuiPanel
+              className="eui-fullHeight"
+              paddingSize="none"
+              hasBorder={false}
+              hasShadow={false}
+            >
+              <EuiFlexGroup direction="column" className="eui-fullHeight devToolsModalContent">
+                <EuiSpacer size="s" />
                 <EuiFlexItem grow={false}>
                   <EuiSpacer />
                   <EuiFlexGroup justifyContent="spaceBetween">
@@ -85,6 +92,7 @@ export function DevToolsIcon({
                     dataSourceManagement={deps.dataSourceManagement}
                     useUpdatedUX
                     setMenuMountPoint={setMountPoint}
+                    RouterComponent={MemoryRouter}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
