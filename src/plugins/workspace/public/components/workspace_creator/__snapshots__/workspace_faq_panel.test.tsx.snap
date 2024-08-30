@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WorkspaceFaqPanel renders correctly 1`] = `
+<div>
+  <div
+    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned"
+  >
+    <div
+      class="euiCard__content"
+    >
+      <h3
+        class="euiTitle euiTitle--xsmall euiCard__title"
+        id="generated-idTitle"
+      >
+        FAQs
+      </h3>
+      <div
+        class="euiCard__children"
+      >
+        <div
+          class="euiText euiText--extraSmall"
+        >
+          <h4>
+            Can I change the workspace use case later?
+          </h4>
+          <p>
+            You can only change to the All use case after workspace creation.
+          </p>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div
+          class="euiSpacer euiSpacer--xs"
+        />
+        <div
+          class="euiText euiText--extraSmall"
+        >
+          <h4>
+            Why can’t I find the data sources I want to attached to the workspace? 
+          </h4>
+          <p>
+            Available data sources to all workspaces here are configured by OpenSearch admin. Contact OpenSearch admin within your organization to add the requested data source. 
+          </p>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div
+          class="euiSpacer euiSpacer--xs"
+        />
+        <div
+          class="euiText euiText--extraSmall"
+        >
+          <h4>
+            Do the added team members automatically gain access to the attached data sources?
+          </h4>
+          <p>
+            No. Adding team members will only grant them access to the created workspace. To grant access to the attached data sources, contact the data source admin within your organization.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

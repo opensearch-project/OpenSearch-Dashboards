@@ -16,7 +16,7 @@ import {
 } from './constants';
 
 import {
-  WorkspaceFormData,
+  WorkspaceFormDataState,
   WorkspaceFormError,
   WorkspaceFormErrorCode,
   WorkspaceFormErrors,
@@ -295,11 +295,7 @@ export const isSelectedDataSourcesDuplicated = (
 ) => selectedDataSources.some((ds) => ds.id === row.id);
 
 export const validateWorkspaceForm = (
-  formData: Omit<Partial<WorkspaceFormSubmitData>, 'permissionSettings'> & {
-    permissionSettings?: Array<
-      Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
-    >;
-  },
+  formData: Partial<WorkspaceFormDataState>,
   isPermissionEnabled: boolean
 ) => {
   const formErrors: WorkspaceFormErrors = {};
@@ -452,12 +448,8 @@ const isSamePermissionSetting = (a: PermissionSettingLike, b: PermissionSettingL
 };
 
 export const getNumberOfChanges = (
-  newFormData: Partial<Omit<WorkspaceFormSubmitData, 'permissionSettings'>> & {
-    permissionSettings?: Array<
-      Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
-    >;
-  },
-  initialFormData: Partial<Omit<WorkspaceFormData, 'id'>>
+  newFormData: Partial<WorkspaceFormDataState>,
+  initialFormData: Partial<WorkspaceFormSubmitData>
 ) => {
   let count = 0;
   if (newFormData.name !== initialFormData.name) {
