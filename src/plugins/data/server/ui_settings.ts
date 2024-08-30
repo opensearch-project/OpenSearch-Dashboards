@@ -762,5 +762,18 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.arrayOf(schema.string()),
     },
+    [UI_SETTINGS.SEARCH_WILDCARD_FIELDS]: {
+      // Placeholder, open to suggestions
+      name: i18n.translate('data.advancedSettings.searchWildcardFieldsTitle', {
+        defaultMessage: 'Search wildcard fields',
+      }),
+      value: false,
+      // Placeholder, open to suggestions
+      description: i18n.translate('data.advancedSettings.searchWildcardFieldsText', {
+        defaultMessage: `Adds the <code>"fields": ["*"]</code> property to search request`,
+      }),
+      schema: schema.boolean(),
+      category: ['search'],
+    },
   };
 }
