@@ -11,41 +11,9 @@
 
 import { monaco } from '@osd/monaco';
 import { CursorPosition, AutocompleteResultBase } from '../shared/types';
-import { parseQuery } from '../shared/utils';
+import { fetchFieldSuggestions, parseQuery } from '../shared/utils';
 import { openSearchPplAutocompleteData } from './opensearch_ppl_autocomplete';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
-import { IndexPattern, IndexPatternField } from '../../index_patterns';
-
-const fetchFieldSuggestions = (
-  indexPattern: IndexPattern
-): Array<{
-  text: string;
-  type: monaco.languages.CompletionItemKind;
-  insertText: string;
-  detail: string;
-}> => {
-  const fieldNames: string[] = indexPattern.fields
-    .filter((idxField: IndexPatternField) => !idxField?.subType) // filter removed .keyword fields
-    .map((idxField: { name: string }) => {
-      return idxField.name;
-    });
-
-  const fieldSuggestions: Array<{
-    text: string;
-    type: monaco.languages.CompletionItemKind;
-    insertText: string;
-    detail: string;
-  }> = fieldNames.map((field: string) => {
-    return {
-      text: field,
-      type: monaco.languages.CompletionItemKind.Field,
-      insertText: `${field}`,
-      detail: '',
-    };
-  });
-
-  return fieldSuggestions;
-};
 
 export const getSuggestions = async ({
   selectionStart,

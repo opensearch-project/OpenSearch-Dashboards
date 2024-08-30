@@ -18,7 +18,7 @@ import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './.generated/DQLParserVisitor';
 import { IDataPluginServices } from '../..';
-import { getQueryService } from '../../services';
+import { fetchFieldSuggestions } from '../shared/utils';
 
 const findCursorIndex = (
   tokenStream: TokenStream,
@@ -39,25 +39,6 @@ const findCursorIndex = (
   }
 
   return undefined;
-};
-
-const findFieldSuggestions = (indexPattern: IndexPattern) => {
-  const fieldNames: string[] = indexPattern.fields
-    .filter((idxField: IndexPatternField) => !idxField?.subType) // filter removed .keyword fields
-    .map((idxField: { name: string }) => {
-      return idxField.name;
-    });
-
-  const fieldSuggestions: QuerySuggestion[] = fieldNames.map((field: string) => {
-    return {
-      text: field,
-      type: monaco.languages.CompletionItemKind.Field,
-      insertText: `${field}: `,
-      detail: '',
-    };
-  });
-
-  return fieldSuggestions;
 };
 
 const findValueSuggestions = async (
@@ -153,7 +134,7 @@ export const getSuggestions = async ({
 
     // check to see if field rule is a candidate. if so, suggest field names
     if (candidates.rules.has(DQLParser.RULE_field)) {
-      completions.push(...findFieldSuggestions(indexPattern));
+      completions.push(...fetchFieldSuggestions(indexPattern, (f) => `${f}help: `));
     }
 
     interface FoundLastValue {

@@ -7,6 +7,7 @@ import { from } from 'rxjs';
 import { distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
 import { CodeCompletionCore } from 'antlr4-c3';
 import { Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
+import { monaco } from '@osd/monaco';
 import { QueryStringContract } from '../../query';
 import { findCursorTokenIndex } from './cursor';
 import { GeneralErrorListener } from './general_error_listerner';
@@ -14,6 +15,8 @@ import { createParser } from '../opensearch_sql/parse';
 import { AutocompleteResultBase, KeywordSuggestion } from './types';
 import { ParsingSubject } from './types';
 import { quotesRegex } from './constants';
+import { IndexPattern, IndexPatternField } from '../../index_patterns';
+import { QuerySuggestion } from '../../autocomplete';
 
 export interface IDataSourceRequestHandlerParams {
   dataSourceId: string;
@@ -90,6 +93,7 @@ export const fetchData = (
 };
 
 // Specific fetch function for table schemas
+// TODO: remove this after using data set table schema fetcher
 export const fetchTableSchemas = (tables: string[], api: any, queryString: QueryStringContract) => {
   return fetchData(
     tables,
@@ -107,6 +111,26 @@ export const fetchTableSchemas = (tables: string[], api: any, queryString: Query
     api,
     queryString
   );
+};
+
+export const fetchFieldSuggestions = (
+  indexPattern: IndexPattern,
+  modifyInsertText?: (input: string) => string
+) => {
+  const filteredFields = indexPattern.fields.filter(
+    (idxField: IndexPatternField) => !idxField?.subType
+  ); // filter removed .keyword fields
+
+  const fieldSuggestions: QuerySuggestion[] = filteredFields.map((field) => {
+    return {
+      text: field.name,
+      type: monaco.languages.CompletionItemKind.Field,
+      detail: field.esTypes?.[0] ?? field.type,
+      ...(modifyInsertText && { insertText: modifyInsertText(field.name) }), // optionally include insert text if fn exists
+    };
+  });
+
+  return fieldSuggestions;
 };
 
 export const parseQuery = <
