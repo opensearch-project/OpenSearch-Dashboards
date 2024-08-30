@@ -26,6 +26,8 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import deepEqual from 'fast-deep-equal';
+import { ApplicationStart } from 'opensearch-dashboards/public';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { AuthenticationMethodRegistry } from '../../../../auth_registry';
 import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import { Header } from '../header';
@@ -49,6 +51,9 @@ import { UpdateAwsCredentialModal } from '../update_aws_credential_modal';
 import { extractRegisteredAuthTypeCredentials, getDefaultAuthMethod } from '../../../utils';
 
 export interface EditDataSourceProps {
+  navigation: NavigationPublicPluginStart;
+  application: ApplicationStart;
+  useNewUX: boolean;
   existingDataSource: DataSourceAttributes;
   existingDatasourceNamesList: string[];
   isDefault: boolean;
@@ -643,6 +648,9 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   renderHeader = () => {
     return (
       <Header
+        navigation={this.props.navigation}
+        application={this.props.application}
+        useNewUX={this.props.useNewUX}
         showDeleteIcon={true}
         isFormValid={this.isFormValid()}
         onClickDeleteIcon={this.onClickDeleteDataSource}
@@ -677,29 +685,31 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   renderConnectionDetailsSection = () => {
     return (
       <EuiPanel paddingSize="m">
-        <EuiText size="m">
-          <h3>
+        <EuiText size="s">
+          <h2>
             {
               <FormattedMessage
                 id="dataSourcesManagement.editDataSource.connectionDetailsText"
                 defaultMessage="Connection Details"
               />
             }
-          </h3>
+          </h2>
         </EuiText>
 
         <EuiHorizontalRule margin="m" />
 
         <EuiDescribedFormGroup
           title={
-            <h4>
-              {
-                <FormattedMessage
-                  id="dataSourcesManagement.editDataSource.objectDetailsText"
-                  defaultMessage="Object Details"
-                />
-              }
-            </h4>
+            <EuiText size="s">
+              <h3>
+                {
+                  <FormattedMessage
+                    id="dataSourcesManagement.editDataSource.objectDetailsText"
+                    defaultMessage="Object Details"
+                  />
+                }
+              </h3>
+            </EuiText>
           }
           description={
             <p>
@@ -763,15 +773,15 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   renderEndpointSection = () => {
     return (
       <EuiPanel paddingSize="m">
-        <EuiText size="m">
-          <h3>
+        <EuiText size="s">
+          <h2>
             {
               <FormattedMessage
                 id="dataSourcesManagement.editDataSource.endpointTitle"
                 defaultMessage="Endpoint"
               />
             }
-          </h3>
+          </h2>
         </EuiText>
 
         <EuiHorizontalRule margin="m" />
@@ -799,29 +809,31 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   renderAuthenticationSection = () => {
     return (
       <EuiPanel paddingSize="m">
-        <EuiText size="m">
-          <h3>
+        <EuiText size="s">
+          <h2>
             {
               <FormattedMessage
                 id="dataSourcesManagement.editDataSource.authenticationTitle"
                 defaultMessage="Authentication"
               />
             }
-          </h3>
+          </h2>
         </EuiText>
 
         <EuiHorizontalRule margin="m" />
 
         <EuiDescribedFormGroup
           title={
-            <h4>
-              {
-                <FormattedMessage
-                  id="dataSourcesManagement.editDataSource.authenticationMethod"
-                  defaultMessage="Authentication Method"
-                />
-              }
-            </h4>
+            <EuiText size="s">
+              <h3>
+                {
+                  <FormattedMessage
+                    id="dataSourcesManagement.editDataSource.authenticationMethod"
+                    defaultMessage="Authentication Method"
+                  />
+                }
+              </h3>
+            </EuiText>
           }
         >
           {this.renderCredentialsSection()}

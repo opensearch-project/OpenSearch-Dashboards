@@ -13,6 +13,7 @@ import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { EuiPageContent } from '@elastic/eui';
 import { ManagementAppMountParams } from '../../../management/public';
 
+import { NavigationPublicPluginStart } from '../../../navigation/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { CreateDataSourceWizardWithRouter } from '../components/create_data_source_wizard';
 import { EditDataSourceWithRouter } from '../components/edit_data_source';
@@ -25,6 +26,7 @@ import { DirectQueryDataConnectionDetail } from '../components/direct_query_data
 
 export interface DataSourceManagementStartDependencies {
   data: DataPublicPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export async function mountManagementSection(
@@ -35,6 +37,7 @@ export async function mountManagementSection(
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
+    { navigation },
   ] = await getStartServices();
 
   const deps: DataSourceManagementContext = {
@@ -46,11 +49,13 @@ export async function mountManagementSection(
     overlays,
     http,
     docLinks,
+    navigation,
     setBreadcrumbs: params.setBreadcrumbs,
     authenticationMethodRegistry: authMethodsRegistry,
   };
 
   const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
+  const useNewUX = uiSettings.get('home:useNewHomePage');
 
   const content = (
     <Router history={params.history}>
@@ -62,11 +67,16 @@ export async function mountManagementSection(
             notifications={notifications}
             setBreadcrumbs={params.setBreadcrumbs}
             application={application}
+            useNewUX={useNewUX}
           />
         </Route>
         {canManageDataSource && (
           <Route path={['/create']}>
-            <CreateDataSourcePanel {...params} featureFlagStatus={featureFlagStatus} />
+            <CreateDataSourcePanel
+              {...params}
+              featureFlagStatus={featureFlagStatus}
+              useNewUX={useNewUX}
+            />
           </Route>
         )}
         {featureFlagStatus && canManageDataSource && (
@@ -76,7 +86,10 @@ export async function mountManagementSection(
         )}
         {canManageDataSource && (
           <Route path={['/configure/:type']}>
-            <ConfigureDirectQueryDataSourceWithRouter notifications={notifications} />
+            <ConfigureDirectQueryDataSourceWithRouter
+              notifications={notifications}
+              useNewUX={useNewUX}
+            />
           </Route>
         )}
         {featureFlagStatus && (
@@ -85,7 +98,11 @@ export async function mountManagementSection(
           </Route>
         )}
         <Route path={['/']}>
-          <DataSourceHomePanel history={params.history} featureFlagStatus={featureFlagStatus} />
+          <DataSourceHomePanel
+            history={params.history}
+            featureFlagStatus={featureFlagStatus}
+            useNewUX={useNewUX}
+          />
         </Route>
       </Switch>
     </Router>
@@ -95,7 +112,7 @@ export async function mountManagementSection(
     <OpenSearchDashboardsContextProvider services={deps}>
       <I18nProvider>
         {params.wrapInPage ? (
-          <EuiPageContent hasShadow={false} hasBorder={false} color="transparent">
+          <EuiPageContent hasShadow={false} hasBorder={false} color="transparent" paddingSize="m">
             {content}
           </EuiPageContent>
         ) : (
