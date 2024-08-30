@@ -54,7 +54,7 @@ export const DataSourceConnectionTable = ({
     // Reset selected items when connectionType changes
     setSelectedItems([]);
     setItemIdToExpandedRowMap({});
-  }, [connectionType, setSelectedItems]);
+  }, [connectionType]);
 
   const openSearchConnections = useMemo(() => {
     return dataSourceConnections.filter((dsc) =>
