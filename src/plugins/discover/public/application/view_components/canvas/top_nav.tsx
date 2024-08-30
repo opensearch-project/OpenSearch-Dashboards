@@ -124,8 +124,6 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   const displayToNavLinkInPortal =
     isEnhancementsEnabled && !!opts?.optionalRef?.topLinkRef?.current && !showActionsInGroup;
 
-  console.log('in discover top  nav', data$);
-
   return (
     <>
       {displayToNavLinkInPortal &&

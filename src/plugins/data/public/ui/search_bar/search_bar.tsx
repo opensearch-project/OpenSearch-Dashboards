@@ -95,6 +95,7 @@ export interface SearchBarOwnProps {
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
   queryResult?: SearchData;
+  data$?: BehaviorSubject<SearchData>;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;

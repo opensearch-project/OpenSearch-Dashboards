@@ -225,8 +225,11 @@ export const useSearch = (services: DiscoverViewServices) => {
 
       data$.next({
         status: ResultStatus.ERROR,
-        rows: [],
         errorMsg: error.body || error,
+        title:
+          indexPattern?.title !== searchSource.getDataFrame()?.name
+            ? searchSource.getDataFrame()?.name
+            : indexPattern?.title,
       });
 
       console.log('error', error.body);

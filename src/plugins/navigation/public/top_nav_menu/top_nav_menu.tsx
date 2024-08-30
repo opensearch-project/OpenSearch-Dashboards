@@ -156,7 +156,6 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     // Validate presence of all required fields
     if (!showSearchBar || !props.data) return null;
     const { SearchBar } = props.data.ui;
-    console.log('in top nav menu', props.data$);
     return (
       <SearchBar
         {...searchBarProps}
