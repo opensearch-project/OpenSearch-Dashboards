@@ -18,9 +18,15 @@ import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
 import { monaco } from '@osd/monaco';
-import { IDataPluginServices, IFieldType, IIndexPattern, Query, TimeRange } from '../..';
+import {
+  IDataPluginServices,
+  IFieldType,
+  IIndexPattern,
+  Query,
+  QuerySuggestion,
+  TimeRange,
+} from '../..';
 import { OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
-import { QuerySuggestion } from '../../autocomplete';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { QueryLanguageSelector } from './language_selector';
@@ -30,12 +36,7 @@ import { DatasetSelector } from '../dataset_selector';
 import { QueryControls } from '../../query/query_string/language_service/get_query_control_links';
 import { RecentQueriesTable } from '../../query/query_string/language_service/recent_query';
 import { DefaultInputProps } from './editors';
-
-const LANGUAGE_ID_SQL = 'SQL';
-monaco.languages.register({ id: LANGUAGE_ID_SQL });
-
-const LANGUAGE_ID_KUERY = 'kuery';
-monaco.languages.register({ id: LANGUAGE_ID_KUERY });
+import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 
 export interface QueryEditorProps {
   query: Query;
@@ -285,7 +286,7 @@ export default class QueryEditorUI extends Component<Props, State> {
 
     // current completion item range being given as last 'word' at pos
     const wordUntil = model.getWordUntilPosition(position);
-    const range = new monaco.Range(
+    const defaultRange = new monaco.Range(
       position.lineNumber,
       wordUntil.startColumn,
       position.lineNumber,
@@ -295,12 +296,17 @@ export default class QueryEditorUI extends Component<Props, State> {
     return {
       suggestions:
         suggestions && suggestions.length > 0
-          ? suggestions.map((s: QuerySuggestion) => ({
-              label: s.text,
-              kind: s.type as monaco.languages.CompletionItemKind,
-              insertText: s.insertText ?? s.text,
-              range,
-            }))
+          ? suggestions
+              .filter((s) => 'detail' in s) // remove suggestion not of type MonacoCompatible
+              .map((s: MonacoCompatibleQuerySuggestion) => {
+                return {
+                  label: s.text,
+                  kind: s.type as monaco.languages.CompletionItemKind,
+                  insertText: s.insertText ?? s.text,
+                  range: s.replacePosition ?? defaultRange,
+                  detail: s.detail,
+                };
+              })
           : [],
       incomplete: false,
     };
