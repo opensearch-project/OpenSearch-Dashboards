@@ -19,13 +19,7 @@ import {
   EuiCard,
   EuiAccordion,
 } from '@elastic/eui';
-import {
-  ApplicationStart,
-  HttpStart,
-  IUiSettingsClient,
-  NotificationsStart,
-  SavedObjectsStart,
-} from 'opensearch-dashboards/public';
+import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { useLocation, useParams } from 'react-router-dom';
 import { escapeRegExp } from 'lodash';
 import { DATACONNECTIONS_BASE } from '../../../constants';
@@ -60,6 +54,7 @@ interface DirectQueryDataConnectionDetailProps {
   notifications: NotificationsStart;
   application: ApplicationStart;
   setBreadcrumbs: (breadcrumbs: any) => void;
+  useNewUX: boolean;
 }
 
 export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnectionDetailProps> = ({
@@ -68,6 +63,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   notifications,
   application,
   setBreadcrumbs,
+  useNewUX,
 }) => {
   const [observabilityDashboardsExists, setObservabilityDashboardsExists] = useState(false);
   const { dataSourceName } = useParams<{ dataSourceName: string }>();
@@ -427,15 +423,17 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   const tabs = [...conditionalTabs, ...genericTabs];
 
   return (
-    <EuiPage>
+    <EuiPage paddingSize="none">
       <EuiPageBody>
         <EuiPageHeader style={{ justifyContent: 'spaceBetween' }}>
           <EuiPageHeaderSection style={{ width: '100%', justifyContent: 'space-between' }}>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiText data-test-subj="datasourceTitle" size="s">
-                  <h1>{datasourceDetails.name}</h1>
-                </EuiText>
+                {!useNewUX && (
+                  <EuiText data-test-subj="datasourceTitle" size="s">
+                    <h1>{datasourceDetails.name}</h1>
+                  </EuiText>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPageHeaderSection>

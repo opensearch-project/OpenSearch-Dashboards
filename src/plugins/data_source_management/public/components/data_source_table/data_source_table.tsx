@@ -122,6 +122,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
 
   const search = {
     toolsRight: renderToolsRight(),
+    compressed: true,
     box: {
       incremental: true,
       schema: {

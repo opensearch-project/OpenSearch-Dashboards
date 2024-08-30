@@ -45,6 +45,7 @@ export const Header = () => {
               <br />
             </p>
           </EuiText>
+          <EuiSpacer size="s" />
         </div>
       </EuiFlexItem>
     </EuiFlexGroup>
