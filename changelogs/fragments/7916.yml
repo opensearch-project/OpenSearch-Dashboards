@@ -1,2 +1,2 @@
 refactor:
-- Update header description for data source management ([#7916](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7916))
+- Update header for data source management when in workspace ([#7916](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7916))
