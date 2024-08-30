@@ -56,7 +56,7 @@ export const DataSourceConnectionTable = ({
     setItemIdToExpandedRowMap({});
   }, [connectionType, setSelectedItems]);
 
-  const filteredDataSources = useMemo(() => {
+  const openSearchConnections = useMemo(() => {
     return dataSourceConnections.filter((dsc) =>
       connectionType === AssociationDataSourceModalTab.OpenSearchConnections
         ? dsc.connectionType === DataSourceConnectionType.OpenSearchConnection
@@ -97,7 +97,7 @@ export const DataSourceConnectionTable = ({
         name: 'Type',
         multiSelect: 'or',
         options: Array.from(
-          new Set(filteredDataSources.map(({ type }) => type).filter(Boolean))
+          new Set(openSearchConnections.map(({ type }) => type).filter(Boolean))
         ).map((type) => ({
           value: type!,
           name: type!,
@@ -126,6 +126,8 @@ export const DataSourceConnectionTable = ({
   const toggleDetails = (item: DataSourceConnection) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
     if (itemIdToExpandedRowMapValues[item.id]) {
+      // When users collapse the expanded row， need to remove its entry from itemIdToExpandedRowMap.
+      // The delete operator is used to remove the key-value pair from the object.
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
       itemIdToExpandedRowMapValues[item.id] = (
@@ -152,6 +154,7 @@ export const DataSourceConnectionTable = ({
             render: (item: DataSourceConnection) =>
               item?.relatedConnections?.length ? (
                 <EuiButtonIcon
+                  data-test-subj={`workspace-detail-dataSources-table-dqc-${item.id}-expand-button`}
                   onClick={() => toggleDetails(item)}
                   aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
                   iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
@@ -215,6 +218,7 @@ export const DataSourceConnectionTable = ({
             closePopover={() => togglePopover(record.id)}
             button={
               <EuiButtonEmpty
+                data-test-subj={`workspace-detail-dataSources-table-dqc-${record.id}-related-button`}
                 size="xs"
                 flush="right"
                 color="text"
@@ -294,7 +298,7 @@ export const DataSourceConnectionTable = ({
   return (
     <>
       <EuiInMemoryTable
-        items={filteredDataSources}
+        items={openSearchConnections}
         itemId="id"
         columns={columns}
         selection={selection}

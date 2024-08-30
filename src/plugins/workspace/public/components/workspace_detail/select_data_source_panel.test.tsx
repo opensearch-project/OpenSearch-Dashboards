@@ -133,7 +133,7 @@ const selectDataSourceDetailPanel = (props: any) => {
   );
 };
 
-describe('WorkspaceDetail', () => {
+describe('SelectDataSourceDetailPanel', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
