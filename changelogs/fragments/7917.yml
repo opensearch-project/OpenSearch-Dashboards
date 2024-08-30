@@ -1,0 +1,2 @@
+feat:
+- Add S3 data exploration for connections, databases, and tables ([#7917](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7917))

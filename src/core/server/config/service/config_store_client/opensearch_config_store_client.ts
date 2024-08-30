@@ -240,6 +240,11 @@ export class OpenSearchConfigStoreClient implements IDynamicConfigStoreClient {
         {
           update: {
             _id: config._id,
+            _index: DYNAMIC_APP_CONFIG_ALIAS,
+            retry_on_conflict: 2,
+            routing: '',
+            version: config._version! + 1,
+            version_type: 'external',
           },
         },
         {
@@ -267,6 +272,11 @@ export class OpenSearchConfigStoreClient implements IDynamicConfigStoreClient {
         {
           create: {
             _id: uniqueId(),
+            _index: DYNAMIC_APP_CONFIG_ALIAS,
+            retry_on_conflict: 2,
+            routing: '',
+            version: 1,
+            version_type: 'external',
           },
         },
         newConfigDocument

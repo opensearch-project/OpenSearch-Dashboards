@@ -38,10 +38,15 @@ export const DEFAULT_DATA = {
       type: 'ROOT',
       meta: {
         type: DATA_STRUCTURE_META_TYPES.FEATURE,
-        icon: 'folderOpen',
+        icon: { type: 'folderOpen' },
         tooltip: 'Root Data Structure',
       },
     } as DataStructure,
+    LOCAL_DATASOURCE: {
+      id: '',
+      title: 'Local Cluster',
+      type: 'DATA_SOURCE',
+    },
   },
 
   SET_TYPES: {
