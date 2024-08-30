@@ -7,12 +7,9 @@ import { useCallback, useState, FormEventHandler, useRef, useMemo } from 'react'
 import { htmlIdGenerator, EuiColorPickerProps } from '@elastic/eui';
 
 import { useApplications } from '../../hooks';
-import {
-  getFirstUseCaseOfFeatureConfigs,
-  getUseCaseFeatureConfig,
-  isUseCaseFeatureConfig,
-} from '../../utils';
+import { getFirstUseCaseOfFeatureConfigs, isUseCaseFeatureConfig } from '../../utils';
 import { DataSource } from '../../../common/types';
+import { getUseCaseFeatureConfig } from '../../../common/utils';
 import { WorkspaceFormProps, WorkspaceFormErrors, WorkspacePermissionSetting } from './types';
 import {
   generatePermissionSettingsState,

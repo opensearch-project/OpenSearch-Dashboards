@@ -11,6 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
 import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
+import { getUseCaseFeatureConfig } from '../../../common/utils';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { convertPermissionSettingsToPermissions } from '../workspace_form';
@@ -18,7 +19,6 @@ import { DataSource } from '../../../common/types';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { WorkspaceUseCase } from '../../types';
 import { WorkspaceFormData } from '../workspace_form/types';
-import { getUseCaseFeatureConfig } from '../../utils';
 import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
 
