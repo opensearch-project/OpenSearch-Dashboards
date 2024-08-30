@@ -762,18 +762,19 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.arrayOf(schema.string()),
     },
-    [UI_SETTINGS.SEARCH_WILDCARD_FIELDS]: {
-      // Placeholder, open to suggestions
-      name: i18n.translate('data.advancedSettings.searchWildcardFieldsTitle', {
-        defaultMessage: 'Search wildcard fields',
+    [UI_SETTINGS.SEARCH_USE_FIELDS]: {
+      name: i18n.translate('data.advancedSettings.searchUseFieldsTitle', {
+        defaultMessage: 'Include all fields in search request',
       }),
       value: false,
-      // Placeholder, open to suggestions
-      description: i18n.translate('data.advancedSettings.searchWildcardFieldsText', {
-        defaultMessage: `Adds the <code>"fields": ["*"]</code> property to search request`,
+      description: i18n.translate('data.advancedSettings.searchUseFieldsDescription', {
+        defaultMessage: `
+        <strong>Experimental</strong>:
+        Adds the <code>"fields": ["*"]</code> property to search request body`,
       }),
       schema: schema.boolean(),
       category: ['search'],
+      requiresPageReload: true,
     },
   };
 }

@@ -86,7 +86,7 @@ export const UI_SETTINGS = {
   COURIER_BATCH_SEARCHES: 'courier:batchSearches',
   SEARCH_INCLUDE_FROZEN: 'search:includeFrozen',
   SEARCH_TIMEOUT: 'search:timeout',
-  SEARCH_WILDCARD_FIELDS: 'search:wildcardFields',
+  SEARCH_USE_FIELDS: 'search:useFields',
   HISTOGRAM_BAR_TARGET: 'histogram:barTarget',
   HISTOGRAM_MAX_BARS: 'histogram:maxBars',
   HISTORY_LIMIT: 'history:limit',
