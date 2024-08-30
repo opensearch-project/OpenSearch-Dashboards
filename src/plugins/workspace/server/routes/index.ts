@@ -4,8 +4,7 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter, Logger, PrincipalType, ACL } from '../../../../core/server';
-import { DEFAULT_NAV_GROUPS } from '../../../../core/public';
+import { IRouter, Logger, PrincipalType, ACL, DEFAULT_NAV_GROUPS } from '../../../../core/server';
 import { getUseCaseFeatureConfig } from '../../common/utils';
 import {
   WorkspacePermissionMode,
