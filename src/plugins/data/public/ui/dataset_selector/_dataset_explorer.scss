@@ -1,7 +1,8 @@
 .datasetExplorer {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 240px)) minmax(300px, 1fr);
-  height: 600px;
+  height: 100%;
+  max-height: calc(100vh - 200px);
   overflow-x: auto;
   border: $euiBorderThin;
 

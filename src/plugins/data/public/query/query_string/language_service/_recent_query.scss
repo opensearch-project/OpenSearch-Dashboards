@@ -1,4 +1,9 @@
 .recentQuery__table {
-  padding: $euiSizeXS;
-  width: 1320px;
+  border: $euiBorderThin;
+  border-radius: $euiSizeXS;
+  margin: 0 $euiSizeXS $euiSizeXS;
+
+  thead {
+    background-color: $euiColorLightestShade;
+  }
 }

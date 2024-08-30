@@ -24,6 +24,9 @@ import {
   WorkspaceObject,
   WorkspaceAvailability,
 } from '../../../core/public';
+
+import { WORKSPACE_DETAIL_APP_ID, USE_CASE_PREFIX } from '../common/constants';
+import { getUseCaseFeatureConfig } from '../common/utils';
 import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
 import { WORKSPACE_DETAIL_APP_ID, WORKSPACE_CREATE_APP_ID } from '../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
@@ -35,10 +38,6 @@ import {
   SEARCH_OVERVIEW_PAGE_ID,
   SECURITY_ANALYTICS_OVERVIEW_PAGE_ID,
 } from '../../../plugins/content_management/public';
-
-export const USE_CASE_PREFIX = 'use-case-';
-
-export const getUseCaseFeatureConfig = (useCaseId: string) => `${USE_CASE_PREFIX}${useCaseId}`;
 
 export const isUseCaseFeatureConfig = (featureConfig: string) =>
   featureConfig.startsWith(USE_CASE_PREFIX);
