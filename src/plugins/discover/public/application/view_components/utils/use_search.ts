@@ -52,6 +52,7 @@ export interface SearchData {
   chartData?: Chart;
   title?: string;
   errorMsg?: any;
+  queryTime?: number;
 }
 
 export type SearchRefetch = 'refetch' | undefined;
@@ -151,6 +152,8 @@ export const useSearch = (services: DiscoverViewServices) => {
 
     dataset = searchSource.getField('index');
 
+    let queryTime;
+
     try {
       // Only show loading indicator if we are fetching when the rows are empty
       if (fetchStateRef.current.rows?.length === 0) {
@@ -182,6 +185,9 @@ export const useSearch = (services: DiscoverViewServices) => {
         .ok({ json: fetchResp });
       const hits = fetchResp.hits.total as number;
       const rows = fetchResp.hits.hits;
+      //setQueryTime(inspectorRequest.getTime());
+      //console.log('queryTime', queryTime);
+      queryTime = inspectorRequest.getTime();
       let bucketInterval = {};
       let chartData;
       for (const row of rows) {
@@ -218,6 +224,7 @@ export const useSearch = (services: DiscoverViewServices) => {
           indexPattern?.title !== searchSource.getDataFrame()?.name
             ? searchSource.getDataFrame()?.name
             : indexPattern?.title,
+        queryTime,
       });
     } catch (error) {
       // If the request was aborted then no need to surface this error in the UI
@@ -230,6 +237,7 @@ export const useSearch = (services: DiscoverViewServices) => {
           indexPattern?.title !== searchSource.getDataFrame()?.name
             ? searchSource.getDataFrame()?.name
             : indexPattern?.title,
+        queryTime,
       });
 
       console.log('error', error.body);

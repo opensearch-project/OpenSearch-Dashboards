@@ -23,7 +23,7 @@ export function QueryResult(props: { queryResult: SearchData }) {
     return (
       <EuiButtonEmpty iconSide="left" iconType={'checkInCircleEmpty'} size="xs" onClick={() => {}}>
         <EuiText size="xs" color="subdued">
-          {'Complete'}
+          {'Complete in ' + props.queryResult.queryTime + ' ms'}
         </EuiText>
       </EuiButtonEmpty>
     );
