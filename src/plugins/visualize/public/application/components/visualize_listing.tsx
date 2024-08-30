@@ -45,6 +45,7 @@ import { getTableColumns, getNoItemsMessage } from '../utils';
 import { getUiActions } from '../../services';
 import { SAVED_OBJECT_DELETE_TRIGGER } from '../../../../saved_objects_management/public';
 import { HeaderVariant } from '../../../../../core/public/index';
+import { constructVisBuilderPath } from '../utils/construct_vis_builder_path';
 
 export const VisualizeListing = () => {
   const {
@@ -123,6 +124,18 @@ export const VisualizeListing = () => {
       history.push(editUrl);
     },
     [application, history]
+  );
+
+  const { services: visualizeServices } = useOpenSearchDashboards<VisualizeServices>();
+
+  // This function takes a legacy visualization item as input and constructs the appropriate path.
+  // It then navigates to the VisBuilder app with the constructed path to migrate the legacy visualization.
+  const visbuilderEditItem = useCallback(
+    async (item) => {
+      const path = await constructVisBuilderPath(item, visualizeServices);
+      application.navigateToApp('vis-builder', { path });
+    },
+    [visualizeServices, application]
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
@@ -204,6 +217,7 @@ export const VisualizeListing = () => {
         findItems={fetchItems}
         deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
         editItem={visualizeCapabilities.save ? editItem : undefined}
+        visbuilderEditItem={visbuilderEditItem}
         tableColumns={tableColumns}
         listingLimit={listingLimit}
         initialPageSize={savedObjectsPublic.settings.getPerPage()}
