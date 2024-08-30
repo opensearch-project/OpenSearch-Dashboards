@@ -44,14 +44,8 @@ export const sqlAsyncSearchStrategyProvider = (
     search: async (context, request: any, options) => {
       try {
         const query: Query = request.body.query;
-        const dataset = query.dataset!;
         const startTime = Date.now();
-        request.body = {
-          query: query.query,
-          datasource: dataset.dataSource?.title,
-          lang: SEARCH_STRATEGY.SQL,
-          sessionId: dataset.dataSource?.meta?.sessionId,
-        };
+        request.body = { ...request.body, lang: SEARCH_STRATEGY.SQL };
         const rawResponse: any = await sqlAsyncFacet.describeQuery(context, request);
 
         if (!rawResponse.success) handleFacetError(rawResponse);
@@ -61,7 +55,6 @@ export const sqlAsyncSearchStrategyProvider = (
 
         const response = await handleQueryStatusPolling(async () => {
           logger.info(`sqlAsyncSearchStrategy: query job: ${statusConfig.queryId}`);
-
           return sqlAsyncJobsFacet.describeQuery(context, request);
         });
 
@@ -73,6 +66,8 @@ export const sqlAsyncSearchStrategyProvider = (
         });
 
         const elapsedMs = Date.now() - startTime;
+
+        dataFrame.size = response.data.datarows.length;
 
         if (usage) usage.trackSuccess(elapsedMs);
 

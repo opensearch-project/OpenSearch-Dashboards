@@ -14,7 +14,7 @@ import {
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../data/public';
-import { DATASET, EnhancedFetchContext, SEARCH_STRATEGY, fetch } from '../../common';
+import { API, DATASET, EnhancedFetchContext, SEARCH_STRATEGY, fetch } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
@@ -35,7 +35,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
   ): Observable<IOpenSearchDashboardsSearchResponse> {
     const context: EnhancedFetchContext = {
       http: this.deps.http,
-      path: trimEnd(strategy),
+      path: trimEnd(strategy === SEARCH_STRATEGY.SQL_ASYNC ? API.SQL_ASYNC_SEARCH : API.SQL_SEARCH),
       signal,
     };
 
