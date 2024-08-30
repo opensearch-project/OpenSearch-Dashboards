@@ -12,9 +12,11 @@ import {
   Dataset,
   IIndexPattern,
   DATA_STRUCTURE_META_TYPES,
+  DataStructureCustomMeta,
 } from '../../../../../common';
 import { DatasetTypeConfig } from '../types';
 import { getIndexPatterns } from '../../../../services';
+import { injectMetaToDataStructures } from './utils';
 
 export const indexPatternTypeConfig: DatasetTypeConfig = {
   id: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
@@ -26,10 +28,12 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
 
   toDataset: (path) => {
     const pattern = path[path.length - 1];
+    const patternMeta = pattern.meta as DataStructureCustomMeta;
     return {
       id: pattern.id,
       title: pattern.title,
       type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+      timeFieldName: patternMeta?.timeFieldName,
       dataSource: pattern.parent
         ? {
             id: pattern.parent.id,
@@ -40,9 +44,9 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     } as Dataset;
   },
 
-  fetch: async (savedObjects, path) => {
+  fetch: async (services, path) => {
     const dataStructure = path[path.length - 1];
-    const indexPatterns = await fetchIndexPatterns(savedObjects);
+    const indexPatterns = await fetchIndexPatterns(services.savedObjects.client);
     return {
       ...dataStructure,
       columnHeader: 'Index patterns',
@@ -97,7 +101,7 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
     });
   }
 
-  return resp.savedObjects.map(
+  const dataStructures = resp.savedObjects.map(
     (savedObject): DataStructure => {
       const dataSourceId = savedObject.references.find((ref) => ref.type === 'data-source')?.id;
       const dataSource = dataSourceId ? dataSourceMap[dataSourceId] : undefined;
@@ -122,4 +126,6 @@ const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<D
       return indexPatternDataStructure;
     }
   );
+
+  return injectMetaToDataStructures(dataStructures, (dataStructure) => dataStructure.parent?.id);
 };

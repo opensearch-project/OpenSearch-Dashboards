@@ -3,7 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiCompressedFieldText, EuiText, PopoverAnchorPosition } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
+
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCompressedFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  PopoverAnchorPosition,
+} from '@elastic/eui';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
@@ -18,7 +28,7 @@ import { QueryEditorExtensions } from './query_editor_extensions';
 import { getQueryService, getIndexPatterns } from '../../services';
 import { DatasetSelector } from '../dataset_selector';
 import { QueryControls } from '../../query/query_string/language_service/get_query_control_links';
-import { RecentQuery } from '../../query/query_string/language_service/recent_query';
+import { RecentQueriesTable } from '../../query/query_string/language_service/recent_query';
 import { DefaultInputProps } from './editors';
 
 const LANGUAGE_ID_SQL = 'SQL';
@@ -64,6 +74,7 @@ interface State {
   isCollapsed: boolean;
   timeStamp: IFieldType | null;
   lineCount: number | undefined;
+  isRecentQueryVisible: boolean;
 }
 
 // Needed for React.lazy
@@ -78,6 +89,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     isCollapsed: false, // default to expand mode
     timeStamp: null,
     lineCount: undefined,
+    isRecentQueryVisible: false,
   };
 
   public inputRef: monaco.editor.IStandaloneCodeEditor | null = null;
@@ -175,12 +187,6 @@ export default class QueryEditorUI extends Component<Props, State> {
     this.setState({ lineCount: currentLineCount });
   };
 
-  private onClickInput = (event: React.MouseEvent<HTMLTextAreaElement>) => {
-    if (event.target instanceof HTMLTextAreaElement) {
-      this.onQueryStringChange(event.target.value);
-    }
-  };
-
   // TODO: MQL consider moving language select language of setting search source here
   private onSelectLanguage = (languageId: string) => {
     // Send telemetry info every time the user opts in or out of kuery
@@ -205,6 +211,13 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   public onMouseEnterSuggestion = (index: number) => {
     this.setState({ index });
+  };
+
+  private toggleRecentQueries = () => {
+    this.setState((prevState) => ({
+      ...prevState,
+      isRecentQueryVisible: !prevState.isRecentQueryVisible,
+    }));
   };
 
   public componentDidMount() {
@@ -293,19 +306,22 @@ export default class QueryEditorUI extends Component<Props, State> {
     };
   };
 
-  public onToggleCollapse = () => {
-    this.setState({ isCollapsed: !this.state.isCollapsed });
+  private renderToggleIcon = () => {
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType={this.state.isCollapsed ? 'expand' : 'minimize'}
+          aria-label={i18n.translate('discover.queryControls.languageToggle', {
+            defaultMessage: `Language Toggle`,
+          })}
+          onClick={() => this.setIsCollapsed(!this.state.isCollapsed)}
+        />
+      </EuiFlexItem>
+    );
   };
 
-  private renderQueryControls = () => {
-    return (
-      <QueryControls
-        services={this.services}
-        queryLanguage={this.props.query.language}
-        onToggleCollapse={this.onToggleCollapse}
-        savedQueryManagement={this.props.savedQueryManagement}
-      />
-    );
+  private renderQueryControls = (queryControls: React.ReactElement[]) => {
+    return <QueryControls queryControls={queryControls} />;
   };
 
   public render() {
@@ -346,11 +362,16 @@ export default class QueryEditorUI extends Component<Props, State> {
           </EuiText>,
         ],
         end: [
-          <RecentQuery
-            queryString={this.queryString}
-            query={this.props.query}
-            onClickRecentQuery={this.onClickRecentQuery}
-          />,
+          <EuiButtonEmpty
+            iconSide="left"
+            iconType="clock"
+            size="xs"
+            onClick={this.toggleRecentQueries}
+          >
+            <EuiText size="xs" color="subdued">
+              {'Recent queries'}
+            </EuiText>
+          </EuiButtonEmpty>,
         ],
       },
       provideCompletionItems: this.provideCompletionItems,
@@ -416,14 +437,27 @@ export default class QueryEditorUI extends Component<Props, State> {
               : languageEditor.TopBar.Expanded && languageEditor.TopBar.Expanded()}
           </div>
           {languageSelector}
-          <div className="osdQueryEditor__querycontrols">{this.renderQueryControls()}</div>
+          <div className="osdQueryEditor__querycontrols">
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              {this.renderQueryControls(languageEditor.TopBar.Controls)}
+              {!languageEditor.TopBar.Expanded && this.renderToggleIcon()}
+              {this.props.savedQueryManagement}
+            </EuiFlexGroup>
+          </div>
         </div>
         <div
           ref={this.headerRef}
           className={classNames('osdQueryEditor__header', this.props.headerClassName)}
         />
         {!this.state.isCollapsed && (
-          <div className="osdQueryEditor__body">{languageEditor.Body()}</div>
+          <>
+            <div className="osdQueryEditor__body">{languageEditor.Body()}</div>
+            <RecentQueriesTable
+              isVisible={this.state.isRecentQueryVisible && useQueryEditor}
+              queryString={this.queryString}
+              onClickRecentQuery={this.onClickRecentQuery}
+            />
+          </>
         )}
 
         {this.renderQueryEditorExtensions()}

@@ -4,7 +4,6 @@
  */
 
 import React, { useState } from 'react';
-import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import {
   BaseDataset,
   DATA_STRUCTURE_META_TYPES,
@@ -15,13 +14,14 @@ import {
 import { DatasetExplorer } from './dataset_explorer';
 import { Configurator } from './configurator';
 import { getQueryService } from '../../services';
+import { IDataPluginServices } from '../../types';
 
 export const AdvancedSelector = ({
-  savedObjects,
+  services,
   onSelect,
   onCancel,
 }: {
-  savedObjects: SavedObjectsClientContract;
+  services: IDataPluginServices;
   onSelect: (dataset: Dataset) => void;
   onCancel: () => void;
 }) => {
@@ -37,11 +37,11 @@ export const AdvancedSelector = ({
         .getTypes()
         .map((type) => {
           return {
-            id: type!.id,
-            title: type!.title,
-            type: type!.id,
+            id: type.id,
+            title: type.title,
+            type: type.id,
             meta: {
-              ...type!.meta,
+              ...type.meta,
               type: DATA_STRUCTURE_META_TYPES.TYPE,
             },
           } as DataStructure;
@@ -59,7 +59,7 @@ export const AdvancedSelector = ({
     />
   ) : (
     <DatasetExplorer
-      savedObjects={savedObjects}
+      services={services}
       queryString={queryString}
       path={path}
       setPath={setPath}

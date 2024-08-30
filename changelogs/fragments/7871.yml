@@ -1,0 +1,2 @@
+feat:
+- Support injecting `DataStructureMeta` from `QueryEditorExtensions` for Query Assist ([#7871](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7871))

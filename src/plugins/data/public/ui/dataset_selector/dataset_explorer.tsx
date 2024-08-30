@@ -19,19 +19,19 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { BaseDataset, DATA_STRUCTURE_META_TYPES, DataStructure } from '../../../common';
 import { QueryStringContract } from '../../query';
+import { IDataPluginServices } from '../../types';
 
 export const DatasetExplorer = ({
-  savedObjects,
+  services,
   queryString,
   path,
   setPath,
   onNext,
   onCancel,
 }: {
-  savedObjects: SavedObjectsClientContract;
+  services: IDataPluginServices;
   queryString: QueryStringContract;
   path: DataStructure[];
   setPath: (path: DataStructure[]) => void;
@@ -55,7 +55,7 @@ export const DatasetExplorer = ({
     }
 
     setLoading(true);
-    const nextDataStructure = await typeConfig.fetch(savedObjects, nextPath);
+    const nextDataStructure = await typeConfig.fetch(services, nextPath);
     setLoading(false);
 
     setPath([...newPath, nextDataStructure]);
@@ -133,6 +133,7 @@ export const DatasetExplorer = ({
                     },
                     searchable: true,
                   })}
+                  height="full"
                   className="datasetExplorer__selectable"
                 >
                   {(list, search) => (
@@ -182,7 +183,7 @@ const LoadingEmptyColumn = ({ isLoading }: { isLoading: boolean }) =>
       <EuiTitle size="xxs" className="datasetExplorer__columnTitle">
         <h3>...</h3>
       </EuiTitle>
-      <EuiSelectable options={[]} singleSelection className="datasetSelector__selectable" isLoading>
+      <EuiSelectable options={[]} singleSelection className="datasetExplorer__selectable" isLoading>
         {(list) => <>{list}</>}
       </EuiSelectable>
     </div>
@@ -190,24 +191,22 @@ const LoadingEmptyColumn = ({ isLoading }: { isLoading: boolean }) =>
     <EmptyColumn />
   );
 const appendIcon = (item: DataStructure) => {
-  if (item.meta?.type === DATA_STRUCTURE_META_TYPES.FEATURE) {
-    if (item.meta?.icon && item.meta?.tooltip) {
-      return (
-        <EuiToolTip content={item.meta.tooltip}>
-          <EuiIcon type={item.meta.icon} />
-        </EuiToolTip>
-      );
-    } else if (item.meta?.icon) {
-      return <EuiIcon type={item.meta.icon} />;
-    }
-  }
-
   if (item.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE) {
     return (
       <EuiToolTip content={item.meta.tooltip}>
         <EuiIcon type="iInCircle" />
       </EuiToolTip>
     );
+  } else {
+    if (item.meta?.icon && item.meta?.tooltip) {
+      return (
+        <EuiToolTip content={item.meta.tooltip}>
+          <EuiIcon {...item.meta.icon} />
+        </EuiToolTip>
+      );
+    } else if (item.meta?.icon) {
+      return <EuiIcon {...item.meta.icon} />;
+    }
   }
 
   return null;

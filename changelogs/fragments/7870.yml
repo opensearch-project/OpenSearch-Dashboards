@@ -1,0 +1,2 @@
+fix:
+- Clean up language search interceptors and fix aggs for PPL ([#7870](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7870))

@@ -9,7 +9,7 @@ import { ChromeNavGroup, NavGroupType } from '../types';
 export const ALL_USE_CASE_ID = 'all';
 export const OBSERVABILITY_USE_CASE_ID = 'observability';
 export const SECURITY_ANALYTICS_USE_CASE_ID = 'security-analytics';
-export const ESSENTIAL_USE_CASE_ID = 'analytics';
+export const ESSENTIAL_USE_CASE_ID = 'essentials';
 export const SEARCH_USE_CASE_ID = 'search';
 
 const defaultNavGroups = {

@@ -139,7 +139,7 @@ export enum DATA_STRUCTURE_META_TYPES {
  */
 export interface DataStructureFeatureMeta {
   type: DATA_STRUCTURE_META_TYPES.FEATURE;
-  icon?: string;
+  icon?: EuiIconProps;
   tooltip?: string;
 }
 
@@ -157,6 +157,8 @@ export interface DataStructureDataTypeMeta {
  */
 export interface DataStructureCustomMeta {
   type: DATA_STRUCTURE_META_TYPES.CUSTOM;
+  icon?: EuiIconProps;
+  tooltip?: string;
   [key: string]: any;
 }
 

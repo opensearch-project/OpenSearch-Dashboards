@@ -447,6 +447,7 @@ export function Header({
         </EuiHeaderSection>
         <EuiHeaderSection side="right">{renderRightControls()}</EuiHeaderSection>
       </EuiHeader>
+      <div id="applicationHeaderFilterBar" />
     </div>
   );
 

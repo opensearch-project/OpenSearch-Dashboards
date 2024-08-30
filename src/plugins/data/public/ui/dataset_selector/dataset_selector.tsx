@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiIcon,
   EuiPopover,
-  EuiPopoverTitle,
+  EuiPopoverFooter,
   EuiSelectable,
   EuiSelectableOption,
   EuiToolTip,
@@ -33,7 +34,15 @@ export const DatasetSelector = ({
 }: DatasetSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
-  const { overlays, savedObjects } = services;
+  const { overlays } = services;
+
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const datasetService = getQueryService().queryString.getDatasetService();
 
@@ -44,7 +53,9 @@ export const DatasetSelector = ({
     const typeConfig = datasetService.getType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
     if (!typeConfig) return;
 
-    const fetchedIndexPatternDataStructures = await typeConfig.fetch(savedObjects.client, []);
+    const fetchedIndexPatternDataStructures = await typeConfig.fetch(services, []);
+
+    if (!isMounted.current) return;
 
     const fetchedDatasets =
       fetchedIndexPatternDataStructures.children?.map((pattern) =>
@@ -56,7 +67,7 @@ export const DatasetSelector = ({
     if (!selectedDataset && fetchedDatasets.length > 0) {
       setSelectedDataset(fetchedDatasets[0]);
     }
-  }, [datasetService, savedObjects.client, selectedDataset, setSelectedDataset]);
+  }, [datasetService, selectedDataset, services, setSelectedDataset]);
 
   useEffect(() => {
     fetchDatasets();
@@ -139,38 +150,6 @@ export const DatasetSelector = ({
       display="block"
       panelPaddingSize="none"
     >
-      <EuiPopoverTitle paddingSize="s">
-        <EuiButtonEmpty
-          className="datasetSelector__advancedButton"
-          iconType="gear"
-          iconSide="right"
-          iconSize="s"
-          size="xs"
-          isSelected={false}
-          onClick={() => {
-            closePopover();
-            const overlay = overlays?.openModal(
-              toMountPoint(
-                <AdvancedSelector
-                  savedObjects={savedObjects.client}
-                  onSelect={(dataset?: Dataset) => {
-                    overlay?.close();
-                    if (dataset) {
-                      setSelectedDataset(dataset);
-                    }
-                  }}
-                  onCancel={() => overlay?.close()}
-                />
-              )
-            );
-          }}
-        >
-          <FormattedMessage
-            id="data.datasetSelector.advancedButton"
-            defaultMessage="View all available data"
-          />
-        </EuiButtonEmpty>
-      </EuiPopoverTitle>
       <EuiSelectable
         className="datasetSelector__selectable"
         options={options}
@@ -191,6 +170,42 @@ export const DatasetSelector = ({
           </>
         )}
       </EuiSelectable>
+      <EuiPopoverFooter paddingSize="none" className="datasetSelector__footer">
+        <EuiButton
+          className="datasetSelector__advancedButton"
+          iconType="gear"
+          iconSide="right"
+          iconSize="s"
+          size="s"
+          isSelected={false}
+          onClick={() => {
+            closePopover();
+            const overlay = overlays?.openModal(
+              toMountPoint(
+                <AdvancedSelector
+                  services={services}
+                  onSelect={(dataset?: Dataset) => {
+                    overlay?.close();
+                    if (dataset) {
+                      setSelectedDataset(dataset);
+                    }
+                  }}
+                  onCancel={() => overlay?.close()}
+                />
+              ),
+              {
+                maxWidth: false,
+                className: 'datasetSelector__advancedModal',
+              }
+            );
+          }}
+        >
+          <FormattedMessage
+            id="data.datasetSelector.advancedButton"
+            defaultMessage="View all available data"
+          />
+        </EuiButton>
+      </EuiPopoverFooter>
     </EuiPopover>
   );
 };
