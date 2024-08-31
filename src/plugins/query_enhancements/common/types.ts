@@ -27,4 +27,10 @@ export interface EnhancedFetchContext {
   signal?: AbortSignal;
 }
 
+export interface QueryStatusOptions<T> {
+  fetchStatus: () => Promise<T>;
+  interval?: number;
+  isServer?: boolean;
+}
+
 export type FetchFunction<T, P = void> = (params?: P) => Promise<T>;

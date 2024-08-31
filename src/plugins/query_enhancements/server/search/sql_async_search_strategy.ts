@@ -18,7 +18,7 @@ import {
   buildQueryStatusConfig,
   getFields,
   handleFacetError,
-  handleQueryStatusPolling,
+  handleQueryStatus,
   SEARCH_STRATEGY,
 } from '../../common';
 
@@ -53,14 +53,15 @@ export const sqlAsyncSearchStrategyProvider = (
         const statusConfig = buildQueryStatusConfig(rawResponse);
         request.params = { queryId: statusConfig.queryId };
 
-        const response = await handleQueryStatusPolling(async () => {
-          const statusResponse: any = await sqlAsyncJobsFacet.describeQuery(context, request);
-          logger.info(
-            `sqlAsyncSearchStrategy: JOB: ${
-              statusConfig.queryId
-            } - STATUS: ${statusResponse.data?.status?.toUpperCase()}`
-          );
-          return statusResponse;
+        const response = await handleQueryStatus({
+          fetchStatus: async () => {
+            const status: any = await sqlAsyncJobsFacet.describeQuery(context, request);
+            logger.info(
+              `sqlAsyncSearchStrategy: JOB: ${statusConfig.queryId} - STATUS: ${status.data?.status}`
+            );
+            return status;
+          },
+          isServer: true,
         });
 
         const dataFrame = createDataFrame({

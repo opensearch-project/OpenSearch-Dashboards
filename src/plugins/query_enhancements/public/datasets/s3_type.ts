@@ -4,8 +4,6 @@
  */
 
 import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { timer } from 'rxjs';
-import { filter, map, mergeMap, takeWhile } from 'rxjs/operators';
 import {
   DATA_STRUCTURE_META_TYPES,
   DEFAULT_DATA,
@@ -16,7 +14,7 @@ import {
   DatasetField,
 } from '../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
-import { DATASET } from '../../common';
+import { DATASET, handleQueryStatus } from '../../common';
 
 const S3_ICON = 'visTable';
 
@@ -105,59 +103,39 @@ export const s3TypeConfig: DatasetTypeConfig = {
   },
 };
 
-const fetch = (
+const fetch = async (
   http: HttpSetup,
   path: DataStructure[],
   type: 'DATABASE' | 'TABLE'
 ): Promise<DataStructure[]> => {
-  return new Promise((resolve, reject) => {
-    const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
-    const parent = path[path.length - 1];
-    const meta = parent.meta as DataStructureCustomMeta;
+  const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
+  const parent = path[path.length - 1];
+  const meta = parent.meta as DataStructureCustomMeta;
 
-    timer(0, 5000)
-      .pipe(
-        mergeMap(() =>
-          http.fetch('../../api/enhancements/datasource/jobs', {
-            query: {
-              id: dataSource?.id,
-              queryId: meta.queryId,
-            },
-          })
-        ),
-        takeWhile(
-          (response) => response.status !== 'SUCCESS' && response.status !== 'FAILED',
-          true
-        ),
-        filter((response) => response.status === 'SUCCESS' || response.status === 'FAILED'),
-        map((response) => {
-          if (response.status === 'FAILED') {
-            throw new Error('Job failed');
-          }
-          return response.datarows.map((item: string[]) => ({
-            id: `${parent.id}.${item[type === 'DATABASE' ? 0 : 1]}`,
-            title: item[type === 'DATABASE' ? 0 : 1],
-            type,
-            meta: {
-              type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-              query: meta.query,
-              session: meta.session,
-            } as DataStructureCustomMeta,
-          }));
-        })
-      )
-      .subscribe({
-        next: (dataStructures) => {
-          resolve(dataStructures);
-        },
-        error: (error) => {
-          reject(error);
-        },
-        complete: () => {
-          reject(new Error('No response'));
-        },
-      });
-  });
+  try {
+    const response = await handleQueryStatus({
+      fetchStatus: () =>
+        http.fetch('../../api/enhancements/datasource/jobs', {
+          query: {
+            id: dataSource?.id,
+            queryId: meta.queryId,
+          },
+        }),
+    });
+
+    return response.datarows.map((item: string[]) => ({
+      id: `${parent.id}.${item[type === 'DATABASE' ? 0 : 1]}`,
+      title: item[type === 'DATABASE' ? 0 : 1],
+      type,
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+        query: meta.query,
+        session: meta.session,
+      } as DataStructureCustomMeta,
+    }));
+  } catch (error) {
+    throw error;
+  }
 };
 
 const setMeta = (dataStructure: DataStructure, response: any) => {

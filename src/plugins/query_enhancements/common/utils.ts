@@ -4,9 +4,14 @@
  */
 
 import { Query } from 'src/plugins/data/common';
-import { from, throwError } from 'rxjs';
-import { tap } from 'rxjs/operators';
-import { EnhancedFetchContext, FetchFunction, QueryAggConfig, QueryStatusConfig } from './types';
+import { from, throwError, timer } from 'rxjs';
+import { filter, mergeMap, take, takeWhile, tap } from 'rxjs/operators';
+import {
+  EnhancedFetchContext,
+  QueryAggConfig,
+  QueryStatusConfig,
+  QueryStatusOptions,
+} from './types';
 
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -62,34 +67,30 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
   ).pipe(tap(handleFetchError));
 };
 
-export const handleQueryStatusPolling = <T, P = void>(
-  fetchQueryStatus: FetchFunction<T, P>,
-  interval: number = 5000
-): Promise<T> => {
-  return new Promise((resolve, reject) => {
-    const pollQueryStatus = async () => {
-      try {
-        const response: any = await fetchQueryStatus();
-        // 1. lowercase / upper case
-        // 2. SQL error -> comes as 500/503 not status (first query)
-        //       2a) close the connection or instance to verify
-        // 3. EMR -> query status request -> comes as status failed with 200 (second query)
-        const status: string = (response.data.status as string).toUpperCase();
+export const handleQueryStatus = <T>(options: QueryStatusOptions<T>): Promise<T> => {
+  const { fetchStatus, interval = 5000, isServer = false } = options;
 
-        if (status === 'SUCCESS') {
-          resolve(response);
-        } else if (status === 'FAILED') {
-          reject(new Error('Job failed'));
-        } else {
-          setTimeout(pollQueryStatus, interval);
+  return timer(0, interval)
+    .pipe(
+      mergeMap(() => fetchStatus()),
+      takeWhile((response) => {
+        const status = isServer
+          ? (response as any)?.data?.status?.toUpperCase()
+          : (response as any)?.status?.toUpperCase();
+        return status !== 'SUCCESS' && status !== 'FAILED';
+      }, true),
+      filter((response) => {
+        const status = isServer
+          ? (response as any)?.data?.status?.toUpperCase()
+          : (response as any)?.status?.toUpperCase();
+        if (status === 'FAILED') {
+          throw new Error('Job failed');
         }
-      } catch (error) {
-        reject(error);
-      }
-    };
-
-    pollQueryStatus();
-  });
+        return status === 'SUCCESS';
+      }),
+      take(1)
+    )
+    .toPromise();
 };
 
 export const buildQueryStatusConfig = (response: any) => {
