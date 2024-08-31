@@ -14,7 +14,7 @@ import {
   UiEnhancements,
 } from '../../../ui';
 import { DataStorage, setOverrides as setFieldOverrides } from '../../../../common';
-import { createDefaultLanguageReference } from './default_language_reference';
+import { createDefaultLanguageReference } from './lib/default_language_reference';
 
 export class LanguageService {
   private languages: Map<string, LanguageConfig> = new Map();

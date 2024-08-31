@@ -9,8 +9,8 @@ import { EuiButtonIcon, EuiLink, EuiPopover, EuiPopoverTitle, EuiText } from '@e
 
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { IDataPluginServices } from '../../../types';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { IDataPluginServices } from '../../../../types';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 
 export const DefaultLanguageReference = () => {
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
