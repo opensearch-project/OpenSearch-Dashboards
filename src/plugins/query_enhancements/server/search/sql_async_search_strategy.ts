@@ -54,8 +54,13 @@ export const sqlAsyncSearchStrategyProvider = (
         request.params = { queryId: statusConfig.queryId };
 
         const response = await handleQueryStatusPolling(async () => {
-          logger.info(`sqlAsyncSearchStrategy: query job: ${statusConfig.queryId}`);
-          return sqlAsyncJobsFacet.describeQuery(context, request);
+          const statusResponse: any = await sqlAsyncJobsFacet.describeQuery(context, request);
+          logger.info(
+            `sqlAsyncSearchStrategy: JOB: ${
+              statusConfig.queryId
+            } - STATUS: ${statusResponse.data?.status?.toUpperCase()}`
+          );
+          return statusResponse;
         });
 
         const dataFrame = createDataFrame({

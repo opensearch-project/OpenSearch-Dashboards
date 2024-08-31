@@ -102,7 +102,7 @@ export class DatasetService {
     const cacheKey = `${dataType}.${lastPathItem.id}`;
 
     const cachedDataStructure = this.sessionStorage.get<CachedDataStructure>(cacheKey);
-    if (cachedDataStructure.children?.length > 0) {
+    if (cachedDataStructure?.children?.length > 0) {
       return this.cacheToDataStructure(dataType, cachedDataStructure);
     }
 
@@ -151,14 +151,13 @@ export class DatasetService {
 
     this.sessionStorage.set(`${dataType}.${dataStructure.id}`, cachedDataStructure);
 
-    // Cache immediate children, but don't recurse
     dataStructure.children?.forEach((child) => {
       const cachedChild: CachedDataStructure = {
         id: child.id,
         title: child.title,
         type: child.type,
         parent: dataStructure.id,
-        children: [], // We're not caching nested children
+        children: [],
         meta: child.meta,
       };
       this.sessionStorage.set(`${dataType}.${child.id}`, cachedChild);

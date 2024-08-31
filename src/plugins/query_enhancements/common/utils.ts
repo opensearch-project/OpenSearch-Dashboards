@@ -70,10 +70,15 @@ export const handleQueryStatusPolling = <T, P = void>(
     const pollQueryStatus = async () => {
       try {
         const response: any = await fetchQueryStatus();
+        // 1. lowercase / upper case
+        // 2. SQL error -> comes as 500/503 not status (first query)
+        //       2a) close the connection or instance to verify
+        // 3. EMR -> query status request -> comes as status failed with 200 (second query)
+        const status: string = (response.data.status as string).toUpperCase();
 
-        if (response.status === 'SUCCESS') {
+        if (status === 'SUCCESS') {
           resolve(response);
-        } else if (response.status === 'FAILED') {
+        } else if (status === 'FAILED') {
           reject(new Error('Job failed'));
         } else {
           setTimeout(pollQueryStatus, interval);

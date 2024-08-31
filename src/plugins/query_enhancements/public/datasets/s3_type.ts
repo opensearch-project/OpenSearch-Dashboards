@@ -121,7 +121,7 @@ const fetch = (
           http.fetch('../../api/enhancements/datasource/jobs', {
             query: {
               id: dataSource?.id,
-              queryId: meta.query.id,
+              queryId: meta.queryId,
             },
           })
         ),
@@ -163,8 +163,8 @@ const fetch = (
 const setMeta = (dataStructure: DataStructure, response: any) => {
   return {
     ...dataStructure.meta,
-    query: { id: response.queryId },
-    session: { id: response.sessionId },
+    queryId: response.queryId,
+    sessionId: response.sessionId,
   } as DataStructureCustomMeta;
 };
 
@@ -214,14 +214,17 @@ const fetchConnections = async (
 const fetchDatabases = async (http: HttpSetup, path: DataStructure[]): Promise<DataStructure[]> => {
   const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
   const connection = path[path.length - 1];
-  const query = (connection.meta as DataStructureCustomMeta).query;
+  const meta = connection.meta as DataStructureCustomMeta;
   const response = await http.post(`../../api/enhancements/datasource/jobs`, {
     body: JSON.stringify({
       lang: 'sql',
       query: `SHOW DATABASES in ${connection.title}`,
       datasource: dataSource?.title,
+      ...(meta.sessionId && { sessionId: meta.sessionId }),
     }),
-    query,
+    query: {
+      id: dataSource?.id,
+    },
   });
 
   connection.meta = setMeta(connection, response);
@@ -231,12 +234,15 @@ const fetchDatabases = async (http: HttpSetup, path: DataStructure[]): Promise<D
 
 const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<DataStructure[]> => {
   const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
+  const sessionId = (path.find((ds) => ds.type === 'CONNECTION')?.meta as DataStructureCustomMeta)
+    .sessionId;
   const database = path[path.length - 1];
   const response = await http.post(`../../api/enhancements/datasource/jobs`, {
     body: JSON.stringify({
       lang: 'sql',
       query: `SHOW TABLES in ${database.title}`,
       datasource: dataSource?.title,
+      ...(sessionId && { sessionId }),
     }),
     query: {
       id: dataSource?.id,
