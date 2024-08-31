@@ -81,7 +81,7 @@ export class DatasetService {
             }
           : undefined,
       } as IndexPatternSpec;
-      const temporaryIndexPattern = await this.indexPatterns?.create(spec);
+      const temporaryIndexPattern = await this.indexPatterns?.create(spec, true);
       if (temporaryIndexPattern) {
         this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
       }
