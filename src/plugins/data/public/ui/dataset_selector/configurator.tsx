@@ -146,7 +146,7 @@ export const Configurator = ({
         <EuiButton onClick={onPrevious} iconType="arrowLeft" iconSide="left">
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.previous"
-            defaultMessage="Previous"
+            defaultMessage="Back"
           />
         </EuiButton>
         <EuiButton
