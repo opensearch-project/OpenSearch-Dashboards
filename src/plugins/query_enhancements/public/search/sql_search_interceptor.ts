@@ -5,7 +5,8 @@
 
 import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError, tap } from 'rxjs/operators';
+import { CoreStart } from 'opensearch-dashboards/public';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -19,12 +20,14 @@ import { QueryEnhancementsPluginStartDependencies } from '../types';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
+  protected notifications!: CoreStart['notifications'];
 
   constructor(deps: SearchInterceptorDeps) {
     super(deps);
 
     deps.startServices.then(([coreStart, depsStart]) => {
       this.queryService = (depsStart as QueryEnhancementsPluginStartDependencies).data.query;
+      this.notifications = coreStart.notifications;
     });
   }
 
@@ -33,13 +36,16 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     signal?: AbortSignal,
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
+    const isAsync = strategy === SEARCH_STRATEGY.SQL_ASYNC;
     const context: EnhancedFetchContext = {
       http: this.deps.http,
-      path: trimEnd(strategy === SEARCH_STRATEGY.SQL_ASYNC ? API.SQL_ASYNC_SEARCH : API.SQL_SEARCH),
+      path: trimEnd(isAsync ? API.SQL_ASYNC_SEARCH : API.SQL_SEARCH),
       signal,
     };
 
+    if (isAsync) this.notifications.toasts.add('Fetching data...');
     return fetch(context, this.queryService.queryString.getQuery()).pipe(
+      tap(() => isAsync && this.notifications.toasts.addSuccess('Fetch complete...')),
       catchError((error) => {
         return throwError(error);
       })
