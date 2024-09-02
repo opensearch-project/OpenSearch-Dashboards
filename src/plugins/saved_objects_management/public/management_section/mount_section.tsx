@@ -103,6 +103,8 @@ export const mountManagementSection = async ({
                 serviceRegistry={serviceRegistry}
                 setBreadcrumbs={setBreadcrumbs}
                 history={history}
+                useUpdatedUX={useUpdatedUX}
+                navigation={navigation}
               />
             </Suspense>
           </RedirectToHomeIfUnauthorized>
@@ -131,10 +133,22 @@ export const mountManagementSection = async ({
     </Router>
   );
 
+  const pageContentPaddingSize = useUpdatedUX
+    ? // align with new header
+      {
+        paddingSize: 'm' as const,
+      }
+    : {};
+
   ReactDOM.render(
     <I18nProvider>
       {mountParams.wrapInPage ? (
-        <EuiPageContent hasShadow={false} hasBorder={false} color="transparent">
+        <EuiPageContent
+          hasShadow={false}
+          hasBorder={false}
+          color="transparent"
+          {...pageContentPaddingSize}
+        >
           {content}
         </EuiPageContent>
       ) : (

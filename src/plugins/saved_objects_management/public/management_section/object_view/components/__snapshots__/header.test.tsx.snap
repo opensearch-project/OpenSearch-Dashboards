@@ -2,11 +2,57 @@
 
 exports[`Intro component renders correctly 1`] = `
 <Header
+  application={
+    Object {
+      "applications$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Map {},
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "capabilities": Object {
+        "catalogue": Object {},
+        "management": Object {},
+        "navLinks": Object {},
+        "workspaces": Object {},
+      },
+      "currentAppId$": Observable {
+        "_isScalar": false,
+        "source": Subject {
+          "_isScalar": false,
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+      },
+      "getUrlForApp": [MockFunction],
+      "navigateToApp": [MockFunction],
+      "navigateToUrl": [MockFunction],
+      "registerMountContext": [MockFunction],
+      "setAppBadgeControls": [MockFunction],
+      "setAppBottomControls": [MockFunction],
+      "setAppCenterControls": [MockFunction],
+      "setAppDescriptionControls": [MockFunction],
+      "setAppLeftControls": [MockFunction],
+      "setAppRightControls": [MockFunction],
+    }
+  }
   canDelete={true}
   canEdit={true}
   canViewInApp={true}
+  navigationUI={
+    Object {
+      "HeaderControl": [Function],
+    }
+  }
   onDeleteClick={[Function]}
   type="search"
+  useUpdatedUX={false}
   viewUrl="/some-url"
 >
   <EuiPageContentHeader>
@@ -225,5 +271,260 @@ exports[`Intro component renders correctly 1`] = `
       </EuiPageContentHeaderSection>
     </div>
   </EuiPageContentHeader>
+</Header>
+`;
+
+exports[`Intro component renders correctly when use new UX 1`] = `
+<Header
+  application={
+    Object {
+      "applications$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Map {},
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "capabilities": Object {
+        "catalogue": Object {},
+        "management": Object {},
+        "navLinks": Object {},
+        "workspaces": Object {},
+      },
+      "currentAppId$": Observable {
+        "_isScalar": false,
+        "source": Subject {
+          "_isScalar": false,
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+      },
+      "getUrlForApp": [MockFunction],
+      "navigateToApp": [MockFunction],
+      "navigateToUrl": [MockFunction],
+      "registerMountContext": [MockFunction],
+      "setAppBadgeControls": [MockFunction],
+      "setAppBottomControls": [MockFunction],
+      "setAppCenterControls": [MockFunction],
+      "setAppDescriptionControls": [MockFunction],
+      "setAppLeftControls": [MockFunction],
+      "setAppRightControls": [MockFunction],
+    }
+  }
+  canDelete={true}
+  canEdit={true}
+  canViewInApp={true}
+  navigationUI={
+    Object {
+      "HeaderControl": [Function],
+    }
+  }
+  onDeleteClick={[Function]}
+  type="search"
+  useUpdatedUX={true}
+  viewUrl="/some-url"
+>
+  <HeaderControl
+    controls={
+      Array [
+        Object {
+          "ariaLabel": "Delete search",
+          "color": "danger",
+          "controlType": "icon",
+          "display": "base",
+          "iconType": "trash",
+          "run": [Function],
+          "testId": "savedObjectEditDelete",
+        },
+        Object {
+          "controlType": "button",
+          "fill": true,
+          "href": "/some-url",
+          "iconSide": "right",
+          "iconType": "popout",
+          "label": "View search",
+          "testId": "savedObjectEditViewInApp",
+        },
+      ]
+    }
+    setMountPoint={[MockFunction]}
+  >
+    Delete search
+  </HeaderControl>
+</Header>
+`;
+
+exports[`Intro component renders correctly when use new UX and canDelete is true 1`] = `
+<Header
+  application={
+    Object {
+      "applications$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Map {},
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "capabilities": Object {
+        "catalogue": Object {},
+        "management": Object {},
+        "navLinks": Object {},
+        "workspaces": Object {},
+      },
+      "currentAppId$": Observable {
+        "_isScalar": false,
+        "source": Subject {
+          "_isScalar": false,
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+      },
+      "getUrlForApp": [MockFunction],
+      "navigateToApp": [MockFunction],
+      "navigateToUrl": [MockFunction],
+      "registerMountContext": [MockFunction],
+      "setAppBadgeControls": [MockFunction],
+      "setAppBottomControls": [MockFunction],
+      "setAppCenterControls": [MockFunction],
+      "setAppDescriptionControls": [MockFunction],
+      "setAppLeftControls": [MockFunction],
+      "setAppRightControls": [MockFunction],
+    }
+  }
+  canDelete={true}
+  canEdit={true}
+  canViewInApp={true}
+  navigationUI={
+    Object {
+      "HeaderControl": [Function],
+    }
+  }
+  onDeleteClick={[Function]}
+  type="search"
+  useUpdatedUX={true}
+  viewUrl="/some-url"
+>
+  <HeaderControl
+    controls={
+      Array [
+        Object {
+          "ariaLabel": "Delete search",
+          "color": "danger",
+          "controlType": "icon",
+          "display": "base",
+          "iconType": "trash",
+          "run": [Function],
+          "testId": "savedObjectEditDelete",
+        },
+        Object {
+          "controlType": "button",
+          "fill": true,
+          "href": "/some-url",
+          "iconSide": "right",
+          "iconType": "popout",
+          "label": "View search",
+          "testId": "savedObjectEditViewInApp",
+        },
+      ]
+    }
+    setMountPoint={[MockFunction]}
+  >
+    Delete search
+  </HeaderControl>
+</Header>
+`;
+
+exports[`Intro component renders correctly when use new UX and canViewInApp is true 1`] = `
+<Header
+  application={
+    Object {
+      "applications$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Map {},
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "capabilities": Object {
+        "catalogue": Object {},
+        "management": Object {},
+        "navLinks": Object {},
+        "workspaces": Object {},
+      },
+      "currentAppId$": Observable {
+        "_isScalar": false,
+        "source": Subject {
+          "_isScalar": false,
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+      },
+      "getUrlForApp": [MockFunction],
+      "navigateToApp": [MockFunction],
+      "navigateToUrl": [MockFunction],
+      "registerMountContext": [MockFunction],
+      "setAppBadgeControls": [MockFunction],
+      "setAppBottomControls": [MockFunction],
+      "setAppCenterControls": [MockFunction],
+      "setAppDescriptionControls": [MockFunction],
+      "setAppLeftControls": [MockFunction],
+      "setAppRightControls": [MockFunction],
+    }
+  }
+  canDelete={true}
+  canEdit={true}
+  canViewInApp={true}
+  navigationUI={
+    Object {
+      "HeaderControl": [Function],
+    }
+  }
+  onDeleteClick={[Function]}
+  type="search"
+  useUpdatedUX={true}
+  viewUrl="/some-url"
+>
+  <HeaderControl
+    controls={
+      Array [
+        Object {
+          "ariaLabel": "Delete search",
+          "color": "danger",
+          "controlType": "icon",
+          "display": "base",
+          "iconType": "trash",
+          "run": [Function],
+          "testId": "savedObjectEditDelete",
+        },
+        Object {
+          "controlType": "button",
+          "fill": true,
+          "href": "/some-url",
+          "iconSide": "right",
+          "iconType": "popout",
+          "label": "View search",
+          "testId": "savedObjectEditViewInApp",
+        },
+      ]
+    }
+    setMountPoint={[MockFunction]}
+  >
+    Delete search
+  </HeaderControl>
 </Header>
 `;
