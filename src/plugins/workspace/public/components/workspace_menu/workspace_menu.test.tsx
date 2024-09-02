@@ -117,6 +117,24 @@ describe('<WorkspaceMenu />', () => {
     expect(screen.getByTestId('workspace-menu-item-recent-workspace-1')).toBeInTheDocument();
   });
 
+  it('should be able to display empty state when seach is not found', () => {
+    coreStartMock.workspaces.workspaceList$.next([
+      { id: 'workspace-1', name: 'workspace 1', features: [] },
+      { id: 'test-2', name: 'test 2', features: [] },
+    ]);
+    jest
+      .spyOn(recentWorkspaceManager, 'getRecentWorkspaces')
+      .mockReturnValue([{ id: 'workspace-1', timestamp: 1234567890 }]);
+    render(<WorkspaceMenuCreatorComponent />);
+
+    const selectButton = screen.getByTestId('workspace-select-button');
+    fireEvent.click(selectButton);
+
+    const searchInput = screen.getByRole('searchbox');
+    fireEvent.change(searchInput, { target: { value: 'noitems' } });
+    expect(screen.getByText(/no workspace available/i)).toBeInTheDocument();
+  });
+
   it('should display current workspace name, use case name and associated icon', () => {
     coreStartMock.workspaces.currentWorkspace$.next({
       id: 'workspace-1',
