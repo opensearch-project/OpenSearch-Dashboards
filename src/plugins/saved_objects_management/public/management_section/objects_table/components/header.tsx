@@ -40,8 +40,7 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import { ApplicationStart } from 'src/core/public';
 import { i18n } from '@osd/i18n';
-import { NavigationPublicPluginStart } from '../../../../../navigation/public';
-import { TopNavControlButtonData } from '../../../../../navigation/public';
+import { NavigationPublicPluginStart, TopNavControlButtonData } from '../../../../../navigation/public';
 
 export const Header = ({
   onExportAll,
