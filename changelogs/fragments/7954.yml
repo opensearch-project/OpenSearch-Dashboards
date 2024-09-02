@@ -1,0 +1,2 @@
+fix:
+- [Workspace]dynamicConfigServiceMock not found in workspace routes UT ([#7954](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7954))
