@@ -43,8 +43,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
-import { useEffectOnce } from 'react-use';
-import { useObservable } from 'react-use';
+import { useEffectOnce, useObservable } from 'react-use';
 import { of } from 'rxjs';
 import {
   reactRouterNavigate,
