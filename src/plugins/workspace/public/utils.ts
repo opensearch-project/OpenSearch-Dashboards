@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import { i18n } from '@osd/i18n';
 import { combineLatest } from 'rxjs';
 import {
   NavGroupType,
@@ -13,6 +13,7 @@ import {
   ChromeBreadcrumb,
   ApplicationStart,
   HttpSetup,
+  NotificationsStart,
   DEFAULT_NAV_GROUPS,
 } from '../../../core/public';
 import {
@@ -30,6 +31,12 @@ import { getUseCaseFeatureConfig } from '../common/utils';
 import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
 import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
+import {
+  DirectQueryDatasourceDetails,
+  DATACONNECTIONS_BASE,
+  DatasourceTypeToDisplayName,
+} from '../../data_source_management/public';
+import { DataSource, DataSourceConnection, DataSourceConnectionType } from '../common/types';
 import {
   ANALYTICS_ALL_OVERVIEW_PAGE_ID,
   ESSENTIAL_OVERVIEW_PAGE_ID,
@@ -243,6 +250,46 @@ export const getDataSourcesList = (
     });
 };
 
+export const getDirectQueryConnections = async (dataSourceId: string, http: HttpSetup) => {
+  const endpoint = `${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceId}`;
+  const res = await http.get(endpoint);
+  const directQueryConnections: DataSourceConnection[] = res.map(
+    (dataConnection: DirectQueryDatasourceDetails) => ({
+      id: `${dataSourceId}-${dataConnection.name}`,
+      name: dataConnection.name,
+      type: DatasourceTypeToDisplayName[dataConnection.connector],
+      connectionType: DataSourceConnectionType.DirectQueryConnection,
+      description: dataConnection.description,
+      parentId: dataSourceId,
+    })
+  );
+  return directQueryConnections;
+};
+
+// Helper function to merge data sources with direct query connections
+export const mergeDataSourcesWithConnections = (
+  assignedDataSources: DataSource[],
+  directQueryConnections: DataSourceConnection[]
+): DataSourceConnection[] => {
+  const dataSources: DataSourceConnection[] = [];
+  assignedDataSources.forEach((ds) => {
+    const relatedConnections = directQueryConnections.filter(
+      (directQueryConnection) => directQueryConnection.parentId === ds.id
+    );
+
+    dataSources.push({
+      id: ds.id,
+      type: ds.dataSourceEngineType,
+      connectionType: DataSourceConnectionType.OpenSearchConnection,
+      name: ds.title,
+      description: ds.description,
+      relatedConnections,
+    });
+  });
+
+  return [...dataSources, ...directQueryConnections];
+};
+
 // If all connected data sources are serverless, will only allow to select essential use case.
 export const getIsOnlyAllowEssentialUseCase = async (client: SavedObjectsStart['client']) => {
   const allDataSources = await getDataSourcesList(client, ['*']);
@@ -423,4 +470,29 @@ export const getUseCaseUrl = (
     http.basePath
   );
   return useCaseURL;
+};
+
+export const fetchDataSourceConnections = async (
+  assignedDataSources: DataSource[],
+  http: HttpSetup | undefined,
+  notifications: NotificationsStart | undefined
+) => {
+  try {
+    const directQueryConnectionsPromises = assignedDataSources.map((ds) =>
+      getDirectQueryConnections(ds.id, http!).catch(() => [])
+    );
+    const directQueryConnectionsResult = await Promise.all(directQueryConnectionsPromises);
+    const directQueryConnections = directQueryConnectionsResult.flat();
+    return mergeDataSourcesWithConnections(
+      assignedDataSources,
+      directQueryConnections
+    ).sort((a, b) => a.name.localeCompare(b.name));
+  } catch (error) {
+    notifications?.toasts.addDanger(
+      i18n.translate('workspace.detail.dataSources.error.message', {
+        defaultMessage: 'Cannot fetch direct query connections',
+      })
+    );
+    return [];
+  }
 };

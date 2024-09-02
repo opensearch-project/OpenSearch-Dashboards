@@ -45,8 +45,7 @@ import { createHttpServer } from '../../../../../core/server/test_utils';
 import { registerStatsRoute } from '../stats';
 import supertest from 'supertest';
 import { CollectorSet } from '../../collector';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { dynamicConfigServiceMock } from '../../../../../core/server/config';
+import { dynamicConfigServiceMock } from '../../../../../core/server/mocks';
 
 type HttpService = ReturnType<typeof createHttpServer>;
 type HttpSetup = UnwrapPromise<ReturnType<HttpService['setup']>>;
