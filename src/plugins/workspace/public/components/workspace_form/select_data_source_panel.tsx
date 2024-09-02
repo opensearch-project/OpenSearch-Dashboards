@@ -3,149 +3,169 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import {
-  EuiSmallButton,
-  EuiCompressedFormRow,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonIcon,
-  EuiCompressedComboBox,
-  EuiComboBoxOptionOption,
-  EuiFormLabel,
-} from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
+import { EuiSpacer, EuiFlexItem, EuiSmallButton, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { SavedObjectsStart } from '../../../../../core/public';
-import { getDataSourcesList } from '../../utils';
-import { DataSource } from '../../../common/types';
+import { SavedObjectsStart, CoreStart, ChromeStart } from '../../../../../core/public';
+import { DataSource, DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceFormError } from './types';
+import { AssociationDataSourceModal } from '../workspace_detail/association_data_source_modal';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { WorkspaceClient } from '../../workspace_client';
+import { AssociationDataSourceModalMode } from '../../../common/constants';
+import { DataSourceConnectionTable } from '../workspace_detail/data_source_connection_table';
+import { fetchDataSourceConnections } from '../../utils';
+import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
 
 export interface SelectDataSourcePanelProps {
   errors?: { [key: number]: WorkspaceFormError };
   savedObjects: SavedObjectsStart;
-  selectedDataSources: DataSource[];
+  assignedDataSources: DataSource[];
   onChange: (value: DataSource[]) => void;
+  isDashboardAdmin: boolean;
 }
 
 export const SelectDataSourcePanel = ({
   errors,
   onChange,
-  selectedDataSources,
+  assignedDataSources,
   savedObjects,
+  isDashboardAdmin,
 }: SelectDataSourcePanelProps) => {
-  const [dataSourcesOptions, setDataSourcesOptions] = useState<EuiComboBoxOptionOption[]>([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<DataSourceConnection[]>([]);
+  const [assignedDataSourceConnections, setAssignedDataSourceConnections] = useState<
+    DataSourceConnection[]
+  >([]);
+  const [toggleIdSelected, setToggleIdSelected] = useState(
+    AssociationDataSourceModalMode.OpenSearchConnections
+  );
+  const {
+    services: { notifications, http, chrome },
+  } = useOpenSearchDashboards<{ CoreStart: CoreStart; workspaceClient: WorkspaceClient }>();
+
   useEffect(() => {
-    if (!savedObjects) return;
-    getDataSourcesList(savedObjects.client, ['*']).then((result) => {
-      const options = result.map(({ title, id }) => ({
-        label: title,
-        value: id,
-      }));
-      setDataSourcesOptions(options);
+    fetchDataSourceConnections(assignedDataSources, http, notifications).then((connections) => {
+      setAssignedDataSourceConnections(connections);
     });
-  }, [savedObjects, setDataSourcesOptions]);
-  const handleAddNewOne = useCallback(() => {
-    onChange?.([
-      ...selectedDataSources,
-      {
-        title: '',
-        id: '',
-      },
-    ]);
-  }, [onChange, selectedDataSources]);
+  }, [assignedDataSources, http, notifications]);
 
-  const handleSelect = useCallback(
-    (selectedOptions, index) => {
-      const newOption = selectedOptions[0]
-        ? // Select new data source
-          {
-            title: selectedOptions[0].label,
-            id: selectedOptions[0].value,
-          }
-        : // Click reset button
-          {
-            title: '',
-            id: '',
-          };
-      const newSelectedOptions = [...selectedDataSources];
-      newSelectedOptions.splice(index, 1, newOption);
+  const handleAssignDataSources = (dataSourceConnections: DataSourceConnection[]) => {
+    setModalVisible(false);
+    const dataSources = dataSourceConnections
+      .filter(
+        ({ connectionType }) => connectionType === DataSourceConnectionType.OpenSearchConnection
+      )
+      .map(({ id, type, name, description }) => ({
+        id,
+        title: name,
+        description,
+        dataSourceEngineType: type as DataSourceEngineType,
+      }));
+    const savedDataSources: DataSource[] = [...assignedDataSources, ...dataSources];
+    onChange(savedDataSources);
+  };
 
-      onChange(newSelectedOptions);
-    },
-    [onChange, selectedDataSources]
+  const handleUnassignDataSources = (dataSourceConnections: DataSourceConnection[]) => {
+    const savedDataSources = (assignedDataSources ?? [])?.filter(
+      ({ id }: DataSource) => !dataSourceConnections.some((item) => item.id === id)
+    );
+    onChange(savedDataSources);
+  };
+
+  const renderTableContent = () => {
+    return (
+      <EuiPanel paddingSize="none" hasBorder={false}>
+        <DataSourceConnectionTable
+          isDashboardAdmin={isDashboardAdmin}
+          dataSourceConnections={assignedDataSourceConnections}
+          handleUnassignDataSources={handleUnassignDataSources}
+          onSelectedItems={getSelectedItems}
+          inCreatePage={true}
+          connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
+        />
+      </EuiPanel>
+    );
+  };
+
+  const addOpenSearchConnectionsButton = (
+    <EuiSmallButton
+      iconType="plusInCircle"
+      onClick={() => {
+        setToggleIdSelected(AssociationDataSourceModalMode.OpenSearchConnections);
+        setModalVisible(true);
+      }}
+      data-test-subj="workspace-creator-dataSources-assign-button"
+    >
+      {i18n.translate('workspace.form.selectDataSourcePanel.addNew', {
+        defaultMessage: 'Add data sources',
+      })}
+    </EuiSmallButton>
   );
 
-  const handleDelete = useCallback(
-    (index) => {
-      const newSelectedOptions = [...selectedDataSources];
-      newSelectedOptions.splice(index, 1);
-
-      onChange(newSelectedOptions);
-    },
-    [onChange, selectedDataSources]
+  const addDirectQueryConnectionsButton = (
+    <EuiSmallButton
+      iconType="plusInCircle"
+      onClick={() => {
+        setToggleIdSelected(AssociationDataSourceModalMode.DirectQueryConnections);
+        setModalVisible(true);
+      }}
+      data-test-subj="workspace-creator-dqc-assign-button"
+    >
+      {i18n.translate('workspace.form.selectDataSourcePanel.addNew', {
+        defaultMessage: 'Add direct query connections',
+      })}
+    </EuiSmallButton>
   );
+
+  const removeButton = (
+    <EuiSmallButton
+      iconType="unlink"
+      color="danger"
+      onClick={() => {
+        handleUnassignDataSources(selectedItems);
+      }}
+      data-test-subj="workspace-creator-dataSources-assign-button"
+    >
+      {i18n.translate('workspace.form.selectDataSourcePanel.remove', {
+        defaultMessage: 'Remove selected',
+      })}
+    </EuiSmallButton>
+  );
+
+  const getSelectedItems = (currentSelectedItems: DataSourceConnection[]) =>
+    setSelectedItems(currentSelectedItems);
 
   return (
     <div>
-      <EuiFormLabel>
-        {i18n.translate('workspace.form.selectDataSource.subTitle', {
-          defaultMessage: 'Data source',
-        })}
-      </EuiFormLabel>
-      <EuiSpacer size="s" />
-      {selectedDataSources.map(({ id, title }, index) => (
-        <EuiCompressedFormRow
-          key={index}
-          isInvalid={!!errors?.[index]}
-          error={errors?.[index]?.message}
-          fullWidth
-        >
-          <EuiFlexGroup alignItems="flexEnd" gutterSize="m">
-            <EuiFlexItem style={{ maxWidth: 400 }}>
-              <EuiCompressedComboBox
-                data-test-subj="workspaceForm-select-dataSource-comboBox"
-                singleSelection
-                options={dataSourcesOptions}
-                selectedOptions={
-                  id
-                    ? [
-                        {
-                          label: title,
-                          value: id,
-                        },
-                      ]
-                    : []
-                }
-                onChange={(selectedOptions) => handleSelect(selectedOptions, index)}
-                placeholder="Select"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem style={{ maxWidth: 332 }}>
-              <EuiButtonIcon
-                color="danger"
-                aria-label="Delete data source"
-                iconType="trash"
-                display="empty"
-                size="m"
-                onClick={() => handleDelete(index)}
-                isDisabled={false}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiCompressedFormRow>
-      ))}
-
-      <EuiSmallButton
-        fill
-        fullWidth={false}
-        onClick={handleAddNewOne}
-        data-test-subj={`workspaceForm-select-dataSource-addNew`}
-      >
-        {i18n.translate('workspace.form.selectDataSourcePanel.addNew', {
-          defaultMessage: 'Add New',
-        })}
-      </EuiSmallButton>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        {isDashboardAdmin && selectedItems.length > 0 && assignedDataSources.length > 0 && (
+          <EuiFlexItem grow={false}>{removeButton}</EuiFlexItem>
+        )}
+        {isDashboardAdmin && (
+          <EuiFlexItem grow={false}>{addOpenSearchConnectionsButton}</EuiFlexItem>
+        )}
+        {isDashboardAdmin && (
+          <EuiFlexItem grow={false}>{addDirectQueryConnectionsButton}</EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      <EuiFlexItem style={{ maxWidth: 800 }}>
+        {assignedDataSources.length > 0 && renderTableContent()}
+      </EuiFlexItem>
+      {modalVisible && chrome && (
+        <AssociationDataSourceModal
+          savedObjects={savedObjects}
+          assignedConnections={assignedDataSourceConnections}
+          closeModal={() => setModalVisible(false)}
+          handleAssignDataSourceConnections={handleAssignDataSources}
+          http={http}
+          mode={toggleIdSelected as AssociationDataSourceModalMode}
+          notifications={notifications}
+          logos={chrome?.logos}
+        />
+      )}
     </div>
   );
 };

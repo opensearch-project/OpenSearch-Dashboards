@@ -6,7 +6,6 @@
 import './data_source_connection_table.scss';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  EuiSpacer,
   EuiInMemoryTable,
   EuiBasicTableColumn,
   EuiTableSelectionType,
@@ -32,7 +31,9 @@ interface DataSourceConnectionTableProps {
   isDashboardAdmin: boolean;
   connectionType: string;
   dataSourceConnections: DataSourceConnection[];
-  handleUnassignDataSources: (dataSources: DataSourceConnection[]) => Promise<void>;
+  handleUnassignDataSources: (dataSources: DataSourceConnection[]) => void;
+  onSelectedItems?: (dataSources: DataSourceConnection[]) => void;
+  inCreatePage?: boolean;
 }
 
 export const DataSourceConnectionTable = ({
@@ -40,6 +41,8 @@ export const DataSourceConnectionTable = ({
   connectionType,
   dataSourceConnections,
   handleUnassignDataSources,
+  onSelectedItems,
+  inCreatePage = false,
 }: DataSourceConnectionTableProps) => {
   const [selectedItems, setSelectedItems] = useState<DataSourceConnection[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -47,6 +50,11 @@ export const DataSourceConnectionTable = ({
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
   >({});
+  useEffect(() => {
+    if (onSelectedItems) {
+      onSelectedItems(selectedItems);
+    }
+  }, [selectedItems, onSelectedItems, inCreatePage]);
 
   useEffect(() => {
     // Reset selected items when connectionType changes
@@ -174,7 +182,7 @@ export const DataSourceConnectionTable = ({
       },
     },
     {
-      width: '10%',
+      width: '15%',
       field: 'type',
       name: i18n.translate('workspace.detail.dataSources.table.type', {
         defaultMessage: 'Type',
@@ -182,7 +190,6 @@ export const DataSourceConnectionTable = ({
       truncateText: true,
     },
     {
-      width: '35%',
       field: 'description',
       name: i18n.translate('workspace.detail.dataSources.table.description', {
         defaultMessage: 'Description',
@@ -190,11 +197,11 @@ export const DataSourceConnectionTable = ({
       truncateText: true,
     },
     {
+      width: '140px',
       field: 'relatedConnections',
       name: i18n.translate('workspace.detail.dataSources.table.relatedConnections', {
         defaultMessage: 'Related connections',
       }),
-      align: 'right',
       truncateText: true,
       render: (relatedConnections: DataSourceConnection[], record) =>
         relatedConnections?.length > 0 ? (
@@ -267,12 +274,17 @@ export const DataSourceConnectionTable = ({
                 icon: 'unlink',
                 type: 'icon',
                 onClick: (item: DataSourceConnection) => {
-                  setSelectedItems([item]);
-                  setModalVisible(true);
+                  if (inCreatePage) {
+                    handleUnassignDataSources([item]);
+                  } else {
+                    setSelectedItems([item]);
+                    setModalVisible(true);
+                  }
                 },
                 'data-test-subj': 'workspace-detail-dataSources-table-actions-remove',
               },
             ],
+            width: '10%',
           } as EuiTableActionsColumnType<DataSourceConnection>,
         ]
       : []),
@@ -285,22 +297,34 @@ export const DataSourceConnectionTable = ({
 
   return (
     <>
-      <EuiInMemoryTable
-        items={openSearchConnections}
-        itemId="id"
-        columns={columns}
-        selection={selection}
-        search={search}
-        key={connectionType}
-        isSelectable={true}
-        itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-        isExpandable={true}
-        pagination={{
-          initialPageSize: 10,
-          pageSizeOptions: [10, 20, 30],
-        }}
-      />
-      <EuiSpacer />
+      {inCreatePage ? (
+        <EuiInMemoryTable
+          items={openSearchConnections}
+          itemId="id"
+          columns={columns}
+          selection={selection}
+          key={connectionType}
+          isSelectable={true}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          isExpandable={true}
+        />
+      ) : (
+        <EuiInMemoryTable
+          items={openSearchConnections}
+          itemId="id"
+          columns={columns}
+          selection={selection}
+          search={search}
+          key={connectionType}
+          isSelectable={true}
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+          isExpandable={true}
+          pagination={{
+            initialPageSize: 10,
+            pageSizeOptions: [10, 20, 30],
+          }}
+        />
+      )}
       {modalVisible && (
         <EuiConfirmModal
           data-test-subj="workspaceForm-cancelModal"

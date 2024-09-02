@@ -85,8 +85,8 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
   );
 
   return (
-    <EuiFlexGroup className="workspaceCreateFormContainer">
-      <EuiFlexItem style={{ maxWidth: 650 }}>
+    <EuiFlexGroup className="workspaceCreateFormContainer" justifyContent="spaceBetween">
+      <EuiFlexItem style={{ maxWidth: 768 }}>
         <EuiForm
           id={formId}
           onSubmit={handleFormSubmit}
@@ -176,8 +176,9 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
                 errors={formErrors.selectedDataSources}
                 onChange={setSelectedDataSources}
                 savedObjects={savedObjects}
-                selectedDataSources={formData.selectedDataSources}
+                assignedDataSources={formData.selectedDataSources}
                 data-test-subj={`workspaceForm-dataSourcePanel`}
+                isDashboardAdmin={true}
               />
               <EuiSpacer size="s" />
               <EuiSpacer size="s" />

@@ -131,7 +131,7 @@ export const WorkspacePermissionSettingPanel = ({
 
   return (
     <div>
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem style={{ maxWidth: 150 }}>
           <EuiCompressedFormRow
             label={i18n.translate('workspaceForm.permissionSetting.typeLabel', {
@@ -150,7 +150,7 @@ export const WorkspacePermissionSettingPanel = ({
             <></>
           </EuiCompressedFormRow>
         </EuiFlexItem>
-        <EuiFlexItem style={{ maxWidth: 332 }}>
+        <EuiFlexItem style={{ maxWidth: 150 }}>
           <EuiCompressedFormRow
             label={i18n.translate('workspaceForm.permissionSetting.permissionLabel', {
               defaultMessage: 'Access level',
@@ -159,6 +159,7 @@ export const WorkspacePermissionSettingPanel = ({
             <></>
           </EuiCompressedFormRow>
         </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ width: 40 }} />
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
       {permissionSettings.map((item, index) => (

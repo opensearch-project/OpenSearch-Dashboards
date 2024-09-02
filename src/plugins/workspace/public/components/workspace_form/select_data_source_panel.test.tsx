@@ -4,85 +4,131 @@
  */
 
 import React from 'react';
-import { fireEvent, render, act } from '@testing-library/react';
+import { fireEvent, render, act, waitFor } from '@testing-library/react';
 import { SelectDataSourcePanel, SelectDataSourcePanelProps } from './select_data_source_panel';
 import { coreMock } from '../../../../../core/public/mocks';
+import * as utils from '../../utils';
+import { DataSourceEngineType } from 'src/plugins/data_source/common/data_sources';
+
+const assignedDataSourcesConections = [
+  {
+    id: 'id1',
+    name: 'title1',
+    description: 'ds-1-description',
+    type: 'OpenSearch' as DataSourceEngineType,
+    connectionType: 0,
+  },
+  {
+    id: 'id2',
+    name: 'title2',
+    description: 'ds-1-description',
+    type: 'S3GLUE' as DataSourceEngineType,
+    connectionType: 0,
+  },
+];
 
 const dataSources = [
   {
-    id: 'id1',
-    title: 'title1',
+    id: 'id3',
+    title: 'title3',
+    description: 'ds-3-description',
+    auth: '',
+    dataSourceEngineType: '' as DataSourceEngineType,
+    workspaces: [],
   },
-  { id: 'id2', title: 'title2' },
+  {
+    id: 'id4',
+    title: 'title4',
+    description: 'ds-4-description',
+    auth: '',
+    dataSourceEngineType: '' as DataSourceEngineType,
+    workspaces: [],
+  },
 ];
 
-jest.mock('../../utils', () => ({
-  getDataSourcesList: jest.fn().mockResolvedValue(dataSources),
-}));
+jest.spyOn(utils, 'getDataSourcesList').mockResolvedValue(dataSources);
+jest.spyOn(utils, 'fetchDataSourceConnections').mockResolvedValue(assignedDataSourcesConections);
 
 const mockCoreStart = coreMock.createStart();
 
 const setup = ({
   savedObjects = mockCoreStart.savedObjects,
-  selectedDataSources = [],
+  assignedDataSources = [],
   onChange = jest.fn(),
   errors = undefined,
+  isDashboardAdmin = true,
 }: Partial<SelectDataSourcePanelProps>) => {
   return render(
     <SelectDataSourcePanel
       onChange={onChange}
       savedObjects={savedObjects}
-      selectedDataSources={selectedDataSources}
+      assignedDataSources={assignedDataSources}
       errors={errors}
+      isDashboardAdmin={isDashboardAdmin}
     />
   );
 };
 
 describe('SelectDataSourcePanel', () => {
-  it('should render consistent data sources when selected data sources passed', () => {
-    const { getByText } = setup({ selectedDataSources: dataSources });
+  it('should render consistent data sources when selected data sources passed', async () => {
+    const { getByText } = setup({ assignedDataSources: dataSources });
 
-    expect(getByText(dataSources[0].title)).toBeInTheDocument();
-    expect(getByText(dataSources[1].title)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(getByText(assignedDataSourcesConections[0].name)).toBeInTheDocument();
+      expect(getByText(assignedDataSourcesConections[1].name)).toBeInTheDocument();
+    });
   });
 
-  it('should call onChange when clicking add new data source button', () => {
+  it('should call onChange when updating data sources', async () => {
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+      configurable: true,
+      value: 600,
+    });
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      value: 600,
+    });
     const onChangeMock = jest.fn();
-    const { getByTestId } = setup({ onChange: onChangeMock });
+    const { getByTestId, getAllByText, getByText } = setup({
+      onChange: onChangeMock,
+      assignedDataSources: [],
+    });
 
     expect(onChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(getByTestId('workspaceForm-select-dataSource-addNew'));
+    fireEvent.click(getByTestId('workspace-creator-dataSources-assign-button'));
+
+    await waitFor(() => {
+      expect(
+        getByText(
+          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
+        )
+      ).toBeInTheDocument();
+      expect(getByText(dataSources[0].title)).toBeInTheDocument();
+    });
+
+    fireEvent.click(getAllByText(dataSources[0].title)[0]);
+    fireEvent.click(getByText('Associate data sources'));
     expect(onChangeMock).toHaveBeenCalledWith([
       {
-        id: '',
-        title: '',
+        connectionType: 0,
+        description: 'ds-3-description',
+        id: 'id3',
+        name: 'title3',
+        relatedConnections: [],
+        type: '',
       },
     ]);
   });
 
-  it('should call onChange when updating selected data sources in combo box', async () => {
-    const onChangeMock = jest.fn();
-    const { getByTitle, getByText } = setup({
-      onChange: onChangeMock,
-      selectedDataSources: [{ id: '', title: '' }],
-    });
-    expect(onChangeMock).not.toHaveBeenCalled();
-    await act(() => {
-      fireEvent.click(getByText('Select'));
-    });
-    fireEvent.click(getByTitle(dataSources[0].title));
-    expect(onChangeMock).toHaveBeenCalledWith([{ id: 'id1', title: 'title1' }]);
-  });
-
   it('should call onChange when deleting selected data source', async () => {
     const onChangeMock = jest.fn();
-    const { getByLabelText } = setup({
+    const { getAllByTestId } = setup({
       onChange: onChangeMock,
-      selectedDataSources: [{ id: '', title: '' }],
+      assignedDataSources: dataSources,
     });
     expect(onChangeMock).not.toHaveBeenCalled();
     await act(() => {
-      fireEvent.click(getByLabelText('Delete data source'));
+      fireEvent.click(getAllByTestId('workspace-detail-dataSources-table-actions-remove')[0]);
     });
     expect(onChangeMock).toHaveBeenCalledWith([]);
   });
