@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useObservable } from 'react-use';
 import {
   EuiTitle,
@@ -56,7 +56,7 @@ export const WorkspacePickerContent = ({
   const availableUseCases = useObservable(registeredUseCases$, []);
   const [search, setSearch] = useState('');
 
-  const filteredRecentWorkspaces = useMemo(() => {
+  const recentWorkspaces = useMemo(() => {
     return recentWorkspaceManager
       .getRecentWorkspaces()
       .map((workspace) => workspaceList.find((ws) => ws.id === workspace.id))
@@ -76,13 +76,14 @@ export const WorkspacePickerContent = ({
 
     return list;
   };
+
   const queriedWorkspace = useMemo(() => {
     return queryFromList({ list: workspaceList, query: search });
   }, [workspaceList, search]);
 
   const queriedRecentWorkspace = useMemo(() => {
-    return queryFromList({ list: filteredRecentWorkspaces, query: search });
-  }, [filteredRecentWorkspaces, search]);
+    return queryFromList({ list: recentWorkspaces, query: search });
+  }, [recentWorkspaces, search]);
 
   const getUseCase = (workspace: WorkspaceObject) => {
     if (!workspace.features) {
@@ -167,6 +168,9 @@ export const WorkspacePickerContent = ({
     );
   };
 
+  // eslint-disable-next-line
+  console.log('queriedWorkspace', queriedWorkspace);
+
   return (
     <>
       <EuiFlexGroup
@@ -189,24 +193,25 @@ export const WorkspacePickerContent = ({
 
         <EuiFlexItem grow={true} style={{ width: '100%', overflowY: 'auto' }}>
           <EuiPanel paddingSize="none" color="transparent" hasBorder={false}>
-            {search ? (
-              <>
-                {queriedRecentWorkspace &&
-                  queriedRecentWorkspace.length > 0 &&
-                  getWorkspaceListGroup(queriedRecentWorkspace, 'recent')}
-                {queriedWorkspace &&
-                  queriedWorkspace.length > 0 &&
-                  getWorkspaceListGroup(queriedWorkspace, 'all')}
-                {(!queriedWorkspace || queriedWorkspace.length === 0) && getEmptyStatePrompt()}
-              </>
-            ) : (
-              <>
-                {filteredRecentWorkspaces.length > 0 &&
-                  getWorkspaceListGroup(filteredRecentWorkspaces, 'recent')}
-                {workspaceList.length > 0 && getWorkspaceListGroup(workspaceList, 'all')}
-                {workspaceList.length === 0 && getEmptyStatePrompt()}
-              </>
-            )}
+            {queriedRecentWorkspace.length > 0 &&
+              queriedRecentWorkspace !== recentWorkspaces &&
+              getWorkspaceListGroup(queriedRecentWorkspace, 'recent')}
+
+            {queriedWorkspace.length > 0 &&
+              queriedWorkspace !== workspaceList &&
+              getWorkspaceListGroup(queriedWorkspace, 'all')}
+
+            {queriedWorkspace.length === 0 && workspaceList.length !== 0 && getEmptyStatePrompt()}
+
+            {queriedRecentWorkspace === recentWorkspaces &&
+              recentWorkspaces.length > 0 &&
+              getWorkspaceListGroup(recentWorkspaces, 'recent')}
+
+            {queriedWorkspace === workspaceList &&
+              workspaceList.length > 0 &&
+              getWorkspaceListGroup(workspaceList, 'all')}
+
+            {workspaceList.length === 0 && getEmptyStatePrompt()}
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
