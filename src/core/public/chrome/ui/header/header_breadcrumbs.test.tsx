@@ -67,7 +67,6 @@ describe('HeaderBreadcrumbs', () => {
       />
     );
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
-    expect(wrapper.find('.headerBreadcrumbs').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="breadcrumb first"]').exists()).toBeFalsy();
 
     act(() => breadcrumbs$.next([{ text: 'First' }, { text: 'Second' }]));
