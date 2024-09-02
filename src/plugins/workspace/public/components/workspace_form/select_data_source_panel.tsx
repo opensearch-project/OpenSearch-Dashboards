@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { EuiSpacer, EuiFlexItem, EuiSmallButton, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { SavedObjectsStart, CoreStart, ChromeStart } from '../../../../../core/public';
+import { SavedObjectsStart, CoreStart } from '../../../../../core/public';
 import { DataSource, DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceFormError } from './types';
 import { AssociationDataSourceModal } from '../workspace_detail/association_data_source_modal';
@@ -125,7 +125,7 @@ export const SelectDataSourcePanel = ({
       onClick={() => {
         handleUnassignDataSources(selectedItems);
       }}
-      data-test-subj="workspace-creator-dataSources-assign-button"
+      data-test-subj="workspace-creator-dataSources-remove-button"
     >
       {i18n.translate('workspace.form.selectDataSourcePanel.remove', {
         defaultMessage: 'Remove selected',
