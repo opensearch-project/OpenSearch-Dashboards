@@ -18,6 +18,12 @@
 
   &__advancedModal {
     width: 1200px;
+    height: 800px;
+    max-height: calc(100vh - $euiSizeS);
+
+    .euiModal__flex {
+      max-height: none;
+    }
   }
 
   &__checkbox {

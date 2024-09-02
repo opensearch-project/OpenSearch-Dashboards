@@ -34,7 +34,7 @@ export const DatasetSelector = ({
 }: DatasetSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
-  const { overlays, savedObjects } = services;
+  const { overlays } = services;
 
   const isMounted = useRef(true);
 
@@ -53,7 +53,7 @@ export const DatasetSelector = ({
     const typeConfig = datasetService.getType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
     if (!typeConfig) return;
 
-    const fetchedIndexPatternDataStructures = await typeConfig.fetch(savedObjects.client, []);
+    const fetchedIndexPatternDataStructures = await typeConfig.fetch(services, []);
 
     if (!isMounted.current) return;
 
@@ -67,7 +67,7 @@ export const DatasetSelector = ({
     if (!selectedDataset && fetchedDatasets.length > 0) {
       setSelectedDataset(fetchedDatasets[0]);
     }
-  }, [datasetService, savedObjects.client, selectedDataset, setSelectedDataset]);
+  }, [datasetService, selectedDataset, services, setSelectedDataset]);
 
   useEffect(() => {
     fetchDatasets();
@@ -183,7 +183,7 @@ export const DatasetSelector = ({
             const overlay = overlays?.openModal(
               toMountPoint(
                 <AdvancedSelector
-                  savedObjects={savedObjects.client}
+                  services={services}
                   onSelect={(dataset?: Dataset) => {
                     overlay?.close();
                     if (dataset) {

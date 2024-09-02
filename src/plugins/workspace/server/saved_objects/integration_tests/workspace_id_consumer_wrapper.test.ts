@@ -16,6 +16,7 @@ const dashboard: Omit<SavedObject, 'id'> = {
 interface WorkspaceAttributes {
   id: string;
   name?: string;
+  features?: string[];
 }
 
 describe('workspace_id_consumer integration test', () => {
@@ -56,11 +57,13 @@ describe('workspace_id_consumer integration test', () => {
 
     createdFooWorkspace = await createWorkspace({
       name: 'foo',
+      features: ['use-case-all'],
     }).then((resp) => {
       return resp.body.result;
     });
     createdBarWorkspace = await createWorkspace({
       name: 'bar',
+      features: ['use-case-all'],
     }).then((resp) => resp.body.result);
   }, 30000);
   afterAll(async () => {

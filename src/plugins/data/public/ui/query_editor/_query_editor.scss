@@ -193,6 +193,7 @@
 .osdQuerEditor__singleLine {
   padding: $euiSizeS;
   background-color: $euiColorEmptyShade;
+  overflow: initial !important; // needed for suggestion window, otherwise will be hidden in child
 
   .monaco-editor .view-overlays .current-line {
     border: none;

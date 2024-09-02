@@ -27,6 +27,7 @@ describe('WorkspaceCreateActionPanel', () => {
         formId={formId}
         formData={{ name: longName, description: formData.description }}
         application={mockApplication}
+        isSubmitting={false}
       />
     );
     const createButton = screen.getByText('Create workspace');
@@ -40,6 +41,7 @@ describe('WorkspaceCreateActionPanel', () => {
         formId={formId}
         formData={{ name: formData.name, description: longDescription }}
         application={mockApplication}
+        isSubmitting={false}
       />
     );
     const createButton = screen.getByText('Create workspace');
@@ -52,9 +54,23 @@ describe('WorkspaceCreateActionPanel', () => {
         formId={formId}
         formData={formData}
         application={mockApplication}
+        isSubmitting={false}
       />
     );
     const createButton = screen.getByText('Create workspace');
     expect(createButton.closest('button')).not.toBeDisabled();
+  });
+
+  it('should disable the "Create Workspace" and "Cancel" button when submitting', () => {
+    render(
+      <WorkspaceCreateActionPanel
+        formId={formId}
+        formData={{ name: 'test' }}
+        application={mockApplication}
+        isSubmitting
+      />
+    );
+    expect(screen.getByText('Create workspace').closest('button')).toBeDisabled();
+    expect(screen.getByText('Cancel').closest('button')).toBeDisabled();
   });
 });

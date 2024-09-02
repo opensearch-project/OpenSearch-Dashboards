@@ -1,3 +1,346 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`AccelerationTable Component matches snapshot 1`] = `"<div class=\\"euiSpacer euiSpacer--l\\"></div><div class=\\"euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow\\"><div class=\\"euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive\\"><div class=\\"euiFlexItem\\"><div class=\\"euiText euiText--small\\"><h2 class=\\"panel-title\\">Accelerations</h2>Accelerations optimize query performance by indexing external data into OpenSearch.</div></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><div class=\\"euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--directionRowReverse euiFlexGroup--responsive\\"><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><button class=\\"euiButton euiButton--primary euiButton--fill\\" type=\\"button\\"><span class=\\"euiButtonContent euiButton__content\\"><span class=\\"euiButton__text\\">Create acceleration</span></span></button></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><button class=\\"euiButton euiButton--primary\\" type=\\"button\\"><span class=\\"euiButtonContent euiButton__content\\"><span class=\\"euiButton__text\\">Refresh</span></span></button></div><div class=\\"euiFlexItem\\"><div class=\\"euiText euiText--extraSmall\\"><div class=\\"euiTextAlign euiTextAlign--right\\"><div class=\\"euiTextColor euiTextColor--subdued\\">Last updated at:</div></div></div><div class=\\"euiText euiText--extraSmall\\"><div class=\\"euiTextAlign euiTextAlign--right\\"><div class=\\"euiTextColor euiTextColor--subdued\\">3/14/2024, 4:05:53 AM</div></div></div></div></div></div></div><hr class=\\"euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge\\"><div class=\\"euiBasicTable\\"><div><div class=\\"euiTableHeaderMobile\\"><div class=\\"euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow\\"><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><div class=\\"euiTableSortMobile\\"><div class=\\"euiPopover euiPopover--anchorDownRight\\"><div class=\\"euiPopover__anchor\\"><button class=\\"euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight\\" type=\\"button\\"><span class=\\"euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content\\"><span data-euiicon-type=\\"arrowDown\\" class=\\"euiButtonContent__icon\\" color=\\"inherit\\"></span><span class=\\"euiButtonEmpty__text\\">Sorting</span></span></button></div></div></div></div></div></div><table tabindex=\\"-1\\" class=\\"euiTable euiTable--responsive\\" id=\\"__table_generated-id\\"><caption class=\\"euiScreenReaderOnly euiTableCaption\\"></caption><thead><tr><th class=\\"euiTableHeaderCell\\" scope=\\"col\\" role=\\"columnheader\\" aria-sort=\\"none\\" aria-live=\\"polite\\" data-test-subj=\\"tableHeaderCell_indexName_0\\"><button type=\\"button\\" class=\\"euiTableHeaderButton\\" data-test-subj=\\"tableHeaderSortButton\\"><span class=\\"euiTableCellContent\\"><span class=\\"euiTableCellContent__text\\" title=\\"Name\\">Name</span></span></button></th><th class=\\"euiTableHeaderCell\\" scope=\\"col\\" role=\\"columnheader\\" aria-sort=\\"none\\" aria-live=\\"polite\\" data-test-subj=\\"tableHeaderCell_status_1\\"><button type=\\"button\\" class=\\"euiTableHeaderButton\\" data-test-subj=\\"tableHeaderSortButton\\"><span class=\\"euiTableCellContent\\"><span class=\\"euiTableCellContent__text\\" title=\\"Status\\">Status</span></span></button></th><th class=\\"euiTableHeaderCell\\" scope=\\"col\\" role=\\"columnheader\\" aria-sort=\\"none\\" aria-live=\\"polite\\" data-test-subj=\\"tableHeaderCell_type_2\\"><button type=\\"button\\" class=\\"euiTableHeaderButton\\" data-test-subj=\\"tableHeaderSortButton\\"><span class=\\"euiTableCellContent\\"><span class=\\"euiTableCellContent__text\\" title=\\"Type\\">Type</span></span></button></th><th class=\\"euiTableHeaderCell\\" scope=\\"col\\" role=\\"columnheader\\" aria-sort=\\"none\\" aria-live=\\"polite\\" data-test-subj=\\"tableHeaderCell_database_3\\"><button type=\\"button\\" class=\\"euiTableHeaderButton\\" data-test-subj=\\"tableHeaderSortButton\\"><span class=\\"euiTableCellContent\\"><span class=\\"euiTableCellContent__text\\" title=\\"Database\\">Database</span></span></button></th><th class=\\"euiTableHeaderCell\\" scope=\\"col\\" role=\\"columnheader\\" aria-sort=\\"none\\" aria-live=\\"polite\\" data-test-subj=\\"tableHeaderCell_table_4\\"><button type=\\"button\\" class=\\"euiTableHeaderButton\\" data-test-subj=\\"tableHeaderSortButton\\"><span class=\\"euiTableCellContent\\"><span class=\\"euiTableCellContent__text\\" title=\\"Table\\">Table</span></span></button></th><th class=\\"euiTableHeaderCell\\" scope=\\"col\\" role=\\"columnheader\\" aria-sort=\\"none\\" aria-live=\\"polite\\" data-test-subj=\\"tableHeaderCell_refreshType_5\\"><button type=\\"button\\" class=\\"euiTableHeaderButton\\" data-test-subj=\\"tableHeaderSortButton\\"><span class=\\"euiTableCellContent\\"><span class=\\"euiTableCellContent__text\\" title=\\"Refresh Type\\">Refresh Type</span></span></button></th><th class=\\"euiTableHeaderCell\\" scope=\\"col\\" role=\\"columnheader\\" aria-sort=\\"none\\" aria-live=\\"polite\\" data-test-subj=\\"tableHeaderCell_flintIndexName_6\\"><button type=\\"button\\" class=\\"euiTableHeaderButton\\" data-test-subj=\\"tableHeaderSortButton\\"><span class=\\"euiTableCellContent\\"><span class=\\"euiTableCellContent__text\\" title=\\"Destination Index\\">Destination Index</span></span></button></th><th class=\\"euiTableHeaderCell\\" scope=\\"col\\" role=\\"columnheader\\"><span class=\\"euiTableCellContent euiTableCellContent--alignRight\\"><span class=\\"euiTableCellContent__text\\" title=\\"Actions\\">Actions</span></span></th></tr></thead><tbody><tr class=\\"euiTableRow euiTableRow-hasActions\\"><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Name</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><button class=\\"euiLink euiLink--primary\\" type=\\"button\\">http_count_view</button></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Status</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiHealth euiHealth--textSizeS\\"><div class=\\"euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow\\"><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><span data-euiicon-type=\\"dot\\" color=\\"warning\\"></span></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\">Refreshing</div></div></div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Type</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">materialized</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Database</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">default</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Table</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">-</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Refresh Type</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">Auto refresh</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Destination Index</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\">flint_mys3_default_http_count_view</div></td><td class=\\"euiTableRowCell euiTableRowCell--hasActions\\"><div class=\\"euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent\\"><div class=\\"euiTableCellContent__hoverItem\\"><div class=\\"euiPopover euiPopover--anchorLeftCenter\\" id=\\"0-actions\\"><div class=\\"euiPopover__anchor\\"><span class=\\"euiToolTipAnchor\\"><button class=\\"euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall\\" type=\\"button\\" aria-label=\\"All actions\\" data-test-subj=\\"euiCollapsedItemActionsButton\\"><span data-euiicon-type=\\"boxesHorizontal\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></span></div></div></div></div></td></tr><tr class=\\"euiTableRow euiTableRow-hasActions\\"><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Name</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><button class=\\"euiLink euiLink--primary\\" type=\\"button\\">http_count_view_alt</button></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Status</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiHealth euiHealth--textSizeS\\"><div class=\\"euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow\\"><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><span data-euiicon-type=\\"dot\\" color=\\"warning\\"></span></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\">Refreshing</div></div></div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Type</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">materialized</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Database</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">default</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Table</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">-</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Refresh Type</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">Auto refresh</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Destination Index</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\">flint_mys3_default_http_count_view_alt</div></td><td class=\\"euiTableRowCell euiTableRowCell--hasActions\\"><div class=\\"euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent\\"><div class=\\"euiTableCellContent__hoverItem\\"><div class=\\"euiPopover euiPopover--anchorLeftCenter\\" id=\\"1-actions\\"><div class=\\"euiPopover__anchor\\"><span class=\\"euiToolTipAnchor\\"><button class=\\"euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall\\" type=\\"button\\" aria-label=\\"All actions\\" data-test-subj=\\"euiCollapsedItemActionsButton\\"><span data-euiicon-type=\\"boxesHorizontal\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></span></div></div></div></div></td></tr><tr class=\\"euiTableRow euiTableRow-hasActions\\"><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Name</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><button class=\\"euiLink euiLink--primary\\" type=\\"button\\">http_logs</button></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Status</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiHealth euiHealth--textSizeS\\"><div class=\\"euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow\\"><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><span data-euiicon-type=\\"dot\\" color=\\"danger\\"></span></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\">Deleted</div></div></div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Type</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">materialized</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Database</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">default</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Table</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">-</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Refresh Type</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">Auto refresh</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Destination Index</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\">flint_mys3_default_http_logs</div></td><td class=\\"euiTableRowCell euiTableRowCell--hasActions\\"><div class=\\"euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent\\"><div class=\\"euiTableCellContent__hoverItem\\"><div class=\\"euiPopover euiPopover--anchorLeftCenter\\" id=\\"2-actions\\"><div class=\\"euiPopover__anchor\\"><span class=\\"euiToolTipAnchor\\"><button class=\\"euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall\\" type=\\"button\\" aria-label=\\"All actions\\" data-test-subj=\\"euiCollapsedItemActionsButton\\"><span data-euiicon-type=\\"boxesHorizontal\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></span></div></div></div></div></td></tr><tr class=\\"euiTableRow euiTableRow-hasActions\\"><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Name</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><button class=\\"euiLink euiLink--primary\\" type=\\"button\\">skipping_index</button></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Status</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiHealth euiHealth--textSizeS\\"><div class=\\"euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow\\"><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><span data-euiicon-type=\\"dot\\" color=\\"success\\"></span></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\">Active</div></div></div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Type</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">skipping</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Database</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">default</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Table</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">http_logs</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Refresh Type</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">Manual</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Destination Index</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\">-</div></td><td class=\\"euiTableRowCell euiTableRowCell--hasActions\\"><div class=\\"euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent\\"><div class=\\"euiTableCellContent__hoverItem\\"><div class=\\"euiPopover euiPopover--anchorLeftCenter\\" id=\\"3-actions\\"><div class=\\"euiPopover__anchor\\"><span class=\\"euiToolTipAnchor\\"><button class=\\"euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall\\" type=\\"button\\" aria-label=\\"All actions\\" data-test-subj=\\"euiCollapsedItemActionsButton\\"><span data-euiicon-type=\\"boxesHorizontal\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></span></div></div></div></div></td></tr><tr class=\\"euiTableRow euiTableRow-hasActions\\"><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Name</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><button class=\\"euiLink euiLink--primary\\" type=\\"button\\">http_count_view</button></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Status</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiHealth euiHealth--textSizeS\\"><div class=\\"euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow\\"><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><span data-euiicon-type=\\"dot\\" color=\\"warning\\"></span></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\">Refreshing</div></div></div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Type</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">materialized</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Database</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">other</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Table</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">-</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Refresh Type</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\"><div class=\\"euiText euiText--medium\\">Auto refresh</div></div></td><td class=\\"euiTableRowCell\\"><div class=\\"euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop\\">Destination Index</div><div class=\\"euiTableCellContent euiTableCellContent--overflowingContent\\">flint_mys3_other_http_count_view</div></td><td class=\\"euiTableRowCell euiTableRowCell--hasActions\\"><div class=\\"euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent\\"><div class=\\"euiTableCellContent__hoverItem\\"><div class=\\"euiPopover euiPopover--anchorLeftCenter\\" id=\\"4-actions\\"><div class=\\"euiPopover__anchor\\"><span class=\\"euiToolTipAnchor\\"><button class=\\"euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall\\" type=\\"button\\" aria-label=\\"All actions\\" data-test-subj=\\"euiCollapsedItemActionsButton\\"><span data-euiicon-type=\\"boxesHorizontal\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></span></div></div></div></div></td></tr></tbody></table></div><div><div class=\\"euiSpacer euiSpacer--m\\"></div><div class=\\"euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow\\"><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><div class=\\"euiPopover euiPopover--anchorUpRight\\"><div class=\\"euiPopover__anchor\\"><button class=\\"euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall\\" type=\\"button\\" data-test-subj=\\"tablePaginationPopoverButton\\"><span class=\\"euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content\\"><span data-euiicon-type=\\"arrowDown\\" class=\\"euiButtonContent__icon\\" color=\\"inherit\\"></span><span class=\\"euiButtonEmpty__text\\">Rows per page: 10</span></span></button></div></div></div><div class=\\"euiFlexItem euiFlexItem--flexGrowZero\\"><nav class=\\"euiPagination\\"><button disabled=\\"\\" class=\\"euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall\\" type=\\"button\\" aria-label=\\"Previous page\\" data-test-subj=\\"pagination-button-previous\\"><span data-euiicon-type=\\"arrowLeft\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button><ul class=\\"euiPagination__list\\"><li class=\\"euiPagination__item\\"><button disabled=\\"\\" class=\\"euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile\\" type=\\"button\\" aria-label=\\"Page 1 of 1\\" data-test-subj=\\"pagination-button-0\\" aria-current=\\"true\\" aria-controls=\\"__table_generated-id\\"><span class=\\"euiButtonContent euiButtonEmpty__content\\"><span class=\\"euiButtonEmpty__text\\">1</span></span></button></li></ul><button disabled=\\"\\" class=\\"euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall\\" type=\\"button\\" aria-label=\\"Next page\\" data-test-subj=\\"pagination-button-next\\"><span data-euiicon-type=\\"arrowRight\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></nav></div></div></div></div></div>"`;
+exports[`AccelerationTable Component render result matches snapshot 1`] = `
+Array [
+  <div
+    class="euiSpacer euiSpacer--l"
+  />,
+  <div
+    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+  >
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiText euiText--small"
+        >
+          <h2
+            class="panel-title"
+          >
+            Accelerations
+          </h2>
+          Accelerations optimize query performance by indexing external data into OpenSearch.
+        </div>
+      </div>
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexEnd euiFlexGroup--directionRowReverse euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              class="euiButton euiButton--primary euiButton--fill"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text"
+                >
+                  Create acceleration
+                </span>
+              </span>
+            </button>
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              class="euiButton euiButton--primary"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text"
+                >
+                  Refresh
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr
+      class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+    />
+    <div
+      class="euiBasicTable"
+    >
+      <div>
+        <div
+          class="euiTableHeaderMobile"
+        >
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+          >
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            />
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <div
+                class="euiTableSortMobile"
+              >
+                <div
+                  class="euiPopover euiPopover--anchorDownRight"
+                >
+                  <div
+                    class="euiPopover__anchor"
+                  >
+                    <button
+                      class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                      type="button"
+                    >
+                      <span
+                        class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                      >
+                        <span
+                          class="euiButtonContent__icon"
+                          color="inherit"
+                          data-euiicon-type="arrowDown"
+                        />
+                        <span
+                          class="euiButtonEmpty__text"
+                        >
+                          Sorting
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <table
+          class="euiTable euiTable--responsive"
+          id="__table_generated-id"
+          tabindex="-1"
+        >
+          <caption
+            class="euiScreenReaderOnly euiTableCaption"
+          />
+          <thead>
+            <tr>
+              <th
+                aria-live="polite"
+                aria-sort="none"
+                class="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_indexName_0"
+                role="columnheader"
+                scope="col"
+              >
+                <button
+                  class="euiTableHeaderButton"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <span
+                    class="euiTableCellContent"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                    >
+                      Name
+                    </span>
+                  </span>
+                </button>
+              </th>
+              <th
+                aria-live="polite"
+                aria-sort="none"
+                class="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_status_1"
+                role="columnheader"
+                scope="col"
+              >
+                <button
+                  class="euiTableHeaderButton"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <span
+                    class="euiTableCellContent"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                    >
+                      Status
+                    </span>
+                  </span>
+                </button>
+              </th>
+              <th
+                aria-live="polite"
+                aria-sort="none"
+                class="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_type_2"
+                role="columnheader"
+                scope="col"
+              >
+                <button
+                  class="euiTableHeaderButton"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <span
+                    class="euiTableCellContent"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                    >
+                      Type
+                    </span>
+                  </span>
+                </button>
+              </th>
+              <th
+                aria-live="polite"
+                aria-sort="none"
+                class="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_database_3"
+                role="columnheader"
+                scope="col"
+              >
+                <button
+                  class="euiTableHeaderButton"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <span
+                    class="euiTableCellContent"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                    >
+                      Database
+                    </span>
+                  </span>
+                </button>
+              </th>
+              <th
+                aria-live="polite"
+                aria-sort="none"
+                class="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_table_4"
+                role="columnheader"
+                scope="col"
+              >
+                <button
+                  class="euiTableHeaderButton"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <span
+                    class="euiTableCellContent"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                    >
+                      Table
+                    </span>
+                  </span>
+                </button>
+              </th>
+              <th
+                aria-live="polite"
+                aria-sort="none"
+                class="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_refreshType_5"
+                role="columnheader"
+                scope="col"
+              >
+                <button
+                  class="euiTableHeaderButton"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <span
+                    class="euiTableCellContent"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                    >
+                      Refresh Type
+                    </span>
+                  </span>
+                </button>
+              </th>
+              <th
+                aria-live="polite"
+                aria-sort="none"
+                class="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_flintIndexName_6"
+                role="columnheader"
+                scope="col"
+              >
+                <button
+                  class="euiTableHeaderButton"
+                  data-test-subj="tableHeaderSortButton"
+                  type="button"
+                >
+                  <span
+                    class="euiTableCellContent"
+                  >
+                    <span
+                      class="euiTableCellContent__text"
+                    >
+                      Destination Index
+                    </span>
+                  </span>
+                </button>
+              </th>
+              <th
+                class="euiTableHeaderCell"
+                role="columnheader"
+                scope="col"
+              >
+                <span
+                  class="euiTableCellContent euiTableCellContent--alignRight"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    Actions
+                  </span>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              class="euiTableRow"
+            >
+              <td
+                class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                colspan="8"
+              >
+                <div
+                  class="euiTableCellContent euiTableCellContent--alignCenter"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    No items found
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>,
+]
+`;

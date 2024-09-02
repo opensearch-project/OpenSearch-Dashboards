@@ -344,4 +344,29 @@ describe('WorkspaceCreator', () => {
     });
     expect(notificationToastsAddDanger).not.toHaveBeenCalled();
   });
+
+  it('should not create workspace API when submitting', async () => {
+    workspaceClientCreate.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(resolve, 100);
+        })
+    );
+    const { getByTestId } = render(<WorkspaceCreator />);
+    // Ensure workspace create form rendered
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    expect(workspaceClientCreate).toHaveBeenCalledTimes(1);
+
+    // Since create button was been disabled, fire form submit event by form directly
+    fireEvent.submit(getByTestId('workspaceCreatorForm'));
+    expect(workspaceClientCreate).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => {
+      fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+      expect(workspaceClientCreate).toHaveBeenCalledTimes(2);
+    });
+  });
 });
