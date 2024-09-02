@@ -10,6 +10,7 @@ import {
   EuiFlexItem,
   EuiCompressedFormRow,
   EuiSpacer,
+  EuiFormLabel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { WorkspaceFormError, WorkspacePermissionSetting } from './types';
@@ -17,6 +18,9 @@ import {
   WorkspacePermissionItemType,
   optionIdToWorkspacePermissionModesMap,
   PermissionModeId,
+  PERMISSION_TYPE_LABEL_ID,
+  PERMISSION_COLLABORATOR_LABEL_ID,
+  PERMISSION_ACCESS_LEVEL_LABEL_ID,
 } from './constants';
 import {
   WorkspacePermissionSettingInput,
@@ -130,34 +134,28 @@ export const WorkspacePermissionSettingPanel = ({
   );
 
   return (
-    <div>
+    <>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem style={{ maxWidth: 150 }}>
-          <EuiCompressedFormRow
-            label={i18n.translate('workspaceForm.permissionSetting.typeLabel', {
+          <EuiFormLabel id={PERMISSION_TYPE_LABEL_ID}>
+            {i18n.translate('workspaceForm.permissionSetting.typeLabel', {
               defaultMessage: 'Type',
             })}
-          >
-            <></>
-          </EuiCompressedFormRow>
+          </EuiFormLabel>
         </EuiFlexItem>
         <EuiFlexItem style={{ maxWidth: 400 }}>
-          <EuiCompressedFormRow
-            label={i18n.translate('workspaceForm.permissionSetting.collaboratorLabel', {
+          <EuiFormLabel id={PERMISSION_COLLABORATOR_LABEL_ID}>
+            {i18n.translate('workspaceForm.permissionSetting.collaboratorLabel', {
               defaultMessage: 'Collaborator',
             })}
-          >
-            <></>
-          </EuiCompressedFormRow>
+          </EuiFormLabel>
         </EuiFlexItem>
         <EuiFlexItem style={{ maxWidth: 150 }}>
-          <EuiCompressedFormRow
-            label={i18n.translate('workspaceForm.permissionSetting.permissionLabel', {
+          <EuiFormLabel id={PERMISSION_ACCESS_LEVEL_LABEL_ID}>
+            {i18n.translate('workspaceForm.permissionSetting.accessLevelLabel', {
               defaultMessage: 'Access level',
             })}
-          >
-            <></>
-          </EuiCompressedFormRow>
+          </EuiFormLabel>
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ width: 40 }} />
       </EuiFlexGroup>
@@ -196,6 +194,6 @@ export const WorkspacePermissionSettingPanel = ({
           })}
         </EuiSmallButton>
       )}
-    </div>
+    </>
   );
 };
