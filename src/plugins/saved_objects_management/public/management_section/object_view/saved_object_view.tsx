@@ -161,13 +161,13 @@ export class SavedObjectEdition extends Component<
         {object && (
           <>
             {useUpdatedUX ? (
-              <EuiTitle>
-                <h3>
+              <EuiTitle size="s">
+                <h2>
                   {i18n.translate('savedObjectsManagement.view.form.title', {
                     defaultMessage: '{type} details',
                     values: { type: typeWithFirstLetterToUpperCase },
                   })}
-                </h3>
+                </h2>
               </EuiTitle>
             ) : (
               <EuiSpacer size="m" />
