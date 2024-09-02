@@ -32,6 +32,9 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@osd/i18n/react';
 import { Header } from './header';
+import { coreMock } from '../../../../../../core/public/mocks';
+import { ApplicationStart } from '../../../../../../core/public';
+import { NavigationPublicPluginStart } from '../../../../../navigation/public';
 
 describe('Intro component', () => {
   const mountHeader = (props: {
@@ -41,6 +44,9 @@ describe('Intro component', () => {
     type: string;
     viewUrl: string;
     onDeleteClick: () => void;
+    useUpdatedUX: boolean;
+    application: ApplicationStart;
+    navigationUI: NavigationPublicPluginStart['ui'];
   }) =>
     mount(
       <I18nProvider>
@@ -55,6 +61,13 @@ describe('Intro component', () => {
     canViewInApp: true,
     viewUrl: '/some-url',
     onDeleteClick: () => undefined,
+    useUpdatedUX: false,
+    navigationUI: ({
+      HeaderControl: ({ controls }) => {
+        return controls?.[0].ariaLabel ?? controls?.[0].label ?? null;
+      },
+    } as unknown) as NavigationPublicPluginStart['ui'],
+    application: coreMock.createStart().application,
   };
 
   it('renders correctly', () => {
@@ -132,5 +145,31 @@ describe('Intro component', () => {
       canViewInApp: false,
     });
     expect(mounted.exists(`a[data-test-subj='savedObjectEditViewInApp']`)).toBe(false);
+  });
+
+  it('renders correctly when use new UX', () => {
+    const mounted = mountHeader({
+      ...defaultProps,
+      useUpdatedUX: true,
+    });
+    expect(mounted).toMatchSnapshot();
+  });
+
+  it('renders correctly when use new UX and canViewInApp is true', () => {
+    const mounted = mountHeader({
+      ...defaultProps,
+      useUpdatedUX: true,
+      canViewInApp: true,
+    });
+    expect(mounted).toMatchSnapshot();
+  });
+
+  it('renders correctly when use new UX and canDelete is true', () => {
+    const mounted = mountHeader({
+      ...defaultProps,
+      useUpdatedUX: true,
+      canDelete: true,
+    });
+    expect(mounted).toMatchSnapshot();
   });
 });
