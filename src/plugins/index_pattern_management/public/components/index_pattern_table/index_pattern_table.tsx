@@ -250,7 +250,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     currentWorkspace
       ? {
           defaultMessage:
-            'Create and manage the index patterns that help you retrieve your data from OpenSearch for {name} workspace. ',
+            'Create and manage the index patterns that help you retrieve your data from OpenSearch for {name} workspace.',
           values: {
             name: currentWorkspace.name,
           },
