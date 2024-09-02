@@ -55,6 +55,7 @@ import { crossCompatibilityServiceMock } from './cross_compatibility/cross_compa
 import { dynamicConfigServiceMock } from './config/dynamic_config_service.mock';
 
 export { configServiceMock } from './config/mocks';
+export { dynamicConfigServiceMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';

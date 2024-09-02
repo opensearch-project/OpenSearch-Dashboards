@@ -163,7 +163,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
               </div>
             </div>
             <table
-              class="euiTable euiTable--responsive"
+              class="euiTable euiTable--compressed euiTable--responsive"
               id="__table_generated-id"
               tabindex="-1"
             >
@@ -424,7 +424,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--small eui-textTruncate"
+                          class="euiText euiText--extraSmall eui-textTruncate"
                           style="max-width: 150px;"
                         >
                           should be able to see the description tooltip when hovering over the description
@@ -635,7 +635,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--small eui-textTruncate"
+                          class="euiText euiText--extraSmall eui-textTruncate"
                           style="max-width: 150px;"
                         >
                           should be able to see the description tooltip when hovering over the description
@@ -813,7 +813,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--small eui-textTruncate"
+                          class="euiText euiText--extraSmall eui-textTruncate"
                           style="max-width: 150px;"
                         />
                       </span>

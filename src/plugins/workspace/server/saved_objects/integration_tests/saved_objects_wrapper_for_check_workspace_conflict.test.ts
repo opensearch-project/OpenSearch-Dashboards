@@ -38,6 +38,7 @@ const advancedSettings: Omit<SavedObject, 'id'> = {
 interface WorkspaceAttributes {
   id: string;
   name?: string;
+  features?: string[];
 }
 
 describe('saved_objects_wrapper_for_check_workspace_conflict integration test', () => {
@@ -76,9 +77,11 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
 
     createdFooWorkspace = await createWorkspace({
       name: 'foo',
+      features: ['use-case-all'],
     }).then((resp) => resp.body.result);
     createdBarWorkspace = await createWorkspace({
       name: 'bar',
+      features: ['use-case-all'],
     }).then((resp) => resp.body.result);
   }, 30000);
   afterAll(async () => {

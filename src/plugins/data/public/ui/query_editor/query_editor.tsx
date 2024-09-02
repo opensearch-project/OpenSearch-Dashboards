@@ -6,6 +6,7 @@
 import { i18n } from '@osd/i18n';
 
 import {
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCompressedFieldText,
   EuiFlexGroup,
@@ -17,9 +18,15 @@ import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
 import { monaco } from '@osd/monaco';
-import { IDataPluginServices, IFieldType, IIndexPattern, Query, TimeRange } from '../..';
+import {
+  IDataPluginServices,
+  IFieldType,
+  IIndexPattern,
+  Query,
+  QuerySuggestion,
+  TimeRange,
+} from '../..';
 import { OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
-import { QuerySuggestion } from '../../autocomplete';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { QueryLanguageSelector } from './language_selector';
@@ -27,14 +34,9 @@ import { QueryEditorExtensions } from './query_editor_extensions';
 import { getQueryService, getIndexPatterns } from '../../services';
 import { DatasetSelector } from '../dataset_selector';
 import { QueryControls } from '../../query/query_string/language_service/get_query_control_links';
-import { RecentQuery } from '../../query/query_string/language_service/recent_query';
+import { RecentQueriesTable } from '../../query/query_string/language_service/recent_query';
 import { DefaultInputProps } from './editors';
-
-const LANGUAGE_ID_SQL = 'SQL';
-monaco.languages.register({ id: LANGUAGE_ID_SQL });
-
-const LANGUAGE_ID_KUERY = 'kuery';
-monaco.languages.register({ id: LANGUAGE_ID_KUERY });
+import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 
 export interface QueryEditorProps {
   query: Query;
@@ -73,6 +75,7 @@ interface State {
   isCollapsed: boolean;
   timeStamp: IFieldType | null;
   lineCount: number | undefined;
+  isRecentQueryVisible: boolean;
 }
 
 // Needed for React.lazy
@@ -87,6 +90,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     isCollapsed: false, // default to expand mode
     timeStamp: null,
     lineCount: undefined,
+    isRecentQueryVisible: false,
   };
 
   public inputRef: monaco.editor.IStandaloneCodeEditor | null = null;
@@ -184,12 +188,6 @@ export default class QueryEditorUI extends Component<Props, State> {
     this.setState({ lineCount: currentLineCount });
   };
 
-  private onClickInput = (event: React.MouseEvent<HTMLTextAreaElement>) => {
-    if (event.target instanceof HTMLTextAreaElement) {
-      this.onQueryStringChange(event.target.value);
-    }
-  };
-
   // TODO: MQL consider moving language select language of setting search source here
   private onSelectLanguage = (languageId: string) => {
     // Send telemetry info every time the user opts in or out of kuery
@@ -214,6 +212,13 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   public onMouseEnterSuggestion = (index: number) => {
     this.setState({ index });
+  };
+
+  private toggleRecentQueries = () => {
+    this.setState((prevState) => ({
+      ...prevState,
+      isRecentQueryVisible: !prevState.isRecentQueryVisible,
+    }));
   };
 
   public componentDidMount() {
@@ -281,7 +286,7 @@ export default class QueryEditorUI extends Component<Props, State> {
 
     // current completion item range being given as last 'word' at pos
     const wordUntil = model.getWordUntilPosition(position);
-    const range = new monaco.Range(
+    const defaultRange = new monaco.Range(
       position.lineNumber,
       wordUntil.startColumn,
       position.lineNumber,
@@ -291,12 +296,17 @@ export default class QueryEditorUI extends Component<Props, State> {
     return {
       suggestions:
         suggestions && suggestions.length > 0
-          ? suggestions.map((s: QuerySuggestion) => ({
-              label: s.text,
-              kind: s.type as monaco.languages.CompletionItemKind,
-              insertText: s.insertText ?? s.text,
-              range,
-            }))
+          ? suggestions
+              .filter((s) => 'detail' in s) // remove suggestion not of type MonacoCompatible
+              .map((s: MonacoCompatibleQuerySuggestion) => {
+                return {
+                  label: s.text,
+                  kind: s.type as monaco.languages.CompletionItemKind,
+                  insertText: s.insertText ?? s.text,
+                  range: s.replacePosition ?? defaultRange,
+                  detail: s.detail,
+                };
+              })
           : [],
       incomplete: false,
     };
@@ -358,11 +368,16 @@ export default class QueryEditorUI extends Component<Props, State> {
           </EuiText>,
         ],
         end: [
-          <RecentQuery
-            queryString={this.queryString}
-            query={this.props.query}
-            onClickRecentQuery={this.onClickRecentQuery}
-          />,
+          <EuiButtonEmpty
+            iconSide="left"
+            iconType="clock"
+            size="xs"
+            onClick={this.toggleRecentQueries}
+          >
+            <EuiText size="xs" color="subdued">
+              {'Recent queries'}
+            </EuiText>
+          </EuiButtonEmpty>,
         ],
       },
       provideCompletionItems: this.provideCompletionItems,
@@ -441,7 +456,14 @@ export default class QueryEditorUI extends Component<Props, State> {
           className={classNames('osdQueryEditor__header', this.props.headerClassName)}
         />
         {!this.state.isCollapsed && (
-          <div className="osdQueryEditor__body">{languageEditor.Body()}</div>
+          <>
+            <div className="osdQueryEditor__body">{languageEditor.Body()}</div>
+            <RecentQueriesTable
+              isVisible={this.state.isRecentQueryVisible && useQueryEditor}
+              queryString={this.queryString}
+              onClickRecentQuery={this.onClickRecentQuery}
+            />
+          </>
         )}
 
         {this.renderQueryEditorExtensions()}

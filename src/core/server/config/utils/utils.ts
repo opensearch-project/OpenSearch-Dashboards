@@ -6,6 +6,7 @@
 import _ from 'lodash';
 import { Logger } from '@osd/logging';
 import { Request } from 'hapi__hapi';
+import { ApiResponse } from '@opensearch-project/opensearch/.';
 import { ConfigIdentifier } from '../types';
 import { DYNAMIC_APP_CONFIG_INDEX_PREFIX } from './constants';
 import { OpenSearchDashboardsRequest } from '../../http';
@@ -23,6 +24,19 @@ export const pathToString = (configIdentifier: ConfigIdentifier) => {
     return Array.isArray(pluginConfigPath) ? pluginConfigPath.join('.') : pluginConfigPath;
   }
   return _.snakeCase(name);
+};
+
+export const createApiResponse = <TResponse = Record<string, any>>(
+  opts: Partial<ApiResponse> = {}
+): ApiResponse<TResponse> => {
+  return {
+    body: {} as any,
+    statusCode: 200,
+    headers: {},
+    warnings: [],
+    meta: {} as any,
+    ...opts,
+  };
 };
 
 /**
