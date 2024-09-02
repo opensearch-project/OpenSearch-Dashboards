@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { mount, configure } from 'enzyme';
+import { mount, configure, render } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { AccelerationTable } from './acceleration_table';
@@ -180,18 +180,14 @@ describe('AccelerationTable Component', () => {
     expect(wrapper!.text()).toContain(expectedLocalizedTime);
   });
 
-  it('matches snapshot', async () => {
-    let wrapper: ReactWrapper;
-    await act(async () => {
-      wrapper = mount(
+  it('render result matches snapshot', async () => {
+    expect(
+      render(
         <AccelerationTable
           dataSourceName="testDataSource"
           cacheLoadingHooks={mockCacheLoadingHooks}
         />
-      );
-    });
-    wrapper!.update();
-
-    expect(wrapper!.html()).toMatchSnapshot();
+      )
+    ).toMatchSnapshot();
   });
 });
