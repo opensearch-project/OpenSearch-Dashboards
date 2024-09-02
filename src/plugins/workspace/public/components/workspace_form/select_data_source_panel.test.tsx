@@ -13,7 +13,6 @@ import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/open
 import { DataSourceConnectionType } from '../../../common/types';
 
 import { SelectDataSourcePanel, SelectDataSourcePanelProps } from './select_data_source_panel';
-import { IntlProvider } from 'react-intl';
 
 const dataSourceConnectionsMock = [
   {
