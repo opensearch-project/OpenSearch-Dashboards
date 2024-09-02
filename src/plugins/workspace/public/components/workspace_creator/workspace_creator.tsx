@@ -17,7 +17,7 @@ import { convertPermissionSettingsToPermissions } from '../workspace_form';
 import { DataSource } from '../../../common/types';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { WorkspaceUseCase } from '../../types';
-import { getUseCaseFeatureConfig } from '../../utils';
+import { getUseCaseFeatureConfig, getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
@@ -87,10 +87,13 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           });
           if (application && http) {
             const newWorkspaceId = result.result.id;
+            const useCaseId = getFirstUseCaseOfFeatureConfigs(attributes.features);
+            const useCaseLandingAppId = availableUseCases?.find(({ id }) => useCaseId === id)
+              ?.features[0].id;
             // Redirect page after one second, leave one second time to show create successful toast.
             window.setTimeout(() => {
               window.location.href = formatUrlWithWorkspaceId(
-                application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
+                application.getUrlForApp(useCaseLandingAppId || WORKSPACE_DETAIL_APP_ID, {
                   absolute: true,
                 }),
                 newWorkspaceId,
@@ -114,7 +117,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
         setIsFormSubmitting(false);
       }
     },
-    [notifications?.toasts, http, application, workspaceClient, isFormSubmitting]
+    [notifications?.toasts, http, application, workspaceClient, isFormSubmitting, availableUseCases]
   );
 
   const isFormReadyToRender =
