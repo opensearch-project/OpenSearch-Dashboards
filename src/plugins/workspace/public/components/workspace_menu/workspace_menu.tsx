@@ -121,7 +121,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                   size="xl"
                   color="success"
                   data-test-subj={`current-workspace-icon-${getUseCase(currentWorkspace)?.id}`}
-                  type={`ws${getUseCase(currentWorkspace)?.title}`}
+                  type={`ws${getUseCase(currentWorkspace)?.id}`}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="workspace-menu-current-workspace-name">
@@ -161,7 +161,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
         </EuiFlexGroup>
       </EuiPanel>
 
-      <EuiPanel paddingSize="s" hasBorder={false} color="transparent" style={{ height: '30vh' }}>
+      <EuiPanel paddingSize="s" hasBorder={false} color="transparent" style={{ height: '35vh' }}>
         <WorkspacePickerContent
           coreStart={coreStart}
           registeredUseCases$={registeredUseCases$}

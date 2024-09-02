@@ -19,7 +19,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
-import { CoreStart, WorkspaceObject, debounce } from '../../../../../core/public';
+import { CoreStart, WorkspaceObject } from '../../../../../core/public';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 import { WorkspaceUseCase } from '../../types';
 import { validateWorkspaceColor } from '../../../common/utils';
@@ -55,17 +55,6 @@ export const WorkspacePickerContent = ({
   const isDashboardAdmin = coreStart.application.capabilities?.dashboards?.isDashboardAdmin;
   const availableUseCases = useObservable(registeredUseCases$, []);
   const [search, setSearch] = useState('');
-
-  const debouncedSetQueryInput = useMemo(() => {
-    return debounce(setSearch, 100);
-  }, [setSearch]);
-
-  const handleSearchInput = useCallback(
-    (query) => {
-      debouncedSetQueryInput(query?.text ?? '');
-    },
-    [debouncedSetQueryInput]
-  );
 
   const filteredRecentWorkspaces = useMemo(() => {
     return recentWorkspaceManager
@@ -192,7 +181,7 @@ export const WorkspacePickerContent = ({
             compressed={true}
             fullWidth={true}
             value={search}
-            onChange={(e) => handleSearchInput({ text: e.target.value })}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder={searchFieldPlaceholder}
           />
           <EuiSpacer />
@@ -201,22 +190,21 @@ export const WorkspacePickerContent = ({
         <EuiFlexItem grow={true} style={{ width: '100%', overflowY: 'auto' }}>
           <EuiPanel paddingSize="none" color="transparent" hasBorder={false}>
             {search ? (
-              queriedWorkspace && queriedWorkspace.length > 0 ? (
-                <>
-                  {filteredRecentWorkspaces.length > 0 &&
-                    getWorkspaceListGroup(queriedRecentWorkspace, 'recent')}
-                  {workspaceList.length > 0 && getWorkspaceListGroup(queriedWorkspace, 'all')}
-                </>
-              ) : (
-                getEmptyStatePrompt()
-              )
+              <>
+                {queriedRecentWorkspace &&
+                  queriedRecentWorkspace.length > 0 &&
+                  getWorkspaceListGroup(queriedRecentWorkspace, 'recent')}
+                {queriedWorkspace &&
+                  queriedWorkspace.length > 0 &&
+                  getWorkspaceListGroup(queriedWorkspace, 'all')}
+                {(!queriedWorkspace || queriedWorkspace.length === 0) && getEmptyStatePrompt()}
+              </>
             ) : (
               <>
                 {filteredRecentWorkspaces.length > 0 &&
                   getWorkspaceListGroup(filteredRecentWorkspaces, 'recent')}
-
                 {workspaceList.length > 0 && getWorkspaceListGroup(workspaceList, 'all')}
-                {workspaceList.length === 0 && <>{getEmptyStatePrompt()}</>}
+                {workspaceList.length === 0 && getEmptyStatePrompt()}
               </>
             )}
           </EuiPanel>
