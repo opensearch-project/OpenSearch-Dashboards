@@ -193,25 +193,24 @@ export const WorkspacePickerContent = ({
 
         <EuiFlexItem grow={true} style={{ width: '100%', overflowY: 'auto' }}>
           <EuiPanel paddingSize="none" color="transparent" hasBorder={false}>
-            {queriedRecentWorkspace.length > 0 &&
-              queriedRecentWorkspace !== recentWorkspaces &&
-              getWorkspaceListGroup(queriedRecentWorkspace, 'recent')}
+            {queriedWorkspace !== workspaceList ? (
+              <>
+                {queriedRecentWorkspace.length > 0 &&
+                  getWorkspaceListGroup(queriedRecentWorkspace, 'recent')}
 
-            {queriedWorkspace.length > 0 &&
-              queriedWorkspace !== workspaceList &&
-              getWorkspaceListGroup(queriedWorkspace, 'all')}
+                {queriedWorkspace.length > 0 && getWorkspaceListGroup(queriedWorkspace, 'all')}
 
-            {queriedWorkspace.length === 0 && workspaceList.length !== 0 && getEmptyStatePrompt()}
+                {queriedWorkspace.length === 0 && getEmptyStatePrompt()}
+              </>
+            ) : (
+              <>
+                {recentWorkspaces.length > 0 && getWorkspaceListGroup(recentWorkspaces, 'recent')}
 
-            {queriedRecentWorkspace === recentWorkspaces &&
-              recentWorkspaces.length > 0 &&
-              getWorkspaceListGroup(recentWorkspaces, 'recent')}
+                {workspaceList.length > 0 && getWorkspaceListGroup(workspaceList, 'all')}
 
-            {queriedWorkspace === workspaceList &&
-              workspaceList.length > 0 &&
-              getWorkspaceListGroup(workspaceList, 'all')}
-
-            {workspaceList.length === 0 && getEmptyStatePrompt()}
+                {workspaceList.length === 0 && getEmptyStatePrompt()}
+              </>
+            )}
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
