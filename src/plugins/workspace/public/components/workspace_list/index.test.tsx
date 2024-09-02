@@ -13,6 +13,7 @@ import { navigateToWorkspaceDetail } from '../utils/workspace';
 import { createMockedRegisteredUseCases$ } from '../../mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { WorkspaceList } from './index';
+import { exp } from 'mathjs';
 
 jest.mock('../utils/workspace');
 
@@ -239,57 +240,24 @@ describe('WorkspaceList', () => {
   });
 
   it('should be able to pagination when clicking pagination button', async () => {
-    const list = [
-      {
-        id: 'id1',
-        name: 'name1',
+    const list = [];
+    // add 15 items into list
+    for (let i = 100; i < 115; i++) {
+      list.push({
+        id: `id${i}`,
+        name: `name${i}`,
         features: ['use-case-all'],
         description: '',
         lastUpdatedTime: '2024-08-06T00:00:00.00Z',
-      },
-      {
-        id: 'id2',
-        name: 'name2',
-        features: ['use-case-observability'],
-        description: '',
-        lastUpdatedTime: '2024-08-06T00:00:00.00Z',
-      },
-      {
-        id: 'id3',
-        name: 'name3',
-        features: ['use-case-search'],
-        description: '',
-        lastUpdatedTime: '2024-08-06T00:00:00.00Z',
-      },
-      {
-        id: 'id4',
-        name: 'name4',
-        features: ['use-case-all'],
-        description: '',
-        lastUpdatedTime: '2024-08-05T00:00:00.00Z',
-      },
-      {
-        id: 'id5',
-        name: 'name5',
-        features: ['use-case-observability'],
-        description: '',
-        lastUpdatedTime: '2024-08-06T00:00:00.00Z',
-      },
-      {
-        id: 'id6',
-        name: 'name6',
-        features: ['use-case-search'],
-        description: '',
-        lastUpdatedTime: '2024-08-06T00:00:00.00Z',
-      },
-    ];
+      });
+    }
     const { getByTestId, getByText, queryByText } = render(getWrapWorkspaceListInContext(list));
-    expect(getByText('name1')).toBeInTheDocument();
-    expect(queryByText('name6')).not.toBeInTheDocument();
+    expect(getByText('name100')).toBeInTheDocument();
+    expect(queryByText('name110')).not.toBeInTheDocument();
     const paginationButton = getByTestId('pagination-button-next');
     fireEvent.click(paginationButton);
-    expect(queryByText('name1')).not.toBeInTheDocument();
-    expect(getByText('name6')).toBeInTheDocument();
+    expect(queryByText('name100')).not.toBeInTheDocument();
+    expect(queryByText('name110')).toBeInTheDocument();
   });
 
   it('should display create workspace button for dashboard admin', async () => {
