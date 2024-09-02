@@ -52,12 +52,15 @@ import {
   HapiValidationError,
   getServerOptions,
   getRequestId,
+  getRedirectUrl,
 } from './http_tools';
 import { HttpServer } from './http_server';
 import { HttpConfig, config } from './http_config';
 import { Router } from './router';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { ByteSizeValue } from '@osd/config-schema';
+import { httpServerMock } from './http_server.mocks';
+import { updateWorkspaceState } from '../utils';
 
 const emptyOutput = {
   statusCode: 400,
@@ -271,5 +274,32 @@ describe('getRequestId', () => {
         );
       });
     });
+  });
+});
+
+describe('getRedirectUrl', () => {
+  it('should prepend with basePath when no requestWorkspaceId is present in request', () => {
+    const request = httpServerMock.createOpenSearchDashboardsRequest();
+    expect(
+      getRedirectUrl({
+        request,
+        nextUrl: '/app/next_url',
+        basePath: '/base',
+      })
+    ).toEqual('/base/app/next_url');
+  });
+
+  it('should prepend with basePath and workspace prefix when requestWorkspaceId is present in request', () => {
+    const request = httpServerMock.createOpenSearchDashboardsRequest();
+    updateWorkspaceState(request, {
+      requestWorkspaceId: 'workspace_id',
+    });
+    expect(
+      getRedirectUrl({
+        request,
+        nextUrl: '/app/next_url',
+        basePath: '/base',
+      })
+    ).toEqual('/base/w/workspace_id/app/next_url');
   });
 });

@@ -43,27 +43,15 @@ export const Template: FunctionComponent<Props> = ({
   metadata: {
     uiPublicUrl,
     locale,
+    darkMode,
+    themeVersion,
     injectedMetadata,
     i18n,
-    startupScriptUrl,
     bootstrapScriptUrl,
     strictCsp,
   },
 }) => {
-  const darkLogos = getLogos(
-    {
-      ...injectedMetadata.branding,
-      darkMode: true,
-    },
-    injectedMetadata.serverBasePath
-  );
-  const lightLogos = getLogos(
-    {
-      ...injectedMetadata.branding,
-      darkMode: false,
-    },
-    injectedMetadata.serverBasePath
-  );
+  const logos = getLogos(injectedMetadata.branding, injectedMetadata.serverBasePath);
 
   const favicon = injectedMetadata.branding.faviconUrl;
   const applicationTitle = injectedMetadata.branding.applicationTitle || 'OpenSearch Dashboards';
@@ -78,8 +66,6 @@ export const Template: FunctionComponent<Props> = ({
         {/**
          * ToDo: Custom branded favicons will not work correctly across all browsers with
          * these `link` elements and single type. Try to guess the image and use only one.
-         *
-         * Favicons (generated from https://realfavicongenerator.net/)
          *
          * For user customized favicon using yml file:
          * If user inputs a valid URL, we guarantee basic favicon customization, such as
@@ -127,17 +113,15 @@ export const Template: FunctionComponent<Props> = ({
           content={favicon ? `` : `${uiPublicUrl}/favicons/browserconfig.xml`}
         />
 
-        <Styles />
+        <meta name="theme-color" content="#ffffff" />
+        <Styles darkMode={darkMode} theme={themeVersion} />
 
         {/* Inject stylesheets into the <head> before scripts so that KP plugins with bundled styles will override them */}
         <meta name="add-styles-here" />
         <meta name="add-scripts-here" />
 
         {/* Place fonts after styles that would be injected later to make sure nothing overrides them */}
-        <Fonts url={uiPublicUrl} />
-        <meta name="add-fonts-here" />
-
-        <script src={startupScriptUrl} />
+        <Fonts url={uiPublicUrl} theme={themeVersion} />
       </head>
       <body>
         {createElement('osd-csp', {
@@ -153,19 +137,11 @@ export const Template: FunctionComponent<Props> = ({
           <div className="osdLoaderWrap" data-test-subj="loadingLogo">
             <div className="loadingLogoContainer">
               <img
-                className="loadingLogo darkOnly"
-                src={darkLogos.AnimatedMark.url}
+                className="loadingLogo"
+                src={logos.AnimatedMark.url}
                 alt={`${applicationTitle} logo`}
-                data-test-subj={`${darkLogos.AnimatedMark.type}Logo`}
-                data-test-image-url={darkLogos.AnimatedMark.url}
-                loading="eager"
-              />
-              <img
-                className="loadingLogo lightOnly"
-                src={lightLogos.AnimatedMark.url}
-                alt={`${applicationTitle} logo`}
-                data-test-subj={`${lightLogos.AnimatedMark.type}Logo`}
-                data-test-image-url={lightLogos.AnimatedMark.url}
+                data-test-subj={`${logos.AnimatedMark.type}Logo`}
+                data-test-image-url={logos.AnimatedMark.url}
                 loading="eager"
               />
             </div>
@@ -180,30 +156,17 @@ export const Template: FunctionComponent<Props> = ({
               })}
             </div>
             {/* Show a progress bar if a static custom branded logo is used */}
-            {darkLogos.AnimatedMark.type === ImageType.ALTERNATIVE && (
-              <div className="osdProgress darkOnly" />
-            )}
-            {lightLogos.AnimatedMark.type === ImageType.ALTERNATIVE && (
-              <div className="osdProgress lightOnly" />
-            )}
+            {logos.AnimatedMark.type === ImageType.ALTERNATIVE && <div className="osdProgress" />}
           </div>
         </div>
 
         <div className="osdWelcomeView" id="osd_legacy_browser_error" style={{ display: 'none' }}>
           <img
-            data-test-subj={darkLogos.Mark.type + ' logo'}
-            data-test-image-url={darkLogos.Mark.url}
-            src={darkLogos.Mark.url}
+            data-test-subj={logos.Mark.type + ' logo'}
+            data-test-image-url={logos.Mark.url}
+            src={logos.Mark.url}
             alt={`${applicationTitle} logo`}
-            className="legacyBrowserErrorLogo darkOnly"
-          />
-
-          <img
-            data-test-subj={lightLogos.Mark.type + ' logo'}
-            data-test-image-url={lightLogos.Mark.url}
-            src={lightLogos.Mark.url}
-            alt={`${applicationTitle} logo`}
-            className="legacyBrowserErrorLogo lightOnly"
+            className="legacyBrowserErrorLogo"
           />
 
           <h2 className="osdWelcomeTitle">

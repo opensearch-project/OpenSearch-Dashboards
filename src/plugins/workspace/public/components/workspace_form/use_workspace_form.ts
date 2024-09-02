@@ -3,139 +3,165 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useState, FormEventHandler, useRef, useMemo, useEffect } from 'react';
-import { htmlIdGenerator, EuiFieldTextProps, EuiColorPickerProps } from '@elastic/eui';
-import { useApplications } from '../../hooks';
-import { featureMatchesConfig } from '../../utils';
+import { useCallback, useState, FormEventHandler, useRef, useMemo } from 'react';
+import { htmlIdGenerator, EuiColorPickerProps } from '@elastic/eui';
 
-import { WorkspaceFormTabs } from './constants';
-import { WorkspaceFormProps, WorkspaceFormErrors, WorkspacePermissionSetting } from './types';
-import { appendDefaultFeatureIds, getNumberOfErrors, validateWorkspaceForm } from './utils';
+import { useApplications } from '../../hooks';
+import {
+  getFirstUseCaseOfFeatureConfigs,
+  getUseCaseFeatureConfig,
+  isUseCaseFeatureConfig,
+} from '../../utils';
+import { DataSource } from '../../../common/types';
+import {
+  WorkspaceFormProps,
+  WorkspaceFormErrors,
+  WorkspacePermissionSetting,
+  WorkspaceFormDataState,
+} from './types';
+import {
+  generatePermissionSettingsState,
+  getNumberOfChanges,
+  getNumberOfErrors,
+  validateWorkspaceForm,
+} from './utils';
+import { WorkspacePermissionItemType } from './constants';
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
-export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: WorkspaceFormProps) => {
+export const useWorkspaceForm = ({
+  application,
+  defaultValues,
+  operationType,
+  onSubmit,
+  permissionEnabled,
+}: WorkspaceFormProps) => {
   const applications = useApplications(application);
-  const [name, setName] = useState(defaultValues?.name);
+  const [name, setName] = useState(defaultValues?.name ?? '');
   const [description, setDescription] = useState(defaultValues?.description);
   const [color, setColor] = useState(defaultValues?.color);
-
-  const [selectedTab, setSelectedTab] = useState(WorkspaceFormTabs.FeatureVisibility);
-  // The matched feature id list based on original feature config,
-  // the feature category will be expanded to list of feature ids
-  const defaultFeatures = useMemo(() => {
-    // The original feature list, may contain feature id and category wildcard like @management, etc.
-    const defaultOriginalFeatures = defaultValues?.features ?? [];
-    return applications.filter(featureMatchesConfig(defaultOriginalFeatures)).map((app) => app.id);
-  }, [defaultValues?.features, applications]);
-
-  const defaultFeaturesRef = useRef(defaultFeatures);
-  defaultFeaturesRef.current = defaultFeatures;
-
-  const [selectedFeatureIds, setSelectedFeatureIds] = useState(
-    appendDefaultFeatureIds(defaultFeatures)
+  const defaultValuesRef = useRef(defaultValues);
+  const [isEditing, setIsEditing] = useState(false);
+  const initialPermissionSettingsRef = useRef(
+    generatePermissionSettingsState(operationType, defaultValues?.permissionSettings)
   );
+
+  const [featureConfigs, setFeatureConfigs] = useState<string[]>(defaultValues?.features ?? []);
+  const selectedUseCase = useMemo(() => getFirstUseCaseOfFeatureConfigs(featureConfigs), [
+    featureConfigs,
+  ]);
   const [permissionSettings, setPermissionSettings] = useState<
-    Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
-  >(
-    defaultValues?.permissionSettings && defaultValues.permissionSettings.length > 0
-      ? defaultValues.permissionSettings
+    WorkspaceFormDataState['permissionSettings']
+  >(initialPermissionSettingsRef.current);
+
+  const [selectedDataSources, setSelectedDataSources] = useState<DataSource[]>(
+    defaultValues?.selectedDataSources && defaultValues.selectedDataSources.length > 0
+      ? defaultValues.selectedDataSources
       : []
   );
 
   const [formErrors, setFormErrors] = useState<WorkspaceFormErrors>({});
   const numberOfErrors = useMemo(() => getNumberOfErrors(formErrors), [formErrors]);
   const formIdRef = useRef<string>();
-  const getFormData = () => ({
+  const getFormData = (): WorkspaceFormDataState => ({
     name,
     description,
-    features: selectedFeatureIds,
+    features: featureConfigs,
+    useCase: selectedUseCase,
     color,
     permissionSettings,
+    selectedDataSources,
   });
   const getFormDataRef = useRef(getFormData);
   getFormDataRef.current = getFormData;
+  const formData = getFormData();
+  const numberOfChanges = defaultValuesRef.current
+    ? getNumberOfChanges(formData, {
+        ...defaultValuesRef.current,
+        // The user form will insert some empty permission rows, should ignore these rows not treated as user new added.
+        permissionSettings: initialPermissionSettingsRef.current,
+      })
+    : 0;
 
   if (!formIdRef.current) {
     formIdRef.current = workspaceHtmlIdGenerator();
   }
 
+  const handleUseCaseChange = useCallback(
+    (newUseCase: string) => {
+      setFeatureConfigs((previousFeatureConfigs) => {
+        return [
+          ...previousFeatureConfigs.filter(
+            (featureConfig) => !isUseCaseFeatureConfig(featureConfig)
+          ),
+          getUseCaseFeatureConfig(newUseCase),
+        ];
+      });
+    },
+    [setFeatureConfigs]
+  );
+
   const handleFormSubmit = useCallback<FormEventHandler>(
     (e) => {
       e.preventDefault();
-      const formData = getFormDataRef.current();
-      const currentFormErrors: WorkspaceFormErrors = validateWorkspaceForm(formData);
+      const currentFormData = getFormDataRef.current();
+      currentFormData.permissionSettings = currentFormData.permissionSettings.filter(
+        (item) =>
+          (item.type === WorkspacePermissionItemType.User && !!item.userId) ||
+          (item.type === WorkspacePermissionItemType.Group && !!item.group)
+      );
+      const currentFormErrors: WorkspaceFormErrors = validateWorkspaceForm(
+        currentFormData,
+        !!permissionEnabled
+      );
       setFormErrors(currentFormErrors);
       if (getNumberOfErrors(currentFormErrors) > 0) {
         return;
       }
 
-      const featureConfigChanged =
-        formData.features.length !== defaultFeatures.length ||
-        formData.features.some((feat) => !defaultFeatures.includes(feat));
-
-      if (!featureConfigChanged) {
-        // If feature config not changed, set workspace feature config to the original value.
-        // The reason why we do this is when a workspace feature is configured by wildcard,
-        // such as `['@management']` or `['*']`. The form value `formData.features` will be
-        // expanded to array of individual feature id, if the feature hasn't changed, we will
-        // set the feature config back to the original value so that category wildcard won't
-        // expanded to feature ids
-        formData.features = defaultValues?.features ?? [];
-      }
-
       onSubmit?.({
-        ...formData,
-        name: formData.name!,
-        permissionSettings: formData.permissionSettings as WorkspacePermissionSetting[],
+        name: currentFormData.name!,
+        description: currentFormData.description,
+        color: currentFormData.color || '#FFFFFF',
+        features: currentFormData.features,
+        permissionSettings: currentFormData.permissionSettings as WorkspacePermissionSetting[],
+        selectedDataSources: currentFormData.selectedDataSources,
       });
     },
-    [defaultFeatures, onSubmit, defaultValues?.features]
+    [onSubmit, permissionEnabled]
   );
-
-  const handleNameInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>((e) => {
-    setName(e.target.value);
-  }, []);
-
-  const handleDescriptionInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>((e) => {
-    setDescription(e.target.value);
-  }, []);
 
   const handleColorChange = useCallback<Required<EuiColorPickerProps>['onChange']>((text) => {
     setColor(text);
   }, []);
 
-  const handleTabFeatureClick = useCallback(() => {
-    setSelectedTab(WorkspaceFormTabs.FeatureVisibility);
+  const handleResetForm = useCallback(() => {
+    const resetValues = defaultValuesRef.current;
+    setName(resetValues?.name ?? '');
+    setDescription(resetValues?.description ?? '');
+    setColor(resetValues?.color);
+    setFeatureConfigs(resetValues?.features ?? []);
+    setPermissionSettings(initialPermissionSettingsRef.current);
+    setFormErrors({});
+    setIsEditing(false);
   }, []);
-
-  const handleTabPermissionClick = useCallback(() => {
-    setSelectedTab(WorkspaceFormTabs.UsersAndPermissions);
-  }, []);
-
-  const handleFeaturesChange = useCallback((featureIds: string[]) => {
-    setSelectedFeatureIds(featureIds);
-  }, []);
-
-  useEffect(() => {
-    // When applications changed, reset form feature selection to original value
-    setSelectedFeatureIds(appendDefaultFeatureIds(defaultFeaturesRef.current));
-  }, [applications]);
 
   return {
     formId: formIdRef.current,
-    formData: getFormData(),
+    formData,
+    isEditing,
     formErrors,
-    selectedTab,
+    setIsEditing,
     applications,
     numberOfErrors,
+    numberOfChanges,
+    handleResetForm,
+    setName,
+    setDescription,
     handleFormSubmit,
     handleColorChange,
-    handleFeaturesChange,
-    handleNameInputChange,
-    handleTabFeatureClick,
+    handleUseCaseChange,
     setPermissionSettings,
-    handleTabPermissionClick,
-    handleDescriptionInputChange,
+    setSelectedDataSources,
   };
 };

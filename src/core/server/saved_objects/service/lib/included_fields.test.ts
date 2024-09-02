@@ -30,7 +30,7 @@
 
 import { includedFields } from './included_fields';
 
-const BASE_FIELD_COUNT = 9;
+const BASE_FIELD_COUNT = 11;
 
 describe('includedFields', () => {
   it('returns undefined if fields are not provided', () => {
@@ -56,6 +56,8 @@ Array [
   "migrationVersion",
   "updated_at",
   "originId",
+  "workspaces",
+  "permissions",
   "foo",
 ]
 `);
@@ -90,6 +92,8 @@ Array [
   "migrationVersion",
   "updated_at",
   "originId",
+  "workspaces",
+  "permissions",
   "foo",
   "bar",
 ]

@@ -87,7 +87,14 @@ import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../opensearch_dashboards_utils/common';
 import { IIndexPattern } from '../../index_patterns';
-import { DATA_FRAME_TYPES, IDataFrame, IDataFrameResponse, convertResult } from '../../data_frames';
+import {
+  DATA_FRAME_TYPES,
+  IDataFrame,
+  IDataFrameError,
+  IDataFrameResponse,
+  convertResult,
+  createDataFrame,
+} from '../../data_frames';
 import { IOpenSearchSearchRequest, IOpenSearchSearchResponse, ISearchOptions } from '../..';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
 import { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
@@ -123,7 +130,7 @@ export const searchSourceRequiredUiSettings = [
   UI_SETTINGS.QUERY_STRING_OPTIONS,
   UI_SETTINGS.SEARCH_INCLUDE_FROZEN,
   UI_SETTINGS.SORT_OPTIONS,
-  UI_SETTINGS.DATAFRAME_HYDRATION_STRATEGY,
+  UI_SETTINGS.QUERY_DATAFRAME_HYDRATION_STRATEGY,
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
@@ -140,7 +147,7 @@ export interface SearchSourceDependencies extends FetchHandlers {
   ) => Promise<SearchStrategyResponse>;
   df: {
     get: () => IDataFrame | undefined;
-    set: (dataFrame: IDataFrame) => Promise<void>;
+    set: (dataFrame: IDataFrame) => void;
     clear: () => void;
   };
 }
@@ -306,6 +313,21 @@ export class SearchSource {
   }
 
   /**
+   * Create and set the data frame of this SearchSource
+   *
+   * @async
+   * @return {undefined|IDataFrame}
+   */
+  async createDataFrame(searchRequest: SearchRequest) {
+    const dataFrame = createDataFrame({
+      name: searchRequest.index.title || searchRequest.index,
+      fields: [],
+    });
+    await this.setDataFrame(dataFrame);
+    return this.getDataFrame();
+  }
+
+  /**
    * Clear the data frame of this SearchSource
    */
   destroyDataFrame() {
@@ -401,6 +423,11 @@ export class SearchSource {
   private async fetchExternalSearch(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
 
+    const currentDataframe = this.getDataFrame();
+    if (!currentDataframe || currentDataframe.name !== searchRequest.index?.id) {
+      await this.createDataFrame(searchRequest);
+    }
+
     const params = getExternalSearchParamsFromRequest(searchRequest, {
       getConfig,
       getDataFrame: this.getDataFrame.bind(this),
@@ -412,6 +439,10 @@ export class SearchSource {
           const dataFrameResponse = response as IDataFrameResponse;
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
           return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+        }
+        if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.ERROR) {
+          const dataFrameError = response as IDataFrameError;
+          throw new RequestFailure(null, dataFrameError);
         }
         // TODO: MQL else if data_frame_polling then poll for the data frame updating the df fields only
       }

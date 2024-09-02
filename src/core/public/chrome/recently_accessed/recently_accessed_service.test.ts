@@ -29,6 +29,7 @@
  */
 
 import { httpServiceMock } from '../../http/http_service.mock';
+import { workspacesServiceMock } from '../../mocks';
 import { RecentlyAccessedService } from './recently_accessed_service';
 import { Subject } from 'rxjs';
 import { takeUntil, bufferCount } from 'rxjs/operators';
@@ -78,8 +79,9 @@ describe('RecentlyAccessed#start()', () => {
 
   const getStart = async () => {
     const http = httpServiceMock.createStartContract();
-    const recentlyAccessed = await new RecentlyAccessedService().start({ http });
-    return { http, recentlyAccessed };
+    const workspaces = workspacesServiceMock.createStartContract();
+    const recentlyAccessed = await new RecentlyAccessedService().start({ http, workspaces });
+    return { http, recentlyAccessed, workspaces };
   };
 
   it('allows adding and getting items', async () => {
@@ -150,5 +152,14 @@ Array [
   ],
 ]
 `);
+  });
+
+  it('adding items with workspaceId if is inside a workspace', async () => {
+    const { recentlyAccessed, workspaces } = await getStart();
+    workspaces.currentWorkspaceId$.next('foo');
+    recentlyAccessed.add('/app/item1', 'Item 1', 'item1');
+    expect(recentlyAccessed.get()).toEqual([
+      { link: '/app/item1', label: 'Item 1', id: 'item1', workspaceId: 'foo' },
+    ]);
   });
 });

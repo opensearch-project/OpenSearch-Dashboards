@@ -32,7 +32,6 @@ import React from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import PropTypes from 'prop-types';
 import { Home } from './legacy/home';
-import { Homepage } from './homepage';
 import { FeatureDirectory } from './feature_directory';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
@@ -42,6 +41,7 @@ import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../opensearch_dashboards_services';
 import { useMount } from 'react-use';
 import { USE_NEW_HOME_PAGE } from '../../../common/constants';
+import { HOME_PAGE_ID } from '../../../../content_management/public';
 
 const RedirectToDefaultApp = () => {
   useMount(() => {
@@ -88,6 +88,7 @@ export function HomeApp({ directories, solutions }) {
     environmentService,
     telemetry,
     uiSettings,
+    contentManagement,
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
@@ -117,7 +118,7 @@ export function HomeApp({ directories, solutions }) {
     />
   );
 
-  const homepage = <Homepage />;
+  const homepage = contentManagement.renderPage(HOME_PAGE_ID);
 
   return (
     <I18nProvider>

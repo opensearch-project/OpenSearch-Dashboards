@@ -39,14 +39,14 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiSuperDatePicker,
-  EuiFieldText,
+  EuiCompressedFieldText,
   prettyDuration,
 } from '@elastic/eui';
 // @ts-ignore
-import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
+import { EuiSuperUpdateButton, OnRefreshProps, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { Toast } from 'src/core/public';
-import { isEqual, compact } from 'lodash';
+import { createPortal } from 'react-dom';
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
 import {
   useOpenSearchDashboards,
@@ -55,18 +55,14 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import QueryStringInputUI from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
-import { PersistedLog, fromUser, getQueryLog } from '../../query';
+import { PersistedLog, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
-import { QueryEnhancement, Settings } from '../types';
 
 const QueryStringInput = withOpenSearchDashboards(QueryStringInputUI);
 
 // @internal
 export interface QueryBarTopRowProps {
   query?: Query;
-  isEnhancementsEnabled?: boolean;
-  queryEnhancements?: Map<string, QueryEnhancement>;
-  settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
@@ -75,7 +71,7 @@ export interface QueryBarTopRowProps {
   screenTitle?: string;
   indexPatterns?: Array<IIndexPattern | string>;
   isLoading?: boolean;
-  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
+  prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   showQueryInput?: boolean;
   showDatePicker?: boolean;
   dateRangeFrom?: string;
@@ -88,6 +84,7 @@ export interface QueryBarTopRowProps {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
+  datePickerRef?: React.RefObject<HTMLDivElement>;
 }
 
 // Needed for React.lazy
@@ -100,22 +97,8 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const { uiSettings, notifications, storage, appName, docLinks } = opensearchDashboards.services;
 
   const osdDQLDocs: string = docLinks!.links.opensearchDashboards.dql.base;
-  const isDataSourceReadOnly = uiSettings.get('query:dataSourceReadOnly');
 
   const queryLanguage = props.query && props.query.language;
-  const queryUiEnhancement =
-    (queryLanguage &&
-      props.queryEnhancements &&
-      props.queryEnhancements.get(queryLanguage)?.searchBar) ||
-    null;
-  const parsedQuery =
-    !queryUiEnhancement || isValidQuery(props.query)
-      ? props.query!
-      : { query: getQueryStringInitialValue(queryLanguage!), language: queryLanguage! };
-  if (!isEqual(parsedQuery?.query, props.query?.query)) {
-    onQueryChange(parsedQuery);
-    onSubmit({ query: parsedQuery, dateRange: getDateRange() });
-  }
   const persistedLog: PersistedLog | undefined = React.useMemo(
     () =>
       queryLanguage && uiSettings && storage && appName
@@ -135,19 +118,15 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   function getDateRange() {
     const defaultTimeSetting = uiSettings!.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
     return {
-      from:
-        props.dateRangeFrom ||
-        queryUiEnhancement?.dateRange?.initialFrom ||
-        defaultTimeSetting.from,
-      to: props.dateRangeTo || queryUiEnhancement?.dateRange?.initialTo || defaultTimeSetting.to,
+      from: props.dateRangeFrom || defaultTimeSetting.from,
+      to: props.dateRangeTo || defaultTimeSetting.to,
     };
   }
 
-  function onQueryChange(query: Query, dateRange?: TimeRange) {
-    if (queryUiEnhancement && !isValidQuery(query)) return;
+  function onQueryChange(query: Query) {
     props.onChange({
       query,
-      dateRange: dateRange ?? getDateRange(),
+      dateRange: getDateRange(),
     });
   }
 
@@ -204,10 +183,10 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     props.onSubmit({ query, dateRange });
   }
 
-  function onInputSubmit(query: Query, dateRange?: TimeRange) {
+  function onInputSubmit(query: Query) {
     onSubmit({
       query,
-      dateRange: dateRange ?? getDateRange(),
+      dateRange: getDateRange(),
     });
   }
 
@@ -219,38 +198,6 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     return valueAsMoment.toISOString();
   }
 
-  function isValidQuery(query: Query | undefined) {
-    if (!query || !query.query) return false;
-    return (
-      !Array.isArray(props.indexPatterns!) ||
-      compact(props.indexPatterns!).length === 0 ||
-      !isDataSourceReadOnly ||
-      fromUser(query!.query).includes(
-        typeof props.indexPatterns[0] === 'string'
-          ? props.indexPatterns[0]
-          : props.indexPatterns[0].title
-      )
-    );
-  }
-
-  function getQueryStringInitialValue(language: string) {
-    const { indexPatterns, queryEnhancements } = props;
-    const input = queryEnhancements?.get(language)?.searchBar?.queryStringInput?.initialValue;
-
-    if (
-      !indexPatterns ||
-      (!Array.isArray(indexPatterns) && compact(indexPatterns).length > 0) ||
-      !input
-    )
-      return '';
-
-    const defaultDataSource = indexPatterns[0];
-    const dataSource =
-      typeof defaultDataSource === 'string' ? defaultDataSource : defaultDataSource.title;
-
-    return input.replace('<data_source>', dataSource);
-  }
-
   function renderQueryInput() {
     if (!shouldRenderQueryInput()) return;
     return (
@@ -259,15 +206,11 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           disableAutoFocus={props.disableAutoFocus}
           indexPatterns={props.indexPatterns!}
           prepend={props.prepend}
-          query={parsedQuery}
-          isEnhancementsEnabled={props.isEnhancementsEnabled}
-          queryEnhancements={props.queryEnhancements}
-          settings={props.settings}
+          query={props.query!}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
           onChangeQueryInputFocus={onChangeQueryInputFocus}
           onSubmit={onInputSubmit}
-          getQueryStringInitialValue={getQueryStringInitialValue}
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}
         />
@@ -292,15 +235,10 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   }
 
   function shouldRenderDatePicker(): boolean {
-    return Boolean(
-      (props.showDatePicker && (queryUiEnhancement?.showDatePicker ?? true)) ??
-        (props.showAutoRefreshOnly && (queryUiEnhancement?.showAutoRefreshOnly ?? true))
-    );
+    return Boolean(props.showDatePicker || props.showAutoRefreshOnly);
   }
 
   function shouldRenderQueryInput(): boolean {
-    // TODO: MQL probably can modify to not care about index patterns
-    // TODO: call queryUiEnhancement?.showQueryInput
     return Boolean(props.showQueryInput && props.indexPatterns && props.query && storage);
   }
 
@@ -314,6 +252,10 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         isLoading={props.isLoading}
         onClick={onClickSubmitButton}
         data-test-subj="querySubmitButton"
+        aria-label={i18n.translate('data.query.queryBar.querySubmitButtonLabel', {
+          defaultMessage: 'Submit query',
+        })}
+        compressed={true}
       />
     );
 
@@ -323,7 +265,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
 
     return (
       <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
-        <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
           {renderDatePicker()}
           <EuiFlexItem grow={false}>{button}</EuiFlexItem>
         </EuiFlexGroup>
@@ -379,6 +321,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           dateFormat={uiSettings!.get('dateFormat')}
           isAutoRefreshOnly={props.showAutoRefreshOnly}
           className="osdQueryBar__datePicker"
+          compressed={true}
         />
       </EuiFlexItem>
     );
@@ -390,7 +333,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     if (
       language === 'kuery' &&
       typeof query === 'string' &&
-      (!storage || !storage.get('opensearchDashboards.luceneSyntaxWarningOptOut')) &&
+      (!storage || !storage.get('luceneSyntaxWarningOptOut')) &&
       doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {
       const toast = notifications!.toasts.addWarning({
@@ -399,23 +342,25 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         }),
         text: toMountPoint(
           <div>
-            <p>
-              <FormattedMessage
-                id="data.query.queryBar.luceneSyntaxWarningMessage"
-                defaultMessage="It looks like you may be trying to use Lucene query syntax, although you
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="data.query.queryBar.luceneSyntaxWarningMessage"
+                  defaultMessage="It looks like you may be trying to use Lucene query syntax, although you
                have opensearchDashboards Query Language (DQL) selected. Please review the DQL docs {link}."
-                values={{
-                  link: (
-                    <EuiLink href={osdDQLDocs} target="_blank">
-                      <FormattedMessage
-                        id="data.query.queryBar.syntaxOptionsDescription.docsLinkText"
-                        defaultMessage="here"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
+                  values={{
+                    link: (
+                      <EuiLink href={osdDQLDocs} target="_blank">
+                        <FormattedMessage
+                          id="data.query.queryBar.syntaxOptionsDescription.docsLinkText"
+                          defaultMessage="here"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            </EuiText>
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiButton size="s" onClick={() => onLuceneSyntaxWarningOptOut(toast)}>
@@ -434,7 +379,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
 
   function onLuceneSyntaxWarningOptOut(toast: Toast) {
     if (!storage) return;
-    storage.set('opensearchDashboards.luceneSyntaxWarningOptOut', true);
+    storage.set('luceneSyntaxWarningOptOut', true);
     notifications!.toasts.remove(toast);
   }
 
@@ -442,17 +387,28 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     'osdQueryBar--withDatePicker': props.showDatePicker,
   });
 
+  const shouldUseDatePickerRef =
+    props?.datePickerRef?.current &&
+    (uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) ||
+      uiSettings.get('home:useNewHomePage'));
+
   return (
-    <EuiFlexGroup
-      className={classes}
-      responsive={!!props.showDatePicker}
-      gutterSize="s"
-      justifyContent="flexEnd"
-    >
-      {renderQueryInput()}
-      {renderSharingMetaFields()}
-      <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup
+        className={classes}
+        responsive={!!props.showDatePicker}
+        gutterSize="s"
+        justifyContent="flexEnd"
+      >
+        {renderQueryInput()}
+        {renderSharingMetaFields()}
+        <EuiFlexItem grow={false}>
+          {shouldUseDatePickerRef
+            ? createPortal(renderUpdateButton(), props.datePickerRef!.current!)
+            : renderUpdateButton()}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 }
 

@@ -381,10 +381,10 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
         ],
       });
 
-      const findAdvancedSettings = await osdTestServer.request
-        .get(root, `/api/saved_objects/_find?type=${advancedSettings.type}`)
+      const getAdvancedSettingsResult = await osdTestServer.request
+        .get(root, `/api/saved_objects/${advancedSettings.type}/${packageInfo.version}`)
         .expect(200);
-      expect(findAdvancedSettings.body.total).toEqual(1);
+      expect(getAdvancedSettingsResult.body.id).toBe(packageInfo.version);
     });
 
     it('checkConflicts when importing ndjson', async () => {
@@ -493,7 +493,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
       const importWithWorkspacesResult = await osdTestServer.request
         .post(
           root,
-          `/api/saved_objects/_import?workspaces=${createdFooWorkspace.id}&overwrite=true`
+          `/api/saved_objects/_import?workspaces=${createdFooWorkspace.id}&overwrite=true&dataSourceEnabled=true`
         )
         .attach(
           'file',

@@ -6,7 +6,7 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiButtonIconProps,
   EuiText,
   EuiToolTip,
@@ -23,7 +23,7 @@ interface IDataSelectorRefresherProps {
 export const DataSelectorRefresher: React.FC<IDataSelectorRefresherProps> = React.memo(
   ({ tooltipText, onRefresh, buttonProps, toolTipProps }) => {
     return (
-      <EuiText size="s">
+      <EuiText size="s" className="sourceRefreshText">
         <EuiToolTip
           position="right"
           content={i18n.translate('data.datasource.selector.refreshDataSources', {
@@ -33,11 +33,11 @@ export const DataSelectorRefresher: React.FC<IDataSelectorRefresherProps> = Reac
           data-test-subj="sourceRefreshButtonToolTip"
           {...toolTipProps}
         >
-          <EuiButtonIcon
-            size="s"
+          <EuiSmallButtonIcon
             onClick={onRefresh}
             iconType="refresh"
             aria-label="sourceRefresh"
+            className="sourceRefreshButton"
             data-test-subj="sourceRefreshButton"
             {...buttonProps}
           />

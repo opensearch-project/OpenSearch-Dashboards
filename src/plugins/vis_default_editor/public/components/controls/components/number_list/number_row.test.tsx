@@ -64,7 +64,7 @@ describe('NumberRow', () => {
 
   test('should call onDelete', () => {
     const comp = shallow(<NumberRow {...defaultProps} />);
-    comp.find('EuiButtonIcon').simulate('click');
+    comp.find('EuiSmallButtonIcon').simulate('click');
 
     expect(defaultProps.onDelete).lastCalledWith(defaultProps.model.id);
   });

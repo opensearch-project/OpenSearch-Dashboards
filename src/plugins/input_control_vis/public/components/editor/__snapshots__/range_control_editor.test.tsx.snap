@@ -16,9 +16,9 @@ exports[`renders RangeControlEditor 1`] = `
     indexPatternId="indexPattern1"
     onChange={[Function]}
   />
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -32,15 +32,15 @@ exports[`renders RangeControlEditor 1`] = `
     }
     labelType="label"
   >
-    <EuiFieldNumber
+    <EuiCompressedFieldNumber
       data-test-subj="rangeControlSizeInput0"
       onChange={[Function]}
       value={1}
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -54,12 +54,12 @@ exports[`renders RangeControlEditor 1`] = `
     }
     labelType="label"
   >
-    <EuiFieldNumber
+    <EuiCompressedFieldNumber
       data-test-subj="rangeControlDecimalPlacesInput0"
       min={0}
       onChange={[Function]}
       value={0}
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
 </Fragment>
 `;

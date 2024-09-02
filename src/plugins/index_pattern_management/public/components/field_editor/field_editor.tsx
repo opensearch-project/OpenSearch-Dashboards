@@ -33,21 +33,21 @@ import { intersection, union, get } from 'lodash';
 
 import {
   EuiBasicTable,
-  EuiButton,
-  EuiButtonEmpty,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
   EuiCallOut,
   EuiCode,
   EuiCodeEditor,
   EuiConfirmModal,
-  EuiFieldNumber,
-  EuiFieldText,
+  EuiCompressedFieldNumber,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiIcon,
   EuiLink,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiSpacer,
   EuiText,
   EUI_MODAL_CONFIRM_BUTTON,
@@ -295,7 +295,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const isInvalid = !spec.name || !spec.name.trim();
 
     return isCreating ? (
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={i18n.translate('indexPatternManagement.nameLabel', { defaultMessage: 'Name' })}
         helpText={
           this.isDuplicateName() ? (
@@ -330,7 +330,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             : null
         }
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           value={spec.name || ''}
           placeholder={i18n.translate('indexPatternManagement.namePlaceholder', {
             defaultMessage: 'New scripted field',
@@ -341,7 +341,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           }}
           isInvalid={isInvalid}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     ) : null;
   }
 
@@ -349,7 +349,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { spec, scriptingLangs, isDeprecatedLang } = this.state;
 
     return spec.scripted ? (
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={i18n.translate('indexPatternManagement.languageLabel', {
           defaultMessage: 'Language',
         })}
@@ -390,7 +390,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           ) : null
         }
       >
-        <EuiSelect
+        <EuiCompressedSelect
           value={spec.lang}
           options={scriptingLangs.map((lang) => {
             return { value: lang, text: lang };
@@ -400,7 +400,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             this.onLangChange(e.target.value);
           }}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     ) : null;
   }
 
@@ -408,10 +408,10 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { spec, fieldTypes } = this.state;
 
     return (
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={i18n.translate('indexPatternManagement.typeLabel', { defaultMessage: 'Type' })}
       >
-        <EuiSelect
+        <EuiCompressedSelect
           value={spec.type}
           disabled={!spec.scripted}
           options={fieldTypes.map((type) => {
@@ -422,7 +422,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             this.onTypeChange(e.target.value as OSD_FIELD_TYPES);
           }}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   }
 
@@ -501,7 +501,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     return (
       <Fragment>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={label}
           helpText={
             <FormattedMessage
@@ -511,7 +511,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             />
           }
         >
-          <EuiSelect
+          <EuiCompressedSelect
             value={fieldFormatId}
             options={fieldTypeFormats.map((fmt) => {
               return { value: fmt.id || '', text: fmt.title };
@@ -521,7 +521,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
               this.onFormatChange(e.target.value);
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         {fieldFormatId ? (
           <FieldFormatEditor
             fieldType={spec.type}
@@ -541,21 +541,21 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { spec } = this.state;
 
     return (
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={i18n.translate('indexPatternManagement.popularityLabel', {
           defaultMessage: 'Popularity',
           description:
             '"Popularity" refers to OpenSearch Dashboards\'s measurement how popular a field is (i.e. how commonly it is used).',
         })}
       >
-        <EuiFieldNumber
+        <EuiCompressedFieldNumber
           value={spec.count}
           data-test-subj="editorFieldCount"
           onChange={(e) => {
             this.onFieldChange('count', e.target.value ? Number(e.target.value) : '');
           }}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   }
 
@@ -585,7 +585,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     return spec.scripted ? (
       <Fragment>
-        <EuiFormRow
+        <EuiCompressedFormRow
           fullWidth
           label={i18n.translate('indexPatternManagement.scriptLabel', { defaultMessage: 'Script' })}
           isInvalid={isInvalid}
@@ -599,11 +599,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             width="100%"
             height="300px"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow>
+        <EuiCompressedFormRow>
           <Fragment>
-            <EuiText>
+            <EuiText size="s">
               <FormattedMessage
                 id="indexPatternManagement.script.accessWithLabel"
                 defaultMessage="Access fields with {code}."
@@ -611,14 +611,16 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
               />
             </EuiText>
             <br />
-            <EuiLink onClick={this.showScriptingHelp} data-test-subj="scriptedFieldsHelpLink">
-              <FormattedMessage
-                id="indexPatternManagement.script.getHelpLabel"
-                defaultMessage="Get help with the syntax and preview the results of your script."
-              />
-            </EuiLink>
+            <EuiText size="s">
+              <EuiLink onClick={this.showScriptingHelp} data-test-subj="scriptedFieldsHelpLink">
+                <FormattedMessage
+                  id="indexPatternManagement.script.getHelpLabel"
+                  defaultMessage="Get help with the syntax and preview the results of your script."
+                />
+              </EuiLink>
+            </EuiText>
           </Fragment>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </Fragment>
     ) : null;
   }
@@ -693,10 +695,10 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { redirectAway } = this.props.services;
 
     return (
-      <EuiFormRow>
+      <EuiCompressedFormRow>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               fill
               onClick={this.saveField}
               isDisabled={this.isSavingDisabled()}
@@ -714,32 +716,32 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
                   defaultMessage="Save field"
                 />
               )}
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={redirectAway} data-test-subj="fieldCancelButton">
+            <EuiSmallButtonEmpty onClick={redirectAway} data-test-subj="fieldCancelButton">
               <FormattedMessage
                 id="indexPatternManagement.actions.cancelButton"
                 defaultMessage="Cancel"
               />
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiFlexItem>
           {!isCreating && spec.scripted ? (
             <EuiFlexItem>
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty color="danger" onClick={this.showDeleteModal}>
+                  <EuiSmallButtonEmpty color="danger" onClick={this.showDeleteModal}>
                     <FormattedMessage
                       id="indexPatternManagement.actions.deleteButton"
                       defaultMessage="Delete"
                     />
-                  </EuiButtonEmpty>
+                  </EuiSmallButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   }
 

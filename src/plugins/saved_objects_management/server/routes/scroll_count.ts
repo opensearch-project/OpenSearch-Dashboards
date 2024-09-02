@@ -30,7 +30,6 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter, SavedObjectsFindOptions } from 'src/core/server';
-import { PUBLIC_WORKSPACE_ID } from '../../../../core/server';
 import { findAll } from '../lib';
 
 export const registerScrollForCountRoute = (router: IRouter) => {
@@ -43,6 +42,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
           namespacesToInclude: schema.maybe(schema.arrayOf(schema.string())),
           searchString: schema.maybe(schema.string()),
           workspaces: schema.maybe(schema.arrayOf(schema.string())),
+          availableWorkspaces: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
     },
@@ -60,7 +60,9 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       const requestHasNamespaces =
         Array.isArray(req.body.namespacesToInclude) && req.body.namespacesToInclude.length;
 
-      const requestHasWorkspaces = Array.isArray(req.body.workspaces) && req.body.workspaces.length;
+      const requestHasWorkspaces =
+        (Array.isArray(req.body.workspaces) && req.body.workspaces.length) ||
+        (Array.isArray(req.body.availableWorkspaces) && req.body.availableWorkspaces.length);
 
       if (requestHasNamespaces) {
         counts.namespaces = {};
@@ -92,7 +94,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
           });
         }
         if (requestHasWorkspaces) {
-          const resultWorkspaces = result.workspaces || [PUBLIC_WORKSPACE_ID];
+          const resultWorkspaces = result.workspaces || [];
           resultWorkspaces.forEach((ws) => {
             counts.workspaces[ws] = counts.workspaces[ws] || 0;
             counts.workspaces[ws]++;
@@ -115,7 +117,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
         }
       }
 
-      const workspacesToInclude = req.body.workspaces || [];
+      const workspacesToInclude = req.body.workspaces || req.body.availableWorkspaces || [];
       for (const ws of workspacesToInclude) {
         if (!counts.workspaces[ws]) {
           counts.workspaces[ws] = 0;

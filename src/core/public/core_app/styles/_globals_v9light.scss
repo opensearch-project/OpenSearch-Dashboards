@@ -1,0 +1,7 @@
+// v8light global scope
+// ---
+// prepended to all .scss imports (from JS, when v8light theme selected)
+
+@import "@elastic/eui/src/themes/v9/v9_colors_light";
+@import "@elastic/eui/src/themes/v9/v9_globals";
+@import "./mixins";

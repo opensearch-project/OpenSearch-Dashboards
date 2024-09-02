@@ -154,15 +154,17 @@ exports[`InspectorPanel should render as expected 1`] = `
             <div
               className="euiFlexItem"
             >
-              <EuiTitle
+              <EuiText
                 size="s"
               >
-                <h1
-                  className="euiTitle euiTitle--small"
+                <div
+                  className="euiText euiText--small"
                 >
-                  Inspector
-                </h1>
-              </EuiTitle>
+                  <h2>
+                    Inspector
+                  </h2>
+                </div>
+              </EuiText>
             </div>
           </EuiFlexItem>
           <EuiFlexItem
@@ -255,6 +257,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                         >
                           <EuiButtonContent
                             className="euiButtonEmpty__content"
+                            iconGap="m"
                             iconSide="right"
                             iconSize="m"
                             iconType="arrowDown"

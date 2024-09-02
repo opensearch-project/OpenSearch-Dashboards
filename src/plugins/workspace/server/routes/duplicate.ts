@@ -58,7 +58,6 @@ export const registerDuplicateRoute = (
       // check whether the target workspace exists or not
       const getTargetWorkspaceResult = await client.get(
         {
-          context,
           request: req,
           logger,
         },
@@ -90,6 +89,7 @@ export const registerDuplicateRoute = (
         overwrite: false,
         createNewCopies: true,
         workspaces: [targetWorkspace],
+        dataSourceEnabled: true,
       });
 
       return res.ok({ body: result });

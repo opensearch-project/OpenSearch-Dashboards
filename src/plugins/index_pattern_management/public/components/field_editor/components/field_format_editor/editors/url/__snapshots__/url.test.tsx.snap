@@ -10,9 +10,9 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     isVisible={false}
     onClose={[Function]}
   />
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -25,7 +25,7 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     }
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       data-test-subj="urlEditorType"
       onChange={[Function]}
       options={
@@ -45,10 +45,10 @@ exports[`UrlFormatEditor should render label template help 1`] = `
         ]
       }
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -73,15 +73,15 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     }
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       data-test-subj="urlEditorUrlTemplate"
       onChange={[Function]}
       value=""
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -106,12 +106,12 @@ exports[`UrlFormatEditor should render label template help 1`] = `
     }
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       data-test-subj="urlEditorLabelTemplate"
       onChange={[Function]}
       value=""
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
   <FormatEditorSamples
     sampleType="html"
     samples={Array []}
@@ -129,9 +129,9 @@ exports[`UrlFormatEditor should render normally 1`] = `
     isVisible={false}
     onClose={[Function]}
   />
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -144,7 +144,7 @@ exports[`UrlFormatEditor should render normally 1`] = `
     }
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       data-test-subj="urlEditorType"
       onChange={[Function]}
       options={
@@ -164,10 +164,10 @@ exports[`UrlFormatEditor should render normally 1`] = `
         ]
       }
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -192,15 +192,15 @@ exports[`UrlFormatEditor should render normally 1`] = `
     }
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       data-test-subj="urlEditorUrlTemplate"
       onChange={[Function]}
       value=""
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -225,12 +225,12 @@ exports[`UrlFormatEditor should render normally 1`] = `
     }
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       data-test-subj="urlEditorLabelTemplate"
       onChange={[Function]}
       value=""
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
   <FormatEditorSamples
     sampleType="html"
     samples={Array []}
@@ -248,9 +248,9 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     isVisible={true}
     onClose={[Function]}
   />
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -263,7 +263,7 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     }
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       data-test-subj="urlEditorType"
       onChange={[Function]}
       options={
@@ -283,10 +283,10 @@ exports[`UrlFormatEditor should render url template help 1`] = `
         ]
       }
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -311,15 +311,15 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     }
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       data-test-subj="urlEditorUrlTemplate"
       onChange={[Function]}
       value=""
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -344,12 +344,12 @@ exports[`UrlFormatEditor should render url template help 1`] = `
     }
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       data-test-subj="urlEditorLabelTemplate"
       onChange={[Function]}
       value=""
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
   <FormatEditorSamples
     sampleType="html"
     samples={Array []}
@@ -367,9 +367,9 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     isVisible={false}
     onClose={[Function]}
   />
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -382,7 +382,7 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     }
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       data-test-subj="urlEditorType"
       onChange={[Function]}
       options={
@@ -403,10 +403,10 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
       }
       value="img"
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -431,15 +431,15 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     }
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       data-test-subj="urlEditorUrlTemplate"
       onChange={[Function]}
       value=""
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -464,15 +464,15 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     }
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       data-test-subj="urlEditorLabelTemplate"
       onChange={[Function]}
       value=""
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -485,15 +485,15 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     }
     labelType="label"
   >
-    <EuiFieldNumber
+    <EuiCompressedFieldNumber
       data-test-subj="urlEditorWidth"
       onChange={[Function]}
       value=""
     />
-  </EuiFormRow>
-  <EuiFormRow
+  </EuiCompressedFormRow>
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -506,12 +506,12 @@ exports[`UrlFormatEditor should render width and height fields if image 1`] = `
     }
     labelType="label"
   >
-    <EuiFieldNumber
+    <EuiCompressedFieldNumber
       data-test-subj="urlEditorHeight"
       onChange={[Function]}
       value=""
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
   <FormatEditorSamples
     sampleType="html"
     samples={

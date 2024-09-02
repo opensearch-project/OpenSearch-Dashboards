@@ -1,0 +1,35 @@
+/*
+* Copyright OpenSearch Contributors
+* SPDX-License-Identifier: Apache-2.0
+*/
+
+.headerBreadcrumbs {
+  margin-left: 0;
+  color: $euiColorPrimary;
+
+  .euiBreadcrumbWall {
+    background-image: none; // Removes any background image
+  }
+
+  .euiBreadcrumbWrapper {
+    padding-left: 0;
+    padding-right: 0;
+
+    &.euiBreadcrumbWrapper--last::after,
+    &:not(.euiBreadcrumbWrapper--last)::after {
+      content: "/";
+      background-color: transparent;
+      padding: 0 $euiSizeS;
+      color: $euiColorMediumShade;
+    }
+
+    &.euiBreadcrumbWrapper--last::before,
+    &:not(.euiBreadcrumbWrapper--last)::before {
+      display: none;
+    }
+  }
+
+  .euiBreadcrumb {
+    color: inherit !important;
+  }
+}

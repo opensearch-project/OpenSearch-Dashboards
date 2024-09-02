@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiSwitch } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
 import { DiscoverTable } from './discover_table';
@@ -18,19 +18,36 @@ import { setColumns, useDispatch, useSelector } from '../../utils/state_manageme
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { filterColumns } from '../utils/filter_columns';
-import { DEFAULT_COLUMNS_SETTING, MODIFY_COLUMNS_ON_SWITCH } from '../../../../common';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  MODIFY_COLUMNS_ON_SWITCH,
+  QUERY_ENHANCEMENT_ENABLED_SETTING,
+} from '../../../../common';
 import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
+import { buildColumns } from '../../utils/columns';
 import './discover_canvas.scss';
-import { getNewDiscoverSetting, setNewDiscoverSetting } from '../../components/utils/local_storage';
+import { HeaderVariant } from '../../../../../../core/public';
 
 // eslint-disable-next-line import/no-default-export
-export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewProps) {
+export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalRef }: ViewProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const { data$, refetch$, indexPattern } = useDiscoverContext();
   const {
-    services: { uiSettings, storage },
+    services: {
+      uiSettings,
+      capabilities,
+      chrome: { setHeaderVariant },
+    },
   } = useOpenSearchDashboards<DiscoverViewServices>();
-  const { columns } = useSelector((state) => state.discover);
+  const { columns } = useSelector((state) => {
+    const stateColumns = state.discover.columns;
+
+    // check if stateColumns is not undefined, otherwise use buildColumns
+    return {
+      columns: stateColumns !== undefined ? stateColumns : buildColumns([]),
+    };
+  });
+  const isEnhancementsEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
   const filteredColumns = filterColumns(
     columns,
     indexPattern,
@@ -90,56 +107,20 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
     }
   }, [dispatch, filteredColumns, indexPattern]);
 
+  useEffect(() => {
+    setHeaderVariant?.(HeaderVariant.APPLICATION);
+    return () => {
+      setHeaderVariant?.();
+    };
+  }, [setHeaderVariant]);
+
   const timeField = indexPattern?.timeFieldName ? indexPattern.timeFieldName : undefined;
   const scrollToTop = () => {
     if (panelRef.current) {
       panelRef.current.scrollTop = 0;
     }
   };
-
-  const [isOptionsOpen, setOptionsOpen] = useState(false);
-  const [useLegacy, setUseLegacy] = useState(!getNewDiscoverSetting(storage));
-  const DiscoverOptions = () => (
-    <EuiPopover
-      button={
-        <EuiButtonIcon
-          data-test-subj="discoverOptionsButton"
-          size="s"
-          iconType="gear"
-          onClick={() => setOptionsOpen(!isOptionsOpen)}
-        />
-      }
-      closePopover={() => setOptionsOpen(false)}
-      isOpen={isOptionsOpen}
-      panelPaddingSize="none"
-      className="dscCanvas_options"
-    >
-      <EuiContextMenu
-        initialPanelId={0}
-        panels={[
-          {
-            id: 0,
-            title: 'Options',
-            content: (
-              <EuiPanel>
-                <EuiSwitch
-                  label="Enable legacy Discover"
-                  checked={useLegacy}
-                  data-test-subj="discoverOptionsLegacySwitch"
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-                    setUseLegacy(checked);
-                    setNewDiscoverSetting(!checked, storage);
-                    window.location.reload();
-                  }}
-                />
-              </EuiPanel>
-            ),
-          },
-        ]}
-      />
-    </EuiPopover>
-  );
+  const showSaveQuery = !!capabilities.discover?.saveQuery;
 
   return (
     <EuiPanel
@@ -151,11 +132,15 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
       className="dscCanvas"
     >
       <TopNav
+        isEnhancementsEnabled={isEnhancementsEnabled}
         opts={{
           setHeaderActionMenu,
           onQuerySubmit,
+          optionalRef,
         }}
+        showSaveQuery={showSaveQuery}
       />
+
       {fetchState.status === ResultStatus.NO_RESULTS && (
         <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
       )}
@@ -163,11 +148,16 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
         <DiscoverUninitialized onRefresh={() => refetch$.next()} />
       )}
       {fetchState.status === ResultStatus.LOADING && <LoadingSpinner />}
-      {fetchState.status === ResultStatus.READY && (
+      {fetchState.status === ResultStatus.READY && isEnhancementsEnabled && (
+        <>
+          <MemoizedDiscoverChartContainer {...fetchState} />
+          <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+        </>
+      )}
+      {fetchState.status === ResultStatus.READY && !isEnhancementsEnabled && (
         <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
           <MemoizedDiscoverChartContainer {...fetchState} />
           <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
-          <DiscoverOptions />
         </EuiPanel>
       )}
     </EuiPanel>

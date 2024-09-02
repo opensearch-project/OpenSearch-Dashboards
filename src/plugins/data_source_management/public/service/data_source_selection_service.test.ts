@@ -45,4 +45,16 @@ describe('DataSourceSelectionService service', () => {
       done();
     });
   });
+
+  it('should not store same id selection after calling remove', () => {
+    const dataSourceSelection = new DataSourceSelectionService();
+    const id = generateComponentId();
+    const dataSource = { id: 'id', label: 'label' };
+    dataSourceSelection.selectDataSource(id, [dataSource]);
+    expect(dataSourceSelection.getSelectionValue().get(id)).toStrictEqual([dataSource]);
+    dataSourceSelection.remove(id);
+    expect(dataSourceSelection.getSelectionValue().get(id)).toStrictEqual(undefined);
+    dataSourceSelection.selectDataSource(id, [dataSource]);
+    expect(dataSourceSelection.getSelectionValue().get(id)).toStrictEqual(undefined);
+  });
 });

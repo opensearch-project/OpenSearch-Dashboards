@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useCallback, useMemo } from 'react';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiCompressedComboBox } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSource, DataSetWithDataSource, IndexPatternOption } from '../datasource';
 import { DataSourceGroup, DataSourceOption, DataSourceSelectableProps } from './types';
@@ -160,8 +160,9 @@ export const DataSourceSelectable = ({
   }, [dataSourceOptionList]);
 
   return (
-    <EuiComboBox
+    <EuiCompressedComboBox
       {...comboBoxProps}
+      className="dataExplorerDSSelect"
       data-test-subj="dataExplorerDSSelect"
       placeholder={i18n.translate('data.datasource.selectADatasource', {
         defaultMessage: DATA_SELECTOR_DEFAULT_PLACEHOLDER,

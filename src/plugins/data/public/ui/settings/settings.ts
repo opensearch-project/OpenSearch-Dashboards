@@ -3,8 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IStorageWrapper } from '../../../../opensearch_dashboards_utils/public';
-import { setOverrides as setFieldOverrides } from '../../../common';
+import { BehaviorSubject } from 'rxjs';
+import { DataStorage, setOverrides as setFieldOverrides } from '../../../common';
+import { ConfigSchema } from '../../../config';
+import { ISearchStart } from '../../search';
+import { QueryEditorExtensionConfig } from '../query_editor/query_editor_extensions';
 import { QueryEnhancement } from '../types';
 
 export interface DataSettings {
@@ -20,40 +23,105 @@ export interface DataSettings {
 }
 
 export class Settings {
+  private isEnabled = false;
+  private enabledQueryEnhancementsUpdated$ = new BehaviorSubject<boolean>(this.isEnabled);
+  private enhancedAppNames: string[] = [];
+
   constructor(
-    private readonly storage: IStorageWrapper,
-    private readonly queryEnhancements: Map<string, QueryEnhancement>
-  ) {}
+    private readonly config: ConfigSchema['enhancements'],
+    private readonly search: ISearchStart,
+    private readonly storage: DataStorage,
+    private readonly queryEnhancements: Map<string, QueryEnhancement>,
+    private readonly queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>
+  ) {
+    this.isEnabled = true;
+    this.setUserQueryEnhancementsEnabled(this.isEnabled);
+    this.enhancedAppNames = this.isEnabled ? this.config.supportedAppNames : [];
+  }
+
+  supportsEnhancementsEnabled(appName: string) {
+    return this.enhancedAppNames.includes(appName);
+  }
+
+  getEnabledQueryEnhancementsUpdated$ = () => {
+    return this.enabledQueryEnhancementsUpdated$.asObservable();
+  };
+
+  setUserQueryEnhancementsEnabled(enabled: boolean) {
+    // If previously enabled and now disabled, reset query to kuery
+    if (this.isEnabled && !enabled) {
+      this.setUserQueryLanguage('kuery');
+      this.setUserQueryString('');
+    }
+    this.isEnabled = enabled;
+    this.enabledQueryEnhancementsUpdated$.next(this.isEnabled);
+    return true;
+  }
+
+  getAllQueryEnhancements() {
+    return this.queryEnhancements;
+  }
+
+  getQueryEnhancements(language: string) {
+    return this.queryEnhancements.get(language);
+  }
+
+  getQueryEditorExtensionMap() {
+    return this.queryEditorExtensionMap;
+  }
+
+  getUserQueryLanguageBlocklist() {
+    return this.storage.get('userQueryLanguageBlocklist') || [];
+  }
+
+  setUserQueryLanguageBlocklist(languages: string[]) {
+    this.storage.set(
+      'userQueryLanguageBlocklist',
+      languages.map((language) => language.toLowerCase())
+    );
+    return true;
+  }
 
   getUserQueryLanguage() {
-    return this.storage.get('opensearchDashboards.userQueryLanguage') || 'kuery';
+    return this.storage.get('userQueryLanguage') || 'kuery';
   }
 
   setUserQueryLanguage(language: string) {
-    this.storage.set('opensearchDashboards.userQueryLanguage', language);
+    if (language !== this.getUserQueryLanguage()) {
+      this.search.df.clear();
+    }
+    this.storage.set('userQueryLanguage', language);
+    const queryEnhancement = this.queryEnhancements.get(language);
+    this.search.__enhance({
+      searchInterceptor: queryEnhancement
+        ? queryEnhancement.search
+        : this.search.getDefaultSearchInterceptor(),
+    });
+    this.setUiOverridesByUserQueryLanguage(language);
+
     return true;
   }
 
   getUserQueryString() {
-    return this.storage.get('opensearchDashboards.userQueryString') || '';
+    return this.storage.get('userQueryString') || '';
   }
 
   setUserQueryString(query: string) {
-    this.storage.set('opensearchDashboards.userQueryString', query);
+    this.storage.set('userQueryString', query);
     return true;
   }
 
   getUiOverrides() {
-    return this.storage.get('opensearchDashboards.uiOverrides') || {};
+    return this.storage.get('uiOverrides') || {};
   }
 
   setUiOverrides(overrides?: { [key: string]: any }) {
     if (!overrides) {
-      this.storage.remove('opensearchDashboards.uiOverrides');
+      this.storage.remove('uiOverrides');
       setFieldOverrides(undefined);
       return true;
     }
-    this.storage.set('opensearchDashboards.uiOverrides', overrides);
+    this.storage.set('uiOverrides', overrides);
     setFieldOverrides(overrides.fields);
     return true;
   }
@@ -84,10 +152,19 @@ export class Settings {
 }
 
 interface Deps {
-  storage: IStorageWrapper;
+  config: ConfigSchema['enhancements'];
+  search: ISearchStart;
+  storage: DataStorage;
   queryEnhancements: Map<string, QueryEnhancement>;
+  queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>;
 }
 
-export function createSettings({ storage, queryEnhancements }: Deps) {
-  return new Settings(storage, queryEnhancements);
+export function createSettings({
+  config,
+  search,
+  storage,
+  queryEnhancements,
+  queryEditorExtensionMap,
+}: Deps) {
+  return new Settings(config, search, storage, queryEnhancements, queryEditorExtensionMap);
 }

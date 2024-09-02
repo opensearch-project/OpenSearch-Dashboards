@@ -4,28 +4,41 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { TimeRange, Query } from 'src/plugins/data/common';
+import { Query, TimeRange } from 'src/plugins/data/common';
+import { createPortal } from 'react-dom';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { AppMountParameters } from '../../../../../../core/public';
-import { PLUGIN_ID } from '../../../../common';
+import { connectStorageToQueryState, opensearchFilters } from '../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { PLUGIN_ID } from '../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
-import { useDiscoverContext } from '../context';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
-import { opensearchFilters, connectStorageToQueryState } from '../../../../../data/public';
+import { useDiscoverContext } from '../context';
+import { useDispatch, setSavedQuery, useSelector } from '../../utils/state_management';
+
+import './discover_canvas.scss';
+import { TopNavMenuItemRenderType } from '../../../../../navigation/public';
 
 export interface TopNavProps {
   opts: {
     setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
     onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
+    optionalRef?: Record<string, React.RefObject<HTMLDivElement>>;
   };
+  showSaveQuery: boolean;
+  isEnhancementsEnabled?: boolean;
 }
 
-export const TopNav = ({ opts }: TopNavProps) => {
+export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const { inspectorAdapters, savedSearch, indexPattern } = useDiscoverContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
+  const [screenTitle, setScreenTitle] = useState<string>('');
+  const state = useSelector((s) => s.discover);
+  const dispatch = useDispatch();
 
   const {
     navigation: {
@@ -37,32 +50,48 @@ export const TopNav = ({ opts }: TopNavProps) => {
     data,
     chrome,
     osdUrlStateStorage,
+    uiSettings,
   } = services;
 
-  const topNavLinks = savedSearch ? getTopNavLinks(services, inspectorAdapters, savedSearch) : [];
+  const showActionsInGroup = uiSettings.get('home:useNewHomePage');
 
-  connectStorageToQueryState(services.data.query, osdUrlStateStorage, {
-    filters: opensearchFilters.FilterStateStore.APP_STATE,
-    query: true,
-  });
+  const topNavLinks = savedSearch
+    ? getTopNavLinks(services, inspectorAdapters, savedSearch, isEnhancementsEnabled)
+    : [];
+
+  connectStorageToQueryState(
+    services.data.query,
+    osdUrlStateStorage,
+    {
+      filters: opensearchFilters.FilterStateStore.APP_STATE,
+      query: true,
+    },
+    uiSettings
+  );
 
   useEffect(() => {
     let isMounted = true;
-    const getDefaultIndexPattern = async () => {
+    const initializeDataset = async () => {
       await data.indexPatterns.ensureDefaultIndexPattern();
       const defaultIndexPattern = await data.indexPatterns.getDefault();
+      // TODO: ROCKY do we need this?
+      // const queryString = data.query.queryString;
+      // const defaultDataset = queryString.getDatasetService().getDefault();
 
       if (!isMounted) return;
 
       setIndexPatterns(defaultIndexPattern ? [defaultIndexPattern] : undefined);
+      // if (defaultDataset) {
+      //   datasetManager.setDataset(defaultDataset);
+      // }
     };
 
-    getDefaultIndexPattern();
+    initializeDataset();
 
     return () => {
       isMounted = false;
     };
-  }, [data.indexPatterns]);
+  }, [data.indexPatterns, data.query]);
 
   useEffect(() => {
     const pageTitleSuffix = savedSearch?.id && savedSearch.title ? `: ${savedSearch.title}` : '';
@@ -75,21 +104,63 @@ export const TopNav = ({ opts }: TopNavProps) => {
     }
   }, [chrome, getUrlForApp, savedSearch?.id, savedSearch?.title]);
 
+  useEffect(() => {
+    setScreenTitle(
+      savedSearch?.title ||
+        i18n.translate('discover.savedSearch.newTitle', {
+          defaultMessage: 'Untitled',
+        })
+    );
+  }, [savedSearch?.title]);
+
   const showDatePicker = useMemo(() => (indexPattern ? indexPattern.isTimeBased() : false), [
     indexPattern,
   ]);
 
+  const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
+    dispatch(setSavedQuery(newSavedQueryId));
+  };
+
+  const displayToNavLinkInPortal =
+    isEnhancementsEnabled && !!opts?.optionalRef?.topLinkRef?.current && !showActionsInGroup;
+
   return (
-    <TopNavMenu
-      appName={PLUGIN_ID}
-      config={topNavLinks}
-      showSearchBar
-      showDatePicker={showDatePicker}
-      showSaveQuery
-      useDefaultBehaviors
-      setMenuMountPoint={opts.setHeaderActionMenu}
-      indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
-      onQuerySubmit={opts.onQuerySubmit}
-    />
+    <>
+      {displayToNavLinkInPortal &&
+        createPortal(
+          <EuiFlexGroup gutterSize="m">
+            {topNavLinks.map((topNavLink) => (
+              <EuiFlexItem grow={false} key={topNavLink.id}>
+                <EuiToolTip position="bottom" content={topNavLink.label}>
+                  <EuiButtonIcon
+                    onClick={(event) => {
+                      topNavLink.run(event.currentTarget);
+                    }}
+                    iconType={topNavLink.iconType}
+                    aria-label={topNavLink.ariaLabel}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>,
+          opts.optionalRef.topLinkRef.current
+        )}
+      <TopNavMenu
+        appName={PLUGIN_ID}
+        config={displayToNavLinkInPortal ? [] : topNavLinks}
+        showSearchBar={TopNavMenuItemRenderType.IN_PLACE}
+        showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
+        showSaveQuery={showSaveQuery}
+        useDefaultBehaviors
+        setMenuMountPoint={opts.setHeaderActionMenu}
+        indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
+        onQuerySubmit={opts.onQuerySubmit}
+        savedQueryId={state.savedQuery}
+        onSavedQueryIdChange={updateSavedQueryId}
+        datePickerRef={opts?.optionalRef?.datePickerRef}
+        groupActions={showActionsInGroup}
+        screenTitle={screenTitle}
+      />
+    </>
   );
 };

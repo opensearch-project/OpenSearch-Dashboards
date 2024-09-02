@@ -11,7 +11,6 @@ import {
   IContainer,
   SavedObjectEmbeddableInput,
 } from '../../../embeddable/public';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../visualizations/public';
 import {
   EDIT_PATH,
   PLUGIN_ID,
@@ -19,7 +18,6 @@ import {
   VisBuilderSavedObjectAttributes,
   VISBUILDER_SAVED_OBJECT,
 } from '../../common';
-import { DisabledEmbeddable } from './disabled_embeddable';
 import {
   VisBuilderEmbeddable,
   VisBuilderInput,
@@ -27,12 +25,7 @@ import {
   VISBUILDER_EMBEDDABLE,
 } from './vis_builder_embeddable';
 import { getStateFromSavedObject } from '../saved_visualizations/transforms';
-import {
-  getHttp,
-  getSavedVisBuilderLoader,
-  getTimeFilter,
-  getUISettings,
-} from '../plugin_services';
+import { getHttp, getSavedVisBuilderLoader, getTimeFilter } from '../plugin_services';
 import { StartServicesGetter } from '../../../opensearch_dashboards_utils/public';
 import { VisBuilderPluginStartDependencies } from '../types';
 
@@ -45,7 +38,7 @@ export class VisBuilderEmbeddableFactory
     EmbeddableFactoryDefinition<
       SavedObjectEmbeddableInput,
       VisBuilderOutput | EmbeddableOutput,
-      VisBuilderEmbeddable | DisabledEmbeddable,
+      VisBuilderEmbeddable,
       VisBuilderSavedObjectAttributes
     > {
   public readonly type = VISBUILDER_EMBEDDABLE;
@@ -75,17 +68,11 @@ export class VisBuilderEmbeddableFactory
     savedObjectId: string,
     input: VisBuilderInput,
     parent?: IContainer
-  ): Promise<VisBuilderEmbeddable | ErrorEmbeddable | DisabledEmbeddable> {
+  ): Promise<VisBuilderEmbeddable | ErrorEmbeddable> {
     try {
       const savedObject = await getSavedVisBuilderLoader().get(savedObjectId);
       const editPath = `${EDIT_PATH}/${savedObjectId}`;
       const editUrl = getHttp().basePath.prepend(`/app/${PLUGIN_ID}${editPath}`);
-      const isLabsEnabled = getUISettings().get<boolean>(VISUALIZE_ENABLE_LABS_SETTING);
-
-      if (!isLabsEnabled) {
-        return new DisabledEmbeddable(PLUGIN_NAME, input);
-      }
-
       const savedVis = getStateFromSavedObject(savedObject);
       const indexPatternService = this.deps.start().plugins.data.indexPatterns;
       const indexPattern = await indexPatternService.get(

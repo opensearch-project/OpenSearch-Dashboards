@@ -96,11 +96,12 @@ describe('#importSavedObjectsFromStream', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';
-  const testDataSourceId = 'some-datasource';
+  const testDataSourceId = uuidv4();
 
   const setupOptions = (
     createNewCopies: boolean = false,
-    dataSourceId: string | undefined = undefined
+    dataSourceId: string | undefined = undefined,
+    dataSourceEnabled: boolean | undefined = false
   ): SavedObjectsImportOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
@@ -131,6 +132,17 @@ describe('#importSavedObjectsFromStream', () => {
     return {
       type: 'foo-type',
       id: dataSourceId ? `${dataSourceId}_${uuidv4()}` : uuidv4(),
+      references: [],
+      attributes: { title: 'some-title' },
+    };
+  };
+
+  const createDataSourceObject = (): SavedObject<{
+    title: string;
+  }> => {
+    return {
+      type: 'data-source',
+      id: uuidv4(),
       references: [],
       attributes: { title: 'some-title' },
     };
@@ -585,6 +597,95 @@ describe('#importSavedObjectsFromStream', () => {
       });
       getMockFn(createSavedObjects).mockResolvedValue({ errors: [errors[4]], createdObjects: [] });
 
+      const result = await importSavedObjectsFromStream(options);
+      const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
+      expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
+    });
+
+    test('early return if import data source objects to non-MDS cluster', async () => {
+      const options = setupOptions(false, testDataSourceId, false);
+      const dsObj = createDataSourceObject();
+      const dsExportedObj = createObject(testDataSourceId);
+      const collectedObjects = [dsObj, dsExportedObj];
+
+      const errors = [
+        {
+          type: dsObj.type,
+          id: dsObj.id,
+          title: dsObj.attributes.title,
+          meta: { title: dsObj.attributes.title },
+          error: { type: 'unsupported_type' },
+        },
+        {
+          type: dsExportedObj.type,
+          id: dsExportedObj.id,
+          title: dsExportedObj.attributes.title,
+          meta: { title: dsExportedObj.attributes.title },
+          error: { type: 'unsupported_type' },
+        },
+      ];
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [],
+        collectedObjects,
+        importIdMap: new Map(),
+      });
+      const result = await importSavedObjectsFromStream(options);
+      const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
+      expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
+    });
+
+    test('early return if import mixed non/data source objects to non-MDS cluster', async () => {
+      const options = setupOptions(false, testDataSourceId, false);
+      const dsObj = createDataSourceObject();
+      const dsExportedObj = createObject(testDataSourceId);
+      const nonDsExportedObj = createObject();
+      const collectedObjects = [dsObj, dsExportedObj, nonDsExportedObj];
+
+      const errors = [
+        {
+          type: dsObj.type,
+          id: dsObj.id,
+          title: dsObj.attributes.title,
+          meta: { title: dsObj.attributes.title },
+          error: { type: 'unsupported_type' },
+        },
+        {
+          type: dsExportedObj.type,
+          id: dsExportedObj.id,
+          title: dsExportedObj.attributes.title,
+          meta: { title: dsExportedObj.attributes.title },
+          error: { type: 'unsupported_type' },
+        },
+      ];
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [],
+        collectedObjects,
+        importIdMap: new Map(),
+      });
+      const result = await importSavedObjectsFromStream(options);
+      const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
+      expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });
+    });
+
+    test('early return if import single data source objects to non-MDS cluster', async () => {
+      const options = setupOptions(false, testDataSourceId, false);
+      const dsObj = createDataSourceObject();
+      const collectedObjects = [dsObj];
+
+      const errors = [
+        {
+          type: dsObj.type,
+          id: dsObj.id,
+          title: dsObj.attributes.title,
+          meta: { title: dsObj.attributes.title },
+          error: { type: 'unsupported_type' },
+        },
+      ];
+      getMockFn(collectSavedObjects).mockResolvedValue({
+        errors: [],
+        collectedObjects,
+        importIdMap: new Map(),
+      });
       const result = await importSavedObjectsFromStream(options);
       const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));
       expect(result).toEqual({ success: false, successCount: 0, errors: expectedErrors });

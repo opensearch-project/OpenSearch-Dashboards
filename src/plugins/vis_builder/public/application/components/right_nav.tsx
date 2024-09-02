@@ -5,11 +5,12 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiSuperSelect,
+  EuiCompressedSuperSelect,
   EuiSuperSelectOption,
   EuiIcon,
   IconType,
   EuiConfirmModal,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -72,7 +73,7 @@ export const RightNavUI = () => {
   return (
     <section className="vbSidenav right">
       <div className="vbSidenav__header">
-        <EuiSuperSelect
+        <EuiCompressedSuperSelect
           options={options}
           valueOfSelected={activeVisName}
           onChange={handleVisTypeChange}
@@ -103,12 +104,14 @@ export const RightNavUI = () => {
           maxWidth="300px"
           data-test-subj="confirmVisChangeModal"
         >
-          <p>
-            <FormattedMessage
-              id="visBuilder.rightNav.changeVisType.modalDescription"
-              defaultMessage="Certain field configurations may be lost when changing visualization types and you may need to reconfigure those fields. Do you want to continue?"
-            />
-          </p>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="visBuilder.rightNav.changeVisType.modalDescription"
+                defaultMessage="Certain field configurations may be lost when changing visualization types and you may need to reconfigure those fields. Do you want to continue?"
+              />
+            </p>
+          </EuiText>
         </EuiConfirmModal>
       )}
     </section>

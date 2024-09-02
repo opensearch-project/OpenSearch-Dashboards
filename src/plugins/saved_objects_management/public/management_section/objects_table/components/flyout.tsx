@@ -40,10 +40,10 @@ import {
   EuiText,
   EuiTitle,
   EuiForm,
-  EuiFormRow,
-  EuiFilePicker,
+  EuiCompressedFormRow,
+  EuiCompressedFilePicker,
   EuiInMemoryTable,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -195,13 +195,19 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
    * Does the initial import of a file, resolveImportErrors then handles errors and retries
    */
   import = async () => {
-    const { http } = this.props;
+    const { http, dataSourceEnabled } = this.props;
     const { file, importMode, selectedDataSourceId } = this.state;
     this.setState({ status: 'loading', error: undefined });
 
     // Import the file
     try {
-      const response = await importFile(http, file!, importMode, selectedDataSourceId);
+      const response = await importFile(
+        http,
+        file!,
+        importMode,
+        selectedDataSourceId,
+        dataSourceEnabled
+      );
       this.setState(processImportResponse(response), () => {
         // Resolve import errors right away if there's no index patterns to match
         // This will ask about overwriting each object, etc
@@ -572,7 +578,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           });
 
           return (
-            <EuiSelect
+            <EuiCompressedSelect
               data-test-subj={`managementChangeIndexSelection-${id}`}
               onChange={(e) => this.onIndexChanged(id, e)}
               options={options}
@@ -639,7 +645,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xl" />
             <EuiSpacer size="m" />
-            <EuiText>
+            <EuiText size="s">
               <p>{loadingMessage}</p>
             </EuiText>
           </EuiFlexItem>
@@ -759,7 +765,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
 
     return (
       <EuiForm>
-        <EuiFormRow
+        <EuiCompressedFormRow
           fullWidth
           label={
             <FormattedMessage
@@ -768,7 +774,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             />
           }
         >
-          <EuiFilePicker
+          <EuiCompressedFilePicker
             accept=".ndjson, .json"
             fullWidth
             initialPromptText={
@@ -779,7 +785,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             }
             onChange={this.setImportFile}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         {this.renderImportControl(importMode, isLegacyFile, dataSourceEnabled)}
       </EuiForm>
@@ -796,7 +802,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       return this.renderImportControlForDataSource(importMode, isLegacyFile);
     }
     return (
-      <EuiFormRow fullWidth>
+      <EuiCompressedFormRow fullWidth>
         <ImportModeControl
           initialValues={importMode}
           isLegacyFile={isLegacyFile}
@@ -806,7 +812,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             { defaultMessage: 'Import options' }
           )}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   }
 
@@ -831,10 +837,11 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             disabled={!this.props.dataSourceEnabled}
             fullWidth={true}
             isClearable={false}
+            compressed={true}
           />
         </EuiFormFieldset>
         <EuiSpacer />
-        <EuiFormRow fullWidth>
+        <EuiCompressedFormRow fullWidth>
           <ImportModeControl
             initialValues={importMode}
             isLegacyFile={isLegacyFile}
@@ -844,7 +851,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
               { defaultMessage: 'Conflict management' }
             )}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </div>
     );
   }
@@ -1020,14 +1027,14 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     return (
       <EuiFlyout onClose={close} size="s">
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle size="m">
+          <EuiText size="s">
             <h2>
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
                 defaultMessage="Import saved objects"
               />
             </h2>
-          </EuiTitle>
+          </EuiText>
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>

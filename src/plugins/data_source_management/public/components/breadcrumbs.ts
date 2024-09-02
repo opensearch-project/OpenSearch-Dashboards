@@ -28,6 +28,65 @@ export function getCreateBreadcrumbs() {
     },
   ];
 }
+export function getCreateOpenSearchDataSourceBreadcrumbs(useNewUX: boolean) {
+  return [
+    ...getCreateBreadcrumbs(),
+    {
+      text: i18n.translate(
+        'dataSourcesManagement.dataSources.createOpenSearchDataSourceBreadcrumbs',
+        {
+          defaultMessage: useNewUX ? 'Connect OpenSearch Cluster' : 'Open Search',
+        }
+      ),
+      href: `/configure/OpenSearch`,
+    },
+  ];
+}
+
+export function getCreateAmazonS3DataSourceBreadcrumbs(useNewUX: boolean) {
+  return [
+    ...getCreateBreadcrumbs(),
+    {
+      text: i18n.translate(
+        'dataSourcesManagement.dataSources.createAmazonS3DataSourceBreadcrumbs',
+        {
+          defaultMessage: useNewUX ? 'Connect Amazon S3' : 'Amazon S3',
+        }
+      ),
+      href: `/configure/AmazonS3AWSGlue`,
+    },
+  ];
+}
+
+export function getCreatePrometheusDataSourceBreadcrumbs(useNewUX: boolean) {
+  return [
+    ...getCreateBreadcrumbs(),
+    {
+      text: i18n.translate(
+        'dataSourcesManagement.dataSources.createPrometheusDataSourceBreadcrumbs',
+        {
+          defaultMessage: useNewUX ? 'Connect Prometheus' : 'Prometheus',
+        }
+      ),
+      href: `/configure/Prometheus`,
+    },
+  ];
+}
+
+export function getManageDirectQueryDataSourceBreadcrumbs(directQueryDatasourceName: string) {
+  return [
+    ...getListBreadcrumbs(),
+    {
+      text: i18n.translate(
+        'dataSourcesManagement.dataSources.manageDirectQueryDataSourceBreadcrumbs',
+        {
+          defaultMessage: directQueryDatasourceName,
+        }
+      ),
+      href: `/manage/${directQueryDatasourceName}`,
+    },
+  ];
+}
 
 export function getEditBreadcrumbs(dataSource: DataSourceAttributes) {
   return [

@@ -35,7 +35,7 @@ import { RecursiveReadonly } from '@osd/utility-types';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { MountPoint } from '../types';
 import { Capabilities } from './capabilities';
-import { ChromeStart } from '../chrome';
+import { ChromeStart, HeaderVariant } from '../chrome';
 import { IContextProvider } from '../context';
 import { DocLinksStart } from '../doc_links';
 import { HttpStart } from '../http';
@@ -228,6 +228,11 @@ export interface App<HistoryLocationState = unknown> {
   chromeless?: boolean;
 
   /**
+   * The application-wide header variant to use. Defaults to `page`.
+   */
+  headerVariant?: HeaderVariant;
+
+  /**
    * A mount function called when the user navigates to this app's route. May have signature of {@link AppMount} or
    * {@link AppMountDeprecated}.
    *
@@ -268,6 +273,12 @@ export interface App<HistoryLocationState = unknown> {
    * indicating the application is available within or out of workspace.
    */
   workspaceAvailability?: WorkspaceAvailability;
+
+  /**
+   * The description of the application.
+   * Will be displayed in landing page or getting started cards to give more information about the feature.
+   */
+  description?: string;
 }
 
 /**
@@ -529,10 +540,19 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```
    */
   setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+
+  setHeaderLeftControls: (menuMount: MountPoint | undefined) => void;
+  setHeaderCenterControls: (menuMount: MountPoint | undefined) => void;
+  setHeaderRightControls: (menuMount: MountPoint | undefined) => void;
+  setHeaderBadgeControls: (menuMount: MountPoint | undefined) => void;
+  setHeaderDescriptionControls: (menuMount: MountPoint | undefined) => void;
+  setHeaderBottomControls: (menuMount: MountPoint | undefined) => void;
   /**
    * Optional datasource id to pass while mounting app
    */
   dataSourceId?: string;
+
+  optionalRef?: Record<string, React.RefObject<HTMLDivElement>>;
 }
 
 /**
@@ -820,6 +840,13 @@ export interface ApplicationStart {
    * An observable that emits the current application id and each subsequent id update.
    */
   currentAppId$: Observable<string | undefined>;
+
+  setAppLeftControls: (mount: MountPoint | undefined) => void;
+  setAppCenterControls: (mount: MountPoint | undefined) => void;
+  setAppRightControls: (mount: MountPoint | undefined) => void;
+  setAppBadgeControls: (mount: MountPoint | undefined) => void;
+  setAppDescriptionControls: (mount: MountPoint | undefined) => void;
+  setAppBottomControls: (mount: MountPoint | undefined) => void;
 }
 
 /** @internal */
@@ -849,6 +876,19 @@ export interface InternalApplicationStart extends Omit<ApplicationStart, 'regist
    * @internal
    */
   currentActionMenu$: Observable<MountPoint | undefined>;
+
+  /**
+   * The potential header controls set by the currently mounted app.
+   * Consumed by the chrome header.
+   *
+   * @internal
+   */
+  currentLeftControls$: Observable<MountPoint | undefined>;
+  currentCenterControls$: Observable<MountPoint | undefined>;
+  currentRightControls$: Observable<MountPoint | undefined>;
+  currentBadgeControls$: Observable<MountPoint | undefined>;
+  currentDescriptionControls$: Observable<MountPoint | undefined>;
+  currentBottomControls$: Observable<MountPoint | undefined>;
 
   /**
    * The global history instance, exposed only to Core.

@@ -83,6 +83,29 @@ describe('workspace service api integration test', () => {
       expect(result.body.success).toEqual(true);
       expect(typeof result.body.result.id).toBe('string');
     });
+    it('create with empty/blank name', async () => {
+      let result = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: { name: '' },
+        })
+        .expect(400);
+
+      expect(result.body.message).toEqual(
+        "[request body.attributes.name]: can't be empty or blank."
+      );
+
+      result = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: { name: '   ' },
+        })
+        .expect(400);
+
+      expect(result.body.message).toEqual(
+        "[request body.attributes.name]: can't be empty or blank."
+      );
+    });
 
     it('create workspace failed when name duplicate', async () => {
       let result: any = await osdTestServer.request
@@ -577,7 +600,10 @@ describe('workspace service api integration test when savedObjects.permission.en
         .post(root, `/api/workspaces`)
         .send({
           attributes: omitId(testWorkspace),
-          permissions: { invalid_type: { users: ['foo'] } },
+          settings: {
+            permissions: { invalid_type: { users: ['foo'] } },
+            dataSources: [],
+          },
         })
         .expect(400);
 
@@ -585,7 +611,10 @@ describe('workspace service api integration test when savedObjects.permission.en
         .post(root, `/api/workspaces`)
         .send({
           attributes: omitId(testWorkspace),
-          permissions: { read: { users: ['foo'] } },
+          settings: {
+            permissions: { read: { users: ['foo'] } },
+            dataSources: [],
+          },
         })
         .expect(200);
 
@@ -613,7 +642,10 @@ describe('workspace service api integration test when savedObjects.permission.en
           attributes: {
             ...omitId(testWorkspace),
           },
-          permissions: { write: { users: ['foo'] } },
+          settings: {
+            permissions: { write: { users: ['foo'] } },
+            dataSources: [],
+          },
         })
         .expect(200);
       expect(updateResult.body.result).toBe(true);

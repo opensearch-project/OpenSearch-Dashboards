@@ -1,0 +1,60 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DeleteModal renders correctly 1`] = `
+<EuiOverlayMask>
+  <EuiModal
+    initialFocus="[name=input]"
+    onClose={[MockFunction]}
+  >
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>
+        Delete Item
+      </EuiModalHeaderTitle>
+    </EuiModalHeader>
+    <EuiModalBody>
+      <EuiText>
+        Are you sure you want to delete this item?
+      </EuiText>
+      <EuiText>
+        The action cannot be undone.
+      </EuiText>
+      <EuiSpacer />
+      <EuiForm>
+        <EuiCompressedFormRow
+          describedByIds={Array []}
+          display="rowCompressed"
+          fullWidth={false}
+          hasChildLabel={true}
+          hasEmptyLabelSpace={false}
+          label="To confirm deletion, enter \\"delete\\" in the text field"
+          labelType="label"
+        >
+          <EuiCompressedFieldText
+            data-test-subj="popoverModal__deleteTextInput"
+            name="input"
+            onChange={[Function]}
+            placeholder="delete"
+            value=""
+          />
+        </EuiCompressedFormRow>
+      </EuiForm>
+    </EuiModalBody>
+    <EuiModalFooter>
+      <EuiSmallButtonEmpty
+        onClick={[MockFunction]}
+      >
+        Cancel
+      </EuiSmallButtonEmpty>
+      <EuiSmallButton
+        color="danger"
+        data-test-subj="popoverModal__deleteButton"
+        disabled={true}
+        fill={true}
+        onClick={[Function]}
+      >
+        Delete
+      </EuiSmallButton>
+    </EuiModalFooter>
+  </EuiModal>
+</EuiOverlayMask>
+`;

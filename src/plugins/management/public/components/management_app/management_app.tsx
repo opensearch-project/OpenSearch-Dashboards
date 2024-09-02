@@ -38,6 +38,7 @@ import { ManagementRouter } from './management_router';
 import { ManagementSidebarNav } from '../management_sidebar_nav';
 import { reactRouterNavigate } from '../../../../opensearch_dashboards_react/public';
 import { SectionsServiceStart } from '../../types';
+import { CoreStart } from '../../../../../core/public';
 
 import './management_app.scss';
 
@@ -51,6 +52,8 @@ export interface ManagementAppDependencies {
   sections: SectionsServiceStart;
   opensearchDashboardsVersion: string;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
+  hideInAppNavigation?: boolean;
+  uiSettings: CoreStart['uiSettings'];
 }
 
 export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => {
@@ -89,7 +92,9 @@ export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => 
   return (
     <I18nProvider>
       <EuiPage>
-        <ManagementSidebarNav selectedId={selectedId} sections={sections} history={history} />
+        {dependencies.hideInAppNavigation ? null : (
+          <ManagementSidebarNav selectedId={selectedId} sections={sections} history={history} />
+        )}
         <ManagementRouter
           history={history}
           setBreadcrumbs={setBreadcrumbsScoped}

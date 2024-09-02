@@ -9,6 +9,8 @@
  * GitHub history for details.
  */
 
+import { DATA_STRUCTURE_META_TYPES, DataStructure } from './types';
+
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -28,14 +30,53 @@
  * under the License.
  */
 
+export const DEFAULT_DATA = {
+  STRUCTURES: {
+    ROOT: {
+      id: 'ROOT',
+      title: 'Data',
+      type: 'ROOT',
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.FEATURE,
+        icon: { type: 'folderOpen' },
+        tooltip: 'Root Data Structure',
+      },
+    } as DataStructure,
+    LOCAL_DATASOURCE: {
+      id: '',
+      title: 'Local Cluster',
+      type: 'DATA_SOURCE',
+    },
+  },
+
+  SET_TYPES: {
+    INDEX_PATTERN: 'INDEX_PATTERN',
+    INDEX: 'INDEXES',
+  },
+
+  SOURCE_TYPES: {
+    OPENSEARCH: 'OpenSearch',
+    LEGACY: 'LEGACY',
+  },
+};
+
 export const DEFAULT_QUERY_LANGUAGE = 'kuery';
+
+export const DEFAULT_QUERY = {
+  LANGUAGE: DEFAULT_QUERY_LANGUAGE,
+  DATASET: {
+    TYPE: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+    DATASOURCE: {
+      TYPE: DEFAULT_DATA.SOURCE_TYPES.OPENSEARCH,
+    },
+  },
+};
 
 export const UI_SETTINGS = {
   META_FIELDS: 'metaFields',
   DOC_HIGHLIGHT: 'doc_table:highlight',
   QUERY_STRING_OPTIONS: 'query:queryString:options',
   QUERY_ALLOW_LEADING_WILDCARDS: 'query:allowLeadingWildcards',
-  QUERY_DATA_SOURCE_READONLY: 'query:dataSourceReadOnly',
   SEARCH_QUERY_LANGUAGE: 'search:queryLanguage',
   SORT_OPTIONS: 'sort:options',
   COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: 'courier:ignoreFilterIfFieldNotInIndex',
@@ -61,5 +102,8 @@ export const UI_SETTINGS = {
   INDEXPATTERN_PLACEHOLDER: 'indexPattern:placeholder',
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
-  DATAFRAME_HYDRATION_STRATEGY: 'dataframe:hydrationStrategy',
+  QUERY_ENHANCEMENTS_ENABLED: 'query:enhancements:enabled',
+  QUERY_DATAFRAME_HYDRATION_STRATEGY: 'query:dataframe:hydrationStrategy',
+  SEARCH_QUERY_LANGUAGE_BLOCKLIST: 'search:queryLanguageBlocklist',
+  NEW_HOME_PAGE: 'home:useNewHomePage',
 } as const;

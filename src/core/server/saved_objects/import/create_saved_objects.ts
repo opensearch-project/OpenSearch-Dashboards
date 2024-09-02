@@ -40,6 +40,8 @@ import {
   extractVegaSpecFromSavedObject,
   getUpdatedTSVBVisState,
   updateDataSourceNameInVegaSpec,
+  extractTimelineExpression,
+  updateDataSourceNameInTimeline,
 } from './utils';
 
 interface CreateSavedObjectsParams<T> {
@@ -128,6 +130,22 @@ export const createSavedObjects = async <T>({
               type: 'data-source',
               name: 'dataSource',
             });
+          }
+
+          // Some visualization types will need special modifications, like TSVB visualizations
+          const timelineExpression = extractTimelineExpression(object);
+          if (!!timelineExpression && !!dataSourceTitle) {
+            // Get the timeline expression with the updated data source name
+            const modifiedExpression = updateDataSourceNameInTimeline(
+              timelineExpression,
+              dataSourceTitle
+            );
+
+            // @ts-expect-error
+            const timelineStateObject = JSON.parse(object.attributes?.visState);
+            timelineStateObject.params.expression = modifiedExpression;
+            // @ts-expect-error
+            object.attributes.visState = JSON.stringify(timelineStateObject);
           }
 
           const visualizationObject = object as VisualizationObject;

@@ -11,6 +11,7 @@ import {
   ToastsStart,
   ApplicationStart,
   CoreStart,
+  NotificationsStart,
 } from 'src/core/public';
 import { deepFreeze } from '@osd/std';
 import uuid from 'uuid';
@@ -37,12 +38,13 @@ import {
   DataSourceSelectionService,
   defaultDataSourceSelection,
 } from '../service/data_source_selection_service';
+import { DataSourceError } from '../types';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
     .find({
       type: 'data-source',
-      fields: ['id', 'description', 'title'],
+      fields: ['id', 'description', 'title', 'dataSourceVersion', 'installedPlugins'],
       perPage: 10000,
     })
     .then(
@@ -51,12 +53,16 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
           const id = source.id;
           const title = source.get('title');
           const description = source.get('description');
+          const datasourceversion = source.get('dataSourceVersion');
+          const installedplugins = source.get('installedPlugins');
 
           return {
             id,
             title,
             description,
             sort: `${title}`,
+            datasourceversion,
+            installedplugins,
           };
         }) || []
     );
@@ -186,7 +192,11 @@ export async function getDataSourceById(
   const response = await savedObjectsClient.get('data-source', id);
 
   if (!response || response.error) {
-    throw new Error('Unable to find data source');
+    const statusCode = response.error?.statusCode;
+    if (statusCode === 404) {
+      throw new DataSourceError({ statusCode, body: 'Unable to find data source' });
+    }
+    throw new DataSourceError({ statusCode, body: response.error?.message });
   }
 
   const attributes: any = response?.attributes || {};
@@ -196,6 +206,8 @@ export async function getDataSourceById(
     endpoint: attributes.endpoint,
     description: attributes.description || '',
     auth: attributes.auth,
+    datasourceversion: attributes.dataSourceVersion,
+    installedplugins: attributes.installedPlugins,
   };
 }
 
@@ -377,4 +389,40 @@ export { getDataSourceSelection, setDataSourceSelection };
 
 export const generateComponentId = () => {
   return uuid.v4();
+};
+
+export const formatError = (name: string, message: string, details: string) => {
+  return {
+    name,
+    message,
+    body: {
+      attributes: {
+        error: {
+          caused_by: {
+            type: '',
+            reason: details,
+          },
+        },
+      },
+    },
+  };
+};
+
+export const isPluginInstalled = async (
+  pluginId: string,
+  notifications: NotificationsStart,
+  http: HttpStart
+): Promise<boolean> => {
+  try {
+    const response = await http.get('/api/status');
+    const pluginExists = response.status.statuses.some((status: { id: string }) =>
+      status.id.includes(pluginId)
+    );
+    return pluginExists;
+  } catch (error) {
+    notifications.toasts.addDanger(`Error checking ${pluginId} Plugin Installation status.`);
+    // eslint-disable-next-line no-console
+    console.error(error);
+    return false;
+  }
 };

@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
 import React, { useState, useMemo, useEffect, useLayoutEffect } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
@@ -13,12 +13,12 @@ import { validateSchemaState, validateAggregations } from '../utils/validations'
 import { useTypedDispatch, useTypedSelector, setUIStateState } from '../utils/state_management';
 import { useAggs, useVisualizationType } from '../utils/use';
 import { PersistedState } from '../../../../visualizations/public';
+import { VISBUILDER_ENABLE_VEGA_SETTING } from '../../../common/constants';
 
 import hand_field from '../../assets/hand_field.svg';
 import fields_bg from '../../assets/fields_bg.svg';
 
 import './workspace.scss';
-import { ExperimentalInfo } from './experimental_info';
 import { handleVisEvent } from '../utils/handle_vis_event';
 
 export const WorkspaceUI = () => {
@@ -28,6 +28,7 @@ export const WorkspaceUI = () => {
       notifications: { toasts },
       data,
       uiActions,
+      uiSettings,
     },
   } = useOpenSearchDashboards<VisBuilderServices>();
   const { toExpression, ui } = useVisualizationType();
@@ -38,6 +39,7 @@ export const WorkspaceUI = () => {
     filters: data.query.filterManager.getFilters(),
     timeRange: data.query.timefilter.timefilter.getTime(),
   });
+  const useVega = uiSettings.get(VISBUILDER_ENABLE_VEGA_SETTING);
   const rootState = useTypedSelector((state) => state);
   const dispatch = useTypedDispatch();
   // Visualizations require the uiState object to persist even when the expression changes
@@ -82,12 +84,20 @@ export const WorkspaceUI = () => {
         return;
       }
 
-      const exp = await toExpression(rootState, searchContext);
+      const exp = await toExpression(rootState, searchContext, useVega);
       setExpression(exp);
     }
 
     loadExpression();
-  }, [rootState, toExpression, toasts, ui.containerConfig.data.schemas, searchContext, aggConfigs]);
+  }, [
+    rootState,
+    toExpression,
+    toasts,
+    ui.containerConfig.data.schemas,
+    searchContext,
+    aggConfigs,
+    useVega,
+  ]);
 
   useLayoutEffect(() => {
     const subscription = data.query.state$.subscribe(({ state }) => {
@@ -105,11 +115,6 @@ export const WorkspaceUI = () => {
 
   return (
     <section className="vbWorkspace">
-      <EuiFlexGroup className="vbCanvasControls">
-        <EuiFlexItem>
-          <ExperimentalInfo />
-        </EuiFlexItem>
-      </EuiFlexGroup>
       <EuiPanel className="vbCanvas" data-test-subj="visualizationLoader">
         {expression ? (
           <ReactExpressionRenderer
@@ -130,12 +135,14 @@ export const WorkspaceUI = () => {
               }
               body={
                 <>
-                  <p>
-                    {i18n.translate('visBuilder.workSpace.empty.description', {
-                      defaultMessage:
-                        'Drag a field to the configuration panel to generate a visualization.',
-                    })}
-                  </p>
+                  <EuiText size="s">
+                    <p>
+                      {i18n.translate('visBuilder.workSpace.empty.description', {
+                        defaultMessage:
+                          'Drag a field to the configuration panel to generate a visualization.',
+                      })}
+                    </p>
+                  </EuiText>
                   <div className="vbWorkspace__container">
                     <EuiIcon className="vbWorkspace__fieldSvg" type={fields_bg} size="original" />
                     <EuiIcon

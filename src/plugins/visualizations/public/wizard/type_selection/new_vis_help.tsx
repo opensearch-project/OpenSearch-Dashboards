@@ -40,7 +40,7 @@ interface Props {
 
 export function NewVisHelp(props: Props) {
   return (
-    <EuiText>
+    <EuiText size="s">
       <p>
         <FormattedMessage
           id="visualizations.newVisWizard.helpText"

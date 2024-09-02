@@ -1,10 +1,11 @@
 {
   "id": "dataSourceManagement",
   "version": "opensearchDashboards",
-  "server": false,
+  "server": true,
   "ui": true,
-  "requiredPlugins": ["management", "dataSource", "indexPatternManagement"],
-  "optionalPlugins": [],
+  "requiredPlugins": ["navigation", "management", "indexPatternManagement"],
+  "optionalPlugins": ["dataSource"],
   "requiredBundles": ["opensearchDashboardsReact", "dataSource", "opensearchDashboardsUtils"],
-  "extraPublicDirs": ["public/components/utils"]
+  "extraPublicDirs": ["public/components/utils"],
+  "configPath": ["data_source_management"]
 }

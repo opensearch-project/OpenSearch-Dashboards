@@ -130,7 +130,7 @@ describe('Flyout', () => {
     component.update();
 
     expect(component.state('file')).toBe(undefined);
-    component.find('EuiFilePicker').simulate('change', [mockFile]);
+    component.find('EuiCompressedFilePicker').simulate('change', [mockFile]);
     expect(component.state('file')).toBe(mockFile);
   });
 
@@ -143,9 +143,9 @@ describe('Flyout', () => {
     component.update();
 
     expect(component.state('file')).toBe(undefined);
-    component.find('EuiFilePicker').simulate('change', [mockFile]);
+    component.find('EuiCompressedFilePicker').simulate('change', [mockFile]);
     expect(component.state('file')).toBe(mockFile);
-    component.find('EuiFilePicker').simulate('change', []);
+    component.find('EuiCompressedFilePicker').simulate('change', []);
     expect(component.state('file')).toBe(undefined);
   });
 
@@ -221,6 +221,7 @@ describe('Flyout', () => {
           createNewCopies: true,
           overwrite: true,
         },
+        undefined,
         undefined
       );
       expect(component.state()).toMatchObject({

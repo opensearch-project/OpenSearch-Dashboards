@@ -122,6 +122,7 @@ export class IndexPatternsService {
 
     this.savedObjectsCache = await Promise.all(
       this.savedObjectsCache.map(async (obj) => {
+        // TODO: This behaviour will cause the index pattern title to be resolved differently depending on how its fetched since the get method in this service will not append the datasource title
         if (obj.type === 'index-pattern') {
           const result = { ...obj };
           result.attributes.title = await getIndexPatternTitle(
@@ -139,6 +140,25 @@ export class IndexPatternsService {
 
   getDataSource = async (id: string) => {
     return await this.savedObjectsClient.get<DataSourceAttributes>('data-source', id);
+  };
+
+  /**
+   * Finds a data source by its title.
+   *
+   * @param title - The title of the data source to find.
+   * @param size - The number of results to return. Defaults to 10.
+   * @returns The first matching data source or undefined if not found.
+   */
+  findDataSourceByTitle = async (title: string, size: number = 10) => {
+    const savedObjectsResponse = await this.savedObjectsClient.find<DataSourceAttributes>({
+      type: 'data-source',
+      fields: ['title'],
+      search: title,
+      searchFields: ['title'],
+      perPage: size,
+    });
+
+    return savedObjectsResponse[0] || undefined;
   };
 
   /**
@@ -414,11 +434,13 @@ export class IndexPatternsService {
   /**
    * Get an index pattern by id. Cache optimized
    * @param id
+   * @param onlyCheckCache - Only check cache for index pattern if it doesn't exist it will not error out
    */
 
-  get = async (id: string): Promise<IndexPattern> => {
+  get = async (id: string, onlyCheckCache: boolean = false): Promise<IndexPattern> => {
     const cache = indexPatternCache.get(id);
-    if (cache) {
+
+    if (cache || onlyCheckCache) {
       return cache;
     }
 

@@ -11,13 +11,14 @@ import {
 } from 'src/core/server';
 import {
   DataSourceAttributes,
+  DataSourceEngineType,
   AuthType,
   UsernamePasswordTypedContent,
   SigV4Content,
 } from '../common/data_sources';
 
 import { CryptographyServiceSetup } from './cryptography_service';
-import { DataSourceError } from './lib/error';
+import { DataSourceError } from '../common/data_sources';
 import { IAuthenticationMethodRegistry } from './auth_registry';
 import { CustomApiSchemaRegistry } from './schema_registry';
 
@@ -97,4 +98,9 @@ export interface DataSourcePluginSetup {
 export interface DataSourcePluginStart {
   getAuthenticationMethodRegistry: () => IAuthenticationMethodRegistry;
   getCustomApiSchemaRegistry: () => CustomApiSchemaRegistry;
+}
+
+export interface DataSourceInfo {
+  dataSourceVersion?: string;
+  dataSourceEngineType?: DataSourceEngineType;
 }

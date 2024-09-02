@@ -5,24 +5,20 @@
 
 import {
   EuiBadge,
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiConfirmModal,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiPageContent,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useEffectOnce } from 'react-use';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { getListBreadcrumbs } from '../breadcrumbs';
 import {
   reactRouterNavigate,
   useOpenSearchDashboards,
@@ -57,6 +53,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     savedObjects,
     notifications: { toasts },
     uiSettings,
+    application,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   /* Component state variables */
@@ -65,12 +62,10 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = React.useState(false);
+  const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
 
   /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
-    /* Update breadcrumb*/
-    setBreadcrumbs(getListBreadcrumbs());
-
     /* Browser - Page Title */
     chrome.docTitle.change(
       i18n.translate('dataSourcesManagement.dataSourcesTable.dataSourcesTitle', {
@@ -103,7 +98,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   /* Table search config */
   const renderDeleteButton = () => {
     return (
-      <EuiButton
+      <EuiSmallButton
         color="danger"
         onClick={() => {
           setConfirmDeleteVisible(true);
@@ -113,20 +108,21 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       >
         Delete {selectedDataSources.length || ''} {selectedDataSources.length ? 'connection' : ''}
         {selectedDataSources.length >= 2 ? 's' : ''}
-      </EuiButton>
+      </EuiSmallButton>
     );
   };
 
   const renderToolsRight = () => {
-    return (
+    return canManageDataSource ? (
       <EuiFlexItem key="delete" grow={false}>
         {renderDeleteButton()}
       </EuiFlexItem>
-    );
+    ) : null;
   };
 
   const search = {
     toolsRight: renderToolsRight(),
+    compressed: true,
     box: {
       incremental: true,
       schema: {
@@ -200,28 +196,22 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         defaultFocusedButton="confirm"
       >
         <p>
-          {
-            <FormattedMessage
-              id="dataSourcesManagement.dataSourcesTable.deleteDescription"
-              defaultMessage="This action will delete the selected data source connections"
-            />
-          }
+          <FormattedMessage
+            id="dataSourcesManagement.dataSourcesTable.deleteDescription"
+            defaultMessage="This action will delete the selected data source connections"
+          />
         </p>
         <p>
-          {
-            <FormattedMessage
-              id="dataSourcesManagement.dataSourcesTable.deleteConfirmation"
-              defaultMessage="Any objects created using data from these sources, including Index Patterns, Visualizations, and Observability Panels, will be impacted."
-            />
-          }
+          <FormattedMessage
+            id="dataSourcesManagement.dataSourcesTable.deleteConfirmation"
+            defaultMessage="Any objects created using data from these sources, including Index Patterns, Visualizations, and Observability Panels, will be impacted."
+          />
         </p>
         <p>
-          {
-            <FormattedMessage
-              id="dataSourcesManagement.dataSourcesTable.deleteWarning"
-              defaultMessage="This action cannot be undone."
-            />
-          }
+          <FormattedMessage
+            id="dataSourcesManagement.dataSourcesTable.deleteWarning"
+            defaultMessage="This action cannot be undone."
+          />
         </p>
       </EuiConfirmModal>
     ) : null;
@@ -290,48 +280,6 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   };
 
   /* Render Ui elements*/
-  /* Create Data Source button */
-  const createButton = <CreateButton history={history} dataTestSubj="createDataSourceButton" />;
-  const createButtonEmptyState = (
-    <CreateButton
-      history={history}
-      isEmptyState={true}
-      dataTestSubj="createDataSourceButtonEmptyState"
-    />
-  );
-
-  /* Render header*/
-  const renderHeader = () => {
-    return (
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>
-              {
-                <FormattedMessage
-                  id="dataSourcesManagement.dataSourcesTable.title"
-                  defaultMessage="Data Sources"
-                />
-              }
-            </h2>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText>
-            <p>
-              {
-                <FormattedMessage
-                  id="dataSourcesManagement.dataSourcesTable.description"
-                  defaultMessage="Create and manage data source connections to help you retrieve data from multiple OpenSearch compatible sources."
-                />
-              }
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
-
   /* Render table */
   const renderTableContent = () => {
     return (
@@ -354,6 +302,14 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   };
 
   const renderEmptyState = () => {
+    const createButtonEmptyState = (
+      <CreateButton
+        history={history}
+        isEmptyState={true}
+        dataTestSubj="createDataSourceButtonEmptyState"
+      />
+    );
+
     return (
       <>
         <EuiSpacer size="l" />
@@ -363,50 +319,29 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           style={{ textAlign: 'center' }}
           data-test-subj="datasourceTableEmptyState"
         >
-          <EuiText>
-            {
-              <FormattedMessage
-                id="dataSourcesManagement.dataSourcesTable.noData"
-                defaultMessage="No Data Source Connections have been created yet."
-              />
-            }
+          <EuiText size="s">
+            <FormattedMessage
+              id="dataSourcesManagement.dataSourcesTable.noData"
+              defaultMessage="No Data Source Connections have been created yet."
+            />
           </EuiText>
           <EuiSpacer />
-          {createButtonEmptyState}
+          {canManageDataSource ? createButtonEmptyState : null}
         </EuiPanel>
         <EuiSpacer size="l" />
       </>
     );
   };
 
-  const renderContent = () => {
-    return (
-      <>
-        <EuiPageContent
-          data-test-subj="dataSourceTable"
-          role="region"
-          aria-label={i18n.translate('dataSourcesManagement.createDataSourcesLiveRegionAriaLabel', {
-            defaultMessage: 'Data Sources',
-          })}
-        >
-          {/* Header */}
-          {renderHeader()}
-
-          <EuiSpacer />
-
-          {/* Delete confirmation modal*/}
-          {tableRenderDeleteModal()}
-
-          {!isLoading && (!dataSources || !dataSources.length)
-            ? renderEmptyState()
-            : renderTableContent()}
-        </EuiPageContent>
-        {isDeleting ? <LoadingMask /> : null}
-      </>
-    );
-  };
-
-  return renderContent();
+  return (
+    <>
+      {tableRenderDeleteModal()}
+      {!isLoading && (!dataSources || !dataSources.length)
+        ? renderEmptyState()
+        : renderTableContent()}
+      {isDeleting ? <LoadingMask /> : null}
+    </>
+  );
 };
 
 export const DataSourceTableWithRouter = withRouter(DataSourceTable);

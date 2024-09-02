@@ -37,11 +37,12 @@ import {
   EuiSpacer,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
+  EuiText,
   EuiIconTip,
   EuiLoadingSpinner,
-  EuiRadioGroup,
-  EuiSwitch,
+  EuiCompressedRadioGroup,
+  EuiCompressedSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
 
@@ -128,7 +129,6 @@ export class UrlPanelContent extends Component<Props, State> {
           <EuiCopy textToCopy={this.state.url || ''} anchorClassName="eui-displayBlock">
             {(copy: () => void) => (
               <EuiButton
-                fill
                 fullWidth
                 onClick={copy}
                 disabled={this.state.isCreatingShortUrl || this.state.url === ''}
@@ -136,17 +136,19 @@ export class UrlPanelContent extends Component<Props, State> {
                 data-test-subj="copyShareUrlButton"
                 size="s"
               >
-                {this.props.isEmbedded ? (
-                  <FormattedMessage
-                    id="share.urlPanel.copyIframeCodeButtonLabel"
-                    defaultMessage="Copy iFrame code"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="share.urlPanel.copyLinkButtonLabel"
-                    defaultMessage="Copy link"
-                  />
-                )}
+                <EuiText size="s">
+                  {this.props.isEmbedded ? (
+                    <FormattedMessage
+                      id="share.urlPanel.copyIframeCodeButtonLabel"
+                      defaultMessage="Copy iFrame code"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="share.urlPanel.copyLinkButtonLabel"
+                      defaultMessage="Copy link"
+                    />
+                  )}
+                </EuiText>
               </EuiButton>
             )}
           </EuiCopy>
@@ -383,7 +385,7 @@ export class UrlPanelContent extends Component<Props, State> {
       />
     ) : undefined;
     return (
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={
           <FormattedMessage
             id="share.urlPanel.generateLinkAsLabel"
@@ -392,12 +394,12 @@ export class UrlPanelContent extends Component<Props, State> {
         }
         helpText={generateLinkAsHelp}
       >
-        <EuiRadioGroup
+        <EuiCompressedRadioGroup
           options={this.renderExportUrlAsOptions()}
           idSelected={this.state.exportUrlAs}
           onChange={this.handleExportUrlAs}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   };
 
@@ -419,7 +421,7 @@ export class UrlPanelContent extends Component<Props, State> {
       shortUrlLabel
     );
     const switchComponent = (
-      <EuiSwitch
+      <EuiCompressedSwitch
         label={switchLabel}
         checked={this.state.useShortUrl}
         onChange={this.handleShortUrlChange}
@@ -437,9 +439,9 @@ export class UrlPanelContent extends Component<Props, State> {
     );
 
     return (
-      <EuiFormRow helpText={this.state.shortUrlErrorMsg} data-test-subj="createShortUrl">
+      <EuiCompressedFormRow helpText={this.state.shortUrlErrorMsg} data-test-subj="createShortUrl">
         {this.renderWithIconTip(switchComponent, tipContent)}
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   };
 
@@ -465,9 +467,9 @@ export class UrlPanelContent extends Component<Props, State> {
     return (
       <React.Fragment>
         {this.props.urlParamExtensions.map(({ paramName, component: UrlParamComponent }) => (
-          <EuiFormRow key={paramName}>
+          <EuiCompressedFormRow key={paramName}>
             <UrlParamComponent setParamValue={setParamValue(paramName)} />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         ))}
       </React.Fragment>
     );

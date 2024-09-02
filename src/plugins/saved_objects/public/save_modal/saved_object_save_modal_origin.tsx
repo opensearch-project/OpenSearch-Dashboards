@@ -30,7 +30,7 @@
 
 import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedSwitch } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
 import { OnSaveProps, SaveModalState, SavedObjectSaveModal } from '.';
@@ -78,8 +78,8 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
       const originVerb = !documentInfo.id || state.copyOnSave ? addLabel : returnLabel;
       return (
         <Fragment>
-          <EuiFormRow>
-            <EuiSwitch
+          <EuiCompressedFormRow>
+            <EuiCompressedSwitch
               data-test-subj="returnToOriginModeSwitch"
               checked={returnToOriginMode}
               onChange={(event) => {
@@ -95,7 +95,7 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
                 )
               }
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </Fragment>
       );
     } else {

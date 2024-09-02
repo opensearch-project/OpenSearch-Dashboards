@@ -57,35 +57,35 @@ export interface Props {
   /**
    * Options for the Monaco Code Editor
    * Documentation of options can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.ieditorconstructionoptions.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/editor.IEditorConstructionOptions.html
    */
   options?: monaco.editor.IEditorConstructionOptions;
 
   /**
    * Suggestion provider for autocompletion
    * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.completionitemprovider.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.CompletionItemProvider.html
    */
   suggestionProvider?: monaco.languages.CompletionItemProvider;
 
   /**
    * Signature provider for function parameter info
    * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.signaturehelpprovider.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.SignatureHelpProvider.html
    */
   signatureProvider?: monaco.languages.SignatureHelpProvider;
 
   /**
    * Hover provider for hover documentation
    * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.hoverprovider.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.HoverProvider.html
    */
   hoverProvider?: monaco.languages.HoverProvider;
 
   /**
    * Language config provider for bracket
    * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.languageconfiguration.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.LanguageConfiguration.html
    */
   languageConfiguration?: monaco.languages.LanguageConfiguration;
 
@@ -127,33 +127,6 @@ export class CodeEditor extends React.Component<Props, {}> {
       this.props.editorWillMount();
     }
 
-    monaco.languages.onLanguage(this.props.languageId, () => {
-      if (this.props.suggestionProvider) {
-        monaco.languages.registerCompletionItemProvider(
-          this.props.languageId,
-          this.props.suggestionProvider
-        );
-      }
-
-      if (this.props.signatureProvider) {
-        monaco.languages.registerSignatureHelpProvider(
-          this.props.languageId,
-          this.props.signatureProvider
-        );
-      }
-
-      if (this.props.hoverProvider) {
-        monaco.languages.registerHoverProvider(this.props.languageId, this.props.hoverProvider);
-      }
-
-      if (this.props.languageConfiguration) {
-        monaco.languages.setLanguageConfiguration(
-          this.props.languageId,
-          this.props.languageConfiguration
-        );
-      }
-    });
-
     // Register the theme
     monaco.editor.defineTheme('euiColors', this.props.useDarkTheme ? DARK_THEME : LIGHT_THEME);
   };
@@ -172,6 +145,24 @@ export class CodeEditor extends React.Component<Props, {}> {
 
   render() {
     const { languageId, value, onChange, width, height, options } = this.props;
+
+    monaco.languages.onLanguage(languageId, () => {
+      if (this.props.suggestionProvider) {
+        monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider);
+      }
+
+      if (this.props.signatureProvider) {
+        monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider);
+      }
+
+      if (this.props.hoverProvider) {
+        monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider);
+      }
+
+      if (this.props.languageConfiguration) {
+        monaco.languages.setLanguageConfiguration(languageId, this.props.languageConfiguration);
+      }
+    });
 
     return (
       <React.Fragment>

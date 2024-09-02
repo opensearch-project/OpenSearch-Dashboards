@@ -33,14 +33,14 @@ import rison from 'rison-node';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
-  EuiButton,
+  EuiSmallButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutHeader,
   EuiFlyoutFooter,
   EuiFlyoutBody,
-  EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { SavedObjectFinderUi } from '../../../../../saved_objects/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -63,14 +63,14 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
   return (
     <EuiFlyout ownFocus onClose={onClose} data-test-subj="loadSearchForm">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiText size="s">
           <h2>
             <FormattedMessage
               id="discover.topNav.openSearchPanel.openSearchTitle"
               defaultMessage="OpenSearch"
             />
           </h2>
-        </EuiTitle>
+        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <SavedObjectFinderUi
@@ -100,9 +100,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiButton
-              fill
+            <EuiSmallButtonEmpty
               onClick={onClose}
               href={addBasePath(
                 `/app/management/opensearch-dashboards/objects?_a=${rison.encode({
@@ -114,7 +112,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
                 id="discover.topNav.openSearchPanel.manageSearchesButtonLabel"
                 defaultMessage="Manage searches"
               />
-            </EuiButton>
+            </EuiSmallButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

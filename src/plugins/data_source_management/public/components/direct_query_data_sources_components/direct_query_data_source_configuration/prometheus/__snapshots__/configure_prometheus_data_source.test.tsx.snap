@@ -1,0 +1,1144 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
+<MemoryRouter>
+  <Router
+    history={
+      Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "consistentKey",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "consistentKey",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      }
+    }
+  >
+    <ConfigurePrometheusDatasourcePanel
+      currentAccessKey=""
+      currentAuthMethod="basicauth"
+      currentDetails=""
+      currentName=""
+      currentPassword=""
+      currentRegion=""
+      currentSecretKey=""
+      currentStore=""
+      currentUsername=""
+      error=""
+      hasSecurityAccess={true}
+      roles={
+        Array [
+          Object {
+            "label": "Admin",
+            "value": "admin",
+          },
+        ]
+      }
+      selectedQueryPermissionRoles={Array []}
+      setAccessKeyForRequest={[MockFunction]}
+      setAuthMethodForRequest={[MockFunction]}
+      setDetailsForRequest={[MockFunction]}
+      setError={[MockFunction]}
+      setNameForRequest={[MockFunction]}
+      setPasswordForRequest={[MockFunction]}
+      setRegionForRequest={[MockFunction]}
+      setSecretKeyForRequest={[MockFunction]}
+      setSelectedQueryPermissionRoles={[MockFunction]}
+      setStoreForRequest={[MockFunction]}
+      setUsernameForRequest={[MockFunction]}
+    >
+      <div>
+        <EuiPanel>
+          <div
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+          >
+            <EuiText
+              size="s"
+            >
+              <div
+                className="euiText euiText--small"
+              >
+                <h1>
+                  Configure Prometheus data source
+                </h1>
+              </div>
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            >
+              <div
+                className="euiSpacer euiSpacer--s"
+              />
+            </EuiSpacer>
+            <EuiText
+              color="subdued"
+              size="s"
+            >
+              <div
+                className="euiText euiText--small"
+              >
+                <EuiTextColor
+                  color="subdued"
+                  component="div"
+                >
+                  <div
+                    className="euiTextColor euiTextColor--subdued"
+                  >
+                    <FormattedMessage
+                      defaultMessage="Connect to Prometheus with OpenSearch and OpenSearch Dashboards. "
+                      id="dataSourcesManagement.configurePrometheusDataSource.description"
+                      values={Object {}}
+                    >
+                      <span>
+                        Connect to Prometheus with OpenSearch and OpenSearch Dashboards. 
+                      </span>
+                    </FormattedMessage>
+                    <EuiLink
+                      external={true}
+                      href="https://opensearch.org/docs/latest/dashboards/management/data-sources/"
+                      target="blank"
+                    >
+                      <a
+                        className="euiLink euiLink--primary"
+                        href="https://opensearch.org/docs/latest/dashboards/management/data-sources/"
+                        rel="noreferrer"
+                        target="blank"
+                      >
+                        Learn more
+                        <EuiIcon
+                          aria-label="External link"
+                          className="euiLink__externalIcon"
+                          size="s"
+                          type="popout"
+                        >
+                          <span
+                            aria-label="External link"
+                            className="euiLink__externalIcon"
+                            data-euiicon-type="popout"
+                            size="s"
+                          />
+                        </EuiIcon>
+                      </a>
+                    </EuiLink>
+                  </div>
+                </EuiTextColor>
+              </div>
+            </EuiText>
+            <EuiSpacer>
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+            </EuiSpacer>
+            <EuiForm
+              component="form"
+            >
+              <form
+                className="euiForm"
+              >
+                <EuiText
+                  size="s"
+                >
+                  <div
+                    className="euiText euiText--small"
+                  >
+                    <h2>
+                      Data source details
+                    </h2>
+                  </div>
+                </EuiText>
+                <EuiSpacer
+                  size="m"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--m"
+                  />
+                </EuiSpacer>
+                <NameRow
+                  currentError=""
+                  currentName=""
+                  setErrorForForm={[MockFunction]}
+                  setNameForRequest={[MockFunction]}
+                >
+                  <EuiCompressedFormRow
+                    describedByIds={Array []}
+                    display="rowCompressed"
+                    error=""
+                    fullWidth={false}
+                    hasChildLabel={true}
+                    hasEmptyLabelSpace={false}
+                    helpText="Connection name that OpenSearch Dashboards references. This name should be descriptive and concise."
+                    isInvalid={false}
+                    label="Data source name"
+                    labelType="label"
+                  >
+                    <div
+                      className="euiFormRow euiFormRow--compressed"
+                      id="generated-id-row"
+                    >
+                      <div
+                        className="euiFormRow__labelWrapper"
+                      >
+                        <EuiFormLabel
+                          aria-invalid={false}
+                          className="euiFormRow__label"
+                          htmlFor="generated-id"
+                          isFocused={false}
+                          isInvalid={false}
+                          type="label"
+                        >
+                          <label
+                            aria-invalid={false}
+                            className="euiFormLabel euiFormRow__label"
+                            htmlFor="generated-id"
+                          >
+                            Data source name
+                          </label>
+                        </EuiFormLabel>
+                      </div>
+                      <div
+                        className="euiFormRow__fieldWrapper"
+                      >
+                        <EuiCompressedFieldText
+                          aria-describedby="generated-id-help-0"
+                          data-test-subj="direct_query-data-source-name"
+                          id="generated-id"
+                          isInvalid={false}
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          placeholder="Title"
+                          value=""
+                        >
+                          <EuiFieldText
+                            aria-describedby="generated-id-help-0"
+                            compressed={true}
+                            data-test-subj="direct_query-data-source-name"
+                            id="generated-id"
+                            isInvalid={false}
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onFocus={[Function]}
+                            placeholder="Title"
+                            value=""
+                          >
+                            <EuiFormControlLayout
+                              compressed={true}
+                              fullWidth={false}
+                              inputId="generated-id"
+                            >
+                              <div
+                                className="euiFormControlLayout euiFormControlLayout--compressed"
+                              >
+                                <div
+                                  className="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <EuiValidatableControl
+                                    isInvalid={false}
+                                  >
+                                    <input
+                                      aria-describedby="generated-id-help-0"
+                                      className="euiFieldText euiFieldText--compressed"
+                                      data-test-subj="direct_query-data-source-name"
+                                      id="generated-id"
+                                      onBlur={[Function]}
+                                      onChange={[Function]}
+                                      onFocus={[Function]}
+                                      placeholder="Title"
+                                      type="text"
+                                      value=""
+                                    />
+                                  </EuiValidatableControl>
+                                  <EuiFormControlLayoutIcons
+                                    compressed={true}
+                                  />
+                                </div>
+                              </div>
+                            </EuiFormControlLayout>
+                          </EuiFieldText>
+                        </EuiCompressedFieldText>
+                        <EuiFormHelpText
+                          className="euiFormRow__text"
+                          id="generated-id-help-0"
+                          key="Connection name that OpenSearch Dashboards references. This name should be descriptive and concise."
+                        >
+                          <div
+                            className="euiFormHelpText euiFormRow__text"
+                            id="generated-id-help-0"
+                          >
+                            Connection name that OpenSearch Dashboards references. This name should be descriptive and concise.
+                          </div>
+                        </EuiFormHelpText>
+                      </div>
+                    </div>
+                  </EuiCompressedFormRow>
+                </NameRow>
+                <EuiCompressedFormRow
+                  describedByIds={Array []}
+                  display="rowCompressed"
+                  fullWidth={false}
+                  hasChildLabel={true}
+                  hasEmptyLabelSpace={false}
+                  label="Description - Optional"
+                  labelType="label"
+                >
+                  <div
+                    className="euiFormRow euiFormRow--compressed"
+                    id="generated-id-row"
+                  >
+                    <div
+                      className="euiFormRow__labelWrapper"
+                    >
+                      <EuiFormLabel
+                        className="euiFormRow__label"
+                        htmlFor="generated-id"
+                        isFocused={false}
+                        type="label"
+                      >
+                        <label
+                          className="euiFormLabel euiFormRow__label"
+                          htmlFor="generated-id"
+                        >
+                          Description - Optional
+                        </label>
+                      </EuiFormLabel>
+                    </div>
+                    <div
+                      className="euiFormRow__fieldWrapper"
+                    >
+                      <EuiCompressedTextArea
+                        data-test-subj="data-source-description"
+                        id="generated-id"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onFocus={[Function]}
+                        placeholder="Placeholder"
+                        value=""
+                      >
+                        <EuiTextArea
+                          compressed={true}
+                          data-test-subj="data-source-description"
+                          id="generated-id"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          placeholder="Placeholder"
+                          value=""
+                        >
+                          <EuiValidatableControl>
+                            <textarea
+                              className="euiTextArea euiTextArea--resizeVertical euiTextArea--compressed"
+                              data-test-subj="data-source-description"
+                              id="generated-id"
+                              onBlur={[Function]}
+                              onChange={[Function]}
+                              onFocus={[Function]}
+                              placeholder="Placeholder"
+                              rows={3}
+                              value=""
+                            />
+                          </EuiValidatableControl>
+                        </EuiTextArea>
+                      </EuiCompressedTextArea>
+                    </div>
+                  </div>
+                </EuiCompressedFormRow>
+                <EuiSpacer>
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
+                <EuiText
+                  size="s"
+                >
+                  <div
+                    className="euiText euiText--small"
+                  >
+                    <h2>
+                      Prometheus data location
+                    </h2>
+                  </div>
+                </EuiText>
+                <EuiSpacer
+                  size="m"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--m"
+                  />
+                </EuiSpacer>
+                <EuiCompressedFormRow
+                  describedByIds={Array []}
+                  display="rowCompressed"
+                  fullWidth={false}
+                  hasChildLabel={true}
+                  hasEmptyLabelSpace={false}
+                  label="Prometheus URI"
+                  labelType="label"
+                >
+                  <div
+                    className="euiFormRow euiFormRow--compressed"
+                    id="generated-id-row"
+                  >
+                    <div
+                      className="euiFormRow__labelWrapper"
+                    >
+                      <EuiFormLabel
+                        className="euiFormRow__label"
+                        htmlFor="generated-id"
+                        isFocused={false}
+                        type="label"
+                      >
+                        <label
+                          className="euiFormLabel euiFormRow__label"
+                          htmlFor="generated-id"
+                        >
+                          Prometheus URI
+                        </label>
+                      </EuiFormLabel>
+                    </div>
+                    <div
+                      className="euiFormRow__fieldWrapper"
+                    >
+                      <EuiText
+                        size="xs"
+                      >
+                        <div
+                          className="euiText euiText--extraSmall"
+                        >
+                          <p>
+                            Enter the Prometheus URI endpoint.
+                          </p>
+                        </div>
+                      </EuiText>
+                      <EuiCompressedFieldText
+                        data-test-subj="Prometheus-URI"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        placeholder="Prometheus URI"
+                        value=""
+                      >
+                        <EuiFieldText
+                          compressed={true}
+                          data-test-subj="Prometheus-URI"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          placeholder="Prometheus URI"
+                          value=""
+                        >
+                          <EuiFormControlLayout
+                            compressed={true}
+                            fullWidth={false}
+                          >
+                            <div
+                              className="euiFormControlLayout euiFormControlLayout--compressed"
+                            >
+                              <div
+                                className="euiFormControlLayout__childrenWrapper"
+                              >
+                                <EuiValidatableControl>
+                                  <input
+                                    className="euiFieldText euiFieldText--compressed"
+                                    data-test-subj="Prometheus-URI"
+                                    onBlur={[Function]}
+                                    onChange={[Function]}
+                                    placeholder="Prometheus URI"
+                                    type="text"
+                                    value=""
+                                  />
+                                </EuiValidatableControl>
+                                <EuiFormControlLayoutIcons
+                                  compressed={true}
+                                />
+                              </div>
+                            </div>
+                          </EuiFormControlLayout>
+                        </EuiFieldText>
+                      </EuiCompressedFieldText>
+                    </div>
+                  </div>
+                </EuiCompressedFormRow>
+                <EuiSpacer>
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
+                <EuiText
+                  size="s"
+                >
+                  <div
+                    className="euiText euiText--small"
+                  >
+                    <h2>
+                      Authentication details
+                    </h2>
+                  </div>
+                </EuiText>
+                <EuiSpacer
+                  size="m"
+                >
+                  <div
+                    className="euiSpacer euiSpacer--m"
+                  />
+                </EuiSpacer>
+                <EuiCompressedFormRow
+                  describedByIds={Array []}
+                  display="rowCompressed"
+                  fullWidth={false}
+                  hasChildLabel={true}
+                  hasEmptyLabelSpace={false}
+                  label="Authentication method"
+                  labelType="label"
+                >
+                  <div
+                    className="euiFormRow euiFormRow--compressed"
+                    id="generated-id-row"
+                  >
+                    <div
+                      className="euiFormRow__labelWrapper"
+                    >
+                      <EuiFormLabel
+                        className="euiFormRow__label"
+                        htmlFor="generated-id"
+                        isFocused={false}
+                        type="label"
+                      >
+                        <label
+                          className="euiFormLabel euiFormRow__label"
+                          htmlFor="generated-id"
+                        >
+                          Authentication method
+                        </label>
+                      </EuiFormLabel>
+                    </div>
+                    <div
+                      className="euiFormRow__fieldWrapper"
+                    >
+                      <EuiCompressedSelect
+                        id="generated-id"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onFocus={[Function]}
+                        options={
+                          Array [
+                            Object {
+                              "text": "Basic authentication",
+                              "value": "basicauth",
+                            },
+                            Object {
+                              "text": "AWS Signature Version 4",
+                              "value": "awssigv4",
+                            },
+                          ]
+                        }
+                        value="basicauth"
+                      >
+                        <EuiSelect
+                          compressed={true}
+                          id="generated-id"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          options={
+                            Array [
+                              Object {
+                                "text": "Basic authentication",
+                                "value": "basicauth",
+                              },
+                              Object {
+                                "text": "AWS Signature Version 4",
+                                "value": "awssigv4",
+                              },
+                            ]
+                          }
+                          value="basicauth"
+                        >
+                          <EuiFormControlLayout
+                            compressed={true}
+                            fullWidth={false}
+                            icon={
+                              Object {
+                                "side": "right",
+                                "type": "arrowDown",
+                              }
+                            }
+                            inputId="generated-id"
+                            isLoading={false}
+                          >
+                            <div
+                              className="euiFormControlLayout euiFormControlLayout--compressed"
+                            >
+                              <div
+                                className="euiFormControlLayout__childrenWrapper"
+                              >
+                                <EuiValidatableControl>
+                                  <select
+                                    className="euiSelect euiSelect--compressed"
+                                    id="generated-id"
+                                    onBlur={[Function]}
+                                    onChange={[Function]}
+                                    onFocus={[Function]}
+                                    onMouseUp={[Function]}
+                                    value="basicauth"
+                                  >
+                                    <option
+                                      key="0"
+                                      value="basicauth"
+                                    >
+                                      Basic authentication
+                                    </option>
+                                    <option
+                                      key="1"
+                                      value="awssigv4"
+                                    >
+                                      AWS Signature Version 4
+                                    </option>
+                                  </select>
+                                </EuiValidatableControl>
+                                <EuiFormControlLayoutIcons
+                                  compressed={true}
+                                  icon={
+                                    Object {
+                                      "side": "right",
+                                      "type": "arrowDown",
+                                    }
+                                  }
+                                  isLoading={false}
+                                >
+                                  <div
+                                    className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                                  >
+                                    <EuiFormControlLayoutCustomIcon
+                                      size="s"
+                                      type="arrowDown"
+                                    >
+                                      <span
+                                        className="euiFormControlLayoutCustomIcon"
+                                      >
+                                        <EuiIcon
+                                          aria-hidden="true"
+                                          className="euiFormControlLayoutCustomIcon__icon"
+                                          size="s"
+                                          type="arrowDown"
+                                        >
+                                          <span
+                                            aria-hidden="true"
+                                            className="euiFormControlLayoutCustomIcon__icon"
+                                            data-euiicon-type="arrowDown"
+                                            size="s"
+                                          />
+                                        </EuiIcon>
+                                      </span>
+                                    </EuiFormControlLayoutCustomIcon>
+                                  </div>
+                                </EuiFormControlLayoutIcons>
+                              </div>
+                            </div>
+                          </EuiFormControlLayout>
+                        </EuiSelect>
+                      </EuiCompressedSelect>
+                    </div>
+                  </div>
+                </EuiCompressedFormRow>
+                <AuthDetails
+                  currentAccessKey=""
+                  currentAuthMethod="basicauth"
+                  currentPassword=""
+                  currentRegion=""
+                  currentSecretKey=""
+                  currentUsername=""
+                  setAccessKeyForRequest={[MockFunction]}
+                  setPasswordForRequest={[MockFunction]}
+                  setRegionForRequest={[MockFunction]}
+                  setSecretKeyForRequest={[MockFunction]}
+                  setUsernameForRequest={[MockFunction]}
+                >
+                  <EuiCompressedFormRow
+                    describedByIds={Array []}
+                    display="rowCompressed"
+                    fullWidth={false}
+                    hasChildLabel={true}
+                    hasEmptyLabelSpace={false}
+                    label="Username"
+                    labelType="label"
+                  >
+                    <div
+                      className="euiFormRow euiFormRow--compressed"
+                      id="generated-id-row"
+                    >
+                      <div
+                        className="euiFormRow__labelWrapper"
+                      >
+                        <EuiFormLabel
+                          className="euiFormRow__label"
+                          htmlFor="generated-id"
+                          isFocused={false}
+                          type="label"
+                        >
+                          <label
+                            className="euiFormLabel euiFormRow__label"
+                            htmlFor="generated-id"
+                          >
+                            Username
+                          </label>
+                        </EuiFormLabel>
+                      </div>
+                      <div
+                        className="euiFormRow__fieldWrapper"
+                      >
+                        <EuiCompressedFieldText
+                          id="generated-id"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          placeholder="Username"
+                          value=""
+                        >
+                          <EuiFieldText
+                            compressed={true}
+                            id="generated-id"
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onFocus={[Function]}
+                            placeholder="Username"
+                            value=""
+                          >
+                            <EuiFormControlLayout
+                              compressed={true}
+                              fullWidth={false}
+                              inputId="generated-id"
+                            >
+                              <div
+                                className="euiFormControlLayout euiFormControlLayout--compressed"
+                              >
+                                <div
+                                  className="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <EuiValidatableControl>
+                                    <input
+                                      className="euiFieldText euiFieldText--compressed"
+                                      id="generated-id"
+                                      onBlur={[Function]}
+                                      onChange={[Function]}
+                                      onFocus={[Function]}
+                                      placeholder="Username"
+                                      type="text"
+                                      value=""
+                                    />
+                                  </EuiValidatableControl>
+                                  <EuiFormControlLayoutIcons
+                                    compressed={true}
+                                  />
+                                </div>
+                              </div>
+                            </EuiFormControlLayout>
+                          </EuiFieldText>
+                        </EuiCompressedFieldText>
+                      </div>
+                    </div>
+                  </EuiCompressedFormRow>
+                  <EuiCompressedFormRow
+                    describedByIds={Array []}
+                    display="rowCompressed"
+                    fullWidth={false}
+                    hasChildLabel={true}
+                    hasEmptyLabelSpace={false}
+                    label="Password"
+                    labelType="label"
+                  >
+                    <div
+                      className="euiFormRow euiFormRow--compressed"
+                      id="generated-id-row"
+                    >
+                      <div
+                        className="euiFormRow__labelWrapper"
+                      >
+                        <EuiFormLabel
+                          className="euiFormRow__label"
+                          htmlFor="generated-id"
+                          isFocused={false}
+                          type="label"
+                        >
+                          <label
+                            className="euiFormLabel euiFormRow__label"
+                            htmlFor="generated-id"
+                          >
+                            Password
+                          </label>
+                        </EuiFormLabel>
+                      </div>
+                      <div
+                        className="euiFormRow__fieldWrapper"
+                      >
+                        <EuiCompressedFieldPassword
+                          id="generated-id"
+                          onBlur={[Function]}
+                          onChange={[Function]}
+                          onFocus={[Function]}
+                          type="dual"
+                          value=""
+                        >
+                          <EuiFieldPassword
+                            compressed={true}
+                            fullWidth={false}
+                            id="generated-id"
+                            isLoading={false}
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onFocus={[Function]}
+                            type="dual"
+                            value=""
+                          >
+                            <EuiFormControlLayout
+                              append={
+                                Array [
+                                  <EuiButtonIcon
+                                    aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
+                                    iconType="eye"
+                                    onClick={[Function]}
+                                    title="Show password as plain text. Note: this will visually expose your password on the screen."
+                                  />,
+                                ]
+                              }
+                              compressed={true}
+                              fullWidth={false}
+                              icon="lock"
+                              isLoading={false}
+                            >
+                              <div
+                                className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+                              >
+                                <div
+                                  className="euiFormControlLayout__childrenWrapper"
+                                >
+                                  <EuiValidatableControl>
+                                    <input
+                                      className="euiFieldPassword euiFieldPassword--compressed euiFieldPassword--inGroup euiFieldPassword--withToggle"
+                                      id="generated-id"
+                                      onBlur={[Function]}
+                                      onChange={[Function]}
+                                      onFocus={[Function]}
+                                      spellCheck="false"
+                                      type="password"
+                                      value=""
+                                    />
+                                  </EuiValidatableControl>
+                                  <EuiFormControlLayoutIcons
+                                    compressed={true}
+                                    icon="lock"
+                                    isLoading={false}
+                                  >
+                                    <div
+                                      className="euiFormControlLayoutIcons"
+                                    >
+                                      <EuiFormControlLayoutCustomIcon
+                                        size="s"
+                                        type="lock"
+                                      >
+                                        <span
+                                          className="euiFormControlLayoutCustomIcon"
+                                        >
+                                          <EuiIcon
+                                            aria-hidden="true"
+                                            className="euiFormControlLayoutCustomIcon__icon"
+                                            size="s"
+                                            type="lock"
+                                          >
+                                            <span
+                                              aria-hidden="true"
+                                              className="euiFormControlLayoutCustomIcon__icon"
+                                              data-euiicon-type="lock"
+                                              size="s"
+                                            />
+                                          </EuiIcon>
+                                        </span>
+                                      </EuiFormControlLayoutCustomIcon>
+                                    </div>
+                                  </EuiFormControlLayoutIcons>
+                                </div>
+                                <EuiButtonIcon
+                                  aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
+                                  className="euiFormControlLayout__append"
+                                  iconType="eye"
+                                  key="0/.0"
+                                  onClick={[Function]}
+                                  title="Show password as plain text. Note: this will visually expose your password on the screen."
+                                >
+                                  <button
+                                    aria-label="Show password as plain text. Note: this will visually expose your password on the screen."
+                                    className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiFormControlLayout__append"
+                                    onClick={[Function]}
+                                    title="Show password as plain text. Note: this will visually expose your password on the screen."
+                                    type="button"
+                                  >
+                                    <EuiIcon
+                                      aria-hidden="true"
+                                      className="euiButtonIcon__icon"
+                                      color="inherit"
+                                      size="m"
+                                      type="eye"
+                                    >
+                                      <span
+                                        aria-hidden="true"
+                                        className="euiButtonIcon__icon"
+                                        color="inherit"
+                                        data-euiicon-type="eye"
+                                        size="m"
+                                      />
+                                    </EuiIcon>
+                                  </button>
+                                </EuiButtonIcon>
+                              </div>
+                            </EuiFormControlLayout>
+                          </EuiFieldPassword>
+                        </EuiCompressedFieldPassword>
+                      </div>
+                    </div>
+                  </EuiCompressedFormRow>
+                </AuthDetails>
+                <EuiSpacer>
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
+                <QueryPermissionsConfiguration
+                  hasSecurityAccess={true}
+                  layout="vertical"
+                  roles={
+                    Array [
+                      Object {
+                        "label": "Admin",
+                        "value": "admin",
+                      },
+                    ]
+                  }
+                  selectedRoles={Array []}
+                  setSelectedRoles={[MockFunction]}
+                >
+                  <EuiFlexItem>
+                    <div
+                      className="euiFlexItem"
+                    >
+                      <EuiFlexGroup
+                        direction="column"
+                      >
+                        <div
+                          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                        >
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <EuiText
+                                size="s"
+                              >
+                                <div
+                                  className="euiText euiText--small"
+                                >
+                                  <h2>
+                                    Query permissions
+                                  </h2>
+                                </div>
+                              </EuiText>
+                              <EuiText
+                                size="s"
+                              >
+                                <div
+                                  className="euiText euiText--small"
+                                >
+                                  <p>
+                                    Control which OpenSearch roles have permission to query and index data from this data source.
+                                  </p>
+                                </div>
+                              </EuiText>
+                            </div>
+                          </EuiFlexItem>
+                          <EuiFlexItem>
+                            <div
+                              className="euiFlexItem"
+                            >
+                              <EuiCompressedRadioGroup
+                                idSelected="query-all"
+                                legend={
+                                  Object {
+                                    "children": <span>
+                                      Query access level
+                                    </span>,
+                                    "compressed": true,
+                                  }
+                                }
+                                name="query-radio-group"
+                                onChange={[Function]}
+                                options={
+                                  Array [
+                                    Object {
+                                      "disabled": false,
+                                      "id": "query-restricted",
+                                      "label": "Restricted - accessible by users with specific OpenSearch roles",
+                                    },
+                                    Object {
+                                      "disabled": false,
+                                      "id": "query-all",
+                                      "label": "Admin only - only accessible by the admin",
+                                    },
+                                  ]
+                                }
+                              >
+                                <EuiRadioGroup
+                                  compressed={true}
+                                  idSelected="query-all"
+                                  legend={
+                                    Object {
+                                      "children": <span>
+                                        Query access level
+                                      </span>,
+                                      "compressed": true,
+                                    }
+                                  }
+                                  name="query-radio-group"
+                                  onChange={[Function]}
+                                  options={
+                                    Array [
+                                      Object {
+                                        "disabled": false,
+                                        "id": "query-restricted",
+                                        "label": "Restricted - accessible by users with specific OpenSearch roles",
+                                      },
+                                      Object {
+                                        "disabled": false,
+                                        "id": "query-all",
+                                        "label": "Admin only - only accessible by the admin",
+                                      },
+                                    ]
+                                  }
+                                >
+                                  <EuiFormFieldset
+                                    legend={
+                                      Object {
+                                        "children": <span>
+                                          Query access level
+                                        </span>,
+                                        "compressed": true,
+                                      }
+                                    }
+                                  >
+                                    <fieldset>
+                                      <EuiFormLegend
+                                        compressed={true}
+                                      >
+                                        <legend
+                                          className="euiFormLegend euiFormLegend--compressed"
+                                        >
+                                          <span>
+                                            Query access level
+                                          </span>
+                                        </legend>
+                                      </EuiFormLegend>
+                                      <EuiRadio
+                                        checked={false}
+                                        className="euiRadioGroup__item"
+                                        compressed={true}
+                                        disabled={false}
+                                        id="query-restricted"
+                                        key="0"
+                                        label="Restricted - accessible by users with specific OpenSearch roles"
+                                        name="query-radio-group"
+                                        onChange={[Function]}
+                                      >
+                                        <div
+                                          className="euiRadio euiRadio--compressed euiRadioGroup__item"
+                                        >
+                                          <input
+                                            checked={false}
+                                            className="euiRadio__input"
+                                            disabled={false}
+                                            id="query-restricted"
+                                            name="query-radio-group"
+                                            onChange={[Function]}
+                                            type="radio"
+                                          />
+                                          <div
+                                            className="euiRadio__circle"
+                                          />
+                                          <label
+                                            className="euiRadio__label"
+                                            htmlFor="query-restricted"
+                                          >
+                                            Restricted - accessible by users with specific OpenSearch roles
+                                          </label>
+                                        </div>
+                                      </EuiRadio>
+                                      <EuiRadio
+                                        checked={true}
+                                        className="euiRadioGroup__item"
+                                        compressed={true}
+                                        disabled={false}
+                                        id="query-all"
+                                        key="1"
+                                        label="Admin only - only accessible by the admin"
+                                        name="query-radio-group"
+                                        onChange={[Function]}
+                                      >
+                                        <div
+                                          className="euiRadio euiRadio--compressed euiRadioGroup__item"
+                                        >
+                                          <input
+                                            checked={true}
+                                            className="euiRadio__input"
+                                            disabled={false}
+                                            id="query-all"
+                                            name="query-radio-group"
+                                            onChange={[Function]}
+                                            type="radio"
+                                          />
+                                          <div
+                                            className="euiRadio__circle"
+                                          />
+                                          <label
+                                            className="euiRadio__label"
+                                            htmlFor="query-all"
+                                          >
+                                            Admin only - only accessible by the admin
+                                          </label>
+                                        </div>
+                                      </EuiRadio>
+                                    </fieldset>
+                                  </EuiFormFieldset>
+                                </EuiRadioGroup>
+                              </EuiCompressedRadioGroup>
+                            </div>
+                          </EuiFlexItem>
+                        </div>
+                      </EuiFlexGroup>
+                    </div>
+                  </EuiFlexItem>
+                </QueryPermissionsConfiguration>
+              </form>
+            </EuiForm>
+          </div>
+        </EuiPanel>
+      </div>
+    </ConfigurePrometheusDatasourcePanel>
+  </Router>
+</MemoryRouter>
+`;

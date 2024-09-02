@@ -134,13 +134,13 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
               <EuiFlexItem
                 grow={false}
               >
-                <EuiButton
+                <EuiSmallButton
                   data-test-subj="loadSavedObjects"
                   isLoading={false}
                   onClick={[Function]}
                 >
                   Load OpenSearch Dashboards objects
-                </EuiButton>
+                </EuiSmallButton>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer
@@ -242,56 +242,65 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                   <div
                     className="euiFlexItem euiFlexItem--flexGrowZero"
                   >
-                    <EuiButton
+                    <EuiSmallButton
                       data-test-subj="loadSavedObjects"
                       isLoading={false}
                       onClick={[Function]}
                     >
-                      <EuiButtonDisplay
-                        baseClassName="euiButton"
+                      <EuiButton
                         data-test-subj="loadSavedObjects"
-                        disabled={false}
-                        element="button"
-                        isDisabled={false}
                         isLoading={false}
                         onClick={[Function]}
-                        type="button"
+                        size="s"
                       >
-                        <button
-                          className="euiButton euiButton--primary"
+                        <EuiButtonDisplay
+                          baseClassName="euiButton"
                           data-test-subj="loadSavedObjects"
                           disabled={false}
+                          element="button"
+                          isDisabled={false}
+                          isLoading={false}
                           onClick={[Function]}
-                          style={
-                            Object {
-                              "minWidth": undefined,
-                            }
-                          }
+                          size="s"
                           type="button"
                         >
-                          <EuiButtonContent
-                            className="euiButton__content"
-                            iconSide="left"
-                            isLoading={false}
-                            textProps={
+                          <button
+                            className="euiButton euiButton--primary euiButton--small"
+                            data-test-subj="loadSavedObjects"
+                            disabled={false}
+                            onClick={[Function]}
+                            style={
                               Object {
-                                "className": "euiButton__text",
+                                "minWidth": undefined,
                               }
                             }
+                            type="button"
                           >
-                            <span
-                              className="euiButtonContent euiButton__content"
+                            <EuiButtonContent
+                              className="euiButton__content"
+                              iconGap="m"
+                              iconSide="left"
+                              isLoading={false}
+                              textProps={
+                                Object {
+                                  "className": "euiButton__text",
+                                }
+                              }
                             >
                               <span
-                                className="euiButton__text"
+                                className="euiButtonContent euiButton__content"
                               >
-                                Load OpenSearch Dashboards objects
+                                <span
+                                  className="euiButton__text"
+                                >
+                                  Load OpenSearch Dashboards objects
+                                </span>
                               </span>
-                            </span>
-                          </EuiButtonContent>
-                        </button>
-                      </EuiButtonDisplay>
-                    </EuiButton>
+                            </EuiButtonContent>
+                          </button>
+                        </EuiButtonDisplay>
+                      </EuiButton>
+                    </EuiSmallButton>
                   </div>
                 </EuiFlexItem>
               </div>
@@ -465,13 +474,13 @@ exports[`bulkCreate should display success message when bulkCreate is successful
               <EuiFlexItem
                 grow={false}
               >
-                <EuiButton
+                <EuiSmallButton
                   data-test-subj="loadSavedObjects"
                   isLoading={false}
                   onClick={[Function]}
                 >
                   Load OpenSearch Dashboards objects
-                </EuiButton>
+                </EuiSmallButton>
               </EuiFlexItem>
             </EuiFlexGroup>
             <EuiSpacer
@@ -573,56 +582,65 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   <div
                     className="euiFlexItem euiFlexItem--flexGrowZero"
                   >
-                    <EuiButton
+                    <EuiSmallButton
                       data-test-subj="loadSavedObjects"
                       isLoading={false}
                       onClick={[Function]}
                     >
-                      <EuiButtonDisplay
-                        baseClassName="euiButton"
+                      <EuiButton
                         data-test-subj="loadSavedObjects"
-                        disabled={false}
-                        element="button"
-                        isDisabled={false}
                         isLoading={false}
                         onClick={[Function]}
-                        type="button"
+                        size="s"
                       >
-                        <button
-                          className="euiButton euiButton--primary"
+                        <EuiButtonDisplay
+                          baseClassName="euiButton"
                           data-test-subj="loadSavedObjects"
                           disabled={false}
+                          element="button"
+                          isDisabled={false}
+                          isLoading={false}
                           onClick={[Function]}
-                          style={
-                            Object {
-                              "minWidth": undefined,
-                            }
-                          }
+                          size="s"
                           type="button"
                         >
-                          <EuiButtonContent
-                            className="euiButton__content"
-                            iconSide="left"
-                            isLoading={false}
-                            textProps={
+                          <button
+                            className="euiButton euiButton--primary euiButton--small"
+                            data-test-subj="loadSavedObjects"
+                            disabled={false}
+                            onClick={[Function]}
+                            style={
                               Object {
-                                "className": "euiButton__text",
+                                "minWidth": undefined,
                               }
                             }
+                            type="button"
                           >
-                            <span
-                              className="euiButtonContent euiButton__content"
+                            <EuiButtonContent
+                              className="euiButton__content"
+                              iconGap="m"
+                              iconSide="left"
+                              isLoading={false}
+                              textProps={
+                                Object {
+                                  "className": "euiButton__text",
+                                }
+                              }
                             >
                               <span
-                                className="euiButton__text"
+                                className="euiButtonContent euiButton__content"
                               >
-                                Load OpenSearch Dashboards objects
+                                <span
+                                  className="euiButton__text"
+                                >
+                                  Load OpenSearch Dashboards objects
+                                </span>
                               </span>
-                            </span>
-                          </EuiButtonContent>
-                        </button>
-                      </EuiButtonDisplay>
-                    </EuiButton>
+                            </EuiButtonContent>
+                          </button>
+                        </EuiButtonDisplay>
+                      </EuiButton>
+                    </EuiSmallButton>
                   </div>
                 </EuiFlexItem>
               </div>
@@ -682,13 +700,13 @@ exports[`renders 1`] = `
             <EuiFlexItem
               grow={false}
             >
-              <EuiButton
+              <EuiSmallButton
                 data-test-subj="loadSavedObjects"
                 isLoading={false}
                 onClick={[Function]}
               >
                 Load OpenSearch Dashboards objects
-              </EuiButton>
+              </EuiSmallButton>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer

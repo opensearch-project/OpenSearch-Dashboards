@@ -64,7 +64,6 @@ import {
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
 import { WorkspaceObject } from 'opensearch-dashboards/public';
-import { PUBLIC_WORKSPACE_NAME, PUBLIC_WORKSPACE_ID } from '../../../../../core/public';
 import { TableProps } from './components/table';
 
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
@@ -242,6 +241,22 @@ describe('SavedObjectsTable', () => {
     expect(component).toMatchSnapshot();
   });
 
+  it('should unmount normally', async () => {
+    const component = shallowRender();
+    const mockDebouncedFetchObjects = {
+      cancel: jest.fn(),
+      flush: jest.fn(),
+    };
+    component.instance().debouncedFetchObjects = mockDebouncedFetchObjects as any;
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    // component.update();
+
+    component.unmount();
+    expect(component).toMatchSnapshot();
+  });
+
   it('should add danger toast when find fails', async () => {
     findObjectsMock.mockImplementation(() => {
       throw new Error('Simulated find error');
@@ -413,10 +428,17 @@ describe('SavedObjectsTable', () => {
     });
 
     it('should export all, accounting for the current workspace criteria', async () => {
-      const component = shallowRender();
+      const workspaceList: WorkspaceObject[] = [
+        {
+          id: 'workspace1',
+          name: 'foo',
+        },
+      ];
+      workspaces.workspaceList$.next(workspaceList);
+      const component = shallowRender({ workspaces });
 
       component.instance().onQueryChange({
-        query: Query.parse(`test workspaces:("${PUBLIC_WORKSPACE_NAME}")`),
+        query: Query.parse(`test workspaces:("foo")`),
       });
 
       // Ensure all promises resolve
@@ -435,7 +457,7 @@ describe('SavedObjectsTable', () => {
         allowedTypes,
         'test*',
         true,
-        [PUBLIC_WORKSPACE_ID]
+        ['workspace1']
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -708,10 +730,9 @@ describe('SavedObjectsTable', () => {
       expect(filters.length).toBe(2);
       expect(filters[0].field).toBe('type');
       expect(filters[1].field).toBe('workspaces');
-      expect(filters[1].options.length).toBe(3);
+      expect(filters[1].options.length).toBe(2);
       expect(filters[1].options[0].value).toBe('foo');
       expect(filters[1].options[1].value).toBe('bar');
-      expect(filters[1].options[2].value).toBe(PUBLIC_WORKSPACE_NAME);
     });
 
     it('workspace filter only include current workspaces when in a workspace', async () => {
@@ -807,7 +828,7 @@ describe('SavedObjectsTable', () => {
       });
     });
 
-    it('all visible workspaces in find options when not in any workspace', async () => {
+    it('no workspaces in find options when not in any workspace', async () => {
       findObjectsMock.mockClear();
       const applications = applicationServiceMock.createStartContract();
       applications.capabilities = {
@@ -846,11 +867,241 @@ describe('SavedObjectsTable', () => {
       await waitFor(() => {
         expect(findObjectsMock).toBeCalledWith(
           http,
-          expect.objectContaining({
-            workspaces: expect.arrayContaining(['workspace1', 'workspace2', PUBLIC_WORKSPACE_ID]),
+          expect.not.objectContaining({
+            workspaces,
           })
         );
       });
+    });
+  });
+
+  describe('duplicate', () => {
+    const applications = applicationServiceMock.createStartContract();
+    applications.capabilities = {
+      navLinks: {},
+      management: {},
+      catalogue: {},
+      savedObjectsManagement: {
+        read: true,
+        edit: false,
+        delete: false,
+      },
+      workspaces: {
+        enabled: true,
+      },
+    };
+
+    const workspaceList: WorkspaceObject[] = [
+      {
+        id: 'workspace1',
+        name: 'foo',
+      },
+      {
+        id: 'workspace2',
+        name: 'bar',
+      },
+    ];
+
+    const mockSelectedSavedObjects = [
+      { id: '1', type: 'dashboard', references: [], attributes: [], meta: { title: 'object-1' } },
+      { id: '2', type: 'dashboard', references: [], attributes: [], meta: { title: 'object-2' } },
+    ] as SavedObjectWithMetadata[];
+
+    beforeEach(() => {
+      workspaces.workspaceList$.next(workspaceList);
+      workspaces.currentWorkspaceId$.next('workspace1');
+      workspaces.currentWorkspace$.next(workspaceList[0]);
+    });
+
+    it('should duplicate selected objects', async () => {
+      const mockCopy = jest.fn().mockResolvedValue({ success: true });
+      workspaces.client$.next({ copy: mockCopy });
+      const client = workspaces.client$.getValue();
+
+      const component = shallowRender({ applications, workspaces });
+      component.setState({ isShowingDuplicateModal: true });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(component.state('isShowingDuplicateModal')).toEqual(true);
+      expect(component.find('SavedObjectsDuplicateModal').length).toEqual(1);
+
+      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
+
+      expect(client?.copy).toHaveBeenCalledWith(
+        [
+          { id: '1', type: 'dashboard' },
+          { id: '2', type: 'dashboard' },
+        ],
+        'workspace2',
+        false
+      );
+      component.update();
+
+      expect(component.state('isShowingDuplicateResultFlyout')).toEqual(true);
+      expect(component.find('DuplicateResultFlyout').length).toEqual(1);
+    });
+
+    it('should duplicate single object', async () => {
+      const mockCopy = jest.fn().mockResolvedValue({ success: true });
+      workspaces.client$.next({ copy: mockCopy });
+      const client = workspaces.client$.getValue();
+
+      const component = shallowRender({ applications, workspaces });
+      component.setState({ isShowingDuplicateModal: true });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await component
+        .instance()
+        .onDuplicate([mockSelectedSavedObjects[0]], true, 'workspace2', 'bar');
+
+      expect(client?.copy).toHaveBeenCalledWith(
+        [{ id: '1', type: 'dashboard' }],
+        'workspace2',
+        true
+      );
+      component.update();
+
+      expect(component.state('isShowingDuplicateResultFlyout')).toEqual(true);
+      expect(component.find('DuplicateResultFlyout').length).toEqual(1);
+    });
+
+    it('should show result flyout when duplicating success and failure coexist', async () => {
+      const mockCopy = jest.fn().mockResolvedValue(() => ({
+        success: false,
+        successCount: 1,
+        successResults: [{ id: '1' }],
+        errors: [{ id: '2' }],
+      }));
+      workspaces.client$.next({ copy: mockCopy });
+      const client = workspaces.client$.getValue();
+      const component = shallowRender({ applications, workspaces });
+      component.setState({ isShowingDuplicateModal: true });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
+
+      expect(client?.copy).toHaveBeenCalledWith(
+        [
+          { id: '1', type: 'dashboard' },
+          { id: '2', type: 'dashboard' },
+        ],
+        'workspace2',
+        false
+      );
+      component.update();
+
+      expect(component.state('isShowingDuplicateResultFlyout')).toEqual(true);
+      expect(component.find('DuplicateResultFlyout').length).toEqual(1);
+    });
+
+    it('should catch error when workspace client is null', async () => {
+      const component = shallowRender({ applications, workspaces });
+      component.setState({ isShowingDuplicateModal: true });
+      workspaces.client$.next(null);
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
+      component.update();
+
+      expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
+        title: 'Unable to copy 2 saved objects.',
+      });
+    });
+
+    it('should catch error when duplicating selected object is fail', async () => {
+      const component = shallowRender({ applications, workspaces });
+      component.setState({ isShowingDuplicateModal: true });
+
+      const mockCopy = jest.fn().mockRejectedValue(() => new Error('Copy operation failed'));
+      workspaces.client$.next({ copy: mockCopy });
+      const client = workspaces.client$.getValue();
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
+
+      expect(client?.copy).toHaveBeenCalledWith(
+        [
+          { id: '1', type: 'dashboard' },
+          { id: '2', type: 'dashboard' },
+        ],
+        'workspace2',
+        false
+      );
+      component.update();
+
+      expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
+        title: 'Unable to copy 2 saved objects.',
+      });
+    });
+
+    it('should allow the user to choose on header when duplicating all', async () => {
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      const header = component.find('Header') as any;
+      expect(header.prop('showDuplicateAll')).toEqual(true);
+      header.prop('onDuplicate')();
+
+      await new Promise((resolve) => process.nextTick(resolve));
+      component.update();
+
+      expect(component.state('isShowingDuplicateModal')).toEqual(true);
+      expect(component.find('SavedObjectsDuplicateModal')).toMatchSnapshot();
+    });
+
+    it('should allow the user to choose on table when duplicating all', async () => {
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      const table = component.find('Table') as any;
+      table.prop('onDuplicate')();
+      component.update();
+
+      expect(component.state('isShowingDuplicateModal')).toEqual(true);
+      expect(component.find('SavedObjectsDuplicateModal')).toMatchSnapshot();
+    });
+
+    it('should allow the user to choose on table when duplicating single', async () => {
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      const table = component.find('Table') as any;
+      table.prop('onDuplicateSingle')([{ id: '1', type: 'dashboard', workspaces: ['workspace1'] }]);
+      component.update();
+
+      expect(component.state('isShowingDuplicateModal')).toEqual(true);
+      expect(component.find('SavedObjectsDuplicateModal')).toMatchSnapshot();
     });
   });
 });

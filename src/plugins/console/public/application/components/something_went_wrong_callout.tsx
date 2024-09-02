@@ -31,7 +31,7 @@
 import React, { FunctionComponent, useEffect } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import { EuiCallOut, EuiText, EuiButton, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiText, EuiSmallButton, EuiSpacer } from '@elastic/eui';
 
 interface Props {
   error: Error;
@@ -52,7 +52,7 @@ export const SomethingWentWrongCallout: FunctionComponent<Props> = ({ error, onB
         defaultMessage: 'Cannot load Console',
       })}
     >
-      <EuiText>
+      <EuiText size="s">
         <p>
           <FormattedMessage
             id="console.loadingError.message"
@@ -61,9 +61,9 @@ export const SomethingWentWrongCallout: FunctionComponent<Props> = ({ error, onB
         </p>
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiButton color="danger" onClick={() => onButtonClick()}>
+      <EuiSmallButton color="danger" onClick={() => onButtonClick()}>
         <FormattedMessage id="console.loadingError.buttonLabel" defaultMessage="Reload Console" />
-      </EuiButton>
+      </EuiSmallButton>
     </EuiCallOut>
   );
 };

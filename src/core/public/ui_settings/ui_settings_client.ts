@@ -32,7 +32,7 @@ import { cloneDeep, defaultsDeep } from 'lodash';
 import { Observable, Subject, concat, defer, of } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { UserProvidedValues, PublicUiSettingsParams } from 'src/core/server/types';
+import { UserProvidedValues, PublicUiSettingsParams, UiSettingsType } from 'src/core/server/types';
 import { IUiSettingsClient, UiSettingsState } from './types';
 
 import { UiSettingsApi } from './ui_settings_api';
@@ -58,13 +58,6 @@ export class UiSettingsClient implements IUiSettingsClient {
     this.defaults = cloneDeep(params.defaults);
     this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));
 
-    if (
-      this.cache['theme:enableUserControl']?.userValue ??
-      this.cache['theme:enableUserControl']?.value
-    ) {
-      this.cache = defaultsDeep(this.cache, this.getBrowserStoredSettings());
-    }
-
     params.done$.subscribe({
       complete: () => {
         this.update$.complete();
@@ -76,6 +69,18 @@ export class UiSettingsClient implements IUiSettingsClient {
 
   getAll() {
     return cloneDeep(this.cache);
+  }
+
+  getDefault<T = any>(key: string): T {
+    const declared = this.isDeclared(key);
+
+    if (!declared) {
+      throw new Error(
+        `Unexpected \`IUiSettingsClient.getDefaultValue("${key}")\` call on unrecognized configuration setting "${key}".
+Please check that the setting for "${key}" exists.`
+      );
+    }
+    return this.resolveValue(this.cache[key].value, this.cache[key].type);
   }
 
   get<T = any>(key: string, defaultOverride?: T) {
@@ -99,16 +104,7 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     const userValue = this.cache[key].userValue;
     const defaultValue = defaultOverride !== undefined ? defaultOverride : this.cache[key].value;
     const value = userValue == null ? defaultValue : userValue;
-
-    if (type === 'json') {
-      return JSON.parse(value);
-    }
-
-    return type === 'number' && typeof value !== 'bigint'
-      ? isFinite(value) && (value > Number.MAX_SAFE_INTEGER || value < Number.MIN_SAFE_INTEGER)
-        ? BigInt(value)
-        : parseFloat(value)
-      : value;
+    return this.resolveValue(value, type);
   }
 
   get$<T = any>(key: string, defaultOverride?: T) {
@@ -180,26 +176,16 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     return this.updateErrors$.asObservable();
   }
 
-  private getBrowserStoredSettings() {
-    const uiSettingsJSON = window.localStorage.getItem('uiSettings') || '{}';
-    try {
-      return JSON.parse(uiSettingsJSON);
-    } catch (error) {
-      this.updateErrors$.next(error);
+  private resolveValue(value: any, type: UiSettingsType | undefined) {
+    if (type === 'json') {
+      return JSON.parse(value);
     }
-    return {};
-  }
 
-  private setBrowserStoredSettings(key: string, newVal: any) {
-    const oldSettings = this.getBrowserStoredSettings();
-    const newSettings = cloneDeep(oldSettings);
-    if (newVal === null) {
-      delete newSettings[key];
-    } else {
-      newSettings[key] = { userValue: newVal };
-    }
-    window.localStorage.setItem(`uiSettings`, JSON.stringify(newSettings));
-    return { settings: newSettings };
+    return type === 'number' && typeof value !== 'bigint'
+      ? isFinite(value) && (value > Number.MAX_SAFE_INTEGER || value < Number.MIN_SAFE_INTEGER)
+        ? BigInt(value)
+        : parseFloat(value)
+      : value;
   }
 
   private assertUpdateAllowed(key: string) {
@@ -227,18 +213,8 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     this.setLocally(key, newVal);
 
     try {
-      if (
-        this.cache['theme:enableUserControl']?.userValue ??
-        this.cache['theme:enableUserControl']?.value
-      ) {
-        const { settings } = this.cache[key]?.preferBrowserSetting
-          ? this.setBrowserStoredSettings(key, newVal)
-          : (await this.api.batchSet(key, newVal)) || {};
-        this.cache = defaultsDeep({}, defaults, this.getBrowserStoredSettings(), settings);
-      } else {
-        const { settings } = (await this.api.batchSet(key, newVal)) || {};
-        this.cache = defaultsDeep({}, defaults, settings);
-      }
+      const { settings } = await this.api.batchSet(key, newVal);
+      this.cache = defaultsDeep({}, defaults, settings);
       this.saved$.next({ key, newValue: newVal, oldValue: initialVal });
       return true;
     } catch (error) {

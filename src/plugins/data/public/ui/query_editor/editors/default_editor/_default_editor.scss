@@ -1,0 +1,9 @@
+.defaultEditor {
+  border: $euiBorderThin;
+  border-radius: $euiSizeXS;
+  margin: 0 $euiSizeXS $euiSizeXS;
+
+  &__footer {
+    margin-left: $euiSizeXS;
+  }
+}

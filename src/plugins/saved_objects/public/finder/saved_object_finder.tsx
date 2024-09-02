@@ -36,8 +36,8 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
-  EuiFieldSearch,
-  EuiFilterButton,
+  EuiCompressedFieldSearch,
+  EuiSmallFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -376,7 +376,7 @@ class SavedObjectFinderUi extends React.Component<
     return (
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={true}>
-          <EuiFieldSearch
+          <EuiCompressedFieldSearch
             placeholder={i18n.translate('savedObjects.finder.searchPlaceholder', {
               defaultMessage: 'Search…',
             })}
@@ -406,7 +406,7 @@ class SavedObjectFinderUi extends React.Component<
               isOpen={this.state.sortOpen}
               closePopover={() => this.setState({ sortOpen: false })}
               button={
-                <EuiFilterButton
+                <EuiSmallFilterButton
                   onClick={() =>
                     this.setState(({ sortOpen }) => ({
                       sortOpen: !sortOpen,
@@ -419,12 +419,13 @@ class SavedObjectFinderUi extends React.Component<
                   {i18n.translate('savedObjects.finder.sortButtonLabel', {
                     defaultMessage: 'Sort',
                   })}
-                </EuiFilterButton>
+                </EuiSmallFilterButton>
               }
             >
               <EuiContextMenuPanel
                 watchedItemProps={['icon', 'disabled']}
                 items={this.getSortOptions()}
+                size="s"
               />
             </EuiPopover>
             {this.props.showFilter && (
@@ -435,7 +436,7 @@ class SavedObjectFinderUi extends React.Component<
                 isOpen={this.state.filterOpen}
                 closePopover={() => this.setState({ filterOpen: false })}
                 button={
-                  <EuiFilterButton
+                  <EuiSmallFilterButton
                     onClick={() =>
                       this.setState(({ filterOpen }) => ({
                         filterOpen: !filterOpen,
@@ -451,11 +452,12 @@ class SavedObjectFinderUi extends React.Component<
                     {i18n.translate('savedObjects.finder.filterButtonLabel', {
                       defaultMessage: 'Types',
                     })}
-                  </EuiFilterButton>
+                  </EuiSmallFilterButton>
                 }
               >
                 <EuiContextMenuPanel
                   watchedItemProps={['icon', 'disabled']}
+                  size="s"
                   items={this.props.savedObjectMetaData.map((metaData) => (
                     <EuiContextMenuItem
                       key={metaData.type}
@@ -515,6 +517,7 @@ class SavedObjectFinderUi extends React.Component<
               ).getIconForSavedObject(item.savedObject);
               return (
                 <EuiListGroupItem
+                  size="s"
                   key={item.id}
                   iconType={iconType}
                   label={item.title}

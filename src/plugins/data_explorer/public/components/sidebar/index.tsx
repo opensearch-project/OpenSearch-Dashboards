@@ -6,7 +6,12 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { EuiPageSideBar, EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { DataSource, DataSourceGroup, DataSourceSelectable } from '../../../../data/public';
+import {
+  DataSource,
+  DataSourceGroup,
+  DataSourceSelectable,
+  UI_SETTINGS,
+} from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
@@ -25,8 +30,15 @@ export const Sidebar: FC = ({ children }) => {
       data: { indexPatterns, dataSources },
       notifications: { toasts },
       application,
+      uiSettings,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
+
+  const [isEnhancementEnabled, setIsEnhancementEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsEnhancementEnabled(uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED));
+  }, [uiSettings]);
 
   useEffect(() => {
     let isMounted = true;
@@ -110,23 +122,25 @@ export const Sidebar: FC = ({ children }) => {
         borderRadius="none"
         color="transparent"
       >
-        <EuiSplitPanel.Inner
-          paddingSize="s"
-          grow={false}
-          color="transparent"
-          className="deSidebar_dataSource"
-        >
-          <DataSourceSelectable
-            dataSources={activeDataSources}
-            dataSourceOptionList={dataSourceOptionList}
-            setDataSourceOptionList={setDataSourceOptionList}
-            onDataSourceSelect={handleSourceSelection}
-            selectedSources={selectedSources}
-            onGetDataSetError={handleGetDataSetError}
-            onRefresh={memorizedReload}
-            fullWidth
-          />
-        </EuiSplitPanel.Inner>
+        {!isEnhancementEnabled && (
+          <EuiSplitPanel.Inner
+            paddingSize="s"
+            grow={false}
+            color="transparent"
+            className="deSidebar_dataSource"
+          >
+            <DataSourceSelectable
+              dataSources={activeDataSources}
+              dataSourceOptionList={dataSourceOptionList}
+              setDataSourceOptionList={setDataSourceOptionList}
+              onDataSourceSelect={handleSourceSelection}
+              selectedSources={selectedSources}
+              onGetDataSetError={handleGetDataSetError}
+              onRefresh={memorizedReload}
+              fullWidth
+            />
+          </EuiSplitPanel.Inner>
+        )}
         <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
           {children}
         </EuiSplitPanel.Inner>

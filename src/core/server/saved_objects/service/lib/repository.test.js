@@ -1308,6 +1308,8 @@ describe('SavedObjectsRepository', () => {
       },
     };
 
+    const workspaces = ['workspace1', 'workspace2'];
+
     const getMockBulkUpdateResponse = (objects, options, includeOriginId) => ({
       items: objects.map(({ type, id }) => ({
         update: {
@@ -1581,6 +1583,20 @@ describe('SavedObjectsRepository', () => {
         );
         client.bulk.mockClear();
       });
+    });
+
+    it(`accepts workspaces property when providing workspaces info`, async () => {
+      const objects = [obj1, obj2].map((obj) => ({ ...obj, workspaces }));
+      await bulkUpdateSuccess(objects);
+      const doc = {
+        doc: expect.objectContaining({ workspaces }),
+      };
+      const body = [expect.any(Object), doc, expect.any(Object), doc];
+      expect(client.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({ body }),
+        expect.anything()
+      );
+      client.bulk.mockClear();
     });
 
     describe('errors', () => {
@@ -2803,6 +2819,8 @@ describe('SavedObjectsRepository', () => {
               'migrationVersion',
               'updated_at',
               'originId',
+              'workspaces',
+              'permissions',
               'title',
             ],
           }),
@@ -3950,6 +3968,8 @@ describe('SavedObjectsRepository', () => {
       },
     };
 
+    const workspaces = ['workspace1', 'workspace2'];
+
     const updateSuccess = async (type, id, attributes, options, includeOriginId) => {
       if (registry.isMultiNamespace(type)) {
         const mockGetResponse = getMockGetResponse({ type, id }, options?.namespace);
@@ -4129,6 +4149,18 @@ describe('SavedObjectsRepository', () => {
       it(`accepts permissions when providing permissions info`, async () => {
         await updateSuccess(type, id, attributes, { permissions });
         const expected = expect.objectContaining({ permissions });
+        const body = {
+          doc: expected,
+        };
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
+      });
+
+      it(`accepts workspaces when providing permissions info`, async () => {
+        await updateSuccess(type, id, attributes, { workspaces });
+        const expected = expect.objectContaining({ workspaces });
         const body = {
           doc: expected,
         };

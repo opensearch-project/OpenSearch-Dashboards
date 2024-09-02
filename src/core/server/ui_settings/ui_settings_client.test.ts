@@ -601,6 +601,25 @@ describe('ui settings', () => {
     });
   });
 
+  describe('#getDefault()', () => {
+    it(`returns the promised value for a key`, async () => {
+      const opensearchDocSource = {};
+      const defaults = { dateFormat: { value: chance.word() } };
+      const { uiSettings } = setup({ opensearchDocSource, defaults });
+      const result = uiSettings.getDefault('dateFormat');
+
+      expect(result).toBe(defaults.dateFormat.value);
+    });
+
+    it(`returns undefined for undefined defaults`, async () => {
+      const opensearchDocSource = { custom: 'value' };
+      const { uiSettings } = setup({ opensearchDocSource });
+      const result = uiSettings.getDefault('custom');
+
+      expect(result).toBe(undefined);
+    });
+  });
+
   describe('#get()', () => {
     it('pulls user configuration from OpenSearch', async () => {
       const opensearchDocSource = {};

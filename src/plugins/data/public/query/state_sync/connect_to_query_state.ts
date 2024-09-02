@@ -31,6 +31,7 @@
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import _ from 'lodash';
+import { CoreStart } from 'opensearch-dashboards/public';
 import {
   BaseStateContainer,
   IOsdUrlStateStorage,
@@ -48,7 +49,7 @@ import { validateTimeRange } from '../timefilter';
  * @param  OsdUrlStateStorage to use for syncing and store data
  * @param syncConfig app filter and query
  */
-export const connectStorageToQueryState = (
+export const connectStorageToQueryState = async (
   {
     filterManager,
     queryString,
@@ -58,7 +59,9 @@ export const connectStorageToQueryState = (
   syncConfig: {
     filters: FilterStateStore;
     query: boolean;
-  }
+    dataSet?: boolean;
+  },
+  uiSettings?: CoreStart['uiSettings']
 ) => {
   try {
     const syncKeys: Array<keyof QueryStateChange> = [];
@@ -156,6 +159,7 @@ export const connectToQueryState = <S extends QueryState>(
     refreshInterval?: boolean;
     filters?: FilterStateStore | boolean;
     query?: boolean;
+    dataSet?: boolean;
   }
 ) => {
   const syncKeys: Array<keyof QueryStateChange> = [];
@@ -278,7 +282,7 @@ export const connectToQueryState = <S extends QueryState>(
       .subscribe((newState) => {
         stateContainer.set({ ...stateContainer.get(), ...newState });
       }),
-    stateContainer.state$.subscribe((state) => {
+    stateContainer.state$.subscribe(async (state) => {
       updateInProgress = true;
 
       // cloneDeep is required because services are mutating passed objects

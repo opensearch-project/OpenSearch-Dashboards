@@ -34,18 +34,20 @@ import moment from 'moment';
 import {
   EuiSearchBar,
   EuiBasicTable,
-  EuiButton,
+  EuiSmallButton,
   EuiIcon,
   EuiLink,
   EuiSpacer,
   EuiToolTip,
   EuiFormErrorText,
   EuiPopover,
-  EuiSwitch,
-  EuiFormRow,
+  EuiCompressedSwitch,
+  EuiCompressedFormRow,
   EuiText,
   EuiTableFieldDataColumnType,
   EuiTableActionsColumnType,
+  EuiSearchBarProps,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -67,9 +69,11 @@ export interface TableProps {
   selectionConfig: {
     onSelectionChange: (selection: SavedObjectWithMetadata[]) => void;
   };
-  filters: any[];
+  filters: EuiSearchBarProps['filters'];
   canDelete: boolean;
   onDelete: () => void;
+  onDuplicate: () => void;
+  onDuplicateSingle: (object: SavedObjectWithMetadata) => void;
   onActionRefresh: (object: SavedObjectWithMetadata) => void;
   onExport: (includeReferencesDeep: boolean) => void;
   goInspectObject: (obj: SavedObjectWithMetadata) => void;
@@ -86,6 +90,9 @@ export interface TableProps {
   dateFormat: string;
   availableWorkspaces?: WorkspaceAttribute[];
   currentWorkspaceId?: string;
+  showDuplicate: boolean;
+  useUpdatedUX: boolean;
+  onRefresh: () => void;
 }
 
 interface TableState {
@@ -170,6 +177,8 @@ export class Table extends PureComponent<TableProps, TableState> {
       filters,
       selectionConfig: selection,
       onDelete,
+      onDuplicate,
+      onDuplicateSingle,
       onActionRefresh,
       selectedSavedObjects,
       onTableChange,
@@ -182,6 +191,9 @@ export class Table extends PureComponent<TableProps, TableState> {
       dateFormat,
       availableWorkspaces,
       currentWorkspaceId,
+      showDuplicate,
+      useUpdatedUX,
+      onRefresh,
     } = this.props;
 
     const visibleWsIds = availableWorkspaces?.map((ws) => ws.id) || [];
@@ -238,15 +250,19 @@ export class Table extends PureComponent<TableProps, TableState> {
           if (!canGoInApp) {
             return <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>;
           }
-          let inAppUrl = basePath.prepend(path);
+          let finalPath = path;
+          if (this.props.useUpdatedUX && finalPath) {
+            finalPath = finalPath.replace(/^\/app\/management\/opensearch-dashboards/, '/app');
+          }
+          let inAppUrl = basePath.prepend(finalPath);
           if (object.workspaces?.length) {
             if (currentWorkspaceId) {
-              inAppUrl = formatUrlWithWorkspaceId(path, currentWorkspaceId, basePath);
+              inAppUrl = formatUrlWithWorkspaceId(finalPath, currentWorkspaceId, basePath);
             } else {
               // find first workspace user have permission
               const workspaceId = object.workspaces.find((wsId) => visibleWsIds.includes(wsId));
               if (workspaceId) {
-                inAppUrl = formatUrlWithWorkspaceId(path, workspaceId, basePath);
+                inAppUrl = formatUrlWithWorkspaceId(finalPath, workspaceId, basePath);
               }
             }
           }
@@ -312,6 +328,25 @@ export class Table extends PureComponent<TableProps, TableState> {
             onClick: (object) => onShowRelationships(object),
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
+          ...(showDuplicate
+            ? [
+                {
+                  name: i18n.translate(
+                    'savedObjectsManagement.objectsTable.table.columnActions.duplicateActionName',
+                    { defaultMessage: 'Copy to...' }
+                  ),
+                  description: i18n.translate(
+                    'savedObjectsManagement.objectsTable.table.columnActions.duplicateActionDescription',
+                    { defaultMessage: 'Copy this saved object' }
+                  ),
+                  type: 'icon',
+                  icon: 'copy',
+                  onClick: (object: SavedObjectWithMetadata) => onDuplicateSingle(object),
+                  available: (object: SavedObjectWithMetadata) => object.type !== 'config',
+                  'data-test-subj': 'savedObjectsTableAction-duplicate',
+                },
+              ]
+            : []),
           ...actionRegistry.getAll().map((action) => {
             return {
               ...action.euiAction,
@@ -353,7 +388,7 @@ export class Table extends PureComponent<TableProps, TableState> {
     }
 
     const button = (
-      <EuiButton
+      <EuiSmallButton
         iconType="arrowDown"
         iconSide="right"
         onClick={this.toggleExportPopoverVisibility}
@@ -363,20 +398,47 @@ export class Table extends PureComponent<TableProps, TableState> {
           id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
           defaultMessage="Export"
         />
-      </EuiButton>
+      </EuiSmallButton>
     );
 
     const activeActionContents = this.state.activeAction?.render() ?? null;
+
+    const duplicateButton = (
+      <EuiSmallButton
+        key="duplicateSO"
+        iconType="copy"
+        onClick={onDuplicate}
+        isDisabled={selectedSavedObjects.length === 0}
+        data-test-subj="savedObjectsManagementDuplicate"
+      >
+        <FormattedMessage
+          id="savedObjectsManagement.objectsTable.table.duplicateSOButtonLabel"
+          defaultMessage="Copy to..."
+        />
+      </EuiSmallButton>
+    );
 
     return (
       <Fragment>
         {activeActionContents}
         <EuiSearchBar
           box={{ 'data-test-subj': 'savedObjectSearchBar' }}
-          filters={filters as any}
+          filters={filters}
           onChange={this.onChange}
           toolsRight={[
-            <EuiButton
+            <>
+              {useUpdatedUX && (
+                <EuiButtonIcon
+                  iconType="refresh"
+                  size="s"
+                  display="base"
+                  type="base"
+                  onClick={onRefresh}
+                />
+              )}
+            </>,
+            <>{showDuplicate && duplicateButton}</>,
+            <EuiSmallButton
               key="deleteSO"
               iconType="trash"
               color="danger"
@@ -395,14 +457,15 @@ export class Table extends PureComponent<TableProps, TableState> {
                 id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
                 defaultMessage="Delete"
               />
-            </EuiButton>,
+            </EuiSmallButton>,
             <EuiPopover
               key="exportSOOptions"
               button={button}
               isOpen={this.state.isExportPopoverOpen}
               closePopover={this.closeExportPopover}
+              panelPaddingSize="s"
             >
-              <EuiFormRow
+              <EuiCompressedFormRow
                 label={
                   <FormattedMessage
                     id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
@@ -410,7 +473,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                   />
                 }
               >
-                <EuiSwitch
+                <EuiCompressedSwitch
                   name="includeReferencesDeep"
                   label={
                     <FormattedMessage
@@ -421,15 +484,20 @@ export class Table extends PureComponent<TableProps, TableState> {
                   checked={this.state.isIncludeReferencesDeepChecked}
                   onChange={this.toggleIsIncludeReferencesDeepChecked}
                 />
-              </EuiFormRow>
-              <EuiFormRow>
-                <EuiButton key="exportSO" iconType="exportAction" onClick={this.onExportClick} fill>
+              </EuiCompressedFormRow>
+              <EuiCompressedFormRow>
+                <EuiSmallButton
+                  key="exportSO"
+                  iconType="exportAction"
+                  onClick={this.onExportClick}
+                  fill
+                >
                   <FormattedMessage
                     id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
                     defaultMessage="Export"
                   />
-                </EuiButton>
-              </EuiFormRow>
+                </EuiSmallButton>
+              </EuiCompressedFormRow>
             </EuiPopover>,
           ]}
         />

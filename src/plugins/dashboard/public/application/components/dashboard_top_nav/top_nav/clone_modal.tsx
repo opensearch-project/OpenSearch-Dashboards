@@ -33,9 +33,9 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFieldText,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
+  EuiCompressedFieldText,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -136,22 +136,24 @@ export class DashboardCloneModal extends React.Component<Props, State> {
           color="warning"
           data-test-subj="titleDupicateWarnMsg"
         >
-          <p>
-            <FormattedMessage
-              id="dashboard.topNav.cloneModal.dashboardExistsDescription"
-              defaultMessage="Click {confirmClone} to clone the dashboard with the duplicate title."
-              values={{
-                confirmClone: (
-                  <strong>
-                    <FormattedMessage
-                      id="dashboard.topNav.cloneModal.confirmCloneDescription"
-                      defaultMessage="Confirm Clone"
-                    />
-                  </strong>
-                ),
-              }}
-            />
-          </p>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="dashboard.topNav.cloneModal.dashboardExistsDescription"
+                defaultMessage="Click {confirmClone} to clone the dashboard with the duplicate title."
+                values={{
+                  confirmClone: (
+                    <strong>
+                      <FormattedMessage
+                        id="dashboard.topNav.cloneModal.confirmCloneDescription"
+                        defaultMessage="Confirm Clone"
+                      />
+                    </strong>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>
         </EuiCallOut>
       </Fragment>
     );
@@ -166,15 +168,19 @@ export class DashboardCloneModal extends React.Component<Props, State> {
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle"
-              defaultMessage="Clone dashboard"
-            />
+            <EuiText size="s">
+              <h2>
+                <FormattedMessage
+                  id="dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle"
+                  defaultMessage="Clone dashboard"
+                />
+              </h2>
+            </EuiText>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiText>
+          <EuiText size="s">
             <p>
               <FormattedMessage
                 id="dashboard.topNav.cloneModal.enterNewNameForDashboardDescription"
@@ -185,7 +191,7 @@ export class DashboardCloneModal extends React.Component<Props, State> {
 
           <EuiSpacer />
 
-          <EuiFieldText
+          <EuiCompressedFieldText
             autoFocus
             aria-label={i18n.translate('dashboard.cloneModal.cloneDashboardTitleAriaLabel', {
               defaultMessage: 'Cloned Dashboard Title',
@@ -200,14 +206,14 @@ export class DashboardCloneModal extends React.Component<Props, State> {
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="cloneCancelButton" onClick={this.props.onClose}>
+          <EuiSmallButtonEmpty data-test-subj="cloneCancelButton" onClick={this.props.onClose}>
             <FormattedMessage
               id="dashboard.topNav.cloneModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
-          </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
 
-          <EuiButton
+          <EuiSmallButton
             fill
             data-test-subj="cloneConfirmButton"
             onClick={this.cloneDashboard}
@@ -217,7 +223,7 @@ export class DashboardCloneModal extends React.Component<Props, State> {
               id="dashboard.topNav.cloneModal.confirmButtonLabel"
               defaultMessage="Confirm Clone"
             />
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </EuiModal>
     );

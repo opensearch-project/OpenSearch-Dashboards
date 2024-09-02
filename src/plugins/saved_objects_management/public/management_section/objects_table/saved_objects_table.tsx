@@ -41,20 +41,22 @@ import {
   EuiLoadingSpinner,
   EuiOverlayMask,
   EUI_MODAL_CONFIRM_BUTTON,
-  EuiCheckboxGroup,
+  EuiCompressedCheckboxGroup,
   EuiToolTip,
   EuiPageContent,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiModal,
   EuiModalHeader,
   EuiModalBody,
   EuiModalFooter,
-  EuiButtonEmpty,
-  EuiButton,
+  EuiSmallButtonEmpty,
+  EuiSmallButton,
   EuiModalHeaderTitle,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSearchBarProps,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -68,9 +70,10 @@ import {
   ApplicationStart,
   WorkspacesStart,
   WorkspaceAttribute,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportError,
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
-import { PUBLIC_WORKSPACE_ID, PUBLIC_WORKSPACE_NAME } from '../../../../../core/public';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
@@ -94,15 +97,23 @@ import {
   SavedObjectsManagementColumnServiceStart,
   SavedObjectsManagementNamespaceServiceStart,
 } from '../../services';
-import { Header, Table, Flyout, Relationships } from './components';
+import {
+  Header,
+  Table,
+  Flyout,
+  Relationships,
+  SavedObjectsDuplicateModal,
+  DuplicateResultFlyout,
+} from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
+import { DuplicateObject } from '../types';
 import { formatWorkspaceIdParams } from '../../utils';
+import { NavigationPublicPluginStart } from '../../../../navigation/public';
 
 interface ExportAllOption {
   id: string;
   label: string;
 }
-
 export interface SavedObjectsTableProps {
   allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
@@ -123,6 +134,8 @@ export interface SavedObjectsTableProps {
   dateFormat: string;
   dataSourceEnabled: boolean;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  navigationUI: NavigationPublicPluginStart['ui'];
+  useUpdatedUX: boolean;
 }
 
 export interface SavedObjectsTableState {
@@ -133,7 +146,9 @@ export interface SavedObjectsTableState {
   savedObjectCounts: Record<string, Record<string, number>>;
   activeQuery: Query;
   selectedSavedObjects: SavedObjectWithMetadata[];
+  duplicateSelectedSavedObjects: DuplicateObject[];
   isShowingImportFlyout: boolean;
+  isShowingDuplicateModal: boolean;
   isSearching: boolean;
   filteredItemCount: number;
   isShowingRelationships: boolean;
@@ -147,6 +162,10 @@ export interface SavedObjectsTableState {
   currentWorkspaceId?: string;
   workspaceEnabled: boolean;
   availableWorkspaces?: WorkspaceAttribute[];
+  isShowingDuplicateResultFlyout: boolean;
+  failedCopies: SavedObjectsImportError[];
+  successfulCopies: SavedObjectsImportSuccess[];
+  targetWorkspaceName: string;
 }
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
@@ -169,7 +188,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       savedObjectCounts: { type: typeCounts } as Record<string, Record<string, number>>,
       activeQuery: Query.parse(''),
       selectedSavedObjects: [],
+      duplicateSelectedSavedObjects: [],
       isShowingImportFlyout: false,
+      isShowingDuplicateModal: false,
       isSearching: false,
       filteredItemCount: 0,
       isShowingRelationships: false,
@@ -183,19 +204,55 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       currentWorkspaceId: this.props.workspaces.currentWorkspaceId$.getValue(),
       availableWorkspaces: this.props.workspaces.workspaceList$.getValue(),
       workspaceEnabled: this.props.applications.capabilities.workspaces.enabled,
+      isShowingDuplicateResultFlyout: false,
+      failedCopies: [],
+      successfulCopies: [],
+      targetWorkspaceName: '',
     };
   }
 
+  private get findOptions() {
+    const { activeQuery: query, page, perPage } = this.state;
+    const { allowedTypes, namespaceRegistry } = this.props;
+    const { queryText, visibleTypes, visibleNamespaces, visibleWorkspaces } = parseQuery(query);
+    const filteredTypes = filterQuery(allowedTypes, visibleTypes);
+    // "searchFields" is missing from the "findOptions" but gets injected via the API.
+    // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
+    const findOptions: SavedObjectsFindOptions = formatWorkspaceIdParams({
+      search: queryText ? `${queryText}*` : undefined,
+      perPage,
+      page: page + 1,
+      fields: ['id'],
+      type: filteredTypes,
+      workspaces: this.workspaceIdQuery,
+    });
+
+    const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
+    if (availableNamespaces.length) {
+      const filteredNamespaces = filterQuery(availableNamespaces, visibleNamespaces);
+      findOptions.namespaces = filteredNamespaces;
+    }
+
+    if (visibleWorkspaces?.length) {
+      findOptions.workspaces = this.workspaceNamesToIds(visibleWorkspaces);
+    }
+
+    if (findOptions.type.length > 1) {
+      findOptions.sortField = 'type';
+    }
+
+    return findOptions;
+  }
+
   private get workspaceIdQuery() {
-    const { availableWorkspaces, currentWorkspaceId, workspaceEnabled } = this.state;
+    const { currentWorkspaceId, workspaceEnabled } = this.state;
     // workspace is turned off
     if (!workspaceEnabled) {
       return undefined;
     } else {
-      // application home
+      // not in any workspace
       if (!currentWorkspaceId) {
-        // public workspace is virtual at this moment
-        return availableWorkspaces?.map((ws) => ws.id).concat(PUBLIC_WORKSPACE_ID);
+        return undefined;
       } else {
         return [currentWorkspaceId];
       }
@@ -205,7 +262,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   private get workspaceNameIdLookup() {
     const { availableWorkspaces } = this.state;
     const workspaceNameIdMap = new Map<string, string>();
-    workspaceNameIdMap.set(PUBLIC_WORKSPACE_NAME, PUBLIC_WORKSPACE_ID);
     // workspace name is unique across the system
     availableWorkspaces?.forEach((workspace) => {
       workspaceNameIdMap.set(workspace.name, workspace.id);
@@ -251,6 +307,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       typesToInclude: filteredTypes,
       searchString: queryText,
       workspaces: this.workspaceIdQuery,
+      availableWorkspaces: this.state.availableWorkspaces?.map((ws) => ws.id),
     });
 
     if (availableNamespaces.length) {
@@ -287,6 +344,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       typesToInclude: allowedTypes,
       searchString: queryText,
       workspaces: this.workspaceIdQuery,
+      availableWorkspaces: this.state.availableWorkspaces?.map((ws) => ws.id),
     });
 
     if (availableNamespaces.length) {
@@ -332,37 +390,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   debouncedFetchObjects = debounce(async () => {
-    const { activeQuery: query, page, perPage } = this.state;
-    const { notifications, http, allowedTypes, namespaceRegistry } = this.props;
-    const { queryText, visibleTypes, visibleNamespaces, visibleWorkspaces } = parseQuery(query);
-    const filteredTypes = filterQuery(allowedTypes, visibleTypes);
-    // "searchFields" is missing from the "findOptions" but gets injected via the API.
-    // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
-    const findOptions: SavedObjectsFindOptions = formatWorkspaceIdParams({
-      search: queryText ? `${queryText}*` : undefined,
-      perPage,
-      page: page + 1,
-      fields: ['id'],
-      type: filteredTypes,
-      workspaces: this.workspaceIdQuery,
-    });
-
-    const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
-    if (availableNamespaces.length) {
-      const filteredNamespaces = filterQuery(availableNamespaces, visibleNamespaces);
-      findOptions.namespaces = filteredNamespaces;
-    }
-
-    if (visibleWorkspaces?.length) {
-      findOptions.workspaces = this.workspaceNamesToIds(visibleWorkspaces);
-    }
-
-    if (findOptions.type.length > 1) {
-      findOptions.sortField = 'type';
-    }
+    const { activeQuery: query } = this.state;
+    const { notifications, http } = this.props;
 
     try {
-      const resp = await findObjects(http, findOptions);
+      const resp = await findObjects(http, this.findOptions);
       if (!this._isMounted) {
         return;
       }
@@ -666,6 +698,127 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     );
   }
 
+  hideDuplicateModal = () => {
+    this.setState({ isShowingDuplicateModal: false });
+  };
+
+  onDuplicateAll = async () => {
+    const { notifications, http } = this.props;
+    const findOptions = this.findOptions;
+    findOptions.perPage = 9999;
+    findOptions.page = 1;
+
+    try {
+      const resp = await findObjects(http, findOptions);
+      const duplicateObjects = resp.savedObjects.map((obj) => ({
+        id: obj.id,
+        type: obj.type,
+        meta: obj.meta,
+        workspaces: obj.workspaces,
+      }));
+      this.setState({
+        duplicateSelectedSavedObjects: duplicateObjects,
+        isShowingDuplicateModal: true,
+      });
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate(
+          'savedObjectsManagement.objectsTable.unableFindSavedObjectsNotificationMessage',
+          { defaultMessage: 'Unable find saved objects' }
+        ),
+        text: `${error}`,
+      });
+    }
+  };
+
+  onDuplicate = async (
+    savedObjects: DuplicateObject[],
+    includeReferencesDeep: boolean,
+    targetWorkspace: string,
+    targetWorkspaceName: string
+  ) => {
+    const { notifications, workspaces } = this.props;
+    const workspaceClient = workspaces.client$.getValue();
+
+    const showErrorNotification = () => {
+      notifications.toasts.addDanger({
+        title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
+          defaultMessage:
+            'Unable to copy {errorCount, plural, one {# saved object} other {# saved objects}}.',
+          values: { errorCount: savedObjects.length },
+        }),
+      });
+    };
+    if (!workspaceClient) {
+      showErrorNotification();
+      return;
+    }
+    const objectsToDuplicate = savedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
+    try {
+      const result = await workspaceClient.copy(
+        objectsToDuplicate,
+        targetWorkspace,
+        includeReferencesDeep
+      );
+
+      this.setState({
+        isShowingDuplicateResultFlyout: true,
+        failedCopies: result.success ? [] : result.errors,
+        successfulCopies: result.successCount > 0 ? result.successResults : [],
+        targetWorkspaceName,
+      });
+    } catch (e) {
+      showErrorNotification();
+    }
+    this.hideDuplicateModal();
+    await this.refreshObjects();
+  };
+
+  renderDuplicateModal() {
+    const { isShowingDuplicateModal, duplicateSelectedSavedObjects } = this.state;
+
+    if (!isShowingDuplicateModal) {
+      return null;
+    }
+
+    return (
+      <SavedObjectsDuplicateModal
+        http={this.props.http}
+        workspaces={this.props.workspaces}
+        onDuplicate={this.onDuplicate}
+        notifications={this.props.notifications}
+        onClose={this.hideDuplicateModal}
+        selectedSavedObjects={duplicateSelectedSavedObjects}
+      />
+    );
+  }
+
+  hideDuplicateResultFlyout = () => {
+    this.setState({ isShowingDuplicateResultFlyout: false });
+  };
+
+  renderDuplicateResultFlyout() {
+    const {
+      isShowingDuplicateResultFlyout,
+      targetWorkspaceName,
+      failedCopies,
+      successfulCopies,
+    } = this.state;
+
+    if (!isShowingDuplicateResultFlyout) {
+      return null;
+    }
+
+    return (
+      <DuplicateResultFlyout
+        workspaceName={targetWorkspaceName}
+        failedCopies={failedCopies}
+        successfulCopies={successfulCopies}
+        onClose={this.hideDuplicateResultFlyout}
+      />
+    );
+  }
+
   renderRelationships() {
     if (!this.state.isShowingRelationships) {
       return null;
@@ -679,6 +832,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         close={this.onHideRelationships}
         goInspectObject={this.props.goInspectObject}
         canGoInApp={this.props.canGoInApp}
+        useUpdatedUX={this.props.useUpdatedUX}
       />
     );
   }
@@ -740,12 +894,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           }
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         >
-          <p>
-            <FormattedMessage
-              id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
-              defaultMessage="This action will delete the following saved objects:"
-            />
-          </p>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+                defaultMessage="This action will delete the following saved objects:"
+              />
+            </p>
+          </EuiText>
           <EuiInMemoryTable
             items={selectedSavedObjects}
             columns={[
@@ -814,17 +970,21 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       <EuiModal onClose={this.closeExportAllModal}>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
-              defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
-              values={{
-                filteredItemCount,
-              }}
-            />
+            <EuiText size="s">
+              <h2>
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
+                  defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
+                  values={{
+                    filteredItemCount,
+                  }}
+                />
+              </h2>
+            </EuiText>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          <EuiFormRow
+          <EuiCompressedFormRow
             label={
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalDescription"
@@ -833,7 +993,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             }
             labelType="legend"
           >
-            <EuiCheckboxGroup
+            <EuiCompressedCheckboxGroup
               options={exportAllOptions}
               idToSelectedMap={exportAllSelectedOptions}
               onChange={(optionId) => {
@@ -849,9 +1009,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
                 });
               }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer size="m" />
-          <EuiSwitch
+          <EuiCompressedSwitch
             name="includeReferencesDeep"
             label={
               <FormattedMessage
@@ -868,20 +1028,20 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             <EuiFlexItem grow={false}>
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={this.closeExportAllModal}>
+                  <EuiSmallButtonEmpty onClick={this.closeExportAllModal}>
                     <FormattedMessage
                       id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
                       defaultMessage="Cancel"
                     />
-                  </EuiButtonEmpty>
+                  </EuiSmallButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton fill onClick={this.onExportAll}>
+                  <EuiSmallButton fill onClick={this.onExportAll}>
                     <FormattedMessage
                       id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
                       defaultMessage="Export all"
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -904,7 +1064,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       workspaceEnabled,
       currentWorkspaceId,
     } = this.state;
-    const { http, allowedTypes, applications, namespaceRegistry } = this.props;
+    const {
+      http,
+      allowedTypes,
+      applications,
+      namespaceRegistry,
+      useUpdatedUX,
+      navigationUI,
+    } = this.props;
 
     const selectionConfig = {
       onSelectionChange: this.onSelectionChanged,
@@ -917,7 +1084,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       view: `${type} (${typeCounts[type] || 0})`,
     }));
 
-    const filters = [
+    const filters: EuiSearchBarProps['filters'] = [
       {
         type: 'field_value_selection',
         field: 'type',
@@ -926,6 +1093,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         }),
         multiSelect: 'or',
         options: filterOptions,
+        searchThreshold: 1,
       },
     ];
 
@@ -956,12 +1124,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     // Add workspace filter
     if (workspaceEnabled && availableWorkspaces?.length) {
       const wsCounts = savedObjectCounts.workspaces || {};
-      const publicWorkspaceExists =
-        availableWorkspaces.findIndex((workspace) => workspace.id === PUBLIC_WORKSPACE_ID) > -1;
       const wsFilterOptions = availableWorkspaces
-        .filter((ws) => {
-          return this.workspaceIdQuery?.includes(ws.id);
-        })
+        .filter((ws) => (currentWorkspaceId ? currentWorkspaceId === ws.id : true))
         .map((ws) => {
           return {
             name: ws.name,
@@ -970,23 +1134,15 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           };
         });
 
-      // add public workspace option only if we don't have it as real workspace
-      if (!currentWorkspaceId && !publicWorkspaceExists) {
-        wsFilterOptions.push({
-          name: PUBLIC_WORKSPACE_NAME,
-          value: PUBLIC_WORKSPACE_NAME,
-          view: `${PUBLIC_WORKSPACE_NAME} (${wsCounts[PUBLIC_WORKSPACE_ID] || 0})`,
-        });
-      }
-
       filters.push({
         type: 'field_value_selection',
         field: 'workspaces',
         name: i18n.translate('savedObjectsManagement.objectsTable.table.workspaceFilterName', {
-          defaultMessage: 'Workspaces',
+          defaultMessage: 'Workspace',
         }),
         multiSelect: 'or',
         options: wsFilterOptions,
+        searchThreshold: 1,
       });
     }
 
@@ -996,11 +1152,18 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         {this.renderRelationships()}
         {this.renderDeleteConfirmModal()}
         {this.renderExportAllOptionsModal()}
+        {this.renderDuplicateModal()}
+        {this.renderDuplicateResultFlyout()}
         <Header
           onExportAll={() => this.setState({ isShowingExportAllOptionsModal: true })}
           onImport={this.showImportFlyout}
+          showDuplicateAll={this.state.workspaceEnabled}
+          onDuplicate={this.onDuplicateAll}
           onRefresh={this.refreshObjects}
-          filteredCount={filteredItemCount}
+          objectCount={savedObjects.length}
+          useUpdatedUX={useUpdatedUX}
+          navigationUI={navigationUI}
+          applications={applications}
         />
         <EuiSpacer size="xs" />
         <RedirectAppLinks application={applications}>
@@ -1017,6 +1180,18 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onExport={this.onExport}
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
+            onDuplicate={() =>
+              this.setState({
+                isShowingDuplicateModal: true,
+                duplicateSelectedSavedObjects: selectedSavedObjects,
+              })
+            }
+            onDuplicateSingle={(object) =>
+              this.setState({
+                duplicateSelectedSavedObjects: [object],
+                isShowingDuplicateModal: true,
+              })
+            }
             onActionRefresh={this.refreshObject}
             goInspectObject={this.props.goInspectObject}
             pageIndex={page}
@@ -1029,6 +1204,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             dateFormat={this.props.dateFormat}
             availableWorkspaces={availableWorkspaces}
             currentWorkspaceId={currentWorkspaceId}
+            showDuplicate={this.state.workspaceEnabled}
+            onRefresh={this.refreshObjects}
+            useUpdatedUX={useUpdatedUX}
           />
         </RedirectAppLinks>
       </EuiPageContent>

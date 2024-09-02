@@ -29,18 +29,24 @@
  */
 
 import { QueryStringManager } from './query_string_manager';
-import { Storage } from '../../../../opensearch_dashboards_utils/public/storage';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { coreMock } from '../../../../../core/public/mocks';
 import { Query } from '../../../common/query';
+import { ISearchInterceptor } from '../../search';
+import { DataStorage } from 'src/plugins/data/common';
 
 describe('QueryStringManager', () => {
   let service: QueryStringManager;
+  let storage: DataStorage;
+  let mockSearchInterceptor: jest.Mocked<ISearchInterceptor>;
 
   beforeEach(() => {
+    storage = new DataStorage(window.localStorage, 'opensearch_dashboards.');
+    mockSearchInterceptor = {} as jest.Mocked<ISearchInterceptor>;
+
     service = new QueryStringManager(
-      new Storage(new StubBrowserStorage()),
-      coreMock.createSetup().uiSettings
+      storage,
+      coreMock.createSetup().uiSettings,
+      mockSearchInterceptor
     );
   });
 

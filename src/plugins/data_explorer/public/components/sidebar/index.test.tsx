@@ -59,6 +59,9 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => {
         overlays: {
           openConfirm: jest.fn(),
         },
+        uiSettings: {
+          get: jest.fn(),
+        },
       },
     }),
     withOpenSearchDashboards: () => (Component: React.ComponentClass) => (props: any) => (

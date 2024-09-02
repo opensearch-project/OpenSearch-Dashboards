@@ -1,0 +1,411 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ReviewS3Datasource renders correctly 1`] = `
+<MemoryRouter>
+  <Router
+    history={
+      Object {
+        "action": "POP",
+        "block": [Function],
+        "canGo": [Function],
+        "createHref": [Function],
+        "entries": Array [
+          Object {
+            "hash": "",
+            "key": "consistentKey",
+            "pathname": "/",
+            "search": "",
+            "state": undefined,
+          },
+        ],
+        "go": [Function],
+        "goBack": [Function],
+        "goForward": [Function],
+        "index": 0,
+        "length": 1,
+        "listen": [Function],
+        "location": Object {
+          "hash": "",
+          "key": "consistentKey",
+          "pathname": "/",
+          "search": "",
+          "state": undefined,
+        },
+        "push": [Function],
+        "replace": [Function],
+      }
+    }
+  >
+    <ReviewS3Datasource
+      currentArn="arn:aws:iam::123456789012:role/S3Access"
+      currentAuthMethod="basicauth"
+      currentDetails="Test description for S3 data source."
+      currentName="Test S3"
+      currentStore="s3://mybucket"
+      goBack={[MockFunction]}
+      selectedQueryPermissionRoles={
+        Array [
+          Object {
+            "label": "Admin",
+            "value": "admin",
+          },
+        ]
+      }
+    >
+      <div>
+        <EuiPanel>
+          <div
+            className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+          >
+            <EuiText
+              size="s"
+            >
+              <div
+                className="euiText euiText--small"
+              >
+                <h1
+                  data-test-subj="reviewTitle"
+                >
+                  Review Amazon S3 data source configuration
+                </h1>
+              </div>
+            </EuiText>
+            <EuiSpacer
+              size="s"
+            >
+              <div
+                className="euiSpacer euiSpacer--s"
+              />
+            </EuiSpacer>
+            <EuiSpacer>
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+            </EuiSpacer>
+            <EuiFlexGroup
+              justifyContent="spaceBetween"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <EuiText>
+                      <div
+                        className="euiText euiText--medium"
+                      >
+                        <h3>
+                          Data source configuration
+                        </h3>
+                      </div>
+                    </EuiText>
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <EuiSmallButton
+                      data-test-subj="editButton"
+                      onClick={[MockFunction]}
+                    >
+                      <EuiButton
+                        data-test-subj="editButton"
+                        onClick={[MockFunction]}
+                        size="s"
+                      >
+                        <EuiButtonDisplay
+                          baseClassName="euiButton"
+                          data-test-subj="editButton"
+                          disabled={false}
+                          element="button"
+                          isDisabled={false}
+                          onClick={[MockFunction]}
+                          size="s"
+                          type="button"
+                        >
+                          <button
+                            className="euiButton euiButton--primary euiButton--small"
+                            data-test-subj="editButton"
+                            disabled={false}
+                            onClick={[MockFunction]}
+                            style={
+                              Object {
+                                "minWidth": undefined,
+                              }
+                            }
+                            type="button"
+                          >
+                            <EuiButtonContent
+                              className="euiButton__content"
+                              iconGap="m"
+                              iconSide="left"
+                              textProps={
+                                Object {
+                                  "className": "euiButton__text",
+                                }
+                              }
+                            >
+                              <span
+                                className="euiButtonContent euiButton__content"
+                              >
+                                <span
+                                  className="euiButton__text"
+                                >
+                                  Edit
+                                </span>
+                              </span>
+                            </EuiButtonContent>
+                          </button>
+                        </EuiButtonDisplay>
+                      </EuiButton>
+                    </EuiSmallButton>
+                  </div>
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+            <EuiHorizontalRule>
+              <hr
+                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+              />
+            </EuiHorizontalRule>
+            <EuiSpacer>
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+            </EuiSpacer>
+            <EuiFlexGroup>
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <EuiFlexItem>
+                  <div
+                    className="euiFlexItem"
+                  >
+                    <EuiFlexGroup
+                      direction="column"
+                    >
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                      >
+                        <EuiFlexItem
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiText
+                              className="overview-title"
+                            >
+                              <div
+                                className="euiText euiText--medium overview-title"
+                              >
+                                Data source name
+                              </div>
+                            </EuiText>
+                            <EuiText
+                              className="overview-content"
+                              data-test-subj="currentName"
+                              size="s"
+                            >
+                              <div
+                                className="euiText euiText--small overview-content"
+                                data-test-subj="currentName"
+                              >
+                                Test S3
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiText
+                              className="overview-title"
+                            >
+                              <div
+                                className="euiText euiText--medium overview-title"
+                              >
+                                Description
+                              </div>
+                            </EuiText>
+                            <EuiText
+                              className="overview-content"
+                              data-test-subj="currentDetails"
+                              size="s"
+                            >
+                              <div
+                                className="euiText euiText--small overview-content"
+                                data-test-subj="currentDetails"
+                              >
+                                Test description for S3 data source.
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <div
+                    className="euiFlexItem"
+                  >
+                    <EuiFlexGroup
+                      direction="column"
+                    >
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                      >
+                        <EuiFlexItem
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiText
+                              className="overview-title"
+                            >
+                              <div
+                                className="euiText euiText--medium overview-title"
+                              >
+                                AWS Glue authentication ARN
+                              </div>
+                            </EuiText>
+                            <EuiText
+                              className="overview-content"
+                              data-test-subj="currentArn"
+                              size="s"
+                            >
+                              <div
+                                className="euiText euiText--small overview-content"
+                                data-test-subj="currentArn"
+                              >
+                                arn:aws:iam::123456789012:role/S3Access
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiText
+                              className="overview-title"
+                            >
+                              <div
+                                className="euiText euiText--medium overview-title"
+                              >
+                                AWS Glue index store URI
+                              </div>
+                            </EuiText>
+                            <EuiText
+                              className="overview-content"
+                              data-test-subj="currentStore"
+                              size="s"
+                            >
+                              <div
+                                className="euiText euiText--small overview-content"
+                                data-test-subj="currentStore"
+                              >
+                                s3://mybucket
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <div
+                    className="euiFlexItem"
+                  >
+                    <EuiFlexGroup
+                      direction="column"
+                    >
+                      <div
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+                      >
+                        <EuiFlexItem
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiText
+                              className="overview-title"
+                            >
+                              <div
+                                className="euiText euiText--medium overview-title"
+                              >
+                                Query permissions
+                              </div>
+                            </EuiText>
+                            <EuiText
+                              className="overview-content"
+                              data-test-subj="currentPermissions"
+                              size="s"
+                            >
+                              <div
+                                className="euiText euiText--small overview-content"
+                                data-test-subj="currentPermissions"
+                              >
+                                Restricted - Admin
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          grow={false}
+                        >
+                          <div
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <EuiText
+                              className="overview-title"
+                            >
+                              <div
+                                className="euiText euiText--medium overview-title"
+                              >
+                                Authentication method
+                              </div>
+                            </EuiText>
+                            <EuiText
+                              className="overview-content"
+                              data-test-subj="currentAuthMethod"
+                              size="s"
+                            >
+                              <div
+                                className="euiText euiText--small overview-content"
+                                data-test-subj="currentAuthMethod"
+                              >
+                                Basic authentication
+                              </div>
+                            </EuiText>
+                          </div>
+                        </EuiFlexItem>
+                      </div>
+                    </EuiFlexGroup>
+                  </div>
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </div>
+        </EuiPanel>
+      </div>
+    </ReviewS3Datasource>
+  </Router>
+</MemoryRouter>
+`;

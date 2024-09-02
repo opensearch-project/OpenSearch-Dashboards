@@ -1,0 +1,201 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.osdQueryEditor__wrapper {
+  display: flex;
+}
+
+.osdQueryEditor__editorAndSelectorWrapper {
+  z-index: $euiZContentMenu;
+  max-width: 1200px;
+}
+
+.osdQueryEditorHeader {
+  max-height: 400px;
+}
+
+.osdQueryEditorFooter-isHidden {
+  display: none;
+}
+
+.osdQueryEditorFooter {
+  color: $euiTextSubduedColor; // Apply the subdued color to all text in this class
+  max-height: 25px;
+
+  * {
+    color: inherit;
+    font-size: $euiFontSizeXS;
+    align-items: center;
+    height: 100%;
+  }
+}
+
+.osdQueryEditor__filterBarWrapper {
+  margin-top: -10px;
+}
+
+.osdQueryEditor__collapseWrapper {
+  max-width: 32px;
+  box-shadow: 1px 0 0 0 $euiColorLightShade;
+}
+
+.osdQueryEditor__languageWrapper {
+  align-items: center;
+  justify-content: center;
+  max-height: 40px;
+  border: $euiBorderThin;
+}
+
+.osdQueryEditor__dataSourceWrapper {
+  .dataSourceSelect {
+    border-bottom: $euiBorderThin !important;
+
+    :first-child {
+      box-shadow: none !important;
+      height: 100%;
+      border-radius: 0;
+    }
+
+    div:is([class$="--group"]) {
+      padding: 0 !important;
+    }
+  }
+}
+
+.osdQueryEditor__dataSetWrapper {
+  max-width: 350px;
+
+  .dataExplorerDSSelect {
+    border-bottom: $euiBorderThin !important;
+    min-width: 300px;
+
+    span:is([class$="__text"]) {
+      width: 350px;
+      text-align: left;
+    }
+
+    div:is([class$="--group"]) {
+      padding: 0 !important;
+    }
+
+    .sourceRefreshText {
+      max-height: 40px;
+    }
+  }
+}
+
+.osdQueryEditor__prependWrapper {
+  box-shadow: -1px 0 0 0 $euiColorLightShade;
+  max-width: 32px;
+}
+
+.osdQueryEditor__prependWrapper-isCollapsed {
+  box-shadow: none;
+  max-width: 32px;
+}
+
+.osdQueryEditor--updateButtonWrapper {
+  :first-child {
+    min-width: 0 !important;
+  }
+}
+
+.osdQueryEditor__datasetSelectorWrapper {
+  :first-child {
+    border-bottom: $euiBorderThin !important;
+  }
+}
+
+@include euiBreakpoint("xs", "s") {
+  .osdQueryEditor--withDatePicker {
+    > :first-child {
+      // Change the order of the query bar and date picker so that the date picker is top
+      // and the query bar still aligns with filters
+      order: 1;
+
+      // EUI Flexbox adds too much margin between responded items, this just moves it up
+      margin-top: $euiSizeS * -1;
+    }
+  }
+}
+
+// IE specific fix for the datepicker to not collapse
+@include euiBreakpoint("m", "l", "xl") {
+  .osdQueryEditor__datePickerWrapper {
+    max-width: 40vw;
+    flex-grow: 0 !important;
+    flex-basis: auto !important;
+
+    &.osdQueryEditor__datePickerWrapper-isHidden {
+      width: 0;
+      overflow: hidden;
+      max-width: 0;
+    }
+  }
+}
+
+// ------------
+
+.osdQueryEditor {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: -3px; // TODO: Hack to handle the renderSharingMetaFields adding a new empty div to the UI
+
+  &.expanded.emptyExpanded {
+    .osdQueryEditor__dataSetPicker {
+      width: auto;
+    }
+  }
+}
+
+.osdQueryEditor__topBar {
+  display: flex;
+  align-items: center;
+  padding: $euiSizeXS;
+
+  > * {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .osdQueryEditor__querycontrols {
+    float: right;
+    margin: $euiSizeS $euiSizeS;
+  }
+
+  .osdQueryEditor__dataSetPicker {
+    width: 155px;
+    padding-left: 4px;
+
+    // To prevent overflow due to Oui styles
+    .euiToolTipAnchor {
+      display: block;
+    }
+  }
+
+  .osdQueryEditor__input {
+    flex-grow: 1;
+  }
+
+  #savedQueryPopover {
+    padding-left: $euiSizeXS;
+    border-left: $euiBorderThin;
+  }
+}
+
+// TODO: improve how this is styled. Styling just for the DQL editor.
+.osdQueryEditor__body .globalFilterGroup__wrapper {
+  margin-top: -$euiSizeS;
+}
+
+.osdQuerEditor__singleLine {
+  padding: $euiSizeS;
+  background-color: $euiColorEmptyShade;
+  overflow: initial !important; // needed for suggestion window, otherwise will be hidden in child
+
+  .monaco-editor .view-overlays .current-line {
+    border: none;
+  }
+}

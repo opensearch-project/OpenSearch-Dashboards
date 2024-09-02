@@ -30,10 +30,9 @@
 
 import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@osd/i18n';
-
 import classNames from 'classnames';
 import {
-  EuiTextArea,
+  EuiCompressedTextArea,
   EuiOutsideClickDetector,
   PopoverAnchorPosition,
   EuiFlexGroup,
@@ -42,12 +41,13 @@ import {
   EuiLink,
   htmlIdGenerator,
   EuiPortal,
+  EuiText,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
-import { IDataPluginServices, IIndexPattern, Query, TimeRange } from '../..';
+import { IDataPluginServices, IIndexPattern, IndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
 import {
@@ -56,18 +56,13 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
-import { LegacyQueryLanguageSwitcher } from './legacy_language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
-import { Settings, SuggestionsComponent } from '..';
-import { DataSettings, QueryEnhancement } from '../types';
+import { SuggestionsComponent } from '..';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
   query: Query;
-  isEnhancementsEnabled?: boolean;
-  queryEnhancements?: Map<string, QueryEnhancement>;
-  settings?: Settings;
   disableAutoFocus?: boolean;
   screenTitle?: string;
   prepend?: any;
@@ -76,10 +71,9 @@ export interface QueryStringInputProps {
   placeholder?: string;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onBlur?: () => void;
-  onChange?: (query: Query, dateRange?: TimeRange) => void;
+  onChange?: (query: Query) => void;
   onChangeQueryInputFocus?: (isFocused: boolean) => void;
-  onSubmit?: (query: Query, dateRange?: TimeRange) => void;
-  getQueryStringInitialValue?: (language: string) => string;
+  onSubmit?: (query: Query) => void;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
   className?: string;
@@ -114,7 +108,6 @@ const KEY_CODES = {
 };
 
 // Needed for React.lazy
-// TODO: MQL export this and let people extended this
 // eslint-disable-next-line import/no-default-export
 export default class QueryStringInputUI extends Component<Props, State> {
   public state: State = {
@@ -137,13 +130,9 @@ export default class QueryStringInputUI extends Component<Props, State> {
   private queryBarInputDivRefInstance: RefObject<HTMLDivElement> = createRef();
 
   private getQueryString = () => {
-    if (!this.props.query.query) {
-      return this.props.getQueryStringInitialValue?.(this.props.query.language) ?? '';
-    }
     return toUser(this.props.query.query);
   };
 
-  // TODO: MQL don't do this here? || Fetch data sources
   private fetchIndexPatterns = async () => {
     const stringPatterns = this.props.indexPatterns.filter(
       (indexPattern) => typeof indexPattern === 'string'
@@ -195,13 +184,12 @@ export default class QueryStringInputUI extends Component<Props, State> {
       const suggestions =
         (await this.services.data.autocomplete.getQuerySuggestions({
           language,
-          indexPatterns,
+          indexPattern: indexPatterns[0] as IndexPattern,
           query: queryString,
           selectionStart,
           selectionEnd,
           signal: this.abortController.signal,
         })) || [];
-
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
       // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error
@@ -235,7 +223,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
   }, 100);
 
-  private onSubmit = (query: Query, dateRange?: TimeRange) => {
+  private onSubmit = (query: Query) => {
     if (this.props.onSubmit) {
       if (this.persistedLog) {
         this.persistedLog.add(query.query);
@@ -245,11 +233,11 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private onChange = (query: Query, dateRange?: TimeRange) => {
+  private onChange = (query: Query) => {
     this.updateSuggestions();
 
     if (this.props.onChange) {
-      this.props.onChange({ query: fromUser(query.query), language: query.language }, dateRange);
+      this.props.onChange({ query: fromUser(query.query), language: query.language });
     }
   };
 
@@ -393,13 +381,13 @@ export default class QueryStringInputUI extends Component<Props, State> {
       'field' in suggestion &&
       suggestion.field.subType &&
       suggestion.field.subType.nested &&
-      !this.services.storage.get('opensearchDashboards.DQLNestedQuerySyntaxInfoOptOut')
+      !this.services.storage.get('DQLNestedQuerySyntaxInfoOptOut')
     ) {
       const { notifications, docLinks } = this.services;
 
       const onDQLNestedQuerySyntaxInfoOptOut = (toast: Toast) => {
         if (!this.services.storage) return;
-        this.services.storage.set('opensearchDashboards.DQLNestedQuerySyntaxInfoOptOut', true);
+        this.services.storage.set('DQLNestedQuerySyntaxInfoOptOut', true);
         notifications!.toasts.remove(toast);
       };
 
@@ -410,24 +398,29 @@ export default class QueryStringInputUI extends Component<Props, State> {
           }),
           text: toMountPoint(
             <div>
-              <p>
-                <FormattedMessage
-                  id="data.query.queryBar.DQLNestedQuerySyntaxInfoText"
-                  defaultMessage="It looks like you're querying on a nested field.
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="data.query.queryBar.DQLNestedQuerySyntaxInfoText"
+                    defaultMessage="It looks like you're querying on a nested field.
                   You can construct DQL syntax for nested queries in different ways, depending on the results you want.
                   Learn more in our {link}."
-                  values={{
-                    link: (
-                      <EuiLink href={docLinks.links.opensearchDashboards.dql.base} target="_blank">
-                        <FormattedMessage
-                          id="data.query.queryBar.DQLNestedQuerySyntaxInfoDocLinkText"
-                          defaultMessage="docs"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
+                    values={{
+                      link: (
+                        <EuiLink
+                          href={docLinks.links.opensearchDashboards.dql.base}
+                          target="_blank"
+                        >
+                          <FormattedMessage
+                            id="data.query.queryBar.DQLNestedQuerySyntaxInfoDocLinkText"
+                            defaultMessage="docs"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiButton size="s" onClick={() => onDQLNestedQuerySyntaxInfoOptOut(toast)}>
@@ -468,7 +461,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  // TODO: MQL consider moving language select language of setting search source here
   private onSelectLanguage = (language: string) => {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
@@ -477,28 +469,11 @@ export default class QueryStringInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    const newQuery = {
-      query: this.props.getQueryStringInitialValue?.(language) ?? '',
-      language,
-    };
+    this.services.storage.set('userQueryLanguage', language);
 
-    const fields = this.props.queryEnhancements?.get(newQuery.language)?.fields;
-    const newSettings: DataSettings = {
-      userQueryLanguage: newQuery.language,
-      userQueryString: newQuery.query,
-      ...(fields && { uiOverrides: { fields } }),
-    };
-    this.props.settings?.updateSettings(newSettings);
-
-    const dateRangeEnhancement = this.props.queryEnhancements?.get(language)?.searchBar?.dateRange;
-    const dateRange = dateRangeEnhancement
-      ? {
-          from: dateRangeEnhancement.initialFrom!,
-          to: dateRangeEnhancement.initialTo!,
-        }
-      : undefined;
-    this.onChange(newQuery, dateRange);
-    this.onSubmit(newQuery, dateRange);
+    const newQuery = { query: '', language };
+    this.onChange(newQuery);
+    this.onSubmit(newQuery);
   };
 
   private onOutsideClick = () => {
@@ -641,21 +616,13 @@ export default class QueryStringInputUI extends Component<Props, State> {
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
     const className = classNames(
-      'euiFormControlLayout euiFormControlLayout--group osdQueryBar__wrap',
+      'euiFormControlLayout euiFormControlLayout--group euiFormControlLayout--compressed osdQueryBar__wrap',
       this.props.className
     );
 
     return (
       <div className={className}>
         {this.props.prepend}
-        {!!this.props.isEnhancementsEnabled && (
-          <QueryLanguageSwitcher
-            language={this.props.query.language}
-            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-            onSelectLanguage={this.onSelectLanguage}
-            appName={this.services.appName}
-          />
-        )}
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
             {...ariaCombobox}
@@ -673,7 +640,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
               className="euiFormControlLayout__childrenWrapper osdQueryBar__textareaWrap"
               ref={this.queryBarInputDivRefInstance}
             >
-              <EuiTextArea
+              <EuiCompressedTextArea
                 placeholder={
                   this.props.placeholder ||
                   i18n.translate('data.query.queryBar.searchInputPlaceholder', {
@@ -717,7 +684,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
                 isInvalid={this.props.isInvalid}
               >
                 {this.getQueryString()}
-              </EuiTextArea>
+              </EuiCompressedTextArea>
             </div>
             <EuiPortal>
               <SuggestionsComponent
@@ -733,13 +700,12 @@ export default class QueryStringInputUI extends Component<Props, State> {
             </EuiPortal>
           </div>
         </EuiOutsideClickDetector>
-        {!!!this.props.isEnhancementsEnabled && (
-          <LegacyQueryLanguageSwitcher
-            language={this.props.query.language}
-            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-            onSelectLanguage={this.onSelectLanguage}
-          />
-        )}
+
+        <QueryLanguageSwitcher
+          language={this.props.query.language}
+          anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+          onSelectLanguage={this.onSelectLanguage}
+        />
       </div>
     );
   }

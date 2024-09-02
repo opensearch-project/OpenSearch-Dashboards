@@ -44,10 +44,10 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFormLabel,
   EuiSpacer,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiTitle,
   EuiHorizontalRule,
   EuiCode,
@@ -105,7 +105,7 @@ export class TablePanelConfig extends Component {
         <div>
           <div className="tvbPanelConfig__container">
             <EuiPanel>
-              <EuiText>
+              <EuiText size="s">
                 <p>
                   <FormattedMessage
                     id="visTypeTimeseries.table.dataTab.defineFieldDescription"
@@ -117,7 +117,7 @@ export class TablePanelConfig extends Component {
 
               <EuiFlexGroup responsive={false} wrap={true}>
                 <EuiFlexItem data-test-subj="groupByField">
-                  <EuiFormRow
+                  <EuiCompressedFormRow
                     id={htmlId('field')}
                     label={
                       <FormattedMessage
@@ -133,10 +133,10 @@ export class TablePanelConfig extends Component {
                       onChange={this.handlePivotChange}
                       fullWidth
                     />
-                  </EuiFormRow>
+                  </EuiCompressedFormRow>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFormRow
+                  <EuiCompressedFormRow
                     id={htmlId('pivotLabelInput')}
                     label={
                       <FormattedMessage
@@ -146,16 +146,16 @@ export class TablePanelConfig extends Component {
                     }
                     fullWidth
                   >
-                    <EuiFieldText
+                    <EuiCompressedFieldText
                       data-test-subj="columnLabelName"
                       onChange={handleTextChange('pivot_label')}
                       value={model.pivot_label}
                       fullWidth
                     />
-                  </EuiFormRow>
+                  </EuiCompressedFormRow>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiFormRow
+                  <EuiCompressedFormRow
                     id={htmlId('pivotRowsInput')}
                     label={
                       <FormattedMessage
@@ -174,7 +174,7 @@ export class TablePanelConfig extends Component {
                       onChange={handleTextChange('pivot_rows')}
                       value={model.pivot_rows}
                     />
-                  </EuiFormRow>
+                  </EuiCompressedFormRow>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
@@ -201,7 +201,7 @@ export class TablePanelConfig extends Component {
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiFormRow
+            <EuiCompressedFormRow
               id={htmlId('drilldownInput')}
               label={
                 <FormattedMessage
@@ -219,11 +219,11 @@ export class TablePanelConfig extends Component {
                 </span>
               }
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 onChange={handleTextChange('drilldown_url')}
                 value={model.drilldown_url}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
 
             <EuiHorizontalRule />
 
@@ -237,7 +237,7 @@ export class TablePanelConfig extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true}>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('panelFilterInput')}
                   label={
                     <FormattedMessage
@@ -257,7 +257,7 @@ export class TablePanelConfig extends Component {
                     onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel htmlFor={htmlId('globalFilterOption')}>

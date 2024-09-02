@@ -43,6 +43,7 @@ interface Props {
 export class EmbeddableRoot extends React.Component<Props> {
   private root?: React.RefObject<HTMLDivElement>;
   private alreadyMounted: boolean = false;
+  private lastUsedInput?: EmbeddableInput;
 
   constructor(props: Props) {
     super(props);
@@ -54,6 +55,7 @@ export class EmbeddableRoot extends React.Component<Props> {
     if (this.root && this.root.current && this.props.embeddable) {
       this.alreadyMounted = true;
       this.props.embeddable.render(this.root.current);
+      this.lastUsedInput = this.props.input;
     }
   }
 
@@ -62,6 +64,16 @@ export class EmbeddableRoot extends React.Component<Props> {
     if (this.root && this.root.current && this.props.embeddable && !this.alreadyMounted) {
       this.alreadyMounted = true;
       this.props.embeddable.render(this.root.current);
+      /**
+       * When an embeddable was created with an value asynchronously, at the time when calling embeddable.render()
+       * The current input value might already changed, so it needs to call embeddable.updateInput() with the
+       * latest input here. It cannot simply compare prevProps.input and this.props.input because input may already
+       * be changed before embeddable was created.
+       */
+      if (this.lastUsedInput !== this.props.input && this.props.input) {
+        this.props.embeddable.updateInput(this.props.input);
+        this.lastUsedInput = this.props.input;
+      }
       justRendered = true;
     }
 
@@ -72,9 +84,10 @@ export class EmbeddableRoot extends React.Component<Props> {
       this.props.embeddable &&
       this.alreadyMounted &&
       this.props.input &&
-      prevProps?.input !== this.props.input
+      this.lastUsedInput !== this.props.input
     ) {
       this.props.embeddable.updateInput(this.props.input);
+      this.lastUsedInput = this.props.input;
     }
   }
 
@@ -93,7 +106,11 @@ export class EmbeddableRoot extends React.Component<Props> {
       <React.Fragment>
         <div ref={this.root} />
         {this.props.loading && <EuiLoadingSpinner data-test-subj="embedSpinner" />}
-        {this.props.error && <EuiText data-test-subj="embedError">{this.props.error}</EuiText>}
+        {this.props.error && (
+          <EuiText size="s" data-test-subj="embedError">
+            {this.props.error}
+          </EuiText>
+        )}
       </React.Fragment>
     );
   }

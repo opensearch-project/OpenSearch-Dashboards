@@ -28,7 +28,7 @@ export function SecondaryPanel() {
   const { draftAgg, aggConfigParams } = useTypedSelector(
     (state) => state.visualization.activeVisualization!
   );
-  const isEditorValid = useTypedSelector((state) => !state.metadata.editor.errors[PANEL_KEY]);
+  const isEditorValid = useTypedSelector((state) => !state.metadata.editor.errors?.[PANEL_KEY]);
   const [touched, setTouched] = useState(false);
   const dispatch = useTypedDispatch();
   const vizType = useVisualizationType();

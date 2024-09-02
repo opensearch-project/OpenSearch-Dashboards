@@ -14,7 +14,7 @@ import {
   DataSourceTableItem,
   ToastMessageItem,
 } from '../../types';
-import { getCreateBreadcrumbs } from '../breadcrumbs';
+import { getCreateOpenSearchDataSourceBreadcrumbs } from '../breadcrumbs';
 import { CreateDataSourceForm } from './components/create_form';
 import {
   createSingleDataSource,
@@ -37,15 +37,18 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
     http,
     notifications: { toasts },
     uiSettings,
+    navigation,
+    application,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   /* State Variables */
   const [existingDatasourceNamesList, setExistingDatasourceNamesList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const useNewUX = uiSettings.get('home:useNewHomePage');
 
   /* Set breadcrumb */
   useEffectOnce(() => {
-    setBreadcrumbs(getCreateBreadcrumbs());
+    setBreadcrumbs(getCreateOpenSearchDataSourceBreadcrumbs(useNewUX));
     getExistingDataSourceNames();
   });
 
@@ -78,6 +81,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
       // Fetch data source metadata from added OS/ES domain/cluster
       const metadata = await fetchDataSourceMetaData(http, attributes);
       attributes.dataSourceVersion = metadata.dataSourceVersion;
+      attributes.dataSourceEngineType = metadata.dataSourceEngineType;
       attributes.installedPlugins = metadata.installedPlugins;
       await createSingleDataSource(savedObjects.client, attributes);
       // Set the first create data source as default data source.
@@ -127,9 +131,12 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
     return (
       <>
         <CreateDataSourceForm
+          useNewUX={useNewUX}
+          navigation={navigation}
+          application={application}
           handleSubmit={handleSubmit}
           handleTestConnection={handleTestConnection}
-          handleCancel={() => props.history.push('')}
+          handleCancel={() => props.history.push('/create')}
           existingDatasourceNamesList={existingDatasourceNamesList}
         />
         {isLoading ? <LoadingMask /> : null}
