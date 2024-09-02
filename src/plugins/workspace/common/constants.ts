@@ -97,7 +97,7 @@ export const WORKSPACE_USE_CASES = Object.freeze({
     ] as string[],
   },
   essentials: {
-    id: 'analytics',
+    id: 'essentials',
     title: i18n.translate('workspace.usecase.essentials.title', {
       defaultMessage: 'Essentials',
     }),
@@ -147,3 +147,9 @@ export const CURRENT_USER_PLACEHOLDER = '%me%';
 
 export const MAX_WORKSPACE_NAME_LENGTH = 40;
 export const MAX_WORKSPACE_DESCRIPTION_LENGTH = 200;
+
+export enum AssociationDataSourceModalMode {
+  OpenSearchConnections = 'opensearch-connections',
+  DirectQueryConnections = 'direction-query-connections',
+}
+export const USE_CASE_PREFIX = 'use-case-';

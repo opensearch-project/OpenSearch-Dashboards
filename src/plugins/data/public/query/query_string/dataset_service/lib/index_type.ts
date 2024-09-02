@@ -5,17 +5,15 @@
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { map } from 'rxjs/operators';
-import { DEFAULT_DATA, DataStructure, Dataset } from '../../../../../common';
+import {
+  DEFAULT_DATA,
+  DataStructure,
+  DataStructureCustomMeta,
+  Dataset,
+} from '../../../../../common';
 import { DatasetTypeConfig } from '../types';
 import { getSearchService, getIndexPatterns } from '../../../../services';
-
-const INDEX_INFO = {
-  LOCAL_DATASOURCE: {
-    id: '',
-    title: 'Local Cluster',
-    type: 'DATA_SOURCE',
-  },
-};
+import { injectMetaToDataStructures } from './utils';
 
 export const indexTypeConfig: DatasetTypeConfig = {
   id: DEFAULT_DATA.SET_TYPES.INDEX,
@@ -28,22 +26,24 @@ export const indexTypeConfig: DatasetTypeConfig = {
   toDataset: (path) => {
     const index = path[path.length - 1];
     const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
+    const indexMeta = index.meta as DataStructureCustomMeta;
 
     return {
       id: index.id,
       title: index.title,
       type: DEFAULT_DATA.SET_TYPES.INDEX,
+      timeFieldName: indexMeta?.timeFieldName,
       dataSource: dataSource
         ? {
             id: dataSource.id,
             title: dataSource.title,
             type: dataSource.type,
           }
-        : INDEX_INFO.LOCAL_DATASOURCE,
+        : DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE,
     };
   },
 
-  fetch: async (savedObjects, path) => {
+  fetch: async (services, path) => {
     const dataStructure = path[path.length - 1];
     switch (dataStructure.type) {
       case 'DATA_SOURCE': {
@@ -61,7 +61,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
       }
 
       default: {
-        const dataSources = await fetchDataSources(savedObjects);
+        const dataSources = await fetchDataSources(services.savedObjects.client);
         return {
           ...dataStructure,
           columnHeader: 'Cluster',
@@ -89,18 +89,19 @@ export const indexTypeConfig: DatasetTypeConfig = {
 };
 
 const fetchDataSources = async (client: SavedObjectsClientContract) => {
-  const resp = await client.find<any>({
+  const response = await client.find<any>({
     type: 'data-source',
     perPage: 10000,
   });
-  const dataSources: DataStructure[] = [INDEX_INFO.LOCAL_DATASOURCE];
-  return dataSources.concat(
-    resp.savedObjects.map((savedObject) => ({
+  const dataSources: DataStructure[] = [DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE].concat(
+    response.savedObjects.map((savedObject) => ({
       id: savedObject.id,
       title: savedObject.attributes.title,
       type: 'DATA_SOURCE',
     }))
   );
+
+  return injectMetaToDataStructures(dataSources);
 };
 
 const fetchIndices = async (dataStructure: DataStructure): Promise<string[]> => {

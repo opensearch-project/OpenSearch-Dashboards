@@ -45,7 +45,7 @@ describe('workspace ui settings saved object client wrapper', () => {
     globalUiSettingsClient = osd.coreStart.uiSettings.asScopedToClient(savedObjectsClient);
 
     const res = await osdTestServer.request.post(osd.root, '/api/workspaces').send({
-      attributes: { name: 'test workspace' },
+      attributes: { name: 'test workspace', features: ['use-case-all'] },
     });
     testWorkspace = res.body.result;
   }, 30000);

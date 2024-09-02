@@ -11,7 +11,7 @@ import {
   DynamicConfigurationClientOptions,
   IDynamicConfigStoreClient,
 } from '../../types';
-import { dynamicConfigurationClientMock } from '../configuration_client.mock';
+import { createApiResponse } from '../../utils/utils';
 
 /**
  * The DummyConfigStoreClient is the client DAO that will used when dynamic config service is "disabled".
@@ -27,28 +27,28 @@ export class DummyConfigStoreClient implements IDynamicConfigStoreClient {
     bulkCreateConfigProps: BulkCreateConfigProps,
     options?: DynamicConfigurationClientOptions | undefined
   ) {
-    return Promise.resolve(dynamicConfigurationClientMock.createApiResponse());
+    return Promise.resolve(createApiResponse());
   }
 
   public async createConfig(
     createConfigProps: CreateConfigProps,
     options?: DynamicConfigurationClientOptions | undefined
   ) {
-    return Promise.resolve(dynamicConfigurationClientMock.createApiResponse());
+    return Promise.resolve(createApiResponse());
   }
 
   public async bulkDeleteConfigs(
     bulkDeleteConfigs: BulkDeleteConfigProps,
     options?: DynamicConfigurationClientOptions | undefined
   ) {
-    return Promise.resolve(dynamicConfigurationClientMock.createApiResponse());
+    return Promise.resolve(createApiResponse());
   }
 
   public async deleteConfig(
     deleteConfigs: ConfigIdentifier,
     options?: DynamicConfigurationClientOptions | undefined
   ) {
-    return Promise.resolve(dynamicConfigurationClientMock.createApiResponse());
+    return Promise.resolve(createApiResponse());
   }
 
   public async getConfig(

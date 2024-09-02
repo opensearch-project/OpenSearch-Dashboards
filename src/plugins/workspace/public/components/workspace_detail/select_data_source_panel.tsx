@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiText,
   EuiTitle,
@@ -15,23 +15,48 @@ import {
   EuiSmallButton,
   EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiButtonGroup,
+  EuiIcon,
+  EuiButtonGroupOptionProps,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from 'react-intl';
-import { DataSource } from '../../../common/types';
+import { DataSource, DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceClient } from '../../workspace_client';
-import { OpenSearchConnectionTable } from './opensearch_connections_table';
+import { DataSourceConnectionTable } from './data_source_connection_table';
 import { AssociationDataSourceModal } from './association_data_source_modal';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { CoreStart, SavedObjectsStart, WorkspaceObject } from '../../../../../core/public';
+import {
+  CoreStart,
+  SavedObjectsStart,
+  WorkspaceObject,
+  ChromeStart,
+} from '../../../../../core/public';
 import { convertPermissionSettingsToPermissions, useWorkspaceFormContext } from '../workspace_form';
+import { fetchDataSourceConnections } from '../../utils';
+import { AssociationDataSourceModalMode } from '../../../common/constants';
 
+const toggleButtons: EuiButtonGroupOptionProps[] = [
+  {
+    id: AssociationDataSourceModalMode.OpenSearchConnections,
+    label: i18n.translate('workspace.detail.dataSources.openSearchConnections', {
+      defaultMessage: 'OpenSearch connections',
+    }),
+  },
+  {
+    id: AssociationDataSourceModalMode.DirectQueryConnections,
+    label: i18n.translate('workspace.detail.dataSources.directQueryConnections', {
+      defaultMessage: 'Direct query connections',
+    }),
+  },
+];
 export interface SelectDataSourcePanelProps {
   savedObjects: SavedObjectsStart;
   assignedDataSources: DataSource[];
   detailTitle: string;
   isDashboardAdmin: boolean;
   currentWorkspace: WorkspaceObject;
+  chrome: ChromeStart;
 }
 
 export const SelectDataSourceDetailPanel = ({
@@ -40,15 +65,40 @@ export const SelectDataSourceDetailPanel = ({
   detailTitle,
   isDashboardAdmin,
   currentWorkspace,
+  chrome,
 }: SelectDataSourcePanelProps) => {
   const {
-    services: { notifications, workspaceClient },
+    services: { notifications, workspaceClient, http },
   } = useOpenSearchDashboards<{ CoreStart: CoreStart; workspaceClient: WorkspaceClient }>();
   const { formData, setSelectedDataSources } = useWorkspaceFormContext();
   const [isLoading, setIsLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [assignedDataSourceConnections, setAssignedDataSourceConnections] = useState<
+    DataSourceConnection[]
+  >([]);
+  const [toggleIdSelected, setToggleIdSelected] = useState(toggleButtons[0].id);
 
-  const handleAssignDataSources = async (dataSources: DataSource[]) => {
+  useEffect(() => {
+    setIsLoading(true);
+    fetchDataSourceConnections(assignedDataSources, http, notifications).then((connections) => {
+      setAssignedDataSourceConnections(connections);
+      setIsLoading(false);
+    });
+  }, [assignedDataSources, http, notifications]);
+
+  const handleAssignDataSourceConnections = async (
+    dataSourceConnections: DataSourceConnection[]
+  ) => {
+    const dataSources = dataSourceConnections
+      .filter(
+        ({ connectionType }) => connectionType === DataSourceConnectionType.OpenSearchConnection
+      )
+      .map(({ id, type, name, description }) => ({
+        id,
+        title: name,
+        description,
+        dataSourceEngineType: type,
+      }));
     try {
       setIsLoading(true);
       setIsVisible(false);
@@ -83,15 +133,58 @@ export const SelectDataSourceDetailPanel = ({
     }
   };
 
+  const handleUnassignDataSources = useCallback(
+    async (dataSources: DataSourceConnection[]) => {
+      try {
+        setIsLoading(true);
+        const { permissionSettings, selectedDataSources, useCase, ...attributes } = formData;
+        const savedDataSources = (selectedDataSources ?? [])?.filter(
+          ({ id }: DataSource) => !dataSources.some((item) => item.id === id)
+        );
+
+        const result = await workspaceClient.update(currentWorkspace.id, attributes, {
+          dataSources: savedDataSources.map(({ id }: DataSource) => id),
+          permissions: convertPermissionSettingsToPermissions(permissionSettings),
+        });
+        if (result?.success) {
+          notifications?.toasts.addSuccess({
+            title: i18n.translate('workspace.detail.dataSources.unassign.success', {
+              defaultMessage: 'Remove associated OpenSearch connections successfully',
+            }),
+          });
+          setSelectedDataSources(savedDataSources);
+        } else {
+          throw new Error(
+            result?.error ? result?.error : 'Remove associated OpenSearch connections failed'
+          );
+        }
+      } catch (error) {
+        notifications?.toasts.addDanger({
+          title: i18n.translate('workspace.detail.dataSources.unassign.failed', {
+            defaultMessage: 'Failed to remove associated OpenSearch connections',
+          }),
+          text: error instanceof Error ? error.message : JSON.stringify(error),
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [currentWorkspace.id, formData, notifications?.toasts, setSelectedDataSources, workspaceClient]
+  );
+
   const associationButton = (
     <EuiSmallButton
       onClick={() => setIsVisible(true)}
       isLoading={isLoading}
       data-test-subj="workspace-detail-dataSources-assign-button"
     >
-      {i18n.translate('workspace.detail.dataSources.assign.button', {
-        defaultMessage: 'Association OpenSearch Connections',
-      })}
+      {toggleIdSelected === AssociationDataSourceModalMode.OpenSearchConnections
+        ? i18n.translate('workspace.detail.dataSources.opensearchConnections.assign.button', {
+            defaultMessage: 'Associate OpenSearch connections',
+          })
+        : i18n.translate('workspace.detail.dataSources.directQueryConnections.assign.button', {
+            defaultMessage: 'Associate direct query connections',
+          })}
     </EuiSmallButton>
   );
 
@@ -102,7 +195,7 @@ export const SelectDataSourceDetailPanel = ({
       <EuiText>
         <FormattedMessage
           id="workspace.detail.dataSources.noAssociation.message"
-          defaultMessage="Loading OpenSearch connections..."
+          defaultMessage="Loading data sources..."
         />
       </EuiText>
     </div>
@@ -110,11 +203,13 @@ export const SelectDataSourceDetailPanel = ({
 
   const noAssociationMessage = (
     <EuiTextAlign textAlign="center">
+      <EuiIcon type="unlink" size="xl" />
+      <EuiSpacer />
       <EuiTitle>
         <h3>
           <FormattedMessage
             id="workspace.detail.dataSources.noAssociation.title"
-            defaultMessage="No associated data sources"
+            defaultMessage="No data sources to display"
           />
         </h3>
       </EuiTitle>
@@ -122,7 +217,7 @@ export const SelectDataSourceDetailPanel = ({
       <EuiText color="subdued">
         <FormattedMessage
           id="workspace.detail.dataSources.noAssociation.message"
-          defaultMessage="No OpenSearch connections are available in this workspace."
+          defaultMessage="There are no data sources associated with the workspace."
         />
       </EuiText>
       {isDashboardAdmin ? (
@@ -149,11 +244,11 @@ export const SelectDataSourceDetailPanel = ({
       return noAssociationMessage;
     }
     return (
-      <OpenSearchConnectionTable
+      <DataSourceConnectionTable
         isDashboardAdmin={isDashboardAdmin}
-        currentWorkspace={currentWorkspace}
-        assignedDataSources={assignedDataSources}
-        setIsLoading={setIsLoading}
+        connectionType={toggleIdSelected}
+        dataSourceConnections={assignedDataSourceConnections}
+        handleUnassignDataSources={handleUnassignDataSources}
       />
     );
   };
@@ -166,16 +261,33 @@ export const SelectDataSourceDetailPanel = ({
             <h2>{detailTitle}</h2>
           </EuiTitle>
         </EuiFlexItem>
-        {isDashboardAdmin && <EuiFlexItem grow={false}>{associationButton}</EuiFlexItem>}
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem>
+              <EuiButtonGroup
+                legend="dataSourceGroup"
+                options={toggleButtons}
+                idSelected={toggleIdSelected}
+                onChange={(id) => setToggleIdSelected(id)}
+              />
+            </EuiFlexItem>
+            {isDashboardAdmin && <EuiFlexItem grow={false}>{associationButton}</EuiFlexItem>}
+          </EuiFlexGroup>
+        </EuiFlexItem>
       </EuiFlexGroup>
+
       <EuiHorizontalRule />
       {renderTableContent()}
       {isVisible && (
         <AssociationDataSourceModal
+          http={http}
+          notifications={notifications}
           savedObjects={savedObjects}
-          assignedDataSources={assignedDataSources}
           closeModal={() => setIsVisible(false)}
-          handleAssignDataSources={handleAssignDataSources}
+          assignedConnections={assignedDataSourceConnections}
+          handleAssignDataSourceConnections={handleAssignDataSourceConnections}
+          mode={toggleIdSelected as AssociationDataSourceModalMode}
+          logos={chrome.logos}
         />
       )}
     </EuiPanel>

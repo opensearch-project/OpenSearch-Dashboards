@@ -18,6 +18,7 @@ import {
 import { LanguageConfig, Query } from '../../data/public';
 import { s3TypeConfig } from './datasets';
 import { createEditor, DefaultInput, SingleLineInput } from '../../data/public';
+import { QueryLanguageReference } from './query_editor/query_language_reference';
 
 export class QueryEnhancementsPlugin
   implements
@@ -56,7 +57,13 @@ export class QueryEnhancementsPlugin
       usageCollector: data.search.usageCollector,
     });
 
-    const enhancedQueryEditor = createEditor(SingleLineInput, null, DefaultInput);
+    const queryLanguageReference = new QueryLanguageReference(core.getStartServices());
+    const pplControls = [queryLanguageReference.createPPLLanguageReference()];
+    const sqlControls = [queryLanguageReference.createPPLLanguageReference()];
+
+    const enhancedPPLQueryEditor = createEditor(SingleLineInput, null, pplControls, DefaultInput);
+
+    const enhancedSQLQueryEditor = createEditor(SingleLineInput, null, sqlControls, DefaultInput);
 
     // Register PPL language
     const pplLanguageConfig: LanguageConfig = {
@@ -71,7 +78,7 @@ export class QueryEnhancementsPlugin
         visualizable: false,
       },
       showDocLinks: false,
-      editor: enhancedQueryEditor,
+      editor: enhancedPPLQueryEditor,
       editorSupportedAppNames: ['discover'],
     };
     queryString.getLanguageService().registerLanguage(pplLanguageConfig);
@@ -89,13 +96,13 @@ export class QueryEnhancementsPlugin
         visualizable: false,
       },
       showDocLinks: false,
-      editor: enhancedQueryEditor,
+      editor: enhancedSQLQueryEditor,
       editorSupportedAppNames: ['discover'],
     };
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
 
     data.__enhance({
-      ui: {
+      editor: {
         queryEditorExtension: createQueryAssistExtension(core.http, data, this.config.queryAssist),
       },
     });

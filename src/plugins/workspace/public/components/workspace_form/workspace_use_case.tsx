@@ -140,7 +140,6 @@ export const WorkspaceUseCase = ({
       })}
       isInvalid={!!formErrors.features}
       error={formErrors.features?.message}
-      fullWidth
     >
       <EuiFlexGroup direction="column">
         {availableUseCases.map(({ id, title, description, features, disabled }) => (

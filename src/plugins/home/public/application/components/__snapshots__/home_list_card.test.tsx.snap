@@ -4,7 +4,7 @@ exports[`<HomeListCard /> should render static content normally 1`] = `
 <body>
   <div>
     <div
-      class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
+      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
     >
       <div
         class="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionColumn euiFlexGroup--responsive"
@@ -13,11 +13,11 @@ exports[`<HomeListCard /> should render static content normally 1`] = `
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <h4
-            class="euiTitle euiTitle--medium"
+          <h2
+            class="euiTitle euiTitle--small"
           >
             What's New
-          </h4>
+          </h2>
         </div>
         <div
           class="euiSpacer euiSpacer--l"

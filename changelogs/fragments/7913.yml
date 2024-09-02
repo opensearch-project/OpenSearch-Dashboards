@@ -1,0 +1,2 @@
+fix:
+- Refactor the style for the work list table ([#7913](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7913))

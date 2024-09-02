@@ -1,0 +1,2 @@
+fix:
+- Enable direct query connections to support in workspace ([#7839](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7839))

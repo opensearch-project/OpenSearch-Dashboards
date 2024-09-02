@@ -12,8 +12,7 @@ import { setupServer } from '../../../../core/server/test_utils';
 import { registerDuplicateRoute } from '../routes/duplicate';
 import { createListStream } from '../../../../core/server/utils/streams';
 import Boom from '@hapi/boom';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { dynamicConfigServiceMock } from '../../../../core/server/config';
+import { dynamicConfigServiceMock } from '../../../../core/server/mocks';
 
 jest.mock('../../../../core/server/saved_objects/export', () => ({
   exportSavedObjectsToStream: jest.fn(),

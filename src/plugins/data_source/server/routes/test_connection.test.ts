@@ -16,8 +16,7 @@ import { registerTestConnectionRoute } from './test_connection';
 import { AuthType } from '../../common/data_sources';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { opensearchClientMock } from '../../../../../src/core/server/opensearch/client/mocks';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { dynamicConfigServiceMock } from '../../../../../src/core/server/config';
+import { dynamicConfigServiceMock } from '../../../../../src/core/server/mocks';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 

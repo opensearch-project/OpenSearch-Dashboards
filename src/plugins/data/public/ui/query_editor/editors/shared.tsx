@@ -21,18 +21,11 @@ type CollapsedComponent<T> = React.ComponentType<T>;
 type ExpandedComponent<T> = React.ComponentType<T> | null;
 type BodyComponent<T> = React.ComponentType<T>;
 
-export interface Editor<TCollapsed, TExpanded, TBody> {
-  TopBar: {
-    Collapsed: CollapsedComponent<TCollapsed>;
-    Expanded: ExpandedComponent<TExpanded>;
-  };
-  Body: BodyComponent<TBody>;
-}
-
 export interface EditorInstance<TCollapsed, TExpanded, TBody> {
   TopBar: {
     Collapsed: () => React.ReactElement;
     Expanded: (() => React.ReactElement) | null;
+    Controls: React.ReactElement[];
   };
   Body: () => React.ReactElement;
 }
@@ -44,6 +37,7 @@ export function createEditor<
 >(
   collapsed: CollapsedComponent<TCollapsed>,
   expanded: ExpandedComponent<TExpanded>,
+  controls: React.ReactElement[],
   body: BodyComponent<TBody>
 ) {
   return (
@@ -54,6 +48,7 @@ export function createEditor<
     TopBar: {
       Collapsed: () => React.createElement(collapsed, collapsedProps),
       Expanded: expanded ? () => React.createElement(expanded, expandedProps) : null,
+      Controls: controls,
     },
     Body: () => React.createElement(body, bodyProps),
   });
@@ -67,7 +62,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
   provideCompletionItems,
   prepend,
 }) => (
-  <div className="euiFormControlLayout euiFormControlLayout--group euiFormControlLayout--compressed osdQueryBar__wrap">
+  <div className="euiFormControlLayout euiFormControlLayout--group osdQueryBar__wrap">
     {prepend}
     <div className="osdQuerEditor__singleLine euiFormControlLayout__childrenWrapper">
       <CodeEditor

@@ -11,4 +11,23 @@
     width: 365px;
     padding: $euiSizeXS;
   }
+
+  &__footer {
+    padding: $euiSizeXS;
+  }
+
+  &__advancedModal {
+    width: 1200px;
+    height: 800px;
+    max-height: calc(100vh - $euiSizeS);
+
+    .euiModal__flex {
+      max-height: none;
+    }
+  }
+
+  &__checkbox {
+    flex: 1;
+    align-self: center;
+  }
 }
