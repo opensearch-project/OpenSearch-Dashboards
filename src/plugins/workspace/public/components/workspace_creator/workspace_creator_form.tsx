@@ -85,7 +85,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
   );
 
   return (
-    <EuiFlexGroup className="workspaceCreateFormContainer" justifyContent="spaceBetween">
+    <EuiFlexGroup className="workspaceCreateFormContainer">
       <EuiFlexItem style={{ maxWidth: 768 }}>
         <EuiForm
           id={formId}

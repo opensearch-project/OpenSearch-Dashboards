@@ -54,7 +54,7 @@ export const DataSourceConnectionTable = ({
     if (onSelectedItems) {
       onSelectedItems(selectedItems);
     }
-  }, [selectedItems, onSelectedItems, inCreatePage]);
+  }, [selectedItems, onSelectedItems]);
 
   useEffect(() => {
     // Reset selected items when connectionType changes

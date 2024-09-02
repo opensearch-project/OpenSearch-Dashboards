@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { EuiSpacer, EuiFlexItem, EuiSmallButton, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { SavedObjectsStart, CoreStart } from '../../../../../core/public';
@@ -133,8 +133,10 @@ export const SelectDataSourcePanel = ({
     </EuiSmallButton>
   );
 
-  const getSelectedItems = (currentSelectedItems: DataSourceConnection[]) =>
-    setSelectedItems(currentSelectedItems);
+  const getSelectedItems = useCallback(
+    (currentSelectedItems: DataSourceConnection[]) => setSelectedItems(currentSelectedItems),
+    [setSelectedItems]
+  );
 
   return (
     <div>

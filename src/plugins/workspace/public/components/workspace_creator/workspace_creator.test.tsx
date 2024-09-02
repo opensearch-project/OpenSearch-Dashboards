@@ -15,6 +15,9 @@ import {
   WorkspaceCreator as WorkspaceCreatorComponent,
   WorkspaceCreatorProps,
 } from './workspace_creator';
+import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
+import { DataSourceConnectionType } from '../../../common/types';
+import * as utils from '../../utils';
 
 const workspaceClientCreate = jest
   .fn()
@@ -32,21 +35,50 @@ const dataSourcesList = [
   {
     id: 'id1',
     title: 'ds1',
+    description: 'Description of data source 1',
+    auth: '',
+    dataSourceEngineType: '' as DataSourceEngineType,
+    workspaces: [],
     // This is used for mocking saved object function
     get: () => {
       return 'ds1';
     },
   },
   {
-    id: '2',
+    id: 'id2',
     title: 'ds2',
+    description: 'Description of data source 1',
+    auth: '',
+    dataSourceEngineType: '' as DataSourceEngineType,
+    workspaces: [],
     get: () => {
       return 'ds2';
     },
   },
 ];
 
+const dataSourceConnectionsList = [
+  {
+    id: 'id1',
+    name: 'ds1',
+    connectionType: DataSourceConnectionType.OpenSearchConnection,
+    type: 'OpenSearch',
+    relatedConnections: [],
+  },
+  {
+    id: 'id2',
+    name: 'ds2',
+    connectionType: DataSourceConnectionType.OpenSearchConnection,
+    type: 'OpenSearch',
+  },
+];
+
 const mockCoreStart = coreMock.createStart();
+jest.spyOn(utils, 'fetchDataSourceConnections').mockImplementation(async (passedDataSources) => {
+  return dataSourceConnectionsList.filter(({ id }) =>
+    passedDataSources.some((dataSource) => dataSource.id === id)
+  );
+});
 
 const WorkspaceCreator = ({
   isDashboardAdmin = false,
@@ -304,7 +336,15 @@ describe('WorkspaceCreator', () => {
   });
 
   it('create workspace with customized selected dataSources', async () => {
-    const { getByTestId, getByTitle, getByText } = render(
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+      configurable: true,
+      value: 600,
+    });
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      value: 600,
+    });
+    const { getByTestId, getAllByText, getByText } = render(
       <WorkspaceCreator isDashboardAdmin={true} />
     );
 
@@ -317,10 +357,17 @@ describe('WorkspaceCreator', () => {
       target: { value: 'test workspace name' },
     });
     fireEvent.click(getByTestId('workspaceUseCase-observability'));
-    fireEvent.click(getByTestId('workspaceForm-select-dataSource-addNew'));
-    fireEvent.click(getByTestId('workspaceForm-select-dataSource-comboBox'));
-    fireEvent.click(getByText('Select'));
-    fireEvent.click(getByTitle(dataSourcesList[0].title));
+    fireEvent.click(getByTestId('workspace-creator-dataSources-assign-button'));
+    await waitFor(() => {
+      expect(
+        getByText(
+          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
+        )
+      ).toBeInTheDocument();
+      expect(getByText(dataSourcesList[0].title)).toBeInTheDocument();
+    });
+    fireEvent.click(getByText(dataSourcesList[0].title));
+    fireEvent.click(getAllByText('Associate data sources')[1]);
 
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).toHaveBeenCalledWith(
