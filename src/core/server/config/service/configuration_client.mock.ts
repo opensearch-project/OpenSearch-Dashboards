@@ -5,19 +5,7 @@
 
 import { ApiResponse } from '@opensearch-project/opensearch/.';
 import { IDynamicConfigurationClient, IInternalDynamicConfigurationClient } from '../types';
-
-const createApiResponse = <TResponse = Record<string, any>>(
-  opts: Partial<ApiResponse> = {}
-): ApiResponse<TResponse> => {
-  return {
-    body: {} as any,
-    statusCode: 200,
-    headers: {},
-    warnings: [],
-    meta: {} as any,
-    ...opts,
-  };
-};
+import { createApiResponse } from '../utils/utils';
 
 const createInternalDynamicConfigurationClientMock = (
   props: InternalDynamicConfigurationClientMockProps = {
