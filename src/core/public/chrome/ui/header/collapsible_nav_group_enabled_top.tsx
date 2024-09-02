@@ -151,9 +151,7 @@ export const CollapsibleNavTop = ({
       {currentNavGroup?.title && (
         <>
           <EuiSpacer />
-          <EuiText>
-            <div style={{ fontWeight: 'normal' }}>{currentNavGroup?.title}</div>
-          </EuiText>
+          <EuiText>{currentNavGroup?.title}</EuiText>
         </>
       )}
     </EuiPanel>
