@@ -36,7 +36,17 @@ export async function mountManagementSection(
   featureFlagStatus: boolean
 ) {
   const [
-    { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
+    {
+      chrome,
+      application,
+      savedObjects,
+      uiSettings,
+      notifications,
+      overlays,
+      http,
+      docLinks,
+      workspaces,
+    },
     { navigation },
   ] = await getStartServices();
 
@@ -52,6 +62,7 @@ export async function mountManagementSection(
     navigation,
     setBreadcrumbs: params.setBreadcrumbs,
     authenticationMethodRegistry: authMethodsRegistry,
+    workspaces,
   };
 
   const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
