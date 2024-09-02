@@ -6,9 +6,6 @@ exports[`ManageDirectQueryDataConnectionsTable matches snapshot 1`] = `
     class="euiPageBody euiPageBody--borderRadiusNone"
   >
     <div
-      class="euiSpacer euiSpacer--s"
-    />
-    <div
       class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
       <div

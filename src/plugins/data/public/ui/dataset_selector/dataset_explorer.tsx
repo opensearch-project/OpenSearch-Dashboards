@@ -79,8 +79,14 @@ export const DatasetExplorer = ({
                 id="data.explorer.datasetSelector.advancedSelector.description"
                 defaultMessage="Select from those available to you. "
               />
-              <EuiLink href="#" external>
-                Manage data sources
+              <EuiLink
+                href={`${services.http.basePath.get()}/app/management/opensearch-dashboards/dataSources`}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="data.explorer.datasetSelector.advancedSelector.dataSourceManagement.title"
+                  defaultMessage="Manage data sources"
+                />
               </EuiLink>
             </p>
           </EuiText>

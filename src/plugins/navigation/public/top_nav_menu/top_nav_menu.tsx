@@ -202,31 +202,20 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
 
           // Show the SearchBar in-place
           default:
-            if (showDatePicker === TopNavMenuItemRenderType.IN_PORTAL) {
-              return (
-                <>
-                  <MountPointPortal setMountPoint={setMenuMountPoint}>
-                    <EuiFlexGroup alignItems="stretch" gutterSize="none">
-                      <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
-                        <EuiText size="s">{screenTitle}</EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>{renderMenu(menuClassName)}</EuiFlexItem>
-                      <EuiFlexItem className="globalDatePicker">
-                        <div ref={datePickerRef} />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </MountPointPortal>
-                  {renderSearchBar({ datePickerRef })}
-                </>
-              );
-            }
-
             return (
               <>
                 <MountPointPortal setMountPoint={setMenuMountPoint}>
-                  {renderMenu(menuClassName)}
+                  <EuiFlexGroup alignItems="stretch" gutterSize="none">
+                    <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
+                      <EuiText size="s">{screenTitle}</EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>{renderMenu(menuClassName)}</EuiFlexItem>
+                    <EuiFlexItem className="globalDatePicker">
+                      <div ref={datePickerRef} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </MountPointPortal>
-                {renderSearchBar()}
+                {renderSearchBar({ datePickerRef })}
               </>
             );
         }

@@ -331,7 +331,6 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
 
   return (
     <EuiPageBody component="div">
-      <EuiSpacer size="s" />
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false} style={{ width: '100%' }}>
           {customSearchBar}
