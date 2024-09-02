@@ -50,7 +50,7 @@ export class DataSourceManagementPlugin
         return toolkit.next();
       }
 
-      const configGroups = config.dataSourceAdmin;
+      const configGroups = config.dataSourceAdmin.groups;
       const isDataSourceAdmin = configGroups.some((configGroup) => groups.includes(configGroup));
       updateWorkspaceState(request, {
         isDataSourceAdmin,

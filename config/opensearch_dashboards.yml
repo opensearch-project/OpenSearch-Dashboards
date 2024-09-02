@@ -329,7 +329,7 @@
 
 # Set the backend roles in groups, whoever has the backend roles defined in this config will be regard as dataSourceAdmin.
 # DataSource Admin will have the access to all the data source saved objects inside OpenSearch Dashboards by api.
-# data_source_management.dataSourceAdmin: []
+# data_source_management.dataSourceAdmin.groups: ["data_source_management"]
 
 # Set the value of this setting to false to hide the help menu link to the OpenSearch Dashboards user survey
 # opensearchDashboards.survey.url: "https://survey.opensearch.org"

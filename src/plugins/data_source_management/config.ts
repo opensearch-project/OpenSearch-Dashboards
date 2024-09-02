@@ -10,8 +10,10 @@ export const configSchema = schema.object({
     [schema.literal('all'), schema.literal('dashboard_admin'), schema.literal('none')],
     { defaultValue: 'all' }
   ),
-  dataSourceAdmin: schema.arrayOf(schema.string(), {
-    defaultValue: [],
+  dataSourceAdmin: schema.object({
+    groups: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+    }),
   }),
 });
 
