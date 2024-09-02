@@ -4,7 +4,14 @@
  */
 
 import './collapsible_nav_group_enabled.scss';
-import { EuiFlyout, EuiPanel, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiPanel,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiHideFor,
+  EuiFlyoutProps,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -274,7 +281,7 @@ export function CollapsibleNavGroupEnabled({
     }
   };
 
-  return (
+  const rendeLeftNav = (props?: Partial<EuiFlyoutProps>) => (
     <EuiFlyout
       data-test-subj="collapsibleNav"
       id={id}
@@ -291,6 +298,7 @@ export function CollapsibleNavGroupEnabled({
       hideCloseButton
       paddingSize="none"
       ownFocus={false}
+      {...props}
     >
       <div className="eui-fullHeight left-navigation-wrapper">
         {!isNavOpen ? null : (
@@ -362,5 +370,22 @@ export function CollapsibleNavGroupEnabled({
         </div>
       </div>
     </EuiFlyout>
+  );
+
+  return (
+    <>
+      <EuiHideFor sizes={['xs', 's', 'm']}>{rendeLeftNav()}</EuiHideFor>
+      <EuiHideFor sizes={['xl', 'l']}>
+        {isNavOpen
+          ? rendeLeftNav({
+              type: 'overlay',
+              size: undefined,
+              outsideClickCloses: true,
+              paddingSize: undefined,
+              ownFocus: true,
+            })
+          : null}
+      </EuiHideFor>
+    </>
   );
 }

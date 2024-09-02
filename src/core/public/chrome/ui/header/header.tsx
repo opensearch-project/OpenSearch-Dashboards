@@ -33,6 +33,7 @@ import {
   EuiHeaderSection,
   EuiHeaderSectionItem,
   EuiHeaderSectionItemButton,
+  EuiHeaderSectionItemButtonProps,
   EuiHideFor,
   EuiIcon,
   EuiShowFor,
@@ -213,34 +214,53 @@ export function Header({
     />
   );
 
-  const renderNavToggle = () => (
-    <EuiHeaderSectionItemButton
-      data-test-subj="toggleNavButton"
-      aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
-        defaultMessage: 'Toggle primary navigation',
-      })}
-      onClick={() => setIsNavOpen(!isNavOpen)}
-      aria-expanded={isNavOpen}
-      aria-pressed={isNavOpen}
-      aria-controls={navId}
-      ref={toggleCollapsibleNavRef}
-      className={
-        useUpdatedHeader
-          ? useApplicationHeader
-            ? 'newAppTopNavExpander'
-            : 'newPageTopNavExpander'
-          : undefined
-      }
-    >
-      <EuiIcon
-        type="menu"
-        size="m"
-        title={i18n.translate('core.ui.primaryNav.menu', {
-          defaultMessage: 'Menu',
+  const renderNavToggle = () => {
+    const renderNavToggleWithExtraProps = (props: EuiHeaderSectionItemButtonProps) => (
+      <EuiHeaderSectionItemButton
+        data-test-subj="toggleNavButton"
+        aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+          defaultMessage: 'Toggle primary navigation',
         })}
-      />
-    </EuiHeaderSectionItemButton>
-  );
+        onClick={() => setIsNavOpen(!isNavOpen)}
+        aria-expanded={isNavOpen}
+        aria-pressed={isNavOpen}
+        aria-controls={navId}
+        ref={toggleCollapsibleNavRef}
+        {...props}
+        className={classnames(
+          useUpdatedHeader
+            ? useApplicationHeader
+              ? 'newAppTopNavExpander'
+              : 'newPageTopNavExpander'
+            : undefined,
+          props.className
+        )}
+      >
+        <EuiIcon
+          type="menu"
+          size="m"
+          title={i18n.translate('core.ui.primaryNav.menu', {
+            defaultMessage: 'Menu',
+          })}
+        />
+      </EuiHeaderSectionItemButton>
+    );
+    return (
+      <>
+        <EuiHideFor sizes={['xs', 's', 'm']}>
+          {renderNavToggleWithExtraProps({
+            className: 'navToggleInLargeScreen',
+          })}
+        </EuiHideFor>
+        <EuiHideFor sizes={['xl', 'l']}>
+          {renderNavToggleWithExtraProps({
+            flush: 'both',
+            className: 'navToggleInSmallScreen',
+          })}
+        </EuiHideFor>
+      </>
+    );
+  };
 
   const renderLeftControls = () => (
     <>

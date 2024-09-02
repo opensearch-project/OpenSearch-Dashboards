@@ -89,16 +89,15 @@
   }
 }
 
-.newAppTopNavExpander {
+.navToggleInLargeScreen {
   position: fixed;
   left: 0;
   top: $euiSize;
 }
 
-.newPageTopNavExpander {
-  position: fixed;
-  left: 0;
-  top: $euiSize;
+// Make the toggle button align with content
+.navToggleInSmallScreen {
+  min-width: unset;
 }
 
 .stretchedActionMenu {
