@@ -9,7 +9,7 @@ import { UnwrapPromise } from '@osd/utility-types';
 import { setupServer } from '../../../../core/server/test_utils';
 import { loggingSystemMock } from '../../../../core/server/mocks';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { dynamicConfigServiceMock } from '../../../../core/server/config';
+import { dynamicConfigServiceMock } from '../../../../core/server/config/dynamic_config_service.mock';
 
 import { workspaceClientMock } from '../workspace_client.mock';
 
