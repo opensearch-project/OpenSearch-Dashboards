@@ -85,7 +85,7 @@ export class AdvancedSettingsServerPlugin implements Plugin<object, object> {
       if (userName) {
         return {
           ...capabilities,
-          useSettings: {
+          userSettings: {
             enabled: true,
           },
         };

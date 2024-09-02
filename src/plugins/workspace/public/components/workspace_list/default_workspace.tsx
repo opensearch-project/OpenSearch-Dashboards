@@ -16,7 +16,7 @@ interface Props {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
 }
 
-export const DefaultWorkspaceList = ({ services, registeredUseCases$ }: Props) => {
+export const UserDefaultWorkspace = ({ services, registeredUseCases$ }: Props) => {
   const { workspaces } = services;
   const workspaceList = useObservable(workspaces?.workspaceList$ ?? of([]), []);
 

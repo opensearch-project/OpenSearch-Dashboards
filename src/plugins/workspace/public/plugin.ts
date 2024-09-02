@@ -71,7 +71,7 @@ import {
   registerAnalyticsAllOverviewContent,
   setAnalyticsAllOverviewSection,
 } from './components/use_case_overview/setup_overview';
-import { DefaultWorkspaceList } from './components/workspace_list/default_workspace';
+import { UserDefaultWorkspace } from './components/workspace_list/default_workspace';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -681,7 +681,7 @@ export class WorkspacePlugin
           kind: 'custom',
           order: 0,
           render: () =>
-            React.createElement(DefaultWorkspaceList, {
+            React.createElement(UserDefaultWorkspace, {
               services,
               registeredUseCases$: this.registeredUseCases$,
             }),

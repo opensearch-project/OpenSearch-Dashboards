@@ -13,7 +13,6 @@ import { navigateToWorkspaceDetail } from '../utils/workspace';
 import { createMockedRegisteredUseCases$ } from '../../mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { WorkspaceList } from './index';
-import { exp } from 'mathjs';
 
 jest.mock('../utils/workspace');
 

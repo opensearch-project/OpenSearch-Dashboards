@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiBreadcrumb, EuiPage, EuiPanel } from '@elastic/eui';
+import { EuiBreadcrumb, EuiPage } from '@elastic/eui';
 import { CoreStart } from 'opensearch-dashboards/public';
 import React, { useEffect } from 'react';
 import { i18n } from '@osd/i18n';
@@ -32,7 +32,7 @@ const sectionRender = (contents: Content[]) => {
 export const setupUserSettingsPage = (contentManagement?: ContentManagementPluginSetup) => {
   contentManagement?.registerPage({
     id: 'user_settings',
-    title: 'Home',
+    title: 'User Settings',
     sections: [
       {
         id: 'user_profile',

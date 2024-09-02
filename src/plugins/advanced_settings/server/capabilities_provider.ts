@@ -33,7 +33,7 @@ export const capabilitiesProvider = () => ({
     show: true,
     save: true,
   },
-  useSettings: {
+  userSettings: {
     enabled: false,
   },
 });

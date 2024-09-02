@@ -191,7 +191,7 @@ export class AdvancedSettingsPlugin
     }
 
     this.appUpdater$.next((app) => {
-      const securityEnabled = core.application.capabilities.useSettings?.enabled;
+      const securityEnabled = core.application.capabilities.userSettings?.enabled;
       if (app.id === 'user_settings') {
         return {
           navLinkStatus: securityEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,

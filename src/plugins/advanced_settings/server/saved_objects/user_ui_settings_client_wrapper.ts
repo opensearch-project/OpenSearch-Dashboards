@@ -131,9 +131,7 @@ export class UserUISettingsClientWrapper {
           so.id = so.id.replace(`${userName}_`, '');
         });
 
-        return new Promise((resolve) => {
-          resolve(resp);
-        });
+        return Promise.resolve(resp);
       }
       return wrapperOptions.client.find(options);
     };
