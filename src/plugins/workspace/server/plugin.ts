@@ -24,6 +24,7 @@ import {
   PRIORITY_FOR_WORKSPACE_UI_SETTINGS_WRAPPER,
   WORKSPACE_INITIAL_APP_ID,
   WORKSPACE_NAVIGATION_APP_ID,
+  DEFAULT_WORKSPACE,
 } from '../common/constants';
 import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
 import { WorkspaceClient } from './workspace_client';
@@ -132,11 +133,10 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
             });
           }
           const [coreStart] = await core.getStartServices();
-          const uiSettings = coreStart.uiSettings.asScopedToClient(
+          const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
             coreStart.savedObjects.getScopedClient(request)
           );
-          // Temporarily use defaultWorkspace as a placeholder
-          const defaultWorkspaceId = await uiSettings.get('defaultWorkspace');
+          const defaultWorkspaceId = await uiSettingsClient.get(DEFAULT_WORKSPACE);
           const defaultWorkspace = workspaceList.find(
             (workspace) => workspace.id === defaultWorkspaceId
           );
