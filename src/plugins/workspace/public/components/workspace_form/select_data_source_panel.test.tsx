@@ -45,7 +45,7 @@ const dataSourceConnectionsMock = [
   },
 ];
 
-const assignedDataSourcesConnections = [dataSourceConnectionsMock[0], dataSourceConnectionsMock[1]];
+const assignedDataSourcesConnections = [dataSourceConnectionsMock[0], dataSourceConnectionsMock[2]];
 
 const dataSources = [
   {
@@ -131,9 +131,21 @@ describe('SelectDataSourcePanel', () => {
           'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
         )
       ).toBeInTheDocument();
-      expect(getByText(assignedDataSourcesConnections[0].name)).toBeInTheDocument();
+      expect(getByText(assignedDataSourcesConnections[1].name)).toBeInTheDocument();
     });
 
+    fireEvent.click(getByText(assignedDataSourcesConnections[1].name));
+    fireEvent.click(getByText('Associate data sources'));
+    expect(onChangeMock).toHaveBeenCalledWith([
+      expect.objectContaining({
+        id: assignedDataSourcesConnections[1].id,
+      }),
+    ]);
+
+    fireEvent.click(getByTestId('workspace-creator-dqc-assign-button'));
+    await waitFor(() => {
+      expect(getByText(assignedDataSourcesConnections[0].name)).toBeInTheDocument();
+    });
     fireEvent.click(getByText(assignedDataSourcesConnections[0].name));
     fireEvent.click(getByText('Associate data sources'));
     expect(onChangeMock).toHaveBeenCalledWith([
@@ -145,14 +157,45 @@ describe('SelectDataSourcePanel', () => {
 
   it('should call onChange when deleting selected data source', async () => {
     const onChangeMock = jest.fn();
-    const { getAllByTestId } = setup({
+    const { getByText, getByTestId } = setup({
       onChange: onChangeMock,
       assignedDataSources: dataSources,
     });
     expect(onChangeMock).not.toHaveBeenCalled();
     await waitFor(() => {
-      fireEvent.click(getAllByTestId('workspace-detail-dataSources-table-actions-remove')[0]);
+      fireEvent.click(getByTestId('checkboxSelectRow-' + dataSources[1].id));
+      fireEvent.click(getByText('Remove selected'));
     });
-    expect(onChangeMock).toHaveBeenCalledWith([dataSources[1]]);
+    expect(onChangeMock).toHaveBeenCalledWith([dataSources[0]]);
   });
+});
+
+it('should close associate data sources modal', async () => {
+  Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+    configurable: true,
+    value: 600,
+  });
+  Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+    configurable: true,
+    value: 600,
+  });
+
+  const { getByText, queryByText, getByTestId } = setup({
+    assignedDataSources: [],
+  });
+
+  fireEvent.click(getByTestId('workspace-creator-dataSources-assign-button'));
+  await waitFor(() => {
+    expect(
+      getByText(
+        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
+      )
+    ).toBeInTheDocument();
+  });
+  fireEvent.click(getByText('Close'));
+  expect(
+    queryByText(
+      'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
+    )
+  ).toBeNull();
 });

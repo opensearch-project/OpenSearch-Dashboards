@@ -112,7 +112,7 @@ export const SelectDataSourcePanel = ({
       }}
       data-test-subj="workspace-creator-dqc-assign-button"
     >
-      {i18n.translate('workspace.form.selectDataSourcePanel.addNew', {
+      {i18n.translate('workspace.form.selectDataSourcePanel.addNewDQCs', {
         defaultMessage: 'Add direct query connections',
       })}
     </EuiSmallButton>
@@ -153,7 +153,7 @@ export const SelectDataSourcePanel = ({
         )}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <EuiFlexItem style={{ maxWidth: 800 }}>
+      <EuiFlexItem style={{ maxWidth: 768 }}>
         {assignedDataSources.length > 0 && renderTableContent()}
       </EuiFlexItem>
       {modalVisible && chrome && (
