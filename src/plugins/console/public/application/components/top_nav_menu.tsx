@@ -29,7 +29,13 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+
+interface CommonProps {
+  disabled: boolean;
+  onClick: () => void;
+  ['data-test-subj']: string;
+}
 
 export interface TopNavMenuItem {
   id: string;
@@ -37,14 +43,40 @@ export interface TopNavMenuItem {
   description: string;
   onClick: () => void;
   testId: string;
+  render?: (commonProps: CommonProps) => React.JSX.Element;
 }
 
 interface Props {
   disabled?: boolean;
   items: TopNavMenuItem[];
+  useUpdatedUX?: boolean;
 }
 
-export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled }) => {
+export const TopNavMenu: FunctionComponent<Props> = ({ items, disabled, useUpdatedUX }) => {
+  if (useUpdatedUX) {
+    return (
+      <>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup>
+          {items.map((item, idx) => {
+            const commonProps: CommonProps = {
+              disabled: !!disabled,
+              onClick: item.onClick,
+              ['data-test-subj']: item.testId,
+            };
+
+            return (
+              <EuiFlexItem grow={false} key={idx}>
+                {item.render?.(commonProps) || null}
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGroup>
+        <EuiSpacer />
+      </>
+    );
+  }
+
   return (
     <EuiTabs size="s">
       {items.map((item, idx) => {

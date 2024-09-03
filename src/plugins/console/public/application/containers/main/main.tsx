@@ -57,7 +57,7 @@ interface MainProps {
 
 export function Main({ dataSourceId }: MainProps) {
   const {
-    services: { storage, objectStorageClient },
+    services: { storage, objectStorageClient, uiSettings },
   } = useServicesContext();
 
   const { ready: editorsReady } = useEditorReadContext();
@@ -98,6 +98,8 @@ export function Main({ dataSourceId }: MainProps) {
 
   const lastDatum = requestData?.[requestData.length - 1] ?? requestError;
 
+  const useUpdatedUX = uiSettings.get('home:useNewHomePage');
+
   return (
     <div id="consoleRoot">
       <EuiFlexGroup
@@ -118,7 +120,9 @@ export function Main({ dataSourceId }: MainProps) {
             <EuiFlexItem>
               <TopNavMenu
                 disabled={!done}
+                useUpdatedUX={useUpdatedUX}
                 items={getTopNavConfig({
+                  useUpdatedUX,
                   onClickHistory: () => setShowHistory(!showingHistory),
                   onClickSettings: () => setShowSettings(true),
                   onClickHelp: () => setShowHelp(!showHelp),

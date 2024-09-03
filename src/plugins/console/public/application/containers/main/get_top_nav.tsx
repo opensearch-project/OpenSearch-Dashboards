@@ -28,7 +28,10 @@
  * under the License.
  */
 
+import React from 'react';
+import { EuiSmallButton, EuiSmallButtonEmpty, EuiSmallButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { TopNavMenuItem } from '../../components';
 
 interface Props {
   onClickHistory: () => void;
@@ -36,6 +39,7 @@ interface Props {
   onClickHelp: () => void;
   onClickExport: () => void;
   onClickImport: () => void;
+  useUpdatedUX?: boolean;
 }
 
 export function getTopNavConfig({
@@ -44,7 +48,8 @@ export function getTopNavConfig({
   onClickHelp,
   onClickExport,
   onClickImport,
-}: Props) {
+  useUpdatedUX,
+}: Props): TopNavMenuItem[] {
   return [
     {
       id: 'history',
@@ -58,6 +63,13 @@ export function getTopNavConfig({
         onClickHistory();
       },
       testId: 'consoleHistoryButton',
+      render: (commonProps) => (
+        <EuiSmallButtonEmpty {...commonProps} flush="both" iconType="arrowDown" iconSide="right">
+          {i18n.translate('console.topNav.historyTabLabel', {
+            defaultMessage: 'History',
+          })}
+        </EuiSmallButtonEmpty>
+      ),
     },
     {
       id: 'settings',
@@ -71,6 +83,15 @@ export function getTopNavConfig({
         onClickSettings();
       },
       testId: 'consoleSettingsButton',
+      render: (commonProps) => (
+        <EuiToolTip
+          content={i18n.translate('console.topNav.settingsToolTipContent', {
+            defaultMessage: 'Console settings',
+          })}
+        >
+          <EuiSmallButtonIcon iconType="gear" display="base" {...commonProps} />
+        </EuiToolTip>
+      ),
     },
     {
       id: 'help',
@@ -84,6 +105,15 @@ export function getTopNavConfig({
         onClickHelp();
       },
       testId: 'consoleHelpButton',
+      render: (commonProps) => (
+        <EuiToolTip
+          content={i18n.translate('console.topNav.helpTabLabel', {
+            defaultMessage: 'Help',
+          })}
+        >
+          <EuiSmallButtonIcon iconType="questionInCircle" display="base" {...commonProps} />
+        </EuiToolTip>
+      ),
     },
     {
       id: 'export',
@@ -97,6 +127,13 @@ export function getTopNavConfig({
         onClickExport();
       },
       testId: 'consoleExportButton',
+      render: (commonProps) => (
+        <EuiSmallButton minWidth="unset" {...commonProps}>
+          {i18n.translate('console.topNav.exportTabLabel', {
+            defaultMessage: 'Export',
+          })}
+        </EuiSmallButton>
+      ),
     },
     {
       id: 'import',
@@ -110,6 +147,13 @@ export function getTopNavConfig({
         onClickImport();
       },
       testId: 'consoleImportButton',
+      render: (commonProps) => (
+        <EuiSmallButton minWidth="unset" fill {...commonProps}>
+          {i18n.translate('console.topNav.importButtonLabel', {
+            defaultMessage: 'Import query',
+          })}
+        </EuiSmallButton>
+      ),
     },
   ];
 }
