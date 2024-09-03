@@ -60,14 +60,32 @@ export class QueryStringManager {
   }
 
   public getDefaultQuery() {
-    return {
-      query: this.getDefaultQueryString(),
-      language: this.getDefaultLanguage(),
-      ...(this.uiSettings &&
-        this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) && {
-          dataset: this.datasetService?.getDefault(),
-        }),
+    const defaultLanguageId = this.getDefaultLanguage();
+    const defaultQuery = this.getDefaultQueryString();
+    const defaultDataset = this.datasetService?.getDefault();
+
+    const query = {
+      query: defaultQuery,
+      language: defaultLanguageId,
     };
+
+    if (
+      this.uiSettings &&
+      this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) &&
+      defaultDataset &&
+      this.languageService
+    ) {
+      const language = this.languageService.getLanguage(defaultLanguageId);
+      const newQuery = { ...query, dataset: defaultDataset };
+      const newQueryString = language?.getQueryString(newQuery) || '';
+
+      return {
+        ...newQuery,
+        query: newQueryString,
+      };
+    }
+
+    return query;
   }
 
   public formatQuery(query: Query | string | undefined): Query {
