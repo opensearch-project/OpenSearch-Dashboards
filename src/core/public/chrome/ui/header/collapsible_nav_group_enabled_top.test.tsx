@@ -101,4 +101,18 @@ describe('<CollapsibleNavTop />', () => {
     );
     await findByTestId('collapsibleNavShrinkButton');
   });
+
+  it('should render successfully without error when visibleUseCases is empty but inside a workspace', async () => {
+    expect(() =>
+      render(
+        <CollapsibleNavTop
+          {...getMockedProps()}
+          currentWorkspace$={
+            new BehaviorSubject<WorkspaceObject | null>({ id: 'foo', name: 'bar' })
+          }
+          shouldShrinkNavigation
+        />
+      )
+    ).not.toThrow();
+  });
 });

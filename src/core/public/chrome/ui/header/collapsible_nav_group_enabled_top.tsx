@@ -70,7 +70,7 @@ export const CollapsibleNavTop = ({
    */
   const isInsideSecondLevelOfAllWorkspace =
     !!currentWorkspace &&
-    visibleUseCases[0].id === ALL_USE_CASE_ID &&
+    visibleUseCases[0]?.id === ALL_USE_CASE_ID &&
     currentNavGroup?.id !== ALL_USE_CASE_ID;
 
   const homeIcon = logos.Mark.url;
