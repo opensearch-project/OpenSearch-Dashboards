@@ -5,13 +5,15 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiCard, EuiCardProps } from '@elastic/eui';
+import { EuiCard, EuiCardProps, EuiToolTip } from '@elastic/eui';
 
 import { Embeddable, EmbeddableInput, IContainer } from '../../../../embeddable/public';
 
 export const CARD_EMBEDDABLE = 'card_embeddable';
 export type CardEmbeddableInput = EmbeddableInput & {
   description: string;
+  toolTipContent?: string;
+  getTitle?: () => React.ReactElement;
   onClick?: () => void;
   getIcon?: () => React.ReactElement;
   getFooter?: () => React.ReactElement;
@@ -34,8 +36,12 @@ export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
 
     const cardProps: EuiCardProps = {
       ...this.input.cardProps,
-      title: this.input.title ?? '',
-      description: this.input.description,
+      title: (this.input?.getTitle?.() || this.input?.title) ?? '',
+      description: (
+        <EuiToolTip position="top" content={this.input?.toolTipContent}>
+          <>{this.input.description}</>
+        </EuiToolTip>
+      ),
       onClick: this.input.onClick,
       icon: this.input?.getIcon?.(),
     };
