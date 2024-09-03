@@ -1360,6 +1360,34 @@ exports[`Header handles visibility and lock changes 1`] = `
     }
   }
   homeHref="/"
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "anonymousPaths": Object {
+        "isAnonymous": [MockFunction],
+        "register": [MockFunction],
+      },
+      "basePath": BasePath {
+        "basePath": "/test",
+        "clientBasePath": "",
+        "get": [Function],
+        "getBasePath": [Function],
+        "prepend": [Function],
+        "remove": [Function],
+        "serverBasePath": "/test",
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -7648,6 +7676,34 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
     }
   }
   homeHref="/"
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "anonymousPaths": Object {
+        "isAnonymous": [MockFunction],
+        "register": [MockFunction],
+      },
+      "basePath": BasePath {
+        "basePath": "/test",
+        "clientBasePath": "",
+        "get": [Function],
+        "getBasePath": [Function],
+        "prepend": [Function],
+        "remove": [Function],
+        "serverBasePath": "/test",
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -8506,6 +8562,34 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                         }
                       }
                       buttonSize="s"
+                      http={
+                        Object {
+                          "addLoadingCountSource": [MockFunction],
+                          "anonymousPaths": Object {
+                            "isAnonymous": [MockFunction],
+                            "register": [MockFunction],
+                          },
+                          "basePath": BasePath {
+                            "basePath": "/test",
+                            "clientBasePath": "",
+                            "get": [Function],
+                            "getBasePath": [Function],
+                            "prepend": [Function],
+                            "remove": [Function],
+                            "serverBasePath": "/test",
+                          },
+                          "delete": [MockFunction],
+                          "fetch": [MockFunction],
+                          "get": [MockFunction],
+                          "getLoadingCount$": [MockFunction],
+                          "head": [MockFunction],
+                          "intercept": [MockFunction],
+                          "options": [MockFunction],
+                          "patch": [MockFunction],
+                          "post": [MockFunction],
+                          "put": [MockFunction],
+                        }
+                      }
                       navLinks$={
                         BehaviorSubject {
                           "_isScalar": false,
@@ -8817,7 +8901,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                         anchorPosition="downCenter"
                         button={
                           <EuiToolTip
-                            content="Recents"
+                            content="Recent"
                             delay="long"
                             position="bottom"
                           >
@@ -8840,7 +8924,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                         initialFocus={false}
                         isOpen={false}
                         ownFocus={true}
-                        panelPaddingSize="s"
+                        panelPaddingSize="m"
                         repositionOnScroll={true}
                       >
                         <div
@@ -8850,7 +8934,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                             className="euiPopover__anchor"
                           >
                             <EuiToolTip
-                              content="Recents"
+                              content="Recent"
                               delay="long"
                               position="bottom"
                             >
@@ -10863,6 +10947,34 @@ exports[`Header renders condensed header 1`] = `
     }
   }
   homeHref="/"
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "anonymousPaths": Object {
+        "isAnonymous": [MockFunction],
+        "register": [MockFunction],
+      },
+      "basePath": BasePath {
+        "basePath": "/test",
+        "clientBasePath": "",
+        "get": [Function],
+        "getBasePath": [Function],
+        "prepend": [Function],
+        "remove": [Function],
+        "serverBasePath": "/test",
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -15764,6 +15876,34 @@ exports[`Header renders page header with application title 1`] = `
     }
   }
   homeHref="/"
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "anonymousPaths": Object {
+        "isAnonymous": [MockFunction],
+        "register": [MockFunction],
+      },
+      "basePath": BasePath {
+        "basePath": "/test",
+        "clientBasePath": "",
+        "get": [Function],
+        "getBasePath": [Function],
+        "prepend": [Function],
+        "remove": [Function],
+        "serverBasePath": "/test",
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -16735,6 +16875,34 @@ exports[`Header renders page header with application title 1`] = `
                         }
                       }
                       buttonSize="xs"
+                      http={
+                        Object {
+                          "addLoadingCountSource": [MockFunction],
+                          "anonymousPaths": Object {
+                            "isAnonymous": [MockFunction],
+                            "register": [MockFunction],
+                          },
+                          "basePath": BasePath {
+                            "basePath": "/test",
+                            "clientBasePath": "",
+                            "get": [Function],
+                            "getBasePath": [Function],
+                            "prepend": [Function],
+                            "remove": [Function],
+                            "serverBasePath": "/test",
+                          },
+                          "delete": [MockFunction],
+                          "fetch": [MockFunction],
+                          "get": [MockFunction],
+                          "getLoadingCount$": [MockFunction],
+                          "head": [MockFunction],
+                          "intercept": [MockFunction],
+                          "options": [MockFunction],
+                          "patch": [MockFunction],
+                          "post": [MockFunction],
+                          "put": [MockFunction],
+                        }
+                      }
                       navLinks$={
                         BehaviorSubject {
                           "_isScalar": false,
@@ -17159,7 +17327,7 @@ exports[`Header renders page header with application title 1`] = `
                         anchorPosition="downCenter"
                         button={
                           <EuiToolTip
-                            content="Recents"
+                            content="Recent"
                             delay="long"
                             position="bottom"
                           >
@@ -17182,7 +17350,7 @@ exports[`Header renders page header with application title 1`] = `
                         initialFocus={false}
                         isOpen={false}
                         ownFocus={true}
-                        panelPaddingSize="s"
+                        panelPaddingSize="m"
                         repositionOnScroll={true}
                       >
                         <div
@@ -17192,7 +17360,7 @@ exports[`Header renders page header with application title 1`] = `
                             className="euiPopover__anchor"
                           >
                             <EuiToolTip
-                              content="Recents"
+                              content="Recent"
                               delay="long"
                               position="bottom"
                             >
@@ -20058,6 +20226,34 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
     }
   }
   homeHref="/"
+  http={
+    Object {
+      "addLoadingCountSource": [MockFunction],
+      "anonymousPaths": Object {
+        "isAnonymous": [MockFunction],
+        "register": [MockFunction],
+      },
+      "basePath": BasePath {
+        "basePath": "/test",
+        "clientBasePath": "",
+        "get": [Function],
+        "getBasePath": [Function],
+        "prepend": [Function],
+        "remove": [Function],
+        "serverBasePath": "/test",
+      },
+      "delete": [MockFunction],
+      "fetch": [MockFunction],
+      "get": [MockFunction],
+      "getLoadingCount$": [MockFunction],
+      "head": [MockFunction],
+      "intercept": [MockFunction],
+      "options": [MockFunction],
+      "patch": [MockFunction],
+      "post": [MockFunction],
+      "put": [MockFunction],
+    }
+  }
   intl={
     Object {
       "defaultFormats": Object {},
