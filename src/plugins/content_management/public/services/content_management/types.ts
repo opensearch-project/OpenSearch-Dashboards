@@ -39,6 +39,7 @@ export type Section =
       input?: CardContainerExplicitInput;
       columns?: number;
       wrap?: boolean;
+      grid?: boolean;
     };
 
 export type Content =

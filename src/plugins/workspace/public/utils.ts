@@ -25,6 +25,7 @@ import {
   WorkspaceObject,
   WorkspaceAvailability,
 } from '../../../core/public';
+
 import { WORKSPACE_DETAIL_APP_ID, USE_CASE_PREFIX } from '../common/constants';
 import { getUseCaseFeatureConfig } from '../common/utils';
 import { WorkspaceUseCase, WorkspaceUseCaseFeature } from './types';
@@ -39,6 +40,9 @@ import { DataSource, DataSourceConnection, DataSourceConnectionType } from '../c
 import {
   ANALYTICS_ALL_OVERVIEW_PAGE_ID,
   ESSENTIAL_OVERVIEW_PAGE_ID,
+  OBSERVABILITY_OVERVIEW_PAGE_ID,
+  SEARCH_OVERVIEW_PAGE_ID,
+  SECURITY_ANALYTICS_OVERVIEW_PAGE_ID,
 } from '../../../plugins/content_management/public';
 
 export const isUseCaseFeatureConfig = (featureConfig: string) =>
@@ -374,14 +378,17 @@ export function prependWorkspaceToBreadcrumbs(
   currentNavGroup: NavGroupItemInMap | undefined,
   navGroupsMap: Record<string, NavGroupItemInMap>
 ) {
-  if (
-    appId === WORKSPACE_DETAIL_APP_ID ||
-    appId === ESSENTIAL_OVERVIEW_PAGE_ID ||
-    appId === ANALYTICS_ALL_OVERVIEW_PAGE_ID
-  ) {
+  if (appId === WORKSPACE_DETAIL_APP_ID) {
     core.chrome.setBreadcrumbsEnricher(undefined);
     return;
   }
+
+  const homeBreadcrumb: ChromeBreadcrumb = {
+    text: 'Home',
+    onClick: () => {
+      core.application.navigateToApp('home');
+    },
+  };
 
   /**
    * There has 3 cases
@@ -393,6 +400,20 @@ export function prependWorkspaceToBreadcrumbs(
    * so we don't need to have reset logic for workspace
    */
   if (currentWorkspace) {
+    // use case overview page only show workspace name
+    if (
+      appId === SEARCH_OVERVIEW_PAGE_ID ||
+      appId === OBSERVABILITY_OVERVIEW_PAGE_ID ||
+      appId === SECURITY_ANALYTICS_OVERVIEW_PAGE_ID ||
+      appId === ESSENTIAL_OVERVIEW_PAGE_ID ||
+      appId === ANALYTICS_ALL_OVERVIEW_PAGE_ID
+    ) {
+      core.chrome.setBreadcrumbsEnricher((breadcrumbs) => [
+        homeBreadcrumb,
+        { text: currentWorkspace.name },
+      ]);
+      return;
+    }
     const useCase = getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features || []);
     // get workspace the only use case
     if (useCase && useCase !== ALL_USE_CASE_ID) {
@@ -407,22 +428,20 @@ export function prependWorkspaceToBreadcrumbs(
         }
       },
     };
-    const homeBreadcrumb: ChromeBreadcrumb = {
-      text: 'Home',
+
+    const workspaceBreadcrumb: ChromeBreadcrumb = {
+      text: currentWorkspace.name,
       onClick: () => {
-        core.application.navigateToApp('home');
+        if (useCase) {
+          const allNavGroups = navGroupsMap[useCase];
+          core.application.navigateToApp(allNavGroups?.navLinks[0].id);
+        }
       },
     };
 
     core.chrome.setBreadcrumbsEnricher((breadcrumbs) => {
       if (!breadcrumbs || !breadcrumbs.length) return breadcrumbs;
 
-      const workspaceBreadcrumb: ChromeBreadcrumb = {
-        text: currentWorkspace.name,
-        onClick: () => {
-          core.application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
-        },
-      };
       if (useCase === ALL_USE_CASE_ID) {
         if (currentNavGroup && currentNavGroup.id !== DEFAULT_NAV_GROUPS.all.id) {
           return [homeBreadcrumb, workspaceBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
@@ -430,7 +449,7 @@ export function prependWorkspaceToBreadcrumbs(
           return [homeBreadcrumb, workspaceBreadcrumb, ...breadcrumbs];
         }
       } else {
-        return [homeBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
+        return [homeBreadcrumb, workspaceBreadcrumb, ...breadcrumbs];
       }
     });
   }
