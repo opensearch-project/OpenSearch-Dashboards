@@ -26,6 +26,8 @@ import { i18n } from '@osd/i18n';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { DirectQueryConnectionIcon } from '../workspace_form';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { CoreStart } from '../../../../../core/public';
 
 interface DataSourceConnectionTableProps {
   isDashboardAdmin: boolean;
@@ -50,6 +52,9 @@ export const DataSourceConnectionTable = ({
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
   >({});
+  const {
+    services: { http },
+  } = useOpenSearchDashboards<CoreStart>();
   useEffect(() => {
     if (onSelectedItems) {
       onSelectedItems(selectedItems);
@@ -160,7 +165,7 @@ export const DataSourceConnectionTable = ({
         ]
       : []),
     {
-      width: '25%',
+      width: '20%',
       field: 'name',
       name: i18n.translate('workspace.detail.dataSources.table.title', {
         defaultMessage: 'Title',
@@ -168,11 +173,12 @@ export const DataSourceConnectionTable = ({
       truncateText: true,
       render: (name: string, record) => {
         const origin = window.location.origin;
+        const basePath = http.basePath.serverBasePath;
         let url: string;
         if (record.connectionType === DataSourceConnectionType.OpenSearchConnection) {
-          url = `${origin}/app/dataSources/${record.id}`;
+          url = `${origin}${basePath}/app/dataSources/${record.id}`;
         } else {
-          url = `${origin}/app/dataSources/manage/${name}?dataSourceMDSId=${record.parentId}`;
+          url = `${origin}${basePath}/app/dataSources/manage/${name}?dataSourceMDSId=${record.parentId}`;
         }
         return (
           <EuiLink href={url} className="eui-textTruncate">
@@ -182,7 +188,7 @@ export const DataSourceConnectionTable = ({
       },
     },
     {
-      width: '15%',
+      width: '20%',
       field: 'type',
       name: i18n.translate('workspace.detail.dataSources.table.type', {
         defaultMessage: 'Type',

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiSpacer, EuiFlexItem, EuiSmallButton, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { SavedObjectsStart, CoreStart } from '../../../../../core/public';
@@ -14,7 +14,6 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { WorkspaceClient } from '../../workspace_client';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { DataSourceConnectionTable } from '../workspace_detail/data_source_connection_table';
-import { fetchDataSourceConnections } from '../../utils';
 import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
 
 export interface SelectDataSourcePanelProps {
@@ -44,13 +43,8 @@ export const SelectDataSourcePanel = ({
     services: { notifications, http, chrome },
   } = useOpenSearchDashboards<{ CoreStart: CoreStart; workspaceClient: WorkspaceClient }>();
 
-  useEffect(() => {
-    fetchDataSourceConnections(assignedDataSources, http, notifications).then((connections) => {
-      setAssignedDataSourceConnections(connections);
-    });
-  }, [assignedDataSources, http, notifications]);
-
   const handleAssignDataSources = (dataSourceConnections: DataSourceConnection[]) => {
+    setAssignedDataSourceConnections([...assignedDataSourceConnections, ...dataSourceConnections]);
     setModalVisible(false);
     const dataSources = dataSourceConnections
       .filter(
@@ -67,6 +61,10 @@ export const SelectDataSourcePanel = ({
   };
 
   const handleUnassignDataSources = (dataSourceConnections: DataSourceConnection[]) => {
+    const savedDataSourcesConnctions = (assignedDataSourceConnections ?? [])?.filter(
+      ({ id }: DataSourceConnection) => !dataSourceConnections.some((item) => item.id === id)
+    );
+    setAssignedDataSourceConnections(savedDataSourcesConnctions);
     const savedDataSources = (assignedDataSources ?? [])?.filter(
       ({ id }: DataSource) => !dataSourceConnections.some((item) => item.id === id)
     );
