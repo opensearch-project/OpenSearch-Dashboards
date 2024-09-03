@@ -31,11 +31,11 @@
 import { i18n } from '@osd/i18n';
 import { IndexPattern } from '../../../data/public';
 
-export function getListBreadcrumbs() {
+export function getListBreadcrumbs(currentWorkspaceName?: string) {
   return [
     {
       text: i18n.translate('indexPatternManagement.indexPatterns.listBreadcrumb', {
-        defaultMessage: 'Index patterns',
+        defaultMessage: currentWorkspaceName ? 'Workspace index patterns' : 'Index patterns',
       }),
       href: `/`,
     },

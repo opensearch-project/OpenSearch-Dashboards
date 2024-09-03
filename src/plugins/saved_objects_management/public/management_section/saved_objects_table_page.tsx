@@ -33,6 +33,7 @@ import { get } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
+import { useObservable } from 'react-use';
 import { DataPublicPluginStart } from '../../../data/public';
 import {
   ISavedObjectsManagementServiceRegistry,
@@ -73,15 +74,22 @@ const SavedObjectsTablePage = ({
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
   const dateFormat = coreStart.uiSettings.get<string>('dateFormat');
+  const currentWorkspace = useObservable(coreStart.workspaces.currentWorkspace$);
 
   useEffect(() => {
     setBreadcrumbs([
       useUpdatedUX
-        ? {
-            text: i18n.translate('savedObjectsManagement.updatedUX.title', {
-              defaultMessage: 'Assets',
-            }),
-          }
+        ? currentWorkspace
+          ? {
+              text: i18n.translate('savedObjectsManagement.updatedUX.workspace.title', {
+                defaultMessage: 'Workspace assets',
+              }),
+            }
+          : {
+              text: i18n.translate('savedObjectsManagement.updatedUX.title', {
+                defaultMessage: 'Assets',
+              }),
+            }
         : {
             text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
               defaultMessage: 'Saved objects',
@@ -89,7 +97,7 @@ const SavedObjectsTablePage = ({
             href: '/',
           },
     ]);
-  }, [setBreadcrumbs, useUpdatedUX]);
+  }, [setBreadcrumbs, useUpdatedUX, currentWorkspace]);
 
   return (
     <SavedObjectsTable

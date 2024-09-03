@@ -68,12 +68,18 @@ import { learnBasicsSection } from './application/components/homepage/sections/l
 import {
   ContentManagementPluginSetup,
   ContentManagementPluginStart,
+  SEARCH_OVERVIEW_PAGE_ID,
 } from '../../content_management/public';
 import { initHome, setupHome } from './application/home_render';
 import { registerSampleDataCard } from './application/components/sample_data/sample_data_card';
 import { registerHomeListCardToPage } from './application/components/home_list_card';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { HomeIcon } from './application/components/home_icon';
+import {
+  registerContentToSearchUseCasePage,
+  setupSearchUseCase,
+} from './application/components/usecase_overview/search_use_case_setup';
+import { DEFAULT_NAV_GROUPS } from '../../../core/public';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -168,6 +174,36 @@ export class HomePublicPlugin
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      // register search use case overview page
+      core.application.register({
+        id: SEARCH_OVERVIEW_PAGE_ID,
+        title: 'Overview',
+        mount: async (params: AppMountParameters) => {
+          const [
+            coreStart,
+            { contentManagement: contentManagementStart },
+          ] = await core.getStartServices();
+          setCommonService();
+
+          const { renderSearchUseCaseOverviewApp } = await import('./application');
+          return await renderSearchUseCaseOverviewApp(
+            params.element,
+            coreStart,
+            contentManagementStart
+          );
+        },
+      });
+
+      // add to search group
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
+        {
+          id: SEARCH_OVERVIEW_PAGE_ID,
+          order: -1,
+        },
+      ]);
+    }
+
     // Register import sample data as a standalone app so that it is available inside workspace.
     core.application.register({
       id: IMPORT_SAMPLE_DATA_APP_ID,
@@ -211,6 +247,7 @@ export class HomePublicPlugin
     sectionTypes.registerSection(workWithDataSection);
     sectionTypes.registerSection(learnBasicsSection);
     setupHome(contentManagement);
+    setupSearchUseCase(contentManagement);
 
     return {
       featureCatalogue,
@@ -234,6 +271,7 @@ export class HomePublicPlugin
 
     // register sample data card to use case overview page
     registerSampleDataCard(contentManagement, core);
+    registerContentToSearchUseCasePage(contentManagement, core);
 
     // register what's new learn opensearch card to use case overview page
     registerHomeListCardToPage(contentManagement);

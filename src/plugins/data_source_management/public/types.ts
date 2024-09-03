@@ -12,6 +12,7 @@ import {
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
+  WorkspacesStart,
 } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { i18n } from '@osd/i18n';
@@ -37,6 +38,7 @@ export interface DataSourceManagementContext {
   navigation: NavigationPublicPluginStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   authenticationMethodRegistry: AuthenticationMethodRegistry;
+  workspaces: WorkspacesStart;
 }
 
 export interface DataSourceTableItem {

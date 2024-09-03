@@ -455,7 +455,8 @@ export const getNumberOfChanges = (
   if (newFormData.name !== initialFormData.name) {
     count++;
   }
-  if (newFormData.description !== initialFormData.description) {
+  // if newFormData.description is '' and initialFormData.description is undefined, count remains unchanged
+  if ((newFormData.description || '') !== (initialFormData.description || '')) {
     count++;
   }
   if (newFormData.color !== initialFormData.color) {

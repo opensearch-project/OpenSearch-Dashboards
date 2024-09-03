@@ -7,8 +7,10 @@ import { EuiCardProps } from '@elastic/eui';
 import { ContainerInput } from '../../../../embeddable/public';
 
 export interface CardExplicitInput {
-  title: string;
+  title?: string;
   description: string;
+  toolTipContent?: string;
+  getTitle?: () => React.ReactElement;
   onClick?: () => void;
   getIcon?: () => React.ReactElement;
   getFooter?: () => React.ReactElement;
@@ -18,6 +20,7 @@ export interface CardExplicitInput {
 export type CardContainerInput = ContainerInput<CardExplicitInput> & {
   columns?: number;
   wrap?: boolean;
+  grid?: boolean;
 };
 
 /**
