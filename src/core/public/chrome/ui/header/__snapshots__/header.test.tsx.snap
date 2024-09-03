@@ -3283,103 +3283,122 @@ exports[`Header handles visibility and lock changes 1`] = `
                 <div
                   className="euiHeaderSectionItem euiHeaderSectionItem--borderRight header__toggleNavButtonSection"
                 >
-                  <EuiHeaderSectionItemButton
-                    aria-controls="mockId"
-                    aria-expanded={false}
-                    aria-label="Toggle primary navigation"
-                    aria-pressed={false}
-                    data-test-subj="toggleNavButton"
-                    onClick={[Function]}
+                  <EuiHideFor
+                    sizes={
+                      Array [
+                        "xs",
+                        "s",
+                        "m",
+                      ]
+                    }
                   >
-                    <EuiButtonEmpty
+                    <EuiHeaderSectionItemButton
                       aria-controls="mockId"
                       aria-expanded={false}
                       aria-label="Toggle primary navigation"
                       aria-pressed={false}
-                      buttonRef={
-                        Object {
-                          "current": <button
-                            aria-controls="mockId"
-                            aria-expanded="false"
-                            aria-label="Toggle primary navigation"
-                            aria-pressed="false"
-                            class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                            data-test-subj="toggleNavButton"
-                            type="button"
-                          >
-                            <span
-                              class="euiButtonContent euiButtonEmpty__content"
-                            >
-                              <span
-                                class="euiButtonEmpty__text"
-                              >
-                                <span
-                                  class="euiHeaderSectionItemButton__content"
-                                >
-                                  <span
-                                    data-euiicon-type="menu"
-                                    title="Menu"
-                                  />
-                                </span>
-                              </span>
-                            </span>
-                          </button>,
-                        }
-                      }
-                      className="euiHeaderSectionItemButton"
-                      color="text"
+                      className="navToggleInLargeScreen"
                       data-test-subj="toggleNavButton"
                       onClick={[Function]}
                     >
-                      <button
+                      <EuiButtonEmpty
                         aria-controls="mockId"
                         aria-expanded={false}
                         aria-label="Toggle primary navigation"
                         aria-pressed={false}
-                        className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                        data-test-subj="toggleNavButton"
-                        disabled={false}
-                        onClick={[Function]}
-                        type="button"
-                      >
-                        <EuiButtonContent
-                          className="euiButtonEmpty__content"
-                          iconGap="m"
-                          iconSide="left"
-                          iconSize="m"
-                          textProps={
-                            Object {
-                              "className": "euiButtonEmpty__text",
-                            }
-                          }
-                        >
-                          <span
-                            className="euiButtonContent euiButtonEmpty__content"
-                          >
-                            <span
-                              className="euiButtonEmpty__text"
+                        buttonRef={
+                          Object {
+                            "current": <button
+                              aria-controls="mockId"
+                              aria-expanded="false"
+                              aria-label="Toggle primary navigation"
+                              aria-pressed="false"
+                              class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton navToggleInLargeScreen"
+                              data-test-subj="toggleNavButton"
+                              type="button"
                             >
                               <span
-                                className="euiHeaderSectionItemButton__content"
+                                class="euiButtonContent euiButtonEmpty__content"
                               >
-                                <EuiIcon
-                                  size="m"
-                                  title="Menu"
-                                  type="menu"
+                                <span
+                                  class="euiButtonEmpty__text"
                                 >
                                   <span
-                                    data-euiicon-type="menu"
+                                    class="euiHeaderSectionItemButton__content"
+                                  >
+                                    <span
+                                      data-euiicon-type="menu"
+                                      title="Menu"
+                                    />
+                                  </span>
+                                </span>
+                              </span>
+                            </button>,
+                          }
+                        }
+                        className="euiHeaderSectionItemButton navToggleInLargeScreen"
+                        color="text"
+                        data-test-subj="toggleNavButton"
+                        onClick={[Function]}
+                      >
+                        <button
+                          aria-controls="mockId"
+                          aria-expanded={false}
+                          aria-label="Toggle primary navigation"
+                          aria-pressed={false}
+                          className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton navToggleInLargeScreen"
+                          data-test-subj="toggleNavButton"
+                          disabled={false}
+                          onClick={[Function]}
+                          type="button"
+                        >
+                          <EuiButtonContent
+                            className="euiButtonEmpty__content"
+                            iconGap="m"
+                            iconSide="left"
+                            iconSize="m"
+                            textProps={
+                              Object {
+                                "className": "euiButtonEmpty__text",
+                              }
+                            }
+                          >
+                            <span
+                              className="euiButtonContent euiButtonEmpty__content"
+                            >
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
+                                <span
+                                  className="euiHeaderSectionItemButton__content"
+                                >
+                                  <EuiIcon
                                     size="m"
                                     title="Menu"
-                                  />
-                                </EuiIcon>
+                                    type="menu"
+                                  >
+                                    <span
+                                      data-euiicon-type="menu"
+                                      size="m"
+                                      title="Menu"
+                                    />
+                                  </EuiIcon>
+                                </span>
                               </span>
                             </span>
-                          </span>
-                        </EuiButtonContent>
-                      </button>
-                    </EuiButtonEmpty>
-                  </EuiHeaderSectionItemButton>
+                          </EuiButtonContent>
+                        </button>
+                      </EuiButtonEmpty>
+                    </EuiHeaderSectionItemButton>
+                  </EuiHideFor>
+                  <EuiHideFor
+                    sizes={
+                      Array [
+                        "xl",
+                        "l",
+                      ]
+                    }
+                  />
                 </div>
               </EuiHeaderSectionItem>
               <EuiHeaderSectionItem
@@ -8438,104 +8457,122 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
               }
             }
           >
-            <EuiHeaderSectionItemButton
-              aria-controls="mockId"
-              aria-expanded={false}
-              aria-label="Toggle primary navigation"
-              aria-pressed={false}
-              className="newAppTopNavExpander"
-              data-test-subj="toggleNavButton"
-              onClick={[Function]}
+            <EuiHideFor
+              sizes={
+                Array [
+                  "xs",
+                  "s",
+                  "m",
+                ]
+              }
             >
-              <EuiButtonEmpty
+              <EuiHeaderSectionItemButton
                 aria-controls="mockId"
                 aria-expanded={false}
                 aria-label="Toggle primary navigation"
                 aria-pressed={false}
-                buttonRef={
-                  Object {
-                    "current": <button
-                      aria-controls="mockId"
-                      aria-expanded="false"
-                      aria-label="Toggle primary navigation"
-                      aria-pressed="false"
-                      class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton newAppTopNavExpander"
-                      data-test-subj="toggleNavButton"
-                      type="button"
-                    >
-                      <span
-                        class="euiButtonContent euiButtonEmpty__content"
-                      >
-                        <span
-                          class="euiButtonEmpty__text"
-                        >
-                          <span
-                            class="euiHeaderSectionItemButton__content"
-                          >
-                            <span
-                              data-euiicon-type="menu"
-                              title="Menu"
-                            />
-                          </span>
-                        </span>
-                      </span>
-                    </button>,
-                  }
-                }
-                className="euiHeaderSectionItemButton newAppTopNavExpander"
-                color="text"
+                className="newAppTopNavExpander navToggleInLargeScreen"
                 data-test-subj="toggleNavButton"
                 onClick={[Function]}
               >
-                <button
+                <EuiButtonEmpty
                   aria-controls="mockId"
                   aria-expanded={false}
                   aria-label="Toggle primary navigation"
                   aria-pressed={false}
-                  className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton newAppTopNavExpander"
-                  data-test-subj="toggleNavButton"
-                  disabled={false}
-                  onClick={[Function]}
-                  type="button"
-                >
-                  <EuiButtonContent
-                    className="euiButtonEmpty__content"
-                    iconGap="m"
-                    iconSide="left"
-                    iconSize="m"
-                    textProps={
-                      Object {
-                        "className": "euiButtonEmpty__text",
-                      }
-                    }
-                  >
-                    <span
-                      className="euiButtonContent euiButtonEmpty__content"
-                    >
-                      <span
-                        className="euiButtonEmpty__text"
+                  buttonRef={
+                    Object {
+                      "current": <button
+                        aria-controls="mockId"
+                        aria-expanded="false"
+                        aria-label="Toggle primary navigation"
+                        aria-pressed="false"
+                        class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton newAppTopNavExpander navToggleInLargeScreen"
+                        data-test-subj="toggleNavButton"
+                        type="button"
                       >
                         <span
-                          className="euiHeaderSectionItemButton__content"
+                          class="euiButtonContent euiButtonEmpty__content"
                         >
-                          <EuiIcon
-                            size="m"
-                            title="Menu"
-                            type="menu"
+                          <span
+                            class="euiButtonEmpty__text"
                           >
                             <span
-                              data-euiicon-type="menu"
+                              class="euiHeaderSectionItemButton__content"
+                            >
+                              <span
+                                data-euiicon-type="menu"
+                                title="Menu"
+                              />
+                            </span>
+                          </span>
+                        </span>
+                      </button>,
+                    }
+                  }
+                  className="euiHeaderSectionItemButton newAppTopNavExpander navToggleInLargeScreen"
+                  color="text"
+                  data-test-subj="toggleNavButton"
+                  onClick={[Function]}
+                >
+                  <button
+                    aria-controls="mockId"
+                    aria-expanded={false}
+                    aria-label="Toggle primary navigation"
+                    aria-pressed={false}
+                    className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton newAppTopNavExpander navToggleInLargeScreen"
+                    data-test-subj="toggleNavButton"
+                    disabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <EuiButtonContent
+                      className="euiButtonEmpty__content"
+                      iconGap="m"
+                      iconSide="left"
+                      iconSize="m"
+                      textProps={
+                        Object {
+                          "className": "euiButtonEmpty__text",
+                        }
+                      }
+                    >
+                      <span
+                        className="euiButtonContent euiButtonEmpty__content"
+                      >
+                        <span
+                          className="euiButtonEmpty__text"
+                        >
+                          <span
+                            className="euiHeaderSectionItemButton__content"
+                          >
+                            <EuiIcon
                               size="m"
                               title="Menu"
-                            />
-                          </EuiIcon>
+                              type="menu"
+                            >
+                              <span
+                                data-euiicon-type="menu"
+                                size="m"
+                                title="Menu"
+                              />
+                            </EuiIcon>
+                          </span>
                         </span>
                       </span>
-                    </span>
-                  </EuiButtonContent>
-                </button>
-              </EuiButtonEmpty>
-            </EuiHeaderSectionItemButton>
+                    </EuiButtonContent>
+                  </button>
+                </EuiButtonEmpty>
+              </EuiHeaderSectionItemButton>
+            </EuiHideFor>
+            <EuiHideFor
+              sizes={
+                Array [
+                  "xl",
+                  "l",
+                ]
+              }
+            />
             <EuiHeaderSection
               grow={true}
               side="left"
@@ -11763,103 +11800,122 @@ exports[`Header renders condensed header 1`] = `
                 <div
                   className="euiHeaderSectionItem euiHeaderSectionItem--borderRight header__toggleNavButtonSection"
                 >
-                  <EuiHeaderSectionItemButton
-                    aria-controls="mockId"
-                    aria-expanded={false}
-                    aria-label="Toggle primary navigation"
-                    aria-pressed={false}
-                    data-test-subj="toggleNavButton"
-                    onClick={[Function]}
+                  <EuiHideFor
+                    sizes={
+                      Array [
+                        "xs",
+                        "s",
+                        "m",
+                      ]
+                    }
                   >
-                    <EuiButtonEmpty
+                    <EuiHeaderSectionItemButton
                       aria-controls="mockId"
                       aria-expanded={false}
                       aria-label="Toggle primary navigation"
                       aria-pressed={false}
-                      buttonRef={
-                        Object {
-                          "current": <button
-                            aria-controls="mockId"
-                            aria-expanded="false"
-                            aria-label="Toggle primary navigation"
-                            aria-pressed="false"
-                            class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                            data-test-subj="toggleNavButton"
-                            type="button"
-                          >
-                            <span
-                              class="euiButtonContent euiButtonEmpty__content"
-                            >
-                              <span
-                                class="euiButtonEmpty__text"
-                              >
-                                <span
-                                  class="euiHeaderSectionItemButton__content"
-                                >
-                                  <span
-                                    data-euiicon-type="menu"
-                                    title="Menu"
-                                  />
-                                </span>
-                              </span>
-                            </span>
-                          </button>,
-                        }
-                      }
-                      className="euiHeaderSectionItemButton"
-                      color="text"
+                      className="navToggleInLargeScreen"
                       data-test-subj="toggleNavButton"
                       onClick={[Function]}
                     >
-                      <button
+                      <EuiButtonEmpty
                         aria-controls="mockId"
                         aria-expanded={false}
                         aria-label="Toggle primary navigation"
                         aria-pressed={false}
-                        className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                        data-test-subj="toggleNavButton"
-                        disabled={false}
-                        onClick={[Function]}
-                        type="button"
-                      >
-                        <EuiButtonContent
-                          className="euiButtonEmpty__content"
-                          iconGap="m"
-                          iconSide="left"
-                          iconSize="m"
-                          textProps={
-                            Object {
-                              "className": "euiButtonEmpty__text",
-                            }
-                          }
-                        >
-                          <span
-                            className="euiButtonContent euiButtonEmpty__content"
-                          >
-                            <span
-                              className="euiButtonEmpty__text"
+                        buttonRef={
+                          Object {
+                            "current": <button
+                              aria-controls="mockId"
+                              aria-expanded="false"
+                              aria-label="Toggle primary navigation"
+                              aria-pressed="false"
+                              class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton navToggleInLargeScreen"
+                              data-test-subj="toggleNavButton"
+                              type="button"
                             >
                               <span
-                                className="euiHeaderSectionItemButton__content"
+                                class="euiButtonContent euiButtonEmpty__content"
                               >
-                                <EuiIcon
-                                  size="m"
-                                  title="Menu"
-                                  type="menu"
+                                <span
+                                  class="euiButtonEmpty__text"
                                 >
                                   <span
-                                    data-euiicon-type="menu"
+                                    class="euiHeaderSectionItemButton__content"
+                                  >
+                                    <span
+                                      data-euiicon-type="menu"
+                                      title="Menu"
+                                    />
+                                  </span>
+                                </span>
+                              </span>
+                            </button>,
+                          }
+                        }
+                        className="euiHeaderSectionItemButton navToggleInLargeScreen"
+                        color="text"
+                        data-test-subj="toggleNavButton"
+                        onClick={[Function]}
+                      >
+                        <button
+                          aria-controls="mockId"
+                          aria-expanded={false}
+                          aria-label="Toggle primary navigation"
+                          aria-pressed={false}
+                          className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton navToggleInLargeScreen"
+                          data-test-subj="toggleNavButton"
+                          disabled={false}
+                          onClick={[Function]}
+                          type="button"
+                        >
+                          <EuiButtonContent
+                            className="euiButtonEmpty__content"
+                            iconGap="m"
+                            iconSide="left"
+                            iconSize="m"
+                            textProps={
+                              Object {
+                                "className": "euiButtonEmpty__text",
+                              }
+                            }
+                          >
+                            <span
+                              className="euiButtonContent euiButtonEmpty__content"
+                            >
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
+                                <span
+                                  className="euiHeaderSectionItemButton__content"
+                                >
+                                  <EuiIcon
                                     size="m"
                                     title="Menu"
-                                  />
-                                </EuiIcon>
+                                    type="menu"
+                                  >
+                                    <span
+                                      data-euiicon-type="menu"
+                                      size="m"
+                                      title="Menu"
+                                    />
+                                  </EuiIcon>
+                                </span>
                               </span>
                             </span>
-                          </span>
-                        </EuiButtonContent>
-                      </button>
-                    </EuiButtonEmpty>
-                  </EuiHeaderSectionItemButton>
+                          </EuiButtonContent>
+                        </button>
+                      </EuiButtonEmpty>
+                    </EuiHeaderSectionItemButton>
+                  </EuiHideFor>
+                  <EuiHideFor
+                    sizes={
+                      Array [
+                        "xl",
+                        "l",
+                      ]
+                    }
+                  />
                 </div>
               </EuiHeaderSectionItem>
               <EuiHeaderSectionItem
@@ -16755,104 +16811,122 @@ exports[`Header renders page header with application title 1`] = `
               }
             }
           >
-            <EuiHeaderSectionItemButton
-              aria-controls="mockId"
-              aria-expanded={false}
-              aria-label="Toggle primary navigation"
-              aria-pressed={false}
-              className="newPageTopNavExpander"
-              data-test-subj="toggleNavButton"
-              onClick={[Function]}
+            <EuiHideFor
+              sizes={
+                Array [
+                  "xs",
+                  "s",
+                  "m",
+                ]
+              }
             >
-              <EuiButtonEmpty
+              <EuiHeaderSectionItemButton
                 aria-controls="mockId"
                 aria-expanded={false}
                 aria-label="Toggle primary navigation"
                 aria-pressed={false}
-                buttonRef={
-                  Object {
-                    "current": <button
-                      aria-controls="mockId"
-                      aria-expanded="false"
-                      aria-label="Toggle primary navigation"
-                      aria-pressed="false"
-                      class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton newPageTopNavExpander"
-                      data-test-subj="toggleNavButton"
-                      type="button"
-                    >
-                      <span
-                        class="euiButtonContent euiButtonEmpty__content"
-                      >
-                        <span
-                          class="euiButtonEmpty__text"
-                        >
-                          <span
-                            class="euiHeaderSectionItemButton__content"
-                          >
-                            <span
-                              data-euiicon-type="menu"
-                              title="Menu"
-                            />
-                          </span>
-                        </span>
-                      </span>
-                    </button>,
-                  }
-                }
-                className="euiHeaderSectionItemButton newPageTopNavExpander"
-                color="text"
+                className="newPageTopNavExpander navToggleInLargeScreen"
                 data-test-subj="toggleNavButton"
                 onClick={[Function]}
               >
-                <button
+                <EuiButtonEmpty
                   aria-controls="mockId"
                   aria-expanded={false}
                   aria-label="Toggle primary navigation"
                   aria-pressed={false}
-                  className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton newPageTopNavExpander"
-                  data-test-subj="toggleNavButton"
-                  disabled={false}
-                  onClick={[Function]}
-                  type="button"
-                >
-                  <EuiButtonContent
-                    className="euiButtonEmpty__content"
-                    iconGap="m"
-                    iconSide="left"
-                    iconSize="m"
-                    textProps={
-                      Object {
-                        "className": "euiButtonEmpty__text",
-                      }
-                    }
-                  >
-                    <span
-                      className="euiButtonContent euiButtonEmpty__content"
-                    >
-                      <span
-                        className="euiButtonEmpty__text"
+                  buttonRef={
+                    Object {
+                      "current": <button
+                        aria-controls="mockId"
+                        aria-expanded="false"
+                        aria-label="Toggle primary navigation"
+                        aria-pressed="false"
+                        class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton newPageTopNavExpander navToggleInLargeScreen"
+                        data-test-subj="toggleNavButton"
+                        type="button"
                       >
                         <span
-                          className="euiHeaderSectionItemButton__content"
+                          class="euiButtonContent euiButtonEmpty__content"
                         >
-                          <EuiIcon
-                            size="m"
-                            title="Menu"
-                            type="menu"
+                          <span
+                            class="euiButtonEmpty__text"
                           >
                             <span
-                              data-euiicon-type="menu"
+                              class="euiHeaderSectionItemButton__content"
+                            >
+                              <span
+                                data-euiicon-type="menu"
+                                title="Menu"
+                              />
+                            </span>
+                          </span>
+                        </span>
+                      </button>,
+                    }
+                  }
+                  className="euiHeaderSectionItemButton newPageTopNavExpander navToggleInLargeScreen"
+                  color="text"
+                  data-test-subj="toggleNavButton"
+                  onClick={[Function]}
+                >
+                  <button
+                    aria-controls="mockId"
+                    aria-expanded={false}
+                    aria-label="Toggle primary navigation"
+                    aria-pressed={false}
+                    className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton newPageTopNavExpander navToggleInLargeScreen"
+                    data-test-subj="toggleNavButton"
+                    disabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <EuiButtonContent
+                      className="euiButtonEmpty__content"
+                      iconGap="m"
+                      iconSide="left"
+                      iconSize="m"
+                      textProps={
+                        Object {
+                          "className": "euiButtonEmpty__text",
+                        }
+                      }
+                    >
+                      <span
+                        className="euiButtonContent euiButtonEmpty__content"
+                      >
+                        <span
+                          className="euiButtonEmpty__text"
+                        >
+                          <span
+                            className="euiHeaderSectionItemButton__content"
+                          >
+                            <EuiIcon
                               size="m"
                               title="Menu"
-                            />
-                          </EuiIcon>
+                              type="menu"
+                            >
+                              <span
+                                data-euiicon-type="menu"
+                                size="m"
+                                title="Menu"
+                              />
+                            </EuiIcon>
+                          </span>
                         </span>
                       </span>
-                    </span>
-                  </EuiButtonContent>
-                </button>
-              </EuiButtonEmpty>
-            </EuiHeaderSectionItemButton>
+                    </EuiButtonContent>
+                  </button>
+                </EuiButtonEmpty>
+              </EuiHeaderSectionItemButton>
+            </EuiHideFor>
+            <EuiHideFor
+              sizes={
+                Array [
+                  "xl",
+                  "l",
+                ]
+              }
+            />
             <EuiHeaderSection
               grow={false}
             >
@@ -21042,103 +21116,122 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                 <div
                   className="euiHeaderSectionItem euiHeaderSectionItem--borderRight header__toggleNavButtonSection"
                 >
-                  <EuiHeaderSectionItemButton
-                    aria-controls="mockId"
-                    aria-expanded={true}
-                    aria-label="Toggle primary navigation"
-                    aria-pressed={true}
-                    data-test-subj="toggleNavButton"
-                    onClick={[Function]}
+                  <EuiHideFor
+                    sizes={
+                      Array [
+                        "xs",
+                        "s",
+                        "m",
+                      ]
+                    }
                   >
-                    <EuiButtonEmpty
+                    <EuiHeaderSectionItemButton
                       aria-controls="mockId"
                       aria-expanded={true}
                       aria-label="Toggle primary navigation"
                       aria-pressed={true}
-                      buttonRef={
-                        Object {
-                          "current": <button
-                            aria-controls="mockId"
-                            aria-expanded="true"
-                            aria-label="Toggle primary navigation"
-                            aria-pressed="true"
-                            class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                            data-test-subj="toggleNavButton"
-                            type="button"
-                          >
-                            <span
-                              class="euiButtonContent euiButtonEmpty__content"
-                            >
-                              <span
-                                class="euiButtonEmpty__text"
-                              >
-                                <span
-                                  class="euiHeaderSectionItemButton__content"
-                                >
-                                  <span
-                                    data-euiicon-type="menu"
-                                    title="Menu"
-                                  />
-                                </span>
-                              </span>
-                            </span>
-                          </button>,
-                        }
-                      }
-                      className="euiHeaderSectionItemButton"
-                      color="text"
+                      className="navToggleInLargeScreen"
                       data-test-subj="toggleNavButton"
                       onClick={[Function]}
                     >
-                      <button
+                      <EuiButtonEmpty
                         aria-controls="mockId"
                         aria-expanded={true}
                         aria-label="Toggle primary navigation"
                         aria-pressed={true}
-                        className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                        data-test-subj="toggleNavButton"
-                        disabled={false}
-                        onClick={[Function]}
-                        type="button"
-                      >
-                        <EuiButtonContent
-                          className="euiButtonEmpty__content"
-                          iconGap="m"
-                          iconSide="left"
-                          iconSize="m"
-                          textProps={
-                            Object {
-                              "className": "euiButtonEmpty__text",
-                            }
-                          }
-                        >
-                          <span
-                            className="euiButtonContent euiButtonEmpty__content"
-                          >
-                            <span
-                              className="euiButtonEmpty__text"
+                        buttonRef={
+                          Object {
+                            "current": <button
+                              aria-controls="mockId"
+                              aria-expanded="true"
+                              aria-label="Toggle primary navigation"
+                              aria-pressed="true"
+                              class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton navToggleInLargeScreen"
+                              data-test-subj="toggleNavButton"
+                              type="button"
                             >
                               <span
-                                className="euiHeaderSectionItemButton__content"
+                                class="euiButtonContent euiButtonEmpty__content"
                               >
-                                <EuiIcon
-                                  size="m"
-                                  title="Menu"
-                                  type="menu"
+                                <span
+                                  class="euiButtonEmpty__text"
                                 >
                                   <span
-                                    data-euiicon-type="menu"
+                                    class="euiHeaderSectionItemButton__content"
+                                  >
+                                    <span
+                                      data-euiicon-type="menu"
+                                      title="Menu"
+                                    />
+                                  </span>
+                                </span>
+                              </span>
+                            </button>,
+                          }
+                        }
+                        className="euiHeaderSectionItemButton navToggleInLargeScreen"
+                        color="text"
+                        data-test-subj="toggleNavButton"
+                        onClick={[Function]}
+                      >
+                        <button
+                          aria-controls="mockId"
+                          aria-expanded={true}
+                          aria-label="Toggle primary navigation"
+                          aria-pressed={true}
+                          className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton navToggleInLargeScreen"
+                          data-test-subj="toggleNavButton"
+                          disabled={false}
+                          onClick={[Function]}
+                          type="button"
+                        >
+                          <EuiButtonContent
+                            className="euiButtonEmpty__content"
+                            iconGap="m"
+                            iconSide="left"
+                            iconSize="m"
+                            textProps={
+                              Object {
+                                "className": "euiButtonEmpty__text",
+                              }
+                            }
+                          >
+                            <span
+                              className="euiButtonContent euiButtonEmpty__content"
+                            >
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
+                                <span
+                                  className="euiHeaderSectionItemButton__content"
+                                >
+                                  <EuiIcon
                                     size="m"
                                     title="Menu"
-                                  />
-                                </EuiIcon>
+                                    type="menu"
+                                  >
+                                    <span
+                                      data-euiicon-type="menu"
+                                      size="m"
+                                      title="Menu"
+                                    />
+                                  </EuiIcon>
+                                </span>
                               </span>
                             </span>
-                          </span>
-                        </EuiButtonContent>
-                      </button>
-                    </EuiButtonEmpty>
-                  </EuiHeaderSectionItemButton>
+                          </EuiButtonContent>
+                        </button>
+                      </EuiButtonEmpty>
+                    </EuiHeaderSectionItemButton>
+                  </EuiHideFor>
+                  <EuiHideFor
+                    sizes={
+                      Array [
+                        "xl",
+                        "l",
+                      ]
+                    }
+                  />
                 </div>
               </EuiHeaderSectionItem>
               <EuiHeaderSectionItem
