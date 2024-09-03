@@ -40,8 +40,12 @@ export class UserUISettingsClientWrapper {
 
   private normalizeDocId(id: string, request: OpenSearchDashboardsRequest, core?: CoreStart) {
     const userName = extractUserName(request, core);
-    if (userName && this.isUserLevelSetting(id)) {
-      return id.replace(CURRENT_USER, userName);
+    if (this.isUserLevelSetting(id)) {
+      if (userName) {
+        return id.replace(CURRENT_USER, userName);
+      } else {
+        return id.replace(`${CURRENT_USER}_`, '');
+      }
     }
     return id;
   }
@@ -86,29 +90,37 @@ export class UserUISettingsClientWrapper {
       const { id } = options || {};
       const userLevel = this.isUserLevelSetting(id);
 
-      if (type === 'config' && userLevel && userName && id) {
-        const permissions = {
-          permissions: new ACL()
-            .addPermission(['write'], {
-              users: [userName],
-            })
-            .getPermissions()!,
-        };
-
+      if (type === 'config' && id) {
         const docId = this.normalizeDocId(id, wrapperOptions.request, this.core);
-        // create with reference, the reference field will used for filter settings by user
-        return await wrapperOptions.client.create(type, attributes, {
-          ...options,
-          id: docId,
-          references: [
-            {
-              type: 'user', // dummy type
-              id: userName,
-              name: userName,
-            },
-          ],
-          ...(this.savedObjectsPermissionEnabled ? permissions : {}),
-        });
+
+        if (userLevel && userName) {
+          const permissions = {
+            permissions: new ACL()
+              .addPermission(['write'], {
+                users: [userName],
+              })
+              .getPermissions()!,
+          };
+
+          // create with reference, the reference field will used for filter settings by user
+          return await wrapperOptions.client.create(type, attributes, {
+            ...options,
+            id: docId,
+            references: [
+              {
+                type: 'user', // dummy type
+                id: userName,
+                name: userName,
+              },
+            ],
+            ...(this.savedObjectsPermissionEnabled ? permissions : {}),
+          });
+        } else {
+          return wrapperOptions.client.create(type, attributes, {
+            ...options,
+            id: docId,
+          });
+        }
       }
       return wrapperOptions.client.create(type, attributes, options);
     };
