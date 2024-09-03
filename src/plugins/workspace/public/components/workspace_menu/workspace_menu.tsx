@@ -124,20 +124,12 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                   type={`ws${getUseCase(currentWorkspace)?.id}`}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false} data-test-subj="workspace-menu-current-workspace-name">
-                <EuiToolTip
-                  anchorClassName="eui-textTruncate"
-                  position="right"
-                  content={currentWorkspaceName}
-                >
-                  <EuiText
-                    textAlign="center"
-                    style={{ maxWidth: '200px' }}
-                    className="eui-textTruncate"
-                  >
-                    {currentWorkspaceName}
-                  </EuiText>
-                </EuiToolTip>
+              <EuiFlexItem
+                grow={false}
+                data-test-subj="workspace-menu-current-workspace-name"
+                style={{ maxWidth: '200px' }}
+              >
+                <EuiText textAlign="center">{currentWorkspaceName}</EuiText>
                 <EuiText
                   size="xs"
                   data-test-subj="workspace-menu-current-use-case"
@@ -161,7 +153,13 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
         </EuiFlexGroup>
       </EuiPanel>
 
-      <EuiPanel paddingSize="s" hasBorder={false} color="transparent" style={{ height: '35vh' }}>
+      <EuiPanel
+        paddingSize="s"
+        hasBorder={false}
+        color="transparent"
+        style={{ height: '30vh' }}
+        className="eui-fullHeight"
+      >
         <WorkspacePickerContent
           coreStart={coreStart}
           registeredUseCases$={registeredUseCases$}

@@ -14,9 +14,7 @@ import {
   EuiFieldSearch,
   EuiListGroup,
   EuiListGroupItem,
-  EuiFlexGroup,
   EuiEmptyPrompt,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { CoreStart, WorkspaceObject } from '../../../../../core/public';
@@ -96,7 +94,7 @@ export const WorkspacePickerContent = ({
   const getEmptyStatePrompt = () => {
     return (
       <EuiEmptyPrompt
-        style={{ width: '100%', height: '100%' }}
+        className="eui-fullHeight"
         iconType="wsSelector"
         data-test-subj="empty-workspace-prompt"
         title={
@@ -168,52 +166,30 @@ export const WorkspacePickerContent = ({
     );
   };
 
-  // eslint-disable-next-line
-  console.log('queriedWorkspace', queriedWorkspace);
-
   return (
     <>
-      <EuiFlexGroup
-        direction="column"
-        justifyContent="center"
-        alignItems="center"
-        style={{ height: '100%' }}
-        gutterSize="none"
+      <EuiFieldSearch
+        compressed={true}
+        fullWidth={true}
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder={searchFieldPlaceholder}
+      />
+      <EuiSpacer />
+
+      <EuiPanel
+        paddingSize="none"
+        color="transparent"
+        hasBorder={false}
+        className="eui-yScrollWithShadows"
       >
-        <EuiFlexItem grow={false} style={{ position: 'sticky', width: '100%' }}>
-          <EuiFieldSearch
-            compressed={true}
-            fullWidth={true}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={searchFieldPlaceholder}
-          />
-          <EuiSpacer />
-        </EuiFlexItem>
+        {queriedRecentWorkspace.length > 0 &&
+          getWorkspaceListGroup(queriedRecentWorkspace, 'recent')}
 
-        <EuiFlexItem grow={true} style={{ width: '100%', overflowY: 'auto' }}>
-          <EuiPanel paddingSize="none" color="transparent" hasBorder={false}>
-            {queriedWorkspace !== workspaceList ? (
-              <>
-                {queriedRecentWorkspace.length > 0 &&
-                  getWorkspaceListGroup(queriedRecentWorkspace, 'recent')}
+        {queriedWorkspace.length > 0 && getWorkspaceListGroup(queriedWorkspace, 'all')}
 
-                {queriedWorkspace.length > 0 && getWorkspaceListGroup(queriedWorkspace, 'all')}
-
-                {queriedWorkspace.length === 0 && getEmptyStatePrompt()}
-              </>
-            ) : (
-              <>
-                {recentWorkspaces.length > 0 && getWorkspaceListGroup(recentWorkspaces, 'recent')}
-
-                {workspaceList.length > 0 && getWorkspaceListGroup(workspaceList, 'all')}
-
-                {workspaceList.length === 0 && getEmptyStatePrompt()}
-              </>
-            )}
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        {queriedWorkspace.length === 0 && getEmptyStatePrompt()}
+      </EuiPanel>
     </>
   );
 };
