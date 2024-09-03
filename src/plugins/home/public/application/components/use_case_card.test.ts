@@ -17,7 +17,7 @@ describe('registerUseCaseCard', () => {
 
   it('should register useCase card correctly', () => {
     registerUseCaseCard(contentManagementStartMock, {
-      id: 'test_id',
+      id: 'testId',
       order: 1,
       target: 'osd_homepage/get_started',
       icon: 'wsObservability',
@@ -32,7 +32,7 @@ describe('registerUseCaseCard', () => {
     expect(registerCall.getTargetArea()).toEqual('osd_homepage/get_started');
 
     expect(registerCall.getContent()).toEqual({
-      id: 'test_id',
+      id: 'testId',
       kind: 'card',
       order: 1,
       description: 'Gain visibility into your application and infrastructure',
