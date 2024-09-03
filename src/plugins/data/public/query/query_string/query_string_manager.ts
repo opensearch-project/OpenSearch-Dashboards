@@ -46,12 +46,13 @@ export class QueryStringManager {
 
   constructor(
     private readonly storage: DataStorage,
+    private readonly sessionStorage: DataStorage,
     private readonly uiSettings: CoreStart['uiSettings'],
     private readonly defaultSearchInterceptor: ISearchInterceptor
   ) {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
     this.queryHistory = createHistory({ storage });
-    this.datasetService = new DatasetService(uiSettings);
+    this.datasetService = new DatasetService(uiSettings, this.sessionStorage);
     this.languageService = new LanguageService(this.defaultSearchInterceptor, this.storage);
   }
 
