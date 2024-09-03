@@ -11,6 +11,7 @@ import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
+  ...jest.requireActual('../../../../opensearch_dashboards_react/public'),
   useOpenSearchDashboards: jest.fn(),
 }));
 const handleUnassignDataSources = jest.fn();
