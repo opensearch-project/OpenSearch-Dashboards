@@ -35,6 +35,7 @@ export const createCardInput = (
     viewMode: ViewMode.VIEW,
     columns: section.columns,
     wrap: section.wrap,
+    grid: section.grid,
     panels,
     ...section.input,
   };
@@ -45,8 +46,10 @@ export const createCardInput = (
         type: CARD_EMBEDDABLE,
         explicitInput: {
           id: content.id,
-          title: content.title,
+          title: content?.title,
           description: content.description,
+          toolTipContent: content?.toolTipContent,
+          getTitle: content?.getTitle,
           onClick: content.onClick,
           getIcon: content?.getIcon,
           getFooter: content?.getFooter,

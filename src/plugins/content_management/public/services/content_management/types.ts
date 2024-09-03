@@ -39,6 +39,7 @@ export type Section =
       input?: CardContainerExplicitInput;
       columns?: number;
       wrap?: boolean;
+      grid?: boolean;
     };
 
 export type Content =
@@ -70,8 +71,10 @@ export type Content =
       kind: 'card';
       id: string;
       order: number;
-      title: string;
+      title?: string;
       description: string;
+      toolTipContent?: string;
+      getTitle?: () => React.ReactElement;
       onClick?: () => void;
       getIcon?: () => React.ReactElement;
       getFooter?: () => React.ReactElement;

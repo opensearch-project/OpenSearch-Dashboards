@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { BehaviorSubject } from 'rxjs';
-import { EuiButtonIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiButtonIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { Content, Section } from '../services';
 import { EmbeddableInput, EmbeddableRenderer, EmbeddableStart } from '../../../embeddable/public';
@@ -54,9 +54,6 @@ const DashboardSection = ({ section, embeddable, contents$, savedObjectsClient }
 
 const CardSection = ({ section, embeddable, contents$ }: Props) => {
   const [isCardVisible, setIsCardVisible] = useState(true);
-  const toggleCardVisibility = () => {
-    setIsCardVisible(!isCardVisible);
-  };
   const contents = useObservable(contents$);
   const input = useMemo(() => {
     return createCardInput(section, contents ?? []);
@@ -66,13 +63,13 @@ const CardSection = ({ section, embeddable, contents$ }: Props) => {
 
   if (section.kind === 'card' && factory && input) {
     return (
-      <EuiPanel paddingSize="none" hasBorder={false} hasShadow={false} color="transparent">
+      <>
         {section.title ? (
           <EuiTitle size="s">
             <h2>
               <EuiButtonIcon
                 iconType={isCardVisible ? 'arrowDown' : 'arrowUp'}
-                onClick={toggleCardVisibility}
+                onClick={() => setIsCardVisible(!isCardVisible)}
                 color="text"
                 aria-label={isCardVisible ? 'Show panel' : 'Hide panel'}
               />
@@ -85,7 +82,7 @@ const CardSection = ({ section, embeddable, contents$ }: Props) => {
             <EuiSpacer size="s" /> <EmbeddableRenderer factory={factory} input={input} />
           </>
         )}
-      </EuiPanel>
+      </>
     );
   }
 
