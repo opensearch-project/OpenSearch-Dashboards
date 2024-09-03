@@ -349,6 +349,7 @@ export class ChromeService {
 
       getHeaderComponent: () => (
         <Header
+          http={http}
           loadingCount$={http.getLoadingCount$()}
           application={application}
           appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
