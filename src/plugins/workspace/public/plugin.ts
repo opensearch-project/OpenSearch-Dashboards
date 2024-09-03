@@ -72,7 +72,6 @@ import {
 import { UserDefaultWorkspace } from './components/workspace_list/default_workspace';
 import { registerGetStartedCardToNewHome } from './components/home_get_start_card';
 
-
 type WorkspaceAppType = (
   params: AppMountParameters,
   services: Services,
