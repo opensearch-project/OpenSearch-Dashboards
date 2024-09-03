@@ -45,6 +45,7 @@ export const PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER = 0;
  * store a static map in workspace.
  *
  */
+
 export const WORKSPACE_USE_CASES = Object.freeze({
   observability: {
     id: 'observability',
