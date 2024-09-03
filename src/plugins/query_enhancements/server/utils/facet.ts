@@ -40,7 +40,7 @@ export class Facet {
       const query: Query = request.body.query;
       const { format, df } = request.body;
       const params = {
-        body: { ...query },
+        body: { query: query.query },
         ...(format !== 'jdbc' && { format }),
       };
       const clientId = query.dataset?.dataSource?.id ?? df?.meta?.queryConfig?.dataSourceId;
