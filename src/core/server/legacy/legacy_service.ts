@@ -234,6 +234,11 @@ export class LegacyService implements CoreService {
         },
       },
       crossCompatibility: startDeps.core.crossCompatibility,
+      dynamicConfig: {
+        getClient: startDeps.core.dynamicConfig.getClient,
+        getAsyncLocalStore: startDeps.core.dynamicConfig.getAsyncLocalStore,
+        createStoreFromRequest: startDeps.core.dynamicConfig.createStoreFromRequest,
+      },
     };
 
     const router = setupDeps.core.http.createRouter('', this.legacyId);
