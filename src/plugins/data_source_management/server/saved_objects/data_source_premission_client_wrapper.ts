@@ -6,6 +6,7 @@
 import { i18n } from '@osd/i18n';
 import _ from 'lodash';
 import {
+  SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
@@ -18,8 +19,9 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '../../../../core/server';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE, ManageableBy } from '../../common';
 import { getWorkspaceState } from '../../../../core/server/utils';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../data_source/common';
+import { ManageableBy } from '../../common';
 
 /**
  * Determine whether the user has the permissions to create, delete, and update data source based on manageableBy/dataSourceAdmin.
@@ -29,23 +31,26 @@ import { getWorkspaceState } from '../../../../core/server/utils';
  * If manageableBy is dashboard_admin, only OSD admin has permissions.
  */
 export class DataSourcePermissionClientWrapper {
+  constructor(private manageableBy: string) {}
+
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
     const { isDashboardAdmin, isDataSourceAdmin } = getWorkspaceState(wrapperOptions.request) || {};
-
-    if (
-      isDataSourceAdmin ||
-      this.manageableBy === ManageableBy.All ||
-      (this.manageableBy === ManageableBy.DashboardAdmin && isDashboardAdmin !== false)
-    ) {
+    if (isDataSourceAdmin) {
       return wrapperOptions.client;
     }
+    // If isDashboardAdmin is undefined / true, the user will be dashboard admin
+    const isDashboardAdminRequest = isDashboardAdmin !== false;
+
+    const canSkipWrapper =
+      this.manageableBy === ManageableBy.All ||
+      (this.manageableBy === ManageableBy.DashboardAdmin && isDashboardAdminRequest);
 
     const createWithManageableBy = async <T = unknown>(
       type: string,
       attributes: T,
       options?: SavedObjectsCreateOptions
     ) => {
-      if (DATA_SOURCE_SAVED_OBJECT_TYPE === type) {
+      if (DATA_SOURCE_SAVED_OBJECT_TYPE === type && !canSkipWrapper) {
         throw this.generatePermissionError();
       }
       return await wrapperOptions.client.create(type, attributes, options);
@@ -55,6 +60,9 @@ export class DataSourcePermissionClientWrapper {
       objects: Array<SavedObjectsBulkCreateObject<T>>,
       options?: SavedObjectsCreateOptions
     ): Promise<SavedObjectsBulkResponse<T>> => {
+      if (canSkipWrapper) {
+        return await wrapperOptions.client.bulkCreate(objects, options);
+      }
       const disallowedSavedObjects: Array<SavedObjectsBulkCreateObject<T>> = [];
       const allowedSavedObjects: Array<SavedObjectsBulkCreateObject<T>> = [];
 
@@ -95,18 +103,22 @@ export class DataSourcePermissionClientWrapper {
         return await wrapperOptions.client.update(type, id, attributes, options);
       }
 
-      // Although the manageableBy is none, the OSD admin can assign workspaces to the data source.
-      if (isDashboardAdmin !== false && options.workspaces) {
+      // Dashboard admin can update the workspace attribute of data source saved object.
+      if (isDashboardAdminRequest && options.workspaces) {
         const originalDataSource = await wrapperOptions.client.get(type, id);
-        const attributesToCompare = ['title', 'description', 'auth'];
+        const attributesToCompare = ['title', 'description', 'auth', 'endpoint'];
         const originalAttributes = _.pick(originalDataSource.attributes, attributesToCompare);
         const updateAttributes = _.pick(attributes, attributesToCompare);
 
         if (_.isEqual(originalAttributes, updateAttributes)) {
           return await wrapperOptions.client.update(type, id, attributes, options);
         }
+        throw this.generatePermissionError();
       }
 
+      if (canSkipWrapper) {
+        return await wrapperOptions.client.update(type, id, attributes, options);
+      }
       throw this.generatePermissionError();
     };
 
@@ -114,6 +126,9 @@ export class DataSourcePermissionClientWrapper {
       objects: Array<SavedObjectsBulkUpdateObject<T>>,
       options?: SavedObjectsBulkUpdateOptions
     ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
+      if (canSkipWrapper) {
+        return await wrapperOptions.client.bulkUpdate(objects, options);
+      }
       const disallowedSavedObjects: Array<SavedObjectsBulkUpdateObject<T>> = [];
       const allowedSavedObjects: Array<SavedObjectsBulkUpdateObject<T>> = [];
 
@@ -149,10 +164,36 @@ export class DataSourcePermissionClientWrapper {
       id: string,
       options: SavedObjectsDeleteOptions = {}
     ) => {
-      if (DATA_SOURCE_SAVED_OBJECT_TYPE === type) {
+      if (DATA_SOURCE_SAVED_OBJECT_TYPE === type && !canSkipWrapper) {
         throw this.generatePermissionError();
       }
       return await wrapperOptions.client.delete(type, id, options);
+    };
+
+    const addToWorkspacesWithManageableBy = async (
+      type: string,
+      id: string,
+      targetWorkspaces: string[],
+      options: SavedObjectsBaseOptions = {}
+    ) => {
+      // Dashboard admin can assign data source to workspace
+      if (type === DATA_SOURCE_SAVED_OBJECT_TYPE && !isDashboardAdminRequest) {
+        throw this.generatePermissionError();
+      }
+      return await wrapperOptions.client.addToWorkspaces(type, id, targetWorkspaces, options);
+    };
+
+    const deleteFromWorkspacesWithManageableBy = async (
+      type: string,
+      id: string,
+      targetWorkspaces: string[],
+      options: SavedObjectsBaseOptions = {}
+    ) => {
+      // Dashboard admin can unassign data source to workspace
+      if (type === DATA_SOURCE_SAVED_OBJECT_TYPE && !isDashboardAdminRequest) {
+        throw this.generatePermissionError();
+      }
+      return await wrapperOptions.client.deleteFromWorkspaces(type, id, targetWorkspaces, options);
     };
 
     return {
@@ -169,10 +210,10 @@ export class DataSourcePermissionClientWrapper {
       errors: wrapperOptions.client.errors,
       addToNamespaces: wrapperOptions.client.addToNamespaces,
       deleteFromNamespaces: wrapperOptions.client.deleteFromNamespaces,
+      addToWorkspaces: addToWorkspacesWithManageableBy,
+      deleteFromWorkspaces: deleteFromWorkspacesWithManageableBy,
     };
   };
-
-  constructor(private manageableBy: string) {}
 
   private generatePermissionError = () =>
     SavedObjectsErrorHelpers.decorateForbiddenError(

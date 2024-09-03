@@ -415,6 +415,9 @@ export class WorkspaceSavedObjectsClientWrapper {
       const objectToGet = await wrapperOptions.client.get<T>(type, id, options);
 
       if (objectToGet.type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+        if (isDataSourceAdmin) {
+          return objectToGet;
+        }
         const hasPermission = this.validateDataSourcePermissions(
           objectToGet,
           wrapperOptions.request
@@ -475,6 +478,13 @@ export class WorkspaceSavedObjectsClientWrapper {
     const findWithWorkspacePermissionControl = async <T = unknown>(
       options: SavedObjectsFindOptions
     ) => {
+      if (
+        options.type.length === 1 &&
+        options.type[0] === DATA_SOURCE_SAVED_OBJECT_TYPE &&
+        isDataSourceAdmin
+      ) {
+        return await wrapperOptions.client.find<T>(options);
+      }
       const principals = this.permissionControl.getPrincipalsFromRequest(wrapperOptions.request);
       const permittedWorkspaceIds = (
         await this.getWorkspaceTypeEnabledClient(wrapperOptions.request).find({
@@ -535,7 +545,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       return await wrapperOptions.client.deleteByWorkspace(workspace, options);
     };
 
-    const isDashboardAdmin = getWorkspaceState(wrapperOptions.request)?.isDashboardAdmin;
+    const { isDashboardAdmin, isDataSourceAdmin } = getWorkspaceState(wrapperOptions.request) || {};
     if (isDashboardAdmin) {
       return wrapperOptions.client;
     }

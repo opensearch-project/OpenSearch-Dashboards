@@ -21,14 +21,17 @@ import { DataSourceManagementPluginSetup, DataSourceManagementPluginStart } from
 import { OpenSearchDataSourceManagementPlugin } from './adaptors/opensearch_data_source_management_plugin';
 import { PPLPlugin } from './adaptors/ppl_plugin';
 import { ConfigSchema } from '../config';
-import { getWorkspaceState, updateWorkspaceState } from '../../../../src/core/server/utils';
+import {
+  getPrincipalsFromRequest,
+  getWorkspaceState,
+  updateWorkspaceState,
+} from '../../../../src/core/server/utils';
 import {
   DATA_SOURCE_PERMISSION_CLIENT_WRAPPER_ID,
   ManageableBy,
   ORDER_FOR_DATA_SOURCE_PERMISSION_WRAPPER,
 } from '../common';
 import { DataSourcePermissionClientWrapper } from './saved_objects/data_source_premission_client_wrapper';
-import { getPrincipalsFromRequest } from './utils';
 
 export interface DataSourceManagementPluginDependencies {
   dataSource: DataSourcePluginSetup;

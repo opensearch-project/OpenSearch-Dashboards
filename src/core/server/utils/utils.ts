@@ -3,13 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  AuthStatus,
-  HttpAuth,
-  OpenSearchDashboardsRequest,
-  Principals,
-  PrincipalType,
-} from '../../../core/server';
+import { AuthStatus, HttpAuth, OpenSearchDashboardsRequest, PrincipalType, Principals } from '..';
 
 export interface AuthInfo {
   backend_roles?: string[];
@@ -18,11 +12,14 @@ export interface AuthInfo {
 
 export const getPrincipalsFromRequest = (
   request: OpenSearchDashboardsRequest,
-  auth: HttpAuth
+  auth?: HttpAuth
 ): Principals => {
   const payload: Principals = {};
-  const authInfoResp = auth.get(request);
+  const authInfoResp = auth?.get(request);
   if (authInfoResp?.status === AuthStatus.unknown) {
+    /**
+     * Login user have access to all the workspaces when no authentication is presented.
+     */
     return payload;
   }
 
@@ -30,6 +27,9 @@ export const getPrincipalsFromRequest = (
     const authInfo = authInfoResp?.state as { authInfo: AuthInfo } | null;
     if (authInfo?.authInfo?.backend_roles) {
       payload[PrincipalType.Groups] = authInfo.authInfo.backend_roles;
+    }
+    if (authInfo?.authInfo?.user_name) {
+      payload[PrincipalType.Users] = [authInfo.authInfo.user_name];
     }
     return payload;
   }

@@ -7,12 +7,14 @@ import { OnPostAuthHandler, OnPreRoutingHandler } from 'src/core/server';
 import { coreMock, httpServerMock, uiSettingsServiceMock } from '../../../core/server/mocks';
 import { WorkspacePlugin } from './plugin';
 import { getWorkspaceState, updateWorkspaceState } from '../../../core/server/utils';
+import * as serverUtils from '../../../core/server/utils/utils';
 import * as utilsExports from './utils';
 import { SavedObjectsPermissionControl } from './permission_control/client';
 
 describe('Workspace server plugin', () => {
   afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   it('#setup', async () => {
@@ -132,7 +134,7 @@ describe('Workspace server plugin', () => {
 
     it('with yml config', async () => {
       jest
-        .spyOn(utilsExports, 'getPrincipalsFromRequest')
+        .spyOn(serverUtils, 'getPrincipalsFromRequest')
         .mockImplementation(() => ({ users: [`user1`] }));
       jest
         .spyOn(utilsExports, 'getOSDAdminConfigFromYMLConfig')
@@ -150,7 +152,7 @@ describe('Workspace server plugin', () => {
     });
 
     it('uninstall security plugin', async () => {
-      jest.spyOn(utilsExports, 'getPrincipalsFromRequest').mockImplementation(() => ({}));
+      jest.spyOn(serverUtils, 'getPrincipalsFromRequest').mockImplementation(() => ({}));
 
       await workspacePlugin.setup(setupMock);
       const toolKitMock = httpServerMock.createToolkit();
@@ -164,7 +166,7 @@ describe('Workspace server plugin', () => {
     });
 
     it('should clear saved objects cache', async () => {
-      jest.spyOn(utilsExports, 'getPrincipalsFromRequest').mockImplementation(() => ({}));
+      jest.spyOn(serverUtils, 'getPrincipalsFromRequest').mockImplementation(() => ({}));
       const clearSavedObjectsCacheMock = jest
         .spyOn(SavedObjectsPermissionControl.prototype, 'clearSavedObjectsCache')
         .mockImplementationOnce(() => {});

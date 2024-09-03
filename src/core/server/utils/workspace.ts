@@ -30,6 +30,7 @@ export const updateWorkspaceState = (
   };
 };
 
+// TODO: Move isDataSourceAdmin and isDashboardAdmin out of WorkspaceState and this change is planned for version 2.18
 export const getWorkspaceState = (request: OpenSearchDashboardsRequest): WorkspaceState => {
   const { requestWorkspaceId, isDashboardAdmin, isDataSourceAdmin } = ensureRawRequest(request)
     .app as WorkspaceState;
