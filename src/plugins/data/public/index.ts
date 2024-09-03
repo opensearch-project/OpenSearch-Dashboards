@@ -471,6 +471,8 @@ export {
   LanguageConfig,
   LanguageService,
   LanguageServiceContract,
+  RecentQueriesTable,
+  QueryControls,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
