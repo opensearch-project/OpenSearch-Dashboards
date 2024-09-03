@@ -11,6 +11,8 @@ import {
   DEFAULT_DATA,
   IFieldType,
   UI_SETTINGS,
+  DataStorage,
+  CachedDataStructure,
 } from '../../../../common';
 import { DatasetTypeConfig } from './types';
 import { indexPatternTypeConfig, indexTypeConfig } from './lib';
@@ -22,7 +24,10 @@ export class DatasetService {
   private defaultDataset?: Dataset;
   private typesRegistry: Map<string, DatasetTypeConfig> = new Map();
 
-  constructor(private readonly uiSettings: CoreStart['uiSettings']) {
+  constructor(
+    private readonly uiSettings: CoreStart['uiSettings'],
+    private readonly sessionStorage: DataStorage
+  ) {
     if (this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) {
       this.registerDefaultTypes();
     }
@@ -76,23 +81,87 @@ export class DatasetService {
             }
           : undefined,
       } as IndexPatternSpec;
-      const temporaryIndexPattern = await this.indexPatterns?.create(spec);
+      const temporaryIndexPattern = await this.indexPatterns?.create(spec, true);
       if (temporaryIndexPattern) {
         this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
       }
     }
   }
 
-  public fetchOptions(
+  public async fetchOptions(
     services: IDataPluginServices,
     path: DataStructure[],
     dataType: string
   ): Promise<DataStructure> {
     const type = this.typesRegistry.get(dataType);
     if (!type) {
-      throw new Error(`No handler found for type: ${path[0]}`);
+      throw new Error(`No handler found for type: ${dataType}`);
     }
-    return type.fetch(services, path);
+
+    const lastPathItem = path[path.length - 1];
+    const cacheKey = `${dataType}.${lastPathItem.id}`;
+
+    const cachedDataStructure = this.sessionStorage.get<CachedDataStructure>(cacheKey);
+    if (cachedDataStructure?.children?.length > 0) {
+      return this.cacheToDataStructure(dataType, cachedDataStructure);
+    }
+
+    const fetchedDataStructure = await type.fetch(services, path);
+    this.cacheDataStructure(dataType, fetchedDataStructure);
+    return fetchedDataStructure;
+  }
+
+  private cacheToDataStructure(
+    dataType: string,
+    cachedDataStructure: CachedDataStructure
+  ): DataStructure {
+    const reconstructed: DataStructure = {
+      ...cachedDataStructure,
+      parent: undefined,
+      children: cachedDataStructure.children
+        .map((childId) => {
+          const cachedChild = this.sessionStorage.get<CachedDataStructure>(
+            `${dataType}.${childId}`
+          );
+          if (!cachedChild) return;
+          return {
+            id: cachedChild.id,
+            title: cachedChild.title,
+            type: cachedChild.type,
+            meta: cachedChild.meta,
+          } as DataStructure;
+        })
+        .filter((child): child is DataStructure => !!child),
+    };
+
+    return reconstructed;
+  }
+
+  private cacheDataStructure(dataType: string, dataStructure: DataStructure) {
+    const cachedDataStructure: CachedDataStructure = {
+      id: dataStructure.id,
+      title: dataStructure.title,
+      type: dataStructure.type,
+      parent: dataStructure.parent?.id || '',
+      children: dataStructure.children?.map((child) => child.id) || [],
+      hasNext: dataStructure.hasNext,
+      columnHeader: dataStructure.columnHeader,
+      meta: dataStructure.meta,
+    };
+
+    this.sessionStorage.set(`${dataType}.${dataStructure.id}`, cachedDataStructure);
+
+    dataStructure.children?.forEach((child) => {
+      const cachedChild: CachedDataStructure = {
+        id: child.id,
+        title: child.title,
+        type: child.type,
+        parent: dataStructure.id,
+        children: [],
+        meta: child.meta,
+      };
+      this.sessionStorage.set(`${dataType}.${child.id}`, cachedChild);
+    });
   }
 
   private async fetchDefaultDataset(): Promise<Dataset | undefined> {

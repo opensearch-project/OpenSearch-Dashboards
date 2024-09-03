@@ -151,10 +151,16 @@ export const Configurator = ({
         <EuiButton onClick={onPrevious} iconType="arrowLeft" iconSide="left">
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.previous"
-            defaultMessage="Previous"
+            defaultMessage="Back"
           />
         </EuiButton>
-        <EuiButton onClick={() => onConfirm({ ...baseDataset, language, timeFieldName })} fill>
+        <EuiButton
+          onClick={() => {
+            queryString.getDatasetService().cacheDataset({ ...dataset, language, timeFieldName });
+            onConfirm({ ...dataset, language, timeFieldName });
+          }}
+          fill
+        >
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"
             defaultMessage="Select Data"

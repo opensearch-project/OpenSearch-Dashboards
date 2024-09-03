@@ -38,12 +38,20 @@ export class Facet {
   ): Promise<FacetResponse> => {
     try {
       const query: Query = request.body.query;
-      const { format, df } = request.body;
+      const { dataSource } = query.dataset!;
+      const { format, lang } = request.body;
       const params = {
-        body: { query: query.query },
+        body: {
+          query: query.query,
+          ...(dataSource && { datasource: dataSource.title }),
+          ...(dataSource?.meta?.sessionId && {
+            sessionId: dataSource?.meta?.sessionId,
+          }),
+          ...(lang && { lang }),
+        },
         ...(format !== 'jdbc' && { format }),
       };
-      const clientId = query.dataset?.dataSource?.id ?? df?.meta?.queryConfig?.dataSourceId;
+      const clientId = dataSource?.id;
       const client = clientId
         ? context.dataSource.opensearch.legacy.getClient(clientId).callAPI
         : this.defaultClient.asScoped(request).callAsCurrentUser;
@@ -67,9 +75,9 @@ export class Facet {
     endpoint: string
   ): Promise<FacetResponse> => {
     try {
+      const query: Query = request.body.query;
       const params = request.params;
-      const { df, dataSourceId } = request.body;
-      const clientId = dataSourceId ?? df?.meta?.queryConfig?.dataSourceId;
+      const clientId = query.dataset?.dataSource?.id;
       const client = clientId
         ? context.dataSource.opensearch.legacy.getClient(clientId).callAPI
         : this.defaultClient.asScoped(request).callAsCurrentUser;
