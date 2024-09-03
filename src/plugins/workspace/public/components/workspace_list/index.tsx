@@ -203,21 +203,20 @@ export const WorkspaceListInner = ({
   }, [isDashboardAdmin, workspaceCreateUrl]);
 
   const renderCreateWorkspaceButton = () => {
-    const button = (
-      <EuiSmallButton
-        href={workspaceCreateUrl}
-        key="create_workspace"
-        data-test-subj="workspaceList-create-workspace"
-        iconType="plus"
-      >
-        {i18n.translate('workspace.list.buttons.createWorkspace', {
-          defaultMessage: 'Create workspace',
-        })}
-      </EuiSmallButton>
-    );
     return (
       <HeaderControl
-        controls={[{ renderComponent: button }]}
+        controls={[
+          {
+            controlType: 'button',
+            label: i18n.translate('workspace.list.buttons.createWorkspace', {
+              defaultMessage: 'Create workspace',
+            }),
+            testId: 'workspaceList-create-workspace',
+            iconType: 'plus',
+            href: workspaceCreateUrl,
+            fill: true,
+          },
+        ]}
         setMountPoint={application?.setAppRightControls}
       />
     );
