@@ -166,6 +166,7 @@ export class QueryStringManager {
     const language = this.languageService.getLanguage(languageId);
     const dataset = curQuery.dataset;
     const input = language?.getQueryString(curQuery) || '';
+    this.languageService.setUserQueryString(input);
 
     return {
       query: input,

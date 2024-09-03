@@ -30,9 +30,10 @@
 
 import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from 'src/core/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
-import { QueryStart, SavedQuery } from '../../query';
+import { QueryStart, SavedQuery, QueryStatus } from '../../query';
 import { SearchBar, SearchBarOwnProps } from './';
 import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
@@ -45,6 +46,7 @@ interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: DataStorage;
+  queryStatus$?: BehaviorSubject<QueryStatus>;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -129,7 +131,7 @@ const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
   return props.useDefaultBehaviors ? {} : props;
 };
 
-export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) {
+export function createSearchBar({ core, storage, data, queryStatus$ }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
@@ -191,6 +193,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           showQueryBar={props.showQueryBar}
           showQueryInput={props.showQueryInput}
           showSaveQuery={props.showSaveQuery}
+          queryStatus$={queryStatus$}
           screenTitle={props.screenTitle}
           indexPatterns={props.indexPatterns}
           indicateNoData={props.indicateNoData}

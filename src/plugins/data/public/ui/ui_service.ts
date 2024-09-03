@@ -4,6 +4,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { BehaviorSubject } from 'rxjs';
 import { ConfigSchema } from '../../config';
 import { DataPublicPluginStart } from '../types';
 import { createIndexPatternSelect } from './index_pattern_select';
@@ -11,6 +12,8 @@ import { createSearchBar } from './search_bar/create_search_bar';
 import { SuggestionsComponent } from './typeahead';
 import { IUiSetup, IUiStart } from './types';
 import { DataStorage } from '../../common';
+import { QueryStatus } from '../query';
+import { ResultStatus } from '../query/query_string/language_service/lib';
 
 /** @internal */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -24,6 +27,7 @@ export interface UiServiceStartDependencies {
 
 export class UiService implements Plugin<IUiSetup, IUiStart> {
   enhancementsConfig: ConfigSchema['enhancements'];
+  private queryStatus$ = new BehaviorSubject<QueryStatus>({ status: ResultStatus.READY });
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     const { enhancements } = initializerContext.config.get<ConfigSchema>();
@@ -36,16 +40,22 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
   }
 
   public start(core: CoreStart, { dataServices, storage }: UiServiceStartDependencies): IUiStart {
+    const setQueryStatus = (status: QueryStatus) => {
+      this.queryStatus$.next(status);
+    };
+
     const SearchBar = createSearchBar({
       core,
       data: dataServices,
       storage,
+      queryStatus$: this.queryStatus$,
     });
 
     return {
       IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
       SearchBar,
       SuggestionsComponent,
+      setQueryStatus,
     };
   }
 

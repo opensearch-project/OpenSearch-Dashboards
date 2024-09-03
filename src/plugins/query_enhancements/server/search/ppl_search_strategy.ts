@@ -72,7 +72,7 @@ export const pplSearchStrategyProvider = (
           took: rawResponse.took,
         } as IDataFrameResponse;
       } catch (e) {
-        logger.error(`pplSearchStrategy: ${e.message}`);
+        logger.error(`pplSearchStrategy: ${e}`);
         if (usage) usage.trackError();
         throw e;
       }

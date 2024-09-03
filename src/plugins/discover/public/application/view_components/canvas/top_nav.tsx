@@ -34,7 +34,7 @@ export interface TopNavProps {
 
 export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
-  const { inspectorAdapters, savedSearch, indexPattern } = useDiscoverContext();
+  const { data$, inspectorAdapters, savedSearch, indexPattern } = useDiscoverContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
   const [screenTitle, setScreenTitle] = useState<string>('');
   const state = useSelector((s) => s.discover);
@@ -68,6 +68,14 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     },
     uiSettings
   );
+
+  useEffect(() => {
+    const subscription = data$.subscribe((queryData) => {
+      if (!queryData.queryStatus) return;
+      data.ui.setQueryStatus(queryData.queryStatus);
+    });
+    return () => subscription.unsubscribe();
+  }, [data$, data.ui]);
 
   useEffect(() => {
     let isMounted = true;
