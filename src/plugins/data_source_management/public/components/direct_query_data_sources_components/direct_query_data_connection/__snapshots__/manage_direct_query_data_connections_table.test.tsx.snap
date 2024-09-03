@@ -60,6 +60,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
               >
                 <EuiInMemoryTable
                   allowNeutralSort={false}
+                  className="direct-query-table"
                   columns={
                     Array [
                       Object {
@@ -470,6 +471,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                       />
                     </EuiSpacer>
                     <EuiBasicTable
+                      className="direct-query-table"
                       columns={
                         Array [
                           Object {
@@ -548,7 +550,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                       tableLayout="auto"
                     >
                       <div
-                        className="euiBasicTable"
+                        className="euiBasicTable direct-query-table"
                       >
                         <div>
                           <EuiTableHeaderMobile>
@@ -1177,6 +1179,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
               >
                 <EuiInMemoryTable
                   allowNeutralSort={false}
+                  className="direct-query-table"
                   columns={
                     Array [
                       Object {
@@ -1645,6 +1648,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                       />
                     </EuiSpacer>
                     <EuiBasicTable
+                      className="direct-query-table"
                       columns={
                         Array [
                           Object {
@@ -1749,7 +1753,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                       tableLayout="auto"
                     >
                       <div
-                        className="euiBasicTable"
+                        className="euiBasicTable direct-query-table"
                       >
                         <div>
                           <EuiTableHeaderMobile>
