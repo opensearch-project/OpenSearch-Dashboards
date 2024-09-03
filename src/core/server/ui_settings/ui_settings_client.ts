@@ -36,7 +36,6 @@ import { Logger } from '../logging';
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 import { IUiSettingsClient, UiSettingsParams, PublicUiSettingsParams } from './types';
 import { CannotOverrideError } from './ui_settings_errors';
-import { HttpServiceStart } from '..';
 
 export interface UiSettingsServiceOptions {
   type: string;
@@ -46,7 +45,6 @@ export interface UiSettingsServiceOptions {
   overrides?: Record<string, any>;
   defaults?: Record<string, UiSettingsParams>;
   log: Logger;
-  httpStart?: HttpServiceStart;
 }
 
 interface ReadOptions {
@@ -297,11 +295,8 @@ export class UiSettingsClient implements IUiSettingsClient {
     userLevel = false,
     ignore404Errors = false,
   }: ReadOptions = {}): Promise<Record<string, any>> {
-    let docId = this.id;
-    if (userLevel) {
-      docId = `${CURRENT_USER}_${this.id}`;
-    }
     try {
+      const docId = userLevel ? `${CURRENT_USER}_${this.id}` : this.id;
       const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, docId);
       return this.translateChanges(resp.attributes, 'timelion', 'timeline');
     } catch (error) {
