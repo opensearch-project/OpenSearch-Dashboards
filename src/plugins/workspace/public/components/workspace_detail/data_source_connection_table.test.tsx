@@ -8,7 +8,11 @@ import { DataSourceConnectionType } from '../../../common/types';
 import React from 'react';
 import { DataSourceConnectionTable } from './data_source_connection_table';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
+jest.mock('../../../../opensearch_dashboards_react/public', () => ({
+  useOpenSearchDashboards: jest.fn(),
+}));
 const handleUnassignDataSources = jest.fn();
 const dataSourceConnectionsMock = [
   {
@@ -58,6 +62,18 @@ const dataSourceConnectionsMock = [
 ];
 
 describe('DataSourceConnectionTable', () => {
+  beforeEach(() => {
+    const mockHttp = {
+      basePath: {
+        serverBasePath: '',
+      },
+    };
+    (useOpenSearchDashboards as jest.Mock).mockImplementation(() => ({
+      services: {
+        http: mockHttp,
+      },
+    }));
+  });
   afterEach(() => {
     jest.clearAllMocks();
   });

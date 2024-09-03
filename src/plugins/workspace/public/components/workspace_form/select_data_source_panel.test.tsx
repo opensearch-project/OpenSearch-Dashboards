@@ -98,16 +98,12 @@ const setup = ({
 };
 
 describe('SelectDataSourcePanel', () => {
-  it('should render consistent data sources when selected data sources passed', async () => {
-    const { getByText } = setup({ assignedDataSources: dataSources });
-
-    await waitFor(() => {
-      expect(getByText(dataSources[0].title)).toBeInTheDocument();
-      expect(getByText(dataSources[1].title)).toBeInTheDocument();
-    });
-  });
-
-  it('should call onChange when updating data sources', async () => {
+  const originalOffsetHeight = Object.getOwnPropertyDescriptor(
+    HTMLElement.prototype,
+    'offsetHeight'
+  );
+  const originalOffsetWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'offsetWidth');
+  beforeEach(() => {
     Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
       configurable: true,
       value: 600,
@@ -116,6 +112,39 @@ describe('SelectDataSourcePanel', () => {
       configurable: true,
       value: 600,
     });
+  });
+  afterEach(() => {
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'offsetHeight',
+      originalOffsetHeight as PropertyDescriptor
+    );
+    Object.defineProperty(
+      HTMLElement.prototype,
+      'offsetWidth',
+      originalOffsetWidth as PropertyDescriptor
+    );
+  });
+  it('should render consistent data sources when selected data sources passed', async () => {
+    const { getByText, getByTestId } = setup({ assignedDataSources: dataSources });
+    fireEvent.click(getByTestId('workspace-creator-dataSources-assign-button'));
+
+    await waitFor(() => {
+      expect(getByText(assignedDataSourcesConnections[0].name)).toBeInTheDocument();
+      expect(getByText(assignedDataSourcesConnections[1].name)).toBeInTheDocument();
+    });
+
+    fireEvent.click(getByText(assignedDataSourcesConnections[0].name));
+    fireEvent.click(getByText(assignedDataSourcesConnections[1].name));
+    fireEvent.click(getByText('Associate data sources'));
+
+    await waitFor(() => {
+      expect(getByText(dataSources[0].title)).toBeInTheDocument();
+      expect(getByText(dataSources[1].title)).toBeInTheDocument();
+    });
+  });
+
+  it('should call onChange when updating data sources', async () => {
     const onChangeMock = jest.fn();
     const { getByTestId, getByText } = setup({
       onChange: onChangeMock,
@@ -161,7 +190,20 @@ describe('SelectDataSourcePanel', () => {
       onChange: onChangeMock,
       assignedDataSources: dataSources,
     });
+    fireEvent.click(getByTestId('workspace-creator-dataSources-assign-button'));
+
+    await waitFor(() => {
+      expect(getByText(assignedDataSourcesConnections[0].name)).toBeInTheDocument();
+      expect(getByText(assignedDataSourcesConnections[1].name)).toBeInTheDocument();
+    });
+
+    fireEvent.click(getByText(assignedDataSourcesConnections[0].name));
+    fireEvent.click(getByText(assignedDataSourcesConnections[1].name));
+
     expect(onChangeMock).not.toHaveBeenCalled();
+
+    fireEvent.click(getByText('Associate data sources'));
+
     await waitFor(() => {
       fireEvent.click(getByTestId('checkboxSelectRow-' + dataSources[1].id));
       fireEvent.click(getByText('Remove selected'));
