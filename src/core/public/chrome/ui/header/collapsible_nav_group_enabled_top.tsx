@@ -82,7 +82,7 @@ export const CollapsibleNavTop = ({
   }, [homeLink, navigateToApp]);
 
   return (
-    <div>
+    <div className="navGroupEnabledNavTopWrapper">
       <EuiFlexGroup responsive={false} alignItems="center" justifyContent="spaceBetween">
         {shouldShowHomeLink ? (
           <EuiFlexItem grow={false}>

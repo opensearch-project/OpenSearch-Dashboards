@@ -305,9 +305,9 @@ export function CollapsibleNavGroupEnabled({
           <EuiPanel
             hasBorder={false}
             borderRadius="none"
-            paddingSize={!isNavOpen ? 's' : 'l'}
+            paddingSize="s"
             hasShadow={false}
-            style={{ flexGrow: 0, paddingBottom: 0 }}
+            style={{ flexGrow: 0 }}
           >
             <CollapsibleNavTop
               homeLink={homeLink}
