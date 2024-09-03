@@ -41,7 +41,7 @@ export interface DatasetTypeConfig {
   fetchFields: (dataset: Dataset) => Promise<DatasetField[]>;
   /**
    * Retrieves the supported query languages for this dataset type.
-   * @returns {Promise<string[]>} A promise that resolves to an array of supported language names.
+   * @returns {Promise<string[]>} A promise that resolves to an array of supported language ids.
    */
   supportedLanguages: (dataset: Dataset) => string[];
 }

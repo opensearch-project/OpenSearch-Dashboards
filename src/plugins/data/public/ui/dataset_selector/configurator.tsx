@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,8 +18,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import React, { useEffect, useState } from 'react';
 import { BaseDataset, Dataset, DatasetField } from '../../../common';
-import { getQueryService, getIndexPatterns } from '../../services';
+import { getIndexPatterns, getQueryService } from '../../services';
 
 export const Configurator = ({
   baseDataset,
@@ -35,14 +35,20 @@ export const Configurator = ({
 }) => {
   const queryService = getQueryService();
   const queryString = queryService.queryString;
+  const languageService = queryService.queryString.getLanguageService();
   const indexPatternsService = getIndexPatterns();
   const type = queryString.getDatasetService().getType(baseDataset.type);
   const languages = type?.supportedLanguages(baseDataset) || [];
 
-  const [dataset, setDataset] = useState<Dataset>(baseDataset);
   const [timeFields, setTimeFields] = useState<DatasetField[]>();
-  const [timeField, setTimeField] = useState<string | undefined>(dataset.timeFieldName);
-  const [language, setLanguage] = useState<string>(languages[0]);
+  const [timeFieldName, setTimeFieldName] = useState<string | undefined>();
+  const [language, setLanguage] = useState<string>(() => {
+    const currentLanguage = queryString.getQuery().language;
+    if (languages.includes(currentLanguage)) {
+      return currentLanguage;
+    }
+    return languages[0];
+  });
 
   useEffect(() => {
     const fetchFields = async () => {
@@ -88,7 +94,7 @@ export const Configurator = ({
               }
             )}
           >
-            <EuiFieldText disabled value={dataset.title} />
+            <EuiFieldText disabled value={baseDataset.title} />
           </EuiFormRow>
           {timeFields && timeFields.length > 0 && (
             <EuiFormRow
@@ -108,11 +114,10 @@ export const Configurator = ({
                   { text: '-----', value: '', disabled: true },
                   { text: 'No time field', value: undefined },
                 ]}
-                value={timeField}
+                value={timeFieldName}
                 onChange={(e) => {
                   const value = e.target.value === 'undefined' ? undefined : e.target.value;
-                  setTimeField(value);
-                  setDataset({ ...dataset, timeFieldName: value });
+                  setTimeFieldName(value);
                 }}
               />
             </EuiFormRow>
@@ -127,7 +132,7 @@ export const Configurator = ({
           >
             <EuiSelect
               options={languages.map((languageId) => ({
-                text: languageId,
+                text: languageService.getLanguage(languageId)?.title || languageId,
                 value: languageId,
               }))}
               value={language}
@@ -151,8 +156,8 @@ export const Configurator = ({
         </EuiButton>
         <EuiButton
           onClick={() => {
-            queryString.getDatasetService().cacheDataset(dataset);
-            onConfirm(dataset);
+            queryString.getDatasetService().cacheDataset({ ...dataset, language, timeFieldName });
+            onConfirm({ ...dataset, language, timeFieldName });
           }}
           fill
         >

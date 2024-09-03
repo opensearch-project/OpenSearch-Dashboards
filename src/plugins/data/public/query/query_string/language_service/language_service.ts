@@ -57,8 +57,8 @@ export class LanguageService {
     this.languages.set(config.id, config);
   }
 
-  public getLanguage(language: string): LanguageConfig | undefined {
-    return this.languages.get(language);
+  public getLanguage(languageId: string): LanguageConfig | undefined {
+    return this.languages.get(languageId);
   }
 
   public getLanguages(): LanguageConfig[] {
