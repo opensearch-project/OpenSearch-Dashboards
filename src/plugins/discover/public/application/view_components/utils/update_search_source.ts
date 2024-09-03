@@ -34,7 +34,7 @@ export const updateSearchSource = async ({
 
   const dataset =
     indexPattern.id === queryDataset?.id
-      ? await data.indexPatterns.get(queryDataset?.id!, true)
+      ? await data.indexPatterns.get(queryDataset?.id!)
       : indexPattern;
 
   const sortForSearchSource = getSortForSearchSource(
