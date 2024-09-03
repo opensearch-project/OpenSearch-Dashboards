@@ -36,12 +36,14 @@ import {
   EuiText,
   EuiTextColor,
   EuiButtonEmpty,
-  EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { ApplicationStart } from 'src/core/public';
 import { i18n } from '@osd/i18n';
-import { NavigationPublicPluginStart } from '../../../../../navigation/public';
+import {
+  NavigationPublicPluginStart,
+  TopNavControlButtonData,
+} from '../../../../../navigation/public';
 
 export const Header = ({
   onExportAll,
@@ -53,6 +55,7 @@ export const Header = ({
   useUpdatedUX,
   navigationUI: { HeaderControl },
   applications,
+  currentWorkspaceName,
 }: {
   onExportAll: () => void;
   onImport: () => void;
@@ -63,6 +66,7 @@ export const Header = ({
   useUpdatedUX: boolean;
   navigationUI: NavigationPublicPluginStart['ui'];
   applications: ApplicationStart;
+  currentWorkspaceName: string;
 }) => {
   const title = useUpdatedUX ? null : (
     <EuiFlexItem grow={false}>
@@ -79,11 +83,23 @@ export const Header = ({
   const description = useUpdatedUX ? (
     <HeaderControl
       controls={[
-        {
-          description: i18n.translate('savedObjectsManagement.objectsTable.table.description', {
-            defaultMessage: 'Manage and share your assets.',
-          }),
-        },
+        currentWorkspaceName
+          ? {
+              description: i18n.translate(
+                'savedObjectsManagement.workspace.objectsTable.table.description',
+                {
+                  defaultMessage: 'Manage and share assets for {workspace}.',
+                  values: {
+                    workspace: currentWorkspaceName,
+                  },
+                }
+              ),
+            }
+          : {
+              description: i18n.translate('savedObjectsManagement.objectsTable.table.description', {
+                defaultMessage: 'Manage and share your assets.',
+              }),
+            },
       ]}
       setMountPoint={applications.setAppDescriptionControls}
     />
@@ -106,53 +122,36 @@ export const Header = ({
         ...(showDuplicateAll
           ? [
               {
-                renderComponent: (
-                  <EuiButton
-                    size="s"
-                    data-test-subj="duplicateObjects"
-                    onClick={onDuplicate}
-                    disabled={objectCount === 0}
-                    iconType="copy"
-                  >
-                    <FormattedMessage
-                      id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
-                      defaultMessage="Copy all objects to..."
-                    />
-                  </EuiButton>
+                testId: 'duplicateObjects',
+                run: onDuplicate,
+                controlType: 'button',
+                disabled: objectCount === 0,
+                iconType: 'copy',
+                label: i18n.translate(
+                  'savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel',
+                  { defaultMessage: 'Copy all objects to...' }
                 ),
-              },
+              } as TopNavControlButtonData,
             ]
           : []),
         {
-          renderComponent: (
-            <EuiButton
-              size="s"
-              iconType="exportAction"
-              data-test-subj="exportAllObjects"
-              onClick={onExportAll}
-            >
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
-                defaultMessage="Export all objects"
-              />
-            </EuiButton>
-          ),
-        },
+          testId: 'exportAllObjects',
+          run: onExportAll,
+          controlType: 'button',
+          iconType: 'exportAction',
+          label: i18n.translate('savedObjectsManagement.objectsTable.header.exportButtonLabel', {
+            defaultMessage: 'Export all objects',
+          }),
+        } as TopNavControlButtonData,
         {
-          renderComponent: (
-            <EuiButton
-              size="s"
-              iconType="importAction"
-              data-test-subj="importObjects"
-              onClick={onImport}
-            >
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.header.importButtonLabel"
-                defaultMessage="Import"
-              />
-            </EuiButton>
-          ),
-        },
+          testId: 'importObjects',
+          run: onImport,
+          controlType: 'button',
+          iconType: 'importAction',
+          label: i18n.translate('savedObjectsManagement.objectsTable.header.importButtonLabel', {
+            defaultMessage: 'Import',
+          }),
+        } as TopNavControlButtonData,
       ]}
       setMountPoint={applications.setAppRightControls}
     />
@@ -219,9 +218,9 @@ export const Header = ({
         {title}
         {rightControls}
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      {!useUpdatedUX ? <EuiSpacer size="m" /> : <EuiSpacer size="l" />}
       {description}
-      <EuiSpacer size="m" />
+      {!useUpdatedUX && <EuiSpacer size="m" />}
     </Fragment>
   );
 };

@@ -43,7 +43,8 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
-import { useEffectOnce, useMount } from 'react-use';
+import { useEffectOnce, useObservable } from 'react-use';
+import { of } from 'rxjs';
 import {
   reactRouterNavigate,
   useOpenSearchDashboards,
@@ -105,6 +106,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     getMlCardState,
     data,
     dataSourceEnabled,
+    workspaces,
   } = useOpenSearchDashboards<IndexPatternManagmentContext>().services;
 
   const [indexPatterns, setIndexPatterns] = useState<IndexPatternTableItem[]>([]);
@@ -115,11 +117,13 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
   const [isLoadingIndexPatterns, setIsLoadingIndexPatterns] = useState<boolean>(true);
   const [isColumnDataLoaded, setIsColumnDataLoaded] = useState(false);
 
+  const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const { columns: columnRegistry } = indexPatternManagementStart;
 
-  useMount(() => {
-    setBreadcrumbs(getListBreadcrumbs());
-  });
+  const useUpdatedUX = uiSettings.get('home:useNewHomePage');
+  useEffect(() => {
+    setBreadcrumbs(getListBreadcrumbs(useUpdatedUX ? currentWorkspace?.name : undefined));
+  }, [chrome, currentWorkspace, setBreadcrumbs, useUpdatedUX]);
 
   useEffect(() => {
     (async function () {
@@ -219,8 +223,6 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     }),
   ];
 
-  const showActionsInHeader = uiSettings.get('home:useNewHomePage');
-
   const createButton = (() => {
     if (!canSave) return null;
 
@@ -233,7 +235,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
       </CreateButton>
     );
 
-    return showActionsInHeader ? (
+    return useUpdatedUX ? (
       <HeaderControl
         controls={[{ renderComponent: button }]}
         setMountPoint={application.setAppRightControls}
@@ -243,13 +245,22 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     );
   })();
 
-  const description = ((
-    <FormattedMessage
-      id="indexPatternManagement.indexPatternTable.indexPatternExplanation"
-      defaultMessage="Create and manage the index patterns that help you retrieve your data from OpenSearch."
-    />
-  ) as unknown) as string;
-  const pageTitleAndDescription = showActionsInHeader ? (
+  const description = i18n.translate(
+    'indexPatternManagement.indexPatternTable.indexPatternExplanation',
+    currentWorkspace
+      ? {
+          defaultMessage:
+            'Create and manage the index patterns that help you retrieve your data from OpenSearch for {name} workspace.',
+          values: {
+            name: currentWorkspace.name,
+          },
+        }
+      : {
+          defaultMessage:
+            'Create and manage the index patterns that help you retrieve your data from OpenSearch.',
+        }
+  );
+  const pageTitleAndDescription = useUpdatedUX ? (
     <HeaderControl
       controls={[{ description }]}
       setMountPoint={application.setAppDescriptionControls}
@@ -291,7 +302,6 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
           canSave={canSave}
           creationOptions={creationOptions}
           docLinksIndexPatternIntro={docLinks.links.noDocumentation.indexPatterns.introduction}
-          setBreadcrumbs={setBreadcrumbs}
         />
       );
     }
