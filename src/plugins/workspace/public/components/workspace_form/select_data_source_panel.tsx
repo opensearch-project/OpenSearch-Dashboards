@@ -96,7 +96,7 @@ export const SelectDataSourcePanel = ({
       data-test-subj="workspace-creator-dataSources-assign-button"
     >
       {i18n.translate('workspace.form.selectDataSourcePanel.addNew', {
-        defaultMessage: 'Add data sources',
+        defaultMessage: 'Add OpenSearch connections',
       })}
     </EuiSmallButton>
   );
