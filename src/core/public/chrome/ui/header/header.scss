@@ -105,6 +105,6 @@
   width: 100%;
 }
 
-#globalHeaderBars {
+#globalHeaderBars:has(.primaryApplicationHeader) {
   border-bottom: 1px solid $euiColorLightShade;
 }
