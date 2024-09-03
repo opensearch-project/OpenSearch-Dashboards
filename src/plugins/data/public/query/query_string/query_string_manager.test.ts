@@ -32,19 +32,22 @@ import { QueryStringManager } from './query_string_manager';
 import { coreMock } from '../../../../../core/public/mocks';
 import { Query } from '../../../common/query';
 import { ISearchInterceptor } from '../../search';
-import { DataStorage } from 'src/plugins/data/common';
+import { DataStorage, DEFAULT_DATA } from 'src/plugins/data/common';
 
 describe('QueryStringManager', () => {
   let service: QueryStringManager;
   let storage: DataStorage;
+  let sessionStorage: DataStorage;
   let mockSearchInterceptor: jest.Mocked<ISearchInterceptor>;
 
   beforeEach(() => {
-    storage = new DataStorage(window.localStorage, 'opensearch_dashboards.');
+    storage = new DataStorage(window.localStorage, 'opensearchDashboards.');
+    sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
     mockSearchInterceptor = {} as jest.Mocked<ISearchInterceptor>;
 
     service = new QueryStringManager(
       storage,
+      sessionStorage,
       coreMock.createSetup().uiSettings,
       mockSearchInterceptor
     );
@@ -65,5 +68,75 @@ describe('QueryStringManager', () => {
 
     service.setQuery({ ...newQuery });
     expect(emittedValues).toHaveLength(1);
+  });
+
+  test('getQuery returns the current query', () => {
+    const initialQuery = service.getQuery();
+    expect(initialQuery).toHaveProperty('query');
+    expect(initialQuery).toHaveProperty('language');
+
+    const newQuery = { query: 'test query', language: 'sql' };
+    service.setQuery(newQuery);
+    expect(service.getQuery()).toEqual(newQuery);
+  });
+
+  test('clearQuery resets to default query', () => {
+    const newQuery = { query: 'test query', language: 'sql' };
+    service.setQuery(newQuery);
+    expect(service.getQuery()).toEqual(newQuery);
+
+    service.clearQuery();
+    const defaultQuery = service.getQuery();
+    expect(defaultQuery).not.toEqual(newQuery);
+    expect(defaultQuery.query).toBe('');
+  });
+
+  test('formatQuery handles different input types', () => {
+    const stringQuery = 'test query';
+    const formattedStringQuery = service.formatQuery(stringQuery);
+    expect(formattedStringQuery).toHaveProperty('query', stringQuery);
+    expect(formattedStringQuery).toHaveProperty('language');
+
+    const objectQuery = { query: 'object query', language: 'sql' };
+    const formattedObjectQuery = service.formatQuery(objectQuery);
+    expect(formattedObjectQuery).toEqual(objectQuery);
+
+    const formattedUndefinedQuery = service.formatQuery(undefined);
+    expect(formattedUndefinedQuery).toEqual(service.getDefaultQuery());
+  });
+
+  test('clearQueryHistory clears the query history', () => {
+    service.addToQueryHistory({ query: 'test query 1', language: 'sql' });
+    service.addToQueryHistory({ query: 'test query 2', language: 'sql' });
+    expect(service.getQueryHistory()).toHaveLength(2);
+
+    service.clearQueryHistory();
+    expect(service.getQueryHistory()).toHaveLength(0);
+  });
+
+  test('addToQueryHistory adds query to history', () => {
+    const query: Query = { query: 'test query', language: 'sql' };
+    service.addToQueryHistory(query);
+    const history = service.getQueryHistory();
+    expect(history).toHaveLength(1);
+    expect(history[0]).toHaveProperty('query', query);
+  });
+
+  test('getInitialQueryByLanguage returns correct query for language', () => {
+    const sqlQuery = service.getInitialQueryByLanguage('sql');
+    expect(sqlQuery).toHaveProperty('language', 'sql');
+
+    const pplQuery = service.getInitialQueryByLanguage('ppl');
+    expect(pplQuery).toHaveProperty('language', 'ppl');
+  });
+
+  test('getInitialQueryByDataset returns correct query for dataset', () => {
+    const dataset = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+    };
+    const query = service.getInitialQueryByDataset(dataset);
+    expect(query).toHaveProperty('dataset', dataset);
   });
 });

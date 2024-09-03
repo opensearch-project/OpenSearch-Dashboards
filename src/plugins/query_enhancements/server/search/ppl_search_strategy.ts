@@ -8,14 +8,13 @@ import { Observable } from 'rxjs';
 import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import {
   DATA_FRAME_TYPES,
-  IDataFrameError,
   IDataFrameResponse,
   IDataFrameWithAggs,
   IOpenSearchDashboardsSearchRequest,
   Query,
   createDataFrame,
 } from '../../../data/common';
-import { getFields } from '../../common/utils';
+import { getFields, handleFacetError } from '../../common/utils';
 import { Facet } from '../utils';
 import { QueryAggConfig } from '../../common';
 
@@ -40,13 +39,7 @@ export const pplSearchStrategyProvider = (
         const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
         const rawResponse: any = await pplFacet.describeQuery(context, request);
 
-        if (!rawResponse.success) {
-          return {
-            type: DATA_FRAME_TYPES.ERROR,
-            body: { error: rawResponse.data },
-            took: rawResponse.took,
-          } as IDataFrameError;
-        }
+        if (!rawResponse.success) handleFacetError(rawResponse);
 
         const dataFrame = createDataFrame({
           name: query.dataset?.id,

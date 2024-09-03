@@ -45,6 +45,7 @@ import { getEnvOptions, configServiceMock } from '../config/mocks';
 import { httpServerMock } from './http_server.mocks';
 
 import { createCookieSessionStorageFactory } from './cookie_session_storage';
+import { dynamicConfigServiceMock } from '../config/dynamic_config_service.mock';
 
 let server: HttpService;
 
@@ -53,6 +54,13 @@ let env: Env;
 let coreContext: CoreContext;
 const configService = configServiceMock.create();
 const contextSetup = contextServiceMock.createSetupContract();
+const dynamicConfigServiceStart = dynamicConfigServiceMock.createInternalStartContract({
+  getConfig: {
+    rules: [],
+  },
+  bulkGetConfigs: new Map(),
+  listConfigs: new Map(),
+});
 
 const setupDeps = {
   context: contextSetup,
@@ -85,8 +93,15 @@ configService.atPath.mockReturnValue(
 beforeEach(() => {
   logger = loggingSystemMock.create();
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
+  const dynamicConfigService = dynamicConfigServiceMock.create();
 
-  coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
+  coreContext = {
+    coreId: Symbol(),
+    env,
+    logger,
+    configService: configService as any,
+    dynamicConfigService,
+  };
   server = new HttpService(coreContext);
 });
 
@@ -149,7 +164,7 @@ describe('Cookie based SessionStorage', () => {
         innerServer,
         cookieOptions
       );
-      await server.start();
+      await server.start({ dynamicConfigService: dynamicConfigServiceStart });
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -186,7 +201,7 @@ describe('Cookie based SessionStorage', () => {
         innerServer,
         cookieOptions
       );
-      await server.start();
+      await server.start({ dynamicConfigService: dynamicConfigServiceStart });
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -217,7 +232,7 @@ describe('Cookie based SessionStorage', () => {
         innerServer,
         cookieOptions
       );
-      await server.start();
+      await server.start({ dynamicConfigService: dynamicConfigServiceStart });
 
       const response = await supertest(innerServer.listener).get('/').expect(200, { value: null });
 
@@ -247,7 +262,7 @@ describe('Cookie based SessionStorage', () => {
         innerServer,
         cookieOptions
       );
-      await server.start();
+      await server.start({ dynamicConfigService: dynamicConfigServiceStart });
 
       const response = await supertest(innerServer.listener)
         .get('/')
@@ -292,7 +307,7 @@ describe('Cookie based SessionStorage', () => {
         innerServer,
         cookieOptions
       );
-      await server.start();
+      await server.start({ dynamicConfigService: dynamicConfigServiceStart });
 
       const response = await supertest(innerServer.listener)
         .get('/')
@@ -422,7 +437,7 @@ describe('Cookie based SessionStorage', () => {
         innerServer,
         cookieOptions
       );
-      await server.start();
+      await server.start({ dynamicConfigService: dynamicConfigServiceStart });
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -477,7 +492,7 @@ describe('Cookie based SessionStorage', () => {
             name: `sid-${sameSite}`,
             sameSite,
           });
-          await server.start();
+          await server.start({ dynamicConfigService: dynamicConfigServiceStart });
 
           const response = await supertest(innerServer.listener).get('/').expect(200);
 

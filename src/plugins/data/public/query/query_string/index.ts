@@ -35,4 +35,6 @@ export {
   LanguageService,
   LanguageConfig,
   EditorEnhancements,
+  RecentQueriesTable,
+  QueryControls,
 } from './language_service';

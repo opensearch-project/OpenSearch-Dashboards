@@ -18,7 +18,6 @@
 
   &.primaryApplicationHeader {
     padding-top: $euiSizeM - $euiSizeXS;
-    border-bottom: 1px solid $euiColorLightShade;
 
     &:last-child {
       margin-bottom: 0;
@@ -104,4 +103,8 @@
 
 .stretchedActionMenu {
   width: 100%;
+}
+
+#globalHeaderBars:has(.primaryApplicationHeader) {
+  border-bottom: 1px solid $euiColorLightShade;
 }

@@ -65,9 +65,9 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
 
   supportedLanguages: (dataset): string[] => {
     if (dataset.dataSource?.type === 'OpenSearch Serverless') {
-      return ['DQL', 'Lucene'];
+      return ['kuery', 'lucene'];
     }
-    return ['DQL', 'Lucene', 'PPL', 'SQL'];
+    return ['kuery', 'lucene', 'PPL', 'SQL'];
   },
 };
 

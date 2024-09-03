@@ -25,6 +25,8 @@ import {
   Query,
   QuerySuggestion,
   TimeRange,
+  QueryControls,
+  RecentQueriesTable,
 } from '../..';
 import { OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
@@ -33,8 +35,6 @@ import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { getQueryService, getIndexPatterns } from '../../services';
 import { DatasetSelector } from '../dataset_selector';
-import { QueryControls } from '../../query/query_string/language_service/get_query_control_links';
-import { RecentQueriesTable } from '../../query/query_string/language_service/recent_query';
 import { DefaultInputProps } from './editors';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 

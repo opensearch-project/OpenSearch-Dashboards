@@ -38,6 +38,7 @@ import { HttpService } from '../http_service';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
+import { dynamicConfigServiceMock } from '../../config/dynamic_config_service.mock';
 
 let server: HttpService;
 
@@ -47,6 +48,7 @@ const contextSetup = contextServiceMock.createSetupContract();
 const setupDeps = {
   context: contextSetup,
 };
+const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
 
 beforeEach(() => {
   logger = loggingSystemMock.create();
@@ -75,7 +77,7 @@ describe('Options', () => {
               },
             })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
@@ -102,7 +104,7 @@ describe('Options', () => {
               },
             })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(200, {
           httpAuthIsAuthenticated: true,
@@ -128,7 +130,7 @@ describe('Options', () => {
               },
             })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
@@ -146,7 +148,7 @@ describe('Options', () => {
           { path: '/', validate: false, options: { authRequired: 'optional' } },
           (context, req, res) => res.ok({ body: 'ok' })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(401);
       });
@@ -173,7 +175,7 @@ describe('Options', () => {
               },
             })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
@@ -197,7 +199,7 @@ describe('Options', () => {
               },
             })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
@@ -224,7 +226,7 @@ describe('Options', () => {
               },
             })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(200, {
           httpAuthIsAuthenticated: true,
@@ -241,7 +243,7 @@ describe('Options', () => {
           { path: '/', validate: false, options: { authRequired: true } },
           (context, req, res) => res.ok({ body: 'ok' })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(401);
       });
@@ -256,7 +258,7 @@ describe('Options', () => {
           { path: '/', validate: false, options: { authRequired: true } },
           (context, req, res) => res.ok({ body: 'ok' })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(401);
       });
@@ -276,7 +278,7 @@ describe('Options', () => {
           { path: '/', validate: false, options: { authRequired: true } },
           (context, req, res) => res.ok({ body: 'ok' })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         const result = await supertest(innerServer.listener).get('/').expect(302);
 
@@ -303,7 +305,7 @@ describe('Options', () => {
               },
             })
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         await supertest(innerServer.listener).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
@@ -356,7 +358,7 @@ describe('Options', () => {
             return res.ok({});
           }
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         // start the request
         const request = supertest(innerServer.listener)
@@ -381,7 +383,7 @@ describe('Options', () => {
           },
           async (context, req, res) => res.ok({})
         );
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         // start the request
         const request = supertest(innerServer.listener)
@@ -416,7 +418,7 @@ describe('Options', () => {
           }
         );
 
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         // start the request
         const request = supertest(innerServer.listener)
@@ -449,7 +451,7 @@ describe('Options', () => {
           }
         );
 
-        await server.start();
+        await server.start({ dynamicConfigService });
 
         // start the request
         const request = supertest(innerServer.listener)
@@ -483,7 +485,7 @@ describe('Options', () => {
           }
         );
 
-        await server.start();
+        await server.start({ dynamicConfigService });
         await expect(supertest(innerServer.listener).post('/a')).rejects.toThrow('socket hang up');
       });
 
@@ -508,7 +510,7 @@ describe('Options', () => {
           }
         );
 
-        await server.start();
+        await server.start({ dynamicConfigService });
         await expect(supertest(innerServer.listener).post('/a')).resolves.toHaveProperty(
           'status',
           200
@@ -524,7 +526,7 @@ describe('Cache-Control', () => {
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false, options: {} }, (context, req, res) => res.ok());
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener)
       .get('/')
@@ -542,7 +544,7 @@ describe('Cache-Control', () => {
         },
       })
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect('Cache-Control', 'public, max-age=1200');
   });
@@ -556,7 +558,7 @@ describe('Handler', () => {
     router.get({ path: '/', validate: false }, (context, req, res) => {
       throw new Error('unexpected error');
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -577,7 +579,7 @@ describe('Handler', () => {
     router.get({ path: '/', validate: false }, (context, req, res) => {
       throw Boom.unauthorized();
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -596,7 +598,7 @@ describe('Handler', () => {
 
     const router = createRouter('/');
     router.get({ path: '/', validate: false }, (context, req, res) => 'ok' as any);
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -625,7 +627,7 @@ describe('Handler', () => {
       },
       (context, req, res) => res.noContent()
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener)
       .get('/')
@@ -656,7 +658,7 @@ describe('Handler', () => {
         return res.ok({ body: 'ok' });
       }
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener)
       .post('/')
@@ -683,7 +685,7 @@ describe('Handler', () => {
         return res.ok({ body: 'ok' });
       }
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).post('/').type('json').send('12').expect(200);
 
@@ -702,7 +704,7 @@ describe('handleLegacyErrors', () => {
         throw Boom.notFound();
       })
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(404);
 
@@ -722,7 +724,7 @@ describe('handleLegacyErrors', () => {
         throw new Error('Unexpected');
       })
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -744,7 +746,7 @@ describe('Response factory', () => {
         return res.ok({ body: { key: 'value' } });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -760,7 +762,7 @@ describe('Response factory', () => {
         return res.ok({ body: 'result' });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -776,7 +778,7 @@ describe('Response factory', () => {
         return res.ok(undefined);
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       await supertest(innerServer.listener).get('/').expect(200);
     });
@@ -798,7 +800,7 @@ describe('Response factory', () => {
         return res.ok({ body: stream });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -826,7 +828,7 @@ describe('Response factory', () => {
           },
         });
       });
-      await server.start();
+      await server.start({ dynamicConfigService });
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.text).toBe('abc');
@@ -851,7 +853,7 @@ describe('Response factory', () => {
           },
         });
       });
-      await server.start();
+      await server.start({ dynamicConfigService });
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.text).toBe('abc');
@@ -871,7 +873,7 @@ describe('Response factory', () => {
           },
         });
       });
-      await server.start();
+      await server.start({ dynamicConfigService });
       const result = await supertest(innerServer.listener).get('/').expect(200).buffer(true);
 
       expect(result.header['content-encoding']).toBe('binary');
@@ -891,7 +893,7 @@ describe('Response factory', () => {
           },
         });
       });
-      await server.start();
+      await server.start({ dynamicConfigService });
       const result = await supertest(innerServer.listener).get('/').expect(200).buffer(true);
 
       expect(result.text).toBe('abc');
@@ -910,7 +912,7 @@ describe('Response factory', () => {
           },
         });
       });
-      await server.start();
+      await server.start({ dynamicConfigService });
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.text).toEqual('value');
@@ -929,7 +931,7 @@ describe('Response factory', () => {
           },
         });
       });
-      await server.start();
+      await server.start({ dynamicConfigService });
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.text).toEqual('value');
@@ -948,7 +950,7 @@ describe('Response factory', () => {
           },
         });
       });
-      await server.start();
+      await server.start({ dynamicConfigService });
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.header.etag).toBe('1234');
@@ -965,7 +967,7 @@ describe('Response factory', () => {
           },
         });
       });
-      await server.start();
+      await server.start({ dynamicConfigService });
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.header['set-cookie']).toEqual(['foo', 'bar']);
@@ -979,7 +981,7 @@ describe('Response factory', () => {
         payload.key.payload = payload;
         return res.ok({ body: payload });
       });
-      await server.start();
+      await server.start({ dynamicConfigService });
       await supertest(innerServer.listener).get('/').expect(500);
 
       // error happens within hapi when route handler already finished execution.
@@ -992,7 +994,7 @@ describe('Response factory', () => {
       router.get({ path: '/', validate: false }, (context, req, res) => {
         return res.ok({ body: { key: 'value' } });
       });
-      await server.start();
+      await server.start({ dynamicConfigService });
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
       expect(result.body).toEqual({ key: 'value' });
@@ -1005,7 +1007,7 @@ describe('Response factory', () => {
       router.get({ path: '/', validate: false }, (context, req, res) => {
         return res.accepted({ body: { location: 'somewhere' } });
       });
-      await server.start();
+      await server.start({ dynamicConfigService });
       const result = await supertest(innerServer.listener).get('/').expect(202);
 
       expect(result.body).toEqual({ location: 'somewhere' });
@@ -1018,7 +1020,7 @@ describe('Response factory', () => {
       router.get({ path: '/', validate: false }, (context, req, res) => {
         return res.noContent();
       });
-      await server.start();
+      await server.start({ dynamicConfigService });
       const result = await supertest(innerServer.listener).get('/').expect(204);
 
       expect(result.noContent).toBe(true);
@@ -1040,7 +1042,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(302);
 
@@ -1061,7 +1063,7 @@ describe('Response factory', () => {
         } as any); // location headers is required
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1086,7 +1088,7 @@ describe('Response factory', () => {
         return res.badRequest({ body: error });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(400);
 
@@ -1105,7 +1107,7 @@ describe('Response factory', () => {
         return res.badRequest();
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(400);
 
@@ -1126,7 +1128,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(400);
 
@@ -1162,7 +1164,7 @@ describe('Response factory', () => {
         }
       );
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       await supertest(innerServer.listener)
         .post('/foo/')
@@ -1210,7 +1212,7 @@ describe('Response factory', () => {
         }
       );
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       await supertest(innerServer.listener)
         .post('/foo/')
@@ -1264,7 +1266,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -1280,7 +1282,7 @@ describe('Response factory', () => {
         return res.unauthorized();
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -1296,7 +1298,7 @@ describe('Response factory', () => {
         return res.forbidden({ body: error });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(403);
 
@@ -1311,7 +1313,7 @@ describe('Response factory', () => {
         return res.forbidden();
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(403);
 
@@ -1327,7 +1329,7 @@ describe('Response factory', () => {
         return res.notFound({ body: error });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(404);
 
@@ -1342,7 +1344,7 @@ describe('Response factory', () => {
         return res.notFound();
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(404);
 
@@ -1358,7 +1360,7 @@ describe('Response factory', () => {
         return res.conflict({ body: error });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(409);
 
@@ -1373,7 +1375,7 @@ describe('Response factory', () => {
         return res.conflict();
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(409);
 
@@ -1392,7 +1394,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(418);
 
@@ -1416,7 +1418,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1440,7 +1442,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1463,7 +1465,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1497,7 +1499,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(201);
 
@@ -1518,7 +1520,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(301);
 
@@ -1537,7 +1539,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1562,7 +1564,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -1583,7 +1585,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -1609,7 +1611,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -1633,7 +1635,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -1651,7 +1653,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1670,7 +1672,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1694,7 +1696,7 @@ describe('Response factory', () => {
         } as any); // requires error message
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1717,7 +1719,7 @@ describe('Response factory', () => {
         return res.custom({ body: error } as any); // options.statusCode is required
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1740,7 +1742,7 @@ describe('Response factory', () => {
         return res.custom({ body: error, statusCode: 20 });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
