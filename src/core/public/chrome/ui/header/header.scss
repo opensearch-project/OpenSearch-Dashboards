@@ -95,9 +95,12 @@
   top: 0;
 }
 
-// Make the toggle button align with content
 .navToggleInSmallScreen {
+  // Make the toggle button align with content
   min-width: unset;
+
+  // Make the icon align with recent icon
+  height: $euiSizeXL;
 }
 
 .stretchedActionMenu {

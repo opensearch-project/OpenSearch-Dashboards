@@ -28,6 +28,7 @@
  * under the License.
  */
 import {
+  EuiButtonIcon,
   EuiHeader,
   EuiHeaderProps,
   EuiHeaderSection,
@@ -215,7 +216,9 @@ export function Header({
   );
 
   const renderNavToggle = () => {
-    const renderNavToggleWithExtraProps = (props: EuiHeaderSectionItemButtonProps) => (
+    const renderNavToggleWithExtraProps = (
+      props: EuiHeaderSectionItemButtonProps & { isSmallScreen?: boolean }
+    ) => (
       <EuiHeaderSectionItemButton
         data-test-subj="toggleNavButton"
         aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
@@ -236,26 +239,42 @@ export function Header({
           props.className
         )}
       >
-        <EuiIcon
-          type="menu"
-          size="m"
-          title={i18n.translate('core.ui.primaryNav.menu', {
-            defaultMessage: 'Menu',
-          })}
-        />
+        {props.isSmallScreen ? (
+          <EuiButtonIcon
+            iconType="menu"
+            size="xs"
+            title={i18n.translate('core.ui.primaryNav.menu', {
+              defaultMessage: 'Menu',
+            })}
+            display="base"
+            color="subdued"
+            iconSize="s"
+          />
+        ) : (
+          <EuiIcon
+            type="menu"
+            size="m"
+            title={i18n.translate('core.ui.primaryNav.menu', {
+              defaultMessage: 'Menu',
+            })}
+          />
+        )}
       </EuiHeaderSectionItemButton>
     );
     return (
       <>
-        <EuiHideFor sizes={['xs', 's', 'm']}>
-          {renderNavToggleWithExtraProps({
-            className: 'navToggleInLargeScreen',
-          })}
-        </EuiHideFor>
+        {isNavOpen ? null : (
+          <EuiHideFor sizes={['xs', 's', 'm']}>
+            {renderNavToggleWithExtraProps({
+              className: 'navToggleInLargeScreen',
+            })}
+          </EuiHideFor>
+        )}
         <EuiHideFor sizes={['xl', 'l']}>
           {renderNavToggleWithExtraProps({
             flush: 'both',
             className: 'navToggleInSmallScreen',
+            isSmallScreen: true,
           })}
         </EuiHideFor>
       </>
@@ -415,7 +434,7 @@ export function Header({
   const renderPageHeader = () => (
     <div>
       <EuiHeader className="primaryHeader newTopNavHeader" style={sidecarPaddingStyle}>
-        {isNavOpen ? null : renderNavToggle()}
+        {renderNavToggle()}
 
         <EuiHeaderSection grow={false}>{renderRecentItems()}</EuiHeaderSection>
 
@@ -463,7 +482,7 @@ export function Header({
   const renderApplicationHeader = () => (
     <div>
       <EuiHeader className="primaryApplicationHeader newTopNavHeader" style={sidecarPaddingStyle}>
-        {isNavOpen ? null : renderNavToggle()}
+        {renderNavToggle()}
         <EuiHeaderSection side="left" grow={true}>
           {renderRecentItems()}
           {renderActionMenu()}
