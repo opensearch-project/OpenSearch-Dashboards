@@ -445,14 +445,11 @@ describe('ui settings', () => {
 
       expect(await uiSettings.getUserProvided()).toStrictEqual({});
 
-      expect(savedObjectsClient.get).toHaveBeenCalledTimes(4);
+      expect(savedObjectsClient.get).toHaveBeenCalledTimes(3);
 
-      expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(2);
+      expect(createOrUpgradeSavedConfig).toHaveBeenCalledTimes(1);
       expect(createOrUpgradeSavedConfig).toHaveBeenCalledWith(
         expect.objectContaining({ handleWriteErrors: true })
-      );
-      expect(createOrUpgradeSavedConfig).toHaveBeenCalledWith(
-        expect.objectContaining({ handleWriteErrors: true, userLevel: true })
       );
     });
 

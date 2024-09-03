@@ -54,7 +54,7 @@ describe('UserUISettingsClientWrapper', () => {
     it('should replace user id placeholder with real user id', async () => {
       await wrapperClient.get('config', `${CURRENT_USER}_3.0.0`);
 
-      expect(mockedClient.get).toBeCalledWith('config', 'test_user_3.0.0', {});
+      expect(mockedClient.get).toBeCalledWith('config', 'test_user', {});
     });
   });
 
@@ -80,7 +80,7 @@ describe('UserUISettingsClientWrapper', () => {
     it('should replace user id placeholder with real user id', async () => {
       await wrapperClient.update('config', `${CURRENT_USER}_3.0.0`, {});
 
-      expect(mockedClient.update).toBeCalledWith('config', 'test_user_3.0.0', {}, {});
+      expect(mockedClient.update).toBeCalledWith('config', 'test_user', {}, {});
     });
   });
 
@@ -110,7 +110,7 @@ describe('UserUISettingsClientWrapper', () => {
         'config',
         {},
         {
-          id: 'test_user_3.0.0',
+          id: 'test_user',
           references: [
             {
               id: 'test_user',
@@ -130,7 +130,7 @@ describe('UserUISettingsClientWrapper', () => {
         'config',
         {},
         {
-          id: 'test_user_3.0.0',
+          id: 'test_user',
           references: [
             {
               id: 'test_user',
@@ -223,6 +223,63 @@ describe('UserUISettingsClientWrapper', () => {
           id: 'test',
         },
       });
+    });
+  });
+});
+
+describe('UserUISettingsClientWrapper - security not enabled', () => {
+  // security not enabled
+  beforeEach(() => {
+    jest.mock('../utils');
+  });
+
+  const requestHandlerContext = coreMock.createRequestHandlerContext();
+  const mockedClient = savedObjectsClientMock.create();
+  const requestMock = httpServerMock.createOpenSearchDashboardsRequest();
+
+  const buildWrapperInstance = (permissionEnabled: boolean) => {
+    const wrapperInstance = new UserUISettingsClientWrapper(loggerMock.create(), permissionEnabled);
+    const wrapperClient = wrapperInstance.wrapperFactory({
+      client: mockedClient,
+      typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+      request: requestMock,
+    });
+    return wrapperClient;
+  };
+
+  const wrapperClient = buildWrapperInstance(false);
+
+  describe('#get', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+
+    it('should replace user id placeholder with version', async () => {
+      await wrapperClient.get('config', `${CURRENT_USER}_3.0.0`);
+
+      expect(mockedClient.get).toBeCalledWith('config', '3.0.0', {});
+    });
+  });
+
+  describe('#update', () => {
+    it('should replace user id placeholder with version', async () => {
+      await wrapperClient.update('config', `${CURRENT_USER}_3.0.0`, {});
+
+      expect(mockedClient.update).toBeCalledWith('config', '3.0.0', {}, {});
+    });
+  });
+
+  describe('#create', () => {
+    it('should replace user id placeholder with version', async () => {
+      await wrapperClient.create('config', {}, { id: `${CURRENT_USER}_3.0.0` });
+
+      expect(mockedClient.create).toBeCalledWith(
+        'config',
+        {},
+        {
+          id: '3.0.0',
+        }
+      );
     });
   });
 });

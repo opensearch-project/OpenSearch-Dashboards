@@ -42,8 +42,10 @@ export class UserUISettingsClientWrapper {
     const userName = extractUserName(request, core);
     if (this.isUserLevelSetting(id)) {
       if (userName) {
-        return id.replace(CURRENT_USER, userName);
+        // return id.replace(CURRENT_USER, userName); // uncomment this to support version for user personal setting
+        return userName;
       } else {
+        // security is not enabled, using global setting id
         return id.replace(`${CURRENT_USER}_`, '');
       }
     }
@@ -102,8 +104,11 @@ export class UserUISettingsClientWrapper {
               .getPermissions()!,
           };
 
+          // remove buildNum from attributes
+          const { buildNum, ...others } = attributes as any;
+
           // create with reference, the reference field will used for filter settings by user
-          return await wrapperOptions.client.create(type, attributes, {
+          return await wrapperOptions.client.create(type, others, {
             ...options,
             id: docId,
             references: [

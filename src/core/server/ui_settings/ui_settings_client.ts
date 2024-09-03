@@ -53,6 +53,7 @@ interface ReadOptions {
   ignore401Errors?: boolean;
   autoCreateOrUpgradeIfMissing?: boolean;
   userLevel?: boolean;
+  ignore404Errors?: boolean;
 }
 
 interface UserProvidedValue<T = unknown> {
@@ -124,9 +125,16 @@ export class UiSettingsClient implements IUiSettingsClient {
   async getUserProvided<T = unknown>(): Promise<UserProvided<T>> {
     // user provided for global
     const userProvided: UserProvided<T> = this.onReadHook<T>(await this.read());
-    // personal level settings
-    const personalLevelProvided: UserProvided<T> = this.onReadHook<T>(
-      await this.read({ userLevel: true })
+    /**
+     * user personal settings, which is not versioned, so that we don't need to create when get
+     * and ignore 404 when not found the document
+     */
+    const userLevelProvided: UserProvided<T> = this.onReadHook<T>(
+      await this.read({
+        userLevel: true,
+        autoCreateOrUpgradeIfMissing: false,
+        ignore404Errors: true,
+      })
     );
 
     // write all overridden keys, dropping the userValue is override is null and
@@ -135,11 +143,11 @@ export class UiSettingsClient implements IUiSettingsClient {
       userProvided[key] =
         value === null ? { isOverridden: true } : { isOverridden: true, userValue: value };
 
-      personalLevelProvided[key] =
+      userLevelProvided[key] =
         value === null ? { isOverridden: true } : { isOverridden: true, userValue: value };
     }
 
-    return { ...userProvided, ...personalLevelProvided };
+    return { ...userProvided, ...userLevelProvided };
   }
 
   async setMany(changes: Record<string, any>) {
@@ -287,6 +295,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     ignore401Errors = false,
     autoCreateOrUpgradeIfMissing = true,
     userLevel = false,
+    ignore404Errors = false,
   }: ReadOptions = {}): Promise<Record<string, any>> {
     let docId = this.id;
     if (userLevel) {
@@ -315,6 +324,11 @@ export class UiSettingsClient implements IUiSettingsClient {
         }
 
         return failedUpgradeAttributes;
+      }
+
+      // ignore 404 and return an empty object
+      if (ignore404Errors && SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        return {};
       }
 
       if (this.isIgnorableError(error, ignore401Errors)) {
