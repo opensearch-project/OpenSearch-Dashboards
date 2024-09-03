@@ -50,6 +50,7 @@ function mockProps() {
   const application = applicationServiceMock.createInternalStartContract();
 
   return {
+    http,
     application,
     opensearchDashboardsVersion: '1.0.0',
     appTitle$: new BehaviorSubject('test'),
