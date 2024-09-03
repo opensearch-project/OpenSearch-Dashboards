@@ -21,6 +21,7 @@ import { UseCaseService } from './services/use_case_service';
 import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
 import { WorkspacePlugin, WorkspacePluginStartDeps } from './plugin';
 import { contentManagementPluginMocks } from '../../content_management/public';
+import { navigationPluginMock } from '../../navigation/public/mocks';
 
 // Expect 6 app registrations: create, fatal error, detail, initial, navigation, and list apps.
 const registrationAppNumber = 6;
@@ -28,6 +29,7 @@ const registrationAppNumber = 6;
 describe('Workspace plugin', () => {
   const mockDependencies: WorkspacePluginStartDeps = {
     contentManagement: contentManagementPluginMocks.createStartContract(),
+    navigation: navigationPluginMock.createStartContract(),
   };
   const getSetupMock = () => coreMock.createSetup();
 

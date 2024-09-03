@@ -105,6 +105,7 @@ export class WorkspacePlugin
   private registeredUseCasesUpdaterSubscription?: Subscription;
   private workspaceAndUseCasesCombineSubscription?: Subscription;
   private useCase = new UseCaseService();
+  private workspaceClient?: WorkspaceClient;
 
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
@@ -262,6 +263,7 @@ export class WorkspacePlugin
   ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
+    this.workspaceClient = workspaceClient;
     core.workspaces.setClient(workspaceClient);
 
     this.useCase.setup({
@@ -671,7 +673,7 @@ export class WorkspacePlugin
     if (contentManagement) {
       const services: Services = {
         ...coreStart,
-        workspaceClient: undefined,
+        workspaceClient: this.workspaceClient!,
         navigationUI: navigation.ui,
       };
       contentManagement.registerContentProvider({
