@@ -63,24 +63,22 @@ export const setupHome = (contentManagement: ContentManagementPluginSetup) => {
 export const initHome = (contentManagement: ContentManagementPluginStart, core: CoreStart) => {
   const workspaceEnabled = core.application.capabilities.workspaces.enabled;
 
-  if (!workspaceEnabled) {
-    const useCases = [
-      DEFAULT_NAV_GROUPS.observability,
-      DEFAULT_NAV_GROUPS.search,
-      DEFAULT_NAV_GROUPS['security-analytics'],
-    ];
+  const useCases = [
+    DEFAULT_NAV_GROUPS.observability,
+    DEFAULT_NAV_GROUPS.search,
+    DEFAULT_NAV_GROUPS['security-analytics'],
+  ];
 
-    useCases.forEach((useCase, index) => {
-      registerUseCaseCard(contentManagement, {
-        id: useCase.id,
-        order: index + 1,
-        description: useCase.description,
-        title: useCase.title,
-        target: HOME_CONTENT_AREAS.GET_STARTED,
-        icon: useCase.icon ?? '',
-      });
+  useCases.forEach((useCase, index) => {
+    registerUseCaseCard(contentManagement, workspaceEnabled, {
+      id: useCase.id,
+      order: index + 1,
+      description: useCase.description,
+      title: useCase.title,
+      target: HOME_CONTENT_AREAS.GET_STARTED,
+      icon: useCase.icon ?? '',
     });
-  }
+  });
 
   registerHomeListCard(contentManagement, {
     id: 'whats_new',

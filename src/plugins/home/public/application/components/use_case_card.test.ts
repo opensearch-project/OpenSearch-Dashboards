@@ -4,6 +4,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
+import { coreMock } from '../../../../../core/public/mocks';
 import { registerUseCaseCard } from './use_case_card';
 import { contentManagementPluginMocks } from '../../../../content_management/public';
 
@@ -15,7 +16,8 @@ describe('registerUseCaseCard', () => {
   };
 
   it('should register useCase card correctly', () => {
-    registerUseCaseCard(contentManagementStartMock, {
+    const workspaceEnabled = false;
+    registerUseCaseCard(contentManagementStartMock, workspaceEnabled, {
       id: 'testId',
       order: 1,
       target: 'osd_homepage/get_started',

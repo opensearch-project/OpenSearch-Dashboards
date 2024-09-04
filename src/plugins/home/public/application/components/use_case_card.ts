@@ -9,6 +9,7 @@ import { ContentManagementPluginStart } from '../../../../content_management/pub
 
 export const registerUseCaseCard = (
   contentManagement: ContentManagementPluginStart,
+  workspaceEnabled: boolean,
   {
     target,
     order,
@@ -25,6 +26,7 @@ export const registerUseCaseCard = (
     icon: string;
   }
 ) => {
+  if (workspaceEnabled) return;
   contentManagement.registerContentProvider({
     id: `home_get_started_${id}`,
     getTargetArea: () => target,
