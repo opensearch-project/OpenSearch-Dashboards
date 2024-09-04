@@ -35,6 +35,7 @@ export const createCardInput = (
     viewMode: ViewMode.VIEW,
     columns: section.columns,
     wrap: section.wrap,
+    grid: section.grid,
     panels,
     ...section.input,
   };
