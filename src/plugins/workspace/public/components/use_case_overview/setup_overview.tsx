@@ -19,6 +19,7 @@ import {
 import { getStartedCards } from './get_started_cards';
 import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
 import { Content } from '../../../../../plugins/content_management/public';
+import './setup_overview.scss';
 
 const recentlyViewSectionRender = (contents: Content[]) => {
   return (
@@ -133,7 +134,11 @@ export const registerAnalyticsAllOverviewContent = (
         id: card.id,
         kind: 'card',
         getIcon: () =>
-          React.createElement(EuiIcon, { size: 'xl', type: card.icon || 'wsSelector' }),
+          React.createElement(EuiIcon, {
+            size: 'xl',
+            type: card.icon || 'wsSelector',
+            className: 'analyticsGettingStartedWorkspaceCardsIcon',
+          }),
         order: card.order || index,
         description: card.description,
         title: card.title,
