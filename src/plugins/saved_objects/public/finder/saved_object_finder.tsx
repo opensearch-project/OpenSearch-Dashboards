@@ -58,9 +58,12 @@ import {
   CoreStart,
   IUiSettingsClient,
   SavedObjectsStart,
+  ApplicationStart,
 } from 'src/core/public';
 
 import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { first } from 'rxjs/operators';
 import { getIndexPatternTitle } from '../../../data/common/index_patterns/utils';
 import { LISTING_LIMIT_SETTING } from '../../common';
 
@@ -76,6 +79,7 @@ export interface SavedObjectMetaData<T = unknown> {
 interface FinderAttributes {
   title?: string;
   type: string;
+  kibanaSavedObjectMeta?: string;
 }
 
 interface SavedObjectFinderState {
@@ -122,6 +126,8 @@ export type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFin
 export type SavedObjectFinderUiProps = {
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
+  data: DataPublicPluginStart;
+  application: CoreStart['application'];
 } & SavedObjectFinderProps;
 
 class SavedObjectFinderUi extends React.Component<
@@ -137,10 +143,17 @@ class SavedObjectFinderUi extends React.Component<
     showFilter: PropTypes.bool,
   };
 
+  public async getCurrentAppId() {
+    const appId = await this.props.application.currentAppId$.pipe(first()).toPromise();
+    return appId;
+  }
+
+  readonly languageService = this.props.data.query.queryString.getLanguageService();
   private isComponentMounted: boolean = false;
 
   private debouncedFetch = _.debounce(async (query: string) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
+    const currentAppId = await this.getCurrentAppId();
 
     const fields = Object.values(metaDataMap)
       .map((metaData) => metaData.includeFields || [])
@@ -162,7 +175,7 @@ class SavedObjectFinderUi extends React.Component<
       return await client.get<DataSourceAttributes>('data-source', id);
     };
 
-    const savedObjects = await Promise.all(
+    let savedObjects = await Promise.all(
       resp.savedObjects.map(async (obj) => {
         if (obj.type === 'index-pattern') {
           const result = { ...obj };
@@ -177,6 +190,25 @@ class SavedObjectFinderUi extends React.Component<
         }
       })
     );
+
+    // Filter search objects whose language are not supported by the current Application
+    savedObjects = savedObjects.filter((obj) => {
+      if (obj.type === 'search') {
+        if (obj.attributes?.kibanaSavedObjectMeta) {
+          const sourceObject = JSON.parse(obj.attributes?.kibanaSavedObjectMeta?.searchSourceJSON);
+          const languageId = sourceObject.query.language;
+
+          const languageProperties = this.languageService.getLanguage(languageId);
+
+          if (languageProperties?.supportedAppNames.includes(currentAppId)) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }
+      return true;
+    });
 
     resp.savedObjects = savedObjects.filter((savedObject) => {
       const metaData = metaDataMap[savedObject.type];
@@ -571,9 +603,20 @@ class SavedObjectFinderUi extends React.Component<
   }
 }
 
-const getSavedObjectFinder = (savedObject: SavedObjectsStart, uiSettings: IUiSettingsClient) => {
+const getSavedObjectFinder = (
+  savedObject: SavedObjectsStart,
+  uiSettings: IUiSettingsClient,
+  data: DataPublicPluginStart,
+  application: ApplicationStart
+) => {
   return (props: SavedObjectFinderProps) => (
-    <SavedObjectFinderUi {...props} savedObjects={savedObject} uiSettings={uiSettings} />
+    <SavedObjectFinderUi
+      {...props}
+      savedObjects={savedObject}
+      uiSettings={uiSettings}
+      data={data}
+      application={application}
+    />
   );
 };
 
