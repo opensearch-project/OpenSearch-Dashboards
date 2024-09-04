@@ -197,7 +197,7 @@ const fetchDatabases = async (http: HttpSetup, path: DataStructure[]): Promise<D
     body: JSON.stringify({
       lang: 'sql',
       query: `SHOW DATABASES in ${connection.title}`,
-      datasource: dataSource?.title,
+      datasource: connection?.title,
       ...(meta.sessionId && { sessionId: meta.sessionId }),
     }),
     query: {
@@ -212,14 +212,14 @@ const fetchDatabases = async (http: HttpSetup, path: DataStructure[]): Promise<D
 
 const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<DataStructure[]> => {
   const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
-  const sessionId = (path.find((ds) => ds.type === 'CONNECTION')?.meta as DataStructureCustomMeta)
-    .sessionId;
+  const connection = path.find((ds) => ds.type === 'CONNECTION');
+  const sessionId = (connection?.meta as DataStructureCustomMeta).sessionId;
   const database = path[path.length - 1];
   const response = await http.post(`../../api/enhancements/datasource/jobs`, {
     body: JSON.stringify({
       lang: 'sql',
       query: `SHOW TABLES in ${database.title}`,
-      datasource: dataSource?.title,
+      datasource: connection?.title,
       ...(sessionId && { sessionId }),
     }),
     query: {
