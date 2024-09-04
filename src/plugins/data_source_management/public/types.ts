@@ -41,11 +41,20 @@ export interface DataSourceManagementContext {
   workspaces: WorkspacesStart;
 }
 
+export enum DataSourceConnectionType {
+  OpenSearchConnection,
+  DirectQueryConnection,
+}
+
 export interface DataSourceTableItem {
   id: string;
+  type?: string;
   title: string;
-  description: string;
-  sort: string;
+  parentId?: string;
+  connectionType?: DataSourceConnectionType;
+  description?: string;
+  sort?: string;
+  relatedConnections?: DataSourceTableItem[];
 }
 
 export interface ToastMessageItem {
@@ -180,16 +189,4 @@ export interface PermissionsConfigurationProps {
   setSelectedRoles: React.Dispatch<React.SetStateAction<Role[]>>;
   layout: 'horizontal' | 'vertical';
   hasSecurityAccess: boolean;
-}
-
-export interface DirectQueryDatasourceDetails {
-  allowedRoles: string[];
-  name: string;
-  connector: DirectQueryDatasourceType;
-  description: string;
-  properties: S3GlueProperties | PrometheusProperties;
-  status: DirectQueryDatasourceStatus;
-}
-export interface PrometheusProperties {
-  'prometheus.uri': string;
 }
