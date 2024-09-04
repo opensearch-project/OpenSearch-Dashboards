@@ -13,13 +13,12 @@ import {
   getDataSourcesList,
   convertNavGroupToWorkspaceUseCase,
   isEqualWorkspaceUseCase,
-  USE_CASE_PREFIX,
   prependWorkspaceToBreadcrumbs,
   getIsOnlyAllowEssentialUseCase,
 } from './utils';
 import { WorkspaceAvailability } from '../../../core/public';
 import { coreMock } from '../../../core/public/mocks';
-import { WORKSPACE_DETAIL_APP_ID } from '../common/constants';
+import { WORKSPACE_DETAIL_APP_ID, USE_CASE_PREFIX } from '../common/constants';
 import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
 import { createMockedRegisteredUseCases } from './mocks';
 
