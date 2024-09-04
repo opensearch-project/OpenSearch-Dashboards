@@ -144,6 +144,9 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
       {fetchState.status === ResultStatus.NO_RESULTS && (
         <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
       )}
+      {fetchState.status === ResultStatus.ERROR && (
+        <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
+      )}
       {fetchState.status === ResultStatus.UNINITIALIZED && (
         <DiscoverUninitialized onRefresh={() => refetch$.next()} />
       )}

@@ -4,8 +4,7 @@
  */
 
 import { trimEnd } from 'lodash';
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { formatTimePickerDate, Query } from '../../../data/common';
 import {
   DataPublicPluginStart,
@@ -52,11 +51,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
 
     const query = this.buildQuery();
 
-    return fetch(context, query, this.getAggConfig(searchRequest, query)).pipe(
-      catchError((error) => {
-        return throwError(error);
-      })
-    );
+    return fetch(context, query, this.getAggConfig(searchRequest, query));
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {

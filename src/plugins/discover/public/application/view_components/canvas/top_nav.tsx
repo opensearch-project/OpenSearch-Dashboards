@@ -9,7 +9,11 @@ import { createPortal } from 'react-dom';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters } from '../../../../../../core/public';
-import { connectStorageToQueryState, opensearchFilters } from '../../../../../data/public';
+import {
+  connectStorageToQueryState,
+  opensearchFilters,
+  QueryStatus,
+} from '../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { PLUGIN_ID } from '../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
@@ -21,6 +25,7 @@ import { useDispatch, setSavedQuery, useSelector } from '../../utils/state_manag
 
 import './discover_canvas.scss';
 import { TopNavMenuItemRenderType } from '../../../../../navigation/public';
+import { ResultStatus } from '../utils';
 
 export interface TopNavProps {
   opts: {
@@ -34,9 +39,10 @@ export interface TopNavProps {
 
 export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
-  const { inspectorAdapters, savedSearch, indexPattern } = useDiscoverContext();
+  const { data$, inspectorAdapters, savedSearch, indexPattern } = useDiscoverContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
   const [screenTitle, setScreenTitle] = useState<string>('');
+  const [queryStatus, setQueryStatus] = useState<QueryStatus>({ status: ResultStatus.READY });
   const state = useSelector((s) => s.discover);
   const dispatch = useDispatch();
 
@@ -68,6 +74,16 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     },
     uiSettings
   );
+
+  useEffect(() => {
+    const subscription = data$.subscribe((queryData) => {
+      const result = {
+        status: queryData.status,
+        ...queryData.queryStatus,
+      };
+      setQueryStatus(result);
+    });
+  }, [data$]);
 
   useEffect(() => {
     let isMounted = true;
@@ -160,6 +176,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
         datePickerRef={opts?.optionalRef?.datePickerRef}
         groupActions={showActionsInGroup}
         screenTitle={screenTitle}
+        queryStatus={queryStatus}
       />
     </>
   );
