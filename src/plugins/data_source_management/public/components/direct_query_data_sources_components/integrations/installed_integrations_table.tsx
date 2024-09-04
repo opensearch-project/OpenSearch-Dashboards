@@ -107,6 +107,7 @@ export const InstallIntegrationFlyout = ({
   datasourceType,
   datasourceName,
   refreshInstances,
+  selectedDataSourceId,
   http,
 }: {
   closeFlyout: () => void;
@@ -114,6 +115,7 @@ export const InstallIntegrationFlyout = ({
   datasourceName: string;
   refreshInstances: () => void;
   http: HttpStart;
+  selectedDataSourceId?: string;
 }) => {
   const [availableIntegrations, setAvailableIntegrations] = useState({
     hits: [],
@@ -155,6 +157,7 @@ export const InstallIntegrationFlyout = ({
         />
       ) : (
         <SetupIntegrationForm
+          selectedDataSourceId={selectedDataSourceId}
           integration={installingIntegration}
           unsetIntegration={() => setInstallingIntegration(null)}
           renderType="flyout"

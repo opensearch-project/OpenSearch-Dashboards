@@ -146,6 +146,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
       datasourceType={datasourceDetails.connector}
       datasourceName={datasourceDetails.name}
       http={http}
+      selectedDataSourceId={dataSourceMDSId || ''}
     />
   ) : null;
 
@@ -189,7 +190,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   const DefaultDatasourceCards = () => {
     return (
       <EuiFlexGroup>
-        {!featureFlagStatus && observabilityDashboardsExists && (
+        {observabilityDashboardsExists && (
           <EuiFlexItem>
             <EuiCard
               icon={<EuiIcon size="xxl" type="integrationGeneral" />}
