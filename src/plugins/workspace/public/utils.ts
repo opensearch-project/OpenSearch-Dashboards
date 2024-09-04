@@ -308,6 +308,7 @@ export const convertNavGroupToWorkspaceUseCase = ({
   navLinks,
   type,
   order,
+  icon,
 }: NavGroupItemInMap): WorkspaceUseCase => ({
   id,
   title,
@@ -315,6 +316,7 @@ export const convertNavGroupToWorkspaceUseCase = ({
   features: navLinks.map((item) => ({ id: item.id, title: item.title })),
   systematic: type === NavGroupType.SYSTEM || id === ALL_USE_CASE_ID,
   order,
+  icon,
 });
 
 const compareFeatures = (
