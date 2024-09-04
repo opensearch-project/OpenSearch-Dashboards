@@ -230,11 +230,15 @@ export const useSearch = (services: DiscoverViewServices) => {
       // If the request was aborted then no need to surface this error in the UI
       if (error instanceof Error && error.name === 'AbortError') return;
 
-      if (
-        data.query.queryString.getQuery().language === 'kuery' ||
-        data.query.queryString.getQuery().language === 'lucene'
-      ) {
-        console.log('native language');
+      const queryLanguage = data.query.queryString.getQuery().language;
+      if (queryLanguage === 'kuery' || queryLanguage === 'lucene') {
+        data$.next({
+          status: ResultStatus.NO_RESULTS,
+          rows: [],
+        });
+
+        data.search.showError(error as Error);
+        return;
       }
       let errorBody;
       try {
