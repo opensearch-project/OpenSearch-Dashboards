@@ -51,7 +51,16 @@ export interface SearchData {
   bucketInterval?: TimechartHeaderBucketInterval | {};
   chartData?: Chart;
   title?: string;
-  queryStatus?: QueryStatus;
+  queryStatus?: {
+    body?: {
+      error?: {
+        reason?: string;
+        details: string;
+      };
+      statusCode?: number;
+    };
+    time?: number;
+  };
 }
 
 export type SearchRefetch = 'refetch' | undefined;
@@ -222,7 +231,6 @@ export const useSearch = (services: DiscoverViewServices) => {
             ? searchSource.getDataFrame()?.name
             : indexPattern?.title,
         queryStatus: {
-          status: rows.length > 0 ? ResultStatus.READY : ResultStatus.NO_RESULTS,
           time: queryTime,
         },
       });
@@ -250,7 +258,6 @@ export const useSearch = (services: DiscoverViewServices) => {
       data$.next({
         status: ResultStatus.ERROR,
         queryStatus: {
-          status: ResultStatus.ERROR,
           body: errorBody,
           time: queryTime,
         },

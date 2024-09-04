@@ -30,7 +30,6 @@
 
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
-import { BehaviorSubject } from 'rxjs';
 import { compact, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
@@ -93,7 +92,7 @@ export interface SearchBarOwnProps {
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
-  queryStatus$?: BehaviorSubject<QueryStatus>;
+  queryStatus?: QueryStatus;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -552,7 +551,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           indicateNoData={this.props.indicateNoData}
           datePickerRef={this.props.datePickerRef}
           savedQueryManagement={searchBarMenu(false, true)}
-          queryStatus$={this.props.queryStatus$}
+          queryStatus={this.props.queryStatus}
         />
       );
     }

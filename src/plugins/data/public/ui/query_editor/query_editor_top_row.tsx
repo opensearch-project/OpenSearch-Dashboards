@@ -12,7 +12,6 @@ import {
   OnRefreshProps,
   prettyDuration,
 } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
 import classNames from 'classnames';
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -55,7 +54,7 @@ export interface QueryEditorTopRowProps {
   indicateNoData?: boolean;
   datePickerRef?: React.RefObject<HTMLDivElement>;
   savedQueryManagement?: any;
-  queryStatus$?: BehaviorSubject<QueryStatus>;
+  queryStatus?: QueryStatus;
 }
 
 // Needed for React.lazy
@@ -188,7 +187,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           dataTestSubj={props.dataTestSubj}
           filterBar={props.filterBar}
           savedQueryManagement={props.savedQueryManagement}
-          queryStatus$={props.queryStatus$}
+          queryStatus={props.queryStatus}
         />
       </EuiFlexItem>
     );

@@ -48,7 +48,6 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       core,
       data: dataServices,
       storage,
-      queryStatus$: this.queryStatus$,
     });
 
     return {

@@ -64,7 +64,7 @@ export interface QueryEditorProps {
   filterBar?: any;
   prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   savedQueryManagement?: any;
-  queryStatus$?: BehaviorSubject<QueryStatus>;
+  queryStatus?: QueryStatus;
 }
 
 interface Props extends QueryEditorProps {
@@ -370,7 +370,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           <EuiText size="xs" color="subdued">
             {this.props.query.dataset?.timeFieldName || ''}
           </EuiText>,
-          <QueryResult queryStatus$={this.props.queryStatus$!} />,
+          <QueryResult queryStatus={this.props.queryStatus!} />,
         ],
         end: [
           <EuiButtonEmpty
