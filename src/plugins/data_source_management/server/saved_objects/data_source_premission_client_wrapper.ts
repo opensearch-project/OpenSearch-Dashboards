@@ -117,7 +117,11 @@ export class DataSourcePermissionClientWrapper {
       if (options.workspaces) {
         if (isDashboardAdminRequest) {
           const originalDataSource = await wrapperOptions.client.get(type, id);
-          if (_.isEqual(originalDataSource.attributes, attributes)) {
+          const originalDataSourceSubset = _.pick(
+            originalDataSource.attributes,
+            Object.keys(attributes)
+          );
+          if (_.isEqual(originalDataSourceSubset, attributes)) {
             return await wrapperOptions.client.update(type, id, attributes, options);
           }
         }
