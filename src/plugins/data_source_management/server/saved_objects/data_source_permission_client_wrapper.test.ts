@@ -33,9 +33,6 @@ describe('DataSourcePermissionClientWrapper', () => {
   const errorMessage = 'You have no permission to perform this operation';
 
   describe('Data source is managed by dashboard admin', () => {
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
     describe('user is not dashboard admin', () => {
       jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ isDashboardAdmin: false });
       const mockedClient = savedObjectsClientMock.create();
@@ -270,7 +267,7 @@ describe('DataSourcePermissionClientWrapper', () => {
     });
   });
 
-  describe('If data source is managed by none', () => {
+  describe('Data source is managed by none', () => {
     jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ isDashboardAdmin: false });
     const mockedClient = {
       ...savedObjectsClientMock.create(),
@@ -439,7 +436,7 @@ describe('DataSourcePermissionClientWrapper', () => {
     });
   });
 
-  describe('assign workspaces to data source', () => {
+  describe('Dashboard admin can assign data source to workspace', () => {
     jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ isDashboardAdmin: true });
     const mockedClient = {
       ...savedObjectsClientMock.create(),
@@ -507,6 +504,97 @@ describe('DataSourcePermissionClientWrapper', () => {
         ['workspace-id'],
         {}
       );
+    });
+  });
+
+  describe('Data source is managed by all', () => {
+    jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ isDashboardAdmin: false });
+    const mockedClient = savedObjectsClientMock.create();
+    const wrapperInstance = new DataSourcePermissionClientWrapper(ManageableBy.All);
+    const wrapperClient = wrapperInstance.wrapperFactory({
+      client: mockedClient,
+      typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+      request: requestMock,
+    });
+
+    it('should create data source', async () => {
+      await wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, attributes, {});
+      expect(mockedClient.create).toBeCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, attributes, {});
+    });
+
+    it('should bulk create data source', async () => {
+      const mockCreateObjects = [dataSource];
+      await wrapperClient.bulkCreate(mockCreateObjects, { overwrite: true });
+      expect(mockedClient.bulkCreate).toBeCalledWith(mockCreateObjects, { overwrite: true });
+    });
+
+    it('should update data source', async () => {
+      await wrapperClient.update(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', {});
+      expect(mockedClient.update).toBeCalledWith(
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
+        'data-source-id',
+        {},
+        {}
+      );
+    });
+
+    it('should bulk update data source', async () => {
+      const mockUpdateObjects = [
+        {
+          ...dataSource,
+          id: 'data-source-id',
+        },
+      ];
+      await wrapperClient.bulkUpdate(mockUpdateObjects, {});
+      expect(mockedClient.bulkUpdate).toBeCalledWith(mockUpdateObjects, {});
+    });
+
+    it('should delete data source', async () => {
+      await wrapperClient.delete(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id');
+      expect(mockedClient.delete).toBeCalledWith(
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
+        'data-source-id',
+        {}
+      );
+    });
+
+    it('should not add data source to workspaces', async () => {
+      let errorCatch;
+      try {
+        await wrapperClient.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
+          'workspace-id',
+        ]);
+      } catch (e) {
+        errorCatch = e;
+      }
+      expect(errorCatch.message).toEqual(errorMessage);
+    });
+
+    it('should not delete data source from workspaces', async () => {
+      let errorCatch;
+      try {
+        await wrapperClient.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
+          'workspace-id',
+        ]);
+      } catch (e) {
+        errorCatch = e;
+      }
+      expect(errorCatch.message).toEqual(errorMessage);
+    });
+
+    it('should not update data source with workspace options', async () => {
+      let errorCatch;
+      try {
+        await wrapperClient.update(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'data-source-id',
+          { title: 'new title' },
+          { workspaces: ['workspace-1'] }
+        );
+      } catch (e) {
+        errorCatch = e;
+      }
+      expect(errorCatch.message).toEqual(errorMessage);
     });
   });
 });

@@ -99,24 +99,29 @@ export class DataSourcePermissionClientWrapper {
       attributes: Partial<T>,
       options: SavedObjectsUpdateOptions = {}
     ): Promise<SavedObjectsUpdateResponse<T>> => {
-      if (DATA_SOURCE_SAVED_OBJECT_TYPE !== type) {
+      if (
+        DATA_SOURCE_SAVED_OBJECT_TYPE !== type ||
+        (this.manageableBy === ManageableBy.DashboardAdmin && isDashboardAdminRequest)
+      ) {
         return await wrapperOptions.client.update(type, id, attributes, options);
       }
 
       // Dashboard admin can update the workspace attribute of data source saved object.
-      if (isDashboardAdminRequest && options.workspaces) {
-        const originalDataSource = await wrapperOptions.client.get(type, id);
-        const attributesToCompare = ['title', 'description', 'auth', 'endpoint'];
-        const originalAttributes = _.pick(originalDataSource.attributes, attributesToCompare);
-        const updateAttributes = _.pick(attributes, attributesToCompare);
+      if (options.workspaces) {
+        if (isDashboardAdminRequest) {
+          const originalDataSource = await wrapperOptions.client.get(type, id);
+          const attributesToCompare = ['title', 'description', 'auth', 'endpoint'];
+          const originalAttributes = _.pick(originalDataSource.attributes, attributesToCompare);
+          const updateAttributes = _.pick(attributes, attributesToCompare);
 
-        if (_.isEqual(originalAttributes, updateAttributes)) {
-          return await wrapperOptions.client.update(type, id, attributes, options);
+          if (_.isEqual(originalAttributes, updateAttributes)) {
+            return await wrapperOptions.client.update(type, id, attributes, options);
+          }
         }
         throw this.generatePermissionError();
       }
 
-      if (canSkipWrapper) {
+      if (this.manageableBy === ManageableBy.All) {
         return await wrapperOptions.client.update(type, id, attributes, options);
       }
       throw this.generatePermissionError();
