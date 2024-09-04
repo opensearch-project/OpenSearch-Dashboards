@@ -135,7 +135,7 @@ export const getSuggestions = async ({
 
     // check to see if field rule is a candidate. if so, suggest field names
     if (candidates.rules.has(DQLParser.RULE_field)) {
-      completions.push(...fetchFieldSuggestions(indexPattern, (f) => `${f}: `));
+      completions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f}: `));
     }
 
     interface FoundLastValue {
@@ -247,6 +247,7 @@ export const getSuggestions = async ({
                 cursorLine,
                 cursorColumn + 1
               ),
+              insertText: `${val} `,
             };
           })
         );
@@ -266,6 +267,7 @@ export const getSuggestions = async ({
           text: tokenSymbolName,
           type: monaco.languages.CompletionItemKind.Keyword,
           detail: SuggestionItemDetailsTags.Keyword,
+          insertText: `${tokenSymbolName} `,
         });
       }
     });
