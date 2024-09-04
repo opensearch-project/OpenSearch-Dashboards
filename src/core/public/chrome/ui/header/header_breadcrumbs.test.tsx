@@ -107,4 +107,25 @@ describe('HeaderBreadcrumbs', () => {
     wrapper.update();
     expect(wrapper.find('.euiBreadcrumbWrapper')).toHaveLength(2);
   });
+
+  it('remove heading home when workspace is enabled', () => {
+    const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
+    const breadcrumbsEnricher$ = new BehaviorSubject((crumbs: ChromeBreadcrumb[]) => [
+      { text: 'Home' },
+      { text: 'Analytics' },
+      ...crumbs,
+    ]);
+    const wrapper = mount(
+      <HeaderBreadcrumbs
+        appTitle$={new BehaviorSubject('')}
+        breadcrumbs$={breadcrumbs$}
+        breadcrumbsEnricher$={breadcrumbsEnricher$}
+        hideFirstHome={true}
+      />
+    );
+    const breadcrumbs = wrapper.find('.euiBreadcrumbWrapper');
+    expect(breadcrumbs).toHaveLength(2);
+    expect(breadcrumbs.at(0).text()).toBe('Analytics');
+    expect(breadcrumbs.at(1).text()).toBe('First');
+  });
 });
