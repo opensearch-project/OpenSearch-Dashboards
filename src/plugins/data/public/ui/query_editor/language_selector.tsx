@@ -106,7 +106,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
           iconSize="s"
           onClick={onButtonClick}
           className="languageSelector__button"
-          iconType={'arrowDown'}
+          iconType="arrowDown"
         >
           {selectedLanguage.label}
         </EuiButtonEmpty>

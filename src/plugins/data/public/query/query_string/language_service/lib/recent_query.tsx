@@ -3,31 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './_recent_query.scss';
+import './_index.scss';
 
 import React, { useEffect, useState } from 'react';
 import { EuiBasicTable, EuiBasicTableColumn, EuiButtonIcon, EuiCopy } from '@elastic/eui';
 import moment from 'moment';
-import { Query, TimeRange } from 'src/plugins/data/common';
-import { QueryStringContract } from '../query_string_manager';
-
-interface RecentQueryItem {
-  query: Query;
-  time: number;
-  timeRange?: TimeRange;
-}
-
-interface RecentQueryTableItem {
-  id: number;
-  query: Query['query'];
-  time: string;
-}
-
-interface RecentQueriesTableProps {
-  queryString: QueryStringContract;
-  onClickRecentQuery: (query: Query, timeRange?: TimeRange) => void;
-  isVisible: boolean;
-}
+import { RecentQueriesTableProps, RecentQueryItem, RecentQueryTableItem } from '../types';
 
 export const MAX_RECENT_QUERY_SIZE = 10;
 
