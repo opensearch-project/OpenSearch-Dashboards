@@ -479,9 +479,12 @@ export class WorkspaceSavedObjectsClientWrapper {
       options: SavedObjectsFindOptions
     ) => {
       if (
-        options.type.length === 1 &&
-        options.type[0] === DATA_SOURCE_SAVED_OBJECT_TYPE &&
-        isDataSourceAdmin
+        isDataSourceAdmin &&
+        options?.type &&
+        (options.type === DATA_SOURCE_SAVED_OBJECT_TYPE ||
+          (Array.isArray(options.type) &&
+            options.type.length === 1 &&
+            options.type[0] === DATA_SOURCE_SAVED_OBJECT_TYPE))
       ) {
         return await wrapperOptions.client.find<T>(options);
       }
