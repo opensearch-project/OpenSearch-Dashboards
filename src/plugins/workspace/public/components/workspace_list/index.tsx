@@ -29,6 +29,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, of } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { isString } from 'lodash';
+import { startCase } from 'lodash';
 import {
   DEFAULT_NAV_GROUPS,
   WorkspaceAttribute,
@@ -414,6 +415,15 @@ export const WorkspaceListInner = ({
       field: 'permissionMode',
       name: 'Permissions',
       width: '6%',
+      render: (permissionMode: WorkspaceAttributeWithPermission['permissionMode']) => {
+        return isDashboardAdmin ? (
+          <EuiToolTip position="right" content="You are dashboard admin">
+            <EuiText size="xs">Admin</EuiText>
+          </EuiToolTip>
+        ) : (
+          startCase(permissionMode)
+        );
+      },
     },
     {
       field: 'lastUpdatedTime',
@@ -451,7 +461,7 @@ export const WorkspaceListInner = ({
       onClick: ({ id }: WorkspaceAttribute) => handleSwitchWorkspace(id),
     },
     {
-      name: <EuiText key="setDefault">Set as default</EuiText>,
+      name: <EuiText key="setDefault">Set as my default</EuiText>,
       icon: 'flag',
       type: 'icon',
       description: 'Set as default workspace',
@@ -464,8 +474,6 @@ export const WorkspaceListInner = ({
       type: 'icon',
       description: 'Leave workspace',
       'data-test-subj': 'workspace-list-leave-icon',
-      enabled: (item: WorkspaceAttributeWithPermission) =>
-        item.permissionMode === PermissionModeId.Owner,
       available: () => false,
     },
     {

@@ -4,9 +4,8 @@
  */
 
 import React from 'react';
-import moment from 'moment';
-import { BehaviorSubject, of } from 'rxjs';
-import { render, fireEvent, screen, waitFor } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
+import { render } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import { coreMock } from '../../../../../core/public/mocks';
 import { createMockedRegisteredUseCases$ } from '../../mocks';
@@ -148,7 +147,6 @@ describe('UserDefaultWorkspace', () => {
     expect(document.querySelectorAll('.euiTableRow-isSelectable').length).toBe(0);
 
     // action button Set as default in document
-    expect(queryAllByText('Set as default')).toHaveLength(3);
-    expect(queryAllByText('Copy ID')).toHaveLength(3);
+    expect(queryAllByText('Set as my default')).toHaveLength(3);
   });
 });

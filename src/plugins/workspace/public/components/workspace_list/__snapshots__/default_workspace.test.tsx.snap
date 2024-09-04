@@ -286,11 +286,17 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                       Permissions
                     </div>
                     <div
-                      class="euiTableCellContent"
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <span
-                        class="euiTableCellContent__text"
-                      />
+                        class="euiToolTipAnchor"
+                      >
+                        <div
+                          class="euiText euiText--extraSmall"
+                        >
+                          Admin
+                        </div>
+                      </span>
                     </div>
                   </td>
                   <td
@@ -349,7 +355,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                           <div
                             class="euiText euiText--medium"
                           >
-                            Set as default
+                            Set as my default
                           </div>
                         </span>
                       </span>
@@ -448,11 +454,17 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                       Permissions
                     </div>
                     <div
-                      class="euiTableCellContent"
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <span
-                        class="euiTableCellContent__text"
-                      />
+                        class="euiToolTipAnchor"
+                      >
+                        <div
+                          class="euiText euiText--extraSmall"
+                        >
+                          Admin
+                        </div>
+                      </span>
                     </div>
                   </td>
                   <td
@@ -511,7 +523,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                           <div
                             class="euiText euiText--medium"
                           >
-                            Set as default
+                            Set as my default
                           </div>
                         </span>
                       </span>
@@ -608,11 +620,17 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                       Permissions
                     </div>
                     <div
-                      class="euiTableCellContent"
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <span
-                        class="euiTableCellContent__text"
-                      />
+                        class="euiToolTipAnchor"
+                      >
+                        <div
+                          class="euiText euiText--extraSmall"
+                        >
+                          Admin
+                        </div>
+                      </span>
                     </div>
                   </td>
                   <td
@@ -671,7 +689,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                           <div
                             class="euiText euiText--medium"
                           >
-                            Set as default
+                            Set as my default
                           </div>
                         </span>
                       </span>
