@@ -230,6 +230,12 @@ export const useSearch = (services: DiscoverViewServices) => {
       // If the request was aborted then no need to surface this error in the UI
       if (error instanceof Error && error.name === 'AbortError') return;
 
+      if (
+        data.query.queryString.getQuery().language === 'kuery' ||
+        data.query.queryString.getQuery().language === 'lucene'
+      ) {
+        console.log('native language');
+      }
       let errorBody;
       try {
         errorBody = JSON.parse(error.body.message);
