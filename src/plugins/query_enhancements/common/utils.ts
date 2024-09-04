@@ -5,7 +5,7 @@
 
 import { Query } from 'src/plugins/data/common';
 import { from, throwError, timer } from 'rxjs';
-import { filter, mergeMap, take, takeWhile, tap } from 'rxjs/operators';
+import { filter, mergeMap, take, takeWhile } from 'rxjs/operators';
 import {
   EnhancedFetchContext,
   QueryAggConfig,
@@ -42,16 +42,9 @@ export const removeKeyword = (queryString: string | undefined) => {
 };
 
 export const handleFacetError = (response: any) => {
-  const error = new Error(response.data);
-  error.name = response.status;
-  return throwError(error);
-};
-
-export const handleFetchError = (response: any) => {
-  if (response.body.error) {
-    const error = new Error(response.body.error.response);
-    return throwError(error);
-  }
+  const error = new Error(response.data.body ?? response.data);
+  error.name = response.data.status ?? response.status;
+  throw error;
 };
 
 export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: QueryAggConfig) => {
@@ -64,7 +57,7 @@ export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: Q
       body,
       signal,
     })
-  ).pipe(tap(handleFetchError));
+  );
 };
 
 export const handleQueryStatus = <T>(options: QueryStatusOptions<T>): Promise<T> => {

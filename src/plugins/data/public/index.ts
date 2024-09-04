@@ -473,6 +473,8 @@ export {
   LanguageServiceContract,
   RecentQueriesTable,
   QueryControls,
+  QueryResult,
+  QueryStatus,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
