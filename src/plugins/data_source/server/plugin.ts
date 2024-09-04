@@ -22,7 +22,7 @@ import { DataSourcePluginConfigType } from '../config';
 import { LoggingAuditor } from './audit/logging_auditor';
 import { CryptographyService, CryptographyServiceSetup } from './cryptography_service';
 import { DataSourceService, DataSourceServiceSetup } from './data_source_service';
-import { DataSourceSavedObjectsClientWrapper, dataSource } from './saved_objects';
+import { dataConnection, dataSource, DataSourceSavedObjectsClientWrapper } from './saved_objects';
 import { AuthenticationMethod, DataSourcePluginSetup, DataSourcePluginStart } from './types';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../common';
 
@@ -55,6 +55,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
 
     // Register data source saved object type
     core.savedObjects.registerType(dataSource);
+    core.savedObjects.registerType(dataConnection);
 
     const config: DataSourcePluginConfigType = await this.config$.pipe(first()).toPromise();
 
