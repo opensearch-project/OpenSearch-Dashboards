@@ -123,9 +123,9 @@ export const DataSourceConnectionTable = ({
           items={item?.relatedConnections ?? []}
           itemId="id"
           columns={baseColumns}
-          className="customized-table"
+          className="direct-query-expanded-table"
           rowProps={{
-            className: 'customized-row',
+            className: 'direct-query-expanded-row',
           }}
         />
       );
@@ -295,6 +295,7 @@ export const DataSourceConnectionTable = ({
         isSelectable={true}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         isExpandable={true}
+        className="direct-query-table"
         pagination={{
           initialPageSize: 10,
           pageSizeOptions: [10, 20, 30],
