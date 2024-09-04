@@ -5,7 +5,7 @@
 
 import { ContentManagementPluginSetup, ContentManagementPluginStart } from './types';
 
-const createStartContract = (): ContentManagementPluginStart => {
+const createStartContract = (): jest.Mocked<ContentManagementPluginStart> => {
   return {
     registerContentProvider: jest.fn(),
     renderPage: jest.fn(),
@@ -13,7 +13,7 @@ const createStartContract = (): ContentManagementPluginStart => {
   };
 };
 
-const createSetupContract = (): ContentManagementPluginSetup => {
+const createSetupContract = (): jest.Mocked<ContentManagementPluginSetup> => {
   return {
     registerPage: jest.fn(),
   };
