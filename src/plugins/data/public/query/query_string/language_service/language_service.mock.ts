@@ -60,6 +60,7 @@ const createSetupLanguageServiceMock = (): jest.Mocked<LanguageServiceContract> 
     setUserQuerySessionId: jest.fn(),
     setUserQuerySessionIdByObj: jest.fn(),
     getUserQuerySessionId: jest.fn().mockReturnValue(null),
+    createDefaultLanguageReference: jest.fn(),
   };
 };
 

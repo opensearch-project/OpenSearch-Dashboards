@@ -14,7 +14,7 @@ import {
   UiEnhancements,
 } from '../../../ui';
 import { DataStorage, setOverrides as setFieldOverrides } from '../../../../common';
-import { createDefaultLanguageReference } from './default_language_reference';
+import { createDefaultLanguageReference } from './lib/default_language_reference';
 
 export class LanguageService {
   private languages: Map<string, LanguageConfig> = new Map();
@@ -57,8 +57,8 @@ export class LanguageService {
     this.languages.set(config.id, config);
   }
 
-  public getLanguage(language: string): LanguageConfig | undefined {
-    return this.languages.get(language);
+  public getLanguage(languageId: string): LanguageConfig | undefined {
+    return this.languages.get(languageId);
   }
 
   public getLanguages(): LanguageConfig[] {

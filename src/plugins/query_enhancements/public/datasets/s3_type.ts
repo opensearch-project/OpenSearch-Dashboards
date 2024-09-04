@@ -4,8 +4,6 @@
  */
 
 import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { timer } from 'rxjs';
-import { filter, map, mergeMap, takeWhile } from 'rxjs/operators';
 import {
   DATA_STRUCTURE_META_TYPES,
   DEFAULT_DATA,
@@ -16,7 +14,7 @@ import {
   DatasetField,
 } from '../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
-import { DATASET } from '../../common';
+import { DATASET, handleQueryStatus } from '../../common';
 
 const S3_ICON = 'visTable';
 
@@ -105,66 +103,46 @@ export const s3TypeConfig: DatasetTypeConfig = {
   },
 };
 
-const fetch = (
+const fetch = async (
   http: HttpSetup,
   path: DataStructure[],
   type: 'DATABASE' | 'TABLE'
 ): Promise<DataStructure[]> => {
-  return new Promise((resolve, reject) => {
-    const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
-    const parent = path[path.length - 1];
-    const meta = parent.meta as DataStructureCustomMeta;
+  const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
+  const parent = path[path.length - 1];
+  const meta = parent.meta as DataStructureCustomMeta;
 
-    timer(0, 5000)
-      .pipe(
-        mergeMap(() =>
-          http.fetch('../../api/enhancements/datasource/jobs', {
-            query: {
-              id: dataSource?.id,
-              queryId: meta.query.id,
-            },
-          })
-        ),
-        takeWhile(
-          (response) => response.status !== 'SUCCESS' && response.status !== 'FAILED',
-          true
-        ),
-        filter((response) => response.status === 'SUCCESS'),
-        map((response) => {
-          if (response.status === 'FAILED') {
-            throw new Error('Job failed');
-          }
-          return response.datarows.map((item: string[]) => ({
-            id: `${parent.id}.${item[type === 'DATABASE' ? 0 : 1]}`,
-            title: item[type === 'DATABASE' ? 0 : 1],
-            type,
-            meta: {
-              type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-              query: meta.query,
-              session: meta.session,
-            } as DataStructureCustomMeta,
-          }));
-        })
-      )
-      .subscribe({
-        next: (dataStructures) => {
-          resolve(dataStructures);
-        },
-        error: (error) => {
-          reject(error);
-        },
-        complete: () => {
-          reject(new Error('No response'));
-        },
-      });
-  });
+  try {
+    const response = await handleQueryStatus({
+      fetchStatus: () =>
+        http.fetch('../../api/enhancements/datasource/jobs', {
+          query: {
+            id: dataSource?.id,
+            queryId: meta.queryId,
+          },
+        }),
+    });
+
+    return response.datarows.map((item: string[]) => ({
+      id: `${parent.id}.${item[type === 'DATABASE' ? 0 : 1]}`,
+      title: item[type === 'DATABASE' ? 0 : 1],
+      type,
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+        query: meta.query,
+        session: meta.session,
+      } as DataStructureCustomMeta,
+    }));
+  } catch (error) {
+    throw error;
+  }
 };
 
 const setMeta = (dataStructure: DataStructure, response: any) => {
   return {
     ...dataStructure.meta,
-    query: { id: response.queryId },
-    session: { id: response.sessionId },
+    queryId: response.queryId,
+    sessionId: response.sessionId,
   } as DataStructureCustomMeta;
 };
 
@@ -214,14 +192,17 @@ const fetchConnections = async (
 const fetchDatabases = async (http: HttpSetup, path: DataStructure[]): Promise<DataStructure[]> => {
   const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
   const connection = path[path.length - 1];
-  const query = (connection.meta as DataStructureCustomMeta).query;
+  const meta = connection.meta as DataStructureCustomMeta;
   const response = await http.post(`../../api/enhancements/datasource/jobs`, {
     body: JSON.stringify({
       lang: 'sql',
       query: `SHOW DATABASES in ${connection.title}`,
-      datasource: dataSource?.title,
+      datasource: connection?.title,
+      ...(meta.sessionId && { sessionId: meta.sessionId }),
     }),
-    query,
+    query: {
+      id: dataSource?.id,
+    },
   });
 
   connection.meta = setMeta(connection, response);
@@ -231,12 +212,15 @@ const fetchDatabases = async (http: HttpSetup, path: DataStructure[]): Promise<D
 
 const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<DataStructure[]> => {
   const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
+  const connection = path.find((ds) => ds.type === 'CONNECTION');
+  const sessionId = (connection?.meta as DataStructureCustomMeta).sessionId;
   const database = path[path.length - 1];
   const response = await http.post(`../../api/enhancements/datasource/jobs`, {
     body: JSON.stringify({
       lang: 'sql',
       query: `SHOW TABLES in ${database.title}`,
-      datasource: dataSource?.title,
+      datasource: connection?.title,
+      ...(sessionId && { sessionId }),
     }),
     query: {
       id: dataSource?.id,

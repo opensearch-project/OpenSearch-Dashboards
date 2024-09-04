@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, act } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { applicationServiceMock, httpServiceMock } from '../../../mocks';
-import { Props, RecentItems } from './recent_items';
+import { SavedObjectWithMetadata } from './recent_items';
+import { RecentItems } from './recent_items';
 
 jest.mock('./nav_link', () => ({
   createRecentNavLink: jest.fn().mockImplementation(() => {
@@ -17,73 +18,136 @@ jest.mock('./nav_link', () => ({
   }),
 }));
 
+const mockRecentlyAccessed = new BehaviorSubject([
+  {
+    id: '6ef856c0-5f86-11ef-b7df-1bb1cf26ce5b',
+    label: 'visualizeMock',
+    link: '/app/visualize',
+    workspaceId: 'workspace_1',
+    meta: { type: 'visualization' },
+  },
+]);
+
+const mockWorkspaceList = new BehaviorSubject([
+  {
+    id: 'workspace_1',
+    name: 'WorkspaceMock_1',
+  },
+]);
+
+const savedObjectsFromServer: SavedObjectWithMetadata[] = [
+  {
+    type: 'visualization',
+    id: '6ef856c0-5f86-11ef-b7df-1bb1cf26ce5b',
+    attributes: {},
+    references: [],
+    updated_at: '2024-07-20T00:00:00.000Z',
+    meta: {},
+  },
+];
 const defaultMockProps = {
   navigateToUrl: applicationServiceMock.createStartContract().navigateToUrl,
   workspaceList$: new BehaviorSubject([]),
   recentlyAccessed$: new BehaviorSubject([]),
   navLinks$: new BehaviorSubject([]),
   basePath: httpServiceMock.createStartContract().basePath,
+  http: httpServiceMock.createSetupContract(),
   renderBreadcrumbs: <></>,
 };
-const setup = (props: Props) => {
-  return render(<RecentItems {...props} />);
-};
+
+jest.spyOn(defaultMockProps.http, 'get').mockImplementation(
+  (url): Promise<SavedObjectWithMetadata> => {
+    if (typeof url === 'string') {
+      if ((url as string).includes('6ef856c0-5f86-11ef-b7df-1bb1cf26ce5b')) {
+        return Promise.resolve(savedObjectsFromServer[0]);
+      } else {
+        return Promise.resolve(savedObjectsFromServer[1]);
+      }
+    }
+    return Promise.reject(new Error('Invalid URL'));
+  }
+);
+
 describe('Recent items', () => {
   it('should render base element normally', () => {
-    const { baseElement } = setup(defaultMockProps);
+    const { baseElement } = render(<RecentItems {...defaultMockProps} />);
     expect(baseElement).toMatchSnapshot();
   });
 
-  it('should get workspace name through workspace id and render it with brackets wrapper', () => {
-    const workspaceList$ = new BehaviorSubject([
-      {
-        id: 'workspace_id',
-        name: 'workspace_name',
-      },
-    ]);
-    const recentlyAccessed$ = new BehaviorSubject([
-      {
-        label: 'item_label',
-        link: 'item_link',
-        id: 'item_id',
-        workspaceId: 'workspace_id',
-      },
-    ]);
-
-    setup({
-      ...defaultMockProps,
-      workspaceList$,
-      recentlyAccessed$,
-      navigateToUrl: defaultMockProps.navigateToUrl,
-    });
-    const button = screen.getByTestId('recentItemsSectionButton');
-    fireEvent.click(button);
-    expect(screen.getByText('(workspace_name)')).toBeInTheDocument();
+  it('render with empty recent work', () => {
+    const { getByText, getByTestId } = render(<RecentItems {...defaultMockProps} />);
+    const mockRecentButton = getByTestId('recentItemsSectionButton');
+    fireEvent.click(mockRecentButton);
+    expect(getByText('No recently viewed items')).toBeInTheDocument();
   });
 
-  it('should call navigateToUrl with link generated from createRecentNavLink when clicking item', () => {
-    const workspaceList$ = new BehaviorSubject([]);
-    const recentlyAccessed$ = new BehaviorSubject([
-      {
-        label: 'item_label',
-        link: 'item_link',
-        id: 'item_id',
-      },
-    ]);
-    const navigateToUrl = jest.fn();
-    const renderBreadcrumbs = <></>;
-    setup({
+  it('should be able to render recent works', async () => {
+    const mockProps = {
       ...defaultMockProps,
-      workspaceList$,
-      recentlyAccessed$,
-      navigateToUrl,
-      renderBreadcrumbs,
+      recentlyAccessed$: mockRecentlyAccessed,
+    };
+
+    await act(async () => {
+      render(<RecentItems {...mockProps} />);
     });
+
+    const mockRecentButton = screen.getByTestId('recentItemsSectionButton');
+    fireEvent.click(mockRecentButton);
+    expect(screen.getByText('visualizeMock')).toBeInTheDocument();
+  });
+
+  it('shoulde be able to display workspace name if the asset is attched to a workspace and render it with brackets wrapper ', async () => {
+    const mockProps = {
+      ...defaultMockProps,
+      recentlyAccessed$: mockRecentlyAccessed,
+      workspaceList$: mockWorkspaceList,
+    };
+
+    await act(async () => {
+      render(<RecentItems {...mockProps} />);
+    });
+
+    const mockRecentButton = screen.getByTestId('recentItemsSectionButton');
+    fireEvent.click(mockRecentButton);
+    expect(screen.getByText('(WorkspaceMock_1)')).toBeInTheDocument();
+  });
+
+  it('should call navigateToUrl with link generated from createRecentNavLink when clicking a recent item', async () => {
+    const mockProps = {
+      ...defaultMockProps,
+      recentlyAccessed$: mockRecentlyAccessed,
+      workspaceList$: mockWorkspaceList,
+    };
+
+    const navigateToUrl = jest.fn();
+
+    await act(async () => {
+      render(<RecentItems {...mockProps} navigateToUrl={navigateToUrl} />);
+    });
+
     const button = screen.getByTestId('recentItemsSectionButton');
     fireEvent.click(button);
-    const item = screen.getByText('item_label');
+    const item = screen.getByText('visualizeMock');
     expect(navigateToUrl).not.toHaveBeenCalled();
     fireEvent.click(item);
     expect(navigateToUrl).toHaveBeenCalledWith('/recent_nav_link');
+  });
+
+  it('should be able to display the preferences popover setting when clicking Preferences button', async () => {
+    const mockProps = {
+      ...defaultMockProps,
+      recentlyAccessed$: mockRecentlyAccessed,
+    };
+
+    await act(async () => {
+      render(<RecentItems {...mockProps} />);
+    });
+
+    const button = screen.getByTestId('recentItemsSectionButton');
+    fireEvent.click(button);
+
+    const preferencesButton = screen.getByTestId('preferencesSettingButton');
+    fireEvent.click(preferencesButton);
+    expect(screen.getByTestId('preferencesSettingPopover')).toBeInTheDocument();
   });
 });

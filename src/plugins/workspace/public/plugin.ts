@@ -7,7 +7,7 @@ import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { map } from 'rxjs/operators';
-import { EuiIcon, EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import {
   Plugin,
   CoreStart,
@@ -29,7 +29,6 @@ import {
   WORKSPACE_DETAIL_APP_ID,
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
-  WORKSPACE_USE_CASES,
   WORKSPACE_INITIAL_APP_ID,
   WORKSPACE_NAVIGATION_APP_ID,
 } from '../common/constants';
@@ -59,7 +58,6 @@ import { recentWorkspaceManager } from './recent_workspace_manager';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { UseCaseService } from './services/use_case_service';
 import { WorkspaceListCard } from './components/service_card';
-import { UseCaseFooter } from './components/home_get_start_card';
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
 import { WorkspacePickerContent } from './components/workspace_picker_content/workspace_picker_content';
 import { HOME_CONTENT_AREAS } from '../../../plugins/content_management/public';
@@ -71,6 +69,7 @@ import {
   registerAnalyticsAllOverviewContent,
   setAnalyticsAllOverviewSection,
 } from './components/use_case_overview/setup_overview';
+import { registerGetStartedCardToNewHome } from './components/home_get_start_card';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -554,40 +553,6 @@ export class WorkspacePlugin
     return {};
   }
 
-  private registerGetStartedCardToNewHome(
-    core: CoreStart,
-    contentManagement: ContentManagementPluginStart
-  ) {
-    const useCases = [
-      WORKSPACE_USE_CASES.observability,
-      WORKSPACE_USE_CASES['security-analytics'],
-      WORKSPACE_USE_CASES.search,
-      WORKSPACE_USE_CASES.essentials,
-    ];
-
-    useCases.forEach((useCase, index) => {
-      contentManagement.registerContentProvider({
-        id: `home_get_start_${useCase.id}`,
-        getTargetArea: () => [HOME_CONTENT_AREAS.GET_STARTED],
-        getContent: () => ({
-          id: useCase.id,
-          kind: 'card',
-          order: (index + 1) * 1000,
-          description: useCase.description,
-          title: useCase.title,
-          getIcon: () => React.createElement(EuiIcon, { size: 'xl', type: 'logoOpenSearch' }),
-          getFooter: () =>
-            React.createElement(UseCaseFooter, {
-              useCaseId: useCase.id,
-              useCaseTitle: useCase.title,
-              core,
-              registeredUseCases$: this.registeredUseCases$,
-            }),
-        }),
-      });
-    });
-  }
-
   public start(core: CoreStart, { contentManagement, navigation }: WorkspacePluginStartDeps) {
     this.coreStart = core;
 
@@ -626,7 +591,7 @@ export class WorkspacePlugin
       this.registerWorkspaceListToHome(core, contentManagement);
 
       // register get started card in new home page
-      this.registerGetStartedCardToNewHome(core, contentManagement);
+      registerGetStartedCardToNewHome(core, contentManagement, this.registeredUseCases$);
 
       // set breadcrumbs enricher for workspace
       this.breadcrumbsSubscription = enrichBreadcrumbsWithWorkspace(core);
