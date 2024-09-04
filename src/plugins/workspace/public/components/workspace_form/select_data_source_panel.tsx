@@ -78,7 +78,7 @@ export const SelectDataSourcePanel = ({
           isDashboardAdmin={isDashboardAdmin}
           dataSourceConnections={assignedDataSourceConnections}
           handleUnassignDataSources={handleUnassignDataSources}
-          onSelectedItems={getSelectedItems}
+          onSelectItems={getSelectedItems}
           inCreatePage={true}
           connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
         />
