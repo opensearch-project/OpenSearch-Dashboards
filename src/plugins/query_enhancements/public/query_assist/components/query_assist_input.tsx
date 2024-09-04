@@ -16,6 +16,7 @@ interface QueryAssistInputProps {
   initialValue?: string;
   selectedIndex?: string;
   previousQuestion?: string;
+  style?: React.CSSProperties;
 }
 
 export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
@@ -75,6 +76,7 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
       <div>
         <EuiFieldText
           data-test-subj="query-assist-input-field-text"
+          style={props.style}
           inputRef={props.inputRef}
           value={value}
           disabled={props.isDisabled}

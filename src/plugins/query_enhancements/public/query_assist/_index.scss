@@ -11,4 +11,19 @@
   &.queryAssist__callout {
     margin-top: $euiSizeXS;
   }
+
+  .queryAssist__badgeContainer {
+    position: fixed;
+    right: 48px;
+  }
+}
+
+.queryAssist__popoverText {
+  padding: 0 $euiSizeM;
+}
+
+#queryAssistErrorTitle::before {
+  content: "⚠";
+  position: absolute;
+  left: $euiSizeS;
 }
