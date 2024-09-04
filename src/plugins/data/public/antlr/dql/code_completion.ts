@@ -254,6 +254,8 @@ export const getSuggestions = async ({
       }
     }
 
+    const dqlOperators = new Set([DQLParser.AND, DQLParser.OR, DQLParser.NOT]);
+
     // suggest other candidates, mainly keywords
     [...candidates.tokens.keys()].forEach((token: number) => {
       // ignore identifier, already handled with field rule
@@ -262,11 +264,18 @@ export const getSuggestions = async ({
       }
 
       const tokenSymbolName = parser.vocabulary.getSymbolicName(token)?.toLowerCase();
+
       if (tokenSymbolName) {
+        let type = monaco.languages.CompletionItemKind.Keyword;
+        let detail = SuggestionItemDetailsTags.Keyword;
+        if (dqlOperators.has(token)) {
+          type = monaco.languages.CompletionItemKind.Operator;
+          detail = SuggestionItemDetailsTags.Operator;
+        }
         completions.push({
           text: tokenSymbolName,
-          type: monaco.languages.CompletionItemKind.Keyword,
-          detail: SuggestionItemDetailsTags.Keyword,
+          type,
+          detail,
           insertText: `${tokenSymbolName} `,
         });
       }
