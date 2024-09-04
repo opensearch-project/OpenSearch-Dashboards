@@ -75,16 +75,16 @@ describe('indexPatternTypeConfig', () => {
       dataSource: { id: 'dataSourceId', title: 'Cluster 1', type: 'OpenSearch' },
     };
     expect(indexPatternTypeConfig.supportedLanguages(mockDataset)).toEqual([
-      'DQL',
-      'Lucene',
+      'kuery',
+      'lucene',
       'PPL',
       'SQL',
     ]);
 
     mockDataset.dataSource = { ...mockDataset.dataSource!, type: 'other' };
     expect(indexPatternTypeConfig.supportedLanguages(mockDataset)).toEqual([
-      'DQL',
-      'Lucene',
+      'kuery',
+      'lucene',
       'PPL',
       'SQL',
     ]);
