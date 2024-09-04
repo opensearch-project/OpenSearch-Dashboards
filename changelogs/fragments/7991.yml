@@ -1,6 +1,6 @@
 feat:
-- Keep Autocomplete Suggestion Window open ([#7991](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7991))
-- User hints below the Suggestion Window ([#7991](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7991))
+- Keep Autocomplete suggestion window open ([#7991](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7991))
+- User hints below the suggestion window ([#7991](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7991))
 
 fix:
-- DQL Autocomplete Operators ([#7991](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7991))
+- DQL Autocomplete Operators distinguished ([#7991](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7991))
