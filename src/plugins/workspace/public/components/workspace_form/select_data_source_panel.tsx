@@ -158,7 +158,7 @@ export const SelectDataSourcePanel = ({
           closeModal={() => setModalVisible(false)}
           handleAssignDataSourceConnections={handleAssignDataSources}
           http={http}
-          mode={toggleIdSelected as AssociationDataSourceModalMode}
+          mode={toggleIdSelected}
           notifications={notifications}
           logos={chrome.logos}
         />
