@@ -43,7 +43,7 @@ import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { DocLinksStart } from 'src/core/public';
 import { StepIndexPattern } from './components/step_index_pattern';
 import { StepTimeField } from './components/step_time_field';
-import { Header, Description } from './components/header';
+import { Header } from './components/header';
 import { LoadingState } from './components/loading_state';
 
 import { context as contextType } from '../../../../opensearch_dashboards_react/public';
