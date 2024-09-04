@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AuthStatus, HttpAuth, OpenSearchDashboardsRequest, PrincipalType, Principals } from '..';
+import { AuthStatus, HttpAuth, OpenSearchDashboardsRequest } from '../http';
+import { Principals, PrincipalType } from '../saved_objects';
 
 export interface AuthInfo {
   backend_roles?: string[];

@@ -93,6 +93,14 @@ export class DataSourcePermissionClientWrapper {
       } as SavedObjectsBulkResponse<T>;
     };
 
+    /**
+     *  Updating a single data source can happen in 2 scenarios:
+     *  1. Update data source's attribute, which can only be done by data source admin when managedBy is `none`
+     *  2. Assign/Unassign data source to workspaces, which under the hood will update the `workspaces` field of the data source,
+     *  and can be done by dashboard admin even when the managedBy is `none`.
+     *  3. When the managedBy is `all` and the user is not dashboard admin,
+     *  need to determine whether the operation is assign/unassign.
+     */
     const updateWithManageableBy = async <T = unknown>(
       type: string,
       id: string,
@@ -106,15 +114,10 @@ export class DataSourcePermissionClientWrapper {
         return await wrapperOptions.client.update(type, id, attributes, options);
       }
 
-      // Dashboard admin can update the workspace attribute of data source saved object.
       if (options.workspaces) {
         if (isDashboardAdminRequest) {
           const originalDataSource = await wrapperOptions.client.get(type, id);
-          const attributesToCompare = ['title', 'description', 'auth', 'endpoint'];
-          const originalAttributes = _.pick(originalDataSource.attributes, attributesToCompare);
-          const updateAttributes = _.pick(attributes, attributesToCompare);
-
-          if (_.isEqual(originalAttributes, updateAttributes)) {
+          if (_.isEqual(originalDataSource.attributes, attributes)) {
             return await wrapperOptions.client.update(type, id, attributes, options);
           }
         }
