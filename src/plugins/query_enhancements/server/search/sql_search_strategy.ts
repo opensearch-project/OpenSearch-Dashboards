@@ -58,7 +58,7 @@ export const sqlSearchStrategyProvider = (
           took: rawResponse.took,
         } as IDataFrameResponse;
       } catch (e) {
-        logger.error(`sqlSearchStrategy: ${e}`);
+        logger.error(`sqlSearchStrategy: ${e.message}`);
         if (usage) usage.trackError();
         throw e;
       }
