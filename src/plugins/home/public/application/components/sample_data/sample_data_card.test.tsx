@@ -19,7 +19,7 @@ describe('Sample data card', () => {
   it('should call the getTargetArea function with the correct arguments', () => {
     registerSampleDataCard(contentManagement, coreStart);
     const call = registerContentProviderMock.mock.calls[0];
-    expect(call[0].getTargetArea()).toEqual(['essentials_overview/get_started']);
+    expect(call[0].getTargetArea()).toEqual('essentials_overview/get_started');
     expect(call[0].getContent()).toMatchInlineSnapshot(`
       Object {
         "cardProps": Object {
@@ -39,5 +39,10 @@ describe('Sample data card', () => {
         "title": "Try openSearch",
       }
     `);
+
+    // search use case overview
+    expect(registerContentProviderMock.mock.calls[1][0].getTargetArea()).toEqual(
+      'search_overview/get_started'
+    );
   });
 });
