@@ -59,7 +59,7 @@ export interface SearchData {
       };
       statusCode?: number;
     };
-    time?: number;
+    elapsedMs?: number;
   };
 }
 
@@ -160,7 +160,7 @@ export const useSearch = (services: DiscoverViewServices) => {
 
     dataset = searchSource.getField('index');
 
-    let queryTime;
+    let elapsedMs;
 
     try {
       // Only show loading indicator if we are fetching when the rows are empty
@@ -193,7 +193,7 @@ export const useSearch = (services: DiscoverViewServices) => {
         .ok({ json: fetchResp });
       const hits = fetchResp.hits.total as number;
       const rows = fetchResp.hits.hits;
-      queryTime = inspectorRequest.getTime();
+      elapsedMs = inspectorRequest.getTime();
       let bucketInterval = {};
       let chartData;
       for (const row of rows) {
@@ -231,7 +231,7 @@ export const useSearch = (services: DiscoverViewServices) => {
             ? searchSource.getDataFrame()?.name
             : indexPattern?.title,
         queryStatus: {
-          time: queryTime,
+          elapsedMs,
         },
       });
     } catch (error) {
@@ -259,7 +259,7 @@ export const useSearch = (services: DiscoverViewServices) => {
         status: ResultStatus.ERROR,
         queryStatus: {
           body: errorBody,
-          time: queryTime,
+          elapsedMs,
         },
       });
     } finally {

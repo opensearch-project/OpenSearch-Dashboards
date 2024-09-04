@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
+
 import './_recent_query.scss';
 import { EuiButtonEmpty, EuiPopover, EuiText, EuiPopoverTitle } from '@elastic/eui';
 
@@ -25,7 +27,7 @@ export interface QueryStatus {
     };
     statusCode?: number;
   };
-  time?: number;
+  elapsedMs?: number;
 }
 
 export function QueryResult(props: { queryStatus: QueryStatus }) {
@@ -38,7 +40,9 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     return (
       <EuiButtonEmpty iconSide="left" iconType={'checkInCircleEmpty'} size="xs" onClick={() => {}}>
         <EuiText size="xs" color="subdued">
-          {props.queryStatus.time ? `Completed in ${props.queryStatus.time} ms` : 'Completed'}
+          {props.queryStatus.elapsedMs
+            ? `Completed in ${props.queryStatus.elapsedMs} ms`
+            : 'Completed'}
         </EuiText>
       </EuiButtonEmpty>
     );
@@ -65,12 +69,21 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
       <EuiPopoverTitle>ERRORS</EuiPopoverTitle>
       <div style={{ width: '250px' }}>
         <EuiText size="s">
-          <strong>Reasons: </strong>
+          <strong>
+            {i18n.translate('data.query.languageService.queryResults.reasons', {
+              defaultMessage: `Reasons:`,
+            })}
+          </strong>
           {props.queryStatus.body.error.reason}
         </EuiText>
         <EuiText size="s">
           <p>
-            <strong>Details:</strong> {props.queryStatus.body.error.details}
+            <strong>
+              {i18n.translate('data.query.languageService.queryResults.details', {
+                defaultMessage: `Details:`,
+              })}
+            </strong>{' '}
+            {props.queryStatus.body.error.details}
           </p>
         </EuiText>
       </div>

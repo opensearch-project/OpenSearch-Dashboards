@@ -27,7 +27,6 @@ export interface UiServiceStartDependencies {
 
 export class UiService implements Plugin<IUiSetup, IUiStart> {
   enhancementsConfig: ConfigSchema['enhancements'];
-  private queryStatus$ = new BehaviorSubject<QueryStatus>({ status: ResultStatus.READY });
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     const { enhancements } = initializerContext.config.get<ConfigSchema>();
@@ -40,10 +39,6 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
   }
 
   public start(core: CoreStart, { dataServices, storage }: UiServiceStartDependencies): IUiStart {
-    const setQueryStatus = (status: QueryStatus) => {
-      this.queryStatus$.next(status);
-    };
-
     const SearchBar = createSearchBar({
       core,
       data: dataServices,
@@ -54,7 +49,6 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
       SearchBar,
       SuggestionsComponent,
-      setQueryStatus,
     };
   }
 
