@@ -34,7 +34,7 @@ interface DataSourceConnectionTableProps {
   connectionType: string;
   dataSourceConnections: DataSourceConnection[];
   handleUnassignDataSources: (dataSources: DataSourceConnection[]) => void;
-  onSelectedItems?: (dataSources: DataSourceConnection[]) => void;
+  onSelectItems?: (dataSources: DataSourceConnection[]) => void;
   inCreatePage?: boolean;
 }
 
@@ -43,7 +43,7 @@ export const DataSourceConnectionTable = ({
   connectionType,
   dataSourceConnections,
   handleUnassignDataSources,
-  onSelectedItems,
+  onSelectItems,
   inCreatePage = false,
 }: DataSourceConnectionTableProps) => {
   const [selectedItems, setSelectedItems] = useState<DataSourceConnection[]>([]);
@@ -56,10 +56,10 @@ export const DataSourceConnectionTable = ({
     services: { http },
   } = useOpenSearchDashboards<CoreStart>();
   useEffect(() => {
-    if (onSelectedItems) {
-      onSelectedItems(selectedItems);
+    if (onSelectItems) {
+      onSelectItems(selectedItems);
     }
-  }, [selectedItems, onSelectedItems]);
+  }, [selectedItems, onSelectItems]);
 
   useEffect(() => {
     // Reset selected items when connectionType changes
