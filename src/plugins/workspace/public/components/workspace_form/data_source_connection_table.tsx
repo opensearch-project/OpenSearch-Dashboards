@@ -118,9 +118,14 @@ export const DataSourceConnectionTable = ({
         const basePath = http.basePath.serverBasePath;
         let url: string;
         if (record.connectionType === DataSourceConnectionType.OpenSearchConnection) {
-          url = `${origin}${basePath}/app/dataSources/${record.id}`;
+          url = http.basePath.prepend(`/app/dataSources/${record.id}`, {
+            withoutClientBasePath: true,
+          });
         } else {
           url = `${origin}${basePath}/app/dataSources/manage/${name}?dataSourceMDSId=${record.parentId}`;
+          url = http.basePath.prepend(`/app/dataSources/${record.id}`, {
+            withoutClientBasePath: true,
+          });
         }
         return (
           <EuiLink href={url} className="eui-textTruncate">

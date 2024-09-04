@@ -80,7 +80,7 @@ const setup = ({
   assignedDataSources = [],
   onChange = jest.fn(),
   errors = undefined,
-  isDashboardAdmin = true,
+  showDataSourceManagement = true,
 }: Partial<SelectDataSourcePanelProps>) => {
   return render(
     <I18nProvider>
@@ -90,7 +90,7 @@ const setup = ({
           savedObjects={savedObjects}
           assignedDataSources={assignedDataSources}
           errors={errors}
-          isDashboardAdmin={isDashboardAdmin}
+          showDataSourceManagement={showDataSourceManagement}
         />
       </OpenSearchDashboardsContextProvider>
     </I18nProvider>

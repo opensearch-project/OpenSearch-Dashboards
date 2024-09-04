@@ -64,9 +64,10 @@ const dataSourceConnectionsMock = [
 
 describe('WorkspaceDetailConnectionTable', () => {
   beforeEach(() => {
+    const mockPrepend = jest.fn().mockImplementation((path) => path);
     const mockHttp = {
       basePath: {
-        serverBasePath: '',
+        prepend: mockPrepend,
       },
     };
     (useOpenSearchDashboards as jest.Mock).mockImplementation(() => ({

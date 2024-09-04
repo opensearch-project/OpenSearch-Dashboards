@@ -178,7 +178,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
                 savedObjects={savedObjects}
                 assignedDataSources={formData.selectedDataSources}
                 data-test-subj={`workspaceForm-dataSourcePanel`}
-                isDashboardAdmin={true}
+                showDataSourceManagement={true}
               />
               <EuiSpacer size="s" />
               <EuiSpacer size="s" />

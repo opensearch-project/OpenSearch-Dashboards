@@ -21,15 +21,14 @@ export interface SelectDataSourcePanelProps {
   savedObjects: SavedObjectsStart;
   assignedDataSources: DataSource[];
   onChange: (value: DataSource[]) => void;
-  isDashboardAdmin: boolean;
+  showDataSourceManagement: boolean;
 }
 
 export const SelectDataSourcePanel = ({
-  errors,
   onChange,
   assignedDataSources,
   savedObjects,
-  isDashboardAdmin,
+  showDataSourceManagement,
 }: SelectDataSourcePanelProps) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedItems, setSelectedItems] = useState<DataSourceConnection[]>([]);
@@ -79,7 +78,7 @@ export const SelectDataSourcePanel = ({
     return (
       <EuiPanel paddingSize="none" hasBorder={false}>
         <DataSourceConnectionTable
-          isDashboardAdmin={isDashboardAdmin}
+          isDashboardAdmin={showDataSourceManagement}
           items={assignedDataSourceConnections}
           onUnlinkDataSource={handleSingleDataSourceUnAssign}
           connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
@@ -138,13 +137,13 @@ export const SelectDataSourcePanel = ({
     <div>
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        {isDashboardAdmin && selectedItems.length > 0 && assignedDataSources.length > 0 && (
+        {showDataSourceManagement && selectedItems.length > 0 && assignedDataSources.length > 0 && (
           <EuiFlexItem grow={false}>{removeButton}</EuiFlexItem>
         )}
-        {isDashboardAdmin && (
+        {showDataSourceManagement && (
           <EuiFlexItem grow={false}>{addOpenSearchConnectionsButton}</EuiFlexItem>
         )}
-        {isDashboardAdmin && (
+        {showDataSourceManagement && (
           <EuiFlexItem grow={false}>{addDirectQueryConnectionsButton}</EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -161,7 +160,7 @@ export const SelectDataSourcePanel = ({
           http={http}
           mode={toggleIdSelected as AssociationDataSourceModalMode}
           notifications={notifications}
-          logos={chrome?.logos}
+          logos={chrome.logos}
         />
       )}
     </div>
