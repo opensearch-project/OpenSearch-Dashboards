@@ -4,7 +4,7 @@
  */
 
 import { EuiBadge, EuiLink, EuiPopover, EuiText } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { SyntheticEvent, useState } from 'react';
 import { AgentError } from '../utils';
 
 interface WarningBadgeProps {
@@ -24,8 +24,10 @@ export const WarningBadge: React.FC<WarningBadgeProps> = (props) => {
       button={
         <EuiBadge
           color="warning"
+          // @ts-ignore this is needed to avoid enter key triggering warning badge instead of submit button
+          type="button"
           iconType="alert"
-          onClick={(e) => {
+          onClick={(e: SyntheticEvent) => {
             e.preventDefault();
             setIsPopoverOpen(!isPopoverOpen);
           }}
