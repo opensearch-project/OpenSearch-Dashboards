@@ -3,12 +3,12 @@
 exports[`<FeatureCards /> render with complex navLinks 1`] = `
 <div>
   <div
-    class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiPageContent"
+    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiPageContent"
     role="main"
   >
     <div>
       <div
-        class="euiSpacer euiSpacer--l"
+        class="euiSpacer euiSpacer--m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -200,7 +200,7 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
         Dashboard
       </h3>
       <div
-        class="euiSpacer euiSpacer--l"
+        class="euiSpacer euiSpacer--m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"

@@ -188,7 +188,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
             setMountPoint={application.setAppRightControls}
           />
         )}
-        <EuiSpacer />
+
         <EuiPageContent>
           <WorkspaceDetailPanel
             useCaseUrl={useCaseUrl}

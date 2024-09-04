@@ -116,6 +116,7 @@ export class DataPublicPlugin
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: DataStorage;
+  private readonly sessionStorage: DataStorage;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
@@ -123,7 +124,11 @@ export class DataPublicPlugin
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
     this.autocomplete = new AutocompleteService(initializerContext);
-    this.storage = createStorage({ engine: window.localStorage, prefix: 'opensearch_dashboards.' });
+    this.storage = createStorage({ engine: window.localStorage, prefix: 'opensearchDashboards.' });
+    this.sessionStorage = createStorage({
+      engine: window.sessionStorage,
+      prefix: 'opensearchDashboards.',
+    });
   }
 
   public setup(
@@ -143,6 +148,7 @@ export class DataPublicPlugin
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
       storage: this.storage,
+      sessionStorage: this.sessionStorage,
       defaultSearchInterceptor: searchService.getDefaultSearchInterceptor(),
     });
 
