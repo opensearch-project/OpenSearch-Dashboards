@@ -420,6 +420,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
                 iconType="trash"
                 color="danger"
                 style={{ padding: 0 }}
+                disabled={!isDashboardAdmin}
               >
                 Delete
               </EuiButtonEmpty>
