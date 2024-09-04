@@ -56,6 +56,7 @@ export const Header = ({
   navigationUI: { HeaderControl },
   applications,
   currentWorkspaceName,
+  showImportButton,
 }: {
   onExportAll: () => void;
   onImport: () => void;
@@ -67,6 +68,7 @@ export const Header = ({
   navigationUI: NavigationPublicPluginStart['ui'];
   applications: ApplicationStart;
   currentWorkspaceName: string;
+  showImportButton: boolean;
 }) => {
   const title = useUpdatedUX ? null : (
     <EuiFlexItem grow={false}>
@@ -143,15 +145,22 @@ export const Header = ({
             defaultMessage: 'Export all objects',
           }),
         } as TopNavControlButtonData,
-        {
-          testId: 'importObjects',
-          run: onImport,
-          controlType: 'button',
-          iconType: 'importAction',
-          label: i18n.translate('savedObjectsManagement.objectsTable.header.importButtonLabel', {
-            defaultMessage: 'Import',
-          }),
-        } as TopNavControlButtonData,
+        ...(showImportButton
+          ? [
+              {
+                testId: 'importObjects',
+                run: onImport,
+                controlType: 'button',
+                iconType: 'importAction',
+                label: i18n.translate(
+                  'savedObjectsManagement.objectsTable.header.importButtonLabel',
+                  {
+                    defaultMessage: 'Import',
+                  }
+                ),
+              } as TopNavControlButtonData,
+            ]
+          : []),
       ]}
       setMountPoint={applications.setAppRightControls}
     />
@@ -187,19 +196,21 @@ export const Header = ({
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            iconType="importAction"
-            data-test-subj="importObjects"
-            onClick={onImport}
-          >
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.header.importButtonLabel"
-              defaultMessage="Import"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        {showImportButton && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              iconType="importAction"
+              data-test-subj="importObjects"
+              onClick={onImport}
+            >
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.header.importButtonLabel"
+                defaultMessage="Import"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty size="s" iconType="refresh" onClick={onRefresh}>
             <FormattedMessage
