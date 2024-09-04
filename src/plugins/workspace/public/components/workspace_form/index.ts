@@ -11,6 +11,7 @@ export { WorkspacePermissionSettingPanel } from './workspace_permission_setting_
 export { WorkspaceCancelModal } from './workspace_cancel_modal';
 export { WorkspaceNameField, WorkspaceDescriptionField } from './fields';
 export { DirectQueryConnectionIcon } from './direct_query_connection_icon';
+export { DataSourceConnectionTable } from './data_source_connection_table';
 
 export { WorkspaceFormSubmitData, WorkspaceFormProps, WorkspaceFormDataState } from './types';
 export {

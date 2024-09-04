@@ -6,9 +6,9 @@
 import { fireEvent, render } from '@testing-library/react';
 import { DataSourceConnectionType } from '../../../common/types';
 import React from 'react';
-import { DataSourceConnectionTable } from './data_source_connection_table';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { WorkspaceDetailConnectionTable } from './workspace_detail_connection_table';
 
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
   ...jest.requireActual('../../../../opensearch_dashboards_react/public'),
@@ -62,7 +62,7 @@ const dataSourceConnectionsMock = [
   },
 ];
 
-describe('DataSourceConnectionTable', () => {
+describe('WorkspaceDetailConnectionTable', () => {
   beforeEach(() => {
     const mockHttp = {
       basePath: {
@@ -81,7 +81,7 @@ describe('DataSourceConnectionTable', () => {
   describe('OpenSearch connections', () => {
     it('renders the table with OpenSearch connections', () => {
       const { getByText, queryByText } = render(
-        <DataSourceConnectionTable
+        <WorkspaceDetailConnectionTable
           isDashboardAdmin={true}
           connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
           dataSourceConnections={dataSourceConnectionsMock}
@@ -101,7 +101,7 @@ describe('DataSourceConnectionTable', () => {
 
     it('should show dqc popover when click the Related connections number ', () => {
       const { getByText } = render(
-        <DataSourceConnectionTable
+        <WorkspaceDetailConnectionTable
           isDashboardAdmin={true}
           connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
           dataSourceConnections={dataSourceConnectionsMock}
@@ -117,7 +117,7 @@ describe('DataSourceConnectionTable', () => {
 
     it('should remove selected OpenSearch connections by dashboard admin', () => {
       const { getByText, queryByTestId, getAllByRole, getByRole } = render(
-        <DataSourceConnectionTable
+        <WorkspaceDetailConnectionTable
           isDashboardAdmin={true}
           connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
           dataSourceConnections={dataSourceConnectionsMock}
@@ -139,7 +139,7 @@ describe('DataSourceConnectionTable', () => {
 
     it('should remove single OpenSearch connections by dashboard admin', () => {
       const { queryAllByTestId, getByText, getByRole } = render(
-        <DataSourceConnectionTable
+        <WorkspaceDetailConnectionTable
           isDashboardAdmin={true}
           connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
           dataSourceConnections={dataSourceConnectionsMock}
@@ -159,7 +159,7 @@ describe('DataSourceConnectionTable', () => {
 
     it('should hide remove action iif user is not dashboard admin', () => {
       const { queryByText, queryByTestId, getAllByRole } = render(
-        <DataSourceConnectionTable
+        <WorkspaceDetailConnectionTable
           isDashboardAdmin={false}
           connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
           dataSourceConnections={dataSourceConnectionsMock}
@@ -177,7 +177,7 @@ describe('DataSourceConnectionTable', () => {
   describe('Direct query connections', () => {
     it('renders the table with Direct query connections', () => {
       const { getByText, queryByText, getByTestId } = render(
-        <DataSourceConnectionTable
+        <WorkspaceDetailConnectionTable
           isDashboardAdmin={true}
           connectionType={AssociationDataSourceModalMode.DirectQueryConnections}
           dataSourceConnections={dataSourceConnectionsMock}

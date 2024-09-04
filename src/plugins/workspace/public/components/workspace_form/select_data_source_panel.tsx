@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { EuiSpacer, EuiFlexItem, EuiSmallButton, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { SavedObjectsStart, CoreStart } from '../../../../../core/public';
@@ -13,8 +13,8 @@ import { AssociationDataSourceModal } from '../workspace_detail/association_data
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceClient } from '../../workspace_client';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
-import { DataSourceConnectionTable } from '../workspace_detail/data_source_connection_table';
 import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
+import { DataSourceConnectionTable } from './data_source_connection_table';
 
 export interface SelectDataSourcePanelProps {
   errors?: { [key: number]: WorkspaceFormError };
@@ -61,14 +61,18 @@ export const SelectDataSourcePanel = ({
   };
 
   const handleUnassignDataSources = (dataSourceConnections: DataSourceConnection[]) => {
-    const savedDataSourcesConnctions = (assignedDataSourceConnections ?? [])?.filter(
+    const savedDataSourcesConnections = (assignedDataSourceConnections ?? [])?.filter(
       ({ id }: DataSourceConnection) => !dataSourceConnections.some((item) => item.id === id)
     );
-    setAssignedDataSourceConnections(savedDataSourcesConnctions);
+    setAssignedDataSourceConnections(savedDataSourcesConnections);
     const savedDataSources = (assignedDataSources ?? [])?.filter(
       ({ id }: DataSource) => !dataSourceConnections.some((item) => item.id === id)
     );
     onChange(savedDataSources);
+  };
+
+  const handleSingleDataSourceUnAssign = (connection: DataSourceConnection) => {
+    handleUnassignDataSources([connection]);
   };
 
   const renderTableContent = () => {
@@ -76,11 +80,10 @@ export const SelectDataSourcePanel = ({
       <EuiPanel paddingSize="none" hasBorder={false}>
         <DataSourceConnectionTable
           isDashboardAdmin={isDashboardAdmin}
-          dataSourceConnections={assignedDataSourceConnections}
-          handleUnassignDataSources={handleUnassignDataSources}
-          onSelectItems={getSelectedItems}
-          inCreatePage={true}
+          items={assignedDataSourceConnections}
+          onUnlinkDataSource={handleSingleDataSourceUnAssign}
           connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
+          onSelectionChange={setSelectedItems}
         />
       </EuiPanel>
     );
@@ -129,11 +132,6 @@ export const SelectDataSourcePanel = ({
         defaultMessage: 'Remove selected',
       })}
     </EuiSmallButton>
-  );
-
-  const getSelectedItems = useCallback(
-    (currentSelectedItems: DataSourceConnection[]) => setSelectedItems(currentSelectedItems),
-    [setSelectedItems]
   );
 
   return (

@@ -3,51 +3,54 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './data_source_connection_table.scss';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   EuiInMemoryTable,
   EuiBasicTableColumn,
-  EuiTableSelectionType,
   EuiTableActionsColumnType,
-  EuiConfirmModal,
-  EuiSearchBarProps,
   EuiText,
   EuiListGroup,
   EuiListGroupItem,
   EuiPopover,
   EuiButtonEmpty,
   EuiPopoverTitle,
-  EuiSmallButton,
   EuiLink,
   EuiButtonIcon,
+  EuiInMemoryTableProps,
+  EuiTableSelectionType,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
-import { DirectQueryConnectionIcon } from '../workspace_form';
+import { DirectQueryConnectionIcon } from './direct_query_connection_icon';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { CoreStart } from '../../../../../core/public';
 
-interface DataSourceConnectionTableProps {
+import './data_source_connection_table.scss';
+
+type DataSourceConnectionTableProps = Omit<
+  EuiInMemoryTableProps<DataSourceConnection>,
+  | 'columns'
+  | 'itemsId'
+  | 'isSelectable'
+  | 'itemIdToExpandedRowMap'
+  | 'isExpandable'
+  | 'selection'
+  | 'pagination'
+> & {
   isDashboardAdmin: boolean;
   connectionType: string;
-  dataSourceConnections: DataSourceConnection[];
-  handleUnassignDataSources: (dataSources: DataSourceConnection[]) => void;
-  onSelectItems?: (dataSources: DataSourceConnection[]) => void;
-  inCreatePage?: boolean;
-}
+  onUnlinkDataSource: (dataSources: DataSourceConnection) => void;
+  onSelectionChange: (selections: DataSourceConnection[]) => void;
+};
 
 export const DataSourceConnectionTable = ({
   isDashboardAdmin,
   connectionType,
-  dataSourceConnections,
-  handleUnassignDataSources,
-  onSelectItems,
-  inCreatePage = false,
+  onUnlinkDataSource,
+  onSelectionChange,
+  ...restProps
 }: DataSourceConnectionTableProps) => {
-  const [selectedItems, setSelectedItems] = useState<DataSourceConnection[]>([]);
-  const [modalVisible, setModalVisible] = useState(false);
   const [popoversState, setPopoversState] = useState<Record<string, boolean>>({});
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
     Record<string, React.ReactNode>
@@ -55,67 +58,6 @@ export const DataSourceConnectionTable = ({
   const {
     services: { http },
   } = useOpenSearchDashboards<CoreStart>();
-  useEffect(() => {
-    if (onSelectItems) {
-      onSelectItems(selectedItems);
-    }
-  }, [selectedItems, onSelectItems]);
-
-  useEffect(() => {
-    // Reset selected items when connectionType changes
-    setSelectedItems([]);
-    setItemIdToExpandedRowMap({});
-  }, [connectionType]);
-
-  const openSearchConnections = useMemo(() => {
-    return dataSourceConnections.filter((dsc) =>
-      connectionType === AssociationDataSourceModalMode.OpenSearchConnections
-        ? dsc.connectionType === DataSourceConnectionType.OpenSearchConnection
-        : dsc?.relatedConnections && dsc.relatedConnections?.length > 0
-    );
-  }, [connectionType, dataSourceConnections]);
-
-  const renderToolsLeft = useCallback(() => {
-    return selectedItems.length > 0 && !modalVisible
-      ? [
-          <EuiSmallButton
-            color="danger"
-            onClick={() => setModalVisible(true)}
-            data-test-subj="workspace-detail-dataSources-table-bulkRemove"
-          >
-            {i18n.translate('workspace.detail.dataSources.table.remove.button', {
-              defaultMessage: 'Remove {numberOfSelect} association(s)',
-              values: { numberOfSelect: selectedItems.length },
-            })}
-          </EuiSmallButton>,
-        ]
-      : [];
-  }, [selectedItems, modalVisible]);
-
-  const onSelectionChange = (selectedDataSources: DataSourceConnection[]) => {
-    setSelectedItems(selectedDataSources);
-  };
-
-  const search: EuiSearchBarProps = {
-    toolsLeft: renderToolsLeft(),
-    box: {
-      incremental: true,
-    },
-    filters: [
-      {
-        type: 'field_value_selection',
-        field: 'type',
-        name: 'Type',
-        multiSelect: 'or',
-        options: Array.from(
-          new Set(openSearchConnections.map(({ type }) => type).filter(Boolean))
-        ).map((type) => ({
-          value: type!,
-          name: type!,
-        })),
-      },
-    ],
-  };
 
   const togglePopover = (itemId: string) => {
     setPopoversState((prevState) => ({
@@ -280,12 +222,7 @@ export const DataSourceConnectionTable = ({
                 icon: 'unlink',
                 type: 'icon',
                 onClick: (item: DataSourceConnection) => {
-                  if (inCreatePage) {
-                    handleUnassignDataSources([item]);
-                  } else {
-                    setSelectedItems([item]);
-                    setModalVisible(true);
-                  }
+                  onUnlinkDataSource(item);
                 },
                 'data-test-subj': 'workspace-detail-dataSources-table-actions-remove',
               },
@@ -302,59 +239,14 @@ export const DataSourceConnectionTable = ({
   };
 
   return (
-    <>
-      {inCreatePage ? (
-        <EuiInMemoryTable
-          items={openSearchConnections}
-          itemId="id"
-          columns={columns}
-          selection={selection}
-          key={connectionType}
-          isSelectable={true}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          isExpandable={true}
-        />
-      ) : (
-        <EuiInMemoryTable
-          items={openSearchConnections}
-          itemId="id"
-          columns={columns}
-          selection={selection}
-          search={search}
-          key={connectionType}
-          isSelectable={true}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          isExpandable={true}
-          pagination={{
-            initialPageSize: 10,
-            pageSizeOptions: [10, 20, 30],
-          }}
-        />
-      )}
-      {modalVisible && (
-        <EuiConfirmModal
-          data-test-subj="workspaceForm-cancelModal"
-          title={i18n.translate('workspace.detail.dataSources.modal.title', {
-            defaultMessage: 'Remove data source(s)',
-          })}
-          onCancel={() => {
-            setModalVisible(false);
-            setSelectedItems([]);
-          }}
-          onConfirm={() => {
-            setModalVisible(false);
-            handleUnassignDataSources(selectedItems);
-          }}
-          cancelButtonText={i18n.translate('workspace.detail.dataSources.modal.cancelButton', {
-            defaultMessage: 'Cancel',
-          })}
-          confirmButtonText={i18n.translate('workspace.detail.dataSources.Modal.confirmButton', {
-            defaultMessage: 'Remove data source(s)',
-          })}
-          buttonColor="danger"
-          defaultFocusedButton="confirm"
-        />
-      )}
-    </>
+    <EuiInMemoryTable
+      {...(restProps as EuiInMemoryTableProps<DataSourceConnection>)}
+      itemId="id"
+      columns={columns}
+      isSelectable={true}
+      itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+      isExpandable={true}
+      selection={selection}
+    />
   );
 };
