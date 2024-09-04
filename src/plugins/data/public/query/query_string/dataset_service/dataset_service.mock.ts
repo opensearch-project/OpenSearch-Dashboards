@@ -18,7 +18,7 @@ const createSetupDatasetServiceMock = (): jest.Mocked<DatasetServiceContract> =>
     toDataset: jest.fn(),
     fetch: jest.fn(),
     fetchFields: jest.fn(),
-    supportedLanguages: jest.fn().mockReturnValue(['DQL', 'Lucene', 'PPL', 'SQL']),
+    supportedLanguages: jest.fn().mockReturnValue(['kuery', 'lucene', 'PPL', 'SQL']),
   };
 
   const defaultDataset: Dataset = {
