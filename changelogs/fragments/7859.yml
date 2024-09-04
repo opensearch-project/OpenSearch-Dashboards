@@ -1,0 +1,2 @@
+refactor:
+- Add workspace info in index pattern and asset header and update workspace header ([#7859](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7859))

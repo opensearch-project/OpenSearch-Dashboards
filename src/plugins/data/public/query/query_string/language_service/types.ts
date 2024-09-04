@@ -4,8 +4,31 @@
  */
 
 import { ISearchInterceptor } from '../../../search';
-import { Query, QueryEditorExtensionConfig } from '../../../../public';
+import {
+  Query,
+  QueryEditorExtensionConfig,
+  QueryStringContract,
+  TimeRange,
+} from '../../../../public';
 import { EditorInstance } from '../../../ui/query_editor/editors';
+
+export interface RecentQueryItem {
+  query: Query;
+  time: number;
+  timeRange?: TimeRange;
+}
+
+export interface RecentQueryTableItem {
+  id: number;
+  query: Query['query'];
+  time: string;
+}
+
+export interface RecentQueriesTableProps {
+  queryString: QueryStringContract;
+  onClickRecentQuery: (query: Query, timeRange?: TimeRange) => void;
+  isVisible: boolean;
+}
 
 export interface EditorEnhancements {
   queryEditorExtension?: QueryEditorExtensionConfig;
