@@ -4,7 +4,6 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-
 import { registerUseCaseCard } from './use_case_card';
 import { contentManagementPluginMocks } from '../../../../content_management/public';
 
