@@ -15,9 +15,7 @@ import { SearchUsage } from '../../../data/server';
 import {
   DATA_FRAME_TYPES,
   IDataFrameError,
-  IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
-  Query,
 } from '../../../data/common';
 import * as facet from '../utils/facet';
 import * as utils from '../../common/utils';
