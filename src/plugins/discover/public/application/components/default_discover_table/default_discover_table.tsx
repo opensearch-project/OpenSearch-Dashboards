@@ -254,7 +254,7 @@ const DefaultDiscoverTableUI = ({
         </table>
         {!showPagination && renderedRowCount < rows.length && (
           <div ref={sentinelRef}>
-            <EuiProgress size="xs" color="accent" />
+            <EuiProgress size="xs" color="accent" data-test-subj="discoverRenderedRowsProgress" />
           </div>
         )}
         {!showPagination && rows.length === sampleSize && (
