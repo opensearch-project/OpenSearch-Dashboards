@@ -43,6 +43,7 @@ const defaultProps = {
   useUpdatedUX: false,
   navigationUI: { HeaderControl: () => null, TopNavMenu: () => null },
   applications: applicationServiceMock.createStartContract(),
+  showImportButton: true,
 };
 
 describe('Header', () => {
@@ -91,5 +92,49 @@ describe('Header - workspace enabled', () => {
     const component = shallow(<Header {...props} />);
 
     expect(component.find('EuiButtonEmpty[data-test-subj="duplicateObjects"]').exists()).toBe(true);
+  });
+
+  it('should render `Import` button inside a workspace', () => {
+    const props = {
+      ...defaultProps,
+      showImportButton: true,
+    };
+
+    const component = shallow(<Header {...props} />);
+
+    expect(component.find('EuiButtonEmpty[data-test-subj="importObjects"]').exists()).toBe(true);
+
+    const newUxProps = {
+      ...defaultProps,
+      showImportButton: true,
+      useUpdatedUX: true,
+    };
+
+    const newUxComponent = shallow(<Header {...newUxProps} />);
+
+    expect(newUxComponent).toMatchSnapshot();
+  });
+
+  it('should not render `Import` button outside a workspace', () => {
+    const props = {
+      ...defaultProps,
+      showImportButton: false,
+    };
+
+    const component = shallow(<Header {...props} />);
+
+    expect(component.find('EuiButtonEmpty[data-test-subj="importObjects"]').exists()).toBe(false);
+
+    const newUxProps = {
+      ...defaultProps,
+      showImportButton: true,
+      useUpdatedUX: false,
+    };
+
+    const newUxComponent = shallow(<Header {...newUxProps} />);
+
+    expect(newUxComponent.find('EuiButtonEmpty[data-test-subj="importObjects"]').exists()).toBe(
+      true
+    );
   });
 });

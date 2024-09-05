@@ -1,5 +1,49 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Header - workspace enabled should render \`Import\` button inside a workspace 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="baseline"
+    justifyContent="spaceBetween"
+  >
+    <HeaderControl
+      controls={
+        Array [
+          Object {
+            "controlType": "button",
+            "iconType": "exportAction",
+            "label": "Export all objects",
+            "run": [Function],
+            "testId": "exportAllObjects",
+          },
+          Object {
+            "controlType": "button",
+            "iconType": "importAction",
+            "label": "Import",
+            "run": [Function],
+            "testId": "importObjects",
+          },
+        ]
+      }
+      setMountPoint={[MockFunction]}
+    />
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="l"
+  />
+  <HeaderControl
+    controls={
+      Array [
+        Object {
+          "description": "Manage and share your assets.",
+        },
+      ]
+    }
+    setMountPoint={[MockFunction]}
+  />
+</Fragment>
+`;
+
 exports[`Header should render normally 1`] = `
 <Fragment>
   <EuiFlexGroup

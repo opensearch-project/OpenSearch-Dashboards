@@ -409,6 +409,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
           type: 'button',
           description: 'Delete workspace',
           'data-test-subj': 'workspace-list-delete-icon',
+          available: () => isDashboardAdmin,
           render: (item: WorkspaceAttribute) => {
             return (
               <EuiButtonEmpty

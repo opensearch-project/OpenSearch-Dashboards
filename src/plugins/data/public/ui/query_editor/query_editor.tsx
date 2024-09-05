@@ -14,6 +14,7 @@ import {
   EuiText,
   PopoverAnchorPosition,
 } from '@elastic/eui';
+import { BehaviorSubject } from 'rxjs';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
@@ -27,6 +28,8 @@ import {
   TimeRange,
   QueryControls,
   RecentQueriesTable,
+  QueryResult,
+  QueryStatus,
 } from '../..';
 import { OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
@@ -61,6 +64,7 @@ export interface QueryEditorProps {
   filterBar?: any;
   prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   savedQueryManagement?: any;
+  queryStatus?: QueryStatus;
 }
 
 interface Props extends QueryEditorProps {
@@ -367,6 +371,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           <EuiText size="xs" color="subdued">
             {this.props.query.dataset?.timeFieldName || ''}
           </EuiText>,
+          <QueryResult queryStatus={this.props.queryStatus!} />,
         ],
         end: [
           <EuiButtonEmpty
