@@ -38,6 +38,8 @@ import { UiSettingScope } from '../types';
 const validate = {
   body: schema.object({
     changes: schema.object({}, { unknowns: 'allow' }),
+  }),
+  query: schema.object({
     scope: schema.maybe(
       schema.oneOf([schema.literal(UiSettingScope.GLOBAL), schema.literal(UiSettingScope.USER)])
     ),
@@ -51,7 +53,8 @@ export function registerSetManyRoute(router: IRouter) {
       try {
         const uiSettingsClient = context.core.uiSettings.client;
 
-        const { changes, scope } = request.body;
+        const { changes } = request.body;
+        const { scope } = request.query;
 
         await uiSettingsClient.setMany(changes, scope);
 

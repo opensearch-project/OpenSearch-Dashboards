@@ -41,6 +41,8 @@ const validate = {
   }),
   body: schema.object({
     value: schema.any(),
+  }),
+  query: schema.object({
     scope: schema.maybe(
       schema.oneOf([schema.literal(UiSettingScope.GLOBAL), schema.literal(UiSettingScope.USER)])
     ),
@@ -55,7 +57,8 @@ export function registerSetRoute(router: IRouter) {
         const uiSettingsClient = context.core.uiSettings.client;
 
         const { key } = request.params;
-        const { value, scope } = request.body;
+        const { value } = request.body;
+        const { scope } = request.query;
 
         await uiSettingsClient.set(key, value, scope);
 

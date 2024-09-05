@@ -39,7 +39,7 @@ const validate = {
   params: schema.object({
     key: schema.string(),
   }),
-  body: schema.object({
+  query: schema.object({
     scope: schema.maybe(
       schema.oneOf([schema.literal(UiSettingScope.GLOBAL), schema.literal(UiSettingScope.USER)])
     ),
@@ -53,7 +53,7 @@ export function registerDeleteRoute(router: IRouter) {
       try {
         const uiSettingsClient = context.core.uiSettings.client;
 
-        const { scope } = request.body;
+        const { scope } = request.query;
 
         await uiSettingsClient.remove(request.params.key, scope);
 
