@@ -102,6 +102,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
               <EuiFlexItem grow={false}>
                 <EuiIcon
                   size="l"
+                  data-test-subj={`current-workspace-icon-${getUseCase(currentWorkspace)?.icon}`}
                   type={getUseCase(currentWorkspace)?.icon || 'wsSelector'}
                   color={getValidWorkspaceColor(currentWorkspace.color)}
                 />
