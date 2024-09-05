@@ -27,6 +27,7 @@ export {
 export {
   convertPermissionsToPermissionSettings,
   convertPermissionSettingsToPermissions,
+  isWorkspacePermissionSetting,
 } from './utils';
 
 export { WorkspaceFormProvider, useWorkspaceFormContext } from './workspace_form_context';

@@ -58,7 +58,6 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
   }>();
 
   const {
-    formData,
     isEditing,
     formId,
     numberOfErrors,
@@ -142,7 +141,6 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
             content: (
               <SelectDataSourceDetailPanel
                 savedObjects={savedObjects}
-                assignedDataSources={formData.selectedDataSources}
                 detailTitle={DetailTabTitles.dataSources}
                 isDashboardAdmin={isDashboardAdmin}
                 currentWorkspace={currentWorkspace}

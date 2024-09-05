@@ -58,7 +58,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
     handleColorChange,
     handleUseCaseChange: handleUseCaseChangeInHook,
     setPermissionSettings,
-    setSelectedDataSources,
+    setSelectedDataSourceConnections,
   } = useWorkspaceForm(props);
   const nameManualChangedRef = useRef(false);
 
@@ -173,10 +173,9 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
                 })}
               </EuiText>
               <SelectDataSourcePanel
-                errors={formErrors.selectedDataSources}
-                onChange={setSelectedDataSources}
+                onChange={setSelectedDataSourceConnections}
                 savedObjects={savedObjects}
-                assignedDataSources={formData.selectedDataSources}
+                assignedDataSourceConnections={formData.selectedDataSourceConnections}
                 data-test-subj={`workspaceForm-dataSourcePanel`}
                 showDataSourceManagement={true}
               />

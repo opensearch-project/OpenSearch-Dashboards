@@ -13,6 +13,7 @@ import { createMockedRegisteredUseCases$ } from '../../mocks';
 import { WorkspaceDetail } from './workspace_detail';
 import { WorkspaceFormProvider, WorkspaceOperationType } from '../workspace_form';
 import { MemoryRouter } from 'react-router-dom';
+import { DataSourceConnectionType } from '../../../common/types';
 
 // all applications
 const PublicAPPInfoMap = new Map([
@@ -52,12 +53,13 @@ const defaultValues = {
       modes: ['library_write', 'write'],
     },
   ],
-  selectedDataSources: [
+  selectedDataSourceConnections: [
     {
       id: 'ds-1',
-      title: 'ds-1-title',
+      name: 'ds-1-title',
       description: 'ds-1-description',
-      dataSourceEngineType: 'OpenSearch',
+      type: 'OpenSearch',
+      connectionType: DataSourceConnectionType.OpenSearchConnection,
     },
   ],
 };

@@ -77,7 +77,7 @@ const mockCoreStart = coreMock.createStart();
 
 const setup = ({
   savedObjects = mockCoreStart.savedObjects,
-  assignedDataSources = [],
+  assignedDataSourceConnections = [],
   onChange = jest.fn(),
   errors = undefined,
   showDataSourceManagement = true,
@@ -88,7 +88,7 @@ const setup = ({
         <SelectDataSourcePanel
           onChange={onChange}
           savedObjects={savedObjects}
-          assignedDataSources={assignedDataSources}
+          assignedDataSourceConnections={assignedDataSourceConnections}
           errors={errors}
           showDataSourceManagement={showDataSourceManagement}
         />
@@ -126,21 +126,19 @@ describe('SelectDataSourcePanel', () => {
     );
   });
   it('should render consistent data sources when selected data sources passed', async () => {
-    const { getByText, getByTestId } = setup({ assignedDataSources: dataSources });
-    fireEvent.click(getByTestId('workspace-creator-dataSources-assign-button'));
+    const { getByText, getByTestId, queryByText } = setup({
+      assignedDataSourceConnections: [assignedDataSourcesConnections[0]],
+    });
 
     await waitFor(() => {
       expect(getByText(assignedDataSourcesConnections[0].name)).toBeInTheDocument();
-      expect(getByText(assignedDataSourcesConnections[1].name)).toBeInTheDocument();
+      expect(queryByText(assignedDataSourcesConnections[1].name)).not.toBeInTheDocument();
     });
 
-    fireEvent.click(getByText(assignedDataSourcesConnections[0].name));
-    fireEvent.click(getByText(assignedDataSourcesConnections[1].name));
-    fireEvent.click(getByText('Associate data sources'));
+    fireEvent.click(getByTestId('workspace-creator-dataSources-assign-button'));
 
     await waitFor(() => {
-      expect(getByText(dataSources[0].title)).toBeInTheDocument();
-      expect(getByText(dataSources[1].title)).toBeInTheDocument();
+      expect(getByText(assignedDataSourcesConnections[1].name)).toBeInTheDocument();
     });
   });
 
@@ -148,7 +146,7 @@ describe('SelectDataSourcePanel', () => {
     const onChangeMock = jest.fn();
     const { getByTestId, getByText } = setup({
       onChange: onChangeMock,
-      assignedDataSources: [],
+      assignedDataSourceConnections: [],
     });
 
     expect(onChangeMock).not.toHaveBeenCalled();
@@ -188,7 +186,7 @@ describe('SelectDataSourcePanel', () => {
     const onChangeMock = jest.fn();
     const { getByText, getByTestId } = setup({
       onChange: onChangeMock,
-      assignedDataSources: dataSources,
+      assignedDataSourceConnections: assignedDataSourcesConnections,
     });
     fireEvent.click(getByTestId('workspace-creator-dataSources-assign-button'));
 
@@ -208,36 +206,27 @@ describe('SelectDataSourcePanel', () => {
       fireEvent.click(getByTestId('checkboxSelectRow-' + dataSources[1].id));
       fireEvent.click(getByText('Remove selected'));
     });
-    expect(onChangeMock).toHaveBeenCalledWith([dataSources[0]]);
-  });
-});
-
-it('should close associate data sources modal', async () => {
-  Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
-    configurable: true,
-    value: 600,
-  });
-  Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
-    configurable: true,
-    value: 600,
+    expect(onChangeMock).toHaveBeenCalledWith([assignedDataSourcesConnections[0]]);
   });
 
-  const { getByText, queryByText, getByTestId } = setup({
-    assignedDataSources: [],
-  });
+  it('should close associate data sources modal', async () => {
+    const { getByText, queryByText, getByTestId } = setup({
+      assignedDataSourceConnections: [],
+    });
 
-  fireEvent.click(getByTestId('workspace-creator-dataSources-assign-button'));
-  await waitFor(() => {
+    fireEvent.click(getByTestId('workspace-creator-dataSources-assign-button'));
+    await waitFor(() => {
+      expect(
+        getByText(
+          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
+        )
+      ).toBeInTheDocument();
+    });
+    fireEvent.click(getByText('Close'));
     expect(
-      getByText(
+      queryByText(
         'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
       )
-    ).toBeInTheDocument();
+    ).toBeNull();
   });
-  fireEvent.click(getByText('Close'));
-  expect(
-    queryByText(
-      'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
-    )
-  ).toBeNull();
 });
