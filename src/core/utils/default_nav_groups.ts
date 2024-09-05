@@ -52,8 +52,7 @@ const defaultNavGroups = {
       defaultMessage: 'Observability',
     }),
     description: i18n.translate('core.ui.group.observability.description', {
-      defaultMessage:
-        'Gain visibility into system health, performance, and reliability through monitoring and analysis of logs, metrics, and traces.',
+      defaultMessage: 'Gain visibility into your application and infrastructure',
     }),
     order: 4000,
     icon: 'wsObservability',
@@ -64,8 +63,7 @@ const defaultNavGroups = {
       defaultMessage: 'Security Analytics',
     }),
     description: i18n.translate('core.ui.group.security.analytics.description', {
-      defaultMessage:
-        'Detect and investigate potential security threats and vulnerabilities across your systems and data.',
+      defaultMessage: 'Enhance your security posture with advanced analytics',
     }),
     order: 5000,
     icon: 'wsSecurityAnalytics',
@@ -88,8 +86,7 @@ const defaultNavGroups = {
       defaultMessage: 'Search',
     }),
     description: i18n.translate('core.ui.group.search.description', {
-      defaultMessage:
-        "Quickly find and explore relevant information across your organization's data sources.",
+      defaultMessage: 'Discover and query your data with ease',
     }),
     order: 6000,
     icon: 'wsSearch',
