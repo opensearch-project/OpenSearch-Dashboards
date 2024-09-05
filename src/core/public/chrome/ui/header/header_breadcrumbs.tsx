@@ -41,7 +41,7 @@ interface Props {
   breadcrumbsEnricher$: Observable<ChromeBreadcrumbEnricher | undefined>;
   useUpdatedHeader?: boolean;
   renderFullLength?: boolean;
-  hideFirstHome?: boolean;
+  dropHomeFromBreadcrumb?: boolean;
 }
 
 export function HeaderBreadcrumbs({
@@ -50,7 +50,7 @@ export function HeaderBreadcrumbs({
   breadcrumbsEnricher$,
   useUpdatedHeader,
   renderFullLength,
-  hideFirstHome,
+  dropHomeFromBreadcrumb,
 }: Props) {
   const appTitle = useObservable(appTitle$, 'OpenSearch Dashboards');
   const breadcrumbs = useObservable(breadcrumbs$, []);
@@ -75,7 +75,7 @@ export function HeaderBreadcrumbs({
     crumbs = breadcrumbEnricher(crumbs);
   }
 
-  if (hideFirstHome && crumbs[0].text === 'Home') {
+  if (dropHomeFromBreadcrumb && Object.hasOwn(crumbs[0], 'home')) {
     crumbs = crumbs.slice(1);
   }
 

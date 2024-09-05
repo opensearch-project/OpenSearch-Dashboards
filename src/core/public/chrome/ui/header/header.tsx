@@ -204,14 +204,14 @@ export function Header({
     />
   );
 
-  const renderBreadcrumbs = (renderFullLength?: boolean, hideFirstHome?: boolean) => (
+  const renderBreadcrumbs = (renderFullLength?: boolean, dropHomeFromBreadcrumb?: boolean) => (
     <HeaderBreadcrumbs
       appTitle$={observables.appTitle$}
       breadcrumbs$={observables.breadcrumbs$}
       breadcrumbsEnricher$={observables.breadcrumbsEnricher$}
       useUpdatedHeader={useUpdatedHeader}
       renderFullLength={renderFullLength}
-      hideFirstHome={hideFirstHome}
+      dropHomeFromBreadcrumb={dropHomeFromBreadcrumb}
     />
   );
 

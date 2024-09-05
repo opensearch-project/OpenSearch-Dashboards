@@ -31,8 +31,8 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { BehaviorSubject } from 'rxjs';
-import { ChromeBreadcrumb } from '../../chrome_service';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { ChromeBreadcrumb, ChromeBreadcrumbEnricher } from '../../chrome_service';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 
 describe('HeaderBreadcrumbs', () => {
@@ -111,7 +111,7 @@ describe('HeaderBreadcrumbs', () => {
   it('remove heading home when workspace is enabled', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
     const breadcrumbsEnricher$ = new BehaviorSubject((crumbs: ChromeBreadcrumb[]) => [
-      { text: 'Home' },
+      { text: 'Home', home: true },
       { text: 'Analytics' },
       ...crumbs,
     ]);
@@ -120,12 +120,22 @@ describe('HeaderBreadcrumbs', () => {
         appTitle$={new BehaviorSubject('')}
         breadcrumbs$={breadcrumbs$}
         breadcrumbsEnricher$={breadcrumbsEnricher$}
-        hideFirstHome={true}
+        dropHomeFromBreadcrumb={true}
       />
     );
     const breadcrumbs = wrapper.find('.euiBreadcrumbWrapper');
     expect(breadcrumbs).toHaveLength(2);
     expect(breadcrumbs.at(0).text()).toBe('Analytics');
     expect(breadcrumbs.at(1).text()).toBe('First');
+
+    // if no home property, we don't drop by text
+    act(() => {
+      breadcrumbsEnricher$.next((items) => items);
+      breadcrumbs$.next([{ text: 'Home' }, { text: 'Second' }]);
+    });
+    wrapper.update();
+    expect(breadcrumbs).toHaveLength(2);
+    expect(breadcrumbs.at(0).text()).toBe('Home');
+    expect(breadcrumbs.at(1).text()).toBe('Second');
   });
 });
