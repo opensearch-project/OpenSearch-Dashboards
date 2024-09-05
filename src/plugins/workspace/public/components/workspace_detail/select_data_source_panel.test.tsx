@@ -410,4 +410,18 @@ describe('SelectDataSourceDetailPanel', () => {
       expect(queryByText('Data Source 2')).toBeNull();
     });
   });
+
+  it('should show loading message when loading', async () => {
+    const { queryByText, getByText, rerender } = render(
+      selectDataSourceDetailPanel({ loading: false })
+    );
+    await waitFor(() => {
+      expect(queryByText('Loading data sources...')).not.toBeInTheDocument();
+    });
+
+    rerender(selectDataSourceDetailPanel({ loading: true }));
+    await waitFor(() => {
+      expect(getByText('Loading data sources...')).toBeInTheDocument();
+    });
+  });
 });

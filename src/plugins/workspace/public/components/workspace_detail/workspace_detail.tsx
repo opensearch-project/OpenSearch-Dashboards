@@ -24,7 +24,12 @@ import { WORKSPACE_LIST_APP_ID } from '../../../common/constants';
 import { cleanWorkspaceId } from '../../../../../core/public/utils';
 import { DetailTab, DetailTabTitles, WorkspaceOperationType } from '../workspace_form/constants';
 import { CoreStart, WorkspaceAttribute } from '../../../../../core/public';
-import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
+import {
+  fetchDataSourceConnectionsByDataSourceIds,
+  fulfillRelatedConnections,
+  getFirstUseCaseOfFeatureConfigs,
+  getUseCaseUrl,
+} from '../../utils';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { SelectDataSourceDetailPanel } from './select_data_source_panel';
@@ -50,6 +55,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
       uiSettings,
       navigationUI: { HeaderControl },
       chrome,
+      notifications,
     },
   } = useOpenSearchDashboards<{
     CoreStart: CoreStart;
@@ -64,11 +70,14 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
     handleResetForm,
     numberOfChanges,
     setIsEditing,
+    formData,
+    setSelectedDataSourceConnections,
   } = useWorkspaceFormContext();
   const [deletedWorkspace, setDeletedWorkspace] = useState<WorkspaceAttribute | null>(null);
   const [selectedTabId, setSelectedTabId] = useState<string>(DetailTab.Details);
   const [modalVisible, setModalVisible] = useState(false);
   const [tabId, setTabId] = useState<string>(DetailTab.Details);
+  const [isDQCFilled, setIsDQCFilled] = useState(false);
 
   const availableUseCases = useObservable(props.registeredUseCases$, []);
   const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
@@ -87,6 +96,31 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
       setSelectedTabId(tab);
     }
   }, [location.search]);
+
+  useEffect(() => {
+    if (selectedTabId !== DetailTab.DataSources || isDQCFilled || !http || !notifications) {
+      return;
+    }
+    fetchDataSourceConnectionsByDataSourceIds(
+      formData.selectedDataSourceConnections.map(({ id }) => id),
+      http
+    )
+      .then((directQueryConnections) => {
+        setSelectedDataSourceConnections(
+          fulfillRelatedConnections(formData.selectedDataSourceConnections, directQueryConnections)
+        );
+      })
+      .finally(() => {
+        setIsDQCFilled(true);
+      });
+  }, [
+    http,
+    isDQCFilled,
+    selectedTabId,
+    notifications,
+    setSelectedDataSourceConnections,
+    formData.selectedDataSourceConnections,
+  ]);
 
   if (!currentWorkspace || !application || !http || !savedObjects || !uiSettings || !chrome) {
     return null;
@@ -140,6 +174,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
             name: DetailTabTitles.dataSources,
             content: (
               <SelectDataSourceDetailPanel
+                loading={!isDQCFilled}
                 savedObjects={savedObjects}
                 detailTitle={DetailTabTitles.dataSources}
                 isDashboardAdmin={isDashboardAdmin}

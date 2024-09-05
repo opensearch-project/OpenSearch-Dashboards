@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from 'react-intl';
+import { useUpdateEffect } from 'react-use';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceClient } from '../../workspace_client';
 import { WorkspaceDetailConnectionTable } from './workspace_detail_connection_table';
@@ -59,6 +60,7 @@ export interface SelectDataSourceDetailPanelProps {
   isDashboardAdmin: boolean;
   currentWorkspace: WorkspaceObject;
   chrome: ChromeStart;
+  loading?: boolean;
 }
 
 export const SelectDataSourceDetailPanel = ({
@@ -67,12 +69,13 @@ export const SelectDataSourceDetailPanel = ({
   isDashboardAdmin,
   currentWorkspace,
   chrome,
+  loading = false,
 }: SelectDataSourceDetailPanelProps) => {
   const {
     services: { notifications, workspaceClient, http },
   } = useOpenSearchDashboards<{ CoreStart: CoreStart; workspaceClient: WorkspaceClient }>();
   const { formData, setSelectedDataSourceConnections } = useWorkspaceFormContext();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(loading);
   const [isVisible, setIsVisible] = useState(false);
   const [toggleIdSelected, setToggleIdSelected] = useState(toggleButtons[0].id);
 
@@ -207,7 +210,7 @@ export const SelectDataSourceDetailPanel = ({
       <EuiSpacer size="m" />
       <EuiText>
         <FormattedMessage
-          id="workspace.detail.dataSources.noAssociation.message"
+          id="workspace.detail.dataSources.loading.message"
           defaultMessage="Loading data sources..."
         />
       </EuiText>
@@ -265,6 +268,10 @@ export const SelectDataSourceDetailPanel = ({
       />
     );
   };
+
+  useUpdateEffect(() => {
+    setIsLoading(loading);
+  }, [loading]);
 
   return (
     <EuiPanel>

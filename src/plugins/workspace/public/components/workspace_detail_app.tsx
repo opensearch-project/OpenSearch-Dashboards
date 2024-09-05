@@ -23,7 +23,7 @@ import { DataSourceConnectionType } from '../../common/types';
 import { WorkspaceClient } from '../workspace_client';
 import { formatUrlWithWorkspaceId } from '../../../../core/public/utils';
 import { WORKSPACE_DETAIL_APP_ID } from '../../common/constants';
-import { fetchDataSourceConnections, getDataSourcesList } from '../utils';
+import { getDataSourcesList, mergeDataSourcesWithConnections } from '../utils';
 import { WorkspaceAttributeWithPermission } from '../../../../core/types';
 
 function getFormDataFromWorkspace(
@@ -92,19 +92,13 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
     const rawFormData = getFormDataFromWorkspace(currentWorkspace);
 
     if (rawFormData && savedObjects && currentWorkspace) {
-      getDataSourcesList(savedObjects.client, [currentWorkspace.id])
-        .then((assignedDataSources) =>
-          fetchDataSourceConnections(assignedDataSources, http, notifications)
-        )
-        .then((selectedDataSourceConnections) => {
-          setCurrentWorkspaceFormData({
-            ...rawFormData,
-            // Connection with parent id means DQC, should filter them out
-            selectedDataSourceConnections: selectedDataSourceConnections.filter(
-              ({ parentId }) => !parentId
-            ),
-          });
+      getDataSourcesList(savedObjects.client, [currentWorkspace.id]).then((dataSources) => {
+        setCurrentWorkspaceFormData({
+          ...rawFormData,
+          // Direct query connections info is not required for all tabs, it can be fetched later
+          selectedDataSourceConnections: mergeDataSourcesWithConnections(dataSources, []),
         });
+      });
     }
   }, [currentWorkspace, savedObjects, http, notifications]);
 
