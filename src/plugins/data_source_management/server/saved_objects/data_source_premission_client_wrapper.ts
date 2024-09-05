@@ -178,48 +178,13 @@ export class DataSourcePermissionClientWrapper {
       return await wrapperOptions.client.delete(type, id, options);
     };
 
-    const addToWorkspacesWithManageableBy = async (
-      type: string,
-      id: string,
-      targetWorkspaces: string[],
-      options: SavedObjectsBaseOptions = {}
-    ) => {
-      // Dashboard admin can assign data source to workspace
-      if (type === DATA_SOURCE_SAVED_OBJECT_TYPE && !isDashboardAdminRequest) {
-        throw this.generatePermissionError();
-      }
-      return await wrapperOptions.client.addToWorkspaces(type, id, targetWorkspaces, options);
-    };
-
-    const deleteFromWorkspacesWithManageableBy = async (
-      type: string,
-      id: string,
-      targetWorkspaces: string[],
-      options: SavedObjectsBaseOptions = {}
-    ) => {
-      // Dashboard admin can unassign data source to workspace
-      if (type === DATA_SOURCE_SAVED_OBJECT_TYPE && !isDashboardAdminRequest) {
-        throw this.generatePermissionError();
-      }
-      return await wrapperOptions.client.deleteFromWorkspaces(type, id, targetWorkspaces, options);
-    };
-
     return {
       ...wrapperOptions.client,
       create: createWithManageableBy,
       bulkCreate: bulkCreateWithManageableBy,
-      checkConflicts: wrapperOptions.client.checkConflicts,
       delete: deleteWithManageableBy,
-      find: wrapperOptions.client.find,
-      bulkGet: wrapperOptions.client.bulkGet,
-      get: wrapperOptions.client.get,
       update: updateWithManageableBy,
       bulkUpdate: bulkUpdateWithManageableBy,
-      errors: wrapperOptions.client.errors,
-      addToNamespaces: wrapperOptions.client.addToNamespaces,
-      deleteFromNamespaces: wrapperOptions.client.deleteFromNamespaces,
-      addToWorkspaces: addToWorkspacesWithManageableBy,
-      deleteFromWorkspaces: deleteFromWorkspacesWithManageableBy,
     };
   };
 

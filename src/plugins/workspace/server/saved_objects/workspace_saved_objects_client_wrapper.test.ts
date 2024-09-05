@@ -108,6 +108,8 @@ const generateWorkspaceSavedObjectsClientWrapper = (role = NO_DASHBOARD_ADMIN) =
       };
     }),
     deleteByWorkspace: jest.fn(),
+    addToWorkspaces: jest.fn(),
+    deleteFromWorkspaces: jest.fn(),
   };
   const requestMock = httpServerMock.createOpenSearchDashboardsRequest();
   updateWorkspaceState(requestMock, { requestWorkspaceId: 'mock-request-workspace-id' });
@@ -946,6 +948,68 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         await wrapper.deleteByWorkspace('not-permitted-workspace');
         expect(clientMock.deleteByWorkspace).toHaveBeenCalledWith('not-permitted-workspace');
         expect(permissionControlMock.validate).not.toHaveBeenCalled();
+      });
+      it('should bypass permission check for call client.addToWorkspaces', async () => {
+        await wrapper.addToWorkspaces(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'data-source-id',
+          ['workspace-1'],
+          {}
+        );
+        expect(clientMock.addToWorkspaces).toHaveBeenCalledWith(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'data-source-id',
+          ['workspace-1'],
+          {}
+        );
+        expect(permissionControlMock.validate).not.toHaveBeenCalled();
+      });
+      it('should bypass permission check for call client.deleteFromWorkspaces', async () => {
+        await wrapper.deleteFromWorkspaces(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'data-source-id',
+          ['workspace-1'],
+          {}
+        );
+        expect(clientMock.deleteFromWorkspaces).toHaveBeenCalledWith(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'data-source-id',
+          ['workspace-1'],
+          {}
+        );
+        expect(permissionControlMock.validate).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('addToWorkspaces', () => {
+      it('should throw error when non dashboard admin add data source to workspaces', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+
+        let errorCatch;
+        try {
+          await wrapper.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
+            'workspace-id',
+          ]);
+        } catch (e) {
+          errorCatch = e;
+        }
+        expect(errorCatch.message).toEqual('Invalid permission, please contact OSD admin');
+      });
+    });
+
+    describe('deleteFromWorkspaces', () => {
+      it('should throw error when non dashboard admin delete data source from workspaces', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+
+        let errorCatch;
+        try {
+          await wrapper.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
+            'workspace-id',
+          ]);
+        } catch (e) {
+          errorCatch = e;
+        }
+        expect(errorCatch.message).toEqual('Invalid permission, please contact OSD admin');
       });
     });
   });

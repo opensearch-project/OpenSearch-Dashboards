@@ -548,6 +548,34 @@ export class WorkspaceSavedObjectsClientWrapper {
       return await wrapperOptions.client.deleteByWorkspace(workspace, options);
     };
 
+    const addToWorkspacesWithPermissionControl = async (
+      type: string,
+      id: string,
+      targetWorkspaces: string[],
+      options: SavedObjectsBaseOptions = {}
+    ) => {
+      // Only dashboard admin can assign data source to workspace
+      if (type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+        throw generateOSDAdminPermissionError();
+      }
+      // In current version, only the type is data-source that will call addToWorkspaces
+      return await wrapperOptions.client.addToWorkspaces(type, id, targetWorkspaces, options);
+    };
+
+    const deleteFromWorkspacesWithPermissionControl = async (
+      type: string,
+      id: string,
+      targetWorkspaces: string[],
+      options: SavedObjectsBaseOptions = {}
+    ) => {
+      // Only dashboard admin can unassign data source to workspace
+      if (type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+        throw generateOSDAdminPermissionError();
+      }
+      // In current version, only the type is data-source will that call deleteFromWorkspaces
+      return await wrapperOptions.client.deleteFromWorkspaces(type, id, targetWorkspaces, options);
+    };
+
     const { isDashboardAdmin, isDataSourceAdmin } = getWorkspaceState(wrapperOptions.request) || {};
     if (isDashboardAdmin) {
       return wrapperOptions.client;
@@ -568,6 +596,8 @@ export class WorkspaceSavedObjectsClientWrapper {
       update: updateWithWorkspacePermissionControl,
       bulkUpdate: bulkUpdateWithWorkspacePermissionControl,
       deleteByWorkspace: deleteByWorkspaceWithPermissionControl,
+      addToWorkspaces: addToWorkspacesWithPermissionControl,
+      deleteFromWorkspaces: deleteFromWorkspacesWithPermissionControl,
     };
   };
 

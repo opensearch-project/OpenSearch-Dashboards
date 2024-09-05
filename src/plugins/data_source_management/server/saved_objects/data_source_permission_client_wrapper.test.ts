@@ -87,32 +87,6 @@ describe('DataSourcePermissionClientWrapper', () => {
         }
         expect(errorCatch.message).toEqual(errorMessage);
       });
-
-      it('should not add data source to workspaces', async () => {
-        let errorCatch;
-        try {
-          await wrapperClient.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
-            'workspace-id',
-          ]);
-        } catch (e) {
-          errorCatch = e;
-        }
-        expect(errorCatch.message).toEqual(errorMessage);
-      });
-
-      it('should not delete data source from workspaces', async () => {
-        let errorCatch;
-        try {
-          await wrapperClient.deleteFromWorkspaces(
-            DATA_SOURCE_SAVED_OBJECT_TYPE,
-            'data-source-id',
-            ['workspace-id']
-          );
-        } catch (e) {
-          errorCatch = e;
-        }
-        expect(errorCatch.message).toEqual(errorMessage);
-      });
     });
     describe('user is osd admin', () => {
       jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ isDashboardAdmin: true });
@@ -161,30 +135,6 @@ describe('DataSourcePermissionClientWrapper', () => {
         expect(mockedClient.delete).toBeCalledWith(
           DATA_SOURCE_SAVED_OBJECT_TYPE,
           'data-source-id',
-          {}
-        );
-      });
-
-      it('should add data source to workspaces', async () => {
-        await wrapperClient.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
-          'workspace-id',
-        ]);
-        expect(mockedClient.addToWorkspaces).toBeCalledWith(
-          DATA_SOURCE_SAVED_OBJECT_TYPE,
-          'data-source-id',
-          ['workspace-id'],
-          {}
-        );
-      });
-
-      it('should delete data source from workspaces', async () => {
-        await wrapperClient.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
-          'workspace-id',
-        ]);
-        expect(mockedClient.deleteFromWorkspaces).toBeCalledWith(
-          DATA_SOURCE_SAVED_OBJECT_TYPE,
-          'data-source-id',
-          ['workspace-id'],
           {}
         );
       });
@@ -237,30 +187,6 @@ describe('DataSourcePermissionClientWrapper', () => {
         expect(mockedClient.delete).toBeCalledWith(
           DATA_SOURCE_SAVED_OBJECT_TYPE,
           'data-source-id',
-          {}
-        );
-      });
-
-      it('should add data source to workspaces', async () => {
-        await wrapperClient.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
-          'workspace-id',
-        ]);
-        expect(mockedClient.addToWorkspaces).toBeCalledWith(
-          DATA_SOURCE_SAVED_OBJECT_TYPE,
-          'data-source-id',
-          ['workspace-id'],
-          {}
-        );
-      });
-
-      it('should delete data source from workspaces', async () => {
-        await wrapperClient.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
-          'workspace-id',
-        ]);
-        expect(mockedClient.deleteFromWorkspaces).toBeCalledWith(
-          DATA_SOURCE_SAVED_OBJECT_TYPE,
-          'data-source-id',
-          ['workspace-id'],
           {}
         );
       });
@@ -339,32 +265,6 @@ describe('DataSourcePermissionClientWrapper', () => {
       await wrapperClient.delete('dashboard', 'dashboard-id');
       expect(mockedClient.delete).toBeCalledWith('dashboard', 'dashboard-id', {});
     });
-
-    it('should not add data source to workspaces', async () => {
-      jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ isDashboardAdmin: false });
-      let errorCatch;
-      try {
-        await wrapperClient.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
-          'workspace-id',
-        ]);
-      } catch (e) {
-        errorCatch = e;
-      }
-      expect(errorCatch.message).toEqual(errorMessage);
-    });
-
-    it('should not delete data source from workspaces', async () => {
-      jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ isDashboardAdmin: false });
-      let errorCatch;
-      try {
-        await wrapperClient.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
-          'workspace-id',
-        ]);
-      } catch (e) {
-        errorCatch = e;
-      }
-      expect(errorCatch.message).toEqual(errorMessage);
-    });
   });
 
   describe('User is data source admin', () => {
@@ -412,28 +312,6 @@ describe('DataSourcePermissionClientWrapper', () => {
       await wrapperClient.delete(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id');
       expect(mockedClient.delete).toBeCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id');
     });
-
-    it('should add data source to workspaces', async () => {
-      await wrapperClient.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
-        'workspace-id',
-      ]);
-      expect(mockedClient.addToWorkspaces).toBeCalledWith(
-        DATA_SOURCE_SAVED_OBJECT_TYPE,
-        'data-source-id',
-        ['workspace-id']
-      );
-    });
-
-    it('should delete data source from workspaces', async () => {
-      await wrapperClient.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
-        'workspace-id',
-      ]);
-      expect(mockedClient.deleteFromWorkspaces).toBeCalledWith(
-        DATA_SOURCE_SAVED_OBJECT_TYPE,
-        'data-source-id',
-        ['workspace-id']
-      );
-    });
   });
 
   describe('Dashboard admin can assign data source to workspace', () => {
@@ -480,30 +358,6 @@ describe('DataSourcePermissionClientWrapper', () => {
         errorCatch = e;
       }
       expect(errorCatch.message).toEqual(errorMessage);
-    });
-
-    it('should add data source to workspaces if user is dashboard admin', async () => {
-      await wrapperClient.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
-        'workspace-id',
-      ]);
-      expect(mockedClient.addToWorkspaces).toBeCalledWith(
-        DATA_SOURCE_SAVED_OBJECT_TYPE,
-        'data-source-id',
-        ['workspace-id'],
-        {}
-      );
-    });
-
-    it('should delete data source from workspaces if user is dashboard admin', async () => {
-      await wrapperClient.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
-        'workspace-id',
-      ]);
-      expect(mockedClient.deleteFromWorkspaces).toBeCalledWith(
-        DATA_SOURCE_SAVED_OBJECT_TYPE,
-        'data-source-id',
-        ['workspace-id'],
-        {}
-      );
     });
   });
 
@@ -556,30 +410,6 @@ describe('DataSourcePermissionClientWrapper', () => {
         'data-source-id',
         {}
       );
-    });
-
-    it('should not add data source to workspaces', async () => {
-      let errorCatch;
-      try {
-        await wrapperClient.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
-          'workspace-id',
-        ]);
-      } catch (e) {
-        errorCatch = e;
-      }
-      expect(errorCatch.message).toEqual(errorMessage);
-    });
-
-    it('should not delete data source from workspaces', async () => {
-      let errorCatch;
-      try {
-        await wrapperClient.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
-          'workspace-id',
-        ]);
-      } catch (e) {
-        errorCatch = e;
-      }
-      expect(errorCatch.message).toEqual(errorMessage);
     });
 
     it('should not update data source with workspace options', async () => {
