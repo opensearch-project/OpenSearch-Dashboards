@@ -49,6 +49,7 @@ import { getAriaName, toEditableConfig, DEFAULT_CATEGORY } from './lib';
 
 import { FieldSetting, SettingsChanges } from './types';
 import { NavigationPublicPluginStart } from '../../../../plugins/navigation/public';
+import { UiSettingScope } from '../../../../core/public';
 
 interface AdvancedSettingsProps {
   enableSaving: boolean;
@@ -172,7 +173,7 @@ export class AdvancedSettingsComponent extends Component<
     const all = config.getAll();
     const userSettingsEnabled = config.get('theme:enableUserControl');
     return Object.entries(all)
-      .filter((setting) => setting[1].scope !== 'user')
+      .filter((setting) => setting[1].scope !== UiSettingScope.USER)
       .map((setting) => {
         return toEditableConfig({
           def: setting[1],

@@ -41,6 +41,7 @@ import {
   UiSettingScope,
 } from './types';
 import { CannotOverrideError } from './ui_settings_errors';
+import { generateDocId } from './utils';
 
 export interface UiSettingsServiceOptions {
   type: string;
@@ -69,9 +70,6 @@ type UiSettingsRawValue = UiSettingsParams & UserProvidedValue;
 type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
 type UiSettingsRaw = Record<string, UiSettingsRawValue>;
 
-// identifier for current user
-export const CURRENT_USER_PLACEHOLDER = '<current_user>';
-
 /**
  * default scope read options, order matters
  */
@@ -89,13 +87,6 @@ const UiSettingScopeReadOptions = [
     ignore404Errors: true,
   },
 ] as ReadOptions[];
-
-export const generateDocId = (id: string, scope?: UiSettingScope) => {
-  if (scope === UiSettingScope.USER) {
-    return `${CURRENT_USER_PLACEHOLDER}_${id}`;
-  }
-  return id;
-};
 
 export class UiSettingsClient implements IUiSettingsClient {
   private readonly type: UiSettingsServiceOptions['type'];
@@ -174,6 +165,8 @@ export class UiSettingsClient implements IUiSettingsClient {
   }
 
   async setMany(changes: Record<string, any>, scope?: UiSettingScope) {
+    // log changes and scope
+    this.log.debug(`UiSettingsClient.setMany: ${JSON.stringify({ changes, scope })}`);
     this.onWriteHook(changes, scope);
 
     if (scope) {

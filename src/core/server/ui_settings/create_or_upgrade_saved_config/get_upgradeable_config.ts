@@ -30,7 +30,7 @@
 
 import { SavedObjectsClientContract } from '../../saved_objects/types';
 import { UiSettingScope } from '../types';
-import { CURRENT_USER_PLACEHOLDER } from '../ui_settings_client';
+import { CURRENT_USER_PLACEHOLDER } from '../utils';
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 
 /**

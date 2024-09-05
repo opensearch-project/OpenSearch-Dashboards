@@ -36,8 +36,9 @@ import { createOrUpgradeSavedConfigMock } from './create_or_upgrade_saved_config
 
 import { SavedObjectsClient } from '../saved_objects';
 import { savedObjectsClientMock } from '../saved_objects/service/saved_objects_client.mock';
-import { CURRENT_USER_PLACEHOLDER, UiSettingsClient } from './ui_settings_client';
+import { UiSettingsClient } from './ui_settings_client';
 import { CannotOverrideError } from './ui_settings_errors';
+import { CURRENT_USER_PLACEHOLDER } from './utils';
 
 const logger = loggingSystemMock.create().get();
 

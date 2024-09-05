@@ -35,8 +35,8 @@ import { SavedObjectsErrorHelpers } from '../../saved_objects/';
 import { Logger } from '../../logging';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';
-import { generateDocId } from '../ui_settings_client';
 import { UiSettingScope } from '../types';
+import { generateDocId } from '../utils';
 
 interface Options {
   savedObjectsClient: SavedObjectsClientContract;
