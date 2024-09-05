@@ -28,28 +28,22 @@ import { CoreStart } from '../../../../../core/public';
 
 import './data_source_connection_table.scss';
 
-type DataSourceConnectionTableProps = Omit<
-  EuiInMemoryTableProps<DataSourceConnection>,
-  | 'columns'
-  | 'itemsId'
-  | 'isSelectable'
-  | 'itemIdToExpandedRowMap'
-  | 'isExpandable'
-  | 'selection'
-  | 'pagination'
-> & {
+interface DataSourceConnectionTableProps {
   isDashboardAdmin: boolean;
   connectionType: string;
   onUnlinkDataSource: (dataSources: DataSourceConnection) => void;
   onSelectionChange: (selections: DataSourceConnection[]) => void;
-};
+  dataSourceConnections: DataSourceConnection[];
+  tableProps?: Pick<EuiInMemoryTableProps<DataSourceConnection>, 'pagination' | 'search'>;
+}
 
 export const DataSourceConnectionTable = ({
   isDashboardAdmin,
   connectionType,
   onUnlinkDataSource,
   onSelectionChange,
-  ...restProps
+  tableProps,
+  dataSourceConnections,
 }: DataSourceConnectionTableProps) => {
   const [popoversState, setPopoversState] = useState<Record<string, boolean>>({});
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
@@ -240,7 +234,8 @@ export const DataSourceConnectionTable = ({
 
   return (
     <EuiInMemoryTable
-      {...(restProps as EuiInMemoryTableProps<DataSourceConnection>)}
+      {...tableProps}
+      items={dataSourceConnections}
       itemId="id"
       columns={columns}
       isSelectable={true}

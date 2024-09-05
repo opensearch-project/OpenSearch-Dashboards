@@ -10,7 +10,7 @@ import { DataSourceConnection, DataSourceConnectionType } from '../../../common/
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { DataSourceConnectionTable } from '../workspace_form';
 
-interface DataSourceConnectionTableProps {
+interface WorkspaceDetailConnectionTableProps {
   isDashboardAdmin: boolean;
   connectionType: string;
   dataSourceConnections: DataSourceConnection[];
@@ -22,7 +22,7 @@ export const WorkspaceDetailConnectionTable = ({
   connectionType,
   dataSourceConnections,
   handleUnassignDataSources,
-}: DataSourceConnectionTableProps) => {
+}: WorkspaceDetailConnectionTableProps) => {
   const [selectedItems, setSelectedItems] = useState<DataSourceConnection[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -82,18 +82,20 @@ export const WorkspaceDetailConnectionTable = ({
       {
         <DataSourceConnectionTable
           isDashboardAdmin={isDashboardAdmin}
-          items={openSearchConnections}
-          search={search}
+          dataSourceConnections={openSearchConnections}
           connectionType={connectionType}
-          pagination={{
-            initialPageSize: 10,
-            pageSizeOptions: [10, 20, 30],
-          }}
           onUnlinkDataSource={(item) => {
             setSelectedItems([item]);
             setModalVisible(true);
           }}
           onSelectionChange={setSelectedItems}
+          tableProps={{
+            search,
+            pagination: {
+              initialPageSize: 10,
+              pageSizeOptions: [10, 20, 30],
+            },
+          }}
         />
       }
       {modalVisible && (

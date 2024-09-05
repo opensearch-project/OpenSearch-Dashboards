@@ -79,7 +79,7 @@ export const SelectDataSourcePanel = ({
       <EuiPanel paddingSize="none" hasBorder={false}>
         <DataSourceConnectionTable
           isDashboardAdmin={showDataSourceManagement}
-          items={assignedDataSourceConnections}
+          dataSourceConnections={assignedDataSourceConnections}
           onUnlinkDataSource={handleSingleDataSourceUnAssign}
           connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
           onSelectionChange={setSelectedItems}
