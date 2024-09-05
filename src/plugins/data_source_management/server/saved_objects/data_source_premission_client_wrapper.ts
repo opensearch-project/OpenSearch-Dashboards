@@ -35,22 +35,22 @@ export class DataSourcePermissionClientWrapper {
 
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
     const { isDashboardAdmin, isDataSourceAdmin } = getWorkspaceState(wrapperOptions.request) || {};
-    if (isDataSourceAdmin) {
-      return wrapperOptions.client;
-    }
     // If isDashboardAdmin is undefined / true, the user will be dashboard admin
     const isDashboardAdminRequest = isDashboardAdmin !== false;
-
-    const canSkipWrapper =
+    if (
+      isDataSourceAdmin ||
       this.manageableBy === ManageableBy.All ||
-      (this.manageableBy === ManageableBy.DashboardAdmin && isDashboardAdminRequest);
+      (this.manageableBy === ManageableBy.DashboardAdmin && isDashboardAdminRequest)
+    ) {
+      return wrapperOptions.client;
+    }
 
     const createWithManageableBy = async <T = unknown>(
       type: string,
       attributes: T,
       options?: SavedObjectsCreateOptions
     ) => {
-      if (DATA_SOURCE_SAVED_OBJECT_TYPE === type && !canSkipWrapper) {
+      if (DATA_SOURCE_SAVED_OBJECT_TYPE === type) {
         throw this.generatePermissionError();
       }
       return await wrapperOptions.client.create(type, attributes, options);
@@ -60,9 +60,6 @@ export class DataSourcePermissionClientWrapper {
       objects: Array<SavedObjectsBulkCreateObject<T>>,
       options?: SavedObjectsCreateOptions
     ): Promise<SavedObjectsBulkResponse<T>> => {
-      if (canSkipWrapper) {
-        return await wrapperOptions.client.bulkCreate(objects, options);
-      }
       const disallowedSavedObjects: Array<SavedObjectsBulkCreateObject<T>> = [];
       const allowedSavedObjects: Array<SavedObjectsBulkCreateObject<T>> = [];
 
@@ -91,54 +88,22 @@ export class DataSourcePermissionClientWrapper {
       } as SavedObjectsBulkResponse<T>;
     };
 
-    /**
-     *  Updating a single data source can happen in 2 scenarios:
-     *  1. Update data source's attribute, which can only be done by data source admin when managedBy is `none`
-     *  2. Assign/Unassign data source to workspaces, which under the hood will update the `workspaces` field of the data source,
-     *  and can be done by dashboard admin even when the managedBy is `none`.
-     *  3. When the managedBy is `all` and the user is not dashboard admin,
-     *  need to determine whether the operation is assign/unassign.
-     */
     const updateWithManageableBy = async <T = unknown>(
       type: string,
       id: string,
       attributes: Partial<T>,
       options: SavedObjectsUpdateOptions = {}
     ): Promise<SavedObjectsUpdateResponse<T>> => {
-      if (
-        DATA_SOURCE_SAVED_OBJECT_TYPE !== type ||
-        (this.manageableBy === ManageableBy.DashboardAdmin && isDashboardAdminRequest)
-      ) {
-        return await wrapperOptions.client.update(type, id, attributes, options);
-      }
-
-      if (options?.workspaces) {
-        if (isDashboardAdminRequest) {
-          const originalDataSource = await wrapperOptions.client.get(type, id);
-          const originalDataSourceSubset = _.pick(
-            originalDataSource.attributes,
-            Object.keys(attributes)
-          );
-          if (_.isEqual(originalDataSourceSubset, attributes)) {
-            return await wrapperOptions.client.update(type, id, attributes, options);
-          }
-        }
+      if (DATA_SOURCE_SAVED_OBJECT_TYPE === type) {
         throw this.generatePermissionError();
       }
-
-      if (this.manageableBy === ManageableBy.All) {
-        return await wrapperOptions.client.update(type, id, attributes, options);
-      }
-      throw this.generatePermissionError();
+      return await wrapperOptions.client.update(type, id, attributes, options);
     };
 
     const bulkUpdateWithManageableBy = async <T = unknown>(
       objects: Array<SavedObjectsBulkUpdateObject<T>>,
       options?: SavedObjectsBulkUpdateOptions
     ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
-      if (canSkipWrapper) {
-        return await wrapperOptions.client.bulkUpdate(objects, options);
-      }
       const disallowedSavedObjects: Array<SavedObjectsBulkUpdateObject<T>> = [];
       const allowedSavedObjects: Array<SavedObjectsBulkUpdateObject<T>> = [];
 
@@ -172,7 +137,7 @@ export class DataSourcePermissionClientWrapper {
       id: string,
       options: SavedObjectsDeleteOptions = {}
     ) => {
-      if (DATA_SOURCE_SAVED_OBJECT_TYPE === type && !canSkipWrapper) {
+      if (DATA_SOURCE_SAVED_OBJECT_TYPE === type) {
         throw this.generatePermissionError();
       }
       return await wrapperOptions.client.delete(type, id, options);
