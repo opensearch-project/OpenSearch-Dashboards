@@ -96,6 +96,8 @@ export const WorkspaceDetailConnectionTable = ({
               pageSizeOptions: [10, 20, 30],
             },
           }}
+          /* Unmount table after connection type */
+          key={connectionType}
         />
       }
       {modalVisible && (
