@@ -61,3 +61,5 @@ export enum DataSourceEngineType {
   Elasticsearch = 'Elasticsearch',
   NA = 'No Engine Type Available',
 }
+
+export const DATA_SOURCE_SAVED_OBJECT_TYPE = 'data-source';

@@ -22,6 +22,8 @@ import { useFormAvailableUseCases } from '../workspace_form/use_form_available_u
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
 import { DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
+import { DATA_CONNECTION_SAVED_OBJECT_TYPE } from '../../../../../plugins/data_source/common/data_connections';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../../plugins/data_source/common/data_sources';
 
 export interface WorkspaceCreatorProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -80,8 +82,14 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           .map(({ id }) => {
             return id;
           });
+        const selectedDataConnectionIds = (selectedDataSourceConnections ?? [])
+          .filter(({ connectionType }) => connectionType === DATA_CONNECTION_SAVED_OBJECT_TYPE)
+          .map(({ id }) => {
+            return id;
+          });
         result = await workspaceClient.create(attributes, {
           dataSources: selectedDataSourceIds,
+          dataConnections: selectedDataConnectionIds,
           permissions: convertPermissionSettingsToPermissions(permissionSettings),
         });
         if (result?.success) {

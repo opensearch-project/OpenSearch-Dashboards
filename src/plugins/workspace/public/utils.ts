@@ -44,6 +44,7 @@ import {
   SEARCH_OVERVIEW_PAGE_ID,
   SECURITY_ANALYTICS_OVERVIEW_PAGE_ID,
 } from '../../../plugins/content_management/public';
+import { WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES } from '../common/constants';
 
 export const isUseCaseFeatureConfig = (featureConfig: string) =>
   featureConfig.startsWith(USE_CASE_PREFIX);
@@ -220,7 +221,7 @@ export const getDataSourcesList = (
 ) => {
   return client
     .find({
-      type: 'data-source',
+      type: WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
       fields: ['id', 'title', 'auth', 'description', 'dataSourceEngineType'],
       perPage: 10000,
       workspaces: targetWorkspaces,
@@ -235,6 +236,7 @@ export const getDataSourcesList = (
           const auth = source.get('auth');
           const description = source.get('description');
           const dataSourceEngineType = source.get('dataSourceEngineType');
+          const type = source.type;
           return {
             id,
             title,
@@ -242,6 +244,7 @@ export const getDataSourcesList = (
             description,
             dataSourceEngineType,
             workspaces,
+            type,
           };
         });
       } else {
