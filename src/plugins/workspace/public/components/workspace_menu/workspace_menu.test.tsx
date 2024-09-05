@@ -99,7 +99,7 @@ describe('<WorkspaceMenu />', () => {
     });
     render(<WorkspaceMenuCreatorComponent />);
 
-    fireEvent.click(screen.getByTestId('current-workspace-button'));
+    fireEvent.click(screen.getByTestId('workspace-select-button'));
     expect(screen.getByTestId('workspace-menu-current-workspace-name')).toBeInTheDocument();
     expect(screen.getByTestId('workspace-menu-current-use-case')).toBeInTheDocument();
     expect(screen.getByText('Observability')).toBeInTheDocument();
@@ -164,7 +164,7 @@ describe('<WorkspaceMenu />', () => {
     const navigateToWorkspaceDetail = jest.spyOn(workspaceUtils, 'navigateToWorkspaceDetail');
     render(<WorkspaceMenuCreatorComponent />);
 
-    fireEvent.click(screen.getByTestId('current-workspace-button'));
+    fireEvent.click(screen.getByTestId('workspace-select-button'));
     const button = screen.getByText(/Manage workspace/i);
     fireEvent.click(button);
     expect(navigateToWorkspaceDetail).toBeCalled();
