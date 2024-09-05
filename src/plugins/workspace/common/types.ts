@@ -12,3 +12,18 @@ export type DataSource = Pick<
   // Id defined in SavedObjectAttribute could be single or array, here only should be single string.
   id: string;
 };
+
+export enum DataSourceConnectionType {
+  OpenSearchConnection,
+  DirectQueryConnection,
+}
+
+export interface DataSourceConnection {
+  id: string;
+  type: string | undefined;
+  parentId?: string;
+  connectionType: DataSourceConnectionType;
+  name: string;
+  description?: string;
+  relatedConnections?: DataSourceConnection[];
+}
