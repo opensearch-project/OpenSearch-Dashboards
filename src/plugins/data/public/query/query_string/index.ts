@@ -37,4 +37,6 @@ export {
   EditorEnhancements,
   RecentQueriesTable,
   QueryControls,
+  QueryResult,
+  QueryStatus,
 } from './language_service';
