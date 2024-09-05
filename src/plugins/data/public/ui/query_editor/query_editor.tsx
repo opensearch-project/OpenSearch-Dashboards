@@ -14,6 +14,7 @@ import {
   EuiText,
   PopoverAnchorPosition,
 } from '@elastic/eui';
+import { BehaviorSubject } from 'rxjs';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
@@ -25,6 +26,10 @@ import {
   Query,
   QuerySuggestion,
   TimeRange,
+  QueryControls,
+  RecentQueriesTable,
+  QueryResult,
+  QueryStatus,
 } from '../..';
 import { OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
@@ -33,8 +38,6 @@ import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { getQueryService, getIndexPatterns } from '../../services';
 import { DatasetSelector } from '../dataset_selector';
-import { QueryControls } from '../../query/query_string/language_service/get_query_control_links';
-import { RecentQueriesTable } from '../../query/query_string/language_service/recent_query';
 import { DefaultInputProps } from './editors';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 
@@ -61,6 +64,7 @@ export interface QueryEditorProps {
   filterBar?: any;
   prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   savedQueryManagement?: any;
+  queryStatus?: QueryStatus;
 }
 
 interface Props extends QueryEditorProps {
@@ -366,6 +370,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           <EuiText size="xs" color="subdued">
             {this.props.query.dataset?.timeFieldName || ''}
           </EuiText>,
+          <QueryResult queryStatus={this.props.queryStatus!} />,
         ],
         end: [
           <EuiButtonEmpty
