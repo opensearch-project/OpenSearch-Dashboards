@@ -415,6 +415,9 @@ export class WorkspaceSavedObjectsClientWrapper {
       const objectToGet = await wrapperOptions.client.get<T>(type, id, options);
 
       if (objectToGet.type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+        if (isDataSourceAdmin) {
+          return objectToGet;
+        }
         const hasPermission = this.validateDataSourcePermissions(
           objectToGet,
           wrapperOptions.request
@@ -475,6 +478,16 @@ export class WorkspaceSavedObjectsClientWrapper {
     const findWithWorkspacePermissionControl = async <T = unknown>(
       options: SavedObjectsFindOptions
     ) => {
+      if (
+        isDataSourceAdmin &&
+        options?.type &&
+        (options.type === DATA_SOURCE_SAVED_OBJECT_TYPE ||
+          (Array.isArray(options.type) &&
+            options.type.length === 1 &&
+            options.type[0] === DATA_SOURCE_SAVED_OBJECT_TYPE))
+      ) {
+        return await wrapperOptions.client.find<T>(options);
+      }
       const principals = this.permissionControl.getPrincipalsFromRequest(wrapperOptions.request);
       const permittedWorkspaceIds = (
         await this.getWorkspaceTypeEnabledClient(wrapperOptions.request).find({
@@ -535,7 +548,35 @@ export class WorkspaceSavedObjectsClientWrapper {
       return await wrapperOptions.client.deleteByWorkspace(workspace, options);
     };
 
-    const isDashboardAdmin = getWorkspaceState(wrapperOptions.request)?.isDashboardAdmin;
+    const addToWorkspacesWithPermissionControl = async (
+      type: string,
+      id: string,
+      targetWorkspaces: string[],
+      options: SavedObjectsBaseOptions = {}
+    ) => {
+      // Only dashboard admin can assign data source to workspace
+      if (type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+        throw generateOSDAdminPermissionError();
+      }
+      // In current version, only the type is data-source that will call addToWorkspaces
+      return await wrapperOptions.client.addToWorkspaces(type, id, targetWorkspaces, options);
+    };
+
+    const deleteFromWorkspacesWithPermissionControl = async (
+      type: string,
+      id: string,
+      targetWorkspaces: string[],
+      options: SavedObjectsBaseOptions = {}
+    ) => {
+      // Only dashboard admin can unassign data source to workspace
+      if (type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+        throw generateOSDAdminPermissionError();
+      }
+      // In current version, only the type is data-source will that call deleteFromWorkspaces
+      return await wrapperOptions.client.deleteFromWorkspaces(type, id, targetWorkspaces, options);
+    };
+
+    const { isDashboardAdmin, isDataSourceAdmin } = getWorkspaceState(wrapperOptions.request) || {};
     if (isDashboardAdmin) {
       return wrapperOptions.client;
     }
@@ -555,6 +596,8 @@ export class WorkspaceSavedObjectsClientWrapper {
       update: updateWithWorkspacePermissionControl,
       bulkUpdate: bulkUpdateWithWorkspacePermissionControl,
       deleteByWorkspace: deleteByWorkspaceWithPermissionControl,
+      addToWorkspaces: addToWorkspacesWithPermissionControl,
+      deleteFromWorkspaces: deleteFromWorkspacesWithPermissionControl,
     };
   };
 

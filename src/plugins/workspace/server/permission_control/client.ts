@@ -16,7 +16,7 @@ import {
   HttpAuth,
 } from '../../../../core/server';
 import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../../common/constants';
-import { getPrincipalsFromRequest } from '../utils';
+import { getPrincipalsFromRequest } from '../../../../core/server/utils';
 
 export type SavedObjectsPermissionControlContract = Pick<
   SavedObjectsPermissionControl,
