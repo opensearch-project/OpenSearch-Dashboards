@@ -205,17 +205,16 @@
 
   &.visible::after {
     position: absolute;
-    bottom: -30px;
+    height: auto;
+    bottom: auto;
     left: 0;
     width: 100%;
-    height: 30px;
     background-color: $euiColorLightestShade;
-    border: 1px solid $euiColorLightShade;
-    padding: 5px;
-    padding-top: 4px;
+    border: $euiBorderThin;
+    padding: $euiSizeXS;
     text-align: left;
     color: $euiColorDarkShade;
-    font-size: small;
+    font-size: $euiFontSizeXS;
     content: "Tab to insert, ESC to close window";
     display: block;
   }
