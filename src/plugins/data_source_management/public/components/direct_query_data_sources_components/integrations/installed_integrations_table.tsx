@@ -193,6 +193,7 @@ export const InstalledIntegrationsTable = ({
   refreshInstances,
   http,
   selectedDataSourceId,
+  selectedClusterName,
 }: {
   integrations: IntegrationInstanceResult[];
   datasourceType: DatasourceType;
@@ -200,6 +201,7 @@ export const InstalledIntegrationsTable = ({
   refreshInstances: () => void;
   http: HttpStart;
   selectedDataSourceId?: string;
+  selectedClusterName?: string;
 }) => {
   const basePathLink = (link: string): string => {
     if (http.basePath) {
@@ -284,6 +286,8 @@ export const InstalledIntegrationsTable = ({
           datasourceName={datasourceName}
           refreshInstances={refreshInstances}
           http={http}
+          selectedDataSourceId={selectedDataSourceId}
+          selectedClusterName={selectedClusterName}
         />
       ) : null}
     </>

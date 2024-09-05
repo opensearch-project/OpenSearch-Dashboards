@@ -153,20 +153,31 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
     const searchDataSourcePattern = new RegExp(
       `flint_${escapeRegExp(datasourceDetails.name)}_default_.*`
     );
+
     const findIntegrations = async () => {
       const result: { data: IntegrationInstancesSearchResult } = await http!.get(
         INTEGRATIONS_BASE + `/store`
       );
+
       if (result.data?.hits) {
-        setDataSourceIntegrations(
-          result.data.hits.filter((res) => res.dataSource.match(searchDataSourcePattern))
+        let filteredIntegrations = result.data.hits.filter((res) =>
+          res.dataSource.match(searchDataSourcePattern)
         );
+
+        if (featureFlagStatus) {
+          filteredIntegrations = filteredIntegrations.filter((res) => {
+            return res.references && res.references.some((ref) => ref.id === dataSourceMDSId);
+          });
+        }
+
+        setDataSourceIntegrations(filteredIntegrations);
       } else {
         setDataSourceIntegrations([]);
       }
     };
+
     findIntegrations();
-  }, [http, datasourceDetails.name, refreshIntegrationsFlag]);
+  }, [http, datasourceDetails.name, refreshIntegrationsFlag, featureFlagStatus, dataSourceMDSId]);
 
   const [showIntegrationsFlyout, setShowIntegrationsFlyout] = useState(false);
   const onclickIntegrationsCard = () => {
@@ -448,6 +459,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
                 refreshInstances={refreshInstances}
                 http={http}
                 selectedDataSourceId={featureFlagStatus ? dataSourceMDSId ?? undefined : undefined}
+                selectedClusterName={clusterTitle}
               />
             ),
           },
