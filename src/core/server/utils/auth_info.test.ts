@@ -5,7 +5,7 @@
 
 import { AuthStatus } from '../http/auth_state_storage';
 import { httpServerMock, httpServiceMock } from '../mocks';
-import { getPrincipalsFromRequest } from './utils';
+import { getPrincipalsFromRequest } from './auth_info';
 
 describe('utils', () => {
   const mockAuth = httpServiceMock.createAuth();

@@ -7,7 +7,7 @@ import { OnPostAuthHandler, OnPreRoutingHandler } from 'src/core/server';
 import { coreMock, httpServerMock, uiSettingsServiceMock } from '../../../core/server/mocks';
 import { WorkspacePlugin } from './plugin';
 import { getWorkspaceState, updateWorkspaceState } from '../../../core/server/utils';
-import * as serverUtils from '../../../core/server/utils/utils';
+import * as serverUtils from '../../../core/server/utils/auth_info';
 import * as utilsExports from './utils';
 import { SavedObjectsPermissionControl } from './permission_control/client';
 

@@ -69,11 +69,9 @@ export class DataSourcePermissionClientWrapper {
       objects.forEach((item) => {
         if (DATA_SOURCE_SAVED_OBJECT_TYPE === item.type) {
           disallowedSavedObjects.push(item);
-          return;
+        } else {
+          allowedSavedObjects.push(item);
         }
-
-        allowedSavedObjects.push(item);
-        return;
       });
 
       const bulkCreateResult = await wrapperOptions.client.bulkCreate(allowedSavedObjects, options);
@@ -114,7 +112,7 @@ export class DataSourcePermissionClientWrapper {
         return await wrapperOptions.client.update(type, id, attributes, options);
       }
 
-      if (options.workspaces) {
+      if (options?.workspaces) {
         if (isDashboardAdminRequest) {
           const originalDataSource = await wrapperOptions.client.get(type, id);
           const originalDataSourceSubset = _.pick(
@@ -147,11 +145,9 @@ export class DataSourcePermissionClientWrapper {
       objects.forEach((item) => {
         if (DATA_SOURCE_SAVED_OBJECT_TYPE === item.type) {
           disallowedSavedObjects.push(item);
-          return;
+        } else {
+          allowedSavedObjects.push(item);
         }
-
-        allowedSavedObjects.push(item);
-        return;
       });
 
       const bulkUpdateResult = await wrapperOptions.client.bulkUpdate(allowedSavedObjects, options);

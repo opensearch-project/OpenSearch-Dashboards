@@ -27,12 +27,12 @@ export const getPrincipalsFromRequest = (
   }
 
   if (authInfoResp?.status === AuthStatus.authenticated) {
-    const authInfo = authInfoResp?.state as { authInfo: AuthInfo } | null;
-    if (authInfo?.authInfo?.backend_roles) {
-      payload[PrincipalType.Groups] = authInfo.authInfo.backend_roles;
+    const authState = authInfoResp?.state as { authInfo: AuthInfo } | null;
+    if (authState?.authInfo?.backend_roles) {
+      payload[PrincipalType.Groups] = authState.authInfo.backend_roles;
     }
-    if (authInfo?.authInfo?.user_name) {
-      payload[PrincipalType.Users] = [authInfo.authInfo.user_name];
+    if (authState?.authInfo?.user_name) {
+      payload[PrincipalType.Users] = [authState.authInfo.user_name];
     }
     return payload;
   }
