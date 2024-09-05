@@ -114,18 +114,13 @@ export const DataSourceConnectionTable = ({
       }),
       truncateText: true,
       render: (name: string, record) => {
-        const origin = window.location.origin;
-        const basePath = http.basePath.serverBasePath;
         let url: string;
         if (record.connectionType === DataSourceConnectionType.OpenSearchConnection) {
-          url = http.basePath.prepend(`/app/dataSources/${record.id}`, {
-            withoutClientBasePath: true,
-          });
+          url = http.basePath.prepend(`/app/dataSources/${record.id}`);
         } else {
-          url = `${origin}${basePath}/app/dataSources/manage/${name}?dataSourceMDSId=${record.parentId}`;
-          url = http.basePath.prepend(`/app/dataSources/${record.id}`, {
-            withoutClientBasePath: true,
-          });
+          url = http.basePath.prepend(
+            `/app/dataSources/manage/${name}?dataSourceMDSId=${record.parentId}`
+          );
         }
         return (
           <EuiLink href={url} className="eui-textTruncate">
