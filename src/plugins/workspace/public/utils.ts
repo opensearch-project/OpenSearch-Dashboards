@@ -266,28 +266,46 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
   return directQueryConnections;
 };
 
-// Helper function to merge data sources with direct query connections
-export const mergeDataSourcesWithConnections = (
-  assignedDataSources: DataSource[],
-  directQueryConnections: DataSourceConnection[]
-): DataSourceConnection[] => {
-  const dataSources: DataSourceConnection[] = [];
-  assignedDataSources.forEach((ds) => {
-    const relatedConnections = directQueryConnections.filter(
-      (directQueryConnection) => directQueryConnection.parentId === ds.id
-    );
-
-    dataSources.push({
+export const convertDataSourcesToOpenSearchConnections = (
+  dataSources: DataSource[]
+): DataSourceConnection[] =>
+  dataSources.map((ds) => {
+    return {
       id: ds.id,
       type: ds.dataSourceEngineType,
       connectionType: DataSourceConnectionType.OpenSearchConnection,
       name: ds.title,
       description: ds.description,
-      relatedConnections,
-    });
+      relatedConnections: [],
+    };
   });
 
-  return [...dataSources, ...directQueryConnections];
+export const fulfillRelatedConnections = (
+  connections: DataSourceConnection[],
+  directQueryConnections: DataSourceConnection[]
+) => {
+  return connections.map((connection) => {
+    const relatedConnections = directQueryConnections.filter(
+      (directQueryConnection) => directQueryConnection.parentId === connection.id
+    );
+    return {
+      ...connection,
+      relatedConnections,
+    };
+  });
+};
+
+// Helper function to merge data sources with direct query connections
+export const mergeDataSourcesWithConnections = (
+  dataSources: DataSource[],
+  directQueryConnections: DataSourceConnection[]
+): DataSourceConnection[] => {
+  const openSearchConnections = convertDataSourcesToOpenSearchConnections(dataSources);
+
+  return [
+    ...fulfillRelatedConnections(openSearchConnections, directQueryConnections),
+    ...directQueryConnections,
+  ].sort((a, b) => a.name.localeCompare(b.name));
 };
 
 // If all connected data sources are serverless, will only allow to select essential use case.
@@ -475,21 +493,28 @@ export const getUseCaseUrl = (
   return useCaseURL;
 };
 
+export const fetchDataSourceConnectionsByDataSourceIds = async (
+  dataSourceIds: string[],
+  http: HttpSetup | undefined
+) => {
+  const directQueryConnectionsPromises = dataSourceIds.map((dataSourceId) =>
+    getDirectQueryConnections(dataSourceId, http!).catch(() => [])
+  );
+  const directQueryConnectionsResult = await Promise.all(directQueryConnectionsPromises);
+  return directQueryConnectionsResult.flat();
+};
+
 export const fetchDataSourceConnections = async (
   assignedDataSources: DataSource[],
   http: HttpSetup | undefined,
   notifications: NotificationsStart | undefined
 ) => {
   try {
-    const directQueryConnectionsPromises = assignedDataSources.map((ds) =>
-      getDirectQueryConnections(ds.id, http!).catch(() => [])
+    const directQueryConnections = await fetchDataSourceConnectionsByDataSourceIds(
+      assignedDataSources.map((ds) => ds.id),
+      http
     );
-    const directQueryConnectionsResult = await Promise.all(directQueryConnectionsPromises);
-    const directQueryConnections = directQueryConnectionsResult.flat();
-    return mergeDataSourcesWithConnections(
-      assignedDataSources,
-      directQueryConnections
-    ).sort((a, b) => a.name.localeCompare(b.name));
+    return mergeDataSourcesWithConnections(assignedDataSources, directQueryConnections);
   } catch (error) {
     notifications?.toasts.addDanger(
       i18n.translate('workspace.detail.dataSources.error.message', {
