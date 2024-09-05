@@ -75,7 +75,7 @@ export function HeaderBreadcrumbs({
     crumbs = breadcrumbEnricher(crumbs);
   }
 
-  if (dropHomeFromBreadcrumb && Object.hasOwn(crumbs[0], 'home')) {
+  if (dropHomeFromBreadcrumb && crumbs.length && Object.hasOwn(crumbs[0], 'home')) {
     crumbs = crumbs.slice(1);
   }
 

@@ -31,8 +31,8 @@
 import { mount } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { ChromeBreadcrumb, ChromeBreadcrumbEnricher } from '../../chrome_service';
+import { BehaviorSubject } from 'rxjs';
+import { ChromeBreadcrumb } from '../../chrome_service';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 
 describe('HeaderBreadcrumbs', () => {
@@ -123,7 +123,7 @@ describe('HeaderBreadcrumbs', () => {
         dropHomeFromBreadcrumb={true}
       />
     );
-    const breadcrumbs = wrapper.find('.euiBreadcrumbWrapper');
+    let breadcrumbs = wrapper.find('.euiBreadcrumbWrapper');
     expect(breadcrumbs).toHaveLength(2);
     expect(breadcrumbs.at(0).text()).toBe('Analytics');
     expect(breadcrumbs.at(1).text()).toBe('First');
@@ -134,8 +134,17 @@ describe('HeaderBreadcrumbs', () => {
       breadcrumbs$.next([{ text: 'Home' }, { text: 'Second' }]);
     });
     wrapper.update();
+    breadcrumbs = wrapper.find('.euiBreadcrumbWrapper');
     expect(breadcrumbs).toHaveLength(2);
     expect(breadcrumbs.at(0).text()).toBe('Home');
     expect(breadcrumbs.at(1).text()).toBe('Second');
+
+    act(() => {
+      breadcrumbsEnricher$.next((items) => []);
+      breadcrumbs$.next([{ text: 'Home' }, { text: 'Second' }]);
+    });
+    wrapper.update();
+    breadcrumbs = wrapper.find('.euiBreadcrumbWrapper');
+    expect(breadcrumbs).toHaveLength(0);
   });
 });
