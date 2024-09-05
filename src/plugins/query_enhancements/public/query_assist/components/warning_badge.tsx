@@ -4,6 +4,7 @@
  */
 
 import { EuiBadge, EuiLink, EuiPopover, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@osd/i18n/react';
 import React, { SyntheticEvent, useState } from 'react';
 import { AgentError } from '../utils';
 
@@ -16,8 +17,9 @@ export const WarningBadge: React.FC<WarningBadgeProps> = (props) => {
   const [showMore, setShowMore] = useState(false);
 
   if (!props.error) return null;
-  const error = props.error.error.error;
-  const status = props.error.error.status;
+  const {
+    error: { error, status },
+  } = props.error;
 
   return (
     <EuiPopover
@@ -34,7 +36,10 @@ export const WarningBadge: React.FC<WarningBadgeProps> = (props) => {
           onClickAriaLabel="Click to show details"
           data-test-subj="queryAssistErrorBadge"
         >
-          Warning
+          <FormattedMessage
+            id="queryEnhancements.queryAssist.badge.title"
+            defaultMessage="Warning"
+          />
         </EuiBadge>
       }
       isOpen={isPopoverOpen}
@@ -44,26 +49,65 @@ export const WarningBadge: React.FC<WarningBadgeProps> = (props) => {
       <EuiText size="s" className="queryAssist__popoverText">
         <dl>
           <dd id="queryAssistErrorTitle">
-            <b>Error</b>
+            <b>
+              <FormattedMessage
+                id="queryEnhancements.queryAssist.error.title"
+                defaultMessage="Error"
+              />
+            </b>
           </dd>
           <dd>
-            <b>Reason</b>: {error.reason}
+            <b>
+              <FormattedMessage
+                id="queryEnhancements.queryAssist.error.reason"
+                defaultMessage="Reason"
+              />
+            </b>
+            : {error.reason}
           </dd>
           {showMore && (
             <>
               <dd>
-                <b>Details</b>: {error.details}
+                <b>
+                  <FormattedMessage
+                    id="queryEnhancements.queryAssist.error.details"
+                    defaultMessage="Details"
+                  />
+                </b>
+                : {error.details}
               </dd>
               <dd>
-                <b>Type</b>: {error.type}
+                <b>
+                  <FormattedMessage
+                    id="queryEnhancements.queryAssist.error.type"
+                    defaultMessage="Type"
+                  />
+                </b>
+                : {error.type}
               </dd>
               <dd>
-                <b>Status</b>: {status}
+                <b>
+                  <FormattedMessage
+                    id="queryEnhancements.queryAssist.error.status"
+                    defaultMessage="Status"
+                  />
+                </b>
+                : {status}
               </dd>
             </>
           )}
           <EuiLink onClick={() => setShowMore(!showMore)} data-test-subj="queryAssistErrorMore">
-            View {showMore ? 'less' : 'more'}
+            {showMore ? (
+              <FormattedMessage
+                id="queryEnhancements.queryAssist.error.viewLess"
+                defaultMessage="View Less"
+              />
+            ) : (
+              <FormattedMessage
+                id="queryEnhancements.queryAssist.error.viewMore"
+                defaultMessage="View More"
+              />
+            )}
           </EuiLink>
         </dl>
       </EuiText>
