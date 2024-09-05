@@ -137,7 +137,7 @@ describe('Setup use case overview', () => {
         "cardProps": Object {
           "layout": "horizontal",
         },
-        "description": "Gain visibility into system health, performance, and reliability through monitoring and analysis of logs, metrics, and traces.",
+        "description": "Gain visibility into your application and infrastructure",
         "getIcon": [Function],
         "id": "observability",
         "kind": "card",
