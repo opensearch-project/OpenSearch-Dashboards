@@ -117,7 +117,7 @@ export const DetailTabTitles: { [key in DetailTab]: string } = {
     defaultMessage: 'Details',
   }),
   [DetailTab.DataSources]: i18n.translate('workspace.detail.tabTitle.dataSources', {
-    defaultMessage: 'Data Sources',
+    defaultMessage: 'Data sources',
   }),
   [DetailTab.Collaborators]: i18n.translate('workspace.detail.tabTitle.collaborators', {
     defaultMessage: 'Collaborators',

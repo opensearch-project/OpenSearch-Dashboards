@@ -10,6 +10,7 @@ export { WorkspaceUseCase } from './workspace_use_case';
 export { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
 export { WorkspaceCancelModal } from './workspace_cancel_modal';
 export { WorkspaceNameField, WorkspaceDescriptionField } from './fields';
+export { DirectQueryConnectionIcon } from './direct_query_connection_icon';
 
 export { WorkspaceFormSubmitData, WorkspaceFormProps, WorkspaceFormDataState } from './types';
 export {

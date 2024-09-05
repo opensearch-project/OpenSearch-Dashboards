@@ -49,6 +49,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
       dataSourceManagement,
       uiSettings,
       navigationUI: { HeaderControl },
+      chrome,
     },
   } = useOpenSearchDashboards<{
     CoreStart: CoreStart;
@@ -88,7 +89,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
     }
   }, [location.search]);
 
-  if (!currentWorkspace || !application || !http || !savedObjects || !uiSettings) {
+  if (!currentWorkspace || !application || !http || !savedObjects || !uiSettings || !chrome) {
     return null;
   }
 
@@ -145,6 +146,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
                 detailTitle={DetailTabTitles.dataSources}
                 isDashboardAdmin={isDashboardAdmin}
                 currentWorkspace={currentWorkspace}
+                chrome={chrome}
               />
             ),
           },
@@ -168,22 +170,25 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
             setMountPoint={application.setAppDescriptionControls}
           />
         )}
-        <HeaderControl
-          controls={[
-            {
-              run: () => setDeletedWorkspace(currentWorkspace),
-              color: 'danger',
-              iconType: 'trash',
-              ariaLabel: i18n.translate('workspace.detail.delete.button', {
-                defaultMessage: 'Delete',
-              }),
-              testId: 'workspace-detail-delete-button',
-              controlType: 'icon',
-              display: 'base',
-            } as TopNavControlIconData,
-          ]}
-          setMountPoint={application.setAppRightControls}
-        />
+        {isDashboardAdmin && (
+          <HeaderControl
+            controls={[
+              {
+                run: () => setDeletedWorkspace(currentWorkspace),
+                color: 'danger',
+                iconType: 'trash',
+                ariaLabel: i18n.translate('workspace.detail.delete.button', {
+                  defaultMessage: 'Delete',
+                }),
+                testId: 'workspace-detail-delete-button',
+                controlType: 'icon',
+                display: 'base',
+              } as TopNavControlIconData,
+            ]}
+            setMountPoint={application.setAppRightControls}
+          />
+        )}
+
         <EuiPageContent>
           <WorkspaceDetailPanel
             useCaseUrl={useCaseUrl}
