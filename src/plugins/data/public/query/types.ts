@@ -34,8 +34,9 @@ export interface IQueryStart {
 
 /** @internal */
 export interface QueryServiceSetupDependencies {
-  storage: DataStorage;
   uiSettings: IUiSettingsClient;
+  storage: DataStorage;
+  sessionStorage: DataStorage;
   defaultSearchInterceptor: ISearchInterceptor;
 }
 

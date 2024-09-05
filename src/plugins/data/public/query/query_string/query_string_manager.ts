@@ -46,12 +46,13 @@ export class QueryStringManager {
 
   constructor(
     private readonly storage: DataStorage,
+    private readonly sessionStorage: DataStorage,
     private readonly uiSettings: CoreStart['uiSettings'],
     private readonly defaultSearchInterceptor: ISearchInterceptor
   ) {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
     this.queryHistory = createHistory({ storage });
-    this.datasetService = new DatasetService(uiSettings);
+    this.datasetService = new DatasetService(uiSettings, this.sessionStorage);
     this.languageService = new LanguageService(this.defaultSearchInterceptor, this.storage);
   }
 
@@ -60,14 +61,32 @@ export class QueryStringManager {
   }
 
   public getDefaultQuery() {
-    return {
-      query: this.getDefaultQueryString(),
-      language: this.getDefaultLanguage(),
-      ...(this.uiSettings &&
-        this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) && {
-          dataset: this.datasetService?.getDefault(),
-        }),
+    const defaultLanguageId = this.getDefaultLanguage();
+    const defaultQuery = this.getDefaultQueryString();
+    const defaultDataset = this.datasetService?.getDefault();
+
+    const query = {
+      query: defaultQuery,
+      language: defaultLanguageId,
     };
+
+    if (
+      this.uiSettings &&
+      this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) &&
+      defaultDataset &&
+      this.languageService
+    ) {
+      const language = this.languageService.getLanguage(defaultLanguageId);
+      const newQuery = { ...query, dataset: defaultDataset };
+      const newQueryString = language?.getQueryString(newQuery) || '';
+
+      return {
+        ...newQuery,
+        query: newQueryString,
+      };
+    }
+
+    return query;
   }
 
   public formatQuery(query: Query | string | undefined): Query {
@@ -147,6 +166,7 @@ export class QueryStringManager {
     const language = this.languageService.getLanguage(languageId);
     const dataset = curQuery.dataset;
     const input = language?.getQueryString(curQuery) || '';
+    this.languageService.setUserQueryString(input);
 
     return {
       query: input,
@@ -157,14 +177,14 @@ export class QueryStringManager {
 
   public getInitialQueryByDataset = (newDataset: Dataset) => {
     const curQuery = this.query$.getValue();
-    const languageId = curQuery.language;
+    const languageId = newDataset.language || curQuery.language;
     const language = this.languageService.getLanguage(languageId);
-    const newQuery = { ...curQuery, dataset: newDataset };
-    const input = language?.getQueryString(newQuery) || '';
+    const newQuery = { ...curQuery, language: languageId, dataset: newDataset };
+    const newQueryString = language?.getQueryString(newQuery) || '';
 
     return {
       ...newQuery,
-      query: input,
+      query: newQueryString,
     };
   };
 

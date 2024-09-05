@@ -143,7 +143,7 @@ describe('<WorkspaceMenu />', () => {
     });
     render(<WorkspaceMenuCreatorComponent />);
 
-    fireEvent.click(screen.getByTestId('current-workspace-button'));
+    fireEvent.click(screen.getByTestId('workspace-select-button'));
     expect(screen.getByTestId('workspace-menu-current-workspace-name')).toBeInTheDocument();
     expect(screen.getByTestId('workspace-menu-current-use-case')).toBeInTheDocument();
     expect(screen.getByTestId('current-workspace-icon-observability')).toBeInTheDocument();

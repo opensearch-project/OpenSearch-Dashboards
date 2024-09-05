@@ -63,7 +63,7 @@ export const FeatureCards = ({
         ]}
         setMountPoint={setAppDescriptionControls}
       />
-      <EuiPageContent hasShadow={false} hasBorder={false} color="transparent">
+      <EuiPageContent hasShadow={false} hasBorder={false} color="transparent" paddingSize="m">
         {groupedCardForDisplay.map((group) => (
           <div key={group.category?.id}>
             {group.category && (
@@ -71,7 +71,7 @@ export const FeatureCards = ({
                 <h3>{group.category.label}</h3>
               </EuiTitle>
             )}
-            <EuiSpacer />
+            <EuiSpacer size="m" />
             {group.navLinks.map((row, rowIndex) => {
               return (
                 <EuiFlexGroup data-test-subj={`landingPageRow_${rowIndex}`} key={rowIndex}>

@@ -37,30 +37,21 @@ import { EuiPageContent, EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@
 import { EuiDescriptionListTitle } from '@elastic/eui';
 import { EuiDescriptionListDescription, EuiDescriptionList } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
-import { useMount } from 'react-use';
-import { getListBreadcrumbs } from '../../breadcrumbs';
 import { IndexPatternCreationOption } from '../../types';
 import { CreateButton } from '../../create_button';
 import { Illustration } from './assets/index_pattern_illustration';
-import { ManagementAppMountParams } from '../../../../../management/public';
 
 interface Props {
   canSave: boolean;
   creationOptions: IndexPatternCreationOption[];
   docLinksIndexPatternIntro: string;
-  setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
 }
 
 export const EmptyIndexPatternPrompt = ({
   canSave,
   creationOptions,
   docLinksIndexPatternIntro,
-  setBreadcrumbs,
 }: Props) => {
-  useMount(() => {
-    setBreadcrumbs(getListBreadcrumbs());
-  });
-
   return (
     <EuiPageContent
       data-test-subj="emptyIndexPatternPrompt"

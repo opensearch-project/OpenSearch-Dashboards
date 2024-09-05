@@ -7,7 +7,7 @@ import React, { useMemo, useState } from 'react';
 import { useObservable } from 'react-use';
 import {
   EuiTitle,
-  EuiAvatar,
+  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -16,6 +16,7 @@ import {
   EuiListGroupItem,
   EuiEmptyPrompt,
 } from '@elastic/eui';
+
 import { BehaviorSubject } from 'rxjs';
 import { CoreStart, WorkspaceObject } from '../../../../../core/public';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
@@ -136,12 +137,10 @@ export const WorkspacePickerContent = ({
           size="s"
           data-test-subj={`workspace-menu-item-${itemType}-${workspace.id}`}
           icon={
-            <EuiAvatar
+            <EuiIcon
               size="s"
-              type="space"
-              name={workspace.name}
+              type={useCase?.icon || 'wsSelector'}
               color={getValidWorkspaceColor(workspace.color)}
-              initialsLength={2}
             />
           }
           label={workspace.name}

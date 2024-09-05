@@ -9,16 +9,13 @@ import { useObservable } from 'react-use';
 import {
   EuiText,
   EuiPanel,
-  EuiAvatar,
-  EuiHorizontalRule,
   EuiButton,
   EuiPopover,
-  EuiToolTip,
+  EuiButtonIcon,
   EuiFlexItem,
   EuiIcon,
   EuiFlexGroup,
-  EuiButtonIcon,
-  EuiSmallButtonEmpty,
+  EuiHorizontalRule,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
@@ -73,23 +70,9 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
     setPopover(false);
   };
 
-  const currentWorkspaceButton = currentWorkspace ? (
-    <EuiSmallButtonEmpty
-      onClick={openPopover}
-      data-test-subj="current-workspace-button"
-      flush="both"
-    >
-      <EuiAvatar
-        size="s"
-        type="space"
-        name={currentWorkspace.name}
-        color={getValidWorkspaceColor(currentWorkspace.color)}
-        initialsLength={2}
-      />
-    </EuiSmallButtonEmpty>
-  ) : (
+  const currentWorkspaceButton = (
     <EuiButtonIcon
-      iconType="spacesApp"
+      iconType="wsSelector"
       onClick={openPopover}
       aria-label="workspace-select-button"
       data-test-subj="workspace-select-button"
@@ -118,10 +101,9 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
             <>
               <EuiFlexItem grow={false}>
                 <EuiIcon
-                  size="xl"
-                  color="success"
-                  data-test-subj={`current-workspace-icon-${getUseCase(currentWorkspace)?.id}`}
-                  type={`ws${getUseCase(currentWorkspace)?.id}`}
+                  size="l"
+                  type={getUseCase(currentWorkspace)?.icon || 'wsSelector'}
+                  color={getValidWorkspaceColor(currentWorkspace.color)}
                 />
               </EuiFlexItem>
               <EuiFlexItem

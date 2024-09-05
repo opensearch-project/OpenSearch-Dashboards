@@ -38,6 +38,7 @@ describe('WorkspaceFormSummaryPanel', () => {
       title: 'Use Case 1',
       description: 'This is Use Case 1',
       features: [],
+      icon: 'wsAnalytics',
     },
     {
       id: 'useCase2',

@@ -55,7 +55,9 @@ export const DatasetExplorer = ({
     }
 
     setLoading(true);
-    const nextDataStructure = await typeConfig.fetch(services, nextPath);
+    const nextDataStructure = await queryString
+      .getDatasetService()
+      .fetchOptions(services, nextPath, typeConfig.id);
     setLoading(false);
 
     setPath([...newPath, nextDataStructure]);
