@@ -19,7 +19,12 @@ import {
   EuiCard,
   EuiAccordion,
 } from '@elastic/eui';
-import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
+import {
+  ApplicationStart,
+  HttpStart,
+  NotificationsStart,
+  SavedObjectsStart,
+} from 'opensearch-dashboards/public';
 import { useLocation, useParams } from 'react-router-dom';
 import { escapeRegExp } from 'lodash';
 import { DATACONNECTIONS_BASE } from '../../../constants';
@@ -46,7 +51,7 @@ import {
   IntegrationInstancesSearchResult,
 } from '../../../../framework/types';
 import { INTEGRATIONS_BASE } from '../../../../framework/utils/shared';
-import { isPluginInstalled } from '../../utils';
+import { isPluginInstalled, getDataSourcesWithFields } from '../../utils';
 
 interface DirectQueryDataConnectionDetailProps {
   featureFlagStatus: boolean;
@@ -55,6 +60,7 @@ interface DirectQueryDataConnectionDetailProps {
   application: ApplicationStart;
   setBreadcrumbs: (breadcrumbs: any) => void;
   useNewUX: boolean;
+  savedObjects: SavedObjectsStart;
 }
 
 export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnectionDetailProps> = ({
@@ -64,6 +70,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   application,
   setBreadcrumbs,
   useNewUX,
+  savedObjects,
 }) => {
   const [observabilityDashboardsExists, setObservabilityDashboardsExists] = useState(false);
   const { dataSourceName } = useParams<{ dataSourceName: string }>();
@@ -117,6 +124,31 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   const [refreshIntegrationsFlag, setRefreshIntegrationsFlag] = useState(false);
   const refreshInstances = () => setRefreshIntegrationsFlag((prev) => !prev);
 
+  const [clusterTitle, setDataSourceTitle] = useState<string | undefined>();
+  const fetchDataSources = async () => {
+    try {
+      const dataSources = await getDataSourcesWithFields(savedObjects.client, ['id', 'title']);
+
+      // Find the data source title based on the dataSourceMDSId
+      const foundDataSource = dataSources.find((ds: any) => ds.id === dataSourceMDSId);
+      if (foundDataSource) {
+        setDataSourceTitle(foundDataSource.attributes.title);
+      }
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: 'Failed to fetch data sources',
+        text: error.message,
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (featureFlagStatus) {
+      fetchDataSources();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [featureFlagStatus, savedObjects, notifications, dataSourceMDSId]);
+
   useEffect(() => {
     const searchDataSourcePattern = new RegExp(
       `flint_${escapeRegExp(datasourceDetails.name)}_default_.*`
@@ -147,6 +179,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
       datasourceName={datasourceDetails.name}
       http={http}
       selectedDataSourceId={dataSourceMDSId || ''}
+      selectedClusterName={clusterTitle}
     />
   ) : null;
 
@@ -403,21 +436,21 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
               />
             ),
           },
-          !featureFlagStatus &&
-            observabilityDashboardsExists && {
-              id: 'installed_integrations',
-              name: 'Installed Integrations',
-              disabled: false,
-              content: (
-                <InstalledIntegrationsTable
-                  integrations={dataSourceIntegrations}
-                  datasourceType={datasourceDetails.connector}
-                  datasourceName={datasourceDetails.name}
-                  refreshInstances={refreshInstances}
-                  http={http}
-                />
-              ),
-            },
+          observabilityDashboardsExists && {
+            id: 'installed_integrations',
+            name: 'Installed Integrations',
+            disabled: false,
+            content: (
+              <InstalledIntegrationsTable
+                integrations={dataSourceIntegrations}
+                datasourceType={datasourceDetails.connector}
+                datasourceName={datasourceDetails.name}
+                refreshInstances={refreshInstances}
+                http={http}
+                selectedDataSourceId={featureFlagStatus ? dataSourceMDSId ?? undefined : undefined}
+              />
+            ),
+          },
         ].filter(Boolean)
       : [];
 

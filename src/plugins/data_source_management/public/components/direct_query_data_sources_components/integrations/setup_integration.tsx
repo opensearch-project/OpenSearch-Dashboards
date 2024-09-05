@@ -357,6 +357,7 @@ export function SetupIntegrationForm({
   setIsInstalling,
   http,
   selectedDataSourceId,
+  selectedClusterName,
 }: {
   integration: string;
   renderType: 'page' | 'flyout';
@@ -368,6 +369,7 @@ export function SetupIntegrationForm({
   setIsInstalling?: (isInstalling: boolean, success?: boolean) => void;
   http: HttpStart;
   selectedDataSourceId?: string | undefined;
+  selectedClusterName?: string | undefined;
 }) {
   const [integConfig, setConfig] = useState({
     displayName: `${integration} Integration`,
@@ -432,6 +434,7 @@ export function SetupIntegrationForm({
             unsetIntegration={unsetIntegration}
             setIsInstalling={setIsInstalling}
             dataSourceMDSId={selectedDataSourceId}
+            dataSourceMDSLabel={selectedClusterName}
             http={http}
           />
         </EuiBottomBar>
@@ -464,6 +467,7 @@ export function SetupIntegrationForm({
             unsetIntegration={unsetIntegration}
             setIsInstalling={setIsInstalling}
             dataSourceMDSId={selectedDataSourceId}
+            dataSourceMDSLabel={selectedClusterName}
             http={http}
           />
         </EuiFlyoutFooter>

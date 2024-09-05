@@ -108,6 +108,7 @@ export const InstallIntegrationFlyout = ({
   datasourceName,
   refreshInstances,
   selectedDataSourceId,
+  selectedClusterName,
   http,
 }: {
   closeFlyout: () => void;
@@ -116,6 +117,7 @@ export const InstallIntegrationFlyout = ({
   refreshInstances: () => void;
   http: HttpStart;
   selectedDataSourceId?: string;
+  selectedClusterName?: string;
 }) => {
   const [availableIntegrations, setAvailableIntegrations] = useState({
     hits: [],
@@ -157,6 +159,7 @@ export const InstallIntegrationFlyout = ({
         />
       ) : (
         <SetupIntegrationForm
+          selectedClusterName={selectedClusterName}
           selectedDataSourceId={selectedDataSourceId}
           integration={installingIntegration}
           unsetIntegration={() => setInstallingIntegration(null)}
@@ -189,12 +192,14 @@ export const InstalledIntegrationsTable = ({
   datasourceName,
   refreshInstances,
   http,
+  selectedDataSourceId,
 }: {
   integrations: IntegrationInstanceResult[];
   datasourceType: DatasourceType;
   datasourceName: string;
   refreshInstances: () => void;
   http: HttpStart;
+  selectedDataSourceId?: string;
 }) => {
   const basePathLink = (link: string): string => {
     if (http.basePath) {
