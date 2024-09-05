@@ -22,8 +22,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiInMemoryTableProps,
-  EuiTableProps,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, of } from 'rxjs';
@@ -47,7 +45,6 @@ import { WorkspaceUseCase } from '../../types';
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
 import { WorkspacePermissionMode } from '../../../common/constants';
 import { DataSourceAttributesWithWorkspaces } from '../../types';
-import { PermissionModeId } from '../../../common/types';
 
 export interface WorkspaceListProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -487,6 +484,7 @@ export const WorkspaceListInner = ({
       isPrimary: false,
       description: 'Delete workspace',
       'data-test-subj': 'workspace-list-delete-icon',
+      available: () => isDashboardAdmin,
       onClick: (item: WorkspaceAttribute) => {
         setDeletedWorkspaces([item]);
       },

@@ -29,6 +29,7 @@ export interface WorkspaceUseCase {
   features: WorkspaceUseCaseFeature[];
   systematic?: boolean;
   order?: number;
+  icon?: string;
 }
 
 export interface DataSourceAttributesWithWorkspaces extends Omit<DataSourceAttributes, 'endpoint'> {

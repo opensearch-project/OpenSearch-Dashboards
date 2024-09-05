@@ -12,7 +12,7 @@ import { cloneDeep } from 'lodash';
 import { useLocation } from 'react-router-dom';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
-import { search } from '../../../../../data/public';
+import { QueryStatus, search } from '../../../../../data/public';
 import { validateTimeRange } from '../../helpers/validate_time_range';
 import { updateSearchSource } from './update_search_source';
 import { useIndexPattern } from './use_index_pattern';
@@ -39,6 +39,7 @@ export enum ResultStatus {
   LOADING = 'loading', // initial data load
   READY = 'ready', // results came back
   NO_RESULTS = 'none', // no results came back
+  ERROR = 'error', // error occurred
 }
 
 export interface SearchData {
@@ -50,6 +51,16 @@ export interface SearchData {
   bucketInterval?: TimechartHeaderBucketInterval | {};
   chartData?: Chart;
   title?: string;
+  queryStatus?: {
+    body?: {
+      error?: {
+        reason?: string;
+        details: string;
+      };
+      statusCode?: number;
+    };
+    elapsedMs?: number;
+  };
 }
 
 export type SearchRefetch = 'refetch' | undefined;
@@ -149,6 +160,8 @@ export const useSearch = (services: DiscoverViewServices) => {
 
     dataset = searchSource.getField('index');
 
+    let elapsedMs;
+
     try {
       // Only show loading indicator if we are fetching when the rows are empty
       if (fetchStateRef.current.rows?.length === 0) {
@@ -180,6 +193,7 @@ export const useSearch = (services: DiscoverViewServices) => {
         .ok({ json: fetchResp });
       const hits = fetchResp.hits.total as number;
       const rows = fetchResp.hits.hits;
+      elapsedMs = inspectorRequest.getTime();
       let bucketInterval = {};
       let chartData;
       for (const row of rows) {
@@ -216,17 +230,38 @@ export const useSearch = (services: DiscoverViewServices) => {
           indexPattern?.title !== searchSource.getDataFrame()?.name
             ? searchSource.getDataFrame()?.name
             : indexPattern?.title,
+        queryStatus: {
+          elapsedMs,
+        },
       });
     } catch (error) {
       // If the request was aborted then no need to surface this error in the UI
       if (error instanceof Error && error.name === 'AbortError') return;
 
-      data$.next({
-        status: ResultStatus.NO_RESULTS,
-        rows: [],
-      });
+      const queryLanguage = data.query.queryString.getQuery().language;
+      if (queryLanguage === 'kuery' || queryLanguage === 'lucene') {
+        data$.next({
+          status: ResultStatus.NO_RESULTS,
+          rows: [],
+        });
 
-      data.search.showError(error as Error);
+        data.search.showError(error as Error);
+        return;
+      }
+      let errorBody;
+      try {
+        errorBody = JSON.parse(error.body.message);
+      } catch (e) {
+        errorBody = error.body.message;
+      }
+
+      data$.next({
+        status: ResultStatus.ERROR,
+        queryStatus: {
+          body: errorBody,
+          elapsedMs,
+        },
+      });
     } finally {
       initalSearchComplete.current = true;
     }

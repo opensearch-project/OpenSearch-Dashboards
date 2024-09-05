@@ -191,6 +191,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           showQueryBar={props.showQueryBar}
           showQueryInput={props.showQueryInput}
           showSaveQuery={props.showSaveQuery}
+          queryStatus={props.queryStatus}
           screenTitle={props.screenTitle}
           indexPatterns={props.indexPatterns}
           indicateNoData={props.indicateNoData}
