@@ -385,8 +385,9 @@ export function prependWorkspaceToBreadcrumbs(
     return;
   }
 
-  const homeBreadcrumb: ChromeBreadcrumb = {
+  const homeBreadcrumb: ChromeBreadcrumb & { home: boolean } = {
     text: 'Home',
+    home: true,
     onClick: () => {
       core.application.navigateToApp('home');
     },
