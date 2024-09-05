@@ -78,9 +78,9 @@ export const DataSourceConnectionTable = ({
           items={item?.relatedConnections ?? []}
           itemId="id"
           columns={baseColumns}
-          className="customized-table"
+          className="workspace-detail-direct-query-expanded-table"
           rowProps={{
-            className: 'customized-row',
+            className: 'workspace-detail-direct-query-expanded-row',
           }}
         />
       );

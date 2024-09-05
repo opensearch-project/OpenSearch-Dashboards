@@ -1,0 +1,2 @@
+feat:
+- Introduce a data-connection saved-object type for external data connections ([#7925](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7925))

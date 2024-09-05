@@ -15,7 +15,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { WorkspaceFormDataState } from '../forms';
+import { WorkspaceFormDataState } from '../workspace_form';
 import { WorkspaceUseCase } from '../../types';
 import { RightSidebarScrollField, RIGHT_SIDEBAR_SCROLL_KEY } from './utils';
 
@@ -33,7 +33,7 @@ const SCROLL_FIELDS = {
     }
   ),
   [RightSidebarScrollField.Color]: i18n.translate('workspace.form.summary.panel.color.title', {
-    defaultMessage: 'Accent color',
+    defaultMessage: 'Workspace icon',
   }),
   [RightSidebarScrollField.DataSource]: i18n.translate(
     'workspace.form.summary.panel.dataSources.title',
@@ -164,9 +164,11 @@ export const WorkspaceFormSummaryPanel = ({
       <FieldSummaryItem field={RightSidebarScrollField.Color}>
         {formData.color && (
           <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="swatchInput" color={formData.color} />
-            </EuiFlexItem>
+            {useCase?.icon && (
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={useCase.icon} color={formData.color} />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem>
               <EuiText size="xs">{formData.color}</EuiText>
             </EuiFlexItem>

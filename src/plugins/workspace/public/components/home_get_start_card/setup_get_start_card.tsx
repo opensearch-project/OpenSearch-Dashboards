@@ -14,6 +14,7 @@ import {
 import { WorkspaceUseCase } from '../../types';
 import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
 import { UseCaseCardTitle } from './use_case_card_title';
+import './setup_get_start_card.scss';
 
 const createContentCard = (useCase: WorkspaceUseCase, core: CoreStart) => {
   const { workspaces, application, http } = core;
@@ -66,7 +67,12 @@ export const registerGetStartedCardToNewHome = (
         order: (index + 1) * 1000,
         description: useCase.description,
         ...content,
-        getIcon: () => React.createElement(EuiIcon, { size: 'xl', type: 'logoOpenSearch' }),
+        getIcon: () =>
+          React.createElement(EuiIcon, {
+            size: 'xl',
+            type: useCase.icon || 'logoOpenSearch',
+            className: 'homeGettingStartedWorkspaceCardsIcon',
+          }),
         cardProps: {
           layout: 'horizontal',
         },

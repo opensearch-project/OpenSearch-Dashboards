@@ -35,6 +35,7 @@ import React, { ReactElement, useRef } from 'react';
 import { MountPoint } from '../../../../core/public';
 import {
   DataPublicPluginStart,
+  QueryStatus,
   SearchBarProps,
   StatefulSearchBarProps,
 } from '../../../data/public';
@@ -82,6 +83,7 @@ export type TopNavMenuProps = Omit<StatefulSearchBarProps, 'showDatePicker'> &
      * ```
      */
     setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
+    queryStatus?: QueryStatus;
   };
 
 /*
@@ -157,6 +159,7 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
         {...searchBarProps}
         showDatePicker={![TopNavMenuItemRenderType.OMITTED, false].includes(showDatePicker!)}
         {...overrides}
+        queryStatus={props.queryStatus}
       />
     );
   }

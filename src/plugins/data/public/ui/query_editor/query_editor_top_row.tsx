@@ -21,7 +21,7 @@ import {
   withOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
 import { UI_SETTINGS } from '../../../common';
-import { getQueryLog, PersistedLog } from '../../query';
+import { getQueryLog, PersistedLog, QueryStatus } from '../../query';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
 
@@ -54,6 +54,7 @@ export interface QueryEditorTopRowProps {
   indicateNoData?: boolean;
   datePickerRef?: React.RefObject<HTMLDivElement>;
   savedQueryManagement?: any;
+  queryStatus?: QueryStatus;
 }
 
 // Needed for React.lazy
@@ -186,6 +187,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           dataTestSubj={props.dataTestSubj}
           filterBar={props.filterBar}
           savedQueryManagement={props.savedQueryManagement}
+          queryStatus={props.queryStatus}
         />
       </EuiFlexItem>
     );

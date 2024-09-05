@@ -113,19 +113,15 @@ describe('sqlSearchStrategyProvider', () => {
     jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
 
     const strategy = sqlSearchStrategyProvider(config$, logger, client, usage);
-    const result = await strategy.search(
-      emptyRequestHandlerContext,
-      ({
-        body: { query: { query: 'SELECT * FROM table' } },
-      } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
-      {}
-    );
-
-    expect(result).toEqual({
-      type: DATA_FRAME_TYPES.ERROR,
-      body: { error: { cause: 'Query failed' } },
-      took: 50,
-    } as IDataFrameError);
+    await expect(
+      strategy.search(
+        emptyRequestHandlerContext,
+        ({
+          body: { query: { query: 'SELECT * FROM table' } },
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      )
+    ).rejects.toThrow();
   });
 
   it('should handle exceptions', async () => {
