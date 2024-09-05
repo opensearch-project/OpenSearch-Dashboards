@@ -4,9 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import _ from 'lodash';
 import {
-  SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
