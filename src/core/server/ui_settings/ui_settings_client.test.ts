@@ -36,7 +36,7 @@ import { createOrUpgradeSavedConfigMock } from './create_or_upgrade_saved_config
 
 import { SavedObjectsClient } from '../saved_objects';
 import { savedObjectsClientMock } from '../saved_objects/service/saved_objects_client.mock';
-import { CURRENT_USER, UiSettingsClient } from './ui_settings_client';
+import { CURRENT_USER_PLACEHOLDER, UiSettingsClient } from './ui_settings_client';
 import { CannotOverrideError } from './ui_settings_errors';
 
 const logger = loggingSystemMock.create().get();
@@ -116,9 +116,13 @@ describe('ui settings', () => {
         one: 'value',
         another: 'val',
       });
-      expect(savedObjectsClient.update).toHaveBeenCalledWith(TYPE, `${CURRENT_USER}_${ID}`, {
-        key: 'value',
-      });
+      expect(savedObjectsClient.update).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_USER_PLACEHOLDER}_${ID}`,
+        {
+          key: 'value',
+        }
+      );
     });
 
     it('automatically creates the savedConfig if it is missing', async () => {
@@ -375,7 +379,10 @@ describe('ui settings', () => {
 
       expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
-      expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, `${CURRENT_USER}_${ID}`);
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_USER_PLACEHOLDER}_${ID}`
+      );
     });
 
     it('returns user configuration', async () => {
@@ -542,7 +549,10 @@ describe('ui settings', () => {
       await uiSettings.getAll();
       expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
-      expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, `${CURRENT_USER}_${ID}`);
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_USER_PLACEHOLDER}_${ID}`
+      );
     });
 
     it('returns defaults when opensearch doc is empty', async () => {
@@ -641,7 +651,7 @@ describe('ui settings', () => {
       const { uiSettings, savedObjectsClient } = setup({ defaults });
 
       savedObjectsClient.get.mockImplementation((_type, id, _options) => {
-        if (id === `${CURRENT_USER}_${ID}`) {
+        if (id === `${CURRENT_USER_PLACEHOLDER}_${ID}`) {
           return Promise.resolve({
             attributes: {
               bar: 'my personal value',
@@ -691,7 +701,10 @@ describe('ui settings', () => {
 
       expect(savedObjectsClient.get).toHaveBeenCalledTimes(2);
       expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, ID);
-      expect(savedObjectsClient.get).toHaveBeenCalledWith(TYPE, `${CURRENT_USER}_${ID}`);
+      expect(savedObjectsClient.get).toHaveBeenCalledWith(
+        TYPE,
+        `${CURRENT_USER_PLACEHOLDER}_${ID}`
+      );
     });
 
     it(`returns the promised value for a key`, async () => {

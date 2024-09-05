@@ -29,7 +29,8 @@
  */
 
 import { SavedObjectsClientContract } from '../../saved_objects/types';
-import { CURRENT_USER } from '../ui_settings_client';
+import { UiSettingScope } from '../types';
+import { CURRENT_USER_PLACEHOLDER } from '../ui_settings_client';
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 
 /**
@@ -42,11 +43,11 @@ import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 export async function getUpgradeableConfig({
   savedObjectsClient,
   version,
-  userLevel,
+  scope,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   version: string;
-  userLevel?: boolean;
+  scope?: UiSettingScope;
 }) {
   // attempt to find a config we can upgrade
   const { saved_objects: savedConfigs } = await savedObjectsClient.find({
@@ -55,7 +56,9 @@ export async function getUpgradeableConfig({
     perPage: 1000,
     sortField: 'buildNum',
     sortOrder: 'desc',
-    ...(userLevel ? { hasReference: { type: 'user', id: CURRENT_USER } } : {}),
+    ...(scope && scope === UiSettingScope.USER
+      ? { hasReference: { type: 'user', id: CURRENT_USER_PLACEHOLDER } }
+      : {}),
   });
 
   // try to find a config that we can upgrade

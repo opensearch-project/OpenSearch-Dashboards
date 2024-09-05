@@ -75,7 +75,7 @@ export class AdvancedSettingsServerPlugin implements Plugin<object, object> {
     );
     this.userUiSettingsClientWrapper = userUiSettingsClientWrapper;
     core.savedObjects.addClientWrapper(
-      3,
+      3, // The wrapper should be triggered after workspace_id_consumer wrapper which id is -3 to avoid creating user settings within any workspace.
       'user_ui_settings',
       userUiSettingsClientWrapper.wrapperFactory
     );

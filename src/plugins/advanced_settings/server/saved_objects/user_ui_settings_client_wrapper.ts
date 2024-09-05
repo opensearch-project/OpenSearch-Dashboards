@@ -16,7 +16,7 @@ import {
   SavedObjectsFindResponse,
   OpenSearchDashboardsRequest,
 } from '../../../../core/server';
-import { Logger, CURRENT_USER } from '../../../../core/server';
+import { Logger, CURRENT_USER_PLACEHOLDER } from '../../../../core/server';
 import { extractUserName } from '../utils';
 
 /**
@@ -35,7 +35,7 @@ export class UserUISettingsClientWrapper {
   }
 
   private isUserLevelSetting(id: string | undefined): boolean {
-    return id ? id.startsWith(CURRENT_USER) : false;
+    return id ? id.startsWith(CURRENT_USER_PLACEHOLDER) : false;
   }
 
   private normalizeDocId(id: string, request: OpenSearchDashboardsRequest, core?: CoreStart) {
@@ -46,7 +46,7 @@ export class UserUISettingsClientWrapper {
         return userName;
       } else {
         // security is not enabled, using global setting id
-        return id.replace(`${CURRENT_USER}_`, '');
+        return id.replace(`${CURRENT_USER_PLACEHOLDER}_`, '');
       }
     }
     return id;
@@ -137,7 +137,7 @@ export class UserUISettingsClientWrapper {
       const userName = extractUserName(wrapperOptions.request, this.core);
       const { hasReference } = options || {};
       if (options.type === 'config' && userName && hasReference) {
-        const id = hasReference.id.replace(CURRENT_USER, userName);
+        const id = hasReference.id.replace(CURRENT_USER_PLACEHOLDER, userName);
         const resp: SavedObjectsFindResponse<T> = await wrapperOptions.client.find({
           ...options,
           hasReference: { ...hasReference, id },

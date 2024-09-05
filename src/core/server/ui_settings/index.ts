@@ -28,7 +28,11 @@
  * under the License.
  */
 
-export { UiSettingsClient, UiSettingsServiceOptions, CURRENT_USER } from './ui_settings_client';
+export {
+  UiSettingsClient,
+  UiSettingsServiceOptions,
+  CURRENT_USER_PLACEHOLDER,
+} from './ui_settings_client';
 
 export { config } from './ui_settings_config';
 export { UiSettingsService } from './ui_settings_service';
@@ -48,4 +52,5 @@ export {
   StringValidation,
   StringValidationRegex,
   StringValidationRegexString,
+  UiSettingScope,
 } from './types';

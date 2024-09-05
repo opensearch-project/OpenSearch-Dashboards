@@ -48,7 +48,7 @@ export interface AdvancedSettingsStart {
 export interface AdvancedSettingsPluginSetup {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
-  contentManagement?: ContentManagementPluginSetup;
+  contentManagement: ContentManagementPluginSetup;
 }
 
 export interface AdvancedSettingsPluginStart {

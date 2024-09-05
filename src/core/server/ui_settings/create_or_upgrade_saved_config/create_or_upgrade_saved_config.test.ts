@@ -155,7 +155,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
             Object {
               "newVersion": "4.0.1",
               "prevVersion": "4.0.0",
-              "userLevel": false,
+              "scope": undefined,
             },
           ],
         ]

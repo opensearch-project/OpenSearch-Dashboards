@@ -111,7 +111,7 @@ export const WorkspaceListInner = ({
   const [selection, setSelection] = useState<WorkspaceAttribute[]>([]);
   const [allDataSources, setAllDataSources] = useState<DataSourceAttributesWithWorkspaces[]>([]);
   //  default workspace state
-  const [defaultWorkspace, setDefaultWorkspace] = useState<string | undefined>(undefined);
+  const [defaultWorkspaceId, setDefaultWorkspaceId] = useState<string | undefined>(undefined);
 
   const dateFormat = uiSettings?.get('dateFormat');
 
@@ -133,7 +133,7 @@ export const WorkspaceListInner = ({
   );
 
   useEffect(() => {
-    setDefaultWorkspace(uiSettings?.get(DEFAULT_WORKSPACE));
+    setDefaultWorkspaceId(uiSettings?.get(DEFAULT_WORKSPACE));
     if (savedObjects) {
       getDataSourcesList(savedObjects.client, ['*']).then((data) => {
         setAllDataSources(data);
@@ -238,15 +238,12 @@ export const WorkspaceListInner = ({
     async (item: WorkspaceAttribute) => {
       const set = await uiSettings?.set(DEFAULT_WORKSPACE, item.id);
       if (set) {
-        setDefaultWorkspace(item.id);
+        setDefaultWorkspaceId(item.id);
         notifications?.toasts.addSuccess(`Default workspace been set to ${item.name}`);
       } else {
         // toast
-        notifications?.toasts.addError(
-          new Error(`Failed to set workspace ${item.name} as default workspace.`),
-          {
-            title: 'Set default workspace error',
-          }
+        notifications?.toasts.addWarning(
+          `Failed to set workspace ${item.name} as default workspace.`
         );
       }
     },
@@ -362,7 +359,7 @@ export const WorkspaceListInner = ({
               <EuiFlexItem>
                 <EuiText size="s">{name}</EuiText>
               </EuiFlexItem>
-              {item.id === defaultWorkspace && (
+              {item.id === defaultWorkspaceId && (
                 <EuiFlexItem grow={false}>
                   <EuiBadge>Default workspace</EuiBadge>
                 </EuiFlexItem>

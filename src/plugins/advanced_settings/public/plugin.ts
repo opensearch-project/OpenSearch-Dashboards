@@ -60,6 +60,7 @@ const titleInGroup = i18n.translate('advancedSettings.applicationSettingsLabel',
   defaultMessage: 'Application settings',
 });
 
+const USER_SETTINGS_APPID = 'user_settings';
 export class AdvancedSettingsPlugin
   implements
     Plugin<
@@ -129,14 +130,12 @@ export class AdvancedSettingsPlugin
     if (core.chrome.navGroup.getNavGroupEnabled()) {
       setupUserSettingsPage(contentManagementSetup);
 
-      core.application.registerAppUpdater(this.appUpdater$);
-
       const userSettingTitle = i18n.translate('advancedSettings.userSettingsLabel', {
         defaultMessage: 'User settings',
       });
 
       core.application.register({
-        id: 'user_settings',
+        id: USER_SETTINGS_APPID,
         title: userSettingTitle,
         updater$: this.appUpdater$,
         navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
@@ -158,8 +157,8 @@ export class AdvancedSettingsPlugin
 
       core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
         {
-          id: 'user_settings',
-          order: 101,
+          id: USER_SETTINGS_APPID,
+          order: 101, // just right after application settings which order is 100
         },
       ]);
     }
@@ -191,10 +190,10 @@ export class AdvancedSettingsPlugin
     }
 
     this.appUpdater$.next((app) => {
-      const securityEnabled = core.application.capabilities.userSettings?.enabled;
-      if (app.id === 'user_settings') {
+      const userSettingsEnabled = core.application.capabilities.userSettings?.enabled;
+      if (app.id === USER_SETTINGS_APPID) {
         return {
-          navLinkStatus: securityEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+          navLinkStatus: userSettingsEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
         };
       }
     });

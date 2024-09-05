@@ -56,7 +56,14 @@ export interface DeprecationSettings {
   docLinksKey: string;
 }
 
-export type SettingScope = 'global' | 'user';
+/**
+ * UiSettings scope options.
+ * @public
+ */
+export enum UiSettingScope {
+  GLOBAL = 'global',
+  USER = 'user',
+}
 
 /**
  * UiSettings parameters defined by the plugins.
@@ -68,7 +75,7 @@ export interface UiSettingsParams<T = unknown> {
   /**
    * scope of the setting item
    */
-  scope?: SettingScope | SettingScope[];
+  scope?: UiSettingScope | UiSettingScope[];
   /** default value to fall back to if a user doesn't provide any */
   value?: T;
   /** description provided to a user in UI */
