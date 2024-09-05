@@ -1166,6 +1166,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           navigationUI={navigationUI}
           applications={applications}
           currentWorkspaceName={currentWorkspace?.name}
+          showImportButton={!workspaceEnabled || !!currentWorkspace}
         />
         {!useUpdatedUX && <EuiSpacer size="xs" />}
         <RedirectAppLinks application={applications}>
