@@ -4,12 +4,13 @@
  */
 
 import React from 'react';
+import { CoreStart } from 'opensearch-dashboards/public';
 import { EuiIcon } from '@elastic/eui';
 import { ContentManagementPluginStart } from '../../../../content_management/public';
 
 export const registerUseCaseCard = (
   contentManagement: ContentManagementPluginStart,
-  workspaceEnabled: boolean,
+  core: CoreStart,
   {
     target,
     order,
@@ -17,6 +18,7 @@ export const registerUseCaseCard = (
     title,
     description,
     icon,
+    navigateAppId,
   }: {
     target: string;
     order: number;
@@ -24,9 +26,9 @@ export const registerUseCaseCard = (
     title: string;
     description: string;
     icon: string;
+    navigateAppId: string;
   }
 ) => {
-  if (workspaceEnabled) return;
   contentManagement.registerContentProvider({
     id: `home_get_started_${id}`,
     getTargetArea: () => target,
@@ -38,6 +40,9 @@ export const registerUseCaseCard = (
       title,
       cardProps: {
         layout: 'horizontal',
+      },
+      onClick: () => {
+        core.application.navigateToApp(navigateAppId);
       },
       getIcon: () =>
         React.createElement(EuiIcon, {

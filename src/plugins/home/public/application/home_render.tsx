@@ -12,6 +12,9 @@ import {
   HOME_PAGE_ID,
   SECTIONS,
   HOME_CONTENT_AREAS,
+  SEARCH_OVERVIEW_PAGE_ID,
+  OBSERVABILITY_OVERVIEW_PAGE_ID,
+  SECURITY_ANALYTICS_OVERVIEW_PAGE_ID,
 } from '../../../../plugins/content_management/public';
 import {
   WHATS_NEW_CONFIG,
@@ -63,22 +66,28 @@ export const setupHome = (contentManagement: ContentManagementPluginSetup) => {
 export const initHome = (contentManagement: ContentManagementPluginStart, core: CoreStart) => {
   const workspaceEnabled = core.application.capabilities.workspaces.enabled;
 
-  const useCases = [
-    DEFAULT_NAV_GROUPS.observability,
-    DEFAULT_NAV_GROUPS.search,
-    DEFAULT_NAV_GROUPS['security-analytics'],
-  ];
+  if (!workspaceEnabled) {
+    const useCases = [
+      { ...DEFAULT_NAV_GROUPS.observability, navigateAppId: OBSERVABILITY_OVERVIEW_PAGE_ID },
+      { ...DEFAULT_NAV_GROUPS.search, navigateAppId: SEARCH_OVERVIEW_PAGE_ID },
+      {
+        ...DEFAULT_NAV_GROUPS['security-analytics'],
+        navigateAppId: SECURITY_ANALYTICS_OVERVIEW_PAGE_ID,
+      },
+    ];
 
-  useCases.forEach((useCase, index) => {
-    registerUseCaseCard(contentManagement, workspaceEnabled, {
-      id: useCase.id,
-      order: index + 1,
-      description: useCase.description,
-      title: useCase.title,
-      target: HOME_CONTENT_AREAS.GET_STARTED,
-      icon: useCase.icon ?? '',
+    useCases.forEach((useCase, index) => {
+      registerUseCaseCard(contentManagement, core, {
+        id: useCase.id,
+        order: index + 1,
+        description: useCase.description,
+        title: useCase.title,
+        target: HOME_CONTENT_AREAS.GET_STARTED,
+        icon: useCase.icon ?? '',
+        navigateAppId: useCase.navigateAppId,
+      });
     });
-  });
+  }
 
   registerHomeListCard(contentManagement, {
     id: 'whats_new',
