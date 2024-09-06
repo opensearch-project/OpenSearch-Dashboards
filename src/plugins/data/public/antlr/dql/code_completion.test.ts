@@ -174,11 +174,11 @@ const testingIndex = ({
 } as unknown) as IndexPattern;
 
 const booleanOperatorSuggestions = [
-  { text: 'or', type: 17, detail: 'Keyword' },
-  { text: 'and', type: 17, detail: 'Keyword' },
+  { text: 'or', type: 11, detail: 'Operator', insertText: 'or ' },
+  { text: 'and', type: 11, detail: 'Operator', insertText: 'and ' },
 ];
 
-const notOperatorSuggestion = { text: 'not', type: 17, detail: 'Keyword' };
+const notOperatorSuggestion = { text: 'not', type: 11, detail: 'Operator', insertText: 'not ' };
 
 const fieldNameSuggestions: Array<{
   text: string;
@@ -211,27 +211,31 @@ const carrierValues = [
 ];
 
 const allCarrierValueSuggestions = [
-  { text: 'Logstash Airways', type: 13, detail: 'Value' },
-  { text: 'BeatsWest', type: 13, detail: 'Value' },
+  { text: 'Logstash Airways', type: 13, detail: 'Value', insertText: 'Logstash Airways ' },
+  { text: 'BeatsWest', type: 13, detail: 'Value', insertText: 'BeatsWest ' },
   {
     text: 'OpenSearch Dashboards Airlines',
     type: 13,
     detail: 'Value',
+    insertText: 'OpenSearch Dashboards Airlines ',
   },
-  { text: 'OpenSearch-Air', type: 13, detail: 'Value' },
+  { text: 'OpenSearch-Air', type: 13, detail: 'Value', insertText: 'OpenSearch-Air ' },
 ];
 
 const carrierWithNotSuggestions = allCarrierValueSuggestions.concat(notOperatorSuggestion);
 
-const logCarrierValueSuggestion = [{ text: 'Logstash Airways', type: 13, detail: 'Value' }];
+const logCarrierValueSuggestion = [
+  { text: 'Logstash Airways', type: 13, detail: 'Value', insertText: 'Logstash Airways ' },
+];
 
 const openCarrierValueSuggestion = [
   {
     text: 'OpenSearch Dashboards Airlines',
     type: 13,
     detail: 'Value',
+    insertText: 'OpenSearch Dashboards Airlines ',
   },
-  { text: 'OpenSearch-Air', type: 13, detail: 'Value' },
+  { text: 'OpenSearch-Air', type: 13, detail: 'Value', insertText: 'OpenSearch-Air ' },
 ];
 
 const addPositionToValue = (vals: any, start: number, end: number) =>
