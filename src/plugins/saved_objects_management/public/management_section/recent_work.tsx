@@ -257,38 +257,45 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
                   textAlign="left"
                   href={recentNavLink.href}
                   footer={
-                    <>
-                      <EuiFlexGrid columns={2} gutterSize="s">
-                        <EuiFlexItem grow={false}>
-                          <EuiText size="xs" color="default">
-                            {selectedSort === recentlyViewed
-                              ? i18n.translate(
-                                  'savedObjectsManagement.recentWorkSection.viewedAt',
-                                  {
-                                    defaultMessage: 'Viewed',
-                                  }
-                                )
-                              : i18n.translate(
-                                  'savedObjectsManagement.recentWorkSection.updatedAt',
-                                  {
-                                    defaultMessage: 'Updated',
-                                  }
-                                )}
-                            :{' '}
-                          </EuiText>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={1} style={{ textAlign: 'right' }}>
-                          <EuiText size="xs" color="default">
-                            <b>
+                    <EuiFlexGroup
+                      justifyContent="spaceBetween"
+                      direction="column"
+                      gutterSize="none"
+                    >
+                      <EuiFlexItem>
+                        <EuiFlexGrid columns={2} gutterSize="s">
+                          <EuiFlexItem grow={false}>
+                            <EuiText size="xs" color="default">
                               {selectedSort === recentlyViewed
-                                ? moment(recentAccessItem?.lastAccessedTime).fromNow()
-                                : moment(recentAccessItem?.updatedAt).fromNow()}
-                            </b>
-                          </EuiText>
-                        </EuiFlexItem>
-
-                        {workspaceEnabled && (
-                          <>
+                                ? i18n.translate(
+                                    'savedObjectsManagement.recentWorkSection.viewedAt',
+                                    {
+                                      defaultMessage: 'Viewed',
+                                    }
+                                  )
+                                : i18n.translate(
+                                    'savedObjectsManagement.recentWorkSection.updatedAt',
+                                    {
+                                      defaultMessage: 'Updated',
+                                    }
+                                  )}
+                              :{' '}
+                            </EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={1} className="eui-textRight">
+                            <EuiText size="xs" color="default">
+                              <b>
+                                {selectedSort === recentlyViewed
+                                  ? moment(recentAccessItem?.lastAccessedTime).fromNow()
+                                  : moment(recentAccessItem?.updatedAt).fromNow()}
+                              </b>
+                            </EuiText>
+                          </EuiFlexItem>
+                        </EuiFlexGrid>
+                      </EuiFlexItem>
+                      {workspaceEnabled && (
+                        <EuiFlexItem>
+                          <EuiFlexGrid columns={2} gutterSize="s">
                             <EuiFlexItem grow={false}>
                               <EuiText size="xs" color="default">
                                 {i18n.translate(
@@ -300,15 +307,15 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
                                 :
                               </EuiText>
                             </EuiFlexItem>
-                            <EuiFlexItem grow={1} style={{ textAlign: 'right' }}>
+                            <EuiFlexItem grow={1} className="eui-textRight">
                               <EuiText size="xs" color="default">
                                 <b>{recentAccessItem.workspaceName || 'N/A'} </b>
                               </EuiText>
                             </EuiFlexItem>
-                          </>
-                        )}
-                      </EuiFlexGrid>
-                    </>
+                          </EuiFlexGrid>
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
                   }
                   onClick={recentNavLink.onClick}
                 />
