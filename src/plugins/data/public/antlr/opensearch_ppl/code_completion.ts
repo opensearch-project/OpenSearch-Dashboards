@@ -10,7 +10,7 @@
  */
 
 import { monaco } from '@osd/monaco';
-import { CursorPosition, AutocompleteResultBase } from '../shared/types';
+import { CursorPosition, OpenSearchPplAutocompleteResult } from '../shared/types';
 import { fetchFieldSuggestions, parseQuery } from '../shared/utils';
 import { openSearchPplAutocompleteData } from './opensearch_ppl_autocomplete';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
@@ -51,6 +51,15 @@ export const getSuggestions = async ({
       );
     }
 
+    if (suggestions.suggestSourcesOrTables) {
+      finalSuggestions.push({
+        text: indexPattern.title,
+        type: monaco.languages.CompletionItemKind.Struct,
+        insertText: `${indexPattern.title} `,
+        detail: SuggestionItemDetailsTags.Table,
+      });
+    }
+
     // Fill in PPL keywords
     if (suggestions.suggestKeywords?.length) {
       finalSuggestions.push(
@@ -71,7 +80,7 @@ export const getSuggestions = async ({
 export const getOpenSearchPplAutoCompleteSuggestions = (
   query: string,
   cursor: CursorPosition
-): AutocompleteResultBase => {
+): OpenSearchPplAutocompleteResult => {
   return parseQuery({
     Lexer: openSearchPplAutocompleteData.Lexer,
     Parser: openSearchPplAutocompleteData.Parser,

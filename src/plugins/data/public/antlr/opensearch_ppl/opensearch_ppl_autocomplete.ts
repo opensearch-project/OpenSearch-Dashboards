@@ -11,6 +11,7 @@ import {
   CursorPosition,
   OpenSearchPplAutocompleteResult,
   ProcessVisitedRulesResult,
+  SourceOrTableSuggestion,
 } from '../shared/types';
 import { OpenSearchPPLLexer } from './.generated/OpenSearchPPLLexer';
 import { OpenSearchPPLParser } from './.generated/OpenSearchPPLParser';
@@ -83,6 +84,9 @@ export function processVisitedRules(
       case OpenSearchPPLParser.RULE_fieldExpression: {
         shouldSuggestColumns = true;
         break;
+      }
+      case OpenSearchPPLParser.RULE_tableQualifiedName: {
+        suggestSourcesOrTables = SourceOrTableSuggestion.TABLES;
       }
     }
   }

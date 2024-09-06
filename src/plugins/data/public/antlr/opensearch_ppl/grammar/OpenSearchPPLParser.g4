@@ -54,7 +54,7 @@ commands
 searchCommand
    : (SEARCH)? fromClause                       # searchFrom
    | (SEARCH)? fromClause logicalExpression     # searchFromFilter
-   | (SEARCH)? logicalExpression fromClause     # searchFilterFrom
+   // | (SEARCH)? logicalExpression fromClause     # searchFilterFrom
    ;
 
 describeCommand
@@ -168,8 +168,8 @@ mlArg
 fromClause
    : SOURCE EQUAL tableSourceClause
    | INDEX EQUAL tableSourceClause
-   | SOURCE EQUAL tableFunction
-   | INDEX EQUAL tableFunction
+   // | SOURCE EQUAL tableFunction
+   // | INDEX EQUAL tableFunction
    ;
 
 tableSourceClause
