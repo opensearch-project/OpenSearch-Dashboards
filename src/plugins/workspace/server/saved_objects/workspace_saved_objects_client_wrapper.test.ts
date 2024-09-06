@@ -55,6 +55,12 @@ const generateWorkspaceSavedObjectsClientWrapper = (role = NO_DASHBOARD_ADMIN) =
     },
     {
       type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      id: 'global-data-source-empty-workspaces',
+      attributes: { title: 'Global data source empty workspaces' },
+      workspaces: [],
+    },
+    {
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
       id: 'workspace-1-data-source',
       attributes: { title: 'Workspace 1 data source' },
       workspaces: ['workspace-1'],
@@ -620,6 +626,33 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           workspaces: ['workspace-1'],
         });
       });
+
+      it('should throw permission error when tried to access a global data source', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.get('data-source', 'global-data-source');
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual(
+          'Invalid data source permission, please associate it to current workspace'
+        );
+      });
+
+      it('should throw permission error when tried to access a empty workspaces global data source', async () => {
+        const { wrapper, requestMock } = generateWorkspaceSavedObjectsClientWrapper();
+        updateWorkspaceState(requestMock, { requestWorkspaceId: undefined });
+        let errorCatched;
+        try {
+          await wrapper.get('data-source', 'global-data-source-empty-workspaces');
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual(
+          'Invalid data source permission, please associate it to current workspace'
+        );
+      });
     });
     describe('bulk get', () => {
       it("should call permission validate with object's workspace and throw permission error", async () => {
@@ -743,6 +776,36 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
             },
           ],
         });
+      });
+
+      it('should throw permission error when tried to bulk get global data source', async () => {
+        const { wrapper, requestMock } = generateWorkspaceSavedObjectsClientWrapper();
+        updateWorkspaceState(requestMock, { requestWorkspaceId: undefined });
+        let errorCatched;
+        try {
+          await wrapper.bulkGet([{ type: 'data-source', id: 'global-data-source' }]);
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual(
+          'Invalid data source permission, please associate it to current workspace'
+        );
+      });
+
+      it('should throw permission error when tried to bulk get a empty workspace global data source', async () => {
+        const { wrapper, requestMock } = generateWorkspaceSavedObjectsClientWrapper();
+        updateWorkspaceState(requestMock, { requestWorkspaceId: undefined });
+        let errorCatched;
+        try {
+          await wrapper.bulkGet([
+            { type: 'data-source', id: 'global-data-source-empty-workspaces' },
+          ]);
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual(
+          'Invalid data source permission, please associate it to current workspace'
+        );
       });
     });
     describe('find', () => {
