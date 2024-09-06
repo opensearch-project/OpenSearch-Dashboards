@@ -20,6 +20,7 @@ export interface CardExplicitInput {
 export type CardContainerInput = ContainerInput<CardExplicitInput> & {
   columns?: number;
   wrap?: boolean;
+  grid?: boolean;
 };
 
 /**
