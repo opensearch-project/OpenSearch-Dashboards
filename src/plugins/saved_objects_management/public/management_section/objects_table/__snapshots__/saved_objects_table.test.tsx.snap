@@ -1042,6 +1042,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
     onExportAll={[Function]}
     onImport={[Function]}
     onRefresh={[Function]}
+    showImportButton={true}
   />
   <EuiSpacer
     size="xs"
