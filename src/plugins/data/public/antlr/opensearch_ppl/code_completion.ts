@@ -15,6 +15,7 @@ import { fetchFieldSuggestions, parseQuery } from '../shared/utils';
 import { openSearchPplAutocompleteData } from './opensearch_ppl_autocomplete';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { SuggestionItemDetailsTags } from '../shared/constants';
+import { PPL_AGGREGATE_FUNTIONS } from './constants';
 
 export const getSuggestions = async ({
   selectionStart,
@@ -35,14 +36,27 @@ export const getSuggestions = async ({
     const finalSuggestions: QuerySuggestion[] = [];
 
     if (suggestions.suggestColumns) {
-      finalSuggestions.push(...fetchFieldSuggestions(indexPattern));
+      finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} `));
+    }
+
+    if (suggestions.suggestAggregateFunctions) {
+      finalSuggestions.push(
+        ...PPL_AGGREGATE_FUNTIONS.map((af) => ({
+          text: `${af}()`,
+          type: monaco.languages.CompletionItemKind.Function,
+          insertText: af + '(${1:expr}) ',
+          detail: SuggestionItemDetailsTags.AggregateFunction,
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        }))
+      );
     }
 
     // Fill in PPL keywords
     if (suggestions.suggestKeywords?.length) {
       finalSuggestions.push(
         ...suggestions.suggestKeywords.map((sk) => ({
-          text: sk.value,
+          text: sk.value.toLowerCase(),
+          insertText: `${sk.value.toLowerCase()} `,
           type: monaco.languages.CompletionItemKind.Keyword,
           detail: SuggestionItemDetailsTags.Keyword,
         }))

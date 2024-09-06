@@ -307,6 +307,7 @@ export default class QueryEditorUI extends Component<Props, State> {
                   label: s.text,
                   kind: s.type as monaco.languages.CompletionItemKind,
                   insertText: s.insertText ?? s.text,
+                  insertTextRules: s.insertTextRules ?? undefined,
                   range: s.replacePosition ?? defaultRange,
                   detail: s.detail,
                   command: { id: 'editor.action.triggerSuggest', title: 'Trigger Next Suggestion' },
