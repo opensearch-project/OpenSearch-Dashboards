@@ -107,17 +107,9 @@ export class UserUISettingsClientWrapper {
           // remove buildNum from attributes
           const { buildNum, ...others } = attributes as any;
 
-          // create with reference, the reference field will used for filter settings by user
           return await wrapperOptions.client.create(type, others, {
             ...options,
             id: docId,
-            references: [
-              {
-                type: 'user', // dummy type
-                id: userName,
-                name: userName,
-              },
-            ],
             ...(this.savedObjectsPermissionEnabled ? permissions : {}),
           });
         } else {

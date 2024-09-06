@@ -120,13 +120,6 @@ describe('UserUISettingsClientWrapper', () => {
         {},
         {
           id: 'test_user',
-          references: [
-            {
-              id: 'test_user',
-              name: 'test_user',
-              type: 'user',
-            },
-          ],
         }
       );
     });
@@ -144,13 +137,6 @@ describe('UserUISettingsClientWrapper', () => {
         {},
         {
           id: 'test_user',
-          references: [
-            {
-              id: 'test_user',
-              name: 'test_user',
-              type: 'user',
-            },
-          ],
           permissions: {
             write: {
               users: ['test_user'],
