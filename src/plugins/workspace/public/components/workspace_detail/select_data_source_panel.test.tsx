@@ -8,10 +8,13 @@ import React from 'react';
 import { coreMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceFormProvider, WorkspaceOperationType } from '../workspace_form';
-import { SelectDataSourceDetailPanel } from './select_data_source_panel';
+import {
+  SelectDataSourceDetailPanel,
+  SelectDataSourceDetailPanelProps,
+} from './select_data_source_panel';
 import * as utils from '../../utils';
 import { IntlProvider } from 'react-intl';
-import { DataSourceConnectionType } from '../../../common/types';
+import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 
 const mockCoreStart = coreMock.createStart();
 
@@ -81,8 +84,7 @@ const defaultValues = {
 };
 
 const defaultProps = {
-  savedObjects: {},
-  assignedDataSources: [],
+  savedObjects: mockCoreStart.savedObjects,
   detailTitle: 'Data sources',
   isDashboardAdmin: true,
   currentWorkspace: workspaceObject,
@@ -96,7 +98,14 @@ const success = jest.fn().mockResolvedValue({
 });
 const failed = jest.fn().mockResolvedValue({});
 
-const selectDataSourceDetailPanel = (props: any) => {
+const selectDataSourceDetailPanel = ({
+  action,
+  selectedDataSourceConnections,
+  ...props
+}: {
+  action?: Function;
+  selectedDataSourceConnections?: DataSourceConnection[];
+} & Partial<SelectDataSourceDetailPanelProps>) => {
   const { Provider } = createOpenSearchDashboardsReactContext({
     ...mockCoreStart,
     ...{
@@ -109,7 +118,7 @@ const selectDataSourceDetailPanel = (props: any) => {
         },
       },
       workspaceClient: {
-        update: props.action,
+        update: action,
       },
     },
   });
@@ -122,11 +131,16 @@ const selectDataSourceDetailPanel = (props: any) => {
         operationType={WorkspaceOperationType.Update}
         permissionEnabled={true}
         onSubmit={jest.fn()}
-        defaultValues={defaultValues}
+        defaultValues={{ ...defaultValues, selectedDataSourceConnections }}
         availableUseCases={[]}
       >
         <Provider>
-          <SelectDataSourceDetailPanel {...props} chrome={mockCoreStart.chrome} />
+          <SelectDataSourceDetailPanel
+            {...defaultProps}
+            savedObjects={mockCoreStart.savedObjects}
+            chrome={mockCoreStart.chrome}
+            {...props}
+          />
         </Provider>
       </WorkspaceFormProvider>
     </IntlProvider>
@@ -134,12 +148,11 @@ const selectDataSourceDetailPanel = (props: any) => {
 };
 
 describe('SelectDataSourceDetailPanel', () => {
-  afterEach(() => {
+  beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should show message when no data sources are assigned', async () => {
-    jest.spyOn(utils, 'fetchDataSourceConnections').mockResolvedValue([]);
     const { getByText, getAllByText } = render(selectDataSourceDetailPanel(defaultProps));
     await waitFor(() => {
       expect(getByText('No data sources to display')).toBeInTheDocument();
@@ -151,7 +164,6 @@ describe('SelectDataSourceDetailPanel', () => {
   });
 
   it('should not show assocition button when user is not OSD admin', async () => {
-    jest.spyOn(utils, 'fetchDataSourceConnections').mockResolvedValue([]);
     const { getByText, queryByText } = render(
       selectDataSourceDetailPanel({
         ...defaultProps,
@@ -167,11 +179,9 @@ describe('SelectDataSourceDetailPanel', () => {
   });
 
   it('should not show remove associations button when user is not OSD admin', async () => {
-    jest.spyOn(utils, 'fetchDataSourceConnections').mockResolvedValue(dataSourceConnectionsMock);
     const { queryByTestId } = render(
       selectDataSourceDetailPanel({
         ...defaultProps,
-        assignedDataSources: dataSources,
         isDashboardAdmin: false,
       })
     );
@@ -181,7 +191,6 @@ describe('SelectDataSourceDetailPanel', () => {
   });
 
   it('should switch toggle button', async () => {
-    jest.spyOn(utils, 'fetchDataSourceConnections').mockResolvedValue(dataSourceConnectionsMock);
     const { getByText } = render(selectDataSourceDetailPanel(defaultProps));
     await waitFor(() => {
       const dqcButton = getByText('Direct query connections');
@@ -200,7 +209,6 @@ describe('SelectDataSourceDetailPanel', () => {
       value: 600,
     });
     jest.spyOn(utils, 'getDataSourcesList').mockResolvedValue([]);
-    jest.spyOn(utils, 'fetchDataSourceConnections').mockResolvedValueOnce([]);
     jest
       .spyOn(utils, 'fetchDataSourceConnections')
       .mockResolvedValueOnce(dataSourceConnectionsMock);
@@ -245,7 +253,6 @@ describe('SelectDataSourceDetailPanel', () => {
       value: 600,
     });
     jest.spyOn(utils, 'getDataSourcesList').mockResolvedValue([]);
-    jest.spyOn(utils, 'fetchDataSourceConnections').mockResolvedValueOnce([]);
     jest
       .spyOn(utils, 'fetchDataSourceConnections')
       .mockResolvedValueOnce(dataSourceConnectionsMock);
@@ -317,13 +324,10 @@ describe('SelectDataSourceDetailPanel', () => {
   });
 
   it('should success to remove data sources', async () => {
-    jest
-      .spyOn(utils, 'fetchDataSourceConnections')
-      .mockResolvedValueOnce([dataSourceConnectionsMock[0]]);
     const { getByText, getByTestId, getByRole } = render(
       selectDataSourceDetailPanel({
         ...defaultProps,
-        assignedDataSources: [dataSources[0]],
+        selectedDataSourceConnections: [dataSourceConnectionsMock[0]],
         action: success,
       })
     );
@@ -341,13 +345,10 @@ describe('SelectDataSourceDetailPanel', () => {
   });
 
   it('should fail to remove data sources', async () => {
-    jest
-      .spyOn(utils, 'fetchDataSourceConnections')
-      .mockResolvedValueOnce([dataSourceConnectionsMock[0]]);
     const { getByText, getByTestId, getByRole } = render(
       selectDataSourceDetailPanel({
         ...defaultProps,
-        assignedDataSources: [dataSources[0]],
+        selectedDataSourceConnections: [dataSourceConnectionsMock[0]],
         action: failed,
       })
     );
@@ -365,13 +366,10 @@ describe('SelectDataSourceDetailPanel', () => {
   });
 
   it('should remove selected data sources successfully', async () => {
-    jest
-      .spyOn(utils, 'fetchDataSourceConnections')
-      .mockResolvedValueOnce([dataSourceConnectionsMock[0]]);
     const { getByText, queryByTestId, getAllByRole, getByRole } = render(
       selectDataSourceDetailPanel({
         ...defaultProps,
-        assignedDataSources: [dataSources[0]],
+        selectedDataSourceConnections: [dataSourceConnectionsMock[0]],
         action: success,
       })
     );
@@ -392,22 +390,38 @@ describe('SelectDataSourceDetailPanel', () => {
   });
 
   it('should handle input in the search box', async () => {
-    jest.spyOn(utils, 'fetchDataSourceConnections').mockResolvedValue(dataSourceConnectionsMock);
     const { getByText, queryByText } = render(
       selectDataSourceDetailPanel({
         ...defaultProps,
-        assignedDataSources: dataSources,
+        selectedDataSourceConnections: dataSourceConnectionsMock,
       })
     );
     await waitFor(() => {
       expect(getByText('Data Source 1')).toBeInTheDocument();
       expect(getByText('Data Source 2')).toBeInTheDocument();
+    });
 
-      const searchInput = screen.getByPlaceholderText('Search...');
-      // Simulate typing in the search input
-      fireEvent.change(searchInput, { target: { value: 'Data Source 1' } });
+    const searchInput = screen.getByPlaceholderText('Search...');
+    // Simulate typing in the search input
+    fireEvent.change(searchInput, { target: { value: 'Data Source 1' } });
+
+    await waitFor(() => {
       expect(getByText('Data Source 1')).toBeInTheDocument();
       expect(queryByText('Data Source 2')).toBeNull();
+    });
+  });
+
+  it('should show loading message when loading', async () => {
+    const { queryByText, getByText, rerender } = render(
+      selectDataSourceDetailPanel({ loading: false })
+    );
+    await waitFor(() => {
+      expect(queryByText('Loading data sources...')).not.toBeInTheDocument();
+    });
+
+    rerender(selectDataSourceDetailPanel({ loading: true }));
+    await waitFor(() => {
+      expect(getByText('Loading data sources...')).toBeInTheDocument();
     });
   });
 });
