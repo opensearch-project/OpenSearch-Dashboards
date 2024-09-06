@@ -234,6 +234,7 @@ export const VisualizeListing = () => {
         })}
         toastNotifications={toastNotifications}
         showUpdatedUx={showUpdatedUx}
+        paddingSize={showUpdatedUx ? 'm' : 'l'}
       />
     </>
   );
