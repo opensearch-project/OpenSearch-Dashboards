@@ -264,7 +264,16 @@ const DefaultDiscoverTableUI = ({
         </table>
         {!showPagination && renderedRowCount < rows.length && (
           <div ref={sentinelRef}>
-            <EuiProgress size="xs" color="accent" data-test-subj="discoverRenderedRowsProgress" />
+            <EuiProgress
+              size="xs"
+              color="accent"
+              data-test-subj="discoverRenderedRowsProgress"
+              style={{
+                // Add a little margin if we aren't rendering the truncation callout below, to make
+                // the progress bar render better when it's not present
+                marginBottom: rows.length !== sampleSize ? '5px' : '0',
+              }}
+            />
           </div>
         )}
         {!showPagination && rows.length === sampleSize && (
