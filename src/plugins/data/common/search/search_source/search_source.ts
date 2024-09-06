@@ -131,6 +131,7 @@ export const searchSourceRequiredUiSettings = [
   UI_SETTINGS.SEARCH_INCLUDE_FROZEN,
   UI_SETTINGS.SORT_OPTIONS,
   UI_SETTINGS.QUERY_DATAFRAME_HYDRATION_STRATEGY,
+  UI_SETTINGS.SEARCH_INCLUDE_ALL_FIELDS,
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
@@ -586,6 +587,7 @@ export class SearchSource {
 
   flatten() {
     const searchRequest = this.mergeProps();
+    const { getConfig } = this.dependencies;
 
     searchRequest.body = searchRequest.body || {};
     const { body, index, fields, query, filters, highlightAll } = searchRequest;
@@ -595,6 +597,9 @@ export class SearchSource {
 
     body.stored_fields = computedFields.storedFields;
     body.script_fields = body.script_fields || {};
+    if (getConfig(UI_SETTINGS.SEARCH_INCLUDE_ALL_FIELDS)) {
+      body.fields = ['*'];
+    }
     extend(body.script_fields, computedFields.scriptFields);
 
     const defaultDocValueFields = computedFields.docvalueFields
@@ -605,8 +610,6 @@ export class SearchSource {
     if (!body.hasOwnProperty('_source') && index) {
       body._source = index.getSourceFiltering();
     }
-
-    const { getConfig } = this.dependencies;
 
     if (body._source) {
       // exclude source fields for this index pattern specified by the user

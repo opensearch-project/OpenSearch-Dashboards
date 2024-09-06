@@ -10,6 +10,11 @@ export const configSchema = schema.object({
     [schema.literal('all'), schema.literal('dashboard_admin'), schema.literal('none')],
     { defaultValue: 'all' }
   ),
+  dataSourceAdmin: schema.object({
+    groups: schema.arrayOf(schema.string(), {
+      defaultValue: [],
+    }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

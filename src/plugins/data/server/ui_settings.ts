@@ -762,5 +762,18 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.arrayOf(schema.string()),
     },
+    [UI_SETTINGS.SEARCH_INCLUDE_ALL_FIELDS]: {
+      name: i18n.translate('data.advancedSettings.searchIncludeAllFieldsTitle', {
+        defaultMessage: 'Include all fields in search request',
+      }),
+      value: false,
+      description: i18n.translate('data.advancedSettings.searchIncludeAllFieldsText', {
+        defaultMessage: `
+        <strong>Experimental</strong>:
+        Adds the <code>"fields": ["*"]</code> property to search request body`,
+      }),
+      schema: schema.boolean(),
+      category: ['search'],
+    },
   };
 }

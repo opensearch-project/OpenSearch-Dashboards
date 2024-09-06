@@ -136,11 +136,6 @@ export type IResponse<T> =
       error?: string;
     };
 
-export interface AuthInfo {
-  backend_roles?: string[];
-  user_name?: string;
-}
-
 export interface WorkspacePluginSetup {
   client: IWorkspaceClientImpl;
 }

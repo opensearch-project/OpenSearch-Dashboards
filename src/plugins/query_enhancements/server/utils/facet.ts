@@ -38,8 +38,8 @@ export class Facet {
   ): Promise<FacetResponse> => {
     try {
       const query: Query = request.body.query;
-      const { dataSource } = query.dataset!;
-      const { meta } = dataSource!;
+      const dataSource = query.dataset?.dataSource;
+      const meta = dataSource?.meta;
       const { format, lang } = request.body;
       const params = {
         body: {
