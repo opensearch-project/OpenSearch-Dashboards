@@ -5,6 +5,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
   locale="en"
 >
   <ManageDirectQueryDataConnectionsTable
+    featureFlagStatus={true}
     history={
       Object {
         "action": "PUSH",
@@ -75,13 +76,13 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                         "render": [Function],
                         "sortable": true,
                         "truncateText": true,
-                        "width": "25%",
+                        "width": "32%",
                       },
                       Object {
                         "field": "type",
                         "name": "Type",
                         "truncateText": true,
-                        "width": "15%",
+                        "width": "22%",
                       },
                       Object {
                         "field": "description",
@@ -90,7 +91,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                         },
                         "name": "Description",
                         "truncateText": true,
-                        "width": "35%",
+                        "width": "45%",
                       },
                       Object {
                         "align": "right",
@@ -138,6 +139,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                   selection={
                     Object {
                       "onSelectionChange": [Function],
+                      "selectable": [Function],
                     }
                   }
                   sorting={
@@ -486,13 +488,13 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                             "render": [Function],
                             "sortable": true,
                             "truncateText": true,
-                            "width": "25%",
+                            "width": "32%",
                           },
                           Object {
                             "field": "type",
                             "name": "Type",
                             "truncateText": true,
-                            "width": "15%",
+                            "width": "22%",
                           },
                           Object {
                             "field": "description",
@@ -501,7 +503,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                             },
                             "name": "Description",
                             "truncateText": true,
-                            "width": "35%",
+                            "width": "45%",
                           },
                           Object {
                             "align": "right",
@@ -536,6 +538,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                       selection={
                         Object {
                           "onSelectionChange": [Function],
+                          "selectable": [Function],
                         }
                       }
                       sorting={
@@ -854,7 +857,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                       isSorted={true}
                                       key="_data_h_title_1"
                                       onSort={[Function]}
-                                      width="25%"
+                                      width="32%"
                                     >
                                       <th
                                         aria-live="polite"
@@ -865,7 +868,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                         scope="col"
                                         style={
                                           Object {
-                                            "width": "25%",
+                                            "width": "32%",
                                           }
                                         }
                                       >
@@ -923,7 +926,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                       align="left"
                                       data-test-subj="tableHeaderCell_type_2"
                                       key="_data_h_type_2"
-                                      width="15%"
+                                      width="22%"
                                     >
                                       <th
                                         className="euiTableHeaderCell"
@@ -932,7 +935,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                         scope="col"
                                         style={
                                           Object {
-                                            "width": "15%",
+                                            "width": "22%",
                                           }
                                         }
                                       >
@@ -975,7 +978,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                           "show": false,
                                         }
                                       }
-                                      width="35%"
+                                      width="45%"
                                     >
                                       <th
                                         className="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
@@ -984,7 +987,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                         scope="col"
                                         style={
                                           Object {
-                                            "width": "35%",
+                                            "width": "45%",
                                           }
                                         }
                                       >
@@ -1124,6 +1127,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
   locale="en"
 >
   <ManageDirectQueryDataConnectionsTable
+    featureFlagStatus={true}
     history={
       Object {
         "action": "PUSH",
@@ -1194,13 +1198,13 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                         "render": [Function],
                         "sortable": true,
                         "truncateText": true,
-                        "width": "25%",
+                        "width": "32%",
                       },
                       Object {
                         "field": "type",
                         "name": "Type",
                         "truncateText": true,
-                        "width": "15%",
+                        "width": "22%",
                       },
                       Object {
                         "field": "description",
@@ -1209,7 +1213,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                         },
                         "name": "Description",
                         "truncateText": true,
-                        "width": "35%",
+                        "width": "45%",
                       },
                       Object {
                         "align": "right",
@@ -1291,6 +1295,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                   selection={
                     Object {
                       "onSelectionChange": [Function],
+                      "selectable": [Function],
                     }
                   }
                   sorting={
@@ -1663,13 +1668,13 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                             "render": [Function],
                             "sortable": true,
                             "truncateText": true,
-                            "width": "25%",
+                            "width": "32%",
                           },
                           Object {
                             "field": "type",
                             "name": "Type",
                             "truncateText": true,
-                            "width": "15%",
+                            "width": "22%",
                           },
                           Object {
                             "field": "description",
@@ -1678,7 +1683,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                             },
                             "name": "Description",
                             "truncateText": true,
-                            "width": "35%",
+                            "width": "45%",
                           },
                           Object {
                             "align": "right",
@@ -1739,6 +1744,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                       selection={
                         Object {
                           "onSelectionChange": [Function],
+                          "selectable": [Function],
                         }
                       }
                       sorting={
@@ -2057,7 +2063,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                       isSorted={true}
                                       key="_data_h_title_1"
                                       onSort={[Function]}
-                                      width="25%"
+                                      width="32%"
                                     >
                                       <th
                                         aria-live="polite"
@@ -2068,7 +2074,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                         scope="col"
                                         style={
                                           Object {
-                                            "width": "25%",
+                                            "width": "32%",
                                           }
                                         }
                                       >
@@ -2126,7 +2132,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                       align="left"
                                       data-test-subj="tableHeaderCell_type_2"
                                       key="_data_h_type_2"
-                                      width="15%"
+                                      width="22%"
                                     >
                                       <th
                                         className="euiTableHeaderCell"
@@ -2135,7 +2141,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                         scope="col"
                                         style={
                                           Object {
-                                            "width": "15%",
+                                            "width": "22%",
                                           }
                                         }
                                       >
@@ -2178,7 +2184,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                           "show": false,
                                         }
                                       }
-                                      width="35%"
+                                      width="45%"
                                     >
                                       <th
                                         className="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
@@ -2187,7 +2193,7 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                         scope="col"
                                         style={
                                           Object {
-                                            "width": "35%",
+                                            "width": "45%",
                                           }
                                         }
                                       >
@@ -2401,13 +2407,13 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                         setScopeRow={false}
                                         textOnly={false}
                                         truncateText={true}
-                                        width="25%"
+                                        width="32%"
                                       >
                                         <td
                                           className="euiTableRowCell"
                                           style={
                                             Object {
-                                              "width": "25%",
+                                              "width": "32%",
                                             }
                                           }
                                         >
@@ -2421,7 +2427,9 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                           >
                                             <EuiButtonEmpty
                                               className=""
-                                              href="http://localhost//manage/test1?dataSourceMDSId=undefined"
+                                              disabled={false}
+                                              flush="left"
+                                              href="http://localhost/manage/test1"
                                               key=".0"
                                               size="xs"
                                               style={
@@ -2431,8 +2439,8 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                               }
                                             >
                                               <a
-                                                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-                                                href="http://localhost//manage/test1?dataSourceMDSId=undefined"
+                                                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
+                                                href="http://localhost/manage/test1"
                                                 rel="noreferrer"
                                                 style={
                                                   Object {
@@ -2478,13 +2486,13 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                         setScopeRow={false}
                                         textOnly={true}
                                         truncateText={true}
-                                        width="15%"
+                                        width="22%"
                                       >
                                         <td
                                           className="euiTableRowCell"
                                           style={
                                             Object {
-                                              "width": "15%",
+                                              "width": "22%",
                                             }
                                           }
                                         >
@@ -2517,13 +2525,13 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                                         setScopeRow={false}
                                         textOnly={true}
                                         truncateText={true}
-                                        width="35%"
+                                        width="45%"
                                       >
                                         <td
                                           className="euiTableRowCell euiTableRowCell--hideForMobile"
                                           style={
                                             Object {
-                                              "width": "35%",
+                                              "width": "45%",
                                             }
                                           }
                                         >
