@@ -1,2 +1,0 @@
-feat:
-- Register section and content with the same id will not throw error but overrides the exist one ([#7633](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7633))
