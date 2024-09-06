@@ -1,0 +1,2 @@
+fix:
+- Bypass permission control when construct ui settings client ([#8053](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8053))
