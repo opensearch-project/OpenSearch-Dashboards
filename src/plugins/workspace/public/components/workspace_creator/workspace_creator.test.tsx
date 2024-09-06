@@ -67,7 +67,7 @@ const WorkspaceCreator = ({
           },
         },
         navigateToApp,
-        getUrlForApp: jest.fn(() => '/app/workspace_detail'),
+        getUrlForApp: jest.fn((appId) => `/app/${appId}`),
         applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(PublicAPPInfoMap as any),
       },
       notifications: {
@@ -368,5 +368,21 @@ describe('WorkspaceCreator', () => {
       fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
       expect(workspaceClientCreate).toHaveBeenCalledTimes(2);
     });
+  });
+
+  it('should redirect to workspace use case landing page after created successfully', async () => {
+    const { getByTestId } = render(<WorkspaceCreator />);
+
+    // Ensure workspace create form rendered
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    jest.useFakeTimers();
+    jest.runAllTimers();
+    await waitFor(() => {
+      expect(setHrefSpy).toHaveBeenCalledWith(expect.stringContaining('/app/discover'));
+    });
+    jest.useRealTimers();
   });
 });
