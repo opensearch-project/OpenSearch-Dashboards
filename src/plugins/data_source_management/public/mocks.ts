@@ -8,7 +8,7 @@ import { throwError } from 'rxjs';
 import { HttpStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
-import { AuthType, DataSourceAttributes } from './types';
+import { AuthType, DataSourceAttributes, DataSourceTableItem } from './types';
 import { coreMock } from '../../../core/public/mocks';
 import {
   DataSourceManagementPlugin,
@@ -233,29 +233,54 @@ export const existingDatasourceNamesList = [
   'dup20',
 ];
 
+export const directQueryConnections: DataSourceTableItem[] = [
+  {
+    id: 'DQ1',
+    type: 'Amazon S3',
+    title: 'DQ1',
+    parentId: 'test1',
+    description: 'DQ1 test resource',
+  },
+  {
+    id: 'DQ2',
+    type: 'Amazon S3',
+    title: 'DQ2',
+    parentId: 'test1',
+    description: 'DQ2 test resource',
+  },
+];
+
 export const getMappedDataSources = [
   {
-    id: 'test',
-    description: 'test datasource',
-    title: 'test',
-    sort: 'test',
+    id: 'test1',
+    type: 'OpenSearch',
+    title: 'test1',
+    connectionType: 'OpenSearchConnection',
+    description: 'test datasource1',
+    relatedConnections: directQueryConnections,
   },
   {
     id: 'test2',
+    type: 'OpenSearch',
     description: 'test datasource2',
     title: 'test',
+    connectionType: 'OpenSearchConnection',
     sort: 'test',
   },
   {
     id: 'alpha-test',
+    type: 'OpenSearch',
     description: 'alpha test datasource',
     title: 'alpha-test',
+    connectionType: 'OpenSearchConnection',
     sort: 'alpha-test',
   },
   {
     id: 'beta-test',
+    type: 'OpenSearch',
     description: 'beta test datasource',
     title: 'beta-test',
+    connectionType: 'OpenSearchConnection',
     sort: 'beta-test',
   },
 ];
