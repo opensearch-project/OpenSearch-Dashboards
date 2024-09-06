@@ -57,11 +57,11 @@ describe('DefaultDiscoverTable', () => {
     };
   });
 
-  const getDefaultDiscoverTable = () => (
+  const getDefaultDiscoverTable = (hitsOverride?: OpenSearchSearchHit[]) => (
     <IntlProvider locale="en">
       <DefaultDiscoverTable
         columns={['textField', 'longField', '@timestamp']}
-        rows={hits as OpenSearchSearchHit[]}
+        rows={(hitsOverride ?? hits) as OpenSearchSearchHit[]}
         indexPattern={indexPattern}
         sort={[]}
         onSort={jest.fn()}
@@ -110,25 +110,6 @@ describe('DefaultDiscoverTable', () => {
     });
   });
 
-  it('should not load more rows than the total number of rows', async () => {
-    const { container } = render(getDefaultDiscoverTable());
-
-    const sentinel = container.querySelector('div[data-test-subj="discoverRenderedRowsProgress"]');
-
-    // Simulate scrolling to the bottom multiple times
-    for (let i = 0; i < 3; i++) {
-      const mockScrollEntry = { isIntersecting: true, target: sentinel };
-      act(() => {
-        intersectionObserverCallback([mockScrollEntry] as IntersectionObserverEntry[]);
-      });
-    }
-
-    await waitFor(() => {
-      const tableRows = container.querySelectorAll('tbody tr');
-      expect(tableRows.length).toBe(40);
-    });
-  });
-
   it('should display the sample size callout when all rows are rendered', async () => {
     const { container } = render(getDefaultDiscoverTable());
 
@@ -146,6 +127,32 @@ describe('DefaultDiscoverTable', () => {
     await waitFor(() => {
       const callout = screen.getByTestId('discoverDocTableFooter');
       expect(callout).toBeInTheDocument();
+    });
+  });
+
+  it('Should restart rendering when new data is available', async () => {
+    const truncHits = hits.slice(0, 35) as OpenSearchSearchHit[];
+    const { container, rerender } = render(getDefaultDiscoverTable(truncHits));
+
+    let sentinel = container.querySelector('div[data-test-subj="discoverRenderedRowsProgress"]');
+
+    // Keep scrolling until all the current rows are exhausted
+    while (sentinel) {
+      const mockScrollEntry = { isIntersecting: true, target: sentinel };
+      act(() => {
+        intersectionObserverCallback([mockScrollEntry] as IntersectionObserverEntry[]);
+      });
+      sentinel = container.querySelector('div[data-test-subj="discoverRenderedRowsProgress"]');
+    }
+
+    // Make the other rows available
+    rerender(getDefaultDiscoverTable(hits as OpenSearchSearchHit[]));
+
+    await waitFor(() => {
+      const progressSentinel = container.querySelector(
+        'div[data-test-subj="discoverRenderedRowsProgress"]'
+      );
+      expect(progressSentinel).toBeInTheDocument();
     });
   });
 });
