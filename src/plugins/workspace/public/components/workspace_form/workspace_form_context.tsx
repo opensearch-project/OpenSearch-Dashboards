@@ -5,16 +5,17 @@
 
 import React, { createContext, useContext, FormEventHandler, ReactNode } from 'react';
 import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/color_picker';
-import { DataSource } from '../../../common/types';
-import { WorkspaceFormProps, WorkspaceFormErrors, WorkspacePermissionSetting } from './types';
+import { DataSourceConnection } from '../../../common/types';
+import { WorkspaceFormProps, WorkspaceFormErrors } from './types';
 import { PublicAppInfo } from '../../../../../core/public';
 import { useWorkspaceForm } from './use_workspace_form';
+import { WorkspaceFormDataState } from '../workspace_form';
 
 interface WorkspaceFormContextProps {
   formId: string;
   setName: React.Dispatch<React.SetStateAction<string>>;
   setDescription: React.Dispatch<React.SetStateAction<string | undefined>>;
-  formData: any;
+  formData: WorkspaceFormDataState;
   isEditing: boolean;
   formErrors: WorkspaceFormErrors;
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
@@ -26,11 +27,9 @@ interface WorkspaceFormContextProps {
   handleColorChange: (text: string, output: EuiColorPickerOutput) => void;
   handleUseCaseChange: (newUseCase: string) => void;
   setPermissionSettings: React.Dispatch<
-    React.SetStateAction<
-      Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
-    >
+    React.SetStateAction<WorkspaceFormDataState['permissionSettings']>
   >;
-  setSelectedDataSources: React.Dispatch<React.SetStateAction<DataSource[]>>;
+  setSelectedDataSourceConnections: React.Dispatch<React.SetStateAction<DataSourceConnection[]>>;
 }
 
 const initialContextValue: WorkspaceFormContextProps = {} as WorkspaceFormContextProps;

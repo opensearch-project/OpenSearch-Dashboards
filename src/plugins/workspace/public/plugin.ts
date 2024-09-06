@@ -539,6 +539,7 @@ export class WorkspacePlugin
         return React.createElement(EuiPanel, {
           hasShadow: false,
           hasBorder: false,
+          paddingSize: 's',
           children: [
             React.createElement(WorkspacePickerContent, {
               key: 'workspacePickerContent',

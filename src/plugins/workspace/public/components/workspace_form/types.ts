@@ -5,8 +5,8 @@
 
 import type { ApplicationStart, SavedObjectsStart } from '../../../../../core/public';
 import type { WorkspacePermissionMode } from '../../../common/constants';
-import type { DetailTab, WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
-import { DataSource } from '../../../common/types';
+import type { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
+import { DataSourceConnection } from '../../../common/types';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { WorkspaceUseCase } from '../../types';
 
@@ -34,7 +34,7 @@ export interface WorkspaceFormSubmitData {
   features: string[];
   color?: string;
   permissionSettings?: WorkspacePermissionSetting[];
-  selectedDataSources?: DataSource[];
+  selectedDataSourceConnections?: DataSourceConnection[];
 }
 
 export enum WorkspaceFormErrorCode {
@@ -61,14 +61,14 @@ export interface WorkspaceFormError {
 export type WorkspaceFormErrors = {
   [key in keyof Omit<
     WorkspaceFormSubmitData,
-    'permissionSettings' | 'description' | 'selectedDataSources'
+    'permissionSettings' | 'description' | 'selectedDataSourceConnections'
   >]?: WorkspaceFormError;
 } & {
   permissionSettings?: {
     overall?: WorkspaceFormError;
     fields?: { [key: number]: WorkspaceFormError };
   };
-  selectedDataSources?: { [key: number]: WorkspaceFormError };
+  selectedDataSourceConnections?: { [key: number]: WorkspaceFormError };
 };
 
 export interface WorkspaceFormProps {
@@ -91,7 +91,7 @@ export interface WorkspaceFormDataState
   extends Omit<WorkspaceFormSubmitData, 'name' | 'permissionSettings'> {
   name: string;
   useCase: string | undefined;
-  selectedDataSources: DataSource[];
+  selectedDataSourceConnections: DataSourceConnection[];
   permissionSettings: Array<
     Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
   >;

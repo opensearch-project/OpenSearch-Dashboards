@@ -91,14 +91,6 @@ export function CollapsibleNavGroupEnabled({
   const appId = useObservable(observables.appId$, '');
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
-  const firstVisibleNavLinkOfAllUseCase = useMemo(
-    () =>
-      fulfillRegistrationLinksToChromeNavLinks(
-        navGroupsMap[ALL_USE_CASE_ID]?.navLinks || [],
-        navLinks
-      )[0],
-    [navGroupsMap, navLinks]
-  );
 
   const visibleUseCases = useMemo(() => getVisibleUseCases(navGroupsMap), [navGroupsMap]);
 
@@ -303,7 +295,8 @@ export function CollapsibleNavGroupEnabled({
           >
             <CollapsibleNavTop
               homeLink={homeLink}
-              firstVisibleNavLinkOfAllUseCase={firstVisibleNavLinkOfAllUseCase}
+              navGroupsMap={navGroupsMap}
+              navLinks={navLinks}
               navigateToApp={navigateToApp}
               logos={logos}
               setCurrentNavGroup={setCurrentNavGroup}
@@ -326,7 +319,7 @@ export function CollapsibleNavGroupEnabled({
             {shouldShowCollapsedNavHeaderContent && collapsibleNavHeaderRender ? (
               <>
                 {collapsibleNavHeaderRender()}
-                <EuiSpacer size="l" />
+                <EuiSpacer />
               </>
             ) : null}
             <NavGroups

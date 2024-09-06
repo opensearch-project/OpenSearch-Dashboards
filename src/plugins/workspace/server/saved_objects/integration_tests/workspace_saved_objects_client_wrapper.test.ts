@@ -16,7 +16,7 @@ import {
   SavedObjectsClientContract,
 } from '../../../../../core/server';
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
-import * as utilsExports from '../../utils';
+import * as utilsExports from '../../../../../core/server/utils/auth_info';
 import { updateWorkspaceState } from '../../../../../core/server/utils';
 
 const repositoryKit = (() => {

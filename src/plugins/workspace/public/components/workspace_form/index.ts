@@ -10,6 +10,8 @@ export { WorkspaceUseCase } from './workspace_use_case';
 export { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
 export { WorkspaceCancelModal } from './workspace_cancel_modal';
 export { WorkspaceNameField, WorkspaceDescriptionField } from './fields';
+export { DirectQueryConnectionIcon } from './direct_query_connection_icon';
+export { DataSourceConnectionTable } from './data_source_connection_table';
 
 export { WorkspaceFormSubmitData, WorkspaceFormProps, WorkspaceFormDataState } from './types';
 export {
@@ -25,6 +27,7 @@ export {
 export {
   convertPermissionsToPermissionSettings,
   convertPermissionSettingsToPermissions,
+  isWorkspacePermissionSetting,
 } from './utils';
 
 export { WorkspaceFormProvider, useWorkspaceFormContext } from './workspace_form_context';

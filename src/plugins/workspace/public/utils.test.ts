@@ -13,13 +13,12 @@ import {
   getDataSourcesList,
   convertNavGroupToWorkspaceUseCase,
   isEqualWorkspaceUseCase,
-  USE_CASE_PREFIX,
   prependWorkspaceToBreadcrumbs,
   getIsOnlyAllowEssentialUseCase,
 } from './utils';
 import { WorkspaceAvailability } from '../../../core/public';
 import { coreMock } from '../../../core/public/mocks';
-import { WORKSPACE_DETAIL_APP_ID } from '../common/constants';
+import { WORKSPACE_DETAIL_APP_ID, USE_CASE_PREFIX } from '../common/constants';
 import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
 import { createMockedRegisteredUseCases } from './mocks';
 
@@ -467,6 +466,7 @@ describe('workspace utils: convertNavGroupToWorkspaceUseCase', () => {
         title: 'Foo',
         description: 'Foo description',
         navLinks: [{ id: 'bar', title: 'Bar' }],
+        icon: 'wsAnalytics',
       })
     ).toEqual({
       id: 'foo',
@@ -474,6 +474,7 @@ describe('workspace utils: convertNavGroupToWorkspaceUseCase', () => {
       description: 'Foo description',
       features: [{ id: 'bar', title: 'Bar' }],
       systematic: false,
+      icon: 'wsAnalytics',
     });
 
     expect(
@@ -619,7 +620,7 @@ describe('workspace utils: prependWorkspaceToBreadcrumbs', () => {
     expect(coreStart.chrome.setBreadcrumbsEnricher).not.toHaveBeenCalled();
   });
 
-  it('should enrich breadcrumbs when in a workspace and use workspace use case as current nav group', async () => {
+  it('should enrich breadcrumbs when in a workspace and add workspace name into breadcrumbs', async () => {
     const navGroupSearch = {
       id: 'search',
       title: 'Search',
@@ -647,7 +648,7 @@ describe('workspace utils: prependWorkspaceToBreadcrumbs', () => {
     const breadcrumbs = [{ text: 'test app' }];
     let enrichedBreadcrumbs = enricher?.(breadcrumbs);
     expect(enrichedBreadcrumbs).toHaveLength(3);
-    expect(enrichedBreadcrumbs?.[1].text).toEqual('Search');
+    expect(enrichedBreadcrumbs?.[1].text).toEqual('test workspace 1');
 
     // ignore current nav group
     prependWorkspaceToBreadcrumbs(coreStart, workspace, 'app1', navGroupDashboards, {
@@ -662,7 +663,7 @@ describe('workspace utils: prependWorkspaceToBreadcrumbs', () => {
 
     enrichedBreadcrumbs = enricher?.(breadcrumbs);
     expect(enrichedBreadcrumbs).toHaveLength(3);
-    expect(enrichedBreadcrumbs?.[1].text).toEqual('Search');
+    expect(enrichedBreadcrumbs?.[1].text).toEqual('test workspace 1');
   });
 
   it('should enrich breadcrumbs when in a workspace with all use case and use selected nav group', async () => {

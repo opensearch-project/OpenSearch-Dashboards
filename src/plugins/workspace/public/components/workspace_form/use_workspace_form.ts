@@ -7,12 +7,9 @@ import { useCallback, useState, FormEventHandler, useRef, useMemo } from 'react'
 import { htmlIdGenerator, EuiColorPickerProps } from '@elastic/eui';
 
 import { useApplications } from '../../hooks';
-import {
-  getFirstUseCaseOfFeatureConfigs,
-  getUseCaseFeatureConfig,
-  isUseCaseFeatureConfig,
-} from '../../utils';
-import { DataSource } from '../../../common/types';
+import { getFirstUseCaseOfFeatureConfigs, isUseCaseFeatureConfig } from '../../utils';
+import { DataSourceConnection } from '../../../common/types';
+import { getUseCaseFeatureConfig } from '../../../common/utils';
 import {
   WorkspaceFormProps,
   WorkspaceFormErrors,
@@ -54,9 +51,12 @@ export const useWorkspaceForm = ({
     WorkspaceFormDataState['permissionSettings']
   >(initialPermissionSettingsRef.current);
 
-  const [selectedDataSources, setSelectedDataSources] = useState<DataSource[]>(
-    defaultValues?.selectedDataSources && defaultValues.selectedDataSources.length > 0
-      ? defaultValues.selectedDataSources
+  const [selectedDataSourceConnections, setSelectedDataSourceConnections] = useState<
+    DataSourceConnection[]
+  >(
+    defaultValues?.selectedDataSourceConnections &&
+      defaultValues.selectedDataSourceConnections.length > 0
+      ? defaultValues.selectedDataSourceConnections
       : []
   );
 
@@ -70,7 +70,7 @@ export const useWorkspaceForm = ({
     useCase: selectedUseCase,
     color,
     permissionSettings,
-    selectedDataSources,
+    selectedDataSourceConnections,
   });
   const getFormDataRef = useRef(getFormData);
   getFormDataRef.current = getFormData;
@@ -125,7 +125,7 @@ export const useWorkspaceForm = ({
         color: currentFormData.color || '#FFFFFF',
         features: currentFormData.features,
         permissionSettings: currentFormData.permissionSettings as WorkspacePermissionSetting[],
-        selectedDataSources: currentFormData.selectedDataSources,
+        selectedDataSourceConnections: currentFormData.selectedDataSourceConnections,
       });
     },
     [onSubmit, permissionEnabled]
@@ -162,6 +162,6 @@ export const useWorkspaceForm = ({
     handleColorChange,
     handleUseCaseChange,
     setPermissionSettings,
-    setSelectedDataSources,
+    setSelectedDataSourceConnections,
   };
 };
