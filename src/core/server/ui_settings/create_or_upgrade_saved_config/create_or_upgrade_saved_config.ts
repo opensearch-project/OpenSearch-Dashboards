@@ -53,11 +53,15 @@ export async function createOrUpgradeSavedConfig(
   const { savedObjectsClient, version, buildNum, log, handleWriteErrors, scope } = options;
 
   // try to find an older config we can upgrade
-  const upgradeableConfig = await getUpgradeableConfig({
-    savedObjectsClient,
-    version,
-    scope,
-  });
+  let upgradeableConfig;
+  if (scope === UiSettingScope.USER) {
+    upgradeableConfig = undefined;
+  } else {
+    upgradeableConfig = await getUpgradeableConfig({
+      savedObjectsClient,
+      version,
+    });
+  }
 
   // default to the attributes of the upgradeableConfig if available
   const attributes = defaults(

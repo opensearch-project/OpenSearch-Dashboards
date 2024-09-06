@@ -130,36 +130,13 @@ export class UserUISettingsClientWrapper {
       return wrapperOptions.client.create(type, attributes, options);
     };
 
-    const findUiSettings = async <T = unknown>(
-      options: SavedObjectsFindOptions
-    ): Promise<SavedObjectsFindResponse<T>> => {
-      // check if options type is config
-      const userName = extractUserName(wrapperOptions.request, this.core);
-      const { hasReference } = options || {};
-      if (options.type === 'config' && userName && hasReference) {
-        const id = hasReference.id.replace(CURRENT_USER_PLACEHOLDER, userName);
-        const resp: SavedObjectsFindResponse<T> = await wrapperOptions.client.find({
-          ...options,
-          hasReference: { ...hasReference, id },
-        });
-
-        // normalize the document id to real version
-        resp.saved_objects.forEach((so) => {
-          so.id = so.id.replace(`${userName}_`, '');
-        });
-
-        return Promise.resolve(resp);
-      }
-      return wrapperOptions.client.find(options);
-    };
-
     return {
       ...wrapperOptions.client,
       checkConflicts: wrapperOptions.client.checkConflicts,
       errors: wrapperOptions.client.errors,
       addToNamespaces: wrapperOptions.client.addToNamespaces,
       deleteFromNamespaces: wrapperOptions.client.deleteFromNamespaces,
-      find: findUiSettings,
+      find: wrapperOptions.client.find,
       bulkGet: wrapperOptions.client.bulkGet,
       create: createUiSettings,
       bulkCreate: wrapperOptions.client.bulkCreate,
