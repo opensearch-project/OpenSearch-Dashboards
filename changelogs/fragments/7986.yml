@@ -1,0 +1,2 @@
+fix:
+- Fix workspace detail classname definition ([#7986](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7986))
