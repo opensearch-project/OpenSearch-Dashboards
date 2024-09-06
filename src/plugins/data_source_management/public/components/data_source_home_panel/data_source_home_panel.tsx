@@ -38,17 +38,9 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
   useNewUX,
   ...props
 }) => {
-  const {
-    setBreadcrumbs,
-    notifications,
-    http,
-    savedObjects,
-    uiSettings,
-    application,
-    workspaces,
-    docLinks,
-    navigation,
-  } = useOpenSearchDashboards<DataSourceManagementContext>().services;
+  const { setBreadcrumbs, application, workspaces, docLinks, navigation } = useOpenSearchDashboards<
+    DataSourceManagementContext
+  >().services;
 
   const defaultTabId = featureFlagStatus
     ? 'manageOpensearchDataSources'
@@ -69,7 +61,7 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
   const createDataSourceButton = [
     {
       id: 'Create data source',
-      label: 'Create data source connection',
+      label: featureFlagStatus ? 'Create data source connection' : 'Create direct query connection',
       testId: 'createDataSourceButton',
       run: () => props.history.push('/create'),
       fill: true,
@@ -110,6 +102,25 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
     },
   ];
 
+  const description = {
+    description: i18n.translate('dataSourcesManagement.dataSourcesTable.description', {
+      defaultMessage: featureFlagStatus
+        ? 'Create and manage data source connections.'
+        : 'Manage direct query data source connections.',
+    }),
+    links: [
+      {
+        href: docLinks.links.opensearchDashboards.dataSource.guide,
+        controlType: 'link',
+        target: '_blank',
+        className: 'external-link-inline-block',
+        label: i18n.translate('dataSourcesManagement.dataSourcesTable.documentation', {
+          defaultMessage: 'Learn more',
+        }),
+      },
+    ],
+  } as TopNavControlDescriptionData;
+
   const renderTabs = () => {
     return tabs.map((tab) => (
       <EuiTab
@@ -126,10 +137,12 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
     <EuiPanel>
       {useNewUX && (
         <>
-          <HeaderControl
-            setMountPoint={application.setAppCenterControls}
-            controls={connectionTypeButton}
-          />
+          {featureFlagStatus && (
+            <HeaderControl
+              setMountPoint={application.setAppCenterControls}
+              controls={connectionTypeButton}
+            />
+          )}
           {canManageDataSource && (
             <HeaderControl
               setMountPoint={application.setAppRightControls}
@@ -151,28 +164,7 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
                       }
                     ),
                   }
-                : ({
-                    description: i18n.translate(
-                      'dataSourcesManagement.dataSourcesTable.description',
-                      {
-                        defaultMessage: 'Create and manage data source connections.',
-                      }
-                    ),
-                    links: [
-                      {
-                        href: docLinks.links.opensearchDashboards.dataSource.guide,
-                        controlType: 'link',
-                        target: '_blank',
-                        className: 'external-link-inline-block',
-                        label: i18n.translate(
-                          'dataSourcesManagement.dataSourcesTable.documentation',
-                          {
-                            defaultMessage: 'Learn more',
-                          }
-                        ),
-                      },
-                    ],
-                  } as TopNavControlDescriptionData),
+                : description,
             ]}
           />
         </>
@@ -184,28 +176,40 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
               <EuiPageHeader>
                 <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <DataSourceHeader history={props.history} />
+                    <DataSourceHeader
+                      history={props.history}
+                      featureFlagStatus={featureFlagStatus}
+                    />
                   </EuiFlexItem>
                   {canManageDataSource ? (
                     <EuiFlexItem grow={false}>
-                      <CreateButton history={props.history} dataTestSubj="createDataSourceButton" />
+                      <CreateButton
+                        history={props.history}
+                        featureFlagStatus={featureFlagStatus}
+                        dataTestSubj="createDataSourceButton"
+                      />
                     </EuiFlexItem>
                   ) : null}
                 </EuiFlexGroup>
               </EuiPageHeader>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiSpacer size="s" />
-              <EuiTabs size="s">{renderTabs()}</EuiTabs>
-            </EuiFlexItem>
+            {featureFlagStatus && (
+              <EuiFlexItem>
+                <EuiSpacer size="s" />
+                <EuiTabs size="s">{renderTabs()}</EuiTabs>
+              </EuiFlexItem>
+            )}
           </>
         )}
         <EuiFlexItem>
           {selectedTabId === 'manageOpensearchDataSources' && featureFlagStatus && (
             <DataSourceTableWithRouter {...props} />
           )}
-          {selectedTabId === 'manageDirectQueryDataSources' && featureFlagStatus && (
-            <ManageDirectQueryDataConnectionsTableWithRouter {...props} />
+          {(!featureFlagStatus || selectedTabId === 'manageDirectQueryDataSources') && (
+            <ManageDirectQueryDataConnectionsTableWithRouter
+              featureFlagStatus={featureFlagStatus}
+              {...props}
+            />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
