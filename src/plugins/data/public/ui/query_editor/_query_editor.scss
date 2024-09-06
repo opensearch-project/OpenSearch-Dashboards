@@ -205,8 +205,8 @@
 
   &.visible::after {
     position: absolute;
-    height: auto;
-    bottom: auto;
+    height: 31px;
+    bottom: -31px;
     left: 0;
     width: 100%;
     background-color: $euiColorLightestShade;
