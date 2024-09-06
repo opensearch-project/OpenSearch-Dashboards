@@ -10,7 +10,6 @@ import { QueryStatementContext } from "./OpenSearchPPLParser.js";
 import { PplCommandsContext } from "./OpenSearchPPLParser.js";
 import { CommandsContext } from "./OpenSearchPPLParser.js";
 import { SearchFromContext } from "./OpenSearchPPLParser.js";
-import { SearchFromFilterContext } from "./OpenSearchPPLParser.js";
 import { DescribeCommandContext } from "./OpenSearchPPLParser.js";
 import { ShowDataSourcesCommandContext } from "./OpenSearchPPLParser.js";
 import { WhereCommandContext } from "./OpenSearchPPLParser.js";
@@ -188,13 +187,6 @@ export class OpenSearchPPLParserVisitor<Result> extends AbstractParseTreeVisitor
      * @return the visitor result
      */
     visitSearchFrom?: (ctx: SearchFromContext) => Result;
-    /**
-     * Visit a parse tree produced by the `searchFromFilter`
-     * labeled alternative in `OpenSearchPPLParser.searchCommand`.
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    visitSearchFromFilter?: (ctx: SearchFromFilterContext) => Result;
     /**
      * Visit a parse tree produced by `OpenSearchPPLParser.describeCommand`.
      * @param ctx the parse tree

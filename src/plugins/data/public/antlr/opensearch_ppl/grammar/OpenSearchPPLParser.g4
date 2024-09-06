@@ -53,7 +53,7 @@ commands
 
 searchCommand
    : (SEARCH)? fromClause                       # searchFrom
-   | (SEARCH)? fromClause logicalExpression     # searchFromFilter
+   // | (SEARCH)? fromClause logicalExpression     # searchFromFilter
    // | (SEARCH)? logicalExpression fromClause     # searchFilterFrom
    ;
 
