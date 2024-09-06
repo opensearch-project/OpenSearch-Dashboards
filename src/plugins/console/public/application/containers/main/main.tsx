@@ -100,6 +100,25 @@ export function Main({ dataSourceId }: MainProps) {
 
   const useUpdatedUX = uiSettings.get('home:useNewHomePage');
 
+  const networkRequestStatusBarContent = (
+    <EuiFlexItem grow={false} className={useUpdatedUX ? '' : 'conApp__tabsExtension'}>
+      <NetworkRequestStatusBar
+        requestInProgress={requestInProgress}
+        requestResult={
+          lastDatum
+            ? {
+                method: lastDatum.request.method.toUpperCase(),
+                endpoint: lastDatum.request.path,
+                statusCode: lastDatum.response.statusCode,
+                statusText: lastDatum.response.statusText,
+                timeElapsedMs: lastDatum.response.timeMs,
+              }
+            : undefined
+        }
+      />
+    </EuiFlexItem>
+  );
+
   return (
     <div id="consoleRoot">
       <EuiFlexGroup
@@ -129,24 +148,10 @@ export function Main({ dataSourceId }: MainProps) {
                   onClickExport: () => onExport(),
                   onClickImport: () => setShowImportFlyout(!showImportFlyout),
                 })}
+                rightContainerChildren={networkRequestStatusBarContent}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false} className="conApp__tabsExtension">
-              <NetworkRequestStatusBar
-                requestInProgress={requestInProgress}
-                requestResult={
-                  lastDatum
-                    ? {
-                        method: lastDatum.request.method.toUpperCase(),
-                        endpoint: lastDatum.request.path,
-                        statusCode: lastDatum.response.statusCode,
-                        statusText: lastDatum.response.statusText,
-                        timeElapsedMs: lastDatum.response.timeMs,
-                      }
-                    : undefined
-                }
-              />
-            </EuiFlexItem>
+            {useUpdatedUX ? null : networkRequestStatusBarContent}
           </EuiFlexGroup>
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}

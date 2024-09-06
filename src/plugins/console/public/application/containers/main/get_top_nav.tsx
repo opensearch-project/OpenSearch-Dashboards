@@ -32,6 +32,7 @@ import React from 'react';
 import { EuiSmallButton, EuiSmallButtonEmpty, EuiSmallButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { TopNavMenuItem } from '../../components';
+import { MenuItemPosition } from '../../components/top_nav_menu';
 
 interface Props {
   onClickHistory: () => void;
@@ -70,6 +71,7 @@ export function getTopNavConfig({
           })}
         </EuiSmallButtonEmpty>
       ),
+      position: MenuItemPosition.LEFT,
     },
     {
       id: 'settings',
@@ -92,6 +94,7 @@ export function getTopNavConfig({
           <EuiSmallButtonIcon iconType="gear" display="base" {...commonProps} />
         </EuiToolTip>
       ),
+      position: MenuItemPosition.RIGHT,
     },
     {
       id: 'help',
@@ -114,6 +117,7 @@ export function getTopNavConfig({
           <EuiSmallButtonIcon iconType="questionInCircle" display="base" {...commonProps} />
         </EuiToolTip>
       ),
+      position: MenuItemPosition.RIGHT,
     },
     {
       id: 'export',
@@ -134,6 +138,7 @@ export function getTopNavConfig({
           })}
         </EuiSmallButton>
       ),
+      position: MenuItemPosition.RIGHT,
     },
     {
       id: 'import',
@@ -154,6 +159,7 @@ export function getTopNavConfig({
           })}
         </EuiSmallButton>
       ),
+      position: MenuItemPosition.RIGHT,
     },
   ];
 }
