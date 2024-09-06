@@ -467,6 +467,7 @@ describe('workspace utils: convertNavGroupToWorkspaceUseCase', () => {
         title: 'Foo',
         description: 'Foo description',
         navLinks: [{ id: 'bar', title: 'Bar' }],
+        icon: 'wsAnalytics',
       })
     ).toEqual({
       id: 'foo',
@@ -474,6 +475,7 @@ describe('workspace utils: convertNavGroupToWorkspaceUseCase', () => {
       description: 'Foo description',
       features: [{ id: 'bar', title: 'Bar' }],
       systematic: false,
+      icon: 'wsAnalytics',
     });
 
     expect(

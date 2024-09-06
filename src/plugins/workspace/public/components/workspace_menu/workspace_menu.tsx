@@ -9,14 +9,14 @@ import { useObservable } from 'react-use';
 import {
   EuiText,
   EuiPanel,
-  EuiAvatar,
   EuiPopover,
   EuiToolTip,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiSmallButtonIcon,
   EuiSmallButtonEmpty,
   EuiSmallButton,
+  EuiButtonIcon,
+  EuiIcon,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
@@ -79,23 +79,9 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
     setPopover(false);
   };
 
-  const currentWorkspaceButton = currentWorkspace ? (
-    <EuiSmallButtonEmpty
-      onClick={openPopover}
-      data-test-subj="current-workspace-button"
-      flush="both"
-    >
-      <EuiAvatar
-        size="s"
-        type="space"
-        name={currentWorkspace.name}
-        color={getValidWorkspaceColor(currentWorkspace.color)}
-        initialsLength={2}
-      />
-    </EuiSmallButtonEmpty>
-  ) : (
-    <EuiSmallButtonIcon
-      iconType="spacesApp"
+  const currentWorkspaceButton = (
+    <EuiButtonIcon
+      iconType="wsSelector"
       onClick={openPopover}
       aria-label="workspace-select-button"
       data-test-subj="workspace-select-button"
@@ -122,12 +108,10 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
           {currentWorkspace ? (
             <>
               <EuiFlexItem grow={false}>
-                <EuiAvatar
-                  size="m"
-                  type="space"
-                  name={currentWorkspaceName}
-                  color={getValidWorkspaceColor(currentWorkspace?.color)}
-                  initialsLength={2}
+                <EuiIcon
+                  size="l"
+                  type={getUseCase(currentWorkspace)?.icon || 'wsSelector'}
+                  color={getValidWorkspaceColor(currentWorkspace.color)}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="workspace-menu-current-workspace-name">
@@ -159,7 +143,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
           ) : (
             <>
               <EuiFlexItem grow={false}>
-                <EuiAvatar size="m" color="plain" name="spacesApp" iconType="spacesApp" />
+                <EuiIcon size="l" type="wsSelector" />
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="workspace-menu-current-workspace-name">
                 {currentWorkspaceName}
@@ -179,7 +163,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
           )}
         </EuiFlexGroup>
       </EuiPanel>
-      <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
+      <EuiPanel paddingSize="none" hasBorder={false} color="transparent">
         <WorkspacePickerContent
           coreStart={coreStart}
           registeredUseCases$={registeredUseCases$}
