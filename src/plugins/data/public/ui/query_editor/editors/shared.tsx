@@ -95,6 +95,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
         }}
         suggestionProvider={{
           provideCompletionItems,
+          triggerCharacters: [' '],
         }}
         languageConfiguration={{
           autoClosingPairs: [
@@ -108,6 +109,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
             },
           ],
         }}
+        triggerSuggestOnFocus={true}
       />
     </div>
   </div>
