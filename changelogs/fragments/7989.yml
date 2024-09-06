@@ -1,0 +1,2 @@
+refactor:
+- Hide saved object import button when user is outside workspace ([#7989](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7989))
