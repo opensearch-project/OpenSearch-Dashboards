@@ -10,7 +10,6 @@ import { CURRENT_USER_PLACEHOLDER, WorkspacePermissionMode } from '../../../comm
 import { isUseCaseFeatureConfig } from '../../utils';
 import {
   optionIdToWorkspacePermissionModesMap,
-  PermissionModeId,
   WorkspaceOperationType,
   WorkspacePermissionItemType,
 } from './constants';
@@ -27,6 +26,7 @@ import {
 } from './types';
 import { DataSourceConnection } from '../../../common/types';
 import { validateWorkspaceColor } from '../../../common/utils';
+import { PermissionModeId } from '../../../../../core/public';
 
 export const isValidFormTextInput = (input?: string) => {
   /**

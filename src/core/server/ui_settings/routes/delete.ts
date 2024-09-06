@@ -33,10 +33,16 @@ import { schema } from '@osd/config-schema';
 import { IRouter } from '../../http';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
 import { CannotOverrideError } from '../ui_settings_errors';
+import { UiSettingScope } from '../types';
 
 const validate = {
   params: schema.object({
     key: schema.string(),
+  }),
+  query: schema.object({
+    scope: schema.maybe(
+      schema.oneOf([schema.literal(UiSettingScope.GLOBAL), schema.literal(UiSettingScope.USER)])
+    ),
   }),
 };
 
@@ -47,7 +53,9 @@ export function registerDeleteRoute(router: IRouter) {
       try {
         const uiSettingsClient = context.core.uiSettings.client;
 
-        await uiSettingsClient.remove(request.params.key);
+        const { scope } = request.query;
+
+        await uiSettingsClient.remove(request.params.key, scope);
 
         return response.ok({
           body: {

@@ -17,12 +17,12 @@ import { WorkspacePermissionMode } from '../../../common/constants';
 import {
   WorkspacePermissionItemType,
   optionIdToWorkspacePermissionModesMap,
-  PermissionModeId,
   PERMISSION_TYPE_LABEL_ID,
   PERMISSION_COLLABORATOR_LABEL_ID,
   PERMISSION_ACCESS_LEVEL_LABEL_ID,
 } from './constants';
 import { getPermissionModeId } from './utils';
+import { PermissionModeId } from '../../../../../core/public';
 
 const permissionModeOptions: Array<EuiSuperSelectOption<any>> = [
   {

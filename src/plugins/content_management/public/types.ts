@@ -12,6 +12,17 @@ import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 export interface ContentManagementPluginSetup {
   registerPage: ContentManagementService['registerPage'];
 }
+export interface RenderOptions {
+  /**
+   * show as fragment not a full page
+   */
+  fragmentOnly?: boolean;
+  /**
+   * only render specific section when specified
+   */
+  sectionId?: string;
+}
+
 export interface ContentManagementPluginStart {
   /**
    * @experimental this API is experimental and might change in future releases
@@ -25,7 +36,7 @@ export interface ContentManagementPluginStart {
     targetArea: string,
     callback: (section: Section | null, err?: Error) => Section | null
   ) => void;
-  renderPage: (id: string) => React.ReactNode;
+  renderPage: (id: string, options?: RenderOptions) => React.ReactNode;
 }
 
 export interface ContentManagementPluginStartDependencies {
