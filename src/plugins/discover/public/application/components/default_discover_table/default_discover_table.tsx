@@ -5,7 +5,7 @@
 
 import './_doc_table.scss';
 
-import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback, SetStateAction } from 'react';
 import { EuiSmallButtonEmpty, EuiCallOut, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { TableHeader } from './table_header';
@@ -155,6 +155,10 @@ const DefaultDiscoverTableUI = ({
   const lazyLoadRequestFrameRef = useRef<number>(0);
   const lazyLoadLastTimeRef = useRef<number>(0);
 
+  // When doing infinite scrolling, the `rows` prop gets regularly updated from the outside: we only
+  // render the additional rows when we know the load isn't too high. To prevent overloading the
+  // renderer, we throttle by current framerate and only render if the frames are fast enough, then
+  // we increase the rendered row count and trigger a re-render.
   React.useEffect(() => {
     if (!showPagination) {
       const loadMoreRows = (time: number) => {
