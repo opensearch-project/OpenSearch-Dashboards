@@ -6,7 +6,6 @@
 import {
   Logger,
   OpenSearchDashboardsRequest,
-  RequestHandlerContext,
   SavedObjectsFindResponse,
   CoreSetup,
   WorkspaceAttribute,
@@ -14,7 +13,7 @@ import {
   Permissions,
   UiSettingsServiceStart,
 } from '../../../core/server';
-import { PermissionModeId } from '../common/types';
+import { PermissionModeId } from '../../../core/server';
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
   permissionMode?: PermissionModeId;

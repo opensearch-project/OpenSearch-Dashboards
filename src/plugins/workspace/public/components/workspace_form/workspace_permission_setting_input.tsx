@@ -22,7 +22,7 @@ import {
   PERMISSION_ACCESS_LEVEL_LABEL_ID,
 } from './constants';
 import { getPermissionModeId } from './utils';
-import { PermissionModeId } from '../../../common/types';
+import { PermissionModeId } from '../../../../../core/public';
 
 const permissionModeOptions: Array<EuiSuperSelectOption<any>> = [
   {

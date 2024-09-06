@@ -16,7 +16,7 @@ import {
 import { updateWorkspaceState } from '../../../core/server/utils';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../data_source_management/common';
 import { CURRENT_USER_PLACEHOLDER, WorkspacePermissionMode } from '../common/constants';
-import { PermissionModeId } from '../common/types';
+import { PermissionModeId } from '../../../core/server';
 
 /**
  * Generate URL friendly random ID

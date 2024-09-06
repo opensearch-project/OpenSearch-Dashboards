@@ -27,9 +27,3 @@ export interface DataSourceConnection {
   description?: string;
   relatedConnections?: DataSourceConnection[];
 }
-
-export enum PermissionModeId {
-  Read = 'read',
-  ReadAndWrite = 'read+write',
-  Owner = 'owner',
-}

@@ -26,7 +26,7 @@ import {
   WorkspacePermissionSettingInputProps,
 } from './workspace_permission_setting_input';
 import { generateNextPermissionSettingsId } from './utils';
-import { PermissionModeId } from '../../../common/types';
+import { PermissionModeId } from '../../../../../core/public';
 
 export interface WorkspacePermissionSettingPanelProps {
   errors?: { [key: number]: WorkspaceFormError };

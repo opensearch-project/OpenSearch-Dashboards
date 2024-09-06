@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { WorkspacePermissionMode } from '../../../common/constants';
-import { PermissionModeId } from '../../../common/types';
+import { PermissionModeId } from '../../../../../core/public';
 
 export enum WorkspaceOperationType {
   Create = 'create',
