@@ -173,7 +173,7 @@ fromClause
    ;
 
 tableSourceClause
-   : tableSource (COMMA tableSource)*
+   : tableSource // (COMMA tableSource)*
    ;
 
 renameClasue
@@ -775,11 +775,11 @@ valueList
    ;
 
 qualifiedName
-   : ident (DOT ident)* # identsAsQualifiedName
+   : ID // (DOT ident)* # identsAsQualifiedName
    ;
 
 tableQualifiedName
-   : tableIdent (DOT ident)* # identsAsTableQualifiedName
+   : ID // tableIdent (DOT ident)* # identsAsTableQualifiedName
    ;
 
 wcQualifiedName
