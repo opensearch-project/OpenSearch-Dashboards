@@ -29,7 +29,12 @@
  */
 
 import { SavedObjectsClientContract } from '../saved_objects/types';
-import { UiSettingsParams, UserProvidedValues, PublicUiSettingsParams } from '../../types';
+import {
+  UiSettingsParams,
+  UserProvidedValues,
+  PublicUiSettingsParams,
+  UiSettingScope,
+} from '../../types';
 export {
   UiSettingsParams,
   PublicUiSettingsParams,
@@ -40,6 +45,7 @@ export {
   ImageValidation,
   UiSettingsType,
   UserProvidedValues,
+  UiSettingScope,
 } from '../../types';
 
 /**
@@ -66,31 +72,33 @@ export interface IUiSettingsClient {
   /**
    * Retrieves uiSettings values set by the user with fallbacks to default values if not specified.
    */
-  get: <T = any>(key: string) => Promise<T>;
+  get: <T = any>(key: string, scope?: UiSettingScope) => Promise<T>;
   /**
    * Retrieves a set of all uiSettings values set by the user with fallbacks to default values if not specified.
    */
-  getAll: <T = any>() => Promise<Record<string, T>>;
+  getAll: <T = any>(scope?: UiSettingScope) => Promise<Record<string, T>>;
   /**
    * Retrieves a set of all uiSettings values set by the user.
    */
-  getUserProvided: <T = any>() => Promise<Record<string, UserProvidedValues<T>>>;
+  getUserProvided: <T = any>(
+    scope?: UiSettingScope
+  ) => Promise<Record<string, UserProvidedValues<T>>>;
   /**
    * Writes multiple uiSettings values and marks them as set by the user.
    */
-  setMany: (changes: Record<string, any>) => Promise<void>;
+  setMany: (changes: Record<string, any>, scope?: UiSettingScope) => Promise<void>;
   /**
    * Writes uiSettings value and marks it as set by the user.
    */
-  set: (key: string, value: any) => Promise<void>;
+  set: (key: string, value: any, scope?: UiSettingScope) => Promise<void>;
   /**
    * Removes uiSettings value by key.
    */
-  remove: (key: string) => Promise<void>;
+  remove: (key: string, scope?: UiSettingScope) => Promise<void>;
   /**
    * Removes multiple uiSettings values by keys.
    */
-  removeMany: (keys: string[]) => Promise<void>;
+  removeMany: (keys: string[], scope?: UiSettingScope) => Promise<void>;
   /**
    * Shows whether the uiSettings value set by the user.
    */

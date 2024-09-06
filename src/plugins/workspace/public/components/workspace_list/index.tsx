@@ -16,14 +16,18 @@ import {
   EuiSearchBarProps,
   copyToClipboard,
   EuiTableSelectionType,
-  EuiButtonEmpty,
   EuiButton,
   EuiEmptyPrompt,
   EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, of } from 'rxjs';
 import { i18n } from '@osd/i18n';
+import { isString } from 'lodash';
+import { startCase } from 'lodash';
 import {
   DEFAULT_NAV_GROUPS,
   WorkspaceAttribute,
@@ -33,7 +37,7 @@ import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashb
 import { navigateToWorkspaceDetail } from '../utils/workspace';
 import { DetailTab } from '../workspace_form/constants';
 
-import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
+import { DEFAULT_WORKSPACE, WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
 import { getFirstUseCaseOfFeatureConfigs, getDataSourcesList } from '../../utils';
@@ -46,12 +50,39 @@ export interface WorkspaceListProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
 }
 
+export interface WorkspaceListInnerProps extends WorkspaceListProps {
+  fullPage?: boolean;
+  selectable?: boolean;
+  searchable?: boolean;
+  excludedActionNames?: string[];
+  includedColumns?: Array<{ field: string; width?: string }>;
+  excludedColumns?: string[];
+}
+
 interface WorkspaceAttributeWithUseCaseIDAndDataSources extends WorkspaceAttribute {
   useCase?: string;
   dataSources?: string[];
 }
 
-export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
+export const WorkspaceList = (props: WorkspaceListProps) => {
+  return (
+    <WorkspaceListInner
+      {...props}
+      excludedActionNames={['leave']}
+      excludedColumns={['permissionMode']}
+    />
+  );
+};
+
+export const WorkspaceListInner = ({
+  registeredUseCases$,
+  fullPage = true,
+  selectable = true,
+  searchable = true,
+  excludedActionNames = [],
+  includedColumns = [],
+  excludedColumns = [],
+}: WorkspaceListInnerProps) => {
   const {
     services: {
       workspaces,
@@ -60,6 +91,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
       navigationUI: { HeaderControl },
       uiSettings,
       savedObjects,
+      notifications,
     },
   } = useOpenSearchDashboards<{
     navigationUI: NavigationPublicPluginStart['ui'];
@@ -72,12 +104,14 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 5,
+    pageSize: 10,
     pageSizeOptions: [5, 10, 20],
   });
   const [deletedWorkspaces, setDeletedWorkspaces] = useState<WorkspaceAttribute[]>([]);
   const [selection, setSelection] = useState<WorkspaceAttribute[]>([]);
   const [allDataSources, setAllDataSources] = useState<DataSourceAttributesWithWorkspaces[]>([]);
+  //  default workspace state
+  const [defaultWorkspaceId, setDefaultWorkspaceId] = useState<string | undefined>(undefined);
 
   const dateFormat = uiSettings?.get('dateFormat');
 
@@ -99,12 +133,13 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
   );
 
   useEffect(() => {
+    setDefaultWorkspaceId(uiSettings?.get(DEFAULT_WORKSPACE));
     if (savedObjects) {
       getDataSourcesList(savedObjects.client, ['*']).then((data) => {
         setAllDataSources(data);
       });
     }
-  }, [savedObjects]);
+  }, [savedObjects, uiSettings]);
 
   const newWorkspaceList: WorkspaceAttributeWithUseCaseIDAndDataSources[] = useMemo(() => {
     return workspaceList.map(
@@ -187,6 +222,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
 
   const handleCopyId = (id: string) => {
     copyToClipboard(id);
+    notifications?.toasts.addSuccess('Workspace ID copied');
   };
 
   const handleSwitchWorkspace = useCallback(
@@ -196,6 +232,22 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
       }
     },
     [application, http]
+  );
+
+  const handleSetDefaultWorkspace = useCallback(
+    async (item: WorkspaceAttribute) => {
+      const set = await uiSettings?.set(DEFAULT_WORKSPACE, item.id);
+      if (set) {
+        setDefaultWorkspaceId(item.id);
+        notifications?.toasts.addSuccess(`Default workspace been set to ${item.name}`);
+      } else {
+        // toast
+        notifications?.toasts.addWarning(
+          `Failed to set workspace ${item.name} as default workspace.`
+        );
+      }
+    },
+    [notifications?.toasts, uiSettings]
   );
 
   const renderDataWithMoreBadge = (
@@ -294,16 +346,25 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     toolsLeft: renderToolsLeft(),
   };
 
-  const columns = [
+  const columnsWithoutActions = [
     {
       field: 'name',
       name: 'Name',
-      width: '15%',
+      width: '18%',
       sortable: true,
       render: (name: string, item: WorkspaceAttributeWithPermission) => (
         <span>
           <EuiLink onClick={() => handleSwitchWorkspace(item.id)}>
-            <EuiLink>{name}</EuiLink>
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem>
+                <EuiText size="s">{name}</EuiText>
+              </EuiFlexItem>
+              {item.id === defaultWorkspaceId && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge>Default workspace</EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiLink>
         </span>
       ),
@@ -312,7 +373,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     {
       field: 'useCase',
       name: 'Use case',
-      width: '15%',
+      width: '12%',
     },
 
     {
@@ -325,7 +386,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
           content={description}
           data-test-subj="workspaceList-hover-description"
         >
-          {/* Here I need to set width mannuly as the tooltip will ineffect the property : truncateText ',  */}
+          {/* Here I need to set width manually as the tooltip will ineffect the property : truncateText ',  */}
           <EuiText className="eui-textTruncate" size="xs" style={{ maxWidth: 150 }}>
             {description}
           </EuiText>
@@ -345,6 +406,20 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
       },
     },
     {
+      field: 'permissionMode',
+      name: 'Permissions',
+      width: '6%',
+      render: (permissionMode: WorkspaceAttributeWithPermission['permissionMode']) => {
+        return isDashboardAdmin ? (
+          <EuiToolTip position="right" content="You are dashboard admin">
+            <EuiText size="xs">Admin</EuiText>
+          </EuiToolTip>
+        ) : (
+          startCase(permissionMode)
+        );
+      },
+    },
+    {
       field: 'lastUpdatedTime',
       name: 'Last updated',
       width: '15%',
@@ -361,125 +436,152 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
         return renderDataWithMoreBadge(dataSources, 2, item.id, DetailTab.DataSources);
       },
     },
+  ];
+  const allActions = [
     {
-      name: 'Actions',
-      field: '',
-      actions: [
-        {
-          name: 'Copy ID',
-          type: 'button',
-          description: 'Copy id',
-          'data-test-subj': 'workspace-list-copy-id-icon',
-          render: ({ id }: WorkspaceAttribute) => {
-            return (
-              <EuiButtonEmpty
-                onClick={() => handleCopyId(id)}
-                size="xs"
-                iconType="copy"
-                color="text"
-              >
-                Copy ID
-              </EuiButtonEmpty>
-            );
-          },
-        },
-        {
-          name: 'Edit',
-          type: 'icon',
-          icon: 'edit',
-          color: 'danger',
-          description: 'Edit workspace',
-          'data-test-subj': 'workspace-list-edit-icon',
-          onClick: ({ id }: WorkspaceAttribute) => handleSwitchWorkspace(id),
-          render: ({ id }: WorkspaceAttribute) => {
-            return (
-              <EuiButtonEmpty
-                onClick={() => handleSwitchWorkspace(id)}
-                iconType="pencil"
-                size="xs"
-                color="text"
-              >
-                Edit
-              </EuiButtonEmpty>
-            );
-          },
-        },
-        {
-          name: 'Delete',
-          type: 'button',
-          description: 'Delete workspace',
-          'data-test-subj': 'workspace-list-delete-icon',
-          available: () => isDashboardAdmin,
-          render: (item: WorkspaceAttribute) => {
-            return (
-              <EuiButtonEmpty
-                onClick={() => {
-                  setDeletedWorkspaces([item]);
-                }}
-                size="s"
-                iconType="trash"
-                color="danger"
-                style={{ padding: 0 }}
-              >
-                Delete
-              </EuiButtonEmpty>
-            );
-          },
-        },
-      ],
+      name: <EuiText key="copyId">Copy ID</EuiText>,
+      icon: 'copy',
+      type: 'icon',
+      description: 'Copy workspace id',
+      'data-test-subj': 'workspace-list-copy-id-icon',
+      onClick: ({ id }: WorkspaceAttribute) => handleCopyId(id),
+    },
+    {
+      name: <EuiText key="edit">Edit</EuiText>,
+      icon: 'pencil',
+      type: 'icon',
+      description: 'Edit workspace',
+      'data-test-subj': 'workspace-list-edit-icon',
+      onClick: ({ id }: WorkspaceAttribute) => handleSwitchWorkspace(id),
+    },
+    {
+      name: <EuiText key="setDefault">Set as my default</EuiText>,
+      icon: 'flag',
+      type: 'icon',
+      description: 'Set as default workspace',
+      'data-test-subj': 'workspace-list-set-default-icon',
+      onClick: (item: WorkspaceAttribute) => handleSetDefaultWorkspace(item),
+    },
+    {
+      name: <EuiText key="leave">Leave</EuiText>,
+      icon: 'exit',
+      type: 'icon',
+      description: 'Leave workspace',
+      'data-test-subj': 'workspace-list-leave-icon',
+      available: () => false,
+    },
+    {
+      name: (
+        <EuiText color="danger" key="delete">
+          Delete
+        </EuiText>
+      ),
+      icon: () => <EuiIcon type="trash" size="m" color="danger" />,
+      type: 'icon',
+      isPrimary: false,
+      description: 'Delete workspace',
+      'data-test-subj': 'workspace-list-delete-icon',
+      available: () => isDashboardAdmin,
+      onClick: (item: WorkspaceAttribute) => {
+        setDeletedWorkspaces([item]);
+      },
     },
   ];
 
-  return (
-    <EuiPage paddingSize="m">
-      <HeaderControl
-        controls={[
-          {
-            description: i18n.translate('workspace.list.description', {
-              defaultMessage: 'Organize collaborative projects with use-case-specific workspaces.',
-            }),
-          },
-        ]}
-        setMountPoint={application?.setAppDescriptionControls}
-      />
-      {isDashboardAdmin && renderCreateWorkspaceButton()}
-      <EuiPageContent
-        verticalPosition="center"
-        horizontalPosition="center"
-        panelPaddingSize="l"
-        paddingSize="m"
-        hasShadow={false}
-      >
-        <EuiInMemoryTable
-          compressed={true}
-          items={newWorkspaceList}
-          columns={columns}
-          itemId="id"
-          message={emptyStateMessage}
-          onTableChange={({ page: { index, size } }) =>
-            setPagination((prev) => {
-              return { ...prev, pageIndex: index, pageSize: size };
-            })
-          }
-          pagination={pagination}
-          sorting={{
-            sort: {
-              field: initialSortField,
-              direction: initialSortDirection,
-            },
-          }}
-          isSelectable={true}
-          search={search}
-          selection={selectionValue}
-        />
-      </EuiPageContent>
+  const availableActions = allActions.filter(
+    (action) =>
+      !excludedActionNames?.includes(isString(action.name) ? action.name : action.name.key || '')
+  );
 
-      {deletedWorkspaces.length > 0 && (
-        <DeleteWorkspaceModal
-          selectedWorkspaces={deletedWorkspaces}
-          onClose={() => setDeletedWorkspaces([])}
+  const includedColumnsFields = includedColumns.map((column) => {
+    return column.field;
+  });
+  const availableColumns = columnsWithoutActions
+    .filter((column) => !excludedColumns.includes(column.field))
+    .filter((column) => {
+      return (
+        !includedColumnsFields ||
+        includedColumnsFields.length === 0 ||
+        includedColumnsFields.includes(column.field)
+      );
+    })
+    .map((column) => {
+      const customizedCol = includedColumns.find((col) => col.field === column.field);
+      return {
+        ...column,
+        ...(customizedCol ? { ...customizedCol } : {}),
+      };
+    });
+
+  const actionColumns = [
+    {
+      name: 'Actions',
+      field: '',
+      actions: availableActions,
+    },
+  ];
+
+  const columns = [...availableColumns, ...actionColumns];
+
+  const workspaceListTable = (
+    <EuiInMemoryTable
+      compressed={true}
+      items={newWorkspaceList}
+      columns={columns}
+      itemId="id"
+      message={emptyStateMessage}
+      onTableChange={({ page: { index, size } }) =>
+        setPagination((prev) => {
+          return { ...prev, pageIndex: index, pageSize: size };
+        })
+      }
+      pagination={pagination}
+      sorting={{
+        sort: {
+          field: initialSortField,
+          direction: initialSortDirection,
+        },
+      }}
+      isSelectable={selectable}
+      search={searchable ? search : undefined}
+      selection={selectable ? selectionValue : undefined}
+    />
+  );
+
+  return fullPage ? (
+    <>
+      <EuiPage paddingSize="m">
+        <HeaderControl
+          controls={[
+            {
+              description: i18n.translate('workspace.list.description', {
+                defaultMessage:
+                  'Organize collaborative projects with use-case-specific workspaces.',
+              }),
+            },
+          ]}
+          setMountPoint={application?.setAppDescriptionControls}
         />
-      )}
-    </EuiPage>
+        {isDashboardAdmin && renderCreateWorkspaceButton()}
+        <EuiPageContent
+          verticalPosition="center"
+          horizontalPosition="center"
+          paddingSize="m"
+          panelPaddingSize="l"
+          hasShadow={false}
+        >
+          {workspaceListTable}
+        </EuiPageContent>
+
+        {deletedWorkspaces.length > 0 && (
+          <DeleteWorkspaceModal
+            selectedWorkspaces={deletedWorkspaces}
+            onClose={() => setDeletedWorkspaces([])}
+          />
+        )}
+      </EuiPage>
+    </>
+  ) : (
+    workspaceListTable
   );
 };

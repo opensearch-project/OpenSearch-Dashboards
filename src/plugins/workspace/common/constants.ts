@@ -16,6 +16,10 @@ export const WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID = 'workspace';
 export const WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID =
   'workspace_conflict_control';
 export const WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID = 'workspace_ui_settings';
+/**
+ * UI setting for user default workspace
+ */
+export const DEFAULT_WORKSPACE = 'defaultWorkspace';
 
 export enum WorkspacePermissionMode {
   Read = 'read',
