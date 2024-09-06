@@ -16,7 +16,8 @@ describe('DataSourceHeader', () => {
     match: {} as any,
   };
 
-  const shallowComponent = (props = defaultProps) => shallow(<DataSourceHeader {...props} />);
+  const shallowComponent = (props = defaultProps) =>
+    shallow(<DataSourceHeader {...props} featureFlagStatus={true} />);
 
   test('renders correctly', () => {
     const wrapper = shallowComponent();
@@ -31,7 +32,7 @@ describe('DataSourceHeader', () => {
 
     const descriptionMessage = wrapper.find(EuiText).at(1).find(FormattedMessage);
     expect(descriptionMessage.prop('id')).toEqual(
-      'dataSourcesManagement.dataSourcesTable.description'
+      'dataSourcesManagement.dataSourcesTable.mdsEnabled.description'
     );
     expect(descriptionMessage.prop('defaultMessage')).toEqual(
       'Create and manage data source connections.'

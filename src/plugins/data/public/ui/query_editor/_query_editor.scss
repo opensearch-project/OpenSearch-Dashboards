@@ -199,3 +199,23 @@
     border: none;
   }
 }
+
+.suggest-widget {
+  position: relative;
+
+  &.visible::after {
+    position: absolute;
+    height: auto;
+    bottom: auto;
+    left: 0;
+    width: 100%;
+    background-color: $euiColorLightestShade;
+    border: $euiBorderThin;
+    padding: $euiSizeXS;
+    text-align: left;
+    color: $euiColorDarkShade;
+    font-size: $euiFontSizeXS;
+    content: "Tab to insert, ESC to close window";
+    display: block;
+  }
+}

@@ -14,7 +14,7 @@ import {
 import { IWorkspaceClientImpl, WorkspaceAttributeWithPermission } from '../types';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import { registerDuplicateRoute } from './duplicate';
-import { transferCurrentUserInPermissions } from '../utils';
+import { transferCurrentUserInPermissions, translatePermissionsToRole } from '../utils';
 import { validateWorkspaceColor } from '../../common/utils';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
@@ -146,6 +146,19 @@ export function registerRoutes({
       if (!result.success) {
         return res.ok({ body: result });
       }
+      const { workspaces } = result.result;
+
+      // enrich workspace permissionMode
+      const principals = permissionControlClient?.getPrincipalsFromRequest(req);
+      workspaces.forEach((workspace) => {
+        const permissionMode = translatePermissionsToRole(
+          isPermissionControlEnabled,
+          workspace.permissions,
+          principals
+        );
+        workspace.permissionMode = permissionMode;
+      });
+
       return res.ok({
         body: result,
       });

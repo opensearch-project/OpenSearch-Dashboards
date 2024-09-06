@@ -28,18 +28,30 @@
  * under the License.
  */
 
+import { schema } from '@osd/config-schema';
+
 import { IRouter } from '../../http';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
+import { UiSettingScope } from '../types';
+
+const validate = {
+  query: schema.object({
+    scope: schema.maybe(
+      schema.oneOf([schema.literal(UiSettingScope.GLOBAL), schema.literal(UiSettingScope.USER)])
+    ),
+  }),
+};
 
 export function registerGetRoute(router: IRouter) {
   router.get(
-    { path: '/api/opensearch-dashboards/settings', validate: false },
+    { path: '/api/opensearch-dashboards/settings', validate },
     async (context, request, response) => {
       try {
         const uiSettingsClient = context.core.uiSettings.client;
+        const { scope } = request.query;
         return response.ok({
           body: {
-            settings: await uiSettingsClient.getUserProvided(),
+            settings: await uiSettingsClient.getUserProvided(scope),
           },
         });
       } catch (error) {

@@ -131,6 +131,8 @@ export {
   NavGroupType,
   NavGroupStatus,
   WorkspaceAttributeWithPermission,
+  UiSettingScope,
+  PermissionModeId,
 } from '../types';
 
 export {
