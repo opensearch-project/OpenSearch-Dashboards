@@ -21,7 +21,7 @@ import { useObservable } from 'react-use';
 import { of } from 'rxjs';
 import { DataSourceHeader } from './data_source_page_header';
 import { DataSourceTableWithRouter } from '../data_source_table/data_source_table';
-import { ManageDirectQueryDataConnectionsTable } from '../direct_query_data_sources_components/direct_query_data_connection/manage_direct_query_data_connections_table';
+import { ManageDirectQueryDataConnectionsTableWithRouter } from '../direct_query_data_sources_components/direct_query_data_connection/manage_direct_query_data_connections_table';
 import { CreateButton } from '../create_button';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { getListBreadcrumbs } from '../breadcrumbs';
@@ -204,15 +204,8 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
           {selectedTabId === 'manageOpensearchDataSources' && featureFlagStatus && (
             <DataSourceTableWithRouter {...props} />
           )}
-          {selectedTabId === 'manageDirectQueryDataSources' && (
-            <ManageDirectQueryDataConnectionsTable
-              http={http}
-              notifications={notifications}
-              savedObjects={savedObjects}
-              uiSettings={uiSettings}
-              featureFlagStatus={featureFlagStatus}
-              application={application}
-            />
+          {selectedTabId === 'manageDirectQueryDataSources' && featureFlagStatus && (
+            <ManageDirectQueryDataConnectionsTableWithRouter {...props} />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
