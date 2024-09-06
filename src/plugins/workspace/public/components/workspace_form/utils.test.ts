@@ -12,12 +12,8 @@ import {
   isWorkspacePermissionSetting,
 } from './utils';
 import { WorkspacePermissionMode } from '../../../common/constants';
-import {
-  WorkspacePermissionItemType,
-  optionIdToWorkspacePermissionModesMap,
-  PermissionModeId,
-} from './constants';
-import { DataSourceConnectionType } from '../../../common/types';
+import { WorkspacePermissionItemType, optionIdToWorkspacePermissionModesMap } from './constants';
+import { DataSourceConnectionType, PermissionModeId } from '../../../common/types';
 import { WorkspaceFormErrorCode } from './types';
 
 describe('convertPermissionSettingsToPermissions', () => {

@@ -72,6 +72,8 @@ type UiSettingsRaw = Record<string, UiSettingsRawValue>;
 
 /**
  * default scope read options, order matters
+ * for user setting, we don't want to create the record when user visit the dashboard that's get,
+ * that will have too much records without any actual setting in it, instead do create when write at first time
  */
 const UiSettingScopeReadOptions = [
   {
@@ -172,7 +174,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     if (scope) {
       await this.write({ changes, scope });
     } else {
-      // group changes into by different scope
+      // group changes into different scope
       const [global, personal] = this.groupChanges(changes);
       if (global && Object.keys(global).length > 0) {
         await this.write({ changes: global });
