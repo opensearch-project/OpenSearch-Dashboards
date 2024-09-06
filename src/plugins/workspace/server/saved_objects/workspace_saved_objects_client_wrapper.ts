@@ -27,12 +27,10 @@ import {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
   SavedObjectsDeleteByWorkspaceOptions,
+  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
 } from '../../../../core/server';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
-import {
-  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
-  WorkspacePermissionMode,
-} from '../../common/constants';
+import { WorkspacePermissionMode } from '../../common/constants';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../data_source/common';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized

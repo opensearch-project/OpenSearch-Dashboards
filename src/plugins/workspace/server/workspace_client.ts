@@ -13,6 +13,7 @@ import {
   UiSettingsServiceStart,
   WORKSPACE_TYPE,
   Logger,
+  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
 } from '../../../core/server';
 import { updateWorkspaceState, getWorkspaceState } from '../../../core/server/utils';
 import {
@@ -24,10 +25,7 @@ import {
 } from './types';
 import { workspace } from './saved_objects';
 import { generateRandomId, getDataSourcesList, checkAndSetDefaultDataSource } from './utils';
-import {
-  WORKSPACE_ID_CONSUMER_WRAPPER_ID,
-  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
-} from '../common/constants';
+import { WORKSPACE_ID_CONSUMER_WRAPPER_ID } from '../common/constants';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../data_source/common';
 
 const WORKSPACE_ID_SIZE = 6;

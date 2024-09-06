@@ -12,7 +12,6 @@ export const WORKSPACE_DETAIL_APP_ID = 'workspace_detail';
 export const WORKSPACE_INITIAL_APP_ID = 'workspace_initial';
 export const WORKSPACE_NAVIGATION_APP_ID = 'workspace_navigation';
 
-export const WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID = 'workspace';
 export const WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID =
   'workspace_conflict_control';
 export const WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID = 'workspace_ui_settings';

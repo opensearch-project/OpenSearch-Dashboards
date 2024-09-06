@@ -12,9 +12,9 @@ import {
   Logger,
   CoreStart,
   SharedGlobalConfig,
+  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
 } from '../../../core/server';
 import {
-  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WORKSPACE_ID_CONSUMER_WRAPPER_ID,
   PRIORITY_FOR_WORKSPACE_CONFLICT_CONTROL_WRAPPER,
@@ -134,7 +134,9 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
           }
           const [coreStart] = await core.getStartServices();
           const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
-            coreStart.savedObjects.getScopedClient(request)
+            coreStart.savedObjects.getScopedClient(request, {
+              excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
+            })
           );
           const defaultWorkspaceId = await uiSettingsClient.get(DEFAULT_WORKSPACE);
           const defaultWorkspace = workspaceList.find(

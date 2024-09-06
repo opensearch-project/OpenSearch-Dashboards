@@ -38,7 +38,10 @@ import * as v8dark from '@elastic/eui/dist/eui_theme_next_dark.json';
 import * as v9light from '@elastic/eui/dist/eui_theme_v9_light.json';
 import * as v9dark from '@elastic/eui/dist/eui_theme_v9_dark.json';
 import * as UiSharedDeps from '@osd/ui-shared-deps';
-import { OpenSearchDashboardsRequest } from '../../../core/server';
+import {
+  OpenSearchDashboardsRequest,
+  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+} from '../../../core/server';
 import { AppBootstrap } from './bootstrap';
 import { getApmConfig } from '../apm';
 
@@ -201,7 +204,10 @@ export function uiRenderMixin(osdServer, server, config) {
     },
     async handler(request, h) {
       const soClient = osdServer.newPlatform.start.core.savedObjects.getScopedClient(
-        OpenSearchDashboardsRequest.from(request)
+        OpenSearchDashboardsRequest.from(request),
+        {
+          excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
+        }
       );
       const uiSettings = osdServer.newPlatform.start.core.uiSettings.asScopedToClient(soClient);
 
@@ -310,7 +316,9 @@ export function uiRenderMixin(osdServer, server, config) {
     const { rendering } = osdServer.newPlatform.__internals;
     const req = OpenSearchDashboardsRequest.from(h.request);
     const uiSettings = osdServer.newPlatform.start.core.uiSettings.asScopedToClient(
-      savedObjects.getScopedClient(req)
+      savedObjects.getScopedClient(req, {
+        excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
+      })
     );
     const vars = {
       apmConfig: getApmConfig(h.request.path),
