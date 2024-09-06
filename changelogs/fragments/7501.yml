@@ -1,2 +1,0 @@
-refactor:
-- [Workspace] Support getting workspaces client from coreStart ([#7501](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7501))

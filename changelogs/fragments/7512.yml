@@ -1,2 +1,0 @@
-fix:
-- [Workspace]add workspace name blank/empty check ([#7512](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7512))
