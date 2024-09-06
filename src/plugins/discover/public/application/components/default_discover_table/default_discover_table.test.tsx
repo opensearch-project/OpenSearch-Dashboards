@@ -17,7 +17,7 @@ jest.mock('../../../opensearch_dashboards_services', () => ({
       get: jest.fn().mockImplementation((key) => {
         switch (key) {
           case 'discover:sampleSize':
-            return 50;
+            return 100;
           case 'shortDots:enable':
             return true;
           case 'doc_table:hideTimeColumn':
@@ -46,7 +46,7 @@ describe('DefaultDiscoverTable', () => {
   );
 
   // Generate 50 hits with sample fields
-  const hits = [...Array(50).keys()].map((key) => {
+  const hits = [...Array(100).keys()].map((key) => {
     return {
       _id: key.toString(),
       fields: {
