@@ -1,2 +1,0 @@
-fix:
-- Fix new header allowing their single-child's overflowing ([#7796](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7796))
