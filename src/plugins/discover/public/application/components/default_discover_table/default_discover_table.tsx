@@ -5,7 +5,7 @@
 
 import './_doc_table.scss';
 
-import React, { useEffect, useMemo, useRef, useState, useCallback, SetStateAction } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { EuiSmallButtonEmpty, EuiCallOut, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { TableHeader } from './table_header';
