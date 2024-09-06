@@ -24,8 +24,9 @@ import {
   WorkspaceUserGroupPermissionSetting,
   WorkspaceUserPermissionSetting,
 } from './types';
-import { DataSourceConnection, PermissionModeId } from '../../../common/types';
+import { DataSourceConnection } from '../../../common/types';
 import { validateWorkspaceColor } from '../../../common/utils';
+import { PermissionModeId } from '../../../../../core/public';
 
 export const isValidFormTextInput = (input?: string) => {
   /**

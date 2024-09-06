@@ -12,6 +12,7 @@ import {
   Permissions,
   SavedObjectsClientContract,
   IUiSettingsClient,
+  Principals,
 } from '../../../core/server';
 import { updateWorkspaceState } from '../../../core/server/utils';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../data_source_management/common';
