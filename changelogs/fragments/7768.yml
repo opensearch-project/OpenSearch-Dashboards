@@ -1,2 +1,0 @@
-fix:
-- Fix the parameter misalignment in the workspace_detail_page ([#7768](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7768))
