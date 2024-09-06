@@ -41,6 +41,8 @@ export interface DefaultDiscoverTableProps {
 // ToDo: These would need to be read from an upcoming config panel
 const PAGINATED_PAGE_SIZE = 50;
 const INFINITE_SCROLLED_PAGE_SIZE = 10;
+// How far to queue unrendered rows ahead of time during infinite scrolling
+const DESIRED_ROWS_LOOKAHEAD = 5 * INFINITE_SCROLLED_PAGE_SIZE;
 
 const DefaultDiscoverTableUI = ({
   columns,
@@ -86,7 +88,7 @@ const DefaultDiscoverTableUI = ({
    */
   const [renderedRowCount, setRenderedRowCount] = useState(INFINITE_SCROLLED_PAGE_SIZE);
   const [desiredRowCount, setDesiredRowCount] = useState(
-    Math.min(rows.length, 5 * INFINITE_SCROLLED_PAGE_SIZE)
+    Math.min(rows.length, DESIRED_ROWS_LOOKAHEAD)
   );
   const [displayedRows, setDisplayedRows] = useState(rows.slice(0, PAGINATED_PAGE_SIZE));
   const [currentRowCounts, setCurrentRowCounts] = useState({
@@ -118,7 +120,7 @@ const DefaultDiscoverTableUI = ({
           if (entries[0].isIntersecting) {
             // Load another batch of rows, some immediately and some lazily
             setRenderedRowCount((prevRowCount) => prevRowCount + INFINITE_SCROLLED_PAGE_SIZE);
-            setDesiredRowCount((prevRowCount) => prevRowCount + 5 * INFINITE_SCROLLED_PAGE_SIZE);
+            setDesiredRowCount((prevRowCount) => prevRowCount + DESIRED_ROWS_LOOKAHEAD);
           }
         },
         { threshold: 1.0 }
@@ -170,12 +172,17 @@ const DefaultDiscoverTableUI = ({
           lazyLoadLastTimeRef.current = time;
           lazyLoadRequestFrameRef.current = requestAnimationFrame(loadMoreRows);
         }
+        // Ensure we have more desired rows in the queue to prevent stalling when we render the
+        // current desired row count
+        if (renderedRowCount + DESIRED_ROWS_LOOKAHEAD > desiredRowCount) {
+          setDesiredRowCount(Math.min(renderedRowCount + DESIRED_ROWS_LOOKAHEAD, rows.length));
+        }
       };
       lazyLoadRequestFrameRef.current = requestAnimationFrame(loadMoreRows);
     }
 
     return () => cancelAnimationFrame(lazyLoadRequestFrameRef.current);
-  }, [showPagination, renderedRowCount, desiredRowCount]);
+  }, [showPagination, renderedRowCount, desiredRowCount, rows.length]);
 
   // Allow auto column-sizing using the initially rendered rows and then convert to fixed
   const tableLayoutRequestFrameRef = useRef<number>(0);
