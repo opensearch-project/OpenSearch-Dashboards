@@ -126,7 +126,7 @@ const DefaultDiscoverTableUI = ({
         {
           // Important that 0 < threshold < 1, since there OSD application div has a transparent
           // fade at the bottom which causes the sentinel element to sometimes not be 100% visible
-          threshold: 0.5,
+          threshold: 0.1,
         }
       );
 
