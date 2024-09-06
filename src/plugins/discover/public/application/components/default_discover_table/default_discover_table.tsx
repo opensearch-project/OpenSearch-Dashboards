@@ -123,7 +123,11 @@ const DefaultDiscoverTableUI = ({
             setDesiredRowCount((prevRowCount) => prevRowCount + DESIRED_ROWS_LOOKAHEAD);
           }
         },
-        { threshold: 1.0 }
+        {
+          // Important that 0 < threshold < 1, since there OSD application div has a transparent
+          // fade at the bottom which causes the sentinel element to sometimes not be 100% visible
+          threshold: 0.5,
+        }
       );
 
       observerRef.current.observe(sentinelElement);
@@ -171,11 +175,6 @@ const DefaultDiscoverTableUI = ({
           }
           lazyLoadLastTimeRef.current = time;
           lazyLoadRequestFrameRef.current = requestAnimationFrame(loadMoreRows);
-        }
-        // Ensure we have more desired rows in the queue to prevent stalling when we render the
-        // current desired row count
-        if (renderedRowCount + DESIRED_ROWS_LOOKAHEAD > desiredRowCount) {
-          setDesiredRowCount(Math.min(renderedRowCount + DESIRED_ROWS_LOOKAHEAD, rows.length));
         }
       };
       lazyLoadRequestFrameRef.current = requestAnimationFrame(loadMoreRows);
