@@ -108,6 +108,11 @@ export interface Props {
    * Should the editor use the dark theme
    */
   useDarkTheme?: boolean;
+
+  /**
+   * Whether the suggestion widget/window will be triggered upon clicking into the editor
+   */
+  triggerSuggestOnFocus?: boolean;
 }
 
 export class CodeEditor extends React.Component<Props, {}> {
@@ -140,6 +145,12 @@ export class CodeEditor extends React.Component<Props, {}> {
 
     if (this.props.editorDidMount) {
       this.props.editorDidMount(editor);
+    }
+
+    if (this.props.triggerSuggestOnFocus) {
+      editor.onDidFocusEditorWidget(() => {
+        editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+      });
     }
   };
 
