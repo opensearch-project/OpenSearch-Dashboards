@@ -41,7 +41,7 @@ import {
   UiSettingScope,
 } from './types';
 import { CannotOverrideError } from './ui_settings_errors';
-import { generateDocId } from './utils';
+import { buildDocIdWithScope } from './utils';
 
 export interface UiSettingsServiceOptions {
   type: string;
@@ -166,8 +166,6 @@ export class UiSettingsClient implements IUiSettingsClient {
   }
 
   async setMany(changes: Record<string, any>, scope?: UiSettingScope) {
-    // log changes and scope
-    this.log.debug(`UiSettingsClient.setMany: ${JSON.stringify({ changes, scope })}`);
     this.onWriteHook(changes, scope);
 
     if (scope) {
@@ -309,7 +307,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   }) {
     changes = this.translateChanges(changes, 'timeline', 'timelion');
     try {
-      const docId = generateDocId(this.id, scope);
+      const docId = buildDocIdWithScope(this.id, scope);
       await this.savedObjectsClient.update(this.type, docId, changes);
     } catch (error) {
       if (!SavedObjectsErrorHelpers.isNotFoundError(error) || !autoCreateOrUpgradeIfMissing) {
@@ -340,7 +338,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     scope,
   }: ReadOptions = {}): Promise<Record<string, any>> {
     try {
-      const docId = generateDocId(this.id, scope);
+      const docId = buildDocIdWithScope(this.id, scope);
       const resp = await this.savedObjectsClient.get<Record<string, any>>(this.type, docId);
       return this.translateChanges(resp.attributes, 'timelion', 'timeline');
     } catch (error) {

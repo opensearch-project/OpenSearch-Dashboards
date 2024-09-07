@@ -171,7 +171,7 @@ export const WorkspaceListInner = ({
   const emptyStateMessage = useMemo(() => {
     return (
       <EuiEmptyPrompt
-        iconType="spacesApp"
+        iconType="wsSelector"
         title={
           <h3>
             {i18n.translate('workspace.workspaceList.emptyState.title', {
@@ -222,7 +222,9 @@ export const WorkspaceListInner = ({
 
   const handleCopyId = (id: string) => {
     copyToClipboard(id);
-    notifications?.toasts.addSuccess('Workspace ID copied');
+    notifications?.toasts.addSuccess(
+      i18n.translate('workspace.copyWorkspaceId.message', { defaultMessage: 'Workspace ID copied' })
+    );
   };
 
   const handleSwitchWorkspace = useCallback(
@@ -239,11 +241,19 @@ export const WorkspaceListInner = ({
       const set = await uiSettings?.set(DEFAULT_WORKSPACE, item.id);
       if (set) {
         setDefaultWorkspaceId(item.id);
-        notifications?.toasts.addSuccess(`Default workspace been set to ${item.name}`);
+        notifications?.toasts.addSuccess(
+          i18n.translate('workspace.setDefaultWorkspace.success.message', {
+            defaultMessage: 'Default workspace been set to {name}',
+            values: { name: item.name },
+          })
+        );
       } else {
         // toast
         notifications?.toasts.addWarning(
-          `Failed to set workspace ${item.name} as default workspace.`
+          i18n.translate('workspace.setDefaultWorkspace.error.message', {
+            defaultMessage: 'Failed to set workspace {name} as default workspace.',
+            values: { name: item.name },
+          })
         );
       }
     },
@@ -349,7 +359,7 @@ export const WorkspaceListInner = ({
   const columnsWithoutActions = [
     {
       field: 'name',
-      name: 'Name',
+      name: i18n.translate('workspace.list.columns.name.title', { defaultMessage: 'Name' }),
       width: '18%',
       sortable: true,
       render: (name: string, item: WorkspaceAttributeWithPermission) => (
@@ -361,7 +371,11 @@ export const WorkspaceListInner = ({
               </EuiFlexItem>
               {item.id === defaultWorkspaceId && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge>Default workspace</EuiBadge>
+                  <EuiBadge>
+                    {i18n.translate('workspace.defaultWorkspace.title', {
+                      defaultMessage: 'Default workspace',
+                    })}
+                  </EuiBadge>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>
@@ -372,13 +386,15 @@ export const WorkspaceListInner = ({
 
     {
       field: 'useCase',
-      name: 'Use case',
+      name: i18n.translate('workspace.list.columns.useCase.title', { defaultMessage: 'Use case' }),
       width: '12%',
     },
 
     {
       field: 'description',
-      name: 'Description',
+      name: i18n.translate('workspace.list.columns.description.title', {
+        defaultMessage: 'Description',
+      }),
       width: '15%',
       render: (description: string) => (
         <EuiToolTip
@@ -395,7 +411,7 @@ export const WorkspaceListInner = ({
     },
     {
       field: 'permissions',
-      name: 'Owners',
+      name: i18n.translate('workspace.list.columns.owners.title', { defaultMessage: 'Owners' }),
       width: '15%',
       render: (
         permissions: WorkspaceAttributeWithPermission['permissions'],
@@ -407,12 +423,21 @@ export const WorkspaceListInner = ({
     },
     {
       field: 'permissionMode',
-      name: 'Permissions',
+      name: i18n.translate('workspace.list.columns.permissions.title', {
+        defaultMessage: 'Permissions',
+      }),
       width: '6%',
       render: (permissionMode: WorkspaceAttributeWithPermission['permissionMode']) => {
         return isDashboardAdmin ? (
-          <EuiToolTip position="right" content="You are dashboard admin">
-            <EuiText size="xs">Admin</EuiText>
+          <EuiToolTip
+            position="right"
+            content={i18n.translate('workspace.role.admin.description', {
+              defaultMessage: 'You are dashboard admin',
+            })}
+          >
+            <EuiText size="xs">
+              {i18n.translate('workspace.role.admin.name', { defaultMessage: 'Admin' })}
+            </EuiText>
           </EuiToolTip>
         ) : (
           startCase(permissionMode)
@@ -421,7 +446,9 @@ export const WorkspaceListInner = ({
     },
     {
       field: 'lastUpdatedTime',
-      name: 'Last updated',
+      name: i18n.translate('workspace.list.columns.lastUpdated.title', {
+        defaultMessage: 'Last updated',
+      }),
       width: '15%',
       truncateText: false,
       render: (lastUpdatedTime: string) => {
@@ -431,7 +458,9 @@ export const WorkspaceListInner = ({
     {
       field: 'dataSources',
       width: '15%',
-      name: 'Data sources',
+      name: i18n.translate('workspace.list.columns.dataSources.title', {
+        defaultMessage: 'Data sources',
+      }),
       render: (dataSources: string[], item: WorkspaceAttributeWithPermission) => {
         return renderDataWithMoreBadge(dataSources, 2, item.id, DetailTab.DataSources);
       },
@@ -439,47 +468,75 @@ export const WorkspaceListInner = ({
   ];
   const allActions = [
     {
-      name: <EuiText key="copyId">Copy ID</EuiText>,
+      name: (
+        <EuiText key="copyId">
+          {i18n.translate('workspace.list.actions.copyId.name', { defaultMessage: 'Copy ID' })}
+        </EuiText>
+      ),
       icon: 'copy',
       type: 'icon',
-      description: 'Copy workspace id',
+      description: i18n.translate('workspace.list.actions.copyId.description', {
+        defaultMessage: 'Copy workspace id',
+      }),
       'data-test-subj': 'workspace-list-copy-id-icon',
       onClick: ({ id }: WorkspaceAttribute) => handleCopyId(id),
     },
     {
-      name: <EuiText key="edit">Edit</EuiText>,
+      name: (
+        <EuiText key="edit">
+          {i18n.translate('workspace.list.actions.edit.name', { defaultMessage: 'Edit' })}
+        </EuiText>
+      ),
       icon: 'pencil',
       type: 'icon',
-      description: 'Edit workspace',
+      description: i18n.translate('workspace.list.actions.edit.description', {
+        defaultMessage: 'Edit workspace',
+      }),
       'data-test-subj': 'workspace-list-edit-icon',
       onClick: ({ id }: WorkspaceAttribute) => handleSwitchWorkspace(id),
     },
     {
-      name: <EuiText key="setDefault">Set as my default</EuiText>,
+      name: (
+        <EuiText key="setDefault">
+          {i18n.translate('workspace.list.actions.setDefault.name', {
+            defaultMessage: 'Set as my default',
+          })}
+        </EuiText>
+      ),
       icon: 'flag',
       type: 'icon',
-      description: 'Set as default workspace',
+      description: i18n.translate('workspace.list.actions.setDefault.description', {
+        defaultMessage: 'Set as my default workspace',
+      }),
       'data-test-subj': 'workspace-list-set-default-icon',
       onClick: (item: WorkspaceAttribute) => handleSetDefaultWorkspace(item),
     },
     {
-      name: <EuiText key="leave">Leave</EuiText>,
+      name: (
+        <EuiText key="leave">
+          {i18n.translate('workspace.list.actions.leave.name', { defaultMessage: 'Leave' })}
+        </EuiText>
+      ),
       icon: 'exit',
       type: 'icon',
-      description: 'Leave workspace',
+      description: i18n.translate('workspace.list.actions.leave.description', {
+        defaultMessage: 'Leave workspace',
+      }),
       'data-test-subj': 'workspace-list-leave-icon',
       available: () => false,
     },
     {
       name: (
         <EuiText color="danger" key="delete">
-          Delete
+          {i18n.translate('workspace.list.actions.delete.name', { defaultMessage: 'Delete' })}
         </EuiText>
       ),
       icon: () => <EuiIcon type="trash" size="m" color="danger" />,
       type: 'icon',
       isPrimary: false,
-      description: 'Delete workspace',
+      description: i18n.translate('workspace.list.actions.delete.description', {
+        defaultMessage: 'Delete workspace',
+      }),
       'data-test-subj': 'workspace-list-delete-icon',
       available: () => isDashboardAdmin,
       onClick: (item: WorkspaceAttribute) => {
@@ -497,12 +554,12 @@ export const WorkspaceListInner = ({
     return column.field;
   });
   const availableColumns = columnsWithoutActions
-    .filter((column) => !excludedColumns.includes(column.field))
     .filter((column) => {
       return (
-        !includedColumnsFields ||
-        includedColumnsFields.length === 0 ||
-        includedColumnsFields.includes(column.field)
+        (!includedColumnsFields ||
+          includedColumnsFields.length === 0 ||
+          includedColumnsFields.includes(column.field)) &&
+        !excludedColumns.includes(column.field)
       );
     })
     .map((column) => {
@@ -515,7 +572,9 @@ export const WorkspaceListInner = ({
 
   const actionColumns = [
     {
-      name: 'Actions',
+      name: i18n.translate('workspace.list.columns.actions.title', {
+        defaultMessage: 'Actions',
+      }),
       field: '',
       actions: availableActions,
     },
