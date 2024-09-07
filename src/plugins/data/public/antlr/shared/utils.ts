@@ -179,6 +179,7 @@ export const parseQuery = <
 
     suggestKeywords.push({
       value: literalName,
+      id: tokenType,
     });
   });
 

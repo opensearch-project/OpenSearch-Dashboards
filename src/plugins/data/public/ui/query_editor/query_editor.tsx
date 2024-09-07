@@ -301,7 +301,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       suggestions:
         suggestions && suggestions.length > 0
           ? suggestions
-              .filter((s) => 'detail' in s) // remove suggestion not of type MonacoCompatible
+              .filter((s) => 'detail' in s) // designed to remove suggestion not of type MonacoCompatible
               .map((s: MonacoCompatibleQuerySuggestion) => {
                 return {
                   label: s.text,
@@ -311,6 +311,7 @@ export default class QueryEditorUI extends Component<Props, State> {
                   range: s.replacePosition ?? defaultRange,
                   detail: s.detail,
                   command: { id: 'editor.action.triggerSuggest', title: 'Trigger Next Suggestion' },
+                  sortText: s.sortText, // when undefined, the falsy value will default to the label
                 };
               })
           : [],

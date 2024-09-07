@@ -81,6 +81,7 @@ export interface MonacoCompatibleQuerySuggestion
   insertText?: string;
   insertTextRules?: monaco.languages.CompletionItemInsertTextRule;
   replacePosition?: monaco.Range;
+  sortText?: string;
 }
 
 /** @public **/

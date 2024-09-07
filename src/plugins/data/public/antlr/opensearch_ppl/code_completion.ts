@@ -16,6 +16,7 @@ import { openSearchPplAutocompleteData } from './opensearch_ppl_autocomplete';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { SuggestionItemDetailsTags } from '../shared/constants';
 import { PPL_AGGREGATE_FUNTIONS } from './constants';
+import { OpenSearchPPLParser } from './.generated/OpenSearchPPLParser';
 
 export const getSuggestions = async ({
   selectionStart,
@@ -60,6 +61,15 @@ export const getSuggestions = async ({
       });
     }
 
+    // create the sortlist
+    const suggestionImportance = new Map<number, string>();
+    suggestionImportance.set(OpenSearchPPLParser.PIPE, '0');
+    suggestionImportance.set(OpenSearchPPLParser.COMMA, '1');
+    suggestionImportance.set(OpenSearchPPLParser.PLUS, '2');
+    suggestionImportance.set(OpenSearchPPLParser.MINUS, '2');
+    suggestionImportance.set(OpenSearchPPLParser.EQUAL, '2');
+    suggestionImportance.set(OpenSearchPPLParser.SOURCE, '2');
+
     // Fill in PPL keywords
     if (suggestions.suggestKeywords?.length) {
       finalSuggestions.push(
@@ -68,6 +78,7 @@ export const getSuggestions = async ({
           insertText: `${sk.value.toLowerCase()} `,
           type: monaco.languages.CompletionItemKind.Keyword,
           detail: SuggestionItemDetailsTags.Keyword,
+          sortText: suggestionImportance.get(sk.id) ?? sk.value.toLowerCase(),
         }))
       );
     }
