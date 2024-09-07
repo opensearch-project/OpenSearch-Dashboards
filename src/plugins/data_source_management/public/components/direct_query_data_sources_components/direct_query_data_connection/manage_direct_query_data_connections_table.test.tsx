@@ -4,164 +4,161 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
+import * as utils from '../../utils';
+import { mount, ReactWrapper } from 'enzyme';
+import { RouteComponentProps } from 'react-router-dom';
+import { wrapWithIntl } from 'test_utils/enzyme_helpers';
+import { ScopedHistory } from 'opensearch-dashboards/public';
+import { scopedHistoryMock } from '../../../../../../core/public/mocks';
+import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
+import { getMappedDataSources, mockManagementPlugin } from '../../../mocks';
 import { ManageDirectQueryDataConnectionsTable } from './manage_direct_query_data_connections_table';
-import { getHideLocalCluster } from '../../utils';
 
-// Mock dependencies
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
-    push: jest.fn(),
-  }),
-}));
-
-jest.mock('../../../plugin', () => ({
-  getRenderCreateAccelerationFlyout: jest.fn(() => jest.fn()),
-}));
-
-jest.mock('../icons/prometheus_logo.svg', () => 'prometheusLogo');
-jest.mock('../icons/s3_logo.svg', () => 's3Logo');
-jest.mock('../integrations/installed_integrations_table', () => ({
-  InstallIntegrationFlyout: jest.fn(() => <div>MockInstallIntegrationFlyout</div>),
-}));
-
-jest.mock('../../utils', () => ({
-  ...jest.requireActual('../../utils'),
-  getHideLocalCluster: jest.fn(() => ({ enabled: true })),
-}));
+const deleteButtonIdentifier = '[data-test-subj="deleteDataSourceConnections"]';
+const tableIdentifier = 'EuiInMemoryTable';
+const confirmModalIdentifier = 'EuiConfirmModal';
 
 describe('ManageDirectQueryDataConnectionsTable', () => {
-  const mockHttp = { get: jest.fn(), delete: jest.fn() };
-  const mockNotifications = {
-    toasts: {
-      addSuccess: jest.fn(),
-      addDanger: jest.fn(),
-      addWarning: jest.fn(),
-    },
+  const mockedContext = {
+    ...mockManagementPlugin.createDataSourceManagementContext(),
+    application: { capabilities: { dataSource: { canManage: true } } },
   };
-  const mockSavedObjects = { client: {} };
-  const mockUiSettings = {};
-  const mockApplication = { navigateToApp: jest.fn() };
-
-  const defaultProps = {
-    http: mockHttp,
-    notifications: mockNotifications,
-    savedObjects: mockSavedObjects,
-    uiSettings: mockUiSettings,
-    featureFlagStatus: false,
-    application: mockApplication,
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
+  const uiSettings = mockedContext.uiSettings;
+  let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
+  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+  describe('should get direct query connections failed', () => {
+    beforeEach(async () => {
+      spyOn(utils, 'getDataSources').and.returnValue(Promise.reject());
+      await act(async () => {
+        component = await mount(
+          wrapWithIntl(
+            <ManageDirectQueryDataConnectionsTable
+              featureFlagStatus={true}
+              history={history}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+      });
+      component.update();
+    });
+    test('should render empty table', () => {
+      expect(component).toMatchSnapshot();
+    });
   });
 
-  test('renders data connections', async () => {
-    mockHttp.get.mockResolvedValue([
-      { name: 'connection1', connector: 'PROMETHEUS', status: 'ACTIVE' },
-      { name: 'connection2', connector: 'S3GLUE', status: 'INACTIVE' },
-    ]);
-
-    render(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
-    await waitFor(() => expect(screen.getByText('connection1')).toBeInTheDocument());
-    expect(screen.getByText('connection2')).toBeInTheDocument();
-  });
-
-  test('handles search input change', async () => {
-    mockHttp.get.mockResolvedValue([
-      { name: 'connection1', connector: 'PROMETHEUS', status: 'ACTIVE' },
-      { name: 'connection2', connector: 'S3GLUE', status: 'INACTIVE' },
-    ]);
-
-    render(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
-    await waitFor(() => expect(screen.getByText('connection1')).toBeInTheDocument());
-
-    const searchInput = screen.getByPlaceholderText('Search...');
-    fireEvent.change(searchInput, { target: { value: 'connection2' } });
-
-    expect(screen.queryByText('connection1')).not.toBeInTheDocument();
-    expect(screen.getByText('connection2')).toBeInTheDocument();
-  });
-
-  test('displays error on failed fetch', async () => {
-    mockHttp.get.mockRejectedValue(new Error('Fetch error'));
-
-    render(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
-
-    await waitFor(() =>
-      expect(mockNotifications.toasts.addDanger).toHaveBeenCalledWith(
-        'Could not fetch data sources'
-      )
-    );
-  });
-
-  test('matches snapshot', async () => {
-    mockHttp.get.mockResolvedValue([
-      { name: 'connection1', connector: 'PROMETHEUS', status: 'ACTIVE' },
-      { name: 'connection2', connector: 'S3GLUE', status: 'INACTIVE' },
-    ]);
-
-    const { asFragment } = render(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
-    await waitFor(() => expect(screen.getByText('connection1')).toBeInTheDocument());
-    expect(asFragment()).toMatchSnapshot();
-  });
-
-  // Conditional rendering tests
-  test('renders no connections message when there are no connections', async () => {
-    mockHttp.get.mockResolvedValue([]);
-
-    render(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
-    await waitFor(() => expect(screen.getByText('No items found')).toBeInTheDocument());
-  });
-
-  test('renders error message when fetch fails', async () => {
-    mockHttp.get.mockRejectedValue(new Error('Fetch error'));
-
-    render(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
-    await waitFor(() =>
-      expect(mockNotifications.toasts.addDanger).toHaveBeenCalledWith(
-        'Could not fetch data sources'
-      )
-    );
-  });
-
-  test('displays loading indicator while fetching data', async () => {
-    mockHttp.get.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          setTimeout(
-            () =>
-              resolve([
-                { name: 'connection1', connector: 'PROMETHEUS', status: 'ACTIVE' },
-                { name: 'connection2', connector: 'S3GLUE', status: 'INACTIVE' },
-              ]),
-            1000
-          );
-        })
-    );
-
-    render(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
-    expect(screen.getByText('Loading direct query data connections...')).toBeInTheDocument();
-
-    await waitFor(() => expect(screen.getByText('connection1')).toBeInTheDocument());
-    expect(screen.queryByText('Loading direct query data connections...')).not.toBeInTheDocument();
-  });
-
-  test('renders DataSourceSelector with hideLocalCluster enabled', async () => {
-    const newProps = {
-      ...defaultProps,
-      featureFlagStatus: true,
-    };
-
-    render(<ManageDirectQueryDataConnectionsTable {...newProps} />);
-
-    await waitFor(() => {
-      const dataSourceSelector = screen.getByTestId('dataSourceSelectorComboBox');
-      expect(dataSourceSelector).toBeInTheDocument();
+  describe('should get direct query connections successful', () => {
+    beforeEach(async () => {
+      spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
+      spyOn(utils, 'fetchDataSourceConnections').and.returnValue(
+        Promise.resolve(getMappedDataSources)
+      );
+      spyOn(utils, 'getHideLocalCluster').and.returnValue(false);
+      spyOn(uiSettings, 'get').and.returnValue('test1');
+      await act(async () => {
+        component = await mount(
+          wrapWithIntl(
+            <ManageDirectQueryDataConnectionsTable
+              featureFlagStatus={true}
+              history={history}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContext,
+            },
+          }
+        );
+      });
+      component.update();
     });
 
-    // Verify that the hideLocalCluster prop is passed correctly
-    expect(getHideLocalCluster).toHaveBeenCalled();
-    expect(getHideLocalCluster().enabled).toBe(true);
+    it('should render normally', () => {
+      expect(component).toMatchSnapshot();
+      expect(utils.getDataSources).toHaveBeenCalled();
+    });
+
+    it('should show delete button when select datasources', () => {
+      expect(component.find(deleteButtonIdentifier).exists()).toBe(false);
+
+      act(() => {
+        // @ts-ignore
+        component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
+      });
+      component.update();
+      expect(component.find(deleteButtonIdentifier).exists()).toBe(true);
+    });
+
+    it('should delete confirm modal pop up and cancel button work normally', () => {
+      act(() => {
+        // @ts-ignore
+        component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
+      });
+      component.update();
+      component.find(deleteButtonIdentifier).first().simulate('click');
+      // test if modal pop up when click the delete button
+      expect(component.find(confirmModalIdentifier).exists()).toBe(true);
+
+      act(() => {
+        // @ts-ignore
+        component.find(confirmModalIdentifier).first().props().onCancel();
+      });
+      component.update();
+      expect(component.find(confirmModalIdentifier).exists()).toBe(false);
+    });
+
+    it('should delete confirm modal confirm button work normally', async () => {
+      spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.resolve({}));
+      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
+      act(() => {
+        // @ts-ignore
+        component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
+      });
+      component.update();
+      component.find(deleteButtonIdentifier).first().simulate('click');
+      expect(component.find(confirmModalIdentifier).exists()).toBe(true);
+
+      await act(async () => {
+        // @ts-ignore
+        await component.find(confirmModalIdentifier).first().props().onConfirm();
+      });
+      component.update();
+      expect(component.find(confirmModalIdentifier).exists()).toBe(false);
+      expect(utils.setFirstDataSourceAsDefault).toHaveBeenCalled();
+    });
+
+    it('should delete datasources & fail', async () => {
+      spyOn(utils, 'deleteMultipleDataSources').and.returnValue(Promise.reject({}));
+      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
+      act(() => {
+        // @ts-ignore
+        component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
+      });
+
+      component.update();
+      component.find(deleteButtonIdentifier).first().simulate('click');
+      expect(component.find(confirmModalIdentifier).exists()).toBe(true);
+
+      await act(async () => {
+        // @ts-ignore
+        await component.find(confirmModalIdentifier).props().onConfirm();
+      });
+      component.update();
+      expect(utils.deleteMultipleDataSources).toHaveBeenCalled();
+      expect(utils.setFirstDataSourceAsDefault).not.toHaveBeenCalled();
+      // @ts-ignore
+      expect(component.find(confirmModalIdentifier).exists()).toBe(false);
+    });
   });
 });
