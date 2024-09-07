@@ -36,7 +36,7 @@ import { Logger } from '../../logging';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';
 import { UiSettingScope } from '../types';
-import { generateDocId } from '../utils';
+import { buildDocIdWithScope } from '../utils';
 
 interface Options {
   savedObjectsClient: SavedObjectsClientContract;
@@ -70,7 +70,7 @@ export async function createOrUpgradeSavedConfig(
   );
 
   try {
-    const docId = generateDocId(version, scope);
+    const docId = buildDocIdWithScope(version, scope);
     // create the new SavedConfig
     await savedObjectsClient.create('config', attributes, { id: docId });
   } catch (error) {
