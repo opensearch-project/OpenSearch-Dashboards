@@ -263,9 +263,9 @@ comparisonExpression
    ;
 
 valueExpression
-   : left = valueExpression binaryOperator = (STAR | DIVIDE | MODULE) right = valueExpression   # binaryArithmetic
-   | left = valueExpression binaryOperator = (PLUS | MINUS) right = valueExpression             # binaryArithmetic
-   | primaryExpression                                                                          # valueExpressionDefault
+   // : left = valueExpression binaryOperator = (STAR | DIVIDE | MODULE) right = valueExpression   # binaryArithmetic
+   // | left = valueExpression binaryOperator = (PLUS | MINUS) right = valueExpression             # binaryArithmetic
+   : primaryExpression                                                                          # valueExpressionDefault
    | positionFunction                                                                           # positionFunctionCall
    | extractFunction                                                                            # extractFunctionCall
    | getFormatFunction                                                                          # getFormatFunctionCall

@@ -33,6 +33,8 @@ export function getIgnoredTokens(): number[] {
     OpenSearchPPLParser.PIPE,
     OpenSearchPPLParser.EQUAL,
     OpenSearchPPLParser.COMMA,
+    OpenSearchPPLParser.PLUS,
+    OpenSearchPPLParser.MINUS,
     // OpenSearchPPLParser.EQUAL,
     // OpenSearchPPLParser.NOT_EQUAL,
     // OpenSearchPPLParser.LESS,
