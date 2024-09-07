@@ -48,4 +48,7 @@ export {
   StringValidation,
   StringValidationRegex,
   StringValidationRegexString,
+  UiSettingScope,
 } from './types';
+
+export { CURRENT_USER_PLACEHOLDER } from './utils';

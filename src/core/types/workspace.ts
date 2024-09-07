@@ -5,6 +5,12 @@
 
 import { Permissions } from '../server/saved_objects';
 
+export enum PermissionModeId {
+  Read = 'read',
+  ReadAndWrite = 'read+write',
+  Owner = 'owner',
+}
+
 export interface WorkspaceAttribute {
   id: string;
   name: string;
@@ -19,4 +25,5 @@ export interface WorkspaceAttribute {
 
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
+  permissionMode?: PermissionModeId;
 }
