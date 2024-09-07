@@ -1,5 +1,49 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Header - workspace enabled should render \`Import\` button inside a workspace 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    alignItems="baseline"
+    justifyContent="spaceBetween"
+  >
+    <HeaderControl
+      controls={
+        Array [
+          Object {
+            "controlType": "button",
+            "iconType": "exportAction",
+            "label": "Export all objects",
+            "run": [Function],
+            "testId": "exportAllObjects",
+          },
+          Object {
+            "controlType": "button",
+            "iconType": "importAction",
+            "label": "Import",
+            "run": [Function],
+            "testId": "importObjects",
+          },
+        ]
+      }
+      setMountPoint={[MockFunction]}
+    />
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="l"
+  />
+  <HeaderControl
+    controls={
+      Array [
+        Object {
+          "description": "Manage and share your assets.",
+        },
+      ]
+    }
+    setMountPoint={[MockFunction]}
+  />
+</Fragment>
+`;
+
 exports[`Header should render normally 1`] = `
 <Fragment>
   <EuiFlexGroup
@@ -216,47 +260,26 @@ exports[`Header should render normally when useUpdatedUX is true 1`] = `
       controls={
         Array [
           Object {
-            "renderComponent": <EuiButton
-              data-test-subj="duplicateObjects"
-              disabled={false}
-              iconType="copy"
-              onClick={[Function]}
-              size="s"
-            >
-              <FormattedMessage
-                defaultMessage="Copy all objects to..."
-                id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>,
+            "controlType": "button",
+            "disabled": false,
+            "iconType": "copy",
+            "label": "Copy all objects to...",
+            "run": [Function],
+            "testId": "duplicateObjects",
           },
           Object {
-            "renderComponent": <EuiButton
-              data-test-subj="exportAllObjects"
-              iconType="exportAction"
-              onClick={[Function]}
-              size="s"
-            >
-              <FormattedMessage
-                defaultMessage="Export all objects"
-                id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>,
+            "controlType": "button",
+            "iconType": "exportAction",
+            "label": "Export all objects",
+            "run": [Function],
+            "testId": "exportAllObjects",
           },
           Object {
-            "renderComponent": <EuiButton
-              data-test-subj="importObjects"
-              iconType="importAction"
-              onClick={[Function]}
-              size="s"
-            >
-              <FormattedMessage
-                defaultMessage="Import"
-                id="savedObjectsManagement.objectsTable.header.importButtonLabel"
-                values={Object {}}
-              />
-            </EuiButton>,
+            "controlType": "button",
+            "iconType": "importAction",
+            "label": "Import",
+            "run": [Function],
+            "testId": "importObjects",
           },
         ]
       }
@@ -264,7 +287,7 @@ exports[`Header should render normally when useUpdatedUX is true 1`] = `
     />
   </EuiFlexGroup>
   <EuiSpacer
-    size="m"
+    size="l"
   />
   <HeaderControl
     controls={
@@ -275,9 +298,6 @@ exports[`Header should render normally when useUpdatedUX is true 1`] = `
       ]
     }
     setMountPoint={[MockFunction]}
-  />
-  <EuiSpacer
-    size="m"
   />
 </Fragment>
 `;

@@ -24,7 +24,12 @@ import { WORKSPACE_LIST_APP_ID } from '../../../common/constants';
 import { cleanWorkspaceId } from '../../../../../core/public/utils';
 import { DetailTab, DetailTabTitles, WorkspaceOperationType } from '../workspace_form/constants';
 import { CoreStart, WorkspaceAttribute } from '../../../../../core/public';
-import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
+import {
+  fetchDataSourceConnectionsByDataSourceIds,
+  fulfillRelatedConnections,
+  getFirstUseCaseOfFeatureConfigs,
+  getUseCaseUrl,
+} from '../../utils';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { SelectDataSourceDetailPanel } from './select_data_source_panel';
@@ -49,6 +54,8 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
       dataSourceManagement,
       uiSettings,
       navigationUI: { HeaderControl },
+      chrome,
+      notifications,
     },
   } = useOpenSearchDashboards<{
     CoreStart: CoreStart;
@@ -57,18 +64,20 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
   }>();
 
   const {
-    formData,
     isEditing,
     formId,
     numberOfErrors,
     handleResetForm,
     numberOfChanges,
     setIsEditing,
+    formData,
+    setSelectedDataSourceConnections,
   } = useWorkspaceFormContext();
   const [deletedWorkspace, setDeletedWorkspace] = useState<WorkspaceAttribute | null>(null);
   const [selectedTabId, setSelectedTabId] = useState<string>(DetailTab.Details);
   const [modalVisible, setModalVisible] = useState(false);
   const [tabId, setTabId] = useState<string>(DetailTab.Details);
+  const [isDQCFilled, setIsDQCFilled] = useState(false);
 
   const availableUseCases = useObservable(props.registeredUseCases$, []);
   const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
@@ -88,7 +97,32 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
     }
   }, [location.search]);
 
-  if (!currentWorkspace || !application || !http || !savedObjects || !uiSettings) {
+  useEffect(() => {
+    if (selectedTabId !== DetailTab.DataSources || isDQCFilled || !http || !notifications) {
+      return;
+    }
+    fetchDataSourceConnectionsByDataSourceIds(
+      formData.selectedDataSourceConnections.map(({ id }) => id),
+      http
+    )
+      .then((directQueryConnections) => {
+        setSelectedDataSourceConnections(
+          fulfillRelatedConnections(formData.selectedDataSourceConnections, directQueryConnections)
+        );
+      })
+      .finally(() => {
+        setIsDQCFilled(true);
+      });
+  }, [
+    http,
+    isDQCFilled,
+    selectedTabId,
+    notifications,
+    setSelectedDataSourceConnections,
+    formData.selectedDataSourceConnections,
+  ]);
+
+  if (!currentWorkspace || !application || !http || !savedObjects || !uiSettings || !chrome) {
     return null;
   }
 
@@ -140,11 +174,12 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
             name: DetailTabTitles.dataSources,
             content: (
               <SelectDataSourceDetailPanel
+                loading={!isDQCFilled}
                 savedObjects={savedObjects}
-                assignedDataSources={formData.selectedDataSources}
                 detailTitle={DetailTabTitles.dataSources}
                 isDashboardAdmin={isDashboardAdmin}
                 currentWorkspace={currentWorkspace}
+                chrome={chrome}
               />
             ),
           },
@@ -168,23 +203,25 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
             setMountPoint={application.setAppDescriptionControls}
           />
         )}
-        <HeaderControl
-          controls={[
-            {
-              run: () => setDeletedWorkspace(currentWorkspace),
-              color: 'danger',
-              iconType: 'trash',
-              ariaLabel: i18n.translate('workspace.detail.delete.button', {
-                defaultMessage: 'Delete',
-              }),
-              testId: 'workspace-detail-delete-button',
-              controlType: 'icon',
-              display: 'base',
-            } as TopNavControlIconData,
-          ]}
-          setMountPoint={application.setAppRightControls}
-        />
-        <EuiSpacer />
+        {isDashboardAdmin && (
+          <HeaderControl
+            controls={[
+              {
+                run: () => setDeletedWorkspace(currentWorkspace),
+                color: 'danger',
+                iconType: 'trash',
+                ariaLabel: i18n.translate('workspace.detail.delete.button', {
+                  defaultMessage: 'Delete',
+                }),
+                testId: 'workspace-detail-delete-button',
+                controlType: 'icon',
+                display: 'base',
+              } as TopNavControlIconData,
+            ]}
+            setMountPoint={application.setAppRightControls}
+          />
+        )}
+
         <EuiPageContent>
           <WorkspaceDetailPanel
             useCaseUrl={useCaseUrl}

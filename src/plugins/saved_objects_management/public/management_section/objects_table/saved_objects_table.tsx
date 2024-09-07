@@ -109,6 +109,7 @@ import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { DuplicateObject } from '../types';
 import { formatWorkspaceIdParams } from '../../utils';
 import { NavigationPublicPluginStart } from '../../../../navigation/public';
+import { WorkspaceObject } from '../../../../workspaces/public';
 
 interface ExportAllOption {
   id: string;
@@ -159,7 +160,7 @@ export interface SavedObjectsTableState {
   exportAllOptions: ExportAllOption[];
   exportAllSelectedOptions: Record<string, boolean>;
   isIncludeReferencesDeepChecked: boolean;
-  currentWorkspaceId?: string;
+  currentWorkspace?: WorkspaceObject;
   workspaceEnabled: boolean;
   availableWorkspaces?: WorkspaceAttribute[];
   isShowingDuplicateResultFlyout: boolean;
@@ -169,7 +170,7 @@ export interface SavedObjectsTableState {
 }
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
-  private currentWorkspaceIdSubscription?: Subscription;
+  private currentWorkspaceSubscription?: Subscription;
   private workspacesSubscription?: Subscription;
 
   constructor(props: SavedObjectsTableProps) {
@@ -201,7 +202,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions: [],
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
-      currentWorkspaceId: this.props.workspaces.currentWorkspaceId$.getValue(),
+      currentWorkspace: this.props.workspaces.currentWorkspace$.getValue(),
       availableWorkspaces: this.props.workspaces.workspaceList$.getValue(),
       workspaceEnabled: this.props.applications.capabilities.workspaces.enabled,
       isShowingDuplicateResultFlyout: false,
@@ -245,16 +246,16 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   private get workspaceIdQuery() {
-    const { currentWorkspaceId, workspaceEnabled } = this.state;
+    const { currentWorkspace, workspaceEnabled } = this.state;
     // workspace is turned off
     if (!workspaceEnabled) {
       return undefined;
     } else {
       // not in any workspace
-      if (!currentWorkspaceId) {
+      if (!currentWorkspace) {
         return undefined;
       } else {
-        return [currentWorkspaceId];
+        return [currentWorkspace.id];
       }
     }
   }
@@ -369,9 +370,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   subscribeWorkspace = () => {
     const workspace = this.props.workspaces;
-    this.currentWorkspaceIdSubscription = workspace.currentWorkspaceId$.subscribe((workspaceId) =>
+    this.currentWorkspaceSubscription = workspace.currentWorkspace$.subscribe((newValue) =>
       this.setState({
-        currentWorkspaceId: workspaceId,
+        currentWorkspace: newValue,
       })
     );
 
@@ -381,7 +382,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   unSubscribeWorkspace = () => {
-    this.currentWorkspaceIdSubscription?.unsubscribe();
+    this.currentWorkspaceSubscription?.unsubscribe();
     this.workspacesSubscription?.unsubscribe();
   };
 
@@ -1062,7 +1063,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       savedObjectCounts,
       availableWorkspaces,
       workspaceEnabled,
-      currentWorkspaceId,
+      currentWorkspace,
     } = this.state;
     const {
       http,
@@ -1125,7 +1126,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     if (workspaceEnabled && availableWorkspaces?.length) {
       const wsCounts = savedObjectCounts.workspaces || {};
       const wsFilterOptions = availableWorkspaces
-        .filter((ws) => (currentWorkspaceId ? currentWorkspaceId === ws.id : true))
+        .filter((ws) => (currentWorkspace ? currentWorkspace.id === ws.id : true))
         .map((ws) => {
           return {
             name: ws.name,
@@ -1164,8 +1165,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           useUpdatedUX={useUpdatedUX}
           navigationUI={navigationUI}
           applications={applications}
+          currentWorkspaceName={currentWorkspace?.name}
+          showImportButton={!workspaceEnabled || !!currentWorkspace}
         />
-        <EuiSpacer size="xs" />
+        {!useUpdatedUX && <EuiSpacer size="xs" />}
         <RedirectAppLinks application={applications}>
           <Table
             basePath={http.basePath}
@@ -1203,7 +1206,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             canGoInApp={this.props.canGoInApp}
             dateFormat={this.props.dateFormat}
             availableWorkspaces={availableWorkspaces}
-            currentWorkspaceId={currentWorkspaceId}
+            currentWorkspaceId={currentWorkspace?.id}
             showDuplicate={this.state.workspaceEnabled}
             onRefresh={this.refreshObjects}
             useUpdatedUX={useUpdatedUX}

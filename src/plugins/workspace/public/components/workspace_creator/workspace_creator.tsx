@@ -11,15 +11,16 @@ import { BehaviorSubject } from 'rxjs';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
 import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
+import { getUseCaseFeatureConfig } from '../../../common/utils';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { convertPermissionSettingsToPermissions } from '../workspace_form';
-import { DataSource } from '../../../common/types';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { WorkspaceUseCase } from '../../types';
-import { getUseCaseFeatureConfig } from '../../utils';
+import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
+import { DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
 
 export interface WorkspaceCreatorProps {
@@ -71,10 +72,14 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
       }
       setIsFormSubmitting(true);
       try {
-        const { permissionSettings, selectedDataSources, ...attributes } = data;
-        const selectedDataSourceIds = (selectedDataSources ?? []).map((ds: DataSource) => {
-          return ds.id;
-        });
+        const { permissionSettings, selectedDataSourceConnections, ...attributes } = data;
+        const selectedDataSourceIds = (selectedDataSourceConnections ?? [])
+          .filter(
+            ({ connectionType }) => connectionType === DataSourceConnectionType.OpenSearchConnection
+          )
+          .map(({ id }) => {
+            return id;
+          });
         result = await workspaceClient.create(attributes, {
           dataSources: selectedDataSourceIds,
           permissions: convertPermissionSettingsToPermissions(permissionSettings),
@@ -87,10 +92,13 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           });
           if (application && http) {
             const newWorkspaceId = result.result.id;
+            const useCaseId = getFirstUseCaseOfFeatureConfigs(attributes.features);
+            const useCaseLandingAppId = availableUseCases?.find(({ id }) => useCaseId === id)
+              ?.features[0].id;
             // Redirect page after one second, leave one second time to show create successful toast.
             window.setTimeout(() => {
               window.location.href = formatUrlWithWorkspaceId(
-                application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
+                application.getUrlForApp(useCaseLandingAppId || WORKSPACE_DETAIL_APP_ID, {
                   absolute: true,
                 }),
                 newWorkspaceId,
@@ -114,7 +122,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
         setIsFormSubmitting(false);
       }
     },
-    [notifications?.toasts, http, application, workspaceClient, isFormSubmitting]
+    [notifications?.toasts, http, application, workspaceClient, isFormSubmitting, availableUseCases]
   );
 
   const isFormReadyToRender =

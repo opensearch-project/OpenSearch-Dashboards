@@ -17,7 +17,9 @@ describe('CreateButton', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 
   beforeEach(() => {
-    component = shallow(<CreateButton history={history} dataTestSubj={dataTestSubj} />);
+    component = shallow(
+      <CreateButton history={history} dataTestSubj={dataTestSubj} featureFlagStatus={true} />
+    );
   });
 
   it('should render normally', () => {

@@ -352,15 +352,6 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on header w
         "closed": false,
         "hasError": false,
         "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "workspace1",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
         "observers": Array [
           Subscriber {
             "_parentOrParents": null,
@@ -400,6 +391,15 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on header w
             "syncErrorValue": null,
           },
         ],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "workspace1",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
         "thrownError": null,
       },
       "initialized$": BehaviorSubject {
@@ -539,15 +539,6 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
         "closed": false,
         "hasError": false,
         "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "workspace1",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
         "observers": Array [
           Subscriber {
             "_parentOrParents": null,
@@ -587,6 +578,15 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
             "syncErrorValue": null,
           },
         ],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "workspace1",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
         "thrownError": null,
       },
       "initialized$": BehaviorSubject {
@@ -738,15 +738,6 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
         "closed": false,
         "hasError": false,
         "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "workspace1",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
         "observers": Array [
           Subscriber {
             "_parentOrParents": null,
@@ -786,6 +777,15 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
             "syncErrorValue": null,
           },
         ],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "workspace1",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
         "thrownError": null,
       },
       "initialized$": BehaviorSubject {
@@ -1042,6 +1042,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
     onExportAll={[Function]}
     onImport={[Function]}
     onRefresh={[Function]}
+    showImportButton={true}
   />
   <EuiSpacer
     size="xs"
@@ -1120,7 +1121,6 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "has": [MockFunction],
         }
       }
-      currentWorkspaceId=""
       filters={
         Array [
           Object {

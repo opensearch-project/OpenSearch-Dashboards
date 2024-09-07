@@ -117,9 +117,13 @@ export const DetailTabTitles: { [key in DetailTab]: string } = {
     defaultMessage: 'Details',
   }),
   [DetailTab.DataSources]: i18n.translate('workspace.detail.tabTitle.dataSources', {
-    defaultMessage: 'Data Sources',
+    defaultMessage: 'Data sources',
   }),
   [DetailTab.Collaborators]: i18n.translate('workspace.detail.tabTitle.collaborators', {
     defaultMessage: 'Collaborators',
   }),
 };
+
+export const PERMISSION_TYPE_LABEL_ID = 'workspace-form-permission-type-label';
+export const PERMISSION_COLLABORATOR_LABEL_ID = 'workspace-form-permission-collaborator-label';
+export const PERMISSION_ACCESS_LEVEL_LABEL_ID = 'workspace-form-permission-access-level-label';

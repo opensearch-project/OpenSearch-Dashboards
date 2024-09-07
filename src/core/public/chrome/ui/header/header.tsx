@@ -143,6 +143,7 @@ export function Header({
   const [isNavOpen, setIsNavOpen] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
   const breadcrumbs = useObservable(observables.breadcrumbs$, []);
+  const currentWorkspace = useObservable(observables.currentWorkspace$, undefined);
 
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
@@ -203,13 +204,14 @@ export function Header({
     />
   );
 
-  const renderBreadcrumbs = (renderFullLength?: boolean) => (
+  const renderBreadcrumbs = (renderFullLength?: boolean, dropHomeFromBreadcrumb?: boolean) => (
     <HeaderBreadcrumbs
       appTitle$={observables.appTitle$}
       breadcrumbs$={observables.breadcrumbs$}
       breadcrumbsEnricher$={observables.breadcrumbsEnricher$}
       useUpdatedHeader={useUpdatedHeader}
       renderFullLength={renderFullLength}
+      dropHomeFromBreadcrumb={dropHomeFromBreadcrumb}
     />
   );
 
@@ -351,7 +353,7 @@ export function Header({
         recentlyAccessed$={observables.recentlyAccessed$}
         workspaceList$={observables.workspaceList$}
         navigateToUrl={application.navigateToUrl}
-        renderBreadcrumbs={renderBreadcrumbs(true)}
+        renderBreadcrumbs={renderBreadcrumbs(true, false)}
         buttonSize={useApplicationHeader ? 's' : 'xs'}
       />
     </EuiHeaderSectionItem>
@@ -399,7 +401,7 @@ export function Header({
 
         <EuiHeaderSection grow={false}>{renderRecentItems()}</EuiHeaderSection>
 
-        {renderBreadcrumbs()}
+        {renderBreadcrumbs(false, !!currentWorkspace)}
       </EuiHeader>
 
       {/* Secondary header */}

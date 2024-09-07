@@ -40,8 +40,9 @@ export const Configurator = ({
   const type = queryString.getDatasetService().getType(baseDataset.type);
   const languages = type?.supportedLanguages(baseDataset) || [];
 
+  const [dataset, setDataset] = useState<Dataset>(baseDataset);
   const [timeFields, setTimeFields] = useState<DatasetField[]>();
-  const [timeFieldName, setTimeFieldName] = useState<string | undefined>();
+  const [timeFieldName, setTimeFieldName] = useState<string | undefined>(dataset.timeFieldName);
   const [language, setLanguage] = useState<string>(() => {
     const currentLanguage = queryString.getQuery().language;
     if (languages.includes(currentLanguage)) {
@@ -94,7 +95,7 @@ export const Configurator = ({
               }
             )}
           >
-            <EuiFieldText disabled value={baseDataset.title} />
+            <EuiFieldText disabled value={dataset.title} />
           </EuiFormRow>
           {timeFields && timeFields.length > 0 && (
             <EuiFormRow
@@ -118,6 +119,7 @@ export const Configurator = ({
                 onChange={(e) => {
                   const value = e.target.value === 'undefined' ? undefined : e.target.value;
                   setTimeFieldName(value);
+                  setDataset({ ...dataset, timeFieldName: value });
                 }}
               />
             </EuiFormRow>
@@ -136,7 +138,10 @@ export const Configurator = ({
                 value: languageId,
               }))}
               value={language}
-              onChange={(e) => setLanguage(e.target.value)}
+              onChange={(e) => {
+                setLanguage(e.target.value);
+                setDataset({ ...dataset, language: e.target.value });
+              }}
             />
           </EuiFormRow>
         </EuiForm>
@@ -156,8 +161,8 @@ export const Configurator = ({
         </EuiButton>
         <EuiButton
           onClick={() => {
-            queryString.getDatasetService().cacheDataset({ ...dataset, language, timeFieldName });
-            onConfirm({ ...dataset, language, timeFieldName });
+            queryString.getDatasetService().cacheDataset(dataset);
+            onConfirm(dataset);
           }}
           fill
         >

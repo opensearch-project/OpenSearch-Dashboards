@@ -109,6 +109,7 @@ const fetch = async (
   type: 'DATABASE' | 'TABLE'
 ): Promise<DataStructure[]> => {
   const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
+  const connection = path.find((ds) => ds.type === 'CONNECTION');
   const parent = path[path.length - 1];
   const meta = parent.meta as DataStructureCustomMeta;
 
@@ -129,8 +130,8 @@ const fetch = async (
       type,
       meta: {
         type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-        query: meta.query,
-        session: meta.session,
+        sessionId: meta.sessionId,
+        name: connection?.title,
       } as DataStructureCustomMeta,
     }));
   } catch (error) {
@@ -197,7 +198,7 @@ const fetchDatabases = async (http: HttpSetup, path: DataStructure[]): Promise<D
     body: JSON.stringify({
       lang: 'sql',
       query: `SHOW DATABASES in ${connection.title}`,
-      datasource: dataSource?.title,
+      datasource: connection?.title,
       ...(meta.sessionId && { sessionId: meta.sessionId }),
     }),
     query: {
@@ -212,14 +213,14 @@ const fetchDatabases = async (http: HttpSetup, path: DataStructure[]): Promise<D
 
 const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<DataStructure[]> => {
   const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
-  const sessionId = (path.find((ds) => ds.type === 'CONNECTION')?.meta as DataStructureCustomMeta)
-    .sessionId;
+  const connection = path.find((ds) => ds.type === 'CONNECTION');
+  const sessionId = (connection?.meta as DataStructureCustomMeta).sessionId;
   const database = path[path.length - 1];
   const response = await http.post(`../../api/enhancements/datasource/jobs`, {
     body: JSON.stringify({
       lang: 'sql',
       query: `SHOW TABLES in ${database.title}`,
-      datasource: dataSource?.title,
+      datasource: connection?.title,
       ...(sessionId && { sessionId }),
     }),
     query: {

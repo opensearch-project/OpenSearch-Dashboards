@@ -5,3 +5,4 @@
 
 export * from './canvas';
 export * from './panel';
+export * from './utils';
