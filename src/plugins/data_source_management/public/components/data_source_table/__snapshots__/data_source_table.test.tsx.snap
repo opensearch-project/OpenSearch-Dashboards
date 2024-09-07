@@ -155,12 +155,12 @@ exports[`DataSourceTable should get datasources failed should render empty table
                         className="euiButton__text"
                       >
                         <FormattedMessage
-                          defaultMessage="Create data source connection"
+                          defaultMessage="Create direct query connection"
                           id="dataSourcesManagement.dataSourceListing.createButton"
                           values={Object {}}
                         >
                           <span>
-                            Create data source connection
+                            Create direct query connection
                           </span>
                         </FormattedMessage>
                       </span>
@@ -1452,11 +1452,12 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  flush="left"
                                   onClick={[Function]}
                                   size="xs"
                                 >
                                   <button
-                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                     disabled={false}
                                     onClick={[Function]}
                                     type="button"
@@ -1676,11 +1677,12 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  flush="left"
                                   onClick={[Function]}
                                   size="xs"
                                 >
                                   <button
-                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                     disabled={false}
                                     onClick={[Function]}
                                     type="button"
@@ -1900,11 +1902,12 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  flush="left"
                                   onClick={[Function]}
                                   size="xs"
                                 >
                                   <button
-                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                     disabled={false}
                                     onClick={[Function]}
                                     type="button"
@@ -2124,11 +2127,12 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  flush="left"
                                   onClick={[Function]}
                                   size="xs"
                                 >
                                   <button
-                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                     disabled={false}
                                     onClick={[Function]}
                                     type="button"

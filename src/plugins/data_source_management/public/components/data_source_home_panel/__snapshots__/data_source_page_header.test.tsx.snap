@@ -28,7 +28,7 @@ exports[`DataSourceHeader renders correctly 1`] = `
       <p>
         <FormattedMessage
           defaultMessage="Create and manage data source connections."
-          id="dataSourcesManagement.dataSourcesTable.description"
+          id="dataSourcesManagement.dataSourcesTable.mdsEnabled.description"
           values={Object {}}
         />
       </p>
