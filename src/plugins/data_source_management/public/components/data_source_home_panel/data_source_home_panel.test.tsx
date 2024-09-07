@@ -100,9 +100,9 @@ describe('DataSourceHomePanel', () => {
     expect(wrapper.find(ManageDirectQueryDataConnectionsTableWithRouter)).toHaveLength(1);
   });
 
-  test('does not render OpenSearch connections tab when featureFlagStatus is false', () => {
+  test('does not render any tab when featureFlagStatus is false', () => {
     const wrapper = shallowComponent({ ...defaultProps, featureFlagStatus: false });
-    expect(wrapper.find(EuiTab)).toHaveLength(1);
+    expect(wrapper.find(EuiTab)).toHaveLength(0);
   });
 
   test('calls history.push when CreateButton is clicked', () => {
