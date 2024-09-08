@@ -45,7 +45,6 @@ import {
   IDynamicConfigurationClient,
   InternalDynamicConfigServiceStart,
 } from './config';
-import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../utils/constants';
 
 class CoreOpenSearchRouteHandlerContext {
   #client?: IScopedClusterClient;
@@ -102,12 +101,14 @@ class CoreUiSettingsRouteHandlerContext {
   #client?: IUiSettingsClient;
   constructor(
     private readonly uiSettingsStart: InternalUiSettingsServiceStart,
-    private readonly savedObjectsClient: SavedObjectsClientContract
+    private readonly savedObjectsRouterHandlerContext: CoreSavedObjectsRouteHandlerContext
   ) {}
 
   public get client() {
     if (this.#client == null) {
-      this.#client = this.uiSettingsStart.asScopedToClient(this.savedObjectsClient);
+      this.#client = this.uiSettingsStart.asScopedToClient(
+        this.savedObjectsRouterHandlerContext.client
+      );
     }
     return this.#client;
   }
@@ -150,19 +151,9 @@ export class CoreRouteHandlerContext {
       this.coreStart.savedObjects,
       this.request
     );
-    /**
-     * UI settings should use a client that bypass workspace permission check
-     * as the configs are always global
-     */
-    const savedObjectsClientForUISettings = this.coreStart.savedObjects.getScopedClient(
-      this.request,
-      {
-        excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
-      }
-    );
     this.uiSettings = new CoreUiSettingsRouteHandlerContext(
       this.coreStart.uiSettings,
-      savedObjectsClientForUISettings
+      this.savedObjects
     );
     this.dynamicConfig = new CoreDynamicConfigRouteHandlerContext(this.coreStart.dynamicConfig);
   }
