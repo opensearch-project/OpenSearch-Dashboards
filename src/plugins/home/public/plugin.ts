@@ -210,7 +210,9 @@ export class HomePublicPlugin
       title: i18n.translate('home.tutorialDirectory.featureCatalogueTitle', {
         defaultMessage: 'Add sample data',
       }),
-      navLinkStatus: AppNavLinkStatus.hidden,
+      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppNavLinkStatus.default
+        : AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
         setCommonService();
