@@ -4,6 +4,7 @@
  */
 
 import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { trimEnd } from 'lodash';
 import {
   DATA_STRUCTURE_META_TYPES,
   DEFAULT_DATA,
@@ -14,7 +15,7 @@ import {
   DatasetField,
 } from '../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
-import { DATASET, handleQueryStatus } from '../../common';
+import { API, DATASET, handleQueryStatus } from '../../common';
 import S3_ICON from '../assets/s3_mark.svg';
 
 export const s3TypeConfig: DatasetTypeConfig = {
@@ -115,7 +116,7 @@ const fetch = async (
   try {
     const response = await handleQueryStatus({
       fetchStatus: () =>
-        http.fetch('../../api/enhancements/datasource/jobs', {
+        http.fetch(trimEnd(API.DATA_SOURCE.ASYNC_JOBS), {
           query: {
             id: dataSource?.id,
             queryId: meta.queryId,
@@ -172,7 +173,7 @@ const fetchConnections = async (
   dataSource: DataStructure
 ): Promise<DataStructure[]> => {
   const query = (dataSource.meta as DataStructureCustomMeta).query;
-  const response = await http.fetch(`../../api/enhancements/datasource/external`, {
+  const response = await http.fetch(trimEnd(API.DATA_SOURCE.EXTERNAL), {
     query,
   });
 
@@ -193,7 +194,7 @@ const fetchDatabases = async (http: HttpSetup, path: DataStructure[]): Promise<D
   const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
   const connection = path[path.length - 1];
   const meta = connection.meta as DataStructureCustomMeta;
-  const response = await http.post(`../../api/enhancements/datasource/jobs`, {
+  const response = await http.post(trimEnd(API.DATA_SOURCE.ASYNC_JOBS), {
     body: JSON.stringify({
       lang: 'sql',
       query: `SHOW DATABASES in ${connection.title}`,
@@ -215,7 +216,7 @@ const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<Data
   const connection = path.find((ds) => ds.type === 'CONNECTION');
   const sessionId = (connection?.meta as DataStructureCustomMeta).sessionId;
   const database = path[path.length - 1];
-  const response = await http.post(`../../api/enhancements/datasource/jobs`, {
+  const response = await http.post(trimEnd(API.DATA_SOURCE.ASYNC_JOBS), {
     body: JSON.stringify({
       lang: 'sql',
       query: `SHOW TABLES in ${database.title}`,

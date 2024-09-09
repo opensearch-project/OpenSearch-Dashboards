@@ -3,20 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { trimEnd } from 'lodash';
+import { CoreStart } from 'opensearch-dashboards/public';
 import { Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
-import { CoreStart } from 'opensearch-dashboards/public';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
-  IOpenSearchDashboardsSearchResponse,
   ISearchOptions,
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../data/public';
-import { API, DATASET, EnhancedFetchContext, SEARCH_STRATEGY, fetch } from '../../common';
+import { DATASET, EnhancedFetchContext, SEARCH_STRATEGY, fetch } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
+import { IOpenSearchDashboardsSearchResponse } from '../../../data/common';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
@@ -39,12 +38,12 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     const isAsync = strategy === SEARCH_STRATEGY.SQL_ASYNC;
     const context: EnhancedFetchContext = {
       http: this.deps.http,
-      path: trimEnd(isAsync ? API.SQL_ASYNC_SEARCH : API.SQL_SEARCH),
+      strategy,
       signal,
     };
 
     if (isAsync) this.notifications.toasts.add('Fetching data...');
-    return fetch(context, this.queryService.queryString.getQuery()).pipe(
+    return fetch(context, request).pipe(
       tap(() => isAsync && this.notifications.toasts.addSuccess('Fetch complete...')),
       catchError((error) => {
         return throwError(error);
@@ -55,6 +54,6 @@ export class SQLSearchInterceptor extends SearchInterceptor {
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
     const dataset = this.queryService.queryString.getQuery().dataset;
     const strategy = dataset?.type === DATASET.S3 ? SEARCH_STRATEGY.SQL_ASYNC : SEARCH_STRATEGY.SQL;
-    return this.runSearch(request, options.abortSignal, strategy);
+    return this.runSearch(request, options.abortSignal!, strategy);
   }
 }

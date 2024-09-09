@@ -23,7 +23,7 @@ export interface QueryStatusConfig {
 
 export interface EnhancedFetchContext {
   http: CoreSetup['http'];
-  path: string;
+  strategy?: string;
   signal?: AbortSignal;
 }
 

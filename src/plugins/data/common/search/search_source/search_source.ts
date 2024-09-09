@@ -424,30 +424,25 @@ export class SearchSource {
   private async fetchExternalSearch(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
 
-    const currentDataframe = this.getDataFrame();
-    if (!currentDataframe || currentDataframe.name !== searchRequest.index?.id) {
-      await this.createDataFrame(searchRequest);
-    }
-
     const params = getExternalSearchParamsFromRequest(searchRequest, {
       getConfig,
-      getDataFrame: this.getDataFrame.bind(this),
     });
 
     return search({ params }, options).then(async (response: any) => {
-      if (response.hasOwnProperty('type')) {
-        if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.DEFAULT) {
-          const dataFrameResponse = response as IDataFrameResponse;
+      const rawResponse = response.rawResponse;
+      if (rawResponse.hasOwnProperty('type')) {
+        if ((rawResponse as IDataFrameResponse).type === DATA_FRAME_TYPES.DEFAULT) {
+          const dataFrameResponse = rawResponse as IDataFrameResponse;
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
-          return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+          return onResponse(searchRequest, convertResult(rawResponse as IDataFrameResponse));
         }
-        if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
-          const dataFrameResponse = response as IDataFrameResponse;
+        if ((rawResponse as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
+          const dataFrameResponse = rawResponse as IDataFrameResponse;
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
-          return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+          return onResponse(searchRequest, convertResult(rawResponse as IDataFrameResponse));
         }
-        if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.ERROR) {
-          const dataFrameError = response as IDataFrameError;
+        if ((rawResponse as IDataFrameResponse).type === DATA_FRAME_TYPES.ERROR) {
+          const dataFrameError = rawResponse as IDataFrameError;
           throw new RequestFailure(null, dataFrameError);
         }
       }

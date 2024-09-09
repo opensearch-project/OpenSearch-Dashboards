@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { trimEnd } from 'lodash';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { formatTimePickerDate, Query } from '../../../data/common';
 import {
   DataPublicPluginStart,
@@ -17,10 +17,10 @@ import {
 import {
   formatDate,
   SEARCH_STRATEGY,
-  API,
+  QueryAggConfig,
+  getQuery,
   EnhancedFetchContext,
   fetch,
-  QueryAggConfig,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
@@ -42,24 +42,46 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     signal?: AbortSignal,
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
-    const { id, ...searchRequest } = request;
     const context: EnhancedFetchContext = {
       http: this.deps.http,
-      path: trimEnd(API.PPL_SEARCH),
+      strategy,
       signal,
     };
 
-    const query = this.buildQuery();
-
-    return fetch(context, query, this.getAggConfig(searchRequest, query));
+    return fetch(context, request).pipe(
+      catchError((error) => {
+        return throwError(error);
+      })
+    );
   }
 
-  public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    return this.runSearch(request, options.abortSignal, SEARCH_STRATEGY.PPL);
+  public search(
+    request: IOpenSearchDashboardsSearchRequest,
+    options: ISearchOptions
+  ): Observable<IOpenSearchDashboardsSearchResponse> {
+    const query = this.buildQuery(request);
+    const aggConfig = this.getAggConfig(request, query);
+
+    // Create a new request object with the updated query and aggConfig
+    const enhancedRequest: IOpenSearchDashboardsSearchRequest = {
+      ...request,
+      params: {
+        ...request.params,
+        body: {
+          ...request.params.body,
+          query: {
+            queries: [getQuery(request), query],
+          },
+          aggConfig,
+        },
+      },
+    };
+
+    return this.runSearch(enhancedRequest, options.abortSignal!, SEARCH_STRATEGY.PPL);
   }
 
-  private buildQuery() {
-    const query: Query = this.queryService.queryString.getQuery();
+  private buildQuery(request: IOpenSearchDashboardsSearchRequest) {
+    const query: Query = getQuery(request);
     const dataset = query.dataset;
     if (!dataset || !dataset.timeFieldName) return query;
     const timeFilter = this.getTimeFilter(dataset.timeFieldName);

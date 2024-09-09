@@ -20,10 +20,6 @@ export const SEARCH_STRATEGY = {
 };
 
 export const API = {
-  SEARCH: `${BASE_API}/search`,
-  PPL_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.PPL}`,
-  SQL_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.SQL}`,
-  SQL_ASYNC_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.SQL_ASYNC}`,
   QUERY_ASSIST: {
     LANGUAGES: `${BASE_API}/assist/languages`,
     GENERATE: `${BASE_API}/assist/generate`,

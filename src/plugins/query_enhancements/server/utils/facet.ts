@@ -7,6 +7,7 @@ import { Logger } from 'opensearch-dashboards/server';
 import { FacetResponse, IPPLEventsDataSource, IPPLVisualizationDataSource } from '../types';
 import { shimSchemaRow, shimStats } from '.';
 import { Query } from '../../../data/common';
+import { getQuery } from '../../common';
 
 export interface FacetProps {
   client: any;
@@ -37,10 +38,11 @@ export class Facet {
     endpoint: string
   ): Promise<FacetResponse> => {
     try {
-      const query: Query = request.body.query;
+      const query: Query = getQuery(request);
       const dataSource = query.dataset?.dataSource;
+      const clientId = dataSource?.id;
       const meta = dataSource?.meta;
-      const { format, lang } = request.body;
+      const { format, lang } = request.params.body;
       const params = {
         body: {
           query: query.query,
@@ -52,10 +54,11 @@ export class Facet {
         },
         ...(format !== 'jdbc' && { format }),
       };
-      const clientId = dataSource?.id;
       const client = clientId
         ? context.dataSource.opensearch.legacy.getClient(clientId).callAPI
         : this.defaultClient.asScoped(request).callAsCurrentUser;
+      this.logger.info('params');
+      this.logger.info(JSON.stringify(params, null, 2));
       const queryRes = await client(endpoint, params);
       return {
         success: true,
@@ -76,8 +79,10 @@ export class Facet {
     endpoint: string
   ): Promise<FacetResponse> => {
     try {
-      const query: Query = request.body.query;
+      const query: Query = getQuery(request);
       const params = request.params;
+      this.logger.info('-----');
+      this.logger.info(JSON.stringify(params, null, 2));
       const clientId = query.dataset?.dataSource?.id;
       const client = clientId
         ? context.dataSource.opensearch.legacy.getClient(clientId).callAPI
@@ -102,7 +107,7 @@ export class Facet {
       : await this.fetch(context, request, this.endpoint);
     if (!this.shimResponse) return response;
 
-    const { format: dataType } = request.body;
+    const { format: dataType } = request.params.body;
     const shimFunctions: { [key: string]: (data: any) => any } = {
       jdbc: (data: any) => shimSchemaRow(data as IPPLEventsDataSource),
       viz: (data: any) => shimStats(data as IPPLVisualizationDataSource),

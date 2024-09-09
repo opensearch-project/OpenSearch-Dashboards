@@ -3,15 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Query } from 'src/plugins/data/common';
-import { from, throwError, timer } from 'rxjs';
+import { IOpenSearchDashboardsSearchRequest, Query } from 'src/plugins/data/common';
+import { from, timer } from 'rxjs';
 import { filter, mergeMap, take, takeWhile } from 'rxjs/operators';
-import {
-  EnhancedFetchContext,
-  QueryAggConfig,
-  QueryStatusConfig,
-  QueryStatusOptions,
-} from './types';
+import { trimEnd } from 'lodash';
+import { EnhancedFetchContext, QueryStatusConfig, QueryStatusOptions } from './types';
 
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
@@ -37,6 +33,12 @@ export const getFields = (rawResponse: any) => {
   }));
 };
 
+export const getQuery = (searchRequest: IOpenSearchDashboardsSearchRequest): Query => {
+  return (
+    searchRequest.params?.body?.query?.queries[1] ?? searchRequest.params?.body?.query?.queries[0]
+  );
+};
+
 export const removeKeyword = (queryString: string | undefined) => {
   return queryString?.replace(new RegExp('.keyword'), '') ?? '';
 };
@@ -47,9 +49,14 @@ export const handleFacetError = (response: any) => {
   throw error;
 };
 
-export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: QueryAggConfig) => {
-  const { http, path, signal } = context;
-  const body = JSON.stringify({ query: { ...query, format: 'jdbc' }, aggConfig });
+export const fetch = (
+  context: EnhancedFetchContext,
+  request: IOpenSearchDashboardsSearchRequest
+) => {
+  const { http, strategy, signal } = context;
+  const { id, ...searchRequest } = request;
+  const path = trimEnd(`/internal/search/${strategy}/${id || ''}`, '/');
+  const body = JSON.stringify(searchRequest);
   return from(
     http.fetch({
       method: 'POST',

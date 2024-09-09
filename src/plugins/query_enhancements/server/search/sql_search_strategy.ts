@@ -8,12 +8,12 @@ import { Observable } from 'rxjs';
 import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import {
   DATA_FRAME_TYPES,
-  IDataFrameResponse,
+  IOpenSearchDashboardsSearchResponse,
   IOpenSearchDashboardsSearchRequest,
   Query,
   createDataFrame,
 } from '../../../data/common';
-import { getFields } from '../../common/utils';
+import { getFields, getQuery } from '../../common/utils';
 import { Facet } from '../utils';
 
 export const sqlSearchStrategyProvider = (
@@ -21,7 +21,7 @@ export const sqlSearchStrategyProvider = (
   logger: Logger,
   client: ILegacyClusterClient,
   usage?: SearchUsage
-): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
+): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse> => {
   const sqlFacet = new Facet({
     client,
     logger,
@@ -33,9 +33,12 @@ export const sqlSearchStrategyProvider = (
   return {
     search: async (context, request: any, options) => {
       try {
-        const query: Query = request.body.query;
+        const query: Query = getQuery(request);
+        logger.info('sql search strategy');
+        logger.info(JSON.stringify(query, null, 2));
         const rawResponse: any = await sqlFacet.describeQuery(context, request);
 
+        // logger.info(JSON.stringify(rawResponse, null, 2));
         if (!rawResponse.success) {
           const error = new Error(rawResponse.data.body);
           error.name = rawResponse.data.status;
@@ -49,14 +52,18 @@ export const sqlSearchStrategyProvider = (
         });
 
         dataFrame.size = rawResponse.data.datarows.length;
+        logger.info('heFUCCUFJCUCFEIOre');
+        // logger.info(JSON.stringify(dataFrame, null, 2));
 
         if (usage) usage.trackSuccess(rawResponse.took);
 
         return {
-          type: DATA_FRAME_TYPES.DEFAULT,
-          body: dataFrame,
-          took: rawResponse.took,
-        } as IDataFrameResponse;
+          rawResponse: {
+            type: DATA_FRAME_TYPES.DEFAULT,
+            body: dataFrame,
+            took: rawResponse.took,
+          },
+        } as IOpenSearchDashboardsSearchResponse;
       } catch (e) {
         logger.error(`sqlSearchStrategy: ${e.message}`);
         if (usage) usage.trackError();

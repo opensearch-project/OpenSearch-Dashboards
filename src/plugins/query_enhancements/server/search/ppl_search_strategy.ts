@@ -8,13 +8,13 @@ import { Observable } from 'rxjs';
 import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import {
   DATA_FRAME_TYPES,
-  IDataFrameResponse,
   IDataFrameWithAggs,
   IOpenSearchDashboardsSearchRequest,
+  IOpenSearchDashboardsSearchResponse,
   Query,
   createDataFrame,
 } from '../../../data/common';
-import { getFields, handleFacetError } from '../../common/utils';
+import { getFields, getQuery, handleFacetError } from '../../common/utils';
 import { Facet } from '../utils';
 import { QueryAggConfig } from '../../common';
 
@@ -23,7 +23,7 @@ export const pplSearchStrategyProvider = (
   logger: Logger,
   client: ILegacyClusterClient,
   usage?: SearchUsage
-): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
+): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse> => {
   const pplFacet = new Facet({
     client,
     logger,
@@ -35,8 +35,8 @@ export const pplSearchStrategyProvider = (
   return {
     search: async (context, request: any, options) => {
       try {
-        const query: Query = request.body.query;
-        const aggConfig: QueryAggConfig | undefined = request.body.aggConfig;
+        const query: Query = getQuery(request);
+        const aggConfig: QueryAggConfig | undefined = request.params.body.aggConfig;
         const rawResponse: any = await pplFacet.describeQuery(context, request);
 
         if (!rawResponse.success) handleFacetError(rawResponse);
@@ -54,7 +54,7 @@ export const pplSearchStrategyProvider = (
 
         if (aggConfig) {
           for (const [key, aggQueryString] of Object.entries(aggConfig.qs)) {
-            request.body.query.query = aggQueryString;
+            request.params.body.query.queries = [{ ...query, query: aggQueryString }];
             const rawAggs: any = await pplFacet.describeQuery(context, request);
             (dataFrame as IDataFrameWithAggs).aggs = {};
             (dataFrame as IDataFrameWithAggs).aggs[key] = rawAggs.data.datarows?.map((hit: any) => {
@@ -67,10 +67,12 @@ export const pplSearchStrategyProvider = (
         }
 
         return {
-          type: DATA_FRAME_TYPES.DEFAULT,
-          body: dataFrame,
-          took: rawResponse.took,
-        } as IDataFrameResponse;
+          rawResponse: {
+            type: DATA_FRAME_TYPES.DEFAULT,
+            body: dataFrame,
+            took: rawResponse.took,
+          },
+        } as IOpenSearchDashboardsSearchResponse;
       } catch (e) {
         logger.error(`pplSearchStrategy: ${e.message}`);
         if (usage) usage.trackError();

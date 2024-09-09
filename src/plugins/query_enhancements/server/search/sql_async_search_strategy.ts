@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import {
   DATA_FRAME_TYPES,
-  IDataFrameResponse,
+  IOpenSearchDashboardsSearchResponse,
   IOpenSearchDashboardsSearchRequest,
   Query,
   createDataFrame,
@@ -17,6 +17,7 @@ import { Facet } from '../utils';
 import {
   buildQueryStatusConfig,
   getFields,
+  getQuery,
   handleFacetError,
   handleQueryStatus,
   SEARCH_STRATEGY,
@@ -27,7 +28,7 @@ export const sqlAsyncSearchStrategyProvider = (
   logger: Logger,
   client: ILegacyClusterClient,
   usage?: SearchUsage
-): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
+): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse> => {
   const sqlAsyncFacet = new Facet({
     client,
     logger,
@@ -43,9 +44,9 @@ export const sqlAsyncSearchStrategyProvider = (
   return {
     search: async (context, request: any, options) => {
       try {
-        const query: Query = request.body.query;
+        const query: Query = getQuery(request);
         const startTime = Date.now();
-        request.body = { ...request.body, lang: SEARCH_STRATEGY.SQL };
+        request.body = { ...request.params.body, lang: SEARCH_STRATEGY.SQL };
         const rawResponse: any = await sqlAsyncFacet.describeQuery(context, request);
 
         if (!rawResponse.success) handleFacetError(rawResponse);
@@ -78,10 +79,12 @@ export const sqlAsyncSearchStrategyProvider = (
         if (usage) usage.trackSuccess(elapsedMs);
 
         return {
-          type: DATA_FRAME_TYPES.POLLING,
-          body: dataFrame,
-          took: elapsedMs,
-        } as IDataFrameResponse;
+          rawResponse: {
+            type: DATA_FRAME_TYPES.POLLING,
+            body: dataFrame,
+            took: elapsedMs,
+          },
+        } as IOpenSearchDashboardsSearchResponse;
       } catch (e) {
         logger.error(`sqlAsyncSearchStrategy: ${e.message}`);
         if (usage) usage.trackError();
