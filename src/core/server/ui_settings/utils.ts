@@ -7,7 +7,7 @@ import { UiSettingScope } from './types';
 
 export const CURRENT_USER_PLACEHOLDER = '<current_user>';
 
-export const generateDocId = (id: string, scope?: UiSettingScope) => {
+export const buildDocIdWithScope = (id: string, scope?: UiSettingScope) => {
   if (scope === UiSettingScope.USER) {
     return `${CURRENT_USER_PLACEHOLDER}_${id}`;
   }

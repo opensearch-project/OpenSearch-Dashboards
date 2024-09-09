@@ -12,8 +12,6 @@ import {
   CoreStart,
   ACL,
   SavedObjectsCreateOptions,
-  SavedObjectsFindOptions,
-  SavedObjectsFindResponse,
   OpenSearchDashboardsRequest,
 } from '../../../../core/server';
 import { Logger, CURRENT_USER_PLACEHOLDER } from '../../../../core/server';
@@ -60,8 +58,6 @@ export class UserUISettingsClientWrapper {
     ): Promise<SavedObject<T>> => {
       if (type === 'config') {
         const docId = this.normalizeDocId(id, wrapperOptions.request, this.core);
-        this.logger.debug(`Getting config with original: ${id} normalizeDocId: ${docId}`);
-        // user level
         return wrapperOptions.client.get(type, docId, options);
       }
 
@@ -76,7 +72,6 @@ export class UserUISettingsClientWrapper {
     ): Promise<SavedObjectsUpdateResponse<T>> => {
       if (type === 'config') {
         const docId = this.normalizeDocId(id, wrapperOptions.request, this.core);
-        this.logger.debug(`Getting config with original: ${id} normalizeDocId: ${docId}`);
         // update user level settings
         return await wrapperOptions.client.update(type, docId, attributes, options);
       }

@@ -58,7 +58,7 @@ export interface DeprecationSettings {
 
 /**
  * UiSettings scope options.
- * @public
+ * @experimental
  */
 export enum UiSettingScope {
   GLOBAL = 'global',
