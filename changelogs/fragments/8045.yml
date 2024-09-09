@@ -1,0 +1,2 @@
+fix:
+- Order of query editor extensions not working ([#8045](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8045))
