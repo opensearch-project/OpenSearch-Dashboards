@@ -14,6 +14,7 @@ const defaultProps = {
   numberOfChanges: 2,
   numberOfErrors: 1,
   handleResetForm: mockHandleResetForm,
+  isFormSubmitting: false,
 };
 
 describe('WorkspaceBottomBar', () => {

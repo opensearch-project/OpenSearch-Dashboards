@@ -184,6 +184,7 @@ export const WorkspacePermissionSettingPanel = ({
       {isEditing && (
         <EuiSmallButton
           fullWidth={false}
+          style={{ maxWidth: 160 }}
           onClick={handleAddNewOne}
           data-test-subj={`workspaceForm-permissionSettingPanel-addNew`}
           color="primary"
