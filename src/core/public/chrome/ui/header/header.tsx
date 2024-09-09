@@ -261,7 +261,7 @@ export function Header({
         )}
       </EuiHeaderSectionItemButton>
     );
-    return (
+    return useUpdatedHeader ? (
       <>
         {isNavOpen
           ? null
@@ -272,9 +272,10 @@ export function Header({
           flush: 'both',
           className: 'navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l',
           isSmallScreen: true,
-          'data-test-subj': 'toggleNavButtonInSmallScreen',
         })}
       </>
+    ) : (
+      renderNavToggleWithExtraProps({})
     );
   };
 
