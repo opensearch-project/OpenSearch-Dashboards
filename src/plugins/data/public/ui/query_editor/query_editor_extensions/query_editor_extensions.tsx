@@ -26,15 +26,21 @@ const QueryEditorExtensions: React.FC<QueryEditorExtensionsProps> = React.memo((
 
   return (
     <>
-      {sortedConfigs.map((config) => (
-        <QueryEditorExtension
-          key={config.id}
-          config={config}
-          dependencies={dependencies}
-          componentContainer={componentContainer}
-          bannerContainer={bannerContainer}
-        />
-      ))}
+      {sortedConfigs.map((config) => {
+        const extensionComponentContainer = document.createElement('div');
+        extensionComponentContainer.className = `osdQueryEditorExtensionComponent osdQueryEditorExtensionComponent__${config.id}`;
+        componentContainer.appendChild(extensionComponentContainer);
+
+        return (
+          <QueryEditorExtension
+            key={config.id}
+            config={config}
+            dependencies={dependencies}
+            componentContainer={extensionComponentContainer}
+            bannerContainer={bannerContainer}
+          />
+        );
+      })}
     </>
   );
 });
