@@ -4,6 +4,7 @@
  */
 
 import { EuiFieldText, EuiIcon, EuiOutsideClickDetector, EuiPortal } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import React, { useMemo, useState } from 'react';
 import { PersistedLog, QuerySuggestionTypes } from '../../../../data/public';
 import assistantMark from '../../assets/query_assist_mark.svg';
@@ -16,7 +17,7 @@ interface QueryAssistInputProps {
   initialValue?: string;
   selectedIndex?: string;
   previousQuestion?: string;
-  style?: React.CSSProperties;
+  className?: string;
 }
 
 export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
@@ -76,7 +77,7 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
       <div>
         <EuiFieldText
           data-test-subj="query-assist-input-field-text"
-          style={props.style}
+          className={props.className}
           inputRef={props.inputRef}
           value={value}
           disabled={props.isDisabled}

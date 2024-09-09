@@ -9,8 +9,16 @@
   }
 
   .queryAssist__badgeContainer {
+    // the badge is 48px away from the right edge of the query assist form
     position: fixed;
     right: 48px;
+  }
+
+  // the query assist badge is overlayed on top of the query assist input, so
+  // we need to push for some blank space on the right to avoid text
+  // overlapping
+  .queryAssist__withBadge {
+    padding-right: 96px;
   }
 }
 
