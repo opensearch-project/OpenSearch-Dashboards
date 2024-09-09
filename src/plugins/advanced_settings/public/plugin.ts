@@ -29,7 +29,14 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { AppMountParameters, CoreSetup, Plugin } from 'opensearch-dashboards/public';
+import {
+  AppMountParameters,
+  AppUpdater,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+} from 'opensearch-dashboards/public';
+import { BehaviorSubject } from 'rxjs';
 import { FeatureCatalogueCategory } from '../../home/public';
 import { ComponentRegistry } from './component_registry';
 import {
@@ -40,6 +47,7 @@ import {
 } from './types';
 import { DEFAULT_NAV_GROUPS, AppNavLinkStatus, WorkspaceAvailability } from '../../../core/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
+import { setupUserSettingsPage } from './management_app/user_settings';
 
 const component = new ComponentRegistry();
 
@@ -51,6 +59,7 @@ const titleInGroup = i18n.translate('advancedSettings.applicationSettingsLabel',
   defaultMessage: 'Application settings',
 });
 
+const USER_SETTINGS_APPID = 'user_settings';
 export class AdvancedSettingsPlugin
   implements
     Plugin<
@@ -59,9 +68,11 @@ export class AdvancedSettingsPlugin
       AdvancedSettingsPluginSetup,
       AdvancedSettingsPluginStart
     > {
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
+
   public setup(
     core: CoreSetup<AdvancedSettingsPluginStart>,
-    { management, home }: AdvancedSettingsPluginSetup
+    { management, home, contentManagement: contentManagementSetup }: AdvancedSettingsPluginSetup
   ) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
 
@@ -115,6 +126,42 @@ export class AdvancedSettingsPlugin
       },
     ]);
 
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      setupUserSettingsPage(contentManagementSetup);
+
+      const userSettingTitle = i18n.translate('advancedSettings.userSettingsLabel', {
+        defaultMessage: 'User settings',
+      });
+
+      core.application.register({
+        id: USER_SETTINGS_APPID,
+        title: userSettingTitle,
+        updater$: this.appUpdater$,
+        navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
+        workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+        description: i18n.translate('advancedSettings.userSettings.description', {
+          defaultMessage: 'Configure your personal preferences.',
+        }),
+        mount: async (params: AppMountParameters) => {
+          const { renderUserSettingsApp } = await import(
+            './management_app/mount_management_section'
+          );
+          const [coreStart, { contentManagement, navigation }] = await core.getStartServices();
+
+          return renderUserSettingsApp(params, { ...coreStart, contentManagement, navigation });
+        },
+      });
+
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+        {
+          id: USER_SETTINGS_APPID,
+          order: 101, // just right after application settings which order is 100
+        },
+      ]);
+    }
+
     if (home) {
       home.featureCatalogue.register({
         id: 'advanced_settings',
@@ -135,7 +182,16 @@ export class AdvancedSettingsPlugin
     };
   }
 
-  public start() {
+  public start(core: CoreStart) {
+    this.appUpdater$.next((app) => {
+      const userSettingsEnabled = core.application.capabilities.userSettings?.enabled;
+      if (app.id === USER_SETTINGS_APPID) {
+        return {
+          navLinkStatus: userSettingsEnabled ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
+        };
+      }
+    });
+
     return {
       component: component.start,
     };

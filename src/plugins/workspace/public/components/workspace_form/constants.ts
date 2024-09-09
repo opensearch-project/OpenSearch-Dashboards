@@ -5,6 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { WorkspacePermissionMode } from '../../../common/constants';
+import { PermissionModeId } from '../../../../../core/public';
 
 export enum WorkspaceOperationType {
   Create = 'create',
@@ -14,12 +15,6 @@ export enum WorkspaceOperationType {
 export enum WorkspacePermissionItemType {
   User = 'user',
   Group = 'group',
-}
-
-export enum PermissionModeId {
-  Read = 'read',
-  ReadAndWrite = 'read+write',
-  Owner = 'owner',
 }
 
 export const optionIdToWorkspacePermissionModesMap: {

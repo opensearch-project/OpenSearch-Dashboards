@@ -57,12 +57,25 @@ export interface DeprecationSettings {
 }
 
 /**
+ * UiSettings scope options.
+ * @experimental
+ */
+export enum UiSettingScope {
+  GLOBAL = 'global',
+  USER = 'user',
+}
+
+/**
  * UiSettings parameters defined by the plugins.
  * @public
  * */
 export interface UiSettingsParams<T = unknown> {
   /** title in the UI */
   name?: string;
+  /**
+   * scope of the setting item
+   */
+  scope?: UiSettingScope | UiSettingScope[];
   /** default value to fall back to if a user doesn't provide any */
   value?: T;
   /** description provided to a user in UI */
