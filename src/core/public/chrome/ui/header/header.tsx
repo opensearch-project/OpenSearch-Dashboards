@@ -272,6 +272,7 @@ export function Header({
           flush: 'both',
           className: 'navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l',
           isSmallScreen: true,
+          'data-test-subj': 'toggleNavButtonInSmallScreen',
         })}
       </>
     );
