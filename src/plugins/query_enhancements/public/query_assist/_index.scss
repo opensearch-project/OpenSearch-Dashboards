@@ -4,11 +4,11 @@
  */
 
 .queryAssist {
-  &.queryAssist__form {
-    padding: 0 $euiSizeXS $euiSizeXS;
-  }
-
   &.queryAssist__callout {
     margin-top: $euiSizeXS;
   }
+}
+
+.osdQueryEditorExtensionComponent__query-assist {
+  flex-grow: 1;
 }
