@@ -86,8 +86,14 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
           placeholder={
             props.previousQuestion ||
             (props.selectedIndex
-              ? `Ask a natural language question about ${props.selectedIndex} to generate a query`
-              : 'Select an index to ask a question')
+              ? i18n.translate('queryEnhancements.queryAssist.input.placeholderWithIndex', {
+                  defaultMessage:
+                    'Ask a natural language question about {selectedIndex} to generate a query',
+                  values: { selectedIndex: props.selectedIndex },
+                })
+              : i18n.translate('queryEnhancements.queryAssist.input.placeholderWithoutIndex', {
+                  defaultMessage: 'Select an index to ask a question',
+                }))
           }
           prepend={<EuiIcon type={assistantMark} />}
           fullWidth
