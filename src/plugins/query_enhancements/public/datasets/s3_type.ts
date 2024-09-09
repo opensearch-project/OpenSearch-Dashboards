@@ -15,8 +15,7 @@ import {
 } from '../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
 import { DATASET, handleQueryStatus } from '../../common';
-
-const S3_ICON = 'visTable';
+import S3_ICON from '../assets/s3_mark.svg';
 
 export const s3TypeConfig: DatasetTypeConfig = {
   id: DATASET.S3,
