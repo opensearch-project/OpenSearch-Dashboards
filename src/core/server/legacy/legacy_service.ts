@@ -221,6 +221,7 @@ export class LegacyService implements CoreService {
         createInternalRepository: startDeps.core.savedObjects.createInternalRepository,
         createSerializer: startDeps.core.savedObjects.createSerializer,
         getTypeRegistry: startDeps.core.savedObjects.getTypeRegistry,
+        isWrapperRegistered: startDeps.core.savedObjects.isWrapperRegistered,
       },
       metrics: {
         collectionInterval: startDeps.core.metrics.collectionInterval,
