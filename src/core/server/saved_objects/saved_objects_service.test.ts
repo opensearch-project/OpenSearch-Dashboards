@@ -507,5 +507,17 @@ describe('SavedObjectsService', () => {
         });
       });
     });
+
+    describe('#isWrapperRegistered', () => {
+      it('should return true if the wrapper has been registered', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+        setup.addClientWrapper(0, 'foo', (wrapperOptions) => wrapperOptions.client);
+        const coreStart = createStartDeps();
+        const start = await soService.start(coreStart);
+        expect(start.isWrapperRegistered('foo')).toEqual(true);
+      });
+    });
   });
 });
