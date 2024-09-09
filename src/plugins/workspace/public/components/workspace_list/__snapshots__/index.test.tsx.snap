@@ -202,7 +202,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                     data-test-subj="tableHeaderCell_name_0"
                     role="columnheader"
                     scope="col"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <button
                       class="euiTableHeaderButton euiTableHeaderButton-isSorted"
@@ -230,7 +230,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                     data-test-subj="tableHeaderCell_useCase_1"
                     role="columnheader"
                     scope="col"
-                    style="width: 15%;"
+                    style="width: 12%;"
                   >
                     <span
                       class="euiTableCellContent"
@@ -362,7 +362,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -379,19 +379,26 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                           class="euiLink euiLink--primary"
                           type="button"
                         >
-                          <button
-                            class="euiLink euiLink--primary"
-                            type="button"
+                          <div
+                            class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                           >
-                            name1
-                          </button>
+                            <div
+                              class="euiFlexItem"
+                            >
+                              <div
+                                class="euiText euiText--small"
+                              >
+                                name1
+                              </div>
+                            </div>
+                          </div>
                         </button>
                       </span>
                     </div>
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 12%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -573,7 +580,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -590,19 +597,26 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                           class="euiLink euiLink--primary"
                           type="button"
                         >
-                          <button
-                            class="euiLink euiLink--primary"
-                            type="button"
+                          <div
+                            class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                           >
-                            name2
-                          </button>
+                            <div
+                              class="euiFlexItem"
+                            >
+                              <div
+                                class="euiText euiText--small"
+                              >
+                                name2
+                              </div>
+                            </div>
+                          </div>
                         </button>
                       </span>
                     </div>
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 12%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -751,7 +765,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -768,19 +782,26 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                           class="euiLink euiLink--primary"
                           type="button"
                         >
-                          <button
-                            class="euiLink euiLink--primary"
-                            type="button"
+                          <div
+                            class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                           >
-                            name3
-                          </button>
+                            <div
+                              class="euiFlexItem"
+                            >
+                              <div
+                                class="euiText euiText--small"
+                              >
+                                name3
+                              </div>
+                            </div>
+                          </div>
                         </button>
                       </span>
                     </div>
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 12%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -936,7 +957,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         >
                           Rows per page
                           : 
-                          5
+                          10
                         </span>
                       </span>
                     </button>

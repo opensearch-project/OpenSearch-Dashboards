@@ -1,2 +1,0 @@
-fix:
-- [Workspace] Move set default source order to avoid dev server crash ([#7636](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7636))

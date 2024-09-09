@@ -16,6 +16,10 @@ export const WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID = 'workspace';
 export const WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID =
   'workspace_conflict_control';
 export const WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID = 'workspace_ui_settings';
+/**
+ * UI setting for user default workspace
+ */
+export const DEFAULT_WORKSPACE = 'defaultWorkspace';
 
 export enum WorkspacePermissionMode {
   Read = 'read',
@@ -45,6 +49,7 @@ export const PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER = 0;
  * store a static map in workspace.
  *
  */
+
 export const WORKSPACE_USE_CASES = Object.freeze({
   observability: {
     id: 'observability',
@@ -52,9 +57,9 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       defaultMessage: 'Observability',
     }),
     description: i18n.translate('workspace.usecase.observability.description', {
-      defaultMessage:
-        'Gain visibility into system health, performance, and reliability through monitoring and analysis of logs, metrics, and traces.',
+      defaultMessage: 'Gain visibility into your application and infrastructure',
     }),
+    icon: 'wsObservability',
     features: [
       'discover',
       'dashboards',
@@ -78,9 +83,9 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       defaultMessage: 'Security Analytics',
     }),
     description: i18n.translate('workspace.usecase.analytics.description', {
-      defaultMessage:
-        'Detect and investigate potential security threats and vulnerabilities across your systems and data.',
+      defaultMessage: 'Enhance your security posture with advanced analytics',
     }),
+    icon: 'wsSecurityAnalytics',
     features: [
       'discover',
       'dashboards',
@@ -102,9 +107,9 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       defaultMessage: 'Essentials',
     }),
     description: i18n.translate('workspace.usecase.essentials.description', {
-      defaultMessage:
-        'Analyze data to derive insights, identify patterns and trends, and make data-driven decisions.',
+      defaultMessage: 'Get start with just the basics',
     }),
+    icon: 'wsEssentials',
     features: [
       'discover',
       'dashboards',
@@ -125,9 +130,9 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       defaultMessage: 'Search',
     }),
     description: i18n.translate('workspace.usecase.search.description', {
-      defaultMessage:
-        "Quickly find and explore relevant information across your organization's data sources.",
+      defaultMessage: 'Discover and query your data with ease',
     }),
+    icon: 'wsSearch',
     features: [
       'discover',
       'dashboards',

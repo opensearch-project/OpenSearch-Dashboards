@@ -69,6 +69,7 @@ import {
   registerAnalyticsAllOverviewContent,
   setAnalyticsAllOverviewSection,
 } from './components/use_case_overview/setup_overview';
+import { UserDefaultWorkspace } from './components/workspace_list/default_workspace';
 import { registerGetStartedCardToNewHome } from './components/home_get_start_card';
 
 type WorkspaceAppType = (
@@ -103,6 +104,7 @@ export class WorkspacePlugin
   private registeredUseCasesUpdaterSubscription?: Subscription;
   private workspaceAndUseCasesCombineSubscription?: Subscription;
   private useCase = new UseCaseService();
+  private workspaceClient?: WorkspaceClient;
 
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
@@ -260,6 +262,7 @@ export class WorkspacePlugin
   ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
+    this.workspaceClient = workspaceClient;
     core.workspaces.setClient(workspaceClient);
 
     this.useCase.setup({
@@ -594,6 +597,9 @@ export class WorkspacePlugin
       // register get started card in new home page
       registerGetStartedCardToNewHome(core, contentManagement, this.registeredUseCases$);
 
+      // register workspace list to user settings page
+      this.registerWorkspaceListToUserSettings(core, contentManagement, navigation);
+
       // set breadcrumbs enricher for workspace
       this.breadcrumbsSubscription = enrichBreadcrumbsWithWorkspace(core);
 
@@ -621,6 +627,34 @@ export class WorkspacePlugin
           render: () => React.createElement(WorkspaceListCard, { core }),
         }),
         getTargetArea: () => HOME_CONTENT_AREAS.SERVICE_CARDS,
+      });
+    }
+  }
+
+  private async registerWorkspaceListToUserSettings(
+    coreStart: CoreStart,
+    contentManagement: ContentManagementPluginStart,
+    navigation: NavigationPublicPluginStart
+  ) {
+    if (contentManagement) {
+      const services: Services = {
+        ...coreStart,
+        workspaceClient: this.workspaceClient!,
+        navigationUI: navigation.ui,
+      };
+      contentManagement.registerContentProvider({
+        id: 'default_workspace_list',
+        getContent: () => ({
+          id: 'default_workspace_list',
+          kind: 'custom',
+          order: 0,
+          render: () =>
+            React.createElement(UserDefaultWorkspace, {
+              services,
+              registeredUseCases$: this.registeredUseCases$,
+            }),
+        }),
+        getTargetArea: () => 'user_settings/default_workspace',
       });
     }
   }

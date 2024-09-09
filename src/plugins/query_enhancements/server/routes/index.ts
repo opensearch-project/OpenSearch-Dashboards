@@ -85,10 +85,9 @@ function defineRoute(
         );
         return res.ok({ body: { ...queryRes } });
       } catch (err) {
-        logger.error(err);
         return res.custom({
-          statusCode: 500,
-          body: err,
+          statusCode: err.name,
+          body: err.message,
         });
       }
     }

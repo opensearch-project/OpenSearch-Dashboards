@@ -17,9 +17,12 @@ import { WorkspacePermissionMode } from '../../../common/constants';
 import {
   WorkspacePermissionItemType,
   optionIdToWorkspacePermissionModesMap,
-  PermissionModeId,
+  PERMISSION_TYPE_LABEL_ID,
+  PERMISSION_COLLABORATOR_LABEL_ID,
+  PERMISSION_ACCESS_LEVEL_LABEL_ID,
 } from './constants';
 import { getPermissionModeId } from './utils';
+import { PermissionModeId } from '../../../../../core/public';
 
 const permissionModeOptions: Array<EuiSuperSelectOption<any>> = [
   {
@@ -148,6 +151,7 @@ export const WorkspacePermissionSettingInput = ({
           onChange={(value) => onTypeChange(value, index)}
           disabled={userOrGroupDisabled || !isEditing}
           data-test-subj="workspace-typeOptions"
+          aria-labelledby={PERMISSION_TYPE_LABEL_ID}
         />
       </EuiFlexItem>
       <EuiFlexItem style={{ maxWidth: 400 }}>
@@ -166,6 +170,7 @@ export const WorkspacePermissionSettingInput = ({
                   defaultMessage: 'Enter group name or group ID',
                 })
           }
+          aria-labelledby={PERMISSION_COLLABORATOR_LABEL_ID}
         />
       </EuiFlexItem>
       <EuiFlexItem style={{ maxWidth: 150 }}>
@@ -176,6 +181,7 @@ export const WorkspacePermissionSettingInput = ({
           onChange={handlePermissionModeOptionChange}
           disabled={userOrGroupDisabled || !isEditing}
           data-test-subj="workspace-permissionModeOptions"
+          aria-labelledby={PERMISSION_ACCESS_LEVEL_LABEL_ID}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

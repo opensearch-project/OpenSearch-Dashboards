@@ -15,8 +15,7 @@ import {
 } from '../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
 import { DATASET, handleQueryStatus } from '../../common';
-
-const S3_ICON = 'visTable';
+import S3_ICON from '../assets/s3_mark.svg';
 
 export const s3TypeConfig: DatasetTypeConfig = {
   id: DATASET.S3,
@@ -109,6 +108,7 @@ const fetch = async (
   type: 'DATABASE' | 'TABLE'
 ): Promise<DataStructure[]> => {
   const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
+  const connection = path.find((ds) => ds.type === 'CONNECTION');
   const parent = path[path.length - 1];
   const meta = parent.meta as DataStructureCustomMeta;
 
@@ -129,8 +129,8 @@ const fetch = async (
       type,
       meta: {
         type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-        query: meta.query,
-        session: meta.session,
+        sessionId: meta.sessionId,
+        name: connection?.title,
       } as DataStructureCustomMeta,
     }));
   } catch (error) {
