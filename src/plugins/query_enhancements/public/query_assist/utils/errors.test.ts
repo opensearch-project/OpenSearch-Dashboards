@@ -47,7 +47,7 @@ describe('formatError', () => {
       statusCode: 400,
       body: {
         statusCode: 400,
-        message: `{"error":{"reason":"Invalid Request","details":"PPLTool doesn't support searching indices starting with '.' since it could be system index, current searching index name: .opensearch-sap-log-types-config","type":"IllegalArgumentException"},"status":400}`,
+        message: `{"error":{"reason":"Invalid Request","details":"PPLTool doesn't support searching indexes starting with '.' since it could be system index, current searching index name: .opensearch-sap-log-types-config","type":"IllegalArgumentException"},"status":400}`,
       },
       warnings: [],
       headers: null,
@@ -56,7 +56,7 @@ describe('formatError', () => {
     const formattedError = formatError(error);
     expect(formattedError).toBeInstanceOf(AgentError);
     expect((formattedError as AgentError).error.error.details).toEqual(
-      "PPLTool doesn't support searching indices starting with '.' since it could be system index, current searching index name: .opensearch-sap-log-types-config"
+      "PPLTool doesn't support searching indexes starting with '.' since it could be system index, current searching index name: .opensearch-sap-log-types-config"
     );
   });
 
