@@ -4,6 +4,7 @@
  */
 
 import { EuiBadge, EuiLink, EuiPopover, EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { SyntheticEvent, useState } from 'react';
 import { AgentError } from '../utils';
@@ -33,7 +34,9 @@ export const WarningBadge: React.FC<WarningBadgeProps> = (props) => {
             e.preventDefault();
             setIsPopoverOpen(!isPopoverOpen);
           }}
-          onClickAriaLabel="Click to show details"
+          onClickAriaLabel={i18n.translate('queryEnhancements.queryAssist.badge.ariaLabel', {
+            defaultMessage: 'Click to show details',
+          })}
           data-test-subj="queryAssistErrorBadge"
         >
           <FormattedMessage
