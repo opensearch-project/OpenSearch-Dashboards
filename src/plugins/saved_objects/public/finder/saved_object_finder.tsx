@@ -62,7 +62,7 @@ import {
 } from 'src/core/public';
 
 import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
-import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginStart, LanguageServiceContract } from 'src/plugins/data/public';
 import { first } from 'rxjs/operators';
 import { getIndexPatternTitle } from '../../../data/common/index_patterns/utils';
 import { LISTING_LIMIT_SETTING } from '../../common';
@@ -126,8 +126,8 @@ export type SavedObjectFinderProps = SavedObjectFinderFixedPage | SavedObjectFin
 export type SavedObjectFinderUiProps = {
   savedObjects: CoreStart['savedObjects'];
   uiSettings: CoreStart['uiSettings'];
-  data: DataPublicPluginStart;
-  application: CoreStart['application'];
+  data?: DataPublicPluginStart;
+  application?: CoreStart['application'];
 } & SavedObjectFinderProps;
 
 class SavedObjectFinderUi extends React.Component<
@@ -144,16 +144,30 @@ class SavedObjectFinderUi extends React.Component<
   };
 
   public async getCurrentAppId() {
-    const appId = await this.props.application.currentAppId$.pipe(first()).toPromise();
-    return appId;
+    return (
+      (await this.props?.application?.currentAppId$?.pipe(first()).toPromise()) ??
+      Promise.resolve(undefined)
+    );
   }
 
-  readonly languageService = this.props.data.query.queryString.getLanguageService();
+  readonly languageService = this.props.data?.query?.queryString?.getLanguageService();
   private isComponentMounted: boolean = false;
+
+  private isSavedSearchLanguageSupported(
+    languageId?: string,
+    currentAppId?: string,
+    languageService?: LanguageServiceContract
+  ) {
+    if (!languageId || !currentAppId || !languageService) {
+      return true;
+    }
+    return (
+      languageService?.getLanguage(languageId)?.supportedAppNames?.includes(currentAppId) ?? true
+    );
+  }
 
   private debouncedFetch = _.debounce(async (query: string) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
-    const currentAppId = await this.getCurrentAppId();
 
     const fields = Object.values(metaDataMap)
       .map((metaData) => metaData.includeFields || [])
@@ -175,7 +189,9 @@ class SavedObjectFinderUi extends React.Component<
       return await client.get<DataSourceAttributes>('data-source', id);
     };
 
-    let savedObjects = await Promise.all(
+    const currentAppId = await this.getCurrentAppId();
+
+    const savedObjects = await Promise.all(
       resp.savedObjects.map(async (obj) => {
         if (obj.type === 'index-pattern') {
           const result = { ...obj };
@@ -185,32 +201,24 @@ class SavedObjectFinderUi extends React.Component<
             getDataSource
           );
           return result;
+        } else if (obj.type === 'search') {
+          const sourceObject = JSON.parse(
+            obj.attributes?.kibanaSavedObjectMeta?.searchSourceJSON ?? null
+          );
+          const languageId = sourceObject?.query?.language;
+          if (this.isSavedSearchLanguageSupported(languageId, currentAppId, this.languageService)) {
+            return obj;
+          }
         } else {
           return obj;
         }
       })
     );
 
-    // Filter search objects whose language are not supported by the current Application
-    savedObjects = savedObjects.filter((obj) => {
-      if (obj.type === 'search') {
-        if (obj.attributes?.kibanaSavedObjectMeta) {
-          const sourceObject = JSON.parse(obj.attributes?.kibanaSavedObjectMeta?.searchSourceJSON);
-          const languageId = sourceObject.query.language;
-
-          const languageProperties = this.languageService.getLanguage(languageId);
-
-          if (languageProperties?.supportedAppNames.includes(currentAppId)) {
-            return true;
-          } else {
-            return false;
-          }
-        }
-      }
-      return true;
-    });
-
     resp.savedObjects = savedObjects.filter((savedObject) => {
+      if (!savedObject) {
+        return false;
+      }
       const metaData = metaDataMap[savedObject.type];
       if (metaData.showSavedObject) {
         return metaData.showSavedObject(savedObject);
@@ -606,8 +614,8 @@ class SavedObjectFinderUi extends React.Component<
 const getSavedObjectFinder = (
   savedObject: SavedObjectsStart,
   uiSettings: IUiSettingsClient,
-  data: DataPublicPluginStart,
-  application: ApplicationStart
+  data?: DataPublicPluginStart,
+  application?: ApplicationStart
 ) => {
   return (props: SavedObjectFinderProps) => (
     <SavedObjectFinderUi
