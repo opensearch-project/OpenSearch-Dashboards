@@ -309,6 +309,7 @@ export default class QueryEditorUI extends Component<Props, State> {
                   insertText: s.insertText ?? s.text,
                   range: s.replacePosition ?? defaultRange,
                   detail: s.detail,
+                  command: { id: 'editor.action.triggerSuggest', title: 'Trigger Next Suggestion' },
                 };
               })
           : [],
