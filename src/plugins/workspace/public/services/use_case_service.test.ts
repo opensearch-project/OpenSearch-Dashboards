@@ -88,24 +88,30 @@ describe('UseCaseService', () => {
       await waitFor(() => {
         expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toBeCalledWith(navGroupInfo, [
           {
-            id: 'dataSources',
+            id: 'objects',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 100,
           },
           {
-            id: 'indexPatterns',
+            id: 'dataSources',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 200,
           },
           {
-            id: 'objects',
+            id: 'indexPatterns',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 300,
           },
           {
-            id: WORKSPACE_DETAIL_APP_ID,
+            id: 'import_sample_data',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 400,
+            title: 'Sample data',
+          },
+          {
+            id: WORKSPACE_DETAIL_APP_ID,
+            category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+            order: 500,
             title: 'Workspace settings',
           },
         ]);
