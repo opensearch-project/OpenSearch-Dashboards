@@ -266,6 +266,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       createScopedRepository: deps.savedObjects.createScopedRepository,
       createSerializer: deps.savedObjects.createSerializer,
       getTypeRegistry: deps.savedObjects.getTypeRegistry,
+      isWrapperRegistered: deps.savedObjects.isWrapperRegistered,
     },
     metrics: {
       collectionInterval: deps.metrics.collectionInterval,
