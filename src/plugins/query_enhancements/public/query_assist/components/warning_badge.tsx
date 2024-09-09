@@ -39,10 +39,7 @@ export const WarningBadge: React.FC<WarningBadgeProps> = (props) => {
           })}
           data-test-subj="queryAssistErrorBadge"
         >
-          <FormattedMessage
-            id="queryEnhancements.queryAssist.badge.title"
-            defaultMessage="Warning"
-          />
+          <FormattedMessage id="queryEnhancements.queryAssist.badge.title" defaultMessage="Error" />
         </EuiBadge>
       }
       isOpen={isPopoverOpen}
