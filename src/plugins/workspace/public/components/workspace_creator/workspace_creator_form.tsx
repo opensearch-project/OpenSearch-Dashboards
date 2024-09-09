@@ -123,11 +123,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
           />
           <EuiSpacer size="m" />
           <div {...generateRightSidebarScrollProps(RightSidebarScrollField.Description)} />
-          <WorkspaceDescriptionField
-            value={formData.description}
-            onChange={setDescription}
-            error={formErrors.name?.message}
-          />
+          <WorkspaceDescriptionField value={formData.description} onChange={setDescription} />
           <EuiSpacer size="m" />
           <EuiCompressedFormRow
             label={i18n.translate('workspace.form.workspaceDetails.color.label', {
