@@ -247,6 +247,12 @@ export interface SavedObjectsServiceStart {
    * {@link SavedObjectsType | saved object types}
    */
   getTypeRegistry: () => ISavedObjectTypeRegistry;
+  /**
+   * Returns a boolean to indicate if a specific wrapper is registered
+   * @param id
+   * @returns boolean
+   */
+  isWrapperRegistered: (id: string) => boolean;
 }
 
 export type InternalSavedObjectsServiceStart = SavedObjectsServiceStart;
@@ -540,6 +546,8 @@ export class SavedObjectsService
       createInternalRepository: repositoryFactory.createInternalRepository,
       createSerializer: () => new SavedObjectsSerializer(this.typeRegistry),
       getTypeRegistry: () => this.typeRegistry,
+      isWrapperRegistered: (id: string) =>
+        this.clientFactoryWrappers.some((wrapper) => wrapper.id === id),
     };
   }
 

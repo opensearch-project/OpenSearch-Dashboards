@@ -55,6 +55,7 @@ const createStartContractMock = (typeRegistry?: jest.Mocked<ISavedObjectTypeRegi
     createScopedRepository: jest.fn(),
     createSerializer: jest.fn(),
     getTypeRegistry: jest.fn(),
+    isWrapperRegistered: jest.fn(),
   };
 
   startContrat.getScopedClient.mockReturnValue(savedObjectsClientMock.create());

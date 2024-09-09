@@ -45,6 +45,7 @@ import {
   IDynamicConfigurationClient,
   InternalDynamicConfigServiceStart,
 } from './config';
+import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../utils';
 
 class CoreOpenSearchRouteHandlerContext {
   #client?: IScopedClusterClient;
@@ -101,14 +102,21 @@ class CoreUiSettingsRouteHandlerContext {
   #client?: IUiSettingsClient;
   constructor(
     private readonly uiSettingsStart: InternalUiSettingsServiceStart,
-    private readonly savedObjectsRouterHandlerContext: CoreSavedObjectsRouteHandlerContext
+    private readonly savedObjectsRouterHandlerContext: CoreSavedObjectsRouteHandlerContext,
+    private readonly savedObjectsStart: InternalSavedObjectsServiceStart,
+    private readonly request: OpenSearchDashboardsRequest
   ) {}
 
   public get client() {
     if (this.#client == null) {
-      this.#client = this.uiSettingsStart.asScopedToClient(
-        this.savedObjectsRouterHandlerContext.client
-      );
+      const savedObjectsClient = this.savedObjectsStart.isWrapperRegistered(
+        WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID
+      )
+        ? this.savedObjectsStart.getScopedClient(this.request, {
+            excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
+          })
+        : this.savedObjectsRouterHandlerContext.client;
+      this.#client = this.uiSettingsStart.asScopedToClient(savedObjectsClient);
     }
     return this.#client;
   }
@@ -153,7 +161,9 @@ export class CoreRouteHandlerContext {
     );
     this.uiSettings = new CoreUiSettingsRouteHandlerContext(
       this.coreStart.uiSettings,
-      this.savedObjects
+      this.savedObjects,
+      this.coreStart.savedObjects,
+      this.request
     );
     this.dynamicConfig = new CoreDynamicConfigRouteHandlerContext(this.coreStart.dynamicConfig);
   }
