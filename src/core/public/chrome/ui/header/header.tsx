@@ -263,20 +263,16 @@ export function Header({
     );
     return (
       <>
-        {isNavOpen ? null : (
-          <EuiHideFor sizes={['xs', 's', 'm']}>
-            {renderNavToggleWithExtraProps({
-              className: 'navToggleInLargeScreen',
+        {isNavOpen
+          ? null
+          : renderNavToggleWithExtraProps({
+              className: 'navToggleInLargeScreen eui-hideFor--xs eui-hideFor--s eui-hideFor--m',
             })}
-          </EuiHideFor>
-        )}
-        <EuiHideFor sizes={['xl', 'l']}>
-          {renderNavToggleWithExtraProps({
-            flush: 'both',
-            className: 'navToggleInSmallScreen',
-            isSmallScreen: true,
-          })}
-        </EuiHideFor>
+        {renderNavToggleWithExtraProps({
+          flush: 'both',
+          className: 'navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l',
+          isSmallScreen: true,
+        })}
       </>
     );
   };
