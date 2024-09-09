@@ -164,7 +164,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
           res.dataSource.match(searchDataSourcePattern)
         );
 
-        if (featureFlagStatus) {
+        if (featureFlagStatus && dataSourceMDSId !== null) {
           filteredIntegrations = filteredIntegrations.filter((res) => {
             return res.references && res.references.some((ref) => ref.id === dataSourceMDSId);
           });
