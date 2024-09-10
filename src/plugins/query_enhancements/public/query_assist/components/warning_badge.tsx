@@ -32,94 +32,99 @@ export const WarningBadge: React.FC<WarningBadgeProps> = (props) => {
   } = props.error;
 
   return (
-    <EuiPopover
-      button={
-        <EuiBadge
-          color="warning"
-          // @ts-ignore this is needed to avoid enter key triggering warning badge instead of submit button
-          type="button"
-          iconType="alert"
-          onClick={(e: SyntheticEvent) => {
-            e.preventDefault();
-            setIsPopoverOpen(!isPopoverOpen);
-          }}
-          onClickAriaLabel={i18n.translate('queryEnhancements.queryAssist.badge.ariaLabel', {
-            defaultMessage: 'Click to show details',
-          })}
-          data-test-subj="queryAssistErrorBadge"
-        >
-          <FormattedMessage id="queryEnhancements.queryAssist.badge.title" defaultMessage="Error" />
-        </EuiBadge>
-      }
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      className="queryAssist__popover"
-    >
-      <EuiText size="s" className="queryAssist__popoverText">
-        <dl>
-          <dd id="queryAssistErrorTitle">
-            <b>
-              <FormattedMessage
-                id="queryEnhancements.queryAssist.error.title"
-                defaultMessage="Error"
-              />
-            </b>
-          </dd>
-          <dd>
-            <b>
-              <FormattedMessage
-                id="queryEnhancements.queryAssist.error.reason"
-                defaultMessage="Reason"
-              />
-            </b>
-            : {error.reason}
-          </dd>
-          {showMore && (
-            <>
-              <dd>
-                <b>
-                  <FormattedMessage
-                    id="queryEnhancements.queryAssist.error.details"
-                    defaultMessage="Details"
-                  />
-                </b>
-                : {error.details}
-              </dd>
-              <dd>
-                <b>
-                  <FormattedMessage
-                    id="queryEnhancements.queryAssist.error.type"
-                    defaultMessage="Type"
-                  />
-                </b>
-                : {error.type}
-              </dd>
-              <dd>
-                <b>
-                  <FormattedMessage
-                    id="queryEnhancements.queryAssist.error.status"
-                    defaultMessage="Status"
-                  />
-                </b>
-                : {status}
-              </dd>
-            </>
-          )}
-          <EuiLink onClick={() => setShowMore(!showMore)} data-test-subj="queryAssistErrorMore">
-            {showMore ? (
-              <FormattedMessage
-                id="queryEnhancements.queryAssist.error.viewLess"
-                defaultMessage="View Less"
-              />
-            ) : (
-              <FormattedMessage
-                id="queryEnhancements.queryAssist.error.viewMore"
-                defaultMessage="View More"
-              />
+    <div className="queryAssist__popoverWrapper">
+      <EuiPopover
+        button={
+          <EuiBadge
+            color="warning"
+            // @ts-ignore this is needed to avoid enter key triggering warning badge instead of submit button
+            type="button"
+            iconType="alert"
+            onClick={(e: SyntheticEvent) => {
+              e.preventDefault();
+              setIsPopoverOpen(!isPopoverOpen);
+            }}
+            onClickAriaLabel={i18n.translate('queryEnhancements.queryAssist.badge.ariaLabel', {
+              defaultMessage: 'Click to show details',
+            })}
+            data-test-subj="queryAssistErrorBadge"
+          >
+            <FormattedMessage
+              id="queryEnhancements.queryAssist.badge.title"
+              defaultMessage="Error"
+            />
+          </EuiBadge>
+        }
+        isOpen={isPopoverOpen}
+        closePopover={() => setIsPopoverOpen(false)}
+        className="queryAssist__popover"
+      >
+        <EuiText size="s" className="queryAssist__popoverText">
+          <dl>
+            <dd id="queryAssistErrorTitle">
+              <b>
+                <FormattedMessage
+                  id="queryEnhancements.queryAssist.error.title"
+                  defaultMessage="Error"
+                />
+              </b>
+            </dd>
+            <dd>
+              <b>
+                <FormattedMessage
+                  id="queryEnhancements.queryAssist.error.reason"
+                  defaultMessage="Reason"
+                />
+              </b>
+              : {error.reason}
+            </dd>
+            {showMore && (
+              <>
+                <dd>
+                  <b>
+                    <FormattedMessage
+                      id="queryEnhancements.queryAssist.error.details"
+                      defaultMessage="Details"
+                    />
+                  </b>
+                  : {error.details}
+                </dd>
+                <dd>
+                  <b>
+                    <FormattedMessage
+                      id="queryEnhancements.queryAssist.error.type"
+                      defaultMessage="Type"
+                    />
+                  </b>
+                  : {error.type}
+                </dd>
+                <dd>
+                  <b>
+                    <FormattedMessage
+                      id="queryEnhancements.queryAssist.error.status"
+                      defaultMessage="Status"
+                    />
+                  </b>
+                  : {status}
+                </dd>
+              </>
             )}
-          </EuiLink>
-        </dl>
-      </EuiText>
-    </EuiPopover>
+            <EuiLink onClick={() => setShowMore(!showMore)} data-test-subj="queryAssistErrorMore">
+              {showMore ? (
+                <FormattedMessage
+                  id="queryEnhancements.queryAssist.error.viewLess"
+                  defaultMessage="View Less"
+                />
+              ) : (
+                <FormattedMessage
+                  id="queryEnhancements.queryAssist.error.viewMore"
+                  defaultMessage="View More"
+                />
+              )}
+            </EuiLink>
+          </dl>
+        </EuiText>
+      </EuiPopover>
+    </div>
   );
 };

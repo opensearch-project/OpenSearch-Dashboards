@@ -9,6 +9,8 @@ import React, { useMemo, useState } from 'react';
 import { PersistedLog, QuerySuggestionTypes } from '../../../../data/public';
 import assistantMark from '../../assets/query_assist_mark.svg';
 import { getData } from '../../services';
+import { AgentError } from '../utils';
+import { WarningBadge } from './warning_badge';
 
 interface QueryAssistInputProps {
   inputRef: React.RefObject<HTMLInputElement>;
@@ -17,7 +19,7 @@ interface QueryAssistInputProps {
   initialValue?: string;
   selectedIndex?: string;
   previousQuestion?: string;
-  className?: string;
+  error?: AgentError;
 }
 
 export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
@@ -74,10 +76,9 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
 
   return (
     <EuiOutsideClickDetector onOutsideClick={() => setIsSuggestionsVisible(false)}>
-      <div>
+      <div className="queryAssist__inputWrapper">
         <EuiFieldText
           data-test-subj="query-assist-input-field-text"
-          className={props.className}
           inputRef={props.inputRef}
           value={value}
           disabled={props.isDisabled}
@@ -97,6 +98,7 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
                 }))
           }
           prepend={<EuiIcon type={assistantMark} />}
+          append={<WarningBadge error={props.error} />}
           fullWidth
         />
         <EuiPortal>

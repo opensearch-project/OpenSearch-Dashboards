@@ -8,17 +8,15 @@
     margin-top: $euiSizeXS;
   }
 
-  .queryAssist__badgeContainer {
-    // the badge is 48px away from the right edge of the query assist form
-    position: fixed;
-    right: 48px;
+  .queryAssist__popoverWrapper {
+    display: flex;
+    align-items: center;
+    padding-right: $euiSizeS;
   }
 
-  // the query assist badge is overlayed on top of the query assist input, so
-  // we need to push for some blank space on the right to avoid text
-  // overlapping
-  .queryAssist__withBadge {
-    padding-right: calc(var(--badge-width) + 18px);
+  // Hide the error badge when the input is focused
+  .queryAssist__inputWrapper:focus-within .queryAssist__popoverWrapper {
+    display: none;
   }
 }
 

@@ -104,11 +104,8 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
               isDisabled={loading}
               selectedIndex={selectedIndex}
               previousQuestion={previousQuestionRef.current}
-              className={agentError ? 'queryAssist__withBadge' : undefined}
+              error={agentError}
             />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} className="queryAssist__badgeContainer">
-            <WarningBadge error={agentError} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <QueryAssistSubmitButton isDisabled={loading} />
