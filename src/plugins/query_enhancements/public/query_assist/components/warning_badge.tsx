@@ -6,7 +6,7 @@
 import { EuiBadge, EuiLink, EuiPopover, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { SyntheticEvent, useState } from 'react';
+import React, { SyntheticEvent, useEffect, useState } from 'react';
 import { AgentError } from '../utils';
 
 interface WarningBadgeProps {
@@ -16,6 +16,15 @@ interface WarningBadgeProps {
 export const WarningBadge: React.FC<WarningBadgeProps> = (props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showMore, setShowMore] = useState(false);
+
+  useEffect(() => {
+    const badgeContainer = document.querySelector<HTMLDivElement>('.queryAssist__badgeContainer');
+    if (badgeContainer === null) return;
+    const elementsWithBadge = document.querySelectorAll<HTMLElement>('.queryAssist__withBadge');
+    elementsWithBadge.forEach((element) =>
+      element.style.setProperty('--badge-width', `${badgeContainer.offsetWidth}px`)
+    );
+  }, [props.error]);
 
   if (!props.error) return null;
   const {
