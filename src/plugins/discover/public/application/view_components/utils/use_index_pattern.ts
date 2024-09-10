@@ -45,8 +45,18 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     let isMounted = true;
 
     const handleIndexPattern = async () => {
-      if (isQueryEnhancementEnabled && query?.dataset) {
-        const pattern = await data.indexPatterns.get(query.dataset.id);
+      if (isQueryEnhancementEnabled && query.dataset) {
+        let pattern = await data.indexPatterns.get(
+          query.dataset.id,
+          query.dataset.type !== 'INDEX_PATTERN'
+        );
+        if (!pattern) {
+          await data.query.queryString.getDatasetService().cacheDataset(query.dataset);
+          pattern = await data.indexPatterns.get(
+            query.dataset.id,
+            query.dataset.type !== 'INDEX_PATTERN'
+          );
+        }
 
         if (isMounted && pattern) {
           setIndexPattern(pattern);
@@ -95,7 +105,8 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     store,
     toastNotifications,
     uiSettings,
-    query?.dataset,
+    query.dataset,
+    data.query.queryString,
   ]);
 
   return indexPattern;
