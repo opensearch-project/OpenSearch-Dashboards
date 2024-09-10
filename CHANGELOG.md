@@ -1,6 +1,30 @@
 # CHANGELOG
 Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [Unreleased](https://github.com/opensearch-project/OpenSearch-Dashboards/compare/1.3.18...1.3)
+
+### 💥 Breaking Changes
+
+### Deprecations
+
+### 🛡 Security
+
+- [CVE-2017-16100] Use a patched version for the `dns-sync` dependency ([#7811](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7811))
+
+### 📈 Features/Enhancements
+
+### 🐛 Bug Fixes
+
+### 🚞 Infrastructure
+
+### 📝 Documentation
+
+### 🛠 Maintenance
+
+### 🪛 Refactoring
+
+### 🔩 Tests
+
 ## [1.3.19 - 2024-08-26](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/1.3.19)
 
 ### 💥 Breaking Changes
