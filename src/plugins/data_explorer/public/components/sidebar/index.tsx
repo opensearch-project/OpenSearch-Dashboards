@@ -137,6 +137,7 @@ export const Sidebar: FC = ({ children }) => {
               selectedSources={selectedSources}
               onGetDataSetError={handleGetDataSetError}
               onRefresh={memorizedReload}
+              uiSettings={uiSettings}
               fullWidth
             />
           </EuiSplitPanel.Inner>
