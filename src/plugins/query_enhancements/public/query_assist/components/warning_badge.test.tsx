@@ -5,6 +5,7 @@
 
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
+import { IntlProvider } from 'react-intl';
 import { WarningBadge } from './warning_badge';
 
 type WarningBadgeProps = ComponentProps<typeof WarningBadge>;
@@ -27,7 +28,11 @@ const renderWarningBadge = (overrideProps: Partial<WarningBadgeProps> = {}) => {
     },
     overrideProps
   );
-  const component = render(<WarningBadge {...props} />);
+  const component = render(
+    <IntlProvider locale="en">
+      <WarningBadge {...props} />
+    </IntlProvider>
+  );
   return { component, props: props as jest.MockedObjectDeep<WarningBadgeProps> };
 };
 

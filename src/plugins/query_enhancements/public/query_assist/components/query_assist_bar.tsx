@@ -16,7 +16,6 @@ import { QueryAssistParameters } from '../../../common/query_assist';
 import { getStorage } from '../../services';
 import { useGenerateQuery } from '../hooks';
 import { getPersistedLog, AgentError, ProhibitedQueryError } from '../utils';
-import { WarningBadge } from './warning_badge';
 import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
 import { QueryAssistInput } from './query_assist_input';
 import { QueryAssistSubmitButton } from './submit_button';

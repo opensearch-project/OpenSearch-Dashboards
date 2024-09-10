@@ -20,10 +20,8 @@ exports[`QueryAssistBar matches snapshot 1`] = `
             class="euiFlexItem"
           >
             <input />
+            <div />
           </div>
-          <div
-            class="euiFlexItem euiFlexItem--flexGrowZero queryAssist__badgeContainer"
-          />
           <div
             class="euiFlexItem euiFlexItem--flexGrowZero"
           >

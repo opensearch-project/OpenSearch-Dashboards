@@ -28,8 +28,11 @@ jest.mock('../hooks', () => ({
 }));
 
 jest.mock('./query_assist_input', () => ({
-  QueryAssistInput: ({ inputRef }: ComponentProps<typeof QueryAssistInput>) => (
-    <input ref={inputRef} />
+  QueryAssistInput: ({ inputRef, error }: ComponentProps<typeof QueryAssistInput>) => (
+    <>
+      <input ref={inputRef} />
+      <div>{JSON.stringify(error)}</div>
+    </>
   ),
 }));
 
@@ -128,7 +131,7 @@ describe('QueryAssistBar', () => {
     });
   });
 
-  it('displays badge for agent errors', async () => {
+  it('passes agent errors to input', async () => {
     const generateQueryMock = jest.fn().mockResolvedValue({
       error: new AgentError({
         error: { type: 'mock-type', reason: 'mock-reason', details: 'mock-details' },
@@ -146,7 +149,7 @@ describe('QueryAssistBar', () => {
     fireEvent.click(screen.getByRole('button'));
 
     await waitFor(() => {
-      expect(screen.getByTestId('queryAssistErrorBadge')).toBeInTheDocument();
+      expect(screen.getByText(/mock-reason/)).toBeInTheDocument();
     });
   });
 
