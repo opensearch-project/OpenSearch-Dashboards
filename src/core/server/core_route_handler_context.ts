@@ -113,6 +113,9 @@ class CoreUiSettingsRouteHandlerContext {
         WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID
       )
         ? this.savedObjectsStart.getScopedClient(this.request, {
+            // If workspace permission control is turned on,
+            // need to bypass permission control wrapper in ui settings client
+            // so that it can find all the config in global.
             excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
           })
         : this.savedObjectsRouterHandlerContext.client;
