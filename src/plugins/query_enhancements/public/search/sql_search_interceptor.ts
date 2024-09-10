@@ -58,7 +58,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     let datasetTypeConfig;
 
     if (datasetType) {
-      datasetTypeConfig = this.queryService.queryString.getDatasetService().getType(dataset?.type);
+      datasetTypeConfig = this.queryService.queryString.getDatasetService().getType(datasetType);
     }
 
     const strategy =

@@ -60,7 +60,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     let datasetTypeConfig;
 
     if (datasetType) {
-      datasetTypeConfig = this.queryService.queryString.getDatasetService().getType(dataset?.type);
+      datasetTypeConfig = this.queryService.queryString.getDatasetService().getType(datasetType);
     }
 
     const strategy = datasetTypeConfig?.getSearchOptions?.().strategy ?? SEARCH_STRATEGY.PPL;
