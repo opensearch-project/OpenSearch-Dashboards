@@ -15,7 +15,7 @@
   }
 
   // Hide the error badge when the input is focused
-  .queryAssist__inputWrapper:focus-within .queryAssist__popoverWrapper {
+  .queryAssist__inputWrapper:has(.queryAssist__input:focus) .queryAssist__popoverWrapper {
     display: none;
   }
 }
