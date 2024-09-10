@@ -1,0 +1,2 @@
+fix:
+- Remove unsupported languages for dataset ([#8100](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8100))
