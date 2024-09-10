@@ -11,6 +11,7 @@ import { PrincipalType, Principals } from '../saved_objects/permission_control/a
 export interface AuthInfo {
   backend_roles?: string[];
   user_name?: string;
+  user_id?: string;
 }
 
 export const getPrincipalsFromRequest = (
@@ -31,7 +32,9 @@ export const getPrincipalsFromRequest = (
     if (authState?.authInfo?.backend_roles) {
       payload[PrincipalType.Groups] = authState.authInfo.backend_roles;
     }
-    if (authState?.authInfo?.user_name) {
+    if (authState?.authInfo?.user_id) {
+      payload[PrincipalType.Users] = [authState.authInfo.user_id];
+    } else if (authState?.authInfo?.user_name) {
       payload[PrincipalType.Users] = [authState.authInfo.user_name];
     }
     return payload;
