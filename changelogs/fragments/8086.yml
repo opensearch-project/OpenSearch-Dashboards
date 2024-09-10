@@ -1,0 +1,2 @@
+fix:
+- [Workspace]Fix page display errors and add loading status ([#8086](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8086))
