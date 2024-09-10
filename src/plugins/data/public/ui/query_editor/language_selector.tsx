@@ -14,12 +14,14 @@ import {
 import { getQueryService } from '../../services';
 import { LanguageConfig } from '../../query';
 import { Query } from '../..';
+import { Dataset } from '../../../common';
 
 export interface QueryLanguageSelectorProps {
   query: Query;
   onSelectLanguage: (newLanguage: string) => void;
   anchorPosition?: PopoverAnchorPosition;
   appName?: string;
+  dataset?: Dataset;
 }
 
 const mapExternalLanguageToOptions = (language: LanguageConfig) => {
@@ -35,6 +37,9 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
 
   const queryString = getQueryService().queryString;
   const languageService = queryString.getLanguageService();
+
+  const type = queryString.getDatasetService().getType(props.dataset!.type);
+  const datasetSupportedLanguages = type?.supportedLanguages(props.dataset!) || [];
 
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query: Query) => {
@@ -54,14 +59,17 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
 
   const languageOptions: Array<{ label: string; value: string }> = [];
 
-  languageService.getLanguages().forEach((language) => {
-    if (
-      (language && props.appName && !language.editorSupportedAppNames?.includes(props.appName)) ||
-      languageService.getUserQueryLanguageBlocklist().includes(language?.id)
-    )
-      return;
-    languageOptions.unshift(mapExternalLanguageToOptions(language!));
-  });
+  languageService
+    .getLanguages()
+    .filter((language) => datasetSupportedLanguages.includes(language.id))
+    .forEach((language) => {
+      if (
+        (language && props.appName && !language.editorSupportedAppNames?.includes(props.appName)) ||
+        languageService.getUserQueryLanguageBlocklist().includes(language?.id)
+      )
+        return;
+      languageOptions.unshift(mapExternalLanguageToOptions(language!));
+    });
 
   const selectedLanguage = {
     label:

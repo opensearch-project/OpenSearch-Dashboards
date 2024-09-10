@@ -347,6 +347,7 @@ export default class QueryEditorUI extends Component<Props, State> {
         anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
         onSelectLanguage={this.onSelectLanguage}
         appName={this.services.appName}
+        dataset={this.props.query.dataset}
       />
     );
 
