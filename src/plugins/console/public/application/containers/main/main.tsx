@@ -122,7 +122,7 @@ export function Main({ dataSourceId }: MainProps) {
   return (
     <div id="consoleRoot">
       <EuiFlexGroup
-        className="consoleContainer"
+        className={`consoleContainer useUpdatedUX-${!!useUpdatedUX}`}
         gutterSize="none"
         direction="column"
         responsive={false}
@@ -156,7 +156,7 @@ export function Main({ dataSourceId }: MainProps) {
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
-          <Editor loading={!done} dataSourceId={dataSourceId} />
+          <Editor useUpdatedUX={useUpdatedUX} loading={!done} dataSourceId={dataSourceId} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
