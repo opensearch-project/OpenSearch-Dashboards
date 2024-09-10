@@ -153,10 +153,7 @@
 .osdQueryEditor__header {
   display: flex;
   align-items: center;
-
-  .osdQueryEditorExtensionComponent {
-    padding: 0 $euiSizeXS $euiSizeXS;
-  }
+  padding: 0 $euiSizeXS $euiSizeXS;
 }
 
 .osdQueryEditor__topBar {
