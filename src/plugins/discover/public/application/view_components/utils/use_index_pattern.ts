@@ -59,7 +59,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
             indexPatternList || [],
             uiSettings.get('defaultIndex')
           );
-          if (isMounted) {
+          if (isMounted && newId) {
             store!.dispatch(updateIndexPattern(newId));
             handleIndexPattern();
           }
