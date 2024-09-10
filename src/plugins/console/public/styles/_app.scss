@@ -12,7 +12,7 @@
 .consoleContainer {
   padding: $euiSizeS;
 
-  .useUpdatedUX-true {
+  &.useUpdatedUX-true {
     padding: $euiSizeS 0;
   }
 }
