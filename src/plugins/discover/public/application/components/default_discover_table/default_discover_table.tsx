@@ -181,7 +181,7 @@ const DefaultDiscoverTableUI = ({
     }
 
     return () => cancelAnimationFrame(lazyLoadRequestFrameRef.current);
-  }, [showPagination, renderedRowCount, desiredRowCount, rows.length]);
+  }, [showPagination, renderedRowCount, desiredRowCount]);
 
   // Allow auto column-sizing using the initially rendered rows and then convert to fixed
   const tableLayoutRequestFrameRef = useRef<number>(0);
