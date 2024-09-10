@@ -42,6 +42,7 @@ import {
 
 export interface WorkspaceDetailProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
+  isFormSubmitting: boolean;
 }
 
 export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
@@ -292,6 +293,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
           numberOfChanges={numberOfChanges}
           numberOfErrors={numberOfErrors}
           handleResetForm={handleResetForm}
+          isFormSubmitting={props.isFormSubmitting}
         />
       )}
     </>

@@ -59,6 +59,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const availableUseCases = useObservable(props.registeredUseCases$, []);
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
   /**
    * set breadcrumbs to chrome
@@ -105,6 +106,9 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
       let result;
+      if (isFormSubmitting) {
+        return;
+      }
       if (!currentWorkspace) {
         notifications?.toasts.addDanger({
           title: i18n.translate('Cannot find current workspace', {
@@ -113,6 +117,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
         });
         return;
       }
+      setIsFormSubmitting(true);
 
       try {
         const { permissionSettings, selectedDataSourceConnections, ...attributes } = data;
@@ -158,9 +163,11 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
           text: error instanceof Error ? error.message : JSON.stringify(error),
         });
         return;
+      } finally {
+        setIsFormSubmitting(false);
       }
     },
-    [notifications?.toasts, currentWorkspace, http, application, workspaceClient]
+    [isFormSubmitting, currentWorkspace, notifications?.toasts, workspaceClient, application, http]
   );
 
   if (!workspaces || !application || !http || !savedObjects || !currentWorkspaceFormData) {
@@ -178,7 +185,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
       availableUseCases={availableUseCases}
     >
       <I18nProvider>
-        <WorkspaceDetail {...props} />
+        <WorkspaceDetail {...props} isFormSubmitting={isFormSubmitting} />
       </I18nProvider>
     </WorkspaceFormProvider>
   );
