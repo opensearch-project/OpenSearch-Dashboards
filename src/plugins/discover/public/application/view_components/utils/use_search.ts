@@ -12,7 +12,7 @@ import { cloneDeep } from 'lodash';
 import { useLocation } from 'react-router-dom';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
-import { QueryStatus, search } from '../../../../../data/public';
+import { search } from '../../../../../data/public';
 import { validateTimeRange } from '../../helpers/validate_time_range';
 import { updateSearchSource } from './update_search_source';
 import { useIndexPattern } from './use_index_pattern';
