@@ -123,7 +123,7 @@ export const CollapsibleNavTop = ({
   );
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false}>
+    <EuiPanel hasBorder={false} hasShadow={false} className="navGroupEnabledNavTopWrapper">
       <EuiFlexGroup responsive={false} alignItems="center" justifyContent="spaceBetween">
         {!shouldShrinkNavigation ? (
           <EuiFlexItem grow={false}>
