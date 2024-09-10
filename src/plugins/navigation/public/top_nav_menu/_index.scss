@@ -70,9 +70,12 @@
   .euiText {
     line-height: $euiFormControlCompressedHeight;
     white-space: nowrap;
-    max-width: 18ch;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    @media only screen and (max-width: map-get($euiBreakpoints, "xxl")) {
+      max-width: 18ch;
+    }
   }
 }
 

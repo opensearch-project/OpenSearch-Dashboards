@@ -182,17 +182,19 @@ export const WorkspacePermissionSettingPanel = ({
         </React.Fragment>
       ))}
       {isEditing && (
-        <EuiSmallButton
-          fullWidth={false}
-          onClick={handleAddNewOne}
-          data-test-subj={`workspaceForm-permissionSettingPanel-addNew`}
-          color="primary"
-          iconType="plusInCircle"
-        >
-          {i18n.translate('workspace.form.permissionSettingPanel.addCollaborator', {
-            defaultMessage: 'Add collaborator',
-          })}
-        </EuiSmallButton>
+        <EuiCompressedFormRow fullWidth>
+          <EuiSmallButton
+            fullWidth={false}
+            onClick={handleAddNewOne}
+            data-test-subj={`workspaceForm-permissionSettingPanel-addNew`}
+            color="primary"
+            iconType="plusInCircle"
+          >
+            {i18n.translate('workspace.form.permissionSettingPanel.addCollaborator', {
+              defaultMessage: 'Add collaborator',
+            })}
+          </EuiSmallButton>
+        </EuiCompressedFormRow>
       )}
     </>
   );
