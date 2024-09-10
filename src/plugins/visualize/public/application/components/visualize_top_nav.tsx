@@ -259,7 +259,12 @@ const TopNav = ({
       savedQueryId={currentAppState.savedQuery}
       onSavedQueryIdChange={stateContainer.transitions.updateSavedQuery}
       indexPatterns={indexPatterns}
-      screenTitle={vis.title.length ?? '' ? vis.title : 'New visualization'}
+      screenTitle={
+        vis.title ||
+        i18n.translate('discover.savedSearch.newTitle', {
+          defaultMessage: 'New visualization',
+        })
+      }
       showAutoRefreshOnly={!showDatePicker()}
       showDatePicker={showDatePicker()}
       showFilterBar={showFilterBar}

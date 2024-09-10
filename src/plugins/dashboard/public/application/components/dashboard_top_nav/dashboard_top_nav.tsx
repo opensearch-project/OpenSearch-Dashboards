@@ -7,6 +7,7 @@ import React, { memo, useState, useEffect } from 'react';
 import { IndexPattern } from 'src/plugins/data/public';
 import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
+import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { getTopNavConfig, getTopNavRightConfig, getTopNavLegacyConfig } from './top_nav';
 import { DashboardAppStateContainer, DashboardAppState, DashboardServices } from '../../../types';
@@ -144,7 +145,12 @@ const TopNav = ({
         appName={'dashboard'}
         config={showTopNavMenu ? topNavMenu : undefined}
         className={isFullScreenMode ? 'osdTopNavMenu-isFullScreen' : undefined}
-        screenTitle={currentAppState.title}
+        screenTitle={
+          currentAppState.title ||
+          i18n.translate('discover.savedSearch.newTitle', {
+            defaultMessage: 'New dashboard',
+          })
+        }
         showSearchBar={showSearchBar && TopNavMenuItemRenderType.IN_PORTAL}
         showQueryBar={showQueryBar}
         showQueryInput={showQueryInput}
