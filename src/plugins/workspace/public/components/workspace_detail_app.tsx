@@ -109,7 +109,6 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
       if (isFormSubmitting) {
         return;
       }
-      setIsFormSubmitting(true);
       if (!currentWorkspace) {
         notifications?.toasts.addDanger({
           title: i18n.translate('Cannot find current workspace', {
@@ -118,6 +117,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
         });
         return;
       }
+      setIsFormSubmitting(true);
 
       try {
         const { permissionSettings, selectedDataSourceConnections, ...attributes } = data;
