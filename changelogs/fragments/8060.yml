@@ -1,0 +1,2 @@
+fix:
+- Fix row rendering in Discover infinite scroll ([#8060](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8060))

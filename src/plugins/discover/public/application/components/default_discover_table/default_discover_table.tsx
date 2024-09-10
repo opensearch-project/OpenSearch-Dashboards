@@ -41,6 +41,8 @@ export interface DefaultDiscoverTableProps {
 // ToDo: These would need to be read from an upcoming config panel
 const PAGINATED_PAGE_SIZE = 50;
 const INFINITE_SCROLLED_PAGE_SIZE = 10;
+// How far to queue unrendered rows ahead of time during infinite scrolling
+const DESIRED_ROWS_LOOKAHEAD = 5 * INFINITE_SCROLLED_PAGE_SIZE;
 
 const DefaultDiscoverTableUI = ({
   columns,
@@ -86,7 +88,7 @@ const DefaultDiscoverTableUI = ({
    */
   const [renderedRowCount, setRenderedRowCount] = useState(INFINITE_SCROLLED_PAGE_SIZE);
   const [desiredRowCount, setDesiredRowCount] = useState(
-    Math.min(rows.length, 5 * INFINITE_SCROLLED_PAGE_SIZE)
+    Math.min(rows.length, DESIRED_ROWS_LOOKAHEAD)
   );
   const [displayedRows, setDisplayedRows] = useState(rows.slice(0, PAGINATED_PAGE_SIZE));
   const [currentRowCounts, setCurrentRowCounts] = useState({
@@ -118,10 +120,14 @@ const DefaultDiscoverTableUI = ({
           if (entries[0].isIntersecting) {
             // Load another batch of rows, some immediately and some lazily
             setRenderedRowCount((prevRowCount) => prevRowCount + INFINITE_SCROLLED_PAGE_SIZE);
-            setDesiredRowCount((prevRowCount) => prevRowCount + 5 * INFINITE_SCROLLED_PAGE_SIZE);
+            setDesiredRowCount((prevRowCount) => prevRowCount + DESIRED_ROWS_LOOKAHEAD);
           }
         },
-        { threshold: 1.0 }
+        {
+          // Important that 0 < threshold < 1, since there OSD application div has a transparent
+          // fade at the bottom which causes the sentinel element to sometimes not be 100% visible
+          threshold: 0.1,
+        }
       );
 
       observerRef.current.observe(sentinelElement);
@@ -155,6 +161,10 @@ const DefaultDiscoverTableUI = ({
   const lazyLoadRequestFrameRef = useRef<number>(0);
   const lazyLoadLastTimeRef = useRef<number>(0);
 
+  // When doing infinite scrolling, the `rows` prop gets regularly updated from the outside: we only
+  // render the additional rows when we know the load isn't too high. To prevent overloading the
+  // renderer, we throttle by current framerate and only render if the frames are fast enough, then
+  // we increase the rendered row count and trigger a re-render.
   React.useEffect(() => {
     if (!showPagination) {
       const loadMoreRows = (time: number) => {
@@ -254,7 +264,16 @@ const DefaultDiscoverTableUI = ({
         </table>
         {!showPagination && renderedRowCount < rows.length && (
           <div ref={sentinelRef}>
-            <EuiProgress size="xs" color="accent" />
+            <EuiProgress
+              size="xs"
+              color="accent"
+              data-test-subj="discoverRenderedRowsProgress"
+              style={{
+                // Add a little margin if we aren't rendering the truncation callout below, to make
+                // the progress bar render better when it's not present
+                marginBottom: rows.length !== sampleSize ? '5px' : '0',
+              }}
+            />
           </div>
         )}
         {!showPagination && rows.length === sampleSize && (
