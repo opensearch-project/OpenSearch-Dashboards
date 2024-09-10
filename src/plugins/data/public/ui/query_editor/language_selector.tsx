@@ -15,6 +15,7 @@ import { getQueryService } from '../../services';
 import { LanguageConfig } from '../../query';
 import { Query } from '../..';
 import { Dataset } from '../../../common';
+import { darkCssDistFilename } from '../../../../../../packages/osd-ui-shared-deps/index';
 
 export interface QueryLanguageSelectorProps {
   query: Query;
@@ -38,8 +39,9 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
   const queryString = getQueryService().queryString;
   const languageService = queryString.getLanguageService();
 
-  const type = queryString.getDatasetService().getType(props.dataset!.type);
-  const datasetSupportedLanguages = type?.supportedLanguages(props.dataset!) || [];
+  const datasetSupportedLanguages = props.dataset
+    ? queryString.getDatasetService().getType(props.dataset.type)?.supportedLanguages(props.dataset)
+    : undefined;
 
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query: Query) => {
@@ -61,14 +63,19 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
 
   languageService
     .getLanguages()
-    .filter((language) => datasetSupportedLanguages.includes(language.id))
+    .filter((language) => {
+      if (datasetSupportedLanguages) {
+        return datasetSupportedLanguages.includes(language.id);
+      }
+      return true;
+    })
     .forEach((language) => {
       if (
         (language && props.appName && !language.editorSupportedAppNames?.includes(props.appName)) ||
         languageService.getUserQueryLanguageBlocklist().includes(language?.id)
       )
         return;
-      languageOptions.unshift(mapExternalLanguageToOptions(language!));
+      languageOptions.unshift(mapExternalLanguageToOptions(language));
     });
 
   const selectedLanguage = {
