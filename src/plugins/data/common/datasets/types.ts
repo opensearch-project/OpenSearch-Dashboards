@@ -251,3 +251,7 @@ export interface DatasetField {
   displayName?: string;
   // TODO:  osdFieldType?
 }
+
+export interface DatasetSearchOptions {
+  strategy?: string;
+}
