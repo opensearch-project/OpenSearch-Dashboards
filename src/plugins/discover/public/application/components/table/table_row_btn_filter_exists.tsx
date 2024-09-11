@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiToolTip, EuiSmallButtonIcon } from '@elastic/eui';
+import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 export interface Props {
@@ -65,7 +65,7 @@ export function DocViewTableRowBtnFilterExists({
 
   return (
     <EuiToolTip content={tooltipContent}>
-      <EuiSmallButtonIcon
+      <EuiButtonIcon
         aria-label={i18n.translate('discover.docViews.table.filterForFieldPresentButtonAriaLabel', {
           defaultMessage: 'Filter for field present',
         })}
@@ -75,6 +75,7 @@ export function DocViewTableRowBtnFilterExists({
         disabled={disabled}
         iconType={'indexOpen'}
         iconSize={'s'}
+        size={'xs'}
       />
     </EuiToolTip>
   );
