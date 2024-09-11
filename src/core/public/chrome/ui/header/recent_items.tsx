@@ -163,7 +163,27 @@ export const RecentItems = ({
       />
     </EuiPopover>
   );
-  const recentButton = (
+
+  const recentButtonIcon = (
+    <EuiButtonIcon
+      iconType="recent"
+      color="text"
+      size="xs"
+      aria-expanded={isPopoverOpen}
+      aria-haspopup="true"
+      aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.viewRecentItemsAriaLabel', {
+        defaultMessage: 'View recents',
+      })}
+      onClick={() => {
+        setIsPopoverOpen((prev) => !prev);
+      }}
+      data-test-subj="recentItemsSectionButton"
+      className="headerRecentItemsButton"
+    />
+  );
+  const recentButton = isPopoverOpen ? (
+    recentButtonIcon
+  ) : (
     <EuiToolTip
       content={i18n.translate('core.ui.chrome.headerGlobalNav.viewRecentItemsTooltip', {
         defaultMessage: 'Recent',
@@ -171,21 +191,7 @@ export const RecentItems = ({
       delay="long"
       position="bottom"
     >
-      <EuiButtonIcon
-        iconType="recent"
-        color="text"
-        size="xs"
-        aria-expanded={isPopoverOpen}
-        aria-haspopup="true"
-        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.viewRecentItemsAriaLabel', {
-          defaultMessage: 'View recents',
-        })}
-        onClick={() => {
-          setIsPopoverOpen((prev) => !prev);
-        }}
-        data-test-subj="recentItemsSectionButton"
-        className="headerRecentItemsButton"
-      />
+      {recentButtonIcon}
     </EuiToolTip>
   );
 

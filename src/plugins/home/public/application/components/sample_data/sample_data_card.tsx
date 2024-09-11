@@ -27,14 +27,14 @@ export const registerSampleDataCard = (
       kind: 'card',
       order,
       description: i18n.translate('home.sampleData.card.description', {
-        defaultMessage: 'You can install sample data to experiment with OpenSearch Dashboards.',
+        defaultMessage: 'Explore sample data before adding your own.',
       }),
       title: i18n.translate('home.sampleData.card.title', {
-        defaultMessage: 'Try openSearch',
+        defaultMessage: 'Try OpenSearch',
       }),
       cardProps: {
         selectable: {
-          children: <EuiI18n token="home.sampleData.card.footer" default="with Sample Datasets" />,
+          children: <EuiI18n token="home.sampleData.card.footer" default="Sample Datasets" />,
           isSelected: false,
           onClick: () => {
             // TODO change to a modal

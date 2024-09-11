@@ -8,6 +8,7 @@ import { render } from '@testing-library/react';
 
 import { HomeListCard, registerHomeListCardToPage } from './home_list_card';
 import { contentManagementPluginMocks } from '../../../../content_management/public';
+import { EuiLink } from '@elastic/eui';
 
 describe('<HomeListCard />', () => {
   it('should render static content normally', async () => {
@@ -38,7 +39,7 @@ it('should render View All button when allLink is provided', () => {
         description: 'Get started in minutes with OpenSearch Dashboards',
       },
     ],
-    allLink: 'https://opensearch.org/docs/latest/',
+    allLink: <EuiLink>View all</EuiLink>,
   };
 
   const { getByText } = render(<HomeListCard config={mockConfig} />);

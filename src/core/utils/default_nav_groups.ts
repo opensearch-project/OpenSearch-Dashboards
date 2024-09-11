@@ -52,7 +52,7 @@ const defaultNavGroups = {
       defaultMessage: 'Observability',
     }),
     description: i18n.translate('core.ui.group.observability.description', {
-      defaultMessage: 'Gain visibility into your application and infrastructure',
+      defaultMessage: 'Gain visibility into your applications and infrastructure.',
     }),
     order: 4000,
     icon: 'wsObservability',
@@ -63,7 +63,7 @@ const defaultNavGroups = {
       defaultMessage: 'Security Analytics',
     }),
     description: i18n.translate('core.ui.group.security.analytics.description', {
-      defaultMessage: 'Enhance your security posture with advanced analytics',
+      defaultMessage: 'Enhance your security posture with advanced analytics.',
     }),
     order: 5000,
     icon: 'wsSecurityAnalytics',
@@ -86,7 +86,7 @@ const defaultNavGroups = {
       defaultMessage: 'Search',
     }),
     description: i18n.translate('core.ui.group.search.description', {
-      defaultMessage: 'Discover and query your data with ease',
+      defaultMessage: 'Discover and query your data with ease.',
     }),
     order: 6000,
     icon: 'wsSearch',

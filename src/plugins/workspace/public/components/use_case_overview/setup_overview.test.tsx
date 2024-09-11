@@ -77,18 +77,18 @@ describe('Setup use case overview', () => {
         "cardProps": Object {
           "selectable": Object {
             "children": <EuiI18n
-              default="with Discover"
+              default="Discover"
               token="workspace.essential_overview.discover.card.footer"
             />,
             "isSelected": false,
             "onClick": [Function],
           },
         },
-        "description": "Explore data interactively to uncover insights.",
+        "description": "Explore data to uncover insights.",
         "id": "get_start_discover",
         "kind": "card",
         "order": 20,
-        "title": "Discover insights",
+        "title": "Explore data",
       }
     `);
   });
@@ -137,7 +137,7 @@ describe('Setup use case overview', () => {
         "cardProps": Object {
           "layout": "horizontal",
         },
-        "description": "Gain visibility into your application and infrastructure",
+        "description": "Gain visibility into your applications and infrastructure.",
         "getIcon": [Function],
         "id": "observability",
         "kind": "card",

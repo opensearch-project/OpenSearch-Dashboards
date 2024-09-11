@@ -59,9 +59,9 @@ const getStartMockForRecentWork = () => {
 };
 
 describe('<RecentWork />', () => {
-  it('render with emty recent work', async () => {
+  it('render with empty recent work', async () => {
     const { findByText } = render(<RecentWork core={getStartMockForRecentWork()} />);
-    await findByText('No assets found');
+    await findByText('No assets to display');
   });
 
   it('render with recent works', async () => {

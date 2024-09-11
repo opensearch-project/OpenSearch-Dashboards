@@ -25,18 +25,18 @@ describe('Sample data card', () => {
         "cardProps": Object {
           "selectable": Object {
             "children": <EuiI18n
-              default="with Sample Datasets"
+              default="Sample Datasets"
               token="home.sampleData.card.footer"
             />,
             "isSelected": false,
             "onClick": [Function],
           },
         },
-        "description": "You can install sample data to experiment with OpenSearch Dashboards.",
+        "description": "Explore sample data before adding your own.",
         "id": "sample_data",
         "kind": "card",
         "order": 0,
-        "title": "Try openSearch",
+        "title": "Try OpenSearch",
       }
     `);
 

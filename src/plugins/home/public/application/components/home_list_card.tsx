@@ -25,13 +25,13 @@ import {
 
 export const LEARN_OPENSEARCH_CONFIG = {
   title: i18n.translate('homepage.card.learnOpenSearch.title', {
-    defaultMessage: 'Learn Opensearch',
+    defaultMessage: 'OpenSearch Documentation',
   }),
   list: [
     {
       label: 'Quickstart guide',
       href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
-      description: 'Get started in minutes with OpenSearch Dashboards',
+      description: 'Start using OpenSearch Dashboards in minutes.',
     },
     {
       label: 'Building data visualizations',
@@ -41,10 +41,18 @@ export const LEARN_OPENSEARCH_CONFIG = {
     {
       label: 'Creating dashboards',
       href: 'https://opensearch.org/docs/latest/dashboards/dashboard/index/',
-      description: 'Build interactive dashboards to explore and analyze your data',
+      description: 'Build interactive dashboards to explore and analyze your data.',
     },
   ],
-  allLink: 'https://opensearch.org/docs/latest/',
+  allLink: (
+    <EuiLink href="https://opensearch.org/docs/latest/" target="_blank">
+      <EuiText size="s" className="eui-displayInline">
+        {i18n.translate('home.list.card.documentation', {
+          defaultMessage: 'Learn more in Documentation',
+        })}
+      </EuiText>
+    </EuiLink>
+  ),
 };
 
 export const WHATS_NEW_CONFIG = {
@@ -58,6 +66,15 @@ export const WHATS_NEW_CONFIG = {
       description: 'Get started in minutes with OpenSearch Dashboards',
     },
   ],
+  allLink: (
+    <EuiLink href="https://opensearch.org" target="_blank">
+      <EuiText size="s" className="eui-displayInline">
+        {i18n.translate('home.list.card.whatsnew', {
+          defaultMessage: 'View all on OpenSearch.org',
+        })}
+      </EuiText>
+    </EuiLink>
+  ),
 };
 
 interface Config {
@@ -67,7 +84,7 @@ interface Config {
     href: string;
     description: string;
   }>;
-  allLink?: string;
+  allLink?: React.JSX.Element;
 }
 
 export const HomeListCard = ({ config }: { config: Config }) => {
@@ -105,17 +122,7 @@ export const HomeListCard = ({ config }: { config: Config }) => {
             )}
           </EuiFlexItem>
           <EuiSpacer />
-          <EuiFlexItem grow={false}>
-            {config.allLink ? (
-              <EuiLink href={config.allLink} target="_blank">
-                <EuiText size="s" className="eui-displayInline">
-                  {i18n.translate('home.list.card.view_all', {
-                    defaultMessage: 'View all',
-                  })}
-                </EuiText>
-              </EuiLink>
-            ) : null}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{config.allLink}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
     </>

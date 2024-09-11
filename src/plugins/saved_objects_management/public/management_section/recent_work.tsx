@@ -21,6 +21,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiSmallButton,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -97,6 +98,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
   const recently$Ref = useRef(core.chrome.recentlyAccessed.get$());
   const recentAccessed = useObservable(recently$Ref.current, []);
   const workspaceList = useObservable(core.workspaces.workspaceList$, []);
+  const currentWorkspace = useObservable(core.workspaces.currentWorkspace$, undefined);
   const [selectedType, setSelectedType] = useState(allOption);
   const [selectedSort, setSelectedSort] = useState(recentlyViewed);
   const [detailedSavedObjects, setDetailedSavedObjects] = useState<DetailedRecentlyAccessedItem[]>(
@@ -132,6 +134,12 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
   useEffect(() => {
     const savedObjects = recentAccessed
       .filter((item) => item.meta?.type)
+      .filter((item) => {
+        if (currentWorkspace) {
+          return item.workspaceId === currentWorkspace?.id;
+        }
+        return true;
+      })
       .map((item) => ({
         type: item.meta?.type || '',
         id: item.id,
@@ -159,7 +167,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
         setDetailedSavedObjects(formatDetailedSavedObjects);
       });
     }
-  }, [core.savedObjects.client, recentAccessed, core.http, workspaceList]);
+  }, [core.savedObjects.client, recentAccessed, core.http, workspaceList, currentWorkspace]);
 
   return (
     <EuiPanel>
@@ -181,7 +189,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
                 position="right"
                 content={i18n.translate('savedObjectsManagement.recentWorkSection.assetsInfo', {
                   defaultMessage:
-                    'Dashboards, visualizations, saved queries, and other assets within your Worksapces.',
+                    'Dashboards, visualizations, saved queries, and other assets within your Workspaces.',
                 })}
                 data-test-subj="assetsTooltip"
               >
@@ -243,6 +251,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
                         <EuiIcon
                           style={{ marginRight: widthForRightMargin }}
                           type={recentAccessItem.meta.icon || 'apps'}
+                          color="subdued"
                         />
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
@@ -293,7 +302,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
                           </EuiFlexItem>
                         </EuiFlexGrid>
                       </EuiFlexItem>
-                      {workspaceEnabled && (
+                      {workspaceEnabled && !currentWorkspace && (
                         <EuiFlexItem>
                           <EuiFlexGrid columns={2} gutterSize="s">
                             <EuiFlexItem grow={false}>
@@ -328,23 +337,48 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
         </EuiFlexGroup>
       ) : (
         <EuiEmptyPrompt
-          icon={<EuiIcon size="l" type="layers" />}
           title={
-            <h2>
+            <h3>
               {i18n.translate('savedObjectsManagement.recentWorkSection.empty.title', {
-                defaultMessage: 'No assets found',
+                defaultMessage: 'No assets to display',
               })}
-            </h2>
+            </h3>
           }
-          body={i18n.translate('savedObjectsManagement.recentWorkSection.empty.body', {
-            defaultMessage: "Assets you've recently viewed or updated will appear here.",
-          })}
+          body={
+            <EuiFlexGroup
+              gutterSize="s"
+              justifyContent="spaceBetween"
+              alignItems="center"
+              direction="column"
+            >
+              <EuiFlexItem>
+                <EuiText color="subdued" size="s">
+                  {i18n.translate('savedObjectsManagement.recentWorkSection.empty.body', {
+                    defaultMessage: 'The recent assets will appear here.',
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiSmallButton
+                  iconType="popout"
+                  iconSide="right"
+                  iconGap="none"
+                  target="_blank"
+                  href={core.application.getUrlForApp(APP_ID)}
+                >
+                  {i18n.translate('savedObjectsManagement.recentWorkSection.empty.manageAssets', {
+                    defaultMessage: 'Manage assets',
+                  })}
+                </EuiSmallButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
         />
       )}
       <EuiSpacer size="m" />
       <EuiLink target="_blank" onClick={() => core.application.navigateToApp(APP_ID)}>
         <EuiText size="s" className="eui-displayInline">
-          {i18n.translate('home.list.card.view_all', {
+          {i18n.translate('savedObjectsManagement.recentWorkSection.view_all', {
             defaultMessage: 'View all',
           })}
         </EuiText>
