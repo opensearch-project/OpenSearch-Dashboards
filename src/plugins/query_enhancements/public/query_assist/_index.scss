@@ -18,6 +18,10 @@
   .queryAssist__inputWrapper:has(.queryAssist__input:focus) .queryAssist__popoverWrapper {
     display: none;
   }
+
+  .queryAssist__input {
+    text-overflow: ellipsis;
+  }
 }
 
 .queryAssist__popoverText {
