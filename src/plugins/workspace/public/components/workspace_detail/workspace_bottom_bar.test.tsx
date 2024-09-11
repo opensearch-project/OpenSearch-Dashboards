@@ -5,6 +5,10 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import {
+  MAX_WORKSPACE_DESCRIPTION_LENGTH,
+  MAX_WORKSPACE_NAME_LENGTH,
+} from '../../../common/constants';
 import { WorkspaceBottomBar } from './workspace_bottom_bar';
 
 const mockHandleResetForm = jest.fn();
@@ -15,6 +19,7 @@ const defaultProps = {
   numberOfErrors: 1,
   handleResetForm: mockHandleResetForm,
   isFormSubmitting: false,
+  formData: { name: 'Foo', description: '' },
 };
 
 describe('WorkspaceBottomBar', () => {
@@ -51,5 +56,36 @@ describe('WorkspaceBottomBar', () => {
 
     // Assuming handleSubmit is called during form submission
     expect(handleSubmit).toHaveBeenCalled();
+  });
+
+  it('should disable the "Save changes" button when name exceeds the maximum length', () => {
+    const longName = 'a'.repeat(MAX_WORKSPACE_NAME_LENGTH + 1);
+    render(
+      <form id="testForm">
+        <WorkspaceBottomBar {...defaultProps} formData={{ name: longName }} />
+      </form>
+    );
+    const saveChangesButton = screen.getByText('Save changes');
+    expect(saveChangesButton.closest('button')).toBeDisabled();
+  });
+
+  it('should disable the "Save changes" button when description exceeds the maximum length', () => {
+    const longDescription = 'a'.repeat(MAX_WORKSPACE_DESCRIPTION_LENGTH + 1);
+    render(
+      <form id="testForm">
+        <WorkspaceBottomBar
+          {...defaultProps}
+          formData={{ ...defaultProps.formData, description: longDescription }}
+        />
+      </form>
+    );
+    const saveChangesButton = screen.getByText('Save changes');
+    expect(saveChangesButton.closest('button')).toBeDisabled();
+  });
+
+  it('should enable the "Save changes" button when name and description are within the maximum length', () => {
+    render(<WorkspaceBottomBar {...defaultProps} />);
+    const saveChangesButton = screen.getByText('Save changes');
+    expect(saveChangesButton.closest('button')).not.toBeDisabled();
   });
 });

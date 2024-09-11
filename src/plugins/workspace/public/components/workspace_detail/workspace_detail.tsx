@@ -290,6 +290,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
       {isEditing && (
         <WorkspaceBottomBar
           formId={formId}
+          formData={formData}
           numberOfChanges={numberOfChanges}
           numberOfErrors={numberOfErrors}
           handleResetForm={handleResetForm}
