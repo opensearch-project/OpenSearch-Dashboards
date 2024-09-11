@@ -124,10 +124,11 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
       .filter((item) => !item.error)
       .sort(sortBy(sortKeyMap[selectedSort]));
     return sortedResult.filter((item: SavedObject & ChromeRecentlyAccessedHistoryItem) => {
+      if (workspaceEnabled && !item.workspaces) return false;
       if (selectedType === allOption) return true;
       return item.type === selectedType;
     });
-  }, [detailedSavedObjects, selectedSort, selectedType]);
+  }, [detailedSavedObjects, selectedSort, selectedType, workspaceEnabled]);
 
   useEffect(() => {
     const savedObjects = recentAccessed
@@ -232,9 +233,9 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
                 recentAccessItem,
                 navLinks,
                 core.http.basePath,
-                core.application.navigateToUrl
+                core.application.navigateToUrl,
+                workspaceEnabled ? true : false
               );
-
               content = (
                 <EuiCard
                   title={

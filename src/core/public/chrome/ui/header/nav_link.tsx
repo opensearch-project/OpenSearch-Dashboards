@@ -125,13 +125,17 @@ export function createRecentNavLink(
   recentLink: ChromeRecentlyAccessedHistoryItem,
   navLinks: ChromeNavLink[],
   basePath: HttpStart['basePath'],
-  navigateToUrl: InternalApplicationStart['navigateToUrl']
+  navigateToUrl: InternalApplicationStart['navigateToUrl'],
+  workspaceEnabled: boolean = true
 ): RecentNavLink {
   const { link, label, workspaceId } = recentLink;
   const href = relativeToAbsolute(
-    basePath.prepend(formatUrlWithWorkspaceId(link, workspaceId || '', basePath), {
-      withoutClientBasePath: true,
-    })
+    basePath.prepend(
+      formatUrlWithWorkspaceId(link, workspaceEnabled ? workspaceId || '' : '', basePath),
+      {
+        withoutClientBasePath: true,
+      }
+    )
   );
   const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl));
   let titleAndAriaLabel = label;
