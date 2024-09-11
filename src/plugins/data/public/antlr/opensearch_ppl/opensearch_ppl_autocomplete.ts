@@ -12,6 +12,7 @@ import {
   OpenSearchPplAutocompleteResult,
   ProcessVisitedRulesResult,
   SourceOrTableSuggestion,
+  TableContextSuggestion,
 } from '../shared/types';
 import { OpenSearchPPLLexer } from './.generated/OpenSearchPPLLexer';
 import { OpenSearchPPLParser } from './.generated/OpenSearchPPLParser';
@@ -111,7 +112,10 @@ export function processVisitedRules(
   };
 }
 
-export function getParseTree(parser: OpenSearchPPLParser, type?: 'search' | 'from'): ParseTree {
+export function getParseTree(
+  parser: OpenSearchPPLParser,
+  type?: 'from' | 'alter' | 'insert' | 'update' | 'select'
+): ParseTree {
   if (!type) {
     return parser.root();
   }
@@ -119,8 +123,6 @@ export function getParseTree(parser: OpenSearchPPLParser, type?: 'search' | 'fro
   switch (type) {
     case 'from':
       return parser.fromClause();
-    case 'search':
-      return parser.searchCommand();
     default:
       return parser.root();
   }
@@ -143,7 +145,7 @@ export function enrichAutocompleteResult(
   const result: OpenSearchPplAutocompleteResult = {
     ...baseResult,
     ...suggestionsFromRules,
-    suggestColumns: shouldSuggestColumns ? shouldSuggestColumns : undefined,
+    suggestColumns: shouldSuggestColumns ? ({ name: '' } as TableContextSuggestion) : undefined,
   };
   return result;
 }
