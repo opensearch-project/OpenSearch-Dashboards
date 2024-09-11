@@ -324,6 +324,7 @@ export function CollapsibleNavGroupEnabled({
             paddingSize={!isNavOpen ? 's' : 'l'}
             hasShadow={false}
             className="eui-yScroll flex-1-container"
+            style={{ paddingTop: 0 }}
           >
             {shouldShowCollapsedNavHeaderContent && collapsibleNavHeaderRender ? (
               <>

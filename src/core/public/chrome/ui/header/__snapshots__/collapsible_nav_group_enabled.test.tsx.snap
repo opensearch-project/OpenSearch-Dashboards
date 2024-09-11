@@ -22,6 +22,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
       </div>
       <div
         class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
+        style="padding-top: 0px;"
       >
         <div
           class="euiFlexItem"
@@ -51,6 +52,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                     >
                       <div
                         class="euiText euiText--extraSmall"
+                        style="font-size: 14px; line-height: 16px;"
                       >
                         link-in-all
                       </div>
@@ -59,7 +61,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                 </button>
               </div>
               <div
-                class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems"
+                class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems nav-link-item-category-item"
               >
                 <div
                   aria-label="Observability"
@@ -73,7 +75,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                       title="Observability"
                     >
                       <div
-                        class="nav-link-item"
+                        class="nav-link-item nav-link-item-category-title"
                       >
                         Observability
                       </div>
@@ -101,6 +103,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                         >
                           <div
                             class="euiText euiText--extraSmall"
+                            style="font-size: 14px; line-height: 16px;"
                           >
                             link-in-observability
                           </div>
@@ -132,6 +135,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                             >
                               <div
                                 class="euiText euiText--extraSmall"
+                                style="font-size: 14px; line-height: 16px;"
                               >
                                 See all...
                               </div>
@@ -144,7 +148,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                 </div>
               </div>
               <div
-                class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems"
+                class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems nav-link-item-category-item"
               >
                 <div
                   aria-label="Essentials"
@@ -158,7 +162,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                       title="Essentials"
                     >
                       <div
-                        class="nav-link-item"
+                        class="nav-link-item nav-link-item-category-title"
                       >
                         Essentials
                       </div>
@@ -186,6 +190,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                         >
                           <div
                             class="euiText euiText--extraSmall"
+                            style="font-size: 14px; line-height: 16px;"
                           >
                             link-in-essentials
                           </div>
@@ -217,6 +222,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                             >
                               <div
                                 class="euiText euiText--extraSmall"
+                                style="font-size: 14px; line-height: 16px;"
                               >
                                 See all...
                               </div>
@@ -289,6 +295,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case by default and 
       </div>
       <div
         class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
+        style="padding-top: 0px;"
       >
         <div
           class="euiFlexItem"
@@ -318,6 +325,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case by default and 
                     >
                       <div
                         class="euiText euiText--extraSmall"
+                        style="font-size: 14px; line-height: 16px;"
                       >
                         link-in-essentials
                       </div>
@@ -362,6 +370,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case when current na
       </div>
       <div
         class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
+        style="padding-top: 0px;"
       >
         <div
           class="euiFlexItem"
@@ -391,6 +400,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case when current na
                     >
                       <div
                         class="euiText euiText--extraSmall"
+                        style="font-size: 14px; line-height: 16px;"
                       >
                         link-in-essentials
                       </div>

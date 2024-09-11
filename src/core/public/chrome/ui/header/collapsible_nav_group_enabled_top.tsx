@@ -157,7 +157,7 @@ export const CollapsibleNavTop = ({
       {currentNavGroup?.title && (
         <>
           <EuiSpacer />
-          <EuiText>{currentNavGroup?.title}</EuiText>
+          <EuiText className="leftNavGroupTitle">{currentNavGroup?.title}</EuiText>
         </>
       )}
     </EuiPanel>

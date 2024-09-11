@@ -47,6 +47,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                   >
                     <div
                       class="euiText euiText--extraSmall"
+                      style="font-size: 14px; line-height: 16px;"
                     >
                       pure link
                     </div>
@@ -77,6 +78,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                       >
                         <div
                           class="euiText euiText--extraSmall"
+                          style="font-size: 14px; line-height: 16px;"
                         >
                           subLink
                         </div>
@@ -89,7 +91,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
           </div>
         </div>
         <div
-          class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems"
+          class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems nav-link-item-category-item"
         >
           <div
             aria-label="category-1"
@@ -103,7 +105,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                 title="category-1"
               >
                 <div
-                  class="nav-link-item"
+                  class="nav-link-item nav-link-item-category-title"
                 >
                   category-1
                 </div>
@@ -131,6 +133,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                   >
                     <div
                       class="euiText euiText--extraSmall"
+                      style="font-size: 14px; line-height: 16px;"
                     >
                       link-in-category
                     </div>
@@ -161,6 +164,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                       >
                         <div
                           class="euiText euiText--extraSmall"
+                          style="font-size: 14px; line-height: 16px;"
                         >
                           sub-link-in-category
                         </div>
@@ -188,6 +192,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                   >
                     <div
                       class="euiText euiText--extraSmall"
+                      style="font-size: 14px; line-height: 16px;"
                     >
                       link-in-category-2
                     </div>

@@ -58,7 +58,11 @@ export function NavGroups({
 
     return {
       id: `${link.id}-${link.title}`,
-      name: <EuiText size="xs">{link.title}</EuiText>,
+      name: (
+        <EuiText size="xs" style={{ fontSize: '14px', lineHeight: '16px' }}>
+          {link.title}
+        </EuiText>
+      ),
       onClick: euiListItem.onClick,
       href: euiListItem.href,
       emphasize: euiListItem.isActive,
@@ -128,9 +132,14 @@ export function NavGroups({
     if (navLink.itemType === LinkItemType.CATEGORY) {
       return {
         id: navLink.category?.id ?? '',
-        name: <div className="nav-link-item">{navLink.category?.label ?? ''}</div>,
+        name: (
+          <div className="nav-link-item nav-link-item-category-title">
+            {navLink.category?.label ?? ''}
+          </div>
+        ),
         items: navLink.links?.map((link) => createSideNavItem(link, level + 1)),
         'aria-label': navLink.category?.label,
+        className: 'nav-link-item-category-item',
       };
     }
 
