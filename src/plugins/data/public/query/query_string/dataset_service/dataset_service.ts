@@ -4,6 +4,7 @@
  */
 
 import { CoreStart } from 'opensearch-dashboards/public';
+import LRUCache from 'lru-cache';
 import {
   Dataset,
   DataStructure,
@@ -22,6 +23,7 @@ export class DatasetService {
   private indexPatterns?: IndexPatternsContract;
   private defaultDataset?: Dataset;
   private typesRegistry: Map<string, DatasetTypeConfig> = new Map();
+  private recentDatasets: LRUCache<string, Dataset> = new LRUCache({ max: 4 });
 
   constructor(
     private readonly uiSettings: CoreStart['uiSettings'],
@@ -59,6 +61,22 @@ export class DatasetService {
 
   public getDefault(): Dataset | undefined {
     return this.defaultDataset;
+  }
+
+  public getRecentDataset(dataset: string | undefined): Dataset | undefined {
+    if (dataset) {
+      return this.recentDatasets.get(dataset);
+    }
+  }
+
+  public getRecentDatasets(): Dataset[] {
+    return Array.from(this.recentDatasets.values());
+  }
+
+  public addRecentDataset(dataset: Dataset | undefined): void {
+    if (dataset) {
+      this.recentDatasets.set(dataset.id, dataset);
+    }
   }
 
   public async cacheDataset(dataset: Dataset): Promise<void> {

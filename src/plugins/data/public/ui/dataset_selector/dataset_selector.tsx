@@ -104,7 +104,24 @@ export const DatasetSelector = ({
         prepend: <EuiIcon type={datasetService.getType(type)!.meta.icon.type} />,
       });
     });
-
+    const recentlySelected: EuiSelectableOption[] = [
+      {
+        label: 'Recently Selected Data',
+        isGroupLabel: true,
+      },
+    ];
+    datasetService.getRecentDatasets().forEach(({ id, title, type, dataSource }) => {
+      const label = dataSource ? `${dataSource.title}::${title}` : title;
+      recentlySelected.push({
+        label,
+        checked: id === selectedDataset?.id ? 'on' : undefined,
+        key: id,
+        prepend: <EuiIcon type={datasetService.getType(type)!.meta.icon.type} />,
+      });
+    });
+    if (recentlySelected.length > 1) {
+      newOptions.unshift(...recentlySelected);
+    }
     return newOptions;
   }, [datasets, selectedDataset?.id, datasetService]);
 
@@ -112,14 +129,16 @@ export const DatasetSelector = ({
     (newOptions: EuiSelectableOption[]) => {
       const selectedOption = newOptions.find((option) => option.checked === 'on');
       if (selectedOption) {
-        const foundDataset = datasets.find((dataset) => dataset.id === selectedOption.key);
+        const foundDataset =
+          datasets.find((dataset) => dataset.id === selectedOption.key) ??
+          datasetService.getRecentDataset(selectedOption.key);
         if (foundDataset) {
           closePopover();
           setSelectedDataset(foundDataset);
         }
       }
     },
-    [datasets, setSelectedDataset, closePopover]
+    [datasets, setSelectedDataset, closePopover, datasetService]
   );
 
   const datasetTitle = useMemo(() => {
