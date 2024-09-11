@@ -44,7 +44,7 @@ export const WarningBadge: React.FC<WarningBadgeProps> = (props) => {
       <EuiPopover
         button={
           <EuiBadge
-            color="warning"
+            color="danger"
             // @ts-ignore this is needed to avoid enter key triggering warning badge instead of submit button
             type="button"
             iconType="alert"
