@@ -50,4 +50,5 @@ export interface LanguageConfig {
   };
   showDocLinks?: boolean;
   editorSupportedAppNames?: string[];
+  supportedAppNames?: string[];
 }
