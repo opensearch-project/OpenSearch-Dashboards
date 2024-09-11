@@ -214,8 +214,8 @@
 
   &.visible::after {
     position: absolute;
-    height: 31px;
-    bottom: -31px;
+    height: auto;
+    bottom: calc(-1 * ($euiFontSizeXS * 2 + $euiSizeXS) + 1px);
     left: 0;
     width: 100%;
     background-color: $euiColorLightestShade;
