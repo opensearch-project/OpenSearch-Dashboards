@@ -242,6 +242,7 @@ export const DataSourceConnectionTable = ({
       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
       isExpandable={true}
       selection={selection}
+      className="workspace-detail-direct-query-table"
     />
   );
 };
