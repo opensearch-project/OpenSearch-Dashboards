@@ -282,7 +282,12 @@ const getEmptyScreenProps = (
             getFactory: embeddable.getEmbeddableFactory,
             notifications,
             overlays,
-            SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
+            SavedObjectFinder: getSavedObjectFinder(
+              savedObjects,
+              uiSettings,
+              services.data,
+              services.application
+            ),
           });
         }
       } else {

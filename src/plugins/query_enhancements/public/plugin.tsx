@@ -80,6 +80,7 @@ export class QueryEnhancementsPlugin
       showDocLinks: false,
       editor: enhancedPPLQueryEditor,
       editorSupportedAppNames: ['discover'],
+      supportedAppNames: ['discover', 'data-explorer'],
     };
     queryString.getLanguageService().registerLanguage(pplLanguageConfig);
 
@@ -98,6 +99,7 @@ export class QueryEnhancementsPlugin
       showDocLinks: false,
       editor: enhancedSQLQueryEditor,
       editorSupportedAppNames: ['discover'],
+      supportedAppNames: ['discover', 'data-explorer'],
     };
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
 
