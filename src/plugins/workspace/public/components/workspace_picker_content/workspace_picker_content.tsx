@@ -99,7 +99,7 @@ export const WorkspacePickerContent = ({
         iconType="wsSelector"
         data-test-subj="empty-workspace-prompt"
         title={
-          <EuiText size="m">
+          <EuiText size="s">
             <p>
               {i18n.translate('workspace.picker.empty.state.title', {
                 defaultMessage: 'No workspace available',
@@ -138,7 +138,7 @@ export const WorkspacePickerContent = ({
           data-test-subj={`workspace-menu-item-${itemType}-${workspace.id}`}
           icon={
             <EuiIcon
-              size="s"
+              size="m"
               type={useCase?.icon || 'wsSelector'}
               color={getValidWorkspaceColor(workspace.color)}
             />
@@ -156,17 +156,18 @@ export const WorkspacePickerContent = ({
         <EuiTitle size="xxs">
           <h4>{itemType === 'all' ? allWorkspacesTitle : recentWorkspacesTitle}</h4>
         </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiListGroup showToolTips flush gutterSize="none" wrapText maxWidth={240}>
+        <EuiSpacer size="xs" />
+        <EuiListGroup flush gutterSize="none" maxWidth={240}>
           {listItems}
         </EuiListGroup>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="xs" />
       </>
     );
   };
 
   return (
     <>
+      <EuiSpacer size="s" />
       <EuiFieldSearch
         compressed={true}
         fullWidth={true}
@@ -174,13 +175,13 @@ export const WorkspacePickerContent = ({
         onChange={(e) => setSearch(e.target.value)}
         placeholder={searchFieldPlaceholder}
       />
-      <EuiSpacer />
+      <EuiSpacer size="s" />
 
       <EuiPanel
         paddingSize="none"
         color="transparent"
         hasBorder={false}
-        className="eui-yScrollWithShadows"
+        className="euiYScrollWithShadows"
       >
         {queriedRecentWorkspace.length > 0 &&
           getWorkspaceListGroup(queriedRecentWorkspace, 'recent')}
