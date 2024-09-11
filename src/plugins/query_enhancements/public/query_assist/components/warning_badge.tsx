@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiBadge, EuiLink, EuiPopover, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPopover,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { SyntheticEvent, useEffect, useState } from 'react';
@@ -63,10 +71,17 @@ export const WarningBadge: React.FC<WarningBadgeProps> = (props) => {
           <dl>
             <dd id="queryAssistErrorTitle">
               <b>
-                <FormattedMessage
-                  id="queryEnhancements.queryAssist.error.title"
-                  defaultMessage="Error"
-                />
+                <EuiFlexGroup gutterSize="xs" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="alert" />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <FormattedMessage
+                      id="queryEnhancements.queryAssist.error.title"
+                      defaultMessage="Error"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </b>
             </dd>
             <dd>

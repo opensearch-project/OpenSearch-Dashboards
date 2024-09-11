@@ -24,10 +24,10 @@
   padding: 0 $euiSizeM;
 }
 
-#queryAssistErrorTitle::before {
-  content: "⚠";
-  position: absolute;
-  left: $euiSizeS;
+#queryAssistErrorTitle {
+  // there is a medium size icon with two extra-small gutter between the icon
+  // and the title pushing to the left so title is aligned with other content
+  margin-left: -($euiSizeM + $euiSizeS);
 }
 
 .osdQueryEditorExtensionComponent__query-assist {
