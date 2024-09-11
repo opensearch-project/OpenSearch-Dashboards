@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { EuiIconProps } from '@elastic/eui';
-import { Dataset, DatasetField, DataStructure } from '../../../../common';
+import { Dataset, DatasetField, DatasetSearchOptions, DataStructure } from '../../../../common';
 import { IDataPluginServices } from '../../../types';
 
 /**
@@ -44,4 +44,9 @@ export interface DatasetTypeConfig {
    * @returns {Promise<string[]>} A promise that resolves to an array of supported language ids.
    */
   supportedLanguages: (dataset: Dataset) => string[];
+  /**
+   * Retrieves the search options to be used for running the query on the data connection associated
+   * with this Dataset
+   */
+  getSearchOptions?: () => DatasetSearchOptions;
 }
