@@ -11,15 +11,15 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
         class="euiSpacer euiSpacer--m"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-        data-test-subj="landingPageRow_0"
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrow1"
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_1"
+            style="width: 200px;"
           >
             <div
               class="euiCard__content"
@@ -47,11 +47,12 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrow1"
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_2"
+            style="width: 200px;"
           >
             <div
               class="euiCard__content"
@@ -79,11 +80,12 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrow1"
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_3"
+            style="width: 200px;"
           >
             <div
               class="euiCard__content"
@@ -111,11 +113,12 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrow1"
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_4"
+            style="width: 200px;"
           >
             <div
               class="euiCard__content"
@@ -142,17 +145,13 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
             </div>
           </div>
         </div>
-      </div>
-      <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-        data-test-subj="landingPageRow_1"
-      >
         <div
-          class="euiFlexItem euiFlexItem--flexGrow1"
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_5"
+            style="width: 200px;"
           >
             <div
               class="euiCard__content"
@@ -179,15 +178,6 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
             </div>
           </div>
         </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrow1"
-        />
-        <div
-          class="euiFlexItem euiFlexItem--flexGrow1"
-        />
-        <div
-          class="euiFlexItem euiFlexItem--flexGrow1"
-        />
       </div>
       <div
         class="euiSpacer euiSpacer--l"
@@ -203,15 +193,15 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
         class="euiSpacer euiSpacer--m"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-        data-test-subj="landingPageRow_0"
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrow1"
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_category-1"
+            style="width: 200px;"
           >
             <div
               class="euiCard__content"
@@ -239,11 +229,12 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrow1"
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_category-2"
+            style="width: 200px;"
           >
             <div
               class="euiCard__content"
@@ -271,11 +262,12 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrow1"
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_category-3"
+            style="width: 200px;"
           >
             <div
               class="euiCard__content"
@@ -303,11 +295,12 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
           </div>
         </div>
         <div
-          class="euiFlexItem euiFlexItem--flexGrow1"
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_category-4"
+            style="width: 200px;"
           >
             <div
               class="euiCard__content"
@@ -334,17 +327,13 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
             </div>
           </div>
         </div>
-      </div>
-      <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
-        data-test-subj="landingPageRow_1"
-      >
         <div
-          class="euiFlexItem euiFlexItem--flexGrow1"
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_category-5"
+            style="width: 200px;"
           >
             <div
               class="euiCard__content"
@@ -371,15 +360,6 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
             </div>
           </div>
         </div>
-        <div
-          class="euiFlexItem euiFlexItem--flexGrow1"
-        />
-        <div
-          class="euiFlexItem euiFlexItem--flexGrow1"
-        />
-        <div
-          class="euiFlexItem euiFlexItem--flexGrow1"
-        />
       </div>
       <div
         class="euiSpacer euiSpacer--l"
