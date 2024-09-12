@@ -78,13 +78,16 @@ export function registerQueryAssistRoutes(router: IRouter) {
         return response.ok({ body: responseBody });
       } catch (error) {
         if (isResponseError(error)) {
-          if (error.statusCode === 400 && error.body.includes(ERROR_DETAILS.GUARDRAILS_TRIGGERED))
+          if (
+            error.statusCode === 400 &&
+            // on opensearch >= 2.17, error.body is an object https://github.com/opensearch-project/ml-commons/pull/2858
+            JSON.stringify(error.body).includes(ERROR_DETAILS.GUARDRAILS_TRIGGERED)
+          )
             return response.badRequest({ body: ERROR_DETAILS.GUARDRAILS_TRIGGERED });
-          return response.badRequest({
-            body:
-              typeof error.meta.body === 'string'
-                ? error.meta.body
-                : JSON.stringify(error.meta.body),
+          return response.custom({
+            statusCode: error.statusCode,
+            // for consistency, frontend will always receive the actual error in error.body.message as a JSON string
+            body: typeof error.body === 'string' ? error.body : JSON.stringify(error.body),
           });
         }
         return response.custom({ statusCode: error.statusCode || 500, body: error.message });
