@@ -99,12 +99,6 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
       }}
       component="form"
     >
-      {numberOfErrors > 0 && (
-        <>
-          <WorkspaceFormErrorCallout errors={formErrors} />
-          <EuiSpacer />
-        </>
-      )}
       <EuiPanel>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -135,6 +129,12 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="m" />
+        {numberOfErrors > 0 && (
+          <>
+            <WorkspaceFormErrorCallout errors={formErrors} />
+            <EuiSpacer />
+          </>
+        )}
         {detailTab === DetailTab.Details && (
           <WorkspaceDetailFormDetails availableUseCases={availableUseCases} />
         )}
