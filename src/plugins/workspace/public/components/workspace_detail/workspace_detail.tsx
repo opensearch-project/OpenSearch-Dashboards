@@ -245,6 +245,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
         {deletedWorkspace && (
           <DeleteWorkspaceModal
             selectedWorkspaces={[deletedWorkspace]}
+            typeTextToConfirm={deletedWorkspace.name}
             onClose={() => setDeletedWorkspace(null)}
             onDeleteSuccess={() => {
               window.setTimeout(() => {
