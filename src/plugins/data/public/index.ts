@@ -62,6 +62,7 @@ import {
 } from '../common';
 
 import { FilterLabel } from './ui';
+export { createEditor, DefaultInput, DQLBody, SingleLineInput } from './ui';
 
 import {
   generateFilters,
@@ -221,13 +222,14 @@ export {
   FieldFormatConfig,
   FieldFormatId,
   FieldFormat,
+  DATA_FRAME_TYPES,
 } from '../common';
 
 /*
  * Index patterns:
  */
 
-import { isNestedField, isFilterable } from '../common';
+import { isNestedField, isFilterable, setOverrides, getOverrides } from '../common';
 
 import {
   ILLEGAL_CHARACTERS_KEY,
@@ -251,6 +253,8 @@ export const indexPatterns = {
   ILLEGAL_CHARACTERS,
   isDefault,
   isFilterable,
+  setOverrides,
+  getOverrides,
   isNestedField,
   validate: validateIndexPattern,
   getFromSavedObject,
@@ -434,6 +438,15 @@ export {
   IndexPatternSelectProps,
   QueryStringInput,
   QueryStringInputProps,
+  QueryEditor,
+  QueryEditorExtensionConfig,
+  QueryEditorExtensions,
+  QueryEditorExtensionDependencies,
+  QueryEditorProps,
+  QueryEditorTopRow,
+  // for BWC, keeping the old name
+  IUiStart as DataPublicPluginStartUi,
+  useQueryStringManager,
 } from './ui';
 
 /**
@@ -450,6 +463,18 @@ export {
   QueryState,
   getDefaultQuery,
   FilterManager,
+  QueryStringContract,
+  QueryStringManager,
+  DatasetTypeConfig,
+  DatasetService,
+  DatasetServiceContract,
+  LanguageConfig,
+  LanguageService,
+  LanguageServiceContract,
+  RecentQueriesTable,
+  QueryControls,
+  QueryResult,
+  QueryStatus,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
@@ -459,6 +484,7 @@ export {
   TimeHistoryContract,
   QueryStateChange,
   QueryStart,
+  PersistedLog,
 } from './query';
 
 export { AggsStart } from './search/aggs';
@@ -468,6 +494,8 @@ export {
   // osd field types
   castOpenSearchToOsdFieldTypeName,
   getOsdTypeNames,
+  getOsdFieldOverrides,
+  setOsdFieldOverrides,
 } from '../common';
 
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
@@ -490,7 +518,6 @@ export {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   IDataPluginServices,
-  DataPublicPluginStartUi,
   DataPublicPluginStartActions,
 } from './types';
 
@@ -500,19 +527,17 @@ export { DataPublicPlugin as Plugin };
 // Export datasources
 export {
   DataSource,
-  IDataSourceMetaData,
+  IDataSourceMetadata,
   IDataSetParams,
   IDataSourceQueryParams,
   IDataSourceQueryResult,
-  ISourceDataSet,
-  ConnectionStatus,
+  IDataSourceDataSet,
+  DataSourceConnectionStatus,
   DataSourceFactory,
-  DataSourceConfig,
 } from './data_sources/datasource';
 export {
   DataSourceRegistrationError,
   DataSourceService,
-  DataSourceType,
   IDataSourceFilter,
   IDataSourceRegistrationResult,
 } from './data_sources/datasource_services';

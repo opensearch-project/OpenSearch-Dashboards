@@ -106,7 +106,7 @@ export const registerExportRoute = (router: IRouter, config: SavedObjectConfig) 
         exportSizeLimit: maxImportExportSize,
         includeReferencesDeep,
         excludeExportDetails,
-        workspaces,
+        ...(workspaces ? { workspaces } : {}),
       });
 
       const docsToExport: string[] = await createPromiseFromStreams([

@@ -1,0 +1,122 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CallOuts spec should display empty_index call out 1`] = `
+<div>
+  <div
+    class="euiCallOut euiCallOut--warning euiCallOut--small queryAssist queryAssist__callout"
+    data-test-subj="query-assist-empty-index-callout"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <span
+        aria-hidden="true"
+        class="euiCallOutHeader__icon"
+        color="inherit"
+        data-euiicon-type="iInCircle"
+      />
+      <span
+        class="euiCallOutHeader__title"
+      >
+        <span>
+          Select a data source or index to ask a question.
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallOuts spec should display empty_query call out 1`] = `
+<div>
+  <div
+    class="euiCallOut euiCallOut--warning euiCallOut--small queryAssist queryAssist__callout"
+    data-test-subj="query-assist-empty-query-callout"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <span
+        aria-hidden="true"
+        class="euiCallOutHeader__icon"
+        color="inherit"
+        data-euiicon-type="iInCircle"
+      />
+      <span
+        class="euiCallOutHeader__title"
+      >
+        <span>
+          Enter a natural language question to automatically generate a query to view results.
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallOuts spec should display invalid_query call out 1`] = `
+<div>
+  <div
+    class="euiCallOut euiCallOut--danger euiCallOut--small queryAssist queryAssist__callout"
+    data-test-subj="query-assist-guard-callout"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <span
+        aria-hidden="true"
+        class="euiCallOutHeader__icon"
+        color="inherit"
+        data-euiicon-type="alert"
+      />
+      <span
+        class="euiCallOutHeader__title"
+      >
+        <span>
+          I am unable to respond to this query. Try another question.
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallOuts spec should display query_generated call out 1`] = `
+<div>
+  <div
+    class="euiCallOut euiCallOut--success euiCallOut--small queryAssist queryAssist__callout"
+    data-test-subj="query-assist-query-generated-callout"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <span
+        aria-hidden="true"
+        class="euiCallOutHeader__icon"
+        color="inherit"
+        data-euiicon-type="check"
+      />
+      <span
+        class="euiCallOutHeader__title"
+      >
+        <span>
+          test lang query generated. If there are any issues with the response, try adding more context to the question or a new question to submit.
+        </span>
+      </span>
+    </div>
+    <button
+      aria-label="dismissible_icon"
+      class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiCallOut__closeIcon"
+      data-test-subj="closeCallOutButton"
+      type="button"
+    >
+      <span
+        aria-hidden="true"
+        class="euiButtonIcon__icon"
+        color="inherit"
+        data-euiicon-type="cross"
+      />
+    </button>
+  </div>
+</div>
+`;

@@ -5,10 +5,7 @@
 
 import { Client } from '@opensearch-project/opensearch';
 import { Client as LegacyClient } from 'elasticsearch';
-import {
-  OpenSearchDashboardsRequest,
-  SavedObjectsClientContract,
-} from '../../../../../src/core/server';
+import { SavedObjectsClientContract } from '../../../../../src/core/server';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../common';
 import {
   DataSourceAttributes,
@@ -18,7 +15,7 @@ import {
 } from '../../common/data_sources';
 import { CryptographyServiceSetup } from '../cryptography_service';
 import { createDataSourceError } from '../lib/error';
-import { IAuthenticationMethodRegistery } from '../auth_registry';
+import { IAuthenticationMethodRegistry } from '../auth_registry';
 import { AuthenticationMethod, ClientParameters } from '../types';
 
 /**
@@ -142,8 +139,7 @@ export const generateCacheKey = (endpoint: string, cacheKeySuffix?: string) => {
 
 export const getAuthenticationMethod = (
   dataSourceAttr: DataSourceAttributes,
-  authRegistry?: IAuthenticationMethodRegistery
+  authRegistry?: IAuthenticationMethodRegistry
 ): AuthenticationMethod => {
-  const name = dataSourceAttr.name ?? dataSourceAttr.auth.type;
-  return authRegistry?.getAuthenticationMethod(name) as AuthenticationMethod;
+  return authRegistry?.getAuthenticationMethod(dataSourceAttr.auth.type) as AuthenticationMethod;
 };

@@ -14,8 +14,18 @@ import {
   isValidUrl,
   testConnection,
   updateDataSourceById,
+  handleSetDefaultDatasource,
+  setFirstDataSourceAsDefault,
+  getFilteredDataSources,
+  getDefaultDataSource,
+  handleDataSourceFetchError,
+  handleNoAvailableDataSourceError,
+  getDataSourceSelection,
+  setDataSourceSelection,
+  getDefaultDataSourceId,
+  getDefaultDataSourceId$,
 } from './utils';
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock, notificationServiceMock } from '../../../../core/public/mocks';
 import {
   getDataSourceByIdWithCredential,
   getDataSourceByIdWithoutCredential,
@@ -24,6 +34,12 @@ import {
   mockDataSourceAttributesWithAuth,
   mockErrorResponseForSavedObjectsCalls,
   mockResponseForSavedObjectsCalls,
+  mockUiSettingsCalls,
+  getSingleDataSourceResponse,
+  getDataSource,
+  getDataSourceOptions,
+  getDataSourceByIdWithNotFoundError,
+  getDataSourceByIdWithNetworkError,
 } from '../mocks';
 import {
   AuthType,
@@ -31,11 +47,25 @@ import {
   sigV4AuthMethod,
   usernamePasswordAuthMethod,
 } from '../types';
-import { HttpStart } from 'opensearch-dashboards/public';
-import { AuthenticationMethod, AuthenticationMethodRegistery } from '../auth_registry';
+import { HttpStart, IToasts, SavedObject } from 'opensearch-dashboards/public';
+import { i18n } from '@osd/i18n';
+import { AuthenticationMethod, AuthenticationMethodRegistry } from '../auth_registry';
 import { deepEqual } from 'assert';
+import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
+import {
+  ADD_COMPATIBLE_DATASOURCES_MESSAGE,
+  CONNECT_DATASOURCES_MESSAGE,
+  NO_COMPATIBLE_DATASOURCES_MESSAGE,
+  NO_DATASOURCES_CONNECTED_MESSAGE,
+} from './constants';
+import {
+  DataSourceSelectionService,
+  defaultDataSourceSelection,
+} from '../service/data_source_selection_service';
+import { Observable, of } from 'rxjs';
 
 const { savedObjects } = coreMock.createStart();
+const { uiSettings } = coreMock.createStart();
 
 describe('DataSourceManagement: Utils.ts', () => {
   describe('Get data source', () => {
@@ -57,6 +87,54 @@ describe('DataSourceManagement: Utils.ts', () => {
         expect(e).toBeTruthy();
       }
     });
+  });
+
+  describe('Handle fetch data source error', () => {
+    const { toasts } = notificationServiceMock.createStartContract();
+
+    test('should send warning when data source fetch failed', () => {
+      const changeStateMock = jest.fn();
+      handleDataSourceFetchError(changeStateMock, toasts);
+      expect(changeStateMock).toBeCalledWith({ showError: true });
+      expect(toasts.add).toBeCalledTimes(1);
+    });
+  });
+
+  describe('Handle no available data source error', () => {
+    let toasts: IToasts;
+    const noDataSourcesConnectedMessage = `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
+    const noCompatibleDataSourcesMessage = `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`;
+
+    beforeEach(() => {
+      toasts = notificationServiceMock.createStartContract().toasts;
+    });
+
+    test.each([
+      {
+        incompatibleDataSourcesExist: false,
+        defaultMessage: noDataSourcesConnectedMessage,
+      },
+      {
+        incompatibleDataSourcesExist: true,
+        defaultMessage: noCompatibleDataSourcesMessage,
+      },
+    ])(
+      'should send warning when data source is not available',
+      ({ incompatibleDataSourcesExist, defaultMessage }) => {
+        const changeState = jest.fn();
+        handleNoAvailableDataSourceError({
+          changeState,
+          notifications: toasts,
+          incompatibleDataSourcesExist,
+        });
+        expect(toasts.add).toBeCalledTimes(1);
+        expect(toasts.add).toBeCalledWith(
+          expect.objectContaining({
+            title: i18n.translate('dataSource.noAvailableDataSourceError', { defaultMessage }),
+          })
+        );
+      }
+    );
   });
 
   describe('Get data source by ID', () => {
@@ -87,6 +165,30 @@ describe('DataSourceManagement: Utils.ts', () => {
         await getDataSourceById('alpha-test', savedObjects.client);
       } catch (e) {
         expect(e).toBeTruthy();
+      }
+    });
+    test('failure: gets error when response contains not found error', async () => {
+      try {
+        mockResponseForSavedObjectsCalls(
+          savedObjects.client,
+          'get',
+          getDataSourceByIdWithNotFoundError
+        );
+        await getDataSourceById('alpha-test', savedObjects.client);
+      } catch (e) {
+        expect(e.statusCode).toBe(404);
+      }
+    });
+    test('failure: gets error when response contains other error', async () => {
+      try {
+        mockResponseForSavedObjectsCalls(
+          savedObjects.client,
+          'get',
+          getDataSourceByIdWithNetworkError
+        );
+        await getDataSourceById('alpha-test', savedObjects.client);
+      } catch (e) {
+        expect(e.statusCode).toBe(500);
       }
     });
   });
@@ -239,13 +341,13 @@ describe('DataSourceManagement: Utils.ts', () => {
       ];
 
       authMethodCombinationsToBeTested.forEach((authOptions) => {
-        const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+        const authenticationMethodRegistry = new AuthenticationMethodRegistry();
 
         authOptions.forEach((authMethod) => {
-          authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+          authenticationMethodRegistry.registerAuthenticationMethod(authMethod);
         });
 
-        expect(getDefaultAuthMethod(authenticationMethodRegistery)?.name).toBe(
+        expect(getDefaultAuthMethod(authenticationMethodRegistry)?.name).toBe(
           AuthType.UsernamePasswordType
         );
       });
@@ -259,22 +361,71 @@ describe('DataSourceManagement: Utils.ts', () => {
       ];
 
       authMethodCombinationsToBeTested.forEach((authOptions) => {
-        const authenticationMethodRegistery = new AuthenticationMethodRegistery();
+        const authenticationMethodRegistry = new AuthenticationMethodRegistry();
 
         authOptions.forEach((authMethod) => {
-          authenticationMethodRegistery.registerAuthenticationMethod(authMethod);
+          authenticationMethodRegistry.registerAuthenticationMethod(authMethod);
         });
 
-        expect(getDefaultAuthMethod(authenticationMethodRegistery)?.name).toBe(authOptions[0].name);
+        expect(getDefaultAuthMethod(authenticationMethodRegistry)?.name).toBe(authOptions[0].name);
       });
     });
 
-    test('default auth type is NoAuth when no auth options registered in authenticationMethodRegistery, this should not happen in real customer scenario for MD', () => {
-      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
-      expect(getDefaultAuthMethod(authenticationMethodRegistery)?.name).toBe(AuthType.NoAuth);
+    test('default auth type is NoAuth when no auth options registered in authenticationMethodRegistry, this should not happen in real customer scenario for MD', () => {
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      expect(getDefaultAuthMethod(authenticationMethodRegistry)?.name).toBe(AuthType.NoAuth);
     });
   });
-
+  describe('handle set default datasource', () => {
+    beforeEach(() => {
+      jest.clearAllMocks(); // Reset all mock calls before each test
+    });
+    test('should set default datasource when it does not have default datasource ', async () => {
+      mockUiSettingsCalls(uiSettings, 'get', null);
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+    test('should set default datasource when returned default datasource id is empty string', async () => {
+      mockUiSettingsCalls(uiSettings, 'get', '');
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+    test('should not set default datasource when it has default datasouce', async () => {
+      mockUiSettingsCalls(uiSettings, 'get', 'test');
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      expect(uiSettings.set).not.toHaveBeenCalled();
+    });
+  });
+  describe('set first aataSource as default', () => {
+    beforeEach(() => {
+      jest.clearAllMocks(); // Reset all mock calls before each test
+    });
+    test('should set defaultDataSource if more than one data source exists', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+    test('should set defaultDataSource if only one data source exists', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getSingleDataSourceResponse);
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+    test('should not set defaultDataSource if no data source exists', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', { savedObjects: [] });
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      expect(uiSettings.remove).toHaveBeenCalled();
+      expect(uiSettings.set).not.toHaveBeenCalled();
+    });
+    test('should not set defaultDataSource if no data source exists and no default datasouce', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', { savedObjects: [] });
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, false);
+      expect(uiSettings.remove).not.toHaveBeenCalled();
+      expect(uiSettings.set).not.toHaveBeenCalled();
+    });
+  });
   describe('Check extractRegisteredAuthTypeCredentials method', () => {
     test('Should extract credential field successfully', () => {
       const authTypeToBeTested = 'Some Auth Type';
@@ -303,13 +454,13 @@ describe('DataSourceManagement: Utils.ts', () => {
         passWordRegistered: 'some filled in password from registed auth credential form',
       };
 
-      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
-      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTested);
 
       const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
         mockedCredentialState,
         authTypeToBeTested,
-        authenticationMethodRegistery
+        authenticationMethodRegistry
       );
 
       expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
@@ -331,13 +482,13 @@ describe('DataSourceManagement: Utils.ts', () => {
         passWord: 'some password',
       } as { [key: string]: string };
 
-      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
-      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTested);
 
       const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
         mockedCredentialState,
         authTypeToBeTested,
-        authenticationMethodRegistery
+        authenticationMethodRegistry
       );
 
       expect(deepEqual(registedAuthTypeCredentials, {}));
@@ -369,13 +520,13 @@ describe('DataSourceManagement: Utils.ts', () => {
         passWordRegistered: '',
       };
 
-      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
-      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTested);
 
       const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
         mockedCredentialState,
         authTypeToBeTested,
-        authenticationMethodRegistery
+        authenticationMethodRegistry
       );
 
       expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
@@ -401,13 +552,13 @@ describe('DataSourceManagement: Utils.ts', () => {
         registeredField: 'some value',
       };
 
-      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
-      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTested);
 
       const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
         mockedCredentialState,
         authTypeToBeTested,
-        authenticationMethodRegistery
+        authenticationMethodRegistry
       );
 
       expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
@@ -435,16 +586,131 @@ describe('DataSourceManagement: Utils.ts', () => {
         registeredField: 'some other values',
       };
 
-      const authenticationMethodRegistery = new AuthenticationMethodRegistery();
-      authenticationMethodRegistery.registerAuthenticationMethod(authMethodToBeTested);
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTested);
 
       const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
         mockedCredentialState,
         authTypeToBeTested,
-        authenticationMethodRegistery
+        authenticationMethodRegistry
       );
 
       expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
+    });
+  });
+
+  describe('Check on get filter datasource', () => {
+    test('should return all data sources when no filter is provided', () => {
+      const dataSources: Array<SavedObject<DataSourceAttributes>> = [
+        {
+          id: '1',
+          type: '',
+          references: [],
+          attributes: {
+            title: 'DataSource 1',
+            endpoint: '',
+            auth: { type: AuthType.NoAuth, credentials: undefined },
+            name: AuthType.NoAuth,
+          },
+        },
+      ];
+
+      const result = getFilteredDataSources(dataSources);
+
+      expect(result).toEqual([
+        {
+          id: '1',
+          label: 'DataSource 1',
+        },
+      ]);
+    });
+
+    test('should return filtered data sources when a filter is provided', () => {
+      const filter = (dataSource: SavedObject<DataSourceAttributes>) => dataSource.id === '2';
+      const result = getFilteredDataSources(getDataSource, filter);
+      expect(result).toEqual([
+        {
+          id: '2',
+          label: 'DataSource 2',
+        },
+      ]);
+    });
+  });
+  describe('getDefaultDataSource', () => {
+    const LocalCluster = { id: 'local', label: 'Local Cluster' };
+    const hideLocalCluster = false;
+    const defaultOption = [{ id: '2', label: 'DataSource 2' }];
+
+    it('should return the default option if it exists in the data sources', () => {
+      mockUiSettingsCalls(uiSettings, 'get', '2');
+      const result = getDefaultDataSource(
+        getDataSourceOptions,
+        LocalCluster,
+        '2',
+        hideLocalCluster
+      );
+      expect(result).toEqual([defaultOption[0]]);
+    });
+
+    it('should return local cluster if it exists and no default options in the data sources', () => {
+      mockUiSettingsCalls(uiSettings, 'get', null);
+      const result = getDefaultDataSource(getDataSource, LocalCluster, null, hideLocalCluster);
+      expect(result).toEqual([LocalCluster]);
+    });
+
+    it('should return the default datasource if hideLocalCluster is false', () => {
+      mockUiSettingsCalls(uiSettings, 'get', '2');
+      const result = getDefaultDataSource(getDataSourceOptions, LocalCluster, '2', false);
+      expect(result).toEqual([{ id: '2', label: 'DataSource 2' }]);
+    });
+
+    it('should return the first data source if no default option, hideLocalCluster is ture and no default datasource', () => {
+      mockUiSettingsCalls(uiSettings, 'get', null);
+      const result = getDefaultDataSource(getDataSourceOptions, LocalCluster, uiSettings, true);
+      expect(result).toEqual([{ id: '1', label: 'DataSource 1' }]);
+    });
+  });
+
+  describe('getDataSourceSelection and setDataSourceSelection', () => {
+    it('should not throw error and return default fallback dataSourceSelection  if value is not set', () => {
+      const result = getDataSourceSelection();
+      expect(result).toEqual(defaultDataSourceSelection);
+    });
+
+    it('should return value normally if value is set', () => {
+      const dataSourceSelection = new DataSourceSelectionService();
+      setDataSourceSelection(dataSourceSelection);
+      const result = getDataSourceSelection();
+      expect(result).toEqual(dataSourceSelection);
+    });
+  });
+  describe('getDefaultDataSourceId', () => {
+    it('should return null if uiSettings is not passed', () => {
+      mockUiSettingsCalls(uiSettings, 'get', 'id-1');
+      const result = getDefaultDataSourceId();
+      expect(result).toEqual(null);
+    });
+
+    it('should return string value normally', () => {
+      mockUiSettingsCalls(uiSettings, 'get', 'id-1');
+      const result = getDefaultDataSourceId(uiSettings);
+      expect(result).toEqual('id-1');
+    });
+  });
+
+  describe('getDefaultDataSourceId$', () => {
+    it('should return null if uiSettings is not passed', () => {
+      mockUiSettingsCalls(uiSettings, 'get', 'id-1');
+      const result = getDefaultDataSourceId$();
+      expect(result).toEqual(null);
+    });
+
+    it('should return observable value normally', () => {
+      const id$ = of('id-1');
+      mockUiSettingsCalls(uiSettings, 'get$', id$);
+      const result$ = getDefaultDataSourceId$(uiSettings);
+      expect(result$).toBeInstanceOf(Observable);
+      expect(result$).toEqual(id$);
     });
   });
 });

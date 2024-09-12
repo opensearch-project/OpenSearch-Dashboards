@@ -29,12 +29,9 @@
  */
 
 import { schema } from '@osd/config-schema';
-import {
-  HttpServiceSetup,
-  LegacyAPICaller,
-  RequestHandlerContext,
-} from 'opensearch-dashboards/server';
+import { HttpServiceSetup, RequestHandlerContext } from 'opensearch-dashboards/server';
 import { IndexPatternsFetcher } from './fetcher';
+import { decideLegacyClient } from '../../../data_source/common/util/';
 
 export function registerRoutes(http: HttpServiceSetup) {
   const parseMetaFields = (metaFields: string | string[]) => {
@@ -62,7 +59,7 @@ export function registerRoutes(http: HttpServiceSetup) {
       },
     },
     async (context, request, response) => {
-      const callAsCurrentUser = await decideClient(context, request);
+      const callAsCurrentUser = await decideLegacyClient(context, request);
       const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
       const { pattern, meta_fields: metaFields } = request.query;
 
@@ -122,7 +119,7 @@ export function registerRoutes(http: HttpServiceSetup) {
       },
     },
     async (context: RequestHandlerContext, request: any, response: any) => {
-      const callAsCurrentUser = await decideClient(context, request);
+      const callAsCurrentUser = await decideLegacyClient(context, request);
 
       const indexPatterns = new IndexPatternsFetcher(callAsCurrentUser);
       const { pattern, interval, look_back: lookBack, meta_fields: metaFields } = request.query;
@@ -154,13 +151,3 @@ export function registerRoutes(http: HttpServiceSetup) {
     }
   );
 }
-
-const decideClient = async (
-  context: RequestHandlerContext,
-  request: any
-): Promise<LegacyAPICaller> => {
-  const dataSourceId = request.query.data_source;
-  return dataSourceId
-    ? (context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI as LegacyAPICaller)
-    : context.core.opensearch.legacy.client.callAsCurrentUser;
-};

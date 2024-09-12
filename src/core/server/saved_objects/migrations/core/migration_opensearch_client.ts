@@ -51,6 +51,7 @@ const methods = [
   'search',
   'scroll',
   'tasks.get',
+  'deleteByQuery',
 ] as const;
 
 type MethodName = typeof methods[number];
@@ -77,6 +78,7 @@ export interface MigrationOpenSearchClient {
   tasks: {
     get: OpenSearchClient['tasks']['get'];
   };
+  deleteByQuery: OpenSearchClient['deleteByQuery'];
 }
 
 export function createMigrationOpenSearchClient(

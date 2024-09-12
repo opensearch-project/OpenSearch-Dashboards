@@ -8,7 +8,7 @@ import { SavedObject, SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';
 import { VisualizationsSetup } from '../../visualizations/public';
-import { ExpressionsStart } from '../../expressions/public';
+import { ExpressionsStart, ExpressionsPublicPlugin } from '../../expressions/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { TypeServiceSetup, TypeServiceStart } from './services/type_service';
@@ -17,6 +17,8 @@ import { AppMountParameters, CoreStart, ToastsStart, ScopedHistory } from '../..
 import { IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginSetup } from '../../data/public';
 import { UiActionsStart } from '../../ui_actions/public';
+import { Capabilities } from '../../../core/public';
+import { IUiSettingsClient } from '../../../core/public';
 
 export type VisBuilderSetup = TypeServiceSetup;
 export interface VisBuilderStart extends TypeServiceStart {
@@ -27,6 +29,7 @@ export interface VisBuilderPluginSetupDependencies {
   embeddable: EmbeddableSetup;
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
 }
 export interface VisBuilderPluginStartDependencies {
   embeddable: EmbeddableStart;
@@ -36,6 +39,7 @@ export interface VisBuilderPluginStartDependencies {
   dashboard: DashboardStart;
   expressions: ExpressionsStart;
   uiActions: UiActionsStart;
+  uiSettings: IUiSettingsClient;
 }
 
 export interface VisBuilderServices extends CoreStart {
@@ -54,6 +58,7 @@ export interface VisBuilderServices extends CoreStart {
   osdUrlStateStorage: IOsdUrlStateStorage;
   dashboard: DashboardStart;
   uiActions: UiActionsStart;
+  capabilities: Capabilities;
 }
 
 export interface ISavedVis {

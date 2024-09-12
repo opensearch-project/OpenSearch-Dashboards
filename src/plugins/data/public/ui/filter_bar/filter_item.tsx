@@ -44,6 +44,7 @@ import {
   toggleFilterPinned,
   toggleFilterDisabled,
   getIndexPatternFromFilter,
+  filterMatchesIndex,
 } from '../../../common';
 import { getIndexPatterns } from '../../services';
 
@@ -268,11 +269,7 @@ export function FilterItem(props: Props) {
     const ip = getIndexPatternFromFilter(filter, indexPatterns);
     if (ip) return true;
 
-    const allFields = indexPatterns.map((indexPattern) => {
-      return indexPattern.fields.map((field) => field.name);
-    });
-    const flatFields = allFields.reduce((acc: string[], it: string[]) => [...acc, ...it], []);
-    return flatFields.includes(filter.meta?.key || '');
+    return indexPatterns.some((indexPattern) => filterMatchesIndex(filter, indexPattern));
   }
 
   function getValueLabel(): LabelOptions {
@@ -364,7 +361,7 @@ export function FilterItem(props: Props) {
       anchorPosition="downLeft"
       panelPaddingSize="none"
     >
-      <EuiContextMenu initialPanelId={0} panels={getPanels()} />
+      <EuiContextMenu initialPanelId={0} panels={getPanels()} size="s" />
     </EuiPopover>
   );
 }

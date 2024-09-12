@@ -36,7 +36,6 @@ import { RenderingMetadata } from '../types';
 
 interface Props {
   url: RenderingMetadata['uiPublicUrl'];
-  theme: RenderingMetadata['themeVersion'];
 }
 
 interface FontFace {
@@ -50,7 +49,114 @@ interface FontFace {
   }>;
 }
 
-export const Fonts: FunctionComponent<Props> = ({ url, theme }) => {
+export const Fonts: FunctionComponent<Props> = ({ url }) => {
+  // For v9 theme
+  const rubik: FontFace = {
+    family: 'Rubik',
+    variants: [
+      {
+        weight: 300,
+        style: 'normal',
+        sources: [`${url}/fonts/rubik/static/Rubik-Light.woff2`],
+      },
+      {
+        weight: 300,
+        style: 'italic',
+        sources: [`${url}/fonts/rubik/static/Rubik-LightItalic.woff2`],
+      },
+      {
+        weight: 400,
+        style: 'normal',
+        sources: [`${url}/fonts/rubik/static/Rubik-Regular.woff2`],
+      },
+      {
+        weight: 400,
+        style: 'italic',
+        sources: [`${url}/fonts/rubik/static/Rubik-Italic.woff2`],
+      },
+      {
+        weight: 500,
+        style: 'normal',
+        sources: [`${url}/fonts/rubik/static/Rubik-Medium.woff2`],
+      },
+      {
+        weight: 500,
+        style: 'italic',
+        sources: [`${url}/fonts/rubik/static/Rubik-MediumItalic.woff2`],
+      },
+      {
+        weight: 600,
+        style: 'normal',
+        sources: [`${url}/fonts/rubik/static/Rubik-SemiBold.woff2`],
+      },
+      {
+        weight: 600,
+        style: 'italic',
+        sources: [`${url}/fonts/rubik/static/Rubik-SemiBoldItalic.woff2`],
+      },
+      {
+        weight: 700,
+        style: 'normal',
+        sources: [`${url}/fonts/rubik/static/Rubik-Bold.woff2`],
+      },
+      {
+        weight: 700,
+        style: 'italic',
+        sources: [`${url}/fonts/rubik/static/Rubik-BoldItalic.woff2`],
+      },
+      {
+        weight: 800,
+        style: 'normal',
+        sources: [`${url}/fonts/rubik/static/Rubik-ExtraBold.woff2`],
+      },
+      {
+        weight: 800,
+        style: 'italic',
+        sources: [`${url}/fonts/rubik/static/Rubik-ExtraBoldItalic.woff2`],
+      },
+      {
+        weight: 900,
+        style: 'normal',
+        sources: [`${url}/fonts/rubik/static/Rubik-Black.woff2`],
+      },
+      {
+        weight: 900,
+        style: 'italic',
+        sources: [`${url}/fonts/rubik/static/Rubik-BlackItalic.woff2`],
+      },
+    ],
+  };
+  const firaCode: FontFace = {
+    family: 'Fira Code',
+    variants: [
+      {
+        weight: 300,
+        style: 'normal',
+        sources: [`${url}/fonts/fira_code/static/FiraCode-Light.woff2`],
+      },
+      {
+        weight: 400,
+        style: 'normal',
+        sources: [`${url}/fonts/fira_code/static/FiraCode-Regular.woff2`],
+      },
+      {
+        weight: 500,
+        style: 'normal',
+        sources: [`${url}/fonts/fira_code/static/FiraCode-Medium.woff2`],
+      },
+      {
+        weight: 600,
+        style: 'normal',
+        sources: [`${url}/fonts/fira_code/static/FiraCode-SemiBold.woff2`],
+      },
+      {
+        weight: 700,
+        style: 'normal',
+        sources: [`${url}/fonts/fira_code/static/FiraCode-Bold.woff2`],
+      },
+    ],
+  };
+
   // For next theme
   const sourceSans3: FontFace = {
     family: 'Source Sans 3',
@@ -532,9 +638,7 @@ export const Fonts: FunctionComponent<Props> = ({ url, theme }) => {
       url('${url}/fonts/inter_ui/Inter-UI-italic.var.woff2') format('woff2');
   }
   */
-  const fontText = theme === 'v7' ? interUi : sourceSans3;
-  const fontCode = theme === 'v7' ? roboto : sourceCodePro;
-  const fontsDefinitionRules = [fontText, fontCode]
+  const fontsDefinitionRules = [interUi, sourceSans3, roboto, sourceCodePro, rubik, firaCode]
     .flatMap(({ family, variants }) =>
       variants.map(({ style, weight, format, sources, unicodeRange }) => {
         const src = sources
@@ -557,36 +661,11 @@ export const Fonts: FunctionComponent<Props> = ({ url, theme }) => {
     )
     .join('\n');
 
-  /*
-   * The default fonts are added as CSS variables, overriding OUI's, and then
-   * the CSS variables are consumed.
-   */
-  const fontRules = `
-    :root {
-      --font-text: "${fontText.family}", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
-                   sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-
-      --font-code: "${fontCode.family}", Consolas, Menlo, Courier, monospace;
-
-      --oui-font-family: var(--font-text);
-      --oui-code-font-family: var(--font-code);
-    }
-
-    code, pre, kbd, samp {
-      font-family: var(--font-code);
-    }
-    html, input, textarea, select, button {
-      font-family: var(--font-text);
-    }
-
-  `;
-
   return (
     <style
       dangerouslySetInnerHTML={{
         __html: `
         ${fontsDefinitionRules}
-        ${fontRules}
       `,
       }}
     />

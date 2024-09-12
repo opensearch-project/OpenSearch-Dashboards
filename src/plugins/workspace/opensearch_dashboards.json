@@ -4,8 +4,10 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
-    "savedObjects"
+    "savedObjects",
+    "opensearchDashboardsReact",
+    "navigation"
   ],
-  "optionalPlugins": [],
-  "requiredBundles": []
+  "optionalPlugins": ["savedObjectsManagement","management","dataSourceManagement","contentManagement"],
+  "requiredBundles": ["opensearchDashboardsReact","dataSource", "dataSourceManagement","contentManagement"]
 }

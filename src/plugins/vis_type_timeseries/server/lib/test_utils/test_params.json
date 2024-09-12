@@ -1,0 +1,154 @@
+{
+    "withDataSourceFieldNonEmpty": {
+        "id": "61ca57f0-469d-11e7-af02-69e470af7417",
+        "type": "timeseries",
+        "series": [
+            {
+                "id": "61ca57f1-469d-11e7-af02-69e470af7417",
+                "color": "#54B399",
+                "split_mode": "everything",
+                "split_color_mode": "opensearchDashboards",
+                "metrics": [
+                    {
+                        "id": "61ca57f2-469d-11e7-af02-69e470af7417",
+                        "type": "avg",
+                        "field": "bytes"
+                    }
+                ],
+                "separate_axis": 0,
+                "axis_position": "right",
+                "formatter": "number",
+                "chart_type": "line",
+                "line_width": 1,
+                "point_size": 1,
+                "fill": "",
+                "stacked": "none",
+                "label": "",
+                "type": "timeseries"
+            }
+        ],
+        "time_field": "timestamp",
+        "index_pattern": "opensearch_dashboards_sample_data_logs",
+        "interval": "",
+        "axis_position": "left",
+        "axis_formatter": "number",
+        "axis_scale": "normal",
+        "show_legend": 1,
+        "show_grid": 1,
+        "tooltip_mode": "show_all",
+        "default_index_pattern": "opensearch_dashboards_sample_data_logs",
+        "default_timefield": "timestamp",
+        "isModelInvalid": false,
+        "drop_last_bucket": 0,
+        "data_source_id": "a"
+    },
+    "withDataSourceFieldEmpty": {
+        "id": "61ca57f0-469d-11e7-af02-69e470af7417",
+        "type": "timeseries",
+        "series": [
+            {
+                "id": "61ca57f1-469d-11e7-af02-69e470af7417",
+                "color": "#54B399",
+                "split_mode": "everything",
+                "split_color_mode": "opensearchDashboards",
+                "metrics": [
+                    {
+                        "id": "61ca57f2-469d-11e7-af02-69e470af7417",
+                        "type": "avg",
+                        "field": "bytes"
+                    }
+                ],
+                "separate_axis": 0,
+                "axis_position": "right",
+                "formatter": "number",
+                "chart_type": "line",
+                "line_width": 1,
+                "point_size": 1,
+                "fill": "",
+                "stacked": "none",
+                "label": "",
+                "type": "timeseries"
+            }
+        ],
+        "time_field": "timestamp",
+        "index_pattern": "opensearch_dashboards_sample_data_logs",
+        "interval": "",
+        "axis_position": "left",
+        "axis_formatter": "number",
+        "axis_scale": "normal",
+        "show_legend": 1,
+        "show_grid": 1,
+        "tooltip_mode": "show_all",
+        "default_index_pattern": "opensearch_dashboards_sample_data_logs",
+        "default_timefield": "timestamp",
+        "isModelInvalid": false,
+        "drop_last_bucket": 0,
+        "data_source_id": ""
+    },
+    "withNoDataSourceField": {
+        "id": "61ca57f0-469d-11e7-af02-69e470af7417",
+        "type": "timeseries",
+        "series": [
+            {
+                "id": "61ca57f1-469d-11e7-af02-69e470af7417",
+                "color": "#54B399",
+                "split_mode": "everything",
+                "split_color_mode": "opensearchDashboards",
+                "metrics": [
+                    {
+                        "id": "61ca57f2-469d-11e7-af02-69e470af7417",
+                        "type": "avg",
+                        "field": "bytes"
+                    }
+                ],
+                "separate_axis": 0,
+                "axis_position": "right",
+                "formatter": "number",
+                "chart_type": "line",
+                "line_width": 1,
+                "point_size": 1,
+                "fill": "",
+                "stacked": "none",
+                "label": "",
+                "type": "timeseries"
+            }
+        ],
+        "time_field": "timestamp",
+        "index_pattern": "opensearch_dashboards_sample_data_logs",
+        "interval": "",
+        "axis_position": "left",
+        "axis_formatter": "number",
+        "axis_scale": "normal",
+        "show_legend": 1,
+        "show_grid": 1,
+        "tooltip_mode": "show_all",
+        "default_index_pattern": "opensearch_dashboards_sample_data_logs",
+        "default_timefield": "timestamp",
+        "isModelInvalid": false,
+        "drop_last_bucket": 0
+    },
+    "referenceWithValidDataSource": [
+        {
+            "id": "a",
+            "name": "dataSource",
+            "type": "data-source"
+        },
+        {
+            "id": "some-dashboard-id",
+            "name": "some-dashboard",
+            "type": "dashboard"
+        }
+    ],
+    "referenceWithOutdatedDataSource": [
+        {
+            "id": "b",
+            "name": "dataSource",
+            "type": "data-source"
+        },
+        {
+            "id": "some-dashboard-id",
+            "name": "some-dashboard",
+            "type": "dashboard"
+        }
+    ]
+}

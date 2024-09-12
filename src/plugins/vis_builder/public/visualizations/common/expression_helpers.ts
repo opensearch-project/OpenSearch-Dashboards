@@ -7,20 +7,21 @@ import { cloneDeep } from 'lodash';
 import { OpenSearchaggsExpressionFunctionDefinition } from '../../../../data/public';
 import { ExpressionFunctionOpenSearchDashboards } from '../../../../expressions';
 import { buildExpressionFunction } from '../../../../expressions/public';
-import { VisualizationState } from '../../application/utils/state_management';
+import { VisualizationState, StyleState } from '../../application/utils/state_management';
 import { getSearchService, getIndexPatterns } from '../../plugin_services';
-import { StyleState } from '../../application/utils/state_management';
+import { IExpressionLoaderParams } from '../../../../expressions/public';
 
 export const getAggExpressionFunctions = async (
   visualization: VisualizationState,
-  style?: StyleState
+  style?: StyleState,
+  useVega: boolean = false,
+  searchContext?: IExpressionLoaderParams['searchContext']
 ) => {
   const { activeVisualization, indexPattern: indexId = '' } = visualization;
   const { aggConfigParams } = activeVisualization || {};
 
   const indexPatternsService = getIndexPatterns();
   const indexPattern = await indexPatternsService.get(indexId);
-  // aggConfigParams is the serealizeable aggConfigs that need to be reconstructed here using the agg servce
   const aggConfigs = getSearchService().aggs.createAggConfigs(
     indexPattern,
     cloneDeep(aggConfigParams)
@@ -31,7 +32,6 @@ export const getAggExpressionFunctions = async (
     {}
   );
 
-  // soon this becomes: const opensearchaggs = vis.data.aggs!.toExpressionAst();
   const opensearchaggs = buildExpressionFunction<OpenSearchaggsExpressionFunctionDefinition>(
     'opensearchaggs',
     {
@@ -43,9 +43,20 @@ export const getAggExpressionFunctions = async (
     }
   );
 
+  let expressionFns = [opensearchDashboards, opensearchaggs];
+
+  if (useVega === true && searchContext) {
+    const opensearchDashboardsContext = buildExpressionFunction('opensearch_dashboards_context', {
+      timeRange: JSON.stringify(searchContext.timeRange || {}),
+      filters: JSON.stringify(searchContext.filters || []),
+      query: JSON.stringify(searchContext.query || []),
+    });
+    expressionFns = [opensearchDashboards, opensearchDashboardsContext, opensearchaggs];
+  }
+
   return {
     aggConfigs,
     indexPattern,
-    expressionFns: [opensearchDashboards, opensearchaggs],
+    expressionFns,
   };
 };

@@ -30,23 +30,53 @@
 
 import { EuiHeaderBreadcrumbs } from '@elastic/eui';
 import classNames from 'classnames';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { ChromeBreadcrumb } from '../../chrome_service';
+import { ChromeBreadcrumb, ChromeBreadcrumbEnricher } from '../../chrome_service';
 
 interface Props {
   appTitle$: Observable<string>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  breadcrumbsEnricher$: Observable<ChromeBreadcrumbEnricher | undefined>;
+  useUpdatedHeader?: boolean;
+  renderFullLength?: boolean;
+  dropHomeFromBreadcrumb?: boolean;
 }
 
-export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {
+export function HeaderBreadcrumbs({
+  appTitle$,
+  breadcrumbs$,
+  breadcrumbsEnricher$,
+  useUpdatedHeader,
+  renderFullLength,
+  dropHomeFromBreadcrumb,
+}: Props) {
   const appTitle = useObservable(appTitle$, 'OpenSearch Dashboards');
   const breadcrumbs = useObservable(breadcrumbs$, []);
+  const [breadcrumbEnricher, setBreadcrumbEnricher] = useState<
+    ChromeBreadcrumbEnricher | undefined
+  >(undefined);
+
+  useEffect(() => {
+    const sub = breadcrumbsEnricher$.subscribe((enricher) => {
+      setBreadcrumbEnricher(() => enricher);
+    });
+    return () => sub.unsubscribe();
+  });
+
   let crumbs = breadcrumbs;
 
   if (breadcrumbs.length === 0 && appTitle) {
     crumbs = [{ text: appTitle }];
+  }
+
+  if (breadcrumbEnricher) {
+    crumbs = breadcrumbEnricher(crumbs);
+  }
+
+  if (dropHomeFromBreadcrumb && crumbs.length && crumbs[0].hasOwnProperty('home')) {
+    crumbs = crumbs.slice(1);
   }
 
   crumbs = crumbs.map((breadcrumb, i) => ({
@@ -55,9 +85,18 @@ export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {
       'breadcrumb',
       breadcrumb['data-test-subj'],
       i === 0 && 'first',
-      i === breadcrumbs.length - 1 && 'last'
+      i === crumbs.length - 1 && 'last'
     ),
   }));
 
-  return <EuiHeaderBreadcrumbs breadcrumbs={crumbs} max={10} data-test-subj="breadcrumbs" />;
+  const remainingCrumbs = useUpdatedHeader ? crumbs.slice(0, -1) : crumbs;
+
+  return (
+    <EuiHeaderBreadcrumbs
+      breadcrumbs={renderFullLength ? crumbs : remainingCrumbs}
+      max={10}
+      data-test-subj="breadcrumbs"
+      simplify={!!useUpdatedHeader}
+    />
+  );
 }

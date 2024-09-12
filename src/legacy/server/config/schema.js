@@ -109,6 +109,7 @@ export default () =>
         }),
         events: Joi.any().default({}),
         dest: Joi.string().default('stdout'),
+        ignoreEnospcError: Joi.boolean().default(false),
         filter: Joi.any().default({}),
         json: Joi.boolean().when('dest', {
           is: 'stdout',
@@ -251,6 +252,11 @@ export default () =>
       survey: Joi.object({
         url: Joi.any().default('/'),
       }),
+      dashboardAdmin: Joi.object({
+        groups: Joi.array().items(Joi.string()).default([]),
+        users: Joi.array().items(Joi.string()).default([]),
+      }),
+      futureNavigation: Joi.boolean().default(false),
     }).default(),
 
     savedObjects: HANDLED_IN_NEW_PLATFORM,

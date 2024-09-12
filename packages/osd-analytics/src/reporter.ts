@@ -36,7 +36,7 @@ import { Report, ReportManager } from './report';
 import { ApplicationUsage } from './metrics';
 
 export interface ReporterConfig {
-  // http: ReportHTTP;
+  http: ReportHTTP;
   storage?: Storage;
   checkInterval?: number;
   debug?: boolean;
@@ -49,7 +49,7 @@ export class Reporter {
   checkInterval: number;
   private interval?: NodeJS.Timer;
   private lastAppId?: string;
-  // private http: ReportHTTP;
+  private http: ReportHTTP;
   private reportManager: ReportManager;
   private storageManager: ReportStorageManager;
   private readonly applicationUsage: ApplicationUsage;
@@ -59,8 +59,8 @@ export class Reporter {
   private started = false;
 
   constructor(config: ReporterConfig) {
-    const { storage, debug, checkInterval = 90000, storageKey = 'analytics' } = config;
-    // this.http = http;
+    const { http, storage, debug, checkInterval = 90000, storageKey = 'analytics' } = config;
+    this.http = http;
     this.checkInterval = checkInterval;
     this.applicationUsage = new ApplicationUsage();
     this.storageManager = new ReportStorageManager(storageKey, storage);
@@ -144,14 +144,14 @@ export class Reporter {
   public reportApplicationUsage(appId?: string) {
     this.log(`Reporting application changed to ${appId}`);
     this.lastAppId = appId || this.lastAppId;
-    // const appChangedReport = this.applicationUsage.appChanged(appId);
-    // if (appChangedReport) this.saveToReport([appChangedReport]);
+    const appChangedReport = this.applicationUsage.appChanged(appId);
+    if (appChangedReport) this.saveToReport([appChangedReport]);
   }
 
   public sendReports = async () => {
     if (!this.reportManager.isReportEmpty()) {
       try {
-        // await this.http(this.reportManager.report);
+        await this.http(this.reportManager.report);
         this.flushReport();
       } catch (err) {
         this.log(`Error Sending Metrics Report ${err}`);

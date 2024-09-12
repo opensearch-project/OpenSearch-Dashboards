@@ -34,10 +34,12 @@ import { i18n } from '@osd/i18n';
 import { ScopedHistory, CoreStart } from 'opensearch-dashboards/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 // @ts-ignore
-import { HomeApp } from './components/home_app';
+import { HomeApp, ImportSampleDataApp } from './components/home_app';
 import { getServices } from './opensearch_dashboards_services';
 
 import './index.scss';
+import { ContentManagementPluginStart } from '../../../../plugins/content_management/public';
+import { SearchUseCaseOverviewApp } from './components/usecase_overview/search_use_case_app';
 
 export const renderApp = async (
   element: HTMLElement,
@@ -75,5 +77,35 @@ export const renderApp = async (
   return () => {
     unmountComponentAtNode(element);
     unlisten();
+  };
+};
+
+export const renderImportSampleDataApp = async (element: HTMLElement, coreStart: CoreStart) => {
+  render(
+    <OpenSearchDashboardsContextProvider services={{ ...coreStart }}>
+      <ImportSampleDataApp />
+    </OpenSearchDashboardsContextProvider>,
+    element
+  );
+
+  return () => {
+    unmountComponentAtNode(element);
+  };
+};
+
+export const renderSearchUseCaseOverviewApp = async (
+  element: HTMLElement,
+  coreStart: CoreStart,
+  contentManagementStart: ContentManagementPluginStart
+) => {
+  render(
+    <OpenSearchDashboardsContextProvider services={{ ...coreStart }}>
+      <SearchUseCaseOverviewApp contentManagement={contentManagementStart} />
+    </OpenSearchDashboardsContextProvider>,
+    element
+  );
+
+  return () => {
+    unmountComponentAtNode(element);
   };
 };

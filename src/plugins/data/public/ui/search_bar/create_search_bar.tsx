@@ -31,7 +31,6 @@
 import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
 import { QueryStart, SavedQuery } from '../../query';
 import { SearchBar, SearchBarOwnProps } from './';
@@ -39,13 +38,13 @@ import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { DataPublicPluginStart } from '../../types';
-import { Filter, Query, TimeRange } from '../../../common';
+import { DataStorage, Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
-  storage: IStorageWrapper;
+  storage: DataStorage;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -135,6 +134,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
     const { useDefaultBehaviors } = props;
+
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
 
@@ -145,9 +145,9 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
       filterManager: data.query.filterManager,
     });
     const { query } = useQueryStringManager({
-      query: props.query,
-      queryStringManager: data.query.queryString,
+      queryString: data.query.queryString,
     });
+
     const { timeRange, refreshInterval } = useTimefilter({
       dateRangeFrom: props.dateRangeFrom,
       dateRangeTo: props.dateRangeTo,
@@ -191,6 +191,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           showQueryBar={props.showQueryBar}
           showQueryInput={props.showQueryInput}
           showSaveQuery={props.showSaveQuery}
+          queryStatus={props.queryStatus}
           screenTitle={props.screenTitle}
           indexPatterns={props.indexPatterns}
           indicateNoData={props.indicateNoData}
@@ -208,6 +209,8 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
           onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
+          datePickerRef={props.datePickerRef}
+          isFilterBarPortable={props.isFilterBarPortable}
           {...overrideDefaultBehaviors(props)}
         />
       </OpenSearchDashboardsContextProvider>

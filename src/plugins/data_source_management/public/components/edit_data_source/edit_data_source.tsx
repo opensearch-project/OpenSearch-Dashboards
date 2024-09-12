@@ -17,11 +17,14 @@ import {
   getDataSources,
   testConnection,
   updateDataSourceById,
+  setFirstDataSourceAsDefault,
+  getDefaultDataSourceId,
 } from '../utils';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 import { EditDataSourceForm } from './components/edit_form/edit_data_source_form';
 import { LoadingMask } from '../loading_mask';
 import { AuthType, DataSourceAttributes } from '../../types';
+import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../constants';
 
 const defaultDataSource: DataSourceAttributes = {
   title: '',
@@ -38,10 +41,13 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
 ) => {
   /* Initialization */
   const {
+    uiSettings,
     savedObjects,
     setBreadcrumbs,
     http,
     notifications: { toasts },
+    application,
+    navigation,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
   const dataSourceID: string = props.match.params.id;
 
@@ -49,6 +55,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   const [dataSource, setDataSource] = useState<DataSourceAttributes>(defaultDataSource);
   const [existingDatasourceNamesList, setExistingDatasourceNamesList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const useNewUX = uiSettings.get('home:useNewHomePage');
 
   /* Fetch data source by id*/
   useEffectOnce(() => {
@@ -83,6 +90,12 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     }
   };
 
+  const handleSetDefault = async () => {
+    await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSourceID);
+  };
+
+  const isDefaultDataSource = getDefaultDataSourceId(uiSettings) === dataSourceID;
+
   /* Handle submit - create data source*/
   const handleSubmit = async (attributes: DataSourceAttributes) => {
     await updateDataSourceById(savedObjects.client, dataSourceID, attributes);
@@ -102,12 +115,30 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     setIsLoading(true);
     try {
       await deleteDataSourceById(props.match.params.id, savedObjects.client);
+
+      // If deleted datasource is the default datasource, then set the first existing
+      // datasource as default datasource.
+      setDefaultDataSource();
       props.history.push('');
     } catch (e) {
       setIsLoading(false);
       handleDisplayToastMessage({
         id: 'dataSourcesManagement.editDataSource.deleteDataSourceFailMsg',
         defaultMessage: 'Unable to delete the Data Source due to some errors. Please try it again.',
+      });
+    }
+  };
+
+  const setDefaultDataSource = async () => {
+    try {
+      if (getDefaultDataSourceId(uiSettings) === dataSourceID) {
+        await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      }
+    } catch (e) {
+      setIsLoading(false);
+      handleDisplayToastMessage({
+        id: 'dataSourcesManagement.editDataSource.setDefaultDataSourceFailMsg',
+        defaultMessage: 'Unable to find a default datasource. Please set a new default datasource.',
       });
     }
   };
@@ -126,12 +157,18 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
       <>
         {dataSource && dataSource.endpoint ? (
           <EditDataSourceForm
+            navigation={navigation}
+            application={application}
+            useNewUX={useNewUX}
             existingDataSource={dataSource}
             existingDatasourceNamesList={existingDatasourceNamesList}
+            isDefault={isDefaultDataSource}
             onDeleteDataSource={handleDelete}
+            onSetDefaultDataSource={handleSetDefault}
             handleSubmit={handleSubmit}
             displayToastMessage={handleDisplayToastMessage}
             handleTestConnection={handleTestConnection}
+            canManageDataSource={!!application.capabilities?.dataSource?.canManage}
           />
         ) : null}
         {isLoading || !dataSource?.endpoint ? <LoadingMask /> : null}

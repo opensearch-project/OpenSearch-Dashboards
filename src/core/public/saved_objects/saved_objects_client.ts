@@ -38,6 +38,7 @@ import {
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
+  SavedObjectsBaseOptions,
 } from '../../server';
 
 import { SimpleSavedObject } from './simple_saved_object';
@@ -45,7 +46,11 @@ import { HttpFetchOptions, HttpSetup } from '../http';
 
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
-  'sortOrder' | 'rootSearchFields' | 'typeToNamespacesMap'
+  | 'sortOrder'
+  | 'rootSearchFields'
+  | 'typeToNamespacesMap'
+  | 'ACLSearchParams'
+  | 'workspacesSearchOperator'
 >;
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
@@ -61,7 +66,7 @@ export interface SavedObjectsCreateOptions {
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
-  workspaces?: string[];
+  workspaces?: SavedObjectsBaseOptions['workspaces'];
 }
 
 /**
@@ -79,7 +84,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsC
 export interface SavedObjectsBulkCreateOptions {
   /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
   overwrite?: boolean;
-  workspaces?: string[];
+  workspaces?: SavedObjectsCreateOptions['workspaces'];
 }
 
 /** @public */
@@ -452,14 +457,14 @@ export class SavedObjectsClient {
    *   { id: 'foo', type: 'index-pattern' }
    * ])
    */
-  public bulkGet = (objects: Array<{ id: string; type: string }> = []) => {
+  public bulkGet = <T = unknown>(objects: Array<{ id: string; type: string }> = []) => {
     const filteredObjects = objects.map((obj) => pick(obj, ['id', 'type']));
     return this.performBulkGet(filteredObjects).then((resp) => {
       resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkGet']>>,
-        SavedObjectsBatchResponse
-      >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
+        SavedObjectsBatchResponse<T>
+      >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse<T>;
     });
   };
 

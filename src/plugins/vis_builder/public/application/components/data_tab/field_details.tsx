@@ -53,7 +53,7 @@ export function FieldDetailsView({ field, details }: FieldDetailsProps) {
 
   return (
     <>
-      <EuiPopoverTitle>{title}</EuiPopoverTitle>
+      <EuiPopoverTitle tabIndex={0}>{title}</EuiPopoverTitle>
       <div className="vbFieldDetails" data-test-subj="fieldDetailsContainer">
         {error ? (
           <EuiText size="xs" data-test-subj="fieldDetailsError">

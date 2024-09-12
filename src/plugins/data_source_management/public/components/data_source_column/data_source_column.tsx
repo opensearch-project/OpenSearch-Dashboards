@@ -4,18 +4,15 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { HttpStart, SavedObjectsStart } from 'opensearch-dashboards/public';
+import { SavedObjectsStart } from 'opensearch-dashboards/public';
 import { EuiBadge, EuiLink } from '@elastic/eui';
 import React from 'react';
-import {
-  IndexPatternTableColumn,
-  IndexPatternTableRecord,
-} from '../../../../index_pattern_management/public';
-import { getDataSources } from '../utils';
+import { IndexPatternTableColumn } from '../../../../index_pattern_management/public';
+import { getApplication, getDataSources } from '../utils';
 import { DataSourceTableItem } from '../../types';
+import { DSM_APP_ID } from '../../plugin';
 
-type DataSourceColumnItem = DataSourceTableItem & { relativeUrl: string };
-type DataSourceMap = Map<string, DataSourceColumnItem> | undefined;
+type DataSourceMap = Map<string, DataSourceTableItem> | undefined;
 
 export class DataSourceColumn implements IndexPatternTableColumn<DataSourceMap> {
   public readonly id: string = 'data_source';
@@ -26,47 +23,44 @@ export class DataSourceColumn implements IndexPatternTableColumn<DataSourceMap> 
     name: i18n.translate('dataSource.management.dataSourceColumn', {
       defaultMessage: 'Data Source Connection',
     }),
-    render: (referenceId: string, index: IndexPatternTableRecord) => {
+    render: (referenceId: string) => {
       if (!referenceId) {
         return null;
       }
 
       const dataSource = this.data?.get(referenceId);
+
       if (!dataSource) {
         // Index pattern has the referenceId but data source not found.
         return <EuiBadge color="danger">Deleted</EuiBadge>;
       }
 
-      const { title, relativeUrl } = dataSource;
-      return <EuiLink href={relativeUrl}>{title}</EuiLink>;
+      const { title, id } = dataSource;
+
+      return (
+        <EuiLink
+          onClick={() =>
+            getApplication().navigateToApp('management', {
+              path: `opensearch-dashboards/${DSM_APP_ID}/${encodeURIComponent(id)}`,
+            })
+          }
+        >
+          {title}
+        </EuiLink>
+      );
     },
   };
 
-  constructor(
-    private readonly savedObjectPromise: Promise<SavedObjectsStart>,
-    private readonly httpPromise: Promise<HttpStart>
-  ) {}
+  constructor(private readonly savedObjectPromise: Promise<SavedObjectsStart>) {}
 
   public loadData = async () => {
     const savedObject = await this.savedObjectPromise;
-    const { basePath } = await this.httpPromise;
 
     return getDataSources(savedObject.client).then((dataSources?: DataSourceTableItem[]) => {
-      this.data = dataSources
-        ?.map((dataSource) => {
-          return {
-            ...dataSource,
-            relativeUrl: basePath.prepend(
-              `/app/management/opensearch-dashboards/dataSources/${encodeURIComponent(
-                dataSource.id
-              )}`
-            ),
-          };
-        })
-        ?.reduce(
-          (map, dataSource) => map.set(dataSource.id, dataSource),
-          new Map<string, DataSourceColumnItem>()
-        );
+      this.data = dataSources?.reduce(
+        (map, dataSource) => map.set(dataSource.id, dataSource),
+        new Map<string, DataSourceTableItem>()
+      );
       return this.data;
     });
   };

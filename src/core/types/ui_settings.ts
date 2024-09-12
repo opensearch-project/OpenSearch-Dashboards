@@ -57,12 +57,25 @@ export interface DeprecationSettings {
 }
 
 /**
+ * UiSettings scope options.
+ * @experimental
+ */
+export enum UiSettingScope {
+  GLOBAL = 'global',
+  USER = 'user',
+}
+
+/**
  * UiSettings parameters defined by the plugins.
  * @public
  * */
 export interface UiSettingsParams<T = unknown> {
   /** title in the UI */
   name?: string;
+  /**
+   * scope of the setting item
+   */
+  scope?: UiSettingScope | UiSettingScope[];
   /** default value to fall back to if a user doesn't provide any */
   value?: T;
   /** description provided to a user in UI */
@@ -75,6 +88,8 @@ export interface UiSettingsParams<T = unknown> {
   optionLabels?: Record<string, string>;
   /** a flag indicating whether new value applying requires page reloading */
   requiresPageReload?: boolean;
+  /** a flag indicating that the source of truth is stored in browser local storage, not in saved object, which only contains the fallback */
+  preferBrowserSetting?: boolean;
   /** a flag indicating that value cannot be changed */
   readonly?: boolean;
   /** defines a type of UI element {@link UiSettingsType} */

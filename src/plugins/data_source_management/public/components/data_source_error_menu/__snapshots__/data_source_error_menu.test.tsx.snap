@@ -1,0 +1,101 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataSourceErrorMenu renders without crashing 1`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <EuiButtonIcon
+        aria-label="dataSourceErrorMenuHeaderLink"
+        className="euiHeaderLink"
+        data-test-subj="dataSourceErrorMenuHeaderLink"
+        iconType={[Function]}
+        onClick={[Function]}
+        size="s"
+      />
+    }
+    closePopover={[Function]}
+    data-test-subj="dataSourceErrorPopover"
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceErrorPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+          "setAppBadgeControls": [MockFunction],
+          "setAppBottomControls": [MockFunction],
+          "setAppCenterControls": [MockFunction],
+          "setAppDescriptionControls": [MockFunction],
+          "setAppLeftControls": [MockFunction],
+          "setAppRightControls": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiPanel
+      className="dataSourceEmptyStatePanel"
+      data-test-subj="datasourceTableEmptyState"
+      hasBorder={false}
+      hasShadow={false}
+    >
+      <EuiText
+        size="s"
+        textAlign="center"
+      >
+        Failed to fetch data sources
+      </EuiText>
+    </EuiPanel>
+    <EuiPopoverFooter>
+      <EuiFlexGroup
+        justifyContent="spaceAround"
+      >
+        <EuiFlexItem>
+          <EuiButton
+            data-test-subj="dataSourceErrorRefreshButton"
+            fill={false}
+            iconType="refresh"
+            onClick={[Function]}
+            size="s"
+          >
+            Refresh the page
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPopoverFooter>
+  </EuiPopover>
+</Fragment>
+`;

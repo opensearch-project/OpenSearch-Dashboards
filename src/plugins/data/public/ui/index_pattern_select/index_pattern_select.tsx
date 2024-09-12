@@ -32,7 +32,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 
 import { Required } from '@osd/utility-types';
-import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
+import { EuiCompressedComboBox, EuiComboBoxProps } from '@elastic/eui';
 
 import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
 import { getTitle } from '../../../common/index_patterns/lib';
@@ -172,9 +172,15 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
     // order than they were sent out. Only load results for the most recent search.
     if (searchValue === this.state.searchValue) {
       const dataSourcesToFetch: Array<{ type: string; id: string }> = [];
+      const dataSourceIdSet = new Set();
       savedObjects.map((indexPatternSavedObject: SimpleSavedObject<any>) => {
         const dataSourceReference = getDataSourceReference(indexPatternSavedObject.references);
-        if (dataSourceReference && !this.state.dataSourceIdToTitle.has(dataSourceReference.id)) {
+        if (
+          dataSourceReference &&
+          !this.state.dataSourceIdToTitle.has(dataSourceReference.id) &&
+          !dataSourceIdSet.has(dataSourceReference.id)
+        ) {
+          dataSourceIdSet.add(dataSourceReference.id);
           dataSourcesToFetch.push({ type: 'data-source', id: dataSourceReference.id });
         }
       });
@@ -264,7 +270,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
     } = this.props;
 
     return (
-      <EuiComboBox
+      <EuiCompressedComboBox
         {...rest}
         placeholder={placeholder}
         singleSelection={true}

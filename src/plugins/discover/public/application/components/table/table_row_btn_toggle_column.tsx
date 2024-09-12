@@ -51,6 +51,7 @@ export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = fal
         disabled
         iconType={'tableOfContents'}
         iconSize={'s'}
+        size={'xs'}
       />
     );
   }
@@ -73,6 +74,7 @@ export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = fal
         data-test-subj="toggleColumnButton"
         iconType={'tableOfContents'}
         iconSize={'s'}
+        size={'xs'}
       />
     </EuiToolTip>
   );

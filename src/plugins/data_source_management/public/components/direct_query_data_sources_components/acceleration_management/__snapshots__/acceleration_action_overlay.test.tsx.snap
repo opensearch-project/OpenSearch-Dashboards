@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AccelerationActionOverlay renders correctly 1`] = `
+<EuiOverlayMask>
+  <EuiConfirmModal
+    buttonColor="danger"
+    cancelButtonText="Cancel"
+    confirmButtonDisabled={false}
+    confirmButtonText="Delete"
+    defaultFocusedButton="confirm"
+    onCancel={[MockFunction]}
+    onConfirm={[Function]}
+    title="Delete acceleration actual_index on test_data_source.default.test_table ?"
+  >
+    <p>
+      Are you sure you want to delete actual_index? Any accelerations associated with this data source will also be deleted.This action cannot be undone.
+    </p>
+  </EuiConfirmModal>
+</EuiOverlayMask>
+`;

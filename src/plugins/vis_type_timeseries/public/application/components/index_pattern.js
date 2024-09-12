@@ -33,14 +33,21 @@ import PropTypes from 'prop-types';
 import React, { useContext } from 'react';
 import {
   htmlIdGenerator,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
-  EuiComboBox,
+  EuiCompressedFormRow,
+  EuiCompressedComboBox,
   EuiText,
 } from '@elastic/eui';
 import { FieldSelect } from './aggs/field_select';
+import { createDataSourcePickerHandler } from './lib/create_data_source_change_handler';
+import {
+  getSavedObjectsClient,
+  getNotifications,
+  getDataSourceManagementSetup,
+  getDataSourceSetup,
+} from '../../services';
 import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
 import { YesNo } from './yes_no';
@@ -112,6 +119,13 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
   };
 
   const model = { ...defaults, ..._model };
+
+  const mdsEnabled = !!getDataSourceSetup().dataSource || false;
+  const handleDataSourceSelectChange = createDataSourcePickerHandler(onChange);
+  const DataSourceSelector = mdsEnabled
+    ? getDataSourceManagementSetup().dataSourceManagement.ui.DataSourceSelector
+    : undefined;
+
   const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
   const intervalValidation = validateIntervalValue(model[intervalName]);
   const selectedTimeRangeOption = timeRangeOptions.find(
@@ -126,13 +140,13 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
       {!isTimeSeries && (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow
+            <EuiCompressedFormRow
               id={htmlId('timeRange')}
               label={i18n.translate('visTypeTimeseries.indexPattern.timeRange.label', {
                 defaultMessage: 'Data timerange mode',
               })}
             >
-              <EuiComboBox
+              <EuiCompressedComboBox
                 isClearable={false}
                 placeholder={i18n.translate(
                   'visTypeTimeseries.indexPattern.timeRange.selectTimeRange',
@@ -146,7 +160,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
                 singleSelection={{ asPlainText: true }}
                 isDisabled={disabled}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
             <EuiText size="xs" style={{ margin: 0 }}>
               {i18n.translate('visTypeTimeseries.indexPattern.timeRange.hint', {
                 defaultMessage: `This setting controls the timespan used for matching documents.
@@ -157,31 +171,61 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
+      {!!mdsEnabled && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiCompressedFormRow
+              id={htmlId('dataSource')}
+              label={i18n.translate('visTypeTimeseries.indexPattern.dataSourceLabel', {
+                defaultMessage: 'Data source',
+              })}
+            >
+              <DataSourceSelector
+                savedObjectsClient={getSavedObjectsClient().client}
+                notifications={getNotifications().toasts}
+                onSelectedDataSource={handleDataSourceSelectChange}
+                defaultOption={
+                  model.data_source_id !== undefined ? [{ id: model.data_source_id }] : undefined
+                }
+                disabled={false}
+                fullWidth={false}
+                compressed={true}
+                removePrepend={true}
+                isClearable={false}
+              />
+            </EuiCompressedFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('indexPattern')}
             label={i18n.translate('visTypeTimeseries.indexPatternLabel', {
-              defaultMessage: 'Index pattern',
+              defaultMessage: 'Index name',
             })}
             helpText={
-              isDefaultIndexPatternUsed &&
-              i18n.translate('visTypeTimeseries.indexPattern.searchByDefaultIndex', {
-                defaultMessage: 'Default index pattern is used. To query all indexes use *',
-              })
+              isDefaultIndexPatternUsed
+                ? i18n.translate('visTypeTimeseries.indexPattern.searchByDefaultIndex', {
+                    defaultMessage: 'Default index pattern is used. To query all indexes use *',
+                  })
+                : i18n.translate('visTypeTimeseries.indexPattern.searchByIndex', {
+                    defaultMessage:
+                      'Use an asterisk (*) to match multiple indices. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
+                  })
             }
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               data-test-subj="metricsIndexPatternInput"
               disabled={disabled}
               placeholder={model.default_index_pattern}
               onChange={handleTextChange(indexPatternName, '*')}
               value={model[indexPatternName]}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('timeField')}
             label={i18n.translate('visTypeTimeseries.indexPattern.timeFieldLabel', {
               defaultMessage: 'Time field',
@@ -197,10 +241,10 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
               fields={fields}
               placeholder={isDefaultIndexPatternUsed ? model.default_timefield : undefined}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             isInvalid={!intervalValidation.isValid}
             error={intervalValidation.errorMessage}
             id={htmlId('interval')}
@@ -213,7 +257,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
                 'auto, 1m, 1d, 7d, 1y, >=1m are required values and must not be translated.',
             })}
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               data-test-subj="metricsIndexPatternInterval"
               isInvalid={!intervalValidation.isValid}
               disabled={disabled || isEntireTimeRangeActive(model, isTimeSeries)}
@@ -221,10 +265,10 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
               value={model[intervalName]}
               placeholder={AUTO_INTERVAL}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('dropLastBucket')}
             label={i18n.translate('visTypeTimeseries.indexPattern.dropLastBucketLabel', {
               defaultMessage: 'Drop last bucket?',
@@ -237,7 +281,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
               onChange={onChange}
               disabled={disabled || isEntireTimeRangeActive(model, isTimeSeries)}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

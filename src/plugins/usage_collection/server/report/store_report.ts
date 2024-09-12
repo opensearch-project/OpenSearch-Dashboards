@@ -57,11 +57,17 @@ export async function storeReport(
       };
     }),
     ...uiStatsMetrics.map(async ([key, metric]) => {
-      const { appName, eventName } = metric;
+      const { appName, eventName, stats } = metric;
       const savedObjectId = `${appName}:${eventName}`;
       return {
         saved_objects: [
-          await internalRepository.incrementCounter('ui-metric', savedObjectId, 'count'),
+          await internalRepository.incrementCounter(
+            'ui-metric',
+            savedObjectId,
+            'count',
+            {},
+            stats.sum
+          ),
         ],
       };
     }),

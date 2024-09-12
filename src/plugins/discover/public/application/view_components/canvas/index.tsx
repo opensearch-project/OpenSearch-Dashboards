@@ -18,18 +18,36 @@ import { setColumns, useDispatch, useSelector } from '../../utils/state_manageme
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { filterColumns } from '../utils/filter_columns';
-import { DEFAULT_COLUMNS_SETTING, MODIFY_COLUMNS_ON_SWITCH } from '../../../../common';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  MODIFY_COLUMNS_ON_SWITCH,
+  QUERY_ENHANCEMENT_ENABLED_SETTING,
+} from '../../../../common';
 import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
+import { buildColumns } from '../../utils/columns';
 import './discover_canvas.scss';
+import { HeaderVariant } from '../../../../../../core/public';
 
 // eslint-disable-next-line import/no-default-export
-export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewProps) {
+export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalRef }: ViewProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const { data$, refetch$, indexPattern } = useDiscoverContext();
   const {
-    services: { uiSettings },
+    services: {
+      uiSettings,
+      capabilities,
+      chrome: { setHeaderVariant },
+    },
   } = useOpenSearchDashboards<DiscoverViewServices>();
-  const { columns } = useSelector((state) => state.discover);
+  const { columns } = useSelector((state) => {
+    const stateColumns = state.discover.columns;
+
+    // check if stateColumns is not undefined, otherwise use buildColumns
+    return {
+      columns: stateColumns !== undefined ? stateColumns : buildColumns([]),
+    };
+  });
+  const isEnhancementsEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
   const filteredColumns = filterColumns(
     columns,
     indexPattern,
@@ -89,12 +107,20 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
     }
   }, [dispatch, filteredColumns, indexPattern]);
 
+  useEffect(() => {
+    setHeaderVariant?.(HeaderVariant.APPLICATION);
+    return () => {
+      setHeaderVariant?.();
+    };
+  }, [setHeaderVariant]);
+
   const timeField = indexPattern?.timeFieldName ? indexPattern.timeFieldName : undefined;
   const scrollToTop = () => {
     if (panelRef.current) {
       panelRef.current.scrollTop = 0;
     }
   };
+  const showSaveQuery = !!capabilities.discover?.saveQuery;
 
   return (
     <EuiPanel
@@ -106,19 +132,32 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
       className="dscCanvas"
     >
       <TopNav
+        isEnhancementsEnabled={isEnhancementsEnabled}
         opts={{
           setHeaderActionMenu,
           onQuerySubmit,
+          optionalRef,
         }}
+        showSaveQuery={showSaveQuery}
       />
+
       {fetchState.status === ResultStatus.NO_RESULTS && (
+        <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
+      )}
+      {fetchState.status === ResultStatus.ERROR && (
         <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
       )}
       {fetchState.status === ResultStatus.UNINITIALIZED && (
         <DiscoverUninitialized onRefresh={() => refetch$.next()} />
       )}
       {fetchState.status === ResultStatus.LOADING && <LoadingSpinner />}
-      {fetchState.status === ResultStatus.READY && (
+      {fetchState.status === ResultStatus.READY && isEnhancementsEnabled && (
+        <>
+          <MemoizedDiscoverChartContainer {...fetchState} />
+          <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+        </>
+      )}
+      {fetchState.status === ResultStatus.READY && !isEnhancementsEnabled && (
         <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
           <MemoizedDiscoverChartContainer {...fetchState} />
           <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />

@@ -48,7 +48,9 @@ describe('OpenSearch Configuration Client', () => {
         },
       };
 
-      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+      const cache = {};
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       const value = await client.getConfig();
 
@@ -77,7 +79,10 @@ describe('OpenSearch Configuration Client', () => {
           }),
         },
       };
-      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+
+      const cache = {};
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       await expect(client.getConfig()).rejects.toThrowError(ERROR_MESSAGE);
     });
@@ -99,11 +104,45 @@ describe('OpenSearch Configuration Client', () => {
         },
       };
 
-      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+      const cache = {
+        has: jest.fn().mockReturnValue(false),
+        set: jest.fn(),
+      };
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       const value = await client.getEntityConfig('config1');
 
       expect(value).toBe('value1');
+      expect(cache.set).toBeCalledWith('config1', 'value1');
+    });
+
+    it('return configuration value from cache', async () => {
+      const opensearchClient = {
+        asInternalUser: {
+          get: jest.fn().mockImplementation(() => {
+            return {
+              body: {
+                _source: {
+                  value: 'value1',
+                },
+              },
+            };
+          }),
+        },
+      };
+
+      const cache = {
+        has: jest.fn().mockReturnValue(true),
+        get: jest.fn().mockReturnValue('cachedValue'),
+      };
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
+
+      const value = await client.getEntityConfig('config1');
+
+      expect(value).toBe('cachedValue');
+      expect(cache.get).toBeCalledWith('config1');
     });
 
     it('throws error when input is empty', async () => {
@@ -121,7 +160,9 @@ describe('OpenSearch Configuration Client', () => {
         },
       };
 
-      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+      const cache = {};
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       await expect(client.getEntityConfig(EMPTY_INPUT)).rejects.toThrowError(
         ERROR_MESSSAGE_FOR_EMPTY_INPUT
@@ -151,9 +192,16 @@ describe('OpenSearch Configuration Client', () => {
         },
       };
 
-      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+      const cache = {
+        has: jest.fn().mockReturnValue(false),
+        set: jest.fn(),
+      };
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       await expect(client.getEntityConfig('config1')).rejects.toThrowError(ERROR_MESSAGE);
+
+      expect(cache.set).toBeCalledWith('config1', undefined);
     });
   });
 
@@ -167,11 +215,16 @@ describe('OpenSearch Configuration Client', () => {
         },
       };
 
-      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+      const cache = {
+        del: jest.fn(),
+      };
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       const value = await client.deleteEntityConfig('config1');
 
       expect(value).toBe('config1');
+      expect(cache.del).toBeCalledWith('config1');
     });
 
     it('throws error when input entity is empty', async () => {
@@ -183,7 +236,9 @@ describe('OpenSearch Configuration Client', () => {
         },
       };
 
-      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+      const cache = {};
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       await expect(client.deleteEntityConfig(EMPTY_INPUT)).rejects.toThrowError(
         ERROR_MESSSAGE_FOR_EMPTY_INPUT
@@ -213,11 +268,16 @@ describe('OpenSearch Configuration Client', () => {
         },
       };
 
-      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+      const cache = {
+        del: jest.fn(),
+      };
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       const value = await client.deleteEntityConfig('config1');
 
       expect(value).toBe('config1');
+      expect(cache.del).toBeCalledWith('config1');
     });
 
     it('return deleted document entity when deletion fails due to document not found', async () => {
@@ -241,11 +301,16 @@ describe('OpenSearch Configuration Client', () => {
         },
       };
 
-      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+      const cache = {
+        del: jest.fn(),
+      };
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       const value = await client.deleteEntityConfig('config1');
 
       expect(value).toBe('config1');
+      expect(cache.del).toBeCalledWith('config1');
     });
 
     it('throws error when opensearch throws error', async () => {
@@ -271,7 +336,9 @@ describe('OpenSearch Configuration Client', () => {
         },
       };
 
-      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+      const cache = {};
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       await expect(client.deleteEntityConfig('config1')).rejects.toThrowError(ERROR_MESSAGE);
     });
@@ -287,11 +354,16 @@ describe('OpenSearch Configuration Client', () => {
         },
       };
 
-      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+      const cache = {
+        set: jest.fn(),
+      };
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       const value = await client.updateEntityConfig('config1', 'newValue1');
 
       expect(value).toBe('newValue1');
+      expect(cache.set).toBeCalledWith('config1', 'newValue1');
     });
 
     it('throws error when entity is empty ', async () => {
@@ -303,7 +375,9 @@ describe('OpenSearch Configuration Client', () => {
         },
       };
 
-      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+      const cache = {};
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       await expect(client.updateEntityConfig(EMPTY_INPUT, 'newValue1')).rejects.toThrowError(
         ERROR_MESSSAGE_FOR_EMPTY_INPUT
@@ -319,7 +393,9 @@ describe('OpenSearch Configuration Client', () => {
         },
       };
 
-      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+      const cache = {};
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       await expect(client.updateEntityConfig('config1', EMPTY_INPUT)).rejects.toThrowError(
         ERROR_MESSSAGE_FOR_EMPTY_INPUT
@@ -349,7 +425,9 @@ describe('OpenSearch Configuration Client', () => {
         },
       };
 
-      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger);
+      const cache = {};
+
+      const client = new OpenSearchConfigurationClient(opensearchClient, INDEX_NAME, logger, cache);
 
       await expect(client.updateEntityConfig('config1', 'newValue1')).rejects.toThrowError(
         ERROR_MESSAGE

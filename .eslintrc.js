@@ -272,26 +272,22 @@ module.exports = {
             basePath: __dirname,
             zones: [
               {
-                target: ['(src)/**/*', '!src/core/**/*'],
+                target: ['src/**/*', '!src/core/**/*'],
                 from: ['src/core/utils/**/*'],
                 errorMessage: `Plugins may only import from src/core/server and src/core/public.`,
               },
               {
-                target: ['(src)/plugins/*/server/**/*'],
-                from: ['(src)/plugins/*/public/**/*'],
+                target: ['src/plugins/*/server/**/*'],
+                from: ['src/plugins/*/public/**/*'],
                 errorMessage: `Server code can not import from public, use a common directory.`,
               },
               {
-                target: ['(src)/plugins/*/common/**/*'],
-                from: ['(src)/plugins/*/(server|public)/**/*'],
+                target: ['src/plugins/*/common/**/*'],
+                from: ['src/plugins/*/(server|public)/**/*'],
                 errorMessage: `Common code can not import from server or public, use a common directory.`,
               },
               {
-                target: [
-                  'src/legacy/**/*',
-                  '(src)/plugins/**/(public|server)/**/*',
-                  'examples/**/*',
-                ],
+                target: ['src/legacy/**/*', 'src/plugins/**/(public|server)/**/*', 'examples/**/*'],
                 from: [
                   'src/core/public/**/*',
                   '!src/core/public/index.ts', // relative import
@@ -320,22 +316,22 @@ module.exports = {
               {
                 target: [
                   'src/legacy/**/*',
-                  '(src)/plugins/**/(public|server)/**/*',
+                  'src/plugins/**/(public|server)/**/*',
                   'examples/**/*',
-                  '!(src)/**/*.test.*',
+                  '!src/**/*.test.*',
                 ],
                 from: [
-                  '(src)/plugins/**/(public|server)/**/*',
-                  '!(src)/plugins/**/(public|server)/mocks/index.{js,mjs,ts}',
-                  '!(src)/plugins/**/(public|server)/(index|mocks).{js,mjs,ts,tsx}',
+                  'src/plugins/**/(public|server)/**/*',
+                  '!src/plugins/**/(public|server)/mocks/index.{js,mjs,ts}',
+                  '!src/plugins/**/(public|server)/(index|mocks).{js,mjs,ts,tsx}',
                 ],
                 allowSameFolder: true,
                 errorMessage: 'Plugins may only import from top-level public and server modules.',
               },
               {
                 target: [
-                  '(src)/plugins/**/*',
-                  '!(src)/plugins/**/server/**/*',
+                  'src/plugins/**/*',
+                  '!src/plugins/**/server/**/*',
 
                   'examples/**/*',
                   '!examples/**/server/**/*',
@@ -343,7 +339,7 @@ module.exports = {
                 from: [
                   'src/core/server',
                   'src/core/server/**/*',
-                  '(src)/plugins/*/server/**/*',
+                  'src/plugins/*/server/**/*',
                   'examples/**/server/**/*',
                 ],
                 errorMessage:
@@ -355,7 +351,7 @@ module.exports = {
                 errorMessage: 'The core cannot depend on any plugins.',
               },
               {
-                target: ['(src)/plugins/*/public/**/*'],
+                target: ['src/plugins/*/public/**/*'],
                 from: ['ui/**/*'],
                 errorMessage: 'Plugins cannot import legacy UI code.',
               },
@@ -753,6 +749,15 @@ module.exports = {
       rules: {
         'import/no-unresolved': 'off',
         'no-undef': 'off',
+      },
+    },
+    {
+      files: [
+        'src/plugins/data/public/antlr/opensearch_sql/.generated/*',
+        'src/plugins/data/public/antlr/opensearch_sql/grammar/**/*',
+      ],
+      rules: {
+        'filenames/match-regex': 'off',
       },
     },
   ],

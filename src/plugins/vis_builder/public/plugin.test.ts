@@ -9,6 +9,7 @@ import { dataPluginMock } from '../../data/public/mocks';
 import { embeddablePluginMock } from '../../embeddable/public/mocks';
 import { navigationPluginMock } from '../../navigation/public/mocks';
 import { visualizationsPluginMock } from '../../visualizations/public/mocks';
+import { expressionsPluginMock } from '../../expressions/public/mocks';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { VisBuilderPlugin } from './plugin';
 
@@ -29,6 +30,7 @@ describe('VisBuilderPlugin', () => {
         visualizations: visualizationsPluginMock.createSetupContract(),
         embeddable: embeddablePluginMock.createSetupContract(),
         data: dataPluginMock.createSetupContract(),
+        expressions: expressionsPluginMock.createSetupContract(), // Add this line
       };
 
       const setup = plugin.setup(coreSetup, setupDeps);
@@ -39,9 +41,9 @@ describe('VisBuilderPlugin', () => {
           title: PLUGIN_NAME,
           aliasPath: '#/',
           aliasApp: PLUGIN_ID,
-          stage: 'experimental',
         })
       );
+      expect(setupDeps.expressions.registerFunction).toHaveBeenCalled(); // Add this expectation
     });
   });
 });

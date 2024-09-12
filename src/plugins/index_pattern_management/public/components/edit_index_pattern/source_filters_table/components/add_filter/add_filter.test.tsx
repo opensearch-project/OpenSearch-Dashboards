@@ -44,8 +44,8 @@ describe('AddFilter', () => {
     const onAddFilter = jest.fn();
     const component = shallow(<AddFilter onAddFilter={onAddFilter} />);
 
-    component.find('EuiFieldText').simulate('change', { target: { value: 'tim*' } });
-    component.find('EuiButton').simulate('click');
+    component.find('EuiCompressedFieldText').simulate('change', { target: { value: 'tim*' } });
+    component.find('EuiSmallButton').simulate('click');
     component.update();
 
     expect(onAddFilter).toBeCalledWith('tim*');
@@ -55,7 +55,7 @@ describe('AddFilter', () => {
     const component = shallow(<AddFilter onAddFilter={() => {}} />);
 
     // Set a value in the input field
-    component.find('EuiFieldText').simulate('keypress', ' ');
+    component.find('EuiCompressedFieldText').simulate('keypress', ' ');
     component.update();
 
     expect(component).toMatchSnapshot();

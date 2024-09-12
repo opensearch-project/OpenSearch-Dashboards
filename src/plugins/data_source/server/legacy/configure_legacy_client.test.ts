@@ -27,8 +27,8 @@ import { ClientMock, parseClientOptionsMock } from './configure_legacy_client.te
 import { authRegistryCredentialProviderMock } from '../client/configure_client.test.mocks';
 import { configureLegacyClient } from './configure_legacy_client';
 import { CustomApiSchemaRegistry } from '../schema_registry';
-import { IAuthenticationMethodRegistery } from '../auth_registry';
-import { authenticationMethodRegisteryMock } from '../auth_registry/authentication_methods_registry.mock';
+import { IAuthenticationMethodRegistry } from '../auth_registry';
+import { authenticationMethodRegistryMock } from '../auth_registry/authentication_methods_registry.mock';
 
 const DATA_SOURCE_ID = 'a54b76ec86771ee865a0f74a305dfff8';
 
@@ -41,7 +41,7 @@ describe('configureLegacyClient', () => {
   let configOptions: ConfigOptions;
   let dataSourceAttr: DataSourceAttributes;
   let sigV4AuthContent: SigV4Content;
-  let authenticationMethodRegistery: jest.Mocked<IAuthenticationMethodRegistery>;
+  let authenticationMethodRegistry: jest.Mocked<IAuthenticationMethodRegistry>;
   let clientParameters: ClientParameters;
 
   let mockOpenSearchClientInstance: {
@@ -77,7 +77,7 @@ describe('configureLegacyClient', () => {
     logger = loggingSystemMock.createLogger();
     savedObjectsMock = savedObjectsClientMock.create();
     cryptographyMock = cryptographyServiceSetupMock.create();
-    authenticationMethodRegistery = authenticationMethodRegisteryMock.create();
+    authenticationMethodRegistry = authenticationMethodRegistryMock.create();
     config = {
       enabled: true,
       clientPool: {
@@ -144,7 +144,7 @@ describe('configureLegacyClient', () => {
       });
     });
 
-    authenticationMethodRegistery.getAuthenticationMethod.mockImplementation(() => authMethod);
+    authenticationMethodRegistry.getAuthenticationMethod.mockImplementation(() => authMethod);
     authRegistryCredentialProviderMock.mockReturnValue(clientParameters);
   });
 
@@ -318,14 +318,14 @@ describe('configureLegacyClient', () => {
     });
 
     await configureLegacyClient(
-      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
       callApiParams,
       clientPoolSetup,
       config,
       logger
     );
     expect(authRegistryCredentialProviderMock).toHaveBeenCalled();
-    expect(authenticationMethodRegistery.getAuthenticationMethod).toHaveBeenCalledTimes(1);
+    expect(authenticationMethodRegistry.getAuthenticationMethod).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
     expect(mockOpenSearchClientInstance.ping).toHaveBeenCalledTimes(1);
@@ -365,14 +365,14 @@ describe('configureLegacyClient', () => {
     });
 
     await configureLegacyClient(
-      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
       callApiParams,
       clientPoolSetup,
       config,
       logger
     );
     expect(authRegistryCredentialProviderMock).toHaveBeenCalled();
-    expect(authenticationMethodRegistery.getAuthenticationMethod).toHaveBeenCalledTimes(1);
+    expect(authenticationMethodRegistry.getAuthenticationMethod).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
     expect(mockOpenSearchClientInstance.ping).toHaveBeenCalledTimes(1);
@@ -405,14 +405,14 @@ describe('configureLegacyClient', () => {
     });
 
     await configureLegacyClient(
-      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+      { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
       callApiParams,
       clientPoolSetup,
       config,
       logger
     );
     expect(authRegistryCredentialProviderMock).toHaveBeenCalled();
-    expect(authenticationMethodRegistery.getAuthenticationMethod).toHaveBeenCalledTimes(1);
+    expect(authenticationMethodRegistry.getAuthenticationMethod).toHaveBeenCalledTimes(1);
     expect(ClientMock).toHaveBeenCalledTimes(1);
     expect(savedObjectsMock.get).toHaveBeenCalledTimes(1);
     expect(mockOpenSearchClientInstance.ping).toHaveBeenCalledTimes(1);
@@ -657,7 +657,7 @@ describe('configureLegacyClient', () => {
           name: 'clientPoolTest',
           credentialProvider: jest.fn(),
         };
-        authenticationMethodRegistery.getAuthenticationMethod
+        authenticationMethodRegistry.getAuthenticationMethod
           .mockReset()
           .mockImplementation(() => authMethodWithClientPool);
         const mockDataSourceAttr = { ...dataSourceAttr, name: 'custom_auth' };
@@ -676,7 +676,7 @@ describe('configureLegacyClient', () => {
       });
       test(' If endpoint is same for multiple requests client pool size should be 1', async () => {
         await configureLegacyClient(
-          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
           callApiParams,
           opensearchClientPoolSetup,
           config,
@@ -684,7 +684,7 @@ describe('configureLegacyClient', () => {
         );
 
         await configureLegacyClient(
-          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
           callApiParams,
           opensearchClientPoolSetup,
           config,
@@ -696,7 +696,7 @@ describe('configureLegacyClient', () => {
 
       test('If endpoint is different for two requests client pool size should be 2', async () => {
         await configureLegacyClient(
-          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
           callApiParams,
           opensearchClientPoolSetup,
           config,
@@ -727,7 +727,7 @@ describe('configureLegacyClient', () => {
         });
 
         await configureLegacyClient(
-          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistery },
+          { ...dataSourceClientParams, authRegistry: authenticationMethodRegistry },
           callApiParams,
           opensearchClientPoolSetup,
           config,

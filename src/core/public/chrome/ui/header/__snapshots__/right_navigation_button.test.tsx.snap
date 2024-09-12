@@ -1,0 +1,35 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Right navigation button should render base element normally 1`] = `
+<body>
+  <div>
+    <span
+      class="euiToolTipAnchor"
+    >
+      <button
+        aria-label="title"
+        class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+        data-test-subj="rightNavigationButton"
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButtonEmpty__content"
+        >
+          <span
+            class="euiButtonEmpty__text"
+          >
+            <span
+              class="euiHeaderSectionItemButton__content"
+            >
+              <span
+                color="text"
+                data-euiicon-type="mock_icon"
+              />
+            </span>
+          </span>
+        </span>
+      </button>
+    </span>
+  </div>
+</body>
+`;

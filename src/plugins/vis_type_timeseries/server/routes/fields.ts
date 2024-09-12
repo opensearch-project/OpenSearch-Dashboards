@@ -38,12 +38,17 @@ export const fieldsRoutes = (framework: Framework) => {
     {
       path: '/api/metrics/fields',
       validate: {
-        query: schema.object({ index: schema.string() }),
+        query: schema.object({
+          index: schema.string(),
+          data_source: schema.maybe(schema.string()),
+        }),
       },
     },
     async (context, req, res) => {
       try {
-        return res.ok({ body: await getFields(context, req, framework, req.query.index) });
+        return res.ok({
+          body: await getFields(context, req, framework, req.query.index),
+        });
       } catch (err) {
         if (isBoom(err) && err.output.statusCode === 401) {
           return res.customError({

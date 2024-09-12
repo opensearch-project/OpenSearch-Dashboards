@@ -12,13 +12,16 @@ import {
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
+  WorkspacesStart,
 } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
-import { SavedObjectAttributes } from 'src/core/types';
 import { i18n } from '@osd/i18n';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+import { AuthType } from '../../data_source/common/data_sources';
 import { SigV4ServiceName } from '../../data_source/common/data_sources';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
-import { AuthenticationMethodRegistery } from './auth_registry';
+import { AuthenticationMethodRegistry } from './auth_registry';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataSourceManagementPluginStart {}
@@ -32,15 +35,26 @@ export interface DataSourceManagementContext {
   overlays: OverlayStart;
   http: HttpSetup;
   docLinks: DocLinksStart;
+  navigation: NavigationPublicPluginStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
-  authenticationMethodRegistery: AuthenticationMethodRegistery;
+  authenticationMethodRegistry: AuthenticationMethodRegistry;
+  workspaces: WorkspacesStart;
+}
+
+export enum DataSourceConnectionType {
+  OpenSearchConnection,
+  DirectQueryConnection,
 }
 
 export interface DataSourceTableItem {
   id: string;
+  type?: string;
   title: string;
-  description: string;
-  sort: string;
+  parentId?: string;
+  connectionType?: DataSourceConnectionType;
+  description?: string;
+  sort?: string;
+  relatedConnections?: DataSourceTableItem[];
 }
 
 export interface ToastMessageItem {
@@ -52,13 +66,6 @@ export interface ToastMessageItem {
 export type DataSourceManagementContextValue = OpenSearchDashboardsReactContextValue<
   DataSourceManagementContext
 >;
-
-/* Datasource types */
-export enum AuthType {
-  NoAuth = 'no_auth',
-  UsernamePasswordType = 'username_password',
-  SigV4 = 'sigv4',
-}
 
 export const defaultAuthType = AuthType.UsernamePasswordType;
 
@@ -136,28 +143,50 @@ export const credentialSourceOptions = [
   sigV4CredentialOption,
 ];
 
-export interface DataSourceAttributes extends SavedObjectAttributes {
-  title: string;
-  description?: string;
-  endpoint?: string;
-  auth: {
-    type: AuthType | string;
-    credentials:
-      | UsernamePasswordTypedContent
-      | SigV4Content
-      | { [key: string]: string }
-      | undefined;
-  };
+export interface MenuPanelItem {
+  name?: string;
+  disabled: boolean;
 }
 
-export interface UsernamePasswordTypedContent extends SavedObjectAttributes {
-  username: string;
-  password?: string;
+export {
+  AuthType,
+  UsernamePasswordTypedContent,
+  SigV4Content,
+  DataSourceAttributes,
+  DataSourceError,
+} from '../../data_source/common/data_sources';
+
+// Direct Query datasources types
+export type DirectQueryDatasourceType = 'S3GLUE' | 'PROMETHEUS';
+
+export type DirectQueryDatasourceStatus = 'ACTIVE' | 'DISABLED';
+
+export type AuthMethod = 'noauth' | 'basicauth' | 'awssigv4';
+
+export type Role = EuiComboBoxOptionOption;
+
+export interface S3GlueProperties {
+  'glue.indexstore.opensearch.uri': string;
+  'glue.indexstore.opensearch.region': string;
 }
 
-export interface SigV4Content extends SavedObjectAttributes {
-  accessKey: string;
-  secretKey: string;
-  region: string;
-  service?: SigV4ServiceName;
+export interface PrometheusProperties {
+  'prometheus.uri': string;
+}
+
+export interface DirectQueryDatasourceDetails {
+  allowedRoles: string[];
+  name: string;
+  connector: DirectQueryDatasourceType;
+  description: string;
+  properties: S3GlueProperties | PrometheusProperties;
+  status: DirectQueryDatasourceStatus;
+}
+
+export interface PermissionsConfigurationProps {
+  roles: Role[];
+  selectedRoles: Role[];
+  setSelectedRoles: React.Dispatch<React.SetStateAction<Role[]>>;
+  layout: 'horizontal' | 'vertical';
+  hasSecurityAccess: boolean;
 }

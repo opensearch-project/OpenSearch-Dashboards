@@ -6,7 +6,7 @@
 import { WORKSPACE_PATH_PREFIX } from './constants';
 import { IBasePath } from '../public';
 
-export const getWorkspaceIdFromUrl = (url: string, basePath?: string): string => {
+export const getWorkspaceIdFromUrl = (url: string, basePath: string): string => {
   const regexp = new RegExp(`^${basePath || ''}\/w\/([^\/]*)`);
   const urlObject = new URL(url);
   const matchedResult = urlObject.pathname.match(regexp);

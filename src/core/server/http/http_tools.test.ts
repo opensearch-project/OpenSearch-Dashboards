@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import { dynamicConfigServiceMock } from '../config/dynamic_config_service.mock';
+
 jest.mock('fs', () => {
   const original = jest.requireActual('fs');
   return {
@@ -50,12 +52,15 @@ import {
   HapiValidationError,
   getServerOptions,
   getRequestId,
+  getRedirectUrl,
 } from './http_tools';
 import { HttpServer } from './http_server';
 import { HttpConfig, config } from './http_config';
 import { Router } from './router';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { ByteSizeValue } from '@osd/config-schema';
+import { httpServerMock } from './http_server.mocks';
+import { updateWorkspaceState } from '../utils';
 
 const emptyOutput = {
   statusCode: 400,
@@ -118,10 +123,12 @@ describe('timeouts', () => {
         allowFromAnyIp: true,
         ipAllowlist: [],
       },
+      updateConfigs: jest.fn(),
     } as any);
     registerRouter(router);
 
-    await server.start();
+    const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
+    await server.start(dynamicConfigService);
 
     expect(supertest(innerServer.listener).get('/a')).rejects.toThrow('socket hang up');
 
@@ -267,5 +274,32 @@ describe('getRequestId', () => {
         );
       });
     });
+  });
+});
+
+describe('getRedirectUrl', () => {
+  it('should prepend with basePath when no requestWorkspaceId is present in request', () => {
+    const request = httpServerMock.createOpenSearchDashboardsRequest();
+    expect(
+      getRedirectUrl({
+        request,
+        nextUrl: '/app/next_url',
+        basePath: '/base',
+      })
+    ).toEqual('/base/app/next_url');
+  });
+
+  it('should prepend with basePath and workspace prefix when requestWorkspaceId is present in request', () => {
+    const request = httpServerMock.createOpenSearchDashboardsRequest();
+    updateWorkspaceState(request, {
+      requestWorkspaceId: 'workspace_id',
+    });
+    expect(
+      getRedirectUrl({
+        request,
+        nextUrl: '/app/next_url',
+        basePath: '/base',
+      })
+    ).toEqual('/base/w/workspace_id/app/next_url');
   });
 });

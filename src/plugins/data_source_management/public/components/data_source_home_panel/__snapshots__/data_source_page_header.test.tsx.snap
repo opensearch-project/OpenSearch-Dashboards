@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataSourceHeader renders correctly 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  justifyContent="spaceBetween"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiText
+      size="s"
+    >
+      <h1>
+        <FormattedMessage
+          defaultMessage="Data Sources"
+          id="dataSourcesManagement.dataSourcesTable.title"
+          values={Object {}}
+        />
+      </h1>
+    </EuiText>
+    <EuiSpacer
+      size="s"
+    />
+    <EuiText
+      size="s"
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="Create and manage data source connections."
+          id="dataSourcesManagement.dataSourcesTable.mdsEnabled.description"
+          values={Object {}}
+        />
+      </p>
+    </EuiText>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

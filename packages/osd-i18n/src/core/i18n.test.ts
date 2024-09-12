@@ -899,8 +899,17 @@ describe('I18n engine', () => {
 
   describe('load', () => {
     let mockFetch: jest.SpyInstance;
+    let originalWindow: any;
+
     beforeEach(() => {
       mockFetch = jest.spyOn(global as any, 'fetch').mockImplementation();
+      originalWindow = global.window;
+      global.window = { ...originalWindow };
+    });
+
+    afterEach(() => {
+      global.window = originalWindow;
+      delete (window as any).__i18nWarning; // Clear the warning after each test
     });
 
     test('fails if server returns >= 300 status code', async () => {
@@ -928,7 +937,7 @@ describe('I18n engine', () => {
 
       mockFetch.mockResolvedValue({
         status: 200,
-        json: jest.fn().mockResolvedValue(translations),
+        json: jest.fn().mockResolvedValue({ translations }),
       });
 
       await expect(i18n.load('some-url')).resolves.toBeUndefined();
@@ -937,6 +946,29 @@ describe('I18n engine', () => {
       expect(mockFetch).toHaveBeenCalledWith('some-url', { credentials: 'same-origin' });
 
       expect(i18n.getTranslation()).toEqual(translations);
+    });
+
+    test('sets warning on window when present in response', async () => {
+      const warning = { title: 'Warning', text: 'This is a warning' };
+      mockFetch.mockResolvedValue({
+        status: 200,
+        json: jest.fn().mockResolvedValue({ translations: { locale: 'en' }, warning }),
+      });
+
+      await i18n.load('some-url');
+
+      expect((window as any).__i18nWarning).toEqual(warning);
+    });
+
+    test('does not set warning on window when not present in response', async () => {
+      mockFetch.mockResolvedValue({
+        status: 200,
+        json: jest.fn().mockResolvedValue({ translations: { locale: 'en' } }),
+      });
+
+      await i18n.load('some-url');
+
+      expect((window as any).__i18nWarning).toBeUndefined();
     });
   });
 });

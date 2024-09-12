@@ -29,7 +29,7 @@
  */
 
 import { NameList } from 'elasticsearch';
-import { Filter, IndexPattern, Query } from '../..';
+import { Filter, IDataFrame, IndexPattern, Query } from '../..';
 import { SearchSource } from './search_source';
 
 /**
@@ -103,6 +103,7 @@ export interface SearchSourceFields {
   searchAfter?: OpenSearchQuerySearchAfter;
   timeout?: string;
   terminate_after?: number;
+  df?: IDataFrame;
 }
 
 export interface SearchSourceOptions {

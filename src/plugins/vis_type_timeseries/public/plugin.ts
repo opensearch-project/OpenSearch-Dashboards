@@ -36,6 +36,8 @@ import {
   CoreStart,
   Plugin,
 } from 'opensearch-dashboards/public';
+import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
 
@@ -49,6 +51,9 @@ import {
   setCoreStart,
   setDataStart,
   setChartsSetup,
+  setDataSourceManagementSetup,
+  setNotifications,
+  setDataSourceSetup,
 } from './services';
 import { DataPublicPluginStart } from '../../data/public';
 import { ChartsPluginSetup } from '../../charts/public';
@@ -58,6 +63,8 @@ export interface MetricsPluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
+  dataSource?: DataSourcePluginSetup;
 }
 
 /** @internal */
@@ -75,12 +82,20 @@ export class MetricsPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { expressions, visualizations, charts }: MetricsPluginSetupDependencies
+    {
+      expressions,
+      visualizations,
+      charts,
+      dataSourceManagement,
+      dataSource,
+    }: MetricsPluginSetupDependencies
   ) {
     expressions.registerFunction(createMetricsFn);
     setUISettings(core.uiSettings);
     setChartsSetup(charts);
     visualizations.createReactVisualization(metricsVisDefinition);
+    setDataSourceManagementSetup({ dataSourceManagement });
+    setDataSourceSetup({ dataSource });
   }
 
   public start(core: CoreStart, { data }: MetricsPluginStartDependencies) {
@@ -89,5 +104,6 @@ export class MetricsPlugin implements Plugin<Promise<void>, void> {
     setFieldFormats(data.fieldFormats);
     setDataStart(data);
     setCoreStart(core);
+    setNotifications(core.notifications);
   }
 }

@@ -3,35 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { errors as LegacyErrors } from 'elasticsearch';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-import { OsdError } from '../../../opensearch_dashboards_utils/common';
-
-export class DataSourceError extends OsdError {
-  // must have statusCode to avoid route handler in search.ts to return 500
-  statusCode: number;
-  constructor(error: any, context?: string, statusCode?: number) {
-    let message: string;
-    if (context) {
-      message = context;
-    } else if (isResponseError(error)) {
-      message = JSON.stringify(error.meta.body);
-    } else {
-      message = error.message;
-    }
-
-    super('Data Source Error: ' + message);
-
-    if (statusCode) {
-      this.statusCode = statusCode;
-    } else if (error.statusCode) {
-      this.statusCode = error.statusCode;
-    } else {
-      this.statusCode = 400;
-    }
-  }
-}
+import { DataSourceError, isResponseError } from '../../common/data_sources/error';
 
 export const createDataSourceError = (error: any, message?: string): DataSourceError => {
   // handle saved object client error, while retrieve data source meta info
@@ -51,8 +25,4 @@ export const createDataSourceError = (error: any, message?: string): DataSourceE
 
   // handle all other error that may or may not comes with statuscode
   return new DataSourceError(error, message);
-};
-
-const isResponseError = (error: any): error is ResponseError => {
-  return Boolean(error.body && error.statusCode && error.headers);
 };

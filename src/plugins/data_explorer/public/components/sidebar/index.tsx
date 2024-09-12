@@ -6,7 +6,12 @@
 import React, { FC, useCallback, useEffect, useState } from 'react';
 import { EuiPageSideBar, EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { DataSourceGroup, DataSourceSelectable, DataSourceType } from '../../../../data/public';
+import {
+  DataSource,
+  DataSourceGroup,
+  DataSourceSelectable,
+  UI_SETTINGS,
+} from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
@@ -18,25 +23,32 @@ export const Sidebar: FC = ({ children }) => {
   const dispatch = useTypedDispatch();
   const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
-  const [activeDataSources, setActiveDataSources] = useState<DataSourceType[]>([]);
+  const [activeDataSources, setActiveDataSources] = useState<DataSource[]>([]);
 
   const {
     services: {
       data: { indexPatterns, dataSources },
       notifications: { toasts },
       application,
+      uiSettings,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
+  const [isEnhancementEnabled, setIsEnhancementEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsEnhancementEnabled(uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED));
+  }, [uiSettings]);
+
   useEffect(() => {
     let isMounted = true;
-    const subscription = dataSources.dataSourceService.dataSources$.subscribe(
-      (currentDataSources) => {
+    const subscription = dataSources.dataSourceService
+      .getDataSources$()
+      .subscribe((currentDataSources) => {
         if (isMounted) {
           setActiveDataSources(Object.values(currentDataSources));
         }
-      }
-    );
+      });
 
     return () => {
       subscription.unsubscribe();
@@ -59,23 +71,31 @@ export const Sidebar: FC = ({ children }) => {
     }
   }, [indexPatternId, activeDataSources, dataSourceOptionList]);
 
+  const redirectToLogExplorer = useCallback(
+    (dsName: string, dsType: string) => {
+      return application.navigateToUrl(
+        `../observability-logs#/explorer?datasourceName=${dsName}&datasourceType=${dsType}`
+      );
+    },
+    [application]
+  );
+
   const handleSourceSelection = useCallback(
     (selectedDataSources: DataSourceOption[]) => {
       if (selectedDataSources.length === 0) {
         setSelectedSources(selectedDataSources);
         return;
       }
-      // Temporary redirection solution for 2.11, where clicking non-index-pattern datasource
-      // will redirect user to Observability event explorer
+      // Temporary redirection solution for 2.11, where clicking non-index-pattern data sources
+      // will prompt users with modal explaining they are being redirected to Observability log explorer
       if (selectedDataSources[0]?.ds?.getType() !== 'DEFAULT_INDEX_PATTERNS') {
-        return application.navigateToUrl(
-          `../observability-logs#/explorer?datasourceName=${selectedDataSources[0].label}&datasourceType=${selectedDataSources[0].type}`
-        );
+        redirectToLogExplorer(selectedDataSources[0].label, selectedDataSources[0].type);
+        return;
       }
       setSelectedSources(selectedDataSources);
       dispatch(setIndexPattern(selectedDataSources[0].value));
     },
-    [application, dispatch]
+    [dispatch, redirectToLogExplorer, setSelectedSources]
   );
 
   const handleGetDataSetError = useCallback(
@@ -90,6 +110,10 @@ export const Sidebar: FC = ({ children }) => {
     [toasts]
   );
 
+  const memorizedReload = useCallback(() => {
+    dataSources.dataSourceService.reload();
+  }, [dataSources.dataSourceService]);
+
   return (
     <EuiPageSideBar className="deSidebar" sticky>
       <EuiSplitPanel.Outer
@@ -98,22 +122,25 @@ export const Sidebar: FC = ({ children }) => {
         borderRadius="none"
         color="transparent"
       >
-        <EuiSplitPanel.Inner
-          paddingSize="s"
-          grow={false}
-          color="transparent"
-          className="deSidebar_dataSource"
-        >
-          <DataSourceSelectable
-            dataSources={activeDataSources}
-            dataSourceOptionList={dataSourceOptionList}
-            setDataSourceOptionList={setDataSourceOptionList}
-            onDataSourceSelect={handleSourceSelection}
-            selectedSources={selectedSources}
-            onGetDataSetError={handleGetDataSetError}
-            fullWidth
-          />
-        </EuiSplitPanel.Inner>
+        {!isEnhancementEnabled && (
+          <EuiSplitPanel.Inner
+            paddingSize="s"
+            grow={false}
+            color="transparent"
+            className="deSidebar_dataSource"
+          >
+            <DataSourceSelectable
+              dataSources={activeDataSources}
+              dataSourceOptionList={dataSourceOptionList}
+              setDataSourceOptionList={setDataSourceOptionList}
+              onDataSourceSelect={handleSourceSelection}
+              selectedSources={selectedSources}
+              onGetDataSetError={handleGetDataSetError}
+              onRefresh={memorizedReload}
+              fullWidth
+            />
+          </EuiSplitPanel.Inner>
+        )}
         <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
           {children}
         </EuiSplitPanel.Inner>

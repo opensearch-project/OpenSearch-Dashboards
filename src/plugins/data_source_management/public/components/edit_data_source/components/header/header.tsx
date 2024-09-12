@@ -7,39 +7,83 @@ import React, { useState } from 'react';
 
 import {
   EuiSpacer,
-  EuiTitle,
   EuiFlexItem,
   EuiFlexGroup,
   EuiToolTip,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiConfirmModal,
-  EuiButton,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import {
+  NavigationPublicPluginStart,
+  TopNavControlComponentData,
+} from 'src/plugins/navigation/public';
+import { ApplicationStart } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext } from '../../../../types';
 
 export const Header = ({
+  navigation,
+  application,
+  useNewUX,
   showDeleteIcon,
   isFormValid,
   onClickDeleteIcon,
   onClickTestConnection,
+  onClickSetDefault,
   dataSourceName,
+  isDefault,
+  canManageDataSource,
 }: {
+  navigation: NavigationPublicPluginStart;
+  application: ApplicationStart;
+  useNewUX: boolean;
   showDeleteIcon: boolean;
   isFormValid: boolean;
   onClickDeleteIcon: () => void;
   onClickTestConnection: () => void;
+  onClickSetDefault: () => void;
   dataSourceName: string;
+  isDefault: boolean;
+  canManageDataSource: boolean;
 }) => {
   /* State Variables */
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [isDefaultDataSourceState, setIsDefaultDataSourceState] = useState(isDefault);
 
   const changeTitle = useOpenSearchDashboards<DataSourceManagementContext>().services.chrome
     .docTitle.change;
 
   changeTitle(dataSourceName);
+
+  const setDefaultAriaLabel = i18n.translate(
+    'dataSourcesManagement.editDataSource.setDefaultDataSource',
+    {
+      defaultMessage: 'Set as a default Data Source.',
+    }
+  );
+
+  const renderDefaultIcon = () => {
+    return (
+      <EuiSmallButtonEmpty
+        onClick={() => {
+          onClickSetDefault();
+          setIsDefaultDataSourceState(!isDefaultDataSourceState);
+        }}
+        disabled={isDefaultDataSourceState}
+        iconType={isDefaultDataSourceState ? 'starFilled' : 'starEmpty'}
+        aria-label={setDefaultAriaLabel}
+        data-test-subj="editSetDefaultDataSource"
+        iconSize="s"
+      >
+        {isDefaultDataSourceState ? 'Default' : 'Set as default'}
+      </EuiSmallButtonEmpty>
+    );
+  };
 
   const renderDeleteButton = () => {
     return (
@@ -49,21 +93,20 @@ export const Header = ({
             defaultMessage: 'Delete this Data Source',
           })}
         >
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             color="danger"
             data-test-subj="editDatasourceDeleteIcon"
             onClick={() => {
               setIsDeleteModalVisible(true);
             }}
             iconType="trash"
-            iconSize="m"
-            size="m"
             aria-label={i18n.translate(
               'dataSourcesManagement.editDataSource.deleteThisDataSource',
               {
                 defaultMessage: 'Delete this Data Source',
               }
             )}
+            iconSize="s"
           />
         </EuiToolTip>
 
@@ -89,22 +132,24 @@ export const Header = ({
             defaultFocusedButton="confirm"
             data-test-subj="editDatasourceDeleteConfirmModal"
           >
-            <p>
-              {
-                <FormattedMessage
-                  id="dataSourcesManagement.editDataSource.deleteConfirmation"
-                  defaultMessage="Any objects created using data from these sources, including Index Patterns, Visualizations, and Observability Panels, will be impacted."
-                />
-              }
-            </p>
-            <p>
-              {
-                <FormattedMessage
-                  id="dataSourcesManagement.editDataSource.deleteWarning"
-                  defaultMessage="This action cannot be undone."
-                />
-              }
-            </p>
+            <EuiText size="s">
+              <p>
+                {
+                  <FormattedMessage
+                    id="dataSourcesManagement.editDataSource.deleteConfirmation"
+                    defaultMessage="Any objects created using data from these sources, including Index Patterns, Visualizations, and Observability Panels, will be impacted."
+                  />
+                }
+              </p>
+              <p>
+                {
+                  <FormattedMessage
+                    id="dataSourcesManagement.editDataSource.deleteWarning"
+                    defaultMessage="This action cannot be undone."
+                  />
+                }
+              </p>
+            </EuiText>
           </EuiConfirmModal>
         ) : null}
       </>
@@ -112,7 +157,7 @@ export const Header = ({
   };
   const renderTestConnectionButton = () => {
     return (
-      <EuiButton
+      <EuiSmallButton
         type="submit"
         fill={false}
         disabled={!isFormValid}
@@ -120,23 +165,48 @@ export const Header = ({
           onClickTestConnection();
         }}
         data-test-subj="datasource-edit-testConnectionButton"
+        iconSize="s"
       >
         <FormattedMessage
           id="dataSourcesManagement.createDataSource.testConnectionButton"
           defaultMessage="Test connection"
         />
-      </EuiButton>
+      </EuiSmallButton>
     );
   };
 
-  return (
+  const rightSideActions = [
+    {
+      renderComponent: (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            {/* Test default button */}
+            <EuiFlexItem grow={false}>{renderDefaultIcon()}</EuiFlexItem>
+            {/* Test connection button */}
+            <EuiFlexItem grow={false}>{renderTestConnectionButton()}</EuiFlexItem>
+            {/* Delete icon button */}
+            {canManageDataSource ? (
+              <EuiFlexItem grow={false}>{showDeleteIcon ? renderDeleteButton() : null}</EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      ),
+    } as TopNavControlComponentData,
+  ];
+
+  return useNewUX ? (
+    <navigation.ui.HeaderControl
+      setMountPoint={application.setAppRightControls}
+      controls={rightSideActions}
+    />
+  ) : (
     <EuiFlexGroup justifyContent="spaceBetween">
       {/* Title */}
       <EuiFlexItem grow={false}>
         <div>
-          <EuiTitle data-test-subj="editDataSourceTitle">
+          <EuiText size="s" data-test-subj="editDataSourceTitle">
             <h1>{dataSourceName}</h1>
-          </EuiTitle>
+          </EuiText>
           <EuiSpacer size="s" />
         </div>
       </EuiFlexItem>
@@ -144,10 +214,14 @@ export const Header = ({
       {/* Right side buttons */}
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
+          {/* Test default button */}
+          <EuiFlexItem grow={false}>{renderDefaultIcon()}</EuiFlexItem>
           {/* Test connection button */}
           <EuiFlexItem grow={false}>{renderTestConnectionButton()}</EuiFlexItem>
           {/* Delete icon button */}
-          <EuiFlexItem grow={false}>{showDeleteIcon ? renderDeleteButton() : null}</EuiFlexItem>
+          {canManageDataSource ? (
+            <EuiFlexItem grow={false}>{showDeleteIcon ? renderDeleteButton() : null}</EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -87,7 +87,7 @@ const getMockCallCluster = (hits?: unknown[]) =>
   jest.fn().mockReturnValue(Promise.resolve({ hits: { hits } }) as unknown) as LegacyAPICaller;
 
 describe('Vega visualization usage collector', () => {
-  const configMock = of({ kibana: { index: '' } });
+  const configMock = of({ opensearchDashboards: { index: '' } });
   const usageCollector = getUsageCollector(configMock, {
     home: ({
       sampleData: {

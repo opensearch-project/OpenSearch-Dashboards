@@ -10,7 +10,20 @@ import { DataSourceManagementPlugin } from './plugin';
 export function plugin() {
   return new DataSourceManagementPlugin();
 }
-export { DataSourceManagementPluginStart } from './types';
-export { DataSourceSelector } from './components/data_source_selector';
+
+export { DataSourceManagementPluginStart, DirectQueryDatasourceDetails } from './types';
+export { DataSourceSelector, DataSourceOption } from './components/data_source_selector';
 export { DataSourceMenu } from './components/data_source_menu';
 export { DataSourceManagementPlugin, DataSourceManagementPluginSetup } from './plugin';
+export {
+  DataSourceSelectableConfig,
+  DataSourceComponentType,
+  DataSourceAggregatedViewConfig,
+  DataSourceViewConfig,
+  DataSourceMenuProps,
+  DataSourceMultiSelectableConfig,
+  createDataSourceMenu,
+} from './components/data_source_menu';
+export { DataSourceSelectionService } from './service/data_source_selection_service';
+export { getDefaultDataSourceId, getDefaultDataSourceId$ } from './components/utils';
+export { DATACONNECTIONS_BASE, DatasourceTypeToDisplayName } from './constants';

@@ -40,6 +40,7 @@ import {
 
 import React from 'react';
 import { Query } from '@elastic/eui';
+import { waitFor } from '@testing-library/dom';
 import { ShallowWrapper } from 'enzyme';
 import { shallowWithI18nProvider } from 'test_utils/enzyme_helpers';
 import {
@@ -48,6 +49,7 @@ import {
   notificationServiceMock,
   savedObjectsServiceMock,
   applicationServiceMock,
+  workspacesServiceMock,
 } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { serviceRegistryMock } from '../../services/service_registry.mock';
@@ -61,6 +63,8 @@ import {
 } from './saved_objects_table';
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
+import { WorkspaceObject } from 'opensearch-dashboards/public';
+import { TableProps } from './components/table';
 
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
 
@@ -102,6 +106,7 @@ describe('SavedObjectsTable', () => {
   let notifications: ReturnType<typeof notificationServiceMock.createStartContract>;
   let savedObjects: ReturnType<typeof savedObjectsServiceMock.createStartContract>;
   let search: ReturnType<typeof dataPluginMock.createStartContract>['search'];
+  let workspaces: ReturnType<typeof workspacesServiceMock.createStartContract>;
 
   const shallowRender = (overrides: Partial<SavedObjectsTableProps> = {}) => {
     return (shallowWithI18nProvider(
@@ -121,6 +126,7 @@ describe('SavedObjectsTable', () => {
     notifications = notificationServiceMock.createStartContract();
     savedObjects = savedObjectsServiceMock.createStartContract();
     search = dataPluginMock.createStartContract().search;
+    workspaces = workspacesServiceMock.createStartContract();
 
     const applications = applicationServiceMock.createStartContract();
     applications.capabilities = {
@@ -132,6 +138,7 @@ describe('SavedObjectsTable', () => {
         edit: false,
         delete: false,
       },
+      workspaces: {},
     };
 
     http.post.mockResolvedValue([]);
@@ -161,6 +168,7 @@ describe('SavedObjectsTable', () => {
       goInspectObject: () => {},
       canGoInApp: () => true,
       search,
+      workspaces,
     };
 
     findObjectsMock.mockImplementation(() => ({
@@ -230,6 +238,22 @@ describe('SavedObjectsTable', () => {
     // Ensure the state changes are reflected
     component.update();
 
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should unmount normally', async () => {
+    const component = shallowRender();
+    const mockDebouncedFetchObjects = {
+      cancel: jest.fn(),
+      flush: jest.fn(),
+    };
+    component.instance().debouncedFetchObjects = mockDebouncedFetchObjects as any;
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    // component.update();
+
+    component.unmount();
     expect(component).toMatchSnapshot();
   });
 
@@ -363,7 +387,8 @@ describe('SavedObjectsTable', () => {
         http,
         allowedTypes,
         undefined,
-        true
+        true,
+        undefined
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -393,7 +418,46 @@ describe('SavedObjectsTable', () => {
         http,
         allowedTypes,
         'test*',
-        true
+        true,
+        undefined
+      );
+      expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
+      expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Your file is downloading in the background',
+      });
+    });
+
+    it('should export all, accounting for the current workspace criteria', async () => {
+      const workspaceList: WorkspaceObject[] = [
+        {
+          id: 'workspace1',
+          name: 'foo',
+        },
+      ];
+      workspaces.workspaceList$.next(workspaceList);
+      const component = shallowRender({ workspaces });
+
+      component.instance().onQueryChange({
+        query: Query.parse(`test workspaces:("foo")`),
+      });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set up mocks
+      const blob = new Blob([JSON.stringify(allSavedObjects)], { type: 'application/ndjson' });
+      fetchExportByTypeAndSearchMock.mockImplementation(() => blob);
+
+      await component.instance().onExportAll();
+
+      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith(
+        http,
+        allowedTypes,
+        'test*',
+        true,
+        ['workspace1']
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -554,6 +618,9 @@ describe('SavedObjectsTable', () => {
 
       // Set some as selected
       component.instance().onSelectionChanged(mockSelectedSavedObjects);
+      await component.instance().onDelete();
+      component.update();
+      expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
 
       await component.instance().delete();
 
@@ -570,6 +637,471 @@ describe('SavedObjectsTable', () => {
         { force: true }
       );
       expect(component.state('selectedSavedObjects').length).toBe(0);
+      expect(notifications.toasts.addDanger).not.toHaveBeenCalled();
+      expect(component.state('isDeleting')).toBe(false);
+      expect(component.state('isShowingDeleteConfirmModal')).toBe(false);
+    });
+
+    it('should show error toast when failing to delete saved objects', async () => {
+      const mockSelectedSavedObjects = [
+        { id: '1', type: 'index-pattern' },
+      ] as SavedObjectWithMetadata[];
+
+      const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
+        id: obj.id,
+        type: obj.type,
+        source: {},
+      }));
+
+      const mockSavedObjectsClient = {
+        ...defaultProps.savedObjectsClient,
+        bulkGet: jest.fn().mockImplementation(() => ({
+          savedObjects: mockSavedObjects,
+        })),
+        delete: jest.fn().mockImplementation(() => {
+          throw new Error('Unable to delete saved objects');
+        }),
+      };
+
+      const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set some as selected
+      component.instance().onSelectionChanged(mockSelectedSavedObjects);
+      await component.instance().onDelete();
+      component.update();
+      expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
+      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+
+      await component.instance().delete();
+      component.update();
+      expect(notifications.toasts.addDanger).toHaveBeenCalled();
+      // If user fail to delete the saved objects, the delete modal will continue to display
+      expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
+      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.state('isDeleting')).toBe(false);
+    });
+  });
+
+  describe('workspace filter', () => {
+    it('workspace filter include all visible workspaces when not in any workspace', async () => {
+      const applications = applicationServiceMock.createStartContract();
+      applications.capabilities = {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        savedObjectsManagement: {
+          read: true,
+          edit: false,
+          delete: false,
+        },
+        workspaces: {
+          enabled: true,
+        },
+      };
+
+      const workspaceList: WorkspaceObject[] = [
+        {
+          id: 'workspace1',
+          name: 'foo',
+        },
+        {
+          id: 'workspace2',
+          name: 'bar',
+        },
+      ];
+      workspaces.workspaceList$.next(workspaceList);
+      workspaces.currentWorkspaceId$.next('');
+      workspaces.currentWorkspace$.next(null);
+
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      const props = component.find('Table').props() as TableProps;
+      const filters = props.filters;
+      expect(filters.length).toBe(2);
+      expect(filters[0].field).toBe('type');
+      expect(filters[1].field).toBe('workspaces');
+      expect(filters[1].options.length).toBe(2);
+      expect(filters[1].options[0].value).toBe('foo');
+      expect(filters[1].options[1].value).toBe('bar');
+    });
+
+    it('workspace filter only include current workspaces when in a workspace', async () => {
+      const applications = applicationServiceMock.createStartContract();
+      applications.capabilities = {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        savedObjectsManagement: {
+          read: true,
+          edit: false,
+          delete: false,
+        },
+        workspaces: {
+          enabled: true,
+        },
+      };
+
+      const workspaceList: WorkspaceObject[] = [
+        {
+          id: 'workspace1',
+          name: 'foo',
+        },
+        {
+          id: 'workspace2',
+          name: 'bar',
+        },
+      ];
+      workspaces.workspaceList$.next(workspaceList);
+      workspaces.currentWorkspaceId$.next('workspace1');
+      workspaces.currentWorkspace$.next(workspaceList[0]);
+
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      const props = component.find('Table').props() as TableProps;
+      const filters = props.filters;
+      const wsFilter = filters.filter((f) => f.field === 'workspaces');
+      expect(wsFilter.length).toBe(1);
+      expect(wsFilter[0].options.length).toBe(1);
+      expect(wsFilter[0].options[0].value).toBe('foo');
+    });
+
+    it('current workspace in find options when workspace on', async () => {
+      findObjectsMock.mockClear();
+      const applications = applicationServiceMock.createStartContract();
+      applications.capabilities = {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        savedObjectsManagement: {
+          read: true,
+          edit: false,
+          delete: false,
+        },
+        workspaces: {
+          enabled: true,
+        },
+      };
+
+      const workspaceList: WorkspaceObject[] = [
+        {
+          id: 'workspace1',
+          name: 'foo',
+        },
+        {
+          id: 'workspace2',
+          name: 'bar',
+        },
+      ];
+      workspaces.workspaceList$.next(workspaceList);
+      workspaces.currentWorkspaceId$.next('workspace1');
+      workspaces.currentWorkspace$.next(workspaceList[0]);
+
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await waitFor(() => {
+        expect(findObjectsMock).toBeCalledWith(
+          http,
+          expect.objectContaining({
+            workspaces: expect.arrayContaining(['workspace1']),
+          })
+        );
+      });
+    });
+
+    it('no workspaces in find options when not in any workspace', async () => {
+      findObjectsMock.mockClear();
+      const applications = applicationServiceMock.createStartContract();
+      applications.capabilities = {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        savedObjectsManagement: {
+          read: true,
+          edit: false,
+          delete: false,
+        },
+        workspaces: {
+          enabled: true,
+        },
+      };
+
+      const workspaceList: WorkspaceObject[] = [
+        {
+          id: 'workspace1',
+          name: 'foo',
+        },
+        {
+          id: 'workspace2',
+          name: 'bar',
+        },
+      ];
+      workspaces.workspaceList$.next(workspaceList);
+
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await waitFor(() => {
+        expect(findObjectsMock).toBeCalledWith(
+          http,
+          expect.not.objectContaining({
+            workspaces,
+          })
+        );
+      });
+    });
+  });
+
+  describe('duplicate', () => {
+    const applications = applicationServiceMock.createStartContract();
+    applications.capabilities = {
+      navLinks: {},
+      management: {},
+      catalogue: {},
+      savedObjectsManagement: {
+        read: true,
+        edit: false,
+        delete: false,
+      },
+      workspaces: {
+        enabled: true,
+      },
+    };
+
+    const workspaceList: WorkspaceObject[] = [
+      {
+        id: 'workspace1',
+        name: 'foo',
+      },
+      {
+        id: 'workspace2',
+        name: 'bar',
+      },
+    ];
+
+    const mockSelectedSavedObjects = [
+      { id: '1', type: 'dashboard', references: [], attributes: [], meta: { title: 'object-1' } },
+      { id: '2', type: 'dashboard', references: [], attributes: [], meta: { title: 'object-2' } },
+    ] as SavedObjectWithMetadata[];
+
+    beforeEach(() => {
+      workspaces.workspaceList$.next(workspaceList);
+      workspaces.currentWorkspaceId$.next('workspace1');
+      workspaces.currentWorkspace$.next(workspaceList[0]);
+    });
+
+    it('should duplicate selected objects', async () => {
+      const mockCopy = jest.fn().mockResolvedValue({ success: true });
+      workspaces.client$.next({ copy: mockCopy });
+      const client = workspaces.client$.getValue();
+
+      const component = shallowRender({ applications, workspaces });
+      component.setState({ isShowingDuplicateModal: true });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(component.state('isShowingDuplicateModal')).toEqual(true);
+      expect(component.find('SavedObjectsDuplicateModal').length).toEqual(1);
+
+      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
+
+      expect(client?.copy).toHaveBeenCalledWith(
+        [
+          { id: '1', type: 'dashboard' },
+          { id: '2', type: 'dashboard' },
+        ],
+        'workspace2',
+        false
+      );
+      component.update();
+
+      expect(component.state('isShowingDuplicateResultFlyout')).toEqual(true);
+      expect(component.find('DuplicateResultFlyout').length).toEqual(1);
+    });
+
+    it('should duplicate single object', async () => {
+      const mockCopy = jest.fn().mockResolvedValue({ success: true });
+      workspaces.client$.next({ copy: mockCopy });
+      const client = workspaces.client$.getValue();
+
+      const component = shallowRender({ applications, workspaces });
+      component.setState({ isShowingDuplicateModal: true });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await component
+        .instance()
+        .onDuplicate([mockSelectedSavedObjects[0]], true, 'workspace2', 'bar');
+
+      expect(client?.copy).toHaveBeenCalledWith(
+        [{ id: '1', type: 'dashboard' }],
+        'workspace2',
+        true
+      );
+      component.update();
+
+      expect(component.state('isShowingDuplicateResultFlyout')).toEqual(true);
+      expect(component.find('DuplicateResultFlyout').length).toEqual(1);
+    });
+
+    it('should show result flyout when duplicating success and failure coexist', async () => {
+      const mockCopy = jest.fn().mockResolvedValue(() => ({
+        success: false,
+        successCount: 1,
+        successResults: [{ id: '1' }],
+        errors: [{ id: '2' }],
+      }));
+      workspaces.client$.next({ copy: mockCopy });
+      const client = workspaces.client$.getValue();
+      const component = shallowRender({ applications, workspaces });
+      component.setState({ isShowingDuplicateModal: true });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
+
+      expect(client?.copy).toHaveBeenCalledWith(
+        [
+          { id: '1', type: 'dashboard' },
+          { id: '2', type: 'dashboard' },
+        ],
+        'workspace2',
+        false
+      );
+      component.update();
+
+      expect(component.state('isShowingDuplicateResultFlyout')).toEqual(true);
+      expect(component.find('DuplicateResultFlyout').length).toEqual(1);
+    });
+
+    it('should catch error when workspace client is null', async () => {
+      const component = shallowRender({ applications, workspaces });
+      component.setState({ isShowingDuplicateModal: true });
+      workspaces.client$.next(null);
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
+      component.update();
+
+      expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
+        title: 'Unable to copy 2 saved objects.',
+      });
+    });
+
+    it('should catch error when duplicating selected object is fail', async () => {
+      const component = shallowRender({ applications, workspaces });
+      component.setState({ isShowingDuplicateModal: true });
+
+      const mockCopy = jest.fn().mockRejectedValue(() => new Error('Copy operation failed'));
+      workspaces.client$.next({ copy: mockCopy });
+      const client = workspaces.client$.getValue();
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
+
+      expect(client?.copy).toHaveBeenCalledWith(
+        [
+          { id: '1', type: 'dashboard' },
+          { id: '2', type: 'dashboard' },
+        ],
+        'workspace2',
+        false
+      );
+      component.update();
+
+      expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
+        title: 'Unable to copy 2 saved objects.',
+      });
+    });
+
+    it('should allow the user to choose on header when duplicating all', async () => {
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      const header = component.find('Header') as any;
+      expect(header.prop('showDuplicateAll')).toEqual(true);
+      header.prop('onDuplicate')();
+
+      await new Promise((resolve) => process.nextTick(resolve));
+      component.update();
+
+      expect(component.state('isShowingDuplicateModal')).toEqual(true);
+      expect(component.find('SavedObjectsDuplicateModal')).toMatchSnapshot();
+    });
+
+    it('should allow the user to choose on table when duplicating all', async () => {
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      const table = component.find('Table') as any;
+      table.prop('onDuplicate')();
+      component.update();
+
+      expect(component.state('isShowingDuplicateModal')).toEqual(true);
+      expect(component.find('SavedObjectsDuplicateModal')).toMatchSnapshot();
+    });
+
+    it('should allow the user to choose on table when duplicating single', async () => {
+      const component = shallowRender({ applications, workspaces });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      const table = component.find('Table') as any;
+      table.prop('onDuplicateSingle')([{ id: '1', type: 'dashboard', workspaces: ['workspace1'] }]);
+      component.update();
+
+      expect(component.state('isShowingDuplicateModal')).toEqual(true);
+      expect(component.find('SavedObjectsDuplicateModal')).toMatchSnapshot();
     });
   });
 });

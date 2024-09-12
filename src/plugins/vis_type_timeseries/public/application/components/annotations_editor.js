@@ -45,16 +45,17 @@ import {
   htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFormLabel,
   EuiSpacer,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiTitle,
-  EuiButton,
+  EuiSmallButton,
   EuiCode,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 
 function newAnnotation() {
   return {
@@ -126,25 +127,29 @@ export class AnnotationsEditor extends Component {
           <EuiFlexItem className="tvbAggRow__children">
             <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('indexPattern')}
                   label={
                     <FormattedMessage
                       id="visTypeTimeseries.annotationsEditor.indexPatternLabel"
-                      defaultMessage="Index pattern (required)"
+                      defaultMessage="Index name (required)"
                     />
                   }
+                  helpText={i18n.translate('visTypeTimeseries.indexPattern.searchByIndex', {
+                    defaultMessage:
+                      'Use an asterisk (*) to match multiple indices. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
+                  })}
                   fullWidth
                 >
-                  <EuiFieldText
+                  <EuiCompressedFieldText
                     onChange={this.handleChange(model, 'index_pattern')}
                     value={model.index_pattern}
                     fullWidth
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('timeField')}
                   label={
                     <FormattedMessage
@@ -162,7 +167,7 @@ export class AnnotationsEditor extends Component {
                     fields={this.props.fields}
                     fullWidth
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
 
@@ -170,7 +175,7 @@ export class AnnotationsEditor extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('queryString')}
                   label={
                     <FormattedMessage
@@ -188,7 +193,7 @@ export class AnnotationsEditor extends Component {
                     onChange={(query) => this.handleQueryChange(model, query)}
                     indexPatterns={[model.index_pattern]}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>
@@ -224,7 +229,7 @@ export class AnnotationsEditor extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('icon')}
                   label={
                     <FormattedMessage
@@ -234,10 +239,10 @@ export class AnnotationsEditor extends Component {
                   }
                 >
                   <IconSelect value={model.icon} onChange={this.handleChange(model, 'icon')} />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('fields')}
                   label={
                     <FormattedMessage
@@ -247,15 +252,15 @@ export class AnnotationsEditor extends Component {
                   }
                   fullWidth
                 >
-                  <EuiFieldText
+                  <EuiCompressedFieldText
                     onChange={this.handleChange(model, 'fields')}
                     value={model.fields}
                     fullWidth
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('rowTemplate')}
                   label={
                     <FormattedMessage
@@ -274,12 +279,12 @@ export class AnnotationsEditor extends Component {
                   }
                   fullWidth
                 >
-                  <EuiFieldText
+                  <EuiCompressedFieldText
                     onChange={this.handleChange(model, 'template')}
                     value={model.template}
                     fullWidth
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -303,19 +308,19 @@ export class AnnotationsEditor extends Component {
     if (!model.annotations || !model.annotations.length) {
       const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
       content = (
-        <EuiText textAlign="center">
+        <EuiText size="s" textAlign="center">
           <p>
             <FormattedMessage
               id="visTypeTimeseries.annotationsEditor.howToCreateAnnotationDataSourceDescription"
               defaultMessage="Click the button below to create an annotation data source."
             />
           </p>
-          <EuiButton fill onClick={handleAdd}>
+          <EuiSmallButton fill onClick={handleAdd}>
             <FormattedMessage
               id="visTypeTimeseries.annotationsEditor.addDataSourceButtonLabel"
               defaultMessage="Add data source"
             />
-          </EuiButton>
+          </EuiSmallButton>
         </EuiText>
       );
     } else {

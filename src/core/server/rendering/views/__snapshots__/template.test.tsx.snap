@@ -50,10 +50,6 @@ Array [
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -62,6 +58,12 @@ Array [
     name="add-scripts-here"
   />,
   null,
+  <meta
+    name="add-fonts-here"
+  />,
+  <script
+    src="[object Object]/startup.js"
+  />,
   <osd-csp
     data="{\\"strictCsp\\":true}"
   />,
@@ -83,7 +85,15 @@ Array [
       >
         <img
           alt="OpenSearch Dashboards logo"
-          class="loadingLogo"
+          class="loadingLogo darkOnly"
+          data-test-image-url="/darkModeLoadingLogo"
+          data-test-subj="customLogo"
+          loading="eager"
+          src="/darkModeLoadingLogo"
+        />
+        <img
+          alt="OpenSearch Dashboards logo"
+          class="loadingLogo lightOnly"
           data-test-image-url="/defaultModeLoadingLogo"
           data-test-subj="customLogo"
           loading="eager"
@@ -103,7 +113,14 @@ Array [
   >
     <img
       alt="OpenSearch Dashboards logo"
-      class="legacyBrowserErrorLogo"
+      class="legacyBrowserErrorLogo darkOnly"
+      data-test-image-url="/darkModeMark"
+      data-test-subj="custom logo"
+      src="/darkModeMark"
+    />
+    <img
+      alt="OpenSearch Dashboards logo"
+      class="legacyBrowserErrorLogo lightOnly"
       data-test-image-url="/defaultModeMark"
       data-test-subj="custom logo"
       src="/defaultModeMark"
@@ -180,10 +197,6 @@ Array [
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -192,6 +205,12 @@ Array [
     name="add-scripts-here"
   />,
   null,
+  <meta
+    name="add-fonts-here"
+  />,
+  <script
+    src="[object Object]/startup.js"
+  />,
   <osd-csp
     data="{\\"strictCsp\\":true}"
   />,
@@ -213,7 +232,15 @@ Array [
       >
         <img
           alt="OpenSearch Dashboards logo"
-          class="loadingLogo"
+          class="loadingLogo darkOnly"
+          data-test-image-url="/defaultModeLoadingLogo"
+          data-test-subj="customLogo"
+          loading="eager"
+          src="/defaultModeLoadingLogo"
+        />
+        <img
+          alt="OpenSearch Dashboards logo"
+          class="loadingLogo lightOnly"
           data-test-image-url="/defaultModeLoadingLogo"
           data-test-subj="customLogo"
           loading="eager"
@@ -233,7 +260,14 @@ Array [
   >
     <img
       alt="OpenSearch Dashboards logo"
-      class="legacyBrowserErrorLogo"
+      class="legacyBrowserErrorLogo darkOnly"
+      data-test-image-url="/darkModeMark"
+      data-test-subj="custom logo"
+      src="/darkModeMark"
+    />
+    <img
+      alt="OpenSearch Dashboards logo"
+      class="legacyBrowserErrorLogo lightOnly"
       data-test-image-url="/defaultModeMark"
       data-test-subj="custom logo"
       src="/defaultModeMark"
@@ -310,10 +344,6 @@ Array [
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -322,6 +352,12 @@ Array [
     name="add-scripts-here"
   />,
   null,
+  <meta
+    name="add-fonts-here"
+  />,
+  <script
+    src="[object Object]/startup.js"
+  />,
   <osd-csp
     data="{\\"strictCsp\\":true}"
   />,
@@ -343,7 +379,15 @@ Array [
       >
         <img
           alt="OpenSearch Dashboards logo"
-          class="loadingLogo"
+          class="loadingLogo darkOnly"
+          data-test-image-url="/darkModeMark"
+          data-test-subj="alternativeLogo"
+          loading="eager"
+          src="/darkModeMark"
+        />
+        <img
+          alt="OpenSearch Dashboards logo"
+          class="loadingLogo lightOnly"
           data-test-image-url="/defaultModeMark"
           data-test-subj="alternativeLogo"
           loading="eager"
@@ -355,7 +399,10 @@ Array [
         data-error-message=""
       />
       <div
-        class="osdProgress"
+        class="osdProgress darkOnly"
+      />
+      <div
+        class="osdProgress lightOnly"
       />
     </div>
   </div>,
@@ -366,7 +413,14 @@ Array [
   >
     <img
       alt="OpenSearch Dashboards logo"
-      class="legacyBrowserErrorLogo"
+      class="legacyBrowserErrorLogo darkOnly"
+      data-test-image-url="/darkModeMark"
+      data-test-subj="custom logo"
+      src="/darkModeMark"
+    />
+    <img
+      alt="OpenSearch Dashboards logo"
+      class="legacyBrowserErrorLogo lightOnly"
       data-test-image-url="/defaultModeMark"
       data-test-subj="custom logo"
       src="/defaultModeMark"
@@ -443,10 +497,6 @@ Array [
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -455,6 +505,12 @@ Array [
     name="add-scripts-here"
   />,
   null,
+  <meta
+    name="add-fonts-here"
+  />,
+  <script
+    src="[object Object]/startup.js"
+  />,
   <osd-csp
     data="{\\"strictCsp\\":true}"
   />,
@@ -476,7 +532,15 @@ Array [
       >
         <img
           alt="OpenSearch Dashboards logo"
-          class="loadingLogo"
+          class="loadingLogo darkOnly"
+          data-test-image-url="/defaultModeMark"
+          data-test-subj="alternativeLogo"
+          loading="eager"
+          src="/defaultModeMark"
+        />
+        <img
+          alt="OpenSearch Dashboards logo"
+          class="loadingLogo lightOnly"
           data-test-image-url="/defaultModeMark"
           data-test-subj="alternativeLogo"
           loading="eager"
@@ -488,7 +552,10 @@ Array [
         data-error-message=""
       />
       <div
-        class="osdProgress"
+        class="osdProgress darkOnly"
+      />
+      <div
+        class="osdProgress lightOnly"
       />
     </div>
   </div>,
@@ -499,7 +566,14 @@ Array [
   >
     <img
       alt="OpenSearch Dashboards logo"
-      class="legacyBrowserErrorLogo"
+      class="legacyBrowserErrorLogo darkOnly"
+      data-test-image-url="/defaultModeMark"
+      data-test-subj="custom logo"
+      src="/defaultModeMark"
+    />
+    <img
+      alt="OpenSearch Dashboards logo"
+      class="legacyBrowserErrorLogo lightOnly"
       data-test-image-url="/defaultModeMark"
       data-test-subj="custom logo"
       src="/defaultModeMark"
@@ -576,10 +650,6 @@ Array [
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -588,6 +658,12 @@ Array [
     name="add-scripts-here"
   />,
   null,
+  <meta
+    name="add-fonts-here"
+  />,
+  <script
+    src="[object Object]/startup.js"
+  />,
   <osd-csp
     data="{\\"strictCsp\\":true}"
   />,
@@ -609,7 +685,15 @@ Array [
       >
         <img
           alt="OpenSearch Dashboards logo"
-          class="loadingLogo"
+          class="loadingLogo darkOnly"
+          data-test-image-url="/ui/logos/opensearch_spinner_on_dark.svg"
+          data-test-subj="defaultLogo"
+          loading="eager"
+          src="/ui/logos/opensearch_spinner_on_dark.svg"
+        />
+        <img
+          alt="OpenSearch Dashboards logo"
+          class="loadingLogo lightOnly"
           data-test-image-url="/ui/logos/opensearch_spinner_on_light.svg"
           data-test-subj="defaultLogo"
           loading="eager"
@@ -629,7 +713,14 @@ Array [
   >
     <img
       alt="OpenSearch Dashboards logo"
-      class="legacyBrowserErrorLogo"
+      class="legacyBrowserErrorLogo darkOnly"
+      data-test-image-url="/ui/logos/opensearch_mark_on_dark.svg"
+      data-test-subj="default logo"
+      src="/ui/logos/opensearch_mark_on_dark.svg"
+    />
+    <img
+      alt="OpenSearch Dashboards logo"
+      class="legacyBrowserErrorLogo lightOnly"
       data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
       data-test-subj="default logo"
       src="/ui/logos/opensearch_mark_on_light.svg"
@@ -706,10 +797,6 @@ Array [
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -718,6 +805,12 @@ Array [
     name="add-scripts-here"
   />,
   null,
+  <meta
+    name="add-fonts-here"
+  />,
+  <script
+    src="[object Object]/startup.js"
+  />,
   <osd-csp
     data="{\\"strictCsp\\":true}"
   />,
@@ -739,7 +832,15 @@ Array [
       >
         <img
           alt="custom title logo"
-          class="loadingLogo"
+          class="loadingLogo darkOnly"
+          data-test-image-url="defaultModeLoadingLogo/"
+          data-test-subj="customLogo"
+          loading="eager"
+          src="defaultModeLoadingLogo/"
+        />
+        <img
+          alt="custom title logo"
+          class="loadingLogo lightOnly"
           data-test-image-url="defaultModeLoadingLogo/"
           data-test-subj="customLogo"
           loading="eager"
@@ -759,7 +860,14 @@ Array [
   >
     <img
       alt="custom title logo"
-      class="legacyBrowserErrorLogo"
+      class="legacyBrowserErrorLogo darkOnly"
+      data-test-image-url="/defaultModeMark"
+      data-test-subj="custom logo"
+      src="/defaultModeMark"
+    />
+    <img
+      alt="custom title logo"
+      class="legacyBrowserErrorLogo lightOnly"
       data-test-image-url="/defaultModeMark"
       data-test-subj="custom logo"
       src="/defaultModeMark"
@@ -836,10 +944,6 @@ Array [
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -848,6 +952,12 @@ Array [
     name="add-scripts-here"
   />,
   null,
+  <meta
+    name="add-fonts-here"
+  />,
+  <script
+    src="[object Object]/startup.js"
+  />,
   <osd-csp
     data="{\\"strictCsp\\":true}"
   />,
@@ -869,7 +979,15 @@ Array [
       >
         <img
           alt="custom title logo"
-          class="loadingLogo"
+          class="loadingLogo darkOnly"
+          data-test-image-url="/defaultModeMark"
+          data-test-subj="alternativeLogo"
+          loading="eager"
+          src="/defaultModeMark"
+        />
+        <img
+          alt="custom title logo"
+          class="loadingLogo lightOnly"
           data-test-image-url="/defaultModeMark"
           data-test-subj="alternativeLogo"
           loading="eager"
@@ -881,7 +999,10 @@ Array [
         data-error-message=""
       />
       <div
-        class="osdProgress"
+        class="osdProgress darkOnly"
+      />
+      <div
+        class="osdProgress lightOnly"
       />
     </div>
   </div>,
@@ -892,7 +1013,14 @@ Array [
   >
     <img
       alt="custom title logo"
-      class="legacyBrowserErrorLogo"
+      class="legacyBrowserErrorLogo darkOnly"
+      data-test-image-url="/defaultModeMark"
+      data-test-subj="custom logo"
+      src="/defaultModeMark"
+    />
+    <img
+      alt="custom title logo"
+      class="legacyBrowserErrorLogo lightOnly"
       data-test-image-url="/defaultModeMark"
       data-test-subj="custom logo"
       src="/defaultModeMark"
@@ -969,10 +1097,6 @@ Array [
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -981,6 +1105,12 @@ Array [
     name="add-scripts-here"
   />,
   null,
+  <meta
+    name="add-fonts-here"
+  />,
+  <script
+    src="[object Object]/startup.js"
+  />,
   <osd-csp
     data="{\\"strictCsp\\":true}"
   />,
@@ -1002,7 +1132,15 @@ Array [
       >
         <img
           alt="custom title logo"
-          class="loadingLogo"
+          class="loadingLogo darkOnly"
+          data-test-image-url="/ui/logos/opensearch_spinner_on_dark.svg"
+          data-test-subj="defaultLogo"
+          loading="eager"
+          src="/ui/logos/opensearch_spinner_on_dark.svg"
+        />
+        <img
+          alt="custom title logo"
+          class="loadingLogo lightOnly"
           data-test-image-url="/ui/logos/opensearch_spinner_on_light.svg"
           data-test-subj="defaultLogo"
           loading="eager"
@@ -1022,7 +1160,14 @@ Array [
   >
     <img
       alt="custom title logo"
-      class="legacyBrowserErrorLogo"
+      class="legacyBrowserErrorLogo darkOnly"
+      data-test-image-url="/ui/logos/opensearch_mark_on_dark.svg"
+      data-test-subj="default logo"
+      src="/ui/logos/opensearch_mark_on_dark.svg"
+    />
+    <img
+      alt="custom title logo"
+      class="legacyBrowserErrorLogo lightOnly"
       data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
       data-test-subj="default logo"
       src="/ui/logos/opensearch_mark_on_light.svg"
@@ -1099,10 +1244,6 @@ Array [
     content=""
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -1111,6 +1252,12 @@ Array [
     name="add-scripts-here"
   />,
   null,
+  <meta
+    name="add-fonts-here"
+  />,
+  <script
+    src="[object Object]/startup.js"
+  />,
   <osd-csp
     data="{\\"strictCsp\\":true}"
   />,
@@ -1132,7 +1279,15 @@ Array [
       >
         <img
           alt="OpenSearch Dashboards logo"
-          class="loadingLogo"
+          class="loadingLogo darkOnly"
+          data-test-image-url="/ui/logos/opensearch_spinner_on_dark.svg"
+          data-test-subj="defaultLogo"
+          loading="eager"
+          src="/ui/logos/opensearch_spinner_on_dark.svg"
+        />
+        <img
+          alt="OpenSearch Dashboards logo"
+          class="loadingLogo lightOnly"
           data-test-image-url="/ui/logos/opensearch_spinner_on_light.svg"
           data-test-subj="defaultLogo"
           loading="eager"
@@ -1152,7 +1307,14 @@ Array [
   >
     <img
       alt="OpenSearch Dashboards logo"
-      class="legacyBrowserErrorLogo"
+      class="legacyBrowserErrorLogo darkOnly"
+      data-test-image-url="/ui/logos/opensearch_mark_on_dark.svg"
+      data-test-subj="default logo"
+      src="/ui/logos/opensearch_mark_on_dark.svg"
+    />
+    <img
+      alt="OpenSearch Dashboards logo"
+      class="legacyBrowserErrorLogo lightOnly"
       data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
       data-test-subj="default logo"
       src="/ui/logos/opensearch_mark_on_light.svg"
@@ -1229,10 +1391,6 @@ Array [
     content="[object Object]/ui/favicons/browserconfig.xml"
     name="msapplication-config"
   />,
-  <meta
-    content="#ffffff"
-    name="theme-color"
-  />,
   null,
   <meta
     name="add-styles-here"
@@ -1241,6 +1399,12 @@ Array [
     name="add-scripts-here"
   />,
   null,
+  <meta
+    name="add-fonts-here"
+  />,
+  <script
+    src="[object Object]/startup.js"
+  />,
   <osd-csp
     data="{\\"strictCsp\\":true}"
   />,
@@ -1262,7 +1426,15 @@ Array [
       >
         <img
           alt="OpenSearch Dashboards logo"
-          class="loadingLogo"
+          class="loadingLogo darkOnly"
+          data-test-image-url="/ui/logos/opensearch_spinner_on_dark.svg"
+          data-test-subj="defaultLogo"
+          loading="eager"
+          src="/ui/logos/opensearch_spinner_on_dark.svg"
+        />
+        <img
+          alt="OpenSearch Dashboards logo"
+          class="loadingLogo lightOnly"
           data-test-image-url="/ui/logos/opensearch_spinner_on_light.svg"
           data-test-subj="defaultLogo"
           loading="eager"
@@ -1282,7 +1454,14 @@ Array [
   >
     <img
       alt="OpenSearch Dashboards logo"
-      class="legacyBrowserErrorLogo"
+      class="legacyBrowserErrorLogo darkOnly"
+      data-test-image-url="/ui/logos/opensearch_mark_on_dark.svg"
+      data-test-subj="default logo"
+      src="/ui/logos/opensearch_mark_on_dark.svg"
+    />
+    <img
+      alt="OpenSearch Dashboards logo"
+      class="legacyBrowserErrorLogo lightOnly"
       data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
       data-test-subj="default logo"
       src="/ui/logos/opensearch_mark_on_light.svg"

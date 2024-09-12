@@ -33,7 +33,7 @@ import { lazy } from 'react';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { url } from '../../opensearch_dashboards_utils/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { DEFAULT_APP_CATEGORIES, DEFAULT_NAV_GROUPS } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { generateDocViewsUrl } from './application/components/doc_views/generate_doc_views_url';
@@ -202,6 +202,9 @@ export class DiscoverPlugin
       generateCb: (renderProps: any) => {
         const globalFilters: any = getServices().filterManager.getGlobalFilters();
         const appFilters: any = getServices().filterManager.getAppFilters();
+        const showDocLinks = getServices()
+          .data.query.queryString.getLanguageService()
+          .getUiOverrides().showDocLinks;
 
         const hash = stringify(
           url.encodeQuery({
@@ -222,7 +225,9 @@ export class DiscoverPlugin
 
         return {
           url: generateDocViewsUrl(contextUrl),
-          hide: !renderProps.indexPattern.isTimeBased(),
+          hide:
+            (showDocLinks !== undefined ? !showDocLinks : false) ||
+            !renderProps.indexPattern.isTimeBased(),
         };
       },
       order: 1,
@@ -233,11 +238,17 @@ export class DiscoverPlugin
         defaultMessage: 'View single document',
       }),
       generateCb: (renderProps) => {
+        const showDocLinks = getServices()
+          .data.query.queryString.getLanguageService()
+          .getUiOverrides().showDocLinks;
+
         const docUrl = `#/doc/${renderProps.indexPattern.id}/${
           renderProps.hit._index
         }?id=${encodeURIComponent(renderProps.hit._id)}`;
+
         return {
           url: generateDocViewsUrl(docUrl),
+          hide: showDocLinks !== undefined ? !showDocLinks : false,
         };
       },
       order: 2,
@@ -283,6 +294,46 @@ export class DiscoverPlugin
         return () => {};
       },
     });
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: PLUGIN_ID,
+        category: undefined,
+        order: 300,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
+      {
+        id: PLUGIN_ID,
+        category: undefined,
+        order: 300,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
+      {
+        id: PLUGIN_ID,
+        category: undefined,
+        order: 200,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
+      {
+        id: PLUGIN_ID,
+        category: undefined,
+        order: 200,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: PLUGIN_ID,
+        category: undefined,
+        order: 200,
+      },
+    ]);
 
     plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {
       return `#${path}`;

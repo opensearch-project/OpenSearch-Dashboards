@@ -29,7 +29,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiCodeEditor } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCodeEditor } from '@elastic/eui';
 import { debounce } from 'lodash';
 
 import { useJson, OnJsonEditorUpdateHandler } from './use_json';
@@ -92,7 +92,7 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
   );
 
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={label}
       helpText={helpText}
       isInvalid={typeof error === 'string'}
@@ -117,7 +117,7 @@ function JsonEditorComp<T extends object = { [key: string]: any }>({
         onChange={onEuiCodeEditorChange}
         {...euiCodeEditorProps}
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 }
 

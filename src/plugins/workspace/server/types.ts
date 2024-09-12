@@ -6,12 +6,19 @@
 import {
   Logger,
   OpenSearchDashboardsRequest,
-  RequestHandlerContext,
   SavedObjectsFindResponse,
   CoreSetup,
   WorkspaceAttribute,
   SavedObjectsServiceStart,
+  Permissions,
+  UiSettingsServiceStart,
 } from '../../../core/server';
+import { PermissionModeId } from '../../../core/server';
+export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
+  permissions?: Permissions;
+  permissionMode?: PermissionModeId;
+}
+import { WorkspacePermissionMode } from '../common/constants';
 
 export interface WorkspaceFindOptions {
   page?: number;
@@ -20,11 +27,11 @@ export interface WorkspaceFindOptions {
   searchFields?: string[];
   sortField?: string;
   sortOrder?: string;
+  permissionModes?: WorkspacePermissionMode[];
 }
 
 export interface IRequestDetail {
   request: OpenSearchDashboardsRequest;
-  context: RequestHandlerContext;
   logger: Logger;
 }
 
@@ -44,15 +51,23 @@ export interface IWorkspaceClientImpl {
    */
   setSavedObjects(savedObjects: SavedObjectsServiceStart): void;
   /**
+   * Set ui settings client that will be used inside the workspace client.
+   * @param uiSettings {@link UiSettingsServiceStart}
+   * @returns void
+   * @public
+   */
+  setUiSettings(uiSettings: UiSettingsServiceStart): void;
+  /**
    * Create a workspace
    * @param requestDetail {@link IRequestDetail}
-   * @param payload {@link WorkspaceAttribute}
-   * @returns a Promise with a new-created id for the workspace
+   * @param payload - An object of type {@link WorkspaceAttributeWithPermission} excluding the 'id' property, and also containing an optional array of string.
    * @public
    */
   create(
     requestDetail: IRequestDetail,
-    payload: Omit<WorkspaceAttribute, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
+      dataSources?: string[];
+    }
   ): Promise<IResponse<{ id: WorkspaceAttribute['id'] }>>;
   /**
    * List workspaces
@@ -67,7 +82,7 @@ export interface IWorkspaceClientImpl {
   ): Promise<
     IResponse<
       {
-        workspaces: WorkspaceAttribute[];
+        workspaces: WorkspaceAttributeWithPermission[];
       } & Pick<SavedObjectsFindResponse, 'page' | 'per_page' | 'total'>
     >
   >;
@@ -83,14 +98,16 @@ export interface IWorkspaceClientImpl {
    * Update the detail of a given workspace
    * @param requestDetail {@link IRequestDetail}
    * @param id workspace id
-   * @param payload {@link WorkspaceAttribute}
+   * @param payload - An object of type {@link WorkspaceAttributeWithPermission} excluding the 'id' property, and also containing an optional array of string.
    * @returns a Promise with a boolean result indicating if the update operation successed.
    * @public
    */
   update(
     requestDetail: IRequestDetail,
     id: string,
-    payload: Omit<WorkspaceAttribute, 'id'>
+    payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>> & {
+      dataSources?: string[];
+    }
   ): Promise<IResponse<boolean>>;
   /**
    * Delete a given workspace

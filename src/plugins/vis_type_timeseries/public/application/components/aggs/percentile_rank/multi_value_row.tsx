@@ -33,7 +33,7 @@ import { get } from 'lodash';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
   htmlIdGenerator,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
@@ -82,7 +82,7 @@ export const MultiValueRow = ({
           </EuiFormLabel>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             value={model.value === '' ? '' : Number(model.value)}
             placeholder="0"
             onChange={onFieldNumberChange}

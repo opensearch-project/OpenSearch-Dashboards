@@ -28,23 +28,33 @@
  * under the License.
  */
 
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { Plugin, CoreSetup, AppMountParameters } from 'src/core/public';
+import { Plugin, CoreSetup, AppMountParameters, CoreStart } from 'src/core/public';
 import { AppUpdater } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
-
+import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
-import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import {
+  AppNavLinkStatus,
+  DEFAULT_APP_CATEGORIES,
+  RightNavigationOrder,
+  RightNavigationButton,
+} from '../../../core/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 
 import './index.scss';
 import { ManagementOverViewPluginSetup } from '../../management_overview/public';
+import { toMountPoint } from '../../opensearch_dashboards_react/public';
+import { DevToolsIcon } from './dev_tools_icon';
+import { WorkspaceAvailability } from '../../../core/public';
 
 export interface DevToolsSetupDependencies {
-  dataSource?: DataSourcePluginSetup;
   urlForwarding: UrlForwardingSetup;
+  dataSource?: DataSourcePluginSetup;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
   managementOverview?: ManagementOverViewPluginSetup;
 }
 
@@ -74,18 +84,21 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
     defaultMessage: 'Dev Tools',
   });
 
+  private id = 'dev_tools';
+
   public setup(coreSetup: CoreSetup, deps: DevToolsSetupDependencies) {
     const { application: applicationSetup, getStartServices } = coreSetup;
     const { urlForwarding, managementOverview } = deps;
 
     applicationSetup.register({
-      id: 'dev_tools',
+      id: this.id,
       title: this.title,
       updater$: this.appStateUpdater,
       icon: '/ui/logos/opensearch_mark.svg',
       /* the order of dev tools, it shows as last item of management section */
       order: 9070,
       category: DEFAULT_APP_CATEGORIES.management,
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
       mount: async (params: AppMountParameters) => {
         const { element, history } = params;
         element.classList.add('devAppWrapper');
@@ -98,7 +111,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
     });
 
     managementOverview?.register({
-      id: 'dev_tools',
+      id: this.id,
       title: this.title,
       description: i18n.translate('devTools.devToolsDescription', {
         defaultMessage:
@@ -124,9 +137,37 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
     };
   }
 
-  public start() {
-    if (this.getSortedDevTools().length === 0) {
+  public start(core: CoreStart) {
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.chrome.navControls.registerLeftBottom({
+        order: 4,
+        mount: toMountPoint(
+          React.createElement(DevToolsIcon, {
+            core,
+            appId: this.id,
+          })
+        ),
+      });
+    }
+    if (this.getSortedDevTools().length === 0 || core.chrome.navGroup.getNavGroupEnabled()) {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
+    } else {
+      // Register right navigation for dev tool only when console and futureNavigation are both enabled.
+      const topRightNavigationEnabled = core.application.capabilities?.dev_tools?.futureNavigation;
+      if (topRightNavigationEnabled) {
+        core.chrome.navControls.registerRight({
+          order: RightNavigationOrder.DevTool,
+          mount: toMountPoint(
+            React.createElement(RightNavigationButton, {
+              appId: this.id,
+              iconType: 'consoleApp',
+              title: this.title,
+              application: core.application,
+              http: core.http,
+            })
+          ),
+        });
+      }
     }
   }
 

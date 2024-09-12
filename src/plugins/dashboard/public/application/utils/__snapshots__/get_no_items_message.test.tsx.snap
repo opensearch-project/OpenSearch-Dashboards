@@ -1,0 +1,759 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`dashboard listing table with no item and no write controls 1`] = `
+<EuiEmptyPrompt
+  iconType="dashboardApp"
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  title={
+    <EuiText
+      size="s"
+    >
+      <h1
+        id="dashboardListingHeading"
+      >
+        <FormattedMessage
+          defaultMessage="Looks like you don't have any dashboards."
+          id="dashboard.listing.noItemsMessage"
+          values={Object {}}
+        />
+      </h1>
+    </EuiText>
+  }
+>
+  <div
+    className="euiEmptyPrompt"
+    intl={
+      Object {
+        "defaultFormats": Object {},
+        "defaultLocale": "en",
+        "formatDate": [Function],
+        "formatHTMLMessage": [Function],
+        "formatMessage": [Function],
+        "formatNumber": [Function],
+        "formatPlural": [Function],
+        "formatRelative": [Function],
+        "formatTime": [Function],
+        "formats": Object {
+          "date": Object {
+            "full": Object {
+              "day": "numeric",
+              "month": "long",
+              "weekday": "long",
+              "year": "numeric",
+            },
+            "long": Object {
+              "day": "numeric",
+              "month": "long",
+              "year": "numeric",
+            },
+            "medium": Object {
+              "day": "numeric",
+              "month": "short",
+              "year": "numeric",
+            },
+            "short": Object {
+              "day": "numeric",
+              "month": "numeric",
+              "year": "2-digit",
+            },
+          },
+          "number": Object {
+            "currency": Object {
+              "style": "currency",
+            },
+            "percent": Object {
+              "style": "percent",
+            },
+          },
+          "relative": Object {
+            "days": Object {
+              "units": "day",
+            },
+            "hours": Object {
+              "units": "hour",
+            },
+            "minutes": Object {
+              "units": "minute",
+            },
+            "months": Object {
+              "units": "month",
+            },
+            "seconds": Object {
+              "units": "second",
+            },
+            "years": Object {
+              "units": "year",
+            },
+          },
+          "time": Object {
+            "full": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "long": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "medium": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+            },
+            "short": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+            },
+          },
+        },
+        "formatters": Object {
+          "getDateTimeFormat": [Function],
+          "getMessageFormat": [Function],
+          "getNumberFormat": [Function],
+          "getPluralFormat": [Function],
+          "getRelativeFormat": [Function],
+        },
+        "locale": "en",
+        "messages": Object {},
+        "now": [Function],
+        "onError": [Function],
+        "textComponent": Symbol(react.fragment),
+        "timeZone": null,
+      }
+    }
+  >
+    <EuiIcon
+      color="subdued"
+      size="xxl"
+      type="dashboardApp"
+    >
+      <span
+        color="subdued"
+        data-euiicon-type="dashboardApp"
+        size="xxl"
+      />
+    </EuiIcon>
+    <EuiSpacer
+      size="m"
+    >
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+    </EuiSpacer>
+    <EuiTitle
+      size="m"
+    >
+      <EuiText
+        className="euiTitle euiTitle--medium"
+        size="s"
+      >
+        <div
+          className="euiText euiText--small euiTitle euiTitle--medium"
+        >
+          <h1
+            id="dashboardListingHeading"
+          >
+            <FormattedMessage
+              defaultMessage="Looks like you don't have any dashboards."
+              id="dashboard.listing.noItemsMessage"
+              values={Object {}}
+            >
+              Looks like you don't have any dashboards.
+            </FormattedMessage>
+          </h1>
+        </div>
+      </EuiText>
+    </EuiTitle>
+  </div>
+</EuiEmptyPrompt>
+`;
+
+exports[`dashboard listing table with no item and with write controls 1`] = `
+<EuiEmptyPrompt
+  actions={
+    <EuiSmallButton
+      data-test-subj="createDashboardPromptButton"
+      fill={true}
+      iconType="plus"
+      onClick={[MockFunction]}
+    >
+      <FormattedMessage
+        defaultMessage="Create new dashboard"
+        id="dashboard.listing.createNewDashboard.createButtonLabel"
+        values={Object {}}
+      />
+    </EuiSmallButton>
+  }
+  body={
+    <React.Fragment>
+      <EuiText
+        size="s"
+      >
+        <p>
+          <FormattedMessage
+            defaultMessage="You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place."
+            id="dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription"
+            values={Object {}}
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
+            id="dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription"
+            values={
+              Object {
+                "sampleDataInstallLink": <EuiLink
+                  onClick={[Function]}
+                >
+                  <FormattedMessage
+                    defaultMessage="Install some sample data"
+                    id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
+                    values={Object {}}
+                  />
+                </EuiLink>,
+              }
+            }
+          />
+        </p>
+      </EuiText>
+    </React.Fragment>
+  }
+  iconType="dashboardApp"
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  title={
+    <EuiText
+      size="s"
+    >
+      <h1
+        id="dashboardListingHeading"
+      >
+        <FormattedMessage
+          defaultMessage="Create your first dashboard"
+          id="dashboard.listing.createNewDashboard.title"
+          values={Object {}}
+        />
+      </h1>
+    </EuiText>
+  }
+>
+  <div
+    className="euiEmptyPrompt"
+    intl={
+      Object {
+        "defaultFormats": Object {},
+        "defaultLocale": "en",
+        "formatDate": [Function],
+        "formatHTMLMessage": [Function],
+        "formatMessage": [Function],
+        "formatNumber": [Function],
+        "formatPlural": [Function],
+        "formatRelative": [Function],
+        "formatTime": [Function],
+        "formats": Object {
+          "date": Object {
+            "full": Object {
+              "day": "numeric",
+              "month": "long",
+              "weekday": "long",
+              "year": "numeric",
+            },
+            "long": Object {
+              "day": "numeric",
+              "month": "long",
+              "year": "numeric",
+            },
+            "medium": Object {
+              "day": "numeric",
+              "month": "short",
+              "year": "numeric",
+            },
+            "short": Object {
+              "day": "numeric",
+              "month": "numeric",
+              "year": "2-digit",
+            },
+          },
+          "number": Object {
+            "currency": Object {
+              "style": "currency",
+            },
+            "percent": Object {
+              "style": "percent",
+            },
+          },
+          "relative": Object {
+            "days": Object {
+              "units": "day",
+            },
+            "hours": Object {
+              "units": "hour",
+            },
+            "minutes": Object {
+              "units": "minute",
+            },
+            "months": Object {
+              "units": "month",
+            },
+            "seconds": Object {
+              "units": "second",
+            },
+            "years": Object {
+              "units": "year",
+            },
+          },
+          "time": Object {
+            "full": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "long": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+              "timeZoneName": "short",
+            },
+            "medium": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+              "second": "numeric",
+            },
+            "short": Object {
+              "hour": "numeric",
+              "minute": "numeric",
+            },
+          },
+        },
+        "formatters": Object {
+          "getDateTimeFormat": [Function],
+          "getMessageFormat": [Function],
+          "getNumberFormat": [Function],
+          "getPluralFormat": [Function],
+          "getRelativeFormat": [Function],
+        },
+        "locale": "en",
+        "messages": Object {},
+        "now": [Function],
+        "onError": [Function],
+        "textComponent": Symbol(react.fragment),
+        "timeZone": null,
+      }
+    }
+  >
+    <EuiIcon
+      color="subdued"
+      size="xxl"
+      type="dashboardApp"
+    >
+      <span
+        color="subdued"
+        data-euiicon-type="dashboardApp"
+        size="xxl"
+      />
+    </EuiIcon>
+    <EuiSpacer
+      size="m"
+    >
+      <div
+        className="euiSpacer euiSpacer--m"
+      />
+    </EuiSpacer>
+    <EuiTitle
+      size="m"
+    >
+      <EuiText
+        className="euiTitle euiTitle--medium"
+        size="s"
+      >
+        <div
+          className="euiText euiText--small euiTitle euiTitle--medium"
+        >
+          <h1
+            id="dashboardListingHeading"
+          >
+            <FormattedMessage
+              defaultMessage="Create your first dashboard"
+              id="dashboard.listing.createNewDashboard.title"
+              values={Object {}}
+            >
+              Create your first dashboard
+            </FormattedMessage>
+          </h1>
+        </div>
+      </EuiText>
+    </EuiTitle>
+    <EuiTextColor
+      color="subdued"
+    >
+      <span
+        className="euiTextColor euiTextColor--subdued"
+      >
+        <EuiSpacer
+          size="m"
+        >
+          <div
+            className="euiSpacer euiSpacer--m"
+          />
+        </EuiSpacer>
+        <EuiText>
+          <div
+            className="euiText euiText--medium"
+          >
+            <EuiText
+              size="s"
+            >
+              <div
+                className="euiText euiText--small"
+              >
+                <p>
+                  <FormattedMessage
+                    defaultMessage="You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place."
+                    id="dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription"
+                    values={Object {}}
+                  >
+                    You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place.
+                  </FormattedMessage>
+                </p>
+                <p>
+                  <FormattedMessage
+                    defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
+                    id="dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription"
+                    values={
+                      Object {
+                        "sampleDataInstallLink": <EuiLink
+                          onClick={[Function]}
+                        >
+                          <FormattedMessage
+                            defaultMessage="Install some sample data"
+                            id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
+                            values={Object {}}
+                          />
+                        </EuiLink>,
+                      }
+                    }
+                  >
+                    New to OpenSearch Dashboards? 
+                    <EuiLink
+                      onClick={[Function]}
+                    >
+                      <button
+                        className="euiLink euiLink--primary"
+                        disabled={false}
+                        onClick={[Function]}
+                        type="button"
+                      >
+                        <FormattedMessage
+                          defaultMessage="Install some sample data"
+                          id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
+                          values={Object {}}
+                        >
+                          Install some sample data
+                        </FormattedMessage>
+                      </button>
+                    </EuiLink>
+                     to take a test drive.
+                  </FormattedMessage>
+                </p>
+              </div>
+            </EuiText>
+          </div>
+        </EuiText>
+      </span>
+    </EuiTextColor>
+    <EuiSpacer
+      size="l"
+    >
+      <div
+        className="euiSpacer euiSpacer--l"
+      />
+    </EuiSpacer>
+    <EuiSmallButton
+      data-test-subj="createDashboardPromptButton"
+      fill={true}
+      iconType="plus"
+      onClick={[MockFunction]}
+    >
+      <EuiButton
+        data-test-subj="createDashboardPromptButton"
+        fill={true}
+        iconType="plus"
+        onClick={[MockFunction]}
+        size="s"
+      >
+        <EuiButtonDisplay
+          baseClassName="euiButton"
+          data-test-subj="createDashboardPromptButton"
+          disabled={false}
+          element="button"
+          fill={true}
+          iconType="plus"
+          isDisabled={false}
+          onClick={[MockFunction]}
+          size="s"
+          type="button"
+        >
+          <button
+            className="euiButton euiButton--primary euiButton--small euiButton--fill"
+            data-test-subj="createDashboardPromptButton"
+            disabled={false}
+            onClick={[MockFunction]}
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
+            type="button"
+          >
+            <EuiButtonContent
+              className="euiButton__content"
+              iconGap="m"
+              iconSide="left"
+              iconType="plus"
+              textProps={
+                Object {
+                  "className": "euiButton__text",
+                }
+              }
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <EuiIcon
+                  className="euiButtonContent__icon"
+                  color="inherit"
+                  size="m"
+                  type="plus"
+                >
+                  <span
+                    className="euiButtonContent__icon"
+                    color="inherit"
+                    data-euiicon-type="plus"
+                    size="m"
+                  />
+                </EuiIcon>
+                <span
+                  className="euiButton__text"
+                >
+                  <FormattedMessage
+                    defaultMessage="Create new dashboard"
+                    id="dashboard.listing.createNewDashboard.createButtonLabel"
+                    values={Object {}}
+                  >
+                    Create new dashboard
+                  </FormattedMessage>
+                </span>
+              </span>
+            </EuiButtonContent>
+          </button>
+        </EuiButtonDisplay>
+      </EuiButton>
+    </EuiSmallButton>
+  </div>
+</EuiEmptyPrompt>
+`;

@@ -35,7 +35,7 @@ import {
 } from './application_service.test.mocks';
 
 import { createElement } from 'react';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, Observable } from 'rxjs';
 import { bufferCount, take, takeUntil } from 'rxjs/operators';
 import { shallow, mount } from 'enzyme';
 
@@ -44,13 +44,24 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
-import { App, PublicAppInfo, AppNavLinkStatus, AppStatus, AppUpdater } from './types';
+import {
+  App,
+  PublicAppInfo,
+  AppNavLinkStatus,
+  AppStatus,
+  AppUpdater,
+  WorkspaceAvailability,
+  InternalApplicationStart,
+} from './types';
+import { MountPoint } from '../types';
 import { act } from 'react-dom/test-utils';
+import { workspacesServiceMock } from '../mocks';
 
 const createApp = (props: Partial<App>): App => {
   return {
     id: 'some-id',
     title: 'some-title',
+    description: 'some-description',
     mount: () => () => undefined,
     ...props,
   };
@@ -68,7 +79,11 @@ describe('#setup()', () => {
       context: contextServiceMock.createSetupContract(),
       redirectTo: jest.fn(),
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      workspaces: workspacesServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 
@@ -141,6 +156,7 @@ describe('#setup()', () => {
           id: 'app2',
           navLinkStatus: AppNavLinkStatus.visible,
           status: AppStatus.accessible,
+          description: 'some-description',
         })
       );
     });
@@ -398,7 +414,11 @@ describe('#start()', () => {
       context: contextServiceMock.createSetupContract(),
       redirectTo: jest.fn(),
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      workspaces: workspacesServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 
@@ -538,6 +558,32 @@ describe('#start()', () => {
       expect(getUrlForApp('app2', { path: 'deep/link', absolute: true })).toBe(
         'http://localhost/base-path/app/app2/deep/link'
       );
+    });
+
+    it('creates URL when the app is not accessible in a workspace', async () => {
+      const httpMock = httpServiceMock.createSetupContract({
+        basePath: '/base-path',
+        clientBasePath: '/client-base-path',
+      });
+      const { register } = service.setup({
+        ...setupDeps,
+        http: httpMock,
+      });
+      // register a app that can only be accessed out of a workspace
+      register(
+        Symbol(),
+        createApp({
+          id: 'app1',
+          workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+        })
+      );
+      const { getUrlForApp } = await service.start({
+        ...startDeps,
+        http: httpMock,
+      });
+
+      expect(getUrlForApp('app1')).toBe('/base-path/app/app1');
+      expect(getUrlForApp('app2')).toBe('/base-path/client-base-path/app/app2');
     });
   });
 
@@ -766,6 +812,46 @@ describe('#start()', () => {
       `);
     });
 
+    it('refresh the page if navigate to a app not accessible within a workspace', async () => {
+      // Save the original assign method
+      const originalLocation = window.location;
+      delete (window as any).location;
+
+      // Mocking the window object
+      window.location = {
+        ...originalLocation,
+        assign: jest.fn(),
+      };
+
+      const { register } = service.setup(setupDeps);
+      // register a app that can only be accessed out of a workspace
+      register(
+        Symbol(),
+        createApp({
+          id: 'app1',
+          workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+        })
+      );
+      const workspaces = workspacesServiceMock.createStartContract();
+      workspaces.currentWorkspaceId$.next('foo');
+      const http = httpServiceMock.createStartContract({
+        basePath: '/base-path',
+        clientBasePath: '/client-base-path',
+      });
+      const { navigateToApp } = await service.start({
+        ...startDeps,
+        workspaces,
+        http,
+      });
+      await navigateToApp('app1');
+
+      expect(window.location.assign).toBeCalledWith('/base-path/app/app1');
+      await navigateToApp('app2');
+      // assign should not be called
+      expect(window.location.assign).toBeCalledTimes(1);
+      window.location = originalLocation;
+    });
+
     describe('when `replace` option is true', () => {
       it('use `history.replace` instead of `history.push`', async () => {
         service.setup(setupDeps);
@@ -853,6 +939,34 @@ describe('#start()', () => {
       expect(setupDeps.redirectTo).not.toHaveBeenCalled();
     });
   });
+
+  describe('AppControls', () => {
+    test.each(['Left', 'Center', 'Right', 'Badge', 'Description', 'Bottom'])(
+      'records the App%sControls',
+      async (container) => {
+        const { register } = service.setup(setupDeps);
+
+        register(Symbol(), createApp({ id: `app${container}` }));
+        const appStart = await service.start(startDeps);
+        const setControls = appStart[
+          `setApp${container}Controls` as keyof InternalApplicationStart
+        ] as (mount: MountPoint | undefined) => void;
+        const currentControls$ = appStart[
+          `current${container}Controls$` as keyof InternalApplicationStart
+        ] as Observable<MountPoint | undefined>;
+
+        const oldMountPoint = jest.fn();
+        const expectedMountPoint = jest.fn();
+
+        await appStart.navigateToApp(`app${container}`);
+        setControls(oldMountPoint);
+        setControls(expectedMountPoint);
+
+        const mountPoint = await currentControls$.pipe(take(1)).toPromise();
+        expect(mountPoint).toBe(expectedMountPoint);
+      }
+    );
+  });
 });
 
 describe('#stop()', () => {
@@ -869,7 +983,11 @@ describe('#stop()', () => {
       http,
       context: contextServiceMock.createSetupContract(),
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      workspaces: workspacesServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 

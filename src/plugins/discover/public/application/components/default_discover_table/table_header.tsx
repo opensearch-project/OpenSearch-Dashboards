@@ -11,6 +11,7 @@
 
 import './_table_header.scss';
 
+import { i18n } from '@osd/i18n';
 import React from 'react';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { TableHeaderColumn } from './table_header_column';
@@ -39,7 +40,7 @@ export function TableHeader({
 }: Props) {
   return (
     <tr data-test-subj="docTableHeader" className="osdDocTableHeader">
-      <th style={{ width: '24px' }} />
+      <th style={{ width: '28px' }} />
       {displayedColumns.map((col) => {
         return (
           <TableHeaderColumn

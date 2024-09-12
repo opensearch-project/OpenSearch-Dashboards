@@ -57,6 +57,14 @@ import {
   getShardDelayBucketAgg,
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
+import {
+  DataFrameService,
+  IDataFrame,
+  IDataFrameResponse,
+  createDataFrameCache,
+} from '../../common/data_frames';
+import { getQueryService } from '../services';
+import { UI_SETTINGS } from '../../common';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -73,7 +81,9 @@ export interface SearchServiceStartDependencies {
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
+  private readonly dfCache = createDataFrameCache();
   private searchInterceptor!: ISearchInterceptor;
+  private defaultSearchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
@@ -95,6 +105,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       startServices: getStartServices(),
       usageCollector: this.usageCollector!,
     });
+    this.defaultSearchInterceptor = this.searchInterceptor;
 
     expressions.registerFunction(opensearchdsl);
     expressions.registerType(opensearchRawResponse);
@@ -115,6 +126,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       __enhance: (enhancements: SearchEnhancements) => {
         this.searchInterceptor = enhancements.searchInterceptor;
       },
+      getDefaultSearchInterceptor: () => this.defaultSearchInterceptor,
     };
   }
 
@@ -123,17 +135,42 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options) => {
-      return this.searchInterceptor.search(request, options);
+      const isEnhancedEnabled = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
+      if (isEnhancedEnabled) {
+        const queryStringManager = getQueryService().queryString;
+        const language = queryStringManager.getQuery().language;
+        const languageConfig = queryStringManager.getLanguageService().getLanguage(language);
+        queryStringManager.getLanguageService().setUiOverridesByUserQueryLanguage(language);
+
+        if (languageConfig) {
+          return languageConfig.search.search(request, options);
+        }
+      }
+
+      return this.defaultSearchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
 
+    const dfService: DataFrameService = {
+      get: () => this.dfCache.get(),
+      set: async (dataFrame: IDataFrame) => {
+        this.dfCache.set(dataFrame);
+      },
+      clear: () => {
+        if (this.dfCache.get() === undefined) return;
+        this.dfCache.clear();
+      },
+    };
+
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
       search: <
         SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-        SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+        SearchStrategyResponse extends
+          | IOpenSearchDashboardsSearchResponse
+          | IDataFrameResponse = IOpenSearchSearchResponse
       >(
         request: SearchStrategyRequest,
         options: ISearchOptions
@@ -145,6 +182,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         callMsearch: getCallMsearch({ http }),
         loadingCount$,
       },
+      df: dfService,
     };
 
     return {
@@ -154,6 +192,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         this.searchInterceptor.showError(e);
       },
       searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),
+      __enhance: (enhancements: SearchEnhancements) => {
+        this.searchInterceptor = enhancements.searchInterceptor;
+      },
+      getDefaultSearchInterceptor: () => this.defaultSearchInterceptor,
+      df: dfService,
     };
   }
 

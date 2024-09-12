@@ -168,7 +168,7 @@ describe('SavedObjectsRepository', () => {
   });
 
   const getMockGetResponse = (
-    { type, id, references, namespace: objectNamespace, originId, permissions },
+    { type, id, references, namespace: objectNamespace, originId, permissions, workspaces },
     namespace
   ) => {
     const namespaceId = objectNamespace === 'default' ? undefined : objectNamespace ?? namespace;
@@ -184,6 +184,7 @@ describe('SavedObjectsRepository', () => {
         ...(registry.isMultiNamespace(type) && { namespaces: [namespaceId ?? 'default'] }),
         ...(originId && { originId }),
         ...(permissions && { permissions }),
+        ...(workspaces && { workspaces }),
         type,
         [type]: { title: 'Testing' },
         references,
@@ -1307,6 +1308,8 @@ describe('SavedObjectsRepository', () => {
       },
     };
 
+    const workspaces = ['workspace1', 'workspace2'];
+
     const getMockBulkUpdateResponse = (objects, options, includeOriginId) => ({
       items: objects.map(({ type, id }) => ({
         update: {
@@ -1580,6 +1583,20 @@ describe('SavedObjectsRepository', () => {
         );
         client.bulk.mockClear();
       });
+    });
+
+    it(`accepts workspaces property when providing workspaces info`, async () => {
+      const objects = [obj1, obj2].map((obj) => ({ ...obj, workspaces }));
+      await bulkUpdateSuccess(objects);
+      const doc = {
+        doc: expect.objectContaining({ workspaces }),
+      };
+      const body = [expect.any(Object), doc, expect.any(Object), doc];
+      expect(client.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({ body }),
+        expect.anything()
+      );
+      client.bulk.mockClear();
     });
 
     describe('errors', () => {
@@ -2802,6 +2819,8 @@ describe('SavedObjectsRepository', () => {
               'migrationVersion',
               'updated_at',
               'originId',
+              'workspaces',
+              'permissions',
               'title',
             ],
           }),
@@ -3156,7 +3175,7 @@ describe('SavedObjectsRepository', () => {
     const namespace = 'foo-namespace';
     const originId = 'some-origin-id';
 
-    const getSuccess = async (type, id, options, includeOriginId, permissions) => {
+    const getSuccess = async (type, id, options, includeOriginId, permissions, workspaces) => {
       const response = getMockGetResponse(
         {
           type,
@@ -3165,6 +3184,7 @@ describe('SavedObjectsRepository', () => {
           // operation will return it in the result. This flag is just used for test purposes to modify the mock cluster call response.
           ...(includeOriginId && { originId }),
           ...(permissions && { permissions }),
+          ...(workspaces && { workspaces }),
         },
         options?.namespace
       );
@@ -3328,6 +3348,14 @@ describe('SavedObjectsRepository', () => {
         const result = await getSuccess(type, id, { namespace }, undefined, permissions);
         expect(result).toMatchObject({
           permissions: permissions,
+        });
+      });
+
+      it(`includes workspaces property if present`, async () => {
+        const workspaces = ['workspace-1'];
+        const result = await getSuccess(type, id, { namespace }, undefined, undefined, workspaces);
+        expect(result).toMatchObject({
+          workspaces: workspaces,
         });
       });
     });
@@ -3940,6 +3968,8 @@ describe('SavedObjectsRepository', () => {
       },
     };
 
+    const workspaces = ['workspace1', 'workspace2'];
+
     const updateSuccess = async (type, id, attributes, options, includeOriginId) => {
       if (registry.isMultiNamespace(type)) {
         const mockGetResponse = getMockGetResponse({ type, id }, options?.namespace);
@@ -4119,6 +4149,18 @@ describe('SavedObjectsRepository', () => {
       it(`accepts permissions when providing permissions info`, async () => {
         await updateSuccess(type, id, attributes, { permissions });
         const expected = expect.objectContaining({ permissions });
+        const body = {
+          doc: expected,
+        };
+        expect(client.update).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
+      });
+
+      it(`accepts workspaces when providing permissions info`, async () => {
+        await updateSuccess(type, id, attributes, { workspaces });
+        const expected = expect.objectContaining({ workspaces });
         const body = {
           doc: expected,
         };

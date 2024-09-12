@@ -28,10 +28,13 @@
  * under the License.
  */
 
+import React from 'react';
 import { i18n } from '@osd/i18n';
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
+import { ContentManagementPluginStart } from 'src/plugins/content_management/public';
+import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { VisBuilderStart } from '../../vis_builder/public';
 import { ManagementSetup } from '../../management/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
@@ -60,6 +63,20 @@ import {
 } from './services';
 import { registerServices } from './register_services';
 import { bootstrap } from './ui_actions_bootstrap';
+import { DEFAULT_NAV_GROUPS } from '../../../core/public';
+import { RecentWork } from './management_section/recent_work';
+import {
+  HOME_CONTENT_AREAS,
+  ESSENTIAL_OVERVIEW_CONTENT_AREAS,
+  ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS,
+} from '../../../plugins/content_management/public';
+import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
+import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
+
+/**
+ * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
+ */
+export const APP_ID = 'objects';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
@@ -79,6 +96,7 @@ export interface SetupDependencies {
   home?: HomePublicPluginSetup;
   uiActions: UiActionsSetup;
   dataSource?: DataSourcePluginSetup;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
 export interface StartDependencies {
@@ -90,6 +108,8 @@ export interface StartDependencies {
   discover?: DiscoverStart;
   visBuilder?: VisBuilderStart;
   uiActions: UiActionsStart;
+  contentManagement?: ContentManagementPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export class SavedObjectsManagementPlugin
@@ -107,7 +127,7 @@ export class SavedObjectsManagementPlugin
 
   public setup(
     core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
-    { home, management, uiActions, dataSource }: SetupDependencies
+    { home, management, uiActions, dataSource, dataSourceManagement }: SetupDependencies
   ): SavedObjectsManagementPluginSetup {
     const actionSetup = this.actionService.setup();
     const columnSetup = this.columnService.setup();
@@ -132,7 +152,7 @@ export class SavedObjectsManagementPlugin
 
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
     opensearchDashboardsSection.registerApp({
-      id: 'objects',
+      id: APP_ID,
       title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
         defaultMessage: 'Saved objects',
       }),
@@ -144,10 +164,47 @@ export class SavedObjectsManagementPlugin
           serviceRegistry: this.serviceRegistry,
           mountParams,
           dataSourceEnabled: !!dataSource,
-          hideLocalCluster: dataSource?.hideLocalCluster ?? false,
+          dataSourceManagement,
         });
       },
     });
+
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.application.register({
+        id: APP_ID,
+        title: i18n.translate('savedObjectsManagement.assets.label', {
+          defaultMessage: 'Assets',
+        }),
+        description: i18n.translate('savedObjectsManagement.assets.description', {
+          defaultMessage: 'Manage and share your global assets.',
+        }),
+        mount: async (params: AppMountParameters) => {
+          const { mountManagementSection } = await import('./management_section');
+          const [coreStart] = await core.getStartServices();
+
+          return mountManagementSection({
+            core,
+            serviceRegistry: this.serviceRegistry,
+            mountParams: {
+              ...params,
+              basePath: core.http.basePath.get(),
+              setBreadcrumbs: (breadCrumbs) =>
+                coreStart.chrome.setBreadcrumbs(getScopedBreadcrumbs(breadCrumbs, params.history)),
+              wrapInPage: true,
+            },
+            dataSourceEnabled: !!dataSource,
+            dataSourceManagement,
+          });
+        },
+      });
+    }
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+      {
+        id: APP_ID,
+        order: 400,
+      },
+    ]);
 
     // sets up the context mappings and registers any triggers/actions for the plugin
     bootstrap(uiActions);
@@ -163,10 +220,32 @@ export class SavedObjectsManagementPlugin
     };
   }
 
-  public start(core: CoreStart, { data, uiActions }: StartDependencies) {
+  public start(core: CoreStart, { data, uiActions, contentManagement }: StartDependencies) {
     const actionStart = this.actionService.start();
     const columnStart = this.columnService.start();
     const namespaceStart = this.namespaceService.start();
+    const workspaceEnabled = core.application.capabilities.workspaces.enabled;
+
+    contentManagement?.registerContentProvider({
+      id: 'recent',
+      getContent: () => {
+        return {
+          order: 1,
+          id: 'recent',
+          kind: 'custom',
+          render: () =>
+            React.createElement(RecentWork, {
+              core,
+              workspaceEnabled,
+            }),
+        };
+      },
+      getTargetArea: () => [
+        HOME_CONTENT_AREAS.RECENTLY_VIEWED,
+        ESSENTIAL_OVERVIEW_CONTENT_AREAS.RECENTLY_VIEWED,
+        ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS.RECENTLY_VIEWED,
+      ],
+    });
 
     return {
       actions: actionStart,

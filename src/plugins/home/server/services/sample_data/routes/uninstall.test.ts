@@ -5,6 +5,7 @@
 
 import { CoreSetup, RequestHandlerContext } from 'src/core/server';
 import { coreMock, httpServerMock } from '../../../../../../core/server/mocks';
+import { updateWorkspaceState } from '../../../../../../core/server/utils';
 import { flightsSpecProvider } from '../data_sets';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createUninstallRoute } from './uninstall';
@@ -86,6 +87,38 @@ describe('sample data uninstall route', () => {
       params: mockBody,
       query: mockQuery,
     });
+    const mockResponse = httpServerMock.createResponseFactory();
+
+    createUninstallRoute(mockCoreSetup.http.createRouter(), sampleDatasets, mockUsageTracker);
+
+    const mockRouter = mockCoreSetup.http.createRouter.mock.results[0].value;
+    const handler = mockRouter.delete.mock.calls[0][1];
+
+    await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
+
+    expect(mockClient).toBeCalled();
+    expect(mockSOClient.delete).toBeCalled();
+  });
+
+  it('handler calls expected api with the given request with workspace', async () => {
+    const mockWorkspaceId = 'workspace';
+    const mockContext = {
+      core: {
+        opensearch: {
+          legacy: {
+            client: { callAsCurrentUser: mockClient },
+          },
+        },
+        savedObjects: { client: mockSOClient },
+      },
+    };
+    const mockBody = { id: 'flights' };
+    const mockQuery = {};
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
+      params: mockBody,
+      query: mockQuery,
+    });
+    updateWorkspaceState(mockRequest, { requestWorkspaceId: mockWorkspaceId });
     const mockResponse = httpServerMock.createResponseFactory();
 
     createUninstallRoute(mockCoreSetup.http.createRouter(), sampleDatasets, mockUsageTracker);

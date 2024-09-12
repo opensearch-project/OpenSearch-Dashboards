@@ -44,11 +44,10 @@ import {
   ScopedHistory,
 } from 'src/core/public';
 
-import { DataSourceSelector } from '../../data_source_management/public';
+import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { DevToolApp } from './dev_tool';
 import { DevToolsSetupDependencies } from './plugin';
 import { addHelpMenuToAppChrome } from './utils/util';
-
 interface DevToolsWrapperProps {
   devTools: readonly DevToolApp[];
   activeDevTool: DevToolApp;
@@ -56,7 +55,7 @@ interface DevToolsWrapperProps {
   savedObjects: SavedObjectsStart;
   notifications: NotificationsStart;
   dataSourceEnabled: boolean;
-  hideLocalCluster: boolean;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
 interface MountedDevToolDescriptor {
@@ -72,9 +71,10 @@ function DevToolsWrapper({
   savedObjects,
   notifications: { toasts },
   dataSourceEnabled,
-  hideLocalCluster,
+  dataSourceManagement,
 }: DevToolsWrapperProps) {
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
+  const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
   useEffect(
     () => () => {
@@ -111,11 +111,28 @@ function DevToolsWrapper({
       mountpoint: mountPoint,
       unmountHandler,
     };
+    setIsLoading(false);
+  };
+
+  const renderDataSourceSelector = () => {
+    const DataSourceSelector = dataSourceManagement!.ui.DataSourceSelector;
+    return (
+      <div className="devAppDataSourceSelector">
+        <DataSourceSelector
+          savedObjectsClient={savedObjects.client}
+          notifications={toasts}
+          onSelectedDataSource={onChange}
+          disabled={!dataSourceEnabled}
+          fullWidth={false}
+          compressed={true}
+        />
+      </div>
+    );
   };
 
   return (
     <main className="devApp">
-      <EuiTabs className="devAppTabs">
+      <EuiTabs size="s" className="devAppTabs">
         {devTools.map((currentDevTool) => (
           <EuiToolTip content={currentDevTool.tooltipContent} key={currentDevTool.id}>
             <EuiTab
@@ -131,18 +148,7 @@ function DevToolsWrapper({
             </EuiTab>
           </EuiToolTip>
         ))}
-        {dataSourceEnabled ? (
-          <div className="devAppDataSourceSelector">
-            <DataSourceSelector
-              savedObjectsClient={savedObjects.client}
-              notifications={toasts}
-              onSelectedDataSource={onChange}
-              disabled={!dataSourceEnabled}
-              hideLocalCluster={hideLocalCluster}
-              fullWidth={false}
-            />
-          </div>
-        ) : null}
+        {dataSourceEnabled && !isLoading && dataSourceManagement && renderDataSourceSelector()}
       </EuiTabs>
 
       <div
@@ -157,7 +163,7 @@ function DevToolsWrapper({
               mountedTool.current.mountpoint !== element)
           ) {
             let initialDataSourceId;
-            if (!dataSourceEnabled || (dataSourceEnabled && !hideLocalCluster)) {
+            if (!dataSourceEnabled) {
               initialDataSourceId = '';
             }
 
@@ -217,10 +223,9 @@ export function renderApp(
   element: HTMLElement,
   history: ScopedHistory,
   devTools: readonly DevToolApp[],
-  { dataSource }: DevToolsSetupDependencies
+  { dataSourceManagement, dataSource }: DevToolsSetupDependencies
 ) {
   const dataSourceEnabled = !!dataSource;
-  const hideLocalCluster = dataSource?.hideLocalCluster ?? false;
   if (redirectOnMissingCapabilities(application)) {
     return () => {};
   }
@@ -250,7 +255,7 @@ export function renderApp(
                     savedObjects={savedObjects}
                     notifications={notifications}
                     dataSourceEnabled={dataSourceEnabled}
-                    hideLocalCluster={hideLocalCluster}
+                    dataSourceManagement={dataSourceManagement}
                   />
                 )}
               />

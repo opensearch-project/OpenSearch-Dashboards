@@ -11,14 +11,15 @@ import {
 } from 'src/core/server';
 import {
   DataSourceAttributes,
+  DataSourceEngineType,
   AuthType,
   UsernamePasswordTypedContent,
   SigV4Content,
 } from '../common/data_sources';
 
 import { CryptographyServiceSetup } from './cryptography_service';
-import { DataSourceError } from './lib/error';
-import { IAuthenticationMethodRegistery } from './auth_registry';
+import { DataSourceError } from '../common/data_sources';
+import { IAuthenticationMethodRegistry } from './auth_registry';
 import { CustomApiSchemaRegistry } from './schema_registry';
 
 export interface LegacyClientCallAPIParams {
@@ -40,7 +41,7 @@ export interface DataSourceClientParams {
   // When client parameters are required to be retrieved from the request header, the caller should provide the request.
   request?: OpenSearchDashboardsRequest;
   // To retrieve the credentials provider for the authentication method from the registry in order to return the client.
-  authRegistry?: IAuthenticationMethodRegistery;
+  authRegistry?: IAuthenticationMethodRegistry;
 }
 
 export interface DataSourceCredentialsProviderOptions {
@@ -95,6 +96,11 @@ export interface DataSourcePluginSetup {
 }
 
 export interface DataSourcePluginStart {
-  getAuthenticationMethodRegistery: () => IAuthenticationMethodRegistery;
+  getAuthenticationMethodRegistry: () => IAuthenticationMethodRegistry;
   getCustomApiSchemaRegistry: () => CustomApiSchemaRegistry;
+}
+
+export interface DataSourceInfo {
+  dataSourceVersion?: string;
+  dataSourceEngineType?: DataSourceEngineType;
 }

@@ -77,7 +77,13 @@ describe('createPluginInitializerContext', () => {
     const config$ = rawConfigServiceMock.create({ rawConfig: {} });
     server = new Server(config$, env, logger);
     await server.setupCoreConfig();
-    coreContext = { coreId, env, logger, configService: server.configService };
+    coreContext = {
+      coreId,
+      env,
+      logger,
+      configService: server.configService,
+      dynamicConfigService: server.dynamicConfigService,
+    };
   });
 
   it('should return a globalConfig handler in the context', async () => {
@@ -101,6 +107,8 @@ describe('createPluginInitializerContext', () => {
         configIndex: '.opensearch_dashboards_config',
         autocompleteTerminateAfter: duration(100000),
         autocompleteTimeout: duration(1000),
+        dashboardAdmin: { groups: [], users: [] },
+        futureNavigation: false,
       },
       opensearch: {
         shardTimeout: duration(30, 's'),
@@ -108,7 +116,12 @@ describe('createPluginInitializerContext', () => {
         pingTimeout: duration(30, 's'),
       },
       path: { data: fromRoot('data') },
-      savedObjects: { maxImportPayloadBytes: new ByteSizeValue(26214400) },
+      savedObjects: {
+        maxImportPayloadBytes: new ByteSizeValue(26214400),
+        permission: {
+          enabled: false,
+        },
+      },
     });
   });
 

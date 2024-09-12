@@ -28,7 +28,9 @@
  * under the License.
  */
 
-import { IFieldType, IIndexPattern } from '../../../common/index_patterns';
+import { monaco } from '@osd/monaco';
+import { IFieldType, IndexPattern } from '../../../common/index_patterns';
+import { IDataPluginServices } from '../../types';
 
 export enum QuerySuggestionTypes {
   Field = 'field',
@@ -45,12 +47,14 @@ export type QuerySuggestionGetFn = (
 /** @public **/
 export interface QuerySuggestionGetFnArgs {
   language: string;
-  indexPatterns: IIndexPattern[];
+  indexPattern: IndexPattern | undefined;
   query: string;
   selectionStart: number;
   selectionEnd: number;
   signal?: AbortSignal;
   boolFilter?: any;
+  position?: monaco.Position;
+  services?: IDataPluginServices;
 }
 
 /** @public **/
@@ -69,5 +73,17 @@ export interface QuerySuggestionField extends QuerySuggestionBasic {
   field: IFieldType;
 }
 
+export interface MonacoCompatibleQuerySuggestion
+  extends Pick<QuerySuggestionBasic, 'description' | 'cursorIndex'> {
+  type: monaco.languages.CompletionItemKind;
+  text: string;
+  detail: string;
+  insertText?: string;
+  replacePosition?: monaco.Range;
+}
+
 /** @public **/
-export type QuerySuggestion = QuerySuggestionBasic | QuerySuggestionField;
+export type QuerySuggestion =
+  | QuerySuggestionBasic
+  | QuerySuggestionField
+  | MonacoCompatibleQuerySuggestion;

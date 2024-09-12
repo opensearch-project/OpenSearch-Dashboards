@@ -236,7 +236,7 @@ export class PersistedState extends EventEmitter {
     }
 
     // update the merged state value
-    const targetObj = this._mergedState || cloneDeep(this._defaultState);
+    const targetObj = cloneDeep(this._mergedState) || cloneDeep(this._defaultState);
     const sourceObj = merge({}, this._changedState);
 
     // handler arguments are (targetValue, sourceValue, key, target, source)

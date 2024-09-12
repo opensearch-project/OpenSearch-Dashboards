@@ -5,22 +5,52 @@
 
 import { EuiForm } from '@elastic/eui';
 import React from 'react';
-import { useVisualizationType } from '../../utils/use';
-import { useTypedSelector } from '../../utils/state_management';
+
 import './config_panel.scss';
 import { mapSchemaToAggPanel } from './schema_to_dropbox';
 import { SecondaryPanel } from './secondary_panel';
+import { Schemas } from '../../../../../vis_default_editor/public';
+import {
+  AggConfig,
+  AggConfigs,
+  CreateAggConfigParams,
+} from '../../../../../data/common/search/aggs';
+import { IndexPattern, TimeRange } from '../../../../../data/public';
+import { SchemaDisplayStates } from '.';
 
-export function ConfigPanel() {
-  const vizType = useVisualizationType();
-  const editingState = useTypedSelector(
-    (state) => state.visualization.activeVisualization?.draftAgg
-  );
-  const schemas = vizType.ui.containerConfig.data.schemas;
+export interface AggProps {
+  indexPattern: IndexPattern | undefined;
+  aggConfigs: AggConfigs | undefined;
+  aggs: AggConfig[];
+  timeRange: TimeRange;
+}
 
+export interface ConfigPanelProps {
+  schemas: Schemas;
+  editingState?: CreateAggConfigParams;
+  aggProps: AggProps;
+  activeSchemaFields: SchemaDisplayStates;
+  setActiveSchemaFields: React.Dispatch<React.SetStateAction<SchemaDisplayStates>>;
+  isDragging: boolean;
+}
+
+export function ConfigPanel({
+  schemas,
+  editingState,
+  aggProps,
+  activeSchemaFields,
+  setActiveSchemaFields,
+  isDragging,
+}: ConfigPanelProps) {
   if (!schemas) return null;
 
-  const mainPanel = mapSchemaToAggPanel(schemas);
+  const mainPanel = mapSchemaToAggPanel(
+    schemas,
+    aggProps,
+    activeSchemaFields,
+    setActiveSchemaFields,
+    isDragging
+  );
 
   return (
     <EuiForm className={`vbConfig ${editingState ? 'showSecondary' : ''}`}>

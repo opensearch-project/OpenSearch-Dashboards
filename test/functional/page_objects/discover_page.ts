@@ -519,12 +519,15 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async switchDiscoverTable(tableType: string) {
       await retry.try(async () => {
-        const switchButton = await testSubjects.find('datagridTableButton');
-        const buttonText = await switchButton.getVisibleText();
+        const optionsButton = await testSubjects.find('discoverOptionsButton');
+        await optionsButton.click();
 
-        if (tableType === 'new' && buttonText.includes('Try new Discover')) {
+        const switchButton = await testSubjects.find('discoverOptionsLegacySwitch');
+        const isLegacyChecked = (await switchButton.getAttribute('aria-checked')) === 'true';
+
+        if (tableType === 'new' && isLegacyChecked) {
           await switchButton.click();
-        } else if (tableType === 'legacy' && buttonText.includes('Use legacy Discover')) {
+        } else if (tableType === 'legacy' && !isLegacyChecked) {
           await switchButton.click();
         }
       });

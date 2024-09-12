@@ -40,10 +40,10 @@ import {
   htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
-  EuiComboBox,
+  EuiCompressedFieldText,
+  EuiCompressedComboBox,
   EuiFormLabel,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
@@ -62,14 +62,14 @@ const StandardSiblingAggUi = (props) => {
   if (model.type === 'std_deviation_bucket') {
     stdDev.sigma = (
       <EuiFlexItem grow={false}>
-        <EuiFormRow
+        <EuiCompressedFormRow
           id={htmlId('sigma')}
           label={
             <FormattedMessage id="visTypeTimeseries.stdSibling.sigmaLabel" defaultMessage="Sigma" />
           }
         >
-          <EuiFieldText value={model.sigma} onChange={handleTextChange('sigma')} />
-        </EuiFormRow>
+          <EuiCompressedFieldText value={model.sigma} onChange={handleTextChange('sigma')} />
+        </EuiCompressedFormRow>
       </EuiFlexItem>
     );
 
@@ -109,19 +109,19 @@ const StandardSiblingAggUi = (props) => {
 
     stdDev.mode = (
       <EuiFlexItem>
-        <EuiFormRow
+        <EuiCompressedFormRow
           id={htmlId('mode')}
           label={
             <FormattedMessage id="visTypeTimeseries.stdSibling.modeLabel" defaultMessage="Mode" />
           }
         >
-          <EuiComboBox
+          <EuiCompressedComboBox
             options={modeOptions}
             selectedOptions={selectedModeOption ? [selectedModeOption] : []}
             onChange={handleSelectChange('mode')}
             singleSelection={{ asPlainText: true }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiFlexItem>
     );
   }
@@ -154,7 +154,7 @@ const StandardSiblingAggUi = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('metric')}
             label={
               <FormattedMessage
@@ -170,7 +170,7 @@ const StandardSiblingAggUi = (props) => {
               metric={model}
               value={model.field}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         {stdDev.sigma}
         {stdDev.mode}

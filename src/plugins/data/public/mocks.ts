@@ -33,6 +33,8 @@ import { fieldFormatsServiceMock } from './field_formats/mocks';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 import { AutocompleteStart, AutocompleteSetup } from './autocomplete';
+import { uiServiceMock } from './ui/mocks';
+import { dataSourceServiceMock } from './data_sources/datasource_services/mocks';
 
 export type Setup = jest.Mocked<ReturnType<Plugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<Plugin['start']>>;
@@ -48,8 +50,8 @@ const autocompleteStartMock: jest.Mocked<AutocompleteStart> = {
   hasQuerySuggestions: jest.fn(),
 };
 
-const createSetupContract = (): Setup => {
-  const querySetupMock = queryServiceMock.createSetupContract();
+const createSetupContract = (isEnhancementsEnabled: boolean = false): Setup => {
+  const querySetupMock = queryServiceMock.createSetupContract(isEnhancementsEnabled);
   return {
     autocomplete: automcompleteSetupMock,
     search: searchServiceMock.createSetupContract(),
@@ -59,8 +61,8 @@ const createSetupContract = (): Setup => {
   };
 };
 
-const createStartContract = (): Start => {
-  const queryStartMock = queryServiceMock.createStartContract();
+const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
+  const queryStartMock = queryServiceMock.createStartContract(isEnhancementsEnabled);
   return {
     actions: {
       createFiltersFromValueClickAction: jest.fn().mockResolvedValue(['yes']),
@@ -70,10 +72,7 @@ const createStartContract = (): Start => {
     search: searchServiceMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
-    ui: {
-      IndexPatternSelect: jest.fn(),
-      SearchBar: jest.fn().mockReturnValue(null),
-    },
+    ui: uiServiceMock.createStartContract(),
     indexPatterns: ({
       find: jest.fn((search) => [{ id: search, title: search }]),
       createField: jest.fn(() => {}),
@@ -93,6 +92,7 @@ const createStartContract = (): Start => {
       ),
       clearCache: jest.fn(),
     } as unknown) as IndexPatternsContract,
+    dataSources: dataSourceServiceMock.createStartContract(),
   };
 };
 

@@ -75,6 +75,7 @@ export function DocViewTableRowBtnFilterExists({
         disabled={disabled}
         iconType={'indexOpen'}
         iconSize={'s'}
+        size={'xs'}
       />
     </EuiToolTip>
   );

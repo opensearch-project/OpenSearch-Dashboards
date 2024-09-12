@@ -175,3 +175,597 @@ The migraton version will be saved as a `migrationVersion` attribute in the save
 ```
 
 For a more detailed explanation on the migration, refer to [`saved objects management`](src/core/server/saved_objects/migrations/README.md).
+
+## Server APIs
+
+### Get saved objects API
+
+Retrieve a single saved object by its ID.
+
+* Path and HTTP methods
+
+```json
+GET <osd host>:<port>/api/saved_objects/<type>/<id>
+```
+
+* Path parameters
+
+The following table lists the available path parameters. All path parameters are required.
+
+| Parameter | Data type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `<type>` | String | YES | The type of the saved object, such as `index-pattern`, `config` and `dashboard`. |
+| `<id>` | String | YES | The ID of the saved object. |
+
+* Example request
+
+```json
+GET api/saved_objects/index-pattern/619cc200-ecd0-11ee-95b1-e7363f9e289d
+```
+
+* Example response
+
+```json
+{
+    "id": "619cc200-ecd0-11ee-95b1-e7363f9e289d",
+    "type": "index-pattern",
+    "namespaces": [
+        "default"
+    ],
+    "updated_at": "2024-03-28T06:57:03.008Z",
+    "version": "WzksMl0=",
+    "attributes": {
+        "title": "test*",
+        "fields": "[{\"count\":0,\"name\":\"_id\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_index\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_score\",\"type\":\"number\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_source\",\"type\":\"_source\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_type\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false}]"
+    },
+    "references": [
+
+    ],
+    "migrationVersion": {
+        "index-pattern": "7.6.0"
+    }
+}
+```
+
+### Bulk get saved objects API
+
+Retrieve mutiple saved objects.
+
+* Path and HTTP methods
+
+```json
+POST <osd host>:<port>/api/saved_objects/_bulk_get
+```
+
+* Request body
+
+| Parameter | Data type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `type` | String | YES | The type of the saved object, such as `index-pattern`, `config` and `dashboard`. |
+| `id` | String | YES | The ID of the saved object. |
+| `fields` | Array | NO | The fields of the saved obejct need to be returned in the response. |
+
+* Example request
+
+```json
+POST api/saved_objects/_bulk_get
+[
+  {
+    "type": "index-pattern",
+    "id": "619cc200-ecd0-11ee-95b1-e7363f9e289d"
+  },
+  {
+    "type": "config",
+    "id": "3.0.0"
+  }
+]
+```
+
+* Example response
+
+```json
+{
+    "saved_objects": [
+        {
+            "id": "619cc200-ecd0-11ee-95b1-e7363f9e289d",
+            "type": "index-pattern",
+            "namespaces": [
+                "default"
+            ],
+            "updated_at": "2024-03-28T06:57:03.008Z",
+            "version": "WzksMl0=",
+            "attributes": {
+                "title": "test*",
+                "fields": "[{\"count\":0,\"name\":\"_id\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_index\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_score\",\"type\":\"number\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_source\",\"type\":\"_source\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_type\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false}]"
+            },
+            "references": [
+
+            ],
+            "migrationVersion": {
+                "index-pattern": "7.6.0"
+            }
+        },
+        {
+            "id": "3.0.0",
+            "type": "config",
+            "namespaces": [
+                "default"
+            ],
+            "updated_at": "2024-03-19T06:11:41.608Z",
+            "version": "WzAsMV0=",
+            "attributes": {
+                "buildNum": 9007199254740991
+            },
+            "references": [
+
+            ],
+            "migrationVersion": {
+                "config": "7.9.0"
+            }
+        }
+    ]
+}
+```
+
+### Find saved objects API
+
+Retrieve a paginated set of saved objects by mulitple conditions.
+
+* Path and HTTP methods
+
+```json
+GET <osd host>:<port>/api/saved_objects/_find
+```
+
+* Query parameters
+
+| Parameter | Data type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `type` | String | YES | The type of the saved object, such as `index-pattern`, `config` and `dashboard`. |
+| `per_page` | Number | NO | The number of saved objects to return in each page. |
+| `page` | Number | NO  |  The page of saved objects to return. |
+| `search` | String | NO  |  A `simple_query_string` query DSL that used to filter the saved objects. |
+| `default_search_operator` | String | NO  |  The default operator to use for the `simple_query_string` query. |
+| `search_fields` | Array | NO  |  The fields to perform the `simple_query_string` parsed query against. |
+| `fields` | Array | NO  | The fields of the saved obejct need to be returned in the response. |
+| `sort_field` | String | NO  | The field used for sorting the response. |
+| `has_reference` | Object | NO  | Filters to objects that have a relationship with the type and ID combination. |
+| `filter` | String | NO  | The query string used to filter the attribute of the saved object. |
+| `workspaces` | String\|Array | NO  | The ID of the workspace which the saved objects exist in. |
+
+* Example request
+
+```json
+GET api/saved_objects/_find?type=index-pattern&search_fields=title
+```
+
+* Example response
+
+```json
+{
+    "page": 1,
+    "per_page": 20,
+    "total": 2,
+    "saved_objects": [
+        {
+            "type": "index-pattern",
+            "id": "619cc200-ecd0-11ee-95b1-e7363f9e289d",
+            "attributes": {
+                "title": "test*",
+                "fields": "[{\"count\":0,\"name\":\"_id\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_index\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_score\",\"type\":\"number\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_source\",\"type\":\"_source\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_type\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false}]"
+            },
+            "references": [
+
+            ],
+            "migrationVersion": {
+                "index-pattern": "7.6.0"
+            },
+            "updated_at": "2024-03-28T06:57:03.008Z",
+            "version": "WzksMl0=",
+            "namespaces": [
+                "default"
+            ],
+            "score": 0
+        },
+        {
+            "type": "index-pattern",
+            "id": "2ffee5da-55b3-49b4-b9e1-c3af5d1adbd3",
+            "attributes": {
+                "title": "test*",
+                "fields": "[{\"count\":0,\"name\":\"_id\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_index\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_score\",\"type\":\"number\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_source\",\"type\":\"_source\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_type\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false}]"
+            },
+            "references": [
+
+            ],
+            "migrationVersion": {
+                "index-pattern": "7.6.0"
+            },
+            "updated_at": "2024-03-28T07:10:13.513Z",
+            "version": "WzEwLDJd",
+            "workspaces": [
+                "9gt4lB"
+            ],
+            "namespaces": [
+                "default"
+            ],
+            "score": 0
+        }
+    ]
+}
+```
+
+### Create saved objects API
+
+Create saved objects.
+
+* Path and HTTP methods
+
+```json
+POST <osd host>:<port>/api/saved_objects/<type>/<id>
+```
+
+* Path parameters
+
+The following table lists the available path parameters.
+
+| Parameter | Data type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `<type>` | String | YES | The type of the saved object, such as `index-pattern`, `config` and `dashboard`. |
+| `<id>` | String | NO |The ID of the saved object. |
+
+* Query parameters
+
+| Parameter | Data type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `overwrite` | Boolean | NO | If `true`, overwrite the saved object with the same ID, defaults to `false`. |
+
+* Request body
+
+| Parameter | Data type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `attributes` | Object | YES | The attributes of the saved object. |
+| `references` | Array | NO | The attributes of the referenced objects. |
+| `workspaces` | String\|Array | NO  | The ID of the workspace which the saved objects exist in. |
+
+* Example request
+
+```json
+POST api/saved_objects/index-pattern/test-pattern
+{
+  "attributes": {
+    "title": "test-pattern-*"
+  }
+}
+```
+
+* Example response
+
+```json
+{
+    "type": "index-pattern",
+    "id": "test-pattern",
+    "attributes": {
+        "title": "test-pattern-*"
+    },
+    "references": [
+
+    ],
+    "migrationVersion": {
+        "index-pattern": "7.6.0"
+    },
+    "updated_at": "2024-03-29T05:55:09.270Z",
+    "version": "WzExLDJd",
+    "namespaces": [
+        "default"
+    ]
+}
+```
+
+### Bulk create saved objects API
+
+Bulk create saved objects.
+
+* Path and HTTP methods
+
+```json
+POST <osd host>:<port>/api/saved_objects/_bulk_create
+```
+
+* Query parameters
+
+| Parameter | Data type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `overwrite` | Boolean | NO | If `true`, overwrite the saved object with the same ID, defaults to `false`. |
+
+* Request body
+
+| Parameter | Data type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `type` | String | YES | The type of the saved object, such as `index-pattern`, `config` and `dashboard`. |
+| `id` | String | NO |The ID of the saved object. |
+| `attributes` | Object | YES | The attributes of the saved object. |
+| `references` | Array | NO | The attributes of the referenced objects. |
+| `version` | String | NO | The version of the saved object. |
+| `workspaces` | String\|Array | NO  | The ID of the workspace which the saved objects exist in. |
+
+* Example request
+
+```json
+POST api/saved_objects/_bulk_create
+[
+    {
+        "type": "index-pattern",
+        "id": "test-pattern1",
+        "attributes": {
+            "title": "test-pattern1-*"
+        }
+    }
+]
+```
+
+* Example response
+
+```json
+{
+    "saved_objects": [
+        {
+            "type": "index-pattern",
+            "id": "test-pattern1",
+            "attributes": {
+                "title": "test-pattern1-*"
+            },
+            "references": [
+
+            ],
+            "migrationVersion": {
+                "index-pattern": "7.6.0"
+            },
+            "updated_at": "2024-03-29T06:01:59.453Z",
+            "version": "WzEyLDJd",
+            "namespaces": [
+                "default"
+            ]
+        }
+    ]
+}
+```
+### Upate saved objects API
+
+Update saved objects.
+
+* Path and HTTP methods
+
+```json
+PUT <osd host>:<port>/api/saved_objects/<type>/<id>
+```
+
+* Path parameters
+
+The following table lists the available path parameters.
+
+| Parameter | Data type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `<type>` | String | YES | The type of the saved object, such as `index-pattern`, `config` and `dashboard`. |
+| `<id>` | String | NO |The ID of the saved object. |
+
+* Request body
+
+| Parameter | Data type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `attributes` | Object | YES | The attributes of the saved object. |
+| `references` | Array | NO | The attributes of the referenced objects. |
+
+* Example request
+
+```json
+PUT api/saved_objects/index-pattern/test-pattern
+{
+  "attributes": {
+    "title": "test-pattern-update-*"
+  }
+}
+```
+
+* Example response
+
+```json
+{
+    "id": "test-pattern",
+    "type": "index-pattern",
+    "updated_at": "2024-03-29T06:04:32.743Z",
+    "version": "WzEzLDJd",
+    "namespaces": [
+        "default"
+    ],
+    "attributes": {
+        "title": "test-pattern-update-*"
+    }
+}
+```
+### Delete saved objects API
+
+Delete saved objects.
+
+* Path and HTTP methods
+
+```json
+DELETE <osd host>:<port>/api/saved_objects/<type>/<id>
+```
+
+* Path parameters
+
+The following table lists the available path parameters.
+
+| Parameter | Data type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `<type>` | String | YES | The type of the saved object, such as `index-pattern`, `config` and `dashboard`. |
+| `<id>` | String | NO | The ID of the saved object. |
+
+* Example request
+
+```json
+DELETE api/saved_objects/index-pattern/test-pattern
+```
+
+* Example response
+
+```json
+{}
+```
+### Export saved object API
+
+Export saved objects.
+
+* Path and HTTP methods
+
+```json
+POST <osd host>:<port>/api/saved_objects/_export
+```
+
+* Request body
+
+| Parameter | Data type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `type` | String|Array | NO | The types of the saved object to be included in the export. |
+| `objects` | Array | NO | A list of saved objects to export. |
+| `includeReferencesDeep` | Boolean | NO | Includes all of the referenced objects in the export. |
+| `excludeExportDetails` | Boolean | NO  | Exclude the export summary in the export. |
+| `workspaces` | String\|Array | NO  | The ID of the workspace which the saved objects exist in. |
+
+* Example request
+
+```json
+POST api/saved_objects/_export
+{
+  "type": "index-pattern"
+}
+```
+
+* Example response
+
+```json
+{"attributes":{"fields":"[{\"count\":0,\"name\":\"_id\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_index\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_score\",\"type\":\"number\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_source\",\"type\":\"_source\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_type\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false}]","title":"test*"},"id":"2ffee5da-55b3-49b4-b9e1-c3af5d1adbd3","migrationVersion":{"index-pattern":"7.6.0"},"references":[],"type":"index-pattern","updated_at":"2024-03-28T07:10:13.513Z","version":"WzEwLDJd","workspaces":["9gt4lB"]}
+{"attributes":{"fields":"[{\"count\":0,\"name\":\"_id\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_index\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_score\",\"type\":\"number\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_source\",\"type\":\"_source\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_type\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false}]","title":"test*"},"id":"619cc200-ecd0-11ee-95b1-e7363f9e289d","migrationVersion":{"index-pattern":"7.6.0"},"references":[],"type":"index-pattern","updated_at":"2024-03-28T06:57:03.008Z","version":"WzksMl0="}
+{"attributes":{"title":"test-pattern1-*"},"id":"test-pattern1","migrationVersion":{"index-pattern":"7.6.0"},"references":[],"type":"index-pattern","updated_at":"2024-03-29T06:01:59.453Z","version":"WzEyLDJd"}
+{"exportedCount":3,"missingRefCount":0,"missingReferences":[]}
+```
+
+### Import saved object API
+
+Import saved objects from the file generated by the export API.
+
+* Path and HTTP methods
+
+```json
+POST <osd host>:<port>/api/saved_objects/_import
+```
+
+* Query parameters
+
+| Parameter | Data type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `createNewCopies` | Boolean | NO | Creates copies of the saved objects, genereate new IDs for the imported saved obejcts and resets the reference. |
+| `overwrite` | Boolean | NO | Overwrites the saved objects when they already exist. |
+| `dataSourceId` | String | NO  | The ID of the data source. |
+| `workspaces` | String\|Array | NO  | The ID of the workspace which the saved objects exist in. |
+
+* Request body
+
+The request body must include a multipart/form-data.
+
+* Example request
+
+```json
+POST api/saved_objects/_import?createNewCopies=true --form file=@export.ndjson
+```
+
+* Example response
+
+```json
+{
+    "successCount": 3,
+    "success": true,
+    "successResults": [
+        {
+            "type": "index-pattern",
+            "id": "2ffee5da-55b3-49b4-b9e1-c3af5d1adbd3",
+            "meta": {
+                "title": "test*",
+                "icon": "indexPatternApp"
+            },
+            "destinationId": "f0b08067-d6ab-4153-ba7d-0304506430d6"
+        },
+        {
+            "type": "index-pattern",
+            "id": "619cc200-ecd0-11ee-95b1-e7363f9e289d",
+            "meta": {
+                "title": "test*",
+                "icon": "indexPatternApp"
+            },
+            "destinationId": "ffd3719c-2314-4022-befc-7d3007225952"
+        },
+        {
+            "type": "index-pattern",
+            "id": "test-pattern1",
+            "meta": {
+                "title": "test-pattern1-*",
+                "icon": "indexPatternApp"
+            },
+            "destinationId": "e87e7f2d-8498-4e44-8d25-f7d41f3b3844"
+        }
+    ]
+}
+```
+
+### Resolve import saved objects errors API
+
+Resolve the errors if the import API returns errors, this API can be used to retry importing some saved obejcts,  overwrite specific saved objects, or change the references to different saved objects.
+
+* Path and HTTP methods
+
+```json
+POST <osd host>:<port>/api/saved_objects/_resolve_import_errors
+```
+
+* Query parameters
+
+| Parameter | Data type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `createNewCopies` | Boolean | NO | Creates copies of the saved objects, genereate new IDs for the imported saved obejcts and resets the reference. |
+| `dataSourceId` | String | NO  | The ID of the data source. |
+| `workspaces` | String\|Array | NO  | The ID of the workspace which the saved objects exist in. |
+
+* Request body
+
+The request body must include a multipart/form-data.
+
+| Parameter | Data type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `file` | ndjson file | YES | The same file given to the import API. |
+| `retries` | Array | YES | The retry operations. |
+
+The attrbutes of the object in the `objects` parameter are as follows:
+| Parameter | Data type | Required | Description |
+| :--- | :--- | :--- | :--- |
+| `type` | String | YES | The type of the saved object, such as `index-pattern`, `config` and `dashboard`. |
+| `id` | String | YES |The ID of the saved object. |
+| `overwrite` | Boolean | NO | If `true`, overwrite the saved object with the same ID, defaults to `false`. |
+| `destinationId` | String | NO | The destination ID that the imported object should have, if different from the current ID. |
+| `replaceReferences` | Array | NO | A list of `type`, `from`, and `to` to be used to change the saved object's references. |
+| `ignoreMissingReferences` | Boolean | NO | If `true`, ignores missing reference errors, defaults to `false`. |
+
+* Example request
+
+```json
+POST api/saved_objects/_import?createNewCopies=true --form file=@export.ndjson --form retries='[{"type":"index-pattern","id":"my-pattern","overwrite":true}]'
+
+```
+
+* Example response
+
+```json
+{
+    "successCount": 0,
+    "success": true
+}
+```

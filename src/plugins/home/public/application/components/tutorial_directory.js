@@ -44,8 +44,8 @@ import {
   EuiFlexGrid,
   EuiFlexGroup,
   EuiSpacer,
-  EuiTitle,
   EuiPageBody,
+  EuiText,
 } from '@elastic/eui';
 
 import { getTutorials } from '../load_tutorials';
@@ -93,14 +93,17 @@ class TutorialDirectoryUi extends React.Component {
 
   async componentDidMount() {
     this._isMounted = true;
-
-    getServices().chrome.setBreadcrumbs([
-      {
+    const { chrome } = getServices();
+    const { withoutHomeBreadCrumb } = this.props;
+    const breadcrumbs = [{ text: addDataTitle }];
+    if (!withoutHomeBreadCrumb) {
+      breadcrumbs.splice(0, 0, {
         text: homeTitle,
         href: '#/',
-      },
-      { text: addDataTitle },
-    ]);
+      });
+    }
+
+    chrome.setBreadcrumbs(breadcrumbs);
 
     const tutorialConfigs = await getTutorials();
 
@@ -236,6 +239,8 @@ class TutorialDirectoryUi extends React.Component {
           onSelectedDataSource={this.onSelectedDataSourceChange}
           disabled={!isDataSourceEnabled}
           hideLocalCluster={isLocalClusterHidden}
+          uiSettings={getServices().uiSettings}
+          compressed={true}
         />
       </div>
     ) : null;
@@ -275,14 +280,14 @@ class TutorialDirectoryUi extends React.Component {
       <>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
-            <EuiTitle size="l">
+            <EuiText size="s">
               <h1>
                 <FormattedMessage
                   id="home.tutorial.addDataToOpenSearchDashboardsTitle"
                   defaultMessage="Add sample data"
                 />
               </h1>
-            </EuiTitle>
+            </EuiText>
           </EuiFlexItem>
           {headerLinks ? <EuiFlexItem grow={false}>{headerLinks}</EuiFlexItem> : null}
         </EuiFlexGroup>
@@ -297,7 +302,7 @@ class TutorialDirectoryUi extends React.Component {
         {this.renderHeader()}
         <EuiSpacer size="m" />
         {this.renderDataSourceSelector()}
-        <EuiTabs>{this.renderTabs()}</EuiTabs>
+        <EuiTabs size="s">{this.renderTabs()}</EuiTabs>
         <EuiSpacer />
         {this.renderTabContent()}
       </EuiPageBody>
@@ -321,6 +326,7 @@ TutorialDirectoryUi.propTypes = {
   addBasePath: PropTypes.func.isRequired,
   openTab: PropTypes.string,
   isCloudEnabled: PropTypes.bool.isRequired,
+  withoutHomeBreadCrumb: PropTypes.bool,
 };
 
 export const TutorialDirectory = injectI18n(TutorialDirectoryUi);

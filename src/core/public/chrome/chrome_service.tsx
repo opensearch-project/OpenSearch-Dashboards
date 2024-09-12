@@ -30,8 +30,17 @@
 
 import { EuiBreadcrumb, IconType } from '@elastic/eui';
 import React from 'react';
-import { FormattedMessage } from '@osd/i18n/react';
-import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
+import ReactDOM from 'react-dom';
+import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
+import {
+  BehaviorSubject,
+  combineLatest,
+  merge,
+  Observable,
+  of,
+  ReplaySubject,
+  Subscription,
+} from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { EuiLink } from '@elastic/eui';
 import { mountReactNode } from '../utils/mount';
@@ -41,17 +50,22 @@ import { HttpStart } from '../http';
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
 import { IUiSettingsClient } from '../ui_settings';
-import { OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK } from './constants';
+import { HeaderVariant, OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK } from './constants';
 import { ChromeDocTitle, DocTitleService } from './doc_title';
 import { ChromeNavControls, NavControlsService } from './nav_controls';
 import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
-import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
-import { Branding } from '../';
+import { ChromeHelpExtensionMenuLink, HeaderHelpMenu } from './ui/header/header_help_menu';
+import { Branding, WorkspacesStart } from '../';
 import { getLogos } from '../../common';
 import type { Logos } from '../../common/types';
 import { OverlayStart } from '../overlays';
+import {
+  ChromeNavGroupService,
+  ChromeNavGroupServiceSetupContract,
+  ChromeNavGroupServiceStartContract,
+} from './nav_group';
 
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -66,6 +80,9 @@ export interface ChromeBadge {
 
 /** @public */
 export type ChromeBreadcrumb = EuiBreadcrumb;
+
+/** @public */
+export type ChromeBreadcrumbEnricher = (breadcrumbs: ChromeBreadcrumb[]) => ChromeBreadcrumb[];
 
 /** @public */
 export type ChromeBranding = Branding;
@@ -90,6 +107,10 @@ interface ConstructorParams {
   browserSupportsCsp: boolean;
 }
 
+export interface SetupDeps {
+  uiSettings: IUiSettingsClient;
+}
+
 export interface StartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
@@ -98,6 +119,7 @@ export interface StartDeps {
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
   overlays: OverlayStart;
+  workspaces: WorkspacesStart;
 }
 
 type CollapsibleNavHeaderRender = () => JSX.Element | null;
@@ -106,11 +128,16 @@ type CollapsibleNavHeaderRender = () => JSX.Element | null;
 export class ChromeService {
   private isVisible$!: Observable<boolean>;
   private isForceHidden$!: BehaviorSubject<boolean>;
+  private headerVariant$!: Observable<HeaderVariant | undefined>;
+  private headerVariantOverride$!: BehaviorSubject<HeaderVariant | undefined>;
   private readonly stop$ = new ReplaySubject(1);
   private readonly navControls = new NavControlsService();
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
+  private readonly navGroup = new ChromeNavGroupService();
+  private useUpdatedHeader = false;
+  private updatedHeaderSubscription: Subscription | undefined;
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
 
   constructor(private readonly params: ConstructorParams) {}
@@ -147,7 +174,30 @@ export class ChromeService {
     );
   }
 
-  public setup() {
+  private initHeaderVariant(application: StartDeps['application']) {
+    this.headerVariantOverride$ = new BehaviorSubject<HeaderVariant | undefined>(undefined);
+
+    const appHeaderVariant$ = application.currentAppId$.pipe(
+      flatMap((appId) =>
+        application.applications$.pipe(
+          map(
+            (applications) =>
+              (appId && applications.has(appId) && applications.get(appId)!.headerVariant) as
+                | HeaderVariant
+                | undefined
+          )
+        )
+      )
+    );
+
+    this.headerVariant$ = combineLatest([appHeaderVariant$, this.headerVariantOverride$]).pipe(
+      map(([appHeaderVariant, headerVariantOverride]) => headerVariantOverride || appHeaderVariant),
+      takeUntil(this.stop$)
+    );
+  }
+
+  public setup({ uiSettings }: SetupDeps): ChromeSetup {
+    const navGroup = this.navGroup.setup({ uiSettings });
     return {
       registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => {
         if (this.collapsibleNavHeaderRender) {
@@ -158,6 +208,7 @@ export class ChromeService {
         }
         this.collapsibleNavHeaderRender = render;
       },
+      navGroup,
     };
   }
 
@@ -169,13 +220,24 @@ export class ChromeService {
     notifications,
     uiSettings,
     overlays,
+    workspaces,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
+    this.initHeaderVariant(application);
+
+    this.updatedHeaderSubscription = uiSettings
+      .get$('home:useNewHomePage', false)
+      .subscribe((value) => {
+        this.useUpdatedHeader = value;
+      });
 
     const appTitle$ = new BehaviorSubject<string>('Overview');
     const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
+    const breadcrumbsEnricher$ = new BehaviorSubject<ChromeBreadcrumbEnricher | undefined>(
+      undefined
+    );
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK);
@@ -184,8 +246,14 @@ export class ChromeService {
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
-    const recentlyAccessed = await this.recentlyAccessed.start({ http });
+    const recentlyAccessed = await this.recentlyAccessed.start({ http, workspaces });
     const docTitle = this.docTitle.start({ document: window.document });
+    const navGroup = await this.navGroup.start({
+      navLinks,
+      application,
+      breadcrumbsEnricher$,
+      workspaces,
+    });
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -203,6 +271,29 @@ export class ChromeService {
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
 
     const logos = getLogos(injectedMetadata.getBranding(), http.basePath.serverBasePath);
+
+    // Add Help menu
+    if (this.useUpdatedHeader) {
+      navControls.registerLeftBottom({
+        order: 9000,
+        mount: (element: HTMLElement) => {
+          ReactDOM.render(
+            <I18nProvider>
+              <HeaderHelpMenu
+                helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
+                helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
+                opensearchDashboardsDocLink={docLinks.links.opensearchDashboards.introduction}
+                opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
+                surveyLink={injectedMetadata.getSurvey()}
+                useUpdatedAppearance
+              />
+            </I18nProvider>,
+            element
+          );
+          return () => ReactDOM.unmountComponentAtNode(element);
+        },
+      });
+    }
 
     const isIE = () => {
       const ua = window.navigator.userAgent;
@@ -254,22 +345,26 @@ export class ChromeService {
       recentlyAccessed,
       docTitle,
       logos,
+      navGroup,
 
       getHeaderComponent: () => (
         <Header
+          http={http}
           loadingCount$={http.getLoadingCount$()}
           application={application}
           appTitle$={appTitle$.pipe(takeUntil(this.stop$))}
           badge$={badge$.pipe(takeUntil(this.stop$))}
           basePath={http.basePath}
           breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
+          breadcrumbsEnricher$={breadcrumbsEnricher$.pipe(takeUntil(this.stop$))}
           customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
           opensearchDashboardsDocLink={docLinks.links.opensearchDashboards.introduction}
           forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
           helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
           helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
-          homeHref={http.basePath.prepend('/app/home')}
+          homeHref={application.getUrlForApp('home')}
           isVisible$={this.isVisible$}
+          headerVariant$={this.headerVariant$}
           opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
           navLinks$={navLinks.getNavLinks$()}
           recentlyAccessed$={recentlyAccessed.get$()}
@@ -278,6 +373,7 @@ export class ChromeService {
           navControlsRight$={navControls.getRight$()}
           navControlsExpandedCenter$={navControls.getExpandedCenter$()}
           navControlsExpandedRight$={navControls.getExpandedRight$()}
+          navControlsLeftBottom$={navControls.getLeftBottom$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}
@@ -285,6 +381,13 @@ export class ChromeService {
           survey={injectedMetadata.getSurvey()}
           collapsibleNavHeaderRender={this.collapsibleNavHeaderRender}
           sidecarConfig$={sidecarConfig$}
+          navGroupEnabled={navGroup.getNavGroupEnabled()}
+          currentNavGroup$={navGroup.getCurrentNavGroup$()}
+          navGroupsMap$={navGroup.getNavGroupsMap$()}
+          setCurrentNavGroup={navGroup.setCurrentNavGroup}
+          workspaceList$={workspaces.workspaceList$}
+          currentWorkspace$={workspaces.currentWorkspace$}
+          useUpdatedHeader={this.useUpdatedHeader}
         />
       ),
 
@@ -293,6 +396,10 @@ export class ChromeService {
       getIsVisible$: () => this.isVisible$,
 
       setIsVisible: (isVisible: boolean) => this.isForceHidden$.next(!isVisible),
+
+      getHeaderVariant$: () => this.headerVariant$,
+
+      setHeaderVariant: (variant?: HeaderVariant) => this.headerVariantOverride$.next(variant),
 
       getApplicationClasses$: () =>
         applicationClasses$.pipe(
@@ -324,6 +431,12 @@ export class ChromeService {
         breadcrumbs$.next(newBreadcrumbs);
       },
 
+      getBreadcrumbsEnricher$: () => breadcrumbsEnricher$.pipe(takeUntil(this.stop$)),
+
+      setBreadcrumbsEnricher: (enricher: ChromeBreadcrumbEnricher) => {
+        breadcrumbsEnricher$.next(enricher);
+      },
+
       getHelpExtension$: () => helpExtension$.pipe(takeUntil(this.stop$)),
 
       setHelpExtension: (helpExtension?: ChromeHelpExtension) => {
@@ -344,6 +457,8 @@ export class ChromeService {
 
   public stop() {
     this.navLinks.stop();
+    this.navGroup.stop();
+    this.updatedHeaderSubscription?.unsubscribe();
     this.stop$.next();
   }
 }
@@ -360,6 +475,7 @@ export class ChromeService {
  */
 export interface ChromeSetup {
   registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => void;
+  navGroup: ChromeNavGroupServiceSetupContract;
 }
 
 /**
@@ -397,6 +513,8 @@ export interface ChromeStart {
   recentlyAccessed: ChromeRecentlyAccessed;
   /** {@inheritdoc ChromeDocTitle} */
   docTitle: ChromeDocTitle;
+  /** {@inheritdoc NavGroupService} */
+  navGroup: ChromeNavGroupServiceStartContract;
   /** {@inheritdoc Logos} */
   readonly logos: Logos;
 
@@ -420,6 +538,16 @@ export interface ChromeStart {
    * with an exit button.
    */
   setIsVisible(isVisible: boolean): void;
+
+  /**
+   * Get an observable of the current header variant.
+   */
+  getHeaderVariant$(): Observable<HeaderVariant | undefined>;
+
+  /**
+   * Set or unset the temporary variant for the header.
+   */
+  setHeaderVariant(variant?: HeaderVariant): void;
 
   /**
    * Get the current set of classNames that will be set on the application container.
@@ -455,6 +583,16 @@ export interface ChromeStart {
    * Override the current set of breadcrumbs
    */
   setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
+
+  /**
+   * Get an observable of the current breadcrumbs enricher
+   */
+  getBreadcrumbsEnricher$(): Observable<ChromeBreadcrumbEnricher | undefined>;
+
+  /**
+   * Override the current ChromeBreadcrumbEnricher
+   */
+  setBreadcrumbsEnricher(newBreadcrumbsEnricher: ChromeBreadcrumbEnricher | undefined): void;
 
   /**
    * Get an observable of the current custom nav link

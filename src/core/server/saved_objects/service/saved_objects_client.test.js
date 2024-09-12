@@ -222,3 +222,66 @@ test(`#deleteByWorkspace`, async () => {
   expect(mockRepository.deleteByWorkspace).toHaveBeenCalledWith(workspace, options);
   expect(result).toBe(returnValue);
 });
+
+test(`#deleteFromWorkspaces Should use update if there is existing workspaces`, async () => {
+  const returnValue = Symbol();
+  const create = jest.fn();
+  const mockRepository = {
+    get: jest.fn().mockResolvedValue({
+      workspaces: ['id1', 'id2'],
+    }),
+    update: jest.fn().mockResolvedValue(returnValue),
+    create,
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const type = Symbol();
+  const id = Symbol();
+  const workspaces = ['id2'];
+  await client.deleteFromWorkspaces(type, id, workspaces);
+  expect(mockRepository.get).toHaveBeenCalledWith(type, id, {});
+  expect(mockRepository.update).toHaveBeenCalledWith(type, id, undefined, {
+    version: undefined,
+    workspaces: ['id1'],
+  });
+});
+
+test(`#deleteFromWorkspaces should throw error if no workspaces passed`, () => {
+  const mockRepository = {};
+  const client = new SavedObjectsClient(mockRepository);
+  const type = Symbol();
+  const id = Symbol();
+  const workspaces = [];
+  expect(() => client.deleteFromWorkspaces(type, id, workspaces)).rejects.toThrowError();
+});
+
+test(`#addToWorkspaces`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    get: jest.fn().mockResolvedValue(returnValue),
+    update: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const type = Symbol();
+  const id = Symbol();
+  const workspaces = Symbol();
+  const result = await client.addToWorkspaces(type, id, workspaces);
+
+  expect(mockRepository.get).toHaveBeenCalledWith(type, id, {});
+  expect(mockRepository.update).toHaveBeenCalledWith(type, id, undefined, {
+    version: undefined,
+    workspaces: [workspaces],
+  });
+
+  expect(result).toBe(returnValue);
+});
+
+test(`#addToWorkspaces should throw error if no workspaces passed`, () => {
+  const mockRepository = {};
+  const client = new SavedObjectsClient(mockRepository);
+  const type = Symbol();
+  const id = Symbol();
+  const workspaces = [];
+  expect(() => client.addToWorkspaces(type, id, workspaces)).rejects.toThrowError();
+});

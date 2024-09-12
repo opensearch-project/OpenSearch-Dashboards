@@ -18,7 +18,7 @@ exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
       <EuiEmptyPrompt
         actions={
           Array [
-            <EuiButton
+            <EuiSmallButton
               color="primary"
               data-test-subj="clearSession"
               fill={true}
@@ -29,8 +29,8 @@ exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
                 id="core.fatalErrors.clearYourSessionButtonLabel"
                 values={Object {}}
               />
-            </EuiButton>,
-            <EuiButtonEmpty
+            </EuiSmallButton>,
+            <EuiSmallButtonEmpty
               data-test-subj="goBack"
               onClick={[Function]}
             >
@@ -39,17 +39,21 @@ exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
                 id="core.fatalErrors.goBackButtonLabel"
                 values={Object {}}
               />
-            </EuiButtonEmpty>,
+            </EuiSmallButtonEmpty>,
           ]
         }
         body={
-          <p>
-            <FormattedMessage
-              defaultMessage="Try refreshing the page. If that doesn't work, go back to the previous page or clear your session data."
-              id="core.fatalErrors.tryRefreshingPageDescription"
-              values={Object {}}
-            />
-          </p>
+          <EuiText
+            size="s"
+          >
+            <p>
+              <FormattedMessage
+                defaultMessage="Try refreshing the page. If that doesn't work, go back to the previous page or clear your session data."
+                id="core.fatalErrors.tryRefreshingPageDescription"
+                values={Object {}}
+              />
+            </p>
+          </EuiText>
         }
         iconColor="danger"
         iconType="alert"

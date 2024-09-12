@@ -37,3 +37,5 @@ export {
   ChromeHelpExtensionMenuDocumentationLink,
   ChromeHelpExtensionMenuGitHubLink,
 } from './header_help_menu';
+export { RightNavigationButton, RightNavigationButtonProps } from './right_navigation_button';
+export { createRecentNavLink } from './nav_link';

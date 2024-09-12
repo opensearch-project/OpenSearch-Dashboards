@@ -30,9 +30,10 @@
 
 import { i18n } from '@osd/i18n';
 import { extractIndexPatterns } from '../../../common/extract_index_patterns';
+import { DATA_SOURCE_ID_KEY } from '../../../common/constants';
 import { getCoreStart } from '../../services';
 
-export async function fetchFields(indexPatterns = ['*']) {
+export async function fetchFields(indexPatterns = ['*'], dataSourceId = undefined) {
   const patterns = Array.isArray(indexPatterns) ? indexPatterns : [indexPatterns];
   try {
     const indexFields = await Promise.all(
@@ -40,6 +41,7 @@ export async function fetchFields(indexPatterns = ['*']) {
         return getCoreStart().http.get('/api/metrics/fields', {
           query: {
             index: pattern,
+            data_source: dataSourceId,
           },
         });
       })
@@ -62,7 +64,8 @@ export async function fetchFields(indexPatterns = ['*']) {
 }
 
 export async function fetchIndexPatternFields({ params, fields = {} }) {
+  const dataSourceId = params[DATA_SOURCE_ID_KEY] || undefined;
   const indexPatterns = extractIndexPatterns(params, fields);
 
-  return await fetchFields(indexPatterns);
+  return await fetchFields(indexPatterns, dataSourceId);
 }

@@ -32,9 +32,12 @@ import React from 'react';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { MountPoint } from 'opensearch-dashboards/public';
-import { TopNavMenu } from './top_nav_menu';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { TopNavMenu, TopNavMenuItemRenderType } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
-import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import { applicationServiceMock, uiSettingsServiceMock } from '../../../../core/public/mocks';
+import * as testUtils from '../../../data_source_management/public/components/utils';
+import { DataSourceSelectionService } from '../../../data_source_management/public/service/data_source_selection_service';
 
 const dataShim = {
   ui: {
@@ -62,6 +65,7 @@ describe('TopNavMenu', () => {
       run: jest.fn(),
     },
   ];
+  const dataSourceSelection = new DataSourceSelectionService();
 
   it('Should render nothing when no config is provided', () => {
     const component = shallowWithIntl(<TopNavMenu appName={'test'} />);
@@ -117,6 +121,57 @@ describe('TopNavMenu', () => {
     expect(component.find('.myCoolClass').length).toBeTruthy();
   });
 
+  it('mounts the data source menu if showDataSourceMenu is true', async () => {
+    spyOn(testUtils, 'getApplication').and.returnValue({ id: 'test2' });
+    spyOn(testUtils, 'getUiSettings').and.returnValue({ id: 'test2' });
+    spyOn(testUtils, 'getHideLocalCluster').and.returnValue(true);
+    spyOn(testUtils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+    const component = shallowWithIntl(
+      <TopNavMenu
+        appName={'test'}
+        showDataSourceMenu={true}
+        dataSourceMenuConfig={{
+          componentType: 'DataSourceView',
+          componentConfig: {
+            hideLocalCluster: true,
+            fullWidth: true,
+            activeOption: [{ label: 'what', id: '1' }],
+          },
+          dataSourceSelection,
+        }}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('mounts the data source menu as well as top nav menu', async () => {
+    spyOn(testUtils, 'getApplication').and.returnValue({ id: 'test2' });
+    spyOn(testUtils, 'getUiSettings').and.returnValue({ id: 'test2' });
+    spyOn(testUtils, 'getHideLocalCluster').and.returnValue(true);
+    spyOn(testUtils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+
+    const component = shallowWithIntl(
+      <TopNavMenu
+        appName={'test'}
+        showDataSourceMenu={true}
+        config={menuItems}
+        dataSourceMenuConfig={{
+          componentType: 'DataSourceView',
+          componentConfig: {
+            hideLocalCluster: true,
+            fullWidth: true,
+            activeOption: [{ label: 'what', id: '1' }],
+          },
+          dataSourceSelection: new DataSourceSelectionService(),
+        }}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+    expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(menuItems.length);
+  });
+
   describe('when setMenuMountPoint is provided', () => {
     let portalTarget: HTMLElement;
     let mountPoint: MountPoint;
@@ -167,6 +222,106 @@ describe('TopNavMenu', () => {
 
       // menu is rendered outside of the component
       expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(0);
+    });
+
+    it('mounts the data source menu with group actions enabled', async () => {
+      spyOn(testUtils, 'getApplication').and.returnValue(applicationServiceMock);
+      spyOn(testUtils, 'getUiSettings').and.returnValue(
+        uiSettingsServiceMock.createStartContract()
+      );
+      spyOn(testUtils, 'getHideLocalCluster').and.returnValue(true);
+      spyOn(testUtils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+
+      const component = mountWithIntl(
+        <TopNavMenu
+          appName={'test'}
+          showDataSourceMenu={true}
+          config={menuItems}
+          dataSourceMenuConfig={{
+            componentType: 'DataSourceView',
+            componentConfig: {
+              hideLocalCluster: true,
+              fullWidth: true,
+              activeOption: [{ label: 'what', id: '1' }],
+            },
+            dataSourceSelection: new DataSourceSelectionService(),
+          }}
+          groupActions={true}
+          setMenuMountPoint={setMountPoint}
+        />
+      );
+
+      act(() => {
+        mountPoint(portalTarget);
+      });
+
+      await refresh();
+      expect(component.find('.osdTopNavMenuScreenTitle').exists()).toBeFalsy();
+      expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(0);
+    });
+
+    it('mounts without data source menu with group actions enabled and showSearchBar in portal', async () => {
+      spyOn(testUtils, 'getApplication').and.returnValue(applicationServiceMock);
+      spyOn(testUtils, 'getUiSettings').and.returnValue(
+        uiSettingsServiceMock.createStartContract()
+      );
+      spyOn(testUtils, 'getHideLocalCluster').and.returnValue(false);
+      spyOn(testUtils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+
+      const component = mountWithIntl(
+        <TopNavMenu
+          appName={'test'}
+          showDataSourceMenu={true}
+          config={menuItems}
+          showSearchBar={TopNavMenuItemRenderType.IN_PORTAL}
+          groupActions={true}
+          setMenuMountPoint={setMountPoint}
+        />
+      );
+
+      act(() => {
+        mountPoint(portalTarget);
+      });
+
+      await refresh();
+
+      await (() => {
+        expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(1);
+        expect(component.find('.osdTopNavMenuScreenTitle').exists()).toBeTruthy();
+      });
+    });
+
+    it('mounts without data source menu with group actions enabled and showSearchBar in place', async () => {
+      spyOn(testUtils, 'getApplication').and.returnValue(applicationServiceMock);
+      spyOn(testUtils, 'getUiSettings').and.returnValue(
+        uiSettingsServiceMock.createStartContract()
+      );
+      spyOn(testUtils, 'getHideLocalCluster').and.returnValue(false);
+      spyOn(testUtils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+
+      const component = mountWithIntl(
+        <TopNavMenu
+          appName={'test'}
+          showDataSourceMenu={true}
+          config={menuItems}
+          showSearchBar={TopNavMenuItemRenderType.IN_PLACE}
+          groupActions={true}
+          setMenuMountPoint={setMountPoint}
+          showDatePicker={TopNavMenuItemRenderType.IN_PORTAL}
+        />
+      );
+
+      act(() => {
+        mountPoint(portalTarget);
+      });
+
+      await refresh();
+
+      await (() => {
+        expect(component.find(SEARCH_BAR_SELECTOR).length).toBe(1);
+        expect(component.find('.osdTopNavMenuScreenTitle').exists()).toBeTruthy();
+        expect(component.find('.globalDatePicker').exists()).toBeTruthy();
+      });
     });
   });
 });

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AuthenticationMethodRegistery } from './authentication_methods_registry';
+import { AuthenticationMethodRegistry } from './authentication_methods_registry';
 import { AuthenticationMethod } from '../../server/types';
 
 const createAuthenticationMethod = (
@@ -14,11 +14,11 @@ const createAuthenticationMethod = (
   ...authMethod,
 });
 
-describe('AuthenticationMethodRegistery', () => {
-  let registry: AuthenticationMethodRegistery;
+describe('AuthenticationMethodRegistry', () => {
+  let registry: AuthenticationMethodRegistry;
 
   beforeEach(() => {
-    registry = new AuthenticationMethodRegistery();
+    registry = new AuthenticationMethodRegistry();
   });
 
   it('allows to register authentication method', () => {

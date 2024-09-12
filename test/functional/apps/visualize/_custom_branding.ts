@@ -45,7 +45,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
       });
 
-      it('with customized logo for opensearch overview header in dark mode', async () => {
+      it('if enable user control, admin customized dark mode logo for opensearch overview header is not applied', async () => {
+        await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
+        await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:enableUserControl');
+        const button = await testSubjects.find('advancedSetting-editField-theme:darkMode');
+        const isDisabled = (await button.getAttribute('disabled')) !== null;
+        expect(isDisabled).equal(true);
+        await PageObjects.common.navigateToApp('opensearch_dashboards_overview');
+        await testSubjects.existOrFail('osdOverviewPageHeaderLogo');
+        const actualLabel = await testSubjects.getAttribute(
+          'osdOverviewPageHeaderLogo',
+          'data-test-logo'
+        );
+        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
+        await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
+        await PageObjects.settings.clearAdvancedSettings('theme:enableUserControl');
+      });
+
+      it('admin customized dark mode logo for opensearch overview header is applied', async () => {
         await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
         await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
         await PageObjects.common.navigateToApp('opensearch_dashboards_overview');
@@ -55,6 +72,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'data-test-logo'
         );
         expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogoDarkMode.toUpperCase());
+        await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
+        await PageObjects.settings.clearAdvancedSettings('theme:darkMode');
       });
     });
 
@@ -99,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(actualLabel.toUpperCase()).to.equal(expectedWelcomeMessage.toUpperCase());
       });
 
-      it('with customized logo in dark mode', async () => {
+      it('admin customized dark mode logo for home is applied', async () => {
         await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
         await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
         await PageObjects.common.navigateToApp('home');
@@ -109,6 +128,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'data-test-image-url'
         );
         expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogoDarkMode.toUpperCase());
+        await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
+        await PageObjects.settings.clearAdvancedSettings('theme:darkMode');
+      });
+
+      it('if enable user control, admin customized dark mode logo for home is not applied', async () => {
+        await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
+        await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:enableUserControl');
+        const button = await testSubjects.find('advancedSetting-editField-theme:darkMode');
+        const isDisabled = (await button.getAttribute('disabled')) !== null;
+        expect(isDisabled).equal(true);
+        await PageObjects.common.navigateToApp('home');
+        await testSubjects.existOrFail('welcomeCustomLogo');
+        const actualLabel = await testSubjects.getAttribute(
+          'welcomeCustomLogo',
+          'data-test-image-url'
+        );
+        expect(actualLabel.toUpperCase()).to.equal(expectedMarkLogo.toUpperCase());
+        await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
+        await PageObjects.settings.clearAdvancedSettings('theme:enableUserControl');
       });
     });
 
@@ -125,7 +163,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('in default mode', async () => {
         it('with customized logo in header bar', async () => {
-          await globalNav.logoExistsOrFail(expectedFullLogo);
+          //  The expanded header shows up with a dark background irrespective of the color scheme and because of that, we will always have a dark logo there.
+          await globalNav.logoExistsOrFail(expectedFullLogoDarkMode);
         });
 
         it('with customized mark logo button in header bar', async () => {
@@ -177,7 +216,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('in dark mode', async () => {
+      describe('OpenSearch Dashboards branding configuration in dark mode', async () => {
         before(async function () {
           await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
           await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');

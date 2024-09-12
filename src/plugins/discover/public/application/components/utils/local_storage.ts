@@ -9,9 +9,9 @@ export const NEW_DISCOVER_KEY = 'discover:newExpereince';
 
 export const getNewDiscoverSetting = (storage: Storage): boolean => {
   const storedValue = storage.get(NEW_DISCOVER_KEY);
-  return storedValue !== null ? JSON.parse(storedValue) : false;
+  return storedValue !== null ? storedValue : false;
 };
 
 export const setNewDiscoverSetting = (value: boolean, storage: Storage) => {
-  storage.set(NEW_DISCOVER_KEY, JSON.stringify(value));
+  storage.set(NEW_DISCOVER_KEY, value);
 };

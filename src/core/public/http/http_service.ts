@@ -53,7 +53,7 @@ export class HttpService implements CoreService<HttpSetup, HttpStart> {
   public setup({ injectedMetadata, fatalErrors }: HttpDeps): HttpSetup {
     const opensearchDashboardsVersion = injectedMetadata.getOpenSearchDashboardsVersion();
     let clientBasePath = '';
-    const workspaceId = getWorkspaceIdFromUrl(window.location.href);
+    const workspaceId = getWorkspaceIdFromUrl(window.location.href, injectedMetadata.getBasePath());
     if (workspaceId) {
       clientBasePath = `${WORKSPACE_PATH_PREFIX}/${workspaceId}`;
     }

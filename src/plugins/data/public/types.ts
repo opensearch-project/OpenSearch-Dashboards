@@ -28,23 +28,23 @@
  * under the License.
  */
 
-import React from 'react';
 import { CoreStart } from 'src/core/public';
-import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
 import { UiActionsSetup, UiActionsStart } from 'src/plugins/ui_actions/public';
 import { AutocompleteSetup, AutocompleteStart } from './autocomplete';
 import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
-import { QuerySetup, QueryStart } from './query';
+import { EditorEnhancements, QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
-import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { DataSourceStart } from './data_sources/datasource_services/types';
+import { IUiStart } from './ui';
+import { DataStorage } from '../common';
 
 export interface DataPublicPluginEnhancements {
-  search: SearchEnhancements;
+  search?: SearchEnhancements;
+  editor?: EditorEnhancements;
 }
 
 export interface DataSetupDependencies {
@@ -69,14 +69,6 @@ export interface DataPublicPluginSetup {
    * @internal
    */
   __enhance: (enhancements: DataPublicPluginEnhancements) => void;
-}
-
-/**
- * Data plugin prewired UI components
- */
-export interface DataPublicPluginStartUi {
-  IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
-  SearchBar: React.ComponentType<StatefulSearchBarProps>;
 }
 
 /**
@@ -122,10 +114,10 @@ export interface DataPublicPluginStart {
    */
   query: QueryStart;
   /**
-   * prewired UI components
-   * {@link DataPublicPluginStartUi}
+   * UI components service
+   * {@link IUiStart}
    */
-  ui: DataPublicPluginStartUi;
+  ui: IUiStart;
   /**
    * multiple datasources
    * {@link DataSourceStart}
@@ -139,6 +131,6 @@ export interface IDataPluginServices extends Partial<CoreStart> {
   savedObjects: CoreStart['savedObjects'];
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
-  storage: IStorageWrapper;
+  storage: DataStorage;
   data: DataPublicPluginStart;
 }

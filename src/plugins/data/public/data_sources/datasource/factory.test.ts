@@ -11,17 +11,19 @@ class MockDataSource extends DataSource<any, any, any, any, any> {
   private readonly indexPatterns;
 
   constructor({
+    id,
     name,
     type,
     metadata,
     indexPatterns,
   }: {
+    id: string;
     name: string;
     type: string;
     metadata: any;
     indexPatterns: IndexPatternsService;
   }) {
-    super(name, type, metadata);
+    super({ id, name, type, metadata });
     this.indexPatterns = indexPatterns;
   }
 

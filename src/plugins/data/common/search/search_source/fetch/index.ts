@@ -28,6 +28,11 @@
  * under the License.
  */
 
-export { getSearchParams, getSearchParamsFromRequest, getPreference } from './get_search_params';
+export {
+  getSearchParams,
+  getExternalSearchParamsFromRequest,
+  getSearchParamsFromRequest,
+  getPreference,
+} from './get_search_params';
 export { RequestFailure } from './request_error';
 export * from './types';

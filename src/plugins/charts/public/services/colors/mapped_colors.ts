@@ -106,9 +106,11 @@ export class MappedColors {
     });
 
     // Choose colors from euiPaletteColorBlind and filter out any already assigned to keys
+    const rotations = Math.ceil(keys.length / 10);
     const colorPalette = euiPaletteColorBlind({
-      rotations: Math.ceil(keys.length / 10),
-      direction: 'both',
+      rotations,
+      direction: rotations === 2 ? 'lighter' : 'both',
+      order: rotations > 2 ? 'middle-out' : 'append',
     })
       .filter((color) => !alreadyUsedColors.includes(color.toLowerCase()))
       .slice(0, keysToMap.length);

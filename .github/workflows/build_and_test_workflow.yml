@@ -10,11 +10,17 @@ on:
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
+      - '.lycheeignore'
+      - 'CODEOWNERS'
+      - 'changelogs/fragments/**'
   pull_request:
     branches: ['**']
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
+      - '.lycheeignore'
+      - 'CODEOWNERS'
+      - 'changelogs/fragments/**'
 
 env:
   TEST_BROWSER_HEADLESS: 1
@@ -122,8 +128,9 @@ jobs:
 
       - name: Upload Code Coverage
         id: upload-code-coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./target/opensearch-dashboards-coverage
           flags: ${{ matrix.name }}_${{ matrix.group }}
 
@@ -196,6 +203,28 @@ jobs:
           key: yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             yarn-
+
+      # Lock Chrome version until ChromeDriver's release pipeline is fixed
+      - name: Download Chrome
+        id: download-chrome
+        uses: abhi1693/setup-browser@v0.3.5
+        with:
+          browser: chrome
+          # v122
+          version: 1250586
+
+      - name: Setup Chrome (Linux)
+        if: matrix.os != 'windows-latest'
+        run: |
+          sudo rm -rf /usr/bin/google-chrome /opt/google/chrome
+          sudo ln -s ${{steps.download-chrome.outputs.path}}/${{steps.download-chrome.outputs.binary}} /usr/bin/google-chrome
+
+      - name: Setup Chrome (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          New-Item -Force -Type Directory "$Env:Programfiles/Google/Chrome/Application"
+          Remove-Item -Recurse -Force "$Env:Programfiles/Google/Chrome/Application/*"
+          Copy-Item -Force -Recurse "${{steps.download-chrome.outputs.path}}/*" "$Env:Programfiles/Google/Chrome/Application"
 
       - name: Setup chromedriver
         run: node scripts/upgrade_chromedriver.js
@@ -290,6 +319,28 @@ jobs:
           key: yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             yarn-
+
+      # Lock Chrome version until ChromeDriver's release pipeline is fixed
+      - name: Download Chrome
+        id: download-chrome
+        uses: abhi1693/setup-browser@v0.3.5
+        with:
+          browser: chrome
+          # v122
+          version: 1250586
+
+      - name: Setup Chrome (Linux)
+        if: matrix.os != 'windows-latest'
+        run: |
+          sudo rm -rf /usr/bin/google-chrome /opt/google/chrome
+          sudo ln -s ${{steps.download-chrome.outputs.path}}/${{steps.download-chrome.outputs.binary}} /usr/bin/google-chrome
+
+      - name: Setup Chrome (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          New-Item -Force -Type Directory "$Env:Programfiles/Google/Chrome/Application"
+          Remove-Item -Recurse -Force "$Env:Programfiles/Google/Chrome/Application/*"
+          Copy-Item -Force -Recurse "${{steps.download-chrome.outputs.path}}/*" "$Env:Programfiles/Google/Chrome/Application"
 
       - name: Setup chromedriver
         run: node scripts/upgrade_chromedriver.js

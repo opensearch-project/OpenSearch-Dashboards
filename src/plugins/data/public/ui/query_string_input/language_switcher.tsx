@@ -28,15 +28,16 @@
  * under the License.
  */
 
+import { i18n } from '@osd/i18n';
 import {
   EuiButtonEmpty,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiLink,
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiText,
   PopoverAnchorPosition,
 } from '@elastic/eui';
@@ -73,6 +74,9 @@ export function QueryLanguageSwitcher(props: Props) {
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       className="euiFormControlLayout__append dqlQueryBar__languageSwitcherButton"
       data-test-subj={'switchQueryLanguageButton'}
+      aria-label={i18n.translate('data.query.queryBar.switchQueryLanguageButtonLabel', {
+        defaultMessage: 'Change query language',
+      })}
     >
       {props.language === 'lucene' ? luceneLabel : dqlLabel}
     </EuiButtonEmpty>
@@ -87,6 +91,7 @@ export function QueryLanguageSwitcher(props: Props) {
       button={button}
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}
+      panelPaddingSize="s"
       repositionOnScroll
     >
       <EuiPopoverTitle>
@@ -96,7 +101,7 @@ export function QueryLanguageSwitcher(props: Props) {
         />
       </EuiPopoverTitle>
       <div style={{ width: '350px' }}>
-        <EuiText>
+        <EuiText size="s">
           <p>
             <FormattedMessage
               id="data.query.queryBar.syntaxOptionsDescription"
@@ -117,8 +122,8 @@ export function QueryLanguageSwitcher(props: Props) {
         <EuiSpacer size="m" />
 
         <EuiForm>
-          <EuiFormRow label={dqlFullName}>
-            <EuiSwitch
+          <EuiCompressedFormRow label={dqlFullName}>
+            <EuiCompressedSwitch
               id="queryEnhancementOptIn"
               name="popswitch"
               label={
@@ -135,7 +140,7 @@ export function QueryLanguageSwitcher(props: Props) {
               }}
               data-test-subj="languageToggle"
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiForm>
       </div>
     </EuiPopover>

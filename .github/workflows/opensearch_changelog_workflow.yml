@@ -1,0 +1,23 @@
+name: OpenSearch Changelog Workflow
+
+on:
+  pull_request_target:
+    types: [opened, reopened, edited]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Parse changelog entries and submit request for changset creation
+        uses: BigSamu/OpenSearch_Changelog_Workflow@1.0.0-alpha1
+        with:
+          token: ${{secrets.GITHUB_TOKEN}}
+          CHANGELOG_PR_BRIDGE_URL_DOMAIN: ${{secrets.CHANGELOG_PR_BRIDGE_URL_DOMAIN}}
+          CHANGELOG_PR_BRIDGE_API_KEY: ${{secrets.CHANGELOG_PR_BRIDGE_API_KEY}}

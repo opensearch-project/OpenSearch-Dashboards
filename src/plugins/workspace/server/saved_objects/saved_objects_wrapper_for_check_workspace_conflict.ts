@@ -15,13 +15,17 @@ import {
   SavedObjectsSerializer,
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
+  SavedObjectsFindOptions,
 } from '../../../../core/server';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../data_source/common';
+
+const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
 
 const errorContent = (error: Boom.Boom) => error.output.payload;
 
 const filterWorkspacesAccordingToSourceWorkspaces = (
-  targetWorkspaces?: string[],
-  baseWorkspaces?: string[]
+  targetWorkspaces?: SavedObjectsBaseOptions['workspaces'],
+  baseWorkspaces?: SavedObjectsBaseOptions['workspaces']
 ): string[] => targetWorkspaces?.filter((item) => !baseWorkspaces?.includes(item)) || [];
 
 export class WorkspaceConflictSavedObjectsClientWrapper {
@@ -34,6 +38,17 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       this._serializer?.generateRawId(props.namespace, props.type, props.id) ||
       `${props.type}:${props.id}`
     );
+  }
+
+  private isDataSourceType(type: SavedObjectsFindOptions['type']): boolean {
+    if (Array.isArray(type)) {
+      return type.every((item) => item === DATA_SOURCE_SAVED_OBJECT_TYPE);
+    }
+
+    return type === DATA_SOURCE_SAVED_OBJECT_TYPE;
+  }
+  private isConfigType(type: SavedObject['type']): boolean {
+    return type === UI_SETTINGS_SAVED_OBJECTS_TYPE;
   }
 
   /**
@@ -49,6 +64,16 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       options: SavedObjectsCreateOptions = {}
     ) => {
       const { workspaces, id, overwrite } = options;
+
+      if (workspaces?.length && (this.isDataSourceType(type) || this.isConfigType(type))) {
+        // For 2.14, data source can only be created without workspace info
+        // config can not be created inside a workspace
+        throw SavedObjectsErrorHelpers.decorateBadRequestError(
+          new Error(`'${type}' is not allowed to be created in workspace.`),
+          'Unsupported type in workspace'
+        );
+      }
+
       let savedObjectWorkspaces = options?.workspaces;
 
       /**
@@ -89,12 +114,33 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkCreateObject<T>>,
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
-      const { overwrite, namespace } = options;
+      const { overwrite, namespace, workspaces } = options;
+
+      const disallowedSavedObjects: Array<SavedObjectsBulkCreateObject<T>> = [];
+      const allowedSavedObjects: Array<SavedObjectsBulkCreateObject<T>> = [];
+      objects.forEach((item) => {
+        const isImportIntoWorkspace = workspaces?.length || item.workspaces?.length;
+        // config can not be created inside a workspace
+        if (this.isConfigType(item.type) && isImportIntoWorkspace) {
+          disallowedSavedObjects.push(item);
+          return;
+        }
+
+        // For 2.14, data source can only be created without workspace info
+        if (this.isDataSourceType(item.type) && isImportIntoWorkspace) {
+          disallowedSavedObjects.push(item);
+          return;
+        }
+
+        allowedSavedObjects.push(item);
+        return;
+      });
+
       /**
        * When overwrite, filter out all the objects that have ids
        */
       const bulkGetDocs = overwrite
-        ? objects
+        ? allowedSavedObjects
             .filter((object) => !!object.id)
             .map((object) => {
               /**
@@ -110,7 +156,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
             })
         : [];
       const objectsConflictWithWorkspace: SavedObject[] = [];
-      const objectsMapWorkspaces: Record<string, string[] | undefined> = {};
+      const objectsMapWorkspaces: Record<string, SavedObjectsBaseOptions['workspaces']> = {};
       if (bulkGetDocs.length) {
         /**
          * Get latest status of objects
@@ -169,7 +215,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       /**
        * Get all the objects that do not conflict on workspaces
        */
-      const objectsNoWorkspaceConflictError = objects.filter(
+      const objectsNoWorkspaceConflictError = allowedSavedObjects.filter(
         (item) =>
           !objectsConflictWithWorkspace.find(
             (errorItems) =>
@@ -211,6 +257,16 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
         ...realBulkCreateResult,
         saved_objects: [
           ...objectsConflictWithWorkspace,
+          ...disallowedSavedObjects.map((item) => ({
+            ...item,
+            error: {
+              ...SavedObjectsErrorHelpers.decorateBadRequestError(
+                new Error(`'${item.type}' is not allowed to be imported in workspace.`),
+                'Unsupported type in workspace'
+              ).output.payload,
+              metadata: { isNotOverwritable: true },
+            },
+          })),
           ...(realBulkCreateResult?.saved_objects || []),
         ],
       } as SavedObjectsBulkResponse<T>;
@@ -228,11 +284,33 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
         return { errors: [] };
       }
 
+      const { workspaces } = options;
+
+      const disallowedSavedObjects: SavedObjectsCheckConflictsObject[] = [];
+      const allowedSavedObjects: SavedObjectsCheckConflictsObject[] = [];
+      objects.forEach((item) => {
+        const isImportIntoWorkspace = !!workspaces?.length;
+        // config can not be created inside a workspace
+        if (this.isConfigType(item.type) && isImportIntoWorkspace) {
+          disallowedSavedObjects.push(item);
+          return;
+        }
+
+        // For 2.14, data source can only be created without workspace info
+        if (this.isDataSourceType(item.type) && isImportIntoWorkspace) {
+          disallowedSavedObjects.push(item);
+          return;
+        }
+
+        allowedSavedObjects.push(item);
+        return;
+      });
+
       /**
        * Workspace conflict only happens when target workspaces params present.
        */
       if (options.workspaces) {
-        const bulkGetDocs: any[] = objects.map((object) => {
+        const bulkGetDocs: any[] = allowedSavedObjects.map((object) => {
           const { type, id } = object;
 
           return {
@@ -274,7 +352,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
         }
       }
 
-      const objectsNoWorkspaceConflictError = objects.filter(
+      const objectsNoWorkspaceConflictError = allowedSavedObjects.filter(
         (item) =>
           !objectsConflictWithWorkspace.find(
             (errorItems) =>
@@ -294,7 +372,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       /**
        * Bypass those objects that are not conflict on workspaces
        */
-      const realBulkCreateResult = await wrapperOptions.client.checkConflicts(
+      const realCheckConflictsResult = await wrapperOptions.client.checkConflicts(
         objectsNoWorkspaceConflictError,
         options
       );
@@ -303,8 +381,21 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
        * Merge results from two conflict check.
        */
       const result: SavedObjectsCheckConflictsResponse = {
-        ...realBulkCreateResult,
-        errors: [...objectsConflictWithWorkspace, ...realBulkCreateResult.errors],
+        ...realCheckConflictsResult,
+        errors: [
+          ...objectsConflictWithWorkspace,
+          ...disallowedSavedObjects.map((item) => ({
+            ...item,
+            error: {
+              ...SavedObjectsErrorHelpers.decorateBadRequestError(
+                new Error(`'${item.type}' is not allowed to be imported in workspace.`),
+                'Unsupported type in workspace'
+              ).output.payload,
+              metadata: { isNotOverwritable: true },
+            },
+          })),
+          ...(realCheckConflictsResult?.errors || []),
+        ],
       };
 
       return result;

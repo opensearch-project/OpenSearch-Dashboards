@@ -10,26 +10,44 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { EuiPageContent } from '@elastic/eui';
 import { ManagementAppMountParams } from '../../../management/public';
 
+import { NavigationPublicPluginStart } from '../../../navigation/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { CreateDataSourceWizardWithRouter } from '../components/create_data_source_wizard';
-import { DataSourceTableWithRouter } from '../components/data_source_table';
-import { DataSourceManagementContext } from '../types';
 import { EditDataSourceWithRouter } from '../components/edit_data_source';
-import { AuthenticationMethodRegistery } from '../auth_registry';
+import { DataSourceHomePanel } from '../components/data_source_home_panel/data_source_home_panel';
+import { CreateDataSourcePanel } from '../components/data_source_creation_panel/create_data_source_panel';
+import { DataSourceManagementContext } from '../types';
+import { AuthenticationMethodRegistry } from '../auth_registry';
+import { ConfigureDirectQueryDataSourceWithRouter } from '../components/direct_query_data_sources_components/direct_query_data_source_configuration/configure_direct_query_data_sources';
+import { DirectQueryDataConnectionDetail } from '../components/direct_query_data_sources_components/connection_detail/direct_query_connection_detail';
 
 export interface DataSourceManagementStartDependencies {
   data: DataPublicPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<DataSourceManagementStartDependencies>,
-  params: ManagementAppMountParams,
-  authMethodsRegistry: AuthenticationMethodRegistery
+  params: ManagementAppMountParams & { wrapInPage?: boolean },
+  authMethodsRegistry: AuthenticationMethodRegistry,
+  featureFlagStatus: boolean
 ) {
   const [
-    { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
+    {
+      chrome,
+      application,
+      savedObjects,
+      uiSettings,
+      notifications,
+      overlays,
+      http,
+      docLinks,
+      workspaces,
+    },
+    { navigation },
   ] = await getStartServices();
 
   const deps: DataSourceManagementContext = {
@@ -41,26 +59,77 @@ export async function mountManagementSection(
     overlays,
     http,
     docLinks,
+    navigation,
     setBreadcrumbs: params.setBreadcrumbs,
-    authenticationMethodRegistery: authMethodsRegistry,
+    authenticationMethodRegistry: authMethodsRegistry,
+    workspaces,
   };
+
+  const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
+  const useNewUX = uiSettings.get('home:useNewHomePage');
+
+  const content = (
+    <Router history={params.history}>
+      <Switch>
+        <Route path={['/manage/:dataSourceName']}>
+          <DirectQueryDataConnectionDetail
+            featureFlagStatus={featureFlagStatus}
+            http={http}
+            notifications={notifications}
+            setBreadcrumbs={params.setBreadcrumbs}
+            application={application}
+            useNewUX={useNewUX}
+            savedObjects={savedObjects}
+          />
+        </Route>
+        {canManageDataSource && (
+          <Route path={['/create']}>
+            <CreateDataSourcePanel
+              {...params}
+              featureFlagStatus={featureFlagStatus}
+              useNewUX={useNewUX}
+            />
+          </Route>
+        )}
+        {featureFlagStatus && canManageDataSource && (
+          <Route path={['/configure/OpenSearch']}>
+            <CreateDataSourceWizardWithRouter />
+          </Route>
+        )}
+        {canManageDataSource && (
+          <Route path={['/configure/:type']}>
+            <ConfigureDirectQueryDataSourceWithRouter
+              notifications={notifications}
+              useNewUX={useNewUX}
+            />
+          </Route>
+        )}
+        {featureFlagStatus && (
+          <Route path={['/:id']}>
+            <EditDataSourceWithRouter />
+          </Route>
+        )}
+        <Route path={['/']}>
+          <DataSourceHomePanel
+            history={params.history}
+            featureFlagStatus={featureFlagStatus}
+            useNewUX={useNewUX}
+          />
+        </Route>
+      </Switch>
+    </Router>
+  );
 
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={deps}>
       <I18nProvider>
-        <Router history={params.history}>
-          <Switch>
-            <Route path={['/create']}>
-              <CreateDataSourceWizardWithRouter />
-            </Route>
-            <Route path={['/:id']}>
-              <EditDataSourceWithRouter />
-            </Route>
-            <Route path={['/']}>
-              <DataSourceTableWithRouter />
-            </Route>
-          </Switch>
-        </Router>
+        {params.wrapInPage ? (
+          <EuiPageContent hasShadow={false} hasBorder={false} color="transparent" paddingSize="m">
+            {content}
+          </EuiPageContent>
+        ) : (
+          content
+        )}
       </I18nProvider>
     </OpenSearchDashboardsContextProvider>,
     params.element

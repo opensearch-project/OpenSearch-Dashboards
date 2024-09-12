@@ -100,7 +100,8 @@ export class ChoroplethLayer extends OpenSearchDashboardsMapLayer {
     leaflet,
     layerChosenByUser,
     http,
-    uiSettings
+    uiSettings,
+    dataSourceRefId
   ) {
     super();
     this._serviceSettings = serviceSettings;
@@ -119,6 +120,7 @@ export class ChoroplethLayer extends OpenSearchDashboardsMapLayer {
     this._http = http;
     this._visParams = null;
     this._uiSettings = uiSettings;
+    this._dataSourceRefId = dataSourceRefId;
 
     // eslint-disable-next-line no-undef
     this._leafletLayer = this._leaflet.geoJson(null, {
@@ -249,7 +251,7 @@ CORS configuration of the server permits requests from the OpenSearch Dashboards
     try {
       const services = getServices(this._http);
       const indexSize = this._uiSettings.get(CUSTOM_VECTOR_MAP_MAX_SIZE_SETTING);
-      const result = await services.getIndexData(this._layerName, indexSize);
+      const result = await services.getIndexData(this._layerName, indexSize, this._dataSourceRefId);
 
       const finalResult = {
         type: 'FeatureCollection',
@@ -346,7 +348,8 @@ CORS configuration of the server permits requests from the OpenSearch Dashboards
     leaflet,
     layerChosenByUser,
     http,
-    uiSettings
+    uiSettings,
+    dataSourceRefId
   ) {
     const clonedLayer = new ChoroplethLayer(
       name,
@@ -359,7 +362,8 @@ CORS configuration of the server permits requests from the OpenSearch Dashboards
       leaflet,
       layerChosenByUser,
       http,
-      uiSettings
+      uiSettings,
+      dataSourceRefId
     );
     clonedLayer.setJoinField(this._joinField);
     clonedLayer.setColorRamp(this._colorRamp);

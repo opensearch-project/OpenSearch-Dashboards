@@ -646,6 +646,129 @@ describe('#getQueryParams', () => {
         });
       });
     });
+
+    describe('when using ACLSearchParams search', () => {
+      it('no ACLSearchParams provided', () => {
+        const result: Result = getQueryParams({
+          registry,
+          ACLSearchParams: {},
+        });
+        expect(result.query.bool.filter[1]).toEqual(undefined);
+      });
+
+      it('workspacesSearchOperator provided as "OR"', () => {
+        const result: Result = getQueryParams({
+          registry,
+          workspaces: ['foo'],
+          workspacesSearchOperator: 'OR',
+        });
+        expect(result.query.bool.filter[1]).toEqual({
+          bool: {
+            should: [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      bool: {
+                        must: [
+                          {
+                            term: {
+                              workspaces: 'foo',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        });
+      });
+
+      it('principals and permissionModes provided in ACLSearchParams', () => {
+        const result: Result = getQueryParams({
+          registry,
+          ACLSearchParams: {
+            principals: {
+              users: ['user-foo'],
+              groups: ['group-foo'],
+            },
+            permissionModes: ['read'],
+          },
+        });
+        expect(result.query.bool.filter[1]).toEqual({
+          bool: {
+            should: [
+              {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            terms: {
+                              'permissions.read.users': ['user-foo'],
+                            },
+                          },
+                          {
+                            term: {
+                              'permissions.read.users': '*',
+                            },
+                          },
+                          {
+                            terms: {
+                              'permissions.read.groups': ['group-foo'],
+                            },
+                          },
+                          {
+                            term: {
+                              'permissions.read.groups': '*',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        });
+      });
+    });
+
+    describe('when using empty workspace search', () => {
+      it('workspacesSearchOperator provided as "OR"', () => {
+        const result: Result = getQueryParams({
+          registry,
+          workspaces: [],
+          workspacesSearchOperator: 'OR',
+        });
+        expect(result.query.bool.filter[1]).toEqual({
+          bool: {
+            should: [
+              {
+                match_none: {},
+              },
+            ],
+          },
+        });
+      });
+
+      it('workspacesSearchOperator provided as "AND"', () => {
+        const result: Result = getQueryParams({
+          registry,
+          workspaces: [],
+          workspacesSearchOperator: 'AND',
+        });
+        expect(result.query.bool.filter[1]).toEqual({
+          match_none: {},
+        });
+      });
+    });
   });
 
   describe('namespaces property', () => {

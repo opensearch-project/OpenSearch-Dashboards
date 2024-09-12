@@ -25,7 +25,8 @@ import {
 } from '../../common/data_sources';
 import { EncryptionContext, CryptographyServiceSetup } from '../cryptography_service';
 import { isValidURL } from '../util/endpoint_validator';
-import { IAuthenticationMethodRegistery } from '../auth_registry';
+import { IAuthenticationMethodRegistry } from '../auth_registry';
+import { DATA_SOURCE_TITLE_LENGTH_LIMIT } from '../util/constants';
 
 /**
  * Describes the Credential Saved Objects Client Wrapper class,
@@ -141,7 +142,7 @@ export class DataSourceSavedObjectsClientWrapper {
   constructor(
     private cryptography: CryptographyServiceSetup,
     private logger: Logger,
-    private authRegistryPromise: Promise<IAuthenticationMethodRegistery>,
+    private authRegistryPromise: Promise<IAuthenticationMethodRegistry>,
     private endpointBlockedIps?: string[]
   ) {}
 
@@ -252,26 +253,38 @@ export class DataSourceSavedObjectsClientWrapper {
 
   private async validateAttributes<T = unknown>(attributes: T) {
     const { title, endpoint, auth } = attributes;
-    if (!title?.trim?.().length) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        '"title" attribute must be a non-empty string'
-      );
-    }
+    this.validateTitle(title);
+    this.validateEndpoint(endpoint);
+    await this.validateAuth(auth);
+  }
 
+  private validateEndpoint(endpoint: string) {
     if (!isValidURL(endpoint, this.endpointBlockedIps)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         '"endpoint" attribute is not valid or allowed'
       );
     }
+  }
 
+  private validateTitle(title: string) {
+    if (!title.trim().length) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        '"title" attribute must be a non-empty string'
+      );
+    }
+
+    if (title.length > DATA_SOURCE_TITLE_LENGTH_LIMIT) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `"title" attribute is limited to ${DATA_SOURCE_TITLE_LENGTH_LIMIT} characters`
+      );
+    }
+  }
+
+  private async validateAuth<T = unknown>(auth: T) {
     if (!auth) {
       throw SavedObjectsErrorHelpers.createBadRequestError('"auth" attribute is required');
     }
 
-    await this.validateAuth(auth);
-  }
-
-  private async validateAuth<T = unknown>(auth: T) {
     const { type, credentials } = auth;
 
     if (!type) {

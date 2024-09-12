@@ -36,6 +36,11 @@ import {
   VisTypeVegaPluginSetup,
   VisTypeVegaPluginStart,
 } from './types';
+import {
+  VEGA_VISUALIZATION_CLIENT_WRAPPER_ID,
+  vegaVisualizationClientWrapper,
+} from './vega_visualization_client_wrapper';
+import { setDataSourceEnabled } from './services';
 
 export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisTypeVegaPluginStart> {
   private readonly config: ConfigObservable;
@@ -44,10 +49,19 @@ export class VisTypeVegaPlugin implements Plugin<VisTypeVegaPluginSetup, VisType
     this.config = initializerContext.config.legacy.globalConfig$;
   }
 
-  public setup(core: CoreSetup, { home, usageCollection }: VisTypeVegaPluginSetupDependencies) {
+  public setup(
+    core: CoreSetup,
+    { home, usageCollection, dataSource }: VisTypeVegaPluginSetupDependencies
+  ) {
     if (usageCollection) {
       registerVegaUsageCollector(usageCollection, this.config, { home });
     }
+    setDataSourceEnabled({ enabled: dataSource?.dataSourceEnabled() || false });
+    core.savedObjects.addClientWrapper(
+      10,
+      VEGA_VISUALIZATION_CLIENT_WRAPPER_ID,
+      vegaVisualizationClientWrapper
+    );
     return {};
   }
 

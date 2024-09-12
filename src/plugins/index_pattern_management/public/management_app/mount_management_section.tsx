@@ -37,6 +37,7 @@ import { I18nProvider } from '@osd/i18n/react';
 import { StartServicesAccessor } from 'src/core/public';
 
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
+import { EuiPageContent } from '@elastic/eui';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import {
@@ -60,16 +61,26 @@ const readOnlyBadge = {
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<IndexPatternManagementStartDependencies>,
-  params: ManagementAppMountParams,
+  params: ManagementAppMountParams & { wrapInPage?: boolean },
   getMlCardState: () => MlCardState,
   dataSource?: DataSourcePluginSetup
 ) {
   const [
-    { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
-    { data },
+    {
+      chrome,
+      application,
+      savedObjects,
+      uiSettings,
+      notifications,
+      overlays,
+      http,
+      docLinks,
+      workspaces,
+    },
+    { data, navigation },
     indexPatternManagementStart,
   ] = await getStartServices();
-  const canSave = Boolean(application.capabilities.indexPatterns.save);
+  const canSave = Boolean(application.capabilities?.indexPatterns?.save);
   const dataSourceEnabled = dataSource?.dataSourceEnabled ?? false;
   const hideLocalCluster = dataSource?.hideLocalCluster ?? false;
 
@@ -82,6 +93,7 @@ export async function mountManagementSection(
     application,
     savedObjects,
     uiSettings,
+    navigationUI: navigation.ui,
     notifications,
     overlays,
     http,
@@ -92,27 +104,45 @@ export async function mountManagementSection(
     getMlCardState,
     dataSourceEnabled,
     hideLocalCluster,
+    workspaces,
   };
+
+  const showActionsInHeader = uiSettings.get('home:useNewHomePage');
+
+  const content = (
+    <Router history={params.history}>
+      <Switch>
+        <Route path={['/create']}>
+          <CreateIndexPatternWizardWithRouter />
+        </Route>
+        <Route path={['/patterns/:id/field/:fieldName', '/patterns/:id/create-field/']}>
+          <CreateEditFieldContainer />
+        </Route>
+        <Route path={['/patterns/:id']}>
+          <EditIndexPatternContainer />
+        </Route>
+        <Route path={['/']}>
+          <IndexPatternTableWithRouter canSave={canSave} />
+        </Route>
+      </Switch>
+    </Router>
+  );
 
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={deps}>
       <I18nProvider>
-        <Router history={params.history}>
-          <Switch>
-            <Route path={['/create']}>
-              <CreateIndexPatternWizardWithRouter />
-            </Route>
-            <Route path={['/patterns/:id/field/:fieldName', '/patterns/:id/create-field/']}>
-              <CreateEditFieldContainer />
-            </Route>
-            <Route path={['/patterns/:id']}>
-              <EditIndexPatternContainer />
-            </Route>
-            <Route path={['/']}>
-              <IndexPatternTableWithRouter canSave={canSave} />
-            </Route>
-          </Switch>
-        </Router>
+        {params.wrapInPage ? (
+          <EuiPageContent
+            hasShadow={false}
+            hasBorder={false}
+            color="transparent"
+            paddingSize={showActionsInHeader ? 'm' : 'l'}
+          >
+            {content}
+          </EuiPageContent>
+        ) : (
+          content
+        )}
       </I18nProvider>
     </OpenSearchDashboardsContextProvider>,
     params.element

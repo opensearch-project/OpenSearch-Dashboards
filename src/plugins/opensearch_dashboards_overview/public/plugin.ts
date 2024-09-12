@@ -40,6 +40,7 @@ import {
   AppStatus,
   AppNavLinkStatus,
   Branding,
+  WorkspaceAvailability,
 } from '../../../core/public';
 import {
   OpenSearchDashboardsOverviewPluginSetup,
@@ -82,7 +83,12 @@ export class OpenSearchDashboardsOverviewPlugin
           if (!hasOpenSearchDashboardsApp) {
             return { status: AppStatus.inaccessible, navLinkStatus: AppNavLinkStatus.hidden };
           } else {
-            return { status: AppStatus.accessible, navLinkStatus: AppNavLinkStatus.default };
+            return {
+              status: AppStatus.accessible,
+              navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+                ? AppNavLinkStatus.hidden
+                : AppNavLinkStatus.default,
+            };
           }
         };
       })
@@ -106,6 +112,7 @@ export class OpenSearchDashboardsOverviewPlugin
         // Render the application
         return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
       },
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
     if (home) {

@@ -34,9 +34,10 @@ import {
   keys,
   EuiBasicTableColumn,
   EuiInMemoryTable,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiButtonIcon,
   RIGHT_ALIGNMENT,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
@@ -148,7 +149,7 @@ export class Table extends Component<TableProps, TableState> {
         render: (value, filter) => {
           if (this.state.editingFilterId && this.state.editingFilterId === filter.clientId) {
             return (
-              <EuiFieldText
+              <EuiCompressedFieldText
                 autoFocus
                 value={this.state.editingFilterValue}
                 onChange={this.onEditingFilterChange}
@@ -224,19 +225,23 @@ export class Table extends Component<TableProps, TableState> {
 
           return (
             <>
-              <EuiButtonIcon
-                size="s"
-                onClick={() => this.startEditingFilter(filter.clientId, filter.value)}
-                iconType="pencil"
-                aria-label={editAria}
-              />
-              <EuiButtonIcon
-                size="s"
-                color="danger"
-                onClick={() => deleteFilter(filter)}
-                iconType="trash"
-                aria-label={deleteAria}
-              />
+              <EuiToolTip content={editAria} delay="long" position="top">
+                <EuiButtonIcon
+                  size="s"
+                  onClick={() => this.startEditingFilter(filter.clientId, filter.value)}
+                  iconType="pencil"
+                  aria-label={editAria}
+                />
+              </EuiToolTip>
+              <EuiToolTip content={deleteAria} delay="long" position="top">
+                <EuiButtonIcon
+                  size="s"
+                  color="danger"
+                  onClick={() => deleteFilter(filter)}
+                  iconType="trash"
+                  aria-label={deleteAria}
+                />
+              </EuiToolTip>
             </>
           );
         },

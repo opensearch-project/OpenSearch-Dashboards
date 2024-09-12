@@ -14,6 +14,7 @@ import { AuthType } from '../../common/data_sources';
 import { cryptographyServiceSetupMock } from '../cryptography_service.mocks';
 import { DataSourceSavedObjectsClientWrapper } from './data_source_saved_objects_client_wrapper';
 import { SavedObject } from 'opensearch-dashboards/public';
+import { DATA_SOURCE_TITLE_LENGTH_LIMIT } from '../util/constants';
 
 describe('DataSourceSavedObjectsClientWrapper', () => {
   const customAuthName = 'role_based_auth';
@@ -23,10 +24,10 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
     credentialProvider: jest.fn(),
   };
   jest.mock('../auth_registry');
-  const { AuthenticationMethodRegistery: authenticationMethodRegistery } = jest.requireActual(
+  const { AuthenticationMethodRegistry: authenticationMethodRegistry } = jest.requireActual(
     '../auth_registry'
   );
-  const authRegistry = new authenticationMethodRegistery();
+  const authRegistry = new authenticationMethodRegistry();
   authRegistry.registerAuthenticationMethod(customAuthMethod);
 
   const requestHandlerContext = coreMock.createRequestHandlerContext();
@@ -198,6 +199,17 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributes, {})
         ).rejects.toThrowError(`"title" attribute must be a non-empty string`);
+      });
+
+      it(`should throw error when title is longer than ${DATA_SOURCE_TITLE_LENGTH_LIMIT} characters`, async () => {
+        const mockDataSourceAttributes = attributes({
+          title: 'a'.repeat(33),
+        });
+        await expect(
+          wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributes, {})
+        ).rejects.toThrowError(
+          `"title" attribute is limited to ${DATA_SOURCE_TITLE_LENGTH_LIMIT} characters`
+        );
       });
 
       it('should throw error when endpoint is not valid', async () => {

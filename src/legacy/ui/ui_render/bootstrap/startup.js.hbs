@@ -1,0 +1,111 @@
+var uiSettingsJSON = window.localStorage.getItem('uiSettings') || '{}';
+
+var uiSettings = {};
+try {
+  uiSettings = JSON.parse(uiSettingsJSON) || {};
+} catch (error) {
+  window.console.log(error);
+}
+
+var useBrowserColorScheme = window.localStorage.getItem('useBrowserColorScheme') === 'true' || false;
+
+var browserDarkMode = uiSettings['theme:darkMode'] || {};
+var browserThemeVersion = uiSettings['theme:version'] || {};
+
+var rawDarkMode = typeof browserDarkMode.userValue !== 'boolean' ? {{configDarkMode}} : browserDarkMode.userValue;
+
+var rawThemeVersion = browserThemeVersion.userValue || '{{configThemeVersion}}'
+
+if ({{configEnableUserControl}}) {
+  if (useBrowserColorScheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches !==
+  rawDarkMode) {
+    uiSettings['theme:darkMode'] = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    window.localStorage.setItem('uiSettings', JSON.stringify(uiSettings));
+    rawDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+} else {
+  window.localStorage.removeItem('uiSettings');
+  window.localStorage.removeItem('useBrowserColorScheme');
+  rawDarkMode = {{configDarkMode}};
+  rawThemeVersion = '{{configThemeVersion}}';
+}
+
+var themeSources = {{THEME_SOURCES}};
+var themeVersionValueMap = {{THEME_VERSION_VALUE_MAP}};
+
+// TODO: source of truth for mapping should be elsewhere
+var darkMode = rawDarkMode ? 'dark' : 'light';
+var resolvedThemeVersion = themeVersionValueMap[rawThemeVersion];
+var themeVersion = themeSources[resolvedThemeVersion] ? resolvedThemeVersion : '{{defaultThemeVersion}}';
+
+window.__osdThemeTag__ = themeVersion + darkMode;
+
+var themeDefinition = themeSources[themeVersion][darkMode];
+
+var stylesheetTarget = document.querySelector('head meta[name="add-styles-here"]');
+
+var themeColorDom = document.createElement('meta');
+
+themeColorDom.name = 'theme-color';
+themeColorDom.content = themeDefinition.euiHeaderBackgroundColor;
+
+document.head.insertBefore(themeColorDom, stylesheetTarget);
+
+var themedStylesDom = document.createElement('style');
+
+themedStylesDom.innerHTML = `
+  :root {
+    color-scheme: ${darkMode};
+  }
+  .${darkMode}Only {
+    display: unset;
+  }
+  .osdWelcomeView {
+    background-color: ${themeDefinition.euiHeaderBackgroundColor};
+  }
+  .osdWelcomeTitle {
+    color: ${themeDefinition.euiColorFullShade};
+  }
+  .osdWelcomeText {
+    color: ${themeDefinition.euiColorDarkShade};
+  }
+  .osdProgress {
+    background-color: ${themeDefinition.euiColorLightestShade};
+  }
+  .osdProgress:before {
+    background-color: ${themeDefinition.euiColorPrimary};
+  }
+`
+
+document.head.insertBefore(themedStylesDom, stylesheetTarget);
+
+var fontTexts = {{fontText}};
+var fontCodes = {{fontCode}};
+
+var fontText = fontTexts[themeVersion];
+var fontCode = fontCodes[themeVersion];
+
+var fontTarget = document.querySelector('head meta[name="add-fonts-here"]');
+
+var themedFontDom = document.createElement('style');
+
+themedFontDom.innerHTML = `
+  :root {
+    --font-text: "${fontText}", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+                sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
+    --font-code: "${fontCode}", Consolas, Menlo, Courier, monospace;
+
+    --oui-font-family: var(--font-text);
+    --oui-code-font-family: var(--font-code);
+  }
+
+  code, pre, kbd, samp {
+    font-family: var(--font-code);
+  }
+  html, input, textarea, select, button {
+    font-family: var(--font-text);
+  }
+`;
+
+document.head.insertBefore(themedFontDom, fontTarget);

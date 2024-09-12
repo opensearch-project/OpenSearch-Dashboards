@@ -22,7 +22,7 @@ export interface VisualizationTypeOptions<T = any> {
   readonly title: string;
   readonly description?: string;
   readonly icon: IconType;
-  readonly stage?: 'experimental' | 'production';
+  readonly stage?: 'production';
   readonly ui: {
     containerConfig: {
       data: DataTabConfig;
@@ -31,6 +31,7 @@ export interface VisualizationTypeOptions<T = any> {
   };
   readonly toExpression: (
     state: RenderState,
-    searchContext: IExpressionLoaderParams['searchContext']
+    searchContext: IExpressionLoaderParams['searchContext'],
+    useVega: boolean
   ) => Promise<string | undefined>;
 }

@@ -87,10 +87,24 @@ import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../opensearch_dashboards_utils/common';
 import { IIndexPattern } from '../../index_patterns';
+import {
+  DATA_FRAME_TYPES,
+  IDataFrame,
+  IDataFrameError,
+  IDataFrameResponse,
+  convertResult,
+  createDataFrame,
+} from '../../data_frames';
 import { IOpenSearchSearchRequest, IOpenSearchSearchResponse, ISearchOptions } from '../..';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
 import { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
-import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
+import {
+  FetchHandlers,
+  RequestFailure,
+  getExternalSearchParamsFromRequest,
+  getSearchParamsFromRequest,
+  SearchRequest,
+} from './fetch';
 
 import {
   getOpenSearchQueryConfig,
@@ -116,6 +130,8 @@ export const searchSourceRequiredUiSettings = [
   UI_SETTINGS.QUERY_STRING_OPTIONS,
   UI_SETTINGS.SEARCH_INCLUDE_FROZEN,
   UI_SETTINGS.SORT_OPTIONS,
+  UI_SETTINGS.QUERY_DATAFRAME_HYDRATION_STRATEGY,
+  UI_SETTINGS.SEARCH_INCLUDE_ALL_FIELDS,
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
@@ -123,11 +139,18 @@ export interface SearchSourceDependencies extends FetchHandlers {
   // search options required here and returning a promise instead of observable.
   search: <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+    SearchStrategyResponse extends
+      | IOpenSearchDashboardsSearchResponse
+      | IDataFrameResponse = IOpenSearchSearchResponse
   >(
     request: SearchStrategyRequest,
     options: ISearchOptions
   ) => Promise<SearchStrategyResponse>;
+  df: {
+    get: () => IDataFrame | undefined;
+    set: (dataFrame: IDataFrame) => void;
+    clear: () => void;
+  };
 }
 
 /** @public **/
@@ -268,6 +291,51 @@ export class SearchSource {
   }
 
   /**
+   * Get the data frame of this SearchSource
+   * @return {undefined|IDataFrame}
+   */
+  getDataFrame() {
+    return this.dependencies.df.get();
+  }
+
+  /**
+   * Set the data frame of this SearchSource
+   *
+   * @async
+   * @return {undefined|IDataFrame}
+   */
+  async setDataFrame(dataFrame: IDataFrame | undefined) {
+    if (dataFrame) {
+      await this.dependencies.df.set(dataFrame);
+    } else {
+      this.destroyDataFrame();
+    }
+    return this.getDataFrame();
+  }
+
+  /**
+   * Create and set the data frame of this SearchSource
+   *
+   * @async
+   * @return {undefined|IDataFrame}
+   */
+  async createDataFrame(searchRequest: SearchRequest) {
+    const dataFrame = createDataFrame({
+      name: searchRequest.index.title || searchRequest.index,
+      fields: [],
+    });
+    await this.setDataFrame(dataFrame);
+    return this.getDataFrame();
+  }
+
+  /**
+   * Clear the data frame of this SearchSource
+   */
+  destroyDataFrame() {
+    this.dependencies.df.clear();
+  }
+
+  /**
    * Fetch this source and reject the returned Promise on error
    *
    * @async
@@ -282,6 +350,8 @@ export class SearchSource {
     let response;
     if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       response = await this.legacyFetch(searchRequest, options);
+    } else if (this.isUnsupportedRequest(searchRequest)) {
+      response = await this.fetchExternalSearch(searchRequest, options);
     } else {
       const indexPattern = this.getField('index');
       searchRequest.dataSourceId = indexPattern?.dataSourceRef?.id;
@@ -337,12 +407,52 @@ export class SearchSource {
 
     const params = getSearchParamsFromRequest(searchRequest, {
       getConfig,
+      getDataFrame: this.getDataFrame.bind(this),
+      destroyDataFrame: this.destroyDataFrame.bind(this),
     });
 
     return search(
       { params, indexType: searchRequest.indexType, dataSourceId: searchRequest.dataSourceId },
       options
-    ).then(({ rawResponse }) => onResponse(searchRequest, rawResponse));
+    ).then((response: any) => onResponse(searchRequest, response.rawResponse));
+  }
+
+  /**
+   * Run a non-native search using the search service
+   * @return {Promise<SearchResponse<unknown>>}
+   */
+  private async fetchExternalSearch(searchRequest: SearchRequest, options: ISearchOptions) {
+    const { search, getConfig, onResponse } = this.dependencies;
+
+    const currentDataframe = this.getDataFrame();
+    if (!currentDataframe || currentDataframe.name !== searchRequest.index?.id) {
+      await this.createDataFrame(searchRequest);
+    }
+
+    const params = getExternalSearchParamsFromRequest(searchRequest, {
+      getConfig,
+      getDataFrame: this.getDataFrame.bind(this),
+    });
+
+    return search({ params }, options).then(async (response: any) => {
+      if (response.hasOwnProperty('type')) {
+        if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.DEFAULT) {
+          const dataFrameResponse = response as IDataFrameResponse;
+          await this.setDataFrame(dataFrameResponse.body as IDataFrame);
+          return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+        }
+        if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
+          const dataFrameResponse = response as IDataFrameResponse;
+          await this.setDataFrame(dataFrameResponse.body as IDataFrame);
+          return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+        }
+        if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.ERROR) {
+          const dataFrameError = response as IDataFrameError;
+          throw new RequestFailure(null, dataFrameError);
+        }
+      }
+      return onResponse(searchRequest, response.rawResponse);
+    });
   }
 
   /**
@@ -364,6 +474,10 @@ export class SearchSource {
         legacy,
       }
     );
+  }
+
+  private isUnsupportedRequest(request: SearchRequest): boolean {
+    return request.body!.query.hasOwnProperty('type') && request.body!.query.type === 'unsupported';
   }
 
   /**
@@ -473,6 +587,7 @@ export class SearchSource {
 
   flatten() {
     const searchRequest = this.mergeProps();
+    const { getConfig } = this.dependencies;
 
     searchRequest.body = searchRequest.body || {};
     const { body, index, fields, query, filters, highlightAll } = searchRequest;
@@ -482,6 +597,9 @@ export class SearchSource {
 
     body.stored_fields = computedFields.storedFields;
     body.script_fields = body.script_fields || {};
+    if (getConfig(UI_SETTINGS.SEARCH_INCLUDE_ALL_FIELDS)) {
+      body.fields = ['*'];
+    }
     extend(body.script_fields, computedFields.scriptFields);
 
     const defaultDocValueFields = computedFields.docvalueFields
@@ -492,8 +610,6 @@ export class SearchSource {
     if (!body.hasOwnProperty('_source') && index) {
       body._source = index.getSourceFiltering();
     }
-
-    const { getConfig } = this.dependencies;
 
     if (body._source) {
       // exclude source fields for this index pattern specified by the user

@@ -9,6 +9,7 @@ import { debounceTime } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { useEffect } from 'react';
 import { cloneDeep } from 'lodash';
+import { useLocation } from 'react-router-dom';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
 import { search } from '../../../../../data/public';
@@ -31,12 +32,14 @@ import {
   getResponseInspectorStats,
 } from '../../../opensearch_dashboards_services';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
+import { syncQueryStateWithUrl } from '../../../../../data/public';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
   LOADING = 'loading', // initial data load
   READY = 'ready', // results came back
   NO_RESULTS = 'none', // no results came back
+  ERROR = 'error', // error occurred
 }
 
 export interface SearchData {
@@ -47,6 +50,17 @@ export interface SearchData {
   rows?: OpenSearchSearchHit[];
   bucketInterval?: TimechartHeaderBucketInterval | {};
   chartData?: Chart;
+  title?: string;
+  queryStatus?: {
+    body?: {
+      error?: {
+        reason?: string;
+        details: string;
+      };
+      statusCode?: number;
+    };
+    elapsedMs?: number;
+  };
 }
 
 export type SearchRefetch = 'refetch' | undefined;
@@ -67,11 +81,21 @@ export type RefetchSubject = Subject<SearchRefetch>;
  * }, [data$]);
  */
 export const useSearch = (services: DiscoverViewServices) => {
+  const { pathname } = useLocation();
   const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
   const { savedSearch: savedSearchId, sort, interval } = useSelector((state) => state.discover);
-  const { data, filterManager, getSavedSearchById, core, toastNotifications, chrome } = services;
   const indexPattern = useIndexPattern(services);
+  const {
+    data,
+    filterManager,
+    getSavedSearchById,
+    core,
+    toastNotifications,
+    osdUrlStateStorage,
+    chrome,
+    uiSettings,
+  } = services;
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{
     abortController: AbortController | undefined;
@@ -105,7 +129,8 @@ export const useSearch = (services: DiscoverViewServices) => {
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
   const fetch = useCallback(async () => {
-    if (!indexPattern) {
+    let dataset = indexPattern;
+    if (!dataset) {
       data$.next({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
       });
@@ -122,16 +147,20 @@ export const useSearch = (services: DiscoverViewServices) => {
     // Abort any in-progress requests before fetching again
     if (fetchStateRef.current.abortController) fetchStateRef.current.abortController.abort();
     fetchStateRef.current.abortController = new AbortController();
-    const histogramConfigs = indexPattern.timeFieldName
-      ? createHistogramConfigs(indexPattern, interval || 'auto', data)
+    const histogramConfigs = dataset.timeFieldName
+      ? createHistogramConfigs(dataset, interval || 'auto', data)
       : undefined;
     const searchSource = await updateSearchSource({
-      indexPattern,
+      indexPattern: dataset,
       services,
       sort,
       searchSource: savedSearch?.searchSource,
       histogramConfigs,
     });
+
+    dataset = searchSource.getField('index');
+
+    let elapsedMs;
 
     try {
       // Only show loading indicator if we are fetching when the rows are empty
@@ -149,7 +178,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       });
       const inspectorRequest = inspectorAdapters.requests.start(title, { description });
       inspectorRequest.stats(getRequestInspectorStats(searchSource));
-      searchSource.getSearchRequestBody().then((body) => {
+      searchSource.getSearchRequestBody().then((body: object) => {
         inspectorRequest.json(body);
       });
 
@@ -164,10 +193,11 @@ export const useSearch = (services: DiscoverViewServices) => {
         .ok({ json: fetchResp });
       const hits = fetchResp.hits.total as number;
       const rows = fetchResp.hits.hits;
+      elapsedMs = inspectorRequest.getTime();
       let bucketInterval = {};
       let chartData;
       for (const row of rows) {
-        const fields = Object.keys(indexPattern.flattenHit(row));
+        const fields = Object.keys(dataset!.flattenHit(row));
         for (const fieldName of fields) {
           fetchStateRef.current.fieldCounts[fieldName] =
             (fetchStateRef.current.fieldCounts[fieldName] || 0) + 1;
@@ -196,17 +226,42 @@ export const useSearch = (services: DiscoverViewServices) => {
         rows,
         bucketInterval,
         chartData,
+        title:
+          indexPattern?.title !== searchSource.getDataFrame()?.name
+            ? searchSource.getDataFrame()?.name
+            : indexPattern?.title,
+        queryStatus: {
+          elapsedMs,
+        },
       });
     } catch (error) {
       // If the request was aborted then no need to surface this error in the UI
       if (error instanceof Error && error.name === 'AbortError') return;
 
-      data$.next({
-        status: ResultStatus.NO_RESULTS,
-        rows: [],
-      });
+      const queryLanguage = data.query.queryString.getQuery().language;
+      if (queryLanguage === 'kuery' || queryLanguage === 'lucene') {
+        data$.next({
+          status: ResultStatus.NO_RESULTS,
+          rows: [],
+        });
 
-      data.search.showError(error as Error);
+        data.search.showError(error as Error);
+        return;
+      }
+      let errorBody;
+      try {
+        errorBody = JSON.parse(error.body.message);
+      } catch (e) {
+        errorBody = error.body.message;
+      }
+
+      data$.next({
+        status: ResultStatus.ERROR,
+        queryStatus: {
+          body: errorBody,
+          elapsedMs,
+        },
+      });
     } finally {
       initalSearchComplete.current = true;
     }
@@ -290,7 +345,10 @@ export const useSearch = (services: DiscoverViewServices) => {
         chrome.recentlyAccessed.add(
           savedSearchInstance.getFullPath(),
           savedSearchInstance.title,
-          savedSearchInstance.id
+          savedSearchInstance.id,
+          {
+            type: savedSearchInstance.getOpenSearchType(),
+          }
         );
       }
     })();
@@ -300,6 +358,16 @@ export const useSearch = (services: DiscoverViewServices) => {
     // only called when the component is first mounted.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getSavedSearchById, savedSearchId]);
+
+  useEffect(() => {
+    // syncs `_g` portion of url with query services
+    const { stop } = syncQueryStateWithUrl(data.query, osdUrlStateStorage, uiSettings);
+
+    return () => stop();
+
+    // this effect should re-run when pathname is changed to preserve querystring part,
+    // so the global state is always preserved
+  }, [data.query, osdUrlStateStorage, pathname, uiSettings]);
 
   return {
     data$,

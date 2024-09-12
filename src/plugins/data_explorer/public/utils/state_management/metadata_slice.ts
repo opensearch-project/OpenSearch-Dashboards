@@ -5,6 +5,7 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DataExplorerServices } from '../../types';
+import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../components/constants';
 
 export interface MetadataState {
   indexPattern?: string;
@@ -18,12 +19,16 @@ export const getPreloadedState = async ({
   embeddable,
   scopedHistory,
   data,
+  uiSettings,
 }: DataExplorerServices): Promise<MetadataState> => {
   const { originatingApp } =
     embeddable
       .getStateTransfer(scopedHistory)
       .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
-  const defaultIndexPattern = await data.indexPatterns.getDefault();
+  const isQueryEnhancementEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
+  const defaultIndexPattern = isQueryEnhancementEnabled
+    ? undefined
+    : await data.indexPatterns.getDefault();
   const preloadedState: MetadataState = {
     ...initialState,
     originatingApp,
@@ -37,7 +42,7 @@ export const slice = createSlice({
   name: 'metadata',
   initialState,
   reducers: {
-    setIndexPattern: (state, action: PayloadAction<string>) => {
+    setIndexPattern: (state, action: PayloadAction<string | undefined>) => {
       state.indexPattern = action.payload;
     },
     setOriginatingApp: (state, action: PayloadAction<string | undefined>) => {

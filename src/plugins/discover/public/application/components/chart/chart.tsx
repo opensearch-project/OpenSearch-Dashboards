@@ -5,10 +5,10 @@
 
 import './_histogram.scss';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { DataPublicPluginStart, search } from '../../../../../data/public';
@@ -30,6 +30,8 @@ interface DiscoverChartProps {
   showResetButton?: boolean;
   isTimeBased?: boolean;
   services: DiscoverServices;
+  isEnhancementsEnabled: boolean;
+  discoverOptions: any;
 }
 
 export const DiscoverChart = ({
@@ -42,6 +44,8 @@ export const DiscoverChart = ({
   isTimeBased,
   services,
   showResetButton = false,
+  isEnhancementsEnabled,
+  discoverOptions,
 }: DiscoverChartProps) => {
   const { refetch$ } = useDiscoverContext();
   const { from, to } = data.query.timefilter.timefilter.getTime();
@@ -65,29 +69,79 @@ export const DiscoverChart = ({
     },
     [data]
   );
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const hitsCounter = (
+    <div className="dscChart__hitsCounter">
+      <HitsCounter
+        hits={hits > 0 ? hits : 0}
+        showResetButton={showResetButton}
+        onResetQuery={resetQuery}
+      />
+    </div>
+  );
+
+  const timeChartHeader = (
+    <div className="dscChart__TimechartHeader">
+      <TimechartHeader
+        bucketInterval={bucketInterval}
+        dateFormat={config.get('dateFormat')}
+        timeRange={timeRange}
+        options={search.aggs.intervalOptions}
+        onChangeInterval={onChangeInterval}
+        stateInterval={interval || ''}
+      />
+    </div>
+  );
+
+  const toggleLabel = i18n.translate('histogram.collapse', {
+    defaultMessage: 'Toggle histogram',
+  });
+
+  const toggle = (
+    <EuiToolTip content={toggleLabel}>
+      <EuiButtonIcon
+        aria-expanded={isCollapsed}
+        aria-label={toggleLabel}
+        data-test-subj="histogramCollapseBtn"
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+        iconSize={'s'}
+      />
+    </EuiToolTip>
+  );
+
+  const queryEnhancedHistogramHeader = (
+    <EuiFlexGroup direction="row" gutterSize="m" className="dscChart__chartheader">
+      <EuiFlexItem grow={false}>{toggle}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{hitsCounter}</EuiFlexItem>
+      <EuiFlexItem grow={true} style={{ justifyContent: 'flex-start' }}>
+        {isTimeBased && timeChartHeader}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>{discoverOptions}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const histogramHeader = (
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexGroup direction="row" gutterSize="s">
+        <EuiFlexItem grow={true}>{hitsCounter}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{discoverOptions}</EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexItem grow={false}>{isTimeBased && timeChartHeader}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  const showHistogram = !isEnhancementsEnabled || !isCollapsed;
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      <EuiFlexItem grow={false} className="dscChart__hitsCounter">
-        <HitsCounter
-          hits={hits > 0 ? hits : 0}
-          showResetButton={showResetButton}
-          onResetQuery={resetQuery}
-        />
-      </EuiFlexItem>
-      {isTimeBased && (
-        <EuiFlexItem className="dscChart__TimechartHeader">
-          <TimechartHeader
-            bucketInterval={bucketInterval}
-            dateFormat={config.get('dateFormat')}
-            timeRange={timeRange}
-            options={search.aggs.intervalOptions}
-            onChangeInterval={onChangeInterval}
-            stateInterval={interval || ''}
-          />
-        </EuiFlexItem>
-      )}
-      {isTimeBased && chartData && (
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="none"
+      className={isEnhancementsEnabled ? 'dscChart__wrapper' : ''}
+    >
+      {isEnhancementsEnabled ? queryEnhancedHistogramHeader : histogramHeader}
+      {isTimeBased && chartData && showHistogram && (
         <EuiFlexItem grow={false}>
           <section
             aria-label={i18n.translate('discover.histogramOfFoundDocumentsAriaLabel', {

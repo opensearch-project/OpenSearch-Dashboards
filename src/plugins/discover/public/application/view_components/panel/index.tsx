@@ -16,7 +16,7 @@ import {
 import { DiscoverSidebar } from '../../components/sidebar';
 import { useDiscoverContext } from '../context';
 import { ResultStatus, SearchData } from '../utils/use_search';
-import { IndexPatternField, opensearchFilters } from '../../../../../data/public';
+import { IndexPatternField, UI_SETTINGS, opensearchFilters } from '../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
 import { popularizeField } from '../../helpers/popularize_field';
@@ -31,13 +31,18 @@ export default function DiscoverPanel(props: ViewProps) {
     },
     capabilities,
     indexPatterns,
+    application,
   } = services;
   const { data$, indexPattern } = useDiscoverContext();
   const [fetchState, setFetchState] = useState<SearchData>(data$.getValue());
 
-  const { columns } = useSelector((state) => ({
-    columns: state.discover.columns,
-  }));
+  const { columns } = useSelector((state) => {
+    const stateColumns = state.discover.columns;
+    // check if state columns is not undefined, otherwise use buildColumns
+    return {
+      columns: stateColumns !== undefined ? stateColumns : buildColumns([]),
+    };
+  });
 
   const prevColumns = useRef(columns);
   const dispatch = useDispatch();
@@ -47,6 +52,7 @@ export default function DiscoverPanel(props: ViewProps) {
     if (columns !== prevColumns.current) {
       let updatedColumns = buildColumns(columns);
       if (
+        columns &&
         timeFieldname &&
         !prevColumns.current.includes(timeFieldname) &&
         columns.includes(timeFieldname)
@@ -86,6 +92,18 @@ export default function DiscoverPanel(props: ViewProps) {
     [filterManager, indexPattern]
   );
 
+  const onCreateIndexPattern = useCallback(async () => {
+    if (!fetchState.title) return;
+    if (fetchState.title === indexPattern?.title) return;
+    application?.navigateToApp('management', {
+      path: `opensearch-dashboards/indexPatterns/create?id=${fetchState.title}`,
+    });
+  }, [application, fetchState.title, indexPattern?.title]);
+
+  const isEnhancementsEnabledOverride = services.uiSettings.get(
+    UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED
+  );
+
   return (
     <DiscoverSidebar
       columns={columns || []}
@@ -119,7 +137,10 @@ export default function DiscoverPanel(props: ViewProps) {
         );
       }}
       selectedIndexPattern={indexPattern}
+      onCreateIndexPattern={onCreateIndexPattern}
+      onNormalize={() => {}}
       onAddFilter={onAddFilter}
+      isEnhancementsEnabledOverride={isEnhancementsEnabledOverride}
     />
   );
 }

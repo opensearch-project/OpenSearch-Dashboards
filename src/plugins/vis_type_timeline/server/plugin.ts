@@ -34,6 +34,7 @@ import { TypeOf, schema } from '@osd/config-schema';
 import { RecursiveReadonly } from '@osd/utility-types';
 import { deepFreeze } from '@osd/std';
 
+import { DataSourcePluginSetup } from 'src/plugins/data_source/server';
 import { PluginStart } from '../../data/server';
 import { CoreSetup, PluginInitializerContext } from '../../../core/server';
 import { configSchema } from '../config';
@@ -42,10 +43,15 @@ import { functionsRoute } from './routes/functions';
 import { validateOpenSearchRoute } from './routes/validate_es';
 import { runRoute } from './routes/run';
 import { ConfigManager } from './lib/config_manager';
+import { setDataSourceEnabled } from './lib/services';
 
 const experimentalLabel = i18n.translate('timeline.uiSettings.experimentalLabel', {
   defaultMessage: 'experimental',
 });
+
+export interface TimelinePluginSetupDeps {
+  dataSource?: DataSourcePluginSetup;
+}
 
 export interface TimelinePluginStartDeps {
   data: PluginStart;
@@ -57,7 +63,7 @@ export interface TimelinePluginStartDeps {
 export class Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public async setup(core: CoreSetup): void {
+  public async setup(core: CoreSetup, { dataSource }: TimelinePluginSetupDeps): void {
     const config = await this.initializerContext.config
       .create<TypeOf<typeof configSchema>>()
       .pipe(first())
@@ -79,6 +85,8 @@ export class Plugin {
         })
       );
     };
+
+    setDataSourceEnabled({ enabled: !!dataSource });
 
     const logger = this.initializerContext.logger.get('timeline');
 

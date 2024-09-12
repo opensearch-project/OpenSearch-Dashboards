@@ -32,12 +32,12 @@ import React, { PureComponent } from 'react';
 import { injectI18n, FormattedMessage, InjectedIntlProps } from '@osd/i18n/react';
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPanel,
-  EuiSelect,
+  EuiCompressedSelect,
 } from '@elastic/eui';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
@@ -181,8 +181,8 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
         <EuiPanel grow={false}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFormRow id="selectControlType">
-                <EuiSelect
+              <EuiCompressedFormRow id="selectControlType">
+                <EuiCompressedSelect
                   data-test-subj="selectControlType"
                   options={[
                     {
@@ -207,12 +207,11 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
                     defaultMessage: 'Select control type',
                   })}
                 />
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFormRow id="addControl">
-                <EuiButton
-                  fill
+              <EuiCompressedFormRow id="addControl">
+                <EuiSmallButton
                   onClick={this.handleAddControl}
                   iconType="plusInCircle"
                   data-test-subj="inputControlEditorAddBtn"
@@ -225,8 +224,8 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
                     id="inputControl.editor.controlsTab.addButtonLabel"
                     defaultMessage="Add"
                   />
-                </EuiButton>
-              </EuiFormRow>
+                </EuiSmallButton>
+              </EuiCompressedFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

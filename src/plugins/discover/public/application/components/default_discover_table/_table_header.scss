@@ -1,6 +1,11 @@
 .osdDocTableHeader {
   white-space: nowrap;
   text-align: left;
+
+  // nested for specificity
+  .docTableHeaderField {
+    padding: calc($euiSizeM / 2); // corresponds to DataGrid medium cellPadding
+  }
 }
 
 .osdDocTableHeader button {

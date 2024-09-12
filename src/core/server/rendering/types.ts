@@ -31,7 +31,7 @@
 import { i18n } from '@osd/i18n';
 
 import { Branding } from 'src/core/types';
-import { EnvironmentMode, PackageInfo } from '../config';
+import { EnvironmentMode, InternalDynamicConfigServiceSetup, PackageInfo } from '../config';
 import { ICspConfig } from '../csp';
 import { InternalHttpServiceSetup, OpenSearchDashboardsRequest, LegacyRequest } from '../http';
 import { UiPlugins, DiscoveredPlugin } from '../plugins';
@@ -43,10 +43,9 @@ export interface RenderingMetadata {
   strictCsp: ICspConfig['strict'];
   uiPublicUrl: string;
   bootstrapScriptUrl: string;
+  startupScriptUrl: string;
   i18n: typeof i18n.translate;
   locale: string;
-  darkMode: boolean;
-  themeVersion: string;
   injectedMetadata: {
     version: string;
     buildNumber: number;
@@ -84,6 +83,7 @@ export interface RenderingSetupDeps {
   http: InternalHttpServiceSetup;
   status: InternalStatusServiceSetup;
   uiPlugins: UiPlugins;
+  dynamicConfig: InternalDynamicConfigServiceSetup;
 }
 
 /** @public */

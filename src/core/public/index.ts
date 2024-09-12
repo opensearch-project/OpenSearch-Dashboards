@@ -68,6 +68,18 @@ import {
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   NavType,
+  RightNavigationOrder,
+  RightNavigationButton,
+  RightNavigationButtonProps,
+  ChromeRegistrationNavLink,
+  ChromeNavGroupUpdater,
+  PersistedLog,
+  NavGroupItemInMap,
+  fulfillRegistrationLinksToChromeNavLinks,
+  createRecentNavLink,
+  HeaderVariant,
+  LinkItemType,
+  getSortedNavLinks,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -94,7 +106,17 @@ export type { Logos } from '../common';
 export { PackageInfo, EnvironmentMode } from '../server/types';
 /** @interal */
 export { CoreContext, CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
+export {
+  DEFAULT_APP_CATEGORIES,
+  WORKSPACE_TYPE,
+  cleanWorkspaceId,
+  DEFAULT_NAV_GROUPS,
+  ALL_USE_CASE_ID,
+  SEARCH_USE_CASE_ID,
+  ESSENTIAL_USE_CASE_ID,
+  OBSERVABILITY_USE_CASE_ID,
+  SECURITY_ANALYTICS_USE_CASE_ID,
+} from '../utils';
 export {
   AppCategory,
   UiSettingsParams,
@@ -105,6 +127,12 @@ export {
   StringValidationRegex,
   StringValidationRegexString,
   WorkspaceAttribute,
+  ChromeNavGroup,
+  NavGroupType,
+  NavGroupStatus,
+  WorkspaceAttributeWithPermission,
+  UiSettingScope,
+  PermissionModeId,
 } from '../types';
 
 export {
@@ -128,6 +156,7 @@ export {
   AppUpdater,
   ScopedHistory,
   NavigateToAppOptions,
+  WorkspaceAvailability,
 } from './application';
 
 export {
@@ -353,10 +382,28 @@ export {
   UiSettingsState,
   NavType,
   Branding,
+  RightNavigationOrder,
+  RightNavigationButton,
+  RightNavigationButtonProps,
+  ChromeRegistrationNavLink,
+  ChromeNavGroupUpdater,
+  PersistedLog,
+  NavGroupItemInMap,
+  fulfillRegistrationLinksToChromeNavLinks,
+  createRecentNavLink,
+  HeaderVariant,
+  LinkItemType,
+  getSortedNavLinks,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';
 
-export { WorkspacesStart, WorkspacesSetup, WorkspacesService } from './workspace';
+export {
+  WorkspacesStart,
+  WorkspacesSetup,
+  WorkspacesService,
+  WorkspaceObject,
+  IWorkspaceClient,
+} from './workspace';
 
-export { WORKSPACE_TYPE } from '../utils';
+export { debounce } from './utils';

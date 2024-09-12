@@ -28,7 +28,12 @@
  * under the License.
  */
 
-import { PublicAppInfo, AppNavLinkStatus, AppStatus } from '../../application';
+import {
+  PublicAppInfo,
+  AppNavLinkStatus,
+  AppStatus,
+  WorkspaceAvailability,
+} from '../../application';
 import { toNavLink } from './to_nav_link';
 
 import { httpServiceMock } from '../../mocks';
@@ -53,6 +58,7 @@ describe('toNavLink', () => {
         title: 'title',
         order: 12,
         tooltip: 'tooltip',
+        description: 'some-description',
         euiIconType: 'my-icon' as EuiIconType,
       }),
       basePath
@@ -64,6 +70,7 @@ describe('toNavLink', () => {
         order: 12,
         tooltip: 'tooltip',
         euiIconType: 'my-icon',
+        description: 'some-description',
       })
     );
   });
@@ -171,6 +178,57 @@ describe('toNavLink', () => {
       expect.objectContaining({
         disabled: true,
         hidden: false,
+      })
+    );
+  });
+
+  it('uses the workspaceAvailability of the application to construct the url', () => {
+    const httpMock = httpServiceMock.createStartContract({
+      basePath: '/base_path',
+      clientBasePath: '/client_base_path',
+    });
+    expect(
+      toNavLink(
+        app({
+          workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+        }),
+        httpMock.basePath
+      ).properties
+    ).toEqual(
+      expect.objectContaining({
+        url: 'http://localhost/base_path/app/some-id',
+        baseUrl: 'http://localhost/base_path/app/some-id',
+      })
+    );
+
+    // When app is accessible inside workspace or outside workspace.
+    expect(
+      toNavLink(
+        app({
+          workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+        }),
+        httpMock.basePath
+      ).properties
+    ).toEqual(
+      expect.objectContaining({
+        url: 'http://localhost/base_path/client_base_path/app/some-id',
+        baseUrl: 'http://localhost/base_path/client_base_path/app/some-id',
+      })
+    );
+
+    expect(
+      toNavLink(
+        app({
+          workspaceAvailability:
+            // eslint-disable-next-line no-bitwise
+            WorkspaceAvailability.insideWorkspace | WorkspaceAvailability.outsideWorkspace,
+        }),
+        httpMock.basePath
+      ).properties
+    ).toEqual(
+      expect.objectContaining({
+        url: 'http://localhost/base_path/client_base_path/app/some-id',
+        baseUrl: 'http://localhost/base_path/client_base_path/app/some-id',
       })
     );
   });

@@ -19,13 +19,13 @@ import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 export interface TableCellProps {
   columnId: string;
   isTimeField?: boolean;
-  onFilter: DocViewFilterFn;
+  onFilter?: DocViewFilterFn;
   filterable?: boolean;
   fieldMapping?: any;
   sanitizedCellValue: string;
 }
 
-export const TableCell = ({
+const TableCellUI = ({
   columnId,
   isTimeField,
   onFilter,
@@ -34,8 +34,11 @@ export const TableCell = ({
 }: TableCellProps) => {
   const content = (
     <>
-      {/* eslint-disable-next-line react/no-danger */}
-      <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
+      <span
+        className="osdDocTableCell__dataField"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: sanitizedCellValue }}
+      />
       <span className="osdDocTableCell__filter">
         <EuiToolTip
           content={i18n.translate('discover.filterForValue', {
@@ -43,7 +46,8 @@ export const TableCell = ({
           })}
         >
           <EuiButtonIcon
-            onClick={() => onFilter(columnId, fieldMapping, '+')}
+            size="xs"
+            onClick={() => onFilter?.(columnId, fieldMapping, '+')}
             iconType="plusInCircle"
             aria-label={i18n.translate('discover.filterForValueLabel', {
               defaultMessage: 'Filter for value',
@@ -58,7 +62,8 @@ export const TableCell = ({
           })}
         >
           <EuiButtonIcon
-            onClick={() => onFilter(columnId, fieldMapping, '-')}
+            size="xs"
+            onClick={() => onFilter?.(columnId, fieldMapping, '-')}
             iconType="minusInCircle"
             aria-label={i18n.translate('discover.filterOutValueLabel', {
               defaultMessage: 'Filter out value',
@@ -84,3 +89,5 @@ export const TableCell = ({
     </td>
   );
 };
+
+export const TableCell = React.memo(TableCellUI);

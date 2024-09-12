@@ -46,6 +46,7 @@ import {
   createPluginSetupContext,
   InstanceInfo,
 } from './plugin_context';
+import { dynamicConfigServiceMock } from '../config/dynamic_config_service.mock';
 
 const { join } = posix;
 const mockPluginInitializer = jest.fn();
@@ -77,10 +78,13 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     requiredBundles: [],
     server: true,
     ui: true,
+    supportedOSDataSourceVersions: '>=1.0.0',
+    requiredOSDataSourcePlugins: ['some-required-data-source-plugin'],
     ...manifestProps,
   };
 }
 
+const dynamicConfigService = dynamicConfigServiceMock.create();
 const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 
@@ -98,7 +102,7 @@ beforeEach(() => {
     uuid: 'instance-uuid',
   };
 
-  coreContext = { coreId, env, logger, configService: configService as any };
+  coreContext = { coreId, env, logger, configService: configService as any, dynamicConfigService };
 });
 
 afterEach(() => {
@@ -125,6 +129,8 @@ test('`constructor` correctly initializes plugin instance', () => {
   expect(plugin.path).toBe('some-plugin-path');
   expect(plugin.requiredPlugins).toEqual(['some-required-dep']);
   expect(plugin.optionalPlugins).toEqual(['some-optional-dep']);
+  expect(plugin.supportedOSDataSourceVersions).toEqual('>=1.0.0');
+  expect(plugin.requiredOSDataSourcePlugins).toEqual(['some-required-data-source-plugin']);
 });
 
 test('`setup` fails if `plugin` initializer is not exported', async () => {

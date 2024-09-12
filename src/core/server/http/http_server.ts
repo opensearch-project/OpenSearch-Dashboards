@@ -55,6 +55,7 @@ import { IsAuthenticated, AuthStateStorage, GetAuthState } from './auth_state_st
 import { AuthHeadersStorage, GetAuthHeaders } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { HttpServiceSetup, HttpServerInfo } from './types';
+import { InternalDynamicConfigServiceStart } from '../config';
 
 /** @internal */
 export interface HttpServerSetup {
@@ -165,7 +166,7 @@ export class HttpServer {
     };
   }
 
-  public async start() {
+  public async start(dynamicConfigService: InternalDynamicConfigServiceStart) {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }

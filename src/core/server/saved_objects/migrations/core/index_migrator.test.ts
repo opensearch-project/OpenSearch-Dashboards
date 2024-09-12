@@ -435,6 +435,228 @@ describe('IndexMigrator', () => {
     });
   });
 
+  test('deletes saved objects by type if configured', async () => {
+    const { client } = testOpts;
+
+    const deleteType = 'delete_type';
+
+    const rawConfig = configMock.create();
+    rawConfig.get.mockImplementation((path) => {
+      if (path === 'migrations.delete.enabled') {
+        return true;
+      }
+      if (path === 'migrations.delete.types') {
+        return [deleteType];
+      }
+    });
+    testOpts.opensearchDashboardsRawConfig = rawConfig;
+
+    testOpts.mappingProperties = { foo: { type: 'text' } as any };
+
+    withIndex(client, {
+      index: {
+        '.kibana_1': {
+          aliases: {},
+          mappings: {
+            properties: {
+              delete_type: { properties: { type: deleteType } },
+            },
+          },
+        },
+      },
+    });
+
+    await new IndexMigrator(testOpts).migrate();
+
+    expect(client.indices.create).toHaveBeenCalledWith({
+      body: {
+        mappings: {
+          dynamic: 'strict',
+          _meta: {
+            migrationMappingPropertyHashes: {
+              foo: '625b32086eb1d1203564cf85062dd22e',
+              migrationVersion: '4a1746014a75ade3a714e1db5763276f',
+              namespace: '2f4316de49999235636386fe51dc06c1',
+              namespaces: '2f4316de49999235636386fe51dc06c1',
+              originId: '2f4316de49999235636386fe51dc06c1',
+              references: '7997cf5a56cc02bdc9c93361bde732b0',
+              type: '2f4316de49999235636386fe51dc06c1',
+              updated_at: '00da57df13e94e9d98437d13ace4bfe0',
+            },
+          },
+          properties: {
+            foo: { type: 'text' },
+            migrationVersion: { dynamic: 'true', type: 'object' },
+            namespace: { type: 'keyword' },
+            namespaces: { type: 'keyword' },
+            originId: { type: 'keyword' },
+            type: { type: 'keyword' },
+            updated_at: { type: 'date' },
+            references: {
+              type: 'nested',
+              properties: {
+                name: { type: 'keyword' },
+                type: { type: 'keyword' },
+                id: { type: 'keyword' },
+              },
+            },
+          },
+        },
+        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+      },
+      index: '.kibana_2',
+    });
+  });
+
+  test('retains saved objects by type if delete is not enabled', async () => {
+    const { client } = testOpts;
+
+    const deleteType = 'delete_type';
+
+    const rawConfig = configMock.create();
+    rawConfig.get.mockImplementation((path) => {
+      if (path === 'migrations.delete.enabled') {
+        return false;
+      }
+      if (path === 'migrations.delete.types') {
+        return [deleteType];
+      }
+    });
+    testOpts.opensearchDashboardsRawConfig = rawConfig;
+
+    testOpts.mappingProperties = { foo: { type: 'text' } as any };
+
+    withIndex(client, {
+      index: {
+        '.kibana_1': {
+          aliases: {},
+          mappings: {
+            properties: {
+              delete_type: { properties: { type: deleteType } },
+            },
+          },
+        },
+      },
+    });
+
+    await new IndexMigrator(testOpts).migrate();
+
+    expect(client.indices.create).toHaveBeenCalledWith({
+      body: {
+        mappings: {
+          dynamic: 'strict',
+          _meta: {
+            migrationMappingPropertyHashes: {
+              foo: '625b32086eb1d1203564cf85062dd22e',
+              migrationVersion: '4a1746014a75ade3a714e1db5763276f',
+              namespace: '2f4316de49999235636386fe51dc06c1',
+              namespaces: '2f4316de49999235636386fe51dc06c1',
+              originId: '2f4316de49999235636386fe51dc06c1',
+              references: '7997cf5a56cc02bdc9c93361bde732b0',
+              type: '2f4316de49999235636386fe51dc06c1',
+              updated_at: '00da57df13e94e9d98437d13ace4bfe0',
+            },
+          },
+          properties: {
+            delete_type: { dynamic: false, properties: {} },
+            foo: { type: 'text' },
+            migrationVersion: { dynamic: 'true', type: 'object' },
+            namespace: { type: 'keyword' },
+            namespaces: { type: 'keyword' },
+            originId: { type: 'keyword' },
+            type: { type: 'keyword' },
+            updated_at: { type: 'date' },
+            references: {
+              type: 'nested',
+              properties: {
+                name: { type: 'keyword' },
+                type: { type: 'keyword' },
+                id: { type: 'keyword' },
+              },
+            },
+          },
+        },
+        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+      },
+      index: '.kibana_2',
+    });
+  });
+
+  test('retains saved objects by type if delete types does not exist', async () => {
+    const { client } = testOpts;
+
+    const deleteType = 'delete_type';
+    const retainType = 'retain_type';
+
+    const rawConfig = configMock.create();
+    rawConfig.get.mockImplementation((path) => {
+      if (path === 'migrations.delete.enabled') {
+        return true;
+      }
+      if (path === 'migrations.delete.types') {
+        return [deleteType];
+      }
+    });
+    testOpts.opensearchDashboardsRawConfig = rawConfig;
+
+    testOpts.mappingProperties = { foo: { type: 'text' } as any };
+
+    withIndex(client, {
+      index: {
+        '.kibana_1': {
+          aliases: {},
+          mappings: {
+            properties: {
+              retain_type: { properties: { type: retainType } },
+            },
+          },
+        },
+      },
+    });
+
+    await new IndexMigrator(testOpts).migrate();
+
+    expect(client.indices.create).toHaveBeenCalledWith({
+      body: {
+        mappings: {
+          dynamic: 'strict',
+          _meta: {
+            migrationMappingPropertyHashes: {
+              foo: '625b32086eb1d1203564cf85062dd22e',
+              migrationVersion: '4a1746014a75ade3a714e1db5763276f',
+              namespace: '2f4316de49999235636386fe51dc06c1',
+              namespaces: '2f4316de49999235636386fe51dc06c1',
+              originId: '2f4316de49999235636386fe51dc06c1',
+              references: '7997cf5a56cc02bdc9c93361bde732b0',
+              type: '2f4316de49999235636386fe51dc06c1',
+              updated_at: '00da57df13e94e9d98437d13ace4bfe0',
+            },
+          },
+          properties: {
+            retain_type: { dynamic: false, properties: {} },
+            foo: { type: 'text' },
+            migrationVersion: { dynamic: 'true', type: 'object' },
+            namespace: { type: 'keyword' },
+            namespaces: { type: 'keyword' },
+            originId: { type: 'keyword' },
+            type: { type: 'keyword' },
+            updated_at: { type: 'date' },
+            references: {
+              type: 'nested',
+              properties: {
+                name: { type: 'keyword' },
+                type: { type: 'keyword' },
+                id: { type: 'keyword' },
+              },
+            },
+          },
+        },
+        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+      },
+      index: '.kibana_2',
+    });
+  });
+
   test('points the alias at the dest index', async () => {
     const { client } = testOpts;
 

@@ -799,6 +799,8 @@ export class SavedObjectsRepository {
       filter,
       preference,
       workspaces,
+      workspacesSearchOperator,
+      ACLSearchParams,
     } = options;
 
     if (!type && !typeToNamespacesMap) {
@@ -873,6 +875,8 @@ export class SavedObjectsRepository {
           hasReference,
           kueryNode,
           workspaces,
+          workspacesSearchOperator,
+          ACLSearchParams,
         }),
       },
     };
@@ -1040,7 +1044,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { originId, updated_at: updatedAt, permissions } = body._source;
+    const { originId, updated_at: updatedAt, permissions, workspaces } = body._source;
 
     let namespaces: string[] = [];
     if (!this._registry.isNamespaceAgnostic(type)) {
@@ -1056,6 +1060,7 @@ export class SavedObjectsRepository {
       ...(originId && { originId }),
       ...(updatedAt && { updated_at: updatedAt }),
       ...(permissions && { permissions }),
+      ...(workspaces && { workspaces }),
       version: encodeHitVersion(body),
       attributes: body._source[type],
       references: body._source.references || [],
@@ -1084,7 +1089,13 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    const { version, references, refresh = DEFAULT_REFRESH_SETTING, permissions } = options;
+    const {
+      version,
+      references,
+      refresh = DEFAULT_REFRESH_SETTING,
+      permissions,
+      workspaces,
+    } = options;
     const namespace = normalizeNamespace(options.namespace);
 
     let preflightResult: SavedObjectsRawDoc | undefined;
@@ -1099,6 +1110,7 @@ export class SavedObjectsRepository {
       updated_at: time,
       ...(Array.isArray(references) && { references }),
       ...(permissions && { permissions }),
+      ...(workspaces && { workspaces }),
     };
 
     const { body, statusCode } = await this.client.update<SavedObjectsRawDocSource>(
@@ -1137,6 +1149,7 @@ export class SavedObjectsRepository {
       namespaces,
       ...(originId && { originId }),
       ...(permissions && { permissions }),
+      ...(workspaces && { workspaces }),
       references,
       attributes,
     };
@@ -1337,7 +1350,14 @@ export class SavedObjectsRepository {
         };
       }
 
-      const { attributes, references, version, namespace: objectNamespace, permissions } = object;
+      const {
+        attributes,
+        references,
+        version,
+        namespace: objectNamespace,
+        permissions,
+        workspaces,
+      } = object;
 
       if (objectNamespace === ALL_NAMESPACES_STRING) {
         return {
@@ -1359,6 +1379,7 @@ export class SavedObjectsRepository {
         updated_at: time,
         ...(Array.isArray(references) && { references }),
         ...(permissions && { permissions }),
+        ...(workspaces && { workspaces }),
       };
 
       const requiresNamespacesCheck = this._registry.isMultiNamespace(object.type);
@@ -1510,8 +1531,13 @@ export class SavedObjectsRepository {
           response
         )[0] as any;
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { [type]: attributes, references, updated_at, permissions } = documentToSave;
+        const {
+          [type]: attributes,
+          references,
+          updated_at: updatedAt,
+          permissions,
+          workspaces,
+        } = documentToSave;
         if (error) {
           return {
             id,
@@ -1526,23 +1552,25 @@ export class SavedObjectsRepository {
           type,
           ...(namespaces && { namespaces }),
           ...(originId && { originId }),
-          updated_at,
+          updated_at: updatedAt,
           version: encodeVersion(seqNo, primaryTerm),
           attributes,
           references,
           ...(permissions && { permissions }),
+          ...(workspaces && { workspaces }),
         };
       }),
     };
   }
 
   /**
-   * Increases a counter field by one. Creates the document if one doesn't exist for the given id.
+   * Increases a counter field by incrementValue which by default is 1. Creates the document if one doesn't exist for the given id.
    *
    * @param {string} type
    * @param {string} id
    * @param {string} counterFieldName
    * @param {object} [options={}]
+   * @param {number} [incrementValue=1]
    * @property {object} [options.migrationVersion=undefined]
    * @returns {promise}
    */
@@ -1550,7 +1578,8 @@ export class SavedObjectsRepository {
     type: string,
     id: string,
     counterFieldName: string,
-    options: SavedObjectsIncrementCounterOptions = {}
+    options: SavedObjectsIncrementCounterOptions = {},
+    incrementValue: number = 1
   ): Promise<SavedObject> {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');
@@ -1574,19 +1603,17 @@ export class SavedObjectsRepository {
     } else if (this._registry.isMultiNamespace(type)) {
       savedObjectNamespaces = await this.preflightGetNamespaces(type, id, namespace);
     }
-
     const migrated = this._migrator.migrateDocument({
       id,
       type,
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-      attributes: { [counterFieldName]: 1 },
+      attributes: { [counterFieldName]: incrementValue },
       migrationVersion,
       updated_at: time,
     });
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
-
     const { body } = await this.client.update<SavedObjectsRawDocSource>({
       id: raw._id,
       index: this.getIndexForType(type),
@@ -1605,7 +1632,7 @@ export class SavedObjectsRepository {
             `,
           lang: 'painless',
           params: {
-            count: 1,
+            count: incrementValue,
             time,
             type,
             counterFieldName,
@@ -1614,7 +1641,6 @@ export class SavedObjectsRepository {
         upsert: raw._source,
       },
     });
-
     const { originId } = body.get?._source ?? {};
     return {
       id,

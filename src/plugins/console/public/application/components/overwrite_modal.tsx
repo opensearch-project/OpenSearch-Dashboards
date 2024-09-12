@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal } from '@elastic/eui';
+import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, EuiText } from '@elastic/eui';
 
 export interface OverwriteModalProps {
   onSkip: () => void;
@@ -29,13 +29,15 @@ export const OverwriteModal = ({ onSkip, onConfirm }: OverwriteModalProps) => {
       defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
       maxWidth="500px"
     >
-      <p>
-        {i18n.translate('console.overwriteModal.body.conflict', {
-          defaultMessage:
-            'Are you sure you want to overwrite the existing queries? This action cannot be undone. All existing queries will be deleted and replaced with the imported queries. If you are unsure, please choose the "{option}" option instead',
-          values: { option: 'Merge with existing queries' },
-        })}
-      </p>
+      <EuiText size="s">
+        <p>
+          {i18n.translate('console.overwriteModal.body.conflict', {
+            defaultMessage:
+              'Are you sure you want to overwrite the existing queries? This action cannot be undone. All existing queries will be deleted and replaced with the imported queries. If you are unsure, please choose the "{option}" option instead',
+            values: { option: 'Merge with existing queries' },
+          })}
+        </p>
+      </EuiText>
     </EuiConfirmModal>
   );
 };

@@ -1,0 +1,92 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DeleteWorkspaceModal should render normally 1`] = `
+<body
+  class="euiBody-hasOverlayMask"
+>
+  <div />
+  <div
+    class="euiOverlayMask euiOverlayMask--aboveHeader"
+  >
+    <div
+      data-eui="EuiFocusTrap"
+    >
+      <div
+        aria-label="modal"
+        class="euiModal euiModal--maxWidth-default delete-workspace-modal"
+        tabindex="0"
+      >
+        <button
+          aria-label="Closes this modal window"
+          class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="cross"
+          />
+        </button>
+        <div
+          class="euiModal__flex"
+        >
+          <div
+            class="euiModalHeader"
+            data-test-subj="delete-workspace-modal-header"
+          >
+            <div
+              class="euiModalHeader__title"
+            >
+              Delete workspace
+            </div>
+          </div>
+          <div
+            class="euiModalBody"
+            data-test-subj="delete-workspace-modal-body"
+          >
+            <div
+              class="euiModalBody__overflow"
+            />
+          </div>
+          <div
+            class="euiModalFooter"
+          >
+            <button
+              class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small"
+              data-test-subj="delete-workspace-modal-cancel-button"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  class="euiButtonEmpty__text"
+                >
+                  Cancel
+                </span>
+              </span>
+            </button>
+            <button
+              class="euiButton euiButton--danger euiButton--small euiButton--fill euiButton-isDisabled"
+              data-test-subj="delete-workspace-modal-confirm"
+              disabled=""
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text"
+                >
+                  Delete
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+`;

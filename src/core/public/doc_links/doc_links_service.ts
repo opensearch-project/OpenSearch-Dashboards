@@ -419,10 +419,16 @@ export class DocLinksService {
           dataSource: {
             // https://opensearch.org/docs/latest/dashboards/discover/multi-data-sources/
             guide: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}discover/multi-data-sources/`,
+            // https://opensearch.org/docs/latest/dashboards/management/S3-data-source/
+            s3DataSource: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}management/S3-data-source/`,
           },
           visualize: {
             // https://opensearch.org/docs/latest/dashboards/visualize/viz-index/
             guide: `${OPENSEARCH_WEBSITE_DOCS}visualize/viz-index/`,
+          },
+          management: {
+            // https://opensearch.org/docs/latest/dashboards/management/advanced-settings/
+            advancedSettings: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}management/advanced-settings/`,
           },
         },
         noDocumentation: {
@@ -817,8 +823,10 @@ export interface DocLinksStart {
       readonly browser: string;
       readonly dataSource: {
         readonly guide: string;
+        readonly s3DataSource: string;
       };
       readonly visualize: Record<string, string>;
+      readonly management: Record<string, string>;
     };
     readonly noDocumentation: {
       readonly auditbeat: string;

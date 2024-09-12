@@ -129,19 +129,7 @@ export const configSchema = schema.object({
   ),
   apiVersion: schema.string({ defaultValue: DEFAULT_API_VERSION }),
   healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
-  ignoreVersionMismatch: schema.conditional(
-    schema.contextRef('dev'),
-    false,
-    schema.boolean({
-      validate: (rawValue) => {
-        if (rawValue === true) {
-          return '"ignoreVersionMismatch" can only be set to true in development mode';
-        }
-      },
-      defaultValue: false,
-    }),
-    schema.boolean({ defaultValue: false })
-  ),
+  ignoreVersionMismatch: schema.boolean({ defaultValue: false }),
   disablePrototypePoisoningProtection: schema.maybe(schema.boolean({ defaultValue: false })),
 });
 
@@ -216,7 +204,7 @@ export class OpenSearchConfig {
   public readonly healthCheckDelay: Duration;
 
   /**
-   * Whether to allow opensearch-dashboards to connect to a non-compatible opensearch node.
+   * Whether to allow opensearch-dashboards to connect to an opensearch node of a different version.
    */
   public readonly ignoreVersionMismatch: boolean;
 

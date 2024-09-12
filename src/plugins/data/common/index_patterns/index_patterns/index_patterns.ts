@@ -55,7 +55,7 @@ import { UI_SETTINGS, SavedObject } from '../../../common';
 import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
 import { findByTitle, getIndexPatternTitle } from '../utils';
-import { DuplicateIndexPatternError } from '../errors';
+import { DuplicateIndexPatternError, MissingIndexPatternError } from '../errors';
 
 const indexPatternCache = createIndexPatternCache();
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
@@ -122,6 +122,7 @@ export class IndexPatternsService {
 
     this.savedObjectsCache = await Promise.all(
       this.savedObjectsCache.map(async (obj) => {
+        // TODO: This behaviour will cause the index pattern title to be resolved differently depending on how its fetched since the get method in this service will not append the datasource title
         if (obj.type === 'index-pattern') {
           const result = { ...obj };
           result.attributes.title = await getIndexPatternTitle(
@@ -139,6 +140,25 @@ export class IndexPatternsService {
 
   getDataSource = async (id: string) => {
     return await this.savedObjectsClient.get<DataSourceAttributes>('data-source', id);
+  };
+
+  /**
+   * Finds a data source by its title.
+   *
+   * @param title - The title of the data source to find.
+   * @param size - The number of results to return. Defaults to 10.
+   * @returns The first matching data source or undefined if not found.
+   */
+  findDataSourceByTitle = async (title: string, size: number = 10) => {
+    const savedObjectsResponse = await this.savedObjectsClient.find<DataSourceAttributes>({
+      type: 'data-source',
+      fields: ['title'],
+      search: title,
+      searchFields: ['title'],
+      perPage: size,
+    });
+
+    return savedObjectsResponse[0] || undefined;
   };
 
   /**
@@ -192,8 +212,10 @@ export class IndexPatternsService {
    * Clear index pattern list cache
    * @param id optionally clear a single id
    */
-  clearCache = (id?: string) => {
-    this.savedObjectsCache = null;
+  clearCache = (id?: string, clearSavedObjectsCache: boolean = true) => {
+    if (clearSavedObjectsCache) {
+      this.savedObjectsCache = null;
+    }
     if (id) {
       indexPatternCache.clear(id);
     } else {
@@ -206,6 +228,10 @@ export class IndexPatternsService {
       await this.refreshSavedObjectsCache();
     }
     return this.savedObjectsCache;
+  };
+
+  saveToCache = (id: string, indexPattern: IndexPattern) => {
+    indexPatternCache.set(id, indexPattern);
   };
 
   /**
@@ -282,9 +308,13 @@ export class IndexPatternsService {
    * Refresh field list for a given index pattern
    * @param indexPattern
    */
-  refreshFields = async (indexPattern: IndexPattern) => {
+  refreshFields = async (indexPattern: IndexPattern, skipType = false) => {
     try {
-      const fields = await this.getFieldsForIndexPattern(indexPattern);
+      const indexPatternCopy = skipType
+        ? ({ ...indexPattern, type: undefined } as IndexPattern)
+        : indexPattern;
+
+      const fields = await this.getFieldsForIndexPattern(indexPatternCopy);
       const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
       indexPattern.fields.replaceAll([...fields, ...scripted]);
     } catch (err) {
@@ -404,11 +434,13 @@ export class IndexPatternsService {
   /**
    * Get an index pattern by id. Cache optimized
    * @param id
+   * @param onlyCheckCache - Only check cache for index pattern if it doesn't exist it will not error out
    */
 
-  get = async (id: string): Promise<IndexPattern> => {
+  get = async (id: string, onlyCheckCache: boolean = false): Promise<IndexPattern> => {
     const cache = indexPatternCache.get(id);
-    if (cache) {
+
+    if (cache || onlyCheckCache) {
       return cache;
     }
 
@@ -496,6 +528,19 @@ export class IndexPatternsService {
     }
 
     indexPattern.resetOriginalSavedObjectBody();
+    return indexPattern;
+  };
+
+  /**
+   * Get an index pattern by title if cached
+   * @param id
+   */
+
+  getByTitle = (title: string, ignoreErrors: boolean = false): IndexPattern => {
+    const indexPattern = indexPatternCache.getByTitle(title);
+    if (!indexPattern && !ignoreErrors) {
+      throw new MissingIndexPatternError(`Missing index pattern: ${title}`);
+    }
     return indexPattern;
   };
 

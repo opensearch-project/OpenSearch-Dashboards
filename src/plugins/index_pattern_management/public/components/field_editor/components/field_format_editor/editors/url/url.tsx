@@ -31,12 +31,12 @@
 import React, { Fragment } from 'react';
 
 import {
-  EuiFieldText,
-  EuiFormRow,
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
   EuiLink,
-  EuiSelect,
-  EuiSwitch,
-  EuiFieldNumber,
+  EuiCompressedSelect,
+  EuiCompressedSwitch,
+  EuiCompressedFieldNumber,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
@@ -154,32 +154,32 @@ export class UrlFormatEditor extends DefaultFormatEditor<
     const height = this.sanitizeNumericValue(this.props.formatParams.height);
     return (
       <Fragment>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage id="indexPatternManagement.url.widthLabel" defaultMessage="Width" />
           }
         >
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             data-test-subj="urlEditorWidth"
             value={width}
             onChange={(e) => {
               this.onChange({ width: e.target.value });
             }}
           />
-        </EuiFormRow>
-        <EuiFormRow
+        </EuiCompressedFormRow>
+        <EuiCompressedFormRow
           label={
             <FormattedMessage id="indexPatternManagement.url.heightLabel" defaultMessage="Height" />
           }
         >
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             data-test-subj="urlEditorHeight"
             value={height}
             onChange={(e) => {
               this.onChange({ height: e.target.value });
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </Fragment>
     );
   };
@@ -198,12 +198,12 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           isVisible={this.state.showUrlTemplateHelp}
           onClose={this.hideUrlTemplateHelp}
         />
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage id="indexPatternManagement.url.typeLabel" defaultMessage="Type" />
           }
         >
-          <EuiSelect
+          <EuiCompressedSelect
             data-test-subj="urlEditorType"
             value={formatParams.type}
             options={format.type.urlTypes.map((type: UrlType) => {
@@ -216,10 +216,10 @@ export class UrlFormatEditor extends DefaultFormatEditor<
               this.onTypeChange(e.target.value);
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         {formatParams.type === 'a' ? (
-          <EuiFormRow
+          <EuiCompressedFormRow
             label={
               <FormattedMessage
                 id="indexPatternManagement.url.openTabLabel"
@@ -227,7 +227,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
               />
             }
           >
-            <EuiSwitch
+            <EuiCompressedSwitch
               label={
                 formatParams.openLinkInCurrentTab ? (
                   <FormattedMessage id="indexPatternManagement.url.offLabel" defaultMessage="Off" />
@@ -240,10 +240,10 @@ export class UrlFormatEditor extends DefaultFormatEditor<
                 this.onChange({ openLinkInCurrentTab: !e.target.checked });
               }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         ) : null}
 
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="indexPatternManagement.url.urlTemplateLabel"
@@ -261,16 +261,16 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           isInvalid={!!error}
           error={error}
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             data-test-subj="urlEditorUrlTemplate"
             value={formatParams.urlTemplate || ''}
             onChange={(e) => {
               this.onChange({ urlTemplate: e.target.value });
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="indexPatternManagement.url.labelTemplateLabel"
@@ -288,14 +288,14 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           isInvalid={!!error}
           error={error}
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             data-test-subj="urlEditorLabelTemplate"
             value={formatParams.labelTemplate || ''}
             onChange={(e) => {
               this.onChange({ labelTemplate: e.target.value });
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         {formatParams.type === 'img' && this.renderWidthHeightParameters()}
 

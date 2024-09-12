@@ -63,6 +63,7 @@ export function DocViewTableRowBtnFilterAdd({ onClick, disabled = false }: Props
         onClick={onClick}
         iconType={'magnifyWithPlus'}
         iconSize={'s'}
+        size={'xs'}
       />
     </EuiToolTip>
   );

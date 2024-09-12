@@ -28,14 +28,18 @@ const formIdentifier = 'EditDataSourceForm';
 const notFoundIdentifier = '[data-test-subj="dataSourceNotFound"]';
 
 describe('Datasource Management: Edit Datasource Wizard', () => {
-  const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
-  mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(
+  const mockedContext = {
+    ...mockManagementPlugin.createDataSourceManagementContext(),
+    application: { capabilities: { dataSource: { canManage: true } } },
+  };
+  const uiSettings = mockedContext.uiSettings;
+  mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(
     noAuthCredentialAuthMethod
   );
-  mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(
+  mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(
     usernamePasswordAuthMethod
   );
-  mockedContext.authenticationMethodRegistery.registerAuthenticationMethod(sigV4AuthMethod);
+  mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(sigV4AuthMethod);
 
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
@@ -125,9 +129,25 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
       component.update();
       expect(utils.updateDataSourceById).toHaveBeenCalled();
     });
+    test('should set default data source', async () => {
+      spyOn(uiSettings, 'set').and.returnValue({});
+      await act(async () => {
+        // @ts-ignore
+        await component.find(formIdentifier).first().prop('onSetDefaultDataSource')(
+          mockDataSourceAttributesWithAuth
+        );
+      });
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
     test('should delete datasource successfully', async () => {
       spyOn(utils, 'deleteDataSourceById').and.returnValue({});
-
+      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
+      spyOn(uiSettings, 'get').and.callFake((key) => {
+        if (key === 'home:useNewHomePage') {
+          return false;
+        }
+        return 'test1';
+      });
       await act(async () => {
         // @ts-ignore
         await component.find(formIdentifier).first().prop('onDeleteDataSource')(
@@ -136,9 +156,12 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
       });
       expect(utils.deleteDataSourceById).toHaveBeenCalled();
       expect(history.push).toBeCalledWith('');
+      expect(utils.setFirstDataSourceAsDefault).toHaveBeenCalled();
     });
     test('should fail to delete datasource', async () => {
       spyOn(utils, 'deleteDataSourceById').and.throwError('error');
+      spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
+      spyOn(uiSettings, 'get').and.returnValue('test1');
       await act(async () => {
         // @ts-ignore
         await component.find(formIdentifier).first().prop('onDeleteDataSource')(
@@ -147,6 +170,7 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
       });
       component.update();
       expect(utils.deleteDataSourceById).toHaveBeenCalled();
+      expect(utils.setFirstDataSourceAsDefault).not.toHaveBeenCalled();
     });
     test('should test connection', () => {
       spyOn(utils, 'testConnection');

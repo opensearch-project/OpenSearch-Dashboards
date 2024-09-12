@@ -6,23 +6,26 @@
 import React from 'react';
 import {
   EuiBottomBar,
+  EuiSmallButton,
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldPassword,
-  EuiFieldText,
+  EuiCompressedFieldPassword,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPageContent,
-  EuiSuperSelect,
+  EuiCompressedSuperSelect,
   EuiSpacer,
   EuiText,
   EuiSuperSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { AuthenticationMethodRegistery } from '../../../../auth_registry';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+import { ApplicationStart } from 'opensearch-dashboards/public';
+import { AuthenticationMethodRegistry } from '../../../../auth_registry';
 import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import {
   AuthType,
@@ -46,6 +49,9 @@ import {
 } from '../../../utils';
 
 export interface CreateDataSourceProps {
+  useNewUX: boolean;
+  navigation: NavigationPublicPluginStart;
+  application: ApplicationStart;
   existingDatasourceNamesList: string[];
   handleSubmit: (formValues: DataSourceAttributes) => void;
   handleTestConnection: (formValues: DataSourceAttributes) => void;
@@ -77,17 +83,17 @@ export class CreateDataSourceForm extends React.Component<
 
   authOptions: Array<EuiSuperSelectOption<string>> = [];
   isNoAuthOptionEnabled: boolean;
-  authenticationMethodRegistery: AuthenticationMethodRegistery;
+  authenticationMethodRegistry: AuthenticationMethodRegistry;
 
   constructor(props: CreateDataSourceProps, context: DataSourceManagementContextValue) {
     super(props, context);
 
-    this.authenticationMethodRegistery = context.services.authenticationMethodRegistery;
-    const registeredAuthMethods = this.authenticationMethodRegistery.getAllAuthenticationMethods();
-    const initialSelectedAuthMethod = getDefaultAuthMethod(this.authenticationMethodRegistery);
+    this.authenticationMethodRegistry = context.services.authenticationMethodRegistry;
+    const registeredAuthMethods = this.authenticationMethodRegistry.getAllAuthenticationMethods();
+    const initialSelectedAuthMethod = getDefaultAuthMethod(this.authenticationMethodRegistry);
 
     this.isNoAuthOptionEnabled =
-      this.authenticationMethodRegistery.getAuthenticationMethod(AuthType.NoAuth) !== undefined;
+      this.authenticationMethodRegistry.getAuthenticationMethod(AuthType.NoAuth) !== undefined;
 
     this.authOptions = registeredAuthMethods.map((authMethod) => {
       return authMethod.credentialSourceOption;
@@ -114,7 +120,7 @@ export class CreateDataSourceForm extends React.Component<
       this.state,
       this.props.existingDatasourceNamesList,
       '',
-      this.authenticationMethodRegistery
+      this.authenticationMethodRegistry
     );
   };
 
@@ -158,7 +164,7 @@ export class CreateDataSourceForm extends React.Component<
     const registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
       (credentials ?? {}) as { [key: string]: string },
       authType,
-      this.authenticationMethodRegistery
+      this.authenticationMethodRegistry
     );
 
     this.setState({
@@ -337,7 +343,7 @@ export class CreateDataSourceForm extends React.Component<
       credentials = extractRegisteredAuthTypeCredentials(
         currentCredentials,
         authType,
-        this.authenticationMethodRegistery
+        this.authenticationMethodRegistry
       );
     }
 
@@ -354,7 +360,7 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   getCredentialFormFromRegistry = (authType: string) => {
-    const registeredAuthMethod = this.authenticationMethodRegistery.getAuthenticationMethod(
+    const registeredAuthMethod = this.authenticationMethodRegistry.getAuthenticationMethod(
       authType
     );
     const authCredentialForm = registeredAuthMethod?.credentialForm;
@@ -366,21 +372,41 @@ export class CreateDataSourceForm extends React.Component<
     return null;
   };
 
+  description = [
+    {
+      renderComponent: (
+        <EuiText size="s" color="subdued">
+          <FormattedMessage
+            id="dataSourcesManagement.createDataSource.description"
+            defaultMessage="Create a new data source connection to help you retrieve data from an external OpenSearch compatible source."
+          />
+        </EuiText>
+      ),
+    },
+  ];
+
   /* Render methods */
 
   /* Render header*/
   renderHeader = () => {
-    return <Header />;
+    return this.props.useNewUX ? (
+      <this.props.navigation.ui.HeaderControl
+        setMountPoint={this.props.application.setAppDescriptionControls}
+        controls={this.description}
+      />
+    ) : (
+      <Header />
+    );
   };
 
   /* Render Section header*/
   renderSectionHeader = (i18nId: string, defaultMessage: string) => {
     return (
       <>
-        <EuiText grow={false}>
-          <h4>
+        <EuiText grow={false} size="s">
+          <h2>
             <FormattedMessage id={i18nId} defaultMessage={defaultMessage} />
-          </h4>
+          </h2>
         </EuiText>
       </>
     );
@@ -411,14 +437,14 @@ export class CreateDataSourceForm extends React.Component<
       case AuthType.UsernamePasswordType:
         return (
           <>
-            <EuiFormRow
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.createDataSource.username', {
                 defaultMessage: 'Username',
               })}
               isInvalid={!!this.state.formErrorsByField.createCredential.username.length}
               error={this.state.formErrorsByField.createCredential.username}
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 placeholder={i18n.translate(
                   'dataSourcesManagement.createDataSource.usernamePlaceholder',
                   {
@@ -431,15 +457,15 @@ export class CreateDataSourceForm extends React.Component<
                 onBlur={this.validateUsername}
                 data-test-subj="createDataSourceFormUsernameField"
               />
-            </EuiFormRow>
-            <EuiFormRow
+            </EuiCompressedFormRow>
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.createDataSource.password', {
                 defaultMessage: 'Password',
               })}
               isInvalid={!!this.state.formErrorsByField.createCredential.password.length}
               error={this.state.formErrorsByField.createCredential.password}
             >
-              <EuiFieldPassword
+              <EuiCompressedFieldPassword
                 isInvalid={!!this.state.formErrorsByField.createCredential.password.length}
                 placeholder={i18n.translate(
                   'dataSourcesManagement.createDataSource.passwordPlaceholder',
@@ -454,20 +480,20 @@ export class CreateDataSourceForm extends React.Component<
                 spellCheck={false}
                 data-test-subj="createDataSourceFormPasswordField"
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </>
         );
       case AuthType.SigV4:
         return (
           <>
-            <EuiFormRow
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.createDataSource.region', {
                 defaultMessage: 'Region',
               })}
               isInvalid={!!this.state.formErrorsByField.awsCredential.region.length}
               error={this.state.formErrorsByField.awsCredential.region}
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 placeholder={i18n.translate(
                   'dataSourcesManagement.createDataSource.regionPlaceholder',
                   {
@@ -480,28 +506,28 @@ export class CreateDataSourceForm extends React.Component<
                 onBlur={this.validateRegion}
                 data-test-subj="createDataSourceFormRegionField"
               />
-            </EuiFormRow>
-            <EuiFormRow
+            </EuiCompressedFormRow>
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.createDataSource.serviceName', {
                 defaultMessage: 'Service Name',
               })}
             >
-              <EuiSuperSelect
+              <EuiCompressedSuperSelect
                 options={sigV4ServiceOptions}
                 valueOfSelected={this.state.auth.credentials.service}
                 onChange={(value) => this.onChangeSigV4ServiceName(value)}
                 name="ServiceName"
                 data-test-subj="createDataSourceFormSigV4ServiceTypeSelect"
               />
-            </EuiFormRow>
-            <EuiFormRow
+            </EuiCompressedFormRow>
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.createDataSource.accessKey', {
                 defaultMessage: 'Access Key',
               })}
               isInvalid={!!this.state.formErrorsByField.awsCredential.accessKey.length}
               error={this.state.formErrorsByField.awsCredential.accessKey}
             >
-              <EuiFieldPassword
+              <EuiCompressedFieldPassword
                 isInvalid={!!this.state.formErrorsByField.awsCredential.accessKey.length}
                 placeholder={i18n.translate(
                   'dataSourcesManagement.createDataSource.accessKeyPlaceholder',
@@ -516,15 +542,15 @@ export class CreateDataSourceForm extends React.Component<
                 spellCheck={false}
                 data-test-subj="createDataSourceFormAccessKeyField"
               />
-            </EuiFormRow>
-            <EuiFormRow
+            </EuiCompressedFormRow>
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.createDataSource.secretKey', {
                 defaultMessage: 'Secret Key',
               })}
               isInvalid={!!this.state.formErrorsByField.awsCredential.secretKey.length}
               error={this.state.formErrorsByField.awsCredential.secretKey}
             >
-              <EuiFieldPassword
+              <EuiCompressedFieldPassword
                 isInvalid={!!this.state.formErrorsByField.awsCredential.secretKey.length}
                 placeholder={i18n.translate(
                   'dataSourcesManagement.createDataSource.secretKeyPlaceholder',
@@ -539,7 +565,7 @@ export class CreateDataSourceForm extends React.Component<
                 spellCheck={false}
                 data-test-subj="createDataSourceFormSecretKeyField"
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </>
         );
 
@@ -553,7 +579,6 @@ export class CreateDataSourceForm extends React.Component<
       <>
         <EuiPageContent>
           {this.renderHeader()}
-          <EuiSpacer size="m" />
           <EuiForm data-test-subj="data-source-creation">
             {/* Endpoint section */}
             {this.renderSectionHeader(
@@ -563,14 +588,14 @@ export class CreateDataSourceForm extends React.Component<
             <EuiSpacer size="s" />
 
             {/* Title */}
-            <EuiFormRow
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.createDataSource.title', {
                 defaultMessage: 'Title',
               })}
               isInvalid={!!this.state.formErrorsByField.title.length}
               error={this.state.formErrorsByField.title}
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 name="dataSourceTitle"
                 value={this.state.title || ''}
                 placeholder={i18n.translate(
@@ -584,16 +609,16 @@ export class CreateDataSourceForm extends React.Component<
                 onBlur={this.validateTitle}
                 data-test-subj="createDataSourceFormTitleField"
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
 
             {/* Description */}
-            <EuiFormRow
+            <EuiCompressedFormRow
               label={this.renderFieldLabelAsOptional(
                 'dataSourceManagement.createDataSource.description',
                 'Description'
               )}
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 name="dataSourceDescription"
                 value={this.state.description || ''}
                 placeholder={i18n.translate(
@@ -605,17 +630,17 @@ export class CreateDataSourceForm extends React.Component<
                 onChange={this.onChangeDescription}
                 data-test-subj="createDataSourceFormDescriptionField"
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
 
             {/* Endpoint URL */}
-            <EuiFormRow
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.createDataSource.endpointURL', {
                 defaultMessage: 'Endpoint URL',
               })}
               isInvalid={!!this.state.formErrorsByField.endpoint.length}
               error={this.state.formErrorsByField.endpoint}
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 name="endpoint"
                 value={this.state.endpoint || ''}
                 placeholder={i18n.translate(
@@ -629,7 +654,7 @@ export class CreateDataSourceForm extends React.Component<
                 onBlur={this.validateEndpoint}
                 data-test-subj="createDataSourceFormEndpointField"
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
 
             {/* Authentication Section: */}
 
@@ -641,8 +666,8 @@ export class CreateDataSourceForm extends React.Component<
             )}
             <EuiSpacer size="m" />
 
-            <EuiFormRow>
-              <EuiText>
+            <EuiCompressedFormRow>
+              <EuiText size="s">
                 <FormattedMessage
                   id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
                   defaultMessage="Enter the authentication details to access the endpoint."
@@ -662,12 +687,12 @@ export class CreateDataSourceForm extends React.Component<
                   </b>
                 )}
               </EuiText>
-            </EuiFormRow>
+            </EuiCompressedFormRow>
 
             {/* Credential source */}
             <EuiSpacer size="l" />
-            <EuiFormRow>
-              <EuiSuperSelect
+            <EuiCompressedFormRow>
+              <EuiCompressedSuperSelect
                 options={this.authOptions}
                 valueOfSelected={this.state.auth.type}
                 onChange={(value) => this.onChangeAuthType(value)}
@@ -675,17 +700,17 @@ export class CreateDataSourceForm extends React.Component<
                 name="Credential"
                 data-test-subj="createDataSourceFormAuthTypeSelect"
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
 
             {/* Create New credentials */}
             {this.renderCreateNewCredentialsForm(this.state.auth.type)}
 
             <EuiSpacer size="xl" />
-            <EuiFormRow>
+            <EuiCompressedFormRow>
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   {/* Test Connection button*/}
-                  <EuiButton
+                  <EuiSmallButton
                     type="submit"
                     fill={false}
                     disabled={!this.isFormValid()}
@@ -696,10 +721,10 @@ export class CreateDataSourceForm extends React.Component<
                       id="dataSourcesManagement.createDataSource.testConnectionButton"
                       defaultMessage="Test connection"
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiForm>
         </EuiPageContent>
         <EuiSpacer size="xxl" />
@@ -748,7 +773,7 @@ export class CreateDataSourceForm extends React.Component<
             >
               <FormattedMessage
                 id="dataSourcesManagement.createDataSource.createButtonLabel"
-                defaultMessage="Create data source"
+                defaultMessage="Connect to OpenSearch Cluster"
               />
             </EuiButton>
           </EuiFlexItem>

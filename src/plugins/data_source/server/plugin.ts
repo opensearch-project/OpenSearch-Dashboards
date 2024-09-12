@@ -22,7 +22,7 @@ import { DataSourcePluginConfigType } from '../config';
 import { LoggingAuditor } from './audit/logging_auditor';
 import { CryptographyService, CryptographyServiceSetup } from './cryptography_service';
 import { DataSourceService, DataSourceServiceSetup } from './data_source_service';
-import { DataSourceSavedObjectsClientWrapper, dataSource } from './saved_objects';
+import { dataConnection, dataSource, DataSourceSavedObjectsClientWrapper } from './saved_objects';
 import { AuthenticationMethod, DataSourcePluginSetup, DataSourcePluginStart } from './types';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../common';
 
@@ -30,7 +30,8 @@ import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../common';
 import { ensureRawRequest } from '../../../../src/core/server/http/router';
 import { createDataSourceError } from './lib/error';
 import { registerTestConnectionRoute } from './routes/test_connection';
-import { AuthenticationMethodRegistery, IAuthenticationMethodRegistery } from './auth_registry';
+import { registerFetchDataSourceMetaDataRoute } from './routes/fetch_data_source_metadata';
+import { AuthenticationMethodRegistry, IAuthenticationMethodRegistry } from './auth_registry';
 import { CustomApiSchemaRegistry } from './schema_registry';
 
 export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourcePluginStart> {
@@ -39,7 +40,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   private readonly dataSourceService: DataSourceService;
   private readonly config$: Observable<DataSourcePluginConfigType>;
   private started = false;
-  private authMethodsRegistry = new AuthenticationMethodRegistery();
+  private authMethodsRegistry = new AuthenticationMethodRegistry();
   private customApiSchemaRegistry = new CustomApiSchemaRegistry();
 
   constructor(private initializerContext: PluginInitializerContext<DataSourcePluginConfigType>) {
@@ -54,6 +55,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
 
     // Register data source saved object type
     core.savedObjects.registerType(dataSource);
+    core.savedObjects.registerType(dataConnection);
 
     const config: DataSourcePluginConfigType = await this.config$.pipe(first()).toPromise();
 
@@ -63,7 +65,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
 
     const authRegistryPromise = core.getStartServices().then(([, , selfStart]) => {
       const dataSourcePluginStart = selfStart as DataSourcePluginStart;
-      return dataSourcePluginStart.getAuthenticationMethodRegistery();
+      return dataSourcePluginStart.getAuthenticationMethodRegistry();
     });
 
     const dataSourceSavedObjectsClientWrapper = new DataSourceSavedObjectsClientWrapper(
@@ -133,6 +135,13 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       authRegistryPromise,
       customApiSchemaRegistryPromise
     );
+    registerFetchDataSourceMetaDataRoute(
+      router,
+      dataSourceService,
+      cryptographyServiceSetup,
+      authRegistryPromise,
+      customApiSchemaRegistryPromise
+    );
 
     const registerCredentialProvider = (method: AuthenticationMethod) => {
       this.logger.debug(`Registered Credential Provider for authType = ${method.name}`);
@@ -154,7 +163,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     this.logger.debug('dataSource: Started');
     this.started = true;
     return {
-      getAuthenticationMethodRegistery: () => this.authMethodsRegistry,
+      getAuthenticationMethodRegistry: () => this.authMethodsRegistry,
       getCustomApiSchemaRegistry: () => this.customApiSchemaRegistry,
     };
   }
@@ -168,7 +177,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     cryptography: CryptographyServiceSetup,
     logger: Logger,
     auditTrailPromise: Promise<AuditorFactory>,
-    authRegistryPromise: Promise<IAuthenticationMethodRegistery>,
+    authRegistryPromise: Promise<IAuthenticationMethodRegistry>,
     customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>
   ): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'dataSource'> => {
     return async (context, req) => {

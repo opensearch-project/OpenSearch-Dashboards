@@ -43,7 +43,7 @@ import {
   getShardTimeout,
   shimAbortSignal,
 } from '..';
-import { decideClient } from './decide_client';
+import { decideClient } from '../../../../data_source/common/util/';
 
 export const opensearchSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -64,8 +64,12 @@ export const opensearchSearchStrategyProvider = (
         throw new Error(`Unsupported index pattern type ${request.indexType}`);
       }
 
-      // ignoreThrottled is not supported in OSS
-      const { ignoreThrottled, ...defaultParams } = await getDefaultSearchParams(uiSettingsClient);
+      // ignoreThrottled & dataFrameHydrationStrategy is not supported by default
+      const {
+        ignoreThrottled,
+        dataFrameHydrationStrategy,
+        ...defaultParams
+      } = await getDefaultSearchParams(uiSettingsClient);
 
       const params = toSnakeCase({
         ...defaultParams,

@@ -41,6 +41,7 @@ import { createBrushHandler } from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../../../../../plugins/vis_type_timeseries/common/extract_index_patterns';
 import { getSavedObjectsClient, getUISettings, getDataStart, getCoreStart } from '../../services';
+import { DATA_SOURCE_ID_KEY } from '../../../common/constants';
 
 import { CoreStartContextProvider } from '../contexts/query_input_bar_context';
 import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
@@ -113,9 +114,13 @@ export class VisEditor extends Component {
     }
 
     if (this.props.isEditorMode) {
+      const dataSourceId = nextModel[DATA_SOURCE_ID_KEY] || undefined;
       const extractedIndexPatterns = extractIndexPatterns(nextModel);
-      if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-        fetchFields(extractedIndexPatterns).then((visFields) =>
+      if (
+        !isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns) ||
+        !isEqual(this.state.model[DATA_SOURCE_ID_KEY], dataSourceId)
+      ) {
+        fetchFields(extractedIndexPatterns, dataSourceId).then((visFields) =>
           this.setState({
             visFields,
             extractedIndexPatterns,

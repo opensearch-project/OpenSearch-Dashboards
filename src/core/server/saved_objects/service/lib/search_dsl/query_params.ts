@@ -34,6 +34,8 @@ type KueryNode = any;
 
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
+import { SavedObjectsFindOptions } from '../../../types';
+import { ACL } from '../../../permission_control/acl';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -132,16 +134,6 @@ function getClauseForType(
  *  Gets the clause that will filter for the workspace.
  */
 function getClauseForWorkspace(workspace: string) {
-  if (workspace === '*') {
-    return {
-      bool: {
-        must: {
-          match_all: {},
-        },
-      },
-    };
-  }
-
   return {
     bool: {
       must: [{ term: { workspaces: workspace } }],
@@ -165,7 +157,9 @@ interface QueryParams {
   defaultSearchOperator?: string;
   hasReference?: HasReferenceQueryParams;
   kueryNode?: KueryNode;
-  workspaces?: string[];
+  workspaces?: SavedObjectsFindOptions['workspaces'];
+  workspacesSearchOperator?: 'AND' | 'OR';
+  ACLSearchParams?: SavedObjectsFindOptions['ACLSearchParams'];
 }
 
 export function getClauseForReference(reference: HasReferenceQueryParams) {
@@ -223,6 +217,8 @@ export function getQueryParams({
   hasReference,
   kueryNode,
   workspaces,
+  workspacesSearchOperator = 'AND',
+  ACLSearchParams,
 }: QueryParams) {
   const types = getTypes(
     registry,
@@ -247,17 +243,6 @@ export function getQueryParams({
     ],
   };
 
-  if (workspaces) {
-    bool.filter.push({
-      bool: {
-        should: workspaces.map((workspace) => {
-          return getClauseForWorkspace(workspace);
-        }),
-        minimum_should_match: 1,
-      },
-    });
-  }
-
   if (search) {
     const useMatchPhrasePrefix = shouldUseMatchPhrasePrefix(search);
     const simpleQueryStringClause = getSimpleQueryStringClause({
@@ -277,6 +262,48 @@ export function getQueryParams({
     } else {
       bool.must = [simpleQueryStringClause];
     }
+  }
+
+  const ACLSearchParamsShouldClause: any = [];
+
+  if (ACLSearchParams) {
+    if (ACLSearchParams.permissionModes?.length && ACLSearchParams.principals) {
+      const permissionDSL = ACL.generateGetPermittedSavedObjectsQueryDSL(
+        ACLSearchParams.permissionModes,
+        ACLSearchParams.principals
+      );
+      ACLSearchParamsShouldClause.push(permissionDSL.query);
+    }
+  }
+
+  if (workspaces) {
+    const conditions =
+      workspacesSearchOperator === 'OR' ? ACLSearchParamsShouldClause : bool.filter;
+
+    switch (workspaces.length) {
+      case 0:
+        conditions.push({
+          match_none: {},
+        });
+        break;
+      default:
+        conditions.push({
+          bool: {
+            should: workspaces.map((workspace) => {
+              return getClauseForWorkspace(workspace);
+            }),
+            minimum_should_match: 1,
+          },
+        });
+    }
+  }
+
+  if (ACLSearchParamsShouldClause.length) {
+    bool.filter.push({
+      bool: {
+        should: ACLSearchParamsShouldClause,
+      },
+    });
   }
 
   return { query: { bool } };

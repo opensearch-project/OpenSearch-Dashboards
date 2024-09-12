@@ -4,18 +4,24 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   DataSourceRegistrationError,
-  GenericDataSource,
   IDataSourceFilter,
   IDataSourceRegistrationResult,
+  DataSourceFetcher,
 } from './types';
+import { DataSource } from '../datasource/datasource';
 
 export class DataSourceService {
   private static dataSourceService: DataSourceService;
   // A record to store all registered data sources, using the data source name as the key.
-  private dataSources: Record<string, GenericDataSource> = {};
-  private dataSourcesSubject: BehaviorSubject<Record<string, GenericDataSource>>;
+  private dataSources: Record<string, DataSource> = {};
+  private dataSourcesSubject: BehaviorSubject<Record<string, DataSource>>;
+  // A record to store all data source fetchers, using the data source type as the key.
+  // Once application starts, all the different types of data source supported with have their fetchers registered here.
+  // And it becomes the single source of truth for reloading data sources.
+  private dataSourceFetchers: Record<string, DataSourceFetcher['registerDataSources']> = {};
 
   private constructor() {
     this.dataSourcesSubject = new BehaviorSubject(this.dataSources);
@@ -36,7 +42,7 @@ export class DataSourceService {
    * @returns An array of registration results, one for each data source.
    */
   async registerMultipleDataSources(
-    datasources: GenericDataSource[]
+    datasources: DataSource[]
   ): Promise<IDataSourceRegistrationResult[]> {
     return Promise.all(datasources.map((ds) => this.registerDataSource(ds)));
   }
@@ -50,21 +56,24 @@ export class DataSourceService {
    * @returns A registration result indicating success or failure.
    * @throws {DataSourceRegistrationError} Throws an error if a data source with the same name already exists.
    */
-  async registerDataSource(ds: GenericDataSource): Promise<IDataSourceRegistrationResult> {
-    const dsName = ds.getName();
-    if (dsName in this.dataSources) {
+  async registerDataSource(ds: DataSource): Promise<IDataSourceRegistrationResult> {
+    const dataSourceId = ds.getId();
+    if (dataSourceId in this.dataSources) {
       throw new DataSourceRegistrationError(
-        `Unable to register datasource ${dsName}, error: datasource name exists.`
+        `Unable to register data source ${ds.getName()}, error: data source exists.`
       );
     } else {
-      this.dataSources[dsName] = ds;
+      this.dataSources[dataSourceId] = ds;
       this.dataSourcesSubject.next(this.dataSources);
       return { success: true, info: '' } as IDataSourceRegistrationResult;
     }
   }
 
-  public get dataSources$() {
-    return this.dataSourcesSubject.asObservable();
+  private isFilterEmpty(filter: IDataSourceFilter): boolean {
+    // Check if all filter properties are either undefined or empty arrays
+    return Object.values(filter).every(
+      (value) => !value || (Array.isArray(value) && value.length === 0)
+    );
   }
 
   /**
@@ -74,15 +83,71 @@ export class DataSourceService {
    * @param filter - An optional object with filter criteria (e.g., names of data sources).
    * @returns A record of filtered data sources.
    */
-  getDataSources(filter?: IDataSourceFilter): Record<string, GenericDataSource> {
-    if (!filter || !Array.isArray(filter.names) || filter.names.length === 0)
-      return this.dataSources;
+  public getDataSources$(filter?: IDataSourceFilter) {
+    return this.dataSourcesSubject.asObservable().pipe(
+      map((dataSources) => {
+        // Check if the filter is provided and valid
+        if (!filter || this.isFilterEmpty(filter)) {
+          return dataSources;
+        }
 
-    return filter.names.reduce<Record<string, GenericDataSource>>((filteredDataSources, dsName) => {
-      if (dsName in this.dataSources) {
-        filteredDataSources[dsName] = this.dataSources[dsName];
+        // Apply filter
+        return Object.entries(dataSources).reduce((acc, [id, dataSource]) => {
+          const matchesId = !filter.ids || filter.ids.includes(id);
+          const matchesName = !filter.names || filter.names.includes(dataSource.getName());
+          const matchesType = !filter.types || filter.types.includes(dataSource.getType());
+
+          if (matchesId && matchesName && matchesType) {
+            acc[id] = dataSource;
+          }
+
+          return acc;
+        }, {} as Record<string, DataSource>);
+      })
+    );
+  }
+
+  /**
+   * Registers functions responsible for fetching data for each data source type.
+   *
+   * @param fetchers - An array of fetcher configurations, each specifying how to fetch data for a specific data source type.
+   */
+  registerDataSourceFetchers(fetchers: DataSourceFetcher[]) {
+    return fetchers.forEach((fetcher) => {
+      if (!this.dataSourceFetchers[fetcher.type])
+        this.dataSourceFetchers[fetcher.type] = fetcher.registerDataSources;
+    });
+  }
+
+  /**
+   * Calls all registered data fetching functions to update data sources.
+   * Typically used to initialize or refresh the data source configurations.
+   */
+  load() {
+    this.reset();
+    Object.values(this.dataSourceFetchers).forEach((fetch) => {
+      try {
+        fetch(); // Directly call the synchronous fetch function
+      } catch (error) {
+        // Handle fetch errors or take corrective actions here
+        // TO-DO: Add error handling, maybe collect errors and show them in UI
       }
-      return filteredDataSources;
-    }, {} as Record<string, GenericDataSource>);
+    });
+  }
+
+  /**
+   * Reloads all data source configurations by re-invoking the load method.
+   * Used for refreshing the system to reflect changes such as new data source registrations.
+   */
+  reload() {
+    this.load();
+  }
+
+  /**
+   * Resets all registered data sources.
+   */
+  reset() {
+    this.dataSources = {};
+    this.dataSourcesSubject.next(this.dataSources);
   }
 }

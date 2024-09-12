@@ -10,22 +10,28 @@
     - [Client_management_design](multi-datasource/client_management_design.md)
     - [High_level_design](multi-datasource/high_level_design.md)
     - [User_stories](multi-datasource/user_stories.md)
+  - [Openapi](openapi/README.md)
   - Plugins
     - [Data_persistence](plugins/data_persistence.md)
   - Saved_objects
     - [Saved_object_repository_factory_design](saved_objects/saved_object_repository_factory_design.md)
+  - Telemetry
+    - [Telemetry](telemetry/telemetry.md)
   - src
     - [Core](../src/core/README.md)
     - dev
       - [Build](../src/dev/build/README.md)
       - [I18n](../src/dev/i18n/README.md)
     - plugins
+      - [Application_config](../src/plugins/application_config/README.md)
       - [Bfetch](../src/plugins/bfetch/README.md)
       - [Charts](../src/plugins/charts/README.md)
       - console
         - public
           - application
             - [Hooks](../src/plugins/console/public/application/hooks/README.md)
+      - [Content_management](../src/plugins/content_management/README.md)
+      - [Csp_handler](../src/plugins/csp_handler/README.md)
       - [Dashboard](../src/plugins/dashboard/README.md)
       - [Data](../src/plugins/data/README.md)
       - [Data_explorer](../src/plugins/data_explorer/README.md)
@@ -54,6 +60,7 @@
           - forms
             - [Form_wizard](../src/plugins/opensearch_ui_shared/public/forms/form_wizard/README.md)
             - [Multi_content](../src/plugins/opensearch_ui_shared/public/forms/multi_content/README.md)
+      - [Query_enhancements](../src/plugins/query_enhancements/README.md)
       - [Saved_objects](../src/plugins/saved_objects/README.md)
       - [Saved_objects_management](../src/plugins/saved_objects_management/README.md)
       - [Share](../src/plugins/share/README.md)
@@ -77,6 +84,7 @@
       - [Vis_type_xy](../src/plugins/vis_type_xy/README.md)
       - [Visualizations](../src/plugins/visualizations/README.md)
       - [Visualize](../src/plugins/visualize/README.md)
+      - [Workspace](../src/plugins/workspace/README.md)
   - examples
     - [Dashboard_embeddable_examples](../examples/dashboard_embeddable_examples/README.md)
     - [Developer_examples](../examples/developer_examples/README.md)
@@ -84,6 +92,7 @@
       - public
         - [Todo](../examples/embeddable_examples/public/todo/README.md)
     - [Expressions_example](../examples/expressions_example/README.md)
+    - [Multiple_data_source_examples](../examples/multiple_data_source_examples/README.md)
     - [Routing_example](../examples/routing_example/README.md)
     - [Search_examples](../examples/search_examples/README.md)
     - [Ui_action_examples](../examples/ui_action_examples/README.md)
@@ -136,6 +145,9 @@
     - [Opensearch dashboards.release notes 1.3.12](../release-notes/opensearch-dashboards.release-notes-1.3.12.md)
     - [Opensearch dashboards.release notes 1.3.13](../release-notes/opensearch-dashboards.release-notes-1.3.13.md)
     - [Opensearch dashboards.release notes 1.3.14](../release-notes/opensearch-dashboards.release-notes-1.3.14.md)
+    - [Opensearch dashboards.release notes 1.3.15](../release-notes/opensearch-dashboards.release-notes-1.3.15.md)
+    - [Opensearch dashboards.release notes 1.3.17](../release-notes/opensearch-dashboards.release-notes-1.3.17.md)
+    - [Opensearch dashboards.release notes 1.3.19](../release-notes/opensearch-dashboards.release-notes-1.3.19.md)
     - [Opensearch dashboards.release notes 1.3.2](../release-notes/opensearch-dashboards.release-notes-1.3.2.md)
     - [Opensearch dashboards.release notes 1.3.3](../release-notes/opensearch-dashboards.release-notes-1.3.3.md)
     - [Opensearch dashboards.release notes 1.3.5](../release-notes/opensearch-dashboards.release-notes-1.3.5.md)
@@ -151,6 +163,11 @@
     - [Opensearch dashboards.release notes 2.11.0](../release-notes/opensearch-dashboards.release-notes-2.11.0.md)
     - [Opensearch dashboards.release notes 2.11.1](../release-notes/opensearch-dashboards.release-notes-2.11.1.md)
     - [Opensearch dashboards.release notes 2.12.0](../release-notes/opensearch-dashboards.release-notes-2.12.0.md)
+    - [Opensearch dashboards.release notes 2.13.0](../release-notes/opensearch-dashboards.release-notes-2.13.0.md)
+    - [Opensearch dashboards.release notes 2.14.0](../release-notes/opensearch-dashboards.release-notes-2.14.0.md)
+    - [Opensearch dashboards.release notes 2.15.0](../release-notes/opensearch-dashboards.release-notes-2.15.0.md)
+    - [Opensearch dashboards.release notes 2.16.0](../release-notes/opensearch-dashboards.release-notes-2.16.0.md)
+    - [Opensearch dashboards.release notes 2.17.0](../release-notes/opensearch-dashboards.release-notes-2.17.0.md)
     - [Opensearch dashboards.release notes 2.2.0](../release-notes/opensearch-dashboards.release-notes-2.2.0.md)
     - [Opensearch dashboards.release notes 2.2.1](../release-notes/opensearch-dashboards.release-notes-2.2.1.md)
     - [Opensearch dashboards.release notes 2.3.0](../release-notes/opensearch-dashboards.release-notes-2.3.0.md)
@@ -164,6 +181,7 @@
   - scripts
     - [README](../scripts/README.md)
   - [DOCS_README](DOCS_README.md)
+  - [Theme](theme.md)
   - [CHANGELOG](../CHANGELOG.md)
   - [CODE_OF_CONDUCT](../CODE_OF_CONDUCT.md)
   - [COMMUNICATIONS](../COMMUNICATIONS.md)

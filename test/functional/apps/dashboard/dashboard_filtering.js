@@ -80,6 +80,7 @@ export default function ({ getService, getPageObjects }) {
     describe('adding a filter that excludes all data', () => {
       before(async () => {
         await PageObjects.common.navigateToApp('discover');
+        await PageObjects.timePicker.setDefaultDataRange();
         await PageObjects.discover.switchDiscoverTable('new');
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardLandingPage();

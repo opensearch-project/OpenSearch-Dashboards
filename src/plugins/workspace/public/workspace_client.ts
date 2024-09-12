@@ -10,7 +10,10 @@ import {
   HttpSetup,
   WorkspaceAttribute,
   WorkspacesSetup,
+  IWorkspaceClient,
 } from '../../../core/public';
+import { WorkspacePermissionMode } from '../common/constants';
+import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -37,6 +40,7 @@ interface WorkspaceFindOptions {
   searchFields?: string[];
   sortField?: string;
   sortOrder?: string;
+  permissionModes?: WorkspacePermissionMode[];
 }
 
 /**
@@ -45,7 +49,7 @@ interface WorkspaceFindOptions {
  *
  * @public
  */
-export class WorkspaceClient {
+export class WorkspaceClient implements IWorkspaceClient {
   private http: HttpSetup;
   private workspaces: WorkspacesSetup;
 
@@ -117,7 +121,20 @@ export class WorkspaceClient {
     });
 
     if (result?.success) {
-      this.workspaces.workspaceList$.next(result.result.workspaces);
+      const resultWithWritePermission = await this.list({
+        perPage: 999,
+        permissionModes: [WorkspacePermissionMode.LibraryWrite],
+      });
+      if (resultWithWritePermission?.success) {
+        const workspaceIdsWithWritePermission = resultWithWritePermission.result.workspaces.map(
+          (workspace: WorkspaceAttribute) => workspace.id
+        );
+        const workspaces = result.result.workspaces.map((workspace: WorkspaceAttribute) => ({
+          ...workspace,
+          readonly: !workspaceIdsWithWritePermission.includes(workspace.id),
+        }));
+        this.workspaces.workspaceList$.next(workspaces);
+      }
     } else {
       this.workspaces.workspaceList$.next([]);
     }
@@ -146,7 +163,7 @@ export class WorkspaceClient {
   /**
    * A bypass layer to get current workspace id
    */
-  public getCurrentWorkspaceId(): IResponse<WorkspaceAttribute['id']> {
+  public getCurrentWorkspaceId(): IResponse<WorkspaceAttributeWithPermission['id']> {
     const currentWorkspaceId = this.workspaces.currentWorkspaceId$.getValue();
     if (!currentWorkspaceId) {
       return {
@@ -166,7 +183,7 @@ export class WorkspaceClient {
   /**
    * Do a find in the latest workspace list with current workspace id
    */
-  public async getCurrentWorkspace(): Promise<IResponse<WorkspaceAttribute>> {
+  public async getCurrentWorkspace(): Promise<IResponse<WorkspaceAttributeWithPermission>> {
     const currentWorkspaceIdResp = this.getCurrentWorkspaceId();
     if (currentWorkspaceIdResp.success) {
       const currentWorkspaceResp = await this.get(currentWorkspaceIdResp.result);
@@ -183,14 +200,19 @@ export class WorkspaceClient {
    * @returns {Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>>} id of the new created workspace
    */
   public async create(
-    attributes: Omit<WorkspaceAttribute, 'id'>
-  ): Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>> {
+    attributes: Omit<WorkspaceAttribute, 'id'>,
+    settings: {
+      dataSources?: string[];
+      permissions?: SavedObjectPermissions;
+    }
+  ): Promise<IResponse<Pick<WorkspaceAttributeWithPermission, 'id'>>> {
     const path = this.getPath();
 
-    const result = await this.safeFetch<WorkspaceAttribute>(path, {
+    const result = await this.safeFetch<WorkspaceAttributeWithPermission>(path, {
       method: 'POST',
       body: JSON.stringify({
         attributes,
+        settings,
       }),
     });
 
@@ -211,6 +233,9 @@ export class WorkspaceClient {
     const result = await this.safeFetch<null>(this.getPath(id), { method: 'DELETE' });
 
     if (result.success) {
+      // After deleting workspace, need to reset current workspace ID.
+      this.workspaces.currentWorkspaceId$.next('');
+
       await this.updateWorkspaceList();
     }
 
@@ -227,13 +252,14 @@ export class WorkspaceClient {
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
    * @property {array} options.fields
+   * @property {string array} permissionModes
    * @returns A find result with workspaces matching the specified search.
    */
   public list(
     options?: WorkspaceFindOptions
   ): Promise<
     IResponse<{
-      workspaces: WorkspaceAttribute[];
+      workspaces: WorkspaceAttributeWithPermission[];
       total: number;
       per_page: number;
       page: number;
@@ -250,9 +276,9 @@ export class WorkspaceClient {
    * Fetches a single workspace by a workspace id
    *
    * @param {string} id
-   * @returns {Promise<IResponse<WorkspaceAttribute>>} The metadata of the workspace for the given id.
+   * @returns {Promise<IResponse<WorkspaceAttributeWithPermission>>} The metadata of the workspace for the given id.
    */
-  public get(id: string): Promise<IResponse<WorkspaceAttribute>> {
+  public get(id: string): Promise<IResponse<WorkspaceAttributeWithPermission>> {
     const path = this.getPath(id);
     return this.safeFetch(path, {
       method: 'GET',
@@ -268,11 +294,16 @@ export class WorkspaceClient {
    */
   public async update(
     id: string,
-    attributes: Partial<WorkspaceAttribute>
+    attributes: Partial<WorkspaceAttribute>,
+    settings: {
+      dataSources?: string[];
+      permissions?: SavedObjectPermissions;
+    }
   ): Promise<IResponse<boolean>> {
     const path = this.getPath(id);
     const body = {
       attributes,
+      settings,
     };
 
     const result = await this.safeFetch(path, {
@@ -283,6 +314,34 @@ export class WorkspaceClient {
     if (result.success) {
       await this.updateWorkspaceList();
     }
+
+    return result;
+  }
+
+  /**
+   * copy saved objects to target workspace
+   *
+   * @param {Array<{ id: string; type: string }>} objects
+   * @param {string} targetWorkspace
+   * @param {boolean} includeReferencesDeep
+   * @returns {Promise<IResponse<any>>} result for this operation
+   */
+  public async copy(
+    objects: Array<{ id: string; type: string }>,
+    targetWorkspace: string,
+    includeReferencesDeep: boolean = true
+  ): Promise<IResponse<any>> {
+    const path = this.getPath('_duplicate_saved_objects');
+    const body = {
+      objects,
+      targetWorkspace,
+      includeReferencesDeep,
+    };
+
+    const result = await this.safeFetch(path, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
 
     return result;
   }
