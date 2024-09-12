@@ -30,6 +30,7 @@
 
 import { IConfigService, Env } from './config';
 import { LoggerFactory } from './logging';
+import { IDynamicConfigService } from './config/dynamic_config_service';
 
 /** @internal */
 export type CoreId = symbol;
@@ -44,4 +45,5 @@ export interface CoreContext {
   env: Env;
   configService: IConfigService;
   logger: LoggerFactory;
+  dynamicConfigService: IDynamicConfigService;
 }

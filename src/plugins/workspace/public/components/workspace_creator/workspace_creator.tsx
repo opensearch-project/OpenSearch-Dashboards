@@ -3,42 +3,83 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
-import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent, EuiSpacer } from '@elastic/eui';
+import React, { useCallback, useState } from 'react';
+import { EuiPage, EuiPageBody, EuiPageContent, euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { useObservable } from 'react-use';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
-import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
-import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
+import { WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
+import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
+import { getUseCaseFeatureConfig } from '../../../common/utils';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { convertPermissionSettingsToPermissions } from '../workspace_form';
-import { DataSource } from '../../../common/types';
+import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
+import { WorkspaceUseCase } from '../../types';
+import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
+import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
+import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
+import { DataSourceConnectionType } from '../../../common/types';
+import { WorkspaceCreatorForm } from './workspace_creator_form';
 
 export interface WorkspaceCreatorProps {
-  workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
+  registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
 }
 
 export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
+  const { registeredUseCases$ } = props;
   const {
-    services: { application, notifications, http, workspaceClient, savedObjects },
-  } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
-  const workspaceConfigurableApps = useObservable(
-    props.workspaceConfigurableApps$ ?? of(undefined)
-  );
+    services: {
+      application,
+      notifications,
+      http,
+      workspaceClient,
+      savedObjects,
+      dataSourceManagement,
+      navigationUI: { HeaderControl },
+    },
+  } = useOpenSearchDashboards<{
+    workspaceClient: WorkspaceClient;
+    dataSourceManagement?: DataSourceManagementPluginSetup;
+    navigationUI: NavigationPublicPluginStart['ui'];
+  }>();
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
+
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
+  const { isOnlyAllowEssential, availableUseCases } = useFormAvailableUseCases({
+    savedObjects,
+    registeredUseCases$,
+    onlyAllowEssentialEnabled: true,
+  });
+
+  const defaultSelectedUseCase = availableUseCases?.[0];
+  const defaultWorkspaceFormValues: Partial<WorkspaceFormSubmitData> = {
+    color: euiPaletteColorBlind()[0],
+    ...(defaultSelectedUseCase
+      ? {
+          name: defaultSelectedUseCase.title,
+          features: [getUseCaseFeatureConfig(defaultSelectedUseCase.id)],
+        }
+      : {}),
+  };
 
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
       let result;
+      if (isFormSubmitting) {
+        return;
+      }
+      setIsFormSubmitting(true);
       try {
-        const { permissionSettings, selectedDataSources, ...attributes } = data;
-        const selectedDataSourceIds = (selectedDataSources ?? []).map((ds: DataSource) => {
-          return ds.id;
-        });
+        const { permissionSettings, selectedDataSourceConnections, ...attributes } = data;
+        const selectedDataSourceIds = (selectedDataSourceConnections ?? [])
+          .filter(
+            ({ connectionType }) => connectionType === DataSourceConnectionType.OpenSearchConnection
+          )
+          .map(({ id }) => {
+            return id;
+          });
         result = await workspaceClient.create(attributes, {
           dataSources: selectedDataSourceIds,
           permissions: convertPermissionSettingsToPermissions(permissionSettings),
@@ -51,10 +92,13 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           });
           if (application && http) {
             const newWorkspaceId = result.result.id;
+            const useCaseId = getFirstUseCaseOfFeatureConfigs(attributes.features);
+            const useCaseLandingAppId = availableUseCases?.find(({ id }) => useCaseId === id)
+              ?.features[0].id;
             // Redirect page after one second, leave one second time to show create successful toast.
             window.setTimeout(() => {
               window.location.href = formatUrlWithWorkspaceId(
-                application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+                application.getUrlForApp(useCaseLandingAppId || WORKSPACE_DETAIL_APP_ID, {
                   absolute: true,
                 }),
                 newWorkspaceId,
@@ -74,37 +118,50 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           text: error instanceof Error ? error.message : JSON.stringify(error),
         });
         return;
+      } finally {
+        setIsFormSubmitting(false);
       }
     },
-    [notifications?.toasts, http, application, workspaceClient]
+    [notifications?.toasts, http, application, workspaceClient, isFormSubmitting, availableUseCases]
   );
 
+  const isFormReadyToRender =
+    application &&
+    savedObjects &&
+    // Default values only worked for component mount, should wait for isOnlyAllowEssential and availableUseCases loaded
+    isOnlyAllowEssential !== undefined &&
+    availableUseCases !== undefined;
+
   return (
-    <EuiPage paddingSize="none">
+    <EuiPage>
+      <HeaderControl
+        controls={[
+          {
+            description: i18n.translate('workspace.creator.description', {
+              defaultMessage: 'Organize collaborative projects in use-case-specific workspaces.',
+            }),
+          },
+        ]}
+        setMountPoint={application?.setAppDescriptionControls}
+      />
       <EuiPageBody>
-        <EuiPageHeader restrictWidth pageTitle="Create a workspace" />
-        <EuiSpacer />
         <EuiPageContent
           verticalPosition="center"
-          horizontalPosition="center"
           paddingSize="none"
           color="subdued"
           hasShadow={false}
-          /**
-           * Since above EuiPageHeader has a maxWidth: 1000 style,
-           * add maxWidth: 1000 below to align with the above page header
-           **/
-          style={{ width: '100%', maxWidth: 1000 }}
         >
-          {application && savedObjects && (
-            <WorkspaceForm
+          {isFormReadyToRender && (
+            <WorkspaceCreatorForm
               application={application}
               savedObjects={savedObjects}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Create}
-              workspaceConfigurableApps={workspaceConfigurableApps}
               permissionEnabled={isPermissionEnabled}
-              permissionLastAdminItemDeletable
+              dataSourceManagement={dataSourceManagement}
+              availableUseCases={availableUseCases}
+              defaultValues={defaultWorkspaceFormValues}
+              isSubmitting={isFormSubmitting}
             />
           )}
         </EuiPageContent>

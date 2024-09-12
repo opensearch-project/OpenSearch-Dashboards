@@ -36,6 +36,7 @@ import { IUiSettingsClient } from './types';
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<IUiSettingsClient> = {
     getAll: jest.fn(),
+    getDefault: jest.fn(),
     get: jest.fn(),
     get$: jest.fn(),
     set: jest.fn(),
@@ -67,6 +68,8 @@ const createMock = () => {
   };
 
   mocked.setup.mockReturnValue(createSetupContractMock());
+  // UiSettings.start returns the client that is returned by setup
+  mocked.start.mockReturnValue(createSetupContractMock());
   return mocked;
 };
 

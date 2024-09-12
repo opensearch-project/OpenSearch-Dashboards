@@ -5,11 +5,12 @@
 
 import { AppCategory } from 'opensearch-dashboards/public';
 import { ChromeNavLink } from './nav_links';
-import { ChromeRegistrationNavLink } from './nav_group';
+import { ChromeRegistrationNavLink, NavGroupItemInMap } from './nav_group';
+import { NavGroupStatus } from '../../../core/types';
 
 type KeyOf<T> = keyof T;
 
-const sortBy = <T>(key: KeyOf<T>) => {
+export const sortBy = <T>(key: KeyOf<T>) => {
   return (a: T, b: T): number => (a[key] > b[key] ? 1 : b[key] > a[key] ? -1 : 0);
 };
 
@@ -73,21 +74,36 @@ export function fulfillRegistrationLinksToChromeNavLinks(
 export const getOrderedLinks = (navLinks: ChromeNavLink[]): ChromeNavLink[] =>
   navLinks.sort(sortBy('order'));
 
-export function flattenLinksOrCategories(linkItems: LinkItem[]): ChromeNavLink[] {
-  return linkItems.reduce((acc, item) => {
-    if (item.itemType === LinkItemType.LINK) {
-      acc.push(item.link);
-    } else if (item.itemType === LinkItemType.PARENT_LINK) {
-      if (item.link) {
-        acc.push(item.link);
-      }
-      acc.push(...flattenLinksOrCategories(item.links));
+function walkLinkItemsTree(
+  props: {
+    linkItems: LinkItem[];
+    parentItem?: LinkItem;
+  },
+  callback: (props: { currentItem: LinkItem; parentItem?: LinkItem }) => void
+) {
+  props.linkItems.forEach((item) => {
+    callback({
+      parentItem: props.parentItem,
+      currentItem: item,
+    });
+    if (item.itemType === LinkItemType.PARENT_LINK) {
+      walkLinkItemsTree(
+        {
+          linkItems: item.links,
+          parentItem: item,
+        },
+        callback
+      );
     } else if (item.itemType === LinkItemType.CATEGORY) {
-      acc.push(...flattenLinksOrCategories(item.links || []));
+      walkLinkItemsTree(
+        {
+          linkItems: item.links || [],
+          parentItem: item,
+        },
+        callback
+      );
     }
-
-    return acc;
-  }, [] as ChromeNavLink[]);
+  });
 }
 
 export const generateItemTypeByLink = (
@@ -173,3 +189,35 @@ export function getOrderedLinksOrCategories(
 
   return result.sort(sortBy('order'));
 }
+
+export const getSortedNavLinks = (
+  navLinks: ChromeNavLink[],
+  enricher?: (currentItem: LinkItem, parentItem?: LinkItem) => LinkItem
+) => {
+  const sortedNavLinksTree = getOrderedLinksOrCategories(navLinks);
+  const acc: ChromeNavLink[] = [];
+  walkLinkItemsTree(
+    {
+      linkItems: sortedNavLinksTree,
+    },
+    (props) => {
+      const { currentItem, parentItem } = props;
+      const enricheredResult = enricher ? enricher(currentItem, parentItem) : currentItem;
+      if (
+        enricheredResult.itemType === LinkItemType.LINK ||
+        enricheredResult.itemType === LinkItemType.PARENT_LINK
+      ) {
+        if (enricheredResult.link) {
+          acc.push(enricheredResult.link);
+        }
+      }
+    }
+  );
+  return acc;
+};
+
+export const getVisibleUseCases = (navGroupMap: Record<string, NavGroupItemInMap>) => {
+  return Object.values(navGroupMap).filter(
+    (navGroup) => navGroup.status !== NavGroupStatus.Hidden && navGroup.type === undefined
+  );
+};

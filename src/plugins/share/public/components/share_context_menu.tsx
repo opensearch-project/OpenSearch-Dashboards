@@ -62,6 +62,7 @@ export class ShareContextMenu extends Component<Props> {
           initialPanelId={initialPanelId}
           panels={panels}
           data-test-subj="shareContextMenu"
+          size="s"
         />
       </I18nProvider>
     );

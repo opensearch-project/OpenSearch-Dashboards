@@ -24,7 +24,10 @@ const tableColumnHeaderButtonIdentifier = 'EuiTableHeaderCell .euiTableHeaderBut
 const emptyStateIdentifier = '[data-test-subj="datasourceTableEmptyState"]';
 
 describe('DataSourceTable', () => {
-  const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+  const mockedContext = {
+    ...mockManagementPlugin.createDataSourceManagementContext(),
+    application: { capabilities: { dataSource: { canManage: true } } },
+  };
   const uiSettings = mockedContext.uiSettings;
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
@@ -59,7 +62,7 @@ describe('DataSourceTable', () => {
   describe('should get datasources successful', () => {
     beforeEach(async () => {
       spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
-      spyOn(uiSettings, 'get').and.returnValue('test');
+      spyOn(uiSettings, 'get').and.returnValue('test1');
       await act(async () => {
         component = await mount(
           wrapWithIntl(
@@ -85,27 +88,27 @@ describe('DataSourceTable', () => {
       expect(utils.getDataSources).toHaveBeenCalled();
     });
 
-    it('should sort datasources based on description', () => {
+    it('should sort datasources based on title', () => {
       expect(component.find(badgeIcon).exists()).toBe(true);
       expect(component.find(tableIdentifier).exists()).toBe(true);
       act(() => {
-        component.find(tableColumnHeaderButtonIdentifier).last().simulate('click');
+        component.find(tableColumnHeaderButtonIdentifier).first().simulate('click');
       });
       component.update();
       // @ts-ignore
-      expect(component.find(tableColumnHeaderIdentifier).last().props().isSorted).toBe(true);
+      expect(component.find(tableColumnHeaderIdentifier).first().props().isSorted).toBe(true);
       expect(uiSettings.get).toHaveBeenCalled();
     });
 
-    it('should enable delete button when select datasources', () => {
-      expect(component.find(deleteButtonIdentifier).first().props().disabled).toBe(true);
+    it('should show delete button when select datasources', () => {
+      expect(component.find(deleteButtonIdentifier).exists()).toBe(false);
 
       act(() => {
         // @ts-ignore
         component.find(tableIdentifier).props().selection.onSelectionChange(getMappedDataSources);
       });
       component.update();
-      expect(component.find(deleteButtonIdentifier).first().props().disabled).toBe(false);
+      expect(component.find(deleteButtonIdentifier).exists()).toBe(true);
     });
 
     it('should delete confirm modal pop up and cancel button work normally', () => {
@@ -167,6 +170,38 @@ describe('DataSourceTable', () => {
       expect(utils.setFirstDataSourceAsDefault).not.toHaveBeenCalled();
       // @ts-ignore
       expect(component.find(confirmModalIdentifier).exists()).toBe(false);
+    });
+  });
+
+  describe('should not manage datasources when canManageDataSource is false', () => {
+    const mockedContextWithFalseManage = {
+      ...mockManagementPlugin.createDataSourceManagementContext(),
+      application: { capabilities: { dataSource: { canManage: false } } },
+    };
+    beforeEach(async () => {
+      spyOn(utils, 'getDataSources').and.returnValue(Promise.reject());
+      await act(async () => {
+        component = await mount(
+          wrapWithIntl(
+            <DataSourceTable
+              history={history}
+              location={({} as unknown) as RouteComponentProps['location']}
+              match={({} as unknown) as RouteComponentProps['match']}
+            />
+          ),
+          {
+            wrappingComponent: OpenSearchDashboardsContextProvider,
+            wrappingComponentProps: {
+              services: mockedContextWithFalseManage,
+            },
+          }
+        );
+      });
+      component.update();
+    });
+    test('should render empty table', () => {
+      expect(component).toMatchSnapshot();
+      expect(component.find(emptyStateIdentifier).exists()).toBe(true);
     });
   });
 });

@@ -4,81 +4,97 @@
  */
 
 import { useCallback, useState, FormEventHandler, useRef, useMemo } from 'react';
-import {
-  htmlIdGenerator,
-  EuiFieldTextProps,
-  EuiColorPickerProps,
-  EuiTextAreaProps,
-} from '@elastic/eui';
+import { htmlIdGenerator, EuiColorPickerProps } from '@elastic/eui';
 
 import { useApplications } from '../../hooks';
+import { getFirstUseCaseOfFeatureConfigs, isUseCaseFeatureConfig } from '../../utils';
+import { DataSourceConnection } from '../../../common/types';
+import { getUseCaseFeatureConfig } from '../../../common/utils';
 import {
-  getUseCaseFeatureConfig,
-  getUseCaseFromFeatureConfig,
-  isUseCaseFeatureConfig,
-} from '../../utils';
-import { DataSource } from '../../../common/types';
-import { WorkspaceFormProps, WorkspaceFormErrors, WorkspacePermissionSetting } from './types';
-import { appendDefaultFeatureIds, getNumberOfErrors, validateWorkspaceForm } from './utils';
+  WorkspaceFormProps,
+  WorkspaceFormErrors,
+  WorkspacePermissionSetting,
+  WorkspaceFormDataState,
+} from './types';
+import {
+  generatePermissionSettingsState,
+  getNumberOfChanges,
+  getNumberOfErrors,
+  validateWorkspaceForm,
+} from './utils';
+import { WorkspacePermissionItemType } from './constants';
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
-const isNotNull = <T extends unknown>(value: T | null): value is T => !!value;
-
-export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: WorkspaceFormProps) => {
+export const useWorkspaceForm = ({
+  application,
+  defaultValues,
+  operationType,
+  onSubmit,
+  permissionEnabled,
+}: WorkspaceFormProps) => {
   const applications = useApplications(application);
-  const [name, setName] = useState(defaultValues?.name);
+  const [name, setName] = useState(defaultValues?.name ?? '');
   const [description, setDescription] = useState(defaultValues?.description);
   const [color, setColor] = useState(defaultValues?.color);
+  const defaultValuesRef = useRef(defaultValues);
+  const [isEditing, setIsEditing] = useState(false);
+  const initialPermissionSettingsRef = useRef(
+    generatePermissionSettingsState(operationType, defaultValues?.permissionSettings)
+  );
 
-  const [featureConfigs, setFeatureConfigs] = useState(
-    appendDefaultFeatureIds(defaultValues?.features ?? [])
-  );
-  const selectedUseCases = useMemo(
-    () => featureConfigs.map(getUseCaseFromFeatureConfig).filter(isNotNull),
-    [featureConfigs]
-  );
+  const [featureConfigs, setFeatureConfigs] = useState<string[]>(defaultValues?.features ?? []);
+  const selectedUseCase = useMemo(() => getFirstUseCaseOfFeatureConfigs(featureConfigs), [
+    featureConfigs,
+  ]);
   const [permissionSettings, setPermissionSettings] = useState<
-    Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
-  >(
-    defaultValues?.permissionSettings && defaultValues.permissionSettings.length > 0
-      ? defaultValues.permissionSettings
-      : []
-  );
+    WorkspaceFormDataState['permissionSettings']
+  >(initialPermissionSettingsRef.current);
 
-  const [selectedDataSources, setSelectedDataSources] = useState<DataSource[]>(
-    defaultValues?.selectedDataSources && defaultValues.selectedDataSources.length > 0
-      ? defaultValues.selectedDataSources
+  const [selectedDataSourceConnections, setSelectedDataSourceConnections] = useState<
+    DataSourceConnection[]
+  >(
+    defaultValues?.selectedDataSourceConnections &&
+      defaultValues.selectedDataSourceConnections.length > 0
+      ? defaultValues.selectedDataSourceConnections
       : []
   );
 
   const [formErrors, setFormErrors] = useState<WorkspaceFormErrors>({});
   const numberOfErrors = useMemo(() => getNumberOfErrors(formErrors), [formErrors]);
   const formIdRef = useRef<string>();
-  const getFormData = () => ({
+  const getFormData = (): WorkspaceFormDataState => ({
     name,
     description,
     features: featureConfigs,
-    useCases: selectedUseCases,
+    useCase: selectedUseCase,
     color,
     permissionSettings,
-    selectedDataSources,
+    selectedDataSourceConnections,
   });
   const getFormDataRef = useRef(getFormData);
   getFormDataRef.current = getFormData;
+  const formData = getFormData();
+  const numberOfChanges = defaultValuesRef.current
+    ? getNumberOfChanges(formData, {
+        ...defaultValuesRef.current,
+        // The user form will insert some empty permission rows, should ignore these rows not treated as user new added.
+        permissionSettings: initialPermissionSettingsRef.current,
+      })
+    : 0;
 
   if (!formIdRef.current) {
     formIdRef.current = workspaceHtmlIdGenerator();
   }
 
-  const handleUseCasesChange = useCallback(
-    (newUseCases: string[]) => {
+  const handleUseCaseChange = useCallback(
+    (newUseCase: string) => {
       setFeatureConfigs((previousFeatureConfigs) => {
         return [
           ...previousFeatureConfigs.filter(
             (featureConfig) => !isUseCaseFeatureConfig(featureConfig)
           ),
-          ...newUseCases.map((useCaseItem) => getUseCaseFeatureConfig(useCaseItem)),
+          getUseCaseFeatureConfig(newUseCase),
         ];
       });
     },
@@ -88,49 +104,64 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   const handleFormSubmit = useCallback<FormEventHandler>(
     (e) => {
       e.preventDefault();
-      const formData = getFormDataRef.current();
-      const currentFormErrors: WorkspaceFormErrors = validateWorkspaceForm(formData);
+      const currentFormData = getFormDataRef.current();
+      currentFormData.permissionSettings = currentFormData.permissionSettings.filter(
+        (item) =>
+          (item.type === WorkspacePermissionItemType.User && !!item.userId) ||
+          (item.type === WorkspacePermissionItemType.Group && !!item.group)
+      );
+      const currentFormErrors: WorkspaceFormErrors = validateWorkspaceForm(
+        currentFormData,
+        !!permissionEnabled
+      );
       setFormErrors(currentFormErrors);
       if (getNumberOfErrors(currentFormErrors) > 0) {
         return;
       }
 
       onSubmit?.({
-        name: formData.name!,
-        description: formData.description,
-        features: formData.features,
-        color: formData.color,
-        permissionSettings: formData.permissionSettings as WorkspacePermissionSetting[],
-        selectedDataSources: formData.selectedDataSources,
+        name: currentFormData.name!,
+        description: currentFormData.description,
+        color: currentFormData.color || '#FFFFFF',
+        features: currentFormData.features,
+        permissionSettings: currentFormData.permissionSettings as WorkspacePermissionSetting[],
+        selectedDataSourceConnections: currentFormData.selectedDataSourceConnections,
       });
     },
-    [onSubmit]
+    [onSubmit, permissionEnabled]
   );
-
-  const handleNameInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>((e) => {
-    setName(e.target.value);
-  }, []);
-
-  const handleDescriptionChange = useCallback<Required<EuiTextAreaProps>['onChange']>((e) => {
-    setDescription(e.target.value);
-  }, []);
 
   const handleColorChange = useCallback<Required<EuiColorPickerProps>['onChange']>((text) => {
     setColor(text);
   }, []);
 
+  const handleResetForm = useCallback(() => {
+    const resetValues = defaultValuesRef.current;
+    setName(resetValues?.name ?? '');
+    setDescription(resetValues?.description ?? '');
+    setColor(resetValues?.color);
+    setFeatureConfigs(resetValues?.features ?? []);
+    setPermissionSettings(initialPermissionSettingsRef.current);
+    setFormErrors({});
+    setIsEditing(false);
+  }, []);
+
   return {
     formId: formIdRef.current,
-    formData: getFormData(),
+    formData,
+    isEditing,
     formErrors,
+    setIsEditing,
     applications,
     numberOfErrors,
+    numberOfChanges,
+    handleResetForm,
+    setName,
+    setDescription,
     handleFormSubmit,
     handleColorChange,
-    handleUseCasesChange,
-    handleNameInputChange,
+    handleUseCaseChange,
     setPermissionSettings,
-    setSelectedDataSources,
-    handleDescriptionChange,
+    setSelectedDataSourceConnections,
   };
 };

@@ -30,10 +30,9 @@
 
 import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@osd/i18n';
-
 import classNames from 'classnames';
 import {
-  EuiTextArea,
+  EuiCompressedTextArea,
   EuiOutsideClickDetector,
   PopoverAnchorPosition,
   EuiFlexGroup,
@@ -48,7 +47,7 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
-import { IDataPluginServices, IIndexPattern, Query } from '../..';
+import { IDataPluginServices, IIndexPattern, IndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
 import {
@@ -185,13 +184,12 @@ export default class QueryStringInputUI extends Component<Props, State> {
       const suggestions =
         (await this.services.data.autocomplete.getQuerySuggestions({
           language,
-          indexPatterns,
+          indexPattern: indexPatterns[0] as IndexPattern,
           query: queryString,
           selectionStart,
           selectionEnd,
           signal: this.abortController.signal,
         })) || [];
-
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
       // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error
@@ -383,13 +381,13 @@ export default class QueryStringInputUI extends Component<Props, State> {
       'field' in suggestion &&
       suggestion.field.subType &&
       suggestion.field.subType.nested &&
-      !this.services.storage.get('opensearchDashboards.DQLNestedQuerySyntaxInfoOptOut')
+      !this.services.storage.get('DQLNestedQuerySyntaxInfoOptOut')
     ) {
       const { notifications, docLinks } = this.services;
 
       const onDQLNestedQuerySyntaxInfoOptOut = (toast: Toast) => {
         if (!this.services.storage) return;
-        this.services.storage.set('opensearchDashboards.DQLNestedQuerySyntaxInfoOptOut', true);
+        this.services.storage.set('DQLNestedQuerySyntaxInfoOptOut', true);
         notifications!.toasts.remove(toast);
       };
 
@@ -471,7 +469,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    this.services.storage.set('opensearchDashboards.userQueryLanguage', language);
+    this.services.storage.set('userQueryLanguage', language);
 
     const newQuery = { query: '', language };
     this.onChange(newQuery);
@@ -618,7 +616,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
     const className = classNames(
-      'euiFormControlLayout euiFormControlLayout--group osdQueryBar__wrap',
+      'euiFormControlLayout euiFormControlLayout--group euiFormControlLayout--compressed osdQueryBar__wrap',
       this.props.className
     );
 
@@ -642,7 +640,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
               className="euiFormControlLayout__childrenWrapper osdQueryBar__textareaWrap"
               ref={this.queryBarInputDivRefInstance}
             >
-              <EuiTextArea
+              <EuiCompressedTextArea
                 placeholder={
                   this.props.placeholder ||
                   i18n.translate('data.query.queryBar.searchInputPlaceholder', {
@@ -686,7 +684,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
                 isInvalid={this.props.isInvalid}
               >
                 {this.getQueryString()}
-              </EuiTextArea>
+              </EuiCompressedTextArea>
             </div>
             <EuiPortal>
               <SuggestionsComponent

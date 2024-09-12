@@ -32,7 +32,7 @@ import React from 'react';
 import { History } from 'history';
 import {
   EuiBetaBadge,
-  EuiButton,
+  EuiSmallButton,
   EuiEmptyPrompt,
   EuiIcon,
   EuiLink,
@@ -175,12 +175,14 @@ export const getNoItemsMessage = (createItem: () => void) => (
   <EuiEmptyPrompt
     iconType="visualizeApp"
     title={
-      <h1 id="visualizeListingHeading">
-        <FormattedMessage
-          id="visualize.listing.createNew.title"
-          defaultMessage="Create your first visualization"
-        />
-      </h1>
+      <EuiText size="s">
+        <h1 id="visualizeListingHeading">
+          <FormattedMessage
+            id="visualize.listing.createNew.title"
+            defaultMessage="Create your first visualization"
+          />
+        </h1>
+      </EuiText>
     }
     body={
       <EuiText size="s">
@@ -193,17 +195,17 @@ export const getNoItemsMessage = (createItem: () => void) => (
       </EuiText>
     }
     actions={
-      <EuiButton
+      <EuiSmallButton
         onClick={createItem}
         fill
-        iconType="plusInCircle"
+        iconType="plus"
         data-test-subj="createVisualizationPromptButton"
       >
         <FormattedMessage
           id="visualize.listing.createNew.createButtonLabel"
           defaultMessage="Create new visualization"
         />
-      </EuiButton>
+      </EuiSmallButton>
     }
   />
 );

@@ -34,13 +34,15 @@ exports[`QueryPermissionsConfiguration renders correctly 1`] = `
               <div
                 className="euiFlexItem"
               >
-                <EuiText>
+                <EuiText
+                  size="s"
+                >
                   <div
-                    className="euiText euiText--medium"
+                    className="euiText euiText--small"
                   >
-                    <h3>
+                    <h2>
                       Query permissions
-                    </h3>
+                    </h2>
                   </div>
                 </EuiText>
                 <EuiText
@@ -60,14 +62,14 @@ exports[`QueryPermissionsConfiguration renders correctly 1`] = `
               <div
                 className="euiFlexItem"
               >
-                <EuiRadioGroup
+                <EuiCompressedRadioGroup
                   idSelected="query-all"
                   legend={
                     Object {
                       "children": <span>
                         Query access level
                       </span>,
-                      "compressed": undefined,
+                      "compressed": true,
                     }
                   }
                   name="query-radio-group"
@@ -87,95 +89,128 @@ exports[`QueryPermissionsConfiguration renders correctly 1`] = `
                     ]
                   }
                 >
-                  <EuiFormFieldset
+                  <EuiRadioGroup
+                    compressed={true}
+                    idSelected="query-all"
                     legend={
                       Object {
                         "children": <span>
                           Query access level
                         </span>,
-                        "compressed": undefined,
+                        "compressed": true,
                       }
                     }
+                    name="query-radio-group"
+                    onChange={[Function]}
+                    options={
+                      Array [
+                        Object {
+                          "disabled": false,
+                          "id": "query-restricted",
+                          "label": "Restricted - accessible by users with specific OpenSearch roles",
+                        },
+                        Object {
+                          "disabled": false,
+                          "id": "query-all",
+                          "label": "Admin only - only accessible by the admin",
+                        },
+                      ]
+                    }
                   >
-                    <fieldset>
-                      <EuiFormLegend>
-                        <legend
-                          className="euiFormLegend"
-                        >
-                          <span>
+                    <EuiFormFieldset
+                      legend={
+                        Object {
+                          "children": <span>
                             Query access level
-                          </span>
-                        </legend>
-                      </EuiFormLegend>
-                      <EuiRadio
-                        checked={false}
-                        className="euiRadioGroup__item"
-                        disabled={false}
-                        id="query-restricted"
-                        key="0"
-                        label="Restricted - accessible by users with specific OpenSearch roles"
-                        name="query-radio-group"
-                        onChange={[Function]}
-                      >
-                        <div
-                          className="euiRadio euiRadioGroup__item"
+                          </span>,
+                          "compressed": true,
+                        }
+                      }
+                    >
+                      <fieldset>
+                        <EuiFormLegend
+                          compressed={true}
                         >
-                          <input
-                            checked={false}
-                            className="euiRadio__input"
-                            disabled={false}
-                            id="query-restricted"
-                            name="query-radio-group"
-                            onChange={[Function]}
-                            type="radio"
-                          />
-                          <div
-                            className="euiRadio__circle"
-                          />
-                          <label
-                            className="euiRadio__label"
-                            htmlFor="query-restricted"
+                          <legend
+                            className="euiFormLegend euiFormLegend--compressed"
                           >
-                            Restricted - accessible by users with specific OpenSearch roles
-                          </label>
-                        </div>
-                      </EuiRadio>
-                      <EuiRadio
-                        checked={true}
-                        className="euiRadioGroup__item"
-                        disabled={false}
-                        id="query-all"
-                        key="1"
-                        label="Admin only - only accessible by the admin"
-                        name="query-radio-group"
-                        onChange={[Function]}
-                      >
-                        <div
-                          className="euiRadio euiRadioGroup__item"
+                            <span>
+                              Query access level
+                            </span>
+                          </legend>
+                        </EuiFormLegend>
+                        <EuiRadio
+                          checked={false}
+                          className="euiRadioGroup__item"
+                          compressed={true}
+                          disabled={false}
+                          id="query-restricted"
+                          key="0"
+                          label="Restricted - accessible by users with specific OpenSearch roles"
+                          name="query-radio-group"
+                          onChange={[Function]}
                         >
-                          <input
-                            checked={true}
-                            className="euiRadio__input"
-                            disabled={false}
-                            id="query-all"
-                            name="query-radio-group"
-                            onChange={[Function]}
-                            type="radio"
-                          />
                           <div
-                            className="euiRadio__circle"
-                          />
-                          <label
-                            className="euiRadio__label"
-                            htmlFor="query-all"
+                            className="euiRadio euiRadio--compressed euiRadioGroup__item"
                           >
-                            Admin only - only accessible by the admin
-                          </label>
-                        </div>
-                      </EuiRadio>
-                    </fieldset>
-                  </EuiFormFieldset>
-                </EuiRadioGroup>
+                            <input
+                              checked={false}
+                              className="euiRadio__input"
+                              disabled={false}
+                              id="query-restricted"
+                              name="query-radio-group"
+                              onChange={[Function]}
+                              type="radio"
+                            />
+                            <div
+                              className="euiRadio__circle"
+                            />
+                            <label
+                              className="euiRadio__label"
+                              htmlFor="query-restricted"
+                            >
+                              Restricted - accessible by users with specific OpenSearch roles
+                            </label>
+                          </div>
+                        </EuiRadio>
+                        <EuiRadio
+                          checked={true}
+                          className="euiRadioGroup__item"
+                          compressed={true}
+                          disabled={false}
+                          id="query-all"
+                          key="1"
+                          label="Admin only - only accessible by the admin"
+                          name="query-radio-group"
+                          onChange={[Function]}
+                        >
+                          <div
+                            className="euiRadio euiRadio--compressed euiRadioGroup__item"
+                          >
+                            <input
+                              checked={true}
+                              className="euiRadio__input"
+                              disabled={false}
+                              id="query-all"
+                              name="query-radio-group"
+                              onChange={[Function]}
+                              type="radio"
+                            />
+                            <div
+                              className="euiRadio__circle"
+                            />
+                            <label
+                              className="euiRadio__label"
+                              htmlFor="query-all"
+                            >
+                              Admin only - only accessible by the admin
+                            </label>
+                          </div>
+                        </EuiRadio>
+                      </fieldset>
+                    </EuiFormFieldset>
+                  </EuiRadioGroup>
+                </EuiCompressedRadioGroup>
               </div>
             </EuiFlexItem>
           </div>

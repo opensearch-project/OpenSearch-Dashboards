@@ -3,32 +3,41 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 
-type DataSourceHeaderProps = RouteComponentProps;
+interface DataSourceHeaderProps extends RouteComponentProps {
+  featureFlagStatus: boolean;
+}
 
-export const DataSourceHeader: React.FC<DataSourceHeaderProps> = () => {
+export const DataSourceHeader: React.FC<DataSourceHeaderProps> = ({ featureFlagStatus }) => {
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiTitle>
-          <h2>
+        <EuiText size="s">
+          <h1>
             <FormattedMessage
               id="dataSourcesManagement.dataSourcesTable.title"
               defaultMessage="Data Sources"
             />
-          </h2>
-        </EuiTitle>
+          </h1>
+        </EuiText>
         <EuiSpacer size="s" />
-        <EuiText>
+        <EuiText size="s">
           <p>
-            <FormattedMessage
-              id="dataSourcesManagement.dataSourcesTable.description"
-              defaultMessage="Create and manage data source connections."
-            />
+            {featureFlagStatus ? (
+              <FormattedMessage
+                id="dataSourcesManagement.dataSourcesTable.mdsEnabled.description"
+                defaultMessage="Create and manage data source connections."
+              />
+            ) : (
+              <FormattedMessage
+                id="dataSourcesManagement.dataSourcesTable.mdsDisabled.description"
+                defaultMessage="Manage direct query data source connections."
+              />
+            )}
           </p>
         </EuiText>
       </EuiFlexItem>

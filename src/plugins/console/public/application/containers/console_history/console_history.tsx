@@ -39,8 +39,9 @@ import {
   EuiTitle,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiButtonEmpty,
-  EuiButton,
+  EuiSmallButtonEmpty,
+  EuiSmallButton,
+  EuiText,
 } from '@elastic/eui';
 
 import { useServicesContext } from '../../contexts';
@@ -192,7 +193,9 @@ export function ConsoleHistory({ close }: Props) {
                   })}
                   aria-selected={isSelected}
                 >
-                  {reqDescription}
+                  <EuiText size="s">
+                    {reqDescription}
+                  </EuiText>
                   <span className="conHistory__reqIcon">
                     <EuiIcon type="arrowRight" />
                   </span>
@@ -210,25 +213,25 @@ export function ConsoleHistory({ close }: Props) {
 
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="danger" onClick={() => clear()}>
+            <EuiSmallButtonEmpty color="danger" onClick={() => clear()}>
               {i18n.translate('console.historyPage.clearHistoryButtonLabel', {
                 defaultMessage: 'Clear',
               })}
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty color="primary" onClick={() => close()}>
+                <EuiSmallButtonEmpty color="primary" onClick={() => close()}>
                   {i18n.translate('console.historyPage.closehistoryButtonLabel', {
                     defaultMessage: 'Close',
                   })}
-                </EuiButtonEmpty>
+                </EuiSmallButtonEmpty>
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiButton
+                <EuiSmallButton
                   color="primary"
                   disabled={!selectedReq}
                   onClick={() => restoreRequestFromHistory(selectedReq.current)}
@@ -236,7 +239,7 @@ export function ConsoleHistory({ close }: Props) {
                   {i18n.translate('console.historyPage.applyHistoryButtonLabel', {
                     defaultMessage: 'Apply',
                   })}
-                </EuiButton>
+                </EuiSmallButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

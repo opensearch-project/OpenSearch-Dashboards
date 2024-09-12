@@ -1,3 +1,5 @@
+$osdDocTableCellPadding: calc($euiSizeM / 2); // corresponds to DataGrid medium cellPadding (6px)
+
 .osdDocTable__detailsParent {
   border-top: none !important;
 }
@@ -8,7 +10,7 @@
 }
 
 .osd-table td.osdDocTableCell__toggleDetails {
-  padding: 5px 0 0 4px;
+  padding: 4px 0 0 4px;
 }
 
 /**
@@ -27,7 +29,7 @@
 
     // Vertically align the button group with the first line of text
     // 8px is set by .table and 2em is the line-height
-    top: calc(2em / 2 + 8px);
+    top: calc(2em / 2 + $osdDocTableCellPadding);
     transform: translateY(-50%);
 
     // Stick it to the right but use the padding of the container to distance it from the edge (below)
@@ -45,7 +47,7 @@
       top: 0;
       height: 100%;
       width: 100%;
-      background-image: linear-gradient(to right, transparent 0, $ouiColorEmptyShade 16px);
+      background-image: linear-gradient(to right, transparent 0, $euiColorEmptyShade 16px);
       z-index: 1;
     }
 
@@ -83,6 +85,13 @@
   }
 }
 
+// nested for specificity
+.osd-table {
+  .osdDocTableCell {
+    padding: $osdDocTableCellPadding;
+  }
+}
+
 .osdDocTableCell__source {
   .truncate-by-height {
     margin-top: -1.5px;
@@ -94,4 +103,8 @@
   dt {
     font-size: inherit !important;
   }
+}
+
+.osdDocTableCell__dataField {
+  white-space: pre-wrap;
 }

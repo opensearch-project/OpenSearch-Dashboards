@@ -1,2 +1,0 @@
-fix:
-- [Discover] Check if the timestamp is already included to remove duplicate col ([#6983](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6983))

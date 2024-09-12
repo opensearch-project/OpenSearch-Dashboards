@@ -36,25 +36,25 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       lang="painless"
       onClose={[Function]}
     />
-    <eui-form-row
+    <eui-compressed-form-row
       error="Name is required"
       helpText={null}
       isInvalid={true}
       label="Name"
     >
-      <eui-field-text
+      <eui-compressed-field-text
         data-test-subj="editorFieldName"
         isInvalid={true}
         onChange={[Function]}
         placeholder="New scripted field"
         value=""
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       helpText={null}
       label="Language"
     >
-      <eui-select
+      <eui-compressed-select
         data-test-subj="editorFieldLang"
         onChange={[Function]}
         options={
@@ -71,11 +71,11 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
         }
         value="painless"
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       label="Type"
     >
-      <eui-select
+      <eui-compressed-select
         data-test-subj="editorFieldType"
         disabled={false}
         onChange={[Function]}
@@ -101,8 +101,8 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
         }
         value="number"
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       helpText={
         <FormattedMessage
           defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
@@ -118,7 +118,7 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
         />
       }
     >
-      <eui-select
+      <eui-compressed-select
         data-test-subj="editorSelectedFormatId"
         onChange={[Function]}
         options={
@@ -134,16 +134,16 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
           ]
         }
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       label="Popularity"
     >
-      <eui-field-number
+      <eui-compressed-field-number
         data-test-subj="editorFieldCount"
         onChange={[Function]}
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       error={
         <FormattedMessage
           defaultMessage="Script is required"
@@ -162,9 +162,11 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
         onChange={[Function]}
         width="100%"
       />
-    </eui-form-row>
-    <eui-form-row>
-      <eui-text>
+    </eui-compressed-form-row>
+    <eui-compressed-form-row>
+      <eui-text
+        size="s"
+      >
         <FormattedMessage
           defaultMessage="Access fields with {code}."
           id="indexPatternManagement.script.accessWithLabel"
@@ -178,23 +180,27 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
         />
       </eui-text>
       <br />
-      <eui-link
-        data-test-subj="scriptedFieldsHelpLink"
-        onClick={[Function]}
+      <eui-text
+        size="s"
       >
-        <FormattedMessage
-          defaultMessage="Get help with the syntax and preview the results of your script."
-          id="indexPatternManagement.script.getHelpLabel"
-          values={Object {}}
-        />
-      </eui-link>
-    </eui-form-row>
-    <eui-form-row>
+        <eui-link
+          data-test-subj="scriptedFieldsHelpLink"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Get help with the syntax and preview the results of your script."
+            id="indexPatternManagement.script.getHelpLabel"
+            values={Object {}}
+          />
+        </eui-link>
+      </eui-text>
+    </eui-compressed-form-row>
+    <eui-compressed-form-row>
       <eui-flex-group>
         <eui-flex-item
           grow={false}
         >
-          <eui-button
+          <eui-small-button
             data-test-subj="fieldSaveButton"
             fill={true}
             isDisabled={true}
@@ -206,12 +212,12 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
               id="indexPatternManagement.actions.createButton"
               values={Object {}}
             />
-          </eui-button>
+          </eui-small-button>
         </eui-flex-item>
         <eui-flex-item
           grow={false}
         >
-          <eui-button-empty
+          <eui-small-button-empty
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
@@ -220,10 +226,10 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
               id="indexPatternManagement.actions.cancelButton"
               values={Object {}}
             />
-          </eui-button-empty>
+          </eui-small-button-empty>
         </eui-flex-item>
       </eui-flex-group>
-    </eui-form-row>
+    </eui-compressed-form-row>
   </eui-form>
   <eui-spacer
     size="l"
@@ -273,11 +279,11 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       onClose={[Function]}
       script="doc.test.value"
     />
-    <eui-form-row
+    <eui-compressed-form-row
       helpText={null}
       label="Language"
     >
-      <eui-select
+      <eui-compressed-select
         data-test-subj="editorFieldLang"
         onChange={[Function]}
         options={
@@ -294,11 +300,11 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
         }
         value="painless"
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       label="Type"
     >
-      <eui-select
+      <eui-compressed-select
         data-test-subj="editorFieldType"
         disabled={false}
         onChange={[Function]}
@@ -324,8 +330,8 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
         }
         value="number"
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       helpText={
         <FormattedMessage
           defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
@@ -341,7 +347,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
         />
       }
     >
-      <eui-select
+      <eui-compressed-select
         data-test-subj="editorSelectedFormatId"
         onChange={[Function]}
         options={
@@ -357,16 +363,16 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
           ]
         }
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       label="Popularity"
     >
-      <eui-field-number
+      <eui-compressed-field-number
         data-test-subj="editorFieldCount"
         onChange={[Function]}
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       error={null}
       fullWidth={true}
       isInvalid={false}
@@ -380,9 +386,11 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
         value="doc.test.value"
         width="100%"
       />
-    </eui-form-row>
-    <eui-form-row>
-      <eui-text>
+    </eui-compressed-form-row>
+    <eui-compressed-form-row>
+      <eui-text
+        size="s"
+      >
         <FormattedMessage
           defaultMessage="Access fields with {code}."
           id="indexPatternManagement.script.accessWithLabel"
@@ -396,23 +404,27 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
         />
       </eui-text>
       <br />
-      <eui-link
-        data-test-subj="scriptedFieldsHelpLink"
-        onClick={[Function]}
+      <eui-text
+        size="s"
       >
-        <FormattedMessage
-          defaultMessage="Get help with the syntax and preview the results of your script."
-          id="indexPatternManagement.script.getHelpLabel"
-          values={Object {}}
-        />
-      </eui-link>
-    </eui-form-row>
-    <eui-form-row>
+        <eui-link
+          data-test-subj="scriptedFieldsHelpLink"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Get help with the syntax and preview the results of your script."
+            id="indexPatternManagement.script.getHelpLabel"
+            values={Object {}}
+          />
+        </eui-link>
+      </eui-text>
+    </eui-compressed-form-row>
+    <eui-compressed-form-row>
       <eui-flex-group>
         <eui-flex-item
           grow={false}
         >
-          <eui-button
+          <eui-small-button
             data-test-subj="fieldSaveButton"
             fill={true}
             isDisabled={false}
@@ -424,12 +436,12 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
               id="indexPatternManagement.actions.saveButton"
               values={Object {}}
             />
-          </eui-button>
+          </eui-small-button>
         </eui-flex-item>
         <eui-flex-item
           grow={false}
         >
-          <eui-button-empty
+          <eui-small-button-empty
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
@@ -438,7 +450,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
               id="indexPatternManagement.actions.cancelButton"
               values={Object {}}
             />
-          </eui-button-empty>
+          </eui-small-button-empty>
         </eui-flex-item>
         <eui-flex-item>
           <eui-flex-group
@@ -447,7 +459,7 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
             <eui-flex-item
               grow={false}
             >
-              <eui-button-empty
+              <eui-small-button-empty
                 color="danger"
                 onClick={[Function]}
               >
@@ -456,12 +468,12 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
                   id="indexPatternManagement.actions.deleteButton"
                   values={Object {}}
                 />
-              </eui-button-empty>
+              </eui-small-button-empty>
             </eui-flex-item>
           </eui-flex-group>
         </eui-flex-item>
       </eui-flex-group>
-    </eui-form-row>
+    </eui-compressed-form-row>
   </eui-form>
   <eui-spacer
     size="l"
@@ -506,7 +518,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       name="foobar"
       onClose={[Function]}
     />
-    <eui-form-row
+    <eui-compressed-form-row
       error={null}
       helpText={
         <span>
@@ -539,19 +551,19 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       isInvalid={false}
       label="Name"
     >
-      <eui-field-text
+      <eui-compressed-field-text
         data-test-subj="editorFieldName"
         isInvalid={false}
         onChange={[Function]}
         placeholder="New scripted field"
         value="foobar"
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       helpText={null}
       label="Language"
     >
-      <eui-select
+      <eui-compressed-select
         data-test-subj="editorFieldLang"
         onChange={[Function]}
         options={
@@ -568,11 +580,11 @@ exports[`FieldEditor should show conflict field warning 1`] = `
         }
         value="painless"
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       label="Type"
     >
-      <eui-select
+      <eui-compressed-select
         data-test-subj="editorFieldType"
         disabled={false}
         onChange={[Function]}
@@ -598,8 +610,8 @@ exports[`FieldEditor should show conflict field warning 1`] = `
         }
         value="number"
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       helpText={
         <FormattedMessage
           defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
@@ -615,7 +627,7 @@ exports[`FieldEditor should show conflict field warning 1`] = `
         />
       }
     >
-      <eui-select
+      <eui-compressed-select
         data-test-subj="editorSelectedFormatId"
         onChange={[Function]}
         options={
@@ -631,16 +643,16 @@ exports[`FieldEditor should show conflict field warning 1`] = `
           ]
         }
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       label="Popularity"
     >
-      <eui-field-number
+      <eui-compressed-field-number
         data-test-subj="editorFieldCount"
         onChange={[Function]}
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       error={
         <FormattedMessage
           defaultMessage="Script is required"
@@ -659,9 +671,11 @@ exports[`FieldEditor should show conflict field warning 1`] = `
         onChange={[Function]}
         width="100%"
       />
-    </eui-form-row>
-    <eui-form-row>
-      <eui-text>
+    </eui-compressed-form-row>
+    <eui-compressed-form-row>
+      <eui-text
+        size="s"
+      >
         <FormattedMessage
           defaultMessage="Access fields with {code}."
           id="indexPatternManagement.script.accessWithLabel"
@@ -675,23 +689,27 @@ exports[`FieldEditor should show conflict field warning 1`] = `
         />
       </eui-text>
       <br />
-      <eui-link
-        data-test-subj="scriptedFieldsHelpLink"
-        onClick={[Function]}
+      <eui-text
+        size="s"
       >
-        <FormattedMessage
-          defaultMessage="Get help with the syntax and preview the results of your script."
-          id="indexPatternManagement.script.getHelpLabel"
-          values={Object {}}
-        />
-      </eui-link>
-    </eui-form-row>
-    <eui-form-row>
+        <eui-link
+          data-test-subj="scriptedFieldsHelpLink"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Get help with the syntax and preview the results of your script."
+            id="indexPatternManagement.script.getHelpLabel"
+            values={Object {}}
+          />
+        </eui-link>
+      </eui-text>
+    </eui-compressed-form-row>
+    <eui-compressed-form-row>
       <eui-flex-group>
         <eui-flex-item
           grow={false}
         >
-          <eui-button
+          <eui-small-button
             data-test-subj="fieldSaveButton"
             fill={true}
             isDisabled={true}
@@ -703,12 +721,12 @@ exports[`FieldEditor should show conflict field warning 1`] = `
               id="indexPatternManagement.actions.createButton"
               values={Object {}}
             />
-          </eui-button>
+          </eui-small-button>
         </eui-flex-item>
         <eui-flex-item
           grow={false}
         >
-          <eui-button-empty
+          <eui-small-button-empty
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
@@ -717,10 +735,10 @@ exports[`FieldEditor should show conflict field warning 1`] = `
               id="indexPatternManagement.actions.cancelButton"
               values={Object {}}
             />
-          </eui-button-empty>
+          </eui-small-button-empty>
         </eui-flex-item>
       </eui-flex-group>
-    </eui-form-row>
+    </eui-compressed-form-row>
   </eui-form>
   <eui-spacer
     size="l"
@@ -770,7 +788,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       onClose={[Function]}
       script="doc.test.value"
     />
-    <eui-form-row
+    <eui-compressed-form-row
       helpText={
         <span>
           <eui-icon
@@ -811,7 +829,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       }
       label="Language"
     >
-      <eui-select
+      <eui-compressed-select
         data-test-subj="editorFieldLang"
         onChange={[Function]}
         options={
@@ -828,11 +846,11 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
         }
         value="testlang"
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       label="Type"
     >
-      <eui-select
+      <eui-compressed-select
         data-test-subj="editorFieldType"
         disabled={false}
         onChange={[Function]}
@@ -902,8 +920,8 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
         }
         value="number"
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       helpText={
         <FormattedMessage
           defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
@@ -919,7 +937,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
         />
       }
     >
-      <eui-select
+      <eui-compressed-select
         data-test-subj="editorSelectedFormatId"
         onChange={[Function]}
         options={
@@ -935,16 +953,16 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
           ]
         }
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       label="Popularity"
     >
-      <eui-field-number
+      <eui-compressed-field-number
         data-test-subj="editorFieldCount"
         onChange={[Function]}
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       error={null}
       fullWidth={true}
       isInvalid={false}
@@ -958,9 +976,11 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
         value="doc.test.value"
         width="100%"
       />
-    </eui-form-row>
-    <eui-form-row>
-      <eui-text>
+    </eui-compressed-form-row>
+    <eui-compressed-form-row>
+      <eui-text
+        size="s"
+      >
         <FormattedMessage
           defaultMessage="Access fields with {code}."
           id="indexPatternManagement.script.accessWithLabel"
@@ -974,23 +994,27 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
         />
       </eui-text>
       <br />
-      <eui-link
-        data-test-subj="scriptedFieldsHelpLink"
-        onClick={[Function]}
+      <eui-text
+        size="s"
       >
-        <FormattedMessage
-          defaultMessage="Get help with the syntax and preview the results of your script."
-          id="indexPatternManagement.script.getHelpLabel"
-          values={Object {}}
-        />
-      </eui-link>
-    </eui-form-row>
-    <eui-form-row>
+        <eui-link
+          data-test-subj="scriptedFieldsHelpLink"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Get help with the syntax and preview the results of your script."
+            id="indexPatternManagement.script.getHelpLabel"
+            values={Object {}}
+          />
+        </eui-link>
+      </eui-text>
+    </eui-compressed-form-row>
+    <eui-compressed-form-row>
       <eui-flex-group>
         <eui-flex-item
           grow={false}
         >
-          <eui-button
+          <eui-small-button
             data-test-subj="fieldSaveButton"
             fill={true}
             isDisabled={false}
@@ -1002,12 +1026,12 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               id="indexPatternManagement.actions.saveButton"
               values={Object {}}
             />
-          </eui-button>
+          </eui-small-button>
         </eui-flex-item>
         <eui-flex-item
           grow={false}
         >
-          <eui-button-empty
+          <eui-small-button-empty
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
@@ -1016,7 +1040,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
               id="indexPatternManagement.actions.cancelButton"
               values={Object {}}
             />
-          </eui-button-empty>
+          </eui-small-button-empty>
         </eui-flex-item>
         <eui-flex-item>
           <eui-flex-group
@@ -1025,7 +1049,7 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
             <eui-flex-item
               grow={false}
             >
-              <eui-button-empty
+              <eui-small-button-empty
                 color="danger"
                 onClick={[Function]}
               >
@@ -1034,12 +1058,12 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
                   id="indexPatternManagement.actions.deleteButton"
                   values={Object {}}
                 />
-              </eui-button-empty>
+              </eui-small-button-empty>
             </eui-flex-item>
           </eui-flex-group>
         </eui-flex-item>
       </eui-flex-group>
-    </eui-form-row>
+    </eui-compressed-form-row>
   </eui-form>
   <eui-spacer
     size="l"
@@ -1084,7 +1108,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       name="foobar"
       onClose={[Function]}
     />
-    <eui-form-row
+    <eui-compressed-form-row
       error={null}
       helpText={
         <span>
@@ -1117,19 +1141,19 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       isInvalid={false}
       label="Name"
     >
-      <eui-field-text
+      <eui-compressed-field-text
         data-test-subj="editorFieldName"
         isInvalid={false}
         onChange={[Function]}
         placeholder="New scripted field"
         value="foobar"
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       helpText={null}
       label="Language"
     >
-      <eui-select
+      <eui-compressed-select
         data-test-subj="editorFieldLang"
         onChange={[Function]}
         options={
@@ -1146,11 +1170,11 @@ exports[`FieldEditor should show multiple type field warning with a table contai
         }
         value="painless"
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       label="Type"
     >
-      <eui-select
+      <eui-compressed-select
         data-test-subj="editorFieldType"
         disabled={false}
         onChange={[Function]}
@@ -1176,7 +1200,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
         }
         value="number"
       />
-    </eui-form-row>
+    </eui-compressed-form-row>
     <div>
       <eui-spacer
         size="m"
@@ -1233,7 +1257,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
         size="m"
       />
     </div>
-    <eui-form-row
+    <eui-compressed-form-row
       helpText={
         <FormattedMessage
           defaultMessage="Formatting allows you to control the way that specific values are displayed. It can also cause values to be completely changed and prevent highlighting in Discover from working."
@@ -1249,7 +1273,7 @@ exports[`FieldEditor should show multiple type field warning with a table contai
         />
       }
     >
-      <eui-select
+      <eui-compressed-select
         data-test-subj="editorSelectedFormatId"
         onChange={[Function]}
         options={
@@ -1265,16 +1289,16 @@ exports[`FieldEditor should show multiple type field warning with a table contai
           ]
         }
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       label="Popularity"
     >
-      <eui-field-number
+      <eui-compressed-field-number
         data-test-subj="editorFieldCount"
         onChange={[Function]}
       />
-    </eui-form-row>
-    <eui-form-row
+    </eui-compressed-form-row>
+    <eui-compressed-form-row
       error={
         <FormattedMessage
           defaultMessage="Script is required"
@@ -1293,9 +1317,11 @@ exports[`FieldEditor should show multiple type field warning with a table contai
         onChange={[Function]}
         width="100%"
       />
-    </eui-form-row>
-    <eui-form-row>
-      <eui-text>
+    </eui-compressed-form-row>
+    <eui-compressed-form-row>
+      <eui-text
+        size="s"
+      >
         <FormattedMessage
           defaultMessage="Access fields with {code}."
           id="indexPatternManagement.script.accessWithLabel"
@@ -1309,23 +1335,27 @@ exports[`FieldEditor should show multiple type field warning with a table contai
         />
       </eui-text>
       <br />
-      <eui-link
-        data-test-subj="scriptedFieldsHelpLink"
-        onClick={[Function]}
+      <eui-text
+        size="s"
       >
-        <FormattedMessage
-          defaultMessage="Get help with the syntax and preview the results of your script."
-          id="indexPatternManagement.script.getHelpLabel"
-          values={Object {}}
-        />
-      </eui-link>
-    </eui-form-row>
-    <eui-form-row>
+        <eui-link
+          data-test-subj="scriptedFieldsHelpLink"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Get help with the syntax and preview the results of your script."
+            id="indexPatternManagement.script.getHelpLabel"
+            values={Object {}}
+          />
+        </eui-link>
+      </eui-text>
+    </eui-compressed-form-row>
+    <eui-compressed-form-row>
       <eui-flex-group>
         <eui-flex-item
           grow={false}
         >
-          <eui-button
+          <eui-small-button
             data-test-subj="fieldSaveButton"
             fill={true}
             isDisabled={true}
@@ -1337,12 +1367,12 @@ exports[`FieldEditor should show multiple type field warning with a table contai
               id="indexPatternManagement.actions.createButton"
               values={Object {}}
             />
-          </eui-button>
+          </eui-small-button>
         </eui-flex-item>
         <eui-flex-item
           grow={false}
         >
-          <eui-button-empty
+          <eui-small-button-empty
             data-test-subj="fieldCancelButton"
             onClick={[Function]}
           >
@@ -1351,10 +1381,10 @@ exports[`FieldEditor should show multiple type field warning with a table contai
               id="indexPatternManagement.actions.cancelButton"
               values={Object {}}
             />
-          </eui-button-empty>
+          </eui-small-button-empty>
         </eui-flex-item>
       </eui-flex-group>
-    </eui-form-row>
+    </eui-compressed-form-row>
   </eui-form>
   <eui-spacer
     size="l"

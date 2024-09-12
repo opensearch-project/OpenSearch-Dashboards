@@ -62,6 +62,7 @@ import {
 } from '../common';
 
 import { FilterLabel } from './ui';
+export { createEditor, DefaultInput, DQLBody, SingleLineInput } from './ui';
 
 import {
   generateFilters,
@@ -437,8 +438,15 @@ export {
   IndexPatternSelectProps,
   QueryStringInput,
   QueryStringInputProps,
+  QueryEditor,
+  QueryEditorExtensionConfig,
+  QueryEditorExtensions,
+  QueryEditorExtensionDependencies,
+  QueryEditorProps,
+  QueryEditorTopRow,
   // for BWC, keeping the old name
   IUiStart as DataPublicPluginStartUi,
+  useQueryStringManager,
 } from './ui';
 
 /**
@@ -455,6 +463,18 @@ export {
   QueryState,
   getDefaultQuery,
   FilterManager,
+  QueryStringContract,
+  QueryStringManager,
+  DatasetTypeConfig,
+  DatasetService,
+  DatasetServiceContract,
+  LanguageConfig,
+  LanguageService,
+  LanguageServiceContract,
+  RecentQueriesTable,
+  QueryControls,
+  QueryResult,
+  QueryStatus,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,

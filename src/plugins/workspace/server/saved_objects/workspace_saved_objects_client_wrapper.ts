@@ -33,6 +33,7 @@ import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WorkspacePermissionMode,
 } from '../../common/constants';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../data_source/common';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -53,6 +54,15 @@ const generateSavedObjectsPermissionError = () =>
     )
   );
 
+const generateDataSourcePermissionError = () =>
+  SavedObjectsErrorHelpers.decorateForbiddenError(
+    new Error(
+      i18n.translate('saved_objects.data_source.invalidate', {
+        defaultMessage: 'Invalid data source permission, please associate it to current workspace',
+      })
+    )
+  );
+
 const generateOSDAdminPermissionError = () =>
   SavedObjectsErrorHelpers.decorateForbiddenError(
     new Error(
@@ -61,6 +71,18 @@ const generateOSDAdminPermissionError = () =>
       })
     )
   );
+
+const getWorkspacesFromSavedObjects = (savedObjects: SavedObject[]) => {
+  return savedObjects
+    .reduce<string[]>(
+      (previous, { workspaces }) => Array.from(new Set([...previous, ...(workspaces ?? [])])),
+      []
+    )
+    .map((id) => ({
+      type: WORKSPACE_TYPE,
+      id,
+    }));
+};
 
 const getDefaultValuesForEmpty = <T>(values: T[] | undefined, defaultValues: T[]) => {
   return !values || values.length === 0 ? defaultValues : values;
@@ -116,15 +138,12 @@ export class WorkspaceSavedObjectsClientWrapper {
       return false;
     }
     for (const workspaceId of workspaces) {
-      const validateResult = await this.permissionControl.validate(
+      const validateResult = await this.validateMultiWorkspacesPermissions(
+        [workspaceId],
         request,
-        {
-          type: WORKSPACE_TYPE,
-          id: workspaceId,
-        },
         permissionModes
       );
-      if (validateResult?.result) {
+      if (validateResult) {
         return true;
       }
     }
@@ -178,6 +197,32 @@ export class WorkspaceSavedObjectsClientWrapper {
     }
     return hasPermission;
   }
+
+  // Data source is a workspace level object, validate if the request has access to the data source within the requested workspace.
+  private validateDataSourcePermissions = (
+    object: SavedObject,
+    request: OpenSearchDashboardsRequest
+  ) => {
+    const requestWorkspaceId = getWorkspaceState(request).requestWorkspaceId;
+    // Deny access if the object is a global data source (no workspaces assigned)
+    if (!object.workspaces || object.workspaces.length === 0) {
+      return false;
+    }
+    /**
+     * Allow access if no specific workspace is requested.
+     * This typically occurs when retrieving data sources or performing operations
+     * that don't require a specific workspace, such as pages within the
+     * Data Administration navigation group that include a data source picker.
+     */
+    if (!requestWorkspaceId) {
+      return true;
+    }
+    /*
+     * Allow access if the requested workspace matches one of the object's assigned workspaces
+     * This ensures that the user can only access data sources within their current workspace
+     */
+    return object.workspaces.includes(requestWorkspaceId);
+  };
 
   private getWorkspaceTypeEnabledClient(request: OpenSearchDashboardsRequest) {
     return this.getScopedClient?.(request, {
@@ -246,6 +291,10 @@ export class WorkspaceSavedObjectsClientWrapper {
       options?: SavedObjectsBulkUpdateOptions
     ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
       const objectsToUpdate = await wrapperOptions.client.bulkGet<T>(objects, options);
+      this.permissionControl.addToCacheAllowlist(
+        wrapperOptions.request,
+        getWorkspacesFromSavedObjects(objectsToUpdate.saved_objects)
+      );
 
       for (const object of objectsToUpdate.saved_objects) {
         const permitted = await validateUpdateWithWorkspacePermission(object);
@@ -303,6 +352,10 @@ export class WorkspaceSavedObjectsClientWrapper {
                 throw error;
               }
             }
+            this.permissionControl.addToCacheAllowlist(
+              wrapperOptions.request,
+              getWorkspacesFromSavedObjects([rawObject])
+            );
             if (
               !(await this.validateWorkspacesAndSavedObjectsPermissions(
                 rawObject,
@@ -378,6 +431,19 @@ export class WorkspaceSavedObjectsClientWrapper {
     ): Promise<SavedObject<T>> => {
       const objectToGet = await wrapperOptions.client.get<T>(type, id, options);
 
+      if (objectToGet.type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+        if (isDataSourceAdmin) {
+          return objectToGet;
+        }
+        const hasPermission = this.validateDataSourcePermissions(
+          objectToGet,
+          wrapperOptions.request
+        );
+        if (!hasPermission) {
+          throw generateDataSourcePermissionError();
+        }
+      }
+
       if (
         !(await this.validateWorkspacesAndSavedObjectsPermissions(
           objectToGet,
@@ -397,8 +463,19 @@ export class WorkspaceSavedObjectsClientWrapper {
       options: SavedObjectsBaseOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
       const objectToBulkGet = await wrapperOptions.client.bulkGet<T>(objects, options);
+      this.permissionControl.addToCacheAllowlist(
+        wrapperOptions.request,
+        getWorkspacesFromSavedObjects(objectToBulkGet.saved_objects)
+      );
 
       for (const object of objectToBulkGet.saved_objects) {
+        if (object.type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+          const hasPermission = this.validateDataSourcePermissions(object, wrapperOptions.request);
+          if (!hasPermission) {
+            throw generateDataSourcePermissionError();
+          }
+        }
+
         if (
           !(await this.validateWorkspacesAndSavedObjectsPermissions(
             object,
@@ -418,6 +495,16 @@ export class WorkspaceSavedObjectsClientWrapper {
     const findWithWorkspacePermissionControl = async <T = unknown>(
       options: SavedObjectsFindOptions
     ) => {
+      if (
+        isDataSourceAdmin &&
+        options?.type &&
+        (options.type === DATA_SOURCE_SAVED_OBJECT_TYPE ||
+          (Array.isArray(options.type) &&
+            options.type.length === 1 &&
+            options.type[0] === DATA_SOURCE_SAVED_OBJECT_TYPE))
+      ) {
+        return await wrapperOptions.client.find<T>(options);
+      }
       const principals = this.permissionControl.getPrincipalsFromRequest(wrapperOptions.request);
       const permittedWorkspaceIds = (
         await this.getWorkspaceTypeEnabledClient(wrapperOptions.request).find({
@@ -437,7 +524,24 @@ export class WorkspaceSavedObjectsClientWrapper {
         })
       ).saved_objects.map((item) => item.id);
 
-      if (!options.workspaces && !options.ACLSearchParams) {
+      // Based on https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/server/ui_settings/create_or_upgrade_saved_config/get_upgradeable_config.ts#L49
+      // we need to make sure the find call for upgrade config should be able to find all the global configs as it was before.
+      // It is a workaround for 2.17, should be optimized in the upcoming 2.18 release.
+      if (options.type === 'config' && options.sortField === 'buildNum') {
+        const findResult = await wrapperOptions.client.find<{ buildNum?: number }>(options);
+
+        // There maybe user settings inside the find result,
+        // so that we need to filter out user configs(user configs are the configs without buildNum attribute).
+        const finalSavedObjects = findResult.saved_objects.filter(
+          (savedObject) => !!savedObject.attributes?.buildNum
+        );
+
+        return {
+          ...findResult,
+          total: finalSavedObjects.length,
+          saved_objects: finalSavedObjects,
+        };
+      } else if (!options.workspaces && !options.ACLSearchParams) {
         options.workspaces = permittedWorkspaceIds;
         options.ACLSearchParams = {
           permissionModes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write],
@@ -478,7 +582,35 @@ export class WorkspaceSavedObjectsClientWrapper {
       return await wrapperOptions.client.deleteByWorkspace(workspace, options);
     };
 
-    const isDashboardAdmin = getWorkspaceState(wrapperOptions.request)?.isDashboardAdmin;
+    const addToWorkspacesWithPermissionControl = async (
+      type: string,
+      id: string,
+      targetWorkspaces: string[],
+      options: SavedObjectsBaseOptions = {}
+    ) => {
+      // Only dashboard admin can assign data source to workspace
+      if (type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+        throw generateOSDAdminPermissionError();
+      }
+      // In current version, only the type is data-source that will call addToWorkspaces
+      return await wrapperOptions.client.addToWorkspaces(type, id, targetWorkspaces, options);
+    };
+
+    const deleteFromWorkspacesWithPermissionControl = async (
+      type: string,
+      id: string,
+      targetWorkspaces: string[],
+      options: SavedObjectsBaseOptions = {}
+    ) => {
+      // Only dashboard admin can unassign data source to workspace
+      if (type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+        throw generateOSDAdminPermissionError();
+      }
+      // In current version, only the type is data-source will that call deleteFromWorkspaces
+      return await wrapperOptions.client.deleteFromWorkspaces(type, id, targetWorkspaces, options);
+    };
+
+    const { isDashboardAdmin, isDataSourceAdmin } = getWorkspaceState(wrapperOptions.request) || {};
     if (isDashboardAdmin) {
       return wrapperOptions.client;
     }
@@ -498,6 +630,8 @@ export class WorkspaceSavedObjectsClientWrapper {
       update: updateWithWorkspacePermissionControl,
       bulkUpdate: bulkUpdateWithWorkspacePermissionControl,
       deleteByWorkspace: deleteByWorkspaceWithPermissionControl,
+      addToWorkspaces: addToWorkspacesWithPermissionControl,
+      deleteFromWorkspaces: deleteFromWorkspacesWithPermissionControl,
     };
   };
 

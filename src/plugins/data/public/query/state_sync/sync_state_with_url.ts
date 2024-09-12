@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { CoreStart } from 'opensearch-dashboards/public';
 import {
   createStateContainer,
   IOsdUrlStateStorage,
@@ -47,7 +48,8 @@ const GLOBAL_STATE_STORAGE_KEY = '_g';
  */
 export const syncQueryStateWithUrl = (
   query: Pick<QueryStart | QuerySetup, 'filterManager' | 'timefilter' | 'queryString' | 'state$'>,
-  osdUrlStateStorage: IOsdUrlStateStorage
+  osdUrlStateStorage: IOsdUrlStateStorage,
+  uiSettings?: CoreStart['uiSettings']
 ) => {
   const {
     timefilter: { timefilter },

@@ -5,13 +5,12 @@
 
 import {
   EuiPanel,
-  EuiTitle,
   EuiSpacer,
   EuiText,
   EuiFlexGroup,
   EuiHorizontalRule,
   EuiFlexItem,
-  EuiButton,
+  EuiSmallButton,
 } from '@elastic/eui';
 import React from 'react';
 import { AuthMethod } from '../../../constants';
@@ -41,9 +40,9 @@ export const ReviewPrometheusDatasource = (props: ConfigurePrometheusDatasourceP
   return (
     <div>
       <EuiPanel>
-        <EuiTitle>
+        <EuiText size="s">
           <h1 data-test-subj="reviewTitle">{`Review Prometheus data source configuration`}</h1>
-        </EuiTitle>
+        </EuiText>
         <EuiSpacer size="s" />
         <EuiSpacer />
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -53,9 +52,9 @@ export const ReviewPrometheusDatasource = (props: ConfigurePrometheusDatasourceP
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={goBack} data-test-subj="editButton">
+            <EuiSmallButton onClick={goBack} data-test-subj="editButton">
               Edit
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule />

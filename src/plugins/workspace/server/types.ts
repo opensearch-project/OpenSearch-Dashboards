@@ -6,17 +6,19 @@
 import {
   Logger,
   OpenSearchDashboardsRequest,
-  RequestHandlerContext,
   SavedObjectsFindResponse,
   CoreSetup,
   WorkspaceAttribute,
   SavedObjectsServiceStart,
   Permissions,
+  UiSettingsServiceStart,
 } from '../../../core/server';
-
+import { PermissionModeId } from '../../../core/server';
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
+  permissionMode?: PermissionModeId;
 }
+import { WorkspacePermissionMode } from '../common/constants';
 
 export interface WorkspaceFindOptions {
   page?: number;
@@ -25,11 +27,11 @@ export interface WorkspaceFindOptions {
   searchFields?: string[];
   sortField?: string;
   sortOrder?: string;
+  permissionModes?: WorkspacePermissionMode[];
 }
 
 export interface IRequestDetail {
   request: OpenSearchDashboardsRequest;
-  context: RequestHandlerContext;
   logger: Logger;
 }
 
@@ -48,6 +50,13 @@ export interface IWorkspaceClientImpl {
    * @public
    */
   setSavedObjects(savedObjects: SavedObjectsServiceStart): void;
+  /**
+   * Set ui settings client that will be used inside the workspace client.
+   * @param uiSettings {@link UiSettingsServiceStart}
+   * @returns void
+   * @public
+   */
+  setUiSettings(uiSettings: UiSettingsServiceStart): void;
   /**
    * Create a workspace
    * @param requestDetail {@link IRequestDetail}
@@ -73,7 +82,7 @@ export interface IWorkspaceClientImpl {
   ): Promise<
     IResponse<
       {
-        workspaces: WorkspaceAttribute[];
+        workspaces: WorkspaceAttributeWithPermission[];
       } & Pick<SavedObjectsFindResponse, 'page' | 'per_page' | 'total'>
     >
   >;
@@ -125,11 +134,6 @@ export type IResponse<T> =
       success: false;
       error?: string;
     };
-
-export interface AuthInfo {
-  backend_roles?: string[];
-  user_name?: string;
-}
 
 export interface WorkspacePluginSetup {
   client: IWorkspaceClientImpl;

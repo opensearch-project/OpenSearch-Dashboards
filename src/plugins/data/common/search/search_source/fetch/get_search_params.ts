@@ -94,7 +94,7 @@ export function getSearchParamsFromRequest(
   }
 
   return {
-    index: searchRequest.index.title || searchRequest.index,
+    index: searchRequest.index?.title || searchRequest.index,
     body: searchRequest.body,
     ...searchParams,
   };

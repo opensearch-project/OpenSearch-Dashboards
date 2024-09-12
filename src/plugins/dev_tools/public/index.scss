@@ -23,12 +23,12 @@
 }
 
 .devAppDataSourceSelector {
-  margin: 7px 8px 0 0;
+  margin: 4px 8px 0 0;
   min-width: 400px;
+  margin-left: auto;
 }
 
 .devAppTabs {
   display: flex;
   flex-flow: row wrap;
-  justify-content: space-between;
 }

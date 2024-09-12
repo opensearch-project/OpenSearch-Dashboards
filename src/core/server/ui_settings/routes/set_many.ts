@@ -33,11 +33,20 @@ import { schema, ValidationError } from '@osd/config-schema';
 import { IRouter } from '../../http';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
 import { CannotOverrideError } from '../ui_settings_errors';
+import { UiSettingScope } from '../types';
 
 const validate = {
   body: schema.object({
     changes: schema.object({}, { unknowns: 'allow' }),
   }),
+  query: schema.object(
+    {
+      scope: schema.maybe(
+        schema.oneOf([schema.literal(UiSettingScope.GLOBAL), schema.literal(UiSettingScope.USER)])
+      ),
+    },
+    { unknowns: 'allow' }
+  ),
 };
 
 export function registerSetManyRoute(router: IRouter) {
@@ -48,12 +57,13 @@ export function registerSetManyRoute(router: IRouter) {
         const uiSettingsClient = context.core.uiSettings.client;
 
         const { changes } = request.body;
+        const { scope } = request.query;
 
-        await uiSettingsClient.setMany(changes);
+        await uiSettingsClient.setMany(changes, scope);
 
         return response.ok({
           body: {
-            settings: await uiSettingsClient.getUserProvided(),
+            settings: await uiSettingsClient.getUserProvided(scope),
           },
         });
       } catch (error) {

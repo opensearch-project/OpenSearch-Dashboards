@@ -39,13 +39,14 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiSuperDatePicker,
-  EuiFieldText,
+  EuiCompressedFieldText,
   prettyDuration,
 } from '@elastic/eui';
 // @ts-ignore
 import { EuiSuperUpdateButton, OnRefreshProps, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { Toast } from 'src/core/public';
+import { createPortal } from 'react-dom';
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
 import {
   useOpenSearchDashboards,
@@ -70,7 +71,7 @@ export interface QueryBarTopRowProps {
   screenTitle?: string;
   indexPatterns?: Array<IIndexPattern | string>;
   isLoading?: boolean;
-  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
+  prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   showQueryInput?: boolean;
   showDatePicker?: boolean;
   dateRangeFrom?: string;
@@ -83,6 +84,7 @@ export interface QueryBarTopRowProps {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
+  datePickerRef?: React.RefObject<HTMLDivElement>;
 }
 
 // Needed for React.lazy
@@ -253,6 +255,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         aria-label={i18n.translate('data.query.queryBar.querySubmitButtonLabel', {
           defaultMessage: 'Submit query',
         })}
+        compressed={true}
       />
     );
 
@@ -262,7 +265,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
 
     return (
       <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
-        <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
           {renderDatePicker()}
           <EuiFlexItem grow={false}>{button}</EuiFlexItem>
         </EuiFlexGroup>
@@ -318,6 +321,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           dateFormat={uiSettings!.get('dateFormat')}
           isAutoRefreshOnly={props.showAutoRefreshOnly}
           className="osdQueryBar__datePicker"
+          compressed={true}
         />
       </EuiFlexItem>
     );
@@ -329,7 +333,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     if (
       language === 'kuery' &&
       typeof query === 'string' &&
-      (!storage || !storage.get('opensearchDashboards.luceneSyntaxWarningOptOut')) &&
+      (!storage || !storage.get('luceneSyntaxWarningOptOut')) &&
       doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {
       const toast = notifications!.toasts.addWarning({
@@ -375,13 +379,18 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
 
   function onLuceneSyntaxWarningOptOut(toast: Toast) {
     if (!storage) return;
-    storage.set('opensearchDashboards.luceneSyntaxWarningOptOut', true);
+    storage.set('luceneSyntaxWarningOptOut', true);
     notifications!.toasts.remove(toast);
   }
 
   const classes = classNames('osdQueryBar', {
     'osdQueryBar--withDatePicker': props.showDatePicker,
   });
+
+  const shouldUseDatePickerRef =
+    props?.datePickerRef?.current &&
+    (uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) ||
+      uiSettings.get('home:useNewHomePage'));
 
   return (
     <>
@@ -393,7 +402,11 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
       >
         {renderQueryInput()}
         {renderSharingMetaFields()}
-        <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {shouldUseDatePickerRef
+            ? createPortal(renderUpdateButton(), props.datePickerRef!.current!)
+            : renderUpdateButton()}
+        </EuiFlexItem>
       </EuiFlexGroup>
     </>
   );

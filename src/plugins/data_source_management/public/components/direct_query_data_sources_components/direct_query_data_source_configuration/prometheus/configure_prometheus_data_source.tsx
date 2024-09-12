@@ -5,18 +5,19 @@
 
 import {
   EuiPanel,
-  EuiTitle,
   EuiSpacer,
   EuiText,
   EuiLink,
-  EuiFormRow,
-  EuiFieldText,
-  EuiTextArea,
-  EuiSelect,
-  EuiFieldPassword,
+  EuiCompressedFormRow,
+  EuiCompressedFieldText,
+  EuiCompressedTextArea,
+  EuiCompressedSelect,
   EuiForm,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+import { ApplicationStart } from 'opensearch-dashboards/public';
+import { FormattedMessage } from '@osd/i18n/react';
 import { AuthMethod, OPENSEARCH_DOCUMENTATION_URL } from '../../../constants';
 import { QueryPermissionsConfiguration } from '../query_permissions';
 import { Role } from '../../../../types';
@@ -24,6 +25,9 @@ import { AuthDetails } from '../direct_query_data_source_auth_details';
 import { NameRow } from '../name_row';
 
 interface ConfigurePrometheusDatasourceProps {
+  useNewUX: boolean;
+  navigation: NavigationPublicPluginStart;
+  application: ApplicationStart;
   roles: Role[];
   selectedQueryPermissionRoles: Role[];
   setSelectedQueryPermissionRoles: React.Dispatch<React.SetStateAction<Role[]>>;
@@ -52,6 +56,9 @@ interface ConfigurePrometheusDatasourceProps {
 
 export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDatasourceProps) => {
   const {
+    useNewUX,
+    navigation,
+    application,
     setNameForRequest,
     setDetailsForRequest,
     setStoreForRequest,
@@ -85,23 +92,37 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
     { value: 'awssigv4', text: 'AWS Signature Version 4' },
   ];
 
+  const description = (
+    <EuiText size="s" color="subdued">
+      <FormattedMessage
+        id="dataSourcesManagement.configurePrometheusDataSource.description"
+        defaultMessage="Connect to Prometheus with OpenSearch and OpenSearch Dashboards. "
+      />
+      <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="blank">
+        Learn more
+      </EuiLink>
+    </EuiText>
+  );
+
   return (
     <div>
       <EuiPanel>
-        <EuiTitle>
-          <h4>{`Configure Prometheus data source`}</h4>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          {`Connect to Prometheus with OpenSearch and OpenSearch Dashboards. `}
-          <EuiLink external={true} href={OPENSEARCH_DOCUMENTATION_URL} target="_blank">
-            Learn more
-          </EuiLink>
-        </EuiText>
-        <EuiSpacer />
+        <EuiText size="s">{!useNewUX && <h1>{`Configure Prometheus data source`}</h1>}</EuiText>
+        {useNewUX ? (
+          <navigation.ui.HeaderControl
+            setMountPoint={application.setAppDescriptionControls}
+            controls={[{ renderComponent: description }]}
+          />
+        ) : (
+          <>
+            <EuiSpacer size="s" />
+            {description}
+            <EuiSpacer />
+          </>
+        )}
         <EuiForm component="form">
-          <EuiText>
-            <h3>Data source details</h3>
+          <EuiText size="s">
+            <h2>Data source details</h2>
           </EuiText>
           <EuiSpacer size="m" />
           <NameRow
@@ -110,8 +131,8 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
             currentError={error}
             setErrorForForm={setError}
           />
-          <EuiFormRow label="Description - Optional">
-            <EuiTextArea
+          <EuiCompressedFormRow label="Description - Optional">
+            <EuiCompressedTextArea
               data-test-subj="data-source-description"
               placeholder="Placeholder"
               value={details}
@@ -122,20 +143,20 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
                 setDetails(e.target.value);
               }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer />
 
-          <EuiText>
-            <h3>Prometheus data location</h3>
+          <EuiText size="s">
+            <h2>Prometheus data location</h2>
           </EuiText>
           <EuiSpacer size="m" />
 
-          <EuiFormRow label="Prometheus URI">
+          <EuiCompressedFormRow label="Prometheus URI">
             <>
               <EuiText size="xs">
                 <p>Enter the Prometheus URI endpoint.</p>
               </EuiText>
-              <EuiFieldText
+              <EuiCompressedFieldText
                 data-test-subj="Prometheus-URI"
                 placeholder="Prometheus URI"
                 value={store}
@@ -147,16 +168,16 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
                 }}
               />
             </>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer />
 
-          <EuiText>
-            <h3>Authentication details</h3>
+          <EuiText size="s">
+            <h2>Authentication details</h2>
           </EuiText>
           <EuiSpacer size="m" />
 
-          <EuiFormRow label="Authentication method">
-            <EuiSelect
+          <EuiCompressedFormRow label="Authentication method">
+            <EuiCompressedSelect
               id="selectAuthMethod"
               options={authOptions}
               value={currentAuthMethod}
@@ -164,7 +185,7 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
                 setAuthMethodForRequest(e.target.value as AuthMethod);
               }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
 
           <AuthDetails
             currentUsername={currentUsername}

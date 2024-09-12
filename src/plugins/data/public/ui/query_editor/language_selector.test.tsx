@@ -8,25 +8,27 @@ import { QueryLanguageSelector } from './language_selector';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { EuiComboBox } from '@elastic/eui';
-import { QueryEnhancement } from '../types';
+import { Query } from '../..';
 
 const startMock = coreMock.createStart();
 
 jest.mock('../../services', () => ({
-  getUiService: () => ({
-    Settings: {
-      getAllQueryEnhancements: () => new Map<string, QueryEnhancement>(),
-      setUserQueryLanguage: jest.fn(),
-      setUiOverridesByUserQueryLanguage: jest.fn(),
+  getQueryService: () => ({
+    queryString: {
+      getLanguageService: () => ({
+        getLanguages: () => [
+          { id: 'lucene', title: 'Lucene' },
+          { id: 'kuery', title: 'DQL' },
+        ],
+        getUserQueryLanguageBlocklist: () => [],
+        setUserQueryLanguage: jest.fn(),
+      }),
+      getUpdates$: () => ({
+        subscribe: () => ({
+          unsubscribe: jest.fn(),
+        }),
+      }),
     },
-  }),
-  getSearchService: () => ({
-    __enhance: jest.fn(),
-    df: {
-      clear: jest.fn(),
-    },
-    getDefaultSearchInterceptor: jest.fn(),
   }),
 }));
 
@@ -45,40 +47,24 @@ describe('LanguageSelector', () => {
   }
 
   it('should select lucene if language is lucene', () => {
+    const query: Query = { query: '', language: 'lucene' };
     const component = mountWithIntl(
       wrapInContext({
-        language: 'lucene',
-        onSelectLanguage: () => {
-          return;
-        },
+        query,
+        onSelectLanguage: jest.fn(),
       })
     );
-    const euiComboBox = component.find(EuiComboBox);
-    expect(euiComboBox.prop('selectedOptions')).toEqual(
-      expect.arrayContaining([
-        {
-          label: 'Lucene',
-        },
-      ])
-    );
+    expect(component).toMatchSnapshot();
   });
 
   it('should select DQL if language is kuery', () => {
+    const query: Query = { query: '', language: 'kuery' };
     const component = mountWithIntl(
       wrapInContext({
-        language: 'kuery',
-        onSelectLanguage: () => {
-          return;
-        },
+        query,
+        onSelectLanguage: jest.fn(),
       })
     );
-    const euiComboBox = component.find(EuiComboBox);
-    expect(euiComboBox.prop('selectedOptions')).toEqual(
-      expect.arrayContaining([
-        {
-          label: 'DQL',
-        },
-      ])
-    );
+    expect(component).toMatchSnapshot();
   });
 });

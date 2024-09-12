@@ -468,59 +468,56 @@ export class SavedObjectsClient {
    * Remove a saved object from workspaces
    * @param type
    * @param id
-   * @param workspaces
+   * @param targetWorkspaces
+   * @param options
    */
-  deleteFromWorkspaces = async <T = unknown>(type: string, id: string, workspaces: string[]) => {
-    if (!workspaces || workspaces.length === 0) {
+  deleteFromWorkspaces = async <T = unknown>(
+    type: string,
+    id: string,
+    targetWorkspaces: string[],
+    options: SavedObjectsBaseOptions = {}
+  ) => {
+    if (!targetWorkspaces || targetWorkspaces.length === 0) {
       throw new TypeError(`Workspaces is required.`);
     }
-    const object = await this.get<T>(type, id);
+    if ('workspaces' in options && options.workspaces) {
+      throw new TypeError('Invalid options, options.workspaces should not exist.');
+    }
+    const object = await this.get<T>(type, id, options);
     const existingWorkspaces = object.workspaces ?? [];
     const newWorkspaces = existingWorkspaces.filter((item) => {
-      return workspaces.indexOf(item) === -1;
+      return targetWorkspaces.indexOf(item) === -1;
     });
-    if (newWorkspaces.length > 0) {
-      return await this.update<T>(type, id, object.attributes, {
-        workspaces: newWorkspaces,
-        version: object.version,
-      });
-    } else {
-      // If there is no workspaces assigned, will create object with overwrite to delete workspace property.
-      return await this.create(
-        type,
-        {
-          ...object.attributes,
-        },
-        {
-          id,
-          permissions: object.permissions,
-          overwrite: true,
-          version: object.version,
-        }
-      );
-    }
+    return await this.update<T>(type, id, object.attributes, {
+      ...options,
+      workspaces: newWorkspaces,
+      version: object.version,
+    });
   };
 
   /**
    * Add a saved object to workspaces
    * @param type
    * @param id
-   * @param workspaces
+   * @param targetWorkspaces
+   * @param options
    */
   addToWorkspaces = async <T = unknown>(
     type: string,
     id: string,
-    workspaces: string[]
+    targetWorkspaces: string[],
+    options: SavedObjectsBaseOptions = {}
   ): Promise<any> => {
-    if (!workspaces || workspaces.length === 0) {
+    if (!targetWorkspaces || targetWorkspaces.length === 0) {
       throw new TypeError(`Workspaces is required.`);
     }
-    const object = await this.get<T>(type, id);
+    const object = await this.get<T>(type, id, options);
     const existingWorkspaces = object.workspaces ?? [];
-    const mergedWorkspaces = existingWorkspaces.concat(workspaces);
+    const mergedWorkspaces = existingWorkspaces.concat(targetWorkspaces);
     const nonDuplicatedWorkspaces = Array.from(new Set(mergedWorkspaces));
 
     return await this.update<T>(type, id, object.attributes, {
+      ...options,
       workspaces: nonDuplicatedWorkspaces,
       version: object.version,
     });

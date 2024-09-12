@@ -64,10 +64,11 @@ export class NewsfeedPublicPlugin
   }
 
   public start(core: CoreStart) {
+    const useLegacyAppearance = !core.uiSettings.get('home:useNewHomePage');
     const api$ = this.fetchNewsfeed(core, this.config).pipe(share());
-    core.chrome.navControls.registerRight({
+    core.chrome.navControls[useLegacyAppearance ? 'registerRight' : 'registerLeftBottom']({
       order: 1000,
-      mount: (target) => this.mount(api$, target),
+      mount: (target) => this.mount(core, api$, target),
     });
 
     return {
@@ -95,10 +96,10 @@ export class NewsfeedPublicPlugin
     );
   }
 
-  private mount(api$: NewsfeedApiFetchResult, targetDomElement: HTMLElement) {
+  private mount(coreStart: CoreStart, api$: NewsfeedApiFetchResult, targetDomElement: HTMLElement) {
     ReactDOM.render(
       <I18nProvider>
-        <NewsfeedNavButton apiFetchResult={api$} />
+        <NewsfeedNavButton coreStart={coreStart} apiFetchResult={api$} />
       </I18nProvider>,
       targetDomElement
     );

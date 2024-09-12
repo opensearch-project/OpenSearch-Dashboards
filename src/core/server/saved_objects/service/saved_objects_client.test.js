@@ -237,35 +237,13 @@ test(`#deleteFromWorkspaces Should use update if there is existing workspaces`, 
 
   const type = Symbol();
   const id = Symbol();
-  await client.deleteFromWorkspaces(type, id, ['id2']);
+  const workspaces = ['id2'];
+  await client.deleteFromWorkspaces(type, id, workspaces);
   expect(mockRepository.get).toHaveBeenCalledWith(type, id, {});
   expect(mockRepository.update).toHaveBeenCalledWith(type, id, undefined, {
     version: undefined,
     workspaces: ['id1'],
   });
-});
-
-test(`#deleteFromWorkspaces Should use overwrite create if there is no existing workspaces`, async () => {
-  const returnValue = Symbol();
-  const create = jest.fn();
-  const mockRepository = {
-    get: jest.fn().mockResolvedValue({
-      workspaces: [],
-    }),
-    update: jest.fn().mockResolvedValue(returnValue),
-    create,
-  };
-  const client = new SavedObjectsClient(mockRepository);
-
-  const type = Symbol();
-  const id = Symbol();
-  await client.deleteFromWorkspaces(type, id, ['id1']);
-  expect(mockRepository.get).toHaveBeenCalledWith(type, id, {});
-  expect(mockRepository.create).toHaveBeenCalledWith(
-    type,
-    {},
-    { id, overwrite: true, permissions: undefined, version: undefined }
-  );
 });
 
 test(`#deleteFromWorkspaces should throw error if no workspaces passed`, () => {
@@ -292,6 +270,7 @@ test(`#addToWorkspaces`, async () => {
 
   expect(mockRepository.get).toHaveBeenCalledWith(type, id, {});
   expect(mockRepository.update).toHaveBeenCalledWith(type, id, undefined, {
+    version: undefined,
     workspaces: [workspaces],
   });
 

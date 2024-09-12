@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSuperSelect, EuiSuperSelectProps } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedSuperSelect, EuiSuperSelectProps } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
@@ -47,7 +47,7 @@ export const SuperSelectField = ({ field, euiFieldProps = { options: [] }, ...re
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={field.label}
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
@@ -56,7 +56,7 @@ export const SuperSelectField = ({ field, euiFieldProps = { options: [] }, ...re
       data-test-subj={rest['data-test-subj']}
       describedByIds={rest.idAria ? [rest.idAria] : undefined}
     >
-      <EuiSuperSelect
+      <EuiCompressedSuperSelect
         fullWidth
         valueOfSelected={field.value as string}
         onChange={(value) => {
@@ -66,6 +66,6 @@ export const SuperSelectField = ({ field, euiFieldProps = { options: [] }, ...re
         data-test-subj="select"
         {...euiFieldProps}
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 };

@@ -9,8 +9,9 @@ import { WorkspaceSavedObjectsClientWrapper } from './workspace_saved_objects_cl
 import { httpServerMock } from '../../../../core/server/mocks';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../data_source/common';
 
-const DASHBOARD_ADMIN = 'dashnoard_admin';
-const NO_DASHBOARD_ADMIN = 'no_dashnoard_admin';
+const DASHBOARD_ADMIN = 'dashboard_admin';
+const NO_DASHBOARD_ADMIN = 'no_dashboard_admin';
+const DATASOURCE_ADMIN = 'dataSource_admin';
 
 const generateWorkspaceSavedObjectsClientWrapper = (role = NO_DASHBOARD_ADMIN) => {
   const savedObjectsStore = [
@@ -54,9 +55,21 @@ const generateWorkspaceSavedObjectsClientWrapper = (role = NO_DASHBOARD_ADMIN) =
     },
     {
       type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      id: 'global-data-source-empty-workspaces',
+      attributes: { title: 'Global data source empty workspaces' },
+      workspaces: [],
+    },
+    {
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
       id: 'workspace-1-data-source',
       attributes: { title: 'Workspace 1 data source' },
       workspaces: ['workspace-1'],
+    },
+    {
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      id: 'workspace-2-data-source',
+      attributes: { title: 'Workspace 2 data source' },
+      workspaces: ['mock-request-workspace-id'],
     },
   ];
   const clientMock = {
@@ -101,9 +114,18 @@ const generateWorkspaceSavedObjectsClientWrapper = (role = NO_DASHBOARD_ADMIN) =
       };
     }),
     deleteByWorkspace: jest.fn(),
+    addToWorkspaces: jest.fn(),
+    deleteFromWorkspaces: jest.fn(),
   };
   const requestMock = httpServerMock.createOpenSearchDashboardsRequest();
-  if (role === DASHBOARD_ADMIN) updateWorkspaceState(requestMock, { isDashboardAdmin: true });
+  updateWorkspaceState(requestMock, { requestWorkspaceId: 'mock-request-workspace-id' });
+  if (role === DASHBOARD_ADMIN) {
+    updateWorkspaceState(requestMock, { isDashboardAdmin: true });
+  }
+  if (role === DATASOURCE_ADMIN) {
+    updateWorkspaceState(requestMock, { isDataSourceAdmin: true });
+  }
+
   const wrapperOptions = {
     client: clientMock,
     request: requestMock,
@@ -122,6 +144,7 @@ const generateWorkspaceSavedObjectsClientWrapper = (role = NO_DASHBOARD_ADMIN) =
     getPrincipalsFromRequest: jest.fn().mockImplementation(() => {
       return { users: ['user-1'] };
     }),
+    addToCacheAllowlist: jest.fn(),
   };
 
   const wrapper = new WorkspaceSavedObjectsClientWrapper(permissionControlMock);
@@ -557,6 +580,79 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         expect(clientMock.get).toHaveBeenCalledWith(...getArgs);
         expect(result).toMatchInlineSnapshot(`[Error: Not Found]`);
       });
+
+      it('should validate data source workspace field', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.get('data-source', 'workspace-1-data-source');
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual(
+          'Invalid data source permission, please associate it to current workspace'
+        );
+
+        const result = await wrapper.get('data-source', 'workspace-2-data-source');
+        expect(result).toEqual({
+          attributes: {
+            title: 'Workspace 2 data source',
+          },
+          id: 'workspace-2-data-source',
+          type: 'data-source',
+          workspaces: ['mock-request-workspace-id'],
+        });
+      });
+
+      it('should not validate data source when not in workspace', async () => {
+        const { wrapper, requestMock } = generateWorkspaceSavedObjectsClientWrapper();
+        updateWorkspaceState(requestMock, { requestWorkspaceId: undefined });
+        const result = await wrapper.get('data-source', 'workspace-1-data-source');
+        expect(result).toEqual({
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          id: 'workspace-1-data-source',
+          attributes: { title: 'Workspace 1 data source' },
+          workspaces: ['workspace-1'],
+        });
+      });
+
+      it('should not validate data source when user is data source admin', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper(DATASOURCE_ADMIN);
+        const result = await wrapper.get('data-source', 'workspace-1-data-source');
+        expect(result).toEqual({
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          id: 'workspace-1-data-source',
+          attributes: { title: 'Workspace 1 data source' },
+          workspaces: ['workspace-1'],
+        });
+      });
+
+      it('should throw permission error when tried to access a global data source', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.get('data-source', 'global-data-source');
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual(
+          'Invalid data source permission, please associate it to current workspace'
+        );
+      });
+
+      it('should throw permission error when tried to access a empty workspaces global data source', async () => {
+        const { wrapper, requestMock } = generateWorkspaceSavedObjectsClientWrapper();
+        updateWorkspaceState(requestMock, { requestWorkspaceId: undefined });
+        let errorCatched;
+        try {
+          await wrapper.get('data-source', 'global-data-source-empty-workspaces');
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual(
+          'Invalid data source permission, please associate it to current workspace'
+        );
+      });
     });
     describe('bulk get', () => {
       it("should call permission validate with object's workspace and throw permission error", async () => {
@@ -622,6 +718,95 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           {}
         );
       });
+      it('should validate data source workspace field', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.bulkGet([
+            {
+              type: 'data-source',
+              id: 'workspace-1-data-source',
+            },
+          ]);
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual(
+          'Invalid data source permission, please associate it to current workspace'
+        );
+
+        const result = await await wrapper.bulkGet([
+          {
+            type: 'data-source',
+            id: 'workspace-2-data-source',
+          },
+        ]);
+        expect(result).toEqual({
+          saved_objects: [
+            {
+              attributes: {
+                title: 'Workspace 2 data source',
+              },
+              id: 'workspace-2-data-source',
+              type: 'data-source',
+              workspaces: ['mock-request-workspace-id'],
+            },
+          ],
+        });
+      });
+
+      it('should not validate data source when not in workspace', async () => {
+        const { wrapper, requestMock } = generateWorkspaceSavedObjectsClientWrapper();
+        updateWorkspaceState(requestMock, { requestWorkspaceId: undefined });
+        const result = await wrapper.bulkGet([
+          {
+            type: 'data-source',
+            id: 'workspace-1-data-source',
+          },
+        ]);
+        expect(result).toEqual({
+          saved_objects: [
+            {
+              attributes: {
+                title: 'Workspace 1 data source',
+              },
+              id: 'workspace-1-data-source',
+              type: 'data-source',
+              workspaces: ['workspace-1'],
+            },
+          ],
+        });
+      });
+
+      it('should throw permission error when tried to bulk get global data source', async () => {
+        const { wrapper, requestMock } = generateWorkspaceSavedObjectsClientWrapper();
+        updateWorkspaceState(requestMock, { requestWorkspaceId: undefined });
+        let errorCatched;
+        try {
+          await wrapper.bulkGet([{ type: 'data-source', id: 'global-data-source' }]);
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual(
+          'Invalid data source permission, please associate it to current workspace'
+        );
+      });
+
+      it('should throw permission error when tried to bulk get a empty workspace global data source', async () => {
+        const { wrapper, requestMock } = generateWorkspaceSavedObjectsClientWrapper();
+        updateWorkspaceState(requestMock, { requestWorkspaceId: undefined });
+        let errorCatched;
+        try {
+          await wrapper.bulkGet([
+            { type: 'data-source', id: 'global-data-source-empty-workspaces' },
+          ]);
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual(
+          'Invalid data source permission, please associate it to current workspace'
+        );
+      });
     });
     describe('find', () => {
       it('should call client.find with consistent params when ACLSearchParams and workspaceOperator not provided', async () => {
@@ -670,6 +855,52 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           workspaces: ['workspace-1'],
         });
       });
+      it('should call client.find without ACLSearchParams and workspaceOperator', async () => {
+        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper(
+          DATASOURCE_ADMIN
+        );
+        await wrapper.find({
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        });
+        expect(clientMock.find).toHaveBeenCalledWith({
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        });
+        await wrapper.find({
+          type: [DATA_SOURCE_SAVED_OBJECT_TYPE],
+        });
+        expect(clientMock.find).toHaveBeenCalledWith({
+          type: [DATA_SOURCE_SAVED_OBJECT_TYPE],
+        });
+      });
+      it('should call client.find without ACLSearchParams and workspaceOperator when find config and the sortField is buildNum', async () => {
+        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper(
+          DATASOURCE_ADMIN
+        );
+        clientMock.find.mockImplementation(() => ({
+          saved_objects: [
+            {
+              id: 'global_config',
+              type: 'config',
+              attributes: {
+                buildNum: 1,
+              },
+            },
+            {
+              id: 'user_config',
+              type: 'config',
+            },
+          ],
+        }));
+        const findResult = await wrapper.find({
+          type: 'config',
+          sortField: 'buildNum',
+        });
+        expect(clientMock.find).toHaveBeenCalledWith({
+          type: 'config',
+          sortField: 'buildNum',
+        });
+        expect(findResult.saved_objects.length).toEqual(1);
+      });
     });
 
     describe('deleteByWorkspace', () => {
@@ -710,6 +941,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       } = generateWorkspaceSavedObjectsClientWrapper(DASHBOARD_ADMIN);
       expect(getWorkspaceState(requestMock)).toEqual({
         isDashboardAdmin: true,
+        requestWorkspaceId: 'mock-request-workspace-id',
       });
       it('should bypass permission check for call client.delete', async () => {
         const deleteArgs = ['dashboard', 'not-permitted-dashboard'] as const;
@@ -808,6 +1040,68 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         await wrapper.deleteByWorkspace('not-permitted-workspace');
         expect(clientMock.deleteByWorkspace).toHaveBeenCalledWith('not-permitted-workspace');
         expect(permissionControlMock.validate).not.toHaveBeenCalled();
+      });
+      it('should bypass permission check for call client.addToWorkspaces', async () => {
+        await wrapper.addToWorkspaces(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'data-source-id',
+          ['workspace-1'],
+          {}
+        );
+        expect(clientMock.addToWorkspaces).toHaveBeenCalledWith(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'data-source-id',
+          ['workspace-1'],
+          {}
+        );
+        expect(permissionControlMock.validate).not.toHaveBeenCalled();
+      });
+      it('should bypass permission check for call client.deleteFromWorkspaces', async () => {
+        await wrapper.deleteFromWorkspaces(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'data-source-id',
+          ['workspace-1'],
+          {}
+        );
+        expect(clientMock.deleteFromWorkspaces).toHaveBeenCalledWith(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'data-source-id',
+          ['workspace-1'],
+          {}
+        );
+        expect(permissionControlMock.validate).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('addToWorkspaces', () => {
+      it('should throw error when non dashboard admin add data source to workspaces', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+
+        let errorCatch;
+        try {
+          await wrapper.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
+            'workspace-id',
+          ]);
+        } catch (e) {
+          errorCatch = e;
+        }
+        expect(errorCatch.message).toEqual('Invalid permission, please contact OSD admin');
+      });
+    });
+
+    describe('deleteFromWorkspaces', () => {
+      it('should throw error when non dashboard admin delete data source from workspaces', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+
+        let errorCatch;
+        try {
+          await wrapper.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', [
+            'workspace-id',
+          ]);
+        } catch (e) {
+          errorCatch = e;
+        }
+        expect(errorCatch.message).toEqual('Invalid permission, please contact OSD admin');
       });
     });
   });

@@ -30,6 +30,7 @@
 
 import React from 'react';
 import SearchBar from './search_bar';
+import { queryServiceMock } from '../../query/mocks';
 
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { I18nProvider } from '@osd/i18n/react';
@@ -55,6 +56,24 @@ jest.mock('../filter_bar/filter_bar', () => {
 jest.mock('../query_string_input/query_bar_top_row', () => {
   return () => <div className="queryBar" />;
 });
+
+const mockQueryService = {
+  queryString: {
+    getLanguageService: () => ({
+      getLanguage: () => ({
+        fields: {
+          filterable: true,
+        },
+      }),
+    }),
+  },
+};
+
+// Update the mock for getQueryService
+jest.mock('../../services', () => ({
+  ...jest.requireActual('../../services'),
+  getQueryService: () => mockQueryService,
+}));
 
 const noop = jest.fn();
 
@@ -110,6 +129,7 @@ function wrapSearchBarInContext(testProps: any) {
     storage: createMockStorage(),
     data: {
       query: {
+        ...queryServiceMock.createStartContract(false),
         savedQueries: {},
       },
     },

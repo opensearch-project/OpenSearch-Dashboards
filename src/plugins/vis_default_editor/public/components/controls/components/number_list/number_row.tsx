@@ -30,7 +30,7 @@
 
 import React, { useCallback } from 'react';
 
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiSmallButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { NumberListRange } from './range';
 
@@ -106,7 +106,7 @@ function NumberRow({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           aria-label={deleteBtnAriaLabel}
           title={deleteBtnAriaLabel}
           color="danger"

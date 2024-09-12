@@ -22,14 +22,17 @@ export class CspHandlerPlugin implements Plugin<CspHandlerPluginSetup, CspHandle
   }
 
   public async setup(core: CoreSetup, { applicationConfig }: AppPluginSetupDependencies) {
-    core.http.registerOnPreResponse(
-      createCspRulesPreResponseHandler(
-        core,
-        core.http.csp.header,
-        applicationConfig.getConfigurationClient,
-        this.logger
-      )
-    );
+    /**
+     * TODO Deprecate this plugin (right now it needs to be enabled for Dashboards plugin to function)
+     */
+    // core.http.registerOnPreResponse(
+    //   createCspRulesPreResponseHandler(
+    //     core,
+    //     core.http.csp.header,
+    //     applicationConfig.getConfigurationClient,
+    //     this.logger
+    //   )
+    // );
 
     return {};
   }

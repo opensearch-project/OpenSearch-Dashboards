@@ -4,15 +4,28 @@
  */
 
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
-import { AppCategory, ChromeNavGroup, ChromeNavLink } from 'opensearch-dashboards/public';
+import {
+  AppCategory,
+  ApplicationStart,
+  ChromeNavGroup,
+  ChromeNavLink,
+  WorkspacesStart,
+} from 'opensearch-dashboards/public';
 import { map, switchMap, takeUntil } from 'rxjs/operators';
+import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from '../../ui_settings';
 import {
-  flattenLinksOrCategories,
   fulfillRegistrationLinksToChromeNavLinks,
-  getOrderedLinksOrCategories,
+  getSortedNavLinks,
+  getVisibleUseCases,
 } from '../utils';
 import { ChromeNavLinks } from '../nav_links';
+import { InternalApplicationStart } from '../../application';
+import { NavGroupStatus } from '../../../../core/types';
+import { ChromeBreadcrumb, ChromeBreadcrumbEnricher } from '../chrome_service';
+import { ALL_USE_CASE_ID } from '../../../utils';
+
+export const CURRENT_NAV_GROUP_ID = 'core.chrome.currentNavGroupId';
 
 /** @public */
 export interface ChromeRegistrationNavLink {
@@ -25,6 +38,11 @@ export interface ChromeRegistrationNavLink {
    * link with parentNavLinkId field will be displayed as nested items in navigation.
    */
   parentNavLinkId?: string;
+
+  /**
+   * If the nav link should be shown in 'all' nav group
+   */
+  showInAllNavGroup?: boolean;
 }
 
 export type NavGroupItemInMap = ChromeNavGroup & {
@@ -45,6 +63,16 @@ export interface ChromeNavGroupServiceSetupContract {
 export interface ChromeNavGroupServiceStartContract {
   getNavGroupsMap$: () => Observable<Record<string, NavGroupItemInMap>>;
   getNavGroupEnabled: ChromeNavGroupServiceSetupContract['getNavGroupEnabled'];
+  /**
+   * Get an observable of the current selected nav group
+   */
+  getCurrentNavGroup$: () => Observable<NavGroupItemInMap | undefined>;
+
+  /**
+   * Set current selected nav group
+   * @param navGroupId The id of the nav group to be set as current
+   */
+  setCurrentNavGroup: (navGroupId: string | undefined) => void;
 }
 
 /** @internal */
@@ -55,6 +83,10 @@ export class ChromeNavGroupService {
   private navGroupEnabled: boolean = false;
   private navGroupEnabledUiSettingsSubscription: Subscription | undefined;
   private navGroupUpdaters$$ = new BehaviorSubject<Array<Observable<ChromeNavGroupUpdater>>>([]);
+  private currentNavGroup$ = new BehaviorSubject<ChromeNavGroup | undefined>(undefined);
+  private currentNavGroupSubscription: Subscription | undefined;
+  private currentAppIdSubscription: Subscription | undefined;
+
   private addNavLinkToGroup(
     currentGroupsMap: Record<string, NavGroupItemInMap>,
     navGroup: ChromeNavGroup,
@@ -81,6 +113,16 @@ export class ChromeNavGroupService {
 
     return currentGroupsMap;
   }
+
+  private sortNavGroupNavLinks(
+    navGroup: NavGroupItemInMap,
+    allValidNavLinks: Array<Readonly<ChromeNavLink>>
+  ) {
+    return getSortedNavLinks(
+      fulfillRegistrationLinksToChromeNavLinks(navGroup.navLinks, allValidNavLinks)
+    );
+  }
+
   private getSortedNavGroupsMap$() {
     return combineLatest([this.getUpdatedNavGroupsMap$(), this.navLinks$])
       .pipe(takeUntil(this.stop$))
@@ -88,12 +130,9 @@ export class ChromeNavGroupService {
         map(([navGroupsMap, navLinks]) => {
           return Object.keys(navGroupsMap).reduce((sortedNavGroupsMap, navGroupId) => {
             const navGroup = navGroupsMap[navGroupId];
-            const sortedNavLinks = getOrderedLinksOrCategories(
-              fulfillRegistrationLinksToChromeNavLinks(navGroup.navLinks, navLinks)
-            );
             sortedNavGroupsMap[navGroupId] = {
               ...navGroup,
-              navLinks: flattenLinksOrCategories(sortedNavLinks),
+              navLinks: this.sortNavGroupNavLinks(navGroup, navLinks),
             };
             return sortedNavGroupsMap;
           }, {} as Record<string, NavGroupItemInMap>);
@@ -159,17 +198,145 @@ export class ChromeNavGroupService {
   }
   async start({
     navLinks,
+    application,
+    breadcrumbsEnricher$,
+    workspaces,
   }: {
     navLinks: ChromeNavLinks;
+    application: InternalApplicationStart;
+    breadcrumbsEnricher$: BehaviorSubject<ChromeBreadcrumbEnricher | undefined>;
+    workspaces: WorkspacesStart;
   }): Promise<ChromeNavGroupServiceStartContract> {
     this.navLinks$ = navLinks.getNavLinks$();
+
+    const currentNavGroupId = sessionStorage.getItem(CURRENT_NAV_GROUP_ID);
+    this.currentNavGroup$ = new BehaviorSubject<ChromeNavGroup | undefined>(
+      currentNavGroupId ? this.navGroupsMap$.getValue()[currentNavGroupId] : undefined
+    );
+
+    const setCurrentNavGroup = (navGroupId: string | undefined) => {
+      const navGroup = navGroupId ? this.navGroupsMap$.getValue()[navGroupId] : undefined;
+      if (navGroup) {
+        this.currentNavGroup$.next(navGroup);
+        sessionStorage.setItem(CURRENT_NAV_GROUP_ID, navGroup.id);
+      } else {
+        this.currentNavGroup$.next(undefined);
+        sessionStorage.removeItem(CURRENT_NAV_GROUP_ID);
+      }
+    };
+
+    const currentNavGroupSorted$ = combineLatest([
+      this.getSortedNavGroupsMap$(),
+      this.currentNavGroup$,
+    ])
+      .pipe(takeUntil(this.stop$))
+      .pipe(
+        map(([navGroupsMapSorted, currentNavGroup]) => {
+          if (currentNavGroup) {
+            return navGroupsMapSorted[currentNavGroup.id];
+          }
+        })
+      );
+
+    // when we not in any workspace or workspace is disabled
+    if (this.navGroupEnabled && !workspaces.currentWorkspace$.getValue()) {
+      this.currentNavGroupSubscription = currentNavGroupSorted$.subscribe((currentNavGroup) => {
+        if (currentNavGroup) {
+          breadcrumbsEnricher$.next((breadcrumbs) =>
+            this.prependCurrentNavGroupToBreadcrumbs(
+              breadcrumbs,
+              currentNavGroup,
+              application.navigateToApp
+            )
+          );
+        } else {
+          breadcrumbsEnricher$.next(undefined);
+        }
+      });
+    }
+
+    this.currentAppIdSubscription = combineLatest([
+      application.currentAppId$,
+      this.getSortedNavGroupsMap$(),
+    ]).subscribe(([appId, navGroupMap]) => {
+      if (appId && navGroupMap) {
+        const appIdNavGroupMap = new Map<string, Set<string>>();
+        const visibleUseCases = getVisibleUseCases(navGroupMap);
+        const mapAppIdToNavGroup = (navGroup: NavGroupItemInMap) => {
+          navGroup.navLinks.forEach((navLink) => {
+            const navLinkId = navLink.id;
+            const navGroupSet = appIdNavGroupMap.get(navLinkId) || new Set();
+            navGroupSet.add(navGroup.id);
+            appIdNavGroupMap.set(navLinkId, navGroupSet);
+          });
+        };
+        if (visibleUseCases.length === 1 && visibleUseCases[0].id === ALL_USE_CASE_ID) {
+          // If the only visible use case is all use case
+          // All the other nav groups will be visible because all use case can visit all of the nav groups.
+          Object.values(navGroupMap).forEach((navGroup) => mapAppIdToNavGroup(navGroup));
+        } else {
+          // Nav group of Hidden status should be filtered out when counting navGroups the currentApp belongs to
+          Object.values(navGroupMap).forEach((navGroup) => {
+            if (navGroup.status === NavGroupStatus.Hidden) {
+              return;
+            }
+
+            mapAppIdToNavGroup(navGroup);
+          });
+        }
+
+        const navGroups = appIdNavGroupMap.get(appId);
+        if (navGroups && navGroups.size === 1) {
+          setCurrentNavGroup(navGroups.values().next().value);
+        } else if (!navGroups) {
+          setCurrentNavGroup(undefined);
+        }
+      }
+    });
+
     return {
       getNavGroupsMap$: () => this.getSortedNavGroupsMap$(),
       getNavGroupEnabled: () => this.navGroupEnabled,
+
+      getCurrentNavGroup$: () => currentNavGroupSorted$,
+      setCurrentNavGroup,
     };
   }
+
+  /**
+   * prepend current nav group into existing breadcrumbs and return new breadcrumbs, the new breadcrumbs will looks like
+   * Home > Search > Visualization
+   * @param breadcrumbs existing breadcrumbs
+   * @param currentNavGroup current nav group object
+   * @param navigateToApp
+   * @returns new breadcrumbs array
+   */
+  private prependCurrentNavGroupToBreadcrumbs(
+    breadcrumbs: ChromeBreadcrumb[],
+    currentNavGroup: NavGroupItemInMap,
+    navigateToApp: ApplicationStart['navigateToApp']
+  ) {
+    const navGroupBreadcrumb: ChromeBreadcrumb = {
+      text: currentNavGroup.title,
+      onClick: () => {
+        if (currentNavGroup.navLinks && currentNavGroup.navLinks.length) {
+          navigateToApp(currentNavGroup.navLinks[0].id);
+        }
+      },
+    };
+    const homeBreadcrumb: ChromeBreadcrumb = {
+      text: i18n.translate('core.breadcrumbs.homeTitle', { defaultMessage: 'Home' }),
+      onClick: () => {
+        navigateToApp('home');
+      },
+    };
+    return [homeBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
+  }
+
   async stop() {
     this.stop$.next();
     this.navGroupEnabledUiSettingsSubscription?.unsubscribe();
+    this.currentAppIdSubscription?.unsubscribe();
+    this.currentNavGroupSubscription?.unsubscribe();
   }
 }

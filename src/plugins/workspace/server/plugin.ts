@@ -22,6 +22,9 @@ import {
   PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER,
   WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID,
   PRIORITY_FOR_WORKSPACE_UI_SETTINGS_WRAPPER,
+  WORKSPACE_INITIAL_APP_ID,
+  WORKSPACE_NAVIGATION_APP_ID,
+  DEFAULT_WORKSPACE,
 } from '../common/constants';
 import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
 import { WorkspaceClient } from './workspace_client';
@@ -41,6 +44,7 @@ import {
 import { getOSDAdminConfigFromYMLConfig, updateDashboardAdminStateForRequest } from './utils';
 import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consumer_wrapper';
 import { WorkspaceUiSettingsClientWrapper } from './saved_objects/workspace_ui_settings_client_wrapper';
+import { uiSettings } from './ui_settings';
 
 export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePluginStart> {
   private readonly logger: Logger;
@@ -101,6 +105,62 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
       this.workspaceSavedObjectsClientWrapper.wrapperFactory
     );
+
+    core.http.registerOnPreResponse((request, _response, toolkit) => {
+      this.permissionControl?.clearSavedObjectsCache(request);
+      return toolkit.next();
+    });
+  }
+
+  private setUpRedirectPage(core: CoreSetup) {
+    core.http.registerOnPostAuth(async (request, response, toolkit) => {
+      const path = request.url.pathname;
+      if (path === '/') {
+        const workspaceListResponse = await this.client?.list(
+          { request, logger: this.logger },
+          { page: 1, perPage: 100 }
+        );
+        const basePath = core.http.basePath.serverBasePath;
+
+        if (workspaceListResponse?.success && workspaceListResponse.result.total > 0) {
+          const workspaceList = workspaceListResponse.result.workspaces;
+          // If user only has one workspace, go to overview page of that workspace
+          if (workspaceList.length === 1) {
+            return response.redirected({
+              headers: {
+                location: `${basePath}/w/${workspaceList[0].id}/app/${WORKSPACE_NAVIGATION_APP_ID}`,
+              },
+            });
+          }
+          const [coreStart] = await core.getStartServices();
+          const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
+            coreStart.savedObjects.getScopedClient(request)
+          );
+          const defaultWorkspaceId = await uiSettingsClient.get(DEFAULT_WORKSPACE);
+          const defaultWorkspace = workspaceList.find(
+            (workspace) => workspace.id === defaultWorkspaceId
+          );
+          // If user has a default workspace configured, go to overview page of that workspace
+          // If user has more than one workspaces, go to homepage
+          if (defaultWorkspace) {
+            return response.redirected({
+              headers: {
+                location: `${basePath}/w/${defaultWorkspace.id}/app/${WORKSPACE_NAVIGATION_APP_ID}`,
+              },
+            });
+          } else {
+            return response.redirected({
+              headers: { location: `${basePath}/app/home` },
+            });
+          }
+        }
+        // If user has no workspaces, go to initial page
+        return response.redirected({
+          headers: { location: `${basePath}/app/${WORKSPACE_INITIAL_APP_ID}` },
+        });
+      }
+      return toolkit.next();
+    });
   }
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -113,7 +173,10 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
     const isPermissionControlEnabled = globalConfig.savedObjects.permission.enabled === true;
 
-    this.client = new WorkspaceClient(core);
+    // setup new ui_setting user's default workspace
+    core.uiSettings.register(uiSettings);
+
+    this.client = new WorkspaceClient(core, this.logger);
 
     await this.client.setup(core);
 
@@ -143,9 +206,10 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     const maxImportExportSize = core.savedObjects.getImportExportObjectLimit();
     this.logger.info('Workspace permission control enabled:' + isPermissionControlEnabled);
     if (isPermissionControlEnabled) this.setupPermission(core);
+    const router = core.http.createRouter();
 
     registerRoutes({
-      http: core.http,
+      router,
       logger: this.logger,
       client: this.client as IWorkspaceClientImpl,
       maxImportExportSize,
@@ -167,6 +231,8 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       return { dashboards: { isDashboardAdmin } };
     });
 
+    this.setUpRedirectPage(core);
+
     return {
       client: this.client,
     };
@@ -176,6 +242,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     this.logger.debug('Starting Workspace service');
     this.permissionControl?.setup(core.savedObjects.getScopedClient, core.http.auth);
     this.client?.setSavedObjects(core.savedObjects);
+    this.client?.setUiSettings(core.uiSettings);
     this.workspaceConflictControl?.setSerializer(core.savedObjects.createSerializer());
     this.workspaceSavedObjectsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);
     this.workspaceUiSettingsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);

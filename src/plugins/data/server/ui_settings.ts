@@ -717,6 +717,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           only querying and querying languages that are considered production-ready are available to the user.`,
       }),
       category: ['search'],
+      requiresPageReload: true,
       schema: schema.boolean(),
     },
     [UI_SETTINGS.QUERY_DATAFRAME_HYDRATION_STRATEGY]: {
@@ -750,19 +751,6 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       category: ['search'],
       schema: schema.string(),
     },
-    [UI_SETTINGS.QUERY_DATA_SOURCE_READONLY]: {
-      name: i18n.translate('data.advancedSettings.query.dataSource.readOnlyTitle', {
-        defaultMessage: 'Read-only data source in query editor',
-      }),
-      value: true,
-      description: i18n.translate('data.advancedSettings.query.dataSource.readOnlyText', {
-        defaultMessage:
-          'When enabled, the search bar prevents modifying the data source in the query input. ' +
-          '<strong>Experimental</strong>: Requires query enhancements enabled.',
-      }),
-      category: ['search'],
-      schema: schema.boolean(),
-    },
     [UI_SETTINGS.SEARCH_QUERY_LANGUAGE_BLOCKLIST]: {
       name: i18n.translate('data.advancedSettings.searchQueryLanguageBlocklistTitle', {
         defaultMessage: 'Additional query languages blocklist',
@@ -773,6 +761,19 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
          <strong>Note</strong>: DQL and Lucene will not be blocked even if set.`,
       }),
       schema: schema.arrayOf(schema.string()),
+    },
+    [UI_SETTINGS.SEARCH_INCLUDE_ALL_FIELDS]: {
+      name: i18n.translate('data.advancedSettings.searchIncludeAllFieldsTitle', {
+        defaultMessage: 'Include all fields in search request',
+      }),
+      value: false,
+      description: i18n.translate('data.advancedSettings.searchIncludeAllFieldsText', {
+        defaultMessage: `
+        <strong>Experimental</strong>:
+        Adds the <code>"fields": ["*"]</code> property to search request body`,
+      }),
+      schema: schema.boolean(),
+      category: ['search'],
     },
   };
 }

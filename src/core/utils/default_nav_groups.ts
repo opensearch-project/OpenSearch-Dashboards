@@ -6,11 +6,17 @@
 import { i18n } from '@osd/i18n';
 import { ChromeNavGroup, NavGroupType } from '../types';
 
+export const ALL_USE_CASE_ID = 'all';
+export const OBSERVABILITY_USE_CASE_ID = 'observability';
+export const SECURITY_ANALYTICS_USE_CASE_ID = 'security-analytics';
+export const ESSENTIAL_USE_CASE_ID = 'essentials';
+export const SEARCH_USE_CASE_ID = 'search';
+
 const defaultNavGroups = {
   dataAdministration: {
     id: 'dataAdministration',
     title: i18n.translate('core.ui.group.dataAdministration.title', {
-      defaultMessage: 'data administration',
+      defaultMessage: 'Data administration',
     }),
     description: i18n.translate('core.ui.group.dataAdministration.description', {
       defaultMessage: 'Apply policies or security on your data.',
@@ -21,7 +27,7 @@ const defaultNavGroups = {
   settingsAndSetup: {
     id: 'settingsAndSetup',
     title: i18n.translate('core.ui.group.settingsAndSetup.title', {
-      defaultMessage: 'settings and setup',
+      defaultMessage: 'Settings and setup',
     }),
     description: i18n.translate('core.ui.group.settingsAndSetup.description', {
       defaultMessage: 'Set up your cluster with index patterns.',
@@ -29,49 +35,61 @@ const defaultNavGroups = {
     order: 2000,
     type: NavGroupType.SYSTEM,
   },
+  all: {
+    id: ALL_USE_CASE_ID,
+    title: i18n.translate('core.ui.group.all.title', {
+      defaultMessage: 'Analytics (All)',
+    }),
+    description: i18n.translate('core.ui.group.all.description', {
+      defaultMessage: 'This is a use case contains all the features.',
+    }),
+    order: 3000,
+    icon: 'wsAnalytics',
+  },
   observability: {
-    id: 'observability',
+    id: OBSERVABILITY_USE_CASE_ID,
     title: i18n.translate('core.ui.group.observability.title', {
       defaultMessage: 'Observability',
     }),
     description: i18n.translate('core.ui.group.observability.description', {
-      defaultMessage:
-        'Gain visibility into system health, performance, and reliability through monitoring and analysis of logs, metrics, and traces.',
+      defaultMessage: 'Gain visibility into your application and infrastructure',
     }),
-    order: 3000,
+    order: 4000,
+    icon: 'wsObservability',
   },
   'security-analytics': {
-    id: 'security-analytics',
+    id: SECURITY_ANALYTICS_USE_CASE_ID,
     title: i18n.translate('core.ui.group.security.analytics.title', {
       defaultMessage: 'Security Analytics',
     }),
     description: i18n.translate('core.ui.group.security.analytics.description', {
-      defaultMessage:
-        'Detect and investigate potential security threats and vulnerabilities across your systems and data.',
+      defaultMessage: 'Enhance your security posture with advanced analytics',
     }),
-    order: 4000,
+    order: 5000,
+    icon: 'wsSecurityAnalytics',
   },
-  analytics: {
-    id: 'analytics',
-    title: i18n.translate('core.ui.group.analytics.title', {
-      defaultMessage: 'Analytics',
+  essentials: {
+    id: ESSENTIAL_USE_CASE_ID,
+    title: i18n.translate('core.ui.group.essential.title', {
+      defaultMessage: 'Essentials',
     }),
-    description: i18n.translate('core.ui.group.analytics.description', {
+    description: i18n.translate('core.ui.group.essential.description', {
       defaultMessage:
         'Analyze data to derive insights, identify patterns and trends, and make data-driven decisions.',
     }),
-    order: 5000,
+    order: 7000,
+    icon: 'wsEssentials',
   },
   search: {
-    id: 'search',
+    id: SEARCH_USE_CASE_ID,
     title: i18n.translate('core.ui.group.search.title', {
       defaultMessage: 'Search',
     }),
     description: i18n.translate('core.ui.group.search.description', {
-      defaultMessage:
-        "Quickly find and explore relevant information across your organization's data sources.",
+      defaultMessage: 'Discover and query your data with ease',
     }),
     order: 6000,
+    icon: 'wsSearch',
   },
 } as const;
 

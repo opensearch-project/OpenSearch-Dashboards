@@ -7,8 +7,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { Observable } from 'rxjs';
-import { IIndexPattern } from '../../../../common';
-import { DataSource } from '../../../data_sources/datasource';
+import { DataStructureMeta } from '../../../../common';
 
 interface QueryEditorExtensionProps {
   config: QueryEditorExtensionConfig;
@@ -19,17 +18,21 @@ interface QueryEditorExtensionProps {
 
 export interface QueryEditorExtensionDependencies {
   /**
-   * Currently selected index patterns.
-   */
-  indexPatterns?: Array<IIndexPattern | string>;
-  /**
-   * Currently selected data source.
-   */
-  dataSource?: DataSource;
-  /**
    * Currently selected query language.
    */
   language: string;
+  /**
+   * Change the selected query language.
+   */
+  onSelectLanguage: (language: string) => void;
+  /**
+   * Whether the query editor is collapsed.
+   */
+  isCollapsed: boolean;
+  /**
+   * Set whether the query editor is collapsed.
+   */
+  setIsCollapsed: (isCollapsed: boolean) => void;
 }
 
 export interface QueryEditorExtensionConfig {
@@ -47,6 +50,12 @@ export interface QueryEditorExtensionConfig {
    */
   isEnabled$: (dependencies: QueryEditorExtensionDependencies) => Observable<boolean>;
   /**
+   * @returns DataStructureMeta for a given data source id.
+   */
+  getDataStructureMeta?: (
+    dataSourceId: string | undefined
+  ) => Promise<DataStructureMeta | undefined>;
+  /**
    * A function that returns the query editor extension component. The component
    * will be displayed on top of the query editor in the search bar.
    * @param dependencies - The dependencies required for the extension.
@@ -61,7 +70,6 @@ export interface QueryEditorExtensionConfig {
    */
   getBanner?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
 }
-
 const QueryEditorExtensionPortal: React.FC<{ container: Element }> = (props) => {
   if (!props.children) return null;
 

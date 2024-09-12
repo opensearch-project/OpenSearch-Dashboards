@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiEmptyPrompt,
   EuiPage,
   EuiPageBody,
@@ -49,12 +49,12 @@ export function WorkspaceFatalError(props: { error?: string }) {
               </p>
             }
             actions={[
-              <EuiButton color="primary" fill onClick={goBackToHome}>
+              <EuiSmallButton color="primary" fill onClick={goBackToHome}>
                 <FormattedMessage
                   id="core.fatalErrors.goBackToHome"
                   defaultMessage="Go back to homepage"
                 />
-              </EuiButton>,
+              </EuiSmallButton>,
             ]}
           />
           {props.error ? <EuiCallOut title={props.error} color="danger" iconType="alert" /> : null}

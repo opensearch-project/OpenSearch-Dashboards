@@ -14,8 +14,8 @@ export interface TableUiState {
 }
 
 export function getTableUIState(uiState: PersistedState): TableUiState {
-  const sort: ColumnSort = uiState.get('vis.sortColumn') || {};
-  const colWidth: ColumnWidth[] = uiState.get('vis.columnsWidth') || [];
+  const sort: ColumnSort = uiState?.get('vis.sortColumn') || {};
+  const colWidth: ColumnWidth[] = uiState?.get('vis.columnsWidth') || [];
 
   const setSort = (newSort: ColumnSort) => {
     uiState.set('vis.sortColumn', newSort);

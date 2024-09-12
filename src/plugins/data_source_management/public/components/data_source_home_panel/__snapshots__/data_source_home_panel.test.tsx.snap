@@ -15,6 +15,7 @@ exports[`DataSourceHomePanel renders correctly 1`] = `
             grow={false}
           >
             <DataSourceHeader
+              featureFlagStatus={true}
               history={
                 Object {
                   "push": [MockFunction],
@@ -27,6 +28,7 @@ exports[`DataSourceHomePanel renders correctly 1`] = `
           >
             <CreateButton
               dataTestSubj="createDataSourceButton"
+              featureFlagStatus={true}
               history={
                 Object {
                   "push": [MockFunction],
@@ -41,33 +43,34 @@ exports[`DataSourceHomePanel renders correctly 1`] = `
       <EuiSpacer
         size="s"
       />
-      <EuiTabs>
+      <EuiTabs
+        size="s"
+      >
         <EuiTab
           isSelected={true}
-          key="manageDirectQueryDataSources"
-          onClick={[Function]}
-        >
-          Direct query connections
-        </EuiTab>
-        <EuiTab
-          isSelected={false}
           key="manageOpensearchDataSources"
           onClick={[Function]}
         >
           OpenSearch connections
         </EuiTab>
+        <EuiTab
+          isSelected={false}
+          key="manageDirectQueryDataSources"
+          onClick={[Function]}
+        >
+          Direct query connections
+        </EuiTab>
       </EuiTabs>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiSpacer
-        size="s"
-      />
-      <ManageDirectQueryDataConnectionsTable
-        featureFlagStatus={true}
-        http={Object {}}
-        notifications={Object {}}
-        savedObjects={Object {}}
-        uiSettings={Object {}}
+      <DataSourceTableWithRouter
+        history={
+          Object {
+            "push": [MockFunction],
+          }
+        }
+        location={Object {}}
+        match={Object {}}
       />
     </EuiFlexItem>
   </EuiFlexGroup>

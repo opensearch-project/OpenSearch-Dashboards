@@ -63,6 +63,7 @@ export function DocViewTableRowBtnFilterRemove({ onClick, disabled = false }: Pr
         onClick={onClick}
         iconType={'magnifyWithMinus'}
         iconSize={'s'}
+        size={'xs'}
       />
     </EuiToolTip>
   );

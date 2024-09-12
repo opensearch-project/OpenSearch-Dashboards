@@ -27,23 +27,25 @@ exports[`ImportFlyout Component renders correctly 1`] = `
           <div
             className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
           >
-            <EuiTitle
-              size="m"
+            <EuiText
+              size="s"
             >
-              <h2
-                className="euiTitle euiTitle--medium"
+              <div
+                className="euiText euiText--small"
               >
-                <FormattedMessage
-                  defaultMessage="Import queries"
-                  id="console.ImportFlyout.importQueriesTitle"
-                  values={Object {}}
-                >
-                  <span>
-                    Import queries
-                  </span>
-                </FormattedMessage>
-              </h2>
-            </EuiTitle>
+                <h2>
+                  <FormattedMessage
+                    defaultMessage="Import queries"
+                    id="console.ImportFlyout.importQueriesTitle"
+                    values={Object {}}
+                  >
+                    <span>
+                      Import queries
+                    </span>
+                  </FormattedMessage>
+                </h2>
+              </div>
+            </EuiText>
           </div>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
@@ -61,9 +63,9 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                   <div
                     className="euiForm"
                   >
-                    <EuiFormRow
+                    <EuiCompressedFormRow
                       describedByIds={Array []}
-                      display="row"
+                      display="rowCompressed"
                       fullWidth={true}
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
@@ -77,7 +79,7 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                       labelType="label"
                     >
                       <div
-                        className="euiFormRow euiFormRow--fullWidth"
+                        className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
                         id="generated-id-row"
                       >
                         <div
@@ -108,9 +110,9 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                         <div
                           className="euiFormRow__fieldWrapper"
                         >
-                          <EuiFilePicker
+                          <EuiCompressedFilePicker
                             accept=".ndjson, .json"
-                            compressed={false}
+                            compressed={true}
                             data-test-subj="queryFilePicker"
                             display="large"
                             fullWidth={true}
@@ -142,7 +144,7 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                               }
                             >
                               <div
-                                className="euiFilePicker euiFilePicker--large euiFilePicker--fullWidth"
+                                className="euiFilePicker euiFilePicker--large euiFilePicker--compressed euiFilePicker--fullWidth"
                               >
                                 <div
                                   className="euiFilePicker__wrap"
@@ -198,20 +200,20 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                                 </div>
                               </div>
                             </EuiI18n>
-                          </EuiFilePicker>
+                          </EuiCompressedFilePicker>
                         </div>
                       </div>
-                    </EuiFormRow>
-                    <EuiFormRow
+                    </EuiCompressedFormRow>
+                    <EuiCompressedFormRow
                       describedByIds={Array []}
-                      display="row"
+                      display="rowCompressed"
                       fullWidth={true}
                       hasChildLabel={true}
                       hasEmptyLabelSpace={false}
                       labelType="label"
                     >
                       <div
-                        className="euiFormRow euiFormRow--fullWidth"
+                        className="euiFormRow euiFormRow--fullWidth euiFormRow--compressed"
                         id="generated-id-row"
                       >
                         <div
@@ -257,7 +259,7 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                                     </EuiTitle>
                                   </legend>
                                 </EuiFormLegend>
-                                <EuiRadioGroup
+                                <EuiCompressedRadioGroup
                                   idSelected="overwriteDisabled"
                                   onChange={[Function]}
                                   options={
@@ -273,73 +275,93 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                                     ]
                                   }
                                 >
-                                  <div>
-                                    <EuiRadio
-                                      checked={true}
-                                      className="euiRadioGroup__item"
-                                      id="overwriteDisabled"
-                                      key="0"
-                                      label="Merge with existing queries"
-                                      onChange={[Function]}
-                                    >
-                                      <div
-                                        className="euiRadio euiRadioGroup__item"
+                                  <EuiRadioGroup
+                                    compressed={true}
+                                    idSelected="overwriteDisabled"
+                                    onChange={[Function]}
+                                    options={
+                                      Array [
+                                        Object {
+                                          "id": "overwriteDisabled",
+                                          "label": "Merge with existing queries",
+                                        },
+                                        Object {
+                                          "id": "overwriteEnabled",
+                                          "label": "Overwrite existing queries",
+                                        },
+                                      ]
+                                    }
+                                  >
+                                    <div>
+                                      <EuiRadio
+                                        checked={true}
+                                        className="euiRadioGroup__item"
+                                        compressed={true}
+                                        id="overwriteDisabled"
+                                        key="0"
+                                        label="Merge with existing queries"
+                                        onChange={[Function]}
                                       >
-                                        <input
-                                          checked={true}
-                                          className="euiRadio__input"
-                                          id="overwriteDisabled"
-                                          onChange={[Function]}
-                                          type="radio"
-                                        />
                                         <div
-                                          className="euiRadio__circle"
-                                        />
-                                        <label
-                                          className="euiRadio__label"
-                                          htmlFor="overwriteDisabled"
+                                          className="euiRadio euiRadio--compressed euiRadioGroup__item"
                                         >
-                                          Merge with existing queries
-                                        </label>
-                                      </div>
-                                    </EuiRadio>
-                                    <EuiRadio
-                                      checked={false}
-                                      className="euiRadioGroup__item"
-                                      id="overwriteEnabled"
-                                      key="1"
-                                      label="Overwrite existing queries"
-                                      onChange={[Function]}
-                                    >
-                                      <div
-                                        className="euiRadio euiRadioGroup__item"
+                                          <input
+                                            checked={true}
+                                            className="euiRadio__input"
+                                            id="overwriteDisabled"
+                                            onChange={[Function]}
+                                            type="radio"
+                                          />
+                                          <div
+                                            className="euiRadio__circle"
+                                          />
+                                          <label
+                                            className="euiRadio__label"
+                                            htmlFor="overwriteDisabled"
+                                          >
+                                            Merge with existing queries
+                                          </label>
+                                        </div>
+                                      </EuiRadio>
+                                      <EuiRadio
+                                        checked={false}
+                                        className="euiRadioGroup__item"
+                                        compressed={true}
+                                        id="overwriteEnabled"
+                                        key="1"
+                                        label="Overwrite existing queries"
+                                        onChange={[Function]}
                                       >
-                                        <input
-                                          checked={false}
-                                          className="euiRadio__input"
-                                          id="overwriteEnabled"
-                                          onChange={[Function]}
-                                          type="radio"
-                                        />
                                         <div
-                                          className="euiRadio__circle"
-                                        />
-                                        <label
-                                          className="euiRadio__label"
-                                          htmlFor="overwriteEnabled"
+                                          className="euiRadio euiRadio--compressed euiRadioGroup__item"
                                         >
-                                          Overwrite existing queries
-                                        </label>
-                                      </div>
-                                    </EuiRadio>
-                                  </div>
-                                </EuiRadioGroup>
+                                          <input
+                                            checked={false}
+                                            className="euiRadio__input"
+                                            id="overwriteEnabled"
+                                            onChange={[Function]}
+                                            type="radio"
+                                          />
+                                          <div
+                                            className="euiRadio__circle"
+                                          />
+                                          <label
+                                            className="euiRadio__label"
+                                            htmlFor="overwriteEnabled"
+                                          >
+                                            Overwrite existing queries
+                                          </label>
+                                        </div>
+                                      </EuiRadio>
+                                    </div>
+                                  </EuiRadioGroup>
+                                </EuiCompressedRadioGroup>
                               </fieldset>
                             </EuiFormFieldset>
                           </ImportModeControl>
                         </div>
                       </div>
-                    </EuiFormRow>
+                    </EuiCompressedFormRow>
                   </div>
                 </EuiForm>
               </div>
@@ -377,6 +399,7 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                       >
                         <EuiButtonContent
                           className="euiButtonEmpty__content"
+                          iconGap="m"
                           iconSide="left"
                           iconSize="m"
                           textProps={
@@ -447,6 +470,7 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                         >
                           <EuiButtonContent
                             className="euiButton__content"
+                            iconGap="m"
                             iconSide="left"
                             isLoading={false}
                             textProps={

@@ -1,0 +1,116 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AccessControlTab Component matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="euiSpacer euiSpacer--l"
+  />
+  <div
+    class="euiCallOut euiCallOut--primary"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <span
+        aria-hidden="true"
+        class="euiCallOutHeader__icon"
+        color="inherit"
+        data-euiicon-type="iInCircle"
+      />
+      <span
+        class="euiCallOutHeader__title"
+      >
+        Configurations may be managed elsewhere.
+      </span>
+    </div>
+    <div
+      class="euiText euiText--small"
+    >
+      <div
+        class="euiTextColor euiTextColor--default"
+      >
+        Access to data may be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--l"
+  />
+  <div
+    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+  >
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiText euiText--small"
+        >
+          <h2
+            class="panel-title"
+          >
+            Access control
+          </h2>
+          Control which OpenSearch users have access to this data source.
+        </div>
+      </div>
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          class="euiButton euiButton--primary"
+          data-test-subj="createButton"
+          type="button"
+        >
+          <span
+            class="euiButtonContent euiButton__content"
+          >
+            <span
+              class="euiButton__text"
+            >
+              Edit
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+    <hr
+      class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+    />
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        >
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              class="euiText euiText--medium overview-title"
+            >
+              Query access
+            </div>
+            <div
+              class="euiText euiText--small overview-content"
+            >
+              Restricted to admin,user
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--l"
+  />
+  <div
+    class="euiSpacer euiSpacer--l"
+  />
+</DocumentFragment>
+`;

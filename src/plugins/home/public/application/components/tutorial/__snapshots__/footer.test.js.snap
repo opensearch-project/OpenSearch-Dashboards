@@ -23,12 +23,12 @@ exports[`render 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiButton
+      <EuiSmallButton
         fill={true}
         href="/app/myapp"
       >
         launch myapp
-      </EuiButton>
+      </EuiSmallButton>
     </EuiFlexItem>
   </EuiFlexGroup>
 </div>

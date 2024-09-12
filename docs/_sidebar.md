@@ -30,6 +30,7 @@
         - public
           - application
             - [Hooks](../src/plugins/console/public/application/hooks/README.md)
+      - [Content_management](../src/plugins/content_management/README.md)
       - [Csp_handler](../src/plugins/csp_handler/README.md)
       - [Dashboard](../src/plugins/dashboard/README.md)
       - [Data](../src/plugins/data/README.md)
@@ -59,6 +60,7 @@
           - forms
             - [Form_wizard](../src/plugins/opensearch_ui_shared/public/forms/form_wizard/README.md)
             - [Multi_content](../src/plugins/opensearch_ui_shared/public/forms/multi_content/README.md)
+      - [Query_enhancements](../src/plugins/query_enhancements/README.md)
       - [Saved_objects](../src/plugins/saved_objects/README.md)
       - [Saved_objects_management](../src/plugins/saved_objects_management/README.md)
       - [Share](../src/plugins/share/README.md)
@@ -145,6 +147,7 @@
     - [Opensearch dashboards.release notes 1.3.14](../release-notes/opensearch-dashboards.release-notes-1.3.14.md)
     - [Opensearch dashboards.release notes 1.3.15](../release-notes/opensearch-dashboards.release-notes-1.3.15.md)
     - [Opensearch dashboards.release notes 1.3.17](../release-notes/opensearch-dashboards.release-notes-1.3.17.md)
+    - [Opensearch dashboards.release notes 1.3.19](../release-notes/opensearch-dashboards.release-notes-1.3.19.md)
     - [Opensearch dashboards.release notes 1.3.2](../release-notes/opensearch-dashboards.release-notes-1.3.2.md)
     - [Opensearch dashboards.release notes 1.3.3](../release-notes/opensearch-dashboards.release-notes-1.3.3.md)
     - [Opensearch dashboards.release notes 1.3.5](../release-notes/opensearch-dashboards.release-notes-1.3.5.md)
@@ -163,6 +166,8 @@
     - [Opensearch dashboards.release notes 2.13.0](../release-notes/opensearch-dashboards.release-notes-2.13.0.md)
     - [Opensearch dashboards.release notes 2.14.0](../release-notes/opensearch-dashboards.release-notes-2.14.0.md)
     - [Opensearch dashboards.release notes 2.15.0](../release-notes/opensearch-dashboards.release-notes-2.15.0.md)
+    - [Opensearch dashboards.release notes 2.16.0](../release-notes/opensearch-dashboards.release-notes-2.16.0.md)
+    - [Opensearch dashboards.release notes 2.17.0](../release-notes/opensearch-dashboards.release-notes-2.17.0.md)
     - [Opensearch dashboards.release notes 2.2.0](../release-notes/opensearch-dashboards.release-notes-2.2.0.md)
     - [Opensearch dashboards.release notes 2.2.1](../release-notes/opensearch-dashboards.release-notes-2.2.1.md)
     - [Opensearch dashboards.release notes 2.3.0](../release-notes/opensearch-dashboards.release-notes-2.3.0.md)

@@ -73,6 +73,13 @@ import {
   RightNavigationButtonProps,
   ChromeRegistrationNavLink,
   ChromeNavGroupUpdater,
+  PersistedLog,
+  NavGroupItemInMap,
+  fulfillRegistrationLinksToChromeNavLinks,
+  createRecentNavLink,
+  HeaderVariant,
+  LinkItemType,
+  getSortedNavLinks,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -104,6 +111,11 @@ export {
   WORKSPACE_TYPE,
   cleanWorkspaceId,
   DEFAULT_NAV_GROUPS,
+  ALL_USE_CASE_ID,
+  SEARCH_USE_CASE_ID,
+  ESSENTIAL_USE_CASE_ID,
+  OBSERVABILITY_USE_CASE_ID,
+  SECURITY_ANALYTICS_USE_CASE_ID,
 } from '../utils';
 export {
   AppCategory,
@@ -118,6 +130,9 @@ export {
   ChromeNavGroup,
   NavGroupType,
   NavGroupStatus,
+  WorkspaceAttributeWithPermission,
+  UiSettingScope,
+  PermissionModeId,
 } from '../types';
 
 export {
@@ -372,10 +387,23 @@ export {
   RightNavigationButtonProps,
   ChromeRegistrationNavLink,
   ChromeNavGroupUpdater,
+  PersistedLog,
+  NavGroupItemInMap,
+  fulfillRegistrationLinksToChromeNavLinks,
+  createRecentNavLink,
+  HeaderVariant,
+  LinkItemType,
+  getSortedNavLinks,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';
 
-export { WorkspacesStart, WorkspacesSetup, WorkspacesService, WorkspaceObject } from './workspace';
+export {
+  WorkspacesStart,
+  WorkspacesSetup,
+  WorkspacesService,
+  WorkspaceObject,
+  IWorkspaceClient,
+} from './workspace';
 
 export { debounce } from './utils';

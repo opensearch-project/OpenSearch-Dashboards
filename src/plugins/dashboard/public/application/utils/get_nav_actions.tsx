@@ -5,7 +5,7 @@
 
 import React, { ReactElement, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { EUI_MODAL_CANCEL_BUTTON, EuiCheckboxGroup } from '@elastic/eui';
+import { EUI_MODAL_CANCEL_BUTTON, EuiCompressedCheckboxGroup } from '@elastic/eui';
 import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/form/checkbox/checkbox_group';
 import {
   SaveResult,
@@ -174,7 +174,12 @@ export const getNavActions = (
         getFactory: embeddable.getEmbeddableFactory,
         notifications,
         overlays,
-        SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
+        SavedObjectFinder: getSavedObjectFinder(
+          savedObjects,
+          uiSettings,
+          services.data,
+          services.application
+        ),
       });
     }
   };
@@ -265,7 +270,7 @@ export const getNavActions = (
         };
 
         return (
-          <EuiCheckboxGroup
+          <EuiCompressedCheckboxGroup
             options={checkboxes}
             idToSelectedMap={(urlParamsSelectedMap as unknown) as EuiCheckboxGroupIdToSelectedMap}
             onChange={handleChange}

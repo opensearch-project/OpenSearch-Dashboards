@@ -1,0 +1,30 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoAccess renders correctly 1`] = `
+<EuiPage>
+  <EuiEmptyPrompt
+    actions={
+      <EuiButton
+        color="primary"
+        fill={true}
+        onClick={[Function]}
+      >
+        Return to data connections
+      </EuiButton>
+    }
+    body={
+      <EuiText
+        size="s"
+      >
+        You are missing permissions to view connection details. Contact your administrator for permissions.
+      </EuiText>
+    }
+    iconType="alert"
+    title={
+      <h2>
+        No permissions to access
+      </h2>
+    }
+  />
+</EuiPage>
+`;

@@ -30,17 +30,17 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiModal,
-  EuiButton,
+  EuiSmallButton,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
   EuiForm,
-  EuiFormRow,
-  EuiFieldText,
-  EuiSwitch,
+  EuiCompressedFormRow,
+  EuiCompressedFieldText,
+  EuiCompressedSwitch,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -156,12 +156,12 @@ export function SaveQueryForm({
 
   const saveQueryForm = (
     <EuiForm isInvalid={hasErrors} error={formErrors} data-test-subj="saveQueryForm">
-      <EuiFormRow>
+      <EuiCompressedFormRow>
         <EuiText size="s" color="subdued">
           {savedQueryDescriptionText}
         </EuiText>
-      </EuiFormRow>
-      <EuiFormRow
+      </EuiCompressedFormRow>
+      <EuiCompressedFormRow
         label={i18n.translate('data.search.searchBar.savedQueryNameLabelText', {
           defaultMessage: 'Name',
         })}
@@ -171,7 +171,7 @@ export function SaveQueryForm({
         })}
         isInvalid={hasErrors}
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           disabled={!!savedQuery}
           value={title}
           name="title"
@@ -180,14 +180,14 @@ export function SaveQueryForm({
           isInvalid={hasErrors}
           onBlur={autoTrim}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
 
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={i18n.translate('data.search.searchBar.savedQueryDescriptionLabelText', {
           defaultMessage: 'Description',
         })}
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           value={description}
           name="description"
           onChange={(event) => {
@@ -195,10 +195,10 @@ export function SaveQueryForm({
           }}
           data-test-subj="saveQueryFormDescription"
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
       {showFilterOption && (
-        <EuiFormRow>
-          <EuiSwitch
+        <EuiCompressedFormRow>
+          <EuiCompressedSwitch
             name="shouldIncludeFilters"
             label={i18n.translate('data.search.searchBar.savedQueryIncludeFiltersLabelText', {
               defaultMessage: 'Include filters',
@@ -209,12 +209,12 @@ export function SaveQueryForm({
             }}
             data-test-subj="saveQueryFormIncludeFiltersOption"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       )}
 
       {showTimeFilterOption && (
-        <EuiFormRow>
-          <EuiSwitch
+        <EuiCompressedFormRow>
+          <EuiCompressedSwitch
             name="shouldIncludeTimefilter"
             label={i18n.translate('data.search.searchBar.savedQueryIncludeTimeFilterLabelText', {
               defaultMessage: 'Include time filter',
@@ -225,7 +225,7 @@ export function SaveQueryForm({
             }}
             data-test-subj="saveQueryFormIncludeTimeFilterOption"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       )}
     </EuiForm>
   );
@@ -234,22 +234,26 @@ export function SaveQueryForm({
     <EuiModal onClose={onClose} initialFocus="[name=title]">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {i18n.translate('data.search.searchBar.savedQueryFormTitle', {
-            defaultMessage: 'Save query',
-          })}
+          <EuiText size="s">
+            <h2>
+              {i18n.translate('data.search.searchBar.savedQueryFormTitle', {
+                defaultMessage: 'Save query',
+              })}
+            </h2>
+          </EuiText>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
       <EuiModalBody>{saveQueryForm}</EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} data-test-subj="savedQueryFormCancelButton">
+        <EuiSmallButtonEmpty onClick={onClose} data-test-subj="savedQueryFormCancelButton">
           {i18n.translate('data.search.searchBar.savedQueryFormCancelButtonText', {
             defaultMessage: 'Cancel',
           })}
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
 
-        <EuiButton
+        <EuiSmallButton
           onClick={onClickSave}
           fill
           data-test-subj="savedQueryFormSaveButton"
@@ -258,7 +262,7 @@ export function SaveQueryForm({
           {i18n.translate('data.search.searchBar.savedQueryFormSaveButtonText', {
             defaultMessage: 'Save',
           })}
-        </EuiButton>
+        </EuiSmallButton>
       </EuiModalFooter>
     </EuiModal>
   );

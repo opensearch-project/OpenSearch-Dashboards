@@ -30,11 +30,13 @@
 
 import { createHash } from 'crypto';
 import Boom from '@hapi/boom';
-import { i18n } from '@osd/i18n';
+import { i18n, i18nLoader } from '@osd/i18n';
 import * as v7light from '@elastic/eui/dist/eui_theme_light.json';
 import * as v7dark from '@elastic/eui/dist/eui_theme_dark.json';
 import * as v8light from '@elastic/eui/dist/eui_theme_next_light.json';
 import * as v8dark from '@elastic/eui/dist/eui_theme_next_dark.json';
+import * as v9light from '@elastic/eui/dist/eui_theme_v9_light.json';
+import * as v9dark from '@elastic/eui/dist/eui_theme_v9_dark.json';
 import * as UiSharedDeps from '@osd/ui-shared-deps';
 import { OpenSearchDashboardsRequest } from '../../../core/server';
 import { AppBootstrap } from './bootstrap';
@@ -53,32 +55,67 @@ import { getApmConfig } from '../apm';
  */
 export function uiRenderMixin(osdServer, server, config) {
   const translationsCache = { translations: null, hash: null };
+  const defaultLocale = i18n.getLocale() || 'en'; // Fallback to 'en' if no default locale is set
+
+  // Route handler for serving translation files.
+  // This handler supports two scenarios:
+  // 1. Serving translations for the default locale
+  // 2. Serving translations for other registered locales
   server.route({
     path: '/translations/{locale}.json',
     method: 'GET',
     config: { auth: false },
-    handler(request, h) {
-      // OpenSearch Dashboards server loads translations only for a single locale
-      // that is specified in `i18n.locale` config value.
+    handler: async (request, h) => {
       const { locale } = request.params;
-      if (i18n.getLocale() !== locale.toLowerCase()) {
-        throw Boom.notFound(`Unknown locale: ${locale}`);
+      const normalizedLocale = locale.toLowerCase();
+      const registeredLocales = i18nLoader.getRegisteredLocales().map((l) => l.toLowerCase());
+      let warning = null;
+
+      // Function to get or create cached translations
+      const getCachedTranslations = async (localeKey, getTranslationsFn) => {
+        if (!translationsCache[localeKey]) {
+          const translations = await getTranslationsFn();
+          translationsCache[localeKey] = {
+            translations: translations,
+            hash: createHash('sha1').update(JSON.stringify(translations)).digest('hex'),
+          };
+        }
+        return translationsCache[localeKey];
+      };
+
+      let cachedTranslations;
+
+      if (normalizedLocale === defaultLocale.toLowerCase()) {
+        // Default locale
+        cachedTranslations = await getCachedTranslations(defaultLocale, () =>
+          i18n.getTranslation()
+        );
+      } else if (registeredLocales.includes(normalizedLocale)) {
+        // Other registered locales
+        cachedTranslations = await getCachedTranslations(normalizedLocale, () =>
+          i18nLoader.getTranslationsByLocale(locale)
+        );
+      } else {
+        // Locale not found, fall back to en locale
+        cachedTranslations = await getCachedTranslations('en', () =>
+          i18nLoader.getTranslationsByLocale('en')
+        );
+        warning = {
+          title: 'Unsupported Locale',
+          text: `The requested locale "${locale}" is not supported. Falling back to English.`,
+        };
       }
 
-      // Stringifying thousands of labels and calculating hash on the resulting
-      // string can be expensive so it makes sense to do it once and cache.
-      if (translationsCache.translations == null) {
-        translationsCache.translations = JSON.stringify(i18n.getTranslation());
-        translationsCache.hash = createHash('sha1')
-          .update(translationsCache.translations)
-          .digest('hex');
-      }
+      const response = {
+        translations: cachedTranslations.translations,
+        warning,
+      };
 
       return h
-        .response(translationsCache.translations)
+        .response(response)
         .header('cache-control', 'must-revalidate')
         .header('content-type', 'application/json')
-        .etag(translationsCache.hash);
+        .etag(cachedTranslations.hash);
     },
   });
 
@@ -139,6 +176,8 @@ export function uiRenderMixin(osdServer, server, config) {
           basePath,
           regularBundlePath,
           UiSharedDeps,
+          THEME_CSS_DIST_FILENAMES: JSON.stringify(UiSharedDeps.themeCssDistFilenames),
+          KUI_CSS_DIST_FILENAMES: JSON.stringify(UiSharedDeps.kuiCssDistFilenames),
         },
       });
 
@@ -166,15 +205,16 @@ export function uiRenderMixin(osdServer, server, config) {
       );
       const uiSettings = osdServer.newPlatform.start.core.uiSettings.asScopedToClient(soClient);
 
+      // coerce to booleans just in case, to make sure template vars render correctly
       const configEnableUserControl =
         !authEnabled || request.auth.isAuthenticated
-          ? await uiSettings.get('theme:enableUserControl')
-          : uiSettings.getOverrideOrDefault('theme:enableUserControl');
+          ? !!(await uiSettings.get('theme:enableUserControl'))
+          : !!uiSettings.getOverrideOrDefault('theme:enableUserControl');
 
       const configDarkMode =
         !authEnabled || request.auth.isAuthenticated
-          ? await uiSettings.get('theme:darkMode')
-          : uiSettings.getOverrideOrDefault('theme:darkMode');
+          ? !!(await uiSettings.get('theme:darkMode'))
+          : !!uiSettings.getOverrideOrDefault('theme:darkMode');
 
       const configThemeVersion =
         !authEnabled || request.auth.isAuthenticated
@@ -202,6 +242,10 @@ export function uiRenderMixin(osdServer, server, config) {
           light: getLoadingVars(v8light),
           dark: getLoadingVars(v8dark),
         },
+        v9: {
+          light: getLoadingVars(v9light),
+          dark: getLoadingVars(v9dark),
+        },
       });
 
       /*
@@ -211,11 +255,13 @@ export function uiRenderMixin(osdServer, server, config) {
       const fontText = JSON.stringify({
         v7: 'Inter UI',
         v8: 'Source Sans 3',
+        v9: 'Rubik',
       });
 
       const fontCode = JSON.stringify({
         v7: 'Roboto Mono',
         v8: 'Source Code Pro',
+        v9: 'Fira Code',
       });
 
       const startup = new AppBootstrap(
@@ -224,6 +270,9 @@ export function uiRenderMixin(osdServer, server, config) {
             configEnableUserControl,
             configDarkMode,
             configThemeVersion,
+            defaultThemeVersion:
+              UiSharedDeps.themeVersionValueMap[uiSettings.getDefault('theme:version')],
+            THEME_VERSION_VALUE_MAP: JSON.stringify(UiSharedDeps.themeVersionValueMap),
             THEME_SOURCES,
             fontText,
             fontCode,

@@ -1,0 +1,958 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Installed Integrations Table test Renders the empty installed integrations table 1`] = `
+<InstalledIntegrationsTable
+  datasourceName="test"
+  datasourceType="S3GLUE"
+  http={
+    Object {
+      "basePath": Object {
+        "prepend": [Function],
+      },
+      "get": [MockFunction],
+    }
+  }
+  integrations={Array []}
+  refreshInstances={[Function]}
+>
+  <EuiSpacer>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+  <EuiPanel>
+    <div
+      className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+    >
+      <NoInstalledIntegrations
+        toggleFlyout={[Function]}
+      >
+        <EuiFlexGroup
+          alignItems="center"
+          direction="column"
+          gutterSize="xs"
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <EuiIcon
+                  glyphName="iInCircle"
+                  size="xxl"
+                  type="iInCircle"
+                >
+                  <span
+                    data-euiicon-type="iInCircle"
+                    glyphName="iInCircle"
+                    size="xxl"
+                  />
+                </EuiIcon>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <EuiText
+                  textAlign="center"
+                >
+                  <div
+                    className="euiText euiText--medium"
+                  >
+                    <EuiTextAlign
+                      textAlign="center"
+                    >
+                      <div
+                        className="euiTextAlign euiTextAlign--center"
+                      >
+                        <p
+                          style={
+                            Object {
+                              "margin-bottom": "8px",
+                            }
+                          }
+                        >
+                          <b>
+                            There are no installed Integrations
+                          </b>
+                          <br />
+                          Add integrations to get started.
+                        </p>
+                      </div>
+                    </EuiTextAlign>
+                  </div>
+                </EuiText>
+              </div>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <div
+                className="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <AddIntegrationButton
+                  toggleFlyout={[Function]}
+                >
+                  <EuiButton
+                    onClick={[Function]}
+                  >
+                    <EuiButtonDisplay
+                      baseClassName="euiButton"
+                      disabled={false}
+                      element="button"
+                      isDisabled={false}
+                      onClick={[Function]}
+                      type="button"
+                    >
+                      <button
+                        className="euiButton euiButton--primary"
+                        disabled={false}
+                        onClick={[Function]}
+                        style={
+                          Object {
+                            "minWidth": undefined,
+                          }
+                        }
+                        type="button"
+                      >
+                        <EuiButtonContent
+                          className="euiButton__content"
+                          iconGap="m"
+                          iconSide="left"
+                          textProps={
+                            Object {
+                              "className": "euiButton__text",
+                            }
+                          }
+                        >
+                          <span
+                            className="euiButtonContent euiButton__content"
+                          >
+                            <span
+                              className="euiButton__text"
+                            >
+                              Add Integrations
+                            </span>
+                          </span>
+                        </EuiButtonContent>
+                      </button>
+                    </EuiButtonDisplay>
+                  </EuiButton>
+                </AddIntegrationButton>
+              </div>
+            </EuiFlexItem>
+          </div>
+        </EuiFlexGroup>
+      </NoInstalledIntegrations>
+    </div>
+  </EuiPanel>
+</InstalledIntegrationsTable>
+`;
+
+exports[`Installed Integrations Table test Renders the installed integrations table 1`] = `
+<InstalledIntegrationsTable
+  datasourceName="unknown"
+  datasourceType="S3GLUE"
+  http={
+    Object {
+      "basePath": Object {
+        "prepend": [Function],
+      },
+      "get": [MockFunction],
+    }
+  }
+  integrations={
+    Array [
+      Object {
+        "assets": Array [
+          Object {
+            "assetId": "9506c132-f466-4ce3-a875-f187ddec587c",
+            "assetType": "index-pattern",
+            "description": "ss4o_logs_waf-aws_waf-sample-sample",
+            "isDefaultAsset": false,
+            "status": "available",
+          },
+          Object {
+            "assetId": "7770e5be-6f10-4435-9773-021c6188bfe5",
+            "assetType": "visualization",
+            "description": "logs-waf-Top Client IPs",
+            "isDefaultAsset": false,
+            "status": "available",
+          },
+          Object {
+            "assetId": "36f26341-22f0-49c5-9820-f787afb4090c",
+            "assetType": "dashboard",
+            "description": "logs-waf-dashboard",
+            "isDefaultAsset": true,
+            "status": "available",
+          },
+        ],
+        "creationDate": "2024-03-12T16:23:18.053Z",
+        "dataSource": "ss4o_logs_waf-aws_waf-sample-sample",
+        "id": "d5b55c60-e08c-11ee-9c80-ff3b93498fea",
+        "name": "aws_waf-sample",
+        "status": "available",
+        "templateName": "aws_waf",
+      },
+    ]
+  }
+  refreshInstances={[Function]}
+>
+  <EuiSpacer>
+    <div
+      className="euiSpacer euiSpacer--l"
+    />
+  </EuiSpacer>
+  <EuiPanel>
+    <div
+      className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+    >
+      <EuiTitle>
+        <h2
+          className="euiTitle euiTitle--medium"
+        >
+          Installed Integrations
+        </h2>
+      </EuiTitle>
+      <EuiSpacer>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiFlexGroup>
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        >
+          <EuiFlexItem>
+            <div
+              className="euiFlexItem"
+            >
+              <EuiFieldSearch
+                compressed={false}
+                fullWidth={true}
+                incremental={false}
+                isClearable={true}
+                isLoading={false}
+                onChange={[Function]}
+                placeholder="Search..."
+              >
+                <EuiFormControlLayout
+                  compressed={false}
+                  fullWidth={true}
+                  icon="search"
+                  isLoading={false}
+                >
+                  <div
+                    className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                  >
+                    <div
+                      className="euiFormControlLayout__childrenWrapper"
+                    >
+                      <EuiValidatableControl>
+                        <input
+                          className="euiFieldSearch euiFieldSearch--fullWidth"
+                          onChange={[Function]}
+                          onKeyUp={[Function]}
+                          placeholder="Search..."
+                          type="search"
+                        />
+                      </EuiValidatableControl>
+                      <EuiFormControlLayoutIcons
+                        compressed={false}
+                        icon="search"
+                        isLoading={false}
+                      >
+                        <div
+                          className="euiFormControlLayoutIcons"
+                        >
+                          <EuiFormControlLayoutCustomIcon
+                            size="m"
+                            type="search"
+                          >
+                            <span
+                              className="euiFormControlLayoutCustomIcon"
+                            >
+                              <EuiIcon
+                                aria-hidden="true"
+                                className="euiFormControlLayoutCustomIcon__icon"
+                                size="m"
+                                type="search"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  className="euiFormControlLayoutCustomIcon__icon"
+                                  data-euiicon-type="search"
+                                  size="m"
+                                />
+                              </EuiIcon>
+                            </span>
+                          </EuiFormControlLayoutCustomIcon>
+                        </div>
+                      </EuiFormControlLayoutIcons>
+                    </div>
+                  </div>
+                </EuiFormControlLayout>
+              </EuiFieldSearch>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <AddIntegrationButton
+                fill={true}
+                toggleFlyout={[Function]}
+              >
+                <EuiButton
+                  fill={true}
+                  onClick={[Function]}
+                >
+                  <EuiButtonDisplay
+                    baseClassName="euiButton"
+                    disabled={false}
+                    element="button"
+                    fill={true}
+                    isDisabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <button
+                      className="euiButton euiButton--primary euiButton--fill"
+                      disabled={false}
+                      onClick={[Function]}
+                      style={
+                        Object {
+                          "minWidth": undefined,
+                        }
+                      }
+                      type="button"
+                    >
+                      <EuiButtonContent
+                        className="euiButton__content"
+                        iconGap="m"
+                        iconSide="left"
+                        textProps={
+                          Object {
+                            "className": "euiButton__text",
+                          }
+                        }
+                      >
+                        <span
+                          className="euiButtonContent euiButton__content"
+                        >
+                          <span
+                            className="euiButton__text"
+                          >
+                            Add Integrations
+                          </span>
+                        </span>
+                      </EuiButtonContent>
+                    </button>
+                  </EuiButtonDisplay>
+                </EuiButton>
+              </AddIntegrationButton>
+            </div>
+          </EuiFlexItem>
+        </div>
+      </EuiFlexGroup>
+      <EuiSpacer>
+        <div
+          className="euiSpacer euiSpacer--l"
+        />
+      </EuiSpacer>
+      <EuiInMemoryTable
+        columns={
+          Array [
+            Object {
+              "field": "locator",
+              "name": "Instance Name",
+              "render": [Function],
+            },
+            Object {
+              "field": "status",
+              "name": "Status",
+              "render": [Function],
+            },
+            Object {
+              "field": "assets",
+              "name": "Asset Count",
+            },
+          ]
+        }
+        items={
+          Array [
+            Object {
+              "assets": 3,
+              "locator": Object {
+                "id": "d5b55c60-e08c-11ee-9c80-ff3b93498fea",
+                "name": "aws_waf-sample",
+              },
+              "name": "aws_waf-sample",
+              "status": "available",
+            },
+          ]
+        }
+        responsive={true}
+        tableLayout="fixed"
+      >
+        <EuiBasicTable
+          columns={
+            Array [
+              Object {
+                "field": "locator",
+                "name": "Instance Name",
+                "render": [Function],
+              },
+              Object {
+                "field": "status",
+                "name": "Status",
+                "render": [Function],
+              },
+              Object {
+                "field": "assets",
+                "name": "Asset Count",
+              },
+            ]
+          }
+          items={
+            Array [
+              Object {
+                "assets": 3,
+                "locator": Object {
+                  "id": "d5b55c60-e08c-11ee-9c80-ff3b93498fea",
+                  "name": "aws_waf-sample",
+                },
+                "name": "aws_waf-sample",
+                "status": "available",
+              },
+            ]
+          }
+          noItemsMessage="No items found"
+          onChange={[Function]}
+          responsive={true}
+          tableLayout="fixed"
+        >
+          <div
+            className="euiBasicTable"
+          >
+            <div>
+              <EuiTableHeaderMobile>
+                <div
+                  className="euiTableHeaderMobile"
+                >
+                  <EuiFlexGroup
+                    alignItems="baseline"
+                    justifyContent="spaceBetween"
+                    responsive={false}
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                    >
+                      <EuiFlexItem
+                        grow={false}
+                      >
+                        <div
+                          className="euiFlexItem euiFlexItem--flexGrowZero"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        grow={false}
+                      >
+                        <div
+                          className="euiFlexItem euiFlexItem--flexGrowZero"
+                        />
+                      </EuiFlexItem>
+                    </div>
+                  </EuiFlexGroup>
+                </div>
+              </EuiTableHeaderMobile>
+              <EuiTable
+                id="__table_generated-id"
+                responsive={true}
+                tableLayout="fixed"
+              >
+                <table
+                  className="euiTable euiTable--responsive"
+                  id="__table_generated-id"
+                  tabIndex={-1}
+                >
+                  <EuiScreenReaderOnly>
+                    <caption
+                      className="euiScreenReaderOnly euiTableCaption"
+                    >
+                      <EuiDelayRender
+                        delay={500}
+                      />
+                    </caption>
+                  </EuiScreenReaderOnly>
+                  <EuiTableHeader>
+                    <thead>
+                      <tr>
+                        <EuiTableHeaderCell
+                          align="left"
+                          data-test-subj="tableHeaderCell_locator_0"
+                          key="_data_h_locator_0"
+                        >
+                          <th
+                            className="euiTableHeaderCell"
+                            data-test-subj="tableHeaderCell_locator_0"
+                            role="columnheader"
+                            scope="col"
+                            style={
+                              Object {
+                                "width": undefined,
+                              }
+                            }
+                          >
+                            <CellContents
+                              className="euiTableCellContent"
+                              showSortMsg={false}
+                            >
+                              <span
+                                className="euiTableCellContent"
+                              >
+                                <EuiInnerText>
+                                  <EuiI18n
+                                    default="{innerText}; {description}"
+                                    token="euiTableHeaderCell.titleTextWithDesc"
+                                    values={
+                                      Object {
+                                        "description": undefined,
+                                        "innerText": "Instance Name",
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiTableCellContent__text"
+                                      title="Instance Name"
+                                    >
+                                      Instance Name
+                                    </span>
+                                  </EuiI18n>
+                                </EuiInnerText>
+                              </span>
+                            </CellContents>
+                          </th>
+                        </EuiTableHeaderCell>
+                        <EuiTableHeaderCell
+                          align="left"
+                          data-test-subj="tableHeaderCell_status_1"
+                          key="_data_h_status_1"
+                        >
+                          <th
+                            className="euiTableHeaderCell"
+                            data-test-subj="tableHeaderCell_status_1"
+                            role="columnheader"
+                            scope="col"
+                            style={
+                              Object {
+                                "width": undefined,
+                              }
+                            }
+                          >
+                            <CellContents
+                              className="euiTableCellContent"
+                              showSortMsg={false}
+                            >
+                              <span
+                                className="euiTableCellContent"
+                              >
+                                <EuiInnerText>
+                                  <EuiI18n
+                                    default="{innerText}; {description}"
+                                    token="euiTableHeaderCell.titleTextWithDesc"
+                                    values={
+                                      Object {
+                                        "description": undefined,
+                                        "innerText": "Status",
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiTableCellContent__text"
+                                      title="Status"
+                                    >
+                                      Status
+                                    </span>
+                                  </EuiI18n>
+                                </EuiInnerText>
+                              </span>
+                            </CellContents>
+                          </th>
+                        </EuiTableHeaderCell>
+                        <EuiTableHeaderCell
+                          align="left"
+                          data-test-subj="tableHeaderCell_assets_2"
+                          key="_data_h_assets_2"
+                        >
+                          <th
+                            className="euiTableHeaderCell"
+                            data-test-subj="tableHeaderCell_assets_2"
+                            role="columnheader"
+                            scope="col"
+                            style={
+                              Object {
+                                "width": undefined,
+                              }
+                            }
+                          >
+                            <CellContents
+                              className="euiTableCellContent"
+                              showSortMsg={false}
+                            >
+                              <span
+                                className="euiTableCellContent"
+                              >
+                                <EuiInnerText>
+                                  <EuiI18n
+                                    default="{innerText}; {description}"
+                                    token="euiTableHeaderCell.titleTextWithDesc"
+                                    values={
+                                      Object {
+                                        "description": undefined,
+                                        "innerText": "Asset Count",
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiTableCellContent__text"
+                                      title="Asset Count"
+                                    >
+                                      Asset Count
+                                    </span>
+                                  </EuiI18n>
+                                </EuiInnerText>
+                              </span>
+                            </CellContents>
+                          </th>
+                        </EuiTableHeaderCell>
+                      </tr>
+                    </thead>
+                  </EuiTableHeader>
+                  <EuiTableBody
+                    bodyRef={[Function]}
+                  >
+                    <tbody>
+                      <EuiTableRow
+                        isSelected={false}
+                      >
+                        <tr
+                          className="euiTableRow"
+                        >
+                          <EuiTableRowCell
+                            align="left"
+                            key="_data_column_locator_0_0"
+                            mobileOptions={
+                              Object {
+                                "header": "Instance Name",
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={false}
+                          >
+                            <td
+                              className="euiTableRowCell"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Instance Name
+                              </div>
+                              <div
+                                className="euiTableCellContent euiTableCellContent--overflowingContent"
+                              >
+                                <EuiLink
+                                  className=""
+                                  data-test-subj="aws_waf-sampleIntegrationLink"
+                                  href="/app/integrations#/installed/d5b55c60-e08c-11ee-9c80-ff3b93498fea"
+                                  key=".0"
+                                >
+                                  <a
+                                    className="euiLink euiLink--primary"
+                                    data-test-subj="aws_waf-sampleIntegrationLink"
+                                    href="/app/integrations#/installed/d5b55c60-e08c-11ee-9c80-ff3b93498fea"
+                                    rel="noreferrer"
+                                  >
+                                    aws_waf-sample
+                                  </a>
+                                </EuiLink>
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="left"
+                            key="_data_column_status_0_1"
+                            mobileOptions={
+                              Object {
+                                "header": "Status",
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={false}
+                          >
+                            <td
+                              className="euiTableRowCell"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Status
+                              </div>
+                              <div
+                                className="euiTableCellContent euiTableCellContent--overflowingContent"
+                              >
+                                <IntegrationHealthBadge
+                                  className=""
+                                  key=".0"
+                                  status="available"
+                                >
+                                  <EuiHealth
+                                    color="success"
+                                  >
+                                    <div
+                                      className="euiHealth euiHealth--textSizeS"
+                                    >
+                                      <EuiFlexGroup
+                                        alignItems="center"
+                                        gutterSize="xs"
+                                        responsive={false}
+                                      >
+                                        <div
+                                          className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                                        >
+                                          <EuiFlexItem
+                                            grow={false}
+                                          >
+                                            <div
+                                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                                            >
+                                              <EuiIcon
+                                                color="success"
+                                                type="dot"
+                                              >
+                                                <span
+                                                  color="success"
+                                                  data-euiicon-type="dot"
+                                                />
+                                              </EuiIcon>
+                                            </div>
+                                          </EuiFlexItem>
+                                          <EuiFlexItem
+                                            grow={false}
+                                          >
+                                            <div
+                                              className="euiFlexItem euiFlexItem--flexGrowZero"
+                                            >
+                                              Active
+                                            </div>
+                                          </EuiFlexItem>
+                                        </div>
+                                      </EuiFlexGroup>
+                                    </div>
+                                  </EuiHealth>
+                                </IntegrationHealthBadge>
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="left"
+                            key="_data_column_assets_0_2"
+                            mobileOptions={
+                              Object {
+                                "header": "Asset Count",
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={true}
+                          >
+                            <td
+                              className="euiTableRowCell"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Asset Count
+                              </div>
+                              <div
+                                className="euiTableCellContent"
+                              >
+                                <span
+                                  className="euiTableCellContent__text"
+                                >
+                                  3
+                                </span>
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
+                        </tr>
+                      </EuiTableRow>
+                    </tbody>
+                  </EuiTableBody>
+                </table>
+              </EuiTable>
+            </div>
+          </div>
+        </EuiBasicTable>
+      </EuiInMemoryTable>
+    </div>
+  </EuiPanel>
+</InstalledIntegrationsTable>
+`;
+
+exports[`Installed Integrations Table test Renders the installed integrations table flyout 1`] = `
+<InstallIntegrationFlyout
+  closeFlyout={[Function]}
+  datasourceName="test"
+  datasourceType="S3GLUE"
+  http={
+    Object {
+      "basePath": Object {
+        "prepend": [Function],
+      },
+      "get": [MockFunction] {
+        "calls": Array [
+          Array [
+            "/api/integrations/repository",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      },
+    }
+  }
+  refreshInstances={[Function]}
+>
+  <EuiFlyout
+    hideCloseButton={false}
+    onClose={[Function]}
+  >
+    <div
+      data-eui="EuiFlyout"
+      role="dialog"
+    >
+      <button
+        data-test-subj="euiFlyoutCloseButton"
+        onClick={[Function]}
+        type="button"
+      />
+      <AvailableIntegrationsTable
+        data={
+          Object {
+            "hits": Array [],
+          }
+        }
+        http={
+          Object {
+            "basePath": Object {
+              "prepend": [Function],
+            },
+            "get": [MockFunction] {
+              "calls": Array [
+                Array [
+                  "/api/integrations/repository",
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Promise {},
+                },
+              ],
+            },
+          }
+        }
+        isCardView={true}
+        loading={false}
+        setInstallingIntegration={[Function]}
+      >
+        <EuiPageContent
+          id="availableIntegrationsArea"
+        >
+          <EuiPanel
+            className="euiPageContent"
+            id="availableIntegrationsArea"
+            paddingSize="l"
+            role="main"
+          >
+            <div
+              className="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPageContent"
+              id="availableIntegrationsArea"
+              role="main"
+            >
+              <EuiSpacer>
+                <div
+                  className="euiSpacer euiSpacer--l"
+                />
+              </EuiSpacer>
+              <EuiSpacer
+                size="xxl"
+              >
+                <div
+                  className="euiSpacer euiSpacer--xxl"
+                />
+              </EuiSpacer>
+              <EuiText
+                textAlign="center"
+              >
+                <div
+                  className="euiText euiText--medium"
+                >
+                  <EuiTextAlign
+                    textAlign="center"
+                  >
+                    <div
+                      className="euiTextAlign euiTextAlign--center"
+                    >
+                      <h2>
+                        No Integrations Available
+                      </h2>
+                    </div>
+                  </EuiTextAlign>
+                </div>
+              </EuiText>
+              <EuiSpacer
+                size="m"
+              >
+                <div
+                  className="euiSpacer euiSpacer--m"
+                />
+              </EuiSpacer>
+            </div>
+          </EuiPanel>
+        </EuiPageContent>
+      </AvailableIntegrationsTable>
+    </div>
+  </EuiFlyout>
+</InstallIntegrationFlyout>
+`;

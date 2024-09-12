@@ -62,8 +62,9 @@ import {
   IDataFrame,
   IDataFrameResponse,
   createDataFrameCache,
-  dataFrameToSpec,
 } from '../../common/data_frames';
+import { getQueryService } from '../services';
+import { UI_SETTINGS } from '../../common';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -125,6 +126,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       __enhance: (enhancements: SearchEnhancements) => {
         this.searchInterceptor = enhancements.searchInterceptor;
       },
+      getDefaultSearchInterceptor: () => this.defaultSearchInterceptor,
     };
   }
 
@@ -133,7 +135,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options) => {
-      return this.searchInterceptor.search(request, options);
+      const isEnhancedEnabled = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
+      if (isEnhancedEnabled) {
+        const queryStringManager = getQueryService().queryString;
+        const language = queryStringManager.getQuery().language;
+        const languageConfig = queryStringManager.getLanguageService().getLanguage(language);
+        queryStringManager.getLanguageService().setUiOverridesByUserQueryLanguage(language);
+
+        if (languageConfig) {
+          return languageConfig.search.search(request, options);
+        }
+      }
+
+      return this.defaultSearchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
     const loadingCount$ = new BehaviorSubject(0);
@@ -142,32 +156,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const dfService: DataFrameService = {
       get: () => this.dfCache.get(),
       set: async (dataFrame: IDataFrame) => {
-        if (this.dfCache.get() && this.dfCache.get()?.name !== dataFrame.name) {
-          indexPatterns.clearCache(this.dfCache.get()!.name, false);
-        }
-        if (
-          dataFrame.meta &&
-          dataFrame.meta.queryConfig &&
-          'dataSource' in dataFrame.meta.queryConfig
-        ) {
-          const dataSource = await indexPatterns.findDataSourceByTitle(
-            dataFrame.meta.queryConfig.dataSource
-          );
-          dataFrame.meta.queryConfig.dataSourceId = dataSource?.id;
-        }
         this.dfCache.set(dataFrame);
-        const existingIndexPattern = indexPatterns.getByTitle(dataFrame.name!, true);
-        const dataSet = await indexPatterns.create(
-          dataFrameToSpec(dataFrame, existingIndexPattern?.id),
-          !existingIndexPattern?.id
-        );
-        // save to cache by title because the id is not unique for temporary index pattern created
-        indexPatterns.saveToCache(dataSet.title, dataSet);
       },
       clear: () => {
         if (this.dfCache.get() === undefined) return;
-        // name because the id is not unique for temporary index pattern created
-        indexPatterns.clearCache(this.dfCache.get()!.name, false);
         this.dfCache.clear();
       },
     };

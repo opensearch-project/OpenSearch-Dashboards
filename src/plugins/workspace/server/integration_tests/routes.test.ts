@@ -16,6 +16,7 @@ const testWorkspace: WorkspaceAttribute = {
   id: 'fake_id',
   name: 'test_workspace',
   description: 'test_workspace_description',
+  features: ['use-case-all'],
 };
 
 describe('workspace service api integration test', () => {
@@ -82,6 +83,29 @@ describe('workspace service api integration test', () => {
 
       expect(result.body.success).toEqual(true);
       expect(typeof result.body.result.id).toBe('string');
+    });
+    it('create with empty/blank name', async () => {
+      let result = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: { name: '' },
+        })
+        .expect(400);
+
+      expect(result.body.message).toEqual(
+        "[request body.attributes.name]: can't be empty or blank."
+      );
+
+      result = await osdTestServer.request
+        .post(root, `/api/workspaces`)
+        .send({
+          attributes: { name: '   ' },
+        })
+        .expect(400);
+
+      expect(result.body.message).toEqual(
+        "[request body.attributes.name]: can't be empty or blank."
+      );
     });
 
     it('create workspace failed when name duplicate', async () => {

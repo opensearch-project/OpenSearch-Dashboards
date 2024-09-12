@@ -8,7 +8,7 @@ import { mount, shallow } from 'enzyme';
 import { render } from '@testing-library/react';
 import { UpdateAwsCredentialModal } from './update_aws_credential_modal';
 import { SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
-import { EuiFormRow, EuiModalHeaderTitle } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiModalHeaderTitle } from '@elastic/eui';
 import { FormattedMessage } from 'react-intl';
 
 describe('UpdateAwsCredentialModal', () => {
@@ -20,6 +20,7 @@ describe('UpdateAwsCredentialModal', () => {
     service: SigV4ServiceName.OpenSearch,
     handleUpdateAwsCredential: mockHandleUpdateAwsCredential,
     closeUpdateAwsCredentialModal: mockCloseUpdateAwsCredentialModal,
+    canManageDataSource: true,
   };
 
   it('updates new access key state on input change', () => {
@@ -45,12 +46,12 @@ describe('UpdateAwsCredentialModal', () => {
 
   it('renders modal with correct label for updated secret key', () => {
     const wrapper = shallow(<UpdateAwsCredentialModal {...props} />);
-    expect(wrapper.find(EuiFormRow).at(4).props().label).toEqual('Updated secret key');
+    expect(wrapper.find(EuiCompressedFormRow).at(4).props().label).toEqual('Updated secret key');
   });
 
   it('renders modal with correct label for updated access key', () => {
     const wrapper = shallow(<UpdateAwsCredentialModal {...props} />);
-    expect(wrapper.find(EuiFormRow).at(3).props().label).toEqual('Updated access key');
+    expect(wrapper.find(EuiCompressedFormRow).at(3).props().label).toEqual('Updated access key');
   });
 
   it('renders modal with correct region', () => {
