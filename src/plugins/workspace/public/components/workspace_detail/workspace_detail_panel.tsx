@@ -24,8 +24,8 @@ const detailUseCase = i18n.translate('workspace.detail.useCase', {
   defaultMessage: 'Use case',
 });
 
-const detailOwner = i18n.translate('workspace.detail.owner', {
-  defaultMessage: 'Owner',
+const detailOwners = i18n.translate('workspace.detail.owners', {
+  defaultMessage: 'Owners',
 });
 
 const detailLastUpdated = i18n.translate('workspace.detail.lastUpdated', {
@@ -87,7 +87,7 @@ export const WorkspaceDetailPanel = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiText>
-          <h4>{detailOwner}</h4>
+          <h4>{detailOwners}</h4>
           <p style={{ display: 'inline-flex' }}>
             {owners?.at(0)}&nbsp;&nbsp;
             {owners && owners.length > 1 && (

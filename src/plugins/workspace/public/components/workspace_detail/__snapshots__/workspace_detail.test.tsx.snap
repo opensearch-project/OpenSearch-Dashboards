@@ -47,7 +47,7 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
             class="euiText euiText--medium"
           >
             <h4>
-              Owner
+              Owners
             </h4>
             <p
               style="display: inline-flex;"
