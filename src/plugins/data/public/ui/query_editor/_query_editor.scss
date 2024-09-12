@@ -150,6 +150,12 @@
   }
 }
 
+.osdQueryEditor__header {
+  display: flex;
+  align-items: center;
+  padding: 0 $euiSizeXS $euiSizeXS;
+}
+
 .osdQueryEditor__topBar {
   display: flex;
   align-items: center;
@@ -197,5 +203,25 @@
 
   .monaco-editor .view-overlays .current-line {
     border: none;
+  }
+}
+
+.suggest-widget {
+  position: relative;
+
+  &.visible::after {
+    position: absolute;
+    height: auto;
+    bottom: auto;
+    left: 0;
+    width: 100%;
+    background-color: $euiColorLightestShade;
+    border: $euiBorderThin;
+    padding: $euiSizeXS;
+    text-align: left;
+    color: $euiColorDarkShade;
+    font-size: $euiFontSizeXS;
+    content: "Tab to insert, ESC to close window";
+    display: block;
   }
 }

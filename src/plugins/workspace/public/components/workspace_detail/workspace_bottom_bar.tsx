@@ -20,6 +20,7 @@ interface WorkspaceBottomBarProps {
   numberOfChanges: number;
   numberOfErrors: number;
   handleResetForm: () => void;
+  isFormSubmitting: boolean;
 }
 
 export const WorkspaceBottomBar = ({
@@ -27,6 +28,7 @@ export const WorkspaceBottomBar = ({
   numberOfChanges,
   numberOfErrors,
   handleResetForm,
+  isFormSubmitting,
 }: WorkspaceBottomBarProps) => {
   const applicationElement = document.querySelector('.app-wrapper');
   const bottomBar = (
@@ -82,6 +84,7 @@ export const WorkspaceBottomBar = ({
                 fill
                 color="primary"
                 data-test-subj="workspaceForm-bottomBar-updateButton"
+                isLoading={isFormSubmitting}
               >
                 {i18n.translate('workspace.form.bottomBar.saveChanges', {
                   defaultMessage: 'Save changes',

@@ -1,2 +1,0 @@
-feat:
-- Only allow essential use case when creating workspace if all data sources are serverless ([#7612](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7612))

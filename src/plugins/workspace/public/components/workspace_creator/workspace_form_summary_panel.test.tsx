@@ -20,10 +20,10 @@ describe('WorkspaceFormSummaryPanel', () => {
     name: 'Test Workspace',
     description: 'This is a test workspace',
     color: '#000000',
-    selectedDataSources: [
-      { id: 'data-source-1', title: 'Data Source 1' },
-      { id: 'data-source-2', title: 'Data Source 2' },
-      { id: 'data-source-3', title: 'Data Source 3' },
+    selectedDataSourceConnections: [
+      { id: 'data-source-1', name: 'Data Source 1' },
+      { id: 'data-source-2', name: 'Data Source 2' },
+      { id: 'data-source-3', name: 'Data Source 3' },
     ],
     permissionSettings: [
       { id: 1, type: WorkspacePermissionItemType.User, userId: 'user1' },
@@ -74,7 +74,7 @@ describe('WorkspaceFormSummaryPanel', () => {
       <WorkspaceFormSummaryPanel
         formData={{
           name: '',
-          selectedDataSources: [],
+          selectedDataSourceConnections: [],
           permissionSettings: [],
           features: [],
           useCase: undefined,

@@ -19,11 +19,11 @@ import {
   convertPermissionSettingsToPermissions,
   convertPermissionsToPermissionSettings,
 } from './workspace_form';
-import { DataSource } from '../../common/types';
+import { DataSourceConnectionType } from '../../common/types';
 import { WorkspaceClient } from '../workspace_client';
 import { formatUrlWithWorkspaceId } from '../../../../core/public/utils';
 import { WORKSPACE_DETAIL_APP_ID } from '../../common/constants';
-import { getDataSourcesList } from '../utils';
+import { getDataSourcesList, mergeDataSourcesWithConnections } from '../utils';
 import { WorkspaceAttributeWithPermission } from '../../../../core/types';
 
 function getFormDataFromWorkspace(
@@ -34,15 +34,12 @@ function getFormDataFromWorkspace(
   }
   return {
     ...currentWorkspace,
+    features: currentWorkspace.features ?? [],
     permissionSettings: currentWorkspace.permissions
       ? convertPermissionsToPermissionSettings(currentWorkspace.permissions)
       : currentWorkspace.permissions,
   };
 }
-
-type FormDataFromWorkspace = ReturnType<typeof getFormDataFromWorkspace> & {
-  selectedDataSources: DataSource[];
-};
 
 export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
   const {
@@ -56,10 +53,13 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
       http,
     },
   } = useOpenSearchDashboards<{ CoreStart: CoreStart; workspaceClient: WorkspaceClient }>();
-  const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState<FormDataFromWorkspace>();
+  const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState<
+    WorkspaceFormSubmitData
+  >();
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const availableUseCases = useObservable(props.registeredUseCases$, []);
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
   /**
    * set breadcrumbs to chrome
@@ -93,18 +93,22 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
     const rawFormData = getFormDataFromWorkspace(currentWorkspace);
 
     if (rawFormData && savedObjects && currentWorkspace) {
-      getDataSourcesList(savedObjects.client, [currentWorkspace.id]).then((selectedDataSources) => {
+      getDataSourcesList(savedObjects.client, [currentWorkspace.id]).then((dataSources) => {
         setCurrentWorkspaceFormData({
           ...rawFormData,
-          selectedDataSources,
+          // Direct query connections info is not required for all tabs, it can be fetched later
+          selectedDataSourceConnections: mergeDataSourcesWithConnections(dataSources, []),
         });
       });
     }
-  }, [currentWorkspace, savedObjects]);
+  }, [currentWorkspace, savedObjects, http, notifications]);
 
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
       let result;
+      if (isFormSubmitting) {
+        return;
+      }
       if (!currentWorkspace) {
         notifications?.toasts.addDanger({
           title: i18n.translate('Cannot find current workspace', {
@@ -113,12 +117,17 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
         });
         return;
       }
+      setIsFormSubmitting(true);
 
       try {
-        const { permissionSettings, selectedDataSources, ...attributes } = data;
-        const selectedDataSourceIds = (selectedDataSources ?? []).map((ds: DataSource) => {
-          return ds.id;
-        });
+        const { permissionSettings, selectedDataSourceConnections, ...attributes } = data;
+        const selectedDataSourceIds = (selectedDataSourceConnections ?? [])
+          .filter(
+            ({ connectionType }) => connectionType === DataSourceConnectionType.OpenSearchConnection
+          )
+          .map((connection) => {
+            return connection.id;
+          });
 
         result = await workspaceClient.update(currentWorkspace.id, attributes, {
           dataSources: selectedDataSourceIds,
@@ -154,9 +163,11 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
           text: error instanceof Error ? error.message : JSON.stringify(error),
         });
         return;
+      } finally {
+        setIsFormSubmitting(false);
       }
     },
-    [notifications?.toasts, currentWorkspace, http, application, workspaceClient]
+    [isFormSubmitting, currentWorkspace, notifications?.toasts, workspaceClient, application, http]
   );
 
   if (!workspaces || !application || !http || !savedObjects || !currentWorkspaceFormData) {
@@ -174,7 +185,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
       availableUseCases={availableUseCases}
     >
       <I18nProvider>
-        <WorkspaceDetail {...props} />
+        <WorkspaceDetail {...props} isFormSubmitting={isFormSubmitting} />
       </I18nProvider>
     </WorkspaceFormProvider>
   );

@@ -10,7 +10,6 @@ import { CURRENT_USER_PLACEHOLDER, WorkspacePermissionMode } from '../../../comm
 import { isUseCaseFeatureConfig } from '../../utils';
 import {
   optionIdToWorkspacePermissionModesMap,
-  PermissionModeId,
   WorkspaceOperationType,
   WorkspacePermissionItemType,
 } from './constants';
@@ -25,8 +24,9 @@ import {
   WorkspaceUserGroupPermissionSetting,
   WorkspaceUserPermissionSetting,
 } from './types';
-import { DataSource } from '../../../common/types';
+import { DataSourceConnection } from '../../../common/types';
 import { validateWorkspaceColor } from '../../../common/utils';
+import { PermissionModeId } from '../../../../../core/public';
 
 export const isValidFormTextInput = (input?: string) => {
   /**
@@ -48,8 +48,8 @@ export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
   if (formErrors.permissionSettings?.overall) {
     numberOfErrors += 1;
   }
-  if (formErrors.selectedDataSources) {
-    numberOfErrors += Object.keys(formErrors.selectedDataSources).length;
+  if (formErrors.selectedDataSourceConnections) {
+    numberOfErrors += Object.keys(formErrors.selectedDataSourceConnections).length;
   }
   if (formErrors.features) {
     numberOfErrors += 1;
@@ -226,7 +226,7 @@ const validateUserGroupPermissionSetting = (
   }
 };
 
-const validatePermissionSetting = (
+const validatePermissionSettings = (
   permissionSettings?: Array<
     Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
   >
@@ -289,17 +289,17 @@ const validatePermissionSetting = (
       : {}),
   };
 };
-export const isSelectedDataSourcesDuplicated = (
-  selectedDataSources: DataSource[],
-  row: DataSource
-) => selectedDataSources.some((ds) => ds.id === row.id);
+export const isSelectedDataSourceConnectionsDuplicated = (
+  selectedDataSourceConnections: DataSourceConnection[],
+  row: DataSourceConnection
+) => selectedDataSourceConnections.some((connection) => connection.id === row.id);
 
 export const validateWorkspaceForm = (
   formData: Partial<WorkspaceFormDataState>,
   isPermissionEnabled: boolean
 ) => {
   const formErrors: WorkspaceFormErrors = {};
-  const { name, permissionSettings, color, features, selectedDataSources } = formData;
+  const { name, permissionSettings, color, features, selectedDataSourceConnections } = formData;
   if (name && name.trim()) {
     if (!isValidFormTextInput(name)) {
       formErrors.name = {
@@ -334,12 +334,12 @@ export const validateWorkspaceForm = (
     };
   }
   if (isPermissionEnabled) {
-    formErrors.permissionSettings = validatePermissionSetting(permissionSettings);
+    formErrors.permissionSettings = validatePermissionSettings(permissionSettings);
   }
-  if (selectedDataSources) {
+  if (selectedDataSourceConnections) {
     const dataSourcesErrors: { [key: number]: WorkspaceFormError } = {};
-    for (let i = 0; i < selectedDataSources.length; i++) {
-      const row = selectedDataSources[i];
+    for (let i = 0; i < selectedDataSourceConnections.length; i++) {
+      const row = selectedDataSourceConnections[i];
       if (!row.id) {
         dataSourcesErrors[i] = {
           code: WorkspaceFormErrorCode.InvalidDataSource,
@@ -347,7 +347,9 @@ export const validateWorkspaceForm = (
             defaultMessage: 'Invalid data source',
           }),
         };
-      } else if (isSelectedDataSourcesDuplicated(selectedDataSources.slice(0, i), row)) {
+      } else if (
+        isSelectedDataSourceConnectionsDuplicated(selectedDataSourceConnections.slice(0, i), row)
+      ) {
         dataSourcesErrors[i] = {
           code: WorkspaceFormErrorCode.DuplicateDataSource,
           message: i18n.translate('workspace.form.permission.invalidate.group', {
@@ -357,7 +359,7 @@ export const validateWorkspaceForm = (
       }
     }
     if (Object.keys(dataSourcesErrors).length > 0) {
-      formErrors.selectedDataSources = dataSourcesErrors;
+      formErrors.selectedDataSourceConnections = dataSourcesErrors;
     }
   }
   return formErrors;
@@ -445,6 +447,34 @@ const isSamePermissionSetting = (a: PermissionSettingLike, b: PermissionSettingL
     a.modes?.length === b.modes?.length &&
     a.modes?.every((mode) => b.modes?.includes(mode))
   );
+};
+
+export const isWorkspacePermissionSetting = (
+  permissionSetting: PermissionSettingLike
+): permissionSetting is WorkspacePermissionSetting => {
+  const { modes, type, userId, group } = permissionSetting;
+  if (!modes) {
+    return false;
+  }
+  const arrayStringify = (array: string[]) => array.sort().join();
+  const stringifyModes = arrayStringify(modes);
+  if (
+    Object.values(optionIdToWorkspacePermissionModesMap).every(
+      (validModes) => arrayStringify([...validModes]) !== stringifyModes
+    )
+  ) {
+    return false;
+  }
+  if (type !== WorkspacePermissionItemType.User && type !== WorkspacePermissionItemType.Group) {
+    return false;
+  }
+  if (type === WorkspacePermissionItemType.User && !userId) {
+    return false;
+  }
+  if (type === WorkspacePermissionItemType.Group && !group) {
+    return false;
+  }
+  return true;
 };
 
 export const getNumberOfChanges = (

@@ -176,9 +176,9 @@ export const WorkspaceFormSummaryPanel = ({
         )}
       </FieldSummaryItem>
       <FieldSummaryItem field={RightSidebarScrollField.DataSource}>
-        {formData.selectedDataSources.length > 0 && (
+        {formData.selectedDataSourceConnections.length > 0 && (
           <ExpandableTextList
-            texts={formData.selectedDataSources.map(({ title }) => title)}
+            texts={formData.selectedDataSourceConnections.map(({ name }) => name)}
             collapseDisplayCount={2}
           />
         )}

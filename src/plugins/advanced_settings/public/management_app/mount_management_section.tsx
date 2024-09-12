@@ -34,15 +34,18 @@ import { Router, Switch, Route } from 'react-router-dom';
 
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
-import { StartServicesAccessor } from 'src/core/public';
+import { AppMountParameters, CoreStart, StartServicesAccessor } from 'src/core/public';
 
 import { EuiPageContent } from '@elastic/eui';
+import { ContentManagementPluginStart } from '../../../content_management/public';
 import { AdvancedSettings } from './advanced_settings';
 import { ManagementAppMountParams } from '../../../management/public';
 import { ComponentRegistry } from '../types';
-import { NavigationPublicPluginStart } from '../../../../plugins/navigation/public';
+import { NavigationPublicPluginStart } from '../../../navigation/public';
+import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 
 import './index.scss';
+import { UserSettingsApp } from './user_settings';
 
 const readOnlyBadge = {
   text: i18n.translate('advancedSettings.badge.readOnly.text', {
@@ -131,3 +134,22 @@ export async function mountManagementSection(
     ReactDOM.unmountComponentAtNode(params.element);
   };
 }
+
+export const renderUserSettingsApp = async (
+  { element }: AppMountParameters,
+  services: CoreStart & {
+    contentManagement: ContentManagementPluginStart;
+    navigation: NavigationPublicPluginStart;
+  }
+) => {
+  ReactDOM.render(
+    <OpenSearchDashboardsContextProvider services={services}>
+      <UserSettingsApp />
+    </OpenSearchDashboardsContextProvider>,
+    element
+  );
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
+};
