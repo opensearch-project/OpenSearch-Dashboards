@@ -12,7 +12,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonIcon,
-  EuiColorPickerSwatch,
+  EuiIcon,
 } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@osd/i18n';
@@ -73,13 +73,16 @@ export const WorkspaceDetailPanel = ({
       <EuiFlexItem>
         <EuiText>
           <h4>{detailUseCase}</h4>
-          <p style={{ display: 'flex', alignItems: 'center' }}>
-            <EuiColorPickerSwatch
-              style={{ width: '14px', height: '14px', marginRight: '8px' }}
-              color={currentWorkspace.color}
-            />
-            {currentUseCase?.title}
-          </p>
+          {currentUseCase && (
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              {currentUseCase.icon && (
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={currentUseCase.icon} color={currentWorkspace.color} />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem>{currentUseCase.title}</EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
