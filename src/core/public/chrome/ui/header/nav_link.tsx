@@ -131,7 +131,7 @@ export function createRecentNavLink(
   const { link, label, workspaceId } = recentLink;
   const href = relativeToAbsolute(
     basePath.prepend(
-      formatUrlWithWorkspaceId(link, workspaceEnabled ? workspaceId || '' : '', basePath),
+      workspaceEnabled ? formatUrlWithWorkspaceId(link, workspaceId || '', basePath) : link,
       {
         withoutClientBasePath: true,
       }
