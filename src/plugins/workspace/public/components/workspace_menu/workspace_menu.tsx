@@ -91,13 +91,19 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
       anchorPosition="downCenter"
       repositionOnScroll={true}
     >
-      <EuiPanel hasBorder={false} color="transparent" paddingSize="none" style={{ width: '280px' }}>
+      <EuiPanel
+        hasBorder={false}
+        color="transparent"
+        hasShadow={false}
+        paddingSize="none"
+        style={{ width: '280px' }}
+      >
         <EuiPanel paddingSize="m" hasBorder={false} color="transparent">
           <EuiFlexGroup
             justifyContent="spaceBetween"
             alignItems="center"
             direction="column"
-            gutterSize="s"
+            gutterSize="xs"
           >
             {currentWorkspace ? (
               <>
@@ -140,8 +146,9 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
         <EuiPanel
           paddingSize="s"
           hasBorder={false}
+          hasShadow={false}
           color="transparent"
-          style={{ height: '25vh' }}
+          style={{ height: '30vh' }}
           className="eui-fullHeight"
         >
           <WorkspacePickerContent
@@ -154,19 +161,20 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
         {isDashboardAdmin ? (
           <>
             <EuiHorizontalRule margin="none" size="full" />
-            <EuiPanel paddingSize="m" hasBorder={false} color="transparent">
+            <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="transparent">
               <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
-                <EuiFlexItem>
+                <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     color="primary"
                     size="xs"
+                    flush="left"
                     data-test-subj="workspace-menu-manage-button"
                     onClick={() => {
                       closePopover();
                       coreStart.application.navigateToApp(WORKSPACE_LIST_APP_ID);
                     }}
                   >
-                    <EuiText size="s">{manageWorkspacesButton}</EuiText>
+                    <EuiText size="s"> {manageWorkspacesButton}</EuiText>
                   </EuiButtonEmpty>
                 </EuiFlexItem>
 
@@ -174,6 +182,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                   <EuiButton
                     color="primary"
                     iconType="plus"
+                    className="eui-textRight"
                     size="s"
                     key={WORKSPACE_CREATE_APP_ID}
                     data-test-subj="workspace-menu-create-workspace-button"
