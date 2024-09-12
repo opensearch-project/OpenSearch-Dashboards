@@ -161,7 +161,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
         {isDashboardAdmin ? (
           <>
             <EuiHorizontalRule margin="none" size="full" />
-            <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="transparent">
+            <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false} color="transparent">
               <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="none">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
