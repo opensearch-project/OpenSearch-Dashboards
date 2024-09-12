@@ -42,7 +42,7 @@ export class WorkspaceIdConsumerWrapper {
     };
   }
 
-  private isConfigType(type: SavedObject['type']): boolean {
+  private isConfigType(type: string): boolean {
     return type === UI_SETTINGS_SAVED_OBJECTS_TYPE;
   }
 
@@ -76,7 +76,12 @@ export class WorkspaceIdConsumerWrapper {
       delete: wrapperOptions.client.delete,
       find: (options: SavedObjectsFindOptions) => {
         return wrapperOptions.client.find(
-          this.formatWorkspaceIdParams(wrapperOptions.request, options)
+          // Based on https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/server/ui_settings/create_or_upgrade_saved_config/get_upgradeable_config.ts#L49
+          // we need to make sure the find call for upgrade config should be able to find all the global configs as it was before.
+          // It is a workaround for 2.17, should be optimized in the upcoming 2.18 release.
+          this.isConfigType(options.type as string) && options.sortField === 'buildNum'
+            ? options
+            : this.formatWorkspaceIdParams(wrapperOptions.request, options)
         );
       },
       bulkGet: wrapperOptions.client.bulkGet,
