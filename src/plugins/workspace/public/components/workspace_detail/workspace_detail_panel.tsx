@@ -113,7 +113,12 @@ export const WorkspaceDetailPanel = ({
           <h4>{detailID}</h4>
           <p>
             {currentWorkspace.id}
-            <EuiCopy textToCopy={currentWorkspace.id}>
+            <EuiCopy
+              beforeMessage={i18n.translate('workspace.detail.workspaceIdCopy.beforeMessage', {
+                defaultMessage: 'Copy',
+              })}
+              textToCopy={currentWorkspace.id}
+            >
               {(copy) => (
                 <EuiButtonIcon
                   aria-label="copy"
