@@ -524,7 +524,24 @@ export class WorkspaceSavedObjectsClientWrapper {
         })
       ).saved_objects.map((item) => item.id);
 
-      if (!options.workspaces && !options.ACLSearchParams) {
+      // Based on https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/server/ui_settings/create_or_upgrade_saved_config/get_upgradeable_config.ts#L49
+      // we need to make sure the find call for upgrade config should be able to find all the global configs as it was before.
+      // It is a workaround for 2.17, should be optimized in the upcoming 2.18 release.
+      if (options.type === 'config' && options.sortField === 'buildNum') {
+        const findResult = await wrapperOptions.client.find<{ buildNum?: number }>(options);
+
+        // There maybe user settings inside the find result,
+        // so that we need to filter out user configs(user configs are the configs without buildNum attribute).
+        const finalSavedObjects = findResult.saved_objects.filter(
+          (savedObject) => !!savedObject.attributes?.buildNum
+        );
+
+        return {
+          ...findResult,
+          total: finalSavedObjects.length,
+          saved_objects: finalSavedObjects,
+        };
+      } else if (!options.workspaces && !options.ACLSearchParams) {
         options.workspaces = permittedWorkspaceIds;
         options.ACLSearchParams = {
           permissionModes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write],
