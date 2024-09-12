@@ -121,6 +121,7 @@ export const Configurator = ({
                   setTimeFieldName(value);
                   setDataset({ ...dataset, timeFieldName: value });
                 }}
+                disabled={dataset?.timeFieldName !== undefined}
               />
             </EuiFormRow>
           )}
@@ -165,6 +166,7 @@ export const Configurator = ({
             onConfirm(dataset);
           }}
           fill
+          disabled={timeFields && timeFields.length > 0 && timeFieldName === undefined}
         >
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"
