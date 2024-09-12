@@ -174,7 +174,7 @@ Array [
     ]);
   });
 
-  it('should not show global objects when workspace enabled', async () => {
+  it('should not get objects without related workspace when workspace enabled', async () => {
     workspaceEnabled = true;
 
     const { recentlyAccessed } = await getStart();
@@ -182,7 +182,7 @@ Array [
     expect(recentlyAccessed.get()).toEqual([]);
   });
 
-  it('should show global objects when workspace enabled', async () => {
+  it('should get objects with related workspace when workspace enabled', async () => {
     workspaceEnabled = true;
 
     const { recentlyAccessed, workspaces } = await getStart();
