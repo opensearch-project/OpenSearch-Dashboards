@@ -84,7 +84,7 @@ export class RecentlyAccessedService {
       },
 
       /** Gets the current array of history items. */
-      get: () => history.get().filter((item) => item.workspaceId),
+      get: () => history.get().filter((item) => !!item.workspaceId),
 
       /** Gets an observable of the current array of history items. */
       get$: () => {
