@@ -134,7 +134,7 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiHorizontalRule />
+        <EuiHorizontalRule margin="m" />
         {detailTab === DetailTab.Details && (
           <WorkspaceDetailFormDetails availableUseCases={availableUseCases} />
         )}

@@ -296,7 +296,7 @@ export const SelectDataSourceDetailPanel = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiHorizontalRule />
+      <EuiHorizontalRule margin="m" />
       {renderTableContent()}
       {isVisible && (
         <AssociationDataSourceModal
