@@ -162,13 +162,14 @@ export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
         <EuiEmptyPrompt
           iconType="alert"
           iconColor="default"
+          data-test-subj="discoverNoResults"
           title={
             <EuiText size="s">
               <h2>No results</h2>
             </EuiText>
           }
           body={
-            <EuiText size="s">
+            <EuiText size="s" data-test-subj="discoverNoResultsTimefilter">
               <p>
                 Try selecting a different data source, expanding your time range or modifying the
                 query &amp; filters.
