@@ -1,2 +1,2 @@
 fix:
-- Remove workspace detail in navigation when new nav is disabled ([#8151](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8151))
+- Remove workspace detail title in navigation when new nav is disabled ([#8151](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8151))
