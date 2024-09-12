@@ -137,6 +137,9 @@ export const DataSourceConnectionTable = ({
         defaultMessage: 'Description',
       }),
       truncateText: true,
+      render: (description: string | undefined) => {
+        return !!description ? description : <>&mdash;</>;
+      },
     },
     {
       width: '140px',
