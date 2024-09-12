@@ -48,6 +48,7 @@ import {
   EuiSmallFilterButton,
   EuiFilterGroup,
   EuiFieldSearch,
+  EuiSmallButtonIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { UI_SETTINGS } from 'src/plugins/data/common';
@@ -327,12 +328,19 @@ export function DiscoverFieldSearch({
     </EuiPopover>
   );
 
+  const minimizeButton = <EuiSmallButtonIcon iconType="menuLeft" />;
+
   if (isEnhancementsEnabledOverride) {
     return (
-      <div className="euiFormControlLayout euiFormControlLayout--group osdDiscoverSideBar__wrap">
-        {fieldSearch}
-        {fieldPopover}
-      </div>
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem>
+          <div className="euiFormControlLayout euiFormControlLayout--group osdDiscoverSideBar__wrap">
+            {fieldSearch}
+            {fieldPopover}
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{minimizeButton}</EuiFlexItem>
+      </EuiFlexGroup>
     );
   } else {
     return (

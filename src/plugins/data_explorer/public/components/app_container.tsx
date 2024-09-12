@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { memo, useRef } from 'react';
+import React, { memo, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -35,6 +35,18 @@ export const AppContainer = React.memo(
 
     const topLinkRef = useRef<HTMLDivElement>(null);
     const datePickerRef = useRef<HTMLDivElement>(null);
+    const collapseFn = useRef(() => {});
+    const [isExpanded, setIsExpanded] = useState(true);
+
+    const onCollapse = () => {
+      setIsExpanded(!isExpanded);
+    };
+
+    const onChange = () => {
+      onCollapse();
+      collapseFn.current();
+    };
+
     if (!view) {
       return <NoView />;
     }
@@ -79,32 +91,38 @@ export const AppContainer = React.memo(
           <Suspense fallback={<div>Loading...</div>}>
             <Context {...params}>
               <EuiResizableContainer direction={isMobile ? 'vertical' : 'horizontal'}>
-                {(EuiResizablePanel, EuiResizableButton) => (
-                  <>
-                    <EuiResizablePanel
-                      initialSize={20}
-                      minSize="260px"
-                      mode={['collapsible', { position: 'top' }]}
-                      paddingSize="none"
-                    >
-                      <Sidebar>
-                        <MemoizedPanel {...params} />
-                      </Sidebar>
-                    </EuiResizablePanel>
-                    <EuiResizableButton />
+                {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
+                  if (togglePanel) {
+                    collapseFn.current = () => togglePanel('sidebar', { direction: 'left' });
+                  }
+                  return (
+                    <>
+                      <EuiResizablePanel
+                        id="sidebar"
+                        initialSize={20}
+                        minSize="260px"
+                        mode={['collapsible', { position: 'top' }]}
+                        paddingSize="none"
+                      >
+                        <Sidebar>
+                          <MemoizedPanel {...params} element={minimizeButton} />
+                        </Sidebar>
+                      </EuiResizablePanel>
+                      <EuiResizableButton />
 
-                    <EuiResizablePanel
-                      initialSize={80}
-                      minSize="65%"
-                      mode="main"
-                      paddingSize="none"
-                    >
-                      <EuiPageBody className="deLayout__canvas">
-                        <MemoizedCanvas {...params} />
-                      </EuiPageBody>
-                    </EuiResizablePanel>
-                  </>
-                )}
+                      <EuiResizablePanel
+                        initialSize={80}
+                        minSize="65%"
+                        mode="main"
+                        paddingSize="none"
+                      >
+                        <EuiPageBody className="deLayout__canvas">
+                          <MemoizedCanvas {...params} />
+                        </EuiPageBody>
+                      </EuiResizablePanel>
+                    </>
+                  );
+                }}
               </EuiResizableContainer>
             </Context>
           </Suspense>
