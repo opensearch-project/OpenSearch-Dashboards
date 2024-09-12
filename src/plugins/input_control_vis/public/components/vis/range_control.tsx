@@ -104,7 +104,7 @@ export class RangeControl extends PureComponent<RangeControlProps, RangeControlS
 
   renderControl() {
     if (!this.props.control.isEnabled()) {
-      return <ValidatedDualRange disabled showInput />;
+      return <ValidatedDualRange disabled showInput formRowDisplay="rowCompressed" />;
     }
 
     const decimalPlaces = _.get(this.props, 'control.options.decimalPlaces', 0);
@@ -121,7 +121,7 @@ export class RangeControl extends PureComponent<RangeControlProps, RangeControlS
         id={this.props.control.id}
         min={min}
         max={max}
-        formRowDisplay={'rowCompressed'}
+        formRowDisplay="rowCompressed"
         value={this.state.value}
         onChange={this.onChangeComplete}
         showInput
