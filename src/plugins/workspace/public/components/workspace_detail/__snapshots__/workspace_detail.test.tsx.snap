@@ -147,7 +147,7 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
       </div>
     </div>
     <div
-      class="euiSpacer euiSpacer--l"
+      class="euiSpacer euiSpacer--m"
     />
     <div
       class="euiPageBody euiPageBody--borderRadiusNone"
@@ -207,6 +207,9 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
           id="generated-id"
           role="tabpanel"
         >
+          <div
+            class="euiSpacer euiSpacer--m"
+          />
           <form
             class="euiForm"
             id="generated-id"
