@@ -872,6 +872,35 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           type: [DATA_SOURCE_SAVED_OBJECT_TYPE],
         });
       });
+      it('should call client.find without ACLSearchParams and workspaceOperator when find config and the sortField is buildNum', async () => {
+        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper(
+          DATASOURCE_ADMIN
+        );
+        clientMock.find.mockImplementation(() => ({
+          saved_objects: [
+            {
+              id: 'global_config',
+              type: 'config',
+              attributes: {
+                buildNum: 1,
+              },
+            },
+            {
+              id: 'user_config',
+              type: 'config',
+            },
+          ],
+        }));
+        const findResult = await wrapper.find({
+          type: 'config',
+          sortField: 'buildNum',
+        });
+        expect(clientMock.find).toHaveBeenCalledWith({
+          type: 'config',
+          sortField: 'buildNum',
+        });
+        expect(findResult.saved_objects.length).toEqual(1);
+      });
     });
 
     describe('deleteByWorkspace', () => {
