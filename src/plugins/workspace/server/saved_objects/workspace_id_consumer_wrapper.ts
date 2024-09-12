@@ -12,7 +12,10 @@ import {
   SavedObjectsCheckConflictsObject,
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
+  SavedObject,
 } from '../../../../core/server';
+
+const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
 
 type WorkspaceOptions = Pick<SavedObjectsBaseOptions, 'workspaces'> | undefined;
 
@@ -39,6 +42,10 @@ export class WorkspaceIdConsumerWrapper {
     };
   }
 
+  private isConfigType(type: SavedObject['type']): boolean {
+    return type === UI_SETTINGS_SAVED_OBJECTS_TYPE;
+  }
+
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
     return {
       ...wrapperOptions.client,
@@ -46,7 +53,9 @@ export class WorkspaceIdConsumerWrapper {
         wrapperOptions.client.create(
           type,
           attributes,
-          this.formatWorkspaceIdParams(wrapperOptions.request, options)
+          this.isConfigType(type)
+            ? options
+            : this.formatWorkspaceIdParams(wrapperOptions.request, options)
         ),
       bulkCreate: <T = unknown>(
         objects: Array<SavedObjectsBulkCreateObject<T>>,
