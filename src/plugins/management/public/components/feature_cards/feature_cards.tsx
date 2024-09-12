@@ -37,7 +37,7 @@ export const FeatureCards = ({
     // so it is safe to group the links here.
     navLinks.forEach((link) => {
       let lastGroup = grouped.length ? grouped[grouped.length - 1] : undefined;
-      if (!lastGroup || lastGroup.category !== link.category) {
+      if (!lastGroup || lastGroup.category?.id !== link.category?.id) {
         lastGroup = { category: link.category, navLinks: [[]] };
         grouped.push(lastGroup);
       }
