@@ -85,7 +85,7 @@ export const DataGridTable = ({
     />
   ) : (
     <DefaultDiscoverTable
-      columns={columns}
+      columns={adjustedColumns}
       indexPattern={indexPattern}
       sort={sort}
       onSort={onSort}
