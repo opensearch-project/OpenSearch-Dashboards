@@ -75,6 +75,25 @@ export const getDynamicConfigIndexName = (n: number) => {
   return `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_${n}`;
 };
 
+/**
+ * Basic check to ensure the index matches the pattern (will pass for ${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_0)
+ *
+ * @param index
+ * @returns
+ */
+export const isDynamicConfigIndex = (index: string) => {
+  const regex = new RegExp(`^${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_\\d+$`);
+  return regex.test(index);
+};
+
+export const extractVersionFromDynamicConfigIndex = (index: string) => {
+  if (!isDynamicConfigIndex(index)) {
+    return 0;
+  }
+  const indexSuffix = index.replace(`${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_`, '');
+  return Number(indexSuffix);
+};
+
 export const createLocalStoreFromOsdRequest = (
   logger: Logger,
   request: OpenSearchDashboardsRequest,
