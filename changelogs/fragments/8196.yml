@@ -1,0 +1,2 @@
+fix:
+- CVE version bumping per major version ([#8196](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8196))
