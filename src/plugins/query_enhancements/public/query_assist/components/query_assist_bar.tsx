@@ -19,7 +19,7 @@ import { getPersistedLog, AgentError, ProhibitedQueryError } from '../utils';
 import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
 import { QueryAssistInput } from './query_assist_input';
 import { QueryAssistSubmitButton } from './submit_button';
-import { useQueryAssist } from '../hooks/use_query_assist';
+import { useQueryAssist } from '../hooks';
 
 interface QueryAssistInputProps {
   dependencies: QueryEditorExtensionDependencies;
