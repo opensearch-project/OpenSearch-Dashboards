@@ -76,6 +76,7 @@ export const getNodeId = async (
      */
     const state = (await internalClient.cluster.state({
       metric: 'nodes',
+      local: true,
       filter_path: [path],
     })) as ApiResponse;
 
