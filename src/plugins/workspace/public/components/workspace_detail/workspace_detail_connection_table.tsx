@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiConfirmModal, EuiSearchBarProps, EuiSmallButton } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { EuiConfirmModal, EuiInMemoryTable, EuiSearchBarProps, EuiSmallButton } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
@@ -25,6 +25,7 @@ export const WorkspaceDetailConnectionTable = ({
 }: WorkspaceDetailConnectionTableProps) => {
   const [selectedItems, setSelectedItems] = useState<DataSourceConnection[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const tableRef = useRef<EuiInMemoryTable<DataSourceConnection>>();
 
   useEffect(() => {
     // Reset selected items when connectionType changes
@@ -98,6 +99,7 @@ export const WorkspaceDetailConnectionTable = ({
           }}
           /* Unmount table after connection type */
           key={connectionType}
+          ref={tableRef}
         />
       }
       {modalVisible && (
@@ -108,7 +110,7 @@ export const WorkspaceDetailConnectionTable = ({
           })}
           onCancel={() => {
             setModalVisible(false);
-            setSelectedItems([]);
+            tableRef.current?.setSelection([]);
           }}
           onConfirm={() => {
             setModalVisible(false);
