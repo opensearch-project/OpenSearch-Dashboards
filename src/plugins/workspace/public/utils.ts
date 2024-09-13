@@ -45,6 +45,8 @@ import {
   SECURITY_ANALYTICS_OVERVIEW_PAGE_ID,
 } from '../../../plugins/content_management/public';
 import { WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES } from '../common/constants';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../data_source/common/data_sources';
+import { DATA_CONNECTION_SAVED_OBJECT_TYPE } from '../../data_source/common/data_connections';
 
 export const isUseCaseFeatureConfig = (featureConfig: string) =>
   featureConfig.startsWith(USE_CASE_PREFIX);
@@ -222,6 +224,7 @@ export const getDataSourcesList = (
   return client
     .find({
       type: WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
+      // type: 'data-source',
       fields: ['id', 'title', 'auth', 'description', 'dataSourceEngineType'],
       perPage: 10000,
       workspaces: targetWorkspaces,
@@ -272,16 +275,18 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
 export const convertDataSourcesToOpenSearchConnections = (
   dataSources: DataSource[]
 ): DataSourceConnection[] =>
-  dataSources.map((ds) => {
-    return {
-      id: ds.id,
-      type: ds.dataSourceEngineType,
-      connectionType: DataSourceConnectionType.OpenSearchConnection,
-      name: ds.title,
-      description: ds.description,
-      relatedConnections: [],
-    };
-  });
+  dataSources
+    .filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE)
+    .map((ds) => {
+      return {
+        id: ds.id,
+        type: ds.dataSourceEngineType,
+        connectionType: DataSourceConnectionType.OpenSearchConnection,
+        name: ds.title,
+        description: ds.description,
+        relatedConnections: [],
+      };
+    });
 
 export const fulfillRelatedConnections = (
   connections: DataSourceConnection[],
@@ -304,11 +309,16 @@ export const mergeDataSourcesWithConnections = (
   directQueryConnections: DataSourceConnection[]
 ): DataSourceConnection[] => {
   const openSearchConnections = convertDataSourcesToOpenSearchConnections(dataSources);
-
-  return [
+  const dataConnections = dataSources
+    .filter((ds) => ds.type === DATA_CONNECTION_SAVED_OBJECT_TYPE)
+    .map((ds) => ({ ...ds, name: ds.id }));
+  const result = [
     ...fulfillRelatedConnections(openSearchConnections, directQueryConnections),
     ...directQueryConnections,
-  ].sort((a, b) => a.name.localeCompare(b.name));
+    ...dataConnections,
+  ].sort((a, b) => a?.name?.localeCompare(b?.name));
+
+  return result;
 };
 
 // If all connected data sources are serverless, will only allow to select essential use case.
@@ -508,16 +518,16 @@ export const fetchDataSourceConnectionsByDataSourceIds = async (
 };
 
 export const fetchDataSourceConnections = async (
-  assignedDataSources: DataSource[],
+  dataSources: DataSource[],
   http: HttpSetup | undefined,
   notifications: NotificationsStart | undefined
 ) => {
   try {
     const directQueryConnections = await fetchDataSourceConnectionsByDataSourceIds(
-      assignedDataSources.map((ds) => ds.id),
+      dataSources.filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE).map((ds) => ds.id),
       http
     );
-    return mergeDataSourcesWithConnections(assignedDataSources, directQueryConnections);
+    return mergeDataSourcesWithConnections(dataSources, directQueryConnections);
   } catch (error) {
     notifications?.toasts.addDanger(
       i18n.translate('workspace.detail.dataSources.error.message', {

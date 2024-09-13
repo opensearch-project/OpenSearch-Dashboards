@@ -83,7 +83,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
             return id;
           });
         const selectedDataConnectionIds = (selectedDataSourceConnections ?? [])
-          .filter(({ connectionType }) => connectionType === DATA_CONNECTION_SAVED_OBJECT_TYPE)
+          .filter(({ type }) => type === DATA_CONNECTION_SAVED_OBJECT_TYPE)
           .map(({ id }) => {
             return id;
           });

@@ -31,6 +31,9 @@ import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../..
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { Logos } from '../../../../../core/common';
 import { DirectQueryConnectionIcon } from '../workspace_form';
+import { DataConnectionIcon } from '../workspace_form';
+
+import { DATA_CONNECTION_SAVED_OBJECT_TYPE } from '../../../../data_source/common/data_connections';
 
 const ConnectionIcon = ({
   connection: { connectionType, type },
@@ -44,6 +47,9 @@ const ConnectionIcon = ({
   }
   if (connectionType === DataSourceConnectionType.DirectQueryConnection) {
     return <DirectQueryConnectionIcon type={type} />;
+  }
+  if (type === DATA_CONNECTION_SAVED_OBJECT_TYPE) {
+    return <DataConnectionIcon type={type} />;
   }
   return null;
 };
@@ -143,6 +149,14 @@ const convertConnectionsToOptions = ({
       ) {
         return [];
       }
+
+      if (connection.type === DATA_CONNECTION_SAVED_OBJECT_TYPE) {
+        if (showDirectQueryConnections) {
+          return [connection];
+        }
+        return [];
+      }
+
       if (showDirectQueryConnections) {
         if (!connection.relatedConnections || connection.relatedConnections.length === 0) {
           return [];

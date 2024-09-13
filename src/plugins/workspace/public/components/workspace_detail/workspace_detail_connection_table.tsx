@@ -9,7 +9,7 @@ import { i18n } from '@osd/i18n';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { DataSourceConnectionTable } from '../workspace_form';
-
+import { DATA_CONNECTION_SAVED_OBJECT_TYPE } from '../../../../data_source/common/data_connections';
 interface WorkspaceDetailConnectionTableProps {
   isDashboardAdmin: boolean;
   connectionType: string;
@@ -36,7 +36,8 @@ export const WorkspaceDetailConnectionTable = ({
     return dataSourceConnections.filter((dsc) =>
       connectionType === AssociationDataSourceModalMode.OpenSearchConnections
         ? dsc.connectionType === DataSourceConnectionType.OpenSearchConnection
-        : dsc?.relatedConnections && dsc.relatedConnections?.length > 0
+        : dsc.type === DATA_CONNECTION_SAVED_OBJECT_TYPE ||
+          (dsc?.relatedConnections && dsc.relatedConnections?.length > 0)
     );
   }, [connectionType, dataSourceConnections]);
 
