@@ -14,9 +14,10 @@ import { contentManagementPluginMocks } from '../../../../plugins/content_manage
 import { registerUseCaseCard } from './components/use_case_card';
 import { initHome } from './home_render';
 
+import { coreMock } from '../../../../core/public/mocks';
 import {
-  WHATS_NEW_CONFIG,
-  LEARN_OPENSEARCH_CONFIG,
+  getLeanOpenSearchConfig,
+  getWhatsNewConfig,
   registerHomeListCard,
 } from './components/home_list_card';
 
@@ -24,9 +25,15 @@ jest.mock('./components/use_case_card', () => ({
   registerUseCaseCard: jest.fn(),
 }));
 
-jest.mock('./components/home_list_card', () => ({
-  registerHomeListCard: jest.fn(),
-}));
+jest.mock('./components/home_list_card', () => {
+  const originalModule = jest.requireActual('./components/home_list_card');
+  return {
+    ...originalModule,
+    registerHomeListCard: jest.fn(),
+    getWhatsNewConfig: jest.fn(() => {}),
+    getLeanOpenSearchConfig: jest.fn(() => {}),
+  };
+});
 
 describe('initHome', () => {
   const registerContentProviderFn = jest.fn();
@@ -39,20 +46,20 @@ describe('initHome', () => {
     jest.clearAllMocks();
   });
 
-  it('should register use case cards when workspace is enabled', () => {
-    const coreMock = {
-      createStart: jest.fn(() => ({
-        application: {
-          capabilities: {
-            workspaces: {
-              enabled: false,
-            },
+  it('should register use case cards when workspace is disabled', () => {
+    const core = {
+      ...coreMock.createStart(),
+      application: {
+        ...coreMock.createStart().application,
+        capabilities: {
+          ...coreMock.createStart().application.capabilities,
+          workspaces: {
+            enabled: false,
           },
-          navigateToApp: jest.fn(),
         },
-      })),
+        navigateToApp: jest.fn(),
+      },
     };
-    const core = coreMock.createStart();
 
     initHome(contentManagementStartMock, core);
 
@@ -89,36 +96,38 @@ describe('initHome', () => {
     });
   });
 
-  it('should not register use case cards when workspace is disabled', () => {
-    const coreMock = {
-      createStart: jest.fn(() => ({
-        application: {
-          capabilities: {
-            workspaces: {
-              enabled: true,
-            },
+  it('should not register use case cards when workspace is enabled', () => {
+    const core = {
+      ...coreMock.createStart(),
+      application: {
+        ...coreMock.createStart().application,
+        capabilities: {
+          ...coreMock.createStart().application.capabilities,
+          workspaces: {
+            enabled: true,
           },
         },
-      })),
+        navigateToApp: jest.fn(),
+      },
     };
-    const core = coreMock.createStart();
     initHome(contentManagementStartMock, core);
     expect(registerUseCaseCard).not.toHaveBeenCalled();
   });
 
   it('should register home list cards correctly', () => {
-    const coreMock = {
-      createStart: jest.fn(() => ({
-        application: {
-          capabilities: {
-            workspaces: {
-              enabled: false,
-            },
+    const core = {
+      ...coreMock.createStart(),
+      application: {
+        ...coreMock.createStart().application,
+        capabilities: {
+          ...coreMock.createStart().application.capabilities,
+          workspaces: {
+            enabled: false,
           },
         },
-      })),
+        navigateToApp: jest.fn(),
+      },
     };
-    const core = coreMock.createStart();
     initHome(contentManagementStartMock, core);
 
     expect(registerHomeListCard).toHaveBeenCalledTimes(2);
@@ -126,7 +135,7 @@ describe('initHome', () => {
     expect(registerHomeListCard).toHaveBeenCalledWith(contentManagementStartMock, {
       id: 'whats_new',
       order: 10,
-      config: WHATS_NEW_CONFIG,
+      config: getWhatsNewConfig(core.docLinks),
       target: HOME_CONTENT_AREAS.SERVICE_CARDS,
       width: 16,
     });
@@ -134,7 +143,7 @@ describe('initHome', () => {
     expect(registerHomeListCard).toHaveBeenCalledWith(contentManagementStartMock, {
       id: 'learn_opensearch_new',
       order: 11,
-      config: LEARN_OPENSEARCH_CONFIG,
+      config: getLeanOpenSearchConfig(core.docLinks),
       target: HOME_CONTENT_AREAS.SERVICE_CARDS,
       width: 16,
     });

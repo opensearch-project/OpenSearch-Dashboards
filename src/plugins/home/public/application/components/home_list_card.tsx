@@ -17,35 +17,39 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { DocLinksStart } from 'opensearch-dashboards/public';
 import {
   ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS,
   ContentManagementPluginStart,
   ESSENTIAL_OVERVIEW_CONTENT_AREAS,
 } from '../../../../content_management/public';
 
-export const LEARN_OPENSEARCH_CONFIG = {
+export const getLeanOpenSearchConfig = (docLinks: DocLinksStart): Config => ({
   title: i18n.translate('homepage.card.learnOpenSearch.title', {
     defaultMessage: 'OpenSearch Documentation',
   }),
   list: [
     {
       label: 'Quickstart guide',
-      href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
+      // href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
+      href: docLinks.links.opensearchDashboards.dashboards.quickStart,
       description: 'Start using OpenSearch Dashboards in minutes.',
     },
     {
       label: 'Building data visualizations',
-      href: 'https://opensearch.org/docs/latest/dashboards/visualize/viz-index/',
+      // href: 'https://opensearch.org/docs/latest/dashboards/visualize/viz-index/',
+      href: docLinks.links.opensearchDashboards.visualize.guide,
       description: 'Design interactive charts and graphs to unlock insights form your data.',
     },
     {
       label: 'Creating dashboards',
-      href: 'https://opensearch.org/docs/latest/dashboards/dashboard/index/',
+      // href: 'https://opensearch.org/docs/latest/dashboards/dashboard/index/',
+      href: docLinks.links.opensearchDashboards.dashboards.createDashboards,
       description: 'Build interactive dashboards to explore and analyze your data.',
     },
   ],
   allLink: (
-    <EuiLink href="https://opensearch.org/docs/latest/" target="_blank">
+    <EuiLink href={docLinks.links.opensearchDashboards.introduction} target="_blank">
       <EuiText size="s" className="eui-displayInline">
         {i18n.translate('home.list.card.documentation', {
           defaultMessage: 'Learn more in Documentation',
@@ -53,21 +57,22 @@ export const LEARN_OPENSEARCH_CONFIG = {
       </EuiText>
     </EuiLink>
   ),
-};
+});
 
-export const WHATS_NEW_CONFIG = {
+export const getWhatsNewConfig = (docLinks: DocLinksStart): Config => ({
   title: i18n.translate('homepage.card.whatsNew.title', {
     defaultMessage: `What's New`,
   }),
   list: [
     {
       label: 'Quickstart guide',
-      href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
+      // href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
+      href: docLinks.links.opensearchDashboards.dashboards.quickStart,
       description: 'Get started in minutes with OpenSearch Dashboards',
     },
   ],
   allLink: (
-    <EuiLink href="https://opensearch.org" target="_blank">
+    <EuiLink href={docLinks.OPENSEARCH_WEBSITE_URL} target="_blank">
       <EuiText size="s" className="eui-displayInline">
         {i18n.translate('home.list.card.whatsnew', {
           defaultMessage: 'View all on OpenSearch.org',
@@ -75,7 +80,7 @@ export const WHATS_NEW_CONFIG = {
       </EuiText>
     </EuiLink>
   ),
-};
+});
 
 interface Config {
   title: string;
@@ -160,11 +165,14 @@ export const registerHomeListCard = (
     getTargetArea: () => target,
   });
 };
-export const registerHomeListCardToPage = (contentManagement: ContentManagementPluginStart) => {
+export const registerHomeListCardToPage = (
+  contentManagement: ContentManagementPluginStart,
+  docLinks: DocLinksStart
+) => {
   registerHomeListCard(contentManagement, {
     id: 'whats_new',
     order: 10,
-    config: WHATS_NEW_CONFIG,
+    config: getWhatsNewConfig(docLinks),
     target: ESSENTIAL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
     width: 24,
   });
@@ -172,7 +180,7 @@ export const registerHomeListCardToPage = (contentManagement: ContentManagementP
   registerHomeListCard(contentManagement, {
     id: 'learn_opensearch_new',
     order: 20,
-    config: LEARN_OPENSEARCH_CONFIG,
+    config: getLeanOpenSearchConfig(docLinks),
     target: ESSENTIAL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
     width: 24,
   });
@@ -180,14 +188,14 @@ export const registerHomeListCardToPage = (contentManagement: ContentManagementP
   registerHomeListCard(contentManagement, {
     id: 'whats_new',
     order: 30,
-    config: WHATS_NEW_CONFIG,
+    config: getWhatsNewConfig(docLinks),
     target: ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
   });
 
   registerHomeListCard(contentManagement, {
     id: 'learn_opensearch_new',
     order: 40,
-    config: LEARN_OPENSEARCH_CONFIG,
+    config: getLeanOpenSearchConfig(docLinks),
     target: ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
   });
 };

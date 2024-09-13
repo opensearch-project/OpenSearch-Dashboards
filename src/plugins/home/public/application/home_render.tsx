@@ -17,8 +17,8 @@ import {
   SECURITY_ANALYTICS_OVERVIEW_PAGE_ID,
 } from '../../../../plugins/content_management/public';
 import {
-  WHATS_NEW_CONFIG,
-  LEARN_OPENSEARCH_CONFIG,
+  getWhatsNewConfig,
+  getLeanOpenSearchConfig,
   registerHomeListCard,
 } from './components/home_list_card';
 
@@ -92,7 +92,7 @@ export const initHome = (contentManagement: ContentManagementPluginStart, core: 
   registerHomeListCard(contentManagement, {
     id: 'whats_new',
     order: 10,
-    config: WHATS_NEW_CONFIG,
+    config: getWhatsNewConfig(core.docLinks),
     target: HOME_CONTENT_AREAS.SERVICE_CARDS,
     width: 16,
   });
@@ -100,7 +100,7 @@ export const initHome = (contentManagement: ContentManagementPluginStart, core: 
   registerHomeListCard(contentManagement, {
     id: 'learn_opensearch_new',
     order: 11,
-    config: LEARN_OPENSEARCH_CONFIG,
+    config: getLeanOpenSearchConfig(core.docLinks),
     target: HOME_CONTENT_AREAS.SERVICE_CARDS,
     width: 16,
   });
