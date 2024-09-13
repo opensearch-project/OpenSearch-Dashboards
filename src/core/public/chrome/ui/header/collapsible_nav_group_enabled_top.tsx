@@ -23,13 +23,6 @@ import { ChromeNavLink } from '../../nav_links';
 import { ALL_USE_CASE_ID } from '../../../../../core/utils';
 import { fulfillRegistrationLinksToChromeNavLinks } from '../../utils';
 
-// Reference https://github.com/opensearch-project/oui/blob/main/src/services/color/is_valid_hex.ts
-const validateWorkspaceColor = (color?: string) =>
-  !!color && /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(color);
-
-const getValidWorkspaceColor = (color?: string) =>
-  validateWorkspaceColor(color) ? color : undefined;
-
 export interface CollapsibleNavTopProps {
   homeLink?: ChromeNavLink;
   navGroupsMap: Record<string, NavGroupItemInMap>;
@@ -138,7 +131,7 @@ export const CollapsibleNavTop = ({
                 type={icon}
                 size="l"
                 data-test-subj={`collapsibleNavIcon-${icon}`}
-                color={getValidWorkspaceColor(currentWorkspace?.color)}
+                color={currentWorkspace?.color}
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

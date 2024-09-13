@@ -74,10 +74,10 @@ export const FeatureCards = ({
                       data-test-subj={`landingPageFeature_${link.id}`}
                       textAlign="left"
                       title={link.title}
-                      description={link.description || link.title}
+                      description={link.description || ''}
                       onClick={() => navigateToApp(link.id)}
                       titleSize="xs"
-                      style={{ width: 200 }}
+                      style={{ width: 240 }}
                     />
                   </EuiFlexItem>
                 );
