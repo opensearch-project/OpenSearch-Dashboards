@@ -123,7 +123,10 @@
     "**/unset-value": "^2.0.1",
     "**/watchpack-chokidar2/chokidar": "^3.5.3",
     "**/xml2js": "^0.5.0",
-    "**/yaml": "^2.2.2"
+    "**/yaml": "^2.2.2",
+    "path-to-regexp": "1.9.0",
+    "**/path-to-regexp@^2.2.1": "6.3.0",
+    "**/path-to-regexp@^6.2.0": "6.3.0"
   },
   "workspaces": {
     "packages": [
