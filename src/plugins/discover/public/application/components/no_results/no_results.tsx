@@ -32,6 +32,7 @@ import React from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 
 import { EuiEmptyPrompt, EuiPanel, EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 
 interface Props {
   timeFieldName?: string;
@@ -165,14 +166,20 @@ export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
           data-test-subj="discoverNoResults"
           title={
             <EuiText size="s">
-              <h2>No results</h2>
+              <h2>
+                {i18n.translate('discover.emptyPrompt.title', {
+                  defaultMessage: 'No Results',
+                })}
+              </h2>
             </EuiText>
           }
           body={
             <EuiText size="s" data-test-subj="discoverNoResultsTimefilter">
               <p>
-                Try selecting a different data source, expanding your time range or modifying the
-                query &amp; filters.
+                {i18n.translate('discover.emptyPrompt.body', {
+                  defaultMessage:
+                    'Try selecting a different data source, expanding your time range or modifying the query & filters.',
+                })}
               </p>
             </EuiText>
           }
