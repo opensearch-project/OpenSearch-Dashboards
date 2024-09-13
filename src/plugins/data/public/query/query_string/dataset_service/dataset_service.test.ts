@@ -5,7 +5,7 @@
 
 import { DatasetService } from './dataset_service';
 import { coreMock } from '../../../../../../core/public/mocks';
-import { DEFAULT_DATA, DataStorage, Dataset } from 'src/plugins/data/common';
+import { DEFAULT_DATA, DataStorage, Dataset, UI_SETTINGS } from 'src/plugins/data/common';
 import { DataStructure } from '../../../../common';
 import { IDataPluginServices } from '../../../types';
 import { indexPatternTypeConfig } from './lib';
@@ -128,5 +128,54 @@ describe('DatasetService', () => {
     await service.cacheDataset(mockDataset);
     expect(indexPatterns.create).toHaveBeenCalledTimes(0);
     expect(indexPatterns.saveToCache).toHaveBeenCalledTimes(0);
+  });
+
+  test('addRecentDataset adds a dataset', () => {
+    const mockDataset1: Dataset = {
+      id: 'dataset1',
+      title: 'Dataset 1',
+      type: 'test-type',
+      timeFieldName: 'timestamp',
+    };
+
+    service.addRecentDataset(mockDataset1);
+    const recents = service.getRecentDatasets();
+    expect(recents).toContainEqual(mockDataset1);
+    expect(recents.length).toEqual(1);
+    expect(sessionStorage.get('recentDatasets')).toContainEqual(mockDataset1);
+  });
+
+  test('getRecentDatasets returns all datasets', () => {
+    for (let i = 0; i < 4; i++) {
+      service.addRecentDataset({
+        id: `dataset${i}`,
+        title: `Dataset ${i}`,
+        type: 'test-type',
+        timeFieldName: 'timestamp',
+      });
+    }
+    expect(service.getRecentDatasets().length).toEqual(4);
+    for (let i = 0; i < 4; i++) {
+      const mockDataset = {
+        id: `dataset${i}`,
+        title: `Dataset ${i}`,
+        type: 'test-type',
+        timeFieldName: 'timestamp',
+      };
+      expect(service.getRecentDatasets()).toContainEqual(mockDataset);
+      expect(sessionStorage.get('recentDatasets')).toContainEqual(mockDataset);
+    }
+  });
+
+  test('addRecentDatasets respects max size', () => {
+    for (let i = 0; i < 5; i++) {
+      service.addRecentDataset({
+        id: `dataset${i}`,
+        title: `Dataset ${i}`,
+        type: 'test-type',
+        timeFieldName: 'timestamp',
+      });
+    }
+    expect(service.getRecentDatasets().length).toEqual(4);
   });
 });

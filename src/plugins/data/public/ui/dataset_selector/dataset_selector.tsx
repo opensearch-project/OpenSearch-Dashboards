@@ -106,7 +106,7 @@ export const DatasetSelector = ({
     });
     const recentlySelected: EuiSelectableOption[] = [
       {
-        label: 'Recently Selected Data',
+        label: 'Recently selected data',
         isGroupLabel: true,
       },
     ];

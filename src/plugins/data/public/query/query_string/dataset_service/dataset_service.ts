@@ -23,7 +23,7 @@ export class DatasetService {
   private indexPatterns?: IndexPatternsContract;
   private defaultDataset?: Dataset;
   private typesRegistry: Map<string, DatasetTypeConfig> = new Map();
-  private recentDatasets: LRUCache<string, Dataset> = new LRUCache({ max: 4 });
+  private recentDatasets: LRUCache<string, Dataset>;
 
   constructor(
     private readonly uiSettings: CoreStart['uiSettings'],
@@ -32,6 +32,9 @@ export class DatasetService {
     if (this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) {
       this.registerDefaultTypes();
     }
+    this.recentDatasets = new LRUCache({
+      max: this.uiSettings.get(UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS) ?? 4,
+    });
   }
 
   /**
@@ -63,9 +66,9 @@ export class DatasetService {
     return this.defaultDataset;
   }
 
-  public getRecentDataset(dataset: string | undefined): Dataset | undefined {
-    if (dataset) {
-      return this.recentDatasets.get(dataset);
+  public getRecentDataset(datasetID: string | undefined): Dataset | undefined {
+    if (datasetID) {
+      return this.recentDatasets.get(datasetID);
     }
   }
 
