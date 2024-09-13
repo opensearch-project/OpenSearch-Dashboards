@@ -8,7 +8,6 @@ import { coreMock, httpServerMock, uiSettingsServiceMock } from '../../../core/s
 import { WorkspacePlugin } from './plugin';
 import { getWorkspaceState, updateWorkspaceState } from '../../../core/server/utils';
 import * as serverUtils from '../../../core/server/utils/auth_info';
-import * as utilsExports from './utils';
 import { SavedObjectsPermissionControl } from './permission_control/client';
 
 describe('Workspace server plugin', () => {
@@ -104,6 +103,20 @@ describe('Workspace server plugin', () => {
 
   describe('#setupPermission', () => {
     const setupMock = coreMock.createSetup();
+    jest.spyOn(setupMock.dynamicConfigService, 'getStartService').mockResolvedValue({
+      ...setupMock.dynamicConfigService.getStartService(),
+      getAsyncLocalStore: jest.fn(),
+      getClient: () => ({
+        getConfig: jest.fn().mockResolvedValue({
+          dashboardAdmin: {
+            users: ['dashboard-admin-user'],
+            groups: [],
+          },
+        }),
+        bulkGetConfigs: jest.fn(),
+        listConfigs: jest.fn(),
+      }),
+    });
     const initializerContextConfigMock = coreMock.createPluginInitializerContext({
       enabled: true,
       permission: {
@@ -111,7 +124,7 @@ describe('Workspace server plugin', () => {
       },
     });
     let registerOnPostAuthFn: OnPostAuthHandler = () => httpServerMock.createResponseFactory().ok();
-    setupMock.http.registerOnPostAuth.mockImplementation((fn) => {
+    setupMock.http.registerOnPostAuth.mockImplementationOnce((fn) => {
       registerOnPostAuthFn = fn;
       return fn;
     });
@@ -132,13 +145,10 @@ describe('Workspace server plugin', () => {
       expect(toolKitMock.next).toBeCalledTimes(1);
     });
 
-    it('with yml config', async () => {
+    it('with dynamic config and user is dashboard admin', async () => {
       jest
         .spyOn(serverUtils, 'getPrincipalsFromRequest')
-        .mockImplementation(() => ({ users: [`user1`] }));
-      jest
-        .spyOn(utilsExports, 'getOSDAdminConfigFromYMLConfig')
-        .mockResolvedValue([['group1'], ['user1']]);
+        .mockImplementation(() => ({ users: [`dashboard-admin-user`] }));
 
       await workspacePlugin.setup(setupMock);
       const toolKitMock = httpServerMock.createToolkit();
@@ -148,6 +158,30 @@ describe('Workspace server plugin', () => {
         httpServerMock.createResponseFactory(),
         toolKitMock
       );
+
+      expect(getWorkspaceState(requestWithWorkspaceInUrl)).toEqual({
+        isDashboardAdmin: true,
+      });
+      expect(toolKitMock.next).toBeCalledTimes(1);
+    });
+
+    it('with dynamic config and user is not dashboard admin', async () => {
+      jest
+        .spyOn(serverUtils, 'getPrincipalsFromRequest')
+        .mockImplementation(() => ({ users: [`none-dashboard-admin-user`] }));
+
+      await workspacePlugin.setup(setupMock);
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(
+        requestWithWorkspaceInUrl,
+        httpServerMock.createResponseFactory(),
+        toolKitMock
+      );
+
+      expect(getWorkspaceState(requestWithWorkspaceInUrl)).toEqual({
+        isDashboardAdmin: false,
+      });
       expect(toolKitMock.next).toBeCalledTimes(1);
     });
 

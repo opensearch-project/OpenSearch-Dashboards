@@ -5,6 +5,7 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { cloneDeep } from 'lodash';
 import {
   PluginInitializerContext,
   CoreSetup,
@@ -25,6 +26,7 @@ import {
   WORKSPACE_INITIAL_APP_ID,
   WORKSPACE_NAVIGATION_APP_ID,
   DEFAULT_WORKSPACE,
+  OPENSEARCHDASHBOARDS_CONFIG_PATH,
 } from '../common/constants';
 import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
 import { WorkspaceClient } from './workspace_client';
@@ -41,7 +43,7 @@ import {
   SavedObjectsPermissionControl,
   SavedObjectsPermissionControlContract,
 } from './permission_control/client';
-import { getOSDAdminConfigFromYMLConfig, updateDashboardAdminStateForRequest } from './utils';
+import { updateDashboardAdminStateForRequest } from './utils';
 import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consumer_wrapper';
 import { WorkspaceUiSettingsClientWrapper } from './saved_objects/workspace_ui_settings_client_wrapper';
 import { uiSettings } from './ui_settings';
@@ -91,7 +93,17 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
         return toolkit.next();
       }
 
-      const [configGroups, configUsers] = await getOSDAdminConfigFromYMLConfig(this.globalConfig$);
+      // Get config from dynamic service client.
+      const dynamicConfigServiceStart = await core.dynamicConfigService.getStartService();
+      const store = dynamicConfigServiceStart.getAsyncLocalStore();
+      const client = dynamicConfigServiceStart.getClient();
+      const config = await client.getConfig(
+        { pluginConfigPath: OPENSEARCHDASHBOARDS_CONFIG_PATH },
+        { asyncLocalStorageContext: store! }
+      );
+      const configUsers: string[] = cloneDeep(config.dashboardAdmin.users);
+      const configGroups: string[] = cloneDeep(config.dashboardAdmin.groups);
+
       updateDashboardAdminStateForRequest(request, groups, users, configGroups, configUsers);
       return toolkit.next();
     });

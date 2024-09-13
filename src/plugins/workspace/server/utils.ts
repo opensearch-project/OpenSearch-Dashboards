@@ -4,11 +4,8 @@
  */
 
 import crypto from 'crypto';
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
 import {
   OpenSearchDashboardsRequest,
-  SharedGlobalConfig,
   Permissions,
   SavedObjectsClientContract,
   IUiSettingsClient,
@@ -48,17 +45,6 @@ export const updateDashboardAdminStateForRequest = (
   updateWorkspaceState(request, {
     isDashboardAdmin: groupMatchAny || userMatchAny,
   });
-};
-
-export const getOSDAdminConfigFromYMLConfig = async (
-  globalConfig$: Observable<SharedGlobalConfig>
-) => {
-  const globalConfig = await globalConfig$.pipe(first()).toPromise();
-  const groupsResult = (globalConfig.opensearchDashboards?.dashboardAdmin?.groups ||
-    []) as string[];
-  const usersResult = (globalConfig.opensearchDashboards?.dashboardAdmin?.users || []) as string[];
-
-  return [groupsResult, usersResult];
 };
 
 export const transferCurrentUserInPermissions = (

@@ -158,3 +158,4 @@ export enum AssociationDataSourceModalMode {
   DirectQueryConnections = 'direction-query-connections',
 }
 export const USE_CASE_PREFIX = 'use-case-';
+export const OPENSEARCHDASHBOARDS_CONFIG_PATH = 'opensearchDashboards';
