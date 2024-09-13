@@ -104,7 +104,7 @@ export const WorkspaceDetailConnectionTable = ({
         <EuiConfirmModal
           data-test-subj="workspaceForm-cancelModal"
           title={i18n.translate('workspace.detail.dataSources.modal.title', {
-            defaultMessage: 'Remove data source(s)',
+            defaultMessage: 'Remove association(s)',
           })}
           onCancel={() => {
             setModalVisible(false);
@@ -118,7 +118,7 @@ export const WorkspaceDetailConnectionTable = ({
             defaultMessage: 'Cancel',
           })}
           confirmButtonText={i18n.translate('workspace.detail.dataSources.Modal.confirmButton', {
-            defaultMessage: 'Remove data source(s)',
+            defaultMessage: 'Remove association(s)',
           })}
           buttonColor="danger"
           defaultFocusedButton="confirm"
