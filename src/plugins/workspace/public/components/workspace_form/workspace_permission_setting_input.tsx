@@ -214,7 +214,7 @@ export const WorkspacePermissionSettingInput = ({
             aria-label="Delete permission setting"
             iconType="trash"
             display="empty"
-            size="m"
+            size="xs"
             onClick={handleDelete}
             isDisabled={!deletable}
           />
