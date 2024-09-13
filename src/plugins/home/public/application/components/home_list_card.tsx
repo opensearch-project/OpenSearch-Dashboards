@@ -25,25 +25,22 @@ import {
 } from '../../../../content_management/public';
 
 export const getLeanOpenSearchConfig = (docLinks: DocLinksStart): Config => ({
-  title: i18n.translate('homepage.card.learnOpenSearch.title', {
+  title: i18n.translate('home.card.learnOpenSearch.title', {
     defaultMessage: 'OpenSearch Documentation',
   }),
   list: [
     {
       label: 'Quickstart guide',
-      // href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
       href: docLinks.links.opensearchDashboards.dashboards.quickStart,
       description: 'Start using OpenSearch Dashboards in minutes.',
     },
     {
       label: 'Building data visualizations',
-      // href: 'https://opensearch.org/docs/latest/dashboards/visualize/viz-index/',
       href: docLinks.links.opensearchDashboards.visualize.guide,
       description: 'Design interactive charts and graphs to unlock insights form your data.',
     },
     {
       label: 'Creating dashboards',
-      // href: 'https://opensearch.org/docs/latest/dashboards/dashboard/index/',
       href: docLinks.links.opensearchDashboards.dashboards.createDashboards,
       description: 'Build interactive dashboards to explore and analyze your data.',
     },
@@ -60,13 +57,12 @@ export const getLeanOpenSearchConfig = (docLinks: DocLinksStart): Config => ({
 });
 
 export const getWhatsNewConfig = (docLinks: DocLinksStart): Config => ({
-  title: i18n.translate('homepage.card.whatsNew.title', {
+  title: i18n.translate('home.card.whatsNew.title', {
     defaultMessage: `What's New`,
   }),
   list: [
     {
       label: 'Quickstart guide',
-      // href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
       href: docLinks.links.opensearchDashboards.dashboards.quickStart,
       description: 'Get started in minutes with OpenSearch Dashboards',
     },
