@@ -19,6 +19,7 @@ import { getPersistedLog, AgentError, ProhibitedQueryError } from '../utils';
 import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
 import { QueryAssistInput } from './query_assist_input';
 import { QueryAssistSubmitButton } from './submit_button';
+import { useQueryAssist } from '../hooks/use_query_assist';
 
 interface QueryAssistInputProps {
   dependencies: QueryEditorExtensionDependencies;
@@ -42,6 +43,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   );
   const selectedIndex = selectedDataset?.title;
   const previousQuestionRef = useRef<string>();
+  const { updateQuestion, isQueryAssistCollapsed } = useQueryAssist();
 
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query) => {
@@ -64,6 +66,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     setAgentError(undefined);
     previousQuestionRef.current = inputRef.current.value;
     persistedLog.add(inputRef.current.value);
+    updateQuestion(inputRef.current.value);
     const params: QueryAssistParameters = {
       question: inputRef.current.value,
       index: selectedIndex,
@@ -90,7 +93,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     }
   };
 
-  if (props.dependencies.isCollapsed) return null;
+  if (props.dependencies.isCollapsed || isQueryAssistCollapsed) return null;
 
   return (
     <EuiForm component="form" onSubmit={onSubmit} className="queryAssist queryAssist__form">

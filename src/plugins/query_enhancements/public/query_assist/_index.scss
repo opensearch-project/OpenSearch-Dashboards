@@ -4,6 +4,10 @@
  */
 
 .queryAssist {
+  &.queryAssist__summary {
+    margin-top: $euiSizeXS;
+  }
+
   &.queryAssist__callout {
     margin-top: $euiSizeXS;
   }

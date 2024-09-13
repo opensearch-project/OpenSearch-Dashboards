@@ -45,6 +45,7 @@ queryStringMock.getUpdates$.mockReturnValue(of(mockQueryWithIndexPattern));
 jest.mock('../components', () => ({
   QueryAssistBar: jest.fn(() => <div>QueryAssistBar</div>),
   QueryAssistBanner: jest.fn(() => <div>QueryAssistBanner</div>),
+  QueryAssistSummary: jest.fn(() => <div>QueryAssistSummary</div>),
 }));
 
 describe('CreateExtension', () => {
@@ -61,6 +62,7 @@ describe('CreateExtension', () => {
 
   const config: ConfigSchema['queryAssist'] = {
     supportedLanguages: [{ language: 'PPL', agentConfig: 'os_query_assist_ppl' }],
+    summary: { enabled: false },
   };
 
   it('should be enabled if at least one language is configured', async () => {
@@ -141,5 +143,37 @@ describe('CreateExtension', () => {
     });
 
     expect(screen.getByText('QueryAssistBanner')).toBeInTheDocument();
+  });
+
+  it('should not render the summary panel if it is not enabled', async () => {
+    httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
+    const extension = createQueryAssistExtension(httpMock, dataMock, config);
+    const component = extension.getComponent?.(dependencies);
+
+    if (!component) throw new Error('QueryEditorExtensions Component is undefined');
+
+    await act(async () => {
+      render(component);
+    });
+    const summaryPanels = screen.queryAllByText('QueryAssistSummary');
+    expect(summaryPanels).toHaveLength(0);
+  });
+
+  it('should render the summary panel if it is enabled', async () => {
+    httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
+    const modifiedConfig: ConfigSchema['queryAssist'] = {
+      supportedLanguages: [{ language: 'PPL', agentConfig: 'os_query_assist_ppl' }],
+      summary: { enabled: true },
+    };
+    const extension = createQueryAssistExtension(httpMock, dataMock, modifiedConfig);
+    const component = extension.getComponent?.(dependencies);
+
+    if (!component) throw new Error('QueryEditorExtensions Component is undefined');
+
+    await act(async () => {
+      render(component);
+    });
+
+    expect(screen.getByText('QueryAssistSummary')).toBeInTheDocument();
   });
 });

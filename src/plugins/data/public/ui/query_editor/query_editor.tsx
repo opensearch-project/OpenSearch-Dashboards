@@ -337,6 +337,19 @@ export default class QueryEditorUI extends Component<Props, State> {
     return <QueryControls queryControls={queryControls} />;
   };
 
+  private renderExtensionSearchBarButtion = () => {
+    const supported = 'query-assist';
+    if (!this.extensionMap || Object.keys(this.extensionMap).length === 0) return null;
+    if (!(supported in this.extensionMap) || !this.extensionMap[supported].getSearchBarButton)
+      return null;
+    return this.extensionMap[supported].getSearchBarButton({
+      language: this.props.query.language,
+      onSelectLanguage: this.onSelectLanguage,
+      isCollapsed: this.state.isCollapsed,
+      setIsCollapsed: this.setIsCollapsed,
+    });
+  };
+
   public render() {
     const className = classNames(this.props.className);
 
@@ -455,6 +468,7 @@ export default class QueryEditorUI extends Component<Props, State> {
             <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
               {this.renderQueryControls(languageEditor.TopBar.Controls)}
               {!languageEditor.TopBar.Expanded && this.renderToggleIcon()}
+              {!languageEditor.TopBar.Expanded && this.renderExtensionSearchBarButtion()}
               {this.props.savedQueryManagement}
             </EuiFlexGroup>
           </div>
