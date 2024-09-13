@@ -13565,12 +13565,7 @@ path-to-regexp@1.9.0, path-to-regexp@^1.7.0, path-to-regexp@^2.2.1, path-to-rege
   dependencies:
     isarray "0.0.1"
 
-path-to-regexp@^2.2.1@6.3.0:
-  version "7.2.0"
-  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-7.2.0.tgz#3d9cc9d46527e2ce2ef7b2cf696aad3cd1ae4f2b"
-  integrity sha512-0W4AcUxPpFlcS8ql8ZEmFwaI0X5WshUVAFdXe3PBurrt18DK8bvSS+UKHvJUAfGILco/nTtc/E4LcPNfVysfwQ==
-
-path-to-regexp@^6.2.0@6.3.0:
+path-to-regexp@^2.2.1@6.3.0, path-to-regexp@^6.2.0@6.3.0, path-to-regexp@^7.0.0@8.0.0:
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-6.3.0.tgz#2b6a26a337737a8e1416f9272ed0766b1c0389f4"
   integrity sha512-Yhpw4T9C6hPpgPeA28us07OJeqZ5EzQTkbfwuhsUg0c237RomFoETJgmp2sa3F/41gfLE6G5cqcYwznmeEeOlQ==
