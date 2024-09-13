@@ -20,9 +20,15 @@ import {
 } from '../../types';
 import {
   DYNAMIC_APP_CONFIG_ALIAS,
+  DYNAMIC_APP_CONFIG_INDEX_PREFIX,
   DYNAMIC_APP_CONFIG_MAX_RESULT_SIZE,
 } from '../../utils/constants';
-import { pathToString, getDynamicConfigIndexName } from '../../utils/utils';
+import {
+  pathToString,
+  getDynamicConfigIndexName,
+  isDynamicConfigIndex,
+  extractVersionFromDynamicConfigIndex,
+} from '../../utils/utils';
 import { ConfigDocument } from './types';
 
 interface ConfigMapEntry {
@@ -48,25 +54,52 @@ export class OpenSearchConfigStoreClient implements IDynamicConfigStoreClient {
    * TODO Add migration logic
    */
   public async createDynamicConfigIndex() {
-    const existsResponse = await this.#openSearchClient.indices.existsAlias({
+    const existsAliasResponse = await this.#openSearchClient.indices.existsAlias({
       name: DYNAMIC_APP_CONFIG_ALIAS,
     });
-    if (!existsResponse.body) {
-      await this.#openSearchClient.indices.create({
-        index: getDynamicConfigIndexName(1),
-      });
-      await this.#openSearchClient.indices.updateAliases({
-        body: {
-          actions: [
-            {
-              add: {
-                index: getDynamicConfigIndexName(1),
-                alias: DYNAMIC_APP_CONFIG_ALIAS,
+
+    if (!existsAliasResponse.body) {
+      const latestVersion = await this.searchLatestConfigIndex();
+      if (latestVersion < 1) {
+        await this.#openSearchClient.indices.create({
+          index: getDynamicConfigIndexName(1),
+          body: {
+            aliases: { [DYNAMIC_APP_CONFIG_ALIAS]: {} },
+          },
+        });
+      } else {
+        await this.#openSearchClient.indices.updateAliases({
+          body: {
+            actions: [
+              {
+                add: {
+                  index: getDynamicConfigIndexName(latestVersion),
+                  alias: DYNAMIC_APP_CONFIG_ALIAS,
+                },
               },
-            },
-          ],
-        },
+            ],
+          },
+        });
+      }
+    } else {
+      const results = await this.#openSearchClient.indices.getAlias({
+        name: DYNAMIC_APP_CONFIG_ALIAS,
       });
+
+      const indices = Object.keys(results.body);
+      if (indices.length !== 1) {
+        throw new Error(
+          `Alias ${DYNAMIC_APP_CONFIG_ALIAS} is pointing to 0 or multiple indices. Please remove the alias(es) and restart the server`
+        );
+      }
+      const numNonDynamicConfigIndices = indices.filter((index) => !isDynamicConfigIndex(index))
+        .length;
+
+      if (numNonDynamicConfigIndices > 0) {
+        throw new Error(
+          `Alias ${DYNAMIC_APP_CONFIG_ALIAS} is pointing to a non dynamic config index. Please remove the alias and restart the server`
+        );
+      }
     }
   }
 
@@ -341,5 +374,35 @@ export class OpenSearchConfigStoreClient implements IDynamicConfigStoreClient {
         },
       },
     });
+  }
+
+  /**
+   * Finds the most updated dynamic config index
+   *
+   * @returns the latest version number or 0 if not found
+   */
+  private async searchLatestConfigIndex(): Promise<number> {
+    const configIndices = await this.#openSearchClient.cat.indices({
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_*`,
+      format: 'json',
+    });
+
+    if (configIndices.body.length < 1) {
+      return 0;
+    }
+
+    const validIndices = configIndices.body
+      .map((hit) => hit.index?.toString())
+      .filter((index) => index && isDynamicConfigIndex(index));
+
+    return validIndices.length === 0
+      ? 0
+      : validIndices
+          .map((configIndex) => {
+            return configIndex ? extractVersionFromDynamicConfigIndex(configIndex) : 0;
+          })
+          .reduce((currentMax, currentNum) => {
+            return currentMax && currentNum && currentMax > currentNum ? currentMax : currentNum;
+          });
   }
 }
