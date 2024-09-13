@@ -24,7 +24,7 @@ import {
 import { getPermissionModeId } from './utils';
 import { PermissionModeId } from '../../../../../core/public';
 
-const permissionModeOptions: Array<EuiSuperSelectOption<any>> = [
+const permissionModeOptions = [
   {
     value: PermissionModeId.Read,
     inputDisplay: i18n.translate(
@@ -54,7 +54,7 @@ const permissionModeOptions: Array<EuiSuperSelectOption<any>> = [
   },
 ];
 
-const typeOptions: Array<EuiSuperSelectOption<any>> = [
+const typeOptions = [
   {
     value: WorkspacePermissionItemType.User,
     inputDisplay: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.user', {
@@ -75,7 +75,7 @@ export interface WorkspacePermissionSettingInputProps {
   userId?: string;
   group?: string;
   modes?: WorkspacePermissionMode[];
-  isEditing?: boolean;
+  readOnly?: boolean;
   deletable?: boolean;
   userOrGroupDisabled: boolean;
   onGroupOrUserIdChange: (
@@ -98,7 +98,7 @@ export const WorkspacePermissionSettingInput = ({
   userId,
   group,
   modes,
-  isEditing = true,
+  readOnly = false,
   deletable = true,
   userOrGroupDisabled,
   onDelete,
@@ -141,23 +141,34 @@ export const WorkspacePermissionSettingInput = ({
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem style={{ maxWidth: 150 }}>
-        <EuiSuperSelect
-          compressed={true}
-          placeholder={i18n.translate('workspaceForm.permissionSetting.selectType', {
-            defaultMessage: 'Select',
-          })}
-          options={typeOptions}
-          valueOfSelected={type}
-          onChange={(value) => onTypeChange(value, index)}
-          disabled={userOrGroupDisabled || !isEditing}
-          data-test-subj="workspace-typeOptions"
-          aria-labelledby={PERMISSION_TYPE_LABEL_ID}
-        />
+        {readOnly ? (
+          <EuiFieldText
+            value={typeOptions.find((option) => option.value === type)?.inputDisplay}
+            aria-labelledby={PERMISSION_TYPE_LABEL_ID}
+            compressed
+            readOnly
+          />
+        ) : (
+          <EuiSuperSelect
+            compressed={true}
+            placeholder={i18n.translate('workspaceForm.permissionSetting.selectType', {
+              defaultMessage: 'Select',
+            })}
+            options={typeOptions}
+            valueOfSelected={type}
+            onChange={(value) => onTypeChange(value, index)}
+            disabled={userOrGroupDisabled}
+            readOnly={readOnly}
+            data-test-subj="workspace-typeOptions"
+            aria-labelledby={PERMISSION_TYPE_LABEL_ID}
+          />
+        )}
       </EuiFlexItem>
       <EuiFlexItem style={{ maxWidth: 400 }}>
         <EuiFieldText
           compressed={true}
-          disabled={userOrGroupDisabled || !isEditing}
+          disabled={userOrGroupDisabled}
+          readOnly={readOnly}
           onChange={handleGroupOrUserIdChange}
           value={(type === WorkspacePermissionItemType.User ? userId : group) ?? ''}
           data-test-subj="workspaceFormUserIdOrGroupInput"
@@ -174,18 +185,30 @@ export const WorkspacePermissionSettingInput = ({
         />
       </EuiFlexItem>
       <EuiFlexItem style={{ maxWidth: 150 }}>
-        <EuiSuperSelect
-          compressed={true}
-          options={permissionModeOptions}
-          valueOfSelected={permissionModesSelected}
-          onChange={handlePermissionModeOptionChange}
-          disabled={userOrGroupDisabled || !isEditing}
-          data-test-subj="workspace-permissionModeOptions"
-          aria-labelledby={PERMISSION_ACCESS_LEVEL_LABEL_ID}
-        />
+        {readOnly ? (
+          <EuiFieldText
+            value={
+              permissionModeOptions.find((option) => option.value === permissionModesSelected)
+                ?.inputDisplay
+            }
+            aria-labelledby={PERMISSION_ACCESS_LEVEL_LABEL_ID}
+            compressed
+            readOnly
+          />
+        ) : (
+          <EuiSuperSelect
+            compressed={true}
+            options={permissionModeOptions}
+            valueOfSelected={permissionModesSelected}
+            onChange={handlePermissionModeOptionChange}
+            disabled={userOrGroupDisabled}
+            data-test-subj="workspace-permissionModeOptions"
+            aria-labelledby={PERMISSION_ACCESS_LEVEL_LABEL_ID}
+          />
+        )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {deletable && isEditing && (
+        {deletable && !readOnly && (
           <EuiButtonIcon
             color="text"
             aria-label="Delete permission setting"

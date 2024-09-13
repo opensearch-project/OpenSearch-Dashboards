@@ -146,7 +146,7 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
               permissionSettings={formData.permissionSettings}
               disabledUserOrGroupInputIds={disabledUserOrGroupInputIdsRef.current}
               data-test-subj={`workspaceForm-permissionSettingPanel`}
-              isEditing={isEditing}
+              readOnly={!isEditing}
             />
           </FormGroup>
         )}
