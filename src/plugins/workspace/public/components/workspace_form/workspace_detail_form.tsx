@@ -139,7 +139,12 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
           <WorkspaceDetailFormDetails availableUseCases={availableUseCases} />
         )}
         {detailTab === DetailTab.Collaborators && (
-          <FormGroup title={usersAndPermissionsTitle}>
+          <FormGroup
+            title={usersAndPermissionsTitle}
+            describe={i18n.translate('workspace.detail.collaborators.permissionSetting.describe', {
+              defaultMessage: 'Manage access and permissions.',
+            })}
+          >
             <WorkspacePermissionSettingPanel
               errors={formErrors.permissionSettings?.fields}
               onChange={setPermissionSettings}
