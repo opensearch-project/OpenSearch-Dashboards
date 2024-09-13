@@ -282,7 +282,7 @@ export const SelectDataSourceDetailPanel = ({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem>
               <EuiButtonGroup
                 legend="dataSourceGroup"
