@@ -19,7 +19,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useEffect, useState } from 'react';
-import { BaseDataset, Dataset, DatasetField } from '../../../common';
+import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField } from '../../../common';
 import { getIndexPatterns, getQueryService } from '../../services';
 
 export const Configurator = ({
@@ -112,16 +112,17 @@ export const Configurator = ({
                     text: field.displayName || field.name,
                     value: field.name,
                   })),
-                  { text: '-----', value: '', disabled: true },
-                  { text: 'No time field', value: undefined },
+                  { text: '-----', value: '-----', disabled: true },
+                  { text: 'I dont want to use time filter', value: '' },
                 ]}
                 value={timeFieldName}
                 onChange={(e) => {
-                  const value = e.target.value === 'undefined' ? undefined : e.target.value;
-                  setTimeFieldName(value);
+                  setTimeFieldName(e.target.value);
+                  const value = e.target.value === '' ? undefined : e.target.value;
                   setDataset({ ...dataset, timeFieldName: value });
                 }}
-                disabled={dataset?.timeFieldName !== undefined}
+                hasNoInitialSelection={dataset.type === DEFAULT_DATA.SET_TYPES.INDEX}
+                disabled={dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN}
               />
             </EuiFormRow>
           )}
@@ -166,7 +167,7 @@ export const Configurator = ({
             onConfirm(dataset);
           }}
           fill
-          disabled={timeFields && timeFields.length > 0 && timeFieldName === undefined}
+          disabled={timeFieldName === undefined && dataset.type === DEFAULT_DATA.SET_TYPES.INDEX}
         >
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"
