@@ -224,7 +224,6 @@ export const getDataSourcesList = (
   return client
     .find({
       type: WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
-      // type: 'data-source',
       fields: ['id', 'title', 'auth', 'description', 'dataSourceEngineType'],
       perPage: 10000,
       workspaces: targetWorkspaces,
@@ -524,6 +523,7 @@ export const fetchDataSourceConnections = async (
 ) => {
   try {
     const directQueryConnections = await fetchDataSourceConnectionsByDataSourceIds(
+      // Only data source saved object type needs to fetch data source connections, data connection type object not.
       dataSources.filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE).map((ds) => ds.id),
       http
     );
