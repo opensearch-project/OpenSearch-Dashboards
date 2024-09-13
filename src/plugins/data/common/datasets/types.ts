@@ -20,6 +20,8 @@ export interface DataSource {
   meta?: DataSourceMeta;
 }
 
+export type DataConnection = DataSource;
+
 /**
  * Metadata for a data source, generic to allow for additional fields.
  */
@@ -202,6 +204,8 @@ export interface BaseDataset {
   type: string;
   /** Optional reference to the data source */
   dataSource?: DataSource;
+  /** Optional reference to the data connection */
+  dataConnection?: DataConnection;
 }
 
 /**
