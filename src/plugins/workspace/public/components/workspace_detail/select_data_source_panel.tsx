@@ -159,7 +159,7 @@ export const SelectDataSourceDetailPanel = ({
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.detail.dataSources.unassign.success', {
-              defaultMessage: 'Remove associated OpenSearch connections successfully',
+              defaultMessage: 'The association has been removed',
             }),
           });
           setSelectedDataSourceConnections(savedDataSourceConnections);
