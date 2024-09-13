@@ -21,7 +21,7 @@ import {
 } from '../utils';
 import { ChromeNavLinks } from '../nav_links';
 import { InternalApplicationStart } from '../../application';
-import { NavGroupStatus } from '../../../../core/types';
+import { NavGroupStatus, NavGroupType } from '../../../../core/types';
 import { ChromeBreadcrumb, ChromeBreadcrumbEnricher } from '../chrome_service';
 import { ALL_USE_CASE_ID } from '../../../utils';
 
@@ -293,15 +293,22 @@ export class ChromeNavGroupService {
         const navGroups = appIdNavGroupMap.get(appId);
         if (navGroups && navGroups.size === 1) {
           const navGroupId = navGroups.values().next().value as string;
-          if (application.capabilities.workspaces.enabled) {
-            const ifUseCaseApplication = visibleUseCases.find(
-              (usecase) => usecase.id === navGroupId
-            );
-            if (ifUseCaseApplication && visibleUseCases.length > 1) {
-              // If the application is inside use case but there are more than 1 visible use cases
-              // It means the application is visited outside workspace and we need to set current nav group to undefined.
-              setCurrentNavGroup(undefined);
-            }
+          /**
+           * If
+           * 1. workspace enabled
+           * 2. outside of workspace: visibleUseCases.length > 1
+           * 3. the matched nav group is a use case nav group
+           *
+           * It means a workspace application is incorrectly opened in global place.
+           * We need to set current nav group to undefined to not show the use case nav.
+           */
+          const navGroupInfo = navGroupMap[navGroupId];
+          if (
+            application.capabilities.workspaces.enabled &&
+            visibleUseCases.length > 1 &&
+            navGroupInfo.type !== NavGroupType.SYSTEM
+          ) {
+            setCurrentNavGroup(undefined);
           } else {
             setCurrentNavGroup(navGroupId);
           }

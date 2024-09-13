@@ -502,7 +502,7 @@ describe('ChromeNavGroupService#start()', () => {
     expect(currentNavGroup).toBeFalsy();
   });
 
-  it('should erase current nav group if application can only be found in use case but there are more than 1 visible nav groups', async () => {
+  it('should erase current nav group if application can only be found in use case but outside workspace', async () => {
     const uiSettings = uiSettingsServiceMock.createSetupContract();
     const navGroupEnabled$ = new Rx.BehaviorSubject(true);
     uiSettings.get$.mockImplementation(() => navGroupEnabled$);
