@@ -273,7 +273,7 @@ export const AssociationDataSourceModal = ({
         <EuiSmallButton onClick={closeModal}>
           <FormattedMessage
             id="workspace.detail.dataSources.associateModal.close.button"
-            defaultMessage="Close"
+            defaultMessage="Cancel"
           />
         </EuiSmallButton>
         <EuiSmallButton
