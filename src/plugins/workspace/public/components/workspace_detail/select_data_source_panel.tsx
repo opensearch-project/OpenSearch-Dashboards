@@ -249,6 +249,7 @@ export const SelectDataSourceDetailPanel = ({
           />
         </EuiText>
       )}
+      <EuiSpacer />
     </EuiTextAlign>
   );
 
