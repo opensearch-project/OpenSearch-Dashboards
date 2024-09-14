@@ -21,6 +21,7 @@ import { coreMock } from '../../../core/public/mocks';
 import { WORKSPACE_DETAIL_APP_ID, USE_CASE_PREFIX } from '../common/constants';
 import { SigV4ServiceName } from '../../../plugins/data_source/common/data_sources';
 import { createMockedRegisteredUseCases } from './mocks';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../data_source/common';
 
 const startMock = coreMock.createStart();
 const STATIC_USE_CASES = createMockedRegisteredUseCases();
@@ -375,6 +376,7 @@ describe('workspace utils: getDataSourcesList', () => {
       savedObjects: [
         {
           id: 'id1',
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
           get: (param: string) => {
             switch (param) {
               case 'title':
@@ -394,6 +396,7 @@ describe('workspace utils: getDataSourcesList', () => {
       {
         id: 'id1',
         title: 'title1',
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
         auth: 'mock_value',
         description: 'description1',
         dataSourceEngineType: 'dataSourceEngineType1',
