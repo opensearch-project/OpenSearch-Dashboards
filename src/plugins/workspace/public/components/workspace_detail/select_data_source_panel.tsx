@@ -297,7 +297,11 @@ export const SelectDataSourceDetailPanel = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiHorizontalRule />
+      {formData.selectedDataSourceConnections.length > 0 ? (
+        <EuiHorizontalRule />
+      ) : (
+        <EuiSpacer size="xl" />
+      )}
       {renderTableContent()}
       {isVisible && (
         <AssociationDataSourceModal
