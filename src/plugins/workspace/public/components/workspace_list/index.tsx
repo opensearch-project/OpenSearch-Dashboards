@@ -110,7 +110,7 @@ export const WorkspaceListInner = ({
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 20,
     pageSizeOptions: [5, 10, 20],
   });
   const [deletedWorkspaces, setDeletedWorkspaces] = useState<WorkspaceAttribute[]>([]);
@@ -372,6 +372,7 @@ export const WorkspaceListInner = ({
   };
 
   const search: EuiSearchBarProps = {
+    compressed: true,
     box: {
       incremental: true,
     },
@@ -390,6 +391,9 @@ export const WorkspaceListInner = ({
     ],
     toolsLeft: renderToolsLeft(),
   };
+
+  // eslint-disable-next-line
+  console.log('newWorkspace', newWorkspaceList);
 
   const columnsWithoutActions = [
     {
@@ -607,7 +611,6 @@ export const WorkspaceListInner = ({
 
   const workspaceListTable = (
     <EuiInMemoryTable
-      compressed={true}
       items={newWorkspaceList}
       columns={columns}
       itemId="id"
