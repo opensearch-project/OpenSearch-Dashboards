@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { fireEvent, render, screen } from '@testing-library/react';
-import React from 'react';
+import React, { ComponentProps } from 'react';
 import { coreMock } from '../../../../../core/public/mocks';
 import { BehaviorSubject } from 'rxjs';
-import { QueryAssistSummary, QueryAssistSummaryProps, QueryContext } from './query_assist_summary';
+import { QueryAssistSummary } from './query_assist_summary';
 import { useQueryAssist } from '../hooks';
 
 jest.mock('react', () => ({
@@ -21,36 +21,35 @@ jest.mock('../hooks', () => ({
 describe('query assist summary', () => {
   const PPL = 'ppl';
   const question = 'Are there any errors in my logs?';
-  const queryContext: QueryContext = {
+  const queryContext = {
     question,
     query: PPL,
     queryResults: [{ size: 1 }],
   };
 
-  const emptyResultQueryContext: QueryContext = {
+  const emptyResultQueryContext = {
     question,
     query: PPL,
     queryResults: [],
   };
-
-  const reportUiStatsMock = jest.fn();
-  const getQuery = jest.fn();
-  const setSummary = jest.fn();
-  const setLoading = jest.fn();
-  const setQueryContext = jest.fn();
-  const setFeedback = jest.fn();
-  const setIsAssistantEnabledByCapability = jest.fn();
 
   const coreSetupMock = coreMock.createSetup({});
   const httpMock = coreSetupMock.http;
   const data = new BehaviorSubject<any[]>([]);
   const question$ = new BehaviorSubject<string>('');
   const query$ = new BehaviorSubject<string>('');
+  const reportUiStatsMock = jest.fn();
+  const setSummary = jest.fn();
+  const setLoading = jest.fn();
+  const setQueryContext = jest.fn();
+  const setFeedback = jest.fn();
+  const setIsAssistantEnabledByCapability = jest.fn();
+  const getQuery = jest.fn();
   const dataMock = {
     query: {
       queryString: {
+        getUpdates$: () => query$,
         getQuery,
-        query$,
       },
     },
     search: {
@@ -73,7 +72,7 @@ describe('query assist summary', () => {
       CLICK: 'click',
     },
   };
-  const props: QueryAssistSummaryProps = {
+  const props: ComponentProps<typeof QueryAssistSummary> = {
     data: dataMock,
     http: httpMock,
     usageCollection: usageCollectionMock,
@@ -132,6 +131,7 @@ describe('query assist summary', () => {
       isAssistantEnabledByCapability,
       setIsAssistantEnabledByCapability,
     ]);
+    React.useState.mockImplementationOnce(() => [undefined, jest.fn()]);
     useQueryAssist.mockImplementationOnce(() => ({
       question: 'question',
       question$,
@@ -212,7 +212,7 @@ describe('query assist summary', () => {
     fireEvent.click(screen.getByTestId('queryAssist_summary_buttons_thumbup'));
     expect(setFeedback).toHaveBeenCalledWith(true);
     expect(reportUiStatsMock).toHaveBeenCalledWith(
-      'query-assistant',
+      'query-assist',
       'click',
       expect.stringMatching(/^thumbup/)
     );
@@ -226,7 +226,7 @@ describe('query assist summary', () => {
     fireEvent.click(screen.getByTestId('queryAssist_summary_buttons_thumbdown'));
     expect(setFeedback).toHaveBeenCalledWith(true);
     expect(reportUiStatsMock).toHaveBeenCalledWith(
-      'query-assistant',
+      'query-assist',
       'click',
       expect.stringMatching(/^thumbdown/)
     );
@@ -251,6 +251,9 @@ describe('query assist summary', () => {
         question,
         ppl: PPL,
       }),
+      query: {
+        dataSourceId: undefined,
+      },
     });
     await sleep(2000);
     expect(setSummary).toHaveBeenNthCalledWith(1, null);
@@ -317,5 +320,14 @@ describe('query assist summary', () => {
     });
     await sleep(2000);
     expect(setQueryContext).toHaveBeenCalledTimes(1);
+  });
+
+  it('should reset feedback state if re-fetch summary', async () => {
+    mockUseState('summary', LOADING.NO, queryContext, FEEDBACK.YES);
+    const RESPONSE_TEXT = 'response';
+    httpMock.post.mockResolvedValue(RESPONSE_TEXT);
+    renderQueryAssistSummary(COLLAPSED.NO);
+    await sleep(2000);
+    expect(setFeedback).toHaveBeenCalledWith(FEEDBACK.NO);
   });
 });

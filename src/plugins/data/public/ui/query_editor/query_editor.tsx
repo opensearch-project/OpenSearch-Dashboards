@@ -14,10 +14,9 @@ import {
   EuiText,
   PopoverAnchorPosition,
 } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
-import React, { Component, createRef, RefObject } from 'react';
+import React, { Component, createRef, RefObject, useMemo } from 'react';
 import { monaco } from '@osd/monaco';
 import {
   IDataPluginServices,
@@ -338,16 +337,22 @@ export default class QueryEditorUI extends Component<Props, State> {
   };
 
   private renderExtensionSearchBarButtion = () => {
-    const supported = 'query-assist';
     if (!this.extensionMap || Object.keys(this.extensionMap).length === 0) return null;
-    if (!(supported in this.extensionMap) || !this.extensionMap[supported].getSearchBarButton)
-      return null;
-    return this.extensionMap[supported].getSearchBarButton({
-      language: this.props.query.language,
-      onSelectLanguage: this.onSelectLanguage,
-      isCollapsed: this.state.isCollapsed,
-      setIsCollapsed: this.setIsCollapsed,
-    });
+    const sortedConfigs = Object.values(this.extensionMap).sort((a, b) => a.order - b.order);
+    return (
+      <>
+        {sortedConfigs.map((config) => {
+          return config.getSearchBarButton
+            ? config.getSearchBarButton({
+                language: this.props.query.language,
+                onSelectLanguage: this.onSelectLanguage,
+                isCollapsed: this.state.isCollapsed,
+                setIsCollapsed: this.setIsCollapsed,
+              })
+            : null;
+        })}
+      </>
+    );
   };
 
   public render() {

@@ -92,7 +92,7 @@ export const createQueryAssistExtension = (
   usageCollection: UsageCollectionSetup
 ): QueryEditorExtensionConfig => {
   const http: HttpSetup = core.http;
-  const isQueryAssistCollapsed$ = new BehaviorSubject<boolean>(true);
+  const isQueryAssistCollapsed$ = new BehaviorSubject<boolean>(false);
   const question$ = new BehaviorSubject('');
   return {
     id: 'query-assist',

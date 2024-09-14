@@ -14,7 +14,7 @@ import {
   EuiCopy,
 } from '@elastic/eui';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import { IDataFrame } from 'src/plugins/data/common';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,11 +22,14 @@ import { isEmpty } from 'lodash';
 import { merge, of } from 'rxjs';
 import { filter, distinctUntilChanged, mergeMap } from 'rxjs/operators';
 import { HttpSetup } from 'opensearch-dashboards/public';
+import { Dataset } from '../../../../data/common';
 import { useQueryAssist } from '../hooks';
 import { DataPublicPluginSetup, QueryEditorExtensionDependencies } from '../../../../data/public';
 import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { CoreSetup } from '../../../../../core/public';
+import { QueryAssistContextType } from '../../../common/query_assist';
 import sparkleHollowSvg from '../../assets/sparkle_hollow.svg';
+import sparkleSolidSvg from '../../assets/sparkle_solid.svg';
 
 export interface QueryContext {
   question: string;
@@ -34,7 +37,7 @@ export interface QueryContext {
   queryResults: any;
 }
 
-export interface QueryAssistSummaryProps {
+interface QueryAssistSummaryProps {
   data: DataPublicPluginSetup;
   http: HttpSetup;
   usageCollection: UsageCollectionSetup;
@@ -43,15 +46,21 @@ export interface QueryAssistSummaryProps {
 }
 
 export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => {
+  const { query, search } = props.data;
   const [summary, setSummary] = useState(null); // store fetched data
   const [loading, setLoading] = useState(false); // track loading state
   const [queryContext, setQueryContext] = useState<QueryContext | undefined>(undefined);
   const [feedback, setFeedback] = useState(false);
-  const [isAssistantEnabledByCapability, setIsAssistantEnabledByCapability] = useState(false); // track loading state
+  const [isEnabledByCapability, setIsEnabledByCapability] = useState(false);
+  const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(
+    query.queryString.getQuery()?.dataset
+  );
   const { question$, isQueryAssistCollapsed } = useQueryAssist();
-  const METRIC_APP = `query-assistant`;
-  const afterFeedbackTip =
-    'Thank you for the feedback. Try again by adjusting your question so that I have the opportunity to better assist you.';
+  const METRIC_APP = `query-assist`;
+  const afterFeedbackTip = i18n.translate('queryEnhancements.queryAssist.summary.afterFeedback', {
+    defaultMessage:
+      'Thank you for the feedback. Try again by adjusting your question so that I have the opportunity to better assist you.',
+  });
 
   const sampleSize = 10;
 
@@ -74,20 +83,22 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
     return hits;
   };
 
-  const { query, search } = props.data;
-
-  const reportMetric = props.usageCollection
-    ? (metric: string) => {
+  const reportMetric = useCallback(
+    (metric: string) => {
+      if (props.usageCollection) {
         props.usageCollection.reportUiStats(
           METRIC_APP,
           props.usageCollection.METRIC_TYPE.CLICK,
           metric + '-' + uuidv4()
         );
       }
-    : () => {};
+    },
+    [props.usageCollection, METRIC_APP]
+  );
 
-  const reportCountMetric = props.usageCollection
-    ? (metric: string, count: number) => {
+  const reportCountMetric = useCallback(
+    (metric: string, count: number) => {
+      if (props.usageCollection) {
         props.usageCollection.reportUiStats(
           METRIC_APP,
           props.usageCollection.METRIC_TYPE.COUNT,
@@ -95,48 +106,62 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
           count
         );
       }
-    : () => {};
+    },
+    [props.usageCollection, METRIC_APP]
+  );
+
+  useEffect(() => {
+    const subscription = query.queryString.getUpdates$().subscribe((_query) => {
+      setSelectedDataset(_query?.dataset);
+    });
+    return () => subscription.unsubscribe();
+  }, [query.queryString]);
 
   useEffect(() => {
     let dataStack = [];
-    const enum DataType {
-      QUESTION,
-      QUERY,
-      DATA,
-    }
-    const combineSubscription = merge(
+    const subscription = merge(
       question$.pipe(
         filter((value) => !isEmpty(value)),
-        mergeMap((value) => of({ type: DataType.QUESTION, data: value }))
+        mergeMap((value) => of({ type: QueryAssistContextType.QUESTION, data: value }))
       ),
-      query.queryString.query$.pipe(
+      query.queryString.getUpdates$().pipe(
         filter((value) => !isEmpty(value)),
-        mergeMap((value) => of({ type: DataType.QUERY, data: value }))
+        mergeMap((value) => of({ type: QueryAssistContextType.QUERY, data: value }))
       ),
       search.df?.df$?.pipe(
         distinctUntilChanged(),
         filter((value) => !isEmpty(value) && !isEmpty(value?.fields)),
-        mergeMap((value) => of({ type: DataType.DATA, data: value }))
+        mergeMap((value) => of({ type: QueryAssistContextType.DATA, data: value }))
       )
     ).subscribe((value) => {
       // to ensure we only trigger summary when user hits the query assist button with natual language input
-      if (value.type === DataType.QUESTION) {
-        dataStack = [value.data];
-      } else if (value.type === DataType.QUERY && dataStack.length === 1) {
-        dataStack.push(value.data.query);
-      } else if (value.type === DataType.DATA && dataStack.length === 2) {
-        dataStack.push(value.data);
-        setQueryContext({
-          question: dataStack[0],
-          query: dataStack[1],
-          queryResults: convertResult(dataStack[2]),
-        });
-        dataStack = [];
+      switch (value.type) {
+        case QueryAssistContextType.QUESTION:
+          dataStack = [value.data];
+          break;
+        case QueryAssistContextType.QUERY:
+          if (dataStack.length === 1) {
+            dataStack.push(value.data.query);
+          }
+          break;
+        case QueryAssistContextType.DATA:
+          if (dataStack.length === 2) {
+            dataStack.push(value.data);
+            setQueryContext({
+              question: dataStack[0],
+              query: dataStack[1],
+              queryResults: convertResult(dataStack[2]),
+            });
+            dataStack = [];
+          }
+          break;
+        default:
+          break;
       }
     });
 
     return () => {
-      combineSubscription.unsubscribe();
+      subscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -146,6 +171,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
       if (isEmpty(queryContext?.queryResults)) return;
       setLoading(true);
       setSummary(null);
+      setFeedback(false);
       const SUCCESS_METRIC = 'fetch_summary_success';
       try {
         const actualSampleSize = Math.min(sampleSize, queryContext?.queryResults?.length);
@@ -159,6 +185,9 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
             question: queryContext?.question,
             ppl: queryContext?.query,
           }),
+          query: {
+            dataSourceId: selectedDataset?.dataSource?.id,
+          },
         });
         setSummary(response);
         reportCountMetric(SUCCESS_METRIC, 1);
@@ -175,20 +204,24 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
 
   useEffect(() => {
     props.core.getStartServices().then(([coreStart, depsStart]) => {
-      const assistantEnabled = coreStart.application.capabilities?.assistant?.enabled === true;
-      setIsAssistantEnabledByCapability(assistantEnabled);
+      const assistantEnabled = !!coreStart.application.capabilities?.assistant?.enabled;
+      setIsEnabledByCapability(assistantEnabled);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onFeedback = (satisfied: boolean) => {
-    if (feedback) return;
-    setFeedback(true);
-    reportMetric(satisfied ? 'thumbup' : 'thumbdown');
-  };
+  const onFeedback = useCallback(
+    (satisfied: boolean) => {
+      if (feedback) return;
+      setFeedback(true);
+      reportMetric(satisfied ? 'thumbup' : 'thumbdown');
+    },
+    [feedback, reportMetric]
+  );
 
-  if (props.dependencies.isCollapsed || isQueryAssistCollapsed || !isAssistantEnabledByCapability)
+  if (props.dependencies.isCollapsed || isQueryAssistCollapsed || !isEnabledByCapability)
     return null;
+  const isDarkMode = props.core.uiSettings.get('theme:darkMode');
   return (
     <EuiSplitPanel.Outer
       className="queryAssist queryAssist__summary"
@@ -197,16 +230,20 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
       borderRadius="none"
     >
       <EuiSplitPanel.Inner
-        style={{ background: 'linear-gradient(to left, #EDF7FF, #F9F4FF)', padding: '6px' }}
+        className={
+          isDarkMode
+            ? 'queryAssist queryAssist__summary_banner_dark'
+            : 'queryAssist queryAssist__summary_banner'
+        }
       >
         <EuiFlexGroup alignItems={'center'} gutterSize={'xs'}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type={sparkleHollowSvg} size="m" />
+            <EuiIcon type={isDarkMode ? sparkleSolidSvg : sparkleHollowSvg} size="m" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">
               <strong>
-                {i18n.translate('assistantDashboards.vizSummary.response', {
+                {i18n.translate('queryEnhancements.queryAssist.summary.panelTitle', {
                   defaultMessage: 'Response',
                 })}
               </strong>
@@ -219,7 +256,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
                   <EuiIconTip
                     type={'iInCircle'}
                     content={`Summary based on first ${sampleSize} records`}
-                    aria-label={i18n.translate('queryAssist.meta.summary.sampletip', {
+                    aria-label={i18n.translate('queryEnhancements.queryAssist.summary.sampletip', {
                       defaultMessage: `Summary based on first ${sampleSize} records`,
                     })}
                   />
@@ -229,7 +266,13 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
                     aria-label="feedback thumbs up"
                     color="text"
                     iconType="thumbsUp"
-                    title={!feedback ? 'Good response' : afterFeedbackTip}
+                    title={
+                      !feedback
+                        ? i18n.translate('queryEnhancements.queryAssist.summary.goodResponse', {
+                            defaultMessage: `Good response`,
+                          })
+                        : afterFeedbackTip
+                    }
                     onClick={() => onFeedback(true)}
                     data-test-subj="queryAssist_summary_buttons_thumbup"
                   />
@@ -238,7 +281,13 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
                   <EuiSmallButtonIcon
                     aria-label="feedback thumbs down"
                     color="text"
-                    title={!feedback ? 'Bad response' : afterFeedbackTip}
+                    title={
+                      !feedback
+                        ? i18n.translate('queryEnhancements.queryAssist.summary.badResponse', {
+                            defaultMessage: `Bad response`,
+                          })
+                        : afterFeedbackTip
+                    }
                     iconType="thumbsDown"
                     onClick={() => onFeedback(false)}
                     data-test-subj="queryAssist_summary_buttons_thumbdown"
@@ -249,8 +298,10 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
                   <EuiCopy textToCopy={summary ?? ''}>
                     {(copy) => (
                       <EuiSmallButtonIcon
-                        aria-label="copy summary"
-                        title="Copy to clipboard"
+                        aria-label="Copy to clipboard"
+                        title={i18n.translate('queryEnhancements.queryAssist.summary.copy', {
+                          defaultMessage: `Copy to clipboard`,
+                        })}
                         onClick={copy}
                         color="text"
                         iconType="copy"
@@ -267,12 +318,16 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
       <EuiSplitPanel.Inner paddingSize={'s'}>
         {!summary && !loading && (
           <EuiText size="s" data-test-subj="queryAssist_summary_empty_text">
-            Ask a question to generate a summary.
+            {i18n.translate('queryEnhancements.queryAssist.summary.placeholder', {
+              defaultMessage: `Ask a question to generate summary.`,
+            })}
           </EuiText>
         )}
         {loading && (
           <EuiText size="s" data-test-subj="queryAssist_summary_loading">
-            Generating response...
+            {i18n.translate('queryEnhancements.queryAssist.summary.generating', {
+              defaultMessage: `Generating response...`,
+            })}
           </EuiText>
         )}
         {summary && !loading && (

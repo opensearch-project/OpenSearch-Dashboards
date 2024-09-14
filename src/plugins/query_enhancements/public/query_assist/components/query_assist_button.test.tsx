@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { fireEvent, render, screen } from '@testing-library/react';
-import React from 'react';
-import { QueryAssistButton, QueryAssistButtonProps } from './query_assist_button';
+import React, { ComponentProps } from 'react';
+import { QueryAssistButton } from './query_assist_button';
 import { useQueryAssist } from '../hooks';
 
 jest.mock('../hooks', () => ({
@@ -15,7 +15,7 @@ describe('query assist button', () => {
   const setIsCollapsed = jest.fn();
   const updateIsQueryAssistCollapsed = jest.fn();
 
-  const props: QueryAssistButtonProps = {
+  const props: ComponentProps<typeof QueryAssistButton> = {
     dependencies: {
       isCollapsed: false,
       setIsCollapsed,
