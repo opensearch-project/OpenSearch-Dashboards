@@ -593,7 +593,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       if (validateIsWorkspaceDataSourceAndConnectionObjectType(type)) {
         throw generateOSDAdminPermissionError();
       }
-      // In current version, only the type is data-source that will call addToWorkspaces
+      // In current version, only the type is data-source and data-connection that will call addToWorkspaces
       return await wrapperOptions.client.addToWorkspaces(type, id, targetWorkspaces, options);
     };
 
@@ -603,11 +603,11 @@ export class WorkspaceSavedObjectsClientWrapper {
       targetWorkspaces: string[],
       options: SavedObjectsBaseOptions = {}
     ) => {
-      // Only dashboard admin can unassign data source to workspace
+      // Only dashboard admin can unassign data source and data-connection to workspace
       if (validateIsWorkspaceDataSourceAndConnectionObjectType(type)) {
         throw generateOSDAdminPermissionError();
       }
-      // In current version, only the type is data-source will that call deleteFromWorkspaces
+      // In current version, only the type is data-source and data-connection will that call deleteFromWorkspaces
       return await wrapperOptions.client.deleteFromWorkspaces(type, id, targetWorkspaces, options);
     };
 
