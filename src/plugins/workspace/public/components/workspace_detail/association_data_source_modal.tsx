@@ -259,6 +259,7 @@ export const AssociationDataSourceModal = ({
           onChange={handleSelectionChange}
           isLoading={isLoading}
           renderOption={renderOption}
+          height={256}
         >
           {(list, search) => (
             <Fragment>
