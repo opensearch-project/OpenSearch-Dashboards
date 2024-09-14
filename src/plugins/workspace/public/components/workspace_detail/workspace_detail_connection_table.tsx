@@ -9,7 +9,7 @@ import { i18n } from '@osd/i18n';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { DataSourceConnectionTable } from '../workspace_form';
-import { DATA_CONNECTION_SAVED_OBJECT_TYPE } from '../../../../data_source/common/data_connections';
+import { DATA_CONNECTION_SAVED_OBJECT_TYPE } from '../../../../data_source/common';
 interface WorkspaceDetailConnectionTableProps {
   isDashboardAdmin: boolean;
   connectionType: string;

@@ -22,8 +22,10 @@ import { useFormAvailableUseCases } from '../workspace_form/use_form_available_u
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
 import { DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
-import { DATA_CONNECTION_SAVED_OBJECT_TYPE } from '../../../../../plugins/data_source/common/data_connections';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../../plugins/data_source/common/data_sources';
+import {
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+  DATA_SOURCE_SAVED_OBJECT_TYPE,
+} from '../../../../../plugins/data_source/common';
 
 export interface WorkspaceCreatorProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;

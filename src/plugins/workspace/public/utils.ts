@@ -45,8 +45,10 @@ import {
   SECURITY_ANALYTICS_OVERVIEW_PAGE_ID,
 } from '../../../plugins/content_management/public';
 import { WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES } from '../common/constants';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../data_source/common/data_sources';
-import { DATA_CONNECTION_SAVED_OBJECT_TYPE } from '../../data_source/common/data_connections';
+import {
+  DATA_SOURCE_SAVED_OBJECT_TYPE,
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+} from '../../data_source/common';
 
 export const isUseCaseFeatureConfig = (featureConfig: string) =>
   featureConfig.startsWith(USE_CASE_PREFIX);

@@ -33,7 +33,7 @@ import { Logos } from '../../../../../core/common';
 import { DirectQueryConnectionIcon } from '../workspace_form';
 import { DataConnectionIcon } from '../workspace_form';
 
-import { DATA_CONNECTION_SAVED_OBJECT_TYPE } from '../../../../data_source/common/data_connections';
+import { DATA_CONNECTION_SAVED_OBJECT_TYPE } from '../../../../data_source/common';
 
 const ConnectionIcon = ({
   connection: { connectionType, type },
