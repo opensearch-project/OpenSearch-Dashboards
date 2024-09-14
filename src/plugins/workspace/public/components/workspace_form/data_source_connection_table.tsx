@@ -137,6 +137,8 @@ export const DataSourceConnectionTable = ({
         defaultMessage: 'Description',
       }),
       truncateText: true,
+      render: (description: string) =>
+        description.length > 0 ? description : <EuiText>&mdash;</EuiText>,
     },
     {
       width: '140px',
@@ -188,7 +190,7 @@ export const DataSourceConnectionTable = ({
             </EuiListGroup>
           </EuiPopover>
         ) : (
-          <EuiText>—</EuiText>
+          <EuiText>&mdash;</EuiText>
         ),
     },
   ];
