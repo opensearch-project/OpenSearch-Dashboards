@@ -16,8 +16,7 @@
 
     .nav-link-item-btn {
       margin-bottom: 0;
-      padding-top: 0;
-      padding-bottom: 0;
+      padding: 0;
 
       &::after {
         display: none;
@@ -35,7 +34,7 @@
 
   .nav-link-item-category-title {
     line-height: 16px;
-    padding: $euiSizeS $euiSize;
+    padding: $euiSizeS;
   }
 
   .nav-link-parent-item-button {
