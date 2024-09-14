@@ -184,7 +184,7 @@ export const DataSourceConnectionTable = ({
                   size="xs"
                   label={item.name}
                   icon={<DirectQueryConnectionIcon type={item.type} />}
-                  style={{ maxHeight: '30px' }}
+                  style={{ maxHeight: '30px', gap: '2px' }}
                 />
               ))}
             </EuiListGroup>
