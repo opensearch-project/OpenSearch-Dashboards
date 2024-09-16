@@ -28,7 +28,10 @@ import {
   WORKSPACE_ID_CONSUMER_WRAPPER_ID,
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
 } from '../common/constants';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../data_source/common';
+import {
+  DATA_SOURCE_SAVED_OBJECT_TYPE,
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+} from '../../data_source/common';
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -96,10 +99,11 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
       dataSources?: string[];
+      dataConnections?: string[];
     }
   ): ReturnType<IWorkspaceClientImpl['create']> {
     try {
-      const { permissions, dataSources, ...attributes } = payload;
+      const { permissions, dataSources, dataConnections, ...attributes } = payload;
       const id = generateRandomId(WORKSPACE_ID_SIZE);
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const existingWorkspaceRes = await this.getScopedClientWithoutPermission(requestDetail)?.find(
@@ -113,13 +117,21 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
       }
 
+      const promises = [];
+
       if (dataSources) {
-        const promises = [];
         for (const dataSourceId of dataSources) {
           promises.push(client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, [id]));
         }
-        await Promise.all(promises);
       }
+      if (dataConnections) {
+        for (const connectionId of dataConnections) {
+          promises.push(
+            client.addToWorkspaces(DATA_CONNECTION_SAVED_OBJECT_TYPE, connectionId, [id])
+          );
+        }
+      }
+      await Promise.all(promises);
 
       const result = await client.create<Omit<WorkspaceAttribute, 'id'>>(
         WORKSPACE_TYPE,
@@ -215,9 +227,15 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     id: string,
     payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>> & {
       dataSources?: string[];
+      dataConnections?: string[];
     }
   ): Promise<IResponse<boolean>> {
-    const { permissions, dataSources: newDataSources, ...attributes } = payload;
+    const {
+      permissions,
+      dataSources: newDataSources,
+      dataConnections: newDataConnections,
+      ...attributes
+    } = payload;
     try {
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       let workspaceInDB: SavedObject<WorkspaceAttribute> = await client.get(WORKSPACE_TYPE, id);
@@ -235,17 +253,19 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         }
       }
 
+      const originalSelectedDataSourcesAndConnections = await getDataSourcesList(client, [id]);
+      const promises = [];
+
       if (newDataSources) {
-        const originalSelectedDataSources = await getDataSourcesList(client, [id]);
-        const originalSelectedDataSourceIds = originalSelectedDataSources.map((ds) => ds.id);
+        const originalSelectedDataSourceIds = originalSelectedDataSourcesAndConnections
+          .filter((item) => item.type === DATA_SOURCE_SAVED_OBJECT_TYPE)
+          .map((ds) => ds.id);
         const dataSourcesToBeRemoved = originalSelectedDataSourceIds.filter(
           (ds) => !newDataSources.find((item) => item === ds)
         );
         const dataSourcesToBeAdded = newDataSources.filter(
           (ds) => !originalSelectedDataSourceIds.find((item) => item === ds)
         );
-
-        const promises = [];
         if (dataSourcesToBeRemoved.length > 0) {
           for (const dataSourceId of dataSourcesToBeRemoved) {
             promises.push(
@@ -260,11 +280,37 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
             );
           }
         }
-        if (promises.length > 0) {
-          await Promise.all(promises);
+      }
+
+      if (newDataConnections) {
+        const originalSelectedDataConnectionIds = originalSelectedDataSourcesAndConnections
+          .filter((item) => item.type === DATA_CONNECTION_SAVED_OBJECT_TYPE)
+          .map((ds) => ds.id);
+        const dataConnectionsToBeRemoved = originalSelectedDataConnectionIds.filter(
+          (ds) => !newDataConnections.find((item) => item === ds)
+        );
+        const dataConnectionsToBeAdded = newDataConnections.filter(
+          (ds) => !originalSelectedDataConnectionIds.find((item) => item === ds)
+        );
+        if (dataConnectionsToBeRemoved.length > 0) {
+          for (const dataConnectionId of dataConnectionsToBeRemoved) {
+            promises.push(
+              client.deleteFromWorkspaces(DATA_CONNECTION_SAVED_OBJECT_TYPE, dataConnectionId, [id])
+            );
+          }
+        }
+        if (dataConnectionsToBeAdded.length > 0) {
+          for (const dataConnectionId of dataConnectionsToBeAdded) {
+            promises.push(
+              client.addToWorkspaces(DATA_CONNECTION_SAVED_OBJECT_TYPE, dataConnectionId, [id])
+            );
+          }
         }
       }
 
+      if (promises.length > 0) {
+        await Promise.all(promises);
+      }
       /**
        * When the workspace owner unassign themselves, ensure the default data source is set before
        * updating the workspace permissions. This prevents a lack of write permission on saved objects
@@ -326,9 +372,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         const promises = [];
         for (const dataSource of selectedDataSources) {
           promises.push(
-            savedObjectClient.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSource.id, [
-              id,
-            ])
+            savedObjectClient.deleteFromWorkspaces(dataSource.type, dataSource.id, [id])
           );
         }
         await Promise.all(promises);
