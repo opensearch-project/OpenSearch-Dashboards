@@ -31,3 +31,19 @@
     align-self: center;
   }
 }
+
+.datasetSelector__button--truncate {
+  display: flex;
+  align-items: center;
+  max-width: 400px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  .datasetSelector__title {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    flex-grow: 1;
+  }
+}

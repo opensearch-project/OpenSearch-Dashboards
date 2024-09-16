@@ -134,13 +134,13 @@ export const DatasetSelector = ({
       button={
         <EuiToolTip content={`${selectedDataset?.title ?? 'Select data'}`}>
           <EuiButtonEmpty
-            className="datasetSelector__button"
+            className="datasetSelector__button datasetSelector__button--truncate"
             iconType="arrowDown"
             iconSide="right"
             onClick={togglePopover}
           >
             <EuiIcon type={datasetIcon} className="datasetSelector__icon" />
-            {datasetTitle}
+            <span className="datasetSelector__title">{datasetTitle}</span>
           </EuiButtonEmpty>
         </EuiToolTip>
       }
