@@ -162,13 +162,8 @@
   padding: $euiSizeXS;
 
   > * {
-    flex: 0 0 auto;
+    flex: 0 0 auto; // Changed from 0 1 auto to prevent shrinking
     min-width: 0;
-  }
-
-  .osdQueryEditor__querycontrols {
-    float: right;
-    margin: $euiSizeS $euiSizeS;
   }
 
   .osdQueryEditor__dataSetPicker {
@@ -182,7 +177,15 @@
   }
 
   .osdQueryEditor__input {
-    flex-grow: 1;
+    flex: 1 1 auto; // Allow growing and shrinking
+    min-width: 0; // Allow shrinking below content size
+    overflow: hidden; // Prevent overflow
+  }
+
+  .osdQueryEditor__querycontrols {
+    display: flex;
+    align-items: center;
+    margin-left: $euiSizeS;
   }
 
   #savedQueryPopover {
@@ -191,17 +194,11 @@
   }
 }
 
-// TODO: improve how this is styled. Styling just for the DQL editor.
-.osdQueryEditor__body .globalFilterGroup__wrapper {
-  margin-top: -$euiSizeS;
-}
-
 .osdQuerEditor__singleLine {
   padding: $euiSizeS;
   background-color: $euiColorEmptyShade;
   overflow: visible !important; // needed for suggestion window
-  position: relative;
-  z-index: 2;  // Same as the input
+  width: 100%; // Ensure it takes full width of its container
 
   .monaco-editor .view-overlays .current-line {
     border: none;
@@ -210,7 +207,7 @@
 
 .suggest-widget {
   position: absolute;
-  z-index: 1000;  // Ensure it's above everything else
+  z-index: 1000;
 
   &.visible::after {
     position: absolute;
