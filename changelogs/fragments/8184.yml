@@ -1,0 +1,2 @@
+fix:
+- Fix bug when dynamic config index and alias are checked ([#8184](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8184))

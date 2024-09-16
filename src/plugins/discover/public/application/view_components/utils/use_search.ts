@@ -324,6 +324,11 @@ export const useSearch = (services: DiscoverViewServices) => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
       setSavedSearch(savedSearchInstance);
 
+      // if saved search does not exist, do not atempt to sync filters and query from savedObject
+      if (!savedSearch) {
+        return;
+      }
+
       // sync initial app filters from savedObject to filterManager
       const filters = cloneDeep(savedSearchInstance.searchSource.getOwnField('filter'));
       const query =
