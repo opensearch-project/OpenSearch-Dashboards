@@ -7,7 +7,10 @@ import { SavedObject } from '../../../../core/public';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { WorkspaceConflictSavedObjectsClientWrapper } from './saved_objects_wrapper_for_check_workspace_conflict';
 import { SavedObjectsSerializer } from '../../../../core/server';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../plugins/data_source/common';
+import {
+  DATA_SOURCE_SAVED_OBJECT_TYPE,
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+} from '../../../../plugins/data_source/common';
 
 describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
   const requestHandlerContext = coreMock.createRequestHandlerContext();
@@ -131,6 +134,19 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
         )
       ).rejects.toMatchInlineSnapshot(
         `[Error: Unsupported type in workspace: 'data-source' is not allowed to be created in workspace.]`
+      );
+
+      await expect(
+        wrapperClient.create(
+          DATA_CONNECTION_SAVED_OBJECT_TYPE,
+          {},
+
+          {
+            workspaces: ['foo'],
+          }
+        )
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unsupported type in workspace: 'data-connection' is not allowed to be created in workspace.]`
       );
 
       await expect(
@@ -336,6 +352,10 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
             type: DATA_SOURCE_SAVED_OBJECT_TYPE,
             id: 'foo',
           }),
+          getSavedObject({
+            type: DATA_CONNECTION_SAVED_OBJECT_TYPE,
+            id: 'foo',
+          }),
         ],
         {
           workspaces: ['foo'],
@@ -356,6 +376,13 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
         expect.objectContaining({
           message:
             "Unsupported type in workspace: 'data-source' is not allowed to be imported in workspace.",
+          statusCode: 400,
+        })
+      );
+      expect(result.saved_objects[2].error).toEqual(
+        expect.objectContaining({
+          message:
+            "Unsupported type in workspace: 'data-connection' is not allowed to be imported in workspace.",
           statusCode: 400,
         })
       );
@@ -474,6 +501,10 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
             type: DATA_SOURCE_SAVED_OBJECT_TYPE,
             id: 'foo',
           }),
+          getSavedObject({
+            type: DATA_CONNECTION_SAVED_OBJECT_TYPE,
+            id: 'foo',
+          }),
         ],
         {
           workspaces: ['foo'],
@@ -494,6 +525,13 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
         expect.objectContaining({
           message:
             "Unsupported type in workspace: 'data-source' is not allowed to be imported in workspace.",
+          statusCode: 400,
+        })
+      );
+      expect(result.errors[2].error).toEqual(
+        expect.objectContaining({
+          message:
+            "Unsupported type in workspace: 'data-connection' is not allowed to be imported in workspace.",
           statusCode: 400,
         })
       );
