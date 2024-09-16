@@ -162,7 +162,7 @@
   padding: $euiSizeXS;
 
   > * {
-    flex: 0 1 auto;
+    flex: 0 0 auto;
     min-width: 0;
   }
 
@@ -199,7 +199,9 @@
 .osdQuerEditor__singleLine {
   padding: $euiSizeS;
   background-color: $euiColorEmptyShade;
-  overflow: initial !important; // needed for suggestion window, otherwise will be hidden in child
+  overflow: visible !important; // needed for suggestion window
+  position: relative;
+  z-index: 2;  // Same as the input
 
   .monaco-editor .view-overlays .current-line {
     border: none;
@@ -207,7 +209,8 @@
 }
 
 .suggest-widget {
-  position: relative;
+  position: absolute;
+  z-index: 1000;  // Ensure it's above everything else
 
   &.visible::after {
     position: absolute;
