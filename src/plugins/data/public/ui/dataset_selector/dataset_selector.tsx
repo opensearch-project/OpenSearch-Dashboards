@@ -17,9 +17,10 @@ import { FormattedMessage } from '@osd/i18n/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
 import { Dataset, DEFAULT_DATA } from '../../../common';
-import { getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
 import { AdvancedSelector } from './advanced_selector';
+import { getQueryService } from '../../services';
+import { DatasetServiceContract } from '../../query';
 
 interface DatasetSelectorProps {
   selectedDataset?: Dataset;
@@ -44,7 +45,7 @@ export const DatasetSelector = ({
 }: DatasetSelectorProps) => {
   const isMounted = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [datasets, setDatasets] = useState<Array<{ dataset: Dataset; recent: boolean }>>([]);
   const { overlays } = services;
   const datasetService = getQueryService().queryString.getDatasetService();
   const datasetIcon =
@@ -58,17 +59,25 @@ export const DatasetSelector = ({
       const typeConfig = datasetService.getType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
       if (!typeConfig) return;
 
-      const fetchedIndexPatternDataStructures = await typeConfig.fetch(services, []);
+      const recentDatasets = datasetService.getRecentDatasets();
 
+      const fetchedIndexPatternDataStructures = await typeConfig.fetch(services, []);
       const fetchedDatasets =
         fetchedIndexPatternDataStructures.children?.map((pattern) =>
           typeConfig.toDataset([pattern])
         ) ?? [];
-      setDatasets(fetchedDatasets);
+      const filteredFetchedDatasets = fetchedDatasets.filter(
+        (dataset) => !recentDatasets.some((ds) => ds.id === dataset.id)
+      );
+      const allDatasets = [
+        ...recentDatasets.map((ds) => ({ dataset: ds, recent: true })),
+        ...filteredFetchedDatasets.map((ds) => ({ dataset: ds, recent: false }))
+      ]
+      setDatasets(allDatasets);
 
       // If no dataset is selected, select the first one
-      if (!selectedDataset && fetchedDatasets.length > 0) {
-        setSelectedDataset(fetchedDatasets[0]);
+      if (!selectedDataset && allDatasets.length > 0) {
+        setSelectedDataset(allDatasets[0].dataset);
       }
     };
 
@@ -88,57 +97,61 @@ export const DatasetSelector = ({
   const closePopover = useCallback(() => setIsOpen(false), []);
 
   const options = useMemo(() => {
-    const newOptions: EuiSelectableOption[] = [
-      {
-        label: 'Index patterns',
-        isGroupLabel: true,
-      },
-    ];
+    const buildDatasetOptions = (
+      groupLabel: string,
+      ds: Dataset[],
+      selectedDatasetId: string | undefined,
+      dsService: DatasetServiceContract
+    ): EuiSelectableOption[] => {
+      const datasetOptions: EuiSelectableOption[] = [
+        {
+          label: groupLabel,
+          isGroupLabel: true,
+        },
+      ];
+      ds.forEach(({ id, title, type, dataSource }) => {
+        const label = dataSource ? `${dataSource.title}::${title}` : title;
+        datasetOptions.push({
+          label,
+          checked: id === selectedDatasetId ? 'on' : undefined,
+          key: id,
+          prepend: <EuiIcon type={datasetService.getType(type)!.meta.icon.type} />,
+        });
+      });
+      return datasetOptions;
+    };
 
-    datasets.forEach(({ id, title, type, dataSource }) => {
-      const label = dataSource ? `${dataSource.title}::${title}` : title;
-      newOptions.push({
-        label,
-        checked: id === selectedDataset?.id ? 'on' : undefined,
-        key: id,
-        prepend: <EuiIcon type={datasetService.getType(type)!.meta.icon.type} />,
-      });
-    });
-    const recentlySelected: EuiSelectableOption[] = [
-      {
-        label: 'Recently selected data',
-        isGroupLabel: true,
-      },
-    ];
-    datasetService.getRecentDatasets().forEach(({ id, title, type, dataSource }) => {
-      const label = dataSource ? `${dataSource.title}::${title}` : title;
-      recentlySelected.push({
-        label,
-        checked: id === selectedDataset?.id ? 'on' : undefined,
-        key: id,
-        prepend: <EuiIcon type={datasetService.getType(type)!.meta.icon.type} />,
-      });
-    });
-    if (recentlySelected.length > 1) {
-      newOptions.unshift(...recentlySelected);
-    }
-    return newOptions;
+    const recentDatasetOptions = buildDatasetOptions(
+      'Recently selected data',
+      datasets.filter((ds) => ds.recent).map((ds) => ds.dataset),
+      selectedDataset?.id,
+      datasetService
+    );
+    const indexPatternOptions = buildDatasetOptions(
+      'Index patterns',
+      datasets.filter((ds) => !ds.recent).map((ds) => ds.dataset),
+      selectedDataset?.id,
+      datasetService
+    );
+    return [...recentDatasetOptions, ...indexPatternOptions];
   }, [datasets, selectedDataset?.id, datasetService]);
 
   const handleOptionChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
       const selectedOption = newOptions.find((option) => option.checked === 'on');
       if (selectedOption) {
-        const foundDataset =
-          datasets.find((dataset) => dataset.id === selectedOption.key) ??
-          datasetService.getRecentDataset(selectedOption.key);
+        const recentDatasets = datasets.filter((ds) => ds.recent).map((ds) => ds.dataset);
+        const indexPatterns = datasets.filter((ds) => !ds.recent).map((ds) => ds.dataset);
+        const foundDataset = [...recentDatasets, ...indexPatterns].find(
+          (dataset) => dataset.id === selectedOption.key
+        );
         if (foundDataset) {
           closePopover();
           setSelectedDataset(foundDataset);
         }
       }
     },
-    [datasets, setSelectedDataset, closePopover, datasetService]
+    [datasets, setSelectedDataset, closePopover]
   );
 
   const datasetTitle = useMemo(() => {
