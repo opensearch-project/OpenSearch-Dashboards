@@ -22,7 +22,7 @@ export const AdvancedSelector = ({
   onCancel,
 }: {
   services: IDataPluginServices;
-  onSelect: (datasets: Dataset[]) => void;
+  onSelect: (dataset: Dataset) => void;
   onCancel: () => void;
 }) => {
   const queryString = getQueryService().queryString;
@@ -48,14 +48,14 @@ export const AdvancedSelector = ({
         }),
     },
   ]);
-  const [selectedDatasets, setSelectedDatasets] = useState<BaseDataset[]>([]);
+  const [selectedDataset, setSelectedDataset] = useState<BaseDataset | undefined>();
 
-  return selectedDatasets.length > 0 ? (
+  return selectedDataset ? (
     <Configurator
-      baseDatasets={selectedDatasets}
+      baseDataset={selectedDataset}
       onConfirm={onSelect}
       onCancel={onCancel}
-      onPrevious={() => setSelectedDatasets([])}
+      onPrevious={() => setSelectedDataset(undefined)}
     />
   ) : (
     <DatasetExplorer
@@ -63,7 +63,7 @@ export const AdvancedSelector = ({
       queryString={queryString}
       path={path}
       setPath={setPath}
-      onNext={(datasets) => setSelectedDatasets(datasets)}
+      onNext={(dataset) => setSelectedDataset(dataset)}
       onCancel={onCancel}
     />
   );

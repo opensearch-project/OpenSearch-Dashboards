@@ -35,7 +35,6 @@ export default function DiscoverPanel(props: ViewProps) {
   } = services;
   const { data$, indexPattern } = useDiscoverContext();
   const [fetchState, setFetchState] = useState<SearchData>(data$.getValue());
-  console.log('❗fetchState:', fetchState);
 
   const { columns } = useSelector((state) => {
     const stateColumns = state.discover.columns;

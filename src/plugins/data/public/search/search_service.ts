@@ -143,7 +143,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         queryStringManager.getLanguageService().setUiOverridesByUserQueryLanguage(language);
 
         if (languageConfig) {
-          console.log('❗request:', request);
           return languageConfig.search.search(request, options);
         }
       }

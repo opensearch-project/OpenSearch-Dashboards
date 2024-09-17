@@ -42,13 +42,11 @@ export const sqlAsyncSearchStrategyProvider = (
 
   return {
     search: async (context, request: any, options) => {
-      console.log('sql async: request.body', JSON.stringify(request.body, null, 2));
       try {
         const query: Query = request.body.query;
         const startTime = Date.now();
         request.body = { ...request.body, lang: SEARCH_STRATEGY.SQL };
         const rawResponse: any = await sqlAsyncFacet.describeQuery(context, request);
-        console.log('sql async: rawResponse', JSON.stringify(rawResponse, null, 2));
 
         if (!rawResponse.success) handleFacetError(rawResponse);
 

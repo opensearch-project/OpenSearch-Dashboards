@@ -97,7 +97,7 @@ describe('QueryStringManager', () => {
     expect(formattedStringQuery).toHaveProperty('query', stringQuery);
     expect(formattedStringQuery).toHaveProperty('language');
 
-    const objectQuery: Query = { query: 'object query', language: 'sql', datasets: [] };
+    const objectQuery = { query: 'object query', language: 'sql' };
     const formattedObjectQuery = service.formatQuery(objectQuery);
     expect(formattedObjectQuery).toEqual(objectQuery);
 
@@ -106,8 +106,8 @@ describe('QueryStringManager', () => {
   });
 
   test('clearQueryHistory clears the query history', () => {
-    service.addToQueryHistory({ query: 'test query 1', language: 'sql', datasets: [] });
-    service.addToQueryHistory({ query: 'test query 2', language: 'sql', datasets: [] });
+    service.addToQueryHistory({ query: 'test query 1', language: 'sql' });
+    service.addToQueryHistory({ query: 'test query 2', language: 'sql' });
     expect(service.getQueryHistory()).toHaveLength(2);
 
     service.clearQueryHistory();
@@ -115,7 +115,7 @@ describe('QueryStringManager', () => {
   });
 
   test('addToQueryHistory adds query to history', () => {
-    const query: Query = { query: 'test query', language: 'sql', datasets: [] };
+    const query: Query = { query: 'test query', language: 'sql' };
     service.addToQueryHistory(query);
     const history = service.getQueryHistory();
     expect(history).toHaveLength(1);
