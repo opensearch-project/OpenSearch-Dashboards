@@ -194,6 +194,11 @@
   }
 }
 
+// TODO: improve how this is styled. Styling just for the DQL editor.
+.osdQueryEditor__body .globalFilterGroup__wrapper {
+  margin-top: -$euiSizeS;
+}
+
 .osdQuerEditor__singleLine {
   padding: $euiSizeS;
   background-color: $euiColorEmptyShade;
