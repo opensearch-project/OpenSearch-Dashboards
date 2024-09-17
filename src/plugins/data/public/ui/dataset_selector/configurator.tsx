@@ -41,8 +41,9 @@ export const Configurator = ({
   const languages = type?.supportedLanguages(baseDataset) || [];
 
   const [dataset, setDataset] = useState<Dataset>(baseDataset);
-  const [timeFields, setTimeFields] = useState<DatasetField[]>();
+  const [timeFields, setTimeFields] = useState<DatasetField[]>([]);
   const [timeFieldName, setTimeFieldName] = useState<string | undefined>(dataset.timeFieldName);
+  const noTimeFilter = 'I dont want to use the time filter';
   const [language, setLanguage] = useState<string>(() => {
     const currentLanguage = queryString.getQuery().language;
     if (languages.includes(currentLanguage)) {
@@ -50,6 +51,18 @@ export const Configurator = ({
     }
     return languages[0];
   });
+
+  const requiresTimeField = (ds: Dataset, lang: string, fields: DatasetField[]) => {
+    if (
+      languageService.getLanguage(lang)?.noTimeField ||
+      ds.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+    ) {
+      return false;
+    }
+    if (fields && fields.length > 0) {
+      return true;
+    }
+  };
 
   useEffect(() => {
     const fetchFields = async () => {
@@ -97,7 +110,20 @@ export const Configurator = ({
           >
             <EuiFieldText disabled value={dataset.title} />
           </EuiFormRow>
-          {timeFields && timeFields.length > 0 && (
+          {dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN &&
+            !languageService.getLanguage(language)?.noTimeField && (
+              <EuiFormRow
+                label={i18n.translate(
+                  'data.explorer.datasetSelector.advancedSelector.configurator.datasetLabel',
+                  {
+                    defaultMessage: 'Time field',
+                  }
+                )}
+              >
+                <EuiFieldText disabled value={dataset.timeFieldName ?? 'No time field'} />
+              </EuiFormRow>
+            )}
+          {requiresTimeField(dataset, language, timeFields) && (
             <EuiFormRow
               label={i18n.translate(
                 'data.explorer.datasetSelector.advancedSelector.configurator.timeFieldLabel',
@@ -113,16 +139,15 @@ export const Configurator = ({
                     value: field.name,
                   })),
                   { text: '-----', value: '-----', disabled: true },
-                  { text: 'I dont want to use time filter', value: '' },
+                  { text: noTimeFilter, value: noTimeFilter },
                 ]}
                 value={timeFieldName}
                 onChange={(e) => {
+                  const value = e.target.value === noTimeFilter ? undefined : e.target.value;
                   setTimeFieldName(e.target.value);
-                  const value = e.target.value === '' ? undefined : e.target.value;
                   setDataset({ ...dataset, timeFieldName: value });
                 }}
                 hasNoInitialSelection={dataset.type === DEFAULT_DATA.SET_TYPES.INDEX}
-                disabled={dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN}
               />
             </EuiFormRow>
           )}
@@ -167,7 +192,7 @@ export const Configurator = ({
             onConfirm(dataset);
           }}
           fill
-          disabled={timeFieldName === undefined && dataset.type === DEFAULT_DATA.SET_TYPES.INDEX}
+          disabled={timeFieldName === undefined && requiresTimeField(dataset, language, timeFields)}
         >
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"
