@@ -17,21 +17,24 @@ interface ConnectedDatasetSelectorProps {
 const ConnectedDatasetSelector = ({ onSubmit }: ConnectedDatasetSelectorProps) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const queryString = services.data.query.queryString;
-  const initialDataset = queryString.getQuery().dataset || queryString.getDefaultQuery().dataset;
-  const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(initialDataset);
+  const initialDatasets =
+    queryString.getQuery().datasets.length > 0
+      ? queryString.getQuery().datasets
+      : queryString.getDefaultQuery().datasets;
+  const [selectedDatasets, setSelectedDatasets] = useState<Dataset[]>(initialDatasets);
 
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query) => {
-      setSelectedDataset(query.dataset);
+      setSelectedDatasets(query.datasets);
     });
 
     return () => subscription.unsubscribe();
   }, [queryString]);
 
-  const handleDatasetChange = (dataset?: Dataset) => {
-    setSelectedDataset(dataset);
-    if (dataset) {
-      const query = queryString.getInitialQueryByDataset(dataset);
+  const handleDatasetsChange = (datasets: Dataset[]) => {
+    setSelectedDatasets(datasets);
+    if (datasets) {
+      const query = queryString.getInitialQueryByDataset(datasets[0]);
       queryString.setQuery(query);
       onSubmit!(queryString.getQuery());
     }
@@ -39,8 +42,8 @@ const ConnectedDatasetSelector = ({ onSubmit }: ConnectedDatasetSelectorProps) =
 
   return (
     <DatasetSelector
-      selectedDataset={selectedDataset}
-      setSelectedDataset={handleDatasetChange}
+      selectedDatasets={selectedDatasets}
+      setSelectedDatasets={handleDatasetsChange}
       services={services}
     />
   );

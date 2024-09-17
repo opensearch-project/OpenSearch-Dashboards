@@ -22,14 +22,14 @@ import { AdvancedSelector } from './advanced_selector';
 import { getQueryService } from '../../services';
 
 interface DatasetSelectorProps {
-  selectedDataset?: Dataset;
-  setSelectedDataset: (dataset: Dataset) => void;
+  selectedDatasets: Dataset[];
+  setSelectedDatasets: (datasets: Dataset[]) => void;
   services: IDataPluginServices;
 }
 
 export const DatasetSelector = ({
-  selectedDataset,
-  setSelectedDataset,
+  selectedDatasets,
+  setSelectedDatasets,
   services,
 }: DatasetSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,7 +47,7 @@ export const DatasetSelector = ({
   const datasetService = getQueryService().queryString.getDatasetService();
 
   const datasetIcon =
-    datasetService.getType(selectedDataset?.type || '')?.meta.icon.type || 'database';
+    datasetService.getType(selectedDatasets[0]?.type || '')?.meta.icon.type || 'database';
 
   const fetchDatasets = useCallback(async () => {
     const typeConfig = datasetService.getType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
@@ -63,11 +63,11 @@ export const DatasetSelector = ({
       ) ?? [];
     setDatasets(fetchedDatasets);
 
-    // If no dataset is selected, select the first one
-    if (!selectedDataset && fetchedDatasets.length > 0) {
-      setSelectedDataset(fetchedDatasets[0]);
+    // If no datasets are selected, select the first one
+    if (selectedDatasets.length === 0 && fetchedDatasets.length > 0) {
+      setSelectedDatasets([fetchedDatasets[0]]);
     }
-  }, [datasetService, selectedDataset, services, setSelectedDataset]);
+  }, [datasetService, selectedDatasets, services, setSelectedDatasets]);
 
   useEffect(() => {
     fetchDatasets();
@@ -94,45 +94,43 @@ export const DatasetSelector = ({
       const label = dataSource ? `${dataSource.title}::${title}` : title;
       newOptions.push({
         label,
-        checked: id === selectedDataset?.id ? 'on' : undefined,
+        checked: selectedDatasets.some((dataset) => dataset.id === id) ? 'on' : undefined,
         key: id,
         prepend: <EuiIcon type={datasetService.getType(type)!.meta.icon.type} />,
       });
     });
 
     return newOptions;
-  }, [datasets, selectedDataset?.id, datasetService]);
+  }, [datasets, selectedDatasets, datasetService]);
 
   const handleOptionChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
-      const selectedOption = newOptions.find((option) => option.checked === 'on');
-      if (selectedOption) {
-        const foundDataset = datasets.find((dataset) => dataset.id === selectedOption.key);
-        if (foundDataset) {
-          closePopover();
-          setSelectedDataset(foundDataset);
-        }
-      }
+      const selectedOptions = newOptions.filter((option) => option.checked === 'on');
+      const newSelectedDatasets = selectedOptions.map(
+        (option) => datasets.find((dataset) => dataset.id === option.key)!
+      );
+      setSelectedDatasets(newSelectedDatasets);
     },
-    [datasets, setSelectedDataset, closePopover]
+    [datasets, setSelectedDatasets]
   );
 
   const datasetTitle = useMemo(() => {
-    if (!selectedDataset) {
+    if (selectedDatasets.length === 0) {
       return 'Select data';
     }
 
-    if (selectedDataset.dataSource) {
-      return `${selectedDataset.dataSource.title}::${selectedDataset.title}`;
+    if (selectedDatasets.length === 1) {
+      const dataset = selectedDatasets[0];
+      return dataset.dataSource ? `${dataset.dataSource.title}::${dataset.title}` : dataset.title;
     }
 
-    return selectedDataset.title;
-  }, [selectedDataset]);
+    return `${selectedDatasets.length} datasets selected`;
+  }, [selectedDatasets]);
 
   return (
     <EuiPopover
       button={
-        <EuiToolTip content={`${selectedDataset?.title ?? 'Select data'}`}>
+        <EuiToolTip content={datasetTitle}>
           <EuiButtonEmpty
             className="datasetSelector__button"
             iconType="arrowDown"
@@ -184,10 +182,10 @@ export const DatasetSelector = ({
               toMountPoint(
                 <AdvancedSelector
                   services={services}
-                  onSelect={(dataset?: Dataset) => {
+                  onSelect={(ds?: Dataset[]) => {
                     overlay?.close();
-                    if (dataset) {
-                      setSelectedDataset(dataset);
+                    if (ds) {
+                      setSelectedDatasets(ds);
                     }
                   }}
                   onCancel={() => overlay?.close()}

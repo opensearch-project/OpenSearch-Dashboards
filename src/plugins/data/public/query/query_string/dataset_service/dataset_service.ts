@@ -101,10 +101,10 @@ export class DatasetService {
     const lastPathItem = path[path.length - 1];
     const cacheKey = `${dataType}.${lastPathItem.id}`;
 
-    const cachedDataStructure = this.sessionStorage.get<CachedDataStructure>(cacheKey);
+    /* const cachedDataStructure = this.sessionStorage.get<CachedDataStructure>(cacheKey);
     if (cachedDataStructure?.children?.length > 0) {
       return this.cacheToDataStructure(dataType, cachedDataStructure);
-    }
+    } */
 
     const fetchedDataStructure = await type.fetch(services, path);
     this.cacheDataStructure(dataType, fetchedDataStructure);

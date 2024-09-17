@@ -68,6 +68,7 @@ export class QueryStringManager {
     const query = {
       query: defaultQuery,
       language: defaultLanguageId,
+      datasets: [],
     };
 
     if (
@@ -77,7 +78,7 @@ export class QueryStringManager {
       this.languageService
     ) {
       const language = this.languageService.getLanguage(defaultLanguageId);
-      const newQuery = { ...query, dataset: defaultDataset };
+      const newQuery = { ...query, datasets: [defaultDataset] };
       const newQueryString = language?.getQueryString(newQuery) || '';
 
       return {
@@ -93,10 +94,11 @@ export class QueryStringManager {
     if (!query) {
       return this.getDefaultQuery();
     } else if (typeof query === 'string') {
+      const defaultDataset = this.datasetService?.getDefault();
       return {
         query,
         language: this.getDefaultLanguage(),
-        dataset: this.datasetService?.getDefault(),
+        datasets: defaultDataset ? [defaultDataset] : [],
       };
     } else {
       return query;
@@ -161,21 +163,21 @@ export class QueryStringManager {
     return this.getInitialQueryByLanguage(this.query$.getValue().language);
   };
 
-  public getInitialQueryByLanguage = (languageId: string) => {
+  public getInitialQueryByLanguage = (languageId: string): Query => {
     const curQuery = this.query$.getValue();
     const language = this.languageService.getLanguage(languageId);
-    const dataset = curQuery.dataset;
+    const datasets = curQuery.datasets;
     const input = language?.getQueryString(curQuery) || '';
     this.languageService.setUserQueryString(input);
 
     return {
       query: input,
       language: languageId,
-      dataset,
+      datasets,
     };
   };
 
-  public getInitialQueryByDataset = (newDataset: Dataset) => {
+  public getInitialQueryByDataset = (newDataset: Dataset): Query => {
     const curQuery = this.query$.getValue();
     const languageId = newDataset.language || curQuery.language;
     const language = this.languageService.getLanguage(languageId);

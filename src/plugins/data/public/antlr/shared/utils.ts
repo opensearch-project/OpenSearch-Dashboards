@@ -39,8 +39,8 @@ export const getRawSuggestionData$ = (
       if (!query) {
         return from(defaultRequestHandler());
       }
-      const dataSourceId = query.dataset?.dataSource?.id;
-      const title = query.dataset?.dataSource?.title;
+      const dataSourceId = query.datasets[0]?.dataSource?.id;
+      const title = query.datasets[0]?.dataSource?.title;
       if (!dataSourceId || !title) throw new Error();
       return from(dataSourceRequestHandler({ dataSourceId, title }));
     })

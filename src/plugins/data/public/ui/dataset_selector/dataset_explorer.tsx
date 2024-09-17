@@ -35,10 +35,10 @@ export const DatasetExplorer = ({
   queryString: QueryStringContract;
   path: DataStructure[];
   setPath: (path: DataStructure[]) => void;
-  onNext: (dataset: BaseDataset) => void;
+  onNext: (datasets: BaseDataset[]) => void;
   onCancel: () => void;
 }) => {
-  const [explorerDataset, setExplorerDataset] = useState<BaseDataset | undefined>(undefined);
+  const [explorerDatasets, setExplorerDatasets] = useState<BaseDataset[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const selectDataStructure = async (item: DataStructure, newPath: DataStructure[]) => {
@@ -49,8 +49,15 @@ export const DatasetExplorer = ({
     if (!typeConfig) return;
 
     if (!lastPathItem.hasNext) {
-      const dataset = typeConfig!.toDataset(nextPath);
-      setExplorerDataset(dataset as BaseDataset);
+      const dataset = typeConfig!.toDataset(nextPath) as BaseDataset;
+      setExplorerDatasets((prev) => {
+        const index = prev.findIndex((d) => d.id === dataset.id);
+        if (index !== -1) {
+          return prev.filter((_, i) => i !== index);
+        } else {
+          return [...prev, dataset];
+        }
+      });
       return;
     }
 
@@ -123,10 +130,10 @@ export const DatasetExplorer = ({
                     prepend: child.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE &&
                       child.meta?.icon && <EuiIcon {...child.meta.icon} />,
                     append: appendIcon(child),
-                    checked: isChecked(child, index, path, explorerDataset),
+                    checked: isChecked(child, index, path, explorerDatasets),
                   }))}
                   onChange={(options) => {
-                    const selected = options.find((option) => option.checked);
+                    const selected = options.find((option) => option.checked === 'on');
                     if (selected) {
                       const item = current.children?.find((child) => child.id === selected.value);
                       if (item) {
@@ -134,7 +141,7 @@ export const DatasetExplorer = ({
                       }
                     }
                   }}
-                  singleSelection
+                  singleSelection={!current.multiSelect}
                   {...(isFinal && {
                     searchProps: {
                       compressed: true,
@@ -165,8 +172,8 @@ export const DatasetExplorer = ({
           />
         </EuiButtonEmpty>
         <EuiButton
-          disabled={explorerDataset === undefined}
-          onClick={() => onNext(explorerDataset!)}
+          disabled={explorerDatasets.length === 0}
+          onClick={() => onNext(explorerDatasets)}
           iconType="arrowRight"
           iconSide="right"
           fill
@@ -224,11 +231,11 @@ const isChecked = (
   child: DataStructure,
   index: number,
   path: DataStructure[],
-  explorerDataset?: BaseDataset
+  selectedDatasets: BaseDataset[]
 ) => {
   if (index === path.length - 1) {
-    // For the last level, check against the selectedDataSet
-    return child.id === explorerDataset?.id ? 'on' : undefined;
+    // For the last level, check against the selectedDatasets
+    return selectedDatasets.some((dataset) => dataset.id === child.id) ? 'on' : undefined;
   }
   // For other levels, check against the next item in the path
   return child.id === path[index + 1]?.id ? 'on' : undefined;

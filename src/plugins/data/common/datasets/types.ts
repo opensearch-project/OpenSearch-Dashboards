@@ -122,6 +122,7 @@ export interface DataStructure {
   /** Optional array of child data structures */
   children?: DataStructure[];
   hasNext?: boolean;
+  multiSelect?: boolean;
   columnHeader?: string;
   /** Optional metadata for the data structure */
   meta?: DataStructureMeta;
