@@ -52,9 +52,9 @@ export const Configurator = ({
     return languages[0];
   });
 
-  const requiresTimeField = (ds: Dataset, lang: string, fields: DatasetField[]) => {
+  const displayTimeFieldSelector = (ds: Dataset, lang: string, fields: DatasetField[]) => {
     if (
-      languageService.getLanguage(lang)?.noTimeField ||
+      languageService.getLanguage(lang)?.disableDatePicker ||
       ds.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
     ) {
       return false;
@@ -62,6 +62,7 @@ export const Configurator = ({
     if (fields && fields.length > 0) {
       return true;
     }
+    return false;
   };
 
   useEffect(() => {
@@ -111,7 +112,7 @@ export const Configurator = ({
             <EuiFieldText disabled value={dataset.title} />
           </EuiFormRow>
           {dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN &&
-            !languageService.getLanguage(language)?.noTimeField && (
+            !languageService.getLanguage(language)?.disableDatePicker && (
               <EuiFormRow
                 label={i18n.translate(
                   'data.explorer.datasetSelector.advancedSelector.configurator.datasetLabel',
@@ -123,7 +124,7 @@ export const Configurator = ({
                 <EuiFieldText disabled value={dataset.timeFieldName ?? 'No time field'} />
               </EuiFormRow>
             )}
-          {requiresTimeField(dataset, language, timeFields) && (
+          {displayTimeFieldSelector(dataset, language, timeFields) && (
             <EuiFormRow
               label={i18n.translate(
                 'data.explorer.datasetSelector.advancedSelector.configurator.timeFieldLabel',
@@ -147,7 +148,7 @@ export const Configurator = ({
                   setTimeFieldName(e.target.value);
                   setDataset({ ...dataset, timeFieldName: value });
                 }}
-                hasNoInitialSelection={dataset.type === DEFAULT_DATA.SET_TYPES.INDEX}
+                hasNoInitialSelection={dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN}
               />
             </EuiFormRow>
           )}
@@ -192,7 +193,9 @@ export const Configurator = ({
             onConfirm(dataset);
           }}
           fill
-          disabled={timeFieldName === undefined && requiresTimeField(dataset, language, timeFields)}
+          disabled={
+            timeFieldName === undefined && displayTimeFieldSelector(dataset, language, timeFields)
+          }
         >
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"

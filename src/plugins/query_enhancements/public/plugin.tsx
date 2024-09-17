@@ -100,7 +100,7 @@ export class QueryEnhancementsPlugin
       editor: enhancedSQLQueryEditor,
       editorSupportedAppNames: ['discover'],
       supportedAppNames: ['discover', 'data-explorer'],
-      noTimeField: true,
+      disableDatePicker: true,
     };
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
 
