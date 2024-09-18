@@ -16,6 +16,10 @@
   .euiToolTipAnchor {
     height: 100%;
   }
+
+  &.euiFormControlLayout--group.euiFormControlLayout--compressed {
+    overflow: initial;
+  }
 }
 
 // Uses the append style, but no bordering

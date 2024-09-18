@@ -32,7 +32,6 @@ import {
   EuiButtonGroup,
   EuiCompressedFieldSearch,
   EuiCompressedSwitch,
-  EuiFieldSearch,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -250,20 +249,6 @@ export function DiscoverFieldSearch({
   const compressedFieldSearch = (
     <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
       <EuiCompressedFieldSearch
-        aria-label={searchPlaceholder}
-        data-test-subj="fieldFilterSearchInput"
-        fullWidth
-        onChange={(event) => onChange('name', event.currentTarget.value)}
-        placeholder={searchPlaceholder}
-        value={value}
-        className="dscSideBar_searchInput"
-      />
-    </EuiOutsideClickDetector>
-  );
-
-  const fieldSearch = (
-    <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
-      <EuiFieldSearch
         aria-label={searchPlaceholder}
         data-test-subj="fieldFilterSearchInput"
         fullWidth

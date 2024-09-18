@@ -72,7 +72,6 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
         onChange={onChange}
         editorDidMount={editorDidMount}
         options={{
-          fixedOverflowWidgets: true,
           lineNumbers: 'off', // Disabled line numbers
           // lineHeight: 40,
           fontSize: 14,
