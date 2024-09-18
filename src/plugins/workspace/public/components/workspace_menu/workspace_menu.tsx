@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiHorizontalRule,
   EuiButtonEmpty,
+  EuiToolTip,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
 import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
@@ -71,12 +72,18 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
   };
 
   const currentWorkspaceButton = (
-    <EuiButtonIcon
-      iconType="wsSelector"
-      onClick={openPopover}
-      aria-label="workspace-select-button"
-      data-test-subj="workspace-select-button"
-    />
+    <EuiToolTip
+      content={i18n.translate('workspace.icon.menu.title', {
+        defaultMessage: 'Workspaces',
+      })}
+    >
+      <EuiButtonIcon
+        iconType="wsSelector"
+        onClick={openPopover}
+        aria-label="workspace-select-button"
+        data-test-subj="workspace-select-button"
+      />
+    </EuiToolTip>
   );
 
   return (
