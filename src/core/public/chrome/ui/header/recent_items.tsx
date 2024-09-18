@@ -9,6 +9,7 @@ import {
   EuiPanel,
   EuiListGroup,
   EuiListGroupItem,
+  EuiTitle,
   EuiPopoverTitle,
   EuiIcon,
   EuiText,
