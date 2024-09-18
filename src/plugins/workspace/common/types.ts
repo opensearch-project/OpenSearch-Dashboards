@@ -7,7 +7,7 @@ import { DataSourceAttributes } from 'src/plugins/data_source/common/data_source
 
 export type DataSource = Pick<
   DataSourceAttributes,
-  'title' | 'description' | 'dataSourceEngineType'
+  'title' | 'description' | 'dataSourceEngineType' | 'type'
 > & {
   // Id defined in SavedObjectAttribute could be single or array, here only should be single string.
   id: string;
@@ -16,6 +16,7 @@ export type DataSource = Pick<
 export enum DataSourceConnectionType {
   OpenSearchConnection,
   DirectQueryConnection,
+  DataConnection,
 }
 
 export interface DataSourceConnection {
