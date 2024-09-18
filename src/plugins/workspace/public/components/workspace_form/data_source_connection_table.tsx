@@ -115,6 +115,10 @@ export const DataSourceConnectionTable = forwardRef<
         }),
         truncateText: true,
         render: (name: string, record) => {
+          // There is not a detail page for data connection, so we won't display a link here.
+          if (record.connectionType === DataSourceConnectionType.DataConnection) {
+            return name;
+          }
           let url: string;
           if (record.connectionType === DataSourceConnectionType.OpenSearchConnection) {
             url = http.basePath.prepend(`/app/dataSources/${record.id}`);
