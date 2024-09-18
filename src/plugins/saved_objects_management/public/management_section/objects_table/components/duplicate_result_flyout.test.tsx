@@ -95,4 +95,13 @@ describe('DuplicateResultFlyout', () => {
     );
     expect(document.children).toMatchSnapshot();
   });
+
+  it('calls onClose after footer close button clicked', () => {
+    render(<DuplicateResultFlyout {...duplicateResultFlyoutProps} />);
+
+    const closeButton = screen.getByText('Close');
+    fireEvent.click(closeButton);
+
+    expect(onCloseMock).toHaveBeenCalledTimes(1);
+  });
 });
