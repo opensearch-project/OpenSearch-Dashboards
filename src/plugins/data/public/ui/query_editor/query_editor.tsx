@@ -14,32 +14,31 @@ import {
   EuiText,
   PopoverAnchorPosition,
 } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
+import { monaco } from '@osd/monaco';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
-import { monaco } from '@osd/monaco';
 import {
   IDataPluginServices,
   IFieldType,
   IIndexPattern,
   Query,
-  QuerySuggestion,
-  TimeRange,
   QueryControls,
-  RecentQueriesTable,
   QueryResult,
   QueryStatus,
+  QuerySuggestion,
+  RecentQueriesTable,
+  TimeRange,
 } from '../..';
 import { OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
+import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
+import { getIndexPatterns, getQueryService } from '../../services';
+import { DatasetSelector } from '../dataset_selector';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
+import { DefaultInputProps } from './editors';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
-import { getQueryService, getIndexPatterns } from '../../services';
-import { DatasetSelector } from '../dataset_selector';
-import { DefaultInputProps } from './editors';
-import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 
 export interface QueryEditorProps {
   query: Query;

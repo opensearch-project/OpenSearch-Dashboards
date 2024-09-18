@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
 import { EuiCompressedFieldText } from '@elastic/eui';
 import { monaco } from '@osd/monaco';
+import React from 'react';
 import { CodeEditor } from '../../../../../opensearch_dashboards_react/public';
 
 interface SingleLineInputProps extends React.JSX.IntrinsicAttributes {
@@ -62,7 +62,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
   provideCompletionItems,
   prepend,
 }) => (
-  <div className="euiFormControlLayout euiFormControlLayout--group osdQueryBar__wrap">
+  <div className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group osdQueryBar__wrap">
     {prepend}
     <div className="osdQuerEditor__singleLine euiFormControlLayout__childrenWrapper">
       <CodeEditor
@@ -72,6 +72,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
         onChange={onChange}
         editorDidMount={editorDidMount}
         options={{
+          fixedOverflowWidgets: true,
           lineNumbers: 'off', // Disabled line numbers
           // lineHeight: 40,
           fontSize: 14,

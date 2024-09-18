@@ -3,17 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useCallback, useMemo } from 'react';
 import { EuiCompressedComboBox } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { DataSource, DataSetWithDataSource, IndexPatternOption } from '../datasource';
-import { DataSourceGroup, DataSourceOption, DataSourceSelectableProps } from './types';
-import { DataSelectorRefresher } from './data_selector_refresher';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   DATA_SELECTOR_DEFAULT_PLACEHOLDER,
   DATA_SELECTOR_REFRESHER_POPOVER_TEXT,
   DATA_SELECTOR_S3_DATA_SOURCE_GROUP_HINT_LABEL,
 } from '../constants';
+import { DataSetWithDataSource, DataSource, IndexPatternOption } from '../datasource';
+import { DataSelectorRefresher } from './data_selector_refresher';
+import { DataSourceGroup, DataSourceOption, DataSourceSelectableProps } from './types';
 
 // Asynchronously retrieves and formats dataset from a given data source.
 const getAndFormatDataSetFromDataSource = async (

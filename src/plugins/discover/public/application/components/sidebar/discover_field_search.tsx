@@ -28,29 +28,28 @@
  * under the License.
  */
 
-import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
-import { i18n } from '@osd/i18n';
 import {
+  EuiButtonGroup,
   EuiCompressedFieldSearch,
+  EuiCompressedSwitch,
+  EuiFieldSearch,
+  EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiOutsideClickDetector,
+  EuiPanel,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelect,
-  EuiCompressedSwitch,
-  EuiSwitchEvent,
-  EuiForm,
-  EuiFormRow,
-  EuiButtonGroup,
-  EuiOutsideClickDetector,
-  EuiPanel,
   EuiSmallFilterButton,
-  EuiFilterGroup,
-  EuiFieldSearch,
+  EuiSwitchEvent,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { UI_SETTINGS } from 'src/plugins/data/common';
+import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
 
 export const NUM_FILTERS = 3;
 
@@ -257,6 +256,7 @@ export function DiscoverFieldSearch({
         onChange={(event) => onChange('name', event.currentTarget.value)}
         placeholder={searchPlaceholder}
         value={value}
+        className="dscSideBar_searchInput"
       />
     </EuiOutsideClickDetector>
   );
@@ -329,8 +329,8 @@ export function DiscoverFieldSearch({
 
   if (isEnhancementsEnabledOverride) {
     return (
-      <div className="euiFormControlLayout euiFormControlLayout--group osdDiscoverSideBar__wrap">
-        {fieldSearch}
+      <div className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group osdDiscoverSideBar__wrap">
+        {compressedFieldSearch}
         {fieldPopover}
       </div>
     );

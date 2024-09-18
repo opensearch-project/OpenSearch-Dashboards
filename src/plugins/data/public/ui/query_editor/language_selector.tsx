@@ -3,17 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
 import {
-  PopoverAnchorPosition,
+  EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
-  EuiButtonEmpty,
-  EuiContextMenuItem,
+  EuiSmallButtonEmpty,
+  PopoverAnchorPosition,
 } from '@elastic/eui';
-import { getQueryService } from '../../services';
-import { LanguageConfig } from '../../query';
+import React, { useEffect, useState } from 'react';
 import { Query } from '../..';
+import { LanguageConfig } from '../../query';
+import { getQueryService } from '../../services';
 
 export interface QueryLanguageSelectorProps {
   query: Query;
@@ -109,7 +109,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
     <EuiPopover
       className="languageSelector"
       button={
-        <EuiButtonEmpty
+        <EuiSmallButtonEmpty
           iconSide="right"
           iconSize="s"
           onClick={onButtonClick}
@@ -117,7 +117,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
           iconType="arrowDown"
         >
           {selectedLanguage.label}
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
       }
       isOpen={isPopoverOpen}
       closePopover={() => setPopover(false)}

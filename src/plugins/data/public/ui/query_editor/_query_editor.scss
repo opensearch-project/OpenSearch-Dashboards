@@ -64,26 +64,10 @@
   }
 }
 
-.osdQueryEditor__dataSetWrapper {
-  max-width: 350px;
-
-  .dataExplorerDSSelect {
-    border-bottom: $euiBorderThin !important;
-    min-width: 300px;
-
-    span:is([class$="__text"]) {
-      width: 350px;
-      text-align: left;
-    }
-
-    div:is([class$="--group"]) {
-      padding: 0 !important;
-    }
-
-    .sourceRefreshText {
-      max-height: 40px;
-    }
-  }
+// TODO: ths is a temporary fix to make sure the height is set to auto
+// Can remove this once, height issue is fixed for combo box append in Oui
+.dataExplorerDSSelect .euiFormControlLayout.euiFormControlLayout--group > .euiToolTipAnchor {
+  height: auto;
 }
 
 .osdQueryEditor__prependWrapper {
@@ -159,7 +143,6 @@
 .osdQueryEditor__topBar {
   display: flex;
   align-items: center;
-  padding: $euiSizeXS;
 
   > * {
     flex: 0 1 auto;
@@ -197,7 +180,7 @@
 }
 
 .osdQuerEditor__singleLine {
-  padding: $euiSizeS;
+  padding: calc($euiSizeXS + 1px);
   background-color: $euiColorEmptyShade;
   overflow: initial !important; // needed for suggestion window, otherwise will be hidden in child
 
