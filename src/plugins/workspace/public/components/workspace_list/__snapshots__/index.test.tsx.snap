@@ -7,7 +7,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
   >
     Organize collaborative projects with use-case-specific workspaces.
     <div
-      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
       role="main"
     >
       <div>
@@ -80,6 +80,40 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                           title="Use Case"
                         >
                           Use Case
+                        </span>
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+              <div
+                class="euiPopover euiPopover--anchorDownCenter"
+                id="field_value_selection_1"
+              >
+                <div
+                  class="euiPopover__anchor"
+                >
+                  <button
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiFilterButton euiFilterButton--hasIcon"
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                    >
+                      <span
+                        class="euiButtonContent__icon"
+                        color="inherit"
+                        data-euiicon-type="arrowDown"
+                      />
+                      <span
+                        class="euiButtonEmpty__text"
+                      >
+                        <span
+                          class="euiFilterButton__textShift"
+                          data-text="Owners"
+                          title="Owners"
+                        >
+                          Owners
                         </span>
                       </span>
                     </span>
@@ -163,7 +197,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
               </div>
             </div>
             <table
-              class="euiTable euiTable--compressed euiTable--responsive"
+              class="euiTable euiTable--responsive"
               id="__table_generated-id"
               tabindex="-1"
             >
@@ -762,7 +796,9 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         <div
                           class="euiText euiText--extraSmall eui-textTruncate"
                           style="max-width: 150px;"
-                        />
+                        >
+                          —
+                        </div>
                       </span>
                     </div>
                   </td>
@@ -870,7 +906,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         >
                           Rows per page
                           : 
-                          10
+                          20
                         </span>
                       </span>
                     </button>
