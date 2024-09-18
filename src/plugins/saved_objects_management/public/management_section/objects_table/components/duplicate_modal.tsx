@@ -142,21 +142,10 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
             fullWidth
             label={i18n.translate(
               'savedObjectsManagement.objectsTable.duplicateModal.targetWorkspaceLabel',
-              { defaultMessage: 'Workspace' }
+              { defaultMessage: 'Target workspace' }
             )}
           >
             <>
-              <EuiText size="s" color="subdued">
-                {i18n.translate(
-                  'savedObjectsManagement.objectsTable.duplicateModal.targetWorkspaceNotice',
-                  {
-                    defaultMessage: `Move copied saved  object${
-                      allSelectedObjects.length > 1 ? `s` : ``
-                    } to the selected workspace.`,
-                  }
-                )}
-              </EuiText>
-              <EuiSpacer size="s" />
               <EuiComboBox
                 options={workspaceOptions}
                 onChange={this.onTargetWorkspaceChange}
