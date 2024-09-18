@@ -258,7 +258,7 @@ logicalExpression
    ;
 
 comparisonExpression
-   : left = valueExpression comparisonOperator right = valueExpression  # compareExpr
+   : left = valueExpression comparisonOperator right = literalValue  # compareExpr
    | valueExpression IN valueList                                       # inExpr
    ;
 

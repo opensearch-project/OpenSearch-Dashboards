@@ -311,7 +311,7 @@ export default class QueryEditorUI extends Component<Props, State> {
                   range: s.replacePosition ?? defaultRange,
                   detail: s.detail,
                   command: { id: 'editor.action.triggerSuggest', title: 'Trigger Next Suggestion' },
-                  sortText: s.sortText, // when undefined, the falsy value will default to the label
+                  sortText: s.sortText ?? s.text, // when undefined, the falsy value will default to the label
                 };
               })
           : [],

@@ -2830,7 +2830,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 this.state = 604;
                 this.comparisonOperator();
                 this.state = 605;
-                (localContext as CompareExprContext)._right = this.valueExpression();
+                (localContext as CompareExprContext)._right = this.literalValue();
                 }
                 break;
             case 2:
@@ -6967,7 +6967,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         5,64,0,0,597,599,3,90,45,4,598,587,1,0,0,0,598,590,1,0,0,0,598,595,
         1,0,0,0,599,602,1,0,0,0,600,598,1,0,0,0,600,601,1,0,0,0,601,91,1,
         0,0,0,602,600,1,0,0,0,603,604,3,94,47,0,604,605,3,182,91,0,605,606,
-        3,94,47,0,606,612,1,0,0,0,607,608,3,94,47,0,608,609,5,60,0,0,609,
+        3,188,94,0,606,612,1,0,0,0,607,608,3,94,47,0,608,609,5,60,0,0,609,
         610,3,212,106,0,610,612,1,0,0,0,611,603,1,0,0,0,611,607,1,0,0,0,
         612,93,1,0,0,0,613,623,3,96,48,0,614,623,3,98,49,0,615,623,3,162,
         81,0,616,623,3,158,79,0,617,623,3,170,85,0,618,619,5,125,0,0,619,
@@ -8948,7 +8948,7 @@ export class InExprContext extends ComparisonExpressionContext {
 }
 export class CompareExprContext extends ComparisonExpressionContext {
     public _left?: ValueExpressionContext;
-    public _right?: ValueExpressionContext;
+    public _right?: LiteralValueContext;
     public constructor(ctx: ComparisonExpressionContext) {
         super(ctx.parent, ctx.invokingState);
         super.copyFrom(ctx);
@@ -8956,14 +8956,11 @@ export class CompareExprContext extends ComparisonExpressionContext {
     public comparisonOperator(): ComparisonOperatorContext {
         return this.getRuleContext(0, ComparisonOperatorContext)!;
     }
-    public valueExpression(): ValueExpressionContext[];
-    public valueExpression(i: number): ValueExpressionContext | null;
-    public valueExpression(i?: number): ValueExpressionContext[] | ValueExpressionContext | null {
-        if (i === undefined) {
-            return this.getRuleContexts(ValueExpressionContext);
-        }
-
-        return this.getRuleContext(i, ValueExpressionContext);
+    public valueExpression(): ValueExpressionContext {
+        return this.getRuleContext(0, ValueExpressionContext)!;
+    }
+    public literalValue(): LiteralValueContext {
+        return this.getRuleContext(0, LiteralValueContext)!;
     }
     public override accept<Result>(visitor: OpenSearchPPLParserVisitor<Result>): Result | null {
         if (visitor.visitCompareExpr) {
