@@ -22,7 +22,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
-import { DirectQueryConnectionIcon } from './direct_query_connection_icon';
+import { ConnectionTypeIcon } from './connection_type_icon';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { CoreStart } from '../../../../../core/public';
 
@@ -167,7 +167,7 @@ export const DataSourceConnectionTable = forwardRef<
                 <EuiButtonEmpty
                   data-test-subj={`workspace-detail-dataSources-table-dqc-${record.id}-related-button`}
                   size="xs"
-                  flush="right"
+                  flush="left"
                   color="text"
                   onClick={() => togglePopover(record.id)}
                 >
@@ -191,7 +191,7 @@ export const DataSourceConnectionTable = forwardRef<
                     key={item.id}
                     size="xs"
                     label={item.name}
-                    icon={<DirectQueryConnectionIcon type={item.type} />}
+                    icon={<ConnectionTypeIcon type={item.type} />}
                     style={{ maxHeight: '30px' }}
                   />
                 ))}

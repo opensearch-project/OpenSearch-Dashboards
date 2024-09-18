@@ -30,10 +30,7 @@ import { DataSourceConnection, DataSourceConnectionType } from '../../../common/
 import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../../core/public';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { Logos } from '../../../../../core/common';
-import { DirectQueryConnectionIcon } from '../workspace_form';
-import { DataConnectionIcon } from '../workspace_form';
-
-import { DATA_CONNECTION_SAVED_OBJECT_TYPE } from '../../../../data_source/common';
+import { ConnectionTypeIcon } from '../workspace_form';
 
 const ConnectionIcon = ({
   connection: { connectionType, type },
@@ -45,12 +42,13 @@ const ConnectionIcon = ({
   if (connectionType === DataSourceConnectionType.OpenSearchConnection) {
     return <EuiIcon type={logos.Mark.url} />;
   }
-  if (connectionType === DataSourceConnectionType.DirectQueryConnection) {
-    return <DirectQueryConnectionIcon type={type} />;
+  if (
+    connectionType === DataSourceConnectionType.DirectQueryConnection ||
+    connectionType === DataSourceConnectionType.DataConnection
+  ) {
+    return <ConnectionTypeIcon type={type} />;
   }
-  if (type === DATA_CONNECTION_SAVED_OBJECT_TYPE) {
-    return <DataConnectionIcon type={type} />;
-  }
+
   return null;
 };
 
@@ -150,7 +148,7 @@ const convertConnectionsToOptions = ({
         return [];
       }
 
-      if (connection.type === DATA_CONNECTION_SAVED_OBJECT_TYPE) {
+      if (connection.connectionType === DataSourceConnectionType.DataConnection) {
         if (showDirectQueryConnections) {
           return [connection];
         }

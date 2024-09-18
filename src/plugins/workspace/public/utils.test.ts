@@ -385,6 +385,8 @@ describe('workspace utils: getDataSourcesList', () => {
                 return 'description1';
               case 'dataSourceEngineType':
                 return 'dataSourceEngineType1';
+              case 'type':
+                return 'connectionType1';
               case 'auth':
                 return 'mock_value';
             }
@@ -400,6 +402,7 @@ describe('workspace utils: getDataSourcesList', () => {
         auth: 'mock_value',
         description: 'description1',
         dataSourceEngineType: 'dataSourceEngineType1',
+        connectionType: 'connectionType1',
         workspaces: [],
       },
     ]);

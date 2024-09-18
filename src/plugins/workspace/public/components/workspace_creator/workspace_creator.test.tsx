@@ -243,6 +243,7 @@ describe('WorkspaceCreator', () => {
       }),
       {
         dataSources: [],
+        dataConnections: [],
         permissions: {
           library_write: { users: ['%me%'] },
           write: { users: ['%me%'] },
@@ -318,6 +319,7 @@ describe('WorkspaceCreator', () => {
         name: 'test workspace name',
       }),
       {
+        dataConnections: [],
         dataSources: [],
         permissions: {
           write: {
@@ -375,6 +377,7 @@ describe('WorkspaceCreator', () => {
         name: 'test workspace name',
       }),
       {
+        dataConnections: [],
         dataSources: ['id1'],
         permissions: {
           library_write: {

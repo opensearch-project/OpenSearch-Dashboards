@@ -36,7 +36,12 @@ import {
   DATACONNECTIONS_BASE,
   DatasourceTypeToDisplayName,
 } from '../../data_source_management/public';
-import { DataSource, DataSourceConnection, DataSourceConnectionType } from '../common/types';
+import {
+  DataSource,
+  DataSourceConnection,
+  DataSourceConnectionType,
+  DataConnection,
+} from '../common/types';
 import {
   ANALYTICS_ALL_OVERVIEW_PAGE_ID,
   ESSENTIAL_OVERVIEW_PAGE_ID,
@@ -226,7 +231,15 @@ export const getDataSourcesList = (
   return client
     .find({
       type: WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
-      fields: ['id', 'title', 'auth', 'description', 'dataSourceEngineType'],
+      fields: [
+        'id',
+        'title',
+        'auth',
+        'description',
+        'dataSourceEngineType',
+        'type',
+        'connectionId',
+      ],
       perPage: 10000,
       workspaces: targetWorkspaces,
     })
@@ -235,12 +248,15 @@ export const getDataSourcesList = (
       if (objects) {
         return objects.map((source) => {
           const id = source.id;
-          const title = source.get('title');
+          // Data connection doesn't have title for now, would use connectionId instead to display.
+          const title = source.get('title') ?? source.get('connectionId') ?? '';
           const workspaces = source.workspaces ?? [];
           const auth = source.get('auth');
           const description = source.get('description');
           const dataSourceEngineType = source.get('dataSourceEngineType');
           const type = source.type;
+          // This is a filed only for detail type of data connection in order not to mix saved object type.
+          const connectionType = source.get('type');
           return {
             id,
             title,
@@ -249,6 +265,7 @@ export const getDataSourcesList = (
             dataSourceEngineType,
             workspaces,
             type,
+            connectionType,
           };
         });
       } else {
@@ -274,11 +291,11 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
 };
 
 export const convertDataSourcesToOpenSearchConnections = (
-  dataSources: DataSource[]
+  dataSources: DataConnection[] | DataSource[]
 ): DataSourceConnection[] =>
   dataSources
     .filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE)
-    .map((ds) => {
+    .map((ds: DataSource) => {
       return {
         id: ds.id,
         type: ds.dataSourceEngineType,
@@ -288,6 +305,23 @@ export const convertDataSourcesToOpenSearchConnections = (
         relatedConnections: [],
       };
     });
+
+export const convertDataSourcesToDataConnections = (
+  dataSources: DataConnection[] | DataSource[]
+): DataSourceConnection[] => {
+  const dataConnections = dataSources.filter(
+    (ds) => ds.type === DATA_CONNECTION_SAVED_OBJECT_TYPE
+  ) as DataConnection[];
+  return dataConnections.map((ds) => {
+    return {
+      id: ds.id,
+      type: ds.connectionType,
+      connectionType: DataSourceConnectionType.DataConnection,
+      name: ds.title,
+      description: ds.description,
+    };
+  });
+};
 
 export const fulfillRelatedConnections = (
   connections: DataSourceConnection[],
@@ -306,13 +340,11 @@ export const fulfillRelatedConnections = (
 
 // Helper function to merge data sources with direct query connections
 export const mergeDataSourcesWithConnections = (
-  dataSources: DataSource[],
+  dataSources: DataSource[] | DataConnection[],
   directQueryConnections: DataSourceConnection[]
 ): DataSourceConnection[] => {
   const openSearchConnections = convertDataSourcesToOpenSearchConnections(dataSources);
-  const dataConnections = dataSources
-    .filter((ds) => ds.type === DATA_CONNECTION_SAVED_OBJECT_TYPE)
-    .map((ds) => ({ ...ds, name: ds.id }));
+  const dataConnections = convertDataSourcesToDataConnections(dataSources);
   const result = [
     ...fulfillRelatedConnections(openSearchConnections, directQueryConnections),
     ...directQueryConnections,
