@@ -1,0 +1,2 @@
+fix:
+- Fix issues in workspace detail and association modal ([#8201](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8201))
