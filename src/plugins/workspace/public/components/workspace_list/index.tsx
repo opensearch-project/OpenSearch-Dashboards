@@ -415,7 +415,7 @@ export const WorkspaceListInner = ({
         multiSelect: 'or',
         type: 'field_value_selection',
         field: 'owners',
-        name: 'Owners',
+        name: 'Owner',
         options: Array.from(new Set(newWorkspaceList.flatMap(({ owners }) => owners || []))).map(
           (owner) => ({
             value: owner,

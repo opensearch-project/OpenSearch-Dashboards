@@ -110,10 +110,10 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                       >
                         <span
                           class="euiFilterButton__textShift"
-                          data-text="Owners"
-                          title="Owners"
+                          data-text="Owner"
+                          title="Owner"
                         >
-                          Owners
+                          Owner
                         </span>
                       </span>
                     </span>
