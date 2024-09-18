@@ -392,7 +392,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   debouncedFetchObjects = debounce(async () => {
     const { activeQuery: query } = this.state;
-    const { notifications, http } = this.props;
+    const { notifications, http, useUpdatedUX } = this.props;
 
     try {
       const resp = await findObjects(http, this.findOptions);
@@ -421,7 +421,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       notifications.toasts.addDanger({
         title: i18n.translate(
           'savedObjectsManagement.objectsTable.unableFindSavedObjectsNotificationMessage',
-          { defaultMessage: 'Unable find saved objects' }
+          {
+            defaultMessage:
+              'Unable find {useUpdatedUX, select, true {assets} other {saved objects}}',
+            values: { useUpdatedUX },
+          }
         ),
         text: `${error}`,
       });
@@ -429,7 +433,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }, 300);
 
   debouncedFetchObject = debounce(async (type: string, id: string) => {
-    const { notifications, http } = this.props;
+    const { notifications, http, useUpdatedUX } = this.props;
     try {
       const resp = await findObject(http, type, id);
       if (!this._isMounted) {
@@ -455,7 +459,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       notifications.toasts.addDanger({
         title: i18n.translate(
           'savedObjectsManagement.objectsTable.unableFindSavedObjectNotificationMessage',
-          { defaultMessage: 'Unable to find saved object' }
+          {
+            defaultMessage:
+              'Unable to find {useUpdatedUX, select, true {asset} other {saved object}}',
+            values: { useUpdatedUX },
+          }
         ),
         text: `${error}`,
       });
@@ -622,7 +630,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   delete = async () => {
-    const { savedObjectsClient, notifications } = this.props;
+    const { savedObjectsClient, notifications, useUpdatedUX } = this.props;
     const { selectedSavedObjects, isDeleting } = this.state;
 
     if (isDeleting) {
@@ -657,7 +665,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       notifications.toasts.addDanger({
         title: i18n.translate(
           'savedObjectsManagement.objectsTable.unableDeleteSavedObjectsNotificationMessage',
-          { defaultMessage: 'Unable to delete saved objects' }
+          {
+            defaultMessage:
+              'Unable to delete {useUpdatedUX, select, true {assets} other {saved objects}}',
+            values: { useUpdatedUX },
+          }
         ),
         text: `${error}`,
       });
@@ -704,7 +716,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   onDuplicateAll = async () => {
-    const { notifications, http } = this.props;
+    const { notifications, http, useUpdatedUX } = this.props;
     const findOptions = this.findOptions;
     findOptions.perPage = 9999;
     findOptions.page = 1;
@@ -725,7 +737,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       notifications.toasts.addDanger({
         title: i18n.translate(
           'savedObjectsManagement.objectsTable.unableFindSavedObjectsNotificationMessage',
-          { defaultMessage: 'Unable find saved objects' }
+          {
+            defaultMessage:
+              'Unable find {useUpdatedUX, select, true {assets} other {saved objects}}',
+            values: { useUpdatedUX },
+          }
         ),
         text: `${error}`,
       });
@@ -738,15 +754,15 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     targetWorkspace: string,
     targetWorkspaceName: string
   ) => {
-    const { notifications, workspaces } = this.props;
+    const { notifications, workspaces, useUpdatedUX } = this.props;
     const workspaceClient = workspaces.client$.getValue();
 
     const showErrorNotification = () => {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
           defaultMessage:
-            'Unable to copy {errorCount, plural, one {# saved object} other {# saved objects}}.',
-          values: { errorCount: savedObjects.length },
+            'Unable to copy {useUpdatedUX, select, true {{errorCount, plural, one {# asset} other {# assets}}} other {{errorCount, plural, one {# saved object} other {# saved objects}}}}.',
+          values: { errorCount: savedObjects.length, useUpdatedUX },
         }),
       });
     };
@@ -975,8 +991,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
               <h2>
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
-                  defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
+                  defaultMessage="Export {useUpdatedUX, select, true {{filteredItemCount, plural, one{# asset} other {# assets}}} other {{filteredItemCount, plural, one{# object} other {# objects}}}}"
                   values={{
+                    useUpdatedUX: this.props.useUpdatedUX,
                     filteredItemCount,
                   }}
                 />
