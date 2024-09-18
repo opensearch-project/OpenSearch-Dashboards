@@ -61,6 +61,10 @@ export class DataStorage {
       if (ourKey != null) ours.push(ourKey);
     });
   }
+
+  clear(): void {
+    this.engine.clear();
+  }
 }
 
 export function createStorage(deps: { engine: IStorageEngine; prefix: string }) {

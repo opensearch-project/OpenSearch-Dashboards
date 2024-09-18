@@ -138,6 +138,7 @@ export class DatasetService {
   }
 
   private cacheDataStructure(dataType: string, dataStructure: DataStructure) {
+    this.setLastCacheTime(new Date());
     const cachedDataStructure: CachedDataStructure = {
       id: dataStructure.id,
       title: dataStructure.title,
@@ -162,6 +163,18 @@ export class DatasetService {
       };
       this.sessionStorage.set(`${dataType}.${child.id}`, cachedChild);
     });
+  }
+
+  public refreshCache(): void {
+    this.sessionStorage.clear();
+  }
+
+  public getLastCacheTime(): string | undefined {
+    return this.sessionStorage.get('lastCacheTime');
+  }
+
+  private setLastCacheTime(time: Date): void {
+    this.sessionStorage.set('lastCacheTime', time);
   }
 
   private async fetchDefaultDataset(): Promise<Dataset | undefined> {

@@ -92,6 +92,29 @@ export const DatasetExplorer = ({
               </EuiLink>
             </p>
           </EuiText>
+          {queryString.getDatasetService().getLastCacheTime() && (
+            <EuiText>
+              <p>
+                <FormattedMessage
+                  id="data.explorer.datasetSelector.advancedSelector.lastUpdatedTime"
+                  defaultMessage={`Last updated at: ${new Date(
+                    Date.parse(queryString.getDatasetService().getLastCacheTime()!)
+                  )?.toLocaleTimeString()}. `}
+                />
+                <EuiLink
+                  onClick={() => {
+                    queryString.getDatasetService().refreshCache();
+                    onCancel();
+                  }}
+                >
+                  <FormattedMessage
+                    id="data.explorer.datasetSelector.advancedSelector.refreshCacheButton"
+                    defaultMessage="Refresh Cache"
+                  />
+                </EuiLink>
+              </p>
+            </EuiText>
+          )}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
