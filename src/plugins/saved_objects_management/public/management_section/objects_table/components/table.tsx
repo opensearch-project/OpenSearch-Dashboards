@@ -502,7 +502,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           ]}
         />
         {queryParseError}
-        <EuiSpacer size="s" />
+        <EuiSpacer size={useUpdatedUX ? 'm' : 's'} />
         <div data-test-subj="savedObjectsTable">
           <EuiBasicTable
             loading={isSearching}

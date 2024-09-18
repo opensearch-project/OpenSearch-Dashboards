@@ -828,7 +828,7 @@ exports[`Table should render normally when use updated UX 1`] = `
     }
   />
   <EuiSpacer
-    size="s"
+    size="m"
   />
   <div
     data-test-subj="savedObjectsTable"
