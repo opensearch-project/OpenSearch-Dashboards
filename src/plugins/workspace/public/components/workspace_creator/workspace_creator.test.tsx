@@ -55,6 +55,19 @@ const dataSourcesList = [
       return 'ds2';
     },
   },
+  {
+    id: 'id3',
+    title: 'dqs1',
+    description: 'Description of data connection 1',
+    auth: '',
+    dataSourceEngineType: '' as DataSourceEngineType,
+    workspaces: [],
+    type: 'data-connection',
+    connectionType: 'AWS Security Lake',
+    get: () => {
+      return 'ds2';
+    },
+  },
 ];
 
 const dataSourceConnectionsList = [
@@ -70,6 +83,13 @@ const dataSourceConnectionsList = [
     name: 'ds2',
     connectionType: DataSourceConnectionType.OpenSearchConnection,
     type: 'OpenSearch',
+  },
+  {
+    id: 'id3',
+    name: 'dqs1',
+    description: 'Description of data connection 1',
+    connectionType: DataSourceConnectionType.DataConnection,
+    type: 'AWS Security Lake',
   },
 ];
 
@@ -379,6 +399,64 @@ describe('WorkspaceCreator', () => {
       {
         dataConnections: [],
         dataSources: ['id1'],
+        permissions: {
+          library_write: {
+            users: ['%me%'],
+          },
+          write: {
+            users: ['%me%'],
+          },
+        },
+      }
+    );
+    await waitFor(() => {
+      expect(notificationToastsAddSuccess).toHaveBeenCalled();
+    });
+    expect(notificationToastsAddDanger).not.toHaveBeenCalled();
+  });
+
+  it('create workspace with customized selected data connections', async () => {
+    Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
+      configurable: true,
+      value: 600,
+    });
+    Object.defineProperty(HTMLElement.prototype, 'offsetWidth', {
+      configurable: true,
+      value: 600,
+    });
+    const { getByTestId, getAllByText, getByText } = render(
+      <WorkspaceCreator isDashboardAdmin={true} />
+    );
+
+    // Ensure workspace create form rendered
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceUseCase-observability'));
+    fireEvent.click(getByTestId('workspace-creator-dqc-assign-button'));
+    await waitFor(() => {
+      expect(
+        getByText(
+          'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
+        )
+      ).toBeInTheDocument();
+      expect(getByText(dataSourcesList[2].title)).toBeInTheDocument();
+    });
+    fireEvent.click(getByText(dataSourcesList[2].title));
+    fireEvent.click(getAllByText('Associate data sources')[1]);
+
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    expect(workspaceClientCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'test workspace name',
+      }),
+      {
+        dataConnections: ['id3'],
+        dataSources: [],
         permissions: {
           library_write: {
             users: ['%me%'],
