@@ -148,6 +148,7 @@ export const DatasetSelector = ({
           </EuiButtonEmpty>
         </EuiToolTip>
       }
+      className="datasetSelector__popover"
       isOpen={isOpen}
       closePopover={closePopover}
       anchorPosition="downLeft"
