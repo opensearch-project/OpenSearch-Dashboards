@@ -55,7 +55,10 @@ export class SQLSearchInterceptor extends SearchInterceptor {
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
     const dataset = this.queryService.queryString.getQuery().dataset;
     const datasetType = dataset?.type;
-    let strategy = datasetType === DATASET.S3 ? SEARCH_STRATEGY.SQL_ASYNC : SEARCH_STRATEGY.SQL;
+    let strategy =
+      datasetType && [DATASET.S3, DATASET.CLOUD_WATCH].includes(datasetType)
+        ? SEARCH_STRATEGY.SQL_ASYNC
+        : SEARCH_STRATEGY.SQL;
 
     if (datasetType) {
       const datasetTypeConfig = this.queryService.queryString

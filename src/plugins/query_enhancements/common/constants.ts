@@ -10,14 +10,15 @@ export const BASE_API = '/api/enhancements';
 
 export const DATASET = {
   S3: 'S3',
-};
+  CLOUD_WATCH: 'CLOUD_WATCH',
+} as const;
 
 export const SEARCH_STRATEGY = {
   PPL: 'ppl',
   PPL_RAW: 'pplraw',
   SQL: 'sql',
   SQL_ASYNC: 'sqlasync',
-};
+} as const;
 
 export const API = {
   SEARCH: `${BASE_API}/search`,
@@ -33,7 +34,7 @@ export const API = {
     ASYNC_JOBS: `${BASE_API}/datasource/jobs`,
     CONNECTIONS: `${BASE_API}/datasource/connections`,
   },
-};
+} as const;
 
 export const URI = {
   PPL: '/_plugins/_ppl',
@@ -42,16 +43,16 @@ export const URI = {
   ML: '/_plugins/_ml',
   OBSERVABILITY: '/_plugins/_observability',
   DATA_CONNECTIONS: '/_plugins/_query/_datasources',
-};
+} as const;
 
 export const OPENSEARCH_API = {
   PANELS: `${URI.OBSERVABILITY}/object`,
   DATA_CONNECTIONS: URI.DATA_CONNECTIONS,
-};
+} as const;
 
 export const UI_SETTINGS = {
   QUERY_ENHANCEMENTS_ENABLED: 'query:enhancements:enabled',
   STATE_STORE_IN_SESSION_STORAGE: 'state:storeInSessionStorage',
-};
+} as const;
 
-export const ERROR_DETAILS = { GUARDRAILS_TRIGGERED: 'guardrails triggered' };
+export const ERROR_DETAILS = { GUARDRAILS_TRIGGERED: 'guardrails triggered' } as const;
