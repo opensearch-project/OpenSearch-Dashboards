@@ -1139,18 +1139,16 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       });
     }
 
-    // Add workspace filter
-    if (workspaceEnabled && availableWorkspaces?.length) {
+    // Add workspace filter when out of workspace
+    if (workspaceEnabled && availableWorkspaces?.length && !currentWorkspace) {
       const wsCounts = savedObjectCounts.workspaces || {};
-      const wsFilterOptions = availableWorkspaces
-        .filter((ws) => (currentWorkspace ? currentWorkspace.id === ws.id : true))
-        .map((ws) => {
-          return {
-            name: ws.name,
-            value: ws.name,
-            view: `${ws.name} (${wsCounts[ws.id] || 0})`,
-          };
-        });
+      const wsFilterOptions = availableWorkspaces.map((ws) => {
+        return {
+          name: ws.name,
+          value: ws.name,
+          view: `${ws.name} (${wsCounts[ws.id] || 0})`,
+        };
+      });
 
       filters.push({
         type: 'field_value_selection',
