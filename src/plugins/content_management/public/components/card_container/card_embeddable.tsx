@@ -35,8 +35,8 @@ export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
     this.node = node;
 
     const title = this.input?.getTitle?.() || (
-      <EuiTitle size="xs">
-        <h5>{this.input?.title || ''}</h5>
+      <EuiTitle size="xxs">
+        <h3>{this.input?.title || ''}</h3>
       </EuiTitle>
     );
 
