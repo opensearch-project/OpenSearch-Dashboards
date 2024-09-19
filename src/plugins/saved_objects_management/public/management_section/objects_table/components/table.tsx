@@ -428,13 +428,22 @@ export class Table extends PureComponent<TableProps, TableState> {
           toolsRight={[
             <>
               {useUpdatedUX && (
-                <EuiButtonIcon
-                  iconType="refresh"
-                  size="s"
-                  display="base"
-                  type="base"
-                  onClick={onRefresh}
-                />
+                <EuiToolTip
+                  content={i18n.translate(
+                    'savedObjectsManagement.objectsTable.table.refreshButtonTooltip',
+                    {
+                      defaultMessage: 'Refresh',
+                    }
+                  )}
+                >
+                  <EuiButtonIcon
+                    iconType="refresh"
+                    size="s"
+                    display="base"
+                    type="base"
+                    onClick={onRefresh}
+                  />
+                </EuiToolTip>
               )}
             </>,
             <>{showDuplicate && duplicateButton}</>,

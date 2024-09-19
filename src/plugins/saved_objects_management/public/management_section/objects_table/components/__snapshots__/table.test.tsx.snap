@@ -731,12 +731,18 @@ exports[`Table should render normally when use updated UX 1`] = `
     toolsRight={
       Array [
         <React.Fragment>
-          <EuiButtonIcon
-            display="base"
-            iconType="refresh"
-            size="s"
-            type="base"
-          />
+          <EuiToolTip
+            content="Refresh"
+            delay="regular"
+            position="top"
+          >
+            <EuiButtonIcon
+              display="base"
+              iconType="refresh"
+              size="s"
+              type="base"
+            />
+          </EuiToolTip>
         </React.Fragment>,
         <React.Fragment />,
         <EuiSmallButton
