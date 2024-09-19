@@ -28,9 +28,10 @@
  * under the License.
  */
 
-import { UsageCollectionSetup, METRIC_TYPE } from '.';
+import { UsageCollectionSetup, UsageCollectionStart, METRIC_TYPE } from '.';
 
 export type Setup = jest.Mocked<UsageCollectionSetup>;
+export type Start = jest.Mocked<UsageCollectionStart>;
 
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
@@ -45,6 +46,16 @@ const createSetupContract = (): Setup => {
   return setupContract;
 };
 
+const createStartContract = (): Start => {
+  const startContract: Start = {
+    reportUiStats: jest.fn(),
+    METRIC_TYPE,
+  };
+
+  return startContract;
+};
+
 export const usageCollectionPluginMock = {
   createSetupContract,
+  createStartContract,
 };
