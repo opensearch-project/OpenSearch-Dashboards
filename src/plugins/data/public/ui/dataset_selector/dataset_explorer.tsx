@@ -7,6 +7,8 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiModalBody,
@@ -68,54 +70,69 @@ export const DatasetExplorer = ({
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <h1>
-            <FormattedMessage
-              id="data.explorer.datasetSelector.advancedSelector.title.step1"
-              defaultMessage="Step 1: Select data"
-            />
-          </h1>
-          <EuiText>
-            <p>
-              <FormattedMessage
-                id="data.explorer.datasetSelector.advancedSelector.description"
-                defaultMessage="Select from those available to you. "
-              />
-              <EuiLink
-                href={`${services.http.basePath.get()}/app/management/opensearch-dashboards/dataSources`}
-                target="_blank"
-              >
+        <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={true}>
+            <EuiModalHeaderTitle>
+              <h1>
                 <FormattedMessage
-                  id="data.explorer.datasetSelector.advancedSelector.dataSourceManagement.title"
-                  defaultMessage="Manage data sources"
+                  id="data.explorer.datasetSelector.advancedSelector.title.step1"
+                  defaultMessage="Step 1: Select data"
                 />
-              </EuiLink>
-            </p>
-          </EuiText>
-          {queryString.getDatasetService().getLastCacheTime() && (
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="data.explorer.datasetSelector.advancedSelector.lastUpdatedTime"
-                  defaultMessage={`Last updated at: ${new Date(
-                    Date.parse(queryString.getDatasetService().getLastCacheTime()!)
-                  )?.toLocaleTimeString()}. `}
-                />
-                <EuiLink
-                  onClick={() => {
-                    queryString.getDatasetService().refreshCache();
-                    onCancel();
-                  }}
-                >
+              </h1>
+              <EuiText>
+                <p>
                   <FormattedMessage
-                    id="data.explorer.datasetSelector.advancedSelector.refreshCacheButton"
-                    defaultMessage="Refresh Cache"
+                    id="data.explorer.datasetSelector.advancedSelector.description"
+                    defaultMessage="Select from those available to you. "
                   />
-                </EuiLink>
-              </p>
-            </EuiText>
+                  <EuiLink
+                    href={`${services.http.basePath.get()}/app/management/opensearch-dashboards/dataSources`}
+                    target="_blank"
+                  >
+                    <FormattedMessage
+                      id="data.explorer.datasetSelector.advancedSelector.dataSourceManagement.title"
+                      defaultMessage="Manage data sources"
+                    />
+                  </EuiLink>
+                </p>
+              </EuiText>
+            </EuiModalHeaderTitle>
+          </EuiFlexItem>
+          {queryString.getDatasetService().getLastCacheTime() && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="xs">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">
+                    <FormattedMessage
+                      id="data.explorer.datasetSelector.advancedSelector.lastUpdatedTime"
+                      defaultMessage={`Last updated at: ${new Date(
+                        Date.parse(queryString.getDatasetService().getLastCacheTime()!)
+                      )?.toLocaleTimeString()}. `}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => {
+                      queryString.getDatasetService().clearCache();
+                      onCancel();
+                    }}
+                    size="xs"
+                    iconSide="left"
+                    iconType="refresh"
+                    iconGap="s"
+                    flush="both"
+                  >
+                    <FormattedMessage
+                      id="data.explorer.datasetSelector.advancedSelector.refreshCacheButton"
+                      defaultMessage="Refresh Cache"
+                    />
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
           )}
-        </EuiModalHeaderTitle>
+        </EuiFlexGroup>
       </EuiModalHeader>
       <EuiModalBody>
         <div

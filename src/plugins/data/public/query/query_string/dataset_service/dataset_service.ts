@@ -165,7 +165,7 @@ export class DatasetService {
     });
   }
 
-  public refreshCache(): void {
+  public clearCache(): void {
     this.sessionStorage.clear();
   }
 
