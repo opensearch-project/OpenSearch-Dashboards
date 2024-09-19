@@ -19,7 +19,6 @@ import { s3TypeConfig } from './datasets';
 import { createEditor, DefaultInput, SingleLineInput } from '../../data/public';
 import { QueryLanguageReference } from './query_editor/query_language_reference';
 import { DataStorage } from '../../data/common';
-import { cloudWatchTypeConfig } from './datasets/cloud_watch_type';
 
 export class QueryEnhancementsPlugin
   implements
@@ -111,7 +110,6 @@ export class QueryEnhancementsPlugin
     });
 
     queryString.getDatasetService().registerType(s3TypeConfig);
-    queryString.getDatasetService().registerType(cloudWatchTypeConfig);
 
     return {};
   }
