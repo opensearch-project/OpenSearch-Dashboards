@@ -126,6 +126,10 @@ export const DatasetSelector = ({
       return `${selectedDataset.dataSource.title}::${selectedDataset.title}`;
     }
 
+    if (selectedDataset.dataConnection) {
+      return `${selectedDataset.dataConnection.title}::${selectedDataset.title}`;
+    }
+
     return selectedDataset.title;
   }, [selectedDataset]);
 
