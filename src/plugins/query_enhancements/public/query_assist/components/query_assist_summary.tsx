@@ -14,7 +14,7 @@ import {
   EuiCopy,
 } from '@elastic/eui';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { i18n } from '@osd/i18n';
 import { IDataFrame } from 'src/plugins/data/common';
 import { v4 as uuidv4 } from 'uuid';
@@ -22,7 +22,6 @@ import { isEmpty } from 'lodash';
 import { merge, of } from 'rxjs';
 import { filter, distinctUntilChanged, mergeMap } from 'rxjs/operators';
 import { HttpSetup } from 'opensearch-dashboards/public';
-import { Dataset } from '../../../../data/common';
 import { useQueryAssist } from '../hooks';
 import { DataPublicPluginSetup, QueryEditorExtensionDependencies } from '../../../../data/public';
 import { UsageCollectionSetup } from '../../../../usage_collection/public';
@@ -40,21 +39,37 @@ export interface QueryContext {
 interface QueryAssistSummaryProps {
   data: DataPublicPluginSetup;
   http: HttpSetup;
-  usageCollection: UsageCollectionSetup;
+  usageCollection?: UsageCollectionSetup;
   dependencies: QueryEditorExtensionDependencies;
   core: CoreSetup;
 }
+
+export const convertResult = (body: IDataFrame) => {
+  const data = body as IDataFrame;
+  const hits: any[] = [];
+
+  if (data && data.fields && data.fields.length > 0) {
+    for (let index = 0; index < data.size; index++) {
+      const hit: { [key: string]: any } = {};
+      data.fields.forEach((field) => {
+        hit[field.name] = field.values[index];
+      });
+      hits.push({
+        _index: data.name,
+        _source: hit,
+      });
+    }
+  }
+  return hits;
+};
 
 export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => {
   const { query, search } = props.data;
   const [summary, setSummary] = useState(null); // store fetched data
   const [loading, setLoading] = useState(false); // track loading state
-  const [queryContext, setQueryContext] = useState<QueryContext | undefined>(undefined);
   const [feedback, setFeedback] = useState(false);
   const [isEnabledByCapability, setIsEnabledByCapability] = useState(false);
-  const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(
-    query.queryString.getQuery()?.dataset
-  );
+  const selectedDataset = useRef(query.queryString.getQuery()?.dataset);
   const { question$, isQueryAssistCollapsed } = useQueryAssist();
   const METRIC_APP = `query-assist`;
   const afterFeedbackTip = i18n.translate('queryEnhancements.queryAssist.summary.afterFeedback', {
@@ -63,25 +78,6 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
   });
 
   const sampleSize = 10;
-
-  const convertResult = (body: IDataFrame) => {
-    const data = body as IDataFrame;
-    const hits: any[] = [];
-
-    if (data && data.fields && data.fields.length > 0) {
-      for (let index = 0; index < data.size; index++) {
-        const hit: { [key: string]: any } = {};
-        data.fields.forEach((field) => {
-          hit[field.name] = field.values[index];
-        });
-        hits.push({
-          _index: data.name,
-          _source: hit,
-        });
-      }
-    }
-    return hits;
-  };
 
   const reportMetric = useCallback(
     (metric: string) => {
@@ -112,62 +108,13 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
 
   useEffect(() => {
     const subscription = query.queryString.getUpdates$().subscribe((_query) => {
-      setSelectedDataset(_query?.dataset);
+      selectedDataset.current = _query?.dataset;
     });
     return () => subscription.unsubscribe();
   }, [query.queryString]);
 
-  useEffect(() => {
-    let dataStack = [];
-    const subscription = merge(
-      question$.pipe(
-        filter((value) => !isEmpty(value)),
-        mergeMap((value) => of({ type: QueryAssistContextType.QUESTION, data: value }))
-      ),
-      query.queryString.getUpdates$().pipe(
-        filter((value) => !isEmpty(value)),
-        mergeMap((value) => of({ type: QueryAssistContextType.QUERY, data: value }))
-      ),
-      search.df?.df$?.pipe(
-        distinctUntilChanged(),
-        filter((value) => !isEmpty(value) && !isEmpty(value?.fields)),
-        mergeMap((value) => of({ type: QueryAssistContextType.DATA, data: value }))
-      )
-    ).subscribe((value) => {
-      // to ensure we only trigger summary when user hits the query assist button with natual language input
-      switch (value.type) {
-        case QueryAssistContextType.QUESTION:
-          dataStack = [value.data];
-          break;
-        case QueryAssistContextType.QUERY:
-          if (dataStack.length === 1) {
-            dataStack.push(value.data.query);
-          }
-          break;
-        case QueryAssistContextType.DATA:
-          if (dataStack.length === 2) {
-            dataStack.push(value.data);
-            setQueryContext({
-              question: dataStack[0],
-              query: dataStack[1],
-              queryResults: convertResult(dataStack[2]),
-            });
-            dataStack = [];
-          }
-          break;
-        default:
-          break;
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    const fetchSummary = async () => {
+  const fetchSummary = useCallback(
+    async (queryContext: QueryContext) => {
       if (isEmpty(queryContext?.queryResults)) return;
       setLoading(true);
       setSummary(null);
@@ -186,7 +133,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
             ppl: queryContext?.query,
           }),
           query: {
-            dataSourceId: selectedDataset?.dataSource?.id,
+            dataSourceId: selectedDataset.current?.dataSource?.id,
           },
         });
         setSummary(response);
@@ -196,19 +143,63 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
       } finally {
         setLoading(false);
       }
-    };
+    },
+    [props.http, reportCountMetric]
+  );
 
-    fetchSummary();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryContext]);
+  useEffect(() => {
+    let dataStack: Array<string | IDataFrame | undefined> = [];
+    const subscription = merge(
+      question$.pipe(
+        filter((value) => !isEmpty(value)),
+        mergeMap((value) => of({ type: QueryAssistContextType.QUESTION as const, data: value }))
+      ),
+      query.queryString.getUpdates$().pipe(
+        filter((value) => !isEmpty(value)),
+        mergeMap((value) => of({ type: QueryAssistContextType.QUERY as const, data: value }))
+      ),
+      search.df?.df$?.pipe(
+        distinctUntilChanged(),
+        filter((value) => !isEmpty(value) && !isEmpty(value?.fields)),
+        mergeMap((value) => of({ type: QueryAssistContextType.DATA as const, data: value }))
+      )
+    ).subscribe((value) => {
+      // to ensure we only trigger summary when user hits the query assist button with natural language input
+      switch (value.type) {
+        case QueryAssistContextType.QUESTION:
+          dataStack = [value.data];
+          break;
+        case QueryAssistContextType.QUERY:
+          if (dataStack.length === 1) {
+            dataStack.push(value.data.query as string);
+          }
+          break;
+        case QueryAssistContextType.DATA:
+          if (dataStack.length === 2) {
+            dataStack.push(value.data);
+            fetchSummary({
+              question: dataStack[0] as string,
+              query: dataStack[1] as string,
+              queryResults: convertResult(dataStack[2] as IDataFrame),
+            });
+            dataStack = [];
+          }
+          break;
+        default:
+          break;
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [question$, query.queryString, search.df?.df$, fetchSummary]);
 
   useEffect(() => {
     props.core.getStartServices().then(([coreStart, depsStart]) => {
       const assistantEnabled = !!coreStart.application.capabilities?.assistant?.enabled;
       setIsEnabledByCapability(assistantEnabled);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [props.core]);
 
   const onFeedback = useCallback(
     (satisfied: boolean) => {

@@ -89,7 +89,7 @@ export const createQueryAssistExtension = (
   core: CoreSetup,
   data: DataPublicPluginSetup,
   config: ConfigSchema['queryAssist'],
-  usageCollection: UsageCollectionSetup
+  usageCollection?: UsageCollectionSetup
 ): QueryEditorExtensionConfig => {
   const http: HttpSetup = core.http;
   const isQueryAssistCollapsed$ = new BehaviorSubject<boolean>(false);

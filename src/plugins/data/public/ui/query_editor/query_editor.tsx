@@ -336,7 +336,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     return <QueryControls queryControls={queryControls} />;
   };
 
-  private renderExtensionSearchBarButtion = () => {
+  private renderExtensionSearchBarButton = () => {
     if (!this.extensionMap || Object.keys(this.extensionMap).length === 0) return null;
     const sortedConfigs = Object.values(this.extensionMap).sort((a, b) => a.order - b.order);
     return (
@@ -473,7 +473,7 @@ export default class QueryEditorUI extends Component<Props, State> {
             <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
               {this.renderQueryControls(languageEditor.TopBar.Controls)}
               {!languageEditor.TopBar.Expanded && this.renderToggleIcon()}
-              {!languageEditor.TopBar.Expanded && this.renderExtensionSearchBarButtion()}
+              {!languageEditor.TopBar.Expanded && this.renderExtensionSearchBarButton()}
               {this.props.savedQueryManagement}
             </EuiFlexGroup>
           </div>

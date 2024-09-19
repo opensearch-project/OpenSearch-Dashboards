@@ -6,12 +6,14 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
 import { coreMock } from '../../../../../core/public/mocks';
 import { BehaviorSubject } from 'rxjs';
-import { QueryAssistSummary } from './query_assist_summary';
+import { QueryAssistSummary, convertResult } from './query_assist_summary';
 import { useQueryAssist } from '../hooks';
+import { IDataFrame, Query } from '../../../../data/common';
 
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
   useState: jest.fn((value) => [value, () => null]),
+  useRef: jest.fn(() => ({ current: null })),
 }));
 
 jest.mock('../hooks', () => ({
@@ -21,27 +23,23 @@ jest.mock('../hooks', () => ({
 describe('query assist summary', () => {
   const PPL = 'ppl';
   const question = 'Are there any errors in my logs?';
-  const queryContext = {
-    question,
-    query: PPL,
-    queryResults: [{ size: 1 }],
+  const dataFrame = {
+    fields: [{ name: 'name', values: ['value'] }],
+    size: 1,
   };
-
-  const emptyResultQueryContext = {
-    question,
-    query: PPL,
-    queryResults: [],
+  const emptyDataFrame = {
+    fields: [],
+    size: 0,
   };
 
   const coreSetupMock = coreMock.createSetup({});
   const httpMock = coreSetupMock.http;
-  const data = new BehaviorSubject<any[]>([]);
+  const data$ = new BehaviorSubject<IDataFrame | undefined>(undefined);
   const question$ = new BehaviorSubject<string>('');
-  const query$ = new BehaviorSubject<string>('');
+  const query$ = new BehaviorSubject<Query | undefined>(undefined);
   const reportUiStatsMock = jest.fn();
   const setSummary = jest.fn();
   const setLoading = jest.fn();
-  const setQueryContext = jest.fn();
   const setFeedback = jest.fn();
   const setIsAssistantEnabledByCapability = jest.fn();
   const getQuery = jest.fn();
@@ -54,14 +52,14 @@ describe('query assist summary', () => {
     },
     search: {
       df: {
-        df$: data,
+        df$: data$,
       },
     },
   };
 
   afterEach(() => {
-    data.next(undefined);
-    question$.next(undefined);
+    data$.next(undefined);
+    question$.next('');
     query$.next(undefined);
     jest.clearAllMocks();
   });
@@ -119,20 +117,17 @@ describe('query assist summary', () => {
   const mockUseState = (
     summary,
     loading,
-    _queryContext,
     feedback,
     isAssistantEnabledByCapability = true,
     isQueryAssistCollapsed = COLLAPSED.NO
   ) => {
     React.useState.mockImplementationOnce(() => [summary, setSummary]);
     React.useState.mockImplementationOnce(() => [loading, setLoading]);
-    React.useState.mockImplementationOnce(() => [_queryContext, setQueryContext]);
     React.useState.mockImplementationOnce(() => [feedback, setFeedback]);
     React.useState.mockImplementationOnce(() => [
       isAssistantEnabledByCapability,
       setIsAssistantEnabledByCapability,
     ]);
-    React.useState.mockImplementationOnce(() => [undefined, jest.fn()]);
     useQueryAssist.mockImplementationOnce(() => ({
       question: 'question',
       question$,
@@ -141,7 +136,7 @@ describe('query assist summary', () => {
   };
 
   const defaultUseStateMock = () => {
-    mockUseState(null, LOADING.NO, undefined, FEEDBACK.NO);
+    mockUseState(null, LOADING.NO, FEEDBACK.NO);
   };
 
   it('should not show if collapsed is true', () => {
@@ -152,14 +147,14 @@ describe('query assist summary', () => {
   });
 
   it('should not show if assistant is disabled by capability', () => {
-    mockUseState(null, LOADING.NO, undefined, FEEDBACK.NO, false);
+    mockUseState(null, LOADING.NO, FEEDBACK.NO, false);
     renderQueryAssistSummary(COLLAPSED.NO);
     const summaryPanels = screen.queryAllByTestId('queryAssist__summary');
     expect(summaryPanels).toHaveLength(0);
   });
 
   it('should not show if query assistant is collapsed', () => {
-    mockUseState(null, LOADING.NO, undefined, FEEDBACK.NO, true, COLLAPSED.YES);
+    mockUseState(null, LOADING.NO, FEEDBACK.NO, true, COLLAPSED.YES);
     renderQueryAssistSummary(COLLAPSED.NO);
     const summaryPanels = screen.queryAllByTestId('queryAssist__summary');
     expect(summaryPanels).toHaveLength(0);
@@ -173,7 +168,7 @@ describe('query assist summary', () => {
   });
 
   it('should display loading view if loading state is true', () => {
-    mockUseState(null, LOADING.YES, undefined, FEEDBACK.NO);
+    mockUseState(null, LOADING.YES, FEEDBACK.NO);
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_loading')).toBeInTheDocument();
     expect(screen.queryAllByTestId('queryAssist_summary_result')).toHaveLength(0);
@@ -181,7 +176,7 @@ describe('query assist summary', () => {
   });
 
   it('should display loading view if loading state is true even with summary', () => {
-    mockUseState('summary', LOADING.YES, undefined, FEEDBACK.NO);
+    mockUseState('summary', LOADING.YES, FEEDBACK.NO);
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_loading')).toBeInTheDocument();
     expect(screen.queryAllByTestId('queryAssist_summary_result')).toHaveLength(0);
@@ -197,7 +192,7 @@ describe('query assist summary', () => {
   });
 
   it('should display summary result', () => {
-    mockUseState('summary', LOADING.NO, undefined, FEEDBACK.NO);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NO);
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
     expect(screen.getByTestId('queryAssist_summary_result')).toHaveTextContent('summary');
@@ -206,7 +201,7 @@ describe('query assist summary', () => {
   });
 
   it('should report metric for thumbup click', async () => {
-    mockUseState('summary', LOADING.NO, undefined, FEEDBACK.NO);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NO);
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
     await screen.getByTestId('queryAssist_summary_buttons_thumbup');
@@ -220,7 +215,7 @@ describe('query assist summary', () => {
   });
 
   it('should report metric for thumbdown click', async () => {
-    mockUseState('summary', LOADING.NO, undefined, FEEDBACK.NO);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NO);
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
     await screen.getByTestId('queryAssist_summary_buttons_thumbdown');
@@ -233,20 +228,27 @@ describe('query assist summary', () => {
     );
   });
 
-  it('should not fetch summary if queryResults is empty', async () => {
-    mockUseState(null, LOADING.NO, emptyResultQueryContext, FEEDBACK.NO);
+  it('should not fetch summary if data is empty', async () => {
+    mockUseState(null, LOADING.NO, FEEDBACK.NO);
     renderQueryAssistSummary(COLLAPSED.NO);
+    question$.next(question);
+    query$.next({ query: PPL, language: 'PPL' });
+    data$.next(emptyDataFrame);
     expect(httpMock.post).toBeCalledTimes(0);
   });
 
   it('should fetch summary with expected payload and response', async () => {
-    mockUseState('summary', LOADING.NO, queryContext, FEEDBACK.NO);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NO);
     const RESPONSE_TEXT = 'response';
     httpMock.post.mockResolvedValue(RESPONSE_TEXT);
     renderQueryAssistSummary(COLLAPSED.NO);
+    question$.next(question);
+    query$.next({ query: PPL, language: 'PPL' });
+    data$.next(dataFrame as IDataFrame);
+    await sleep(WAIT_TIME);
     expect(httpMock.post).toBeCalledWith('/api/assistant/data2summary', {
       body: JSON.stringify({
-        sample_data: `'${JSON.stringify(queryContext.queryResults)}'`,
+        sample_data: `'${JSON.stringify(convertResult(dataFrame))}'`,
         sample_count: 1,
         total_count: 1,
         question,
@@ -256,7 +258,6 @@ describe('query assist summary', () => {
         dataSourceId: undefined,
       },
     });
-    await sleep(WAIT_TIME);
     expect(setSummary).toHaveBeenNthCalledWith(1, null);
     expect(setSummary).toHaveBeenNthCalledWith(2, RESPONSE_TEXT);
     expect(setLoading).toHaveBeenNthCalledWith(1, true);
@@ -264,9 +265,12 @@ describe('query assist summary', () => {
   });
 
   it('should handle fetch summary error', async () => {
-    mockUseState('summary', LOADING.NO, queryContext, FEEDBACK.NO);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NO);
     httpMock.post.mockRejectedValueOnce({});
     renderQueryAssistSummary(COLLAPSED.NO);
+    question$.next(question);
+    query$.next({ query: PPL, language: 'PPL' });
+    data$.next(dataFrame as IDataFrame);
     await sleep(WAIT_TIME);
     expect(setSummary).toBeCalledTimes(1);
     expect(setLoading).toHaveBeenNthCalledWith(1, true);
@@ -274,60 +278,44 @@ describe('query assist summary', () => {
   });
 
   it('should not update queryResults if subscription changed not in order', async () => {
-    mockUseState('summary', LOADING.NO, queryContext, FEEDBACK.NO);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NO);
     const RESPONSE_TEXT = 'response';
     httpMock.post.mockResolvedValue(RESPONSE_TEXT);
     renderQueryAssistSummary(COLLAPSED.NO);
-    await sleep(WAIT_TIME);
-    dataMock.search.df.df$.next({
-      size: 2,
-      fields: [
-        {
-          name: 'title1',
-          values: ['value1', 'value2'],
-        },
-        {
-          name: 'title2',
-          values: ['value3', 'value4'],
-        },
-      ],
-    });
+    data$.next(dataFrame as IDataFrame);
     question$.next(question);
-    query$.next(PPL);
+    query$.next({ query: PPL, language: 'PPL' });
     await sleep(WAIT_TIME);
-    expect(setQueryContext).toHaveBeenCalledTimes(0);
+    expect(httpMock.post).toHaveBeenCalledTimes(0);
   });
 
   it('should update queryResults if subscriptions changed in order', async () => {
-    mockUseState('summary', LOADING.NO, queryContext, FEEDBACK.NO);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NO);
     const RESPONSE_TEXT = 'response';
     httpMock.post.mockResolvedValue(RESPONSE_TEXT);
     renderQueryAssistSummary(COLLAPSED.NO);
-    await sleep(WAIT_TIME);
     question$.next(question);
-    query$.next(PPL);
-    dataMock.search.df.df$.next({
-      size: 2,
-      fields: [
-        {
-          name: 'title1',
-          values: ['value1', 'value2'],
-        },
-        {
-          name: 'title2',
-          values: ['value3', 'value4'],
-        },
-      ],
-    });
+    query$.next({ query: PPL, language: 'PPL' });
+    data$.next(dataFrame as IDataFrame);
     await sleep(WAIT_TIME);
-    expect(setQueryContext).toHaveBeenCalledTimes(1);
+    expect(httpMock.post).toHaveBeenCalledTimes(1);
+    data$.next(undefined);
+    question$.next(question);
+    query$.next({ query: PPL, language: 'PPL' });
+    data$.next(dataFrame as IDataFrame);
+    await sleep(WAIT_TIME);
+    expect(httpMock.post).toHaveBeenCalledTimes(2);
   });
 
   it('should reset feedback state if re-fetch summary', async () => {
-    mockUseState('summary', LOADING.NO, queryContext, FEEDBACK.YES);
+    mockUseState('summary', LOADING.NO, FEEDBACK.YES);
     const RESPONSE_TEXT = 'response';
     httpMock.post.mockResolvedValue(RESPONSE_TEXT);
     renderQueryAssistSummary(COLLAPSED.NO);
+    question$.next(question);
+    query$.next({ query: PPL, language: 'PPL' });
+    data$.next(dataFrame as IDataFrame);
+    await sleep(WAIT_TIME);
     expect(setFeedback).toHaveBeenCalledWith(FEEDBACK.NO);
   });
 });
