@@ -41,8 +41,8 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     setPopover(!isPopoverOpen);
   };
 
-  const getTime = () => {
-    const time = new Date().getTime() - props.queryStatus.startTime!;
+  const updateElapsedTime = () => {
+    const time = Date.now() - (props.queryStatus.startTime || 0);
     if (time > BUFFER_TIME) {
       setElapsedTime(time);
     } else {
@@ -51,7 +51,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
   };
 
   useEffect(() => {
-    const interval = setInterval(getTime, 1000);
+    const interval = setInterval(updateElapsedTime, 1000);
 
     return () => clearInterval(interval);
   });
@@ -69,7 +69,9 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
         isLoading
         data-test-subj="queryResultLoading"
       >
-        {`Loading ${time} s`}
+        {i18n.translate('data.query.languageService.queryResults.completeTime', {
+          defaultMessage: `Loading ${time} s`,
+        })}
       </EuiButtonEmpty>
     );
   }
@@ -77,11 +79,20 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
   if (props.queryStatus.status === ResultStatus.READY) {
     let message;
     if (!props.queryStatus.elapsedMs) {
-      message = 'Completed';
+      message = i18n.translate('data.query.languageService.queryResults.completeTime', {
+        defaultMessage: `Completed`,
+      });
     } else if (props.queryStatus.elapsedMs < 1000) {
-      message = `Completed in ${props.queryStatus.elapsedMs} ms`;
+      message = i18n.translate(
+        'data.query.languageService.queryResults.completeTimeInMiliseconds',
+        {
+          defaultMessage: `Completed in ${props.queryStatus.elapsedMs} ms`,
+        }
+      );
     } else {
-      message = `Completed in ${Math.floor(props.queryStatus.elapsedMs / 1000)} s`;
+      message = i18n.translate('data.query.languageService.queryResults.completeTimeInSeconds', {
+        defaultMessage: `Completed in ${(props.queryStatus.elapsedMs / 1000).toFixed(1)} s`,
+      });
     }
 
     return (
@@ -108,7 +119,9 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
           data-test-subj="queryResultErrorBtn"
         >
           <EuiText size="xs" color="subdued">
-            {'Error'}
+            {i18n.translate('data.query.languageService.queryResults.error', {
+              defaultMessage: `Error`,
+            })}
           </EuiText>
         </EuiButtonEmpty>
       }
@@ -134,7 +147,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
               {i18n.translate('data.query.languageService.queryResults.details', {
                 defaultMessage: `Details:`,
               })}
-            </strong>{' '}
+            </strong>
             {props.queryStatus.body.error.details}
           </p>
         </EuiText>

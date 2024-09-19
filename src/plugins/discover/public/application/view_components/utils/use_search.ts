@@ -120,7 +120,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     );
   }, [savedSearch, services.uiSettings, timefilter]);
 
-  const startTime = new Date().getTime();
+  const startTime = Date.now();
   const data$ = useMemo(
     () =>
       new BehaviorSubject<SearchData>({
