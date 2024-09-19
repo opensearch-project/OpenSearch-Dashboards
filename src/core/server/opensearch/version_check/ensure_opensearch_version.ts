@@ -71,11 +71,12 @@ export const getNodeId = async (
     }
 
     /*
-     * Using _cluster/state/nodes to retrieve the cluster_id of each node from cluster manager node which
-     * is considered to be a lightweight operation to aggegrate different cluster_ids from the OpenSearch nodes.
+     * Using _cluster/state/nodes to retrieve the cluster_id of each node from local cluster state of the node
+     * which would be be a lightweight operation to aggegrate different cluster_ids from the OpenSearch nodes.
      */
     const state = (await internalClient.cluster.state({
       metric: 'nodes',
+      local: true,
       filter_path: [path],
     })) as ApiResponse;
 
