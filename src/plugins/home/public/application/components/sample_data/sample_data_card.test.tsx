@@ -31,6 +31,8 @@ describe('Sample data card', () => {
             "isSelected": false,
             "onClick": [Function],
           },
+          "titleElement": "h3",
+          "titleSize": "xxs",
         },
         "description": "Explore sample data before adding your own.",
         "id": "sample_data",

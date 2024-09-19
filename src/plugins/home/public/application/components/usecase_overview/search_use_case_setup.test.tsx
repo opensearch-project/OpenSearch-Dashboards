@@ -75,6 +75,8 @@ describe('Search use case setup', () => {
             "isSelected": false,
             "onClick": [Function],
           },
+          "titleElement": "h3",
+          "titleSize": "xxs",
         },
         "description": "You can run a search using REST API or language client. For experimentation, you can also run queries interactively.",
         "id": "access_search_functionality",
@@ -102,6 +104,8 @@ describe('Search use case setup', () => {
             </EuiLink>
           </div>,
           "layout": "horizontal",
+          "titleElement": "h3",
+          "titleSize": "s",
         },
         "description": "Lexical or keyword search matches documents based on exact words or phrases. Search the text using human-friendly query string query syntax or create complex, customizable queries using Query DSL—the OpenSearch query language.",
         "getIcon": [Function],

@@ -163,7 +163,6 @@ export const RecentItems = ({
       />
     </EuiPopover>
   );
-
   const recentButton = (
     <EuiToolTip
       content={i18n.translate('core.ui.chrome.headerGlobalNav.viewRecentItemsTooltip', {

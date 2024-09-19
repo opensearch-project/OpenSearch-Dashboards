@@ -5,7 +5,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { EuiCard, EuiCardProps, EuiTitle, EuiToolTip } from '@elastic/eui';
+import { EuiCard, EuiCardProps, EuiToolTip } from '@elastic/eui';
 
 import { Embeddable, EmbeddableInput, IContainer } from '../../../../embeddable/public';
 
@@ -34,15 +34,9 @@ export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
     }
     this.node = node;
 
-    const title = this.input?.getTitle?.() || (
-      <EuiTitle size="xxs">
-        <h3>{this.input?.title || ''}</h3>
-      </EuiTitle>
-    );
-
     const cardProps: EuiCardProps = {
       ...this.input.cardProps,
-      title,
+      title: this.input?.getTitle?.() || this.input?.title || '',
       description: (
         <EuiToolTip position="top" content={this.input?.toolTipContent}>
           <>{this.input.description}</>

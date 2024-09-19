@@ -77,6 +77,8 @@ export const registerEssentialOverviewContent = (
         description: card.description,
         title: card.title,
         cardProps: {
+          titleElement: 'h3',
+          titleSize: 'xxs',
           selectable: {
             onClick: () => {
               core.application.navigateToApp(card.navigateAppId);

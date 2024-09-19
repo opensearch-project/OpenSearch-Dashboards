@@ -102,6 +102,8 @@ export const registerContentToSearchUseCasePage = (
         title: card.title,
         description: card.description,
         cardProps: {
+          titleElement: 'h3',
+          titleSize: 'xxs',
           selectable: {
             onClick: () => {
               window.open(card.documentURL, '_blank');
@@ -115,7 +117,7 @@ export const registerContentToSearchUseCasePage = (
     });
   });
 
-  const searchIcon = <EuiIcon color="subdued" size="l" type="search" />;
+  const searchIcon = <EuiIcon color="#9FC4D2" size="l" type="search" />;
 
   const searchTypeCards = [
     {
@@ -244,6 +246,8 @@ export const registerContentToSearchUseCasePage = (
         cardProps: {
           children: <div className="euiCard__footer">{card.footer}</div>,
           layout: 'horizontal',
+          titleElement: 'h3',
+          titleSize: 's',
         },
       }),
       getTargetArea: () => SEARCH_OVERVIEW_CONTENT_AREAS.DIFFERENT_SEARCH_TYPES,

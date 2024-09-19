@@ -83,6 +83,8 @@ describe('Setup use case overview', () => {
             "isSelected": false,
             "onClick": [Function],
           },
+          "titleElement": "h3",
+          "titleSize": "xxs",
         },
         "description": "Explore data to uncover insights.",
         "id": "get_start_discover",

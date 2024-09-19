@@ -33,6 +33,8 @@ export const registerSampleDataCard = (
         defaultMessage: 'Try OpenSearch',
       }),
       cardProps: {
+        titleElement: 'h3',
+        titleSize: 'xxs',
         selectable: {
           children: <EuiI18n token="home.sampleData.card.footer" default="Sample Datasets" />,
           isSelected: false,
