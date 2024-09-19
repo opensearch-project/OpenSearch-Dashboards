@@ -14,7 +14,7 @@ import {
   DataStorage,
   CachedDataStructure,
 } from '../../../../common';
-import { DatasetTypeConfig } from './types';
+import { DatasetTypeConfig, DataStructureFetchOptions } from './types';
 import { indexPatternTypeConfig, indexTypeConfig } from './lib';
 import { IndexPatternsContract } from '../../../index_patterns';
 import { IDataPluginServices } from '../../../types';
@@ -91,7 +91,8 @@ export class DatasetService {
   public async fetchOptions(
     services: IDataPluginServices,
     path: DataStructure[],
-    dataType: string
+    dataType: string,
+    options?: DataStructureFetchOptions
   ): Promise<DataStructure> {
     const type = this.typesRegistry.get(dataType);
     if (!type) {
@@ -99,14 +100,19 @@ export class DatasetService {
     }
 
     const lastPathItem = path[path.length - 1];
-    const cacheKey = `${dataType}.${lastPathItem.id}`;
+    const fetchOptionsKey = Object.entries(options || {})
+      .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+      .map(([key, value]) => `${key}=${value}`)
+      .join('&');
+    const cacheKey =
+      `${dataType}.${lastPathItem.id}` + (fetchOptionsKey.length ? `?${fetchOptionsKey}` : '');
 
     const cachedDataStructure = this.sessionStorage.get<CachedDataStructure>(cacheKey);
     if (cachedDataStructure?.children?.length > 0) {
       return this.cacheToDataStructure(dataType, cachedDataStructure);
     }
 
-    const fetchedDataStructure = await type.fetch(services, path);
+    const fetchedDataStructure = await type.fetch(services, path, options);
     this.cacheDataStructure(dataType, fetchedDataStructure);
     return fetchedDataStructure;
   }
@@ -145,6 +151,8 @@ export class DatasetService {
       parent: dataStructure.parent?.id || '',
       children: dataStructure.children?.map((child) => child.id) || [],
       hasNext: dataStructure.hasNext,
+      nextToken: dataStructure.nextToken,
+      multiSelect: dataStructure.multiSelect,
       columnHeader: dataStructure.columnHeader,
       meta: dataStructure.meta,
     };

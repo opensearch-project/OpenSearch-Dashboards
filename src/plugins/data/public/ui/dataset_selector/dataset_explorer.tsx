@@ -22,7 +22,8 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { BaseDataset, DATA_STRUCTURE_META_TYPES, DataStructure } from '../../../common';
 import { QueryStringContract } from '../../query';
 import { IDataPluginServices } from '../../types';
-import { DatasetTable } from './dataset_table';
+import { DataSetTable } from './dataset_table';
+import { DataStructureFetchOptions } from '../../query/query_string/dataset_service';
 
 export const DatasetExplorer = ({
   services,
@@ -41,6 +42,13 @@ export const DatasetExplorer = ({
 }) => {
   const [explorerDataset, setExplorerDataset] = useState<BaseDataset | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
+  const datasetService = queryString.getDatasetService();
+
+  const fetchNextDataStructure = async (
+    nextPath: DataStructure[],
+    dataType: string,
+    options?: DataStructureFetchOptions
+  ) => datasetService.fetchOptions(services, nextPath, dataType, options);
 
   const selectDataStructure = async (item: DataStructure | undefined, newPath: DataStructure[]) => {
     if (!item) {
@@ -50,7 +58,7 @@ export const DatasetExplorer = ({
     const lastPathItem = newPath[newPath.length - 1];
     const nextPath = [...newPath, item];
 
-    const typeConfig = queryString.getDatasetService().getType(nextPath[1].id);
+    const typeConfig = datasetService.getType(nextPath[1].id);
     if (!typeConfig) return;
 
     if (!lastPathItem.hasNext) {
@@ -60,9 +68,7 @@ export const DatasetExplorer = ({
     }
 
     setLoading(true);
-    const nextDataStructure = await queryString
-      .getDatasetService()
-      .fetchOptions(services, nextPath, typeConfig.id);
+    const nextDataStructure = await fetchNextDataStructure(nextPath, typeConfig.id);
     setLoading(false);
 
     setPath([...newPath, nextDataStructure]);
@@ -122,12 +128,13 @@ export const DatasetExplorer = ({
                   <h3>{current.columnHeader}</h3>
                 </EuiTitle>
                 {current.multiSelect ? (
-                  <DatasetTable
-                    current={current}
+                  <DataSetTable
                     path={path}
+                    setPath={setPath}
                     index={index}
                     explorerDataset={explorerDataset}
                     selectDataStructure={selectDataStructure}
+                    fetchNextDataStructure={fetchNextDataStructure}
                   />
                 ) : (
                   <EuiSelectable

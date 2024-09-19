@@ -6,6 +6,11 @@ import { EuiIconProps } from '@elastic/eui';
 import { Dataset, DatasetField, DatasetSearchOptions, DataStructure } from '../../../../common';
 import { IDataPluginServices } from '../../../types';
 
+export interface DataStructureFetchOptions {
+  search?: string;
+  nextToken?: string;
+}
+
 /**
  * Configuration for handling dataset operations.
  */
@@ -31,9 +36,14 @@ export interface DatasetTypeConfig {
    * Fetches child options for a given DataStructure.
    * @param {IDataPluginServices} services - The data plugin services.
    * @param {DataStructure} dataStructure - The parent DataStructure.
+   * @param {DataStructureFetchOptions} options - The fetch options for pagination and search.
    * @returns {Promise<DatasetHandlerFetchResponse>} A promise that resolves to a DatasetHandlerFetchResponse.
    */
-  fetch: (services: IDataPluginServices, path: DataStructure[]) => Promise<DataStructure>;
+  fetch: (
+    services: IDataPluginServices,
+    path: DataStructure[],
+    options?: DataStructureFetchOptions
+  ) => Promise<DataStructure>;
   /**
    * Fetches fields for the dataset.
    * @returns {Promise<DatasetField[]>} A promise that resolves to an array of DatasetFields.

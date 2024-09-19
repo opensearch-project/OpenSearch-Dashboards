@@ -4,16 +4,11 @@
  */
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import {
-  Dataset,
-  DataStructure,
-  DataStructureCustomMeta,
-  DEFAULT_DATA,
-} from '../../../data/common';
+import { Dataset, DataStructure, DataStructureCustomMeta } from '../../../data/common';
 import { DatasetTypeConfig } from '../../../data/public';
 import type { DataConnectionSavedObjectAttributes } from '../../../data_source/common/data_connections';
-import CLOUD_WATCH_ICON from '../assets/cloud_watch_mark.svg';
 import { DATASET } from '../../common';
+import CLOUD_WATCH_ICON from '../assets/cloud_watch_mark.svg';
 
 export const cloudWatchTypeConfig: DatasetTypeConfig = {
   id: DATASET.CLOUD_WATCH,
@@ -44,22 +39,24 @@ export const cloudWatchTypeConfig: DatasetTypeConfig = {
     };
   },
 
-  fetch: async (services, path) => {
+  fetch: async (services, path, options) => {
     const currDataStructure = path[path.length - 1];
     switch (currDataStructure.type) {
       case 'DATA_CONNECTION': {
-        const logGroups = Array.from({ length: 30 }, (_, i) => `test${i + 1}`);
-        return {
+        const logGroups = await fetchLogGroups(
+          currDataStructure,
+          options?.nextToken,
+          options?.search
+        );
+        const newDataStructure = {
           ...currDataStructure,
           hasNext: false,
           columnHeader: 'Log groups',
           multiSelect: true,
-          children: logGroups.map((indexName) => ({
-            id: `${currDataStructure.id}::${indexName}`,
-            title: indexName,
-            type: 'LOG_GROUP',
-          })),
+          nextToken: logGroups.nextToken,
+          children: logGroups.logGroups,
         };
+        return newDataStructure;
       }
 
       case DATASET.CLOUD_WATCH:
@@ -108,4 +105,22 @@ const fetchDataConnections = async (client: SavedObjectsClientContract) => {
       type: 'DATA_CONNECTION',
     }));
   return dataConnections;
+};
+
+const fetchLogGroups = async (current: DataStructure, nextToken?: string, search?: string) => {
+  const logGroups = (nextToken
+    ? Array.from({ length: 5 }, (_, i) => `log-group-${i + 5 * Number(nextToken) + 1}`)
+    : Array.from({ length: 5 }, (_, i) => `log-group-${i + 1}`)
+  ).map((name) => ({
+    id: name,
+    title: name,
+    type: 'LOG_GROUP',
+  }));
+
+  const filteredLogGroups = logGroups.filter((group) => group.title.includes(search || ''));
+
+  return {
+    logGroups: nextToken ? [...(current.children || []), ...filteredLogGroups] : filteredLogGroups,
+    nextToken: String(Number(nextToken || '0') + 1),
+  };
 };
