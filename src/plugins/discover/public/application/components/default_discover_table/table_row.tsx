@@ -107,33 +107,20 @@ const TableRowUI = ({
         const sanitizedCellValue = dompurify.sanitize(formattedValue);
 
         if (!fieldInfo?.filterable) {
-          if (colName === '@timestamp') {
-            return (
-              <td
-                key={colName}
-                data-test-subj="docTableField"
-                className="osdDocTableCell  eui-textNoWrap"
-              >
-                <div className="truncate-by-height">
-                  {/* eslint-disable-next-line react/no-danger */}
-                  <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
-                </div>
-              </td>
-            );
-          } else {
-            return (
-              <td
-                key={colName}
-                data-test-subj="docTableField"
-                className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
-              >
-                <div className="truncate-by-height">
-                  {/* eslint-disable-next-line react/no-danger */}
-                  <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
-                </div>
-              </td>
-            );
-          }
+          return (
+            <td
+              key={colName}
+              data-test-subj="docTableField"
+              className={`osdDocTableCell ${
+                colName === '@timestamp' ? 'eui-textNoWrap' : 'eui-textBreakAll eui-textBreakWord'
+              }`}
+            >
+              <div className="truncate-by-height">
+                {/* eslint-disable-next-line react/no-danger */}
+                <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
+              </div>
+            </td>
+          );
         }
 
         return (
