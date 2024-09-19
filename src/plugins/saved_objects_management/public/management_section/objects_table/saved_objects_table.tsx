@@ -806,6 +806,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         notifications={this.props.notifications}
         onClose={this.hideDuplicateModal}
         selectedSavedObjects={duplicateSelectedSavedObjects}
+        useUpdatedUX={this.props.useUpdatedUX}
       />
     );
   }

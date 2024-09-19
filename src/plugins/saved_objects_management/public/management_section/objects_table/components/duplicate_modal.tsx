@@ -17,7 +17,6 @@ import {
   EuiComboBox,
   EuiFormRow,
   EuiCheckbox,
-  EuiText,
 } from '@elastic/eui';
 import { HttpSetup, NotificationsStart, WorkspacesStart } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
@@ -36,6 +35,7 @@ export interface ShowDuplicateModalProps {
   notifications: NotificationsStart;
   selectedSavedObjects: DuplicateObject[];
   onClose: () => void;
+  useUpdatedUX?: boolean;
 }
 
 interface State {
@@ -128,10 +128,11 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.duplicateModal.title"
-              defaultMessage="Copy {objectCount, plural, =1 {{objectName}} other {# objects}} to another workspace?"
+              defaultMessage="Copy {objectCount, plural, =1 {{objectName}} other {# {useUpdatedUX, select, true {assets} other {objects}}}} to another workspace?"
               values={{
                 objectName: allSelectedObjects[0].meta.title,
                 objectCount: allSelectedObjects.length,
+                useUpdatedUX: this.props.useUpdatedUX,
               }}
             />
           </EuiModalHeaderTitle>
