@@ -37,13 +37,13 @@ export interface WorkspacePermissionSettingPanelProps {
   onChange?: (
     value: Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
   ) => void;
-  isEditing?: boolean;
+  readOnly?: boolean;
 }
 
 export const WorkspacePermissionSettingPanel = ({
   errors,
   onChange,
-  isEditing = true,
+  readOnly = false,
   permissionSettings,
   disabledUserOrGroupInputIds,
 }: WorkspacePermissionSettingPanelProps) => {
@@ -176,12 +176,12 @@ export const WorkspacePermissionSettingPanel = ({
               onGroupOrUserIdChange={handleGroupOrUserIdChange}
               onPermissionModesChange={handlePermissionModesChange}
               onTypeChange={handleTypeChange}
-              isEditing={isEditing}
+              readOnly={readOnly}
             />
           </EuiCompressedFormRow>
         </React.Fragment>
       ))}
-      {isEditing && (
+      {!readOnly && (
         <EuiCompressedFormRow fullWidth>
           <EuiSmallButton
             fullWidth={false}
