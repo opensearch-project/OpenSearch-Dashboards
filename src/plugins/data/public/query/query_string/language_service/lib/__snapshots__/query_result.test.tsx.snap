@@ -52,7 +52,6 @@ exports[`Query Result show error status with error message 2`] = `
         <strong>
           Details:
         </strong>
-         
         error details
       </p>
     </EuiText>

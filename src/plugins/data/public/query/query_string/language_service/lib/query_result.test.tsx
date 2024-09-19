@@ -61,10 +61,10 @@ describe('Query Result', () => {
       },
     };
     const component = mountWithIntl(<QueryResult {...props} />);
-    expect(component.find('EuiText').text()).toEqual('Completed in 2 s');
+    expect(component.find('EuiText').text()).toEqual('Completed in 2.0 s');
   });
 
-  it('shows ready status with round down seconds', () => {
+  it('shows ready status with split seconds', () => {
     const props = {
       queryStatus: {
         status: ResultStatus.READY,
@@ -73,7 +73,7 @@ describe('Query Result', () => {
       },
     };
     const component = mountWithIntl(<QueryResult {...props} />);
-    expect(component.find('EuiText').text()).toEqual('Completed in 2 s');
+    expect(component.find('EuiText').text()).toEqual('Completed in 2.7 s');
   });
 
   it('show error status with error message', () => {
