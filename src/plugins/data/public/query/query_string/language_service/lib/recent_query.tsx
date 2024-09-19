@@ -51,7 +51,10 @@ export function RecentQueriesTable({
           icon: 'play',
           type: 'icon',
           onClick: (item: RecentQueryTableItem) => {
-            onClickRecentQuery(recentQueries[item.id].query, recentQueries[item.id].timeRange);
+            onClickRecentQuery(
+              recentQueries.find((recentQuery) => recentQuery.query.query === item.query)?.query!,
+              recentQueries[item.id].timeRange
+            );
           },
           'data-test-subj': 'action-run',
         },
