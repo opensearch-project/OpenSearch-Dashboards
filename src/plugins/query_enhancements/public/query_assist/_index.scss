@@ -10,12 +10,7 @@
 
   &.queryAssist__summary_banner {
     /* stylelint-disable  @osd/stylelint/no_restricted_values */
-    background: linear-gradient(to left, #edf7ff, #f9f4ff);
-    padding: $euiSizeXS;
-  }
-
-  &.queryAssist__summary_banner_dark {
-    background: transparent;
+    background: lightOrDarkTheme(linear-gradient(to left, #edf7ff, #f9f4ff), $euiColorEmptyShade);
     padding: $euiSizeXS;
   }
 

@@ -229,13 +229,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
       hasBorder={true}
       borderRadius="none"
     >
-      <EuiSplitPanel.Inner
-        className={
-          isDarkMode
-            ? 'queryAssist queryAssist__summary_banner_dark'
-            : 'queryAssist queryAssist__summary_banner'
-        }
-      >
+      <EuiSplitPanel.Inner className={'queryAssist queryAssist__summary_banner'}>
         <EuiFlexGroup alignItems={'center'} gutterSize={'xs'}>
           <EuiFlexItem grow={false}>
             <EuiIcon type={isDarkMode ? sparkleSolidSvg : sparkleHollowSvg} size="m" />

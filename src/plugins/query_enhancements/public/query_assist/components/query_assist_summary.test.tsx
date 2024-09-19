@@ -111,9 +111,10 @@ describe('query assist summary', () => {
     return component;
   };
 
-  function sleep(ms) {
+  const sleep = (ms) => {
     return new Promise((resolve) => setTimeout(resolve, ms));
-  }
+  };
+  const WAIT_TIME = 100;
 
   const mockUseState = (
     summary,
@@ -255,7 +256,7 @@ describe('query assist summary', () => {
         dataSourceId: undefined,
       },
     });
-    await sleep(2000);
+    await sleep(WAIT_TIME);
     expect(setSummary).toHaveBeenNthCalledWith(1, null);
     expect(setSummary).toHaveBeenNthCalledWith(2, RESPONSE_TEXT);
     expect(setLoading).toHaveBeenNthCalledWith(1, true);
@@ -266,7 +267,7 @@ describe('query assist summary', () => {
     mockUseState('summary', LOADING.NO, queryContext, FEEDBACK.NO);
     httpMock.post.mockRejectedValueOnce({});
     renderQueryAssistSummary(COLLAPSED.NO);
-    await sleep(2000);
+    await sleep(WAIT_TIME);
     expect(setSummary).toBeCalledTimes(1);
     expect(setLoading).toHaveBeenNthCalledWith(1, true);
     expect(setLoading).toHaveBeenNthCalledWith(2, false);
@@ -277,7 +278,7 @@ describe('query assist summary', () => {
     const RESPONSE_TEXT = 'response';
     httpMock.post.mockResolvedValue(RESPONSE_TEXT);
     renderQueryAssistSummary(COLLAPSED.NO);
-    await sleep(2000);
+    await sleep(WAIT_TIME);
     dataMock.search.df.df$.next({
       size: 2,
       fields: [
@@ -293,7 +294,7 @@ describe('query assist summary', () => {
     });
     question$.next(question);
     query$.next(PPL);
-    await sleep(2000);
+    await sleep(WAIT_TIME);
     expect(setQueryContext).toHaveBeenCalledTimes(0);
   });
 
@@ -302,7 +303,7 @@ describe('query assist summary', () => {
     const RESPONSE_TEXT = 'response';
     httpMock.post.mockResolvedValue(RESPONSE_TEXT);
     renderQueryAssistSummary(COLLAPSED.NO);
-    await sleep(2000);
+    await sleep(WAIT_TIME);
     question$.next(question);
     query$.next(PPL);
     dataMock.search.df.df$.next({
@@ -318,7 +319,7 @@ describe('query assist summary', () => {
         },
       ],
     });
-    await sleep(2000);
+    await sleep(WAIT_TIME);
     expect(setQueryContext).toHaveBeenCalledTimes(1);
   });
 
@@ -327,7 +328,6 @@ describe('query assist summary', () => {
     const RESPONSE_TEXT = 'response';
     httpMock.post.mockResolvedValue(RESPONSE_TEXT);
     renderQueryAssistSummary(COLLAPSED.NO);
-    await sleep(2000);
     expect(setFeedback).toHaveBeenCalledWith(FEEDBACK.NO);
   });
 });

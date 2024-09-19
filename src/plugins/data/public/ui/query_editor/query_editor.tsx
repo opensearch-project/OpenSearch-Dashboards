@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
-import React, { Component, createRef, RefObject, useMemo } from 'react';
+import React, { Component, createRef, RefObject } from 'react';
 import { monaco } from '@osd/monaco';
 import {
   IDataPluginServices,
