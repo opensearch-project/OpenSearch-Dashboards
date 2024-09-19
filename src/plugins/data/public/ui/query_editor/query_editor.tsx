@@ -14,7 +14,6 @@ import {
   EuiText,
   PopoverAnchorPosition,
 } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';

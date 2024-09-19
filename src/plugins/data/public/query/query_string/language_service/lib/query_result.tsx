@@ -62,7 +62,13 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     }
     const time = Math.floor(elapsedTime / 1000);
     return (
-      <EuiButtonEmpty color="text" size="xs" onClick={() => {}} isLoading>
+      <EuiButtonEmpty
+        color="text"
+        size="xs"
+        onClick={() => {}}
+        isLoading
+        data-test-subj="queryResultLoading"
+      >
         {`Loading ${time} s`}
       </EuiButtonEmpty>
     );
@@ -80,7 +86,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
 
     return (
       <EuiButtonEmpty iconSide="left" iconType={'checkInCircleEmpty'} size="xs" onClick={() => {}}>
-        <EuiText size="xs" color="subdued">
+        <EuiText size="xs" color="subdued" data-test-subj="queryResultCompleteMsg">
           {message}
         </EuiText>
       </EuiButtonEmpty>
@@ -94,7 +100,13 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
   return (
     <EuiPopover
       button={
-        <EuiButtonEmpty iconSide="left" iconType={'alert'} size="xs" onClick={onButtonClick}>
+        <EuiButtonEmpty
+          iconSide="left"
+          iconType={'alert'}
+          size="xs"
+          onClick={onButtonClick}
+          data-test-subj="queryResultErrorBtn"
+        >
           <EuiText size="xs" color="subdued">
             {'Error'}
           </EuiText>
@@ -104,6 +116,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
       closePopover={() => setPopover(false)}
       panelPaddingSize="s"
       anchorPosition={'downRight'}
+      data-test-subj="queryResultError"
     >
       <EuiPopoverTitle>ERRORS</EuiPopoverTitle>
       <div style={{ width: '250px' }}>
