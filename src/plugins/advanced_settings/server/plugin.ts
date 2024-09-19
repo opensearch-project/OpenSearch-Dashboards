@@ -81,16 +81,12 @@ export class AdvancedSettingsServerPlugin implements Plugin<object, object> {
     );
 
     core.capabilities.registerSwitcher(async (request, capabilities) => {
-      const userName = extractUserName(request, this.coreStart);
-      if (userName) {
-        return {
-          ...capabilities,
-          userSettings: {
-            enabled: true,
-          },
-        };
-      }
-      return capabilities;
+      return {
+        ...capabilities,
+        userSettings: {
+          enabled: false,
+        },
+      };
     });
 
     return {};
