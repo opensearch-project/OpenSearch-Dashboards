@@ -177,7 +177,10 @@ export class DataPublicPlugin
 
     return {
       // TODO: MQL
-      autocomplete: this.autocomplete.setup(core),
+      // registerAutocompleteProvider: {
+      //   { languagee, queryprovider, valueprovider}
+      // }
+      autocomplete: autoComplete,
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,

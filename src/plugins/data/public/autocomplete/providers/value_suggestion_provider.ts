@@ -29,7 +29,7 @@
  */
 
 import { memoize } from 'lodash';
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup, HttpSetup } from 'src/core/public';
 import { IIndexPattern, IFieldType, UI_SETTINGS } from '../../../common';
 
 function resolver(title: string, field: IFieldType, query: string, boolFilter: any) {
@@ -39,7 +39,16 @@ function resolver(title: string, field: IFieldType, query: string, boolFilter: a
   return [ttl, query, title, field.name, JSON.stringify(boolFilter)].join('|');
 }
 
-export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;
+export type ValueSuggestionsGetFn = (
+  args: ValueSuggestionsGetFnArgs | ValueSuggestionsSQLGetFnArgs
+) => Promise<any[]>;
+
+interface ValueSuggestionsSQLGetFnArgs {
+  language: string;
+  table: string;
+  column: string;
+  http: HttpSetup;
+}
 
 interface ValueSuggestionsGetFnArgs {
   indexPattern: IIndexPattern;
@@ -51,7 +60,9 @@ interface ValueSuggestionsGetFnArgs {
 
 export const getEmptyValueSuggestions = (() => Promise.resolve([])) as ValueSuggestionsGetFn;
 
-export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsGetFn => {
+export const setupValueSuggestionProvider = (
+  core: CoreSetup
+): ((any: ValueSuggestionsGetFnArgs) => Promise<any[]>) => {
   const requestSuggestions = memoize(
     (index: string, field: IFieldType, query: string, boolFilter: any = [], signal?: AbortSignal) =>
       core.http.fetch(`/api/opensearch-dashboards/suggestions/values/${index}`, {
