@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+import { i18n } from '@osd/i18n';
 
 import { getWorkspaceState } from '../../../../core/server/utils';
 import {
@@ -12,8 +13,9 @@ import {
   SavedObjectsCheckConflictsObject,
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
-  SavedObject,
+  SavedObjectsErrorHelpers,
 } from '../../../../core/server';
+import { IWorkspaceClientImpl } from '../types';
 
 const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
 
@@ -74,15 +76,42 @@ export class WorkspaceIdConsumerWrapper {
           this.formatWorkspaceIdParams(wrapperOptions.request, options)
         ),
       delete: wrapperOptions.client.delete,
-      find: (options: SavedObjectsFindOptions) => {
-        return wrapperOptions.client.find(
-          // Based on https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/server/ui_settings/create_or_upgrade_saved_config/get_upgradeable_config.ts#L49
-          // we need to make sure the find call for upgrade config should be able to find all the global configs as it was before.
-          // It is a workaround for 2.17, should be optimized in the upcoming 2.18 release.
+      find: async (options: SavedObjectsFindOptions) => {
+        // Based on https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/server/ui_settings/create_or_upgrade_saved_config/get_upgradeable_config.ts#L49
+        // we need to make sure the find call for upgrade config should be able to find all the global configs as it was before.
+        // It is a workaround for 2.17, should be optimized in the upcoming 2.18 release.
+        const finalOptions =
           this.isConfigType(options.type as string) && options.sortField === 'buildNum'
             ? options
-            : this.formatWorkspaceIdParams(wrapperOptions.request, options)
-        );
+            : this.formatWorkspaceIdParams(wrapperOptions.request, options);
+        if (finalOptions.workspaces?.length) {
+          const workspaceList = await this.workspaceClient.list(
+            {
+              request: wrapperOptions.request,
+            },
+            {
+              perPage: 9999,
+            }
+          );
+          let isAllTargetWorkspaceExisting = false;
+          if (workspaceList.success) {
+            const workspaceIds = workspaceList.result.workspaces.map((workspace) => workspace.id);
+            isAllTargetWorkspaceExisting = finalOptions.workspaces.every((targetWorkspace) =>
+              workspaceIds.includes(targetWorkspace)
+            );
+          }
+
+          if (!isAllTargetWorkspaceExisting) {
+            throw SavedObjectsErrorHelpers.decorateBadRequestError(
+              new Error(
+                i18n.translate('workspace.id_consumer.invalid', {
+                  defaultMessage: 'Invalid workspaces',
+                })
+              )
+            );
+          }
+        }
+        return wrapperOptions.client.find(finalOptions);
       },
       bulkGet: wrapperOptions.client.bulkGet,
       get: wrapperOptions.client.get,
@@ -94,5 +123,5 @@ export class WorkspaceIdConsumerWrapper {
     };
   };
 
-  constructor() {}
+  constructor(private readonly workspaceClient: IWorkspaceClientImpl) {}
 }

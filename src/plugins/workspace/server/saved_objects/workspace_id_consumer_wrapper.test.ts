@@ -7,10 +7,12 @@ import { updateWorkspaceState } from '../../../../core/server/utils';
 import { SavedObject } from '../../../../core/public';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { WorkspaceIdConsumerWrapper } from './workspace_id_consumer_wrapper';
+import { workspaceClientMock } from '../workspace_client.mock';
 
 describe('WorkspaceIdConsumerWrapper', () => {
   const requestHandlerContext = coreMock.createRequestHandlerContext();
-  const wrapperInstance = new WorkspaceIdConsumerWrapper();
+  const mockedWorkspaceClient = workspaceClientMock.create();
+  const wrapperInstance = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
   const mockedClient = savedObjectsClientMock.create();
   const workspaceEnabledMockRequest = httpServerMock.createOpenSearchDashboardsRequest();
   updateWorkspaceState(workspaceEnabledMockRequest, {
@@ -103,6 +105,16 @@ describe('WorkspaceIdConsumerWrapper', () => {
   describe('find', () => {
     beforeEach(() => {
       mockedClient.find.mockClear();
+      mockedWorkspaceClient.list.mockResolvedValue({
+        success: true,
+        result: {
+          workspaces: [
+            {
+              id: 'foo',
+            },
+          ],
+        },
+      });
     });
 
     it(`Should add workspaces parameters when find`, async () => {
@@ -116,7 +128,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
     });
 
     it(`Should pass a empty workspace array`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper();
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, {});
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
@@ -130,6 +142,23 @@ describe('WorkspaceIdConsumerWrapper', () => {
       expect(mockedClient.find).toBeCalledWith({
         type: ['dashboard', 'visualization'],
       });
+    });
+
+    it(`Should throw error when passing in invalid workspace`, async () => {
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+      updateWorkspaceState(mockRequest, {});
+      const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
+        client: mockedClient,
+        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+        request: mockRequest,
+      });
+      expect(
+        mockedWrapperClient.find({
+          type: ['dashboard', 'visualization'],
+          workspaces: ['foo', 'not-exist'],
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Invalid workspaces]`);
     });
   });
 });
