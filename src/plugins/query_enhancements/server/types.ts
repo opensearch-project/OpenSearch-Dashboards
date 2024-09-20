@@ -9,7 +9,7 @@ import { IDataFrameResponse, IOpenSearchDashboardsSearchRequest } from '../../da
 
 export interface QueryEnhancementsPluginSetup {
   defineSearchStrategyRoute: (
-    searchStrategyId: string,
+    id: string,
     searchStrategy: ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse>
   ) => void;
 }
