@@ -36,16 +36,18 @@ export function getIgnoredTokens(): number[] {
     OpenSearchPPLParser.COMMA,
     OpenSearchPPLParser.PLUS,
     OpenSearchPPLParser.MINUS,
-    // OpenSearchPPLParser.EQUAL,
-    // OpenSearchPPLParser.NOT_EQUAL,
-    // OpenSearchPPLParser.LESS,
-    // OpenSearchPPLParser.NOT_LESS,
-    // OpenSearchPPLParser.GREATER,
-    // OpenSearchPPLParser.NOT_GREATER,
-    // OpenSearchPPLParser.OR,
-    // OpenSearchPPLParser.AND,
-    // OpenSearchPPLParser.XOR,
-    // OpenSearchPPLParser.NOT,
+    OpenSearchPPLParser.EQUAL,
+    OpenSearchPPLParser.NOT_EQUAL,
+    OpenSearchPPLParser.LESS,
+    OpenSearchPPLParser.NOT_LESS,
+    OpenSearchPPLParser.GREATER,
+    OpenSearchPPLParser.NOT_GREATER,
+    OpenSearchPPLParser.OR,
+    OpenSearchPPLParser.AND,
+    OpenSearchPPLParser.XOR,
+    OpenSearchPPLParser.NOT,
+    OpenSearchPPLParser.LT_PRTHS,
+    OpenSearchPPLParser.RT_PRTHS,
   ];
   for (let i = firstFunctionIndex; i <= lastFunctionIndex; i++) {
     if (!operatorsToInclude.includes(i)) {
@@ -166,7 +168,7 @@ export function enrichAutocompleteResult(
   const result: OpenSearchPplAutocompleteResult = {
     ...baseResult,
     ...suggestionsFromRules,
-    suggestColumns: shouldSuggestColumns ? ({ name: '' } as TableContextSuggestion) : undefined,
+    suggestColumns: shouldSuggestColumns ? ({} as TableContextSuggestion) : undefined,
   };
   return result;
 }

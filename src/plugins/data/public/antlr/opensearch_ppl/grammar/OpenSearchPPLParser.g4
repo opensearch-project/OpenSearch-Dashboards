@@ -177,7 +177,7 @@ tableSourceClause
    ;
 
 renameClasue
-   : orignalField = wcFieldExpression AS renamedField = wcFieldExpression
+   : orignalField = fieldExpression AS renamedField = ID
    ;
 
 byClause
@@ -696,11 +696,11 @@ stringLiteral
    ;
 
 integerLiteral
-   : (PLUS | MINUS)? INTEGER_LITERAL
+   : INTEGER_LITERAL
    ;
 
 decimalLiteral
-   : (PLUS | MINUS)? DECIMAL_LITERAL
+   : DECIMAL_LITERAL
    ;
 
 booleanLiteral
