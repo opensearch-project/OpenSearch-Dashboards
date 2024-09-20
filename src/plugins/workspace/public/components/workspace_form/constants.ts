@@ -41,7 +41,7 @@ export const selectDataSourceTitle = i18n.translate('workspace.form.selectDataSo
 });
 
 export const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndPermissions.title', {
-  defaultMessage: 'Workspaces access',
+  defaultMessage: 'Workspace access',
 });
 
 export const usersAndPermissionsCreatePageTitle = i18n.translate(
