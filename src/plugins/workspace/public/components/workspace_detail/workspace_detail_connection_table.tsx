@@ -36,7 +36,8 @@ export const WorkspaceDetailConnectionTable = ({
     return dataSourceConnections.filter((dsc) =>
       connectionType === AssociationDataSourceModalMode.OpenSearchConnections
         ? dsc.connectionType === DataSourceConnectionType.OpenSearchConnection
-        : dsc?.relatedConnections && dsc.relatedConnections?.length > 0
+        : dsc.connectionType === DataSourceConnectionType.DataConnection ||
+          (dsc?.relatedConnections && dsc.relatedConnections?.length > 0)
     );
   }, [connectionType, dataSourceConnections]);
 
