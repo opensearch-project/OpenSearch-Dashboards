@@ -218,11 +218,14 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
                 color: 'danger',
                 iconType: 'trash',
                 ariaLabel: i18n.translate('workspace.detail.delete.button', {
-                  defaultMessage: 'Delete',
+                  defaultMessage: 'Delete workspace',
                 }),
                 testId: 'workspace-detail-delete-button',
                 controlType: 'icon',
                 display: 'base',
+                tooltip: i18n.translate('workspace.detail.delete.button.tooltip', {
+                  defaultMessage: 'Delete workspace',
+                }),
               } as TopNavControlIconData,
             ]}
             setMountPoint={application.setAppRightControls}
