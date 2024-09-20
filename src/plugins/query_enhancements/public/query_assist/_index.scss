@@ -7,6 +7,31 @@
   &.queryAssist__callout {
     margin-top: $euiSizeXS;
   }
+
+  .queryAssist__popoverWrapper {
+    display: flex;
+    align-items: center;
+    padding-right: $euiSizeS;
+  }
+
+  // Hide the error badge when the input is focused
+  .queryAssist__inputWrapper:has(.queryAssist__input:focus) .queryAssist__popoverWrapper {
+    display: none;
+  }
+
+  .queryAssist__input {
+    text-overflow: ellipsis;
+  }
+}
+
+.queryAssist__popoverText {
+  padding: 0 $euiSizeM;
+}
+
+#queryAssistErrorTitle {
+  // there is a medium size icon with two extra-small gutter between the icon
+  // and the title pushing to the left so title is aligned with other content
+  margin-left: -($euiSizeM + $euiSizeS);
 }
 
 .osdQueryEditorExtensionComponent__query-assist {
