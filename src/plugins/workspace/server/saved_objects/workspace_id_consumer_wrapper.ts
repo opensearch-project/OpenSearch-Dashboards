@@ -95,7 +95,10 @@ export class WorkspaceIdConsumerWrapper {
           );
           let isAllTargetWorkspaceExisting = false;
           if (workspaceList.success) {
-            const workspaceIds = workspaceList.result.workspaces.map((workspace) => workspace.id);
+            const workspaceIds = [
+              '*',
+              ...workspaceList.result.workspaces.map((workspace) => workspace.id),
+            ];
             isAllTargetWorkspaceExisting = finalOptions.workspaces.every((targetWorkspace) =>
               workspaceIds.includes(targetWorkspace)
             );
