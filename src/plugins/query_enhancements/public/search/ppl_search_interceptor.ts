@@ -15,12 +15,12 @@ import {
   SearchInterceptorDeps,
 } from '../../../data/public';
 import {
-  formatDate,
-  SEARCH_STRATEGY,
   API,
   EnhancedFetchContext,
   fetch,
+  formatDate,
   QueryAggConfig,
+  SEARCH_STRATEGY,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
@@ -73,8 +73,10 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     const query: Query = this.queryService.queryString.getQuery();
     const dataset = query.dataset;
     if (!dataset || !dataset.timeFieldName) return query;
+    const [baseQuery, ...afterPipeParts] = query.query.split('|');
+    const afterPipe = afterPipeParts.length > 0 ? ` | ${afterPipeParts.join('|').trim()}` : '';
     const timeFilter = this.getTimeFilter(dataset.timeFieldName);
-    return { ...query, query: query.query + timeFilter };
+    return { ...query, query: baseQuery + timeFilter + afterPipe };
   }
 
   private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {
