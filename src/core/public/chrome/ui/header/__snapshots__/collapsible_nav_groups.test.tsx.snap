@@ -47,7 +47,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                   >
                     <div
                       class="euiText euiText--extraSmall"
-                      style="font-size: 14px; line-height: 16px;"
+                      style="font-size: 14px; line-height: 16px; font-weight: 400;"
                     >
                       pure link
                     </div>
@@ -78,7 +78,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                       >
                         <div
                           class="euiText euiText--extraSmall"
-                          style="font-size: 14px; line-height: 16px;"
+                          style="font-size: 14px; line-height: 16px; font-weight: 400;"
                         >
                           subLink
                         </div>
@@ -133,7 +133,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                   >
                     <div
                       class="euiText euiText--extraSmall"
-                      style="font-size: 14px; line-height: 16px;"
+                      style="font-size: 14px; line-height: 16px; font-weight: 400;"
                     >
                       link-in-category
                     </div>
@@ -164,7 +164,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                       >
                         <div
                           class="euiText euiText--extraSmall"
-                          style="font-size: 14px; line-height: 16px;"
+                          style="font-size: 14px; line-height: 16px; font-weight: 400;"
                         >
                           sub-link-in-category
                         </div>
@@ -192,7 +192,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                   >
                     <div
                       class="euiText euiText--extraSmall"
-                      style="font-size: 14px; line-height: 16px;"
+                      style="font-size: 14px; line-height: 16px; font-weight: 400;"
                     >
                       link-in-category-2
                     </div>

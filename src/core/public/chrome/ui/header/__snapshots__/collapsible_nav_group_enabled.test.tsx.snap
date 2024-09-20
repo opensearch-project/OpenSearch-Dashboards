@@ -52,7 +52,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                     >
                       <div
                         class="euiText euiText--extraSmall"
-                        style="font-size: 14px; line-height: 16px;"
+                        style="font-size: 14px; line-height: 16px; font-weight: 400;"
                       >
                         link-in-all
                       </div>
@@ -103,7 +103,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                         >
                           <div
                             class="euiText euiText--extraSmall"
-                            style="font-size: 14px; line-height: 16px;"
+                            style="font-size: 14px; line-height: 16px; font-weight: 400;"
                           >
                             link-in-observability
                           </div>
@@ -135,7 +135,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                             >
                               <div
                                 class="euiText euiText--extraSmall"
-                                style="font-size: 14px; line-height: 16px;"
+                                style="font-size: 14px; line-height: 16px; font-weight: 400;"
                               >
                                 See all...
                               </div>
@@ -190,7 +190,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                         >
                           <div
                             class="euiText euiText--extraSmall"
-                            style="font-size: 14px; line-height: 16px;"
+                            style="font-size: 14px; line-height: 16px; font-weight: 400;"
                           >
                             link-in-essentials
                           </div>
@@ -222,7 +222,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                             >
                               <div
                                 class="euiText euiText--extraSmall"
-                                style="font-size: 14px; line-height: 16px;"
+                                style="font-size: 14px; line-height: 16px; font-weight: 400;"
                               >
                                 See all...
                               </div>
@@ -325,7 +325,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case by default and 
                     >
                       <div
                         class="euiText euiText--extraSmall"
-                        style="font-size: 14px; line-height: 16px;"
+                        style="font-size: 14px; line-height: 16px; font-weight: 400;"
                       >
                         link-in-essentials
                       </div>
@@ -400,7 +400,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case when current na
                     >
                       <div
                         class="euiText euiText--extraSmall"
-                        style="font-size: 14px; line-height: 16px;"
+                        style="font-size: 14px; line-height: 16px; font-weight: 400;"
                       >
                         link-in-essentials
                       </div>
