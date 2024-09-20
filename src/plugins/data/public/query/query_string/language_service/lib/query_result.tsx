@@ -8,7 +8,7 @@ import { i18n } from '@osd/i18n';
 import './_recent_query.scss';
 import { EuiButtonEmpty, EuiPopover, EuiText, EuiPopoverTitle } from '@elastic/eui';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -28,21 +28,77 @@ export interface QueryStatus {
     statusCode?: number;
   };
   elapsedMs?: number;
+  startTime?: number;
 }
+
+// This is the time in milliseconds that the query will wait before showing the loading spinner
+const BUFFER_TIME = 3000;
 
 export function QueryResult(props: { queryStatus: QueryStatus }) {
   const [isPopoverOpen, setPopover] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState(0);
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
   };
 
+  const updateElapsedTime = () => {
+    const time = Date.now() - (props.queryStatus.startTime || 0);
+    if (time > BUFFER_TIME) {
+      setElapsedTime(time);
+    } else {
+      setElapsedTime(0);
+    }
+  };
+
+  useEffect(() => {
+    const interval = setInterval(updateElapsedTime, 1000);
+
+    return () => clearInterval(interval);
+  });
+
+  if (props.queryStatus.status === ResultStatus.LOADING) {
+    if (elapsedTime < BUFFER_TIME) {
+      return null;
+    }
+    const time = Math.floor(elapsedTime / 1000);
+    return (
+      <EuiButtonEmpty
+        color="text"
+        size="xs"
+        onClick={() => {}}
+        isLoading
+        data-test-subj="queryResultLoading"
+      >
+        {i18n.translate('data.query.languageService.queryResults.completeTime', {
+          defaultMessage: `Loading ${time} s`,
+        })}
+      </EuiButtonEmpty>
+    );
+  }
+
   if (props.queryStatus.status === ResultStatus.READY) {
+    let message;
+    if (!props.queryStatus.elapsedMs) {
+      message = i18n.translate('data.query.languageService.queryResults.completeTime', {
+        defaultMessage: `Completed`,
+      });
+    } else if (props.queryStatus.elapsedMs < 1000) {
+      message = i18n.translate(
+        'data.query.languageService.queryResults.completeTimeInMiliseconds',
+        {
+          defaultMessage: `Completed in ${props.queryStatus.elapsedMs} ms`,
+        }
+      );
+    } else {
+      message = i18n.translate('data.query.languageService.queryResults.completeTimeInSeconds', {
+        defaultMessage: `Completed in ${(props.queryStatus.elapsedMs / 1000).toFixed(1)} s`,
+      });
+    }
+
     return (
       <EuiButtonEmpty iconSide="left" iconType={'checkInCircleEmpty'} size="xs" onClick={() => {}}>
-        <EuiText size="xs" color="subdued">
-          {props.queryStatus.elapsedMs
-            ? `Completed in ${props.queryStatus.elapsedMs} ms`
-            : 'Completed'}
+        <EuiText size="xs" color="subdued" data-test-subj="queryResultCompleteMsg">
+          {message}
         </EuiText>
       </EuiButtonEmpty>
     );
@@ -55,9 +111,17 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
   return (
     <EuiPopover
       button={
-        <EuiButtonEmpty iconSide="left" iconType={'alert'} size="xs" onClick={onButtonClick}>
+        <EuiButtonEmpty
+          iconSide="left"
+          iconType={'alert'}
+          size="xs"
+          onClick={onButtonClick}
+          data-test-subj="queryResultErrorBtn"
+        >
           <EuiText size="xs" color="subdued">
-            {'Error'}
+            {i18n.translate('data.query.languageService.queryResults.error', {
+              defaultMessage: `Error`,
+            })}
           </EuiText>
         </EuiButtonEmpty>
       }
@@ -65,6 +129,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
       closePopover={() => setPopover(false)}
       panelPaddingSize="s"
       anchorPosition={'downRight'}
+      data-test-subj="queryResultError"
     >
       <EuiPopoverTitle>ERRORS</EuiPopoverTitle>
       <div style={{ width: '250px' }}>
@@ -82,7 +147,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
               {i18n.translate('data.query.languageService.queryResults.details', {
                 defaultMessage: `Details:`,
               })}
-            </strong>{' '}
+            </strong>
             {props.queryStatus.body.error.details}
           </p>
         </EuiText>
