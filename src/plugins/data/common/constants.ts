@@ -104,6 +104,8 @@ export const UI_SETTINGS = {
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
   QUERY_ENHANCEMENTS_ENABLED: 'query:enhancements:enabled',
+  QUERY_ENHANCEMENTS_SUGGEST_VALUES: 'query:enhancements:suggestValues',
+  QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT: 'query:enhancements:suggestValuesLimit',
   QUERY_DATAFRAME_HYDRATION_STRATEGY: 'query:dataframe:hydrationStrategy',
   SEARCH_QUERY_LANGUAGE_BLOCKLIST: 'search:queryLanguageBlocklist',
   NEW_HOME_PAGE: 'home:useNewHomePage',

@@ -45,7 +45,7 @@ export const getSuggestions = async ({
       const res = await fetchColumnValues(
         [indexPattern.title],
         suggestions.suggestValuesForColumn,
-        services.http
+        services
       );
 
       let i = 0;

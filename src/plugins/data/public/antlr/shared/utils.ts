@@ -8,7 +8,6 @@ import { distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
 import { CodeCompletionCore } from 'antlr4-c3';
 import { Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
 import { monaco } from '@osd/monaco';
-import { HttpSetup } from 'opensearch-dashboards/public';
 import { QueryStringContract } from '../../query';
 import { findCursorTokenIndex } from './cursor';
 import { GeneralErrorListener } from './general_error_listerner';
@@ -18,6 +17,8 @@ import { ParsingSubject } from './types';
 import { quotesRegex } from './constants';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestion } from '../../autocomplete';
+import { IDataPluginServices } from '../../types';
+import { UI_SETTINGS } from '../../../common';
 
 export interface IDataSourceRequestHandlerParams {
   dataSourceId: string;
@@ -94,12 +95,21 @@ export const fetchData = (
   });
 };
 
-export const fetchColumnValues = (tables: string[], column: string, http: HttpSetup) => {
+export const fetchColumnValues = (
+  tables: string[],
+  column: string,
+  services: IDataPluginServices
+) => {
+  if (!services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES)) {
+    return new Promise(() => []);
+  }
+  const limit = services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT);
+
   return fetchFromAPI(
-    http,
+    services.http,
     JSON.stringify({
       query: {
-        query: `SELECT ${column} FROM ${tables[0]} GROUP BY ${column} ORDER BY COUNT(${column}) DESC LIMIT 200`,
+        query: `SELECT ${column} FROM ${tables[0]} GROUP BY ${column} ORDER BY COUNT(${column}) DESC LIMIT ${limit}`,
         language: 'SQL',
         dataset: {},
         format: 'jdbc',
