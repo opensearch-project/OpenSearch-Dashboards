@@ -33,8 +33,3 @@ export interface Connection {
     auth?: any;
   };
 }
-
-export interface ConnectionsServiceDeps {
-  http: CoreSetup['http'];
-  startServices: Promise<[CoreStart, QueryEnhancementsPluginStartDependencies, unknown]>;
-}
