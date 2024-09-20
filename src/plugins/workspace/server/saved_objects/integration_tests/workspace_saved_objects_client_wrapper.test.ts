@@ -243,19 +243,14 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
 
   describe('find', () => {
     it('should return empty result if user not permitted', async () => {
-      const result = await notPermittedSavedObjectedClient.find({
-        type: 'dashboard',
-        workspaces: ['workspace-1'],
-        perPage: 999,
-        page: 1,
-      });
-
-      expect(result).toEqual({
-        saved_objects: [],
-        total: 0,
-        page: 1,
-        per_page: 999,
-      });
+      await expect(
+        notPermittedSavedObjectedClient.find({
+          type: 'dashboard',
+          workspaces: ['workspace-1'],
+          perPage: 999,
+          page: 1,
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Invalid workspaces]`);
     });
 
     it('should return consistent inner workspace data when user permitted', async () => {
@@ -758,7 +753,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         {
           id: deleteWorkspaceId,
           permissions: {
-            library_read: { users: ['foo'] },
+            read: { users: ['foo'] },
             library_write: { users: ['foo'] },
           },
         }
