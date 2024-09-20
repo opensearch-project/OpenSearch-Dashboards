@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { QueryAssistParameters, QueryAssistResponse } from './types';
+export { QueryAssistParameters, QueryAssistResponse, QueryAssistContextType } from './types';
