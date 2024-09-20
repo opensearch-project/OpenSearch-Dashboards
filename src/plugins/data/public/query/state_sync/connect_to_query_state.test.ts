@@ -92,6 +92,8 @@ setupMock.uiSettings.get.mockImplementation((key: string) => {
       return { pause: false, value: 0 };
     case UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED:
       return false;
+    case UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS:
+      return 4;
     default:
       throw new Error(`sync_query test: not mocked uiSetting: ${key}`);
   }
