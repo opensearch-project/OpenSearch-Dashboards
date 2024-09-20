@@ -105,6 +105,17 @@ describe('WorkspaceIdConsumerWrapper', () => {
   describe('find', () => {
     beforeEach(() => {
       mockedClient.find.mockClear();
+      mockedWorkspaceClient.get.mockImplementation((requestContext, id) => {
+        if (id === 'foo') {
+          return {
+            success: true,
+          };
+        }
+
+        return {
+          success: false,
+        };
+      });
       mockedWorkspaceClient.list.mockResolvedValue({
         success: true,
         result: {
@@ -115,6 +126,8 @@ describe('WorkspaceIdConsumerWrapper', () => {
           ],
         },
       });
+      mockedWorkspaceClient.get.mockClear();
+      mockedWorkspaceClient.list.mockClear();
     });
 
     it(`Should add workspaces parameters when find`, async () => {
@@ -125,6 +138,8 @@ describe('WorkspaceIdConsumerWrapper', () => {
         type: 'dashboard',
         workspaces: ['foo'],
       });
+      expect(mockedWorkspaceClient.get).toBeCalledTimes(1);
+      expect(mockedWorkspaceClient.list).toBeCalledTimes(0);
     });
 
     it(`Should pass a empty workspace array`, async () => {
@@ -144,7 +159,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       });
     });
 
-    it(`Should throw error when passing in invalid workspace`, async () => {
+    it(`Should throw error when passing in invalid workspaces`, async () => {
       const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, {});
@@ -159,6 +174,8 @@ describe('WorkspaceIdConsumerWrapper', () => {
           workspaces: ['foo', 'not-exist'],
         })
       ).rejects.toMatchInlineSnapshot(`[Error: Invalid workspaces]`);
+      expect(mockedWorkspaceClient.get).toBeCalledTimes(0);
+      expect(mockedWorkspaceClient.list).toBeCalledTimes(1);
     });
 
     it(`Should not throw error when passing in '*'`, async () => {

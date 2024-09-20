@@ -85,22 +85,33 @@ export class WorkspaceIdConsumerWrapper {
             ? options
             : this.formatWorkspaceIdParams(wrapperOptions.request, options);
         if (finalOptions.workspaces?.length) {
-          const workspaceList = await this.workspaceClient.list(
-            {
-              request: wrapperOptions.request,
-            },
-            {
-              perPage: 9999,
-            }
-          );
           let isAllTargetWorkspaceExisting = false;
-          if (workspaceList.success) {
-            const workspaceIdsSet = new Set(
-              workspaceList.result.workspaces.map((workspace) => workspace.id)
+          // If only has one workspace, we should use get to optimize performance
+          if (finalOptions.workspaces.length === 1) {
+            const workspaceGet = await this.workspaceClient.get(
+              { request: wrapperOptions.request },
+              finalOptions.workspaces[0]
             );
-            isAllTargetWorkspaceExisting = finalOptions.workspaces.every((targetWorkspace) =>
-              workspaceIdsSet.has(targetWorkspace)
+            if (workspaceGet.success) {
+              isAllTargetWorkspaceExisting = true;
+            }
+          } else {
+            const workspaceList = await this.workspaceClient.list(
+              {
+                request: wrapperOptions.request,
+              },
+              {
+                perPage: 9999,
+              }
             );
+            if (workspaceList.success) {
+              const workspaceIdsSet = new Set(
+                workspaceList.result.workspaces.map((workspace) => workspace.id)
+              );
+              isAllTargetWorkspaceExisting = finalOptions.workspaces.every((targetWorkspace) =>
+                workspaceIdsSet.has(targetWorkspace)
+              );
+            }
           }
 
           if (!isAllTargetWorkspaceExisting) {
