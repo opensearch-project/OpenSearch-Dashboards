@@ -21,9 +21,13 @@ describe('DatasetService', () => {
 
   beforeEach(() => {
     uiSettings = coreMock.createSetup().uiSettings;
+    uiSettings.get = jest.fn().mockImplementation((setting: string) => {
+      if (setting === UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS) {
+        return 4;
+      }
+    });
     sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
     mockDataPluginServices = {} as jest.Mocked<IDataPluginServices>;
-
     service = new DatasetService(uiSettings, sessionStorage);
     indexPatterns = dataPluginMock.createStartContract().indexPatterns;
     service.init(indexPatterns);

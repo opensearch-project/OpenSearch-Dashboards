@@ -33,7 +33,7 @@ export class DatasetService {
       this.registerDefaultTypes();
     }
     this.recentDatasets = new LRUCache({
-      max: this.uiSettings.get(UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS) ?? 4,
+      max: this.uiSettings.get(UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS),
     });
   }
 
