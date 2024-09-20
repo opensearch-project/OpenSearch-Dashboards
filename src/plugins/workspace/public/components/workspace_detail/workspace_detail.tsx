@@ -154,15 +154,18 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
     id,
     name: detailTitle,
     content: (
-      <WorkspaceDetailForm
-        application={application}
-        operationType={WorkspaceOperationType.Update}
-        savedObjects={savedObjects}
-        detailTab={id}
-        dataSourceManagement={dataSourceManagement}
-        availableUseCases={availableUseCases}
-        detailTitle={detailTitle}
-      />
+      <>
+        <EuiSpacer size="m" />
+        <WorkspaceDetailForm
+          application={application}
+          operationType={WorkspaceOperationType.Update}
+          savedObjects={savedObjects}
+          detailTab={id}
+          dataSourceManagement={dataSourceManagement}
+          availableUseCases={availableUseCases}
+          detailTitle={detailTitle}
+        />
+      </>
     ),
   });
 
@@ -174,14 +177,17 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
             id: DetailTab.DataSources,
             name: DetailTabTitles.dataSources,
             content: (
-              <SelectDataSourceDetailPanel
-                loading={!isDQCFilled}
-                savedObjects={savedObjects}
-                detailTitle={DetailTabTitles.dataSources}
-                isDashboardAdmin={isDashboardAdmin}
-                currentWorkspace={currentWorkspace}
-                chrome={chrome}
-              />
+              <>
+                <EuiSpacer size="m" />
+                <SelectDataSourceDetailPanel
+                  loading={!isDQCFilled}
+                  savedObjects={savedObjects}
+                  detailTitle={DetailTabTitles.dataSources}
+                  isDashboardAdmin={isDashboardAdmin}
+                  currentWorkspace={currentWorkspace}
+                  chrome={chrome}
+                />
+              </>
             ),
           },
         ]
@@ -232,7 +238,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
             dateFormat={uiSettings.get('dateFormat')}
           />
         </EuiPageContent>
-        <EuiSpacer />
+        <EuiSpacer size="m" />
         <EuiPageBody>
           <EuiTabbedContent
             data-test-subj="workspaceTabs"
@@ -245,6 +251,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
         {deletedWorkspace && (
           <DeleteWorkspaceModal
             selectedWorkspaces={[deletedWorkspace]}
+            typeTextToConfirm={deletedWorkspace.name}
             onClose={() => setDeletedWorkspace(null)}
             onDeleteSuccess={() => {
               window.setTimeout(() => {
