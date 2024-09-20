@@ -13,6 +13,7 @@ import {
   EuiSelectable,
   EuiSelectableOption,
   EuiToolTip,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
@@ -140,7 +141,7 @@ export const DatasetSelector = ({
             onClick={togglePopover}
           >
             <EuiIcon type={datasetIcon} className="datasetSelector__icon" />
-            <span className="datasetSelector__title">{datasetTitle}</span>
+            <EuiText className="datasetSelector__title">{datasetTitle} </EuiText>
           </EuiButtonEmpty>
         </EuiToolTip>
       }
