@@ -20246,25 +20246,29 @@ exports[`Header renders page header with application title 1`] = `
                     <div
                       className="euiSimplifiedBreadcrumbWall euiSimplifiedBreadcrumbWall--single"
                     >
-                      <div
-                        className="euiSimplifiedBreadcrumbWrapper euiSimplifiedBreadcrumbWrapper--first euiSimplifiedBreadcrumbWrapper--last"
-                      >
-                        <EuiInnerText>
-                          <span
-                            aria-current="page"
-                            className="euiSimplifiedBreadcrumb euiSimplifiedBreadcrumb--last"
-                            data-test-subj="breadcrumb first"
-                            title="test"
-                          >
-                            test
-                          </span>
-                        </EuiInnerText>
-                      </div>
+                      <EuiInnerText>
+                        <span
+                          aria-current="page"
+                          className="euiSimplifiedBreadcrumb euiSimplifiedBreadcrumb--last"
+                          data-test-subj="breadcrumb first"
+                          title="test"
+                        >
+                          test
+                        </span>
+                      </EuiInnerText>
                     </div>
                     <EuiBreadcrumbSeparator>
-                      <div
+                      <svg
                         className="euiBreadcrumbSeparator"
-                      />
+                        preserveAspectRatio="none"
+                        viewBox="0 0 8 12"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M2 12H0L6 0h2z"
+                          fill="currentColor"
+                        />
+                      </svg>
                     </EuiBreadcrumbSeparator>
                   </nav>
                 </EuiSimplifiedBreadcrumbs>
