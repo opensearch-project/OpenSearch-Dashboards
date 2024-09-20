@@ -255,7 +255,7 @@ export const getDataSourcesList = (
           const description = source.get('description');
           const dataSourceEngineType = source.get('dataSourceEngineType');
           const type = source.type;
-          // This is a field only for detail type of data connection in order not to mix saved object type.
+          // This is a field only for detail type of data connection in order not to mix with saved object type.
           const connectionType = source.get('type');
           return {
             id,
@@ -290,10 +290,10 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
   return directQueryConnections;
 };
 
-export const convertDataSourcesToOpenSearchConnections = (
+export const convertDataSourcesToOpenSearchAndDataConnections = (
   dataSources: DataConnection[] | DataSource[]
-): DataSourceConnection[] =>
-  dataSources
+): Record<'openSearchConnections' | 'dataConnections', DataSourceConnection[]> => {
+  const openSearchConnections = dataSources
     .filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE)
     .map((ds: DataSource) => {
       return {
@@ -305,22 +305,21 @@ export const convertDataSourcesToOpenSearchConnections = (
         relatedConnections: [],
       };
     });
-
-export const convertDataSourcesToDataConnections = (
-  dataSources: DataConnection[] | DataSource[]
-): DataSourceConnection[] => {
-  const dataConnections = dataSources.filter(
-    (ds) => ds.type === DATA_CONNECTION_SAVED_OBJECT_TYPE
-  ) as DataConnection[];
-  return dataConnections.map((ds) => {
-    return {
-      id: ds.id,
-      type: ds.connectionType,
-      connectionType: DataSourceConnectionType.DataConnection,
-      name: ds.title,
-      description: ds.description,
-    };
-  });
+  const dataConnections = dataSources
+    .filter((ds) => ds.type === DATA_CONNECTION_SAVED_OBJECT_TYPE)
+    .map((ds) => {
+      return {
+        id: ds.id,
+        type: (ds as DataConnection).connectionType,
+        connectionType: DataSourceConnectionType.DataConnection,
+        name: ds.title,
+        description: ds.description,
+      };
+    });
+  return {
+    openSearchConnections,
+    dataConnections,
+  };
 };
 
 export const fulfillRelatedConnections = (
@@ -343,13 +342,15 @@ export const mergeDataSourcesWithConnections = (
   dataSources: DataSource[] | DataConnection[],
   directQueryConnections: DataSourceConnection[]
 ): DataSourceConnection[] => {
-  const openSearchConnections = convertDataSourcesToOpenSearchConnections(dataSources);
-  const dataConnections = convertDataSourcesToDataConnections(dataSources);
+  const {
+    openSearchConnections,
+    dataConnections,
+  } = convertDataSourcesToOpenSearchAndDataConnections(dataSources);
   const result = [
     ...fulfillRelatedConnections(openSearchConnections, directQueryConnections),
     ...directQueryConnections,
     ...dataConnections,
-  ].sort((a, b) => a?.name?.localeCompare(b?.name));
+  ].sort((a, b) => a.name.localeCompare(b.name));
 
   return result;
 };

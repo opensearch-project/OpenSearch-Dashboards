@@ -9,6 +9,7 @@ import { i18n } from '@osd/i18n';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { DataSourceConnectionTable } from '../workspace_form';
+
 interface WorkspaceDetailConnectionTableProps {
   isDashboardAdmin: boolean;
   connectionType: string;
