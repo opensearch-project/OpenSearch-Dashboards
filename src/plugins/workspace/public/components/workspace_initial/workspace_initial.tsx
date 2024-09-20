@@ -125,7 +125,7 @@ export const WorkspaceInitial = () => {
         <EuiTitle size="l">
           <h1>
             {i18n.translate('workspace.initial.title', {
-              defaultMessage: 'Create a workspace to get started',
+              defaultMessage: 'Getting started with OpenSearch',
             })}
           </h1>
         </EuiTitle>
@@ -134,24 +134,20 @@ export const WorkspaceInitial = () => {
         <EuiText size="s">
           {i18n.translate('workspace.initial.description', {
             defaultMessage:
-              'Welcome to OpenSearch! This interface supports you to easily explore, enrich and visualize your data with developer-friendly tools and powerful integrations for machine learning, data process, and more. To begin, create a workspace for your use case.',
+              'OpenSearch is a flexible, scalable, open-source way to build solutions for data-intensive search and analytics applications. Explore, enrich, and visualize your data, using developer-friendly tools and powerful integrations for machine learning, data processing, and more.',
           })}
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false} className="eui-displayInline">
-        <EuiSmallButtonEmpty
+        <EuiLink
           href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html"
-          iconType="popout"
-          iconSide="right"
-          flush="left"
-          data-test-subj="workspace-initial-button-openSearch"
+          external
+          style={{ fontWeight: 'normal' }}
         >
-          <EuiText size="s">
-            {i18n.translate('workspace.initial.button.openSearch', {
-              defaultMessage: 'Learn more from documentation',
-            })}
-          </EuiText>
-        </EuiSmallButtonEmpty>
+          {i18n.translate('workspace.initial.button.openSearch', {
+            defaultMessage: 'Learn more from documentation',
+          })}
+        </EuiLink>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiTitle size="m">
@@ -176,7 +172,11 @@ export const WorkspaceInitial = () => {
               <EuiText size="s">
                 <EuiIcon type="dashboardApp" size="l" />
                 &nbsp;&nbsp;Explore live demo environment at{' '}
-                <EuiLink href="https://playground.opensearch.org/">
+                <EuiLink
+                  href="https://playground.opensearch.org/"
+                  external
+                  style={{ fontWeight: 'normal' }}
+                >
                   playground.opensearch.org
                 </EuiLink>
               </EuiText>
@@ -190,7 +190,7 @@ export const WorkspaceInitial = () => {
   return (
     <EuiPage style={{ minHeight: '100vh' }}>
       <EuiPageBody>
-        <EuiFlexGroup direction="column" justifyContent="center" alignItems="center">
+        <EuiFlexGroup direction="column" alignItems="center" style={{ paddingTop: '100px' }}>
           <EuiFlexItem grow={false}>
             <EuiImage size="l" alt="OpenSearch" src={logos.OpenSearch.url} />
           </EuiFlexItem>
@@ -206,6 +206,7 @@ export const WorkspaceInitial = () => {
             >
               {content}
             </EuiPageContent>
+            <EuiSpacer size="m" />
             <EuiSmallButtonEmpty
               iconType="gear"
               iconSide="left"

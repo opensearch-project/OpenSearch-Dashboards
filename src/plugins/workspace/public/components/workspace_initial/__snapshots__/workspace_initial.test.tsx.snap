@@ -10,7 +10,8 @@ exports[`WorkspaceInitial render workspace initial page normally when theme is d
       class="euiPageBody euiPageBody--borderRadiusNone"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        style="padding-top: 100px;"
       >
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -46,7 +47,7 @@ exports[`WorkspaceInitial render workspace initial page normally when theme is d
                 <h1
                   class="euiTitle euiTitle--large"
                 >
-                  Create a workspace to get started
+                  Getting started with OpenSearch
                 </h1>
               </div>
               <div
@@ -56,36 +57,24 @@ exports[`WorkspaceInitial render workspace initial page normally when theme is d
                 <div
                   class="euiText euiText--small"
                 >
-                  Welcome to OpenSearch! This interface supports you to easily explore, enrich and visualize your data with developer-friendly tools and powerful integrations for machine learning, data process, and more. To begin, create a workspace for your use case.
+                  OpenSearch is a flexible, scalable, open-source way to build solutions for data-intensive search and analytics applications. Explore, enrich, and visualize your data, using developer-friendly tools and powerful integrations for machine learning, data processing, and more.
                 </div>
               </div>
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero eui-displayInline"
               >
                 <a
-                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft"
-                  data-test-subj="workspace-initial-button-openSearch"
+                  class="euiLink euiLink--primary"
                   href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html"
                   rel="noreferrer"
+                  style="font-weight: normal;"
                 >
+                  Learn more from documentation
                   <span
-                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-                  >
-                    <span
-                      class="euiButtonContent__icon"
-                      color="inherit"
-                      data-euiicon-type="popout"
-                    />
-                    <span
-                      class="euiButtonEmpty__text"
-                    >
-                      <div
-                        class="euiText euiText--small"
-                      >
-                        Learn more from documentation
-                      </div>
-                    </span>
-                  </span>
+                    aria-label="External link"
+                    class="euiLink__externalIcon"
+                    data-euiicon-type="popout"
+                  />
                 </a>
               </div>
               <div
@@ -303,8 +292,14 @@ exports[`WorkspaceInitial render workspace initial page normally when theme is d
                           class="euiLink euiLink--primary"
                           href="https://playground.opensearch.org/"
                           rel="noreferrer"
+                          style="font-weight: normal;"
                         >
                           playground.opensearch.org
+                          <span
+                            aria-label="External link"
+                            class="euiLink__externalIcon"
+                            data-euiicon-type="popout"
+                          />
                         </a>
                       </div>
                     </div>
@@ -313,6 +308,9 @@ exports[`WorkspaceInitial render workspace initial page normally when theme is d
               </div>
             </div>
           </div>
+          <div
+            class="euiSpacer euiSpacer--m"
+          />
           <button
             class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft"
             data-test-subj="workspace-initial-button-settingsAndSetup"
@@ -354,7 +352,8 @@ exports[`WorkspaceInitial render workspace initial page normally when user is da
       class="euiPageBody euiPageBody--borderRadiusNone"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        style="padding-top: 100px;"
       >
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -390,7 +389,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is da
                 <h1
                   class="euiTitle euiTitle--large"
                 >
-                  Create a workspace to get started
+                  Getting started with OpenSearch
                 </h1>
               </div>
               <div
@@ -400,36 +399,24 @@ exports[`WorkspaceInitial render workspace initial page normally when user is da
                 <div
                   class="euiText euiText--small"
                 >
-                  Welcome to OpenSearch! This interface supports you to easily explore, enrich and visualize your data with developer-friendly tools and powerful integrations for machine learning, data process, and more. To begin, create a workspace for your use case.
+                  OpenSearch is a flexible, scalable, open-source way to build solutions for data-intensive search and analytics applications. Explore, enrich, and visualize your data, using developer-friendly tools and powerful integrations for machine learning, data processing, and more.
                 </div>
               </div>
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero eui-displayInline"
               >
                 <a
-                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft"
-                  data-test-subj="workspace-initial-button-openSearch"
+                  class="euiLink euiLink--primary"
                   href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html"
                   rel="noreferrer"
+                  style="font-weight: normal;"
                 >
+                  Learn more from documentation
                   <span
-                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-                  >
-                    <span
-                      class="euiButtonContent__icon"
-                      color="inherit"
-                      data-euiicon-type="popout"
-                    />
-                    <span
-                      class="euiButtonEmpty__text"
-                    >
-                      <div
-                        class="euiText euiText--small"
-                      >
-                        Learn more from documentation
-                      </div>
-                    </span>
-                  </span>
+                    aria-label="External link"
+                    class="euiLink__externalIcon"
+                    data-euiicon-type="popout"
+                  />
                 </a>
               </div>
               <div
@@ -647,8 +634,14 @@ exports[`WorkspaceInitial render workspace initial page normally when user is da
                           class="euiLink euiLink--primary"
                           href="https://playground.opensearch.org/"
                           rel="noreferrer"
+                          style="font-weight: normal;"
                         >
                           playground.opensearch.org
+                          <span
+                            aria-label="External link"
+                            class="euiLink__externalIcon"
+                            data-euiicon-type="popout"
+                          />
                         </a>
                       </div>
                     </div>
@@ -657,6 +650,9 @@ exports[`WorkspaceInitial render workspace initial page normally when user is da
               </div>
             </div>
           </div>
+          <div
+            class="euiSpacer euiSpacer--m"
+          />
           <button
             class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft"
             data-test-subj="workspace-initial-button-settingsAndSetup"
@@ -698,7 +694,8 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
       class="euiPageBody euiPageBody--borderRadiusNone"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        style="padding-top: 100px;"
       >
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -734,7 +731,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                 <h1
                   class="euiTitle euiTitle--large"
                 >
-                  Create a workspace to get started
+                  Getting started with OpenSearch
                 </h1>
               </div>
               <div
@@ -744,36 +741,24 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                 <div
                   class="euiText euiText--small"
                 >
-                  Welcome to OpenSearch! This interface supports you to easily explore, enrich and visualize your data with developer-friendly tools and powerful integrations for machine learning, data process, and more. To begin, create a workspace for your use case.
+                  OpenSearch is a flexible, scalable, open-source way to build solutions for data-intensive search and analytics applications. Explore, enrich, and visualize your data, using developer-friendly tools and powerful integrations for machine learning, data processing, and more.
                 </div>
               </div>
               <div
                 class="euiFlexItem euiFlexItem--flexGrowZero eui-displayInline"
               >
                 <a
-                  class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft"
-                  data-test-subj="workspace-initial-button-openSearch"
+                  class="euiLink euiLink--primary"
                   href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html"
                   rel="noreferrer"
+                  style="font-weight: normal;"
                 >
+                  Learn more from documentation
                   <span
-                    class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-                  >
-                    <span
-                      class="euiButtonContent__icon"
-                      color="inherit"
-                      data-euiicon-type="popout"
-                    />
-                    <span
-                      class="euiButtonEmpty__text"
-                    >
-                      <div
-                        class="euiText euiText--small"
-                      >
-                        Learn more from documentation
-                      </div>
-                    </span>
-                  </span>
+                    aria-label="External link"
+                    class="euiLink__externalIcon"
+                    data-euiicon-type="popout"
+                  />
                 </a>
               </div>
               <div
@@ -977,8 +962,14 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                           class="euiLink euiLink--primary"
                           href="https://playground.opensearch.org/"
                           rel="noreferrer"
+                          style="font-weight: normal;"
                         >
                           playground.opensearch.org
+                          <span
+                            aria-label="External link"
+                            class="euiLink__externalIcon"
+                            data-euiicon-type="popout"
+                          />
                         </a>
                       </div>
                     </div>
@@ -987,6 +978,9 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
               </div>
             </div>
           </div>
+          <div
+            class="euiSpacer euiSpacer--m"
+          />
           <button
             class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty--flushLeft"
             data-test-subj="workspace-initial-button-settingsAndSetup"
