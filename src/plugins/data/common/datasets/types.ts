@@ -20,8 +20,6 @@ export interface DataSource {
   meta?: DataSourceMeta;
 }
 
-export type DataConnection = DataSource;
-
 /**
  * Metadata for a data source, generic to allow for additional fields.
  */
@@ -122,7 +120,7 @@ export interface DataStructure {
   /** Optional array of child data structures */
   children?: DataStructure[];
   hasNext?: boolean;
-  nextToken?: string;
+  paginationToken?: string;
   multiSelect?: boolean;
   columnHeader?: string;
   /** Optional metadata for the data structure */
@@ -206,8 +204,6 @@ export interface BaseDataset {
   type: string;
   /** Optional reference to the data source */
   dataSource?: DataSource;
-  /** Optional reference to the data connection */
-  dataConnection?: DataConnection;
 }
 
 /**

@@ -31,7 +31,7 @@ export const cloudWatchTypeConfig: DatasetTypeConfig = {
       title: index.title,
       type: DATASET.CLOUD_WATCH,
       timeFieldName: indexMeta?.timeFieldName,
-      dataConnection: {
+      dataSource: {
         id: dataConnection.id,
         title: dataConnection.title,
         type: dataConnection.type,
@@ -45,7 +45,7 @@ export const cloudWatchTypeConfig: DatasetTypeConfig = {
       case 'DATA_CONNECTION': {
         const logGroups = await fetchLogGroups(
           currDataStructure,
-          options?.nextToken,
+          options?.paginationToken,
           options?.search
         );
         const newDataStructure = {
@@ -53,7 +53,7 @@ export const cloudWatchTypeConfig: DatasetTypeConfig = {
           hasNext: false,
           columnHeader: 'Log groups',
           multiSelect: true,
-          nextToken: logGroups.nextToken,
+          paginationToken: logGroups.paginationToken,
           children: logGroups.logGroups,
         };
         return newDataStructure;
@@ -107,9 +107,14 @@ const fetchDataConnections = async (client: SavedObjectsClientContract) => {
   return dataConnections;
 };
 
-const fetchLogGroups = async (current: DataStructure, nextToken?: string, search?: string) => {
-  const logGroups = (nextToken
-    ? Array.from({ length: 5 }, (_, i) => `log-group-${i + 5 * Number(nextToken) + 1}`)
+const fetchLogGroups = async (
+  current: DataStructure,
+  paginationToken?: string,
+  search?: string
+) => {
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  const logGroups = (paginationToken
+    ? Array.from({ length: 5 }, (_, i) => `log-group-${i + 5 * Number(paginationToken) + 1}`)
     : Array.from({ length: 5 }, (_, i) => `log-group-${i + 1}`)
   ).map((name) => ({
     id: name,
@@ -120,7 +125,9 @@ const fetchLogGroups = async (current: DataStructure, nextToken?: string, search
   const filteredLogGroups = logGroups.filter((group) => group.title.includes(search || ''));
 
   return {
-    logGroups: nextToken ? [...(current.children || []), ...filteredLogGroups] : filteredLogGroups,
-    nextToken: String(Number(nextToken || '0') + 1),
+    logGroups: paginationToken
+      ? [...(current.children || []), ...filteredLogGroups]
+      : filteredLogGroups,
+    paginationToken: String(Number(paginationToken || '0') + 1),
   };
 };

@@ -151,7 +151,7 @@ export class DatasetService {
       parent: dataStructure.parent?.id || '',
       children: dataStructure.children?.map((child) => child.id) || [],
       hasNext: dataStructure.hasNext,
-      nextToken: dataStructure.nextToken,
+      paginationToken: dataStructure.paginationToken,
       multiSelect: dataStructure.multiSelect,
       columnHeader: dataStructure.columnHeader,
       meta: dataStructure.meta,

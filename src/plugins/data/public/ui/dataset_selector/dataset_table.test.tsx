@@ -9,7 +9,7 @@ import { IntlProvider } from 'react-intl';
 import { DataStructure } from '../../../common';
 import { queryServiceMock } from '../../query/mocks';
 import { getQueryService } from '../../services';
-import { DataSetTable } from './dataset_table';
+import { DatasetTable } from './dataset_table';
 
 jest.mock('../../services', () => ({
   getQueryService: jest.fn(),
@@ -30,12 +30,12 @@ describe('DataSetTable', () => {
         { id: 'child1', title: 'Child 1', type: 'index' },
         { id: 'child2', title: 'Child 2', type: 'index' },
       ],
-      nextToken: 'next_token',
+      paginationToken: 'token',
       multiSelect: true,
     },
   ];
 
-  const mockProps: ComponentProps<typeof DataSetTable> = {
+  const mockProps: ComponentProps<typeof DatasetTable> = {
     path: mockPath,
     setPath: jest.fn(),
     index: 2,
@@ -53,7 +53,7 @@ describe('DataSetTable', () => {
   });
 
   it('renders the DataSetTable component', () => {
-    renderWithIntl(<DataSetTable {...mockProps} />);
+    renderWithIntl(<DatasetTable {...mockProps} />);
 
     expect(screen.getByText('Child 1')).toBeInTheDocument();
     expect(screen.getByText('Child 2')).toBeInTheDocument();
@@ -61,7 +61,7 @@ describe('DataSetTable', () => {
   });
 
   it('calls selectDataStructure when an index is selected', async () => {
-    renderWithIntl(<DataSetTable {...mockProps} />);
+    renderWithIntl(<DatasetTable {...mockProps} />);
 
     const checkbox = screen.getByTestId('checkboxSelectRow-child1');
     fireEvent.click(checkbox);
@@ -83,7 +83,7 @@ describe('DataSetTable', () => {
       ...mockProps,
       explorerDataset: { id: 'child1,child2', title: 'Child 1,Child 2', type: 'index' },
     };
-    renderWithIntl(<DataSetTable {...propsWithSelection} />);
+    renderWithIntl(<DatasetTable {...propsWithSelection} />);
 
     const checkbox1 = screen.getByTestId('checkboxSelectRow-child1');
     const checkbox2 = screen.getByTestId('checkboxSelectRow-child2');
@@ -97,7 +97,7 @@ describe('DataSetTable', () => {
   });
 
   it('calls onTableChange when search is performed', async () => {
-    renderWithIntl(<DataSetTable {...mockProps} />);
+    renderWithIntl(<DatasetTable {...mockProps} />);
     const searchInput = screen.getByRole('searchbox');
     fireEvent.change(searchInput, { target: { value: 'test' } });
     fireEvent.keyDown(searchInput, { key: 'Enter', code: 'Enter' });
@@ -114,14 +114,14 @@ describe('DataSetTable', () => {
   });
 
   it('calls onTableChange when Load more is clicked', async () => {
-    renderWithIntl(<DataSetTable {...mockProps} />);
+    renderWithIntl(<DatasetTable {...mockProps} />);
     fireEvent.click(screen.getByText('Load more'));
 
     await waitFor(() => {
       expect(mockProps.fetchNextDataStructure).toHaveBeenCalledWith(
         mockPath,
         mockedTypeId,
-        expect.objectContaining({ nextToken: 'next_token' })
+        expect.objectContaining({ paginationToken: 'token' })
       );
     });
   });

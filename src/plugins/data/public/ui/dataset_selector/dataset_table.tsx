@@ -23,14 +23,14 @@ interface DatasetTableProps {
   ) => Promise<DataStructure>;
 }
 
-export const DataSetTable: React.FC<DatasetTableProps> = (props) => {
+export const DatasetTable: React.FC<DatasetTableProps> = (props) => {
   const datasetService = getQueryService().queryString.getDatasetService();
   const [loading, setLoading] = useState(false);
   const searchRef = useRef<HTMLInputElement | null>(null);
 
   const initialSelectedIds = props.explorerDataset?.id.split(',');
   const dataStructures = props.path[props.index].children || [];
-  const nextToken = props.path[props.index].nextToken;
+  const paginationToken = props.path[props.index].paginationToken;
 
   const onTableChange = async (options: DataStructureFetchOptions) => {
     const typeConfig = datasetService.getType(props.path[1].id);
@@ -82,9 +82,11 @@ export const DataSetTable: React.FC<DatasetTableProps> = (props) => {
         }}
       />
 
-      {nextToken && (
+      {paginationToken && (
         <div className="datasetTable__loadMore">
-          <EuiLink onClick={() => onTableChange({ nextToken, search: searchRef.current?.value })}>
+          <EuiLink
+            onClick={() => onTableChange({ paginationToken, search: searchRef.current?.value })}
+          >
             <EuiText size="s">
               <FormattedMessage
                 id="data.explorer.datasetSelector.advancedSelector.loadMore"
