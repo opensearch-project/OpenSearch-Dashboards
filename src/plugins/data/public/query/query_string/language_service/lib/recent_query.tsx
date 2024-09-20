@@ -52,8 +52,8 @@ export function RecentQueriesTable({
           type: 'icon',
           onClick: (item: RecentQueryTableItem) => {
             onClickRecentQuery(
-              recentQueries.find((recentQuery) => recentQuery.query.query === item.query)?.query!,
-              recentQueries[item.id].timeRange
+              recentQueries.find((recentQuery) => recentQuery.id === item.id)?.query!,
+              recentQueries.find((recentQuery) => recentQuery.id === item.id)?.timeRange
             );
           },
           'data-test-subj': 'action-run',
@@ -79,8 +79,8 @@ export function RecentQueriesTable({
   const recentQueryItems: RecentQueryTableItem[] = recentQueries
     .filter((item, idx) => idx < MAX_RECENT_QUERY_SIZE)
     .filter((item) => item.query.language === currentLanguage)
-    .map((query, idx) => ({
-      id: idx,
+    .map((query) => ({
+      id: query.id,
       query: query.query.query,
       timeRange: query.timeRange,
       time: moment(query.time).format('MMM D, YYYY HH:mm:ss'),
