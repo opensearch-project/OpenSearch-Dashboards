@@ -138,7 +138,7 @@ export class DatasetService {
   }
 
   private cacheDataStructure(dataType: string, dataStructure: DataStructure) {
-    this.setLastCacheTime(new Date());
+    this.setLastCacheTime(Date.now());
     const cachedDataStructure: CachedDataStructure = {
       id: dataStructure.id,
       title: dataStructure.title,
@@ -169,11 +169,11 @@ export class DatasetService {
     this.sessionStorage.clear();
   }
 
-  public getLastCacheTime(): string | undefined {
-    return this.sessionStorage.get('lastCacheTime');
+  public getLastCacheTime(): number | undefined {
+    return Number(this.sessionStorage.get('lastCacheTime')) || undefined;
   }
 
-  private setLastCacheTime(time: Date): void {
+  private setLastCacheTime(time: number): void {
     this.sessionStorage.set('lastCacheTime', time);
   }
 

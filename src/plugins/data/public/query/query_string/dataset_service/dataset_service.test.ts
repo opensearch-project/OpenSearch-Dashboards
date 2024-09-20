@@ -23,17 +23,26 @@ describe('DatasetService', () => {
     service = new DatasetService(uiSettings, sessionStorage);
   });
 
-  test('registerType and getType', () => {
-    const mockType = {
-      id: 'test-type',
-      title: 'Test Type',
-      meta: { icon: { type: 'test' } },
-      toDataset: jest.fn(),
-      fetch: jest.fn(),
-      fetchFields: jest.fn(),
-      supportedLanguages: jest.fn(),
-    };
+  const mockResult = {
+    id: 'test-structure',
+    title: 'Test Structure',
+    type: 'test-type',
+    children: [{ id: 'child1', title: 'Child 1', type: 'test-type' }],
+  };
 
+  const mockPath: DataStructure[] = [{ id: 'root', title: 'Root', type: 'root' }];
+
+  const mockType = {
+    id: 'test-type',
+    title: 'Test Type',
+    meta: { icon: { type: 'test' } },
+    toDataset: jest.fn(),
+    fetch: jest.fn().mockResolvedValue(mockResult),
+    fetchFields: jest.fn(),
+    supportedLanguages: jest.fn(),
+  };
+
+  test('registerType and getType', () => {
     service.registerType(mockType);
     expect(service.getType('test-type')).toBe(mockType);
   });
@@ -52,25 +61,9 @@ describe('DatasetService', () => {
   });
 
   test('fetchOptions caches and returns data structures', async () => {
-    const mockType = {
-      id: 'test-type',
-      title: 'Test Type',
-      meta: { icon: { type: 'test' } },
-      toDataset: jest.fn(),
-      fetch: jest.fn().mockResolvedValue({
-        id: 'test-structure',
-        title: 'Test Structure',
-        type: 'test-type',
-        children: [{ id: 'child1', title: 'Child 1', type: 'test-type' }],
-      }),
-      fetchFields: jest.fn(),
-      supportedLanguages: jest.fn(),
-    };
-
     service.registerType(mockType);
 
-    const path: DataStructure[] = [{ id: 'root', title: 'Root', type: 'root' }];
-    const result = await service.fetchOptions(mockDataPluginServices, path, 'test-type');
+    const result = await service.fetchOptions(mockDataPluginServices, mockPath, 'test-type');
 
     expect(result).toEqual({
       id: 'test-structure',
@@ -79,8 +72,30 @@ describe('DatasetService', () => {
       children: [{ id: 'child1', title: 'Child 1', type: 'test-type' }],
     });
 
-    const cachedResult = await service.fetchOptions(mockDataPluginServices, path, 'test-type');
+    const cachedResult = await service.fetchOptions(mockDataPluginServices, mockPath, 'test-type');
     expect(cachedResult).toEqual(result);
     expect(mockType.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  test('clear cache', async () => {
+    service.registerType(mockType);
+
+    await service.fetchOptions(mockDataPluginServices, mockPath, 'test-type');
+    expect(sessionStorage.keys().length === 1);
+
+    service.clearCache();
+    expect(sessionStorage.keys().length === 0);
+  });
+
+  test('caching object correctly sets last cache time', async () => {
+    service.registerType(mockType);
+
+    const time = Date.now();
+
+    Date.now = jest.fn(() => time);
+
+    await service.fetchOptions(mockDataPluginServices, mockPath, 'test-type');
+
+    expect(service.getLastCacheTime()).toEqual(time);
   });
 });

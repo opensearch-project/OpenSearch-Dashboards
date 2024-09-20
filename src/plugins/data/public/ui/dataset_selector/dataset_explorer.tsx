@@ -21,6 +21,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+import moment from 'moment';
 import { BaseDataset, DATA_STRUCTURE_META_TYPES, DataStructure } from '../../../common';
 import { QueryStringContract } from '../../query';
 import { IDataPluginServices } from '../../types';
@@ -40,6 +41,7 @@ export const DatasetExplorer = ({
   onNext: (dataset: BaseDataset) => void;
   onCancel: () => void;
 }) => {
+  const uiSettings = services.uiSettings;
   const [explorerDataset, setExplorerDataset] = useState<BaseDataset | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -105,9 +107,11 @@ export const DatasetExplorer = ({
                   <EuiText size="s">
                     <FormattedMessage
                       id="data.explorer.datasetSelector.advancedSelector.lastUpdatedTime"
-                      defaultMessage={`Last updated at: ${new Date(
-                        Date.parse(queryString.getDatasetService().getLastCacheTime()!)
-                      )?.toLocaleTimeString()}. `}
+                      defaultMessage={`Last updated at: ${moment(
+                        queryString.getDatasetService().getLastCacheTime()
+                      )
+                        .format(uiSettings.get('dateFormat'))
+                        .toString()}. `}
                     />
                   </EuiText>
                 </EuiFlexItem>
