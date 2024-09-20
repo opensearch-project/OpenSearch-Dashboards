@@ -102,7 +102,12 @@ export class DatasetService {
     const cacheKey = `${dataType}.${lastPathItem.id}`;
 
     const cachedDataStructure = this.sessionStorage.get<CachedDataStructure>(cacheKey);
-    if (cachedDataStructure?.children?.length > 0) {
+    if (
+      cachedDataStructure?.children?.length > 0 &&
+      (!cachedDataStructure?.meta?.updatedAt ||
+        Date.now() - cachedDataStructure?.meta?.updatedAt <
+          this.uiSettings.get(UI_SETTINGS.QUERY_CACHED_DATA_STRUCTURES_TTL))
+    ) {
       return this.cacheToDataStructure(dataType, cachedDataStructure);
     }
 

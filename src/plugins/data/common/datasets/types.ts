@@ -159,6 +159,7 @@ export interface DataStructureCustomMeta {
   type: DATA_STRUCTURE_META_TYPES.CUSTOM;
   icon?: EuiIconProps;
   tooltip?: string;
+  updatedAt?: number;
   [key: string]: any;
 }
 

@@ -720,6 +720,20 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       requiresPageReload: true,
       schema: schema.boolean(),
     },
+    [UI_SETTINGS.QUERY_CACHED_DATA_STRUCTURES_TTL]: {
+      name: i18n.translate('data.advancedSettings.query.cachedDataStructures.ttl', {
+        defaultMessage: 'Cached data structures TTL',
+      }),
+      value: 600000,
+      description: i18n.translate('data.advancedSettings.query.cachedDataStructures.ttl', {
+        defaultMessage: `
+          <strong>Experimental</strong>:
+          Cached data structures TTL before refetching if the data type has it configured.`,
+      }),
+      category: ['search'],
+      requiresPageReload: true,
+      schema: schema.oneOf([schema.number({ min: 0 }), schema.literal('Infinity')]),
+    },
     [UI_SETTINGS.QUERY_DATAFRAME_HYDRATION_STRATEGY]: {
       name: i18n.translate('data.advancedSettings.query.dataFrameHydrationStrategyTitle', {
         defaultMessage: 'Data frame hydration strategy',
