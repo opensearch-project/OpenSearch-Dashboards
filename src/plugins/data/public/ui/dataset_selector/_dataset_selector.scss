@@ -34,7 +34,7 @@
   &__button--truncate {
     display: flex;
     align-items: center;
-    max-width: 300px;
+    max-width: euiSizeXXL;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
