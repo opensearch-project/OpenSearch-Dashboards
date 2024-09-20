@@ -255,7 +255,7 @@ export const getDataSourcesList = (
           const description = source.get('description');
           const dataSourceEngineType = source.get('dataSourceEngineType');
           const type = source.type;
-          // This is a filed only for detail type of data connection in order not to mix saved object type.
+          // This is a field only for detail type of data connection in order not to mix saved object type.
           const connectionType = source.get('type');
           return {
             id,
