@@ -7,8 +7,8 @@ import { EuiBasicTable, EuiFieldSearch, EuiLink, EuiText } from '@elastic/eui';
 import React, { useRef, useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { DataStructure } from '../../../common';
-import { DataStructureFetchOptions } from '../../query/query_string/dataset_service';
 import { getQueryService } from '../../services';
+import { DataStructureFetchOptions } from '../../query';
 
 interface DatasetTableProps {
   path: DataStructure[];

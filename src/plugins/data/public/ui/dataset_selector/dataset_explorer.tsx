@@ -20,10 +20,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { BaseDataset, DATA_STRUCTURE_META_TYPES, DataStructure } from '../../../common';
-import { QueryStringContract } from '../../query';
+import { DataStructureFetchOptions, QueryStringContract } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { DatasetTable } from './dataset_table';
-import { DataStructureFetchOptions } from '../../query/query_string/dataset_service';
 
 export const DatasetExplorer = ({
   services,
