@@ -16,7 +16,7 @@ import { initHome } from './home_render';
 
 import { coreMock } from '../../../../core/public/mocks';
 import {
-  getLeanOpenSearchConfig,
+  getLearnOpenSearchConfig,
   getWhatsNewConfig,
   registerHomeListCard,
 } from './components/home_list_card';
@@ -143,7 +143,7 @@ describe('initHome', () => {
     expect(registerHomeListCard).toHaveBeenCalledWith(contentManagementStartMock, {
       id: 'learn_opensearch_new',
       order: 11,
-      config: getLeanOpenSearchConfig(core.docLinks),
+      config: getLearnOpenSearchConfig(core.docLinks),
       target: HOME_CONTENT_AREAS.SERVICE_CARDS,
       width: 16,
     });

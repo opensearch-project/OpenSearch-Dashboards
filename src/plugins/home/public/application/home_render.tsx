@@ -18,7 +18,7 @@ import {
 } from '../../../../plugins/content_management/public';
 import {
   getWhatsNewConfig,
-  getLeanOpenSearchConfig,
+  getLearnOpenSearchConfig,
   registerHomeListCard,
 } from './components/home_list_card';
 
@@ -100,7 +100,7 @@ export const initHome = (contentManagement: ContentManagementPluginStart, core: 
   registerHomeListCard(contentManagement, {
     id: 'learn_opensearch_new',
     order: 11,
-    config: getLeanOpenSearchConfig(core.docLinks),
+    config: getLearnOpenSearchConfig(core.docLinks),
     target: HOME_CONTENT_AREAS.SERVICE_CARDS,
     width: 16,
   });

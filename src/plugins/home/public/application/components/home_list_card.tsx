@@ -24,7 +24,7 @@ import {
   ESSENTIAL_OVERVIEW_CONTENT_AREAS,
 } from '../../../../content_management/public';
 
-export const getLeanOpenSearchConfig = (docLinks: DocLinksStart): Config => ({
+export const getLearnOpenSearchConfig = (docLinks: DocLinksStart): Config => ({
   title: i18n.translate('home.card.learnOpenSearch.title', {
     defaultMessage: 'OpenSearch Documentation',
   }),
@@ -176,7 +176,7 @@ export const registerHomeListCardToPage = (
   registerHomeListCard(contentManagement, {
     id: 'learn_opensearch_new',
     order: 20,
-    config: getLeanOpenSearchConfig(docLinks),
+    config: getLearnOpenSearchConfig(docLinks),
     target: ESSENTIAL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
     width: 24,
   });
@@ -191,7 +191,7 @@ export const registerHomeListCardToPage = (
   registerHomeListCard(contentManagement, {
     id: 'learn_opensearch_new',
     order: 40,
-    config: getLeanOpenSearchConfig(docLinks),
+    config: getLearnOpenSearchConfig(docLinks),
     target: ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
   });
 };

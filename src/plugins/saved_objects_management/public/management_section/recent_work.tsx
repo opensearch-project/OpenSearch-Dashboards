@@ -131,8 +131,8 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
   };
 
   const itemsForDisplay = useMemo(() => {
-    const sortedResult = [...detailedSavedObjects].filter((item) => !item.error);
-    return sortedResult.filter((item) => {
+    return [...detailedSavedObjects].filter((item) => {
+      if (item.error) return false;
       if (selectedType === allOption) return true;
       return item.type === selectedType;
     });
