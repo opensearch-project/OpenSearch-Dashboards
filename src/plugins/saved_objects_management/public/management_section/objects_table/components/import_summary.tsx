@@ -53,6 +53,7 @@ const DEFAULT_ICON = 'apps';
 export interface ImportSummaryProps {
   failedImports: FailedImport[];
   successfulImports: SavedObjectsImportSuccess[];
+  useUpdatedUX?: boolean;
 }
 
 interface ImportItem {
@@ -187,7 +188,11 @@ const getStatusIndicator = ({ outcome, errorMessage = 'Error' }: ImportItem) => 
   }
 };
 
-export const ImportSummary = ({ failedImports, successfulImports }: ImportSummaryProps) => {
+export const ImportSummary = ({
+  failedImports,
+  successfulImports,
+  useUpdatedUX,
+}: ImportSummaryProps) => {
   const importItems: ImportItem[] = _.sortBy(
     [
       ...failedImports.map((x) => mapFailedImport(x)),
@@ -208,13 +213,14 @@ export const ImportSummary = ({ failedImports, successfulImports }: ImportSummar
           {importItems.length === 1 ? (
             <FormattedMessage
               id="savedObjectsManagement.importSummary.headerLabelSingular"
-              defaultMessage="1 object imported"
+              defaultMessage="1 {useUpdatedUX, select, true {asset} other {object}} imported"
+              values={{ useUpdatedUX }}
             />
           ) : (
             <FormattedMessage
               id="savedObjectsManagement.importSummary.headerLabelPlural"
-              defaultMessage="{importCount} objects imported"
-              values={{ importCount: importItems.length }}
+              defaultMessage="{importCount} {useUpdatedUX, select, true {assets} other {objects}} imported"
+              values={{ importCount: importItems.length, useUpdatedUX }}
             />
           )}
         </h3>

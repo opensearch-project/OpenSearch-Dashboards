@@ -13,9 +13,13 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
     >
       <h2>
         <FormattedMessage
-          defaultMessage="Import saved objects"
+          defaultMessage="Import {useUpdatedUX, select, true {assets} other {saved objects}}"
           id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
-          values={Object {}}
+          values={
+            Object {
+              "useUpdatedUX": undefined,
+            }
+          }
         />
       </h2>
     </EuiText>
@@ -38,7 +42,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
     >
       <p>
         <FormattedMessage
-          defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+          defaultMessage="The following {useUpdatedUX, select, true {assets} other {saved objects}} use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
           id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
           values={
             Object {
@@ -51,6 +55,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
                   values={Object {}}
                 />
               </EuiLink>,
+              "useUpdatedUX": undefined,
             }
           }
         />
@@ -277,9 +282,13 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
     >
       <h2>
         <FormattedMessage
-          defaultMessage="Import saved objects"
+          defaultMessage="Import {useUpdatedUX, select, true {assets} other {saved objects}}"
           id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
-          values={Object {}}
+          values={
+            Object {
+              "useUpdatedUX": undefined,
+            }
+          }
         />
       </h2>
     </EuiText>
@@ -328,7 +337,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
     >
       <p>
         <FormattedMessage
-          defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+          defaultMessage="The following {useUpdatedUX, select, true {assets} other {saved objects}} use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
           id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
           values={
             Object {
@@ -341,6 +350,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
                   values={Object {}}
                 />
               </EuiLink>,
+              "useUpdatedUX": undefined,
             }
           }
         />
@@ -491,7 +501,7 @@ Array [
   >
     <p>
       <FormattedMessage
-        defaultMessage="The following saved objects use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
+        defaultMessage="The following {useUpdatedUX, select, true {assets} other {saved objects}} use index patterns that do not exist. Please select the index patterns you'd like re-associated with them. You can {indexPatternLink} if necessary."
         id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsDescription"
         values={
           Object {
@@ -504,6 +514,7 @@ Array [
                 values={Object {}}
               />
             </EuiLink>,
+            "useUpdatedUX": undefined,
           }
         }
       />
@@ -541,9 +552,13 @@ exports[`Flyout should render cluster selector and import options when datasourc
     >
       <h2>
         <FormattedMessage
-          defaultMessage="Import saved objects"
+          defaultMessage="Import {useUpdatedUX, select, true {assets} other {saved objects}}"
           id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
-          values={Object {}}
+          values={
+            Object {
+              "useUpdatedUX": undefined,
+            }
+          }
         />
       </h2>
     </EuiText>
@@ -697,9 +712,13 @@ exports[`Flyout should render import step 1`] = `
     >
       <h2>
         <FormattedMessage
-          defaultMessage="Import saved objects"
+          defaultMessage="Import {useUpdatedUX, select, true {assets} other {saved objects}}"
           id="savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle"
-          values={Object {}}
+          values={
+            Object {
+              "useUpdatedUX": undefined,
+            }
+          }
         />
       </h2>
     </EuiText>

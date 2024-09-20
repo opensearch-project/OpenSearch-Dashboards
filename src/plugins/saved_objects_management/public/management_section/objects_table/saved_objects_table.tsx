@@ -707,6 +707,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         savedObjects={this.props.savedObjectsClient}
         notifications={this.props.notifications}
         dataSourceManagement={this.props.dataSourceManagement}
+        useUpdatedUX={this.props.useUpdatedUX}
       />
     );
   }
