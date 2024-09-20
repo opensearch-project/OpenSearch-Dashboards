@@ -43,10 +43,6 @@ import { registerDataSourceConnectionsRoutes } from './data_source_connection';
  *   "aggConfig": {
  *     // Optional aggregation configuration
  *   },
- *   @deprecated
- *   "df": {
- *     // Optional data frame configuration
- *   }
  * }
  * ```
  */
@@ -72,7 +68,6 @@ function defineRoute(
             format: schema.string(),
           }),
           aggConfig: schema.nullable(schema.object({}, { unknowns: 'allow' })),
-          df: schema.nullable(schema.object({}, { unknowns: 'allow' })),
         }),
       },
     },
@@ -88,71 +83,6 @@ function defineRoute(
         return res.custom({
           statusCode: err.name,
           body: err.message,
-        });
-      }
-    }
-  );
-
-  router.get(
-    {
-      path: `${path}/{queryId}`,
-      validate: {
-        params: schema.object({
-          queryId: schema.string(),
-        }),
-      },
-    },
-    async (context, req, res): Promise<any> => {
-      try {
-        const queryRes: IDataFrameResponse = await searchStrategies[searchStrategyId].search(
-          context,
-          req as any,
-          {}
-        );
-        const result: any = {
-          body: {
-            ...queryRes,
-          },
-        };
-        return res.ok(result);
-      } catch (err) {
-        logger.error(err);
-        return res.custom({
-          statusCode: 500,
-          body: err,
-        });
-      }
-    }
-  );
-
-  router.get(
-    {
-      path: `${path}/{queryId}/{dataSourceId}`,
-      validate: {
-        params: schema.object({
-          queryId: schema.string(),
-          dataSourceId: schema.string(),
-        }),
-      },
-    },
-    async (context, req, res): Promise<any> => {
-      try {
-        const queryRes: IDataFrameResponse = await searchStrategies[searchStrategyId].search(
-          context,
-          req as any,
-          {}
-        );
-        const result: any = {
-          body: {
-            ...queryRes,
-          },
-        };
-        return res.ok(result);
-      } catch (err) {
-        logger.error(err);
-        return res.custom({
-          statusCode: 500,
-          body: err,
         });
       }
     }
