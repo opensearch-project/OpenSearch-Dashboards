@@ -59,7 +59,7 @@ export function NavGroups({
     return {
       id: `${link.id}-${link.title}`,
       name: (
-        <EuiText size="xs" style={{ fontSize: '14px', lineHeight: '16px' }}>
+        <EuiText size="xs" style={{ fontSize: '14px', lineHeight: '16px', fontWeight: 400 }}>
           {link.title}
         </EuiText>
       ),
