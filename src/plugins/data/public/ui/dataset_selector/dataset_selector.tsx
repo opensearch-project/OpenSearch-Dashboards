@@ -141,7 +141,9 @@ export const DatasetSelector = ({
             onClick={togglePopover}
           >
             <EuiIcon type={datasetIcon} className="datasetSelector__icon" />
-            <EuiText className="datasetSelector__title">{datasetTitle} </EuiText>
+            <EuiText size="s" className="datasetSelector__title">
+              {datasetTitle}
+            </EuiText>
           </EuiButtonEmpty>
         </EuiToolTip>
       }

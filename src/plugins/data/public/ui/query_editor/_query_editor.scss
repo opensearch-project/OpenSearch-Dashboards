@@ -212,7 +212,7 @@
 
 .suggest-widget {
   position: absolute;
-  z-index: 1000;
+  z-index: 1;
 
   &.visible::after {
     position: absolute;
