@@ -179,7 +179,7 @@
   .osdQueryEditor__input {
     flex: 1 1 auto; // Allow growing and shrinking
     min-width: 0; // Allow shrinking below content size
-    overflow: hidden; // Prevent overflow
+    overflow: visible; // Prevent overflow
   }
 
   .osdQueryEditor__querycontrols {
