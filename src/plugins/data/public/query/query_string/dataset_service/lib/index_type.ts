@@ -64,7 +64,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
         const dataSources = await fetchDataSources(services.savedObjects.client);
         return {
           ...dataStructure,
-          columnHeader: 'Cluster',
+          columnHeader: 'Clusters',
           hasNext: true,
           children: dataSources,
         };
