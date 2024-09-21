@@ -36,6 +36,13 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
   const queryString = getQueryService().queryString;
   const languageService = queryString.getLanguageService();
 
+  const datasetSupportedLanguages = props.query.dataset
+    ? queryString
+        .getDatasetService()
+        .getType(props.query.dataset.type)
+        ?.supportedLanguages(props.query.dataset)
+    : undefined;
+
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query: Query) => {
       if (query.language !== currentLanguage) {
@@ -57,10 +64,11 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
   languageService.getLanguages().forEach((language) => {
     if (
       (language && props.appName && !language.editorSupportedAppNames?.includes(props.appName)) ||
-      languageService.getUserQueryLanguageBlocklist().includes(language?.id)
+      languageService.getUserQueryLanguageBlocklist().includes(language?.id) ||
+      (datasetSupportedLanguages && !datasetSupportedLanguages.includes(language.id))
     )
       return;
-    languageOptions.unshift(mapExternalLanguageToOptions(language!));
+    languageOptions.unshift(mapExternalLanguageToOptions(language));
   });
 
   const selectedLanguage = {
