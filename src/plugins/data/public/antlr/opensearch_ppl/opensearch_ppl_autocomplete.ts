@@ -11,13 +11,16 @@ import {
   CursorPosition,
   OpenSearchPplAutocompleteResult,
   ProcessVisitedRulesResult,
+  SourceOrTableSuggestion,
+  TableContextSuggestion,
 } from '../shared/types';
 import { OpenSearchPPLLexer } from './.generated/OpenSearchPPLLexer';
 import { OpenSearchPPLParser } from './.generated/OpenSearchPPLParser';
 
 // These are keywords that we do not want to show in autocomplete
 export function getIgnoredTokens(): number[] {
-  const tokens = [OpenSearchPPLParser.SPACE, OpenSearchPPLParser.EOF];
+  // const tokens = [OpenSearchPPLParser.SPACE, OpenSearchPPLParser.EOF];
+  const tokens = [];
 
   const firstOperatorIndex = OpenSearchPPLParser.MATCH;
   const lastOperatorIndex = OpenSearchPPLParser.ERROR_RECOGNITION;
@@ -31,6 +34,18 @@ export function getIgnoredTokens(): number[] {
     OpenSearchPPLParser.PIPE,
     OpenSearchPPLParser.EQUAL,
     OpenSearchPPLParser.COMMA,
+    OpenSearchPPLParser.PLUS,
+    OpenSearchPPLParser.MINUS,
+    // OpenSearchPPLParser.EQUAL,
+    // OpenSearchPPLParser.NOT_EQUAL,
+    // OpenSearchPPLParser.LESS,
+    // OpenSearchPPLParser.NOT_LESS,
+    // OpenSearchPPLParser.GREATER,
+    // OpenSearchPPLParser.NOT_GREATER,
+    // OpenSearchPPLParser.OR,
+    // OpenSearchPPLParser.AND,
+    // OpenSearchPPLParser.XOR,
+    // OpenSearchPPLParser.NOT,
   ];
   for (let i = firstFunctionIndex; i <= lastFunctionIndex; i++) {
     if (!operatorsToInclude.includes(i)) {
@@ -84,6 +99,9 @@ export function processVisitedRules(
         shouldSuggestColumns = true;
         break;
       }
+      case OpenSearchPPLParser.RULE_tableQualifiedName: {
+        suggestSourcesOrTables = SourceOrTableSuggestion.TABLES;
+      }
     }
   }
 
@@ -94,7 +112,10 @@ export function processVisitedRules(
   };
 }
 
-export function getParseTree(parser: OpenSearchPPLParser, type?: 'search' | 'from'): ParseTree {
+export function getParseTree(
+  parser: OpenSearchPPLParser,
+  type?: 'from' | 'alter' | 'insert' | 'update' | 'select'
+): ParseTree {
   if (!type) {
     return parser.root();
   }
@@ -102,8 +123,6 @@ export function getParseTree(parser: OpenSearchPPLParser, type?: 'search' | 'fro
   switch (type) {
     case 'from':
       return parser.fromClause();
-    case 'search':
-      return parser.searchCommand();
     default:
       return parser.root();
   }
@@ -126,7 +145,7 @@ export function enrichAutocompleteResult(
   const result: OpenSearchPplAutocompleteResult = {
     ...baseResult,
     ...suggestionsFromRules,
-    suggestColumns: shouldSuggestColumns ? shouldSuggestColumns : undefined,
+    suggestColumns: shouldSuggestColumns ? ({ name: '' } as TableContextSuggestion) : undefined,
   };
   return result;
 }
