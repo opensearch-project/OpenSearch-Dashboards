@@ -25,6 +25,7 @@ export const getSuggestions = async ({
   position,
   query,
   services,
+  dataset,
 }: QuerySuggestionGetFnArgs) => {
   if (!services || !services.appName || !indexPattern) return [];
   try {
@@ -45,16 +46,17 @@ export const getSuggestions = async ({
       const res = await fetchColumnValues(
         [indexPattern.title],
         suggestions.suggestValuesForColumn,
-        services
+        services,
+        dataset
       );
 
       let i = 0;
       finalSuggestions.push(
-        ...res.body.fields[0].values.map((val: string) => {
+        ...res.body.fields[0].values.map((val: any) => {
           i++;
           return {
-            text: val,
-            insertText: `"${val}" `,
+            text: val.toString(),
+            insertText: typeof val === 'string' ? `"${val}" ` : `${val} `,
             type: monaco.languages.CompletionItemKind.Value,
             detail: SuggestionItemDetailsTags.Value,
             sortText: i.toString().padStart(3, '0'),

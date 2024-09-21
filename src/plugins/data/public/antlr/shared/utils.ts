@@ -18,7 +18,7 @@ import { quotesRegex } from './constants';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestion } from '../../autocomplete';
 import { IDataPluginServices } from '../../types';
-import { UI_SETTINGS } from '../../../common';
+import { Dataset, UI_SETTINGS } from '../../../common';
 
 export interface IDataSourceRequestHandlerParams {
   dataSourceId: string;
@@ -98,7 +98,8 @@ export const fetchData = (
 export const fetchColumnValues = (
   tables: string[],
   column: string,
-  services: IDataPluginServices
+  services: IDataPluginServices,
+  dataset?: Dataset
 ) => {
   if (!services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES)) {
     return new Promise(() => []);
@@ -111,7 +112,7 @@ export const fetchColumnValues = (
       query: {
         query: `SELECT ${column} FROM ${tables[0]} GROUP BY ${column} ORDER BY COUNT(${column}) DESC LIMIT ${limit}`,
         language: 'SQL',
-        dataset: {},
+        dataset,
         format: 'jdbc',
       },
     })
