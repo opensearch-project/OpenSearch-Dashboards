@@ -40,13 +40,7 @@ import {
   getSearchService,
   getUiService,
 } from '../../services';
-import {
-  fetchDataSources,
-  fetchIndexPatterns,
-  fetchIndices,
-  isCatalogCacheFetching,
-  fetchIfExternalDataSourcesEnabled,
-} from './lib';
+import { fetchDataSources, fetchIndexPatterns, fetchIndices, isCatalogCacheFetching } from './lib';
 import { useDataSetManager } from '../search_bar/lib/use_dataset_manager';
 import { DataSetContract } from '../../query';
 
@@ -76,7 +70,6 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
   const isInitialized = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isExternalDataSourcesEnabled, setIsExternalDataSourcesEnabled] = useState(false);
   const [dataSources, setDataSources] = useState<SimpleDataSource[]>([]);
   const [externalDataSources, setExternalDataSources] = useState<SimpleDataSource[]>([]);
   const [indexPatterns, setIndexPatterns] = useState<any[]>([]);
@@ -85,6 +78,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
   const [selectedDataSetState, setSelectedDataSetState] = useState<
     SelectedDataSetState | undefined
   >(undefined);
+  const isExternalDataSourcesEnabled = externalDataSources.length > 0;
 
   const {
     loadStatus: dataSourcesLoadStatus,
@@ -104,7 +98,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
 
   const onRefresh = useCallback(() => {
     if (!isCatalogCacheFetching(dataSourcesLoadStatus) && dataSources.length > 0) {
-      startLoadingDataSources(dataSources.map((dataSource) => dataSource.id));
+      startLoadingDataSources(dataSources);
     }
   }, [dataSourcesLoadStatus, dataSources, startLoadingDataSources]);
 
@@ -158,19 +152,27 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
 
       setIsLoading(true);
       try {
-        const [
-          fetchedIndexPatterns,
-          fetchedDataSources,
-          fetchedIsExternalDataSourcesEnabled,
-        ] = await Promise.all([
+        const [fetchedIndexPatterns, fetchedDataSources] = await Promise.all([
           fetchIndexPatterns(savedObjectsClient!, ''),
           fetchDataSources(savedObjectsClient!),
-          fetchIfExternalDataSourcesEnabled(http!),
         ]);
+
+        const externalDataSourcesCache = CatalogCacheManager.getExternalDataSourcesCache();
+        if (externalDataSourcesCache.status === CachedDataSourceStatus.Updated) {
+          setExternalDataSources(
+            externalDataSourcesCache.dataSources.map((ds) => ({
+              id: ds.dataSourceRef,
+              name: ds.name,
+              type: SIMPLE_DATA_SOURCE_TYPES.EXTERNAL,
+            }))
+          );
+        } else if (fetchedDataSources.length > 0) {
+          setExternalDataSources(await startLoadingDataSources(fetchedDataSources));
+        }
 
         setIndexPatterns(fetchedIndexPatterns);
         setDataSources(fetchedDataSources);
-        setIsExternalDataSourcesEnabled(fetchedIsExternalDataSourcesEnabled);
+
         if (dataSet) {
           setSelectedDataSetState({
             id: dataSet.id,
@@ -206,7 +208,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
     const externalDataSourcesCache = CatalogCacheManager.getExternalDataSourcesCache();
     if (status === DirectQueryLoadingStatus.SUCCESS) {
       setExternalDataSources(
-        externalDataSourcesCache.externalDataSources.map((ds) => ({
+        externalDataSourcesCache.dataSources.map((ds) => ({
           id: ds.dataSourceRef,
           name: ds.name,
           type: SIMPLE_DATA_SOURCE_TYPES.EXTERNAL,
@@ -462,25 +464,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
                 {
                   name: S3DataSourcesLabel,
                   panel: 4,
-                  onClick: () => {
-                    const externalDataSourcesCache = CatalogCacheManager.getExternalDataSourcesCache();
-                    if (
-                      (externalDataSourcesCache.status === CachedDataSourceStatus.Empty ||
-                        externalDataSourcesCache.status === CachedDataSourceStatus.Failed) &&
-                      !isCatalogCacheFetching(dataSourcesLoadStatus) &&
-                      dataSources.length > 0
-                    ) {
-                      startLoadingDataSources(dataSources.map((dataSource) => dataSource.id));
-                    } else if (externalDataSourcesCache.status === CachedDataSourceStatus.Updated) {
-                      setExternalDataSources(
-                        externalDataSourcesCache.externalDataSources.map((ds) => ({
-                          id: ds.dataSourceRef,
-                          name: ds.name,
-                          type: SIMPLE_DATA_SOURCE_TYPES.EXTERNAL,
-                        }))
-                      );
-                    }
-                  },
+                  onClick: () => {},
                 },
               ]
             : []),
@@ -527,7 +511,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
         ),
         items: externalDataSources.map((dataSource) => ({
           name: dataSource.name,
-          onClick: () => handleSelectExternalDataSource(dataSource),
+          onClick: async () => await handleSelectExternalDataSource(dataSource),
           panel: 5,
         })),
         content: isCatalogCacheFetching(dataSourcesLoadStatus) && createLoadingSpinner(),
@@ -652,7 +636,6 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
       databasesLoadStatus,
       cachedTables,
       tablesLoadStatus,
-      startLoadingDataSources,
       handleSelectedDataSet,
       handleSelectedDataSource,
       handleSelectedObject,
