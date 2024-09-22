@@ -387,7 +387,7 @@ remove it, don't simply comment it out.
 
 We are gradually moving the OpenSearch Dashboards code base over to Prettier. All TypeScript code
 and some JavaScript code (check `.eslintrc.js`) is using Prettier to format code. You
-can run `node script/eslint --fix` to fix linting issues and apply Prettier formatting.
+can run `node script/eslint.js --fix` to fix linting issues and apply Prettier formatting.
 We recommend you to enable running ESLint via your IDE.
 
 Whenever possible we are trying to use Prettier and linting over written developer guide rules.
