@@ -39,6 +39,7 @@ import { configServiceMock } from '../config/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { config as RawOpenSearchDashboardsConfig } from '../opensearch_dashboards_config';
 import { mockCoreContext } from '../core_context.mock';
+import type { AxiosRequestConfig } from 'axios';
 
 const INJECTED_METADATA = {
   version: expect.any(String),
@@ -60,6 +61,15 @@ const INJECTED_METADATA = {
   },
 };
 
+const invalidSVGContainingURL = 'http://notfound.svg';
+
+jest.mock('axios', () => ({
+  get: (url: string, args: AxiosRequestConfig) =>
+    url === invalidSVGContainingURL
+      ? new Promise((_, reject) => reject('not found'))
+      : jest.requireActual('axios').default.get(url, args),
+}));
+
 const { createOpenSearchDashboardsRequest, createRawRequest } = httpServerMock;
 
 describe('RenderingService', () => {
@@ -74,6 +84,8 @@ describe('RenderingService', () => {
     jest.clearAllMocks();
     service = new RenderingService(context);
   });
+
+  afterEach(() => jest.resetModules());
 
   describe('setup()', () => {
     describe('render()', () => {
@@ -187,7 +199,7 @@ describe('RenderingService', () => {
     });
 
     it('checks invalid URL', async () => {
-      const result = await service.isUrlValid('http://notfound.svg', 'config');
+      const result = await service.isUrlValid(invalidSVGContainingURL, 'config');
       expect(result).toEqual(false);
     });
 
