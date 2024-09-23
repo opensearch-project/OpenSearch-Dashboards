@@ -77,7 +77,7 @@ export const FeatureCards = ({
                       description={link.description || ''}
                       onClick={() => navigateToApp(link.id)}
                       titleSize="xs"
-                      style={{ width: 240 }}
+                      style={{ maxWidth: 240 }}
                     />
                   </EuiFlexItem>
                 );
