@@ -117,6 +117,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🛠 Maintenance
 
  - Update oui to 1.12 ([#7865](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7865))
+ - Bump OpenSearch-Dashboards to use NodeJS v18.20.4 ([#8294](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8294))
 
 ### 🪛 Refactoring
 
