@@ -2,7 +2,7 @@
   border: none !important;
 
   .nav-link-item {
-    padding: $euiSizeXS $euiSize;
+    padding: $euiSizeXS $euiSizeS;
     border-radius: $euiSizeS;
     box-shadow: none;
     margin-bottom: 0;
@@ -10,11 +10,6 @@
 
     .nav-link-item-btn {
       margin-bottom: 0;
-      padding: 0;
-
-      &::after {
-        display: none;
-      }
     }
   }
 
@@ -31,17 +26,6 @@
     padding: $euiSizeS;
   }
 
-  .nav-link-parent-item-button {
-    > span {
-      flex-direction: row-reverse;
-
-      > * {
-        margin-right: $euiSizeS;
-        margin-left: 0;
-      }
-    }
-  }
-
   .nav-link-fake-item {
     margin-top: 0;
   }
@@ -51,15 +35,11 @@
   }
 
   .nav-nested-item {
-    margin-left: -10px;
+    padding: $euiSizeS 0;
 
-    &::after {
-      height: unset;
-    }
-
-    .nav-link-item-btn {
-      padding-left: 0;
-      padding-right: 0;
+    // The height is used to comply with the extra padding
+    &:last-of-type::after {
+      height: 50%;
     }
   }
 

@@ -110,7 +110,6 @@ export function NavGroups({
         href: undefined,
         onClick: undefined,
         className: classNames(props.className, 'nav-link-parent-item'),
-        buttonClassName: classNames(props.buttonClassName, 'nav-link-parent-item-button'),
         items: navLink.links.map((subNavLink) =>
           createSideNavItem(subNavLink, level + 1, 'nav-nested-item')
         ),

@@ -34,7 +34,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
             >
               <button
                 aria-label="pure link"
-                class="euiSideNavItemButton euiSideNavItemButton-isOpen nav-link-item-btn nav-link-parent-item-button"
+                class="euiSideNavItemButton euiSideNavItemButton-isOpen nav-link-item-btn"
                 data-test-subj="collapsibleNavAppLink-pure"
                 type="button"
               >
@@ -120,7 +120,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
             >
               <button
                 aria-label="link-in-category"
-                class="euiSideNavItemButton euiSideNavItemButton-isOpen nav-link-item-btn nav-link-parent-item-button"
+                class="euiSideNavItemButton euiSideNavItemButton-isOpen nav-link-item-btn"
                 data-test-subj="collapsibleNavAppLink-link-in-category"
                 type="button"
               >
