@@ -55,6 +55,7 @@ export interface ISearchSetup {
    */
   __enhance: (enhancements: SearchEnhancements) => void;
   getDefaultSearchInterceptor: () => ISearchInterceptor;
+  df: DataFrameService;
 }
 
 /**
