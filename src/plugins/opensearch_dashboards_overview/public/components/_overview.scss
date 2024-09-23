@@ -56,13 +56,13 @@
 
 .osdOverviewApps__item {
   .osdOverviewApps__group--primary & {
-    @include euiBreakpoint("m", "l", "xl") {
+    @include euiBreakpoint("m", "l", "xl", "xxl", "xxl") {
       max-width: calc(50% - #{$euiSizeM * 2});
     }
   }
 
   .osdOverviewApps__group--secondary & {
-    @include euiBreakpoint("m", "l", "xl") {
+    @include euiBreakpoint("m", "l", "xl", "xxl", "xxxl") {
       max-width: calc(25% - #{$euiSizeM * 2});
     }
   }
@@ -86,7 +86,7 @@
 }
 
 .osdOverviewMore__item {
-  @include euiBreakpoint("m", "l", "xl") {
+  @include euiBreakpoint("m", "l", "xl", "xxl", "xxxl") {
     max-width: calc(33.3333% - #{$euiSizeM * 2});
   }
 }
@@ -101,13 +101,13 @@
 
 .osdOverviewSupplements--noNews .osdOverviewMore {
   h2 {
-    @include euiBreakpoint("m", "l", "xl") {
+    @include euiBreakpoint("m", "l", "xl", "xxl", "xxxl") {
       text-align: center;
     }
   }
 
   .osdOverviewMore__content {
-    @include euiBreakpoint("m", "l", "xl") {
+    @include euiBreakpoint("m", "l", "xl", "xxl", "xxxl") {
       justify-content: center;
     }
   }
@@ -129,7 +129,7 @@
 }
 
 .osdOverviewDataManage__item:not(:only-child) {
-  @include euiBreakpoint("m", "l", "xl") {
+  @include euiBreakpoint("m", "l", "xl", "xxl", "xxxl") {
     flex: 0 0 calc(50% - #{$euiSizeM * 2});
   }
 }
