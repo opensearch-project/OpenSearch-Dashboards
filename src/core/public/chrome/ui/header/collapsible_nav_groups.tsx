@@ -59,8 +59,8 @@ export function NavGroups({
     return {
       id: `${link.id}-${link.title}`,
       name: (
-        <EuiText size="s">
-          <h4 style={{ fontWeight: 400 }}>{link.title}</h4>
+        <EuiText size="xs">
+          <h3>{link.title}</h3>
         </EuiText>
       ),
       onClick: euiListItem.onClick,
