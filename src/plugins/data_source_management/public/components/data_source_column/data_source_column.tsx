@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { SavedObjectsStart } from 'opensearch-dashboards/public';
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { IndexPatternTableColumn } from '../../../../index_pattern_management/public';
 import { getApplication, getDataSources } from '../utils';
@@ -38,7 +38,9 @@ export class DataSourceColumn implements IndexPatternTableColumn<DataSourceMap> 
       const { title, id } = dataSource;
 
       return (
-        <EuiLink
+        <EuiButtonEmpty
+          flush="left"
+          size="xs"
           onClick={() =>
             getApplication().navigateToApp('management', {
               path: `opensearch-dashboards/${DSM_APP_ID}/${encodeURIComponent(id)}`,
@@ -46,7 +48,7 @@ export class DataSourceColumn implements IndexPatternTableColumn<DataSourceMap> 
           }
         >
           {title}
-        </EuiLink>
+        </EuiButtonEmpty>
       );
     },
   };
