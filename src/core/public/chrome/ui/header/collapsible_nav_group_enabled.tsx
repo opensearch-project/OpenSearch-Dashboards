@@ -11,6 +11,7 @@ import {
   EuiSpacer,
   EuiHideFor,
   EuiFlyoutProps,
+  EuiShowFor,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useMemo } from 'react';
@@ -368,7 +369,7 @@ export function CollapsibleNavGroupEnabled({
   return (
     <>
       <EuiHideFor sizes={['xs', 's', 'm']}>{rendeLeftNav()}</EuiHideFor>
-      <EuiHideFor sizes={['xl', 'l', 'xxl', 'xxxl']}>
+      <EuiShowFor sizes={['xs', 's', 'm']}>
         {isNavOpen
           ? rendeLeftNav({
               type: 'overlay',
@@ -378,7 +379,7 @@ export function CollapsibleNavGroupEnabled({
               ownFocus: true,
             })
           : null}
-      </EuiHideFor>
+      </EuiShowFor>
     </>
   );
 }
