@@ -59,6 +59,7 @@ import {
 import { DataPublicPluginStart } from '../../data/public';
 import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
+import { NavigationPublicPluginStart } from '../../navigation/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { AppNavLinkStatus, WorkspaceAvailability } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH, IMPORT_SAMPLE_DATA_APP_ID } from '../common/constants';
@@ -87,6 +88,7 @@ export interface HomePluginStartDependencies {
   urlForwarding: UrlForwardingStart;
   dataSource?: DataSourcePluginStart;
   contentManagement: ContentManagementPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -214,7 +216,7 @@ export class HomePublicPlugin
         ? AppNavLinkStatus.default
         : AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, { navigation }] = await core.getStartServices();
         setCommonService();
         coreStart.chrome.docTitle.change(
           i18n.translate('home.tutorialDirectory.featureCatalogueTitle', {
@@ -222,7 +224,11 @@ export class HomePublicPlugin
           })
         );
         const { renderImportSampleDataApp } = await import('./application');
-        return await renderImportSampleDataApp(params.element, coreStart);
+        return await renderImportSampleDataApp(params.element, {
+          ...coreStart,
+          navigation,
+          setHeaderActionMenu: params.setHeaderActionMenu,
+        });
       },
     });
     urlForwarding.forwardApp('home', 'home');

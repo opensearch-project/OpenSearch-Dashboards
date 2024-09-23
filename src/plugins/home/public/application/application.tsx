@@ -31,8 +31,9 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@osd/i18n';
-import { ScopedHistory, CoreStart } from 'opensearch-dashboards/public';
+import { ScopedHistory, CoreStart, MountPoint } from 'opensearch-dashboards/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
+import { NavigationPublicPluginStart } from '../../../navigation/public';
 // @ts-ignore
 import { HomeApp, ImportSampleDataApp } from './components/home_app';
 import { getServices } from './opensearch_dashboards_services';
@@ -80,9 +81,15 @@ export const renderApp = async (
   };
 };
 
-export const renderImportSampleDataApp = async (element: HTMLElement, coreStart: CoreStart) => {
+export const renderImportSampleDataApp = async (
+  element: HTMLElement,
+  startServices: CoreStart & {
+    navigation: NavigationPublicPluginStart;
+    setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+  }
+) => {
   render(
-    <OpenSearchDashboardsContextProvider services={{ ...coreStart }}>
+    <OpenSearchDashboardsContextProvider services={startServices}>
       <ImportSampleDataApp />
     </OpenSearchDashboardsContextProvider>,
     element
