@@ -466,10 +466,10 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                       </EuiFlexGroup>
                     </EuiSearchBar>
                     <EuiSpacer
-                      size="m"
+                      size="l"
                     >
                       <div
-                        className="euiSpacer euiSpacer--m"
+                        className="euiSpacer euiSpacer--l"
                       />
                     </EuiSpacer>
                     <EuiBasicTable
@@ -1646,10 +1646,10 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                       </EuiFlexGroup>
                     </EuiSearchBar>
                     <EuiSpacer
-                      size="m"
+                      size="l"
                     >
                       <div
-                        className="euiSpacer euiSpacer--m"
+                        className="euiSpacer euiSpacer--l"
                       />
                     </EuiSpacer>
                     <EuiBasicTable
