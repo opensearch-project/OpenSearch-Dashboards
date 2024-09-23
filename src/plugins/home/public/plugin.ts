@@ -165,13 +165,21 @@ export class HomePublicPlugin
       title: 'Home',
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, { navigation }] = await core.getStartServices();
         setCommonService();
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
         );
         const { renderApp } = await import('./application');
-        return await renderApp(params.element, coreStart, params.history);
+        return await renderApp(
+          params.element,
+          {
+            ...coreStart,
+            navigation,
+            setHeaderActionMenu: params.setHeaderActionMenu,
+          },
+          params.history
+        );
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });

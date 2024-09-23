@@ -44,7 +44,10 @@ import { SearchUseCaseOverviewApp } from './components/usecase_overview/search_u
 
 export const renderApp = async (
   element: HTMLElement,
-  coreStart: CoreStart,
+  startServices: CoreStart & {
+    navigation: NavigationPublicPluginStart;
+    setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+  },
   history: ScopedHistory
 ) => {
   const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
@@ -69,7 +72,7 @@ export const renderApp = async (
   });
 
   render(
-    <OpenSearchDashboardsContextProvider services={{ ...coreStart }}>
+    <OpenSearchDashboardsContextProvider services={startServices}>
       <HomeApp directories={directories} solutions={solutions} />
     </OpenSearchDashboardsContextProvider>,
     element
