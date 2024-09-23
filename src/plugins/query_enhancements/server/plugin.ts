@@ -15,7 +15,7 @@ import {
 } from '../../../core/server';
 import { SEARCH_STRATEGY } from '../common';
 import { ConfigSchema } from '../common/config';
-import { defineRoutes } from './routes';
+import { defineRoutes, defineSearchStrategyRouteProvider } from './routes';
 import {
   pplSearchStrategyProvider,
   pplRawSearchStrategyProvider,
@@ -89,7 +89,9 @@ export class QueryEnhancementsPlugin
     });
 
     this.logger.info('queryEnhancements: Setup complete');
-    return {};
+    return {
+      defineSearchStrategyRoute: defineSearchStrategyRouteProvider(this.logger, router),
+    };
   }
 
   public start(core: CoreStart) {
