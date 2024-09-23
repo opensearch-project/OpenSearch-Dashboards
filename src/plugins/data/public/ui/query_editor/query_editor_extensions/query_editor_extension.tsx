@@ -69,6 +69,10 @@ export interface QueryEditorExtensionConfig {
    * @returns The component the query editor extension.
    */
   getBanner?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
+
+  getSearchBarButton?: (
+    dependencies: QueryEditorExtensionDependencies
+  ) => React.ReactElement | null;
 }
 const QueryEditorExtensionPortal: React.FC<{ container: Element }> = (props) => {
   if (!props.children) return null;
