@@ -60,7 +60,7 @@ export function NavGroups({
       id: `${link.id}-${link.title}`,
       name: (
         <EuiTitle size="xs">
-          {/* the inline style is required because 1. fontWeight is used  */}
+          {/* the inline style is required to overwrite the letterspacing style EuiText applies */}
           <EuiText size="s" style={{ letterSpacing: 0 }}>
             {link.title}
           </EuiText>
