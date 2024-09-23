@@ -19,7 +19,7 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_1"
-            style="width: 200px;"
+            style="max-width: 240px;"
           >
             <div
               class="euiCard__content"
@@ -29,20 +29,13 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                 id="generated-idTitle"
               >
                 <button
-                  aria-describedby=" generated-idDescription"
+                  aria-describedby=" "
                   class="euiCard__titleButton"
                 >
                   title1
                 </button>
               </span>
-              <div
-                class="euiText euiText--small euiCard__description"
-                id="generated-idDescription"
-              >
-                <p>
-                  title1
-                </p>
-              </div>
+              
             </div>
           </div>
         </div>
@@ -52,7 +45,7 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_2"
-            style="width: 200px;"
+            style="max-width: 240px;"
           >
             <div
               class="euiCard__content"
@@ -62,20 +55,13 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                 id="generated-idTitle"
               >
                 <button
-                  aria-describedby=" generated-idDescription"
+                  aria-describedby=" "
                   class="euiCard__titleButton"
                 >
                   title2
                 </button>
               </span>
-              <div
-                class="euiText euiText--small euiCard__description"
-                id="generated-idDescription"
-              >
-                <p>
-                  title2
-                </p>
-              </div>
+              
             </div>
           </div>
         </div>
@@ -85,7 +71,7 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_3"
-            style="width: 200px;"
+            style="max-width: 240px;"
           >
             <div
               class="euiCard__content"
@@ -95,20 +81,13 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                 id="generated-idTitle"
               >
                 <button
-                  aria-describedby=" generated-idDescription"
+                  aria-describedby=" "
                   class="euiCard__titleButton"
                 >
                   title3
                 </button>
               </span>
-              <div
-                class="euiText euiText--small euiCard__description"
-                id="generated-idDescription"
-              >
-                <p>
-                  title3
-                </p>
-              </div>
+              
             </div>
           </div>
         </div>
@@ -118,7 +97,7 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_4"
-            style="width: 200px;"
+            style="max-width: 240px;"
           >
             <div
               class="euiCard__content"
@@ -128,20 +107,13 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                 id="generated-idTitle"
               >
                 <button
-                  aria-describedby=" generated-idDescription"
+                  aria-describedby=" "
                   class="euiCard__titleButton"
                 >
                   title4
                 </button>
               </span>
-              <div
-                class="euiText euiText--small euiCard__description"
-                id="generated-idDescription"
-              >
-                <p>
-                  title4
-                </p>
-              </div>
+              
             </div>
           </div>
         </div>
@@ -151,7 +123,7 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_5"
-            style="width: 200px;"
+            style="max-width: 240px;"
           >
             <div
               class="euiCard__content"
@@ -161,20 +133,13 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                 id="generated-idTitle"
               >
                 <button
-                  aria-describedby=" generated-idDescription"
+                  aria-describedby=" "
                   class="euiCard__titleButton"
                 >
                   title5
                 </button>
               </span>
-              <div
-                class="euiText euiText--small euiCard__description"
-                id="generated-idDescription"
-              >
-                <p>
-                  title5
-                </p>
-              </div>
+              
             </div>
           </div>
         </div>
@@ -201,7 +166,7 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_category-1"
-            style="width: 200px;"
+            style="max-width: 240px;"
           >
             <div
               class="euiCard__content"
@@ -211,20 +176,13 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                 id="generated-idTitle"
               >
                 <button
-                  aria-describedby=" generated-idDescription"
+                  aria-describedby=" "
                   class="euiCard__titleButton"
                 >
                   title1
                 </button>
               </span>
-              <div
-                class="euiText euiText--small euiCard__description"
-                id="generated-idDescription"
-              >
-                <p>
-                  title1
-                </p>
-              </div>
+              
             </div>
           </div>
         </div>
@@ -234,7 +192,7 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_category-2"
-            style="width: 200px;"
+            style="max-width: 240px;"
           >
             <div
               class="euiCard__content"
@@ -244,20 +202,13 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                 id="generated-idTitle"
               >
                 <button
-                  aria-describedby=" generated-idDescription"
+                  aria-describedby=" "
                   class="euiCard__titleButton"
                 >
                   title2
                 </button>
               </span>
-              <div
-                class="euiText euiText--small euiCard__description"
-                id="generated-idDescription"
-              >
-                <p>
-                  title2
-                </p>
-              </div>
+              
             </div>
           </div>
         </div>
@@ -267,7 +218,7 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_category-3"
-            style="width: 200px;"
+            style="max-width: 240px;"
           >
             <div
               class="euiCard__content"
@@ -277,20 +228,13 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                 id="generated-idTitle"
               >
                 <button
-                  aria-describedby=" generated-idDescription"
+                  aria-describedby=" "
                   class="euiCard__titleButton"
                 >
                   title3
                 </button>
               </span>
-              <div
-                class="euiText euiText--small euiCard__description"
-                id="generated-idDescription"
-              >
-                <p>
-                  title3
-                </p>
-              </div>
+              
             </div>
           </div>
         </div>
@@ -300,7 +244,7 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_category-4"
-            style="width: 200px;"
+            style="max-width: 240px;"
           >
             <div
               class="euiCard__content"
@@ -310,20 +254,13 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                 id="generated-idTitle"
               >
                 <button
-                  aria-describedby=" generated-idDescription"
+                  aria-describedby=" "
                   class="euiCard__titleButton"
                 >
                   title4
                 </button>
               </span>
-              <div
-                class="euiText euiText--small euiCard__description"
-                id="generated-idDescription"
-              >
-                <p>
-                  title4
-                </p>
-              </div>
+              
             </div>
           </div>
         </div>
@@ -333,7 +270,7 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
           <div
             class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
             data-test-subj="landingPageFeature_category-5"
-            style="width: 200px;"
+            style="max-width: 240px;"
           >
             <div
               class="euiCard__content"
@@ -343,20 +280,13 @@ exports[`<FeatureCards /> render with complex navLinks 1`] = `
                 id="generated-idTitle"
               >
                 <button
-                  aria-describedby=" generated-idDescription"
+                  aria-describedby=" "
                   class="euiCard__titleButton"
                 >
                   title5
                 </button>
               </span>
-              <div
-                class="euiText euiText--small euiCard__description"
-                id="generated-idDescription"
-              >
-                <p>
-                  title5
-                </p>
-              </div>
+              
             </div>
           </div>
         </div>

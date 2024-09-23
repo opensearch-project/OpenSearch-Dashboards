@@ -51,11 +51,10 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                       title="link-in-all"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--small euiTitle euiTitle--xsmall"
+                        style="letter-spacing: 0;"
                       >
-                        <h3>
-                          link-in-all
-                        </h3>
+                        link-in-all
                       </div>
                     </span>
                   </span>
@@ -103,11 +102,10 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                           title="link-in-observability"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small euiTitle euiTitle--xsmall"
+                            style="letter-spacing: 0;"
                           >
-                            <h3>
-                              link-in-observability
-                            </h3>
+                            link-in-observability
                           </div>
                         </span>
                       </span>
@@ -136,11 +134,10 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                               class="euiTextColor euiTextColor--success"
                             >
                               <div
-                                class="euiText euiText--extraSmall"
+                                class="euiText euiText--small euiTitle euiTitle--xsmall"
+                                style="letter-spacing: 0;"
                               >
-                                <h3>
-                                  See all...
-                                </h3>
+                                See all...
                               </div>
                             </div>
                           </div>
@@ -192,11 +189,10 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                           title="link-in-essentials"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small euiTitle euiTitle--xsmall"
+                            style="letter-spacing: 0;"
                           >
-                            <h3>
-                              link-in-essentials
-                            </h3>
+                            link-in-essentials
                           </div>
                         </span>
                       </span>
@@ -225,11 +221,10 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                               class="euiTextColor euiTextColor--success"
                             >
                               <div
-                                class="euiText euiText--extraSmall"
+                                class="euiText euiText--small euiTitle euiTitle--xsmall"
+                                style="letter-spacing: 0;"
                               >
-                                <h3>
-                                  See all...
-                                </h3>
+                                See all...
                               </div>
                             </div>
                           </div>
@@ -329,11 +324,10 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case by default and 
                       title="link-in-essentials"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--small euiTitle euiTitle--xsmall"
+                        style="letter-spacing: 0;"
                       >
-                        <h3>
-                          link-in-essentials
-                        </h3>
+                        link-in-essentials
                       </div>
                     </span>
                   </span>
@@ -405,11 +399,10 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case when current na
                       title="link-in-essentials"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--small euiTitle euiTitle--xsmall"
+                        style="letter-spacing: 0;"
                       >
-                        <h3>
-                          link-in-essentials
-                        </h3>
+                        link-in-essentials
                       </div>
                     </span>
                   </span>
