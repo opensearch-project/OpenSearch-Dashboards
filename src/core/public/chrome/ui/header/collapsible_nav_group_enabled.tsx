@@ -368,7 +368,7 @@ export function CollapsibleNavGroupEnabled({
   return (
     <>
       <EuiHideFor sizes={['xs', 's', 'm']}>{rendeLeftNav()}</EuiHideFor>
-      <EuiHideFor sizes={['xl', 'l']}>
+      <EuiHideFor sizes={['xl', 'l', 'xxl', 'xxxl']}>
         {isNavOpen
           ? rendeLeftNav({
               type: 'overlay',
