@@ -36,9 +36,11 @@ export interface DatasetTypeConfig {
   fetch: (services: IDataPluginServices, path: DataStructure[]) => Promise<DataStructure>;
   /**
    * Fetches fields for the dataset.
+   * @param {IDataPluginServices} services - The data plugin services.
+   * @param {Dataset} dataset - The current dataset.
    * @returns {Promise<DatasetField[]>} A promise that resolves to an array of DatasetFields.
    */
-  fetchFields: (dataset: Dataset) => Promise<DatasetField[]>;
+  fetchFields: (services: IDataPluginServices, dataset: Dataset) => Promise<DatasetField[]>;
   /**
    * Retrieves the supported query languages for this dataset type.
    * @returns {Promise<string[]>} A promise that resolves to an array of supported language ids.

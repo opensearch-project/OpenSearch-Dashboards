@@ -13,6 +13,7 @@ import {
   UI_SETTINGS,
   DataStorage,
   CachedDataStructure,
+  DataStructureCustomMeta,
 } from '../../../../common';
 import { DatasetTypeConfig } from './types';
 import { indexPatternTypeConfig, indexTypeConfig } from './lib';
@@ -62,7 +63,7 @@ export class DatasetService {
     return this.defaultDataset;
   }
 
-  public async cacheDataset(dataset: Dataset): Promise<void> {
+  public async cacheDataset(services: IDataPluginServices, dataset: Dataset): Promise<void> {
     const type = this.getType(dataset.type);
     if (dataset) {
       const spec = {
@@ -72,7 +73,7 @@ export class DatasetService {
           name: dataset.timeFieldName,
           type: 'date',
         } as Partial<IFieldType>,
-        fields: await type?.fetchFields(dataset),
+        fields: await type?.fetchFields(services, dataset),
         dataSourceRef: dataset.dataSource
           ? {
               id: dataset.dataSource.id!,
@@ -143,6 +144,9 @@ export class DatasetService {
   }
 
   private cacheDataStructure(dataType: string, dataStructure: DataStructure) {
+    const isCacheable = (dataStructure.meta as DataStructureCustomMeta)?.isCacheable ?? true;
+    if (!isCacheable) return;
+
     const cachedDataStructure: CachedDataStructure = {
       id: dataStructure.id,
       title: dataStructure.title,

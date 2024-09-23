@@ -52,6 +52,7 @@ export const AdvancedSelector = ({
 
   return selectedDataset ? (
     <Configurator
+      services={services}
       baseDataset={selectedDataset}
       onConfirm={onSelect}
       onCancel={onCancel}

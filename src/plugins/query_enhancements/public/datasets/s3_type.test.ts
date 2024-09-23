@@ -146,7 +146,7 @@ describe('s3TypeConfig', () => {
 
   test('fetchFields returns empty array', async () => {
     const mockDataset: Dataset = { id: 'table1', title: 'Table 1', type: 'S3' };
-    const result = await s3TypeConfig.fetchFields(mockDataset);
+    const result = await s3TypeConfig.fetchFields(mockServices as IDataPluginServices, mockDataset);
 
     expect(result).toEqual([]);
   });

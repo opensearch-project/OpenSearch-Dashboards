@@ -55,7 +55,7 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     };
   },
 
-  fetchFields: async (dataset: Dataset): Promise<DatasetField[]> => {
+  fetchFields: async (_, dataset: Dataset): Promise<DatasetField[]> => {
     const indexPattern = await getIndexPatterns().get(dataset.id);
     return indexPattern.fields.map((field: any) => ({
       name: field.name,

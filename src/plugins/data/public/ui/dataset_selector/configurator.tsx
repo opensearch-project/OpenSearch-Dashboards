@@ -21,13 +21,16 @@ import { FormattedMessage } from '@osd/i18n/react';
 import React, { useEffect, useState } from 'react';
 import { BaseDataset, Dataset, DatasetField } from '../../../common';
 import { getIndexPatterns, getQueryService } from '../../services';
+import { IDataPluginServices } from '../../types';
 
 export const Configurator = ({
+  services,
   baseDataset,
   onConfirm,
   onCancel,
   onPrevious,
 }: {
+  services: IDataPluginServices;
   baseDataset: BaseDataset;
   onConfirm: (dataset: Dataset) => void;
   onCancel: () => void;
@@ -56,14 +59,14 @@ export const Configurator = ({
       const datasetFields = await queryString
         .getDatasetService()
         .getType(baseDataset.type)
-        ?.fetchFields(baseDataset);
+        ?.fetchFields(services, baseDataset);
 
       const dateFields = datasetFields?.filter((field) => field.type === 'date');
       setTimeFields(dateFields || []);
     };
 
     fetchFields();
-  }, [baseDataset, indexPatternsService, queryString]);
+  }, [baseDataset, indexPatternsService, queryString, services]);
 
   return (
     <>
@@ -161,7 +164,7 @@ export const Configurator = ({
         </EuiButton>
         <EuiButton
           onClick={async () => {
-            await queryString.getDatasetService().cacheDataset(dataset);
+            await queryString.getDatasetService().cacheDataset(services, dataset);
             onConfirm(dataset);
           }}
           fill

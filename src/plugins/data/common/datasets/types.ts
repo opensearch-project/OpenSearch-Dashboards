@@ -160,6 +160,7 @@ export interface DataStructureCustomMeta {
   icon?: EuiIconProps;
   tooltip?: string;
   updatedAt?: number;
+  isCacheable?: boolean;
   [key: string]: any;
 }
 

@@ -82,6 +82,14 @@ export const s3TypeConfig: DatasetTypeConfig = {
           children: tables,
         };
       }
+      case 'TABLE': {
+        const fields = await fetchFields(http, path);
+        return {
+          ...dataStructure,
+          hasNext: false,
+          children: fields,
+        };
+      }
       default: {
         const dataSources = await fetchDataSources(client);
         return {
@@ -94,7 +102,46 @@ export const s3TypeConfig: DatasetTypeConfig = {
     }
   },
 
-  fetchFields: async (dataset: Dataset): Promise<DatasetField[]> => {
+  fetchFields: async (services: IDataPluginServices, dataset: Dataset): Promise<DatasetField[]> => {
+    const datasetService = services.data.query.queryString.getDatasetService();
+
+    // re-construct the data structure path from the dataset
+    const path: DataStructure[] = [];
+    if (dataset.dataSource) {
+      path.push({
+        id: dataset.dataSource.id!,
+        title: dataset.dataSource.title,
+        type: 'DATA_SOURCE',
+      });
+    }
+
+    const [connection, database, table] = dataset.title.split('.');
+    path.push(
+      {
+        id: `${dataset.dataSource?.id}::${connection}`,
+        title: connection,
+        type: 'CONNECTION',
+        meta: dataset.dataSource?.meta as DataStructureCustomMeta,
+      },
+      {
+        id: `${dataset.dataSource?.id}::${connection}.${database}`,
+        title: database,
+        type: 'DATABASE',
+      },
+      { id: dataset.id, title: table, type: 'TABLE' }
+    );
+
+    const dataStructure = await datasetService.fetchOptions(services, path, DATASET.S3);
+    if (
+      dataStructure.children &&
+      dataStructure.children.length > 0 &&
+      dataStructure.children[0].type === 'FIELD'
+    ) {
+      return dataStructure.children.map((field) => ({
+        name: field.title,
+        type: (field.meta as DataStructureCustomMeta).fieldType || 'unknown',
+      }));
+    }
     return [];
   },
 
@@ -106,7 +153,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
 const fetch = async (
   http: HttpSetup,
   path: DataStructure[],
-  type: 'DATABASE' | 'TABLE'
+  type: 'DATABASE' | 'TABLE' | 'FIELD'
 ): Promise<DataStructure[]> => {
   const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
   const connection = path.find((ds) => ds.type === 'CONNECTION');
@@ -246,4 +293,31 @@ const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<Data
   database.meta = setMeta(database, response);
 
   return fetch(http, path, 'TABLE');
+};
+
+const fetchFields = async (http: HttpSetup, path: DataStructure[]): Promise<DataStructure[]> => {
+  const abortController = new AbortController();
+  const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
+  const connection = path.find((ds) => ds.type === 'CONNECTION');
+  const database = path.find((ds) => ds.type === 'DATABASE');
+  const sessionId = (connection?.meta as DataStructureCustomMeta).sessionId;
+  const table = path[path.length - 1];
+  const response = await http.fetch({
+    method: 'POST',
+    path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
+    body: JSON.stringify({
+      lang: 'sql',
+      query: `DESCRIBE ${database?.title}.${table.title}`,
+      datasource: connection?.title,
+      ...(sessionId && { sessionId }),
+    }),
+    query: {
+      id: dataSource?.id,
+    },
+    signal: abortController.signal,
+  });
+
+  table.meta = setMeta(table, response);
+
+  return fetch(http, path, 'FIELD');
 };
