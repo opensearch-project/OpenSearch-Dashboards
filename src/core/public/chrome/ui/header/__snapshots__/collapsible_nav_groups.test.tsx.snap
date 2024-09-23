@@ -46,10 +46,13 @@ exports[`<NavGroups /> should render correctly 1`] = `
                     title="pure link"
                   >
                     <div
-                      class="euiText euiText--extraSmall"
-                      style="font-size: 14px; line-height: 16px; font-weight: 400;"
+                      class="euiText euiText--small"
                     >
-                      pure link
+                      <h4
+                        style="font-weight: 400;"
+                      >
+                        pure link
+                      </h4>
                     </div>
                   </span>
                   <span
@@ -77,10 +80,13 @@ exports[`<NavGroups /> should render correctly 1`] = `
                         title="subLink"
                       >
                         <div
-                          class="euiText euiText--extraSmall"
-                          style="font-size: 14px; line-height: 16px; font-weight: 400;"
+                          class="euiText euiText--small"
                         >
-                          subLink
+                          <h4
+                            style="font-weight: 400;"
+                          >
+                            subLink
+                          </h4>
                         </div>
                       </span>
                     </span>
@@ -132,10 +138,13 @@ exports[`<NavGroups /> should render correctly 1`] = `
                     title="link-in-category"
                   >
                     <div
-                      class="euiText euiText--extraSmall"
-                      style="font-size: 14px; line-height: 16px; font-weight: 400;"
+                      class="euiText euiText--small"
                     >
-                      link-in-category
+                      <h4
+                        style="font-weight: 400;"
+                      >
+                        link-in-category
+                      </h4>
                     </div>
                   </span>
                   <span
@@ -163,10 +172,13 @@ exports[`<NavGroups /> should render correctly 1`] = `
                         title="sub-link-in-category"
                       >
                         <div
-                          class="euiText euiText--extraSmall"
-                          style="font-size: 14px; line-height: 16px; font-weight: 400;"
+                          class="euiText euiText--small"
                         >
-                          sub-link-in-category
+                          <h4
+                            style="font-weight: 400;"
+                          >
+                            sub-link-in-category
+                          </h4>
                         </div>
                       </span>
                     </span>
@@ -191,10 +203,13 @@ exports[`<NavGroups /> should render correctly 1`] = `
                     title="link-in-category-2"
                   >
                     <div
-                      class="euiText euiText--extraSmall"
-                      style="font-size: 14px; line-height: 16px; font-weight: 400;"
+                      class="euiText euiText--small"
                     >
-                      link-in-category-2
+                      <h4
+                        style="font-weight: 400;"
+                      >
+                        link-in-category-2
+                      </h4>
                     </div>
                   </span>
                 </span>
