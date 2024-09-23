@@ -21,6 +21,7 @@ import { SelectElementsContext } from "./OpenSearchSQLParser.js";
 import { SelectElementContext } from "./OpenSearchSQLParser.js";
 import { FromClauseContext } from "./OpenSearchSQLParser.js";
 import { TableAsRelationContext } from "./OpenSearchSQLParser.js";
+import { SubqueryAsRelationContext } from "./OpenSearchSQLParser.js";
 import { WhereClauseContext } from "./OpenSearchSQLParser.js";
 import { GroupByClauseContext } from "./OpenSearchSQLParser.js";
 import { GroupByElementsContext } from "./OpenSearchSQLParser.js";
@@ -67,7 +68,6 @@ import { IsNullPredicateContext } from "./OpenSearchSQLParser.js";
 import { LikePredicateContext } from "./OpenSearchSQLParser.js";
 import { RegexpPredicateContext } from "./OpenSearchSQLParser.js";
 import { ExpressionsContext } from "./OpenSearchSQLParser.js";
-import { ConstantExpressionAtomContext } from "./OpenSearchSQLParser.js";
 import { FunctionCallExpressionAtomContext } from "./OpenSearchSQLParser.js";
 import { FullColumnNameExpressionAtomContext } from "./OpenSearchSQLParser.js";
 import { NestedExpressionAtomContext } from "./OpenSearchSQLParser.js";
@@ -273,6 +273,13 @@ export class OpenSearchSQLParserVisitor<Result> extends AbstractParseTreeVisitor
      * @return the visitor result
      */
     visitTableAsRelation?: (ctx: TableAsRelationContext) => Result;
+    /**
+     * Visit a parse tree produced by the `subqueryAsRelation`
+     * labeled alternative in `OpenSearchSQLParser.relation`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitSubqueryAsRelation?: (ctx: SubqueryAsRelationContext) => Result;
     /**
      * Visit a parse tree produced by `OpenSearchSQLParser.whereClause`.
      * @param ctx the parse tree
@@ -569,13 +576,6 @@ export class OpenSearchSQLParserVisitor<Result> extends AbstractParseTreeVisitor
      * @return the visitor result
      */
     visitExpressions?: (ctx: ExpressionsContext) => Result;
-    /**
-     * Visit a parse tree produced by the `constantExpressionAtom`
-     * labeled alternative in `OpenSearchSQLParser.expressionAtom`.
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    visitConstantExpressionAtom?: (ctx: ConstantExpressionAtomContext) => Result;
     /**
      * Visit a parse tree produced by the `functionCallExpressionAtom`
      * labeled alternative in `OpenSearchSQLParser.expressionAtom`.

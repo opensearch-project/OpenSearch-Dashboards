@@ -48,28 +48,28 @@ export const getSuggestions = async ({
       finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} = `));
     }
 
-    // if (suggestions.suggestValuesForColumn) {
-    //   const res = await fetchColumnValues(
-    //     [indexPattern.title],
-    //     suggestions.suggestValuesForColumn,
-    //     services,
-    //     dataset
-    //   );
+    if (suggestions.suggestValuesForColumn) {
+      const res = await fetchColumnValues(
+        [indexPattern.title],
+        suggestions.suggestValuesForColumn,
+        services,
+        dataset
+      );
 
-    //   let i = 0;
-    //   finalSuggestions.push(
-    //     ...res.body.fields[0].values.map((val: any) => {
-    //       i++;
-    //       return {
-    //         text: val.toString(),
-    //         insertText: typeof val === 'string' ? `"${val}" ` : `${val} `,
-    //         type: monaco.languages.CompletionItemKind.Value,
-    //         detail: SuggestionItemDetailsTags.Value,
-    //         sortText: i.toString().padStart(3, '0'),
-    //       };
-    //     })
-    //   );
-    // }
+      let i = 0;
+      finalSuggestions.push(
+        ...res.body.fields[0].values.map((val: any) => {
+          i++;
+          return {
+            text: val.toString(),
+            insertText: typeof val === 'string' ? `"${val}" ` : `${val} `,
+            type: monaco.languages.CompletionItemKind.Value,
+            detail: SuggestionItemDetailsTags.Value,
+            sortText: i.toString().padStart(3, '0'),
+          };
+        })
+      );
+    }
 
     // Fill in aggregate functions
     if (suggestions.suggestAggregateFunctions) {
