@@ -45,7 +45,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classnames from 'classnames';
-import React, { createRef, useMemo, useState } from 'react';
+import React, { createRef, useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { LoadingIndicator } from '../';
@@ -122,6 +122,7 @@ export interface HeaderProps {
   workspaceList$: Observable<WorkspaceObject[]>;
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
+  storage?: Storage;
 }
 
 const hasValue = (value: any) => {
@@ -147,12 +148,16 @@ export function Header({
   navGroupEnabled,
   setCurrentNavGroup,
   useUpdatedHeader,
+  storage = window.localStorage,
   ...observables
 }: HeaderProps) {
+  const storageKey = `core.leftNav.navGroupEnabled-${!!navGroupEnabled}.isNavOpen`;
   const isVisible = useObservable(observables.isVisible$, false);
   const headerVariant = useObservable(observables.headerVariant$, HeaderVariant.PAGE);
   const isLocked = useObservable(observables.isLocked$, false);
-  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isNavOpen, setIsNavOpenState] = useState(
+    localStorage.getItem(storageKey) === 'true' ? true : false
+  );
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
   const breadcrumbs = useObservable(observables.breadcrumbs$, []);
   const currentWorkspace = useObservable(observables.currentWorkspace$, undefined);
@@ -160,6 +165,16 @@ export function Header({
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
   }, [sidecarConfig]);
+
+  const setIsNavOpen = useCallback(
+    (value) => {
+      setIsNavOpenState(value);
+      if (navGroupEnabled) {
+        storage.setItem(storageKey, JSON.stringify(value));
+      }
+    },
+    [setIsNavOpenState, navGroupEnabled, storageKey, storage]
+  );
 
   if (!isVisible) {
     return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
