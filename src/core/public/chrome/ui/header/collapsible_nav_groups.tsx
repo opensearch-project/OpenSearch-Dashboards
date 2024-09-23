@@ -4,7 +4,7 @@
  */
 
 import './collapsible_nav_group_enabled.scss';
-import { EuiFlexItem, EuiSideNavItemType, EuiSideNav, EuiText } from '@elastic/eui';
+import { EuiFlexItem, EuiSideNavItemType, EuiSideNav, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import classNames from 'classnames';
@@ -59,8 +59,8 @@ export function NavGroups({
     return {
       id: `${link.id}-${link.title}`,
       name: (
-        <EuiText size="xs" style={{ fontSize: '14px', lineHeight: '16px', fontWeight: 400 }}>
-          {link.title}
+        <EuiText size="s">
+          <h4 style={{ fontWeight: 400 }}>{link.title}</h4>
         </EuiText>
       ),
       onClick: euiListItem.onClick,

@@ -1,13 +1,8 @@
 .context-nav-wrapper {
   border: none !important;
 
-  .leftNavGroupTitle {
-    font-weight: 400;
-    font-size: 18px;
-  }
-
   .nav-link-item {
-    padding: $euiSizeS $euiSize;
+    padding: $euiSizeXS $euiSize;
     border-radius: $euiSizeS;
     font-size: 14px;
     box-shadow: none;

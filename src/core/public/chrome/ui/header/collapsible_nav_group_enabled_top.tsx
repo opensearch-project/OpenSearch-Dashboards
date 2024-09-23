@@ -14,7 +14,7 @@ import {
   EuiIcon,
   EuiPanel,
   EuiSpacer,
-  EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { InternalApplicationStart } from 'src/core/public/application';
 import { createEuiListItem } from './nav_link';
@@ -150,7 +150,9 @@ export const CollapsibleNavTop = ({
       {currentNavGroup?.title && (
         <>
           <EuiSpacer />
-          <EuiText className="leftNavGroupTitle">{currentNavGroup?.title}</EuiText>
+          <EuiTitle size="s">
+            <h3>{currentNavGroup?.title}</h3>
+          </EuiTitle>
         </>
       )}
     </EuiPanel>
