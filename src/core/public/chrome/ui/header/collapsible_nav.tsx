@@ -282,7 +282,7 @@ export function CollapsibleNav({
         ))}
 
         {/* Docking button only for larger screens that can support it*/}
-        <EuiShowFor sizes={['l', 'xl']}>
+        <EuiShowFor sizes={['l', 'xl', 'xxl', 'xxxl']}>
           <EuiCollapsibleNavGroup>
             <EuiListGroup flush>
               <EuiListGroupItem

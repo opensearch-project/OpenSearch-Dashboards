@@ -1860,6 +1860,8 @@ exports[`CollapsibleNav renders links grouped by category 1`] = `
                 Array [
                   "l",
                   "xl",
+                  "xxl",
+                  "xxxl",
                 ]
               }
             >
@@ -3065,6 +3067,8 @@ exports[`CollapsibleNav renders the default nav 3`] = `
                 Array [
                   "l",
                   "xl",
+                  "xxl",
+                  "xxxl",
                 ]
               }
             >
@@ -4182,6 +4186,8 @@ exports[`CollapsibleNav with custom branding renders the nav bar in dark mode 1`
                 Array [
                   "l",
                   "xl",
+                  "xxl",
+                  "xxxl",
                 ]
               }
             >
@@ -5298,6 +5304,8 @@ exports[`CollapsibleNav with custom branding renders the nav bar in default mode
                 Array [
                   "l",
                   "xl",
+                  "xxl",
+                  "xxxl",
                 ]
               }
             >
@@ -6407,6 +6415,8 @@ exports[`CollapsibleNav without custom branding renders the nav bar in dark mode
                 Array [
                   "l",
                   "xl",
+                  "xxl",
+                  "xxxl",
                 ]
               }
             >
@@ -7512,6 +7522,8 @@ exports[`CollapsibleNav without custom branding renders the nav bar in default m
                 Array [
                   "l",
                   "xl",
+                  "xxl",
+                  "xxxl",
                 ]
               }
             >
