@@ -137,7 +137,12 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     const menuClassName = classNames(className, { osdTopNavMenuSpread: spreadSections });
 
     return (
-      <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={menuClassName}>
+      <EuiHeaderLinks
+        data-test-subj="top-nav"
+        gutterSize="xs"
+        className={menuClassName}
+        popoverBreakpoints={'none'}
+      >
         {renderItems()}
         {renderDataSourceMenu()}
       </EuiHeaderLinks>
@@ -179,8 +184,12 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                     <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                       <EuiText size="s">{screenTitle}</EuiText>
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>{renderMenu(menuClassName)}</EuiFlexItem>
-                    <EuiFlexItem>{renderSearchBar({ isFilterBarPortable: true })}</EuiFlexItem>
+                    <EuiFlexItem grow={false} className="osdTopNavMenu">
+                      {renderMenu(menuClassName)}
+                    </EuiFlexItem>
+                    <EuiFlexItem className="osdTopNavSearchBar">
+                      {renderSearchBar({ isFilterBarPortable: true })}
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 </MountPointPortal>
               </>
@@ -194,7 +203,9 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                   <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                     <EuiText size="s">{screenTitle}</EuiText>
                   </EuiFlexItem>
-                  <EuiFlexItem>{renderMenu(menuClassName, true)}</EuiFlexItem>
+                  <EuiFlexItem className="osdTopNavMenu">
+                    {renderMenu(menuClassName, true)}
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </MountPointPortal>
             ) : (
@@ -212,7 +223,9 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                     <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
                       <EuiText size="s">{screenTitle}</EuiText>
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>{renderMenu(menuClassName)}</EuiFlexItem>
+                    <EuiFlexItem grow={false} className="osdTopNavMenu">
+                      {renderMenu(menuClassName)}
+                    </EuiFlexItem>
                     <EuiFlexItem className="globalDatePicker">
                       <div ref={datePickerRef} />
                     </EuiFlexItem>

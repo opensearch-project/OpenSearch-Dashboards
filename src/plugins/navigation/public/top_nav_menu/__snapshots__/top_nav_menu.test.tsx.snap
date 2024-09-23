@@ -6,6 +6,7 @@ exports[`TopNavMenu mounts the data source menu as well as top nav menu 1`] = `
     className="osdTopNavMenu"
     data-test-subj="top-nav"
     gutterSize="xs"
+    popoverBreakpoints="none"
   >
     <TopNavMenuItem
       disableButton={false}
@@ -74,6 +75,7 @@ exports[`TopNavMenu mounts the data source menu if showDataSourceMenu is true 1`
     className="osdTopNavMenu"
     data-test-subj="top-nav"
     gutterSize="xs"
+    popoverBreakpoints="none"
   >
     <Component
       componentConfig={

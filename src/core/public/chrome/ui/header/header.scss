@@ -112,7 +112,7 @@
 }
 
 /* Control flex items to wrap when the viewport is less than the medium size */
-@media (max-width: 768px) {
+@include euiBreakpoint("s", "xs") {
   .secondaryPageHeaderFlexGroup {
     display: flex;
     flex-direction: column;
