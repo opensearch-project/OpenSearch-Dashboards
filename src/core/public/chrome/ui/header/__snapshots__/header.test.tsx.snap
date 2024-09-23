@@ -10452,7 +10452,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
               aria-expanded={false}
               aria-label="Toggle primary navigation"
               aria-pressed={false}
-              className="newAppTopNavExpander navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l"
+              className="newAppTopNavExpander navToggleInSmallScreen eui-hideFor--xxxl eui-hideFor--xxl eui-hideFor--xl eui-hideFor--l"
               data-test-subj="toggleNavButton"
               flush="both"
               isSmallScreen={true}
@@ -10470,7 +10470,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                       aria-expanded="false"
                       aria-label="Toggle primary navigation"
                       aria-pressed="false"
-                      class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushBoth euiHeaderSectionItemButton newAppTopNavExpander navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l"
+                      class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushBoth euiHeaderSectionItemButton newAppTopNavExpander navToggleInSmallScreen eui-hideFor--xxxl eui-hideFor--xxl eui-hideFor--xl eui-hideFor--l"
                       data-test-subj="toggleNavButton"
                       type="button"
                     >
@@ -10501,7 +10501,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                     </button>,
                   }
                 }
-                className="euiHeaderSectionItemButton newAppTopNavExpander navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l"
+                className="euiHeaderSectionItemButton newAppTopNavExpander navToggleInSmallScreen eui-hideFor--xxxl eui-hideFor--xxl eui-hideFor--xl eui-hideFor--l"
                 color="text"
                 data-test-subj="toggleNavButton"
                 flush="both"
@@ -10513,7 +10513,7 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                   aria-expanded={false}
                   aria-label="Toggle primary navigation"
                   aria-pressed={false}
-                  className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushBoth euiHeaderSectionItemButton newAppTopNavExpander navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l"
+                  className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushBoth euiHeaderSectionItemButton newAppTopNavExpander navToggleInSmallScreen eui-hideFor--xxxl eui-hideFor--xxl eui-hideFor--xl eui-hideFor--l"
                   data-test-subj="toggleNavButton"
                   disabled={false}
                   isSmallScreen={true}
@@ -19326,7 +19326,7 @@ exports[`Header renders page header with application title 1`] = `
               aria-expanded={false}
               aria-label="Toggle primary navigation"
               aria-pressed={false}
-              className="newPageTopNavExpander navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l"
+              className="newPageTopNavExpander navToggleInSmallScreen eui-hideFor--xxxl eui-hideFor--xxl eui-hideFor--xl eui-hideFor--l"
               data-test-subj="toggleNavButton"
               flush="both"
               isSmallScreen={true}
@@ -19344,7 +19344,7 @@ exports[`Header renders page header with application title 1`] = `
                       aria-expanded="false"
                       aria-label="Toggle primary navigation"
                       aria-pressed="false"
-                      class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushBoth euiHeaderSectionItemButton newPageTopNavExpander navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l"
+                      class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushBoth euiHeaderSectionItemButton newPageTopNavExpander navToggleInSmallScreen eui-hideFor--xxxl eui-hideFor--xxl eui-hideFor--xl eui-hideFor--l"
                       data-test-subj="toggleNavButton"
                       type="button"
                     >
@@ -19375,7 +19375,7 @@ exports[`Header renders page header with application title 1`] = `
                     </button>,
                   }
                 }
-                className="euiHeaderSectionItemButton newPageTopNavExpander navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l"
+                className="euiHeaderSectionItemButton newPageTopNavExpander navToggleInSmallScreen eui-hideFor--xxxl eui-hideFor--xxl eui-hideFor--xl eui-hideFor--l"
                 color="text"
                 data-test-subj="toggleNavButton"
                 flush="both"
@@ -19387,7 +19387,7 @@ exports[`Header renders page header with application title 1`] = `
                   aria-expanded={false}
                   aria-label="Toggle primary navigation"
                   aria-pressed={false}
-                  className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushBoth euiHeaderSectionItemButton newPageTopNavExpander navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l"
+                  className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushBoth euiHeaderSectionItemButton newPageTopNavExpander navToggleInSmallScreen eui-hideFor--xxxl eui-hideFor--xxl eui-hideFor--xl eui-hideFor--l"
                   data-test-subj="toggleNavButton"
                   disabled={false}
                   isSmallScreen={true}
