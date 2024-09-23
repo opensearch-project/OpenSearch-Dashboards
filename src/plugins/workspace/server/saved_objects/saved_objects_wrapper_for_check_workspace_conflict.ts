@@ -17,7 +17,7 @@ import {
   SavedObjectsCheckConflictsResponse,
   SavedObjectsFindOptions,
 } from '../../../../core/server';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../data_source/common';
+import { validateIsWorkspaceDataSourceAndConnectionObjectType } from '../../common/utils';
 
 const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
 
@@ -42,10 +42,10 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
 
   private isDataSourceType(type: SavedObjectsFindOptions['type']): boolean {
     if (Array.isArray(type)) {
-      return type.every((item) => item === DATA_SOURCE_SAVED_OBJECT_TYPE);
+      return type.every((item) => validateIsWorkspaceDataSourceAndConnectionObjectType(item));
     }
 
-    return type === DATA_SOURCE_SAVED_OBJECT_TYPE;
+    return validateIsWorkspaceDataSourceAndConnectionObjectType(type);
   }
   private isConfigType(type: SavedObject['type']): boolean {
     return type === UI_SETTINGS_SAVED_OBJECTS_TYPE;

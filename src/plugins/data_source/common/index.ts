@@ -6,3 +6,4 @@
 export const PLUGIN_ID = 'dataSource';
 export const PLUGIN_NAME = 'data_source';
 export const DATA_SOURCE_SAVED_OBJECT_TYPE = 'data-source';
+export { DATA_CONNECTION_SAVED_OBJECT_TYPE, DataConnectionType } from './data_connections';

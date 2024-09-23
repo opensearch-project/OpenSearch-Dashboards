@@ -567,7 +567,12 @@ export class DashboardPlugin
       embeddable,
     } = plugins;
 
-    const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
+    const SavedObjectFinder = getSavedObjectFinder(
+      core.savedObjects,
+      core.uiSettings,
+      plugins.data,
+      core.application
+    );
 
     const changeViewAction = new ReplacePanelAction(
       core,

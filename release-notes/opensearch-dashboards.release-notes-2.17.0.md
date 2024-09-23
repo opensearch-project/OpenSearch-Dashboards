@@ -70,6 +70,7 @@
  - Support DQCs in create page ([#7961](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7961))
  - [Workspace] Hide home breadcrumbs when in a workspace ([#7992](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7992))
  - [Workspace]Deny get or bulkGet for global data source ([#8043](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8043))
+ - [MDS]Add MDS support for Integration #8008 ([#8008](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8008))
 
 ### 🐛 Bug Fixes
 

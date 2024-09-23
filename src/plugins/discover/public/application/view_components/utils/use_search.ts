@@ -12,7 +12,7 @@ import { cloneDeep } from 'lodash';
 import { useLocation } from 'react-router-dom';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
-import { QueryStatus, search } from '../../../../../data/public';
+import { search } from '../../../../../data/public';
 import { validateTimeRange } from '../../helpers/validate_time_range';
 import { updateSearchSource } from './update_search_source';
 import { useIndexPattern } from './use_index_pattern';
@@ -60,6 +60,7 @@ export interface SearchData {
       statusCode?: number;
     };
     elapsedMs?: number;
+    startTime?: number;
   };
 }
 
@@ -119,12 +120,14 @@ export const useSearch = (services: DiscoverViewServices) => {
     );
   }, [savedSearch, services.uiSettings, timefilter]);
 
+  const startTime = Date.now();
   const data$ = useMemo(
     () =>
       new BehaviorSubject<SearchData>({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
+        queryStatus: { startTime },
       }),
-    [shouldSearchOnPageLoad]
+    [shouldSearchOnPageLoad, startTime]
   );
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
@@ -161,7 +164,6 @@ export const useSearch = (services: DiscoverViewServices) => {
     dataset = searchSource.getField('index');
 
     let elapsedMs;
-
     try {
       // Only show loading indicator if we are fetching when the rows are empty
       if (fetchStateRef.current.rows?.length === 0) {
@@ -267,14 +269,14 @@ export const useSearch = (services: DiscoverViewServices) => {
     }
   }, [
     indexPattern,
-    interval,
     timefilter,
     toastNotifications,
+    interval,
     data,
     services,
+    sort,
     savedSearch?.searchSource,
     data$,
-    sort,
     shouldSearchOnPageLoad,
     inspectorAdapters.requests,
   ]);
@@ -323,6 +325,11 @@ export const useSearch = (services: DiscoverViewServices) => {
     (async () => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
       setSavedSearch(savedSearchInstance);
+
+      // if saved search does not exist, do not atempt to sync filters and query from savedObject
+      if (!savedSearch) {
+        return;
+      }
 
       // sync initial app filters from savedObject to filterManager
       const filters = cloneDeep(savedSearchInstance.searchSource.getOwnField('filter'));
