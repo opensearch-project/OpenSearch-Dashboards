@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
-import { combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import React from 'react';
 import {
   NavGroupType,
   SavedObjectsStart,
@@ -14,7 +15,6 @@ import {
   ApplicationStart,
   HttpSetup,
   NotificationsStart,
-  DEFAULT_NAV_GROUPS,
 } from '../../../core/public';
 import {
   App,
@@ -42,18 +42,12 @@ import {
   DataSourceConnectionType,
   DataConnection,
 } from '../common/types';
-import {
-  ANALYTICS_ALL_OVERVIEW_PAGE_ID,
-  ESSENTIAL_OVERVIEW_PAGE_ID,
-  OBSERVABILITY_OVERVIEW_PAGE_ID,
-  SEARCH_OVERVIEW_PAGE_ID,
-  SECURITY_ANALYTICS_OVERVIEW_PAGE_ID,
-} from '../../../plugins/content_management/public';
 import { WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES } from '../common/constants';
 import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
 } from '../../data_source/common';
+import { WorkspaceNameWithIcon } from './components/workspace_name/workspace_name_with_icon';
 
 export const isUseCaseFeatureConfig = (featureConfig: string) =>
   featureConfig.startsWith(USE_CASE_PREFIX);
@@ -212,8 +206,8 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
         navLinkStatus !== AppNavLinkStatus.hidden &&
         !chromeless &&
         workspaceAvailability !== WorkspaceAvailability.outsideWorkspace;
-      // If the category is management, only retain Dashboards Management which contains saved objets and index patterns.
-      // Saved objets can show all saved objects in the current workspace and index patterns is at workspace level.
+      // If the category is management, only retain Dashboards Management which contains saved objects and index patterns.
+      // Saved objects can show all saved objects in the current workspace and index patterns is at workspace level.
       if (category?.id === DEFAULT_APP_CATEGORIES.management.id) {
         return filterCondition && id === 'management';
       }
@@ -423,14 +417,16 @@ const isNotNull = <T extends unknown>(value: T | null): value is T => !!value;
 export const getFirstUseCaseOfFeatureConfigs = (featureConfigs: string[]): string | undefined =>
   featureConfigs.map(getUseCaseFromFeatureConfig).filter(isNotNull)[0];
 
-export function enrichBreadcrumbsWithWorkspace(core: CoreStart) {
+export function enrichBreadcrumbsWithWorkspace(
+  core: CoreStart,
+  registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>
+) {
   return combineLatest([
     core.workspaces.currentWorkspace$,
-    core.application.currentAppId$,
-    core.chrome.navGroup.getCurrentNavGroup$(),
     core.chrome.navGroup.getNavGroupsMap$(),
-  ]).subscribe(([currentWorkspace, appId, currentNavGroup, navGroupsMap]) => {
-    prependWorkspaceToBreadcrumbs(core, currentWorkspace, appId, currentNavGroup, navGroupsMap);
+    registeredUseCases$,
+  ]).subscribe(([currentWorkspace, navGroupsMap, registeredUseCases]) => {
+    prependWorkspaceToBreadcrumbs(core, currentWorkspace, navGroupsMap, registeredUseCases);
   });
 }
 
@@ -441,23 +437,9 @@ export function enrichBreadcrumbsWithWorkspace(core: CoreStart) {
 export function prependWorkspaceToBreadcrumbs(
   core: CoreStart,
   currentWorkspace: WorkspaceObject | null,
-  appId: string | undefined,
-  currentNavGroup: NavGroupItemInMap | undefined,
-  navGroupsMap: Record<string, NavGroupItemInMap>
+  navGroupsMap: Record<string, NavGroupItemInMap>,
+  availableUseCases: WorkspaceUseCase[]
 ) {
-  if (appId === WORKSPACE_DETAIL_APP_ID) {
-    core.chrome.setBreadcrumbsEnricher(undefined);
-    return;
-  }
-
-  const homeBreadcrumb: ChromeBreadcrumb & { home: boolean } = {
-    text: 'Home',
-    home: true,
-    onClick: () => {
-      core.application.navigateToApp('home');
-    },
-  };
-
   /**
    * There has 3 cases
    * nav group is enable + workspace enable + in a workspace -> workspace enricher
@@ -468,37 +450,12 @@ export function prependWorkspaceToBreadcrumbs(
    * so we don't need to have reset logic for workspace
    */
   if (currentWorkspace) {
-    // use case overview page only show workspace name
-    if (
-      appId === SEARCH_OVERVIEW_PAGE_ID ||
-      appId === OBSERVABILITY_OVERVIEW_PAGE_ID ||
-      appId === SECURITY_ANALYTICS_OVERVIEW_PAGE_ID ||
-      appId === ESSENTIAL_OVERVIEW_PAGE_ID ||
-      appId === ANALYTICS_ALL_OVERVIEW_PAGE_ID
-    ) {
-      core.chrome.setBreadcrumbsEnricher((breadcrumbs) => [
-        homeBreadcrumb,
-        { text: currentWorkspace.name },
-      ]);
-      return;
-    }
     const useCase = getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features || []);
-    // get workspace the only use case
-    if (useCase && useCase !== ALL_USE_CASE_ID) {
-      currentNavGroup = navGroupsMap[useCase];
-    }
-    const navGroupBreadcrumb: ChromeBreadcrumb = {
-      text: currentNavGroup?.title,
-      onClick: () => {
-        // current nav group links are sorted, we don't need to sort it again here
-        if (currentNavGroup?.navLinks[0].id) {
-          core.application.navigateToApp(currentNavGroup?.navLinks[0].id);
-        }
-      },
-    };
-
     const workspaceBreadcrumb: ChromeBreadcrumb = {
-      text: currentWorkspace.name,
+      text: React.createElement(WorkspaceNameWithIcon, {
+        workspace: currentWorkspace,
+        availableUseCases,
+      }),
       onClick: () => {
         if (useCase) {
           const allNavGroups = navGroupsMap[useCase];
@@ -509,16 +466,7 @@ export function prependWorkspaceToBreadcrumbs(
 
     core.chrome.setBreadcrumbsEnricher((breadcrumbs) => {
       if (!breadcrumbs || !breadcrumbs.length) return breadcrumbs;
-
-      if (useCase === ALL_USE_CASE_ID) {
-        if (currentNavGroup && currentNavGroup.id !== DEFAULT_NAV_GROUPS.all.id) {
-          return [homeBreadcrumb, workspaceBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
-        } else {
-          return [homeBreadcrumb, workspaceBreadcrumb, ...breadcrumbs];
-        }
-      } else {
-        return [homeBreadcrumb, workspaceBreadcrumb, ...breadcrumbs];
-      }
+      return [workspaceBreadcrumb, ...breadcrumbs];
     });
   }
 }
@@ -571,4 +519,12 @@ export const fetchDataSourceConnections = async (
     );
     return [];
   }
+};
+
+export const getUseCase = (workspace: WorkspaceObject, availableUseCases: WorkspaceUseCase[]) => {
+  if (!workspace.features) {
+    return;
+  }
+  const useCaseId = getFirstUseCaseOfFeatureConfigs(workspace.features);
+  return availableUseCases.find((useCase) => useCase.id === useCaseId);
 };

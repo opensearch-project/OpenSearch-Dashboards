@@ -8,7 +8,6 @@ import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
-import { EuiBreadcrumb } from '@elastic/eui';
 import { of } from 'rxjs';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { WorkspaceDetail, WorkspaceDetailProps } from './workspace_detail/workspace_detail';
@@ -65,29 +64,14 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
    * set breadcrumbs to chrome
    */
   useEffect(() => {
-    const breadcrumbs: EuiBreadcrumb[] = [
+    chrome?.setBreadcrumbs([
       {
-        text: 'Home',
-        onClick: () => {
-          application?.navigateToApp('home');
-        },
-      },
-    ];
-    if (currentWorkspace) {
-      breadcrumbs.push({
-        text: currentWorkspace.name,
-      });
-      breadcrumbs.push({
         text: i18n.translate('workspace.detail.title', {
-          defaultMessage: '{name} settings',
-          values: {
-            name: currentWorkspace.name,
-          },
+          defaultMessage: 'Workspace settings',
         }),
-      });
-    }
-    chrome?.setBreadcrumbs(breadcrumbs);
-  }, [chrome, currentWorkspace, application]);
+      },
+    ]);
+  }, [chrome]);
 
   useEffect(() => {
     const rawFormData = getFormDataFromWorkspace(currentWorkspace);

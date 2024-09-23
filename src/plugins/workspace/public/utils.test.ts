@@ -677,15 +677,9 @@ describe('workspace utils: prependWorkspaceToBreadcrumbs', () => {
     features: [`${USE_CASE_PREFIX}search`],
   };
 
-  it('should not enrich breadcrumbs for workspace detail page', () => {
-    const coreStart = coreMock.createStart();
-    prependWorkspaceToBreadcrumbs(coreStart, workspace, WORKSPACE_DETAIL_APP_ID, undefined, {});
-    expect(coreStart.chrome.setBreadcrumbsEnricher).toHaveBeenCalledWith(undefined);
-  });
-
   it('should not enrich breadcrumbs when out a workspace', async () => {
     const coreStart = coreMock.createStart();
-    prependWorkspaceToBreadcrumbs(coreStart, null, 'app1', undefined, {});
+    prependWorkspaceToBreadcrumbs(coreStart, null, {}, []);
     expect(coreStart.chrome.setBreadcrumbsEnricher).not.toHaveBeenCalled();
   });
 
@@ -704,64 +698,16 @@ describe('workspace utils: prependWorkspaceToBreadcrumbs', () => {
     };
 
     const coreStart = coreMock.createStart();
-    prependWorkspaceToBreadcrumbs(coreStart, workspace, 'app1', undefined, {
-      search: navGroupSearch,
-      ds: navGroupDashboards,
-    });
+    prependWorkspaceToBreadcrumbs(
+      coreStart,
+      workspace,
+      {
+        search: navGroupSearch,
+        ds: navGroupDashboards,
+      },
+      []
+    );
     expect(coreStart.chrome.setBreadcrumbsEnricher).toHaveBeenCalledTimes(1);
-    let calls = coreStart.chrome.setBreadcrumbsEnricher.mock.calls;
-    // calls is an array of arrays, where each inner array represents the arguments for a single call
-    // get the actual enricher
-    let enricher = calls[0][0];
-
-    const breadcrumbs = [{ text: 'test app' }];
-    let enrichedBreadcrumbs = enricher?.(breadcrumbs);
-    expect(enrichedBreadcrumbs).toHaveLength(3);
-    expect(enrichedBreadcrumbs?.[1].text).toEqual('test workspace 1');
-
-    // ignore current nav group
-    prependWorkspaceToBreadcrumbs(coreStart, workspace, 'app1', navGroupDashboards, {
-      search: navGroupSearch,
-      ds: navGroupDashboards,
-    });
-    expect(coreStart.chrome.setBreadcrumbsEnricher).toHaveBeenCalledTimes(2);
-    calls = coreStart.chrome.setBreadcrumbsEnricher.mock.calls;
-    // calls is an array of arrays, where each inner array represents the arguments for a single call
-    // get the actual enricher
-    enricher = calls[0][0];
-
-    enrichedBreadcrumbs = enricher?.(breadcrumbs);
-    expect(enrichedBreadcrumbs).toHaveLength(3);
-    expect(enrichedBreadcrumbs?.[1].text).toEqual('test workspace 1');
-  });
-
-  it('should enrich breadcrumbs when in a workspace with all use case and use selected nav group', async () => {
-    const workspaceWithAllUseCase = {
-      id: 'workspace-all',
-      name: 'test workspace 1',
-      features: [`${USE_CASE_PREFIX}all`],
-    };
-
-    const navGroupSearch = {
-      id: 'search',
-      title: 'Search',
-      description: 'search desc',
-      navLinks: [],
-    };
-    const navGroupDashboards = {
-      id: 'ds',
-      title: 'Dashboards',
-      description: 'Dashboards desc',
-      navLinks: [],
-    };
-
-    const coreStart = coreMock.createStart();
-    prependWorkspaceToBreadcrumbs(coreStart, workspaceWithAllUseCase, 'app1', navGroupDashboards, {
-      search: navGroupSearch,
-      ds: navGroupDashboards,
-    });
-    expect(coreStart.chrome.setBreadcrumbsEnricher).toHaveBeenCalledTimes(1);
-
     const calls = coreStart.chrome.setBreadcrumbsEnricher.mock.calls;
     // calls is an array of arrays, where each inner array represents the arguments for a single call
     // get the actual enricher
@@ -769,46 +715,21 @@ describe('workspace utils: prependWorkspaceToBreadcrumbs', () => {
 
     const breadcrumbs = [{ text: 'test app' }];
     const enrichedBreadcrumbs = enricher?.(breadcrumbs);
-    expect(enrichedBreadcrumbs).toHaveLength(4);
-    expect(enrichedBreadcrumbs?.[1].text).toEqual(workspaceWithAllUseCase.name);
-    expect(enrichedBreadcrumbs?.[2].text).toEqual(navGroupDashboards.title);
-  });
-
-  it('should enrich breadcrumbs when in a workspace with all use case and current nav group is null', async () => {
-    const workspaceWithAllUseCase = {
-      id: 'workspace-all',
-      name: 'test workspace 1',
-      features: [`${USE_CASE_PREFIX}all`],
-    };
-
-    const navGroupSearch = {
-      id: 'search',
-      title: 'Search',
-      description: 'search desc',
-      navLinks: [],
-    };
-    const navGroupDashboards = {
-      id: 'ds',
-      title: 'Dashboards',
-      description: 'Dashboards desc',
-      navLinks: [],
-    };
-
-    const coreStart = coreMock.createStart();
-    prependWorkspaceToBreadcrumbs(coreStart, workspaceWithAllUseCase, 'app1', undefined, {
-      search: navGroupSearch,
-      ds: navGroupDashboards,
-    });
-    expect(coreStart.chrome.setBreadcrumbsEnricher).toHaveBeenCalledTimes(1);
-
-    const calls = coreStart.chrome.setBreadcrumbsEnricher.mock.calls;
-    // calls is an array of arrays, where each inner array represents the arguments for a single call
-    // get the actual enricher
-    const enricher = calls[0][0];
-
-    const enrichedBreadcrumbs = enricher?.([{ text: 'overview' }]);
-    expect(enrichedBreadcrumbs).toHaveLength(3);
-    expect(enrichedBreadcrumbs?.[1].text).toEqual(workspaceWithAllUseCase.name);
+    expect(enrichedBreadcrumbs).toHaveLength(2);
+    expect(enrichedBreadcrumbs?.[0].text).toMatchInlineSnapshot(`
+      <WorkspaceNameWithIcon
+        availableUseCases={Array []}
+        workspace={
+          Object {
+            "features": Array [
+              "use-case-search",
+            ],
+            "id": "workspace-1",
+            "name": "test workspace 1",
+          }
+        }
+      />
+    `);
   });
 });
 

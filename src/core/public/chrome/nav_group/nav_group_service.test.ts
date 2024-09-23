@@ -513,8 +513,8 @@ describe('ChromeNavGroupService#start()', () => {
     const breadcrumbs = [{ text: 'test' }];
     const enrichedBreadcrumbs = breadcrumbsEnricher$.getValue()?.(breadcrumbs);
 
-    // home -> bar-group -> test
-    expect(enrichedBreadcrumbs).toHaveLength(3);
+    // bar-group -> test
+    expect(enrichedBreadcrumbs).toHaveLength(2);
 
     // reset current nav group
     chromeNavGroupServiceStart.setCurrentNavGroup(undefined);

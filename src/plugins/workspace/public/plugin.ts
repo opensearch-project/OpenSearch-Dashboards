@@ -604,7 +604,7 @@ export class WorkspacePlugin
       this.registerWorkspaceListToUserSettings(core, contentManagement, navigation);
 
       // set breadcrumbs enricher for workspace
-      this.breadcrumbsSubscription = enrichBreadcrumbsWithWorkspace(core);
+      this.breadcrumbsSubscription = enrichBreadcrumbsWithWorkspace(core, this.registeredUseCases$);
 
       // register content to essential overview page
       registerEssentialOverviewContent(contentManagement, core);

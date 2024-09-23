@@ -21,21 +21,19 @@ interface Props {
 
 export const SearchUseCaseOverviewApp = ({ contentManagement }: Props) => {
   const {
-    services: { workspaces, chrome },
+    services: { chrome },
   } = useOpenSearchDashboards<CoreStart>();
 
-  const currentWorkspace = useObservable(workspaces.currentWorkspace$);
-
-  const title = i18n.translate('home.usecase.search.title', { defaultMessage: 'Search overview' });
+  const title = i18n.translate('home.searchOverview.title', { defaultMessage: 'Overview' });
 
   useEffect(() => {
     const breadcrumbs: EuiBreadcrumb[] = [
       {
-        text: currentWorkspace?.name || title,
+        text: title,
       },
     ];
     chrome.setBreadcrumbs(breadcrumbs);
-  }, [chrome, currentWorkspace, title]);
+  }, [chrome, title]);
 
   return (
     <I18nProvider>

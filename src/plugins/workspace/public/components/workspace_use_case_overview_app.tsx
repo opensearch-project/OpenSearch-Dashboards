@@ -5,6 +5,7 @@
 
 import React, { useEffect } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
@@ -24,7 +25,7 @@ export const WorkspaceUseCaseOverviewApp = (props: WorkspaceUseCaseOverviewProps
   useEffect(() => {
     const breadcrumbs: EuiBreadcrumb[] = [
       {
-        text: currentWorkspace?.name,
+        text: i18n.translate('workspace.overview.title', { defaultMessage: 'Overview' }),
       },
     ];
     chrome.setBreadcrumbs(breadcrumbs);

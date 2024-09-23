@@ -10875,7 +10875,6 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                               "thrownError": null,
                             }
                           }
-                          dropHomeFromBreadcrumb={false}
                           renderFullLength={true}
                           useUpdatedHeader={true}
                         />
@@ -19861,7 +19860,6 @@ exports[`Header renders page header with application title 1`] = `
                               "thrownError": null,
                             }
                           }
-                          dropHomeFromBreadcrumb={false}
                           renderFullLength={true}
                           useUpdatedHeader={true}
                         />
@@ -20207,7 +20205,6 @@ exports[`Header renders page header with application title 1`] = `
                   "thrownError": null,
                 }
               }
-              dropHomeFromBreadcrumb={false}
               renderFullLength={false}
               useUpdatedHeader={true}
             >
