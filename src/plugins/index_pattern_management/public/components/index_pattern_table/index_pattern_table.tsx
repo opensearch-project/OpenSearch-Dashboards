@@ -30,7 +30,6 @@
 
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -38,6 +37,7 @@ import {
   EuiText,
   EuiBadgeGroup,
   EuiPageContent,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
@@ -199,9 +199,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
         }
       ) => (
         <>
-          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `patterns/${index.id}`)}>
-            {name}
-          </EuiButtonEmpty>
+          <EuiLink {...reactRouterNavigate(history, `patterns/${index.id}`)}>{name}</EuiLink>
           &emsp;
           <EuiBadgeGroup gutterSize="s">
             {index.tags &&
