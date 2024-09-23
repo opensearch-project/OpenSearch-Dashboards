@@ -1,0 +1,2 @@
+fix:
+- Fix failed snapshots after oui upgrade ([#8288](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8288))
