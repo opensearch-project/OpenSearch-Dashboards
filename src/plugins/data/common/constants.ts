@@ -44,7 +44,7 @@ export const DEFAULT_DATA = {
     } as DataStructure,
     LOCAL_DATASOURCE: {
       id: '',
-      title: 'Local Cluster',
+      title: 'Default Cluster',
       type: 'DATA_SOURCE',
     },
   },
