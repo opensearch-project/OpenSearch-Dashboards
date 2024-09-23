@@ -8,7 +8,7 @@ import { CursorPosition, OpenSearchSqlAutocompleteResult } from '../shared/types
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
 import { SQL_SYMBOLS } from './constants';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
-import { fetchFieldSuggestions, parseQuery } from '../shared/utils';
+import { fetchColumnValues, fetchFieldSuggestions, parseQuery } from '../shared/utils';
 import { SuggestionItemDetailsTags } from '../shared/constants';
 
 export interface SuggestionParams {
@@ -29,6 +29,7 @@ export const getSuggestions = async ({
   position,
   query,
   services,
+  dataset,
 }: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
   if (!services || !services.appName || !indexPattern) return [];
   try {
@@ -44,8 +45,31 @@ export const getSuggestions = async ({
     if (suggestions.suggestColumns?.tables?.length) {
       // NOTE:  currently the suggestions return the table present in the query, but since the
       //        parameters already provide that, it may not be needed anymore
-      finalSuggestions.push(...fetchFieldSuggestions(indexPattern));
+      finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} = `));
     }
+
+    // if (suggestions.suggestValuesForColumn) {
+    //   const res = await fetchColumnValues(
+    //     [indexPattern.title],
+    //     suggestions.suggestValuesForColumn,
+    //     services,
+    //     dataset
+    //   );
+
+    //   let i = 0;
+    //   finalSuggestions.push(
+    //     ...res.body.fields[0].values.map((val: any) => {
+    //       i++;
+    //       return {
+    //         text: val.toString(),
+    //         insertText: typeof val === 'string' ? `"${val}" ` : `${val} `,
+    //         type: monaco.languages.CompletionItemKind.Value,
+    //         detail: SuggestionItemDetailsTags.Value,
+    //         sortText: i.toString().padStart(3, '0'),
+    //       };
+    //     })
+    //   );
+    // }
 
     // Fill in aggregate functions
     if (suggestions.suggestAggregateFunctions) {
@@ -59,13 +83,22 @@ export const getSuggestions = async ({
       );
     }
 
+    if (suggestions.suggestViewsOrTables) {
+      finalSuggestions.push({
+        text: indexPattern.title,
+        type: monaco.languages.CompletionItemKind.Struct,
+        insertText: `${indexPattern.title} `,
+        detail: SuggestionItemDetailsTags.Table,
+      });
+    }
+
     // Fill in SQL keywords
     if (suggestions.suggestKeywords?.length) {
       finalSuggestions.push(
         ...suggestions.suggestKeywords.map((sk) => ({
           text: sk.value,
           type: monaco.languages.CompletionItemKind.Keyword,
-          insertText: sk.value,
+          insertText: `${sk.value} `,
           detail: SuggestionItemDetailsTags.Keyword,
         }))
       );

@@ -114,8 +114,8 @@ fromClause
    ;
 
 relation
-   : tableName (AS? alias)?                                         # tableAsRelation
-   | LR_BRACKET subquery = querySpecification RR_BRACKET AS? alias  # subqueryAsRelation
+   : tableName                                         # tableAsRelation
+   //| LR_BRACKET subquery = querySpecification RR_BRACKET AS? alias  # subqueryAsRelation
    ;
 
 whereClause
@@ -806,7 +806,7 @@ alternateMultiMatchField
 
 // Identifiers
 tableName
-   : qualifiedName
+   : ID
    ;
 
 columnName

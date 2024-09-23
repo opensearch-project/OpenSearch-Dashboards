@@ -38,6 +38,7 @@ const tokenDictionary: TokenDictionary = {
   JOIN: OpenSearchSQLParser.JOIN,
   SEMICOLON: OpenSearchSQLParser.SEMI,
   SELECT: OpenSearchSQLParser.SELECT,
+  ID: OpenSearchSQLParser.ID,
 };
 
 // These are keywords that we do not want to show in autocomplete
@@ -143,7 +144,9 @@ export function processVisitedRules(
           )
         ) {
           suggestViewsOrTables = TableOrViewSuggestion.TABLES;
-        } else {
+        } else if (
+          !getPreviousToken(tokenStream, tokenDictionary, cursorTokenIndex, OpenSearchSQLLexer.ID)
+        ) {
           suggestViewsOrTables = TableOrViewSuggestion.ALL;
         }
         break;

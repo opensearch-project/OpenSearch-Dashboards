@@ -1,4 +1,4 @@
-// Generated from ./src/plugins/data/public/antlr/opensearch_sql/grammar/OpenSearchSQLParser.g4 by ANTLR 4.13.1
+// Generated from grammar/OpenSearchSQLParser.g4 by ANTLR 4.13.1
 
 import { AbstractParseTreeVisitor } from "antlr4ng";
 
@@ -21,7 +21,6 @@ import { SelectElementsContext } from "./OpenSearchSQLParser.js";
 import { SelectElementContext } from "./OpenSearchSQLParser.js";
 import { FromClauseContext } from "./OpenSearchSQLParser.js";
 import { TableAsRelationContext } from "./OpenSearchSQLParser.js";
-import { SubqueryAsRelationContext } from "./OpenSearchSQLParser.js";
 import { WhereClauseContext } from "./OpenSearchSQLParser.js";
 import { GroupByClauseContext } from "./OpenSearchSQLParser.js";
 import { GroupByElementsContext } from "./OpenSearchSQLParser.js";
@@ -274,13 +273,6 @@ export class OpenSearchSQLParserVisitor<Result> extends AbstractParseTreeVisitor
      * @return the visitor result
      */
     visitTableAsRelation?: (ctx: TableAsRelationContext) => Result;
-    /**
-     * Visit a parse tree produced by the `subqueryAsRelation`
-     * labeled alternative in `OpenSearchSQLParser.relation`.
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    visitSubqueryAsRelation?: (ctx: SubqueryAsRelationContext) => Result;
     /**
      * Visit a parse tree produced by `OpenSearchSQLParser.whereClause`.
      * @param ctx the parse tree
