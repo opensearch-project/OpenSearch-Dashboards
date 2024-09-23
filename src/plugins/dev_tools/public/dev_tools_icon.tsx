@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useCallback, useState } from 'react';
+import React, { useRef, useCallback, useState, useEffect } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -24,23 +24,33 @@ import './dev_tools_icon.scss';
 
 export function DevToolsIcon({
   core,
-  appId,
   devTools,
   deps,
   title,
 }: {
   core: CoreStart;
-  appId: string;
   devTools: readonly DevToolApp[];
   deps: DevToolsSetupDependencies;
   title: string;
 }) {
-  const [modalVisibile, setModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const elementRef = useRef<HTMLDivElement | null>(null);
   const setMountPoint = useCallback((renderFn) => {
     renderFn(elementRef.current);
     return () => {};
   }, []);
+
+  useEffect(() => {
+    if (modalVisible) {
+      document.body.classList.add('noScrollByDevTools');
+    } else {
+      document.body.classList.remove('noScrollByDevTools');
+    }
+
+    return () => {
+      document.body.classList.remove('noScrollByDevTools');
+    };
+  }, [modalVisible]);
 
   return (
     <>
@@ -51,7 +61,7 @@ export function DevToolsIcon({
           setModalVisible(true);
         }}
       />
-      {modalVisibile ? (
+      {modalVisible ? (
         /**
          * We can not use OuiModal component here because OuiModal uses OuiOverlayMask as its parent node
          * but overlay mask has a default padding bottom that prevent the modal from covering the whole page.
