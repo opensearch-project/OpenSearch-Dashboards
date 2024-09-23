@@ -309,7 +309,12 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
 
   return (
     <>
-      <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
+      <EuiPageContent
+        data-test-subj="indexPatternTable"
+        role="region"
+        aria-label={ariaRegion}
+        paddingSize="m"
+      >
         <EuiFlexGroup justifyContent="spaceBetween">
           {pageTitleAndDescription}
           {createButton}
