@@ -38,7 +38,7 @@ export class QueryEnhancementsPlugin
 
   public setup(
     core: CoreSetup<QueryEnhancementsPluginStartDependencies>,
-    { data }: QueryEnhancementsPluginSetupDependencies
+    { data, usageCollection }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
     const { queryString } = data.query;
     const pplSearchInterceptor = new PPLSearchInterceptor({
@@ -105,7 +105,12 @@ export class QueryEnhancementsPlugin
 
     data.__enhance({
       editor: {
-        queryEditorExtension: createQueryAssistExtension(core.http, data, this.config.queryAssist),
+        queryEditorExtension: createQueryAssistExtension(
+          core,
+          data,
+          this.config.queryAssist,
+          usageCollection
+        ),
       },
     });
 
