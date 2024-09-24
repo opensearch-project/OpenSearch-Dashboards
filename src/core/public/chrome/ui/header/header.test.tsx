@@ -265,11 +265,11 @@ describe('Header', () => {
     const props = {
       ...mockProps(),
       branding,
-      navGroupEnabled: true,
-      storage: new StubBrowserStorage(),
+      useUpdatedHeader: true,
+      onIsLockedUpdate: jest.fn(),
     };
     const component = mountWithIntl(<Header {...props} />);
     component.find(EuiHeaderSectionItemButton).first().simulate('click');
-    expect(props.storage.getItem('core.leftNav.navGroupEnabled-true.isNavOpen')).toEqual('true');
+    expect(props.onIsLockedUpdate).toBeCalledWith(true);
   });
 });

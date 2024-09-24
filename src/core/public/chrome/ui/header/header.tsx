@@ -122,7 +122,6 @@ export interface HeaderProps {
   workspaceList$: Observable<WorkspaceObject[]>;
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
-  storage?: Storage;
 }
 
 const hasValue = (value: any) => {
@@ -148,16 +147,12 @@ export function Header({
   navGroupEnabled,
   setCurrentNavGroup,
   useUpdatedHeader,
-  storage = window.localStorage,
   ...observables
 }: HeaderProps) {
-  const storageKey = `core.leftNav.navGroupEnabled-${!!navGroupEnabled}.isNavOpen`;
   const isVisible = useObservable(observables.isVisible$, false);
   const headerVariant = useObservable(observables.headerVariant$, HeaderVariant.PAGE);
   const isLocked = useObservable(observables.isLocked$, false);
-  const [isNavOpen, setIsNavOpenState] = useState(
-    localStorage.getItem(storageKey) === 'true' ? true : false
-  );
+  const [isNavOpenState, setIsNavOpenState] = useState(isLocked);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
   const breadcrumbs = useObservable(observables.breadcrumbs$, []);
   const currentWorkspace = useObservable(observables.currentWorkspace$, undefined);
@@ -166,14 +161,20 @@ export function Header({
     return getOsdSidecarPaddingStyle(sidecarConfig);
   }, [sidecarConfig]);
 
+  const isNavOpen = useUpdatedHeader ? isLocked : isNavOpenState;
+
   const setIsNavOpen = useCallback(
     (value) => {
-      setIsNavOpenState(value);
-      if (navGroupEnabled) {
-        storage.setItem(storageKey, JSON.stringify(value));
+      /**
+       * When use updated header, we will regard the lock state as source of truth
+       */
+      if (useUpdatedHeader) {
+        onIsLockedUpdate(value);
+      } else {
+        setIsNavOpenState(value);
       }
     },
-    [setIsNavOpenState, navGroupEnabled, storageKey, storage]
+    [setIsNavOpenState, onIsLockedUpdate, useUpdatedHeader]
   );
 
   if (!isVisible) {
@@ -652,13 +653,11 @@ export function Header({
             appId$={application.currentAppId$}
             collapsibleNavHeaderRender={collapsibleNavHeaderRender}
             id={navId}
-            isLocked={isLocked}
             navLinks$={observables.navLinks$}
             isNavOpen={isNavOpen}
             basePath={basePath}
             navigateToApp={application.navigateToApp}
             navigateToUrl={application.navigateToUrl}
-            onIsLockedUpdate={onIsLockedUpdate}
             closeNav={() => {
               setIsNavOpen(false);
               if (toggleCollapsibleNavRef.current) {
