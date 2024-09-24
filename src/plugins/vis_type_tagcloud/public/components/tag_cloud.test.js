@@ -32,9 +32,9 @@ import _ from 'lodash';
 import d3 from 'd3';
 import 'jest-canvas-mock';
 
-import { fromNode, delay } from 'bluebird';
 import { TagCloud } from './tag_cloud';
 import { setHTMLElementOffset, setSVGElementGetBBox } from '../../../../test_utils/public';
+import { nextTick } from '../../../../test_utils/public/helpers';
 
 describe('tag cloud tests', () => {
   let SVGElementGetBBoxSpyInstance;
@@ -149,7 +149,11 @@ describe('tag cloud tests', () => {
         tagCloud = new TagCloud(domNode, colorScale);
         tagCloud.setData(currentTest.data);
         tagCloud.setOptions(currentTest.options);
-        await fromNode((cb) => tagCloud.once('renderComplete', cb));
+        await new Promise((resolve) => {
+          tagCloud.once('renderComplete', () => {
+            resolve();
+          });
+        });
       });
 
       afterEach(teardownDOM);
@@ -183,7 +187,11 @@ describe('tag cloud tests', () => {
         //this timeout modifies the settings before the cloud is rendered.
         //the cloud needs to use the correct options
         setTimeout(() => tagCloud.setOptions(logScaleTest.options), timeout);
-        await fromNode((cb) => tagCloud.once('renderComplete', cb));
+        await new Promise((resolve) => {
+          tagCloud.once('renderComplete', () => {
+            resolve();
+          });
+        });
       });
 
       afterEach(teardownDOM);
@@ -211,7 +219,11 @@ describe('tag cloud tests', () => {
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
       tagCloud.setOptions(logScaleTest.options);
-      await fromNode((cb) => tagCloud.once('renderComplete', cb));
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
     });
 
     afterEach(teardownDOM);
@@ -238,7 +250,11 @@ describe('tag cloud tests', () => {
       tagCloud.setOptions(baseTest.options);
       tagCloud.setData(trimDataTest.data);
 
-      await fromNode((cb) => tagCloud.once('renderComplete', cb));
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
     });
 
     afterEach(teardownDOM);
@@ -313,7 +329,7 @@ describe('tag cloud tests', () => {
       tagCloud.setData(logScaleTest.data);
       tagCloud.setOptions(logScaleTest.options);
 
-      await delay(1000); //let layout run
+      await nextTick(1000); //let layout run
 
       SVGElementGetBBoxSpyInstance.mockRestore();
       SVGElementGetBBoxSpyInstance = setSVGElementGetBBox(600, 600);
@@ -324,7 +340,11 @@ describe('tag cloud tests', () => {
         tagCloud.setData(baseTest.data);
         tagCloud.setOptions(baseTest.options);
       }, 200);
-      await fromNode((cb) => tagCloud.once('renderComplete', cb));
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
     });
 
     afterEach(teardownDOM);
@@ -349,7 +369,11 @@ describe('tag cloud tests', () => {
       tagCloud = new TagCloud(domNode, colorScale);
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
-      await fromNode((cb) => tagCloud.once('renderComplete', cb));
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
     });
 
     afterEach(teardownDOM);
@@ -371,12 +395,20 @@ describe('tag cloud tests', () => {
       tagCloud = new TagCloud(domNode, colorScale);
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
-      await fromNode((cb) => tagCloud.once('renderComplete', cb));
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
 
       //make bigger
       tagCloud._size = [600, 600];
       tagCloud.resize();
-      await fromNode((cb) => tagCloud.once('renderComplete', cb));
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
     });
 
     afterEach(teardownDOM);
@@ -394,12 +426,20 @@ describe('tag cloud tests', () => {
       tagCloud = new TagCloud(domNode, colorScale);
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
-      await fromNode((cb) => tagCloud.once('renderComplete', cb));
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
 
       //make smaller
       tagCloud._size = [];
       tagCloud.resize();
-      await fromNode((cb) => tagCloud.once('renderComplete', cb));
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
     });
 
     afterEach(teardownDOM);
@@ -417,7 +457,11 @@ describe('tag cloud tests', () => {
       tagCloud.setData(baseTest.data);
       tagCloud.setOptions(baseTest.options);
 
-      await fromNode((cb) => tagCloud.once('renderComplete', cb));
+      await new Promise((resolve) => {
+        tagCloud.once('renderComplete', () => {
+          resolve();
+        });
+      });
 
       expect(domNode.innerHTML).toMatchSnapshot();
     });

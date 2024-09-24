@@ -28,9 +28,9 @@
  * under the License.
  */
 
-import { delay } from 'bluebird';
 import { WebElement, WebDriver, By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
+import { nextTick } from 'src/test_utils/public/helpers';
 // @ts-ignore not supported yet
 import cheerio from 'cheerio';
 import { testSubjSelector } from '@osd/test-subj-selector';
@@ -145,7 +145,7 @@ export class WebElementWrapper {
         `finding element '${this.locator.toString()}' again, ${attemptsRemaining - 1} attempts left`
       );
 
-      await delay(200);
+      await nextTick(200);
       this._webElement = await this.driver.findElement(this.locator);
       return await this.retryCall(fn, attemptsRemaining - 1);
     }
@@ -264,7 +264,7 @@ export class WebElementWrapper {
       const value = await this.getAttribute('value');
       for (let i = 0; i <= value.length; i++) {
         await this.pressKeys(this.Keys.BACK_SPACE);
-        await delay(100);
+        await nextTick(100);
       }
     } else {
       if (this.isChromium) {
@@ -303,7 +303,7 @@ export class WebElementWrapper {
       for (const char of value) {
         await this.retryCall(async function type(wrapper) {
           await wrapper._webElement.sendKeys(char);
-          await delay(100);
+          await nextTick(100);
         });
       }
     } else {

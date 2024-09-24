@@ -29,13 +29,13 @@
  */
 
 import expect from '@osd/expect';
-import { delay } from 'bluebird';
 
 import { createListStream, createPromiseFromStreams } from '../streams';
 
 import { Progress } from '../progress';
 import { createIndexDocRecordsStream } from './index_doc_records_stream';
 import { createStubStats, createStubClient, createPersonDocRecords } from './test_stubs';
+import { nextTick } from '../../../../../src/test_utils/public/helpers';
 
 const recordsToBulkBody = (records: any[]) => {
   return records.reduce((acc, record) => {
@@ -128,7 +128,7 @@ describe('opensearchArchiver: createIndexDocRecordsStream()', () => {
       async (name, params) => {
         expect(name).to.be('bulk');
         expect(params).to.eql({ body: recordsToBulkBody(records.slice(0, 1)) });
-        await delay(delayMs);
+        await nextTick(delayMs);
         return {
           body: {
             ok: true,

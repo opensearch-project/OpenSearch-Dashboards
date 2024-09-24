@@ -29,18 +29,20 @@
  */
 
 import { resolve } from 'path';
-import { readFile } from 'fs';
+import { readFile } from 'fs/promises';
+import { promisify } from 'util';
 
-import { fromNode as fcb } from 'bluebird';
 import glob from 'glob';
+
+const promisifiedGlob = promisify(glob);
 
 export async function getBundledNotices(packageDirectory) {
   const pattern = resolve(packageDirectory, '*{LICENSE,NOTICE}*');
-  const paths = await fcb((cb) => glob(pattern, cb));
+  const paths = await promisifiedGlob(pattern);
   return Promise.all(
     paths.map(async (path) => ({
       path,
-      text: await fcb((cb) => readFile(path, 'utf8', cb)),
+      text: await readFile(path, { encoding: 'utf8' }),
     }))
   );
 }

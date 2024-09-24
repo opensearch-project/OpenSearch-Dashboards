@@ -30,8 +30,8 @@
 
 import { resolve } from 'path';
 import { readFileSync } from 'fs';
+import { promisify } from 'util';
 
-import { fromNode as fcb } from 'bluebird';
 import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
@@ -39,6 +39,8 @@ import expect from '@osd/expect';
 import { getUniqueJunitReportPath } from '@osd/test';
 
 import { setupJUnitReportGeneration } from '../junit_report_generation';
+
+const promisifiedParseString = promisify(parseString);
 
 const PROJECT_DIR = resolve(__dirname, 'fixtures/project');
 const DURATION_REGEX = /^\d+\.\d{3}$/;
@@ -62,7 +64,7 @@ describe('dev/mocha/junit report generation', () => {
 
     mocha.addFile(resolve(PROJECT_DIR, 'test.js'));
     await new Promise((resolve) => mocha.run(resolve));
-    const report = await fcb((cb) => parseString(readFileSync(XML_PATH), cb));
+    const report = await promisifiedParseString(readFileSync(XML_PATH));
 
     // test case results are wrapped in <testsuites></testsuites>
     expect(report).to.eql({

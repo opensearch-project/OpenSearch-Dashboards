@@ -33,7 +33,7 @@
 // eslint-disable-next-line max-classes-per-file
 import { EventEmitter } from 'events';
 import { assign, random } from 'lodash';
-import { delay } from 'bluebird';
+import { nextTick } from '../../../src/test_utils/public/helpers';
 
 class MockClusterFork extends EventEmitter {
   public exitCode = 0;
@@ -44,7 +44,7 @@ class MockClusterFork extends EventEmitter {
     let dead = true;
 
     function wait() {
-      return delay(random(10, 250));
+      return nextTick(random(10, 250));
     }
 
     assign(this, {
