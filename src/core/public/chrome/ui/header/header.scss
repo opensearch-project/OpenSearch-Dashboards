@@ -110,11 +110,3 @@
 #globalHeaderBars:has(.primaryApplicationHeader) {
   border-bottom: 1px solid $euiColorLightShade;
 }
-
-/* Control flex items to wrap when the viewport is less than the medium size */
-@media (max-width: 768px) {
-  .secondaryPageHeaderFlexGroup {
-    display: flex;
-    flex-direction: column;
-  }
-}
