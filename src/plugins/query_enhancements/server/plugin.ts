@@ -18,7 +18,6 @@ import { ConfigSchema } from '../common/config';
 import { defineRoutes } from './routes';
 import {
   pplSearchStrategyProvider,
-  pplRawSearchStrategyProvider,
   sqlSearchStrategyProvider,
   sqlAsyncSearchStrategyProvider,
 } from './search';
@@ -26,8 +25,10 @@ import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
   QueryEnhancementsPluginStart,
+  QueryEnhancementsPluginStartDependencies,
 } from './types';
-import { OpenSearchEnhancements } from './utils';
+import { OpenSearchObservabilityPlugin, OpenSearchPPLPlugin } from './utils';
+import { pplRawSearchStrategyProvider } from './search/ppl_raw_search_strategy';
 
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
@@ -42,12 +43,13 @@ export class QueryEnhancementsPlugin
     this.logger.debug('queryEnhancements: Setup');
     const router = core.http.createRouter();
     // Register server side APIs
-    const client = core.opensearch.legacy.createClient('opensearch_enhancements', {
-      plugins: [OpenSearchEnhancements],
+    const client = core.opensearch.legacy.createClient('opensearch_observability', {
+      plugins: [OpenSearchPPLPlugin, OpenSearchObservabilityPlugin],
     });
 
     if (dataSource) {
-      dataSource.registerCustomApiSchema(OpenSearchEnhancements);
+      dataSource.registerCustomApiSchema(OpenSearchPPLPlugin);
+      dataSource.registerCustomApiSchema(OpenSearchObservabilityPlugin);
     }
 
     const pplSearchStrategy = pplSearchStrategyProvider(this.config$, this.logger, client);
@@ -82,7 +84,7 @@ export class QueryEnhancementsPlugin
       dataSourceEnabled: !!dataSource,
     }));
 
-    defineRoutes(this.logger, router, client, {
+    defineRoutes(this.logger, router, {
       ppl: pplSearchStrategy,
       sql: sqlSearchStrategy,
       sqlasync: sqlAsyncSearchStrategy,

@@ -311,7 +311,7 @@ export interface ExternalDataSource {
 
 export interface ExternalDataSourcesCacheData {
   version: string;
-  dataSources: ExternalDataSource[];
+  externalDataSources: ExternalDataSource[];
   lastUpdated: string;
   status: CachedDataSourceStatus;
 }

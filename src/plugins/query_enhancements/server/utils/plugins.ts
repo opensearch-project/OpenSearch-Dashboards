@@ -45,46 +45,51 @@ const createAction = (
   });
 };
 
-export const OpenSearchEnhancements = (client: any, config: any, components: any) => {
-  client.prototype.enhancements = components.clientAction.namespaceFactory();
-  const enhancements = client.prototype.enhancements.prototype;
+export const OpenSearchPPLPlugin = (client: any, config: any, components: any) => {
+  client.prototype.ppl = components.clientAction.namespaceFactory();
+  const ppl = client.prototype.ppl.prototype;
 
-  enhancements.pplQuery = createAction(client, components, {
+  ppl.pplQuery = createAction(client, components, {
     endpoint: URI.PPL,
     method: 'POST',
     needBody: true,
   });
-  enhancements.sqlQuery = createAction(client, components, {
+  ppl.sqlQuery = createAction(client, components, {
     endpoint: URI.SQL,
     method: 'POST',
     needBody: true,
   });
-  enhancements.getDataConnectionById = createAction(client, components, {
+  ppl.getDataConnectionById = createAction(client, components, {
     endpoint: OPENSEARCH_API.DATA_CONNECTIONS,
     method: 'GET',
     paramKey: 'dataconnection',
   });
-  enhancements.deleteDataConnection = createAction(client, components, {
+  ppl.deleteDataConnection = createAction(client, components, {
     endpoint: OPENSEARCH_API.DATA_CONNECTIONS,
     method: 'DELETE',
     paramKey: 'dataconnection',
   });
-  enhancements.createDataSource = createAction(client, components, {
+  ppl.createDataSource = createAction(client, components, {
     endpoint: OPENSEARCH_API.DATA_CONNECTIONS,
     method: 'POST',
     needBody: true,
   });
-  enhancements.modifyDataConnection = createAction(client, components, {
+  ppl.modifyDataConnection = createAction(client, components, {
     endpoint: OPENSEARCH_API.DATA_CONNECTIONS,
     method: 'PATCH',
     needBody: true,
   });
-  enhancements.getDataConnections = createAction(client, components, {
+  ppl.getDataConnections = createAction(client, components, {
     endpoint: OPENSEARCH_API.DATA_CONNECTIONS,
     method: 'GET',
   });
+};
 
-  enhancements.getObject = createAction(client, components, {
+export const OpenSearchObservabilityPlugin = (client: any, config: any, components: any) => {
+  client.prototype.observability = components.clientAction.namespaceFactory();
+  const observability = client.prototype.observability.prototype;
+
+  observability.getObject = createAction(client, components, {
     endpoint: OPENSEARCH_API.PANELS,
     method: 'GET',
     params: {
@@ -101,32 +106,32 @@ export const OpenSearchEnhancements = (client: any, config: any, components: any
     },
   });
 
-  enhancements.getObjectById = createAction(client, components, {
+  observability.getObjectById = createAction(client, components, {
     endpoint: `${OPENSEARCH_API.PANELS}/<%=objectId%>`,
     method: 'GET',
     paramKey: 'objectId',
   });
 
-  enhancements.createObject = createAction(client, components, {
+  observability.createObject = createAction(client, components, {
     endpoint: OPENSEARCH_API.PANELS,
     method: 'POST',
     needBody: true,
   });
 
-  enhancements.updateObjectById = createAction(client, components, {
+  observability.updateObjectById = createAction(client, components, {
     endpoint: `${OPENSEARCH_API.PANELS}/<%=objectId%>`,
     method: 'PUT',
     paramKey: 'objectId',
     needBody: true,
   });
 
-  enhancements.deleteObjectById = createAction(client, components, {
+  observability.deleteObjectById = createAction(client, components, {
     endpoint: `${OPENSEARCH_API.PANELS}/<%=objectId%>`,
     method: 'DELETE',
     paramKey: 'objectId',
   });
 
-  enhancements.deleteObjectByIdList = createAction(client, components, {
+  observability.deleteObjectByIdList = createAction(client, components, {
     endpoint: OPENSEARCH_API.PANELS,
     method: 'DELETE',
     params: {
@@ -134,19 +139,19 @@ export const OpenSearchEnhancements = (client: any, config: any, components: any
     },
   });
 
-  enhancements.getJobStatus = createAction(client, components, {
+  observability.getJobStatus = createAction(client, components, {
     endpoint: `${URI.ASYNC_QUERY}`,
     method: 'GET',
     paramKey: 'queryId',
   });
 
-  enhancements.deleteJob = createAction(client, components, {
+  observability.deleteJob = createAction(client, components, {
     endpoint: `${URI.ASYNC_QUERY}/<%=queryId%>`,
     method: 'DELETE',
     paramKey: 'queryId',
   });
 
-  enhancements.runDirectQuery = createAction(client, components, {
+  observability.runDirectQuery = createAction(client, components, {
     endpoint: URI.ASYNC_QUERY,
     method: 'POST',
     needBody: true,

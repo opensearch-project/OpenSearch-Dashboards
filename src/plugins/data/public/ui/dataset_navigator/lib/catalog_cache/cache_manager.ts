@@ -3,13 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ASYNC_QUERY, DATASET } from '../constants';
+import {
+  ASYNC_QUERY_EXTERNAL_DATASOURCES_CACHE,
+  CATALOG_CACHE_VERSION,
+  RECENT_DATASET_OPTIONS_CACHE,
+} from '../constants';
+import { ASYNC_QUERY_ACCELERATIONS_CACHE, ASYNC_QUERY_DATASOURCE_CACHE } from '../utils/shared';
 import {
   AccelerationsCacheData,
   CachedAccelerationByDataSource,
   CachedDataSource,
   CachedDataSourceStatus,
   CachedDatabase,
+  DataSetOption,
   DataSourceCacheData,
   ExternalDataSource,
   ExternalDataSourcesCacheData,
@@ -21,6 +27,26 @@ import { SimpleDataSet, SimpleObject } from '../../../../../common';
  * Manages caching for catalog data including data sources and accelerations.
  */
 export class CatalogCacheManager {
+  /**
+   * Key for the data source cache in local storage.
+   */
+  private static readonly datasourceCacheKey = ASYNC_QUERY_DATASOURCE_CACHE;
+
+  /**
+   * Key for the accelerations cache in local storage.
+   */
+  private static readonly accelerationsCacheKey = ASYNC_QUERY_ACCELERATIONS_CACHE;
+
+  /**
+   * Key for external datasources cache in local storage
+   */
+  private static readonly externalDataSourcesCacheKey = ASYNC_QUERY_EXTERNAL_DATASOURCES_CACHE;
+
+  /**
+   * Key for recently selected datasets in local storage
+   */
+  private static readonly recentDataSetCacheKey = RECENT_DATASET_OPTIONS_CACHE;
+
   // TODO: make this an advanced setting
   private static readonly maxRecentDataSet = 4;
 
@@ -29,7 +55,7 @@ export class CatalogCacheManager {
    * @param {DataSourceCacheData} cacheData - The data source cache data to save.
    */
   static saveDataSourceCache(cacheData: DataSourceCacheData): void {
-    sessionStorage.setItem(ASYNC_QUERY.CATALOG_CACHE.KEY, JSON.stringify(cacheData));
+    sessionStorage.setItem(this.datasourceCacheKey, JSON.stringify(cacheData));
   }
 
   /**
@@ -37,12 +63,12 @@ export class CatalogCacheManager {
    * @returns {DataSourceCacheData} The retrieved data source cache.
    */
   static getDataSourceCache(): DataSourceCacheData {
-    const catalogData = sessionStorage.getItem(ASYNC_QUERY.CATALOG_CACHE.KEY);
+    const catalogData = sessionStorage.getItem(this.datasourceCacheKey);
 
     if (catalogData) {
       return JSON.parse(catalogData);
     } else {
-      const defaultCacheObject = { version: ASYNC_QUERY.CATALOG_CACHE.VERSION, dataSources: [] };
+      const defaultCacheObject = { version: CATALOG_CACHE_VERSION, dataSources: [] };
       this.saveDataSourceCache(defaultCacheObject);
       return defaultCacheObject;
     }
@@ -53,7 +79,7 @@ export class CatalogCacheManager {
    * @param {AccelerationsCacheData} cacheData - The accelerations cache data to save.
    */
   static saveAccelerationsCache(cacheData: AccelerationsCacheData): void {
-    sessionStorage.setItem(ASYNC_QUERY.ACCELERATIONS_CACHE, JSON.stringify(cacheData));
+    sessionStorage.setItem(this.accelerationsCacheKey, JSON.stringify(cacheData));
   }
 
   /**
@@ -61,13 +87,13 @@ export class CatalogCacheManager {
    * @returns {AccelerationsCacheData} The retrieved accelerations cache.
    */
   static getAccelerationsCache(): AccelerationsCacheData {
-    const accelerationCacheData = sessionStorage.getItem(ASYNC_QUERY.ACCELERATIONS_CACHE);
+    const accelerationCacheData = sessionStorage.getItem(this.accelerationsCacheKey);
 
     if (accelerationCacheData) {
       return JSON.parse(accelerationCacheData);
     } else {
       const defaultCacheObject = {
-        version: ASYNC_QUERY.CATALOG_CACHE.VERSION,
+        version: CATALOG_CACHE_VERSION,
         dataSources: [],
       };
       this.saveAccelerationsCache(defaultCacheObject);
@@ -145,11 +171,19 @@ export class CatalogCacheManager {
    */
   static addOrUpdateDataSource(dataSource: CachedDataSource, dataSourceMDSId?: string): void {
     const cacheData = this.getDataSourceCache();
-    const index = cacheData.dataSources.findIndex(
-      (ds) =>
-        ds.name === dataSource.name && (!dataSourceMDSId || ds.dataSourceMDSId === dataSourceMDSId)
-    );
-    cacheData.dataSources.splice(index, 1, dataSource);
+    let index;
+    if (dataSourceMDSId) {
+      index = cacheData.dataSources.findIndex(
+        (ds: CachedDataSource) =>
+          ds.name === dataSource.name && ds.dataSourceMDSId === dataSourceMDSId
+      );
+    }
+    index = cacheData.dataSources.findIndex((ds: CachedDataSource) => ds.name === dataSource.name);
+    if (index !== -1) {
+      cacheData.dataSources[index] = dataSource;
+    } else {
+      cacheData.dataSources.push(dataSource);
+    }
     this.saveDataSourceCache(cacheData);
   }
 
@@ -236,11 +270,11 @@ export class CatalogCacheManager {
   ): SimpleObject {
     const cachedDatabase = this.getDatabase(dataSourceName, databaseName, dataSourceMDSId);
 
-    const cachedTable = cachedDatabase.tables!.find((table) => table.name === tableName);
+    const cachedTable = cachedDatabase.tables!.find((table) => table.title === tableName);
     if (!cachedTable) {
       throw new Error('Table not found exception: ' + tableName);
     }
-    return { id: cachedTable.name, ...cachedTable };
+    return cachedTable;
   }
 
   /**
@@ -282,7 +316,7 @@ export class CatalogCacheManager {
    * Clears the data source cache from local storage.
    */
   static clearDataSourceCache(): void {
-    sessionStorage.removeItem(ASYNC_QUERY.CATALOG_CACHE.KEY);
+    sessionStorage.removeItem(this.datasourceCacheKey);
     this.clearExternalDataSourcesCache();
   }
 
@@ -290,22 +324,22 @@ export class CatalogCacheManager {
    * Clears the accelerations cache from local storage.
    */
   static clearAccelerationsCache(): void {
-    sessionStorage.removeItem(ASYNC_QUERY.ACCELERATIONS_CACHE);
+    sessionStorage.removeItem(this.accelerationsCacheKey);
   }
 
   static saveExternalDataSourcesCache(cacheData: ExternalDataSourcesCacheData): void {
-    sessionStorage.setItem(ASYNC_QUERY.CATALOG_CACHE.KEY, JSON.stringify(cacheData));
+    sessionStorage.setItem(this.externalDataSourcesCacheKey, JSON.stringify(cacheData));
   }
 
   static getExternalDataSourcesCache(): ExternalDataSourcesCacheData {
-    const externalDataSourcesData = sessionStorage.getItem(ASYNC_QUERY.CATALOG_CACHE.KEY);
+    const externalDataSourcesData = sessionStorage.getItem(this.externalDataSourcesCacheKey);
 
     if (externalDataSourcesData) {
       return JSON.parse(externalDataSourcesData);
     } else {
       const defaultCacheObject: ExternalDataSourcesCacheData = {
-        version: ASYNC_QUERY.CATALOG_CACHE.VERSION,
-        dataSources: [],
+        version: CATALOG_CACHE_VERSION,
+        externalDataSources: [],
         lastUpdated: '',
         status: CachedDataSourceStatus.Empty,
       };
@@ -317,7 +351,7 @@ export class CatalogCacheManager {
   static updateExternalDataSources(externalDataSources: ExternalDataSource[]): void {
     const currentTime = new Date().toUTCString();
     const cacheData = this.getExternalDataSourcesCache();
-    cacheData.dataSources = externalDataSources;
+    cacheData.externalDataSources = externalDataSources;
     cacheData.lastUpdated = currentTime;
     cacheData.status = CachedDataSourceStatus.Updated;
     this.saveExternalDataSourcesCache(cacheData);
@@ -328,7 +362,7 @@ export class CatalogCacheManager {
   }
 
   static clearExternalDataSourcesCache(): void {
-    sessionStorage.removeItem(ASYNC_QUERY.CATALOG_CACHE.KEY);
+    sessionStorage.removeItem(this.externalDataSourcesCacheKey);
   }
 
   static setExternalDataSourcesLoadingStatus(status: CachedDataSourceStatus): void {
@@ -338,17 +372,17 @@ export class CatalogCacheManager {
   }
 
   static saveRecentDataSetsCache(cacheData: RecentDataSetOptionsCacheData): void {
-    sessionStorage.setItem(DATASET.OPTIONS_CACHE.KEY, JSON.stringify(cacheData));
+    sessionStorage.setItem(this.recentDataSetCacheKey, JSON.stringify(cacheData));
   }
 
   static getRecentDataSetsCache(): RecentDataSetOptionsCacheData {
-    const recentDataSetOptionsData = sessionStorage.getItem(DATASET.OPTIONS_CACHE.KEY);
+    const recentDataSetOptionsData = sessionStorage.getItem(this.recentDataSetCacheKey);
 
     if (recentDataSetOptionsData) {
       return JSON.parse(recentDataSetOptionsData);
     } else {
       const defaultCacheObject: RecentDataSetOptionsCacheData = {
-        version: ASYNC_QUERY.CATALOG_CACHE.VERSION,
+        version: CATALOG_CACHE_VERSION,
         recentDataSets: [],
       };
       this.saveRecentDataSetsCache(defaultCacheObject);
@@ -377,6 +411,6 @@ export class CatalogCacheManager {
   }
 
   static clearRecentDataSetsCache(): void {
-    sessionStorage.removeItem(DATASET.OPTIONS_CACHE.KEY);
+    sessionStorage.removeItem(this.recentDataSetCacheKey);
   }
 }
