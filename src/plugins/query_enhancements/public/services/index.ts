@@ -9,3 +9,5 @@ import { createGetterSetter } from '../../../opensearch_dashboards_utils/common'
 
 export const [getStorage, setStorage] = createGetterSetter<DataStorage>('storage');
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('data');
+
+export { ConnectionsService } from './connections_service';

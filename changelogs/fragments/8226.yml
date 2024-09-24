@@ -1,2 +1,0 @@
-fix:
-- Remove unused enhancements APIs, clean up, and error handling ([#8226](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8226))
