@@ -18,7 +18,7 @@ export const WorkspaceNameWithIcon = ({ workspace, availableUseCases }: Props) =
   const useCase = getUseCase(workspace, availableUseCases);
 
   return (
-    <EuiFlexGroup gutterSize="xs" alignItems="center">
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
       <EuiFlexItem>
         <EuiIcon
           data-test-subj={`${workspace.id}-icon`}
