@@ -16,7 +16,7 @@ import {
   OpenSearchDashboardsRequest,
   SavedObjectsClientContract,
 } from '../../../../core/server';
-import { WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID } from '../../common/constants';
+import { DEFAULT_WORKSPACE, WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID } from '../../common/constants';
 import { Logger } from '../../../../core/server';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../../data_source_management/common';
 
@@ -101,8 +101,9 @@ export class WorkspaceUiSettingsClientWrapper {
       /**
        * When updating ui settings within a workspace, it will update the workspace ui settings,
        * the global ui settings will remain unchanged.
+       * When updating default workspace, it will update user level settings.
        */
-      if (type === 'config' && requestWorkspaceId) {
+      if (type === 'config' && requestWorkspaceId && !(DEFAULT_WORKSPACE in attributes)) {
         const configObject = await wrapperOptions.client.get<Record<string, any>>(
           'config',
           id,

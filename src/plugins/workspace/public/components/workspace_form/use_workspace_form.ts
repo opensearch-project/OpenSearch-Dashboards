@@ -32,6 +32,7 @@ export const useWorkspaceForm = ({
   operationType,
   onSubmit,
   permissionEnabled,
+  onAppLeave,
 }: WorkspaceFormProps) => {
   const applications = useApplications(application);
   const [name, setName] = useState(defaultValues?.name ?? '');
@@ -163,5 +164,6 @@ export const useWorkspaceForm = ({
     handleUseCaseChange,
     setPermissionSettings,
     setSelectedDataSourceConnections,
+    onAppLeave,
   };
 };

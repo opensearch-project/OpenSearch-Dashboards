@@ -7,7 +7,7 @@ import React, { createContext, useContext, FormEventHandler, ReactNode } from 'r
 import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/color_picker';
 import { DataSourceConnection } from '../../../common/types';
 import { WorkspaceFormProps, WorkspaceFormErrors } from './types';
-import { PublicAppInfo } from '../../../../../core/public';
+import { AppMountParameters, PublicAppInfo } from '../../../../../core/public';
 import { useWorkspaceForm } from './use_workspace_form';
 import { WorkspaceFormDataState } from '../workspace_form';
 
@@ -30,6 +30,7 @@ interface WorkspaceFormContextProps {
     React.SetStateAction<WorkspaceFormDataState['permissionSettings']>
   >;
   setSelectedDataSourceConnections: React.Dispatch<React.SetStateAction<DataSourceConnection[]>>;
+  onAppLeave: AppMountParameters['onAppLeave'];
 }
 
 const initialContextValue: WorkspaceFormContextProps = {} as WorkspaceFormContextProps;
@@ -47,6 +48,7 @@ export const WorkspaceFormProvider = ({
   permissionEnabled,
   savedObjects,
   availableUseCases,
+  onAppLeave,
 }: ContextProps) => {
   const workspaceFormContextValue = useWorkspaceForm({
     application,
@@ -56,6 +58,7 @@ export const WorkspaceFormProvider = ({
     permissionEnabled,
     savedObjects,
     availableUseCases,
+    onAppLeave,
   });
 
   return (

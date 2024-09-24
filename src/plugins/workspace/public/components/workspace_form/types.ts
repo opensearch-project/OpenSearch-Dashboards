@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ApplicationStart, SavedObjectsStart } from '../../../../../core/public';
+import type {
+  AppMountParameters,
+  ApplicationStart,
+  SavedObjectsStart,
+} from '../../../../../core/public';
 import type { WorkspacePermissionMode } from '../../../common/constants';
 import type { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
 import { DataSourceConnection } from '../../../common/types';
@@ -80,6 +84,7 @@ export interface WorkspaceFormProps {
   permissionEnabled?: boolean;
   dataSourceManagement?: DataSourceManagementPluginSetup;
   availableUseCases: WorkspaceUseCase[];
+  onAppLeave: AppMountParameters['onAppLeave'];
 }
 
 export interface AvailableUseCaseItem

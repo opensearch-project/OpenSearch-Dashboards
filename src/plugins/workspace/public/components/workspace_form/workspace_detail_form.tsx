@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   EuiSpacer,
   EuiForm,
@@ -68,6 +68,7 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
     handleResetForm,
     handleFormSubmit,
     setPermissionSettings,
+    onAppLeave,
   } = useWorkspaceFormContext();
   const disabledUserOrGroupInputIdsRef = useRef(
     defaultValues?.permissionSettings?.map((item) => item.id) ?? []
@@ -75,20 +76,16 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
 
   const [isSaving, setIsSaving] = useState(false);
 
-  // Handle beforeunload event
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!isSaving && isEditing && numberOfChanges > 0) {
-        event.preventDefault();
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [isEditing, isSaving, numberOfChanges]);
+  onAppLeave((actions) => {
+    if (!isSaving && isEditing && numberOfChanges > 0) {
+      return actions.confirm(
+        i18n.translate('workspace.detail.navigate.message', {
+          defaultMessage: 'Any unsaved changes will be lost.',
+        })
+      );
+    }
+    return actions.default();
+  });
 
   return (
     <EuiForm
