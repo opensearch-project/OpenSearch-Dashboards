@@ -762,10 +762,10 @@ exports[`DataSourceTable should get datasources successful should render normall
           </EuiFlexGroup>
         </EuiSearchBar>
         <EuiSpacer
-          size="m"
+          size="l"
         >
           <div
-            className="euiSpacer euiSpacer--m"
+            className="euiSpacer euiSpacer--l"
           />
         </EuiSpacer>
         <EuiBasicTable
