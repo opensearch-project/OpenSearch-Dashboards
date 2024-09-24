@@ -197,7 +197,7 @@ export function Header({
         },
         {
           items: [
-            <EuiShowFor sizes={['m', 'l', 'xl', 'xxl', 'xxxl']}>
+            <EuiShowFor sizes={['m', 'l', 'xl']}>
               <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
             </EuiShowFor>,
           ],
@@ -205,7 +205,7 @@ export function Header({
         },
         {
           items: [
-            <EuiHideFor sizes={['m', 'l', 'xl', 'xxl', 'xxxl']}>
+            <EuiHideFor sizes={['m', 'l', 'xl']}>
               <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
             </EuiHideFor>,
             <HeaderNavControls navControls$={observables.navControlsExpandedRight$} />,
@@ -283,7 +283,7 @@ export function Header({
         {renderNavToggleWithExtraProps({
           flush: 'both',
           className:
-            'navToggleInSmallScreen eui-hideFor--xxxl eui-hideFor--xxl eui-hideFor--xl eui-hideFor--l',
+            'navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l eui-hideFor--xxl eui-hideFor--xxxl',
           isSmallScreen: true,
         })}
       </>
