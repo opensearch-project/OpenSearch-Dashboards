@@ -4,12 +4,13 @@
  */
 
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
-import { DataStorage, UI_SETTINGS } from '../../../../data/common';
+import { UI_SETTINGS } from '../../../../data/common';
 import { PersistedLog } from '../../../../data/public';
+import { IStorageWrapper } from '../../../../opensearch_dashboards_utils/public';
 
 export function getPersistedLog(
   uiSettings: IUiSettingsClient,
-  storage: DataStorage,
+  storage: IStorageWrapper,
   language: string
 ) {
   return new PersistedLog(
