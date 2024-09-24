@@ -79,10 +79,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
       });
       breadcrumbs.push({
         text: i18n.translate('workspace.detail.title', {
-          defaultMessage: '{name} settings',
-          values: {
-            name: currentWorkspace.name,
-          },
+          defaultMessage: 'Workspace settings',
         }),
       });
     }
