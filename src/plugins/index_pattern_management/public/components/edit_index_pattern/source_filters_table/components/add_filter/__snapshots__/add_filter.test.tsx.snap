@@ -1,7 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AddFilter should ignore strings with just spaces 1`] = `
-<EuiFlexGroup>
+<EuiFlexGroup
+  gutterSize="s"
+>
   <EuiFlexItem
     grow={10}
   >
@@ -28,7 +30,9 @@ exports[`AddFilter should ignore strings with just spaces 1`] = `
 `;
 
 exports[`AddFilter should render normally 1`] = `
-<EuiFlexGroup>
+<EuiFlexGroup
+  gutterSize="s"
+>
   <EuiFlexItem
     grow={10}
   >
