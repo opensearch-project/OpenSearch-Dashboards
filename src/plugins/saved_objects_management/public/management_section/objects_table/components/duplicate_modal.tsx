@@ -165,7 +165,13 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
             fullWidth
             label={i18n.translate(
               'savedObjectsManagement.objectsTable.duplicateModal.relatedObjects',
-              { defaultMessage: 'Copy related objects' }
+              {
+                defaultMessage:
+                  'Copy related {useUpdatedUX, select, true {assets} other {objects}}',
+                values: {
+                  useUpdatedUX: this.props.useUpdatedUX,
+                },
+              }
             )}
           >
             <>
@@ -176,7 +182,10 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
                   'savedObjectsManagement.objectsTable.duplicateModal.includeReferencesDeepLabel',
                   {
                     defaultMessage:
-                      'Copy the selected object and any related objects (recommended).',
+                      'Copy the selected {useUpdatedUX, select, true {asset} other {object}} and any related {useUpdatedUX, select, true {assets} other {objects}} (recommended).',
+                    values: {
+                      useUpdatedUX: this.props.useUpdatedUX,
+                    },
                   }
                 )}
                 checked={isIncludeReferencesDeepChecked}

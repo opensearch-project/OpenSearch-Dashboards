@@ -589,7 +589,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   showExportSuccessMessage = (exportDetails: SavedObjectsExportResultDetails | undefined) => {
-    const { notifications } = this.props;
+    const { notifications, useUpdatedUX } = this.props;
     if (exportDetails && exportDetails.missingReferences.length > 0) {
       notifications.toasts.addWarning({
         title: i18n.translate(
@@ -597,8 +597,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           {
             defaultMessage:
               'Your file is downloading in the background. ' +
-              'Some related objects could not be found. ' +
+              'Some related {useUpdatedUX, select, true {assets} other {objects}} could not be found. ' +
               'Please see the last line in the exported file for a list of missing objects.',
+            values: {
+              useUpdatedUX,
+            },
           }
         ),
       });
@@ -1036,7 +1039,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             label={
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                defaultMessage="Include related objects"
+                defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
+                values={{
+                  useUpdatedUX: this.props.useUpdatedUX,
+                }}
               />
             }
             checked={isIncludeReferencesDeepChecked}

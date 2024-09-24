@@ -84,9 +84,13 @@ exports[`Table prevents saved objects from being deleted 1`] = `
               checked={true}
               label={
                 <FormattedMessage
-                  defaultMessage="Include related objects"
+                  defaultMessage="Include related related {useUpdatedUX, select, true {assets} other {objects}}"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                  values={Object {}}
+                  values={
+                    Object {
+                      "useUpdatedUX": false,
+                    }
+                  }
                 />
               }
               name="includeReferencesDeep"
@@ -324,9 +328,13 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
               checked={true}
               label={
                 <FormattedMessage
-                  defaultMessage="Include related objects"
+                  defaultMessage="Include related related {useUpdatedUX, select, true {assets} other {objects}}"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                  values={Object {}}
+                  values={
+                    Object {
+                      "useUpdatedUX": false,
+                    }
+                  }
                 />
               }
               name="includeReferencesDeep"
@@ -560,9 +568,13 @@ exports[`Table should render normally 1`] = `
               checked={true}
               label={
                 <FormattedMessage
-                  defaultMessage="Include related objects"
+                  defaultMessage="Include related related {useUpdatedUX, select, true {assets} other {objects}}"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                  values={Object {}}
+                  values={
+                    Object {
+                      "useUpdatedUX": false,
+                    }
+                  }
                 />
               }
               name="includeReferencesDeep"
@@ -800,9 +812,13 @@ exports[`Table should render normally when use updated UX 1`] = `
               checked={true}
               label={
                 <FormattedMessage
-                  defaultMessage="Include related objects"
+                  defaultMessage="Include related related {useUpdatedUX, select, true {assets} other {objects}}"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                  values={Object {}}
+                  values={
+                    Object {
+                      "useUpdatedUX": true,
+                    }
+                  }
                 />
               }
               name="includeReferencesDeep"

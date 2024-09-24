@@ -487,7 +487,10 @@ export class Table extends PureComponent<TableProps, TableState> {
                   label={
                     <FormattedMessage
                       id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                      defaultMessage="Include related objects"
+                      defaultMessage="Include related related {useUpdatedUX, select, true {assets} other {objects}}"
+                      values={{
+                        useUpdatedUX: this.props.useUpdatedUX,
+                      }}
                     />
                   }
                   checked={this.state.isIncludeReferencesDeepChecked}

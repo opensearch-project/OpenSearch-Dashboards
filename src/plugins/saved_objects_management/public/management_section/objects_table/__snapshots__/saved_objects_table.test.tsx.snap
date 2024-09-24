@@ -937,9 +937,13 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
       checked={true}
       label={
         <FormattedMessage
-          defaultMessage="Include related objects"
+          defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
           id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-          values={Object {}}
+          values={
+            Object {
+              "useUpdatedUX": undefined,
+            }
+          }
         />
       }
       name="includeReferencesDeep"

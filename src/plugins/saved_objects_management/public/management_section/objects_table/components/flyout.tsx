@@ -888,6 +888,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
               'savedObjectsManagement.objectsTable.importModeControl.importOptionsTitle',
               { defaultMessage: 'Conflict management' }
             )}
+            useUpdatedUX={this.props.useUpdatedUX}
           />
         </EuiCompressedFormRow>
       </div>
