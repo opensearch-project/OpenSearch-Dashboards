@@ -21,9 +21,7 @@ export const pplRawSearchStrategyProvider = (
         : client.asScoped(request.rawRequest).callAsCurrentUser;
 
       try {
-        const rawResponse: any = await runSearch('enhancements.pplQuery', {
-          body: request.params.body,
-        });
+        const rawResponse: any = await runSearch('ppl.pplQuery', { body: request.params.body });
         const data = shimSchemaRow(rawResponse);
         rawResponse.jsonData = data.jsonData;
 

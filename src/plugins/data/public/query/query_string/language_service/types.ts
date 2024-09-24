@@ -13,7 +13,6 @@ import {
 import { EditorInstance } from '../../../ui/query_editor/editors';
 
 export interface RecentQueryItem {
-  id: number;
   query: Query;
   time: number;
   timeRange?: TimeRange;

@@ -60,7 +60,6 @@ export interface SearchData {
       statusCode?: number;
     };
     elapsedMs?: number;
-    startTime?: number;
   };
 }
 
@@ -120,14 +119,12 @@ export const useSearch = (services: DiscoverViewServices) => {
     );
   }, [savedSearch, services.uiSettings, timefilter]);
 
-  const startTime = Date.now();
   const data$ = useMemo(
     () =>
       new BehaviorSubject<SearchData>({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
-        queryStatus: { startTime },
       }),
-    [shouldSearchOnPageLoad, startTime]
+    [shouldSearchOnPageLoad]
   );
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
@@ -164,6 +161,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     dataset = searchSource.getField('index');
 
     let elapsedMs;
+
     try {
       // Only show loading indicator if we are fetching when the rows are empty
       if (fetchStateRef.current.rows?.length === 0) {
@@ -269,14 +267,14 @@ export const useSearch = (services: DiscoverViewServices) => {
     }
   }, [
     indexPattern,
+    interval,
     timefilter,
     toastNotifications,
-    interval,
     data,
     services,
-    sort,
     savedSearch?.searchSource,
     data$,
+    sort,
     shouldSearchOnPageLoad,
     inspectorAdapters.requests,
   ]);

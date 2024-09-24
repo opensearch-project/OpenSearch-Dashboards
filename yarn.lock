@@ -1431,10 +1431,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@npm:@opensearch-project/oui@1.13.0":
-  version "1.13.0"
-  resolved "https://registry.yarnpkg.com/@opensearch-project/oui/-/oui-1.13.0.tgz#830de8bfbb9d0471288b9526ddcfd5fcbd45c420"
-  integrity sha512-5qVqb7OiiMxIttn7ByFzMySFuIImTqP664PtrjmjDgLsiLkah0f7s1RFT5jE4Os1CrWaTFXiSXzleYpuZyA4oA==
+"@elastic/eui@npm:@opensearch-project/oui@1.12.0":
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/@opensearch-project/oui/-/oui-1.12.0.tgz#dfb34669549fec2500e71f66e43868932178318c"
+  integrity sha512-0phXBR8OZneJr/TwIiqTMWL53e/2PqzEDzl/y7QYEc6xUofD+RQSNi/YZNw4OZgscogu/zTajWA5tdQdrxT2+g==
   dependencies:
     "@types/chroma-js" "^2.4.0"
     "@types/react-beautiful-dnd" "^13.1.3"
@@ -5542,10 +5542,15 @@ camelize@^1.0.0:
   resolved "https://registry.yarnpkg.com/camelize/-/camelize-1.0.0.tgz#164a5483e630fa4321e5af07020e531831b2609b"
   integrity sha1-FkpUg+Yw+kMh5a8HAg5TGDGyYJs=
 
-caniuse-lite@^1.0.30001464, caniuse-lite@^1.0.30001640:
-  version "1.0.30001659"
-  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001659.tgz"
-  integrity sha512-Qxxyfv3RdHAfJcXelgf0hU4DFUVXBGTjqrBUZLUh8AtlGnsDo+CnncYtTd95+ZKfnANUOzxyIQCuU/UeBZBYoA==
+caniuse-lite@^1.0.30001464:
+  version "1.0.30001587"
+  resolved "https://registry.npmjs.org/caniuse-lite/-/caniuse-lite-1.0.30001587.tgz"
+  integrity sha512-HMFNotUmLXn71BQxg8cijvqxnIAofforZOwGsxyXJ0qugTdspUF4sPSJ2vhgprHCB996tIDzEq1ubumPDV8ULA==
+
+caniuse-lite@^1.0.30001640:
+  version "1.0.30001643"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001643.tgz#9c004caef315de9452ab970c3da71085f8241dbd"
+  integrity sha512-ERgWGNleEilSrHM6iUz/zJNSQTP8Mr21wDWpdgvRwcTXGAq6jMtOUPP4dqFPTdKqZ2wKTdtB+uucZ3MRpAUSmg==
 
 ccount@^1.0.0:
   version "1.1.0"

@@ -15,12 +15,12 @@ import {
   SearchInterceptorDeps,
 } from '../../../data/public';
 import {
+  formatDate,
+  SEARCH_STRATEGY,
   API,
   EnhancedFetchContext,
   fetch,
-  formatDate,
   QueryAggConfig,
-  SEARCH_STRATEGY,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
@@ -45,7 +45,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     const { id, ...searchRequest } = request;
     const context: EnhancedFetchContext = {
       http: this.deps.http,
-      path: trimEnd(`${API.SEARCH}/${strategy}`),
+      path: trimEnd(API.PPL_SEARCH),
       signal,
     };
 
@@ -55,28 +55,15 @@ export class PPLSearchInterceptor extends SearchInterceptor {
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    const dataset = this.queryService.queryString.getQuery().dataset;
-    const datasetType = dataset?.type;
-    let strategy = SEARCH_STRATEGY.PPL;
-
-    if (datasetType) {
-      const datasetTypeConfig = this.queryService.queryString
-        .getDatasetService()
-        .getType(datasetType);
-      strategy = datasetTypeConfig?.getSearchOptions?.().strategy ?? strategy;
-    }
-
-    return this.runSearch(request, options.abortSignal, strategy);
+    return this.runSearch(request, options.abortSignal, SEARCH_STRATEGY.PPL);
   }
 
   private buildQuery() {
     const query: Query = this.queryService.queryString.getQuery();
     const dataset = query.dataset;
     if (!dataset || !dataset.timeFieldName) return query;
-    const [baseQuery, ...afterPipeParts] = query.query.split('|');
-    const afterPipe = afterPipeParts.length > 0 ? ` | ${afterPipeParts.join('|').trim()}` : '';
     const timeFilter = this.getTimeFilter(dataset.timeFieldName);
-    return { ...query, query: baseQuery + timeFilter + afterPipe };
+    return { ...query, query: query.query + timeFilter };
   }
 
   private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {

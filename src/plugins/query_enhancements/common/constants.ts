@@ -29,8 +29,7 @@ export const API = {
     GENERATE: `${BASE_API}/assist/generate`,
   },
   DATA_SOURCE: {
-    ASYNC_JOBS: `${BASE_API}/jobs`,
-    CONNECTIONS: `${BASE_API}/connections`,
+    CONNECTIONS: `${BASE_API}/datasource/connections`,
   },
 };
 

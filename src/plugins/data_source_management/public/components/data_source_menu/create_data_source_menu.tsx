@@ -20,7 +20,7 @@ export function createDataSourceMenu<T>() {
     if (props.setMenuMountPoint) {
       return (
         <MountPointPortal setMountPoint={props.setMenuMountPoint}>
-          <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" popoverBreakpoints={'none'}>
+          <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs">
             <DataSourceMenu
               {...props}
               uiSettings={uiSettings}
