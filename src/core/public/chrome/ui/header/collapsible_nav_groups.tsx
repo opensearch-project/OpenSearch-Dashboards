@@ -154,7 +154,7 @@ export function NavGroups({
 
   return (
     <EuiFlexItem style={style}>
-      <EuiSideNav items={sideNavItems} isOpenOnMobile />
+      <EuiSideNav items={sideNavItems} isOpenOnMobile mobileBreakpoints={[]} />
       {suffix}
     </EuiFlexItem>
   );
