@@ -39,7 +39,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     const isAsync = strategy === SEARCH_STRATEGY.SQL_ASYNC;
     const context: EnhancedFetchContext = {
       http: this.deps.http,
-      path: trimEnd(`${API.SEARCH}/${strategy}`),
+      path: trimEnd(isAsync ? API.SQL_ASYNC_SEARCH : API.SQL_SEARCH),
       signal,
     };
 
@@ -54,16 +54,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
     const dataset = this.queryService.queryString.getQuery().dataset;
-    const datasetType = dataset?.type;
-    let strategy = datasetType === DATASET.S3 ? SEARCH_STRATEGY.SQL_ASYNC : SEARCH_STRATEGY.SQL;
-
-    if (datasetType) {
-      const datasetTypeConfig = this.queryService.queryString
-        .getDatasetService()
-        .getType(datasetType);
-      strategy = datasetTypeConfig?.getSearchOptions?.().strategy ?? strategy;
-    }
-
+    const strategy = dataset?.type === DATASET.S3 ? SEARCH_STRATEGY.SQL_ASYNC : SEARCH_STRATEGY.SQL;
     return this.runSearch(request, options.abortSignal, strategy);
   }
 }

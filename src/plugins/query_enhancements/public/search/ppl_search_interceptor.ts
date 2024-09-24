@@ -45,7 +45,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     const { id, ...searchRequest } = request;
     const context: EnhancedFetchContext = {
       http: this.deps.http,
-      path: trimEnd(`${API.SEARCH}/${strategy}`),
+      path: trimEnd(API.PPL_SEARCH),
       signal,
     };
 
@@ -55,18 +55,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    const dataset = this.queryService.queryString.getQuery().dataset;
-    const datasetType = dataset?.type;
-    let strategy = SEARCH_STRATEGY.PPL;
-
-    if (datasetType) {
-      const datasetTypeConfig = this.queryService.queryString
-        .getDatasetService()
-        .getType(datasetType);
-      strategy = datasetTypeConfig?.getSearchOptions?.().strategy ?? strategy;
-    }
-
-    return this.runSearch(request, options.abortSignal, strategy);
+    return this.runSearch(request, options.abortSignal, SEARCH_STRATEGY.PPL);
   }
 
   private buildQuery() {
