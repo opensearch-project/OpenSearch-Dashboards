@@ -112,7 +112,9 @@ const TableRowUI = ({
               key={colName}
               data-test-subj="docTableField"
               className={`osdDocTableCell ${
-                colName === '@timestamp' ? 'eui-textNoWrap' : 'eui-textBreakAll eui-textBreakWord'
+                indexPattern.timeFieldName === colName
+                  ? 'eui-textNoWrap'
+                  : 'eui-textBreakAll eui-textBreakWord'
               }`}
             >
               <div className="truncate-by-height">
