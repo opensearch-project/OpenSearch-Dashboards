@@ -157,6 +157,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
           }
           return;
         } else {
+          setIsFormSubmitting(false);
           throw new Error(result?.error ? result?.error : 'update workspace failed');
         }
       } catch (error) {
@@ -166,9 +167,8 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
           }),
           text: error instanceof Error ? error.message : JSON.stringify(error),
         });
-        return;
-      } finally {
         setIsFormSubmitting(false);
+        return;
       }
     },
     [isFormSubmitting, currentWorkspace, notifications?.toasts, workspaceClient, application, http]

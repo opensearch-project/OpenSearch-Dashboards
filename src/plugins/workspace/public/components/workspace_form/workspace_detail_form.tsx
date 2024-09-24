@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import {
   EuiSpacer,
   EuiForm,
@@ -50,7 +50,7 @@ const FormGroup = ({ title, children, describe }: FormGroupProps) => (
   </>
 );
 
-interface WorkspaceDetailedFormProps extends WorkspaceFormProps {
+interface WorkspaceDetailedFormProps extends Omit<WorkspaceFormProps, 'onAppLeave'> {
   detailTab?: DetailTab;
   detailTitle?: string;
 }
@@ -64,34 +64,18 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
     formErrors,
     setIsEditing,
     numberOfErrors,
-    numberOfChanges,
     handleResetForm,
     handleFormSubmit,
     setPermissionSettings,
-    onAppLeave,
   } = useWorkspaceFormContext();
   const disabledUserOrGroupInputIdsRef = useRef(
     defaultValues?.permissionSettings?.map((item) => item.id) ?? []
   );
 
-  const [isSaving, setIsSaving] = useState(false);
-
-  onAppLeave((actions) => {
-    if (!isSaving && isEditing && numberOfChanges > 0) {
-      return actions.confirm(
-        i18n.translate('workspace.detail.navigate.message', {
-          defaultMessage: 'Any unsaved changes will be lost.',
-        })
-      );
-    }
-    return actions.default();
-  });
-
   return (
     <EuiForm
       id={formId}
       onSubmit={(event) => {
-        setIsSaving(true);
         handleFormSubmit(event);
       }}
       component="form"

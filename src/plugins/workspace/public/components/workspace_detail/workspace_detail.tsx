@@ -77,6 +77,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
     setIsEditing,
     formData,
     setSelectedDataSourceConnections,
+    onAppLeave,
   } = useWorkspaceFormContext();
   const [deletedWorkspace, setDeletedWorkspace] = useState<WorkspaceAttribute | null>(null);
   const [selectedTabId, setSelectedTabId] = useState<string>(DetailTab.Details);
@@ -132,6 +133,17 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
     setSelectedDataSourceConnections,
     formData.selectedDataSourceConnections,
   ]);
+
+  onAppLeave((actions) => {
+    if (!props.isFormSubmitting && isEditing && numberOfChanges > 0) {
+      return actions.confirm(
+        i18n.translate('workspace.detail.navigate.message', {
+          defaultMessage: 'Any unsaved changes will be lost.',
+        })
+      );
+    }
+    return actions.default();
+  });
 
   const handleSetDefaultWorkspace = useCallback(
     async (workspace: WorkspaceAttribute) => {
