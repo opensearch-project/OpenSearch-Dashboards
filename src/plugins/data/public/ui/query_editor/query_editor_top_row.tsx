@@ -13,7 +13,7 @@ import {
   prettyDuration,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { IDataPluginServices, IIndexPattern, Query, TimeHistoryContract, TimeRange } from '../..';
 import {
@@ -72,6 +72,20 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     },
   } = opensearchDashboards.services;
 
+  useEffect(() => {
+    function handleCmdEnter(event: KeyboardEvent) {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+        event.preventDefault();
+
+        onClickSubmitButton(event);
+      }
+    }
+    document.addEventListener('keydown', handleCmdEnter);
+    return () => {
+      document.removeEventListener('keydown', handleCmdEnter);
+    };
+  }, [onClickSubmitButton]);
+
   const queryLanguage = props.query && props.query.language;
   const persistedLog: PersistedLog | undefined = React.useMemo(
     () =>
@@ -81,7 +95,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     [queryLanguage, uiSettings, storage, appName]
   );
 
-  function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
+  function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement> | KeyboardEvent) {
     if (persistedLog && props.query) {
       persistedLog.add(props.query.query);
     }
