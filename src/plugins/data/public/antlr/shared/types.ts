@@ -41,7 +41,6 @@ export interface TokenPosition {
 
 export interface KeywordSuggestion {
   value: string;
-  id: number;
 }
 
 export type ColumnSuggestion = TableContextSuggestion;
