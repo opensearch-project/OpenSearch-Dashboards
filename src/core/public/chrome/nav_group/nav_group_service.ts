@@ -22,7 +22,7 @@ import { ChromeNavLinks } from '../nav_links';
 import { InternalApplicationStart } from '../../application';
 import { NavGroupStatus, NavGroupType } from '../../../../core/types';
 import { ChromeBreadcrumb, ChromeBreadcrumbEnricher } from '../chrome_service';
-import { ALL_USE_CASE_ID } from '../../../utils';
+import { ALL_USE_CASE_ID, DEFAULT_APP_CATEGORIES } from '../../../utils';
 
 export const CURRENT_NAV_GROUP_ID = 'core.chrome.currentNavGroupId';
 
@@ -74,6 +74,14 @@ export interface ChromeNavGroupServiceStartContract {
   setCurrentNavGroup: (navGroupId: string | undefined) => void;
 }
 
+// Custom category is used for those features not belong to any of use cases in all use case.
+// and the custom category should always sit after manage category
+const customCategory: AppCategory = {
+  id: 'custom',
+  label: i18n.translate('core.ui.customNavList.label', { defaultMessage: 'Custom' }),
+  order: (DEFAULT_APP_CATEGORIES.manage.order || 0) + 500,
+};
+
 /** @internal */
 export class ChromeNavGroupService {
   private readonly navGroupsMap$ = new BehaviorSubject<Record<string, NavGroupItemInMap>>({});
@@ -114,12 +122,87 @@ export class ChromeNavGroupService {
   }
 
   private sortNavGroupNavLinks(
-    navGroup: NavGroupItemInMap,
+    navLinks: NavGroupItemInMap['navLinks'],
     allValidNavLinks: Array<Readonly<ChromeNavLink>>
   ) {
-    return getSortedNavLinks(
-      fulfillRegistrationLinksToChromeNavLinks(navGroup.navLinks, allValidNavLinks)
-    );
+    return getSortedNavLinks(fulfillRegistrationLinksToChromeNavLinks(navLinks, allValidNavLinks));
+  }
+
+  private getNavLinksForAllUseCase(
+    navGroupsMap: Record<string, NavGroupItemInMap>,
+    navLinks: Array<Readonly<ChromeNavLink>>
+  ) {
+    const navLinksResult: ChromeRegistrationNavLink[] = [];
+
+    // Append all the links that do not have use case info to keep backward compatible
+    const linkIdsWithNavGroupInfo = Object.values(navGroupsMap).reduce((total, navGroup) => {
+      return [...total, ...navGroup.navLinks.map((navLink) => navLink.id)];
+    }, [] as string[]);
+    navLinks.forEach((navLink) => {
+      if (linkIdsWithNavGroupInfo.includes(navLink.id)) {
+        return;
+      }
+      navLinksResult.push({
+        ...navLink,
+        category: customCategory,
+      });
+    });
+
+    // Append all the links registered to all use case
+    navGroupsMap[ALL_USE_CASE_ID]?.navLinks.forEach((navLink) => {
+      navLinksResult.push(navLink);
+    });
+
+    // Append use case section into left navigation
+    Object.values(navGroupsMap).forEach((group) => {
+      if (group.type) {
+        return;
+      }
+      const categoryInfo = {
+        id: group.id,
+        label: group.title,
+        order: group.order,
+      };
+
+      const fulfilledLinksOfNavGroup = fulfillRegistrationLinksToChromeNavLinks(
+        group.navLinks,
+        navLinks
+      );
+
+      const linksForAllUseCaseWithinNavGroup: ChromeRegistrationNavLink[] = [];
+
+      fulfilledLinksOfNavGroup.forEach((navLink) => {
+        if (!navLink.showInAllNavGroup) {
+          return;
+        }
+
+        linksForAllUseCaseWithinNavGroup.push({
+          ...navLink,
+          category: categoryInfo,
+        });
+      });
+
+      navLinksResult.push(...linksForAllUseCaseWithinNavGroup);
+
+      if (!linksForAllUseCaseWithinNavGroup.length) {
+        /**
+         * Find if there are any links inside a use case but without a `see all` entry.
+         * If so, append these features into custom category as a fallback
+         */
+        fulfillRegistrationLinksToChromeNavLinks(group.navLinks, navLinks).forEach((navLink) => {
+          // Links that already exists in all use case do not need to reappend
+          if (navLinksResult.find((navLinkInAll) => navLinkInAll.id === navLink.id)) {
+            return;
+          }
+          navLinksResult.push({
+            ...navLink,
+            category: customCategory,
+          });
+        });
+      }
+    });
+
+    return navLinksResult;
   }
 
   private getSortedNavGroupsMap$() {
@@ -129,10 +212,20 @@ export class ChromeNavGroupService {
         map(([navGroupsMap, navLinks]) => {
           return Object.keys(navGroupsMap).reduce((sortedNavGroupsMap, navGroupId) => {
             const navGroup = navGroupsMap[navGroupId];
-            sortedNavGroupsMap[navGroupId] = {
-              ...navGroup,
-              navLinks: this.sortNavGroupNavLinks(navGroup, navLinks),
-            };
+            if (navGroupId === ALL_USE_CASE_ID) {
+              sortedNavGroupsMap[navGroupId] = {
+                ...navGroup,
+                navLinks: this.sortNavGroupNavLinks(
+                  this.getNavLinksForAllUseCase(navGroupsMap, navLinks),
+                  navLinks
+                ),
+              };
+            } else {
+              sortedNavGroupsMap[navGroupId] = {
+                ...navGroup,
+                navLinks: this.sortNavGroupNavLinks(navGroup.navLinks, navLinks),
+              };
+            }
             return sortedNavGroupsMap;
           }, {} as Record<string, NavGroupItemInMap>);
         })
