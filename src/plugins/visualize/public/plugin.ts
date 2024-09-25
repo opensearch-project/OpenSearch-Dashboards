@@ -259,7 +259,7 @@ export class VisualizePlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
       {
         id: visualizeAppId,
-        category: DEFAULT_APP_CATEGORIES.analyzeSearch,
+        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
         order: 400,
         title: titleInLeftNav,
       },
@@ -267,7 +267,7 @@ export class VisualizePlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
       {
         id: visualizeAppId,
-        category: undefined,
+        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
         order: 400,
         title: titleInLeftNav,
       },
