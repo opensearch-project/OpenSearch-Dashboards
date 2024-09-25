@@ -282,7 +282,8 @@ export function Header({
             })}
         {renderNavToggleWithExtraProps({
           flush: 'both',
-          className: 'navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l',
+          className:
+            'navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l eui-hideFor--xxl eui-hideFor--xxxl',
           isSmallScreen: true,
         })}
       </>
