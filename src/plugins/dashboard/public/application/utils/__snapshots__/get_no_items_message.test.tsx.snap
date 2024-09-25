@@ -307,7 +307,7 @@ exports[`dashboard listing table with no item and with write controls 1`] = `
             values={
               Object {
                 "sampleDataInstallLink": <EuiLink
-                  onClick={[Function]}
+                  href="http://localhost/test/w/wk1/import_sample_data"
                 >
                   <FormattedMessage
                     defaultMessage="Install some sample data"
@@ -627,7 +627,7 @@ exports[`dashboard listing table with no item and with write controls 1`] = `
                     values={
                       Object {
                         "sampleDataInstallLink": <EuiLink
-                          onClick={[Function]}
+                          href="http://localhost/test/w/wk1/import_sample_data"
                         >
                           <FormattedMessage
                             defaultMessage="Install some sample data"
@@ -640,13 +640,12 @@ exports[`dashboard listing table with no item and with write controls 1`] = `
                   >
                     New to OpenSearch Dashboards? 
                     <EuiLink
-                      onClick={[Function]}
+                      href="http://localhost/test/w/wk1/import_sample_data"
                     >
-                      <button
+                      <a
                         className="euiLink euiLink--primary"
-                        disabled={false}
-                        onClick={[Function]}
-                        type="button"
+                        href="http://localhost/test/w/wk1/import_sample_data"
+                        rel="noreferrer"
                       >
                         <FormattedMessage
                           defaultMessage="Install some sample data"
@@ -655,7 +654,7 @@ exports[`dashboard listing table with no item and with write controls 1`] = `
                         >
                           Install some sample data
                         </FormattedMessage>
-                      </button>
+                      </a>
                     </EuiLink>
                      to take a test drive.
                   </FormattedMessage>
@@ -712,7 +711,6 @@ exports[`dashboard listing table with no item and with write controls 1`] = `
           >
             <EuiButtonContent
               className="euiButton__content"
-              iconGap="m"
               iconSide="left"
               iconType="plus"
               textProps={

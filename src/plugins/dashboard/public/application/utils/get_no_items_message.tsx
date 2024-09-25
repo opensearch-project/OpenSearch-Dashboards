@@ -6,12 +6,14 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiSmallButton, EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
-import { ApplicationStart } from 'opensearch-dashboards/public';
+import { HttpStart } from 'opensearch-dashboards/public';
+import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 
 export const getNoItemsMessage = (
   hideWriteControls: boolean,
   createItem: () => void,
-  application: ApplicationStart
+  basePath: HttpStart['basePath'],
+  workspaceId: string | undefined
 ) => {
   if (hideWriteControls) {
     return (
@@ -60,11 +62,9 @@ export const getNoItemsMessage = (
                 values={{
                   sampleDataInstallLink: (
                     <EuiLink
-                      onClick={() =>
-                        application.navigateToApp('home', {
-                          path: '#/tutorial_directory/sampleData',
-                        })
-                      }
+                      href={basePath.prepend(
+                        formatUrlWithWorkspaceId('import_sample_data', workspaceId || '', basePath)
+                      )}
                     >
                       <FormattedMessage
                         id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
