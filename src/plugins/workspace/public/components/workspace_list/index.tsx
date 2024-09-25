@@ -603,9 +603,9 @@ export const WorkspaceListInner = ({
           direction: initialSortDirection,
         },
       }}
-      isSelectable={selectable}
+      isSelectable={selectable && !!isDashboardAdmin}
       search={searchable ? search : undefined}
-      selection={selectable ? selectionValue : undefined}
+      selection={selectable && !!isDashboardAdmin ? selectionValue : undefined}
     />
   );
 
