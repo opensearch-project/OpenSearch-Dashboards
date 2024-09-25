@@ -152,7 +152,7 @@ export function Header({
   const isVisible = useObservable(observables.isVisible$, false);
   const headerVariant = useObservable(observables.headerVariant$, HeaderVariant.PAGE);
   const isLocked = useObservable(observables.isLocked$, false);
-  const [isNavOpenState, setIsNavOpenState] = useState(isLocked);
+  const [isNavOpenState, setIsNavOpenState] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
   const breadcrumbs = useObservable(observables.breadcrumbs$, []);
   const currentWorkspace = useObservable(observables.currentWorkspace$, undefined);
