@@ -251,7 +251,6 @@ describe('ChromeNavGroupService#start()', () => {
         title: 'foo',
       },
     ]);
-    const navLinkService = new NavLinksService();
     const navLinkServiceStart = mockedNavLink.start({
       http: mockedHttpService,
       application: mockedApplicationService,
