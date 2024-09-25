@@ -3,7 +3,7 @@ name: Run cypress tests
 # trigger on every PR for all branches
 on:
   pull_request:
-    branches: [ '**' ]
+    branches: ['**']
     paths-ignore:
       - '**/*.md'
       - '.lycheeignore'
@@ -32,8 +32,8 @@ env:
   TEST_REPO: ${{ inputs.test_repo != '' && inputs.test_repo || 'opensearch-project/opensearch-dashboards-functional-test' }}
   TEST_BRANCH: "${{ inputs.test_branch != '' && inputs.test_branch || github.base_ref }}"
   FTR_PATH: 'ftr'
-  START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true  --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false'
-  OPENSEARCH_SNAPSHOT_CMD: 'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false'
+  START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true  --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides["home:useNewHomePage"]=true'
+  OPENSEARCH_SNAPSHOT_CMD: 'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false --sql'
   CYPRESS_BROWSER: 'chromium'
   CYPRESS_VISBUILDER_ENABLED: true
   CYPRESS_DATASOURCE_MANAGEMENT_ENABLED: false
@@ -49,7 +49,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-          group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+        group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
@@ -133,7 +133,7 @@ jobs:
         id: cypress_version
         run: |
           echo "name=cypress_version::$(cat ./${{ env.FTR_PATH }}/package.json | jq '.devDependencies.cypress' | tr -d '"')" >> $GITHUB_OUTPUT
-      
+
       - name: Cache Cypress
         if: ${{ matrix.group < 10 }}
         id: cache-cypress
@@ -167,7 +167,7 @@ jobs:
           start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
-      
+
       # Clear Cypress Cache before running Dashboards tests
       - name: Clear Cypress Cache
         if: ${{ matrix.group > 9 }}
@@ -245,7 +245,7 @@ jobs:
         with:
           issue-number: ${{ inputs.pr_number }}
           comment-author: 'github-actions[bot]'
-          body-includes: "${{ env.COMMENT_TAG }}"
+          body-includes: '${{ env.COMMENT_TAG }}'
 
       - name: Add comment on the PR
         uses: peter-evans/create-or-update-comment@v3
