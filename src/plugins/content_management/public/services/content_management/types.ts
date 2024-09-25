@@ -36,6 +36,7 @@ export type Section =
       id: string;
       order: number;
       title?: string;
+      collapseAble?: boolean;
       input?: CardContainerExplicitInput;
       columns?: number;
       wrap?: boolean;

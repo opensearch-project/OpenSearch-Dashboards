@@ -32,6 +32,7 @@ describe('Search use case setup', () => {
         "id": "search_overview",
         "sections": Array [
           Object {
+            "collapseAble": true,
             "id": "get_started",
             "kind": "card",
             "order": 1000,
@@ -97,7 +98,7 @@ describe('Search use case setup', () => {
           >
             <EuiLink
               external={true}
-              href="https://opensearch.org/docs/latest/query-dsl/full-text/query-string/"
+              href="https://opensearch.org/docs/latest/query-dsl/full-text/"
               target="_blank"
             >
               View Documentation
