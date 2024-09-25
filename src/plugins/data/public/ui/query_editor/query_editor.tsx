@@ -14,7 +14,6 @@ import {
   EuiText,
   PopoverAnchorPosition,
 } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
@@ -301,15 +300,17 @@ export default class QueryEditorUI extends Component<Props, State> {
       suggestions:
         suggestions && suggestions.length > 0
           ? suggestions
-              .filter((s) => 'detail' in s) // remove suggestion not of type MonacoCompatible
+              .filter((s) => 'detail' in s) // designed to remove suggestion not of type MonacoCompatible
               .map((s: MonacoCompatibleQuerySuggestion) => {
                 return {
                   label: s.text,
                   kind: s.type as monaco.languages.CompletionItemKind,
                   insertText: s.insertText ?? s.text,
+                  insertTextRules: s.insertTextRules ?? undefined,
                   range: s.replacePosition ?? defaultRange,
                   detail: s.detail,
                   command: { id: 'editor.action.triggerSuggest', title: 'Trigger Next Suggestion' },
+                  sortText: s.sortText, // when undefined, the falsy value will default to the label
                 };
               })
           : [],
@@ -333,6 +334,25 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   private renderQueryControls = (queryControls: React.ReactElement[]) => {
     return <QueryControls queryControls={queryControls} />;
+  };
+
+  private renderExtensionSearchBarButton = () => {
+    if (!this.extensionMap || Object.keys(this.extensionMap).length === 0) return null;
+    const sortedConfigs = Object.values(this.extensionMap).sort((a, b) => a.order - b.order);
+    return (
+      <>
+        {sortedConfigs.map((config) => {
+          return config.getSearchBarButton
+            ? config.getSearchBarButton({
+                language: this.props.query.language,
+                onSelectLanguage: this.onSelectLanguage,
+                isCollapsed: this.state.isCollapsed,
+                setIsCollapsed: this.setIsCollapsed,
+              })
+            : null;
+        })}
+      </>
+    );
   };
 
   public render() {
@@ -453,6 +473,7 @@ export default class QueryEditorUI extends Component<Props, State> {
             <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
               {this.renderQueryControls(languageEditor.TopBar.Controls)}
               {!languageEditor.TopBar.Expanded && this.renderToggleIcon()}
+              {!languageEditor.TopBar.Expanded && this.renderExtensionSearchBarButton()}
               {this.props.savedQueryManagement}
             </EuiFlexGroup>
           </div>

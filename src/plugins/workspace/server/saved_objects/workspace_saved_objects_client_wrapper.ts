@@ -33,7 +33,7 @@ import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WorkspacePermissionMode,
 } from '../../common/constants';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../data_source/common';
+import { validateIsWorkspaceDataSourceAndConnectionObjectType } from '../../common/utils';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -431,7 +431,7 @@ export class WorkspaceSavedObjectsClientWrapper {
     ): Promise<SavedObject<T>> => {
       const objectToGet = await wrapperOptions.client.get<T>(type, id, options);
 
-      if (objectToGet.type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+      if (validateIsWorkspaceDataSourceAndConnectionObjectType(objectToGet.type)) {
         if (isDataSourceAdmin) {
           return objectToGet;
         }
@@ -469,7 +469,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       );
 
       for (const object of objectToBulkGet.saved_objects) {
-        if (object.type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+        if (validateIsWorkspaceDataSourceAndConnectionObjectType(object.type)) {
           const hasPermission = this.validateDataSourcePermissions(object, wrapperOptions.request);
           if (!hasPermission) {
             throw generateDataSourcePermissionError();
@@ -498,10 +498,11 @@ export class WorkspaceSavedObjectsClientWrapper {
       if (
         isDataSourceAdmin &&
         options?.type &&
-        (options.type === DATA_SOURCE_SAVED_OBJECT_TYPE ||
+        ((!Array.isArray(options.type) &&
+          validateIsWorkspaceDataSourceAndConnectionObjectType(options.type)) ||
           (Array.isArray(options.type) &&
             options.type.length === 1 &&
-            options.type[0] === DATA_SOURCE_SAVED_OBJECT_TYPE))
+            validateIsWorkspaceDataSourceAndConnectionObjectType(options.type[0])))
       ) {
         return await wrapperOptions.client.find<T>(options);
       }
@@ -524,7 +525,24 @@ export class WorkspaceSavedObjectsClientWrapper {
         })
       ).saved_objects.map((item) => item.id);
 
-      if (!options.workspaces && !options.ACLSearchParams) {
+      // Based on https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/src/core/server/ui_settings/create_or_upgrade_saved_config/get_upgradeable_config.ts#L49
+      // we need to make sure the find call for upgrade config should be able to find all the global configs as it was before.
+      // It is a workaround for 2.17, should be optimized in the upcoming 2.18 release.
+      if (options.type === 'config' && options.sortField === 'buildNum') {
+        const findResult = await wrapperOptions.client.find<{ buildNum?: number }>(options);
+
+        // There maybe user settings inside the find result,
+        // so that we need to filter out user configs(user configs are the configs without buildNum attribute).
+        const finalSavedObjects = findResult.saved_objects.filter(
+          (savedObject) => !!savedObject.attributes?.buildNum
+        );
+
+        return {
+          ...findResult,
+          total: finalSavedObjects.length,
+          saved_objects: finalSavedObjects,
+        };
+      } else if (!options.workspaces && !options.ACLSearchParams) {
         options.workspaces = permittedWorkspaceIds;
         options.ACLSearchParams = {
           permissionModes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write],
@@ -572,10 +590,10 @@ export class WorkspaceSavedObjectsClientWrapper {
       options: SavedObjectsBaseOptions = {}
     ) => {
       // Only dashboard admin can assign data source to workspace
-      if (type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+      if (validateIsWorkspaceDataSourceAndConnectionObjectType(type)) {
         throw generateOSDAdminPermissionError();
       }
-      // In current version, only the type is data-source that will call addToWorkspaces
+      // In current version, only the type is data-source and data-connection that will call addToWorkspaces
       return await wrapperOptions.client.addToWorkspaces(type, id, targetWorkspaces, options);
     };
 
@@ -585,11 +603,11 @@ export class WorkspaceSavedObjectsClientWrapper {
       targetWorkspaces: string[],
       options: SavedObjectsBaseOptions = {}
     ) => {
-      // Only dashboard admin can unassign data source to workspace
-      if (type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+      // Only dashboard admin can unassign data source and data-connection to workspace
+      if (validateIsWorkspaceDataSourceAndConnectionObjectType(type)) {
         throw generateOSDAdminPermissionError();
       }
-      // In current version, only the type is data-source will that call deleteFromWorkspaces
+      // In current version, only the type is data-source and data-connection will that call deleteFromWorkspaces
       return await wrapperOptions.client.deleteFromWorkspaces(type, id, targetWorkspaces, options);
     };
 

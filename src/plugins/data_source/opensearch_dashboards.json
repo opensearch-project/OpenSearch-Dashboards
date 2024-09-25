@@ -6,5 +6,5 @@
   "ui": true,
   "requiredPlugins": ["opensearchDashboardsUtils"],
   "optionalPlugins": [],
-  "extraPublicDirs": ["common/data_sources", "common/util"]
+  "extraPublicDirs": ["common","common/data_sources", "common/util"]
 }

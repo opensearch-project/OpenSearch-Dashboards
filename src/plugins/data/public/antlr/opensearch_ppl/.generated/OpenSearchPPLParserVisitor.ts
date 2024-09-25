@@ -1,4 +1,4 @@
-// Generated from ./src/plugins/data/public/antlr/opensearch_ppl/grammar/OpenSearchPPLParser.g4 by ANTLR 4.13.1
+// Generated from grammar/OpenSearchPPLParser.g4 by ANTLR 4.13.1
 
 import { AbstractParseTreeVisitor } from "antlr4ng";
 
@@ -10,8 +10,6 @@ import { QueryStatementContext } from "./OpenSearchPPLParser.js";
 import { PplCommandsContext } from "./OpenSearchPPLParser.js";
 import { CommandsContext } from "./OpenSearchPPLParser.js";
 import { SearchFromContext } from "./OpenSearchPPLParser.js";
-import { SearchFromFilterContext } from "./OpenSearchPPLParser.js";
-import { SearchFilterFromContext } from "./OpenSearchPPLParser.js";
 import { DescribeCommandContext } from "./OpenSearchPPLParser.js";
 import { ShowDataSourcesCommandContext } from "./OpenSearchPPLParser.js";
 import { WhereCommandContext } from "./OpenSearchPPLParser.js";
@@ -63,13 +61,12 @@ import { LogicalXorContext } from "./OpenSearchPPLParser.js";
 import { LogicalOrContext } from "./OpenSearchPPLParser.js";
 import { CompareExprContext } from "./OpenSearchPPLParser.js";
 import { InExprContext } from "./OpenSearchPPLParser.js";
-import { PositionFunctionCallContext } from "./OpenSearchPPLParser.js";
 import { ValueExpressionDefaultContext } from "./OpenSearchPPLParser.js";
-import { ParentheticValueExprContext } from "./OpenSearchPPLParser.js";
-import { GetFormatFunctionCallContext } from "./OpenSearchPPLParser.js";
+import { PositionFunctionCallContext } from "./OpenSearchPPLParser.js";
 import { ExtractFunctionCallContext } from "./OpenSearchPPLParser.js";
-import { BinaryArithmeticContext } from "./OpenSearchPPLParser.js";
+import { GetFormatFunctionCallContext } from "./OpenSearchPPLParser.js";
 import { TimestampFunctionCallContext } from "./OpenSearchPPLParser.js";
+import { ParentheticValueExprContext } from "./OpenSearchPPLParser.js";
 import { PrimaryExpressionContext } from "./OpenSearchPPLParser.js";
 import { PositionFunctionContext } from "./OpenSearchPPLParser.js";
 import { BooleanExpressionContext } from "./OpenSearchPPLParser.js";
@@ -129,8 +126,8 @@ import { TimestampLiteralContext } from "./OpenSearchPPLParser.js";
 import { IntervalUnitContext } from "./OpenSearchPPLParser.js";
 import { TimespanUnitContext } from "./OpenSearchPPLParser.js";
 import { ValueListContext } from "./OpenSearchPPLParser.js";
-import { IdentsAsQualifiedNameContext } from "./OpenSearchPPLParser.js";
-import { IdentsAsTableQualifiedNameContext } from "./OpenSearchPPLParser.js";
+import { QualifiedNameContext } from "./OpenSearchPPLParser.js";
+import { TableQualifiedNameContext } from "./OpenSearchPPLParser.js";
 import { IdentsAsWildcardQualifiedNameContext } from "./OpenSearchPPLParser.js";
 import { IdentContext } from "./OpenSearchPPLParser.js";
 import { TableIdentContext } from "./OpenSearchPPLParser.js";
@@ -189,20 +186,6 @@ export class OpenSearchPPLParserVisitor<Result> extends AbstractParseTreeVisitor
      * @return the visitor result
      */
     visitSearchFrom?: (ctx: SearchFromContext) => Result;
-    /**
-     * Visit a parse tree produced by the `searchFromFilter`
-     * labeled alternative in `OpenSearchPPLParser.searchCommand`.
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    visitSearchFromFilter?: (ctx: SearchFromFilterContext) => Result;
-    /**
-     * Visit a parse tree produced by the `searchFilterFrom`
-     * labeled alternative in `OpenSearchPPLParser.searchCommand`.
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    visitSearchFilterFrom?: (ctx: SearchFilterFromContext) => Result;
     /**
      * Visit a parse tree produced by `OpenSearchPPLParser.describeCommand`.
      * @param ctx the parse tree
@@ -524,13 +507,6 @@ export class OpenSearchPPLParserVisitor<Result> extends AbstractParseTreeVisitor
      */
     visitInExpr?: (ctx: InExprContext) => Result;
     /**
-     * Visit a parse tree produced by the `positionFunctionCall`
-     * labeled alternative in `OpenSearchPPLParser.valueExpression`.
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    visitPositionFunctionCall?: (ctx: PositionFunctionCallContext) => Result;
-    /**
      * Visit a parse tree produced by the `valueExpressionDefault`
      * labeled alternative in `OpenSearchPPLParser.valueExpression`.
      * @param ctx the parse tree
@@ -538,19 +514,12 @@ export class OpenSearchPPLParserVisitor<Result> extends AbstractParseTreeVisitor
      */
     visitValueExpressionDefault?: (ctx: ValueExpressionDefaultContext) => Result;
     /**
-     * Visit a parse tree produced by the `parentheticValueExpr`
+     * Visit a parse tree produced by the `positionFunctionCall`
      * labeled alternative in `OpenSearchPPLParser.valueExpression`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitParentheticValueExpr?: (ctx: ParentheticValueExprContext) => Result;
-    /**
-     * Visit a parse tree produced by the `getFormatFunctionCall`
-     * labeled alternative in `OpenSearchPPLParser.valueExpression`.
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    visitGetFormatFunctionCall?: (ctx: GetFormatFunctionCallContext) => Result;
+    visitPositionFunctionCall?: (ctx: PositionFunctionCallContext) => Result;
     /**
      * Visit a parse tree produced by the `extractFunctionCall`
      * labeled alternative in `OpenSearchPPLParser.valueExpression`.
@@ -559,12 +528,12 @@ export class OpenSearchPPLParserVisitor<Result> extends AbstractParseTreeVisitor
      */
     visitExtractFunctionCall?: (ctx: ExtractFunctionCallContext) => Result;
     /**
-     * Visit a parse tree produced by the `binaryArithmetic`
+     * Visit a parse tree produced by the `getFormatFunctionCall`
      * labeled alternative in `OpenSearchPPLParser.valueExpression`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitBinaryArithmetic?: (ctx: BinaryArithmeticContext) => Result;
+    visitGetFormatFunctionCall?: (ctx: GetFormatFunctionCallContext) => Result;
     /**
      * Visit a parse tree produced by the `timestampFunctionCall`
      * labeled alternative in `OpenSearchPPLParser.valueExpression`.
@@ -572,6 +541,13 @@ export class OpenSearchPPLParserVisitor<Result> extends AbstractParseTreeVisitor
      * @return the visitor result
      */
     visitTimestampFunctionCall?: (ctx: TimestampFunctionCallContext) => Result;
+    /**
+     * Visit a parse tree produced by the `parentheticValueExpr`
+     * labeled alternative in `OpenSearchPPLParser.valueExpression`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitParentheticValueExpr?: (ctx: ParentheticValueExprContext) => Result;
     /**
      * Visit a parse tree produced by `OpenSearchPPLParser.primaryExpression`.
      * @param ctx the parse tree
@@ -927,19 +903,17 @@ export class OpenSearchPPLParserVisitor<Result> extends AbstractParseTreeVisitor
      */
     visitValueList?: (ctx: ValueListContext) => Result;
     /**
-     * Visit a parse tree produced by the `identsAsQualifiedName`
-     * labeled alternative in `OpenSearchPPLParser.qualifiedName`.
+     * Visit a parse tree produced by `OpenSearchPPLParser.qualifiedName`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitIdentsAsQualifiedName?: (ctx: IdentsAsQualifiedNameContext) => Result;
+    visitQualifiedName?: (ctx: QualifiedNameContext) => Result;
     /**
-     * Visit a parse tree produced by the `identsAsTableQualifiedName`
-     * labeled alternative in `OpenSearchPPLParser.tableQualifiedName`.
+     * Visit a parse tree produced by `OpenSearchPPLParser.tableQualifiedName`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitIdentsAsTableQualifiedName?: (ctx: IdentsAsTableQualifiedNameContext) => Result;
+    visitTableQualifiedName?: (ctx: TableQualifiedNameContext) => Result;
     /**
      * Visit a parse tree produced by the `identsAsWildcardQualifiedName`
      * labeled alternative in `OpenSearchPPLParser.wcQualifiedName`.

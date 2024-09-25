@@ -16,7 +16,11 @@ import {
 } from '../../../core/server';
 import { updateWorkspaceState } from '../../../core/server/utils';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../data_source_management/common';
-import { CURRENT_USER_PLACEHOLDER, WorkspacePermissionMode } from '../common/constants';
+import {
+  CURRENT_USER_PLACEHOLDER,
+  WorkspacePermissionMode,
+  WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
+} from '../common/constants';
 import { PermissionModeId } from '../../../core/server';
 
 /**
@@ -85,8 +89,8 @@ export const transferCurrentUserInPermissions = (
 export const getDataSourcesList = (client: SavedObjectsClientContract, workspaces: string[]) => {
   return client
     .find({
-      type: 'data-source',
-      fields: ['id', 'title'],
+      type: WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
+      fields: ['id', 'title', 'type'],
       perPage: 10000,
       workspaces,
     })
@@ -95,8 +99,10 @@ export const getDataSourcesList = (client: SavedObjectsClientContract, workspace
       if (objects) {
         return objects.map((source) => {
           const id = source.id;
+          const type = source.type;
           return {
             id,
+            type,
           };
         });
       } else {

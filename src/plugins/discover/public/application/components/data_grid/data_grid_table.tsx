@@ -6,6 +6,7 @@
 import { i18n } from '@osd/i18n';
 import React, { useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
+import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 import { IndexPattern, getServices } from '../../../opensearch_dashboards_services';
 import { DataGridFlyout } from './data_grid_table_flyout';
 import { DiscoverGridContextProvider } from './data_grid_table_context';
@@ -71,35 +72,37 @@ export const DataGridTable = ({
   }
 
   const newDiscoverEnabled = getNewDiscoverSetting(services.storage);
+  const isQueryEnhancementEnabled = services.uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
 
-  const panelContent = newDiscoverEnabled ? (
-    <DataGrid
-      columns={columns}
-      indexPattern={indexPattern}
-      sort={sort}
-      onSort={onSort}
-      rows={rows}
-      onSetColumns={onSetColumns}
-      isToolbarVisible={isToolbarVisible}
-      isContextView={isContextView}
-    />
-  ) : (
-    <DefaultDiscoverTable
-      columns={columns}
-      indexPattern={indexPattern}
-      sort={sort}
-      onSort={onSort}
-      rows={rows}
-      hits={hits}
-      onAddColumn={onAddColumn}
-      onMoveColumn={onMoveColumn}
-      onRemoveColumn={onRemoveColumn}
-      onFilter={onFilter}
-      onClose={() => setInspectedHit(undefined)}
-      showPagination={showPagination}
-      scrollToTop={scrollToTop}
-    />
-  );
+  const panelContent =
+    isQueryEnhancementEnabled || !newDiscoverEnabled ? (
+      <DefaultDiscoverTable
+        columns={adjustedColumns}
+        indexPattern={indexPattern}
+        sort={sort}
+        onSort={onSort}
+        rows={rows}
+        hits={hits}
+        onAddColumn={onAddColumn}
+        onMoveColumn={onMoveColumn}
+        onRemoveColumn={onRemoveColumn}
+        onFilter={onFilter}
+        onClose={() => setInspectedHit(undefined)}
+        showPagination={showPagination}
+        scrollToTop={scrollToTop}
+      />
+    ) : (
+      <DataGrid
+        columns={columns}
+        indexPattern={indexPattern}
+        sort={sort}
+        onSort={onSort}
+        rows={rows}
+        onSetColumns={onSetColumns}
+        isToolbarVisible={isToolbarVisible}
+        isContextView={isContextView}
+      />
+    );
 
   const tablePanelProps = {
     paddingSize: 'none' as const,

@@ -5,12 +5,20 @@
 
 import { SavedObject } from 'src/core/types';
 import { isEqual } from 'lodash';
+import packageInfo from '../../../../../../package.json';
 import * as osdTestServer from '../../../../../core/test_helpers/osd_server';
 
 const dashboard: Omit<SavedObject, 'id'> = {
   type: 'dashboard',
   attributes: {},
   references: [],
+};
+
+const config: SavedObject = {
+  type: 'config',
+  attributes: {},
+  references: [],
+  id: `config:${packageInfo.version}`,
 };
 
 interface WorkspaceAttributes {
@@ -111,6 +119,33 @@ describe('workspace_id_consumer integration test', () => {
         type: dashboard.type,
         id: createResult.body.id,
       });
+    });
+
+    it('create should not append requestWorkspaceId automatically when the type is config', async () => {
+      await osdTestServer.request.delete(
+        root,
+        `/api/saved_objects/${config.type}/${packageInfo.version}`
+      );
+
+      // Get page to trigger create config and it should return 200
+      await osdTestServer.request
+        .post(
+          root,
+          `/w/${createdFooWorkspace.id}/api/saved_objects/${config.type}/${packageInfo.version}`
+        )
+        .send({
+          attributes: {
+            legacyConfig: 'foo',
+          },
+        })
+        .expect(200);
+      const getConfigResult = await osdTestServer.request.get(
+        root,
+        `/api/saved_objects/${config.type}/${packageInfo.version}`
+      );
+
+      // workspaces arrtibutes should not be append
+      expect(!getConfigResult.body.workspaces).toEqual(true);
     });
 
     it('bulk create', async () => {
