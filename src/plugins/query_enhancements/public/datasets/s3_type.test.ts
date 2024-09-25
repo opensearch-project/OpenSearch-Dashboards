@@ -5,8 +5,8 @@
 
 // s3_type.test.ts
 
-import { s3TypeConfig } from './s3_type';
 import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { IDataPluginServices } from 'src/plugins/data/public';
 import {
   DATA_STRUCTURE_META_TYPES,
   DataStructure,
@@ -14,7 +14,7 @@ import {
   Dataset,
 } from '../../../data/common';
 import { DATASET } from '../../common';
-import { IDataPluginServices } from 'src/plugins/data/public';
+import { s3TypeConfig } from './s3_type';
 
 describe('s3TypeConfig', () => {
   const mockHttp = ({
@@ -146,7 +146,7 @@ describe('s3TypeConfig', () => {
 
   test('fetchFields returns empty array', async () => {
     const mockDataset: Dataset = { id: 'table1', title: 'Table 1', type: 'S3' };
-    const result = await s3TypeConfig.fetchFields(mockDataset);
+    const result = await s3TypeConfig.fetchFields(mockServices as IDataPluginServices, mockDataset);
 
     expect(result).toEqual([]);
   });

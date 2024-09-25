@@ -5,10 +5,11 @@
 
 // index_type.test.ts
 
-import { indexTypeConfig } from './index_type';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { DATA_STRUCTURE_META_TYPES, DataStructure, Dataset } from '../../../../../common';
 import * as services from '../../../../services';
+import { IDataPluginServices } from '../../../../types';
+import { indexTypeConfig } from './index_type';
 
 jest.mock('../../../../services', () => ({
   getSearchService: jest.fn(),
@@ -66,7 +67,10 @@ describe('indexTypeConfig', () => {
     });
 
     const mockDataset: Dataset = { id: 'index1', title: 'Index 1', type: 'INDEX' };
-    const result = await indexTypeConfig.fetchFields(mockDataset);
+    const result = await indexTypeConfig.fetchFields(
+      mockServices as IDataPluginServices,
+      mockDataset
+    );
 
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual({ name: 'field1', type: 'string' });

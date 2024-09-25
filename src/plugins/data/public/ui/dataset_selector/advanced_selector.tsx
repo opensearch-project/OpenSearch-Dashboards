@@ -11,10 +11,10 @@ import {
   DataStructure,
   DEFAULT_DATA,
 } from '../../../common';
-import { DatasetExplorer } from './dataset_explorer';
-import { Configurator } from './configurator';
 import { getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
+import { Configurator } from './configurator';
+import { DatasetExplorer } from './dataset_explorer';
 
 export const AdvancedSelector = ({
   services,
@@ -52,6 +52,7 @@ export const AdvancedSelector = ({
 
   return selectedDataset ? (
     <Configurator
+      services={services}
       baseDataset={selectedDataset}
       onConfirm={onSelect}
       onCancel={onCancel}

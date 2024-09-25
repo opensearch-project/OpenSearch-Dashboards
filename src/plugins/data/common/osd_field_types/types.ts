@@ -93,3 +93,27 @@ export enum OSD_FIELD_TYPES {
   NESTED = 'nested',
   HISTOGRAM = 'histogram',
 }
+
+/** @public **/
+export enum OPENSEARCH_SQL_TYPES {
+  BOOLEAN = 'boolean',
+  BYTE = 'byte',
+  SHORT = 'short',
+  INTEGER = 'integer',
+  LONG = 'long',
+  FLOAT = 'float',
+  DOUBLE = 'double',
+  KEYWORD = 'keyword',
+  TEXT = 'text',
+  TIMESTAMP = 'timestamp',
+  DATE = 'date',
+  DATE_NANOS = 'date_nanos',
+  TIME = 'time',
+  INTERVAL = 'interval',
+  IP = 'ip',
+  GEO_POINT = 'geo_point',
+  BINARY = 'binary',
+  STRUCT = 'struct',
+  ARRAY = 'array',
+  UNKNOWN = 'unknown', // For unmapped or unsupported types
+}

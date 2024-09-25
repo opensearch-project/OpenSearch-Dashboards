@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { trimEnd } from 'lodash';
+import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import {
   DATA_STRUCTURE_META_TYPES,
   DEFAULT_DATA,
@@ -13,6 +13,8 @@ import {
   DataStructureCustomMeta,
   Dataset,
   DatasetField,
+  OPENSEARCH_SQL_TYPES,
+  castSQLTypeToOSDFieldType,
 } from '../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
 import { API, DATASET, handleQueryStatus } from '../../common';
@@ -94,8 +96,38 @@ export const s3TypeConfig: DatasetTypeConfig = {
     }
   },
 
-  fetchFields: async (dataset: Dataset): Promise<DatasetField[]> => {
-    return [];
+  fetchFields: async (services: IDataPluginServices, dataset: Dataset): Promise<DatasetField[]> => {
+    const datasetService = services.data.query.queryString.getDatasetService();
+
+    // re-construct the data structure path from the dataset
+    const path: DataStructure[] = [];
+    if (dataset.dataSource) {
+      path.push({
+        id: dataset.dataSource.id!,
+        title: dataset.dataSource.title,
+        type: 'DATA_SOURCE',
+      });
+    }
+
+    const [connection, database, table] = dataset.title.split('.');
+    path.push(
+      {
+        id: `${dataset.dataSource?.id}::${connection}`,
+        title: connection,
+        type: 'CONNECTION',
+        meta: dataset.dataSource?.meta as DataStructureCustomMeta,
+      },
+      {
+        id: `${dataset.dataSource?.id}::${connection}.${database}`,
+        title: database,
+        type: 'DATABASE',
+      },
+      { id: dataset.id, title: table, type: 'TABLE' }
+    );
+
+    const dataStructure = await datasetService.fetchOptions(services, path, DATASET.S3);
+    const { http } = services;
+    return fetchFields(http, [dataStructure]);
   },
 
   supportedLanguages: (dataset: Dataset): string[] => {
@@ -106,7 +138,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
 const fetch = async (
   http: HttpSetup,
   path: DataStructure[],
-  type: 'DATABASE' | 'TABLE'
+  type: 'DATABASE' | 'TABLE' | 'FIELD'
 ): Promise<DataStructure[]> => {
   const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
   const connection = path.find((ds) => ds.type === 'CONNECTION');
@@ -146,6 +178,7 @@ const setMeta = (dataStructure: DataStructure, response: any) => {
     ...dataStructure.meta,
     queryId: response.queryId,
     sessionId: response.sessionId,
+    updatedAt: Date.now(),
   } as DataStructureCustomMeta;
 };
 
@@ -245,4 +278,69 @@ const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<Data
   database.meta = setMeta(database, response);
 
   return fetch(http, path, 'TABLE');
+};
+
+// Function to process the input and map types using the new SQL to OSD mapping
+export function mapResponseToFields(sqlOutput: {
+  status: string;
+  schema: Array<{ name: string; type: string }>;
+  datarows: Array<Array<string | null>>;
+  total: number;
+  size: number;
+}): DatasetField[] {
+  return sqlOutput.datarows
+    .filter((row) => row[1] && row[1] !== '') // Filter out rows with empty types
+    .map((row) => {
+      const [name, type] = row;
+      const sqlType = type as OPENSEARCH_SQL_TYPES; // Cast the type to SQL_TYPES enum
+      return {
+        name: name as string,
+        type: castSQLTypeToOSDFieldType(sqlType),
+      };
+    });
+}
+
+const fetchFields = async (http: HttpSetup, path: DataStructure[]): Promise<DatasetField[]> => {
+  const abortController = new AbortController();
+  try {
+    const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
+    const connection = path.find((ds) => ds.type === 'CONNECTION');
+    const database = path.find((ds) => ds.type === 'DATABASE');
+    const sessionId = (connection?.meta as DataStructureCustomMeta).sessionId;
+    const table = path[path.length - 1];
+
+    const response = await http.fetch({
+      method: 'POST',
+      path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
+      body: JSON.stringify({
+        lang: 'sql',
+        query: `DESCRIBE TABLE ${connection?.title}.${database?.title}.${table.title}`,
+        datasource: connection?.title,
+        ...(sessionId && { sessionId }),
+      }),
+      query: {
+        id: dataSource?.id,
+      },
+      signal: abortController.signal,
+    });
+    table.meta = setMeta(table, response);
+
+    const parent = path[path.length - 1];
+    const meta = parent.meta as DataStructureCustomMeta;
+
+    const fetchResponse = await handleQueryStatus({
+      fetchStatus: () =>
+        http.fetch({
+          method: 'GET',
+          path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
+          query: {
+            id: dataSource?.id,
+            queryId: meta.queryId,
+          },
+        }),
+    });
+    return mapResponseToFields(fetchResponse);
+  } catch (error) {
+    throw error;
+  }
 };

@@ -5,18 +5,18 @@
 
 import { CoreStart } from 'opensearch-dashboards/public';
 import {
-  Dataset,
-  DataStructure,
-  IndexPatternSpec,
-  DEFAULT_DATA,
-  UI_SETTINGS,
-  DataStorage,
   CachedDataStructure,
+  Dataset,
+  DataStorage,
+  DataStructure,
+  DEFAULT_DATA,
+  IndexPatternSpec,
+  UI_SETTINGS,
 } from '../../../../common';
-import { DatasetTypeConfig, DataStructureFetchOptions } from './types';
-import { indexPatternTypeConfig, indexTypeConfig } from './lib';
 import { IndexPatternsContract } from '../../../index_patterns';
 import { IDataPluginServices } from '../../../types';
+import { indexPatternTypeConfig, indexTypeConfig } from './lib';
+import { DatasetTypeConfig, DataStructureFetchOptions } from './types';
 
 export class DatasetService {
   private indexPatterns?: IndexPatternsContract;
@@ -61,14 +61,14 @@ export class DatasetService {
     return this.defaultDataset;
   }
 
-  public async cacheDataset(dataset: Dataset): Promise<void> {
+  public async cacheDataset(services: IDataPluginServices, dataset: Dataset): Promise<void> {
     const type = this.getType(dataset.type);
     if (dataset && dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
       const spec = {
         id: dataset.id,
         title: dataset.title,
         timeFieldName: dataset.timeFieldName,
-        fields: await type?.fetchFields(dataset),
+        fields: await type?.fetchFields(services, dataset),
         dataSourceRef: dataset.dataSource
           ? {
               id: dataset.dataSource.id!,
