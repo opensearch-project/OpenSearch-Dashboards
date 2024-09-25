@@ -145,6 +145,7 @@ const WorkspaceDetailPage = (props: any) => {
         onSubmit={jest.fn()}
         defaultValues={values}
         availableUseCases={[]}
+        onAppLeave={jest.fn()}
       >
         <Provider>
           <WorkspaceDetail registeredUseCases$={registeredUseCases$} {...props} />

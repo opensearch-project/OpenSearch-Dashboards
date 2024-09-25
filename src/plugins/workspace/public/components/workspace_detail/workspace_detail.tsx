@@ -144,12 +144,13 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
           }),
           i18n.translate('workspace.detail.navigate.title', {
             defaultMessage: 'Navigate away?',
-          })
+          }),
+          handleResetForm
         );
       }
       return actions.default();
     });
-  }, [isEditing, numberOfChanges, onAppLeave, props.isFormSubmitting]);
+  }, [handleResetForm, isEditing, numberOfChanges, onAppLeave, props.isFormSubmitting]);
 
   const handleSetDefaultWorkspace = useCallback(
     async (workspace: WorkspaceAttribute) => {
