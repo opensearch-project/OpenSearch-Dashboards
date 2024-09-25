@@ -377,10 +377,8 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
               defaultMessage: 'Cancel',
             })}
             confirmButtonText={i18n.translate('workspace.form.confirmButtonText', {
-              defaultMessage: 'Navigate away',
+              defaultMessage: 'Confirm',
             })}
-            buttonColor="danger"
-            defaultFocusedButton="confirm"
           >
             {i18n.translate('workspace.form.cancelModal.body', {
               defaultMessage: 'Any unsaved changes will be lost.',
