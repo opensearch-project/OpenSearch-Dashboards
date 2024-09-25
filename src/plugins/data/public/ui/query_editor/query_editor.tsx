@@ -382,6 +382,20 @@ export default class QueryEditorUI extends Component<Props, State> {
         editor.setValue(`\n`.repeat(10));
         this.setState({ lineCount: editor.getModel()?.getLineCount() });
         this.inputRef = editor;
+        const handleEnterPress = () => {
+          this.onSubmit(this.props.query);
+        };
+
+        const disposable = editor.onKeyDown((e) => {
+          if (e.metaKey && e.keyCode === monaco.KeyCode.Enter) {
+            e.preventDefault();
+            handleEnterPress();
+          }
+        });
+
+        return () => {
+          disposable.dispose();
+        };
       },
       footerItems: {
         start: [
@@ -441,7 +455,6 @@ export default class QueryEditorUI extends Component<Props, State> {
     };
 
     const languageEditorFunc = this.languageManager.getLanguage(this.props.query.language)!.editor;
-
     const languageEditor = useQueryEditor
       ? languageEditorFunc(singleLineInputProps, {}, defaultInputProps)
       : languageEditorFunc(singleLineInputProps, singleLineInputProps, {

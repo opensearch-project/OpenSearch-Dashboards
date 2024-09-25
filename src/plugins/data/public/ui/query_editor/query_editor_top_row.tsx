@@ -72,20 +72,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     },
   } = opensearchDashboards.services;
 
-  useEffect(() => {
-    function handleCmdEnter(event: KeyboardEvent) {
-      if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
-        event.preventDefault();
-
-        onClickSubmitButton(event);
-      }
-    }
-    document.addEventListener('keydown', handleCmdEnter);
-    return () => {
-      document.removeEventListener('keydown', handleCmdEnter);
-    };
-  }, [onClickSubmitButton]);
-
   const queryLanguage = props.query && props.query.language;
   const persistedLog: PersistedLog | undefined = React.useMemo(
     () =>
@@ -95,7 +81,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     [queryLanguage, uiSettings, storage, appName]
   );
 
-  function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement> | KeyboardEvent) {
+  function onClickSubmitButton(event: React.MouseEvent<HTMLButtonElement>) {
     if (persistedLog && props.query) {
       persistedLog.add(props.query.query);
     }
