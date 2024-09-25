@@ -13,7 +13,7 @@ import {
   prettyDuration,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { IDataPluginServices, IIndexPattern, Query, TimeHistoryContract, TimeRange } from '../..';
 import {
