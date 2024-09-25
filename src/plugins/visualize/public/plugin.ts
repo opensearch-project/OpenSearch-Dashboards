@@ -236,7 +236,7 @@ export class VisualizePlugin
       {
         id: visualizeAppId,
         category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-        order: 200,
+        order: 100,
         title: titleInLeftNav,
       },
     ]);
@@ -244,7 +244,7 @@ export class VisualizePlugin
       {
         id: visualizeAppId,
         category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-        order: 200,
+        order: 100,
         title: titleInLeftNav,
       },
     ]);
@@ -260,7 +260,7 @@ export class VisualizePlugin
       {
         id: visualizeAppId,
         category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-        order: 400,
+        order: 100,
         title: titleInLeftNav,
       },
     ]);
@@ -268,7 +268,7 @@ export class VisualizePlugin
       {
         id: visualizeAppId,
         category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-        order: 400,
+        order: 100,
         title: titleInLeftNav,
       },
     ]);
