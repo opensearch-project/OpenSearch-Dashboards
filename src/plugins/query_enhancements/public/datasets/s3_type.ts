@@ -138,7 +138,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
 const fetch = async (
   http: HttpSetup,
   path: DataStructure[],
-  type: 'DATABASE' | 'TABLE' | 'FIELD'
+  type: 'DATABASE' | 'TABLE'
 ): Promise<DataStructure[]> => {
   const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
   const connection = path.find((ds) => ds.type === 'CONNECTION');
@@ -178,7 +178,6 @@ const setMeta = (dataStructure: DataStructure, response: any) => {
     ...dataStructure.meta,
     queryId: response.queryId,
     sessionId: response.sessionId,
-    updatedAt: Date.now(),
   } as DataStructureCustomMeta;
 };
 
