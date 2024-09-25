@@ -6,16 +6,16 @@
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { DataSourceAttributes } from '../../../../../../data_source/common/data_sources';
 import {
+  DATA_STRUCTURE_META_TYPES,
   DEFAULT_DATA,
   DataStructure,
-  DatasetField,
-  Dataset,
-  IIndexPattern,
-  DATA_STRUCTURE_META_TYPES,
   DataStructureCustomMeta,
+  Dataset,
+  DatasetField,
+  IIndexPattern,
 } from '../../../../../common';
-import { DatasetTypeConfig } from '../types';
 import { getIndexPatterns } from '../../../../services';
+import { DatasetTypeConfig } from '../types';
 import { injectMetaToDataStructures } from './utils';
 
 export const indexPatternTypeConfig: DatasetTypeConfig = {
@@ -55,7 +55,7 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     };
   },
 
-  fetchFields: async (dataset: Dataset): Promise<DatasetField[]> => {
+  fetchFields: async (_, dataset: Dataset): Promise<DatasetField[]> => {
     const indexPattern = await getIndexPatterns().get(dataset.id);
     return indexPattern.fields.map((field: any) => ({
       name: field.name,

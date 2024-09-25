@@ -5,19 +5,19 @@
 
 import { CoreStart } from 'opensearch-dashboards/public';
 import {
+  CachedDataStructure,
   Dataset,
+  DataStorage,
   DataStructure,
-  IndexPatternSpec,
   DEFAULT_DATA,
   IFieldType,
+  IndexPatternSpec,
   UI_SETTINGS,
-  DataStorage,
-  CachedDataStructure,
 } from '../../../../common';
-import { DatasetTypeConfig, DataStructureFetchOptions } from './types';
-import { indexPatternTypeConfig, indexTypeConfig } from './lib';
 import { IndexPatternsContract } from '../../../index_patterns';
 import { IDataPluginServices } from '../../../types';
+import { indexPatternTypeConfig, indexTypeConfig } from './lib';
+import { DatasetTypeConfig, DataStructureFetchOptions } from './types';
 
 export class DatasetService {
   private indexPatterns?: IndexPatternsContract;
@@ -62,7 +62,7 @@ export class DatasetService {
     return this.defaultDataset;
   }
 
-  public async cacheDataset(dataset: Dataset): Promise<void> {
+  public async cacheDataset(services: IDataPluginServices, dataset: Dataset): Promise<void> {
     const type = this.getType(dataset.type);
     if (dataset) {
       const spec = {
@@ -72,7 +72,7 @@ export class DatasetService {
           name: dataset.timeFieldName,
           type: 'date',
         } as Partial<IFieldType>,
-        fields: await type?.fetchFields(dataset),
+        fields: await type?.fetchFields(services, dataset),
         dataSourceRef: dataset.dataSource
           ? {
               id: dataset.dataSource.id!,
