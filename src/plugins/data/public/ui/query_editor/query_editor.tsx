@@ -455,6 +455,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     };
 
     const languageEditorFunc = this.languageManager.getLanguage(this.props.query.language)!.editor;
+
     const languageEditor = useQueryEditor
       ? languageEditorFunc(singleLineInputProps, {}, defaultInputProps)
       : languageEditorFunc(singleLineInputProps, singleLineInputProps, {
