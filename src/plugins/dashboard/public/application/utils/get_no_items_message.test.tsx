@@ -6,9 +6,9 @@
 import { getNoItemsMessage } from './get_no_items_message';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { ApplicationStart, Capabilities, PublicAppInfo } from 'opensearch-dashboards/public';
-import { Observable } from 'rxjs';
-import { RecursiveReadonly } from '@osd/utility-types';
 import { EuiLink } from '@elastic/eui';
+import { RecursiveReadonly } from '@osd/utility-types';
+import { Observable } from 'rxjs';
 
 describe('dashboard listing table with no item', () => {
   test('and no write controls', () => {
