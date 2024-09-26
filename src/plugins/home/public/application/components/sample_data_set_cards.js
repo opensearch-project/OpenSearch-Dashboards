@@ -217,7 +217,11 @@ export class SampleDataSetCards extends React.Component {
 
   render() {
     return (
-      <EuiFlexGrid columns={3} className="homSampleDataSetCards">
+      <EuiFlexGrid
+        columns={3}
+        className="homSampleDataSetCards"
+        gutterSize={this.props.useUpdatedUX ? 'm' : undefined}
+      >
         {this.state.sampleDataSets.map((sampleDataSet) => {
           return (
             <EuiFlexItem
