@@ -349,7 +349,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
                     </EuiFlexGroup>
                   }
                   data-test-subj="recentlyCard"
-                  description={<h3>{recentAccessItem.label}</h3>}
+                  description={<h3 className="eui-textBreakAll">{recentAccessItem.label}</h3>}
                   textAlign="left"
                   href={recentAccessItem.link}
                   footer={
