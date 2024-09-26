@@ -431,7 +431,6 @@ export class SearchSource {
 
     const params = getExternalSearchParamsFromRequest(searchRequest, {
       getConfig,
-      getDataFrame: this.getDataFrame.bind(this),
     });
 
     return search({ params }, options).then(async (response: any) => {
