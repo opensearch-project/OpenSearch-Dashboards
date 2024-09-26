@@ -389,6 +389,7 @@ export class WorkspacePlugin
         defaultMessage: 'Workspace Initial',
       }),
       navLinkStatus: AppNavLinkStatus.hidden,
+      chromeless: true,
       async mount(params: AppMountParameters) {
         const { renderInitialApp } = await import('./application');
         return mountWorkspaceApp(params, renderInitialApp);
