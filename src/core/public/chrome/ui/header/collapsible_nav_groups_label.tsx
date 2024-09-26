@@ -18,7 +18,7 @@ export interface CollapsibleNavGroupsLabelProps {
 }
 
 export function getIsCategoryOpen(storageKey: string, storage: Storage = window.localStorage) {
-  return getIsCategoryOpenFromStorage(storageKey, storage, 'false');
+  return getIsCategoryOpenFromStorage(storageKey, storage);
 }
 
 export function CollapsibleNavGroupsLabel(props: CollapsibleNavGroupsLabelProps) {
