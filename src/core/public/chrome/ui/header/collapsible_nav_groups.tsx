@@ -4,14 +4,27 @@
  */
 
 import './collapsible_nav_group_enabled.scss';
-import { EuiFlexItem, EuiSideNavItemType, EuiSideNav, EuiText } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiSideNavItemType,
+  EuiSideNav,
+  EuiText,
+  EuiFlexGroup,
+  EuiIcon,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames';
 import { ChromeNavLink } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { createEuiListItem } from './nav_link';
-import { getOrderedLinksOrCategories, LinkItem, LinkItemType } from '../../utils';
+import {
+  getIsCategoryOpen,
+  getOrderedLinksOrCategories,
+  LinkItem,
+  LinkItemType,
+  setIsCategoryOpen,
+} from '../../utils';
 
 export interface NavGroupsProps {
   navLinks: ChromeNavLink[];
@@ -23,6 +36,9 @@ export interface NavGroupsProps {
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     navItem: ChromeNavLink
   ) => void;
+  categoryCollapsible?: boolean;
+  currentWorkspaceId?: string;
+  storage?: Storage;
 }
 
 const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
@@ -38,7 +54,11 @@ export function NavGroups({
   appId,
   navigateToApp,
   onNavItemClick,
+  categoryCollapsible,
+  currentWorkspaceId,
+  storage = window.localStorage,
 }: NavGroupsProps) {
+  const [, setRenderKey] = useState(Date.now());
   const createNavItem = ({
     link,
     className,
@@ -126,10 +146,42 @@ export function NavGroups({
     }
 
     if (navLink.itemType === LinkItemType.CATEGORY) {
+      const categoryOpenKey = `${currentWorkspaceId ? `${currentWorkspaceId}-` : ''}${
+        navLink.category?.id
+      }`;
+      const isCategoryOpen = categoryCollapsible
+        ? getIsCategoryOpen(categoryOpenKey, storage, 'false')
+        : true;
       return {
         id: navLink.category?.id ?? '',
-        name: <div className="nav-link-item">{navLink.category?.label ?? ''}</div>,
-        items: navLink.links?.map((link) => createSideNavItem(link, level + 1)),
+        name: (
+          <EuiFlexGroup
+            alignItems="center"
+            className={`nav-link-item${categoryCollapsible ? ' euiAccordion__button' : ''}`}
+            gutterSize="none"
+            onClick={() => {
+              if (!categoryCollapsible) {
+                return;
+              }
+
+              setIsCategoryOpen(categoryOpenKey, !isCategoryOpen, storage);
+              // Trigger the element to rerender because `setIsCategoryOpen` is not updating component's state
+              setRenderKey(Date.now());
+            }}
+          >
+            <EuiFlexItem>
+              <div>{navLink.category?.label ?? ''}</div>
+            </EuiFlexItem>
+            {categoryCollapsible ? (
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={isCategoryOpen ? 'minus' : 'plus'} />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        ),
+        items: (isCategoryOpen ? navLink.links : [])?.map((link) =>
+          createSideNavItem(link, level + 1)
+        ),
         'aria-label': navLink.category?.label,
       };
     }
@@ -143,7 +195,11 @@ export function NavGroups({
 
   return (
     <EuiFlexItem style={style}>
-      <EuiSideNav items={sideNavItems} isOpenOnMobile />
+      <EuiSideNav
+        items={sideNavItems}
+        isOpenOnMobile
+        className={`categoryCollapsible-${!!categoryCollapsible}`}
+      />
       {suffix}
     </EuiFlexItem>
   );

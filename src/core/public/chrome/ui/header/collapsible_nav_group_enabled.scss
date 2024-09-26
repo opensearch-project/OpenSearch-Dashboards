@@ -87,3 +87,8 @@
     padding: 0 $euiSizeL;
   }
 }
+
+// Hide the expand / collapse button when category is collasible
+.categoryCollapsible-true .nav-link-parent-item-button svg {
+  display: none;
+}

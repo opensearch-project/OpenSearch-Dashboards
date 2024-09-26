@@ -221,3 +221,17 @@ export const getVisibleUseCases = (navGroupMap: Record<string, NavGroupItemInMap
     (navGroup) => navGroup.status !== NavGroupStatus.Hidden && navGroup.type === undefined
   );
 };
+
+function getCategoryLocalStorageKey(id: string) {
+  return `core.navGroup.${id}`;
+}
+
+export function getIsCategoryOpen(id: string, storage: Storage, defaultValue: string = 'true') {
+  const value = storage.getItem(getCategoryLocalStorageKey(id)) ?? defaultValue;
+
+  return value === 'true';
+}
+
+export function setIsCategoryOpen(id: string, isOpen: boolean, storage: Storage) {
+  storage.setItem(getCategoryLocalStorageKey(id), `${isOpen}`);
+}

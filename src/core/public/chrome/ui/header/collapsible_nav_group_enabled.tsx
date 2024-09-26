@@ -86,6 +86,7 @@ export function CollapsibleNavGroupEnabled({
   const appId = useObservable(observables.appId$, '');
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
+  const currentWorkspace = useObservable(observables.currentWorkspace$);
 
   const visibleUseCases = useMemo(() => getVisibleUseCases(navGroupsMap), [navGroupsMap]);
 
@@ -251,6 +252,8 @@ export function CollapsibleNavGroupEnabled({
                 }
               }}
               appId={appId}
+              categoryCollapsible={currentNavGroupId === ALL_USE_CASE_ID}
+              currentWorkspaceId={currentWorkspace?.id}
             />
           </EuiPanel>
         )}
