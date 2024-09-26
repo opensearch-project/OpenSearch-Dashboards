@@ -9,11 +9,11 @@ import { map } from 'rxjs/operators';
 import useObservable from 'react-use/lib/useObservable';
 
 /**
- * A custom hook for subscribing to an Observable that is a function.
+ * A custom hook for subscribing to an Observable which value is a function.
  *
  * The `useObservable` hook from the `react-use` library doesn't support subscribing to an Observable
- * that is a function. This hook addresses that limitation by converting the function Observable
- * into a plain object Observable and then subscribing to its values using `useObservable` from `react-use`.
+ * which value is a function. This hook addresses that limitation by mapping the Observable value
+ * into a plain object so that `useObservable` can correctly emit the value
  *
  */
 export const useObservableValue = <T>(observableValue$: Observable<T>, initialValue?: T) => {
