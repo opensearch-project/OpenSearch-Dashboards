@@ -1,0 +1,2 @@
+security:
+-  Use NodeJS v18.20.4 to remediate CVE-2024-27980, CVE-2024-27983 and CVE-2024-36138 ([#8294](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8294))
