@@ -35,7 +35,6 @@ exports[`<NavGroups /> should render correctly 1`] = `
               <button
                 aria-label="pure link"
                 class="euiSideNavItemButton euiSideNavItemButton-isOpen nav-link-item-btn"
-                data-test-subj="collapsibleNavAppLink-pure"
                 type="button"
               >
                 <span
@@ -46,10 +45,28 @@ exports[`<NavGroups /> should render correctly 1`] = `
                     title="pure link"
                   >
                     <div
-                      class="euiText euiText--small euiTitle euiTitle--xsmall"
-                      style="letter-spacing: 0;"
+                      class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiAccordion__button"
+                      data-test-subj="collapsibleNavAppLink-pure"
                     >
-                      pure link
+                      <div
+                        class="euiFlexItem"
+                      >
+                        <div
+                          class="euiText euiText--small euiTitle euiTitle--xsmall"
+                        >
+                          <h4>
+                            pure link
+                          </h4>
+                        </div>
+                      </div>
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <span
+                          class="leftNavCustomizedAccordionIcon"
+                          data-euiicon-type="plus"
+                        />
+                      </div>
                     </div>
                   </span>
                   <span
@@ -59,34 +76,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
               </button>
               <div
                 class="euiSideNavItem__items"
-              >
-                <div
-                  class="euiSideNavItem euiSideNavItem--branch nav-link-item nav-nested-item"
-                >
-                  <button
-                    aria-label="subLink"
-                    class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
-                    data-test-subj="collapsibleNavAppLink-subLink"
-                    type="button"
-                  >
-                    <span
-                      class="euiSideNavItemButton__content"
-                    >
-                      <span
-                        class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
-                        title="subLink"
-                      >
-                        <div
-                          class="euiText euiText--small euiTitle euiTitle--xsmall"
-                          style="letter-spacing: 0;"
-                        >
-                          subLink
-                        </div>
-                      </span>
-                    </span>
-                  </button>
-                </div>
-              </div>
+              />
             </div>
           </div>
         </div>
@@ -105,9 +95,17 @@ exports[`<NavGroups /> should render correctly 1`] = `
                 title="category-1"
               >
                 <div
-                  class="nav-link-item nav-link-item-category-title"
+                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive undefined"
                 >
-                  category-1
+                  <div
+                    class="euiFlexItem"
+                  >
+                    <h3
+                      class="euiCollapsibleNavGroup__heading nav-link-item"
+                    >
+                      category-1
+                    </h3>
+                  </div>
                 </div>
               </span>
             </span>
@@ -121,7 +119,6 @@ exports[`<NavGroups /> should render correctly 1`] = `
               <button
                 aria-label="link-in-category"
                 class="euiSideNavItemButton euiSideNavItemButton-isOpen nav-link-item-btn"
-                data-test-subj="collapsibleNavAppLink-link-in-category"
                 type="button"
               >
                 <span
@@ -132,10 +129,28 @@ exports[`<NavGroups /> should render correctly 1`] = `
                     title="link-in-category"
                   >
                     <div
-                      class="euiText euiText--small euiTitle euiTitle--xsmall"
-                      style="letter-spacing: 0;"
+                      class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiAccordion__button"
+                      data-test-subj="collapsibleNavAppLink-link-in-category"
                     >
-                      link-in-category
+                      <div
+                        class="euiFlexItem"
+                      >
+                        <div
+                          class="euiText euiText--small euiTitle euiTitle--xsmall"
+                        >
+                          <h4>
+                            link-in-category
+                          </h4>
+                        </div>
+                      </div>
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <span
+                          class="leftNavCustomizedAccordionIcon"
+                          data-euiicon-type="plus"
+                        />
+                      </div>
                     </div>
                   </span>
                   <span
@@ -145,42 +160,15 @@ exports[`<NavGroups /> should render correctly 1`] = `
               </button>
               <div
                 class="euiSideNavItem__items"
-              >
-                <div
-                  class="euiSideNavItem euiSideNavItem--branch nav-link-item nav-nested-item"
-                >
-                  <button
-                    aria-label="sub-link-in-category"
-                    class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
-                    data-test-subj="collapsibleNavAppLink-sub-link-in-category"
-                    type="button"
-                  >
-                    <span
-                      class="euiSideNavItemButton__content"
-                    >
-                      <span
-                        class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
-                        title="sub-link-in-category"
-                      >
-                        <div
-                          class="euiText euiText--small euiTitle euiTitle--xsmall"
-                          style="letter-spacing: 0;"
-                        >
-                          sub-link-in-category
-                        </div>
-                      </span>
-                    </span>
-                  </button>
-                </div>
-              </div>
+              />
             </div>
             <div
               class="euiSideNavItem euiSideNavItem--trunk nav-link-item "
             >
               <button
-                aria-label="link-in-category-2"
+                aria-label="link-2-in-category"
                 class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
-                data-test-subj="collapsibleNavAppLink-link-in-category-2"
+                data-test-subj="collapsibleNavAppLink-link-2-in-category"
                 type="button"
               >
                 <span
@@ -188,13 +176,14 @@ exports[`<NavGroups /> should render correctly 1`] = `
                 >
                   <span
                     class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
-                    title="link-in-category-2"
+                    title="link-2-in-category"
                   >
                     <div
                       class="euiText euiText--small euiTitle euiTitle--xsmall"
-                      style="letter-spacing: 0;"
                     >
-                      link-in-category-2
+                      <h4>
+                        link-2-in-category
+                      </h4>
                     </div>
                   </span>
                 </span>

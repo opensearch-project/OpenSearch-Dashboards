@@ -28,7 +28,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
           class="euiFlexItem"
         >
           <nav
-            class="euiSideNav categoryCollapsible-true euiSideNav-isOpenMobile"
+            class="euiSideNav euiSideNav-isOpenMobile"
           >
             <div
               class="euiSideNav__content"
@@ -128,7 +128,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
           class="euiFlexItem"
         >
           <nav
-            class="euiSideNav categoryCollapsible-true euiSideNav-isOpenMobile"
+            class="euiSideNav euiSideNav-isOpenMobile"
           >
             <div
               class="euiSideNav__content"

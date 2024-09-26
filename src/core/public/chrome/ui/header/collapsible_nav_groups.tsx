@@ -122,6 +122,7 @@ export function NavGroups({
          */
         href: undefined,
         onClick: undefined,
+        'data-test-subj': undefined,
         className: classNames(props.className, 'nav-link-parent-item'),
         name: (
           <CollapsibleNavGroupsLabel
@@ -129,6 +130,7 @@ export function NavGroups({
             storageKey={parentOpenKey}
             collapsible={!categoryCollapsible}
             onToggle={() => setRenderKey(Date.now())}
+            data-test-subj={props['data-test-subj']}
           />
         ),
         items: (getIsCategoryOpen(parentOpenKey) ? navLink.links : []).map((subNavLink) =>
