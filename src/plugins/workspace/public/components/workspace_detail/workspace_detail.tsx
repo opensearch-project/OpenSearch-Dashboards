@@ -308,7 +308,9 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
                   }),
                 } as TopNavControlButtonData),
             {
-              run: () => application.navigateToUrl(useCaseUrl),
+              run: () => {
+                window.open(useCaseUrl, '_blank', 'noopener noreferrer');
+              },
               iconType: 'popout',
               label: i18n.translate('workspace.detail.viewWorkspace.button', {
                 defaultMessage: 'View workspace',
