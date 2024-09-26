@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHeaderLinks, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHeaderLinks, EuiText, EuiTitle } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { ReactElement, useRef } from 'react';
 
@@ -182,7 +182,9 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                 <MountPointPortal setMountPoint={setMenuMountPoint}>
                   <EuiFlexGroup alignItems="stretch" gutterSize="none">
                     <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
-                      <EuiText size="s">{screenTitle}</EuiText>
+                      <EuiTitle size="xs">
+                        <h1>{screenTitle}</h1>
+                      </EuiTitle>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false} className="osdTopNavMenu">
                       {renderMenu(menuClassName)}
@@ -201,7 +203,9 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
               <MountPointPortal setMountPoint={setMenuMountPoint}>
                 <EuiFlexGroup alignItems="stretch" gutterSize="none">
                   <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
-                    <EuiText size="s">{screenTitle}</EuiText>
+                    <EuiTitle size="xs">
+                      <h1>{screenTitle}</h1>
+                    </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem className="osdTopNavMenu">
                     {renderMenu(menuClassName, true)}
@@ -221,7 +225,9 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                 <MountPointPortal setMountPoint={setMenuMountPoint}>
                   <EuiFlexGroup alignItems="stretch" gutterSize="none">
                     <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
-                      <EuiText size="s">{screenTitle}</EuiText>
+                      <EuiTitle size="xs">
+                        <h1>{screenTitle}</h1>
+                      </EuiTitle>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false} className="osdTopNavMenu">
                       {renderMenu(menuClassName)}
