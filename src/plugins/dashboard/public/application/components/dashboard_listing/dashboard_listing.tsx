@@ -5,8 +5,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { useMount, useObservable } from 'react-use';
-import { of } from 'rxjs';
+import { useMount } from 'react-use';
 import { useLocation } from 'react-router-dom';
 import {
   useOpenSearchDashboards,
@@ -36,12 +35,9 @@ export const DashboardListing = () => {
       data: { query },
       osdUrlStateStorage,
       navigation,
-      http,
-      workspaces,
     },
   } = useOpenSearchDashboards<DashboardServices>();
 
-  const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const location = useLocation();
   const queryParameters = useMemo(() => new URLSearchParams(location.search), [location]);
   const initialFiltersFromURL = queryParameters.get('filter');
@@ -111,8 +107,8 @@ export const DashboardListing = () => {
   }, [history]);
 
   const noItemsFragment = useMemo(
-    () => getNoItemsMessage(hideWriteControls, createItem, http.basePath, currentWorkspace?.id),
-    [hideWriteControls, createItem, http.basePath, currentWorkspace?.id]
+    () => getNoItemsMessage(hideWriteControls, createItem, application),
+    [hideWriteControls, createItem, application]
   );
 
   const dashboardProvidersForListing = dashboardProviders() || {};

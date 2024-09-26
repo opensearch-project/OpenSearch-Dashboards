@@ -307,7 +307,7 @@ exports[`dashboard listing table with no item and with write controls 1`] = `
             values={
               Object {
                 "sampleDataInstallLink": <EuiLink
-                  href="http://localhost/test/w/wk1/import_sample_data"
+                  onClick={[Function]}
                 >
                   <FormattedMessage
                     defaultMessage="Install some sample data"
@@ -627,7 +627,7 @@ exports[`dashboard listing table with no item and with write controls 1`] = `
                     values={
                       Object {
                         "sampleDataInstallLink": <EuiLink
-                          href="http://localhost/test/w/wk1/import_sample_data"
+                          onClick={[Function]}
                         >
                           <FormattedMessage
                             defaultMessage="Install some sample data"
@@ -640,12 +640,13 @@ exports[`dashboard listing table with no item and with write controls 1`] = `
                   >
                     New to OpenSearch Dashboards? 
                     <EuiLink
-                      href="http://localhost/test/w/wk1/import_sample_data"
+                      onClick={[Function]}
                     >
-                      <a
+                      <button
                         className="euiLink euiLink--primary"
-                        href="http://localhost/test/w/wk1/import_sample_data"
-                        rel="noreferrer"
+                        disabled={false}
+                        onClick={[Function]}
+                        type="button"
                       >
                         <FormattedMessage
                           defaultMessage="Install some sample data"
@@ -654,7 +655,7 @@ exports[`dashboard listing table with no item and with write controls 1`] = `
                         >
                           Install some sample data
                         </FormattedMessage>
-                      </a>
+                      </button>
                     </EuiLink>
                      to take a test drive.
                   </FormattedMessage>

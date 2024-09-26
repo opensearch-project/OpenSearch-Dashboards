@@ -6,14 +6,12 @@
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiSmallButton, EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
-import { HttpStart } from 'opensearch-dashboards/public';
-import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
+import { ApplicationStart } from 'opensearch-dashboards/public';
 
 export const getNoItemsMessage = (
   hideWriteControls: boolean,
   createItem: () => void,
-  basePath: HttpStart['basePath'],
-  workspaceId: string | undefined
+  application: ApplicationStart
 ) => {
   if (hideWriteControls) {
     return (
@@ -61,11 +59,7 @@ export const getNoItemsMessage = (
                 defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
                 values={{
                   sampleDataInstallLink: (
-                    <EuiLink
-                      href={basePath.prepend(
-                        formatUrlWithWorkspaceId('import_sample_data', workspaceId || '', basePath)
-                      )}
-                    >
+                    <EuiLink onClick={() => application.navigateToApp('import_sample_data')}>
                       <FormattedMessage
                         id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                         defaultMessage="Install some sample data"
