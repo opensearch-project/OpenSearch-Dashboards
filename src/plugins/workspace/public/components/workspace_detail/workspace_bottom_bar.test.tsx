@@ -88,4 +88,10 @@ describe('WorkspaceBottomBar', () => {
     const saveChangesButton = screen.getByText('Save changes');
     expect(saveChangesButton.closest('button')).not.toBeDisabled();
   });
+
+  it('should enable the "Save changes" button when name and description are empty', () => {
+    render(<WorkspaceBottomBar {...defaultProps} formData={{}} />);
+    const saveChangesButton = screen.getByText('Save changes');
+    expect(saveChangesButton.closest('button')).not.toBeDisabled();
+  });
 });
