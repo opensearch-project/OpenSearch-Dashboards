@@ -21,10 +21,6 @@
     }
   }
 
-  .nav-link-item-category-title {
-    padding: 0;
-  }
-
   .nav-link-fake-item {
     margin-top: 0;
   }
@@ -81,7 +77,14 @@
   }
 }
 
-// Hide the expand / collapse button when category is collasible
-.categoryCollapsible-true .nav-link-parent-item-button svg {
-  display: none;
+.nav-link-parent-item {
+  // Hide the expand / collapse button as we will use + / -
+  svg {
+    display: none;
+  }
+
+  // Show the customized icon
+  .leftNavCustomizedAccordionIcon {
+    display: inline-block;
+  }
 }

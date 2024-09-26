@@ -4,28 +4,15 @@
  */
 
 import './collapsible_nav_group_enabled.scss';
-import {
-  EuiFlexItem,
-  EuiSideNavItemType,
-  EuiSideNav,
-  EuiText,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiSideNavItemType, EuiSideNav, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useState } from 'react';
 import classNames from 'classnames';
 import { ChromeNavLink } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { createEuiListItem } from './nav_link';
-import {
-  getIsCategoryOpen,
-  getOrderedLinksOrCategories,
-  LinkItem,
-  LinkItemType,
-  setIsCategoryOpen,
-} from '../../utils';
+import { getOrderedLinksOrCategories, LinkItem, LinkItemType } from '../../utils';
+import { CollapsibleNavGroupsLabel, getIsCategoryOpen } from './collapsible_nav_groups_label';
 
 export interface NavGroupsProps {
   navLinks: ChromeNavLink[];
@@ -39,7 +26,6 @@ export interface NavGroupsProps {
   ) => void;
   categoryCollapsible?: boolean;
   currentWorkspaceId?: string;
-  storage?: Storage;
 }
 
 const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
@@ -57,7 +43,6 @@ export function NavGroups({
   onNavItemClick,
   categoryCollapsible,
   currentWorkspaceId,
-  storage = window.localStorage,
 }: NavGroupsProps) {
   const [, setRenderKey] = useState(Date.now());
   const createNavItem = ({
@@ -121,16 +106,32 @@ export function NavGroups({
 
     if (navLink.itemType === LinkItemType.PARENT_LINK && navLink.link) {
       const props = createNavItem({ link: navLink.link });
+      const parentOpenKey = `${currentWorkspaceId ? `${currentWorkspaceId}-` : ''}${
+        navLink.link.id
+      }`;
       const parentItem = {
         ...props,
         forceOpen: true,
+        /**
+         * The Tree component inside SideNav is not a controllable component,
+         * so we need to change the id(will pass as key into the Tree component) to remount the component.
+         */
+        id: `${props.id}-${!!getIsCategoryOpen(parentOpenKey)}`,
         /**
          * The href and onClick should both be undefined to make parent item rendered as accordion.
          */
         href: undefined,
         onClick: undefined,
         className: classNames(props.className, 'nav-link-parent-item'),
-        items: navLink.links.map((subNavLink) =>
+        name: (
+          <CollapsibleNavGroupsLabel
+            label={props.name}
+            storageKey={parentOpenKey}
+            collapsible={!categoryCollapsible}
+            onToggle={() => setRenderKey(Date.now())}
+          />
+        ),
+        items: (getIsCategoryOpen(parentOpenKey) ? navLink.links : []).map((subNavLink) =>
           createSideNavItem(subNavLink, level + 1, 'nav-nested-item')
         ),
       };
@@ -155,41 +156,24 @@ export function NavGroups({
       const categoryOpenKey = `${currentWorkspaceId ? `${currentWorkspaceId}-` : ''}${
         navLink.category?.id
       }`;
-      const isCategoryOpen = categoryCollapsible
-        ? getIsCategoryOpen(categoryOpenKey, storage, 'false')
-        : true;
       return {
         id: navLink.category?.id ?? '',
         name: (
-          <EuiFlexGroup
-            alignItems="center"
-            className={`nav-link-item${categoryCollapsible ? ' euiAccordion__button' : ''}`}
-            gutterSize="none"
-            onClick={() => {
-              if (!categoryCollapsible) {
-                return;
-              }
-
-              setIsCategoryOpen(categoryOpenKey, !isCategoryOpen, storage);
-              // Trigger the element to rerender because `setIsCategoryOpen` is not updating component's state
-              setRenderKey(Date.now());
-            }}
-          >
-            <EuiFlexItem>
-              <h3 className="euiCollapsibleNavGroup__heading nav-link-item-category-title">
+          <CollapsibleNavGroupsLabel
+            label={
+              <h3 className="euiCollapsibleNavGroup__heading nav-link-item">
                 {navLink.category?.label ?? ''}
               </h3>
-            </EuiFlexItem>
-            {categoryCollapsible ? (
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={isCategoryOpen ? 'minus' : 'plus'} />
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
+            }
+            collapsible={!!categoryCollapsible}
+            storageKey={categoryOpenKey}
+            onToggle={() => setRenderKey(Date.now())}
+          />
         ),
-        items: (isCategoryOpen ? navLink.links : [])?.map((link) =>
-          createSideNavItem(link, level + 1)
-        ),
+        items: (!categoryCollapsible || getIsCategoryOpen(categoryOpenKey)
+          ? navLink.links
+          : []
+        )?.map((link) => createSideNavItem(link, level + 1)),
         'aria-label': navLink.category?.label,
         className: 'nav-link-item-category-item',
       };
@@ -204,12 +188,7 @@ export function NavGroups({
 
   return (
     <EuiFlexItem style={style}>
-      <EuiSideNav
-        items={sideNavItems}
-        isOpenOnMobile
-        className={`categoryCollapsible-${!!categoryCollapsible}`}
-        mobileBreakpoints={[]}
-      />
+      <EuiSideNav items={sideNavItems} isOpenOnMobile mobileBreakpoints={[]} />
       {suffix}
     </EuiFlexItem>
   );
