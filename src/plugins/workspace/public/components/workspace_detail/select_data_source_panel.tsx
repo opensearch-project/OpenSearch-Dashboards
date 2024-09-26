@@ -111,7 +111,9 @@ export const SelectDataSourceDetailPanel = ({
       if (result?.success) {
         notifications?.toasts.addSuccess({
           title: i18n.translate('workspace.detail.dataSources.assign.success', {
-            defaultMessage: 'Associate OpenSearch connections successfully.',
+            defaultMessage:
+              'Associate {numberOfAssignedDataSources, plural, one {# OpenSearch connection} other {# OpenSearch connections}} successfully.',
+            values: { numberOfAssignedDataSources: newAssignedDataSourceConnections.length },
           }),
         });
         setSelectedDataSourceConnections(savedDataSourceConnections);
@@ -159,7 +161,9 @@ export const SelectDataSourceDetailPanel = ({
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.detail.dataSources.unassign.success', {
-              defaultMessage: 'The association has been removed.',
+              defaultMessage:
+                '{numberOfUnAssignedDataSources, plural, one {# association has} other {# associations have}} been removed.',
+              values: { numberOfUnAssignedDataSources: unAssignedDataSources.length },
             }),
           });
           setSelectedDataSourceConnections(savedDataSourceConnections);
