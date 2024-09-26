@@ -9,7 +9,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
       class="euiSideNav euiSideNav-isOpenMobile"
     >
       <div
-        class="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        class="euiSideNav__content"
         id="euiSideNavContent_generated-id"
       >
         <div
@@ -34,7 +34,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
             >
               <button
                 aria-label="pure link"
-                class="euiSideNavItemButton euiSideNavItemButton-isOpen nav-link-item-btn nav-link-parent-item-button"
+                class="euiSideNavItemButton euiSideNavItemButton-isOpen nav-link-item-btn"
                 data-test-subj="collapsibleNavAppLink-pure"
                 type="button"
               >
@@ -46,7 +46,8 @@ exports[`<NavGroups /> should render correctly 1`] = `
                     title="pure link"
                   >
                     <div
-                      class="euiText euiText--extraSmall"
+                      class="euiText euiText--small euiTitle euiTitle--xsmall"
+                      style="letter-spacing: 0;"
                     >
                       pure link
                     </div>
@@ -76,7 +77,8 @@ exports[`<NavGroups /> should render correctly 1`] = `
                         title="subLink"
                       >
                         <div
-                          class="euiText euiText--extraSmall"
+                          class="euiText euiText--small euiTitle euiTitle--xsmall"
+                          style="letter-spacing: 0;"
                         >
                           subLink
                         </div>
@@ -89,7 +91,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
           </div>
         </div>
         <div
-          class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems"
+          class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems nav-link-item-category-item"
         >
           <div
             aria-label="category-1"
@@ -103,7 +105,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                 title="category-1"
               >
                 <div
-                  class="nav-link-item"
+                  class="nav-link-item nav-link-item-category-title"
                 >
                   category-1
                 </div>
@@ -118,7 +120,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
             >
               <button
                 aria-label="link-in-category"
-                class="euiSideNavItemButton euiSideNavItemButton-isOpen nav-link-item-btn nav-link-parent-item-button"
+                class="euiSideNavItemButton euiSideNavItemButton-isOpen nav-link-item-btn"
                 data-test-subj="collapsibleNavAppLink-link-in-category"
                 type="button"
               >
@@ -130,7 +132,8 @@ exports[`<NavGroups /> should render correctly 1`] = `
                     title="link-in-category"
                   >
                     <div
-                      class="euiText euiText--extraSmall"
+                      class="euiText euiText--small euiTitle euiTitle--xsmall"
+                      style="letter-spacing: 0;"
                     >
                       link-in-category
                     </div>
@@ -160,7 +163,8 @@ exports[`<NavGroups /> should render correctly 1`] = `
                         title="sub-link-in-category"
                       >
                         <div
-                          class="euiText euiText--extraSmall"
+                          class="euiText euiText--small euiTitle euiTitle--xsmall"
+                          style="letter-spacing: 0;"
                         >
                           sub-link-in-category
                         </div>
@@ -187,7 +191,8 @@ exports[`<NavGroups /> should render correctly 1`] = `
                     title="link-in-category-2"
                   >
                     <div
-                      class="euiText euiText--extraSmall"
+                      class="euiText euiText--small euiTitle euiTitle--xsmall"
+                      style="letter-spacing: 0;"
                     >
                       link-in-category-2
                     </div>

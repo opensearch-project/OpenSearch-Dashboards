@@ -11,6 +11,7 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiIcon,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useState } from 'react';
@@ -78,7 +79,13 @@ export function NavGroups({
 
     return {
       id: `${link.id}-${link.title}`,
-      name: <EuiText size="xs">{link.title}</EuiText>,
+      name: (
+        <EuiTitle size="xs">
+          <EuiText size="s">
+            <h4>{link.title}</h4>
+          </EuiText>
+        </EuiTitle>
+      ),
       onClick: euiListItem.onClick,
       href: euiListItem.href,
       emphasize: euiListItem.isActive,
@@ -123,7 +130,6 @@ export function NavGroups({
         href: undefined,
         onClick: undefined,
         className: classNames(props.className, 'nav-link-parent-item'),
-        buttonClassName: classNames(props.buttonClassName, 'nav-link-parent-item-button'),
         items: navLink.links.map((subNavLink) =>
           createSideNavItem(subNavLink, level + 1, 'nav-nested-item')
         ),
@@ -170,7 +176,9 @@ export function NavGroups({
             }}
           >
             <EuiFlexItem>
-              <div>{navLink.category?.label ?? ''}</div>
+              <h3 className="euiCollapsibleNavGroup__heading nav-link-item-category-title">
+                {navLink.category?.label ?? ''}
+              </h3>
             </EuiFlexItem>
             {categoryCollapsible ? (
               <EuiFlexItem grow={false}>
@@ -183,6 +191,7 @@ export function NavGroups({
           createSideNavItem(link, level + 1)
         ),
         'aria-label': navLink.category?.label,
+        className: 'nav-link-item-category-item',
       };
     }
 
@@ -199,6 +208,7 @@ export function NavGroups({
         items={sideNavItems}
         isOpenOnMobile
         className={`categoryCollapsible-${!!categoryCollapsible}`}
+        mobileBreakpoints={[]}
       />
       {suffix}
     </EuiFlexItem>

@@ -2,30 +2,27 @@
   border: none !important;
 
   .nav-link-item {
-    padding: calc($euiSize / 4) $euiSize;
-    border-radius: $euiSize;
+    padding: $euiSizeXS $euiSizeS;
+    border-radius: $euiSizeS;
     box-shadow: none;
     margin-bottom: 0;
     margin-top: 0;
 
     .nav-link-item-btn {
       margin-bottom: 0;
-
-      &::after {
-        display: none;
-      }
     }
   }
 
-  .nav-link-parent-item-button {
-    > span {
-      flex-direction: row-reverse;
+  .nav-link-item-category-item {
+    margin-top: $euiSizeL;
 
-      > * {
-        margin-right: $euiSizeS;
-        margin-left: 2px;
-      }
+    > * {
+      margin-bottom: 0;
     }
+  }
+
+  .nav-link-item-category-title {
+    padding: 0;
   }
 
   .nav-link-fake-item {
@@ -37,15 +34,11 @@
   }
 
   .nav-nested-item {
-    margin-bottom: 4px;
+    padding: $euiSizeS 0;
 
-    &::after {
-      height: unset;
-    }
-
-    .nav-link-item-btn {
-      padding-left: 0;
-      padding-right: 0;
+    // The height is used to comply with the extra padding
+    &:last-of-type::after {
+      height: 50%;
     }
   }
 

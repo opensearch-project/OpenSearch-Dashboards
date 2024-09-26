@@ -22,7 +22,6 @@ import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav
 import { ChromeNavLink } from '../../nav_links';
 import { ALL_USE_CASE_ID } from '../../../../../core/utils';
 import { fulfillRegistrationLinksToChromeNavLinks } from '../../utils';
-import './collapsible_nav_group_enabled_top.scss';
 
 export interface CollapsibleNavTopProps {
   homeLink?: ChromeNavLink;
@@ -131,8 +130,8 @@ export const CollapsibleNavTop = ({
               <EuiIcon
                 type={icon}
                 size="l"
-                className="leftNavTopIcon"
                 data-test-subj={`collapsibleNavIcon-${icon}`}
+                color={currentWorkspace?.color}
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -151,7 +150,9 @@ export const CollapsibleNavTop = ({
       {currentNavGroup?.title && (
         <>
           <EuiSpacer />
-          <EuiText>{currentNavGroup?.title}</EuiText>
+          <EuiText size="s">
+            <h3>{currentNavGroup?.title}</h3>
+          </EuiText>
         </>
       )}
     </EuiPanel>

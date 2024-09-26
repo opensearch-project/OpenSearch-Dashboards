@@ -22,15 +22,16 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
       </div>
       <div
         class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
+        style="padding-top: 0px;"
       >
         <div
           class="euiFlexItem"
         >
           <nav
-            class="euiSideNav euiSideNav-isOpenMobile"
+            class="euiSideNav categoryCollapsible-true euiSideNav-isOpenMobile"
           >
             <div
-              class="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+              class="euiSideNav__content"
               id="euiSideNavContent_generated-id"
             >
               <div
@@ -50,9 +51,11 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                       title="link-in-all"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--small euiTitle euiTitle--xsmall"
                       >
-                        link-in-all
+                        <h4>
+                          link-in-all
+                        </h4>
                       </div>
                     </span>
                   </span>
@@ -119,15 +122,16 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
       </div>
       <div
         class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
+        style="padding-top: 0px;"
       >
         <div
           class="euiFlexItem"
         >
           <nav
-            class="euiSideNav euiSideNav-isOpenMobile"
+            class="euiSideNav categoryCollapsible-true euiSideNav-isOpenMobile"
           >
             <div
-              class="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+              class="euiSideNav__content"
               id="euiSideNavContent_generated-id"
             >
               <div
@@ -147,9 +151,11 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
                       title="link-in-all"
                     >
                       <div
-                        class="euiText euiText--extraSmall"
+                        class="euiText euiText--small euiTitle euiTitle--xsmall"
                       >
-                        link-in-all
+                        <h4>
+                          link-in-all
+                        </h4>
                       </div>
                     </span>
                   </span>
