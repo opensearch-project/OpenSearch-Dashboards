@@ -72,7 +72,7 @@
 }
 
 // IE specific fix for the datepicker to not collapse
-@include euiBreakpoint("m", "l", "xl") {
+@include euiBreakpoint("m", "l", "xl", "xxl", "xxl") {
   .osdQueryBar__datePickerWrapper {
     max-width: 40vw;
     flex-grow: 0 !important;

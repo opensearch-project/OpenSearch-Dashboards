@@ -2613,6 +2613,8 @@ exports[`Header handles visibility and lock changes 1`] = `
                       "m",
                       "l",
                       "xl",
+                      "xxl",
+                      "xxxl",
                     ]
                   }
                 >
@@ -2679,6 +2681,8 @@ exports[`Header handles visibility and lock changes 1`] = `
                       "m",
                       "l",
                       "xl",
+                      "xxl",
+                      "xxxl",
                     ]
                   }
                 >
@@ -3144,6 +3148,8 @@ exports[`Header handles visibility and lock changes 1`] = `
                         "m",
                         "l",
                         "xl",
+                        "xxl",
+                        "xxxl",
                       ]
                     }
                   >
@@ -3222,6 +3228,8 @@ exports[`Header handles visibility and lock changes 1`] = `
                         "m",
                         "l",
                         "xl",
+                        "xxl",
+                        "xxxl",
                       ]
                     }
                   />
@@ -7122,6 +7130,8 @@ exports[`Header handles visibility and lock changes 1`] = `
                     Array [
                       "l",
                       "xl",
+                      "xxl",
+                      "xxxl",
                     ]
                   }
                 >
@@ -24979,6 +24989,8 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                     Array [
                       "l",
                       "xl",
+                      "xxl",
+                      "xxxl",
                     ]
                   }
                 >
