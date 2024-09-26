@@ -14,6 +14,7 @@ import {
   WORKSPACE_TYPE,
   ISavedObjectsRepository,
   SavedObjectsClientContract,
+  SavedObjectsBulkCreateObject,
 } from '../../../../../core/server';
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import * as utilsExports from '../../../../../core/server/utils/auth_info';
@@ -297,6 +298,57 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
 
       expect(result.saved_objects).toEqual(
         expect.arrayContaining([expect.objectContaining({ id: 'acl-controlled-dashboard-2' })])
+      );
+    });
+
+    it('should return global non-user-level configs when search with sortField buildNum', async () => {
+      const configsForCreation: SavedObjectsBulkCreateObject[] = [
+        {
+          id: 'user_foo',
+          type: 'config',
+          attributes: {},
+        },
+        {
+          id: 'user_bar',
+          type: 'config',
+          attributes: {},
+        },
+        {
+          id: 'global_config',
+          type: 'config',
+          attributes: {
+            buildNum: 1,
+          },
+        },
+      ];
+      await permittedSavedObjectedClient.bulkCreate(configsForCreation);
+      const result = await permittedSavedObjectedClient.find({
+        type: 'config',
+        sortField: 'buildNum',
+        perPage: 999,
+        page: 1,
+      });
+
+      const resultForFindConfig = await permittedSavedObjectedClient.find({
+        type: 'config',
+        perPage: 999,
+        page: 1,
+      });
+
+      expect(result.saved_objects).toEqual(
+        expect.arrayContaining([expect.objectContaining({ id: 'global_config' })])
+      );
+      expect(result.saved_objects.length).toEqual(1);
+      expect(result.total).toEqual(1);
+
+      // Should not be able to find global config if do not find with `sortField: 'buildNum'`
+      expect(resultForFindConfig.saved_objects.length).toEqual(0);
+
+      // clean up the test configs
+      await Promise.all(
+        configsForCreation.map((config) =>
+          permittedSavedObjectedClient.delete(config.type, config.id as string)
+        )
       );
     });
   });

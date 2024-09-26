@@ -4,6 +4,16 @@
  */
 
 .queryAssist {
+  &.queryAssist__summary {
+    margin-top: $euiSizeXS;
+  }
+
+  &.queryAssist__summary_banner {
+    /* stylelint-disable  @osd/stylelint/no_restricted_values */
+    background: lightOrDarkTheme(linear-gradient(to left, #edf7ff, #f9f4ff), $euiColorEmptyShade);
+    padding: $euiSizeXS;
+  }
+
   &.queryAssist__callout {
     margin-top: $euiSizeXS;
   }

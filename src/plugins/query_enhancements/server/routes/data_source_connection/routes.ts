@@ -13,62 +13,26 @@ export function registerDataSourceConnectionsRoutes(
 ) {
   router.get(
     {
-      path: API.DATA_SOURCE.CONNECTIONS,
-      validate: {
-        params: schema.object({}, { unknowns: 'allow' }),
-      },
-    },
-    async (context, request, response) => {
-      const fields = ['id', 'title', 'auth.type'];
-      const resp = await context.core.savedObjects.client.find({
-        type: 'data-source',
-        fields,
-        perPage: 10000,
-      });
-
-      return response.ok({ body: { savedObjects: resp.saved_objects } });
-    }
-  );
-
-  router.get(
-    {
-      path: `${API.DATA_SOURCE.CONNECTIONS}/{dataSourceId}`,
+      path: `${API.DATA_SOURCE.CONNECTIONS}/{id?}`,
       validate: {
         params: schema.object({
-          dataSourceId: schema.string(),
+          id: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, response) => {
-      const resp = await context.core.savedObjects.client.get(
-        'data-source',
-        request.params.dataSourceId
-      );
-      return response.ok({ body: resp });
-    }
-  );
-
-  router.get(
-    {
-      path: `${API.DATA_SOURCE.EXTERNAL}`,
-      validate: {
-        query: schema.object({
-          id: schema.string(),
-          name: schema.nullable(schema.string()),
-        }),
-      },
-    },
-    async (context, request, response) => {
-      const client = request.query.id
-        ? context.dataSource.opensearch.legacy.getClient(request.query.id).callAPI
+      const client = request.params.id
+        ? context.dataSource.opensearch.legacy.getClient(request.params.id).callAPI
         : defaultClient.asScoped(request).callAsCurrentUser;
-
-      const resp = request.query.name
-        ? await client('enhancements.getDataConnectionById', {
-            dataconnection: request.query.name,
-          })
-        : await client('enhancements.getDataConnections');
-      return response.ok({ body: resp });
+      try {
+        const resp = await client('enhancements.getDataConnections');
+        return response.ok({ body: resp });
+      } catch (error) {
+        if (error.statusCode === 404 || error.statusCode === 400) {
+          return response.ok({ body: [] });
+        }
+        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
+      }
     }
   );
 

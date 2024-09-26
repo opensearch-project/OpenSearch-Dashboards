@@ -118,7 +118,6 @@ export const DiscoverChart = ({
       <EuiFlexItem grow={true} style={{ justifyContent: 'flex-start' }}>
         {isTimeBased && timeChartHeader}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{discoverOptions}</EuiFlexItem>
     </EuiFlexGroup>
   );
 

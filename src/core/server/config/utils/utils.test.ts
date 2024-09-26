@@ -3,9 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { createLocalStore, mergeConfigs, pathToString } from './utils';
+import {
+  createLocalStore,
+  extractVersionFromDynamicConfigIndex,
+  isDynamicConfigIndex,
+  mergeConfigs,
+  pathToString,
+} from './utils';
 import { Request } from 'hapi__hapi';
 import { loggerMock } from '../../logging/logger.mock';
+import { DYNAMIC_APP_CONFIG_INDEX_PREFIX } from './constants';
 
 describe('Utils', () => {
   test.each([
@@ -176,6 +183,79 @@ describe('Utils', () => {
       expectedMap.forEach((value, key) => {
         expect(actualMap.get(key)).toEqual(value);
       });
+    }
+  );
+
+  test.each([
+    {
+      index: `.sanity_check_2`,
+      result: false,
+    },
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_144b`,
+      result: false,
+    },
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_354.4`,
+      result: false,
+    },
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_-4`,
+      result: false,
+    },
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_asdfasdfasdf`,
+      result: false,
+    },
+    {
+      index: `opensearch_dashboards_dynamic_config_2`,
+      result: false,
+    },
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}3`,
+      result: false,
+    },
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}`,
+      result: false,
+    },
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_0`,
+      result: true,
+    },
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_1`,
+      result: true,
+    },
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_141515`,
+      result: true,
+    },
+  ])('isDynamicConfigIndex() should return $result when index is $index', ({ index, result }) => {
+    expect(isDynamicConfigIndex(index)).toBe(result);
+  });
+
+  test.each([
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_-10`,
+      result: 0,
+    },
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_0`,
+      result: 0,
+    },
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_1`,
+      result: 1,
+    },
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_5732`,
+      result: 5732,
+    },
+  ])(
+    'extractVersionFromDynamicConfigIndex() should extract number $result from index $index',
+    ({ index, result }) => {
+      expect(extractVersionFromDynamicConfigIndex(index)).toBe(result);
     }
   );
 });
