@@ -111,17 +111,17 @@ export const SelectDataSourceDetailPanel = ({
       if (result?.success) {
         notifications?.toasts.addSuccess({
           title: i18n.translate('workspace.detail.dataSources.assign.success', {
-            defaultMessage: 'Associate OpenSearch connections successfully',
+            defaultMessage: 'Associate OpenSearch connections successfully.',
           }),
         });
         setSelectedDataSourceConnections(savedDataSourceConnections);
       } else {
-        throw new Error(result?.error ? result?.error : 'Associate OpenSearch connections failed');
+        throw new Error(result?.error ? result?.error : 'Associate OpenSearch connections failed.');
       }
     } catch (error) {
       notifications?.toasts.addDanger({
         title: i18n.translate('workspace.detail.dataSources.assign.failed', {
-          defaultMessage: 'Failed to associate OpenSearch connections',
+          defaultMessage: 'Failed to associate OpenSearch connections.',
         }),
         text: error instanceof Error ? error.message : JSON.stringify(error),
       });
@@ -159,19 +159,19 @@ export const SelectDataSourceDetailPanel = ({
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.detail.dataSources.unassign.success', {
-              defaultMessage: 'The association has been removed',
+              defaultMessage: 'The association has been removed.',
             }),
           });
           setSelectedDataSourceConnections(savedDataSourceConnections);
         } else {
           throw new Error(
-            result?.error ? result?.error : 'Remove associated OpenSearch connections failed'
+            result?.error ? result?.error : 'Remove associated OpenSearch connections failed.'
           );
         }
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.detail.dataSources.unassign.failed', {
-            defaultMessage: 'Failed to remove associated OpenSearch connections',
+            defaultMessage: 'Failed to remove associated OpenSearch connections.',
           }),
           text: error instanceof Error ? error.message : JSON.stringify(error),
         });
