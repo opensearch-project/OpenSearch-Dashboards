@@ -60,9 +60,8 @@ export function NavGroups({
       id: `${link.id}-${link.title}`,
       name: (
         <EuiTitle size="xs">
-          {/* the inline style is required to overwrite the letterspacing style EuiText applies */}
-          <EuiText size="s" style={{ letterSpacing: 0 }}>
-            {link.title}
+          <EuiText size="s">
+            <h4>{link.title}</h4>
           </EuiText>
         </EuiTitle>
       ),
@@ -135,8 +134,10 @@ export function NavGroups({
       return {
         id: navLink.category?.id ?? '',
         name: (
-          <div className="nav-link-item nav-link-item-category-title">
-            {navLink.category?.label ?? ''}
+          <div className="nav-link-item">
+            <h3 className="euiCollapsibleNavGroup__heading nav-link-item-category-title">
+              {navLink.category?.label ?? ''}
+            </h3>
           </div>
         ),
         items: navLink.links?.map((link) => createSideNavItem(link, level + 1)),
