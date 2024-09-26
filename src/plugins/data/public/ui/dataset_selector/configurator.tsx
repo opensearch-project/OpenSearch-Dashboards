@@ -52,7 +52,7 @@ export const Configurator = ({
     return languages[0];
   });
 
-  const displayTimeFieldSelector = (ds: Dataset, lang: string, fields: DatasetField[]) => {
+  const shouldDisplayTimeFieldSelector = (ds: Dataset, lang: string, fields: DatasetField[]) => {
     return (
       !(
         languageService.getLanguage(lang)?.disableDatePicker ||
@@ -113,7 +113,7 @@ export const Configurator = ({
             !languageService.getLanguage(language)?.disableDatePicker && (
               <EuiFormRow
                 label={i18n.translate(
-                  'data.explorer.datasetSelector.advancedSelector.configurator.datasetLabel',
+                  'data.explorer.datasetSelector.advancedSelector.configurator.indexPatternTimeFieldLabel',
                   {
                     defaultMessage: 'Time field',
                   }
@@ -122,7 +122,7 @@ export const Configurator = ({
                 <EuiFieldText disabled value={dataset.timeFieldName ?? 'No time field'} />
               </EuiFormRow>
             )}
-          {displayTimeFieldSelector(dataset, language, timeFields) && (
+          {shouldDisplayTimeFieldSelector(dataset, language, timeFields) && (
             <EuiFormRow
               label={i18n.translate(
                 'data.explorer.datasetSelector.advancedSelector.configurator.timeFieldLabel',
@@ -192,7 +192,8 @@ export const Configurator = ({
           }}
           fill
           disabled={
-            timeFieldName === undefined && displayTimeFieldSelector(dataset, language, timeFields)
+            timeFieldName === undefined &&
+            shouldDisplayTimeFieldSelector(dataset, language, timeFields)
           }
         >
           <FormattedMessage
