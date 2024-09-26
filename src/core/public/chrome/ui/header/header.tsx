@@ -159,20 +159,20 @@ export function Header({
   const currentWorkspace = useObservable(observables.currentWorkspace$, undefined);
 
   const currentLeftControls = useObservableValue(application.currentLeftControls$);
-  const navControlsLeft = useObservableValue(observables.navControlsLeft$);
+  const navControlsLeft = useObservable(observables.navControlsLeft$);
 
   const currentCenterControls = useObservableValue(application.currentCenterControls$);
-  const navControlsExpandedCenter = useObservableValue(observables.navControlsExpandedCenter$);
-  const navControlsCenter = useObservableValue(observables.navControlsCenter$);
+  const navControlsExpandedCenter = useObservable(observables.navControlsExpandedCenter$);
+  const navControlsCenter = useObservable(observables.navControlsCenter$);
 
   const currentRightControls = useObservableValue(application.currentRightControls$);
-  const navControlsExpandedRight = useObservableValue(observables.navControlsExpandedRight$);
-  const navControlsRight = useObservableValue(observables.navControlsRight$);
+  const navControlsExpandedRight = useObservable(observables.navControlsExpandedRight$);
+  const navControlsRight = useObservable(observables.navControlsRight$);
 
   const currentActionMenu = useObservableValue(application.currentActionMenu$);
 
   const currentBadgeControls = useObservableValue(application.currentBadgeControls$);
-  const observableBadge = useObservableValue(observables.badge$);
+  const observableBadge = useObservable(observables.badge$);
 
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
