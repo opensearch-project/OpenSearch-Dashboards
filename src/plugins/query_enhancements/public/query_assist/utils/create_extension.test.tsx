@@ -45,6 +45,7 @@ queryStringMock.getUpdates$.mockReturnValue(of(mockQueryWithIndexPattern));
 jest.mock('../components', () => ({
   QueryAssistBar: jest.fn(() => <div>QueryAssistBar</div>),
   QueryAssistBanner: jest.fn(() => <div>QueryAssistBanner</div>),
+  QueryAssistSummary: jest.fn(() => <div>QueryAssistSummary</div>),
 }));
 
 describe('CreateExtension', () => {
@@ -61,11 +62,12 @@ describe('CreateExtension', () => {
 
   const config: ConfigSchema['queryAssist'] = {
     supportedLanguages: [{ language: 'PPL', agentConfig: 'os_query_assist_ppl' }],
+    summary: { enabled: false },
   };
 
   it('should be enabled if at least one language is configured', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
-    const extension = createQueryAssistExtension(httpMock, dataMock, config);
+    const extension = createQueryAssistExtension(coreSetupMock, dataMock, config);
     const isEnabled = await firstValueFrom(extension.isEnabled$(dependencies));
     expect(isEnabled).toBeTruthy();
     expect(httpMock.get).toBeCalledWith('/api/enhancements/assist/languages', {
@@ -75,7 +77,7 @@ describe('CreateExtension', () => {
 
   it('should be disabled when there is an error', async () => {
     httpMock.get.mockRejectedValueOnce(new Error('network failure'));
-    const extension = createQueryAssistExtension(httpMock, dataMock, config);
+    const extension = createQueryAssistExtension(coreSetupMock, dataMock, config);
     const isEnabled = await firstValueFrom(extension.isEnabled$(dependencies));
     expect(isEnabled).toBeFalsy();
     expect(httpMock.get).toBeCalledWith('/api/enhancements/assist/languages', {
@@ -85,7 +87,7 @@ describe('CreateExtension', () => {
 
   it('creates data structure meta', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
-    const extension = createQueryAssistExtension(httpMock, dataMock, config);
+    const extension = createQueryAssistExtension(coreSetupMock, dataMock, config);
     const meta = await extension.getDataStructureMeta?.('mock-data-source-id2');
     expect(meta).toMatchInlineSnapshot(`
       Object {
@@ -103,7 +105,7 @@ describe('CreateExtension', () => {
 
   it('does not send multiple requests for the same data source', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
-    const extension = createQueryAssistExtension(httpMock, dataMock, config);
+    const extension = createQueryAssistExtension(coreSetupMock, dataMock, config);
     const metas = await Promise.all(
       Array.from({ length: 10 }, () => extension.getDataStructureMeta?.('mock-data-source-id2'))
     );
@@ -114,7 +116,7 @@ describe('CreateExtension', () => {
 
   it('should render the component if language is supported', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
-    const extension = createQueryAssistExtension(httpMock, dataMock, config);
+    const extension = createQueryAssistExtension(coreSetupMock, dataMock, config);
     const component = extension.getComponent?.(dependencies);
 
     if (!component) throw new Error('QueryEditorExtensions Component is undefined');
@@ -128,7 +130,7 @@ describe('CreateExtension', () => {
 
   it('should render the banner if language is not supported', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
-    const extension = createQueryAssistExtension(httpMock, dataMock, config);
+    const extension = createQueryAssistExtension(coreSetupMock, dataMock, config);
     const banner = extension.getBanner?.({
       ...dependencies,
       language: 'DQL',
@@ -141,5 +143,37 @@ describe('CreateExtension', () => {
     });
 
     expect(screen.getByText('QueryAssistBanner')).toBeInTheDocument();
+  });
+
+  it('should not render the summary panel if it is not enabled', async () => {
+    httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
+    const extension = createQueryAssistExtension(coreSetupMock, dataMock, config);
+    const component = extension.getComponent?.(dependencies);
+
+    if (!component) throw new Error('QueryEditorExtensions Component is undefined');
+
+    await act(async () => {
+      render(component);
+    });
+    const summaryPanels = screen.queryAllByText('QueryAssistSummary');
+    expect(summaryPanels).toHaveLength(0);
+  });
+
+  it('should render the summary panel if it is enabled', async () => {
+    httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
+    const modifiedConfig: ConfigSchema['queryAssist'] = {
+      supportedLanguages: [{ language: 'PPL', agentConfig: 'os_query_assist_ppl' }],
+      summary: { enabled: true },
+    };
+    const extension = createQueryAssistExtension(coreSetupMock, dataMock, modifiedConfig);
+    const component = extension.getComponent?.(dependencies);
+
+    if (!component) throw new Error('QueryEditorExtensions Component is undefined');
+
+    await act(async () => {
+      render(component);
+    });
+
+    expect(screen.getByText('QueryAssistSummary')).toBeInTheDocument();
   });
 });

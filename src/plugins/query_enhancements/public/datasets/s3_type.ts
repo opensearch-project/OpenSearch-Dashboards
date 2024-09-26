@@ -4,6 +4,7 @@
  */
 
 import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { trimEnd } from 'lodash';
 import {
   DATA_STRUCTURE_META_TYPES,
   DEFAULT_DATA,
@@ -14,7 +15,7 @@ import {
   DatasetField,
 } from '../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
-import { DATASET, handleQueryStatus } from '../../common';
+import { API, DATASET, handleQueryStatus } from '../../common';
 import S3_ICON from '../assets/s3_mark.svg';
 
 export const s3TypeConfig: DatasetTypeConfig = {
@@ -115,7 +116,9 @@ const fetch = async (
   try {
     const response = await handleQueryStatus({
       fetchStatus: () =>
-        http.fetch('../../api/enhancements/datasource/jobs', {
+        http.fetch({
+          method: 'GET',
+          path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
           query: {
             id: dataSource?.id,
             queryId: meta.queryId,
@@ -171,9 +174,13 @@ const fetchConnections = async (
   http: HttpSetup,
   dataSource: DataStructure
 ): Promise<DataStructure[]> => {
-  const query = (dataSource.meta as DataStructureCustomMeta).query;
-  const response = await http.fetch(`../../api/enhancements/datasource/external`, {
-    query,
+  const abortController = new AbortController();
+  const query =
+    dataSource.id !== '' ? (dataSource.meta as DataStructureCustomMeta).query : undefined;
+  const response = await http.fetch({
+    method: 'GET',
+    path: trimEnd(`${API.DATA_SOURCE.CONNECTIONS}/${query?.id || ''}`),
+    signal: abortController.signal,
   });
 
   return response
@@ -190,10 +197,13 @@ const fetchConnections = async (
 };
 
 const fetchDatabases = async (http: HttpSetup, path: DataStructure[]): Promise<DataStructure[]> => {
+  const abortController = new AbortController();
   const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
   const connection = path[path.length - 1];
   const meta = connection.meta as DataStructureCustomMeta;
-  const response = await http.post(`../../api/enhancements/datasource/jobs`, {
+  const response = await http.fetch({
+    method: 'POST',
+    path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
     body: JSON.stringify({
       lang: 'sql',
       query: `SHOW DATABASES in ${connection.title}`,
@@ -203,6 +213,7 @@ const fetchDatabases = async (http: HttpSetup, path: DataStructure[]): Promise<D
     query: {
       id: dataSource?.id,
     },
+    signal: abortController.signal,
   });
 
   connection.meta = setMeta(connection, response);
@@ -211,11 +222,14 @@ const fetchDatabases = async (http: HttpSetup, path: DataStructure[]): Promise<D
 };
 
 const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<DataStructure[]> => {
+  const abortController = new AbortController();
   const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
   const connection = path.find((ds) => ds.type === 'CONNECTION');
   const sessionId = (connection?.meta as DataStructureCustomMeta).sessionId;
   const database = path[path.length - 1];
-  const response = await http.post(`../../api/enhancements/datasource/jobs`, {
+  const response = await http.fetch({
+    method: 'POST',
+    path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
     body: JSON.stringify({
       lang: 'sql',
       query: `SHOW TABLES in ${database.title}`,
@@ -225,6 +239,7 @@ const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<Data
     query: {
       id: dataSource?.id,
     },
+    signal: abortController.signal,
   });
 
   database.meta = setMeta(database, response);
