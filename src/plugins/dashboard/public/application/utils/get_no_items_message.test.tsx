@@ -30,7 +30,6 @@ describe('dashboard listing table with no item', () => {
     const component = mountWithIntl(getNoItemsMessage(false, jest.fn(), application));
 
     expect(component).toMatchSnapshot();
-
     component.find(EuiLink).simulate('click');
 
     expect(application.navigateToApp).toHaveBeenCalledWith('import_sample_data');
