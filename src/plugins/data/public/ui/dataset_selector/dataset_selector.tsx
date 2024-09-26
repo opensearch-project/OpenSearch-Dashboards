@@ -27,6 +27,16 @@ interface DatasetSelectorProps {
   services: IDataPluginServices;
 }
 
+/**
+ * This component provides a dropdown selector for datasets and an advanced selector modal.
+ * It fetches datasets once on mount to populate the selector options.
+ *
+ * @remarks
+ * The component uses several optimizations to prevent unnecessary re-renders:
+ * 1. It uses `useRef` and `useEffect` to ensure datasets are fetched only once on mount.
+ * 2. It uses `useMemo` and `useCallback` to memoize computed values and functions.
+ * 3. It intentionally omits some dependencies from the `useEffect` dependency array to prevent re-fetching.
+ */
 export const DatasetSelector = ({
   selectedDataset,
   setSelectedDataset,
@@ -67,6 +77,7 @@ export const DatasetSelector = ({
     return () => {
       isMounted.current = false;
     };
+    // NOTE: Intentionally omitting dependencies which can cause unnecessary re-renders
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datasetService]);
 
