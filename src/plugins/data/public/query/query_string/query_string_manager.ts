@@ -31,7 +31,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { isEqual, debounce } from 'lodash';
+import { isEqual } from 'lodash';
 import { Dataset, DataStorage, Query, TimeRange, UI_SETTINGS } from '../../../common';
 import { createHistory, QueryHistory } from './query_history';
 import { DatasetService, DatasetServiceContract } from './dataset_service';
@@ -123,14 +123,6 @@ export class QueryStringManager {
       this.query$.next(newQuery);
     }
   };
-
-  /**
-   * Updates the query with debounce
-   * @param {Query} query
-   */
-  public debouncedSetQuery = debounce((query: Partial<Query>) => {
-    this.setQuery(query);
-  }, 100);
 
   /**
    * Resets the query to the default one.

@@ -26,7 +26,7 @@ const ConnectedDatasetSelector = ({ onSubmit }: ConnectedDatasetSelectorProps) =
       setSelectedDataset(dataset);
       if (dataset) {
         const query = queryString.getInitialQueryByDataset(dataset);
-        queryString.debouncedSetQuery(query);
+        queryString.setQuery(query);
         onSubmit!(queryString.getQuery());
       }
     },
