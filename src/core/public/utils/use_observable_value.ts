@@ -4,9 +4,9 @@
  */
 
 import { useMemo, useRef } from 'react';
-import { useObservable } from 'react-use';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import useObservable from 'react-use/lib/useObservable';
 
 /**
  * A custom hook for subscribing to an Observable that is a function.
