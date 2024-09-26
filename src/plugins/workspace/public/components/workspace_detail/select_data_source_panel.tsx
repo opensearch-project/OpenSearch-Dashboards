@@ -123,7 +123,9 @@ export const SelectDataSourceDetailPanel = ({
     } catch (error) {
       notifications?.toasts.addDanger({
         title: i18n.translate('workspace.detail.dataSources.assign.failed', {
-          defaultMessage: 'Failed to associate OpenSearch connections.',
+          defaultMessage:
+            'Failed to associate {numberOfAssignedDataSources, plural, one {# OpenSearch connection} other {# OpenSearch connections}}.',
+          values: { numberOfAssignedDataSources: newAssignedDataSourceConnections.length },
         }),
         text: error instanceof Error ? error.message : JSON.stringify(error),
       });
@@ -175,7 +177,9 @@ export const SelectDataSourceDetailPanel = ({
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.detail.dataSources.unassign.failed', {
-            defaultMessage: 'Failed to remove associated OpenSearch connections.',
+            defaultMessage:
+              'Failed to remove {numberOfUnAssignedDataSources, plural, one {# associated OpenSearch association} other {# associated OpenSearch associations}}.',
+            values: { numberOfUnAssignedDataSources: unAssignedDataSources.length },
           }),
           text: error instanceof Error ? error.message : JSON.stringify(error),
         });
