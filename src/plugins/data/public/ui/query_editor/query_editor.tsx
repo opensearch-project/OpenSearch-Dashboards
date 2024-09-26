@@ -14,7 +14,6 @@ import {
   EuiText,
   PopoverAnchorPosition,
 } from '@elastic/eui';
-import { BehaviorSubject } from 'rxjs';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
@@ -337,6 +336,25 @@ export default class QueryEditorUI extends Component<Props, State> {
     return <QueryControls queryControls={queryControls} />;
   };
 
+  private renderExtensionSearchBarButton = () => {
+    if (!this.extensionMap || Object.keys(this.extensionMap).length === 0) return null;
+    const sortedConfigs = Object.values(this.extensionMap).sort((a, b) => a.order - b.order);
+    return (
+      <>
+        {sortedConfigs.map((config) => {
+          return config.getSearchBarButton
+            ? config.getSearchBarButton({
+                language: this.props.query.language,
+                onSelectLanguage: this.onSelectLanguage,
+                isCollapsed: this.state.isCollapsed,
+                setIsCollapsed: this.setIsCollapsed,
+              })
+            : null;
+        })}
+      </>
+    );
+  };
+
   public render() {
     const className = classNames(this.props.className);
 
@@ -455,6 +473,7 @@ export default class QueryEditorUI extends Component<Props, State> {
             <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
               {this.renderQueryControls(languageEditor.TopBar.Controls)}
               {!languageEditor.TopBar.Expanded && this.renderToggleIcon()}
+              {!languageEditor.TopBar.Expanded && this.renderExtensionSearchBarButton()}
               {this.props.savedQueryManagement}
             </EuiFlexGroup>
           </div>

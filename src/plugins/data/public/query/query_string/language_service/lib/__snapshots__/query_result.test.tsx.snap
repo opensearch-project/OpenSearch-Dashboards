@@ -1,0 +1,62 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Query Result show error status with error message 2`] = `
+<EuiPopover
+  anchorPosition="downRight"
+  button={
+    <EuiButtonEmpty
+      data-test-subj="queryResultErrorBtn"
+      iconSide="left"
+      iconType="alert"
+      onClick={[Function]}
+      size="xs"
+    >
+      <EuiText
+        color="subdued"
+        size="xs"
+      >
+        Error
+      </EuiText>
+    </EuiButtonEmpty>
+  }
+  closePopover={[Function]}
+  data-test-subj="queryResultError"
+  display="inlineBlock"
+  hasArrow={true}
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="s"
+>
+  <EuiPopoverTitle>
+    ERRORS
+  </EuiPopoverTitle>
+  <div
+    style={
+      Object {
+        "width": "250px",
+      }
+    }
+  >
+    <EuiText
+      size="s"
+    >
+      <strong>
+        Reasons:
+      </strong>
+      error reason
+    </EuiText>
+    <EuiText
+      size="s"
+    >
+      <p>
+        <strong>
+          Details:
+        </strong>
+        error details
+      </p>
+    </EuiText>
+  </div>
+</EuiPopover>
+`;
+
+exports[`Query Result shows loading status 1`] = `""`;

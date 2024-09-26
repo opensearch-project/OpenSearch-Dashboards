@@ -3,23 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiSelectable,
   EuiSelectableOption,
+  EuiSmallButtonEmpty,
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
 import { Dataset, DEFAULT_DATA } from '../../../common';
+import { getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
 import { AdvancedSelector } from './advanced_selector';
-import { getQueryService } from '../../services';
 
 interface DatasetSelectorProps {
   selectedDataset?: Dataset;
@@ -133,7 +133,7 @@ export const DatasetSelector = ({
     <EuiPopover
       button={
         <EuiToolTip content={`${selectedDataset?.title ?? 'Select data'}`}>
-          <EuiButtonEmpty
+          <EuiSmallButtonEmpty
             className="datasetSelector__button"
             iconType="arrowDown"
             iconSide="right"
@@ -141,7 +141,7 @@ export const DatasetSelector = ({
           >
             <EuiIcon type={datasetIcon} className="datasetSelector__icon" />
             {datasetTitle}
-          </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
         </EuiToolTip>
       }
       isOpen={isOpen}
