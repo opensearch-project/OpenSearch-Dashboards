@@ -17,7 +17,7 @@ describe('dashboard listing table with no item', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('and with write controls', async () => {
+  test('and with write controls', () => {
     const application = {
       capabilities: {} as RecursiveReadonly<Capabilities>,
       applications$: {} as Observable<ReadonlyMap<string, PublicAppInfo>>,
