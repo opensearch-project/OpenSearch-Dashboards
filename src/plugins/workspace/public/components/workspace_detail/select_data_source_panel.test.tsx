@@ -323,7 +323,7 @@ describe('SelectDataSourceDetailPanel', () => {
     ).toBeNull();
   });
 
-  it('should success to remove data sources', async () => {
+  it('should success to remove data associations', async () => {
     const { getByText, getByTestId, getByRole } = render(
       selectDataSourceDetailPanel({
         ...defaultProps,
@@ -336,7 +336,7 @@ describe('SelectDataSourceDetailPanel', () => {
     });
     const removeButton = getByTestId('workspace-detail-dataSources-table-actions-remove');
     fireEvent.click(removeButton);
-    const confirButton = getByRole('button', { name: 'Remove data source(s)' });
+    const confirButton = getByRole('button', { name: 'Remove association(s)' });
     expect(confirButton).toBeInTheDocument();
     fireEvent.click(confirButton);
     await waitFor(() => {
@@ -344,7 +344,7 @@ describe('SelectDataSourceDetailPanel', () => {
     });
   });
 
-  it('should fail to remove data sources', async () => {
+  it('should fail to remove data associations', async () => {
     const { getByText, getByTestId, getByRole } = render(
       selectDataSourceDetailPanel({
         ...defaultProps,
@@ -357,7 +357,7 @@ describe('SelectDataSourceDetailPanel', () => {
     });
     const removeButton = getByTestId('workspace-detail-dataSources-table-actions-remove');
     fireEvent.click(removeButton);
-    const confirButton = getByRole('button', { name: 'Remove data source(s)' });
+    const confirButton = getByRole('button', { name: 'Remove association(s)' });
     expect(confirButton).toBeInTheDocument();
     fireEvent.click(confirButton);
     await waitFor(() => {
@@ -383,7 +383,7 @@ describe('SelectDataSourceDetailPanel', () => {
     fireEvent.click(checkbox);
     expect(getByText('Remove 1 association(s)')).toBeInTheDocument();
     fireEvent.click(getByText('Remove 1 association(s)'));
-    fireEvent.click(getByRole('button', { name: 'Remove data source(s)' }));
+    fireEvent.click(getByRole('button', { name: 'Remove association(s)' }));
     await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
     });

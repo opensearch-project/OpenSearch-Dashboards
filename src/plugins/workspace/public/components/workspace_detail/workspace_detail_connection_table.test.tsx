@@ -134,7 +134,7 @@ describe('WorkspaceDetailConnectionTable', () => {
       fireEvent.click(checkbox[0]);
       expect(getByText('Remove 2 association(s)')).toBeInTheDocument();
       fireEvent.click(getByText('Remove 2 association(s)'));
-      fireEvent.click(getByRole('button', { name: 'Remove data source(s)' }));
+      fireEvent.click(getByRole('button', { name: 'Remove association(s)' }));
       expect(handleUnassignDataSources).toHaveBeenCalled();
     });
 
@@ -154,7 +154,7 @@ describe('WorkspaceDetailConnectionTable', () => {
       fireEvent.click(buttons[0]);
       fireEvent.click(getByRole('button', { name: 'Cancel' }));
       fireEvent.click(buttons[0]);
-      fireEvent.click(getByRole('button', { name: 'Remove data source(s)' }));
+      fireEvent.click(getByRole('button', { name: 'Remove association(s)' }));
       expect(handleUnassignDataSources).toHaveBeenCalled();
     });
 

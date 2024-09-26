@@ -99,12 +99,6 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
       }}
       component="form"
     >
-      {numberOfErrors > 0 && (
-        <>
-          <WorkspaceFormErrorCallout errors={formErrors} />
-          <EuiSpacer />
-        </>
-      )}
       <EuiPanel>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
@@ -134,19 +128,30 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiHorizontalRule />
+        <EuiHorizontalRule margin="m" />
+        {numberOfErrors > 0 && (
+          <>
+            <WorkspaceFormErrorCallout errors={formErrors} />
+            <EuiSpacer />
+          </>
+        )}
         {detailTab === DetailTab.Details && (
           <WorkspaceDetailFormDetails availableUseCases={availableUseCases} />
         )}
         {detailTab === DetailTab.Collaborators && (
-          <FormGroup title={usersAndPermissionsTitle}>
+          <FormGroup
+            title={usersAndPermissionsTitle}
+            describe={i18n.translate('workspace.detail.collaborators.permissionSetting.describe', {
+              defaultMessage: 'Manage access and permissions.',
+            })}
+          >
             <WorkspacePermissionSettingPanel
               errors={formErrors.permissionSettings?.fields}
               onChange={setPermissionSettings}
               permissionSettings={formData.permissionSettings}
               disabledUserOrGroupInputIds={disabledUserOrGroupInputIdsRef.current}
               data-test-subj={`workspaceForm-permissionSettingPanel`}
-              isEditing={isEditing}
+              readOnly={!isEditing}
             />
           </FormGroup>
         )}
