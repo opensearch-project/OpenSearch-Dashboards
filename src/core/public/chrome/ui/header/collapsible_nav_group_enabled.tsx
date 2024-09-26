@@ -370,17 +370,17 @@ export function CollapsibleNavGroupEnabled({
   return (
     <>
       <EuiHideFor sizes={['xs', 's', 'm']}>{rendeLeftNav()}</EuiHideFor>
-      <EuiShowFor sizes={['xs', 's', 'm']}>
-        {isNavOpen
-          ? rendeLeftNav({
-              type: 'overlay',
-              size: undefined,
-              outsideClickCloses: true,
-              paddingSize: undefined,
-              ownFocus: true,
-            })
-          : null}
-      </EuiShowFor>
+      {isNavOpen ? (
+        <EuiShowFor sizes={['xs', 's', 'm']}>
+          {rendeLeftNav({
+            type: 'overlay',
+            size: undefined,
+            outsideClickCloses: true,
+            paddingSize: undefined,
+            ownFocus: true,
+          })}
+        </EuiShowFor>
+      ) : null}
     </>
   );
 }

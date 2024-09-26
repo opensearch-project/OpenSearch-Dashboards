@@ -9,7 +9,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
       class="euiSideNav euiSideNav-isOpenMobile"
     >
       <div
-        class="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+        class="euiSideNav__content"
         id="euiSideNavContent_generated-id"
       >
         <div
