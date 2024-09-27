@@ -88,41 +88,15 @@ export const getOsdFieldOverrides = (): { [key: string]: any } => {
 /**
  *  Mapping function from SQL_TYPES to OSD_FIELD_TYPES
  *
- *  @param {OPENSEARCH_SQL_FIELD_TYPES} sqlType
+ *  @param {string} sqlType
  *  @return {OSD_FIELD_TYPES}
  */
-export function castSQLTypeToOSDFieldType(sqlType: OPENSEARCH_SQL_FIELD_TYPES): OSD_FIELD_TYPES {
-  switch (sqlType) {
-    case OPENSEARCH_SQL_FIELD_TYPES.BOOLEAN:
-      return OSD_FIELD_TYPES.BOOLEAN;
-    case OPENSEARCH_SQL_FIELD_TYPES.BYTE:
-    case OPENSEARCH_SQL_FIELD_TYPES.SHORT:
-    case OPENSEARCH_SQL_FIELD_TYPES.INTEGER:
-    case OPENSEARCH_SQL_FIELD_TYPES.INT:
-    case OPENSEARCH_SQL_FIELD_TYPES.LONG:
-    case OPENSEARCH_SQL_FIELD_TYPES.FLOAT:
-    case OPENSEARCH_SQL_FIELD_TYPES.DOUBLE:
-      return OSD_FIELD_TYPES.NUMBER;
-    case OPENSEARCH_SQL_FIELD_TYPES.KEYWORD:
-    case OPENSEARCH_SQL_FIELD_TYPES.TEXT:
-    case OPENSEARCH_SQL_FIELD_TYPES.STRING:
-      return OSD_FIELD_TYPES.STRING;
-    case OPENSEARCH_SQL_FIELD_TYPES.TIMESTAMP:
-    case OPENSEARCH_SQL_FIELD_TYPES.DATE:
-    case OPENSEARCH_SQL_FIELD_TYPES.DATE_NANOS:
-    case OPENSEARCH_SQL_FIELD_TYPES.TIME:
-    case OPENSEARCH_SQL_FIELD_TYPES.INTERVAL:
-      return OSD_FIELD_TYPES.DATE;
-    case OPENSEARCH_SQL_FIELD_TYPES.IP:
-      return OSD_FIELD_TYPES.IP;
-    case OPENSEARCH_SQL_FIELD_TYPES.GEO_POINT:
-      return OSD_FIELD_TYPES.GEO_POINT;
-    case OPENSEARCH_SQL_FIELD_TYPES.BINARY:
-      return OSD_FIELD_TYPES.ATTACHMENT;
-    case OPENSEARCH_SQL_FIELD_TYPES.STRUCT:
-    case OPENSEARCH_SQL_FIELD_TYPES.ARRAY:
-      return OSD_FIELD_TYPES.OBJECT;
-    default:
-      return OSD_FIELD_TYPES.UNKNOWN;
-  }
+export function castSQLTypeToOSDFieldType(
+  sqlType: OPENSEARCH_SQL_FIELD_TYPES | string
+): OSD_FIELD_TYPES {
+  const type = registeredOsdTypes.find((t) =>
+    t.osSQLTypes?.includes(sqlType as OPENSEARCH_SQL_FIELD_TYPES)
+  );
+
+  return type && type.name ? (type.name as OSD_FIELD_TYPES) : OSD_FIELD_TYPES.UNKNOWN;
 }
