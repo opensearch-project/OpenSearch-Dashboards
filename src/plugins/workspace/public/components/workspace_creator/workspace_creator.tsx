@@ -80,8 +80,16 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           .map(({ id }) => {
             return id;
           });
+        const selectedDataConnectionIds = (selectedDataSourceConnections ?? [])
+          .filter(
+            ({ connectionType }) => connectionType === DataSourceConnectionType.DataConnection
+          )
+          .map(({ id }) => {
+            return id;
+          });
         result = await workspaceClient.create(attributes, {
           dataSources: selectedDataSourceIds,
+          dataConnections: selectedDataConnectionIds,
           permissions: convertPermissionSettingsToPermissions(permissionSettings),
         });
         if (result?.success) {

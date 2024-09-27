@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConnectionTypeIcon should render normally 1`] = `<ConnectionTypeIcon />`;
+
+exports[`ConnectionTypeIcon should render normally 2`] = `
+<ConnectionTypeIcon
+  type="Amazon S3"
+>
+  <EuiIcon
+    type="test-file-stub"
+  >
+    <span
+      data-euiicon-type="test-file-stub"
+    />
+  </EuiIcon>
+</ConnectionTypeIcon>
+`;
