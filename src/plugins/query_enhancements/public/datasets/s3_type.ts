@@ -17,7 +17,13 @@ import {
   castSQLTypeToOSDFieldType,
 } from '../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
-import { API, DATASET, handleQueryStatus } from '../../common';
+import {
+  API,
+  DATASET,
+  S3_COMMENT_FIELD,
+  S3_PARTITION_FIELD,
+  handleQueryStatus,
+} from '../../common';
 import S3_ICON from '../assets/s3_mark.svg';
 
 export const s3TypeConfig: DatasetTypeConfig = {
@@ -259,9 +265,12 @@ export function mapResponseToFields(sqlOutput: {
   size: number;
 }): DatasetField[] {
   return sqlOutput.datarows
-    .filter((row) => row[1] && row[1] !== '') // Filter out rows with empty types
+    .filter(
+      (row) =>
+        row[1] && row[1] !== '' && row[0] !== S3_PARTITION_FIELD && row[2] !== S3_COMMENT_FIELD
+    ) // Filter out rows with empty, comment or partition type
     .map((row) => {
-      const [name, type] = row;
+      const [name, type, _] = row;
       const sqlType = type as OPENSEARCH_SQL_FIELD_TYPES; // Cast the type to SQL_TYPES enum
       return {
         name: name as string,

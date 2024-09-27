@@ -69,7 +69,7 @@ export const Configurator = ({
       setTimeFields(dateFields || []);
     };
 
-    fetchFields();
+    if (baseDataset) fetchFields();
   }, [baseDataset, indexPatternsService, queryString, services]);
 
   return (

@@ -64,27 +64,32 @@ export class DatasetService {
 
   public async cacheDataset(services: IDataPluginServices, dataset: Dataset): Promise<void> {
     const type = this.getType(dataset.type);
-    if (dataset) {
-      const spec = {
-        id: dataset.id,
-        title: dataset.title,
-        timeFieldName: {
-          name: dataset.timeFieldName,
-          type: 'date',
-        } as Partial<IFieldType>,
-        fields: await type?.fetchFields(services, dataset),
-        dataSourceRef: dataset.dataSource
-          ? {
-              id: dataset.dataSource.id!,
-              name: dataset.dataSource.title,
-              type: dataset.dataSource.type,
-            }
-          : undefined,
-      } as IndexPatternSpec;
-      const temporaryIndexPattern = await this.indexPatterns?.create(spec, true);
-      if (temporaryIndexPattern) {
-        this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
+    try {
+      if (dataset) {
+        const fetchedFields = await type?.fetchFields(services, dataset);
+        const spec = {
+          id: dataset.id,
+          title: dataset.title,
+          timeFieldName: {
+            name: dataset.timeFieldName,
+            type: 'date',
+          } as Partial<IFieldType>,
+          fields: fetchedFields,
+          dataSourceRef: dataset.dataSource
+            ? {
+                id: dataset.dataSource.id!,
+                name: dataset.dataSource.title,
+                type: dataset.dataSource.type,
+              }
+            : undefined,
+        } as IndexPatternSpec;
+        const temporaryIndexPattern = await this.indexPatterns?.create(spec, true);
+        if (temporaryIndexPattern) {
+          this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
+        }
       }
+    } catch (error) {
+      throw new Error(`Failed to load cacheDataset for dataset: ${dataset}`);
     }
   }
 
