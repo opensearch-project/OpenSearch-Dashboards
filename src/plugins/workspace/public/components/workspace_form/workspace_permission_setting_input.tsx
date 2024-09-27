@@ -210,7 +210,7 @@ export const WorkspacePermissionSettingInput = ({
       <EuiFlexItem grow={false}>
         {deletable && !readOnly && (
           <EuiButtonIcon
-            color="text"
+            color="danger"
             aria-label="Delete permission setting"
             iconType="trash"
             display="empty"
