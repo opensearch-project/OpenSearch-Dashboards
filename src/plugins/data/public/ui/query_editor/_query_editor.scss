@@ -106,7 +106,7 @@
 }
 
 // IE specific fix for the datepicker to not collapse
-@include euiBreakpoint("m", "l", "xl") {
+@include euiBreakpoint("m", "l", "xl", "xxl", "xxxl") {
   .osdQueryEditor__datePickerWrapper {
     max-width: 40vw;
     flex-grow: 0 !important;
@@ -152,6 +152,12 @@
   .osdQueryEditor__querycontrols {
     float: right;
     margin: $euiSizeS $euiSizeS;
+
+    .osdQueryEditor__extensionQueryControls {
+      display: flex;
+      padding: 0 $euiSizeS 0 $euiSizeXS;
+      border-right: $euiBorderThin;
+    }
   }
 
   .osdQueryEditor__dataSetPicker {
@@ -183,6 +189,7 @@
   padding: calc($euiSizeXS + 1px);
   background-color: $euiColorEmptyShade;
   overflow: initial !important; // needed for suggestion window, otherwise will be hidden in child
+  min-width: 0;
 
   .monaco-editor .view-overlays .current-line {
     border: none;
