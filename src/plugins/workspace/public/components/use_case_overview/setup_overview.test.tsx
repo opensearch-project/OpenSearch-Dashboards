@@ -83,8 +83,8 @@ describe('Setup use case overview', () => {
             "isSelected": false,
             "onClick": [Function],
           },
-          "titleElement": "h3",
-          "titleSize": "xxs",
+          "titleElement": "h4",
+          "titleSize": "s",
         },
         "description": "Explore data to uncover insights.",
         "id": "get_start_discover",
@@ -138,6 +138,8 @@ describe('Setup use case overview', () => {
       Object {
         "cardProps": Object {
           "layout": "horizontal",
+          "titleElement": "h4",
+          "titleSize": "s",
         },
         "description": "Gain visibility into your applications and infrastructure.",
         "getIcon": [Function],

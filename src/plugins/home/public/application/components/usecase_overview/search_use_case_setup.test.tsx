@@ -32,7 +32,6 @@ describe('Search use case setup', () => {
         "id": "search_overview",
         "sections": Array [
           Object {
-            "collapseAble": false,
             "id": "get_started",
             "kind": "card",
             "order": 1000,
@@ -76,8 +75,8 @@ describe('Search use case setup', () => {
             "isSelected": false,
             "onClick": [Function],
           },
-          "titleElement": "h3",
-          "titleSize": "xxs",
+          "titleElement": "h4",
+          "titleSize": "s",
         },
         "description": "You can run a search using REST API or language client. For experimentation, you can also run queries interactively.",
         "id": "access_search_functionality",

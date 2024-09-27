@@ -27,7 +27,6 @@ export const setupSearchUseCase = (contentManagement: ContentManagementPluginSet
           defaultMessage: 'Set up search',
         }),
         kind: 'card',
-        collapseAble: false,
       },
       {
         id: SECTIONS.DIFFERENT_SEARCH_TYPES,
@@ -103,8 +102,8 @@ export const registerContentToSearchUseCasePage = (
         title: card.title,
         description: card.description,
         cardProps: {
-          titleElement: 'h3',
-          titleSize: 'xxs',
+          titleElement: 'h4',
+          titleSize: 's',
           selectable: {
             onClick: () => {
               window.open(card.documentURL, '_blank');
