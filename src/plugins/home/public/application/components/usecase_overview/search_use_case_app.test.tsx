@@ -10,6 +10,8 @@ import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_d
 import { contentManagementPluginMocks } from '../../../../../content_management/public/mocks';
 import { SearchUseCaseOverviewApp } from './search_use_case_app';
 import { ContentManagementPluginStart } from '../../../../../content_management/public';
+import { ALL_USE_CASE_ID } from '../../../../../../core/public';
+import { BehaviorSubject } from 'rxjs';
 
 describe('<SearchUseCaseOverviewApp />', () => {
   const renderPageMock = jest.fn();
@@ -18,7 +20,18 @@ describe('<SearchUseCaseOverviewApp />', () => {
     ...contentManagementPluginMocks.createStartContract(),
     renderPage: renderPageMock,
   };
-  const coreStartMocks = coreMock.createStart();
+  const core = coreMock.createStart();
+  const currentNavGroupMock = new BehaviorSubject({ id: 'Search' });
+  const coreStartMocks = {
+    ...core,
+    chrome: {
+      ...core.chrome,
+      navGroup: {
+        ...core.chrome.navGroup,
+        getCurrentNavGroup$: jest.fn(() => currentNavGroupMock),
+      },
+    },
+  };
 
   function renderSearchUseCaseOverviewApp(
     contentManagement: ContentManagementPluginStart,
@@ -46,5 +59,14 @@ describe('<SearchUseCaseOverviewApp />', () => {
 
     expect(coreStartMocks.chrome.setBreadcrumbs).toHaveBeenCalledWith([{ text: 'Overview' }]);
     expect(mock.renderPage).toBeCalledWith('search_overview');
+  });
+
+  it('set page title correctly in all use case', () => {
+    currentNavGroupMock.next({ id: ALL_USE_CASE_ID });
+    render(renderSearchUseCaseOverviewApp(mock, coreStartMocks));
+
+    expect(coreStartMocks.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+      { text: 'Search Overview' },
+    ]);
   });
 });
