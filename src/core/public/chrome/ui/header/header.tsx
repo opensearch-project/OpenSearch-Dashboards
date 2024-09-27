@@ -232,13 +232,14 @@ export function Header({
     />
   );
 
-  const renderBreadcrumbs = (renderFullLength?: boolean) => (
+  const renderBreadcrumbs = (renderFullLength?: boolean, hideTrailingSeparator?: boolean) => (
     <HeaderBreadcrumbs
       appTitle$={observables.appTitle$}
       breadcrumbs$={observables.breadcrumbs$}
       breadcrumbsEnricher$={observables.breadcrumbsEnricher$}
       useUpdatedHeader={useUpdatedHeader}
       renderFullLength={renderFullLength}
+      hideTrailingSeparator={hideTrailingSeparator}
     />
   );
 
@@ -472,7 +473,7 @@ export function Header({
         recentlyAccessed$={observables.recentlyAccessed$}
         workspaceList$={observables.workspaceList$}
         navigateToUrl={application.navigateToUrl}
-        renderBreadcrumbs={renderBreadcrumbs(true)}
+        renderBreadcrumbs={renderBreadcrumbs(true, true)}
         buttonSize={useApplicationHeader ? 's' : 'xs'}
       />
     </EuiHeaderSectionItem>
@@ -526,7 +527,7 @@ export function Header({
 
         <EuiHeaderSection grow={false}>{renderRecentItems()}</EuiHeaderSection>
 
-        {renderBreadcrumbs(false)}
+        {renderBreadcrumbs(false, false)}
       </EuiHeader>
 
       {/* Secondary header */}
