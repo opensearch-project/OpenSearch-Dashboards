@@ -66,9 +66,7 @@ export function NavGroups({
       id: `${link.id}-${link.title}`,
       name: (
         <EuiTitle size="xs">
-          <EuiText size="s">
-            <h4>{link.title}</h4>
-          </EuiText>
+          <h4>{link.title}</h4>
         </EuiTitle>
       ),
       onClick: euiListItem.onClick,
@@ -178,6 +176,7 @@ export function NavGroups({
         )?.map((link) => createSideNavItem(link, level + 1)),
         'aria-label': navLink.category?.label,
         className: 'nav-link-item-category-item',
+        buttonClassName: 'nav-link-item-category-button',
       };
     }
 

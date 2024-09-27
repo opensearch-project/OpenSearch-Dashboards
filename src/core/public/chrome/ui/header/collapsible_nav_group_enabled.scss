@@ -1,8 +1,19 @@
+.context-nav-wrapper .newPageTopNavExpander {
+  &:hover,
+  &:active,
+  &:focus {
+    background-color: $euiColorMediumShade;
+  }
+}
+
 .context-nav-wrapper {
   border: none !important;
+  border-top-right-radius: $euiSizeL;
+  border-bottom-right-radius: $euiSizeL;
+  background-color: $euiColorLightShade;
 
   .nav-link-item {
-    padding: $euiSizeXS $euiSizeS;
+    padding: $euiSizeS;
     border-radius: $euiSizeS;
     box-shadow: none;
     margin-bottom: 0;
@@ -10,15 +21,38 @@
 
     .nav-link-item-btn {
       margin-bottom: 0;
+      padding-top: 0;
+      padding-bottom: 0;
     }
+  }
+
+  .nav-link-parent-item {
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: $euiSizeS;
+
+    > .nav-link-item-btn {
+      padding: $euiSizeS;
+      margin-bottom: $euiSizeXS;
+    }
+
+    // Hide the expand / collapse button as we will use + / -
+    svg {
+      display: none;
+    }
+
+    // Show the customized icon
+    .leftNavCustomizedAccordionIcon {
+      display: inline-block;
+    }
+  }
+
+  .nav-link-item-category-button {
+    margin-bottom: $euiSizeS;
   }
 
   .nav-link-item-category-item {
     margin-top: $euiSizeL;
-
-    > * {
-      margin-bottom: 0;
-    }
   }
 
   .nav-link-fake-item {
@@ -32,6 +66,11 @@
   .nav-nested-item {
     padding: $euiSizeS 0;
 
+    &::after,
+    .nav-link-item-btn::after {
+      background-color: $euiColorDarkShade;
+    }
+
     // The height is used to comply with the extra padding
     &:last-of-type::after {
       height: 50%;
@@ -41,7 +80,6 @@
   .left-navigation-wrapper {
     display: flex;
     flex-direction: column;
-    border-right: $euiBorderThin;
   }
 
   .flex-1-container {
@@ -52,6 +90,8 @@
     padding: 0 $euiSize;
     display: flex;
     -ms-overflow-style: -ms-autohiding-scrollbar;
+
+    @include euiBottomShadowLarge($euiShadowColorLarge, 0.1, true, true);
 
     &.bottom-container-collapsed {
       flex-direction: column;
@@ -67,24 +107,12 @@
 
     &.bottom-container-expanded {
       gap: 16px;
-      padding-top: $euiSize;
-      padding-bottom: $euiSize;
+      padding-top: $euiSizeM;
+      padding-bottom: $euiSizeM;
     }
   }
 
   .navGroupEnabledNavTopWrapper {
     padding: 0 $euiSizeL;
-  }
-}
-
-.nav-link-parent-item {
-  // Hide the expand / collapse button as we will use + / -
-  svg {
-    display: none;
-  }
-
-  // Show the customized icon
-  .leftNavCustomizedAccordionIcon {
-    display: inline-block;
   }
 }

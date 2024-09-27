@@ -211,20 +211,16 @@ export function CollapsibleNavGroupEnabled({
             borderRadius="none"
             paddingSize="s"
             hasShadow={false}
+            color="transparent"
             style={{ flexGrow: 0 }}
           >
             <CollapsibleNavTop
               homeLink={homeLink}
-              navGroupsMap={navGroupsMap}
-              navLinks={navLinks}
               navigateToApp={navigateToApp}
               logos={logos}
-              setCurrentNavGroup={setCurrentNavGroup}
               currentNavGroup={currentNavGroupId ? navGroupsMap[currentNavGroupId] : undefined}
               shouldShrinkNavigation={!isNavOpen}
               onClickShrink={closeNav}
-              visibleUseCases={visibleUseCases}
-              currentWorkspace$={observables.currentWorkspace$}
             />
           </EuiPanel>
         )}
@@ -235,6 +231,7 @@ export function CollapsibleNavGroupEnabled({
             paddingSize={!isNavOpen ? 's' : 'l'}
             hasShadow={false}
             className="eui-yScroll flex-1-container"
+            color="transparent"
             style={{ paddingTop: 0 }}
           >
             {shouldShowCollapsedNavHeaderContent && collapsibleNavHeaderRender ? (
