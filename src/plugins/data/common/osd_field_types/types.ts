@@ -34,6 +34,7 @@ export interface OsdFieldTypeOptions {
   filterable: boolean;
   name: string;
   esTypes: OPENSEARCH_FIELD_TYPES[];
+  osSQLTypes?: OPENSEARCH_SQL_FIELD_TYPES[];
 }
 
 /** @public **/

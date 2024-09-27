@@ -73,7 +73,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
     }
   },
 
-  fetchFields: async (_, dataset: Dataset): Promise<DatasetField[]> => {
+  fetchFields: async (_services, dataset: Dataset): Promise<DatasetField[]> => {
     const fields = await getIndexPatterns().getFieldsForWildcard({
       pattern: dataset.title,
       dataSourceId: dataset.dataSource?.id,
