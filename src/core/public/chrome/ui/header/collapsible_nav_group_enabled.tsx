@@ -94,7 +94,6 @@ export function CollapsibleNavGroupEnabled({
   const appId = useObservable(observables.appId$, '');
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
-
   const visibleUseCases = useMemo(() => getVisibleUseCases(navGroupsMap), [navGroupsMap]);
 
   const currentNavGroupId = useMemo(() => {
@@ -300,6 +299,7 @@ export function CollapsibleNavGroupEnabled({
             <CollapsibleNavTop
               homeLink={homeLink}
               navGroupsMap={navGroupsMap}
+              collapsibleNavHeaderRender={collapsibleNavHeaderRender}
               navLinks={navLinks}
               navigateToApp={navigateToApp}
               logos={logos}

@@ -14,7 +14,6 @@ import {
   EuiIcon,
   EuiPanel,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { InternalApplicationStart } from 'src/core/public/application';
 import { createEuiListItem } from './nav_link';
@@ -25,6 +24,7 @@ import { fulfillRegistrationLinksToChromeNavLinks } from '../../utils';
 import './collapsible_nav_group_enabled_top.scss';
 
 export interface CollapsibleNavTopProps {
+  collapsibleNavHeaderRender?: () => JSX.Element | null;
   homeLink?: ChromeNavLink;
   navGroupsMap: Record<string, NavGroupItemInMap>;
   currentNavGroup?: NavGroupItemInMap;
@@ -39,6 +39,7 @@ export interface CollapsibleNavTopProps {
 }
 
 export const CollapsibleNavTop = ({
+  collapsibleNavHeaderRender,
   currentNavGroup,
   navigateToApp,
   logos,
@@ -148,10 +149,10 @@ export const CollapsibleNavTop = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {currentNavGroup?.title && (
+      {currentNavGroup?.title && collapsibleNavHeaderRender && (
         <>
           <EuiSpacer />
-          <EuiText>{currentNavGroup?.title}</EuiText>
+          {collapsibleNavHeaderRender()}
         </>
       )}
     </EuiPanel>
