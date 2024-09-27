@@ -29,6 +29,7 @@ import { CoreSetup } from '../../../../../core/public';
 import { QueryAssistContextType } from '../../../common/query_assist';
 import sparkleHollowSvg from '../../assets/sparkle_hollow.svg';
 import sparkleSolidSvg from '../../assets/sparkle_solid.svg';
+import { FeedbackStatus } from '../../../common/query_assist';
 
 export interface QueryContext {
   question: string;
@@ -62,12 +63,6 @@ export const convertResult = (body: IDataFrame) => {
   }
   return hits;
 };
-
-enum FeedbackStatus {
-  NONE,
-  THUMB_UP,
-  THUMB_DOWN,
-}
 
 export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => {
   const { query, search } = props.data;
@@ -214,8 +209,9 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
   const onFeedback = useCallback(
     (satisfied: boolean) => {
       if (feedback !== FeedbackStatus.NONE) return;
-      setFeedback(satisfied ? FeedbackStatus.THUMB_UP : FeedbackStatus.THUMB_DOWN);
-      reportMetric(satisfied ? 'thumbup' : 'thumbdown');
+      const feedbackStatus = satisfied ? FeedbackStatus.THUMB_UP : FeedbackStatus.THUMB_DOWN;
+      setFeedback(feedbackStatus);
+      reportMetric(feedbackStatus);
     },
     [feedback, reportMetric]
   );

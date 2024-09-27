@@ -9,6 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import { QueryAssistSummary, convertResult } from './query_assist_summary';
 import { useQueryAssist } from '../hooks';
 import { IDataFrame, Query } from '../../../../data/common';
+import { FeedbackStatus as FEEDBACK } from '../../../common/query_assist';
 
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
@@ -89,12 +90,6 @@ describe('query assist summary', () => {
     YES: true,
     NO: false,
   };
-
-  enum FEEDBACK {
-    NONE,
-    THUMB_UP,
-    THUMB_DOWN,
-  }
 
   const renderQueryAssistSummary = (isCollapsed: boolean) => {
     const component = render(
