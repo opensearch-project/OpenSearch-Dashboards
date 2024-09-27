@@ -95,16 +95,18 @@ export enum OSD_FIELD_TYPES {
 }
 
 /** @public **/
-export enum OPENSEARCH_SQL_TYPES {
+export enum OPENSEARCH_SQL_FIELD_TYPES {
   BOOLEAN = 'boolean',
   BYTE = 'byte',
   SHORT = 'short',
   INTEGER = 'integer',
+  INT = 'int',
   LONG = 'long',
   FLOAT = 'float',
   DOUBLE = 'double',
   KEYWORD = 'keyword',
   TEXT = 'text',
+  STRING = 'string',
   TIMESTAMP = 'timestamp',
   DATE = 'date',
   DATE_NANOS = 'date_nanos',

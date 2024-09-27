@@ -13,7 +13,7 @@ import {
   DataStructureCustomMeta,
   Dataset,
   DatasetField,
-  OPENSEARCH_SQL_TYPES,
+  OPENSEARCH_SQL_FIELD_TYPES,
   castSQLTypeToOSDFieldType,
 } from '../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
@@ -97,37 +97,8 @@ export const s3TypeConfig: DatasetTypeConfig = {
   },
 
   fetchFields: async (services: IDataPluginServices, dataset: Dataset): Promise<DatasetField[]> => {
-    const datasetService = services.data.query.queryString.getDatasetService();
-
-    // re-construct the data structure path from the dataset
-    const path: DataStructure[] = [];
-    if (dataset.dataSource) {
-      path.push({
-        id: dataset.dataSource.id!,
-        title: dataset.dataSource.title,
-        type: 'DATA_SOURCE',
-      });
-    }
-
-    const [connection, database, table] = dataset.title.split('.');
-    path.push(
-      {
-        id: `${dataset.dataSource?.id}::${connection}`,
-        title: connection,
-        type: 'CONNECTION',
-        meta: dataset.dataSource?.meta as DataStructureCustomMeta,
-      },
-      {
-        id: `${dataset.dataSource?.id}::${connection}.${database}`,
-        title: database,
-        type: 'DATABASE',
-      },
-      { id: dataset.id, title: table, type: 'TABLE' }
-    );
-
-    const dataStructure = await datasetService.fetchOptions(services, path, DATASET.S3);
     const { http } = services;
-    return fetchFields(http, [dataStructure]);
+    return fetchFields(http, dataset);
   },
 
   supportedLanguages: (dataset: Dataset): string[] => {
@@ -291,7 +262,7 @@ export function mapResponseToFields(sqlOutput: {
     .filter((row) => row[1] && row[1] !== '') // Filter out rows with empty types
     .map((row) => {
       const [name, type] = row;
-      const sqlType = type as OPENSEARCH_SQL_TYPES; // Cast the type to SQL_TYPES enum
+      const sqlType = type as OPENSEARCH_SQL_FIELD_TYPES; // Cast the type to SQL_TYPES enum
       return {
         name: name as string,
         type: castSQLTypeToOSDFieldType(sqlType),
@@ -299,42 +270,33 @@ export function mapResponseToFields(sqlOutput: {
     });
 }
 
-const fetchFields = async (http: HttpSetup, path: DataStructure[]): Promise<DatasetField[]> => {
+const fetchFields = async (http: HttpSetup, dataset: Dataset): Promise<DatasetField[]> => {
   const abortController = new AbortController();
   try {
-    const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
-    const connection = path.find((ds) => ds.type === 'CONNECTION');
-    const database = path.find((ds) => ds.type === 'DATABASE');
-    const sessionId = (connection?.meta as DataStructureCustomMeta).sessionId;
-    const table = path[path.length - 1];
-
+    const connection = (dataset.dataSource?.meta as DataStructureCustomMeta).name;
+    const sessionId = (dataset.dataSource?.meta as DataStructureCustomMeta).sessionId;
     const response = await http.fetch({
       method: 'POST',
       path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
       body: JSON.stringify({
         lang: 'sql',
-        query: `DESCRIBE TABLE ${connection?.title}.${database?.title}.${table.title}`,
-        datasource: connection?.title,
+        query: `DESCRIBE TABLE ${dataset.title}`,
+        datasource: connection,
         ...(sessionId && { sessionId }),
       }),
       query: {
-        id: dataSource?.id,
+        id: dataset.dataSource?.id,
       },
       signal: abortController.signal,
     });
-    table.meta = setMeta(table, response);
-
-    const parent = path[path.length - 1];
-    const meta = parent.meta as DataStructureCustomMeta;
-
     const fetchResponse = await handleQueryStatus({
       fetchStatus: () =>
         http.fetch({
           method: 'GET',
           path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
           query: {
-            id: dataSource?.id,
-            queryId: meta.queryId,
+            id: dataset.dataSource?.id,
+            queryId: response.queryId,
           },
         }),
     });
