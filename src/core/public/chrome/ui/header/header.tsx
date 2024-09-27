@@ -61,6 +61,7 @@ import type { Logos } from '../../../../common/types';
 import { WorkspaceObject, WorkspacesStart } from '../../../../public/workspace';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
+import { useObservableValue } from '../../../utils';
 import { getOsdSidecarPaddingStyle, ISidecarConfig } from '../../../overlays';
 import {
   ChromeBranding,
@@ -155,6 +156,22 @@ export function Header({
   const [isNavOpen, setIsNavOpen] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
   const breadcrumbs = useObservable(observables.breadcrumbs$, []);
+
+  const currentLeftControls = useObservableValue(application.currentLeftControls$);
+  const navControlsLeft = useObservable(observables.navControlsLeft$);
+
+  const currentCenterControls = useObservableValue(application.currentCenterControls$);
+  const navControlsExpandedCenter = useObservable(observables.navControlsExpandedCenter$);
+  const navControlsCenter = useObservable(observables.navControlsCenter$);
+
+  const currentRightControls = useObservableValue(application.currentRightControls$);
+  const navControlsExpandedRight = useObservable(observables.navControlsExpandedRight$);
+  const navControlsRight = useObservable(observables.navControlsRight$);
+
+  const currentActionMenu = useObservableValue(application.currentActionMenu$);
+
+  const currentBadgeControls = useObservableValue(application.currentBadgeControls$);
+  const observableBadge = useObservable(observables.badge$);
 
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
@@ -291,15 +308,8 @@ export function Header({
   };
 
   const renderLeftControls = () => {
-    let hasLeftControls;
-    let hasNavControlsLeft;
-
-    application.currentLeftControls$.subscribe((value) => {
-      hasLeftControls = hasValue(value);
-    });
-    observables.navControlsLeft$.subscribe((value) => {
-      hasNavControlsLeft = hasValue(value);
-    });
+    const hasLeftControls = hasValue(currentLeftControls);
+    const hasNavControlsLeft = hasValue(navControlsLeft);
 
     if (!hasLeftControls && !hasNavControlsLeft && useUpdatedHeader) {
       return null;
@@ -326,19 +336,9 @@ export function Header({
   };
 
   const renderCenterControls = () => {
-    let hasCenterControls;
-    let hasNavControlsExpandedCenter;
-    let hasNavControlsCenter;
-
-    application.currentCenterControls$.subscribe((value) => {
-      hasCenterControls = hasValue(value);
-    });
-    observables.navControlsExpandedCenter$.subscribe((value) => {
-      hasNavControlsExpandedCenter = hasValue(value);
-    });
-    observables.navControlsCenter$.subscribe((value) => {
-      hasNavControlsCenter = hasValue(value);
-    });
+    const hasCenterControls = hasValue(currentCenterControls);
+    const hasNavControlsExpandedCenter = hasValue(navControlsExpandedCenter);
+    const hasNavControlsCenter = hasValue(navControlsCenter);
 
     if (
       !hasCenterControls &&
@@ -374,19 +374,9 @@ export function Header({
   };
 
   const renderRightControls = () => {
-    let hasNavControlsExpandedRight;
-    let hasRightControls;
-    let hasNavControlsRight;
-
-    application.currentRightControls$.subscribe((value) => {
-      hasRightControls = hasValue(value);
-    });
-    observables.navControlsExpandedRight$.subscribe((value) => {
-      hasNavControlsExpandedRight = hasValue(value);
-    });
-    observables.navControlsRight$.subscribe((value) => {
-      hasNavControlsRight = hasValue(value);
-    });
+    const hasNavControlsExpandedRight = hasValue(navControlsExpandedRight);
+    const hasRightControls = hasValue(currentRightControls);
+    const hasNavControlsRight = hasValue(navControlsRight);
 
     if (
       !hasRightControls &&
@@ -421,10 +411,7 @@ export function Header({
     );
   };
   const renderActionMenu = () => {
-    let hasActionMenu;
-    application.currentActionMenu$.subscribe((value) => {
-      hasActionMenu = hasValue(value);
-    });
+    const hasActionMenu = hasValue(currentActionMenu);
 
     if (!hasActionMenu && useUpdatedHeader) {
       return null;
@@ -438,15 +425,8 @@ export function Header({
   };
 
   const renderBadge = () => {
-    let hasBadge;
-    let hasCurrentBadgeControls;
-
-    application.currentBadgeControls$.subscribe((value) => {
-      hasBadge = hasValue(value);
-    });
-    observables.badge$.subscribe((value) => {
-      hasCurrentBadgeControls = hasValue(value);
-    });
+    const hasBadge = hasValue(observableBadge);
+    const hasCurrentBadgeControls = hasValue(currentBadgeControls);
 
     if (!hasBadge && !hasCurrentBadgeControls && useUpdatedHeader) {
       return null;
