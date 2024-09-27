@@ -27,7 +27,7 @@ export const setupSearchUseCase = (contentManagement: ContentManagementPluginSet
           defaultMessage: 'Set up search',
         }),
         kind: 'card',
-        collapseAble: true,
+        collapseAble: false,
       },
       {
         id: SECTIONS.DIFFERENT_SEARCH_TYPES,

@@ -32,7 +32,7 @@ describe('Search use case setup', () => {
         "id": "search_overview",
         "sections": Array [
           Object {
-            "collapseAble": true,
+            "collapseAble": false,
             "id": "get_started",
             "kind": "card",
             "order": 1000,
