@@ -220,11 +220,13 @@ export class Table extends PureComponent<TableProps, TableState> {
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowType',
         render: (type: string, object: SavedObjectWithMetadata) => {
+          // eslint-disable-next-line
+          console.log('lalal', object);
           return (
             <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
               <EuiIcon
                 aria-label={getSavedObjectLabel(type)}
-                type={object.meta.icon || 'apps'}
+                type={object.type === 'config' ? 'gear' : object.meta.icon || 'app'}
                 size="s"
                 data-test-subj="objectType"
               />
