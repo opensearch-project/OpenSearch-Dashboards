@@ -39,6 +39,7 @@ import {
   EuiPagination,
   EuiText,
   EuiSpacer,
+  EuiListGroupItem,
 } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
@@ -46,15 +47,25 @@ import React, { useCallback, useEffect, useState, Fragment, useRef } from 'react
 import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
 import { SavedQueryListItem } from './saved_query_list_item';
+import {
+  toMountPoint,
+  useOpenSearchDashboards,
+} from '../../../../opensearch_dashboards_react/public';
+import { SaveQueryFlyout } from '../saved_query_flyouts/save_query_flyout';
+import {
+  OpenSavedQueryFlyout,
+  OpenSavedQueryFlyoutProps,
+} from '../saved_query_flyouts/open_saved_query_flyout';
 
 const perPage = 50;
 interface Props {
   showSaveQuery?: boolean;
   loadedSavedQuery?: SavedQuery;
   savedQueryService: SavedQueryService;
+  useNewSavedQueryUI?: boolean;
   onSave: () => void;
   onSaveAsNew: () => void;
-  onLoad: (savedQuery: SavedQuery) => void;
+  onLoad: OpenSavedQueryFlyoutProps['onQueryOpen'];
   onClearSavedQuery: () => void;
   closeMenuPopover: () => void;
 }
@@ -68,11 +79,15 @@ export function SavedQueryManagementComponent({
   onClearSavedQuery,
   savedQueryService,
   closeMenuPopover,
+  useNewSavedQueryUI,
 }: Props) {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
   const [activePage, setActivePage] = useState(0);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
+  const {
+    services: { overlays },
+  } = useOpenSearchDashboards();
 
   useEffect(() => {
     const fetchCountAndSavedQueries = async () => {
@@ -186,7 +201,43 @@ export function SavedQueryManagementComponent({
     ));
   };
 
-  return (
+  return useNewSavedQueryUI ? (
+    <div
+      className="osdSavedQueryManagement__popover"
+      data-test-subj="saved-query-management-popover"
+    >
+      <EuiListGroup>
+        <EuiListGroupItem
+          label={'Save query'}
+          iconType={'save'}
+          onClick={() => {
+            closeMenuPopover();
+            // Opent the save flyout with the save stuff inside it
+            const saveQueryFlyout = overlays?.openFlyout(
+              toMountPoint(<SaveQueryFlyout onClose={() => saveQueryFlyout?.close().then()} />)
+            );
+          }}
+        />
+        <EuiListGroupItem
+          label={'Open query'}
+          iconType={'folderOpen'}
+          onClick={() => {
+            closeMenuPopover();
+            // Opent the existing saved query flyout
+            const openSavedQueryFlyout = overlays?.openFlyout(
+              toMountPoint(
+                <OpenSavedQueryFlyout
+                  savedQueries={savedQueries}
+                  onClose={() => openSavedQueryFlyout?.close().then()}
+                  onQueryOpen={onLoad}
+                />
+              )
+            );
+          }}
+        />
+      </EuiListGroup>
+    </div>
+  ) : (
     <div
       className="osdSavedQueryManagement__popover"
       data-test-subj="saved-query-management-popover"
