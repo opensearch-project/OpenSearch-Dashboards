@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-
+import moment from 'moment';
 import { WorkspaceMenu } from './workspace_menu';
 import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart, DEFAULT_NAV_GROUPS } from '../../../../../core/public';
@@ -64,16 +64,14 @@ describe('<WorkspaceMenu />', () => {
     const selectButton = screen.getByTestId('workspace-select-button');
     fireEvent.click(selectButton);
 
-    expect(screen.getByText(/all workspaces/i)).toBeInTheDocument();
-    expect(screen.getByTestId('workspace-menu-item-all-workspace-1')).toBeInTheDocument();
-    expect(screen.getByTestId('workspace-menu-item-all-workspace-2')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-item-workspace-1')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-item-workspace-2')).toBeInTheDocument();
   });
 
   it('should display a list of recent workspaces in the dropdown', () => {
-    jest.spyOn(recentWorkspaceManager, 'getRecentWorkspaces').mockReturnValue([
-      { id: 'workspace-1', timestamp: 1234567890 },
-      { id: 'workspace-2', timestamp: 1234567899 },
-    ]);
+    jest
+      .spyOn(recentWorkspaceManager, 'getRecentWorkspaces')
+      .mockReturnValue([{ id: 'workspace-1', timestamp: 1234567890 }]);
 
     coreStartMock.workspaces.workspaceList$.next([
       { id: 'workspace-1', name: 'workspace 1', features: [] },
@@ -85,9 +83,7 @@ describe('<WorkspaceMenu />', () => {
     const selectButton = screen.getByTestId('workspace-select-button');
     fireEvent.click(selectButton);
 
-    expect(screen.getByText(/recent workspaces/i)).toBeInTheDocument();
-    expect(screen.getByTestId('workspace-menu-item-recent-workspace-1')).toBeInTheDocument();
-    expect(screen.getByTestId('workspace-menu-item-recent-workspace-2')).toBeInTheDocument();
+    expect(screen.getByText(`viewed ${moment(1234567890).fromNow()}`)).toBeInTheDocument();
   });
 
   it('should be able to display empty state when the workspace list is empty', () => {
@@ -113,8 +109,8 @@ describe('<WorkspaceMenu />', () => {
 
     const searchInput = screen.getByRole('searchbox');
     fireEvent.change(searchInput, { target: { value: 'works' } });
-    expect(screen.getByTestId('workspace-menu-item-recent-workspace-1')).toBeInTheDocument();
-    expect(screen.getByTestId('workspace-menu-item-recent-workspace-1')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-item-workspace-1')).toBeInTheDocument();
+    expect(screen.queryByText('workspace-menu-item-workspace-1')).not.toBeInTheDocument();
   });
 
   it('should be able to display empty state when seach is not found', () => {

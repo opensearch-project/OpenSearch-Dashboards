@@ -567,10 +567,17 @@ export class WorkspacePlugin
         if (!this.coreStart) {
           return null;
         }
-        return React.createElement(WorkspaceSelector, {
-          key: 'workspaceSelector',
-          coreStart: this.coreStart,
-          registeredUseCases$: this.registeredUseCases$,
+        return React.createElement(EuiPanel, {
+          hasShadow: false,
+          hasBorder: false,
+          paddingSize: 'none',
+          children: [
+            React.createElement(WorkspaceSelector, {
+              key: 'workspaceSelector',
+              coreStart: this.coreStart,
+              registeredUseCases$: this.registeredUseCases$,
+            }),
+          ],
         });
       });
     }

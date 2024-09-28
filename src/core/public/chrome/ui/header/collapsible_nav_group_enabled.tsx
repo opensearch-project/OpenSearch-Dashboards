@@ -70,7 +70,7 @@ const customCategory: AppCategory = {
 };
 
 enum NavWidth {
-  Expanded = 270,
+  Expanded = 350,
   Collapsed = 48, // The Collasped width is supposed to be aligned with the hamburger icon on the top left navigation.
 }
 
@@ -322,7 +322,14 @@ export function CollapsibleNavGroupEnabled({
           >
             {shouldShowCollapsedNavHeaderContent && collapsibleNavHeaderRender ? (
               <>
-                {collapsibleNavHeaderRender()}
+                <EuiPanel
+                  paddingSize="none"
+                  color="transparent"
+                  hasBorder={false}
+                  hasShadow={false}
+                >
+                  {collapsibleNavHeaderRender()}
+                </EuiPanel>
                 <EuiSpacer />
               </>
             ) : null}

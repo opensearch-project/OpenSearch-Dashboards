@@ -5,8 +5,9 @@
 import { i18n } from '@osd/i18n';
 import React, { useMemo, useState } from 'react';
 import { useObservable } from 'react-use';
+import moment from 'moment';
 import {
-  EuiTitle,
+  EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
   EuiSpacer,
@@ -15,6 +16,8 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiEmptyPrompt,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 
 import { BehaviorSubject } from 'rxjs';
@@ -24,25 +27,34 @@ import { WorkspaceUseCase } from '../../types';
 import { validateWorkspaceColor } from '../../../common/utils';
 import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
 
-const allWorkspacesTitle = i18n.translate('workspace.menu.title.allWorkspaces', {
-  defaultMessage: 'All workspaces',
-});
+function sortBy<T>(getkey: (item: T) => number | undefined) {
+  return (a: T, b: T): number => {
+    const aValue = getkey(a);
+    const bValue = getkey(b);
+
+    if (aValue === undefined) return 1;
+    if (bValue === undefined) return -1;
+
+    return bValue - aValue;
+  };
+}
 
 const searchFieldPlaceholder = i18n.translate('workspace.menu.search.placeholder', {
   defaultMessage: 'Search workspace name',
 });
 
-const recentWorkspacesTitle = i18n.translate('workspace.menu.title.recentWorkspaces', {
-  defaultMessage: 'Recent workspaces',
-});
-
 const getValidWorkspaceColor = (color?: string) =>
   validateWorkspaceColor(color) ? color : undefined;
 
+interface UpdatedWorkspaceObject extends WorkspaceObject {
+  accessTimeStamp?: number;
+  accessTime?: string;
+}
 interface Props {
   coreStart: CoreStart;
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
   onClickWorkspace?: () => void;
+  isReturnLists?: boolean;
 }
 
 export const WorkspacePickerContent = ({
@@ -50,39 +62,44 @@ export const WorkspacePickerContent = ({
   registeredUseCases$,
   onClickWorkspace,
 }: Props) => {
-  const workspaceList = useObservable(coreStart.workspaces.workspaceList$, []);
   const isDashboardAdmin = coreStart.application.capabilities?.dashboards?.isDashboardAdmin;
   const availableUseCases = useObservable(registeredUseCases$, []);
   const [search, setSearch] = useState('');
+  const workspaceList = useObservable(coreStart.workspaces.workspaceList$, []);
 
-  const recentWorkspaces = useMemo(() => {
-    return recentWorkspaceManager
-      .getRecentWorkspaces()
-      .map((workspace) => workspaceList.find((ws) => ws.id === workspace.id))
-      .filter((workspace): workspace is WorkspaceObject => workspace !== undefined);
+  const updatedRecentWorkspaceList: UpdatedWorkspaceObject[] = useMemo(() => {
+    const recentWorkspaces = recentWorkspaceManager.getRecentWorkspaces();
+    const updatedList = workspaceList.map((workspace) => {
+      const recentWorkspace = recentWorkspaces.find((recent) => recent.id === workspace.id);
+
+      if (recentWorkspace) {
+        return {
+          ...workspace,
+          accessTimeStamp: recentWorkspace.timestamp,
+          accessTime: `viewed ${moment(recentWorkspace.timestamp).fromNow()}`,
+        };
+      }
+      return workspace as UpdatedWorkspaceObject;
+    });
+
+    return updatedList.sort(sortBy((workspace) => workspace.accessTimeStamp));
   }, [workspaceList]);
 
-  const queryFromList = ({ list, query }: { list: WorkspaceObject[]; query: string }) => {
+  const queryFromList = ({ list, query }: { list: UpdatedWorkspaceObject[]; query: string }) => {
     if (!list || list.length === 0) {
       return [];
     }
-
     if (query && query.trim() !== '') {
       const normalizedQuery = query.toLowerCase();
       const result = list.filter((item) => item.name.toLowerCase().includes(normalizedQuery));
       return result;
     }
-
     return list;
   };
 
   const queriedWorkspace = useMemo(() => {
-    return queryFromList({ list: workspaceList, query: search });
-  }, [workspaceList, search]);
-
-  const queriedRecentWorkspace = useMemo(() => {
-    return queryFromList({ list: recentWorkspaces, query: search });
-  }, [recentWorkspaces, search]);
+    return queryFromList({ list: updatedRecentWorkspaceList, query: search });
+  }, [updatedRecentWorkspaceList, search]);
 
   const getUseCase = (workspace: WorkspaceObject) => {
     if (!workspace.features) {
@@ -125,42 +142,67 @@ export const WorkspacePickerContent = ({
     );
   };
 
-  const getWorkspaceListGroup = (filterWorkspaceList: WorkspaceObject[], itemType: string) => {
-    const listItems = filterWorkspaceList.map((workspace: WorkspaceObject) => {
+  const getWorkspaceLists = (filterWorkspaceList: UpdatedWorkspaceObject[]) => {
+    const listItems = filterWorkspaceList.map((workspace: UpdatedWorkspaceObject) => {
       const useCase = getUseCase(workspace);
       const useCaseURL = getUseCaseUrl(useCase, workspace, coreStart.application, coreStart.http);
 
       return (
-        <EuiListGroupItem
-          key={workspace.id}
-          className="eui-textTruncate"
-          size="s"
-          data-test-subj={`workspace-menu-item-${itemType}-${workspace.id}`}
-          icon={
-            <EuiIcon
-              size="s"
-              type={useCase?.icon || 'wsSelector'}
-              color={getValidWorkspaceColor(workspace.color)}
-            />
-          }
-          label={workspace.name}
-          onClick={() => {
-            onClickWorkspace?.();
-            window.location.assign(useCaseURL);
-          }}
-        />
+        <>
+          <EuiHorizontalRule size="full" margin="none" />
+          <EuiListGroupItem
+            // using inline style to make sure that the list item will be expanded，className="eui-fullWidth" is not working, need to set minWidth
+            style={{ width: '100%', minWidth: '0' }}
+            key={workspace.id}
+            size="s"
+            data-test-subj={`workspace-menu-item-${workspace.id}`}
+            icon={
+              <EuiIcon
+                size="m"
+                type={useCase?.icon || 'wsSelector'}
+                color={getValidWorkspaceColor(workspace.color)}
+              />
+            }
+            label={
+              <EuiFlexGroup direction="column" gutterSize="none" className="eui-fullWidth">
+                <EuiFlexItem>
+                  <EuiText className="eui-textTruncate">{workspace.name}</EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup justifyContent="spaceBetween">
+                    <EuiFlexItem className="eui-textLeft" grow={false}>
+                      <EuiText size="xs" color="subdued">
+                        {useCase?.title}
+                      </EuiText>
+                    </EuiFlexItem>
+                    {/* text-alignRight is ineffective here*/}
+                    <EuiFlexItem grow={1} style={{ position: 'absolute', right: '0px' }}>
+                      <EuiText size="xs" color="subdued">
+                        {workspace.accessTime}
+                      </EuiText>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            onClick={() => {
+              onClickWorkspace?.();
+              window.location.assign(useCaseURL);
+            }}
+          />
+        </>
       );
     });
+    return listItems;
+  };
+
+  const getWorkspaceListGroup = (filterWorkspaceList: UpdatedWorkspaceObject[]) => {
+    const listItems = getWorkspaceLists(filterWorkspaceList);
     return (
       <>
-        <EuiTitle size="xxs">
-          <h4>{itemType === 'all' ? allWorkspacesTitle : recentWorkspacesTitle}</h4>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiListGroup showToolTips flush gutterSize="none" wrapText maxWidth={240}>
+        <EuiListGroup gutterSize="none" maxWidth="300px">
           {listItems}
         </EuiListGroup>
-        <EuiSpacer size="s" />
       </>
     );
   };
@@ -174,18 +216,19 @@ export const WorkspacePickerContent = ({
         onChange={(e) => setSearch(e.target.value)}
         placeholder={searchFieldPlaceholder}
       />
-      <EuiSpacer />
+      <EuiSpacer size="s" />
+      <EuiHorizontalRule size="full" margin="none" />
 
       <EuiPanel
         paddingSize="none"
-        color="transparent"
         hasBorder={false}
-        className="eui-yScrollWithShadows"
+        hasShadow={false}
+        color="transparent"
+        // adding this inline style to make sure that part of list won't be hidden, and enable scrolling in side bar as well
+        style={{ maxHeight: 'calc(100% - 50px)' }}
+        className="euiYScrollWithShadows"
       >
-        {queriedRecentWorkspace.length > 0 &&
-          getWorkspaceListGroup(queriedRecentWorkspace, 'recent')}
-
-        {queriedWorkspace.length > 0 && getWorkspaceListGroup(queriedWorkspace, 'all')}
+        {queriedWorkspace.length > 0 && getWorkspaceListGroup(queriedWorkspace)}
 
         {queriedWorkspace.length === 0 && getEmptyStatePrompt()}
       </EuiPanel>
