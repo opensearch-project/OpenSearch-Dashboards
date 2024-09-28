@@ -88,6 +88,7 @@ const FilterOptionsUI = (props: Props) => {
   const uiSettings = opensearchDashboards.services.uiSettings;
   const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
   const useNewHeader = Boolean(uiSettings!.get(UI_SETTINGS.NEW_HOME_PAGE));
+  const useNewSavedQueryUI = Boolean(uiSettings!.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED));
   const [indexPattern] = props.indexPatterns;
   const index = indexPattern && indexPattern.id;
   const newFilter = buildEmptyFilter(isPinned, index);
@@ -307,6 +308,7 @@ const FilterOptionsUI = (props: Props) => {
             setIsPopoverOpen(false);
           }}
           key={'savedQueryManagement'}
+          useNewSavedQueryUI={useNewSavedQueryUI}
         />,
       ]}
       data-test-subj="save-query-panel"
