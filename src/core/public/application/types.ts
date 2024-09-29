@@ -625,6 +625,7 @@ export interface AppLeaveActionFactory {
    *
    * @param text The text to display in the confirmation message
    * @param title (optional) title to display in the confirmation message
+   * @param callback (optional) function to execute in the confirmation message
    */
   confirm(text: string, title?: string, callback?: () => void): AppLeaveConfirmAction;
   /**
