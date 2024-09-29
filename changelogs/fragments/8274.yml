@@ -1,2 +1,0 @@
-fix:
-- Add a temporary fix for a bug with Chrome 129 when handling mask-image ([#8274](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8274))
