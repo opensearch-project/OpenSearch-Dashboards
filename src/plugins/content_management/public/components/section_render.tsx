@@ -62,13 +62,13 @@ const CardSection = ({ section, embeddable, contents$ }: Props) => {
   const factory = embeddable.getEmbeddableFactory(CARD_CONTAINER);
 
   if (section.kind === 'card' && factory && input) {
-    const isCardCollapseAble = section.collapseAble;
+    const isCardCollapsible = section.collapsible;
     return (
       <>
         {section.title ? (
           <EuiTitle size="s">
             <h2>
-              {isCardCollapseAble ? (
+              {isCardCollapsible ? (
                 <EuiButtonIcon
                   iconType={isCardVisible ? 'arrowDown' : 'arrowRight'}
                   onClick={() => setIsCardVisible(!isCardVisible)}

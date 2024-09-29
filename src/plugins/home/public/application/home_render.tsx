@@ -58,7 +58,7 @@ export const setupHome = (contentManagement: ContentManagementPluginSetup) => {
         order: 1000,
         title: "Get started with OpenSearch's powerful features",
         kind: 'card',
-        collapseAble: true,
+        collapsible: true,
       },
     ],
   });

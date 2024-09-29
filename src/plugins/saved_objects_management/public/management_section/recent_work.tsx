@@ -142,6 +142,8 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
     (object: SavedObjectWithMetadata) => {
       const { path = '' } = object.meta.inAppUrl || {};
       let finalPath = path;
+      // index pattern has been move out of dashboard management to be a standalone application,
+      // the path changed from `/app/management/opensearch-dashboards/indexPatterns` to `/app/indexPatterns`
       if (useUpdatedUX && finalPath) {
         finalPath = finalPath.replace(/^\/app\/management\/opensearch-dashboards/, '/app');
       }
