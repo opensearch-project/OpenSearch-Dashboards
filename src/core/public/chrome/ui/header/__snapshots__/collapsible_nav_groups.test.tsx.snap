@@ -51,20 +51,18 @@ exports[`<NavGroups /> should render correctly 1`] = `
                       <div
                         class="euiFlexItem"
                       >
-                        <div
-                          class="euiText euiText--small euiTitle euiTitle--xsmall"
+                        <h4
+                          class="euiTitle euiTitle--xsmall"
                         >
-                          <h4>
-                            pure link
-                          </h4>
-                        </div>
+                          pure link
+                        </h4>
                       </div>
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
                         <span
                           class="leftNavCustomizedAccordionIcon"
-                          data-euiicon-type="plus"
+                          data-euiicon-type="minus"
                         />
                       </div>
                     </div>
@@ -76,7 +74,33 @@ exports[`<NavGroups /> should render correctly 1`] = `
               </button>
               <div
                 class="euiSideNavItem__items"
-              />
+              >
+                <div
+                  class="euiSideNavItem euiSideNavItem--branch nav-link-item nav-nested-item"
+                >
+                  <button
+                    aria-label="subLink"
+                    class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
+                    data-test-subj="collapsibleNavAppLink-subLink"
+                    type="button"
+                  >
+                    <span
+                      class="euiSideNavItemButton__content"
+                    >
+                      <span
+                        class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                        title="subLink"
+                      >
+                        <h4
+                          class="euiTitle euiTitle--xsmall"
+                        >
+                          subLink
+                        </h4>
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -85,7 +109,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
         >
           <div
             aria-label="category-1"
-            class="euiSideNavItemButton"
+            class="euiSideNavItemButton nav-link-item-category-button"
           >
             <span
               class="euiSideNavItemButton__content"
@@ -135,20 +159,18 @@ exports[`<NavGroups /> should render correctly 1`] = `
                       <div
                         class="euiFlexItem"
                       >
-                        <div
-                          class="euiText euiText--small euiTitle euiTitle--xsmall"
+                        <h4
+                          class="euiTitle euiTitle--xsmall"
                         >
-                          <h4>
-                            link-in-category
-                          </h4>
-                        </div>
+                          link-in-category
+                        </h4>
                       </div>
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
                       >
                         <span
                           class="leftNavCustomizedAccordionIcon"
-                          data-euiicon-type="plus"
+                          data-euiicon-type="minus"
                         />
                       </div>
                     </div>
@@ -160,7 +182,33 @@ exports[`<NavGroups /> should render correctly 1`] = `
               </button>
               <div
                 class="euiSideNavItem__items"
-              />
+              >
+                <div
+                  class="euiSideNavItem euiSideNavItem--branch nav-link-item nav-nested-item"
+                >
+                  <button
+                    aria-label="sub-link-in-category"
+                    class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
+                    data-test-subj="collapsibleNavAppLink-sub-link-in-category"
+                    type="button"
+                  >
+                    <span
+                      class="euiSideNavItemButton__content"
+                    >
+                      <span
+                        class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                        title="sub-link-in-category"
+                      >
+                        <h4
+                          class="euiTitle euiTitle--xsmall"
+                        >
+                          sub-link-in-category
+                        </h4>
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
             </div>
             <div
               class="euiSideNavItem euiSideNavItem--trunk nav-link-item "
@@ -178,13 +226,11 @@ exports[`<NavGroups /> should render correctly 1`] = `
                     class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
                     title="link-2-in-category"
                   >
-                    <div
-                      class="euiText euiText--small euiTitle euiTitle--xsmall"
+                    <h4
+                      class="euiTitle euiTitle--xsmall"
                     >
-                      <h4>
-                        link-2-in-category
-                      </h4>
-                    </div>
+                      link-2-in-category
+                    </h4>
                   </span>
                 </span>
               </button>

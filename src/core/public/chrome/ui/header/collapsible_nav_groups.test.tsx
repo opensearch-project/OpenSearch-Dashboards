@@ -65,11 +65,13 @@ describe('<NavGroups />', () => {
       />
     );
     expect(container).toMatchSnapshot();
-    expect(container.querySelectorAll('.nav-link-item-btn').length).toEqual(3);
+    expect(container.querySelectorAll('.nav-link-item-btn').length).toEqual(5);
+    fireEvent.click(getByTestId('collapsibleNavAppLink-pure'));
     expect(navigateToApp).toBeCalledTimes(0);
     // The accordion is collapsed by default
     expect(queryByTestId('collapsibleNavAppLink-subLink')).toBeNull();
 
+    // Expand the accordion
     fireEvent.click(getByTestId('collapsibleNavAppLink-pure'));
     fireEvent.click(getByTestId('collapsibleNavAppLink-subLink'));
     expect(navigateToApp).toBeCalledWith('subLink');
