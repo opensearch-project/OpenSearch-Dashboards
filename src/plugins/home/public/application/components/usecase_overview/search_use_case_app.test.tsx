@@ -10,7 +10,7 @@ import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_d
 import { contentManagementPluginMocks } from '../../../../../content_management/public/mocks';
 import { SearchUseCaseOverviewApp } from './search_use_case_app';
 import { ContentManagementPluginStart } from '../../../../../content_management/public';
-import { ALL_USE_CASE_ID } from '../../../../../../core/public';
+import { ALL_USE_CASE_ID, SEARCH_USE_CASE_ID } from '../../../../../../core/public';
 import { BehaviorSubject } from 'rxjs';
 
 describe('<SearchUseCaseOverviewApp />', () => {
@@ -49,6 +49,7 @@ describe('<SearchUseCaseOverviewApp />', () => {
   });
 
   it('render page normally', () => {
+    currentNavGroupMock.next({ id: SEARCH_USE_CASE_ID });
     const { container } = render(renderSearchUseCaseOverviewApp(mock, coreStartMocks));
 
     expect(container).toMatchInlineSnapshot(`

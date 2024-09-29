@@ -14,7 +14,7 @@ import {
   ContentManagementPluginStart,
   SEARCH_OVERVIEW_PAGE_ID,
 } from '../../../../../content_management/public';
-import { ALL_USE_CASE_ID } from '../../../../../../core/public';
+import { SEARCH_USE_CASE_ID } from '../../../../../../core/public';
 
 interface Props {
   contentManagement: ContentManagementPluginStart;
@@ -26,7 +26,7 @@ export const SearchUseCaseOverviewApp = ({ contentManagement }: Props) => {
   } = useOpenSearchDashboards<CoreStart>();
 
   const currentNavGroup = useObservable(chrome.navGroup.getCurrentNavGroup$());
-  const isAllUseCase = currentNavGroup?.id === ALL_USE_CASE_ID;
+  const isSearchUseCase = currentNavGroup?.id === SEARCH_USE_CASE_ID;
 
   useEffect(() => {
     const title = i18n.translate('home.searchOverview.title', { defaultMessage: 'Overview' });
@@ -35,11 +35,11 @@ export const SearchUseCaseOverviewApp = ({ contentManagement }: Props) => {
     });
     const breadcrumbs: EuiBreadcrumb[] = [
       {
-        text: isAllUseCase ? titleWithUseCase : title,
+        text: isSearchUseCase ? title : titleWithUseCase,
       },
     ];
     chrome.setBreadcrumbs(breadcrumbs);
-  }, [chrome, isAllUseCase]);
+  }, [chrome, isSearchUseCase]);
 
   return (
     <I18nProvider>
