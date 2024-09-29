@@ -112,7 +112,7 @@ export const SelectDataSourceDetailPanel = ({
         notifications?.toasts.addSuccess({
           title: i18n.translate('workspace.detail.dataSources.assign.success', {
             defaultMessage:
-              'Associate {numberOfAssignedDataSources, plural, one {# OpenSearch connection} other {# OpenSearch connections}} successfully.',
+              '{numberOfAssignedDataSources, plural, one {The data source has} other {# data sources have}} been associated to the workspace.',
             values: { numberOfAssignedDataSources: newAssignedDataSourceConnections.length },
           }),
         });
@@ -124,7 +124,7 @@ export const SelectDataSourceDetailPanel = ({
       notifications?.toasts.addDanger({
         title: i18n.translate('workspace.detail.dataSources.assign.failed', {
           defaultMessage:
-            'Failed to associate {numberOfAssignedDataSources, plural, one {# OpenSearch connection} other {# OpenSearch connections}}.',
+            'Failed to associate {numberOfAssignedDataSources, plural, one {the data source} other {# data sources}} to the workspace.',
           values: { numberOfAssignedDataSources: newAssignedDataSourceConnections.length },
         }),
         text: error instanceof Error ? error.message : JSON.stringify(error),
