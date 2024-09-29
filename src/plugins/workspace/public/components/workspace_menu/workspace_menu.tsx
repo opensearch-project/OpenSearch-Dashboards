@@ -93,18 +93,12 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
       button={currentWorkspaceButton}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
       anchorPosition="downCenter"
+      panelPaddingSize="s"
       repositionOnScroll={true}
     >
-      <EuiFlexGroup
-        direction="column"
-        alignItems="center"
-        gutterSize="none"
-        // padding equals to size s
-        style={{ padding: '4px' }}
-      >
-        <EuiFlexItem style={{ padding: '12px' }}>
+      <EuiFlexGroup direction="column" alignItems="center" gutterSize="none">
+        <EuiFlexItem style={{ padding: '24px' }}>
           <EuiFlexGroup
             justifyContent="spaceAround"
             alignItems="center"
@@ -168,7 +162,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
               <EuiFlexItem grow={false} className="eui-textLeft">
                 <EuiButtonEmpty
                   color="primary"
-                  size="xs"
+                  size="s"
                   data-test-subj="workspace-menu-manage-button"
                   onClick={() => {
                     closePopover();
@@ -182,7 +176,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
               <EuiFlexItem grow={false} className="eui-textRight">
                 <EuiButtonEmpty
                   color="primary"
-                  size="xs"
+                  size="s"
                   iconType="plus"
                   key={WORKSPACE_CREATE_APP_ID}
                   data-test-subj="workspace-menu-create-workspace-button"

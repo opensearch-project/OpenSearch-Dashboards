@@ -548,6 +548,7 @@ export class WorkspacePlugin
           hasShadow: false,
           hasBorder: false,
           paddingSize: 's',
+          style: { height: '65vh' },
           children: [
             React.createElement(WorkspacePickerContent, {
               key: 'workspacePickerContent',

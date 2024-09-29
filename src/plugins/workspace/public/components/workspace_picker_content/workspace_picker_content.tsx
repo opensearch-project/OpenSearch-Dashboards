@@ -158,7 +158,7 @@ export const WorkspacePickerContent = ({
             data-test-subj={`workspace-menu-item-${workspace.id}`}
             icon={
               <EuiIcon
-                size="m"
+                size="l"
                 type={useCase?.icon || 'wsSelector'}
                 color={getValidWorkspaceColor(workspace.color)}
               />
@@ -224,7 +224,7 @@ export const WorkspacePickerContent = ({
         hasBorder={false}
         hasShadow={false}
         color="transparent"
-        // adding this inline style to make sure that part of list won't be hidden, and enable scrolling in side bar as well
+        // adding this inline style to make sure that part of list won't be hidden
         style={{ maxHeight: 'calc(100% - 50px)' }}
         className="euiYScrollWithShadows"
       >

@@ -124,26 +124,21 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
       hasArrow={false}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       anchorPosition="downCenter"
       repositionOnScroll={true}
       display="block"
       className="eui-fullWidth"
     >
-      <EuiFlexGroup
-        direction="column"
-        alignItems="center"
-        gutterSize="none"
-        // padding equals to size s
-        style={{ padding: '4px' }}
-      >
+      <EuiFlexGroup direction="column" alignItems="center" gutterSize="none">
         <EuiFlexItem>
           <EuiPanel
             paddingSize="none"
             hasBorder={false}
             hasShadow={false}
             color="transparent"
-            style={{ height: '42vh', width: '285px' }}
+            // set the width fixed to achieve a similar appearance to Superselect
+            style={{ height: '42vh', width: '282px' }}
           >
             <WorkspacePickerContent
               coreStart={coreStart}
