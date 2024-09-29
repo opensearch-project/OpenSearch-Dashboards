@@ -11,7 +11,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
       class="eui-fullHeight left-navigation-wrapper"
     >
       <div
-        class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
+        class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder"
         style="flex-grow: 0;"
       >
         <button
@@ -21,7 +21,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
         </button>
       </div>
       <div
-        class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
+        class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
         style="padding-top: 0px;"
       >
         <div
@@ -50,13 +50,11 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                       class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
                       title="link-in-all"
                     >
-                      <div
-                        class="euiText euiText--small euiTitle euiTitle--xsmall"
+                      <h4
+                        class="euiTitle euiTitle--xsmall"
                       >
-                        <h4>
-                          link-in-all
-                        </h4>
-                      </div>
+                        link-in-all
+                      </h4>
                     </span>
                   </span>
                 </button>
@@ -111,7 +109,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
       class="eui-fullHeight left-navigation-wrapper"
     >
       <div
-        class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
+        class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder"
         style="flex-grow: 0;"
       >
         <button
@@ -121,7 +119,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
         </button>
       </div>
       <div
-        class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
+        class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
         style="padding-top: 0px;"
       >
         <div
@@ -150,13 +148,11 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
                       class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
                       title="link-in-all"
                     >
-                      <div
-                        class="euiText euiText--small euiTitle euiTitle--xsmall"
+                      <h4
+                        class="euiTitle euiTitle--xsmall"
                       >
-                        <h4>
-                          link-in-all
-                        </h4>
-                      </div>
+                        link-in-all
+                      </h4>
                     </span>
                   </span>
                 </button>
