@@ -57,6 +57,7 @@ export function DevToolsIcon({
       <EuiButtonIcon
         aria-label="go-to-dev-tools"
         iconType="consoleApp"
+        data-test-subj="openDevToolsModal"
         onClick={() => {
           setModalVisible(true);
         }}
@@ -73,6 +74,7 @@ export function DevToolsIcon({
               onClick={() => setModalVisible(false)}
               className="euiModal__closeIcon"
               color="text"
+              aria-label="close modal"
             />
             <EuiPanel
               className="eui-fullHeight"
