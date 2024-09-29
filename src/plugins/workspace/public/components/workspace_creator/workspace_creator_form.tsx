@@ -4,16 +4,7 @@
  */
 
 import React, { useCallback, useRef } from 'react';
-import {
-  EuiSpacer,
-  EuiTitle,
-  EuiForm,
-  EuiText,
-  EuiCompressedFormRow,
-  EuiColorPicker,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiForm, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
   useWorkspaceForm,
@@ -23,14 +14,13 @@ import {
   SelectDataSourcePanel,
   usersAndPermissionsCreatePageTitle,
   WorkspaceFormProps,
-  WorkspaceNameField,
-  WorkspaceDescriptionField,
 } from '../workspace_form';
 
 import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
 import { WorkspaceFaqPanel } from './workspace_faq_panel';
 import { WorkspaceFormSummaryPanel } from './workspace_form_summary_panel';
 import { generateRightSidebarScrollProps, RightSidebarScrollField } from './utils';
+import { CreatorDetailsPanel } from './creator_details_panel';
 
 import './workspace_creator_form.scss';
 
@@ -86,7 +76,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
 
   return (
     <EuiFlexGroup className="workspaceCreateFormContainer">
-      <EuiFlexItem style={{ maxWidth: 768 }}>
+      <EuiFlexItem style={{ maxWidth: 848 }}>
         <EuiForm
           id={formId}
           onSubmit={handleFormSubmit}
@@ -99,13 +89,15 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
               <EuiSpacer />
             </>
           )}
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('workspace.creator.form.customizeTitle', {
-                defaultMessage: 'Customize the workspace',
-              })}
-            </h3>
-          </EuiTitle>
+          <CreatorDetailsPanel
+            name={formData.name}
+            color={formData.color}
+            description={formData.description}
+            onNameChange={handleNameInputChange}
+            onColorChange={handleColorChange}
+            onDescriptionChange={setDescription}
+          />
+          <EuiSpacer size="m" />
           <div {...generateRightSidebarScrollProps(RightSidebarScrollField.UseCase)}>
             <WorkspaceUseCase
               value={formData.useCase}
@@ -115,40 +107,6 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
             />
           </div>
           <EuiSpacer size="m" />
-          <div {...generateRightSidebarScrollProps(RightSidebarScrollField.Name)} />
-          <WorkspaceNameField
-            value={formData.name}
-            onChange={handleNameInputChange}
-            error={formErrors.name?.message}
-          />
-          <EuiSpacer size="m" />
-          <div {...generateRightSidebarScrollProps(RightSidebarScrollField.Description)} />
-          <WorkspaceDescriptionField value={formData.description} onChange={setDescription} />
-          <EuiSpacer size="m" />
-          <EuiCompressedFormRow
-            label={i18n.translate('workspace.form.workspaceDetails.color.label', {
-              defaultMessage: 'Workspace icon color',
-            })}
-            isInvalid={!!formErrors.color}
-            error={formErrors.color?.message}
-            {...generateRightSidebarScrollProps(RightSidebarScrollField.Color)}
-          >
-            <div>
-              <EuiText size="xs" color="subdued">
-                {i18n.translate('workspace.form.workspaceDetails.color.description', {
-                  defaultMessage:
-                    'Select a background color for the icon representing this workspace.',
-                })}
-              </EuiText>
-              <EuiSpacer size={'s'} />
-              <EuiColorPicker
-                color={formData.color}
-                onChange={handleColorChange}
-                data-test-subj="workspaceForm-workspaceDetails-colorPicker"
-              />
-            </div>
-          </EuiCompressedFormRow>
-          <EuiSpacer />
           {/* SelectDataSourcePanel is only visible for dashboard admin and when data source is enabled*/}
           {isDashboardAdmin && isDataSourceEnabled && (
             <>
