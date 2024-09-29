@@ -13,6 +13,7 @@ import {
   EuiFormControlLayout,
   EuiFormRow,
   EuiPanel,
+  EuiText,
 } from '@elastic/eui';
 import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/color_picker';
 import { i18n } from '@osd/i18n';
@@ -37,11 +38,14 @@ export const CreatorDetailsPanel = ({
   onDescriptionChange,
 }: CreatorDetailsPanelProps) => {
   return (
-    <EuiPanel
-      title={i18n.translate('workspace.creator.details.panel.title', {
-        defaultMessage: 'Workspace details',
-      })}
-    >
+    <EuiPanel>
+      <EuiText size="s">
+        <h2>
+          {i18n.translate('workspace.creator.details.panel.title', {
+            defaultMessage: 'Workspace details',
+          })}
+        </h2>
+      </EuiText>
       <EuiDescribedFormGroup
         title={
           <h4 {...generateRightSidebarScrollProps(RightSidebarScrollField.Name)}>
