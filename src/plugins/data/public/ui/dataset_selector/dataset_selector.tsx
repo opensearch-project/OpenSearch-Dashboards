@@ -27,58 +27,63 @@ interface DatasetSelectorProps {
   services: IDataPluginServices;
 }
 
+/**
+ * This component provides a dropdown selector for datasets and an advanced selector modal.
+ * It fetches datasets once on mount to populate the selector options.
+ *
+ * @remarks
+ * The component uses several optimizations to prevent unnecessary re-renders:
+ * 1. It uses `useRef` and `useEffect` to ensure datasets are fetched only once on mount.
+ * 2. It uses `useMemo` and `useCallback` to memoize computed values and functions.
+ * 3. It intentionally omits some dependencies from the `useEffect` dependency array to prevent re-fetching.
+ */
 export const DatasetSelector = ({
   selectedDataset,
   setSelectedDataset,
   services,
 }: DatasetSelectorProps) => {
+  const isMounted = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const { overlays } = services;
-
-  const isMounted = useRef(true);
-
-  useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
   const datasetService = getQueryService().queryString.getDatasetService();
-
   const datasetIcon =
     datasetService.getType(selectedDataset?.type || '')?.meta.icon.type || 'database';
 
-  const fetchDatasets = useCallback(async () => {
-    const typeConfig = datasetService.getType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
-    if (!typeConfig) return;
-
-    const fetchedIndexPatternDataStructures = await typeConfig.fetch(services, []);
-
-    if (!isMounted.current) return;
-
-    const fetchedDatasets =
-      fetchedIndexPatternDataStructures.children?.map((pattern) =>
-        typeConfig.toDataset([pattern])
-      ) ?? [];
-    setDatasets(fetchedDatasets);
-
-    // If no dataset is selected, select the first one
-    if (!selectedDataset && fetchedDatasets.length > 0) {
-      setSelectedDataset(fetchedDatasets[0]);
-    }
-  }, [datasetService, selectedDataset, services, setSelectedDataset]);
-
   useEffect(() => {
+    isMounted.current = true;
+    const fetchDatasets = async () => {
+      if (!isMounted.current) return;
+
+      const typeConfig = datasetService.getType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
+      if (!typeConfig) return;
+
+      const fetchedIndexPatternDataStructures = await typeConfig.fetch(services, []);
+
+      const fetchedDatasets =
+        fetchedIndexPatternDataStructures.children?.map((pattern) =>
+          typeConfig.toDataset([pattern])
+        ) ?? [];
+      setDatasets(fetchedDatasets);
+
+      // If no dataset is selected, select the first one
+      if (!selectedDataset && fetchedDatasets.length > 0) {
+        setSelectedDataset(fetchedDatasets[0]);
+      }
+    };
+
     fetchDatasets();
-  }, [fetchDatasets]);
+
+    return () => {
+      isMounted.current = false;
+    };
+    // NOTE: Intentionally omitting dependencies which can cause unnecessary re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [datasetService]);
 
   const togglePopover = useCallback(async () => {
-    if (!isOpen) {
-      await fetchDatasets();
-    }
     setIsOpen(!isOpen);
-  }, [isOpen, fetchDatasets]);
+  }, [isOpen]);
 
   const closePopover = useCallback(() => setIsOpen(false), []);
 
