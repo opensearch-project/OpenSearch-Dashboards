@@ -32,7 +32,7 @@ export const QueryAssistButton: React.FC<QueryAssistButtonProps> = (props) => {
         iconType={
           !props.dependencies.isCollapsed && !isQueryAssistCollapsed ? expandIcon : collapsedIcon
         }
-        aria-label={i18n.translate('queryEnhancements.queryAssist.button.ariaLable', {
+        aria-label={i18n.translate('queryEnhancements.queryAssist.button.ariaLabel', {
           defaultMessage: `Query Assist Toggle`,
         })}
         onClick={onClick}
