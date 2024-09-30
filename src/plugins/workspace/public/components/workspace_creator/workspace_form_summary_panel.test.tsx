@@ -76,6 +76,7 @@ describe('WorkspaceFormSummaryPanel', () => {
 
     expect(screen.getByText('Summary')).toBeInTheDocument();
     expect(screen.getByText('Workspace name')).toBeInTheDocument();
+    expect(screen.getByText('This is a test workspace')).toBeInTheDocument();
     expect(screen.getByText('Test Workspace')).toBeInTheDocument();
     expect(screen.getByText('Use Case 1')).toBeInTheDocument();
     expect(screen.getByText('Data Source 1')).toBeInTheDocument();
@@ -118,6 +119,12 @@ describe('WorkspaceFormSummaryPanel', () => {
     // Name placeholder
     const namePlaceholder = screen.getByTestId('workspaceFormRightSideBarSummary-name-Value');
     expect(namePlaceholder).toHaveTextContent('—');
+
+    // Description placeholder
+    const descriptionPlaceholder = screen.getByTestId(
+      'workspaceFormRightSideBarSummary-description-Value'
+    );
+    expect(descriptionPlaceholder).toHaveTextContent('—');
 
     // Data sources placeholder
     const dataSourcesPlaceholder = screen.getByTestId(

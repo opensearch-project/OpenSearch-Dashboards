@@ -207,6 +207,9 @@ export const WorkspaceFormSummaryPanel = ({
           </EuiFlexGroup>
         )}
       </FieldSummaryItem>
+      <FieldSummaryItem field={RightSidebarScrollField.Description}>
+        {formData.description?.trim()}
+      </FieldSummaryItem>
       <FieldSummaryItem field={RightSidebarScrollField.UseCase}>
         {useCase && <EuiText size="xs">{useCase.title}</EuiText>}
       </FieldSummaryItem>
