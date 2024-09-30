@@ -22,7 +22,7 @@ import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.moc
 import { WorkspacePlugin } from './plugin';
 import { contentManagementPluginMocks } from '../../content_management/public';
 import { navigationPluginMock } from '../../navigation/public/mocks';
-
+import { AppStatus } from '../../../core/public';
 // Expect 6 app registrations: create, fatal error, detail, initial, navigation, and list apps.
 const registrationAppNumber = 6;
 
@@ -439,6 +439,45 @@ describe('Workspace plugin', () => {
     const appUpdater = await appUpdater$.pipe(first()).toPromise();
 
     expect(appUpdater({ id: 'system-feature', title: '', mount: () => () => {} })).toBeUndefined();
+  });
+
+  it('#start should not be able to access dashboards and visualize when out of workspace and not admin', async () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const coreStart = coreMock.createStart();
+
+    await workspacePlugin.setup(setupMock, {});
+
+    coreStart.workspaces.currentWorkspace$.next(null);
+    coreStart.application.capabilities = {
+      ...coreStart.application.capabilities,
+      dashboard: {
+        isDashboardAdmin: false,
+      },
+    };
+
+    workspacePlugin.start(coreStart, getMockDependencies());
+
+    const mockApps = [{ id: 'dashboards' }, { id: 'visualize' }];
+
+    const appUpdater$ = setupMock.application.registerAppUpdater.mock.calls[0][0];
+
+    const appUpdaterChangeMock = jest.fn((app) => {
+      if (app.id === 'dashboards' || app.id === 'visualize') {
+        return { status: AppStatus.inaccessible };
+      }
+      return { status: AppStatus.accessible };
+    });
+    appUpdater$.subscribe(appUpdaterChangeMock);
+
+    mockApps.forEach((app) => {
+      const result = appUpdaterChangeMock(app);
+      if (app.id === 'dashboards' || app.id === 'visualize') {
+        expect(result).toEqual({ status: AppStatus.inaccessible });
+      } else {
+        expect(result).toEqual({ status: AppStatus.accessible });
+      }
+    });
   });
 
   it('#start should update nav group status after currentWorkspace set', async () => {

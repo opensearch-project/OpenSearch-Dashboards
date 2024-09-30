@@ -122,7 +122,7 @@ export class WorkspacePlugin
    */
   private filterNavLinks = (core: CoreStart) => {
     const currentWorkspace$ = core.workspaces.currentWorkspace$;
-
+    const isDashboardAdmin = core.application.capabilities.dashboards?.isDashboardAdmin;
     this.workspaceAndUseCasesCombineSubscription?.unsubscribe();
     this.workspaceAndUseCasesCombineSubscription = combineLatest([
       currentWorkspace$,
@@ -145,6 +145,7 @@ export class WorkspacePlugin
           if (app.status === AppStatus.inaccessible) {
             return;
           }
+
           if (
             registeredUseCases.some(
               (useCase) =>
@@ -159,6 +160,19 @@ export class WorkspacePlugin
            */
           return { status: AppStatus.inaccessible };
         });
+      } else {
+        /**
+         * If out of the workspace, dashboards and visualize are not accessible
+         * If trying to access such app, an "Application Not Found" page will be displayed
+         * However, the admin could be able to access dashboards and visualize
+         */
+        if (!isDashboardAdmin) {
+          this.appUpdater$.next((app) => {
+            if (app.id === 'dashboards' || app.id === 'visualize') {
+              return { status: AppStatus.inaccessible };
+            }
+          });
+        }
       }
     });
 
