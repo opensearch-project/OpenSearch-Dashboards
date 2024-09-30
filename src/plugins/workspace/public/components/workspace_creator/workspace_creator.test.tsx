@@ -232,7 +232,7 @@ describe('WorkspaceCreator', () => {
   });
 
   it('create workspace with detailed information', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId, getByRole } = render(<WorkspaceCreator />);
 
     // Ensure workspace create form rendered
     await waitFor(() => {
@@ -246,18 +246,15 @@ describe('WorkspaceCreator', () => {
     fireEvent.input(descriptionInput, {
       target: { value: 'test workspace description' },
     });
-    const colorSelector = getByTestId(
-      'euiColorPickerAnchor workspaceForm-workspaceDetails-colorPicker'
-    );
-    fireEvent.input(colorSelector, {
-      target: { value: '#000000' },
-    });
+    const colorSelector = getByTestId('euiColorPickerAnchor');
+    fireEvent.click(colorSelector);
+    fireEvent.click(getByRole('option', { name: 'Select #54B399 as the color' }));
     fireEvent.click(getByTestId('workspaceUseCase-observability'));
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'test workspace name',
-        color: '#000000',
+        color: '#54B399',
         description: 'test workspace description',
         features: expect.arrayContaining(['use-case-observability']),
       }),
