@@ -23,6 +23,7 @@ export {
   selectDataSourceTitle,
   workspaceDetailsTitle,
   workspaceUseCaseTitle,
+  permissionModeOptions,
 } from './constants';
 export {
   convertPermissionsToPermissionSettings,
