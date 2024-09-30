@@ -9,7 +9,6 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiSuperSelect,
-  EuiSuperSelectOption,
   EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -20,39 +19,9 @@ import {
   PERMISSION_TYPE_LABEL_ID,
   PERMISSION_COLLABORATOR_LABEL_ID,
   PERMISSION_ACCESS_LEVEL_LABEL_ID,
+  permissionModeOptions,
 } from './constants';
 import { getPermissionModeId } from './utils';
-import { PermissionModeId } from '../../../../../core/public';
-
-const permissionModeOptions = [
-  {
-    value: PermissionModeId.Read,
-    inputDisplay: i18n.translate(
-      'workspace.form.permissionSettingPanel.permissionModeOptions.read',
-      {
-        defaultMessage: 'Read',
-      }
-    ),
-  },
-  {
-    value: PermissionModeId.ReadAndWrite,
-    inputDisplay: i18n.translate(
-      'workspace.form.permissionSettingPanel.permissionModeOptions.readAndWrite',
-      {
-        defaultMessage: 'Read & Write',
-      }
-    ),
-  },
-  {
-    value: PermissionModeId.Owner,
-    inputDisplay: i18n.translate(
-      'workspace.form.permissionSettingPanel.permissionModeOptions.owner',
-      {
-        defaultMessage: 'Owner',
-      }
-    ),
-  },
-];
 
 const typeOptions = [
   {
