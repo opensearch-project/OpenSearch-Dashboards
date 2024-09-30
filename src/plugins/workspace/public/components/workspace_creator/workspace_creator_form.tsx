@@ -119,7 +119,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
           {isDashboardAdmin && isDataSourceEnabled && (
             <>
               <EuiPanel>
-                <EuiTitle
+                <EuiText
                   {...generateRightSidebarScrollProps(RightSidebarScrollField.DataSource)}
                   size="s"
                 >
@@ -128,7 +128,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
                       defaultMessage: 'Associate data sources',
                     })}
                   </h2>
-                </EuiTitle>
+                </EuiText>
                 <EuiText size="xs">
                   {i18n.translate('workspace.creator.form.associateDataSourceDescription', {
                     defaultMessage:
