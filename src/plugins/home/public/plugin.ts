@@ -276,7 +276,7 @@ export class HomePublicPlugin
     registerContentToSearchUseCasePage(contentManagement, core);
 
     // register what's new learn opensearch card to use case overview page
-    registerHomeListCardToPage(contentManagement);
+    registerHomeListCardToPage(contentManagement, core.docLinks);
 
     this.featuresCatalogueRegistry.start({ capabilities });
     this.sectionTypeService.start({ core, data });

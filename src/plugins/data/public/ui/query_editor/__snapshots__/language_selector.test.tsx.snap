@@ -421,6 +421,10 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
           },
           "opensearchDashboards": Object {
             "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+            "dashboards": Object {
+              "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+              "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+            },
             "dataSource": Object {
               "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
               "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -456,7 +460,7 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
             },
             "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
             "visualize": Object {
-              "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+              "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
             },
           },
         },
@@ -995,6 +999,10 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
           },
           "opensearchDashboards": Object {
             "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+            "dashboards": Object {
+              "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+              "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+            },
             "dataSource": Object {
               "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
               "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -1030,7 +1038,7 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
             },
             "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
             "visualize": Object {
-              "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+              "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
             },
           },
         },
