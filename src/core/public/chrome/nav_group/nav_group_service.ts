@@ -11,6 +11,7 @@ import {
   ChromeNavLink,
   WorkspacesStart,
 } from 'opensearch-dashboards/public';
+import { i18n } from '@osd/i18n';
 import { map, switchMap, takeUntil } from 'rxjs/operators';
 import { IUiSettingsClient } from '../../ui_settings';
 import {
