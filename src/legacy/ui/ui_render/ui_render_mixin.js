@@ -261,7 +261,7 @@ export function uiRenderMixin(osdServer, server, config) {
       const fontCode = JSON.stringify({
         v7: 'Roboto Mono',
         v8: 'Source Code Pro',
-        v9: 'Fira Code',
+        v9: 'Source Code Pro',
       });
 
       const startup = new AppBootstrap(
