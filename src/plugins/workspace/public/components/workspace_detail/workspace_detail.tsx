@@ -84,6 +84,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
   const [modalVisible, setModalVisible] = useState(false);
   const [tabId, setTabId] = useState<string>(DetailTab.Details);
   const [isDQCFilled, setIsDQCFilled] = useState(false);
+  const [isSettingDefaultWorkspace, setIsSettingDefaultWorkspace] = useState(false);
 
   const availableUseCases = useObservable(props.registeredUseCases$, []);
   const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
@@ -154,6 +155,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
 
   const handleSetDefaultWorkspace = useCallback(
     async (workspace: WorkspaceAttribute) => {
+      setIsSettingDefaultWorkspace(true);
       const setDefaultWorkspaceSuccess = await uiSettings?.set(DEFAULT_WORKSPACE, workspace.id);
 
       if (setDefaultWorkspaceSuccess) {
@@ -172,6 +174,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
           })
         );
       }
+      setIsSettingDefaultWorkspace(false);
     },
     [notifications?.toasts, uiSettings]
   );
@@ -301,6 +304,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
                   label: i18n.translate('workspace.detail.setDefaultWorkspace.button', {
                     defaultMessage: 'Set as default',
                   }),
+                  isLoading: isSettingDefaultWorkspace,
                   testId: 'workspace-detail-set-as-default-button',
                   controlType: 'button',
                   tooltip: i18n.translate('workspace.detail.setDefaultWorkspace.button.tooltip', {
