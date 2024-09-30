@@ -369,7 +369,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
         {modalVisible && (
           <EuiConfirmModal
             data-test-subj="workspaceForm-cancelModal"
-            title={i18n.translate('workspace.form.cancelModal.title', {
+            title={i18n.translate('workspace.detail.cancelModal.title', {
               defaultMessage: 'Navigate away?',
             })}
             onCancel={() => setModalVisible(false)}
@@ -379,14 +379,14 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
               history.push(`?tab=${tabId}`);
               setSelectedTabId(tabId);
             }}
-            cancelButtonText={i18n.translate('workspace.form.cancelButtonText', {
+            cancelButtonText={i18n.translate('workspace.detail.cancelButtonText', {
               defaultMessage: 'Cancel',
             })}
-            confirmButtonText={i18n.translate('workspace.form.confirmButtonText', {
+            confirmButtonText={i18n.translate('workspace.detail.confirmButtonText', {
               defaultMessage: 'Confirm',
             })}
           >
-            {i18n.translate('workspace.form.cancelModal.body', {
+            {i18n.translate('workspace.detail.cancelModal.body', {
               defaultMessage: 'Any unsaved changes will be lost.',
             })}
           </EuiConfirmModal>
