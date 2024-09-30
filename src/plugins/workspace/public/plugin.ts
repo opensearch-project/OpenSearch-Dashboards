@@ -548,6 +548,7 @@ export class WorkspacePlugin
           hasShadow: false,
           hasBorder: false,
           paddingSize: 's',
+          color: 'transparent',
           children: [
             React.createElement(WorkspacePickerContent, {
               key: 'workspacePickerContent',
