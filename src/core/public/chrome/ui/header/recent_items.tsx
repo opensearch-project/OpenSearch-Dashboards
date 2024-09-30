@@ -13,7 +13,6 @@ import {
   EuiPopoverTitle,
   EuiIcon,
   EuiText,
-  EuiButtonEmpty,
   EuiSpacer,
   EuiHeaderSectionItemButtonProps,
   EuiButtonIcon,
@@ -135,17 +134,15 @@ export const RecentItems = ({
       ownFocus={false}
       panelPaddingSize="s"
       button={
-        <EuiButtonEmpty
-          data-test-subj="preferencesSettingButton"
-          flush="left"
-          size="xs"
+        <EuiButtonIcon
           color="primary"
+          size="xs"
           onClick={() => {
             setIsPreferencesPopoverOpen((IsPreferencesPopoverOpe) => !IsPreferencesPopoverOpe);
           }}
-        >
-          <EuiIcon type="managementApp" />
-        </EuiButtonEmpty>
+          iconType="managementApp"
+          data-test-subj="preferencesSettingButton"
+        />
       }
       isOpen={isPreferencesPopoverOpen}
       anchorPosition="downLeft"
