@@ -8,6 +8,8 @@ import { render } from '@testing-library/react';
 
 import { HomeListCard, registerHomeListCardToPage } from './home_list_card';
 import { contentManagementPluginMocks } from '../../../../content_management/public';
+import { EuiLink } from '@elastic/eui';
+import { docLinksServiceMock } from '../../../../../core/public/mocks';
 
 describe('<HomeListCard />', () => {
   it('should render static content normally', async () => {
@@ -38,7 +40,7 @@ it('should render View All button when allLink is provided', () => {
         description: 'Get started in minutes with OpenSearch Dashboards',
       },
     ],
-    allLink: 'https://opensearch.org/docs/latest/',
+    allLink: <EuiLink>View all</EuiLink>,
   };
 
   const { getByText } = render(<HomeListCard config={mockConfig} />);
@@ -69,8 +71,10 @@ describe('Register HomeListCardToPages', () => {
     registerContentProvider: registerContentProviderFn,
   };
 
+  const docLinkMock = docLinksServiceMock.createStartContract();
+
   it('register to use case overview page', () => {
-    registerHomeListCardToPage(contentManagementStartMock);
+    registerHomeListCardToPage(contentManagementStartMock, docLinkMock);
     expect(contentManagementStartMock.registerContentProvider).toHaveBeenCalledTimes(4);
 
     let whatsNewCall = registerContentProviderFn.mock.calls[0];

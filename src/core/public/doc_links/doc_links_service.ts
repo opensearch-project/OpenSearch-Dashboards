@@ -424,7 +424,13 @@ export class DocLinksService {
           },
           visualize: {
             // https://opensearch.org/docs/latest/dashboards/visualize/viz-index/
-            guide: `${OPENSEARCH_WEBSITE_DOCS}visualize/viz-index/`,
+            guide: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}visualize/viz-index/`,
+          },
+          dashboards: {
+            // https://opensearch.org/docs/latest/dashboards/quickstart/
+            quickStart: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}quickstart/`,
+            // https://opensearch.org/docs/latest/dashboards/dashboard/index/
+            createDashboards: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}dashboard/index/`,
           },
           management: {
             // https://opensearch.org/docs/latest/dashboards/management/advanced-settings/
@@ -826,6 +832,7 @@ export interface DocLinksStart {
         readonly s3DataSource: string;
       };
       readonly visualize: Record<string, string>;
+      readonly dashboards: Record<string, string>;
       readonly management: Record<string, string>;
     };
     readonly noDocumentation: {

@@ -189,6 +189,7 @@
   padding: calc($euiSizeXS + 1px);
   background-color: $euiColorEmptyShade;
   overflow: initial !important; // needed for suggestion window, otherwise will be hidden in child
+  min-width: 0;
 
   .monaco-editor .view-overlays .current-line {
     border: none;

@@ -173,6 +173,26 @@ HTMLCollection [
               </div>
             </div>
           </div>
+          <div
+            class="euiFlyoutFooter"
+          >
+            <button
+              class="euiButton euiButton--primary euiButton--small"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text"
+                >
+                  <span>
+                    Close
+                  </span>
+                </span>
+              </span>
+            </button>
+          </div>
         </div>
       </div>
     </body>
@@ -570,6 +590,26 @@ HTMLCollection [
                 </div>
               </div>
             </div>
+          </div>
+          <div
+            class="euiFlyoutFooter"
+          >
+            <button
+              class="euiButton euiButton--primary euiButton--small"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text"
+                >
+                  <span>
+                    Close
+                  </span>
+                </span>
+              </span>
+            </button>
           </div>
         </div>
       </div>
