@@ -31,7 +31,8 @@ export function CollapsibleNavGroupsLabel(props: CollapsibleNavGroupsLabelProps)
       className={`${collapsible ? 'euiAccordion__button' : undefined}`}
       gutterSize="none"
       data-test-subj={props['data-test-subj']}
-      onClick={() => {
+      onClick={(e) => {
+        e.stopPropagation();
         if (!collapsible) {
           return;
         }
