@@ -1,0 +1,2 @@
+fix:
+- [Workspace] Show error for so unassigned data source ([#7690](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7690))

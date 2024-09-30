@@ -17,7 +17,8 @@ export const registerDuplicateRoute = (
   router: IRouter,
   logger: Logger,
   client: IWorkspaceClientImpl,
-  maxImportExportSize: number
+  maxImportExportSize: number,
+  isDataSourceEnabled: boolean
 ) => {
   router.post(
     {
@@ -89,7 +90,7 @@ export const registerDuplicateRoute = (
         overwrite: false,
         createNewCopies: true,
         workspaces: [targetWorkspace],
-        dataSourceEnabled: true,
+        dataSourceEnabled: isDataSourceEnabled,
       });
 
       return res.ok({ body: result });
