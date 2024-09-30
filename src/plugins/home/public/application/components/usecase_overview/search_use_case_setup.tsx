@@ -117,7 +117,7 @@ export const registerContentToSearchUseCasePage = (
     });
   });
 
-  const searchIcon = <EuiIcon color="#9FC4D2" size="l" type="search" />;
+  const searchIcon = <EuiIcon className="searchIcon" size="l" type="search" />;
 
   const searchTypeCards = [
     {
