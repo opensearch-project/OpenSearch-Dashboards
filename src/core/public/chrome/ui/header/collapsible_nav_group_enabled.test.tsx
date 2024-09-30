@@ -69,7 +69,6 @@ describe('<CollapsibleNavGroupEnabled />', () => {
       appId$: new BehaviorSubject('test'),
       basePath: mockBasePath,
       id: 'collapsibe-nav',
-      isLocked: false,
       isNavOpen: false,
       currentWorkspace$: new BehaviorSubject<WorkspaceObject | null>({ id: 'test', name: 'test' }),
       navLinks$: new BehaviorSubject([
@@ -94,7 +93,6 @@ describe('<CollapsibleNavGroupEnabled />', () => {
         ...(props?.navLinks || []),
       ]),
       storage: new StubBrowserStorage(),
-      onIsLockedUpdate: () => {},
       closeNav: () => {},
       navigateToApp: () => Promise.resolve(),
       navigateToUrl: () => Promise.resolve(),
