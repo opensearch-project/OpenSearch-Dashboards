@@ -9,7 +9,6 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiSuperSelect,
-  EuiSuperSelectOption,
   EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -175,7 +174,7 @@ export const WorkspacePermissionSettingInput = ({
           placeholder={
             type === WorkspacePermissionItemType.User
               ? i18n.translate('workspaceForm.permissionSetting.selectUser', {
-                  defaultMessage: 'Enter user name or uer ID',
+                  defaultMessage: 'Enter user name or email address',
                 })
               : i18n.translate('workspaceForm.permissionSetting.selectUserGroup', {
                   defaultMessage: 'Enter group name or group ID',

@@ -131,9 +131,7 @@ export const SelectDataSourcePanel = ({
         )}
       </EuiFlexGroup>
       {assignedDataSourceConnections.length > 0 && <EuiSpacer size="m" />}
-      <EuiFlexItem style={{ maxWidth: 768 }}>
-        {assignedDataSourceConnections.length > 0 && renderTableContent()}
-      </EuiFlexItem>
+      {assignedDataSourceConnections.length > 0 && renderTableContent()}
       {modalVisible && chrome && (
         <AssociationDataSourceModal
           savedObjects={savedObjects}

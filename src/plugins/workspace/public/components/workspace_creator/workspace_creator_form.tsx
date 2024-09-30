@@ -117,34 +117,36 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
           <EuiSpacer size="m" />
           {/* SelectDataSourcePanel is only visible for dashboard admin and when data source is enabled*/}
           {isDashboardAdmin && isDataSourceEnabled && (
-            <EuiPanel>
-              <EuiTitle
-                {...generateRightSidebarScrollProps(RightSidebarScrollField.DataSource)}
-                size="s"
-              >
-                <h3>
-                  {i18n.translate('workspace.creator.form.associateDataSourceTitle', {
-                    defaultMessage: 'Associate data sources',
+            <>
+              <EuiPanel>
+                <EuiTitle
+                  {...generateRightSidebarScrollProps(RightSidebarScrollField.DataSource)}
+                  size="s"
+                >
+                  <h3>
+                    {i18n.translate('workspace.creator.form.associateDataSourceTitle', {
+                      defaultMessage: 'Associate data sources',
+                    })}
+                  </h3>
+                </EuiTitle>
+                <EuiText size="xs">
+                  {i18n.translate('workspace.creator.form.associateDataSourceDescription', {
+                    defaultMessage:
+                      'Add at least one data source that will be available in the workspace. If a selected OpenSearch connection has related Direct Query connections, they will also be available in the workspace.',
                   })}
-                </h3>
-              </EuiTitle>
-              <EuiText size="xs">
-                {i18n.translate('workspace.creator.form.associateDataSourceDescription', {
-                  defaultMessage:
-                    'Add at least one data source that will be available in the workspace. If a selected OpenSearch connection has related Direct Query connections, they will also be available in the workspace.',
-                })}
-              </EuiText>
-              <SelectDataSourcePanel
-                onChange={setSelectedDataSourceConnections}
-                savedObjects={savedObjects}
-                assignedDataSourceConnections={formData.selectedDataSourceConnections}
-                data-test-subj={`workspaceForm-dataSourcePanel`}
-                showDataSourceManagement={true}
-              />
-            </EuiPanel>
+                </EuiText>
+                <SelectDataSourcePanel
+                  onChange={setSelectedDataSourceConnections}
+                  savedObjects={savedObjects}
+                  assignedDataSourceConnections={formData.selectedDataSourceConnections}
+                  data-test-subj={`workspaceForm-dataSourcePanel`}
+                  showDataSourceManagement={true}
+                />
+              </EuiPanel>
+              <EuiSpacer size="s" />
+              <EuiSpacer size="s" />
+            </>
           )}
-          <EuiSpacer size="s" />
-          <EuiSpacer size="s" />
           {permissionEnabled && (
             <>
               <EuiTitle
