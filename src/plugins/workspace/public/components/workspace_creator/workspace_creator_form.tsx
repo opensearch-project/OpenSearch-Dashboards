@@ -123,11 +123,11 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
                   {...generateRightSidebarScrollProps(RightSidebarScrollField.DataSource)}
                   size="s"
                 >
-                  <h3>
+                  <h2>
                     {i18n.translate('workspace.creator.form.associateDataSourceTitle', {
                       defaultMessage: 'Associate data sources',
                     })}
-                  </h3>
+                  </h2>
                 </EuiTitle>
                 <EuiText size="xs">
                   {i18n.translate('workspace.creator.form.associateDataSourceDescription', {
