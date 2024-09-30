@@ -111,17 +111,21 @@ export const SelectDataSourceDetailPanel = ({
       if (result?.success) {
         notifications?.toasts.addSuccess({
           title: i18n.translate('workspace.detail.dataSources.assign.success', {
-            defaultMessage: 'Associate OpenSearch connections successfully',
+            defaultMessage:
+              '{numberOfAssignedDataSources, plural, one {The data source has} other {# data sources have}} been associated to the workspace.',
+            values: { numberOfAssignedDataSources: newAssignedDataSourceConnections.length },
           }),
         });
         setSelectedDataSourceConnections(savedDataSourceConnections);
       } else {
-        throw new Error(result?.error ? result?.error : 'Associate OpenSearch connections failed');
+        throw new Error(result?.error ? result?.error : 'Associate OpenSearch connections failed.');
       }
     } catch (error) {
       notifications?.toasts.addDanger({
         title: i18n.translate('workspace.detail.dataSources.assign.failed', {
-          defaultMessage: 'Failed to associate OpenSearch connections',
+          defaultMessage:
+            'Failed to associate {numberOfAssignedDataSources, plural, one {the data source} other {# data sources}} to the workspace.',
+          values: { numberOfAssignedDataSources: newAssignedDataSourceConnections.length },
         }),
         text: error instanceof Error ? error.message : JSON.stringify(error),
       });
@@ -159,19 +163,23 @@ export const SelectDataSourceDetailPanel = ({
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.detail.dataSources.unassign.success', {
-              defaultMessage: 'The association has been removed',
+              defaultMessage:
+                '{numberOfUnAssignedDataSources, plural, one {# association has} other {# associations have}} been removed.',
+              values: { numberOfUnAssignedDataSources: unAssignedDataSources.length },
             }),
           });
           setSelectedDataSourceConnections(savedDataSourceConnections);
         } else {
           throw new Error(
-            result?.error ? result?.error : 'Remove associated OpenSearch connections failed'
+            result?.error ? result?.error : 'Remove associated OpenSearch connections failed.'
           );
         }
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.detail.dataSources.unassign.failed', {
-            defaultMessage: 'Failed to remove associated OpenSearch connections',
+            defaultMessage:
+              'Failed to remove {numberOfUnAssignedDataSources, plural, one {# associated OpenSearch association} other {# associated OpenSearch associations}}.',
+            values: { numberOfUnAssignedDataSources: unAssignedDataSources.length },
           }),
           text: error instanceof Error ? error.message : JSON.stringify(error),
         });

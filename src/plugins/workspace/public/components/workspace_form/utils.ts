@@ -10,6 +10,7 @@ import { CURRENT_USER_PLACEHOLDER, WorkspacePermissionMode } from '../../../comm
 import { isUseCaseFeatureConfig } from '../../utils';
 import {
   optionIdToWorkspacePermissionModesMap,
+  permissionModeOptions,
   WorkspaceOperationType,
   WorkspacePermissionItemType,
 } from './constants';
@@ -88,6 +89,16 @@ export const getPermissionModeId = (modes: WorkspacePermissionMode[]) => {
     }
   }
   return PermissionModeId.Read;
+};
+
+export const getPermissionModeName = (modes: WorkspacePermissionMode[]) => {
+  for (const key in optionIdToWorkspacePermissionModesMap) {
+    if (optionIdToWorkspacePermissionModesMap[key].every((mode) => modes?.includes(mode))) {
+      return permissionModeOptions.find((option) => option.value === key)?.inputDisplay;
+    }
+  }
+  return permissionModeOptions.find((option) => option.value === PermissionModeId.Read)
+    ?.inputDisplay;
 };
 
 export const convertPermissionSettingsToPermissions = (

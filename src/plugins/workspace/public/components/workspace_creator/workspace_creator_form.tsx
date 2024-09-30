@@ -25,8 +25,6 @@ import {
   WorkspaceFormProps,
 } from '../workspace_form';
 
-import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
-import { WorkspaceFaqPanel } from './workspace_faq_panel';
 import { WorkspaceFormSummaryPanel } from './workspace_form_summary_panel';
 import { generateRightSidebarScrollProps, RightSidebarScrollField } from './utils';
 import { CreatorDetailsPanel } from './creator_details_panel';
@@ -149,7 +147,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
           {permissionEnabled && (
             <EuiPanel>
               <EuiText
-                {...generateRightSidebarScrollProps(RightSidebarScrollField.Member)}
+                {...generateRightSidebarScrollProps(RightSidebarScrollField.Collaborators)}
                 size="s"
               >
                 <h2>{usersAndPermissionsCreatePageTitle}</h2>
@@ -159,7 +157,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
                   defaultMessage: 'Manage access and permissions',
                 })}
               </EuiText>
-              <EuiSpacer size="l" />
+              <EuiSpacer size="m" />
               <EuiDescribedFormGroup
                 title={
                   <h4 {...generateRightSidebarScrollProps(RightSidebarScrollField.Name)}>
@@ -191,18 +189,10 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
       <EuiFlexItem grow={false}>
         <div className="workspaceCreateRightSidebar">
           <div className="workspaceCreateRightSideBarContentWrapper">
-            <WorkspaceFaqPanel />
-            <EuiSpacer size="m" />
             <WorkspaceFormSummaryPanel
               formData={formData}
               availableUseCases={availableUseCases}
               permissionEnabled={permissionEnabled}
-            />
-          </div>
-          <EuiSpacer size="m" />
-          <div className="workspaceCreateRightSideBarActionsWrapper">
-            <WorkspaceCreateActionPanel
-              formData={formData}
               formId={formId}
               application={application}
               isSubmitting={props.isSubmitting}
