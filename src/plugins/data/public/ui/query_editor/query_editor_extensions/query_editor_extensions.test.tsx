@@ -23,6 +23,7 @@ describe('QueryEditorExtensions', () => {
   const defaultProps: QueryEditorExtensionsProps = {
     componentContainer: document.createElement('div'),
     bannerContainer: document.createElement('div'),
+    queryControlsContainer: document.createElement('div'),
     language: 'Test-lang',
     onSelectLanguage: jest.fn(),
     isCollapsed: false,

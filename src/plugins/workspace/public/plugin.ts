@@ -517,9 +517,11 @@ export class WorkspacePlugin
     }
 
     /**
-     * register workspace column into saved objects table
+     * Only register workspace column into saved objects table when out of workspace
      */
-    savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
+    if (!core.workspaces.currentWorkspaceId$.getValue()) {
+      savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
+    }
 
     /**
      * Add workspace list to settings and setup group

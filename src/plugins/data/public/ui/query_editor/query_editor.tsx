@@ -106,6 +106,7 @@ export default class QueryEditorUI extends Component<Props, State> {
   private services = this.props.opensearchDashboards.services;
   private headerRef: RefObject<HTMLDivElement> = createRef();
   private bannerRef: RefObject<HTMLDivElement> = createRef();
+  private queryControlsContainer: RefObject<HTMLDivElement> = createRef();
   private extensionMap = this.languageManager.getQueryEditorExtensionMap();
 
   private getQueryString = () => {
@@ -121,6 +122,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       !(
         this.headerRef.current &&
         this.bannerRef.current &&
+        this.queryControlsContainer.current &&
         this.props.query.language &&
         this.extensionMap &&
         Object.keys(this.extensionMap).length > 0
@@ -137,6 +139,7 @@ export default class QueryEditorUI extends Component<Props, State> {
         configMap={this.extensionMap}
         componentContainer={this.headerRef.current}
         bannerContainer={this.bannerRef.current}
+        queryControlsContainer={this.queryControlsContainer.current}
       />
     );
   }
@@ -336,25 +339,6 @@ export default class QueryEditorUI extends Component<Props, State> {
     return <QueryControls queryControls={queryControls} />;
   };
 
-  private renderExtensionSearchBarButton = () => {
-    if (!this.extensionMap || Object.keys(this.extensionMap).length === 0) return null;
-    const sortedConfigs = Object.values(this.extensionMap).sort((a, b) => a.order - b.order);
-    return (
-      <>
-        {sortedConfigs.map((config) => {
-          return config.getSearchBarButton
-            ? config.getSearchBarButton({
-                language: this.props.query.language,
-                onSelectLanguage: this.onSelectLanguage,
-                isCollapsed: this.state.isCollapsed,
-                setIsCollapsed: this.setIsCollapsed,
-              })
-            : null;
-        })}
-      </>
-    );
-  };
-
   public render() {
     const className = classNames(this.props.className);
 
@@ -471,9 +455,12 @@ export default class QueryEditorUI extends Component<Props, State> {
           {languageSelector}
           <div className="osdQueryEditor__querycontrols">
             <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              <div
+                ref={this.queryControlsContainer}
+                className="osdQueryEditor__extensionQueryControls"
+              />
               {this.renderQueryControls(languageEditor.TopBar.Controls)}
               {!languageEditor.TopBar.Expanded && this.renderToggleIcon()}
-              {!languageEditor.TopBar.Expanded && this.renderExtensionSearchBarButton()}
               {this.props.savedQueryManagement}
             </EuiFlexGroup>
           </div>

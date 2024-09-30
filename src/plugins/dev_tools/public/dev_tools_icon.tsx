@@ -13,6 +13,7 @@ import {
   EuiSmallButton,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { CoreStart } from 'opensearch-dashboards/public';
@@ -54,14 +55,20 @@ export function DevToolsIcon({
 
   return (
     <>
-      <EuiButtonIcon
-        aria-label="go-to-dev-tools"
-        iconType="consoleApp"
-        data-test-subj="openDevToolsModal"
-        onClick={() => {
-          setModalVisible(true);
-        }}
-      />
+      <EuiToolTip
+        content={i18n.translate('devTools.icon.nav.title', {
+          defaultMessage: 'Developer tools',
+        })}
+      >
+        <EuiButtonIcon
+          aria-label="go-to-dev-tools"
+          iconType="consoleApp"
+          data-test-subj="openDevToolsModal"
+          onClick={() => {
+            setModalVisible(true);
+          }}
+        />
+      </EuiToolTip>
       {modalVisible ? (
         /**
          * We can not use OuiModal component here because OuiModal uses OuiOverlayMask as its parent node
