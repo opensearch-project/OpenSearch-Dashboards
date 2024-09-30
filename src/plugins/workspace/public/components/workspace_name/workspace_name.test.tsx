@@ -4,7 +4,7 @@
  */
 
 import { render } from '@testing-library/react';
-import { WorkspaceNameWithIcon } from './workspace_name_with_icon';
+import { WorkspaceTitleDisplay } from './workspace_name';
 import React from 'react';
 import { DEFAULT_NAV_GROUPS, WorkspaceObject } from '../../../../../core/public';
 
@@ -25,7 +25,7 @@ describe('<WorkspaceNameWithIcon />', () => {
 
   test('should render normally', () => {
     const { queryByText, queryByTestId } = render(
-      <WorkspaceNameWithIcon workspace={workspace} availableUseCases={availableUseCases} />
+      <WorkspaceTitleDisplay workspace={workspace} availableUseCases={availableUseCases} />
     );
     expect(queryByText('Foo')).toBeInTheDocument();
     expect(queryByTestId('foo-icon')).toBeInTheDocument();

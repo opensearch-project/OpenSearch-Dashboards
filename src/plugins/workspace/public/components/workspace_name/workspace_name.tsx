@@ -14,7 +14,7 @@ interface Props {
   availableUseCases: WorkspaceUseCase[];
 }
 
-export const WorkspaceNameWithIcon = ({ workspace, availableUseCases }: Props) => {
+export const WorkspaceTitleDisplay = ({ workspace, availableUseCases }: Props) => {
   const useCase = getUseCase(workspace, availableUseCases);
 
   return (

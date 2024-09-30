@@ -33,6 +33,13 @@ export const SearchUseCaseOverviewApp = ({ contentManagement }: Props) => {
     const titleWithUseCase = i18n.translate('home.searchOverview.titleWithUseCase', {
       defaultMessage: 'Search Overview',
     });
+
+    /**
+     * There have three cases for the page title:
+     * 1. Search workspace which currentNavGroup is Search, then the page title is "Overview" as workspace name has the use case information
+     * 2. Analytics(All) workspace which currentNavGroup is All, then the page title is "Search Overview" to differentiate with other overview pages like Observability/Security Analytics
+     * 3. workspace is disable, the currentNavGroup is undefined or All, then the page title is "Search Overview" to indicate this overview page is for search
+     */
     const breadcrumbs: EuiBreadcrumb[] = [
       {
         text: isSearchUseCase ? title : titleWithUseCase,

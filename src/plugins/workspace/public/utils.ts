@@ -47,7 +47,7 @@ import {
   DATA_SOURCE_SAVED_OBJECT_TYPE,
   DATA_CONNECTION_SAVED_OBJECT_TYPE,
 } from '../../data_source/common';
-import { WorkspaceNameWithIcon } from './components/workspace_name/workspace_name_with_icon';
+import { WorkspaceTitleDisplay } from './components/workspace_name/workspace_name';
 
 export const isUseCaseFeatureConfig = (featureConfig: string) =>
   featureConfig.startsWith(USE_CASE_PREFIX);
@@ -452,7 +452,7 @@ export function prependWorkspaceToBreadcrumbs(
   if (currentWorkspace) {
     const useCase = getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features || []);
     const workspaceBreadcrumb: ChromeBreadcrumb = {
-      text: React.createElement(WorkspaceNameWithIcon, {
+      text: React.createElement(WorkspaceTitleDisplay, {
         workspace: currentWorkspace,
         availableUseCases,
       }),

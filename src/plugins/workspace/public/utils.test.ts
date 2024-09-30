@@ -717,7 +717,7 @@ describe('workspace utils: prependWorkspaceToBreadcrumbs', () => {
     const enrichedBreadcrumbs = enricher?.(breadcrumbs);
     expect(enrichedBreadcrumbs).toHaveLength(2);
     expect(enrichedBreadcrumbs?.[0].text).toMatchInlineSnapshot(`
-      <WorkspaceNameWithIcon
+      <WorkspaceTitleDisplay
         availableUseCases={Array []}
         workspace={
           Object {
