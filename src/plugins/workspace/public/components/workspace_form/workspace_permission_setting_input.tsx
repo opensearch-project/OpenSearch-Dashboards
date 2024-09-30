@@ -9,6 +9,7 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiSuperSelect,
+  EuiSuperSelectOption,
   EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
