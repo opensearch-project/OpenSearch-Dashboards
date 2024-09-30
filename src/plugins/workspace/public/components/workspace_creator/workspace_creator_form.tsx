@@ -11,7 +11,6 @@ import {
   EuiText,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiPanel,
   EuiSplitPanel,
   EuiDescribedFormGroup,
 } from '@elastic/eui';
@@ -154,7 +153,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
                   {...generateRightSidebarScrollProps(RightSidebarScrollField.Member)}
                   size="s"
                 >
-                  <h3>{usersAndPermissionsCreatePageTitle}</h3>
+                  <h2>{usersAndPermissionsCreatePageTitle}</h2>
                 </EuiTitle>
                 <EuiText size="xs">
                   {i18n.translate('workspace.creator.form.usersAndPermissionsDescription', {
