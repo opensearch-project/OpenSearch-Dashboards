@@ -102,7 +102,7 @@ export class WorkspaceUiSettingsClientWrapper {
       /**
        * When updating ui settings within a workspace, it will update the workspace ui settings,
        * the global ui settings will remain unchanged.
-       * Allow user to update user level settings.
+       * Skip updating workspace level setting if the request is updating user level setting specifically.
        */
       if (type === 'config' && requestWorkspaceId && !id.startsWith(CURRENT_USER_PLACEHOLDER)) {
         const configObject = await wrapperOptions.client.get<Record<string, any>>(
