@@ -64,10 +64,17 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
     setPopover(false);
   };
   const button = currentWorkspace ? (
-    <EuiPanel paddingSize="none" color="transparent" hasBorder={false} hasShadow={false}>
+    <EuiPanel
+      paddingSize="none"
+      color="transparent"
+      hasBorder={false}
+      hasShadow={false}
+      data-test-subj="workspace-selector-button"
+      onClick={onButtonClick}
+    >
       <EuiText
         size="xs"
-        // here I try inline style to achive the label looks
+        // TODO: Use standard OuiComponent to achieve the label looks
         style={{
           position: 'relative',
           bottom: '-10px',
@@ -75,7 +82,11 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
           padding: '0 5px',
         }}
       >
-        <p>worksapce</p>
+        <small>
+          {i18n.translate('workspace.left.nav.selector.label', {
+            defaultMessage: 'WORKSPACE',
+          })}
+        </small>
       </EuiText>
       <EuiPanel paddingSize="s" borderRadius="m">
         <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
@@ -97,18 +108,18 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText size="xs" color="subdued">
-                      <p>
+                      <small>
                         {i18n.translate('workspace.left.nav.selector.description', {
                           defaultMessage: getUseCase(currentWorkspace)?.title || '',
                         })}
-                      </p>
+                      </small>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false} style={{ alignSelf: 'center' }} onClick={onButtonClick}>
+          <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
             <EuiIcon type="arrowDown" size="m" />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -136,7 +147,7 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
             hasBorder={false}
             hasShadow={false}
             color="transparent"
-            // set the width fixed to achieve a similar appearance to Superselect
+            // set the width fixed to achieve text truncation
             style={{ height: '40vh', width: '310px' }}
           >
             <WorkspacePickerContent
@@ -158,10 +169,6 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
                   color="primary"
                   size="xs"
                   data-test-subj="workspace-menu-manage-button"
-                  onClick={() => {
-                    closePopover();
-                    coreStart.application.navigateToApp(WORKSPACE_LIST_APP_ID);
-                  }}
                 >
                   <EuiText size="s">{manageWorkspacesButton}</EuiText>
                 </EuiButtonEmpty>

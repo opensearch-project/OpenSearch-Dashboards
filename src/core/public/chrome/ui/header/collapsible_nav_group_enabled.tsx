@@ -14,7 +14,7 @@ import {
   EuiShowFor,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import classNames from 'classnames';
@@ -79,6 +79,10 @@ export function CollapsibleNavGroupEnabled({
   id,
   isNavOpen,
   storage = window.localStorage,
+<<<<<<< HEAD
+=======
+  currentWorkspace$,
+>>>>>>> 3dce1748aa (fix/the_UI_of_recent_assets, resolve comments)
   closeNav,
   navigateToApp,
   navigateToUrl,
@@ -88,6 +92,7 @@ export function CollapsibleNavGroupEnabled({
   collapsibleNavHeaderRender,
   ...observables
 }: CollapsibleNavGroupEnabledProps) {
+  const currentWorkspace = useObservable(currentWorkspace$);
   const allNavLinks = useObservable(observables.navLinks$, []);
   const navLinks = allNavLinks.filter((link) => !link.hidden);
   const homeLink = useMemo(() => allNavLinks.find((item) => item.id === 'home'), [allNavLinks]);
@@ -308,7 +313,7 @@ export function CollapsibleNavGroupEnabled({
               shouldShrinkNavigation={!isNavOpen}
               onClickShrink={closeNav}
               visibleUseCases={visibleUseCases}
-              currentWorkspace$={observables.currentWorkspace$}
+              currentWorkspace={currentWorkspace}
             />
           </EuiPanel>
         )}
@@ -320,13 +325,16 @@ export function CollapsibleNavGroupEnabled({
             hasShadow={false}
             className="eui-yScroll flex-1-container"
           >
-            {shouldShowCollapsedNavHeaderContent && collapsibleNavHeaderRender ? (
+            {shouldShowCollapsedNavHeaderContent &&
+            collapsibleNavHeaderRender &&
+            !currentWorkspace ? (
               <>
                 <EuiPanel
                   paddingSize="none"
                   color="transparent"
                   hasBorder={false}
                   hasShadow={false}
+                  style={{ height: '40vh' }}
                 >
                   {collapsibleNavHeaderRender()}
                 </EuiPanel>

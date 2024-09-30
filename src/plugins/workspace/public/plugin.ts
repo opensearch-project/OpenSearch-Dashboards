@@ -537,50 +537,24 @@ export class WorkspacePlugin
     ]);
 
     if (core.chrome.navGroup.getNavGroupEnabled()) {
-      /**
-       * Show workspace picker content when outside of workspace and not in any nav group
-       */
       core.chrome.registerCollapsibleNavHeader(() => {
         if (!this.coreStart) {
           return null;
         }
-        return React.createElement(EuiPanel, {
-          hasShadow: false,
-          hasBorder: false,
-          paddingSize: 's',
-          style: { height: '65vh' },
-          children: [
-            React.createElement(WorkspacePickerContent, {
-              key: 'workspacePickerContent',
-              coreStart: this.coreStart,
-              registeredUseCases$: this.registeredUseCases$,
-              isInTwoLines: true,
-            }),
-          ],
-        });
-      });
-    }
-
-    if (workspaceId) {
-      /**
-       * Show workspace selector when inside of workspace
-       */
-      core.chrome.registerCollapsibleNavHeader(() => {
-        if (!this.coreStart) {
-          return null;
+        if (workspaceId) {
+          return React.createElement(WorkspaceSelector, {
+            key: 'workspaceSelector',
+            coreStart: this.coreStart,
+            registeredUseCases$: this.registeredUseCases$,
+          });
+        } else {
+          return React.createElement(WorkspacePickerContent, {
+            key: 'workspacePickerContent',
+            coreStart: this.coreStart,
+            registeredUseCases$: this.registeredUseCases$,
+            isInTwoLines: true,
+          });
         }
-        return React.createElement(EuiPanel, {
-          hasShadow: false,
-          hasBorder: false,
-          paddingSize: 'none',
-          children: [
-            React.createElement(WorkspaceSelector, {
-              key: 'workspaceSelector',
-              coreStart: this.coreStart,
-              registeredUseCases$: this.registeredUseCases$,
-            }),
-          ],
-        });
       });
     }
 

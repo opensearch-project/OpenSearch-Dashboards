@@ -176,12 +176,12 @@ export const WorkspacePickerContent = ({
                     <EuiFlexGroup justifyContent="spaceBetween">
                       <EuiFlexItem className="eui-textLeft" grow={false}>
                         <EuiText size="xs" color="subdued">
-                          {useCase?.title}
+                          <small>{useCase?.title}</small>
                         </EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem grow={1} style={{ position: 'absolute', right: '0px' }}>
                         <EuiText size="xs" color="subdued">
-                          <p> {workspace.accessTime}</p>
+                          <small> {workspace.accessTime}</small>
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>

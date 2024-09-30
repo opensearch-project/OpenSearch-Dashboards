@@ -4,6 +4,7 @@
  */
 
 import { WorkspacePlugin } from './plugin';
+
 export function plugin() {
   return new WorkspacePlugin();
 }
