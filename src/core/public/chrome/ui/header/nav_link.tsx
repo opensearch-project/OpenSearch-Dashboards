@@ -126,7 +126,7 @@ export function createRecentNavLink(
   navLinks: ChromeNavLink[],
   basePath: HttpStart['basePath'],
   navigateToUrl: InternalApplicationStart['navigateToUrl'],
-  workspaceEnabled: boolean = true
+  workspaceEnabled: boolean = false
 ): RecentNavLink {
   const { link, label, workspaceId } = recentLink;
   const href = relativeToAbsolute(
