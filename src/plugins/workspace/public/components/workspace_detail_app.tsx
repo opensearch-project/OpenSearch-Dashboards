@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import { CoreStart } from 'opensearch-dashboards/public';
+import { AppMountParameters, CoreStart } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { of } from 'rxjs';
@@ -41,7 +41,11 @@ function getFormDataFromWorkspace(
   };
 }
 
-export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
+export interface WorkspaceDetailPropsWithOnAppLeave extends WorkspaceDetailProps {
+  onAppLeave: AppMountParameters['onAppLeave'];
+}
+
+export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) => {
   const {
     services: {
       workspaces,
@@ -153,6 +157,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
           }
           return;
         } else {
+          setIsFormSubmitting(false);
           throw new Error(result?.error ? result?.error : 'update workspace failed');
         }
       } catch (error) {
@@ -162,9 +167,8 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
           }),
           text: error instanceof Error ? error.message : JSON.stringify(error),
         });
-        return;
-      } finally {
         setIsFormSubmitting(false);
+        return;
       }
     },
     [isFormSubmitting, currentWorkspace, notifications?.toasts, workspaceClient, application, http]
@@ -183,6 +187,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
       onSubmit={handleWorkspaceFormSubmit}
       defaultValues={currentWorkspaceFormData}
       availableUseCases={availableUseCases}
+      onAppLeave={props.onAppLeave}
     >
       <I18nProvider>
         <WorkspaceDetail {...props} isFormSubmitting={isFormSubmitting} />
