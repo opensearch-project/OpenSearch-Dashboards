@@ -11,7 +11,6 @@ import {
   EuiText,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiSplitPanel,
   EuiDescribedFormGroup,
   EuiPanel,
 } from '@elastic/eui';
