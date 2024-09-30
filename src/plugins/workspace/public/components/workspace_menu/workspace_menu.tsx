@@ -101,7 +101,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
         direction="column"
         alignItems="center"
         gutterSize="none"
-        style={{ width: '300px' }}
+        style={{ width: '310px' }}
       >
         <EuiFlexItem style={{ padding: '24px' }}>
           <EuiFlexGroup

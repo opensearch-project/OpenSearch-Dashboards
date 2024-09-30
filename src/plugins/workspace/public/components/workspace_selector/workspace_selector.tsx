@@ -137,7 +137,7 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
             hasShadow={false}
             color="transparent"
             // set the width fixed to achieve a similar appearance to Superselect
-            style={{ height: '40vh', width: '300px' }}
+            style={{ height: '40vh', width: '310px' }}
           >
             <WorkspacePickerContent
               coreStart={coreStart}
