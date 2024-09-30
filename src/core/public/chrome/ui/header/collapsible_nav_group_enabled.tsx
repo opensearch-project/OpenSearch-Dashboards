@@ -228,7 +228,7 @@ export function CollapsibleNavGroupEnabled({
           <EuiPanel
             hasBorder={false}
             borderRadius="none"
-            paddingSize={!isNavOpen ? 's' : 'l'}
+            paddingSize={!isNavOpen ? 's' : 'm'}
             hasShadow={false}
             className="eui-yScroll flex-1-container"
             color="transparent"
