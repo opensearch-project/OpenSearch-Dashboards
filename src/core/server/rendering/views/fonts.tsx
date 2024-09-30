@@ -127,36 +127,6 @@ export const Fonts: FunctionComponent<Props> = ({ url, theme }) => {
       },
     ],
   };
-  const firaCode: FontFace = {
-    family: 'Fira Code',
-    variants: [
-      {
-        weight: 300,
-        style: 'normal',
-        sources: [`${url}/fonts/fira_code/static/FiraCode-Light.woff2`],
-      },
-      {
-        weight: 400,
-        style: 'normal',
-        sources: [`${url}/fonts/fira_code/static/FiraCode-Regular.woff2`],
-      },
-      {
-        weight: 500,
-        style: 'normal',
-        sources: [`${url}/fonts/fira_code/static/FiraCode-Medium.woff2`],
-      },
-      {
-        weight: 600,
-        style: 'normal',
-        sources: [`${url}/fonts/fira_code/static/FiraCode-SemiBold.woff2`],
-      },
-      {
-        weight: 700,
-        style: 'normal',
-        sources: [`${url}/fonts/fira_code/static/FiraCode-Bold.woff2`],
-      },
-    ],
-  };
 
   // For next theme
   const sourceSans3: FontFace = {
@@ -651,10 +621,10 @@ export const Fonts: FunctionComponent<Props> = ({ url, theme }) => {
     ({
       v7: roboto,
       v8: sourceCodePro,
-      v9: firaCode,
+      v9: sourceCodePro,
     } as Record<string, FontFace>)[theme as string] || sourceCodePro;
 
-  const fontsDefinitionRules = [interUi, sourceSans3, roboto, sourceCodePro, rubik, firaCode]
+  const fontsDefinitionRules = [interUi, sourceSans3, roboto, sourceCodePro, rubik]
     .flatMap(({ family, variants }) =>
       variants.map(({ style, weight, format, sources, unicodeRange }) => {
         const src = sources
