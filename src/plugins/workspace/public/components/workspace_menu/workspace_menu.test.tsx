@@ -141,7 +141,7 @@ describe('<WorkspaceMenu />', () => {
 
     fireEvent.click(screen.getByTestId('workspace-select-button'));
     expect(screen.getByTestId('workspace-menu-current-workspace-name')).toBeInTheDocument();
-    expect(screen.getByTestId('workspace-menu-current-use-case')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-current-workspace-use-case')).toBeInTheDocument();
     expect(screen.getByTestId('current-workspace-icon-wsObservability')).toBeInTheDocument();
     expect(screen.getByText('Observability')).toBeInTheDocument();
   });

@@ -70,7 +70,7 @@ const customCategory: AppCategory = {
 };
 
 enum NavWidth {
-  Expanded = 350,
+  Expanded = 270,
   Collapsed = 48, // The Collasped width is supposed to be aligned with the hamburger icon on the top left navigation.
 }
 

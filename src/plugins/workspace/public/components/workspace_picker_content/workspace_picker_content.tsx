@@ -54,13 +54,14 @@ interface Props {
   coreStart: CoreStart;
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
   onClickWorkspace?: () => void;
-  isReturnLists?: boolean;
+  isInTwoLines?: boolean;
 }
 
 export const WorkspacePickerContent = ({
   coreStart,
   registeredUseCases$,
   onClickWorkspace,
+  isInTwoLines,
 }: Props) => {
   const isDashboardAdmin = coreStart.application.capabilities?.dashboards?.isDashboardAdmin;
   const availableUseCases = useObservable(registeredUseCases$, []);
@@ -164,26 +165,52 @@ export const WorkspacePickerContent = ({
               />
             }
             label={
-              <EuiFlexGroup direction="column" gutterSize="none" className="eui-fullWidth">
-                <EuiFlexItem>
-                  <EuiText className="eui-textTruncate">{workspace.name}</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGroup justifyContent="spaceBetween">
-                    <EuiFlexItem className="eui-textLeft" grow={false}>
-                      <EuiText size="xs" color="subdued">
-                        {useCase?.title}
-                      </EuiText>
-                    </EuiFlexItem>
-                    {/* text-alignRight is ineffective here*/}
-                    <EuiFlexItem grow={1} style={{ position: 'absolute', right: '0px' }}>
-                      <EuiText size="xs" color="subdued">
-                        {workspace.accessTime}
-                      </EuiText>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              !isInTwoLines ? (
+                <EuiFlexGroup direction="column" gutterSize="none" className="eui-fullWidth">
+                  <EuiFlexItem>
+                    <EuiText className="eui-textTruncate" size="s">
+                      {workspace.name}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFlexGroup justifyContent="spaceBetween">
+                      <EuiFlexItem className="eui-textLeft" grow={false}>
+                        <EuiText size="xs" color="subdued">
+                          {useCase?.title}
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={1} style={{ position: 'absolute', right: '0px' }}>
+                        <EuiText size="xs" color="subdued">
+                          <p> {workspace.accessTime}</p>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) : (
+                <EuiFlexGroup
+                  direction="column"
+                  gutterSize="none"
+                  className="eui-fullWidth"
+                  alignItems="flexStart"
+                >
+                  <EuiFlexItem>
+                    <EuiText className="eui-textTruncate" size="s">
+                      {workspace.name}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="xs" color="subdued">
+                      {useCase?.title}
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="xs" color="subdued">
+                      {workspace.accessTime}
+                    </EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )
             }
             onClick={() => {
               onClickWorkspace?.();
@@ -200,9 +227,7 @@ export const WorkspacePickerContent = ({
     const listItems = getWorkspaceLists(filterWorkspaceList);
     return (
       <>
-        <EuiListGroup gutterSize="none" maxWidth="300px">
-          {listItems}
-        </EuiListGroup>
+        <EuiListGroup gutterSize="none">{listItems}</EuiListGroup>
       </>
     );
   };
@@ -223,10 +248,9 @@ export const WorkspacePickerContent = ({
         paddingSize="none"
         hasBorder={false}
         hasShadow={false}
-        color="transparent"
         // adding this inline style to make sure that part of list won't be hidden
         style={{ maxHeight: 'calc(100% - 50px)' }}
-        className="euiYScrollWithShadows"
+        className="euiYScrollWithShadows eui-fullWidth"
       >
         {queriedWorkspace.length > 0 && getWorkspaceListGroup(queriedWorkspace)}
 

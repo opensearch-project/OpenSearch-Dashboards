@@ -90,9 +90,9 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup direction="column" gutterSize="none">
-                  <EuiFlexItem grow={false} style={{ maxWidth: '150px' }}>
+                  <EuiFlexItem grow={false} style={{ maxWidth: '130px' }}>
                     <EuiText size="s">
-                      <h3 className="eui-textTruncate">{currentWorkspace.name}</h3>
+                      <h4 className="eui-textTruncate">{currentWorkspace.name}</h4>
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
@@ -121,11 +121,10 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
   return (
     <EuiPopover
       button={button}
-      hasArrow={false}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelPaddingSize="s"
-      anchorPosition="downCenter"
+      anchorPosition="downLeft"
       repositionOnScroll={true}
       display="block"
       className="eui-fullWidth"
@@ -138,12 +137,13 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
             hasShadow={false}
             color="transparent"
             // set the width fixed to achieve a similar appearance to Superselect
-            style={{ height: '42vh', width: '282px' }}
+            style={{ height: '40vh', width: '300px' }}
           >
             <WorkspacePickerContent
               coreStart={coreStart}
               registeredUseCases$={registeredUseCases$}
               onClickWorkspace={() => setPopover(false)}
+              isInTwoLines={false}
             />
           </EuiPanel>
         </EuiFlexItem>
