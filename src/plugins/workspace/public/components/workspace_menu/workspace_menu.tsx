@@ -126,12 +126,12 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText
-                    size="xs"
+                    size="s"
                     data-test-subj="workspace-menu-current-workspace-use-case"
                     textAlign="center"
                     color="subdued"
                   >
-                    <p>{getUseCase(currentWorkspace)?.title ?? ''}</p>
+                    <small>{getUseCase(currentWorkspace)?.title ?? ''}</small>
                   </EuiText>
                 </EuiFlexItem>
               </>

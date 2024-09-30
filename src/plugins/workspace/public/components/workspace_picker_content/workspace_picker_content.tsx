@@ -175,12 +175,12 @@ export const WorkspacePickerContent = ({
                   <EuiFlexItem>
                     <EuiFlexGroup justifyContent="spaceBetween">
                       <EuiFlexItem className="eui-textLeft" grow={false}>
-                        <EuiText size="xs" color="subdued">
+                        <EuiText size="s" color="subdued">
                           <small>{useCase?.title}</small>
                         </EuiText>
                       </EuiFlexItem>
                       <EuiFlexItem grow={1} style={{ position: 'absolute', right: '0px' }}>
-                        <EuiText size="xs" color="subdued">
+                        <EuiText size="s" color="subdued">
                           <small> {workspace.accessTime}</small>
                         </EuiText>
                       </EuiFlexItem>
@@ -200,13 +200,13 @@ export const WorkspacePickerContent = ({
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiText size="xs" color="subdued">
-                      {useCase?.title}
+                    <EuiText size="s" color="subdued">
+                      <small>{useCase?.title}</small>
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiText size="xs" color="subdued">
-                      {workspace.accessTime}
+                    <EuiText size="s" color="subdued">
+                      <small> {workspace.accessTime}</small>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>

@@ -169,6 +169,10 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
                   color="primary"
                   size="xs"
                   data-test-subj="workspace-menu-manage-button"
+                  onClick={() => {
+                    closePopover();
+                    coreStart.application.navigateToApp(WORKSPACE_LIST_APP_ID);
+                  }}
                 >
                   <EuiText size="s">{manageWorkspacesButton}</EuiText>
                 </EuiButtonEmpty>
