@@ -23,7 +23,6 @@ import { ChromeNavControl, ChromeNavLink } from '../..';
 import { AppCategory, NavGroupType } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { OnIsLockedUpdate } from './';
 import { createEuiListItem } from './nav_link';
 import type { Logos } from '../../../../common/types';
 import {
@@ -42,11 +41,9 @@ export interface CollapsibleNavGroupEnabledProps {
   collapsibleNavHeaderRender?: () => JSX.Element | null;
   basePath: HttpStart['basePath'];
   id: string;
-  isLocked: boolean;
   isNavOpen: boolean;
   navLinks$: Rx.Observable<ChromeNavLink[]>;
   storage?: Storage;
-  onIsLockedUpdate: OnIsLockedUpdate;
   closeNav: () => void;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
@@ -80,10 +77,8 @@ enum NavWidth {
 export function CollapsibleNavGroupEnabled({
   basePath,
   id,
-  isLocked,
   isNavOpen,
   storage = window.localStorage,
-  onIsLockedUpdate,
   closeNav,
   navigateToApp,
   navigateToUrl,
