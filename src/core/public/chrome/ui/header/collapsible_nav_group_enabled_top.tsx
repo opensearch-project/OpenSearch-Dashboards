@@ -70,7 +70,9 @@ export const CollapsibleNavTop = ({
       hasShadow={false}
       className="navGroupEnabledNavTopWrapper"
     >
-      <EuiFlexGroup responsive={false} alignItems="center" justifyContent="spaceBetween">
+      {/* The spacer here is used for align with the page header */}
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
         {!shouldShrinkNavigation ? (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty flush="both" {...homeLinkProps} onClick={onIconClick}>
@@ -87,10 +89,10 @@ export const CollapsibleNavTop = ({
             onClick={onClickShrink}
             iconType={shouldShrinkNavigation ? 'menu' : 'menuLeft'}
             color="subdued"
-            display={shouldShrinkNavigation ? 'empty' : 'base'}
+            display="empty"
             aria-label="shrink-button"
             data-test-subj="collapsibleNavShrinkButton"
-            size="s"
+            size="xs"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -48,7 +48,12 @@
   }
 
   .nav-link-item-category-button {
-    margin-bottom: $euiSizeS;
+    margin-bottom: $euiSizeXS;
+
+    // Use a smaller vertical padding so that category title looks more grouped to the items
+    .nav-link-item {
+      padding: $euiSizeXS $euiSizeS;
+    }
   }
 
   .nav-link-item-category-item {
