@@ -4,7 +4,15 @@
  */
 
 import React, { useCallback, useRef } from 'react';
-import { EuiSpacer, EuiTitle, EuiForm, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiTitle,
+  EuiForm,
+  EuiText,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiPanel,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
   useWorkspaceForm,
@@ -109,7 +117,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
           <EuiSpacer size="m" />
           {/* SelectDataSourcePanel is only visible for dashboard admin and when data source is enabled*/}
           {isDashboardAdmin && isDataSourceEnabled && (
-            <>
+            <EuiPanel>
               <EuiTitle
                 {...generateRightSidebarScrollProps(RightSidebarScrollField.DataSource)}
                 size="s"
@@ -123,7 +131,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
               <EuiText size="xs">
                 {i18n.translate('workspace.creator.form.associateDataSourceDescription', {
                   defaultMessage:
-                    'Add data sources that will be available in the workspace. If a selected OpenSearch connection has embedded Direct Query connection, they will also be available in the workspace.',
+                    'Add at least one data source that will be available in the workspace. If a selected OpenSearch connection has related Direct Query connections, they will also be available in the workspace.',
                 })}
               </EuiText>
               <SelectDataSourcePanel
@@ -133,10 +141,10 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
                 data-test-subj={`workspaceForm-dataSourcePanel`}
                 showDataSourceManagement={true}
               />
-              <EuiSpacer size="s" />
-              <EuiSpacer size="s" />
-            </>
+            </EuiPanel>
           )}
+          <EuiSpacer size="s" />
+          <EuiSpacer size="s" />
           {permissionEnabled && (
             <>
               <EuiTitle
