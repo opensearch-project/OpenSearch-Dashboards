@@ -40,9 +40,7 @@ describe('<WorkspaceSelector />', () => {
       navigateToApp,
     };
 
-    const mockCurrentWorkspace = [
-      { id: 'workspace-1', name: 'workspace 1', timestamp: 1234567890 },
-    ];
+    const mockCurrentWorkspace = [{ id: 'workspace-1', name: 'workspace 1' }];
     coreStartMock.workspaces.currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(
       mockCurrentWorkspace
     );
@@ -65,6 +63,11 @@ describe('<WorkspaceSelector />', () => {
     jest.restoreAllMocks();
   });
 
+  it('should display the current workspace name', () => {
+    render(<WorkspaceSelectorCreatorComponent />);
+    expect(screen.getByTestId('workspace-selector-current-title')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-selector-current-name')).toBeInTheDocument();
+  });
   it('should display a list of workspaces in the dropdown', () => {
     jest
       .spyOn(recentWorkspaceManager, 'getRecentWorkspaces')

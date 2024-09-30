@@ -102,14 +102,18 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup direction="column" gutterSize="none">
                   <EuiFlexItem grow={false} style={{ maxWidth: '130px' }}>
-                    <EuiText size="s">
+                    <EuiText size="s" data-test-subj="workspace-selector-current-name">
                       <h4 className="eui-textTruncate">{currentWorkspace.name}</h4>
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiText size="xs" color="subdued">
+                    <EuiText
+                      size="xs"
+                      color="subdued"
+                      data-test-subj="workspace-selector-current-title"
+                    >
                       <small>
-                        {i18n.translate('workspace.left.nav.selector.description', {
+                        {i18n.translate('workspace.left.nav.selector.title', {
                           defaultMessage: getUseCase(currentWorkspace)?.title || '',
                         })}
                       </small>
@@ -160,7 +164,7 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
         </EuiFlexItem>
 
         {isDashboardAdmin && (
-          <EuiFlexItem className="eui-fullWidth" style={{ padding: '4px' }}>
+          <EuiFlexItem className="eui-fullWidth">
             <EuiHorizontalRule size="full" margin="none" />
             <EuiSpacer size="s" />
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

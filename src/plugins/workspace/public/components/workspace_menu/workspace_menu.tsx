@@ -25,7 +25,7 @@ import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { WorkspaceUseCase } from '../../types';
 import { validateWorkspaceColor } from '../../../common/utils';
 import { WorkspacePickerContent } from '../workspace_picker_content/workspace_picker_content';
-
+import './workspace_menu.scss';
 const defaultHeaderName = i18n.translate('workspace.menu.defaultHeaderName', {
   defaultMessage: 'Workspaces',
 });
@@ -102,7 +102,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
         gutterSize="none"
         style={{ width: '310px' }}
       >
-        <EuiFlexItem style={{ padding: '24px' }}>
+        <EuiFlexItem className="workspaceMenuHeader">
           <EuiFlexGroup
             justifyContent="spaceAround"
             alignItems="center"
