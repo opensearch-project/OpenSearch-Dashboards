@@ -60,7 +60,7 @@ export class QueryStringManager {
     return this.storage.get('userQueryString') || '';
   }
 
-  public getDefaultQuery() {
+  public getDefaultQuery(): Query {
     const defaultLanguageId = this.getDefaultLanguage();
     const defaultQuery = this.getDefaultQueryString();
     const defaultDataset = this.datasetService?.getDefault();
