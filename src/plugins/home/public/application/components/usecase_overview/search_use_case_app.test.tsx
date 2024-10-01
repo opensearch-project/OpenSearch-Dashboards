@@ -10,8 +10,8 @@ import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_d
 import { contentManagementPluginMocks } from '../../../../../content_management/public/mocks';
 import { SearchUseCaseOverviewApp } from './search_use_case_app';
 import { ContentManagementPluginStart } from '../../../../../content_management/public';
+import { ALL_USE_CASE_ID, SEARCH_USE_CASE_ID } from '../../../../../../core/public';
 import { BehaviorSubject } from 'rxjs';
-import { WorkspaceObject } from 'opensearch-dashboards/public';
 
 describe('<SearchUseCaseOverviewApp />', () => {
   const renderPageMock = jest.fn();
@@ -20,7 +20,18 @@ describe('<SearchUseCaseOverviewApp />', () => {
     ...contentManagementPluginMocks.createStartContract(),
     renderPage: renderPageMock,
   };
-  const coreStartMocks = coreMock.createStart();
+  const core = coreMock.createStart();
+  const currentNavGroupMock = new BehaviorSubject({ id: 'Search' });
+  const coreStartMocks = {
+    ...core,
+    chrome: {
+      ...core.chrome,
+      navGroup: {
+        ...core.chrome.navGroup,
+        getCurrentNavGroup$: jest.fn(() => currentNavGroupMock),
+      },
+    },
+  };
 
   function renderSearchUseCaseOverviewApp(
     contentManagement: ContentManagementPluginStart,
@@ -37,7 +48,8 @@ describe('<SearchUseCaseOverviewApp />', () => {
     jest.clearAllMocks();
   });
 
-  it('render for workspace disabled case', () => {
+  it('render page normally', () => {
+    currentNavGroupMock.next({ id: SEARCH_USE_CASE_ID });
     const { container } = render(renderSearchUseCaseOverviewApp(mock, coreStartMocks));
 
     expect(container).toMatchInlineSnapshot(`
@@ -46,33 +58,16 @@ describe('<SearchUseCaseOverviewApp />', () => {
       </div>
     `);
 
-    expect(coreStartMocks.chrome.setBreadcrumbs).toHaveBeenCalledWith([
-      { text: 'Search overview' },
-    ]);
+    expect(coreStartMocks.chrome.setBreadcrumbs).toHaveBeenCalledWith([{ text: 'Overview' }]);
     expect(mock.renderPage).toBeCalledWith('search_overview');
   });
 
-  it('render for workspace enabled case', () => {
-    const coreStartMocksWithWorkspace = {
-      ...coreStartMocks,
-      workspaces: {
-        ...coreStartMocks.workspaces,
-        currentWorkspace$: new BehaviorSubject({
-          id: 'foo',
-          name: 'foo ws',
-        }),
-      },
-    };
+  it('set page title correctly in all use case', () => {
+    currentNavGroupMock.next({ id: ALL_USE_CASE_ID });
+    render(renderSearchUseCaseOverviewApp(mock, coreStartMocks));
 
-    const { container } = render(renderSearchUseCaseOverviewApp(mock, coreStartMocksWithWorkspace));
-
-    expect(container).toMatchInlineSnapshot(`
-      <div>
-        dummy page
-      </div>
-    `);
-
-    expect(coreStartMocks.chrome.setBreadcrumbs).toHaveBeenCalledWith([{ text: 'foo ws' }]);
-    expect(mock.renderPage).toBeCalledWith('search_overview');
+    expect(coreStartMocks.chrome.setBreadcrumbs).toHaveBeenCalledWith([
+      { text: 'Search Overview' },
+    ]);
   });
 });

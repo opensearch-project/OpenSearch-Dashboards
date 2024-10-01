@@ -68,7 +68,7 @@ export const renderListApp = (
 };
 
 export const renderDetailApp = (
-  { element }: AppMountParameters,
+  { element, onAppLeave }: AppMountParameters,
   services: Services,
   props: WorkspaceDetailProps
 ) => {
@@ -77,7 +77,7 @@ export const renderDetailApp = (
       <Router>
         <Switch>
           <Route>
-            <WorkspaceDetailApp {...props} />
+            <WorkspaceDetailApp {...props} onAppLeave={onAppLeave} />
           </Route>
         </Switch>
       </Router>

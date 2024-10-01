@@ -518,9 +518,11 @@ export class WorkspacePlugin
     }
 
     /**
-     * register workspace column into saved objects table
+     * Only register workspace column into saved objects table when out of workspace
      */
-    savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
+    if (!core.workspaces.currentWorkspaceId$.getValue()) {
+      savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
+    }
 
     /**
      * Add workspace list to settings and setup group
@@ -605,7 +607,7 @@ export class WorkspacePlugin
       this.registerWorkspaceListToUserSettings(core, contentManagement, navigation);
 
       // set breadcrumbs enricher for workspace
-      this.breadcrumbsSubscription = enrichBreadcrumbsWithWorkspace(core);
+      this.breadcrumbsSubscription = enrichBreadcrumbsWithWorkspace(core, this.registeredUseCases$);
 
       // register content to essential overview page
       registerEssentialOverviewContent(contentManagement, core);

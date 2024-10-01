@@ -14,6 +14,7 @@ interface QueryEditorExtensionProps {
   dependencies: QueryEditorExtensionDependencies;
   componentContainer: Element;
   bannerContainer: Element;
+  queryControlsContainer: Element;
 }
 
 export interface QueryEditorExtensionDependencies {
@@ -97,6 +98,11 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
     props.dependencies,
   ]);
 
+  const queryControlButtons = useMemo(() => props.config.getSearchBarButton?.(props.dependencies), [
+    props.config,
+    props.dependencies,
+  ]);
+
   useEffect(() => {
     isMounted.current = true;
     return () => {
@@ -120,6 +126,9 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
       </QueryEditorExtensionPortal>
       <QueryEditorExtensionPortal container={props.componentContainer}>
         {component}
+      </QueryEditorExtensionPortal>
+      <QueryEditorExtensionPortal container={props.queryControlsContainer}>
+        {queryControlButtons}
       </QueryEditorExtensionPortal>
     </>
   );

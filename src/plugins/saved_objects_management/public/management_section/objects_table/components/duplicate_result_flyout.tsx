@@ -9,10 +9,12 @@ import {
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiIcon,
   EuiIconTip,
+  EuiSmallButton,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -226,6 +228,14 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{this.copyResult({ failedCopies, successfulCopies })}</EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiSmallButton onClick={onClose}>
+            <FormattedMessage
+              id="savedObjectsManagement.copyResult.closeButton"
+              defaultMessage="Close"
+            />
+          </EuiSmallButton>
+        </EuiFlyoutFooter>
       </EuiFlyout>
     );
   }
