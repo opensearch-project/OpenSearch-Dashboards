@@ -149,16 +149,19 @@ export const CollapsibleNavTop = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {(currentNavGroup?.type || collapsibleNavHeaderRender) && (
-        <>
-          <EuiSpacer />
-          {collapsibleNavHeaderRender ? (
-            collapsibleNavHeaderRender()
-          ) : (
-            <EuiText>{currentNavGroup?.title}</EuiText>
-          )}
-        </>
-      )}
+      {
+        // Nav groups with type are system(global) nav group and we should show title for those nav groups
+        (currentNavGroup?.type || collapsibleNavHeaderRender) && (
+          <>
+            <EuiSpacer />
+            {currentNavGroup?.type ? (
+              <EuiText>{currentNavGroup?.title}</EuiText>
+            ) : (
+              collapsibleNavHeaderRender?.()
+            )}
+          </>
+        )
+      }
     </EuiPanel>
   );
 };
