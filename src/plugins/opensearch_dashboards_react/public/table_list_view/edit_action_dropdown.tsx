@@ -90,7 +90,7 @@ export const EditActionDropdown: React.FC<EditActionDropdownProps> = ({
       }}
       data-test-subj="dashboardEditDashboard"
     >
-      {i18n.translate('opensearch-dashboards-react..editActionDropdown.edit', {
+      {i18n.translate('opensearch-dashboards-react.editActionDropdown.edit', {
         defaultMessage: 'Edit',
       })}
     </EuiContextMenuItem>,
