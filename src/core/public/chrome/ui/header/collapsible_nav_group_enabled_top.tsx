@@ -149,7 +149,7 @@ export const CollapsibleNavTop = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {(currentNavGroup?.title || collapsibleNavHeaderRender) && (
+      {(currentNavGroup?.type || collapsibleNavHeaderRender) && (
         <>
           <EuiSpacer />
           {collapsibleNavHeaderRender ? (
