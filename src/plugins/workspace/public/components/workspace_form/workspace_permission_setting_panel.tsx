@@ -160,6 +160,7 @@ export const WorkspacePermissionSettingPanel = ({
                 })}
               </EuiFormLabel>
             </EuiFlexItem>
+            {/* Placeholder to vertically align form labels with their respective inputs */}
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
                 color="text"
