@@ -37,7 +37,7 @@ const useCaseMock = {
   id: 'foo',
   title: 'Foo',
   description: 'Foo description',
-  features: [{ id: 'bar' }],
+  features: [{ id: 'bar' }, { id: 'baz', title: 'Baz', details: ['Qux'] }],
   systematic: false,
   order: 1,
 };
@@ -752,6 +752,28 @@ describe('workspace utils: isEqualWorkspaceUseCase', () => {
         }
       )
     ).toEqual(true);
+  });
+
+  it('should return false for different feature details', () => {
+    const featureWithDetails = {
+      id: 'foo',
+      title: 'Foo',
+      details: ['Bar'],
+    };
+    const featureWithOtherDetails = {
+      id: 'foo',
+      title: 'Foo',
+      details: ['Baz'],
+    };
+    expect(
+      isEqualWorkspaceUseCase(
+        { ...useCaseMock, features: [featureWithDetails] },
+        {
+          ...useCaseMock,
+          features: [featureWithOtherDetails],
+        }
+      )
+    ).toEqual(false);
   });
   it('should return true when all properties equal', () => {
     expect(
