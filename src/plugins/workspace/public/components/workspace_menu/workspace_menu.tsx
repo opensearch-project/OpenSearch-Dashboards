@@ -26,6 +26,7 @@ import { WorkspaceUseCase } from '../../types';
 import { validateWorkspaceColor } from '../../../common/utils';
 import { WorkspacePickerContent } from '../workspace_picker_content/workspace_picker_content';
 import './workspace_menu.scss';
+
 const defaultHeaderName = i18n.translate('workspace.menu.defaultHeaderName', {
   defaultMessage: 'Workspaces',
 });
