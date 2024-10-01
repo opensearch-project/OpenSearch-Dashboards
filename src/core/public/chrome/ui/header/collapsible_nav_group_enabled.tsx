@@ -8,7 +8,6 @@ import {
   EuiFlyout,
   EuiPanel,
   EuiHorizontalRule,
-  EuiSpacer,
   EuiHideFor,
   EuiFlyoutProps,
   EuiShowFor,
@@ -79,6 +78,7 @@ export function CollapsibleNavGroupEnabled({
   id,
   isNavOpen,
   storage = window.localStorage,
+  currentWorkspace$,
   closeNav,
   navigateToApp,
   navigateToUrl,
@@ -94,7 +94,6 @@ export function CollapsibleNavGroupEnabled({
   const appId = useObservable(observables.appId$, '');
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
-
   const visibleUseCases = useMemo(() => getVisibleUseCases(navGroupsMap), [navGroupsMap]);
 
   const currentNavGroupId = useMemo(() => {
@@ -114,9 +113,6 @@ export function CollapsibleNavGroupEnabled({
   const shouldAppendManageCategory = capabilities.workspaces.enabled
     ? !currentNavGroupId
     : currentNavGroupId === ALL_USE_CASE_ID;
-
-  const shouldShowCollapsedNavHeaderContent =
-    isNavOpen && !!collapsibleNavHeaderRender && !currentNavGroupId;
 
   const navLinksForRender: ChromeNavLink[] = useMemo(() => {
     const getSystemNavGroups = () => {
@@ -300,6 +296,7 @@ export function CollapsibleNavGroupEnabled({
             <CollapsibleNavTop
               homeLink={homeLink}
               navGroupsMap={navGroupsMap}
+              collapsibleNavHeaderRender={collapsibleNavHeaderRender}
               navLinks={navLinks}
               navigateToApp={navigateToApp}
               logos={logos}
@@ -308,7 +305,7 @@ export function CollapsibleNavGroupEnabled({
               shouldShrinkNavigation={!isNavOpen}
               onClickShrink={closeNav}
               visibleUseCases={visibleUseCases}
-              currentWorkspace$={observables.currentWorkspace$}
+              currentWorkspace$={currentWorkspace$}
             />
           </EuiPanel>
         )}
@@ -320,12 +317,6 @@ export function CollapsibleNavGroupEnabled({
             hasShadow={false}
             className="eui-yScroll flex-1-container"
           >
-            {shouldShowCollapsedNavHeaderContent && collapsibleNavHeaderRender ? (
-              <>
-                {collapsibleNavHeaderRender()}
-                <EuiSpacer />
-              </>
-            ) : null}
             <NavGroups
               navLinks={navLinksForRender}
               navigateToApp={navigateToApp}
