@@ -248,7 +248,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                     data-test-subj="tableHeaderCell_description_2"
                     role="columnheader"
                     scope="col"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <span
                       class="euiTableCellContent"
@@ -263,28 +263,10 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </th>
                   <th
                     class="euiTableHeaderCell"
-                    data-test-subj="tableHeaderCell_permissions_3"
+                    data-test-subj="tableHeaderCell_lastUpdatedTime_3"
                     role="columnheader"
                     scope="col"
-                    style="width: 15%;"
-                  >
-                    <span
-                      class="euiTableCellContent"
-                    >
-                      <span
-                        class="euiTableCellContent__text"
-                        title="Owners"
-                      >
-                        Owners
-                      </span>
-                    </span>
-                  </th>
-                  <th
-                    class="euiTableHeaderCell"
-                    data-test-subj="tableHeaderCell_lastUpdatedTime_4"
-                    role="columnheader"
-                    scope="col"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <span
                       class="euiTableCellContent"
@@ -299,7 +281,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </th>
                   <th
                     class="euiTableHeaderCell"
-                    data-test-subj="tableHeaderCell_dataSources_5"
+                    data-test-subj="tableHeaderCell_dataSources_4"
                     role="columnheader"
                     scope="col"
                     style="width: 15%;"
@@ -417,7 +399,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -441,53 +423,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
-                  >
-                    <div
-                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                    >
-                      Owners
-                    </div>
-                    <div
-                      class="euiTableCellContent euiTableCellContent--overflowingContent"
-                    >
-                      admin
-                       
-                      <span
-                        class="euiBadge euiBadge--hollow euiBadge--iconRight"
-                      >
-                        <span
-                          class="euiBadge__content"
-                        >
-                          <button
-                            aria-label="Open workspace detail"
-                            class="euiBadge__childButton"
-                            data-test-subj="workspaceList-more-collaborators-badge"
-                            title="+ 1 more"
-                          >
-                            + 
-                            1
-                             more
-                          </button>
-                          <button
-                            aria-label="Open workspace detail"
-                            class="euiBadge__iconButton"
-                            title="Open workspace detail"
-                            type="button"
-                          >
-                            <span
-                              class="euiBadge__icon"
-                              color="inherit"
-                              data-euiicon-type="popout"
-                            />
-                          </button>
-                        </span>
-                      </span>
-                    </div>
-                  </td>
-                  <td
-                    class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -635,7 +571,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -659,20 +595,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
-                  >
-                    <div
-                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                    >
-                      Owners
-                    </div>
-                    <div
-                      class="euiTableCellContent euiTableCellContent--overflowingContent"
-                    />
-                  </td>
-                  <td
-                    class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -820,7 +743,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -842,20 +765,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
-                  >
-                    <div
-                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                    >
-                      Owners
-                    </div>
-                    <div
-                      class="euiTableCellContent euiTableCellContent--overflowingContent"
-                    />
-                  </td>
-                  <td
-                    class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
