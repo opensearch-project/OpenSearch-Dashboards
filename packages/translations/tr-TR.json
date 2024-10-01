@@ -1,0 +1,24 @@
+{
+  "messages": {
+    "flot.pie.unableToDrawLabelsInsideCanvasErrorMessage": "Etiketler tuval içine çizilemedi",
+    "flot.time.janLabel": "Oca",
+    "flot.time.febLabel": "Şub",
+    "flot.time.marLabel": "Mar",
+    "flot.time.aprLabel": "Nis",
+    "flot.time.mayLabel": "May",
+    "flot.time.junLabel": "Haz",
+    "flot.time.julLabel": "Tem",
+    "flot.time.augLabel": "Ağu",
+    "flot.time.sepLabel": "Eyl",
+    "flot.time.novLabel": "Kas",
+    "flot.time.octLabel": "Eki",
+    "flot.time.decLabel": "Ara",
+    "flot.time.monLabel": "Pzt",
+    "flot.time.tueLabel": "Sal",
+    "flot.time.wedLabel": "Çar",
+    "flot.time.thuLabel": "Per",
+    "flot.time.friLabel": "Cum",
+    "flot.time.satLabel": "Cmt",
+    "flot.time.sunLabel": "Paz"
+  }
+}
