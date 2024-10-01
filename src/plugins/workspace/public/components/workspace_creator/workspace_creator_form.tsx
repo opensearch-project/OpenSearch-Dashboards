@@ -4,7 +4,15 @@
  */
 
 import React, { useCallback, useRef } from 'react';
-import { EuiSpacer, EuiTitle, EuiForm, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiTitle,
+  EuiForm,
+  EuiText,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiPanel,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
   useWorkspaceForm,
@@ -16,8 +24,6 @@ import {
   WorkspaceFormProps,
 } from '../workspace_form';
 
-import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
-import { WorkspaceFaqPanel } from './workspace_faq_panel';
 import { WorkspaceFormSummaryPanel } from './workspace_form_summary_panel';
 import { generateRightSidebarScrollProps, RightSidebarScrollField } from './utils';
 import { CreatorDetailsPanel } from './creator_details_panel';
@@ -110,29 +116,31 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
           {/* SelectDataSourcePanel is only visible for dashboard admin and when data source is enabled*/}
           {isDashboardAdmin && isDataSourceEnabled && (
             <>
-              <EuiTitle
-                {...generateRightSidebarScrollProps(RightSidebarScrollField.DataSource)}
-                size="s"
-              >
-                <h3>
-                  {i18n.translate('workspace.creator.form.associateDataSourceTitle', {
-                    defaultMessage: 'Associate data sources',
+              <EuiPanel>
+                <EuiText
+                  {...generateRightSidebarScrollProps(RightSidebarScrollField.DataSource)}
+                  size="s"
+                >
+                  <h2>
+                    {i18n.translate('workspace.creator.form.associateDataSourceTitle', {
+                      defaultMessage: 'Associate data sources',
+                    })}
+                  </h2>
+                </EuiText>
+                <EuiText size="xs">
+                  {i18n.translate('workspace.creator.form.associateDataSourceDescription', {
+                    defaultMessage:
+                      'Add at least one data source that will be available in the workspace. If a selected OpenSearch connection has related Direct Query connections, they will also be available in the workspace.',
                   })}
-                </h3>
-              </EuiTitle>
-              <EuiText size="xs">
-                {i18n.translate('workspace.creator.form.associateDataSourceDescription', {
-                  defaultMessage:
-                    'Add data sources that will be available in the workspace. If a selected OpenSearch connection has embedded Direct Query connection, they will also be available in the workspace.',
-                })}
-              </EuiText>
-              <SelectDataSourcePanel
-                onChange={setSelectedDataSourceConnections}
-                savedObjects={savedObjects}
-                assignedDataSourceConnections={formData.selectedDataSourceConnections}
-                data-test-subj={`workspaceForm-dataSourcePanel`}
-                showDataSourceManagement={true}
-              />
+                </EuiText>
+                <SelectDataSourcePanel
+                  onChange={setSelectedDataSourceConnections}
+                  savedObjects={savedObjects}
+                  assignedDataSourceConnections={formData.selectedDataSourceConnections}
+                  data-test-subj={`workspaceForm-dataSourcePanel`}
+                  showDataSourceManagement={true}
+                />
+              </EuiPanel>
               <EuiSpacer size="s" />
               <EuiSpacer size="s" />
             </>
@@ -140,7 +148,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
           {permissionEnabled && (
             <>
               <EuiTitle
-                {...generateRightSidebarScrollProps(RightSidebarScrollField.Member)}
+                {...generateRightSidebarScrollProps(RightSidebarScrollField.Collaborators)}
                 size="s"
               >
                 <h3>{usersAndPermissionsCreatePageTitle}</h3>
@@ -166,18 +174,10 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
       <EuiFlexItem grow={false}>
         <div className="workspaceCreateRightSidebar">
           <div className="workspaceCreateRightSideBarContentWrapper">
-            <WorkspaceFaqPanel />
-            <EuiSpacer size="m" />
             <WorkspaceFormSummaryPanel
               formData={formData}
               availableUseCases={availableUseCases}
               permissionEnabled={permissionEnabled}
-            />
-          </div>
-          <EuiSpacer size="m" />
-          <div className="workspaceCreateRightSideBarActionsWrapper">
-            <WorkspaceCreateActionPanel
-              formData={formData}
               formId={formId}
               application={application}
               isSubmitting={props.isSubmitting}

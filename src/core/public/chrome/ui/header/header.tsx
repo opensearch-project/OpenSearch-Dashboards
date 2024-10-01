@@ -45,7 +45,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classnames from 'classnames';
-import React, { createRef, useMemo, useState } from 'react';
+import React, { createRef, useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { LoadingIndicator } from '../';
@@ -153,10 +153,9 @@ export function Header({
   const isVisible = useObservable(observables.isVisible$, false);
   const headerVariant = useObservable(observables.headerVariant$, HeaderVariant.PAGE);
   const isLocked = useObservable(observables.isLocked$, false);
-  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isNavOpenState, setIsNavOpenState] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
   const breadcrumbs = useObservable(observables.breadcrumbs$, []);
-  const currentWorkspace = useObservable(observables.currentWorkspace$, undefined);
 
   const currentLeftControls = useObservableValue(application.currentLeftControls$);
   const navControlsLeft = useObservable(observables.navControlsLeft$);
@@ -177,6 +176,22 @@ export function Header({
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
   }, [sidecarConfig]);
+
+  const isNavOpen = useUpdatedHeader ? isLocked : isNavOpenState;
+
+  const setIsNavOpen = useCallback(
+    (value) => {
+      /**
+       * When use updated header, we will regard the lock state as source of truth
+       */
+      if (useUpdatedHeader) {
+        onIsLockedUpdate(value);
+      } else {
+        setIsNavOpenState(value);
+      }
+    },
+    [setIsNavOpenState, onIsLockedUpdate, useUpdatedHeader]
+  );
 
   if (!isVisible) {
     return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
@@ -233,14 +248,14 @@ export function Header({
     />
   );
 
-  const renderBreadcrumbs = (renderFullLength?: boolean, dropHomeFromBreadcrumb?: boolean) => (
+  const renderBreadcrumbs = (renderFullLength?: boolean, hideTrailingSeparator?: boolean) => (
     <HeaderBreadcrumbs
       appTitle$={observables.appTitle$}
       breadcrumbs$={observables.breadcrumbs$}
       breadcrumbsEnricher$={observables.breadcrumbsEnricher$}
       useUpdatedHeader={useUpdatedHeader}
       renderFullLength={renderFullLength}
-      dropHomeFromBreadcrumb={dropHomeFromBreadcrumb}
+      hideTrailingSeparator={hideTrailingSeparator}
     />
   );
 
@@ -474,7 +489,7 @@ export function Header({
         recentlyAccessed$={observables.recentlyAccessed$}
         workspaceList$={observables.workspaceList$}
         navigateToUrl={application.navigateToUrl}
-        renderBreadcrumbs={renderBreadcrumbs(true, false)}
+        renderBreadcrumbs={renderBreadcrumbs(true, true)}
         buttonSize={useApplicationHeader ? 's' : 'xs'}
       />
     </EuiHeaderSectionItem>
@@ -528,7 +543,7 @@ export function Header({
 
         <EuiHeaderSection grow={false}>{renderRecentItems()}</EuiHeaderSection>
 
-        {renderBreadcrumbs(false, !!currentWorkspace)}
+        {renderBreadcrumbs(false, false)}
       </EuiHeader>
 
       {/* Secondary header */}
@@ -617,13 +632,11 @@ export function Header({
             appId$={application.currentAppId$}
             collapsibleNavHeaderRender={collapsibleNavHeaderRender}
             id={navId}
-            isLocked={isLocked}
             navLinks$={observables.navLinks$}
             isNavOpen={isNavOpen}
             basePath={basePath}
             navigateToApp={application.navigateToApp}
             navigateToUrl={application.navigateToUrl}
-            onIsLockedUpdate={onIsLockedUpdate}
             closeNav={() => {
               setIsNavOpen(false);
               if (toggleCollapsibleNavRef.current) {
