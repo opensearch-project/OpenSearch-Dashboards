@@ -51,6 +51,52 @@ export function getTopNavConfig({
   onClickImport,
   useUpdatedUX,
 }: Props): TopNavMenuItem[] {
+  const helpItem: TopNavMenuItem = {
+    id: 'help',
+    label: i18n.translate('console.topNav.helpTabLabel', {
+      defaultMessage: 'Help',
+    }),
+    description: i18n.translate('console.topNav.helpTabDescription', {
+      defaultMessage: 'Help',
+    }),
+    onClick: () => {
+      onClickHelp();
+    },
+    testId: 'consoleHelpButton',
+    render: (commonProps) => (
+      <EuiToolTip
+        content={i18n.translate('console.topNav.helpTabLabel', {
+          defaultMessage: 'Help',
+        })}
+      >
+        <EuiSmallButtonIcon iconType="questionInCircle" display="base" {...commonProps} />
+      </EuiToolTip>
+    ),
+    position: MenuItemPosition.RIGHT,
+  };
+  const settingsItem = {
+    id: 'settings',
+    label: i18n.translate('console.topNav.settingsTabLabel', {
+      defaultMessage: 'Settings',
+    }),
+    description: i18n.translate('console.topNav.settingsTabDescription', {
+      defaultMessage: 'Settings',
+    }),
+    onClick: () => {
+      onClickSettings();
+    },
+    testId: 'consoleSettingsButton',
+    render: (commonProps) => (
+      <EuiToolTip
+        content={i18n.translate('console.topNav.settingsToolTipContent', {
+          defaultMessage: 'Console settings',
+        })}
+      >
+        <EuiSmallButtonIcon iconType="gear" display="base" {...commonProps} />
+      </EuiToolTip>
+    ),
+    position: MenuItemPosition.RIGHT,
+  };
   return [
     {
       id: 'history',
@@ -73,52 +119,7 @@ export function getTopNavConfig({
       ),
       position: MenuItemPosition.LEFT,
     },
-    {
-      id: 'settings',
-      label: i18n.translate('console.topNav.settingsTabLabel', {
-        defaultMessage: 'Settings',
-      }),
-      description: i18n.translate('console.topNav.settingsTabDescription', {
-        defaultMessage: 'Settings',
-      }),
-      onClick: () => {
-        onClickSettings();
-      },
-      testId: 'consoleSettingsButton',
-      render: (commonProps) => (
-        <EuiToolTip
-          content={i18n.translate('console.topNav.settingsToolTipContent', {
-            defaultMessage: 'Console settings',
-          })}
-        >
-          <EuiSmallButtonIcon iconType="gear" display="base" {...commonProps} />
-        </EuiToolTip>
-      ),
-      position: MenuItemPosition.RIGHT,
-    },
-    {
-      id: 'help',
-      label: i18n.translate('console.topNav.helpTabLabel', {
-        defaultMessage: 'Help',
-      }),
-      description: i18n.translate('console.topNav.helpTabDescription', {
-        defaultMessage: 'Help',
-      }),
-      onClick: () => {
-        onClickHelp();
-      },
-      testId: 'consoleHelpButton',
-      render: (commonProps) => (
-        <EuiToolTip
-          content={i18n.translate('console.topNav.helpTabLabel', {
-            defaultMessage: 'Help',
-          })}
-        >
-          <EuiSmallButtonIcon iconType="questionInCircle" display="base" {...commonProps} />
-        </EuiToolTip>
-      ),
-      position: MenuItemPosition.RIGHT,
-    },
+    ...(useUpdatedUX ? [helpItem, settingsItem] : [settingsItem, helpItem]),
     {
       id: 'export',
       label: i18n.translate('console.topNav.exportTabLabel', {
