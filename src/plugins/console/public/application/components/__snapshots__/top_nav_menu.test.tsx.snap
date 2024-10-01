@@ -50,7 +50,7 @@ exports[`TopNavMenu Component should render correctly when use updatedUX 1`] = `
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -61,7 +61,7 @@ exports[`TopNavMenu Component should render correctly when use updatedUX 1`] = `
       class="euiFlexItem euiFlexItem--flexGrowZero"
     >
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+        class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow euiFlexGroup--responsive"
       >
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
