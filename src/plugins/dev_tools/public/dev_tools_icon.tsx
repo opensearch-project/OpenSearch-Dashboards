@@ -91,7 +91,7 @@ export function DevToolsIcon({
             >
               <EuiFlexGroup direction="column" className="eui-fullHeight devToolsModalContent">
                 <EuiFlexItem grow={false}>
-                  <EuiSpacer />
+                  <EuiSpacer size="m" />
                   <EuiFlexGroup justifyContent="spaceBetween">
                     <EuiFlexItem grow={1}>
                       <EuiText size="s">

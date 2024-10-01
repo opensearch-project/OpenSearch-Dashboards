@@ -86,10 +86,12 @@ export const TopNavMenu: FunctionComponent<Props> = ({
         <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup>{leftMenus.map((item, index) => renderMenus(item, index))}</EuiFlexGroup>
+            <EuiFlexGroup gutterSize="m">
+              {leftMenus.map((item, index) => renderMenus(item, index))}
+            </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
+            <EuiFlexGroup gutterSize="m">
               {rightContainerChildren}
               {rightMenus.map((item, index) => renderMenus(item, index))}
             </EuiFlexGroup>
