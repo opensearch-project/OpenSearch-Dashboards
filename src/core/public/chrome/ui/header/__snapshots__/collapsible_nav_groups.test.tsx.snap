@@ -51,11 +51,11 @@ exports[`<NavGroups /> should render correctly 1`] = `
                       <div
                         class="euiFlexItem"
                       >
-                        <h4
-                          class="euiTitle euiTitle--xsmall"
+                        <div
+                          class="euiText euiText--medium"
                         >
                           pure link
-                        </h4>
+                        </div>
                       </div>
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -91,11 +91,11 @@ exports[`<NavGroups /> should render correctly 1`] = `
                         class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
                         title="subLink"
                       >
-                        <h4
-                          class="euiTitle euiTitle--xsmall"
+                        <div
+                          class="euiText euiText--medium"
                         >
                           subLink
-                        </h4>
+                        </div>
                       </span>
                     </span>
                   </button>
@@ -159,11 +159,11 @@ exports[`<NavGroups /> should render correctly 1`] = `
                       <div
                         class="euiFlexItem"
                       >
-                        <h4
-                          class="euiTitle euiTitle--xsmall"
+                        <div
+                          class="euiText euiText--medium"
                         >
                           link-in-category
-                        </h4>
+                        </div>
                       </div>
                       <div
                         class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -199,11 +199,11 @@ exports[`<NavGroups /> should render correctly 1`] = `
                         class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
                         title="sub-link-in-category"
                       >
-                        <h4
-                          class="euiTitle euiTitle--xsmall"
+                        <div
+                          class="euiText euiText--medium"
                         >
                           sub-link-in-category
-                        </h4>
+                        </div>
                       </span>
                     </span>
                   </button>
@@ -226,11 +226,11 @@ exports[`<NavGroups /> should render correctly 1`] = `
                     class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
                     title="link-2-in-category"
                   >
-                    <h4
-                      class="euiTitle euiTitle--xsmall"
+                    <div
+                      class="euiText euiText--medium"
                     >
                       link-2-in-category
-                    </h4>
+                    </div>
                   </span>
                 </span>
               </button>

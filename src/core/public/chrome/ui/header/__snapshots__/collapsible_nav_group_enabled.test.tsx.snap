@@ -21,7 +21,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
         </button>
       </div>
       <div
-        class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
         style="padding-top: 0px;"
       >
         <div
@@ -50,11 +50,11 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                       class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
                       title="link-in-all"
                     >
-                      <h4
-                        class="euiTitle euiTitle--xsmall"
+                      <div
+                        class="euiText euiText--medium"
                       >
                         link-in-all
-                      </h4>
+                      </div>
                     </span>
                   </span>
                 </button>
@@ -119,7 +119,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
         </button>
       </div>
       <div
-        class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder eui-yScroll flex-1-container"
         style="padding-top: 0px;"
       >
         <div
@@ -148,11 +148,11 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
                       class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
                       title="link-in-all"
                     >
-                      <h4
-                        class="euiTitle euiTitle--xsmall"
+                      <div
+                        class="euiText euiText--medium"
                       >
                         link-in-all
-                      </h4>
+                      </div>
                     </span>
                   </span>
                 </button>
