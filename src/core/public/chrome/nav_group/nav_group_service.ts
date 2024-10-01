@@ -133,7 +133,11 @@ export class ChromeNavGroupService {
     navGroupsMap: Record<string, NavGroupItemInMap>,
     navLinks: Array<Readonly<ChromeNavLink>>
   ) {
-    const navLinksResult: ChromeRegistrationNavLink[] = [];
+    // Note: we need to use a new pointer when `assign navGroupsMap[ALL_USE_CASE_ID]?.navLinks`
+    // because we will mutate the array directly in the following code.
+    const navLinksResult: ChromeRegistrationNavLink[] = [
+      ...(navGroupsMap[ALL_USE_CASE_ID]?.navLinks || []),
+    ];
 
     // Append all the links that do not have use case info to keep backward compatible
     const linkIdsWithNavGroupInfo = Object.values(navGroupsMap).reduce((total, navGroup) => {
@@ -147,11 +151,6 @@ export class ChromeNavGroupService {
         ...navLink,
         category: customCategory,
       });
-    });
-
-    // Append all the links registered to all use case
-    navGroupsMap[ALL_USE_CASE_ID]?.navLinks.forEach((navLink) => {
-      navLinksResult.push(navLink);
     });
 
     // Append use case section into left navigation
@@ -364,14 +363,8 @@ export class ChromeNavGroupService {
           });
         };
         if (visibleUseCases.length === 1) {
-          if (visibleUseCases[0].id === ALL_USE_CASE_ID) {
-            // If the only visible use case is all use case
-            // All the other nav groups will be visible because all use case can visit all of the nav groups.
-            Object.values(navGroupMap).forEach((navGroup) => mapAppIdToNavGroup(navGroup));
-          } else {
-            // It means we are in a workspace, we should only use the visible use cases
-            visibleUseCases.forEach((navGroup) => mapAppIdToNavGroup(navGroup));
-          }
+          // It means we are in a workspace, we should only use the visible use cases
+          visibleUseCases.forEach((navGroup) => mapAppIdToNavGroup(navGroup));
         } else {
           // Nav group of Hidden status should be filtered out when counting navGroups the currentApp belongs to
           Object.values(navGroupMap).forEach((navGroup) => {
