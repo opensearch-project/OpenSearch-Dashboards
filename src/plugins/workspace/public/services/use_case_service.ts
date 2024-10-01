@@ -118,12 +118,13 @@ export class UseCaseService {
     return {
       getRegisteredUseCases$: () => {
         if (chrome.navGroup.getNavGroupEnabled()) {
-          return chrome.navGroup
-            .getNavGroupsMap$()
+          return combineLatest([chrome.navGroup.getNavGroupsMap$(), chrome.navLinks.getNavLinks$()])
             .pipe(
-              map((navGroupsMap) =>
-                Object.values(navGroupsMap).map(convertNavGroupToWorkspaceUseCase)
-              )
+              map(([navGroupsMap, allNavLinks]) => {
+                return Object.values(navGroupsMap).map((navGroup) =>
+                  convertNavGroupToWorkspaceUseCase(navGroup, allNavLinks)
+                );
+              })
             )
             .pipe(
               distinctUntilChanged((useCases, anotherUseCases) => {

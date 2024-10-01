@@ -15,8 +15,8 @@ import {
   ApplicationStart,
   HttpSetup,
   NotificationsStart,
-} from '../../../core/public';
-import {
+  fulfillRegistrationLinksToChromeNavLinks,
+  ChromeNavLink,
   App,
   AppCategory,
   AppNavLinkStatus,
@@ -360,24 +360,28 @@ export const getIsOnlyAllowEssentialUseCase = async (client: SavedObjectsStart['
   return false;
 };
 
-export const convertNavGroupToWorkspaceUseCase = ({
-  id,
-  title,
-  description,
-  navLinks,
-  type,
-  order,
-  icon,
-}: NavGroupItemInMap): WorkspaceUseCase => {
+export const convertNavGroupToWorkspaceUseCase = (
+  { id, title, description, navLinks, type, order, icon }: NavGroupItemInMap,
+  allNavLinks: ChromeNavLink[]
+): WorkspaceUseCase => {
+  const visibleNavLinks = allNavLinks.filter((link) => !link.hidden);
+  const visibleNavLinksWithinNavGroup = fulfillRegistrationLinksToChromeNavLinks(
+    navLinks,
+    visibleNavLinks
+  );
   const features: WorkspaceUseCaseFeature[] = [];
   const category2NavLinks: { [key: string]: WorkspaceUseCaseFeature & { details: string[] } } = {};
-  for (const { id: featureId, title: featureTitle, category } of navLinks) {
+  for (const { id: featureId, title: featureTitle, category } of visibleNavLinksWithinNavGroup) {
     // Filter out overview link
     if (featureId.endsWith('overview')) {
       continue;
     }
     if (!category) {
       features.push({ id: featureId, title: featureTitle });
+      continue;
+    }
+    // Filter out custom features
+    if (category.id === 'custom') {
       continue;
     }
     if (!category2NavLinks[category.id]) {
@@ -391,9 +395,7 @@ export const convertNavGroupToWorkspaceUseCase = ({
       category2NavLinks[category.id].details.push(featureTitle);
     }
   }
-  for (const feature of Object.values(category2NavLinks)) {
-    features.push(feature);
-  }
+  features.push(...Object.values(category2NavLinks));
   return {
     id,
     title,

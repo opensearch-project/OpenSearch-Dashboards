@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AppNavLinkStatus, NavGroupType, PublicAppInfo } from '../../../core/public';
+import { AppNavLinkStatus, ChromeNavLink, NavGroupType, PublicAppInfo } from '../../../core/public';
 import {
   featureMatchesConfig,
   filterWorkspaceConfigurableApps,
@@ -19,7 +19,7 @@ import {
 } from './utils';
 import { WorkspaceAvailability } from '../../../core/public';
 import { coreMock } from '../../../core/public/mocks';
-import { WORKSPACE_DETAIL_APP_ID, USE_CASE_PREFIX } from '../common/constants';
+import { USE_CASE_PREFIX } from '../common/constants';
 import {
   SigV4ServiceName,
   DataSourceEngineType,
@@ -41,6 +41,13 @@ const useCaseMock = {
   systematic: false,
   order: 1,
 };
+const allNavLinksMock: ChromeNavLink[] = [
+  { id: 'foo', title: 'Foo', baseUrl: '', href: '' },
+  { id: 'bar', title: 'Bar', baseUrl: '', href: '' },
+  { id: 'baz', title: 'Baz', baseUrl: '', href: '' },
+  { id: 'qux', title: 'Qux', baseUrl: '', href: '' },
+  { id: 'observability_overview', title: 'Observability Overview', baseUrl: '', href: '' },
+];
 
 describe('workspace utils: featureMatchesConfig', () => {
   it('feature configured with `*` should match any features', () => {
@@ -530,13 +537,16 @@ describe('workspace utils: getIsOnlyAllowEssentialUseCase', () => {
 describe('workspace utils: convertNavGroupToWorkspaceUseCase', () => {
   it('should convert nav group to consistent workspace use case', () => {
     expect(
-      convertNavGroupToWorkspaceUseCase({
-        id: 'foo',
-        title: 'Foo',
-        description: 'Foo description',
-        navLinks: [{ id: 'bar', title: 'Bar' }],
-        icon: 'wsAnalytics',
-      })
+      convertNavGroupToWorkspaceUseCase(
+        {
+          id: 'foo',
+          title: 'Foo',
+          description: 'Foo description',
+          navLinks: [{ id: 'bar', title: 'Bar' }],
+          icon: 'wsAnalytics',
+        },
+        allNavLinksMock
+      )
     ).toEqual({
       id: 'foo',
       title: 'Foo',
@@ -547,13 +557,16 @@ describe('workspace utils: convertNavGroupToWorkspaceUseCase', () => {
     });
 
     expect(
-      convertNavGroupToWorkspaceUseCase({
-        id: 'foo',
-        title: 'Foo',
-        description: 'Foo description',
-        navLinks: [{ id: 'bar', title: 'Bar' }],
-        type: NavGroupType.SYSTEM,
-      })
+      convertNavGroupToWorkspaceUseCase(
+        {
+          id: 'foo',
+          title: 'Foo',
+          description: 'Foo description',
+          navLinks: [{ id: 'bar', title: 'Bar' }],
+          type: NavGroupType.SYSTEM,
+        },
+        allNavLinksMock
+      )
     ).toEqual({
       id: 'foo',
       title: 'Foo',
@@ -563,30 +576,83 @@ describe('workspace utils: convertNavGroupToWorkspaceUseCase', () => {
     });
   });
 
-  it('should grouped nav links by category', () => {
+  it('should filter out overview features', () => {
     expect(
-      convertNavGroupToWorkspaceUseCase({
+      convertNavGroupToWorkspaceUseCase(
+        {
+          id: 'foo',
+          title: 'Foo',
+          description: 'Foo description',
+          navLinks: [{ id: 'observability_overview', title: 'Observability Overview' }],
+          icon: 'wsAnalytics',
+        },
+        allNavLinksMock
+      )
+    ).toEqual(
+      expect.objectContaining({
         id: 'foo',
         title: 'Foo',
         description: 'Foo description',
-        navLinks: [
-          { id: 'bar', title: 'Bar', category: { id: 'category-1', label: 'Category 1' } },
-          { id: 'baz', title: 'Baz' },
-          { id: 'qux', title: 'Qux', category: { id: 'category-1', label: 'Category 1' } },
-        ],
+        features: [],
+        systematic: false,
         icon: 'wsAnalytics',
       })
-    ).toEqual({
-      id: 'foo',
-      title: 'Foo',
-      description: 'Foo description',
-      features: [
-        { id: 'baz', title: 'Baz' },
-        { id: 'category-1', title: 'Category 1', details: ['Bar', 'Qux'] },
-      ],
-      systematic: false,
-      icon: 'wsAnalytics',
-    });
+    );
+  });
+
+  it('should grouped nav links by category', () => {
+    expect(
+      convertNavGroupToWorkspaceUseCase(
+        {
+          id: 'foo',
+          title: 'Foo',
+          description: 'Foo description',
+          navLinks: [
+            { id: 'bar', title: 'Bar', category: { id: 'category-1', label: 'Category 1' } },
+            { id: 'baz', title: 'Baz' },
+            { id: 'qux', title: 'Qux', category: { id: 'category-1', label: 'Category 1' } },
+          ],
+          icon: 'wsAnalytics',
+        },
+        allNavLinksMock
+      )
+    ).toEqual(
+      expect.objectContaining({
+        id: 'foo',
+        title: 'Foo',
+        description: 'Foo description',
+        features: [
+          { id: 'baz', title: 'Baz' },
+          { id: 'category-1', title: 'Category 1', details: ['Bar', 'Qux'] },
+        ],
+        systematic: false,
+        icon: 'wsAnalytics',
+      })
+    );
+  });
+
+  it('should filter out custom features', () => {
+    expect(
+      convertNavGroupToWorkspaceUseCase(
+        {
+          id: 'foo',
+          title: 'Foo',
+          description: 'Foo description',
+          navLinks: [{ id: 'bar', title: 'Bar', category: { id: 'custom', label: 'Custom' } }],
+          icon: 'wsAnalytics',
+        },
+        allNavLinksMock
+      )
+    ).toEqual(
+      expect.objectContaining({
+        id: 'foo',
+        title: 'Foo',
+        description: 'Foo description',
+        features: [],
+        systematic: false,
+        icon: 'wsAnalytics',
+      })
+    );
   });
 });
 
