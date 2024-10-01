@@ -41,7 +41,9 @@ export const useWorkspaceForm = ({
   const defaultValuesRef = useRef(defaultValues);
   const [isEditing, setIsEditing] = useState(false);
   const initialPermissionSettingsRef = useRef(
-    generatePermissionSettingsState(operationType, defaultValues?.permissionSettings)
+    permissionEnabled
+      ? generatePermissionSettingsState(operationType, defaultValues?.permissionSettings)
+      : []
   );
 
   const [featureConfigs, setFeatureConfigs] = useState<string[]>(defaultValues?.features ?? []);

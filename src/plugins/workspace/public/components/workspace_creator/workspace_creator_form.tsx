@@ -32,6 +32,7 @@ import './workspace_creator_form.scss';
 
 interface WorkspaceCreatorFormProps extends WorkspaceFormProps {
   isSubmitting: boolean;
+  collaboratorEditorEnabled: boolean;
 }
 
 export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {

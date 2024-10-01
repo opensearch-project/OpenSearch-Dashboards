@@ -88,6 +88,7 @@ const WorkspaceDetailPage = (props: any) => {
   const workspacesService = props.workspacesService || createWorkspacesSetupContractMockWithValue();
   const values = props.defaultValues || defaultValues;
   const permissionEnabled = props.permissionEnabled ?? true;
+  const collaboratorEditorEnabled = props.collaboratorEditorEnabled ?? true;
   const dataSourceManagement =
     props.dataSourceEnabled !== false
       ? {
@@ -131,6 +132,7 @@ const WorkspaceDetailPage = (props: any) => {
           return null;
         },
       },
+      collaboratorEditorEnabled,
     },
   });
 
@@ -240,6 +242,16 @@ describe('WorkspaceDetail', () => {
     );
     expect(queryByText('Collaborators')).toBeNull();
     expect(queryByText('Data Sources')).toBeNull();
+  });
+
+  it('should not render "Collaborators" tab if collaborator editor not enabled', async () => {
+    const { queryByText } = render(
+      WorkspaceDetailPage({
+        permissionEnabled: true,
+        collaboratorEditorEnabled: false,
+      })
+    );
+    expect(queryByText('Collaborators')).toBeNull();
   });
 
   it('click on tab button will show navigate modal when number of changes > 1', async () => {

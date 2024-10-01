@@ -23,6 +23,7 @@ import {
   DEFAULT_NAV_GROUPS,
   NavGroupType,
   ALL_USE_CASE_ID,
+  PluginInitializerContext,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -86,6 +87,10 @@ interface WorkspacePluginSetupDeps {
   contentManagement?: ContentManagementPluginSetup;
 }
 
+interface WorkspaceFeatureFlagConfig {
+  collaboratorEditorEnabled: boolean;
+}
+
 export interface WorkspacePluginStartDeps {
   contentManagement: ContentManagementPluginStart;
   navigation: NavigationPublicPluginStart;
@@ -93,6 +98,8 @@ export interface WorkspacePluginStartDeps {
 
 export class WorkspacePlugin
   implements Plugin<{}, {}, WorkspacePluginSetupDeps, WorkspacePluginStartDeps> {
+  constructor(private initializerContext: PluginInitializerContext) {}
+
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private breadcrumbsSubscription?: Subscription;
@@ -106,6 +113,7 @@ export class WorkspacePlugin
   private workspaceAndUseCasesCombineSubscription?: Subscription;
   private useCase = new UseCaseService();
   private workspaceClient?: WorkspaceClient;
+  private workspaceFeatureFlagConfig?: WorkspaceFeatureFlagConfig;
 
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
@@ -260,6 +268,9 @@ export class WorkspacePlugin
       contentManagement,
     }: WorkspacePluginSetupDeps
   ) {
+    this.workspaceFeatureFlagConfig = this.initializerContext.config.get<
+      WorkspaceFeatureFlagConfig
+    >();
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
     this.workspaceClient = workspaceClient;
@@ -333,6 +344,7 @@ export class WorkspacePlugin
         workspaceClient,
         dataSourceManagement,
         navigationUI: navigation.ui,
+        collaboratorEditorEnabled: this.workspaceFeatureFlagConfig?.collaboratorEditorEnabled,
       };
 
       return renderApp(params, services, {

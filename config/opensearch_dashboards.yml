@@ -352,6 +352,8 @@
 # uiSettings:
 #   overrides:
 #     "home:useNewHomePage": true
+# Set the value to true to enable the collaborator editor in the workspace creation and settings pages.
+# workspace.collaboratorEditorEnabled: false
 
 # Optional settings to specify saved object types to be deleted during migration.
 # This feature can help address compatibility issues that may arise during the migration of saved objects, such as types defined by legacy applications.

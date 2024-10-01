@@ -13,13 +13,10 @@ import { WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_fo
 import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
 import { getUseCaseFeatureConfig } from '../../../common/utils';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
-import { WorkspaceClient } from '../../workspace_client';
 import { convertPermissionSettingsToPermissions } from '../workspace_form';
-import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
-import { WorkspaceUseCase } from '../../types';
+import { WorkspaceDependServices, WorkspaceUseCase } from '../../types';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
-import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
 import { DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
 
@@ -38,12 +35,9 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
       savedObjects,
       dataSourceManagement,
       navigationUI: { HeaderControl },
+      collaboratorEditorEnabled,
     },
-  } = useOpenSearchDashboards<{
-    workspaceClient: WorkspaceClient;
-    dataSourceManagement?: DataSourceManagementPluginSetup;
-    navigationUI: NavigationPublicPluginStart['ui'];
-  }>();
+  } = useOpenSearchDashboards<WorkspaceDependServices>();
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
@@ -164,7 +158,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               savedObjects={savedObjects}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Create}
-              permissionEnabled={isPermissionEnabled}
+              permissionEnabled={isPermissionEnabled && collaboratorEditorEnabled}
               dataSourceManagement={dataSourceManagement}
               availableUseCases={availableUseCases}
               defaultValues={defaultWorkspaceFormValues}

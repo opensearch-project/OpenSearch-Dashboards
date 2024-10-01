@@ -15,6 +15,9 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export const config: PluginConfigDescriptor = {
+  exposeToBrowser: {
+    collaboratorEditorEnabled: true,
+  },
   schema: configSchema,
 };
 

@@ -102,8 +102,11 @@ jest.spyOn(utils, 'fetchDataSourceConnections').mockImplementation(async (passed
 
 const WorkspaceCreator = ({
   isDashboardAdmin = false,
+  collaboratorEditorEnabled = true,
   ...props
-}: Partial<WorkspaceCreatorProps & { isDashboardAdmin: boolean }>) => {
+}: Partial<
+  WorkspaceCreatorProps & { isDashboardAdmin: boolean; collaboratorEditorEnabled: boolean }
+>) => {
   const { Provider } = createOpenSearchDashboardsReactContext({
     ...mockCoreStart,
     ...{
@@ -147,6 +150,7 @@ const WorkspaceCreator = ({
       navigationUI: {
         HeaderControl: () => null,
       },
+      collaboratorEditorEnabled,
     },
   });
   const registeredUseCases$ = createMockedRegisteredUseCases$();
@@ -346,6 +350,35 @@ describe('WorkspaceCreator', () => {
             users: ['%me%'],
           },
         },
+      }
+    );
+    await waitFor(() => {
+      expect(notificationToastsAddSuccess).toHaveBeenCalled();
+    });
+    expect(notificationToastsAddDanger).not.toHaveBeenCalled();
+  });
+
+  it('create workspace without permissions if collaborator editor not enabled', async () => {
+    const { getByTestId } = render(<WorkspaceCreator collaboratorEditorEnabled={false} />);
+
+    // Ensure workspace create form rendered
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceUseCase-observability'));
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    expect(workspaceClientCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'test workspace name',
+      }),
+      {
+        dataConnections: [],
+        dataSources: [],
+        permissions: undefined,
       }
     );
     await waitFor(() => {

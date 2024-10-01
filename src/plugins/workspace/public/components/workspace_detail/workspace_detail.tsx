@@ -16,7 +16,7 @@ import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { BehaviorSubject, of } from 'rxjs';
 import { useHistory, useLocation } from 'react-router-dom';
-import { WorkspaceUseCase } from '../../types';
+import { WorkspaceDependServices, WorkspaceUseCase } from '../../types';
 import { WorkspaceDetailForm, useWorkspaceFormContext } from '../workspace_form';
 import { WorkspaceDetailPanel } from './workspace_detail_panel';
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
@@ -61,12 +61,9 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
       navigationUI: { HeaderControl },
       chrome,
       notifications,
+      collaboratorEditorEnabled,
     },
-  } = useOpenSearchDashboards<{
-    CoreStart: CoreStart;
-    dataSourceManagement?: DataSourceManagementPluginSetup;
-    navigationUI: NavigationPublicPluginStart['ui'];
-  }>();
+  } = useOpenSearchDashboards<WorkspaceDependServices>();
 
   const {
     isEditing,
@@ -89,7 +86,8 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
   const availableUseCases = useObservable(props.registeredUseCases$, []);
   const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
-  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
+  const isPermissionEnabled =
+    application?.capabilities.workspaces.permissionEnabled && collaboratorEditorEnabled;
   const currentUseCase = availableUseCases.find(
     (useCase) => useCase.id === getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features ?? [])
   );
