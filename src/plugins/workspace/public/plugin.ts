@@ -536,25 +536,16 @@ export class WorkspacePlugin
       },
     ]);
 
-    if (core.chrome.navGroup.getNavGroupEnabled()) {
+    if (workspaceId) {
       core.chrome.registerCollapsibleNavHeader(() => {
         if (!this.coreStart) {
           return null;
         }
-        if (workspaceId) {
-          return React.createElement(WorkspaceSelector, {
-            key: 'workspaceSelector',
-            coreStart: this.coreStart,
-            registeredUseCases$: this.registeredUseCases$,
-          });
-        } else {
-          return React.createElement(WorkspacePickerContent, {
-            key: 'workspacePickerContent',
-            coreStart: this.coreStart,
-            registeredUseCases$: this.registeredUseCases$,
-            isInTwoLines: true,
-          });
-        }
+        return React.createElement(WorkspaceSelector, {
+          key: 'workspaceSelector',
+          coreStart: this.coreStart,
+          registeredUseCases$: this.registeredUseCases$,
+        });
       });
     }
 

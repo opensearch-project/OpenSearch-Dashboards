@@ -5,14 +5,14 @@
 
 import React, { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { Logos, WorkspaceObject, WorkspacesStart } from 'opensearch-dashboards/public';
+import { Logos, WorkspacesStart } from 'opensearch-dashboards/public';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiText,
+  EuiIcon,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
@@ -34,7 +34,7 @@ export interface CollapsibleNavTopProps {
   onClickShrink?: () => void;
   shouldShrinkNavigation: boolean;
   visibleUseCases: NavGroupItemInMap[];
-  currentWorkspace: WorkspaceObject | null | undefined;
+  currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
   navLinks: ChromeNavLink[];
 }
@@ -47,12 +47,13 @@ export const CollapsibleNavTop = ({
   onClickShrink,
   shouldShrinkNavigation,
   visibleUseCases,
-  currentWorkspace,
+  currentWorkspace$,
   setCurrentNavGroup,
   homeLink,
   navGroupsMap,
   navLinks,
 }: CollapsibleNavTopProps) => {
+  const currentWorkspace = useObservable(currentWorkspace$);
   const firstVisibleNavLinkInFirstVisibleUseCase = useMemo(
     () =>
       fulfillRegistrationLinksToChromeNavLinks(
@@ -148,10 +149,14 @@ export const CollapsibleNavTop = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {collapsibleNavHeaderRender && currentWorkspace && (
+      {(currentNavGroup?.title || collapsibleNavHeaderRender) && (
         <>
           <EuiSpacer />
-          {collapsibleNavHeaderRender()}
+          {collapsibleNavHeaderRender ? (
+            collapsibleNavHeaderRender()
+          ) : (
+            <EuiText>{currentNavGroup?.title}</EuiText>
+          )}
         </>
       )}
     </EuiPanel>
