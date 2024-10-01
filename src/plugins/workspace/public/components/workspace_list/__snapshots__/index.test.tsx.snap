@@ -284,7 +284,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                     data-test-subj="tableHeaderCell_dataSources_4"
                     role="columnheader"
                     scope="col"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <span
                       class="euiTableCellContent"
@@ -438,7 +438,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -610,7 +610,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -780,7 +780,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </td>
                   <td
                     class="euiTableRowCell"
-                    style="width: 15%;"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"

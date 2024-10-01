@@ -448,7 +448,7 @@ export const WorkspaceListInner = ({
     },
     {
       field: 'dataSources',
-      width: '15%',
+      width: '18%',
       name: i18n.translate('workspace.list.columns.dataSources.title', {
         defaultMessage: 'Data sources',
       }),
