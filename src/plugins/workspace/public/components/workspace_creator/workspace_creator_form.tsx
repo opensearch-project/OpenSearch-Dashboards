@@ -4,7 +4,15 @@
  */
 
 import React, { useCallback, useRef } from 'react';
-import { EuiSpacer, EuiTitle, EuiForm, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiTitle,
+  EuiForm,
+  EuiText,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiPanel,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
   useWorkspaceForm,
@@ -108,29 +116,31 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
           {/* SelectDataSourcePanel is only visible for dashboard admin and when data source is enabled*/}
           {isDashboardAdmin && isDataSourceEnabled && (
             <>
-              <EuiTitle
-                {...generateRightSidebarScrollProps(RightSidebarScrollField.DataSource)}
-                size="s"
-              >
-                <h3>
-                  {i18n.translate('workspace.creator.form.associateDataSourceTitle', {
-                    defaultMessage: 'Associate data sources',
+              <EuiPanel>
+                <EuiText
+                  {...generateRightSidebarScrollProps(RightSidebarScrollField.DataSource)}
+                  size="s"
+                >
+                  <h2>
+                    {i18n.translate('workspace.creator.form.associateDataSourceTitle', {
+                      defaultMessage: 'Associate data sources',
+                    })}
+                  </h2>
+                </EuiText>
+                <EuiText size="xs">
+                  {i18n.translate('workspace.creator.form.associateDataSourceDescription', {
+                    defaultMessage:
+                      'Add at least one data source that will be available in the workspace. If a selected OpenSearch connection has related Direct Query connections, they will also be available in the workspace.',
                   })}
-                </h3>
-              </EuiTitle>
-              <EuiText size="xs">
-                {i18n.translate('workspace.creator.form.associateDataSourceDescription', {
-                  defaultMessage:
-                    'Add data sources that will be available in the workspace. If a selected OpenSearch connection has embedded Direct Query connection, they will also be available in the workspace.',
-                })}
-              </EuiText>
-              <SelectDataSourcePanel
-                onChange={setSelectedDataSourceConnections}
-                savedObjects={savedObjects}
-                assignedDataSourceConnections={formData.selectedDataSourceConnections}
-                data-test-subj={`workspaceForm-dataSourcePanel`}
-                showDataSourceManagement={true}
-              />
+                </EuiText>
+                <SelectDataSourcePanel
+                  onChange={setSelectedDataSourceConnections}
+                  savedObjects={savedObjects}
+                  assignedDataSourceConnections={formData.selectedDataSourceConnections}
+                  data-test-subj={`workspaceForm-dataSourcePanel`}
+                  showDataSourceManagement={true}
+                />
+              </EuiPanel>
               <EuiSpacer size="s" />
               <EuiSpacer size="s" />
             </>
