@@ -261,7 +261,7 @@ const TopNav = ({
       indexPatterns={indexPatterns}
       screenTitle={
         vis.title ||
-        i18n.translate('discover.savedSearch.newTitle', {
+        i18n.translate('visualize.savedSearch.newTitle', {
           defaultMessage: 'New visualization',
         })
       }
