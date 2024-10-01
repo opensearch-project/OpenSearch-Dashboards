@@ -368,15 +368,42 @@ export const convertNavGroupToWorkspaceUseCase = ({
   type,
   order,
   icon,
-}: NavGroupItemInMap): WorkspaceUseCase => ({
-  id,
-  title,
-  description,
-  features: navLinks.map((item) => ({ id: item.id, title: item.title })),
-  systematic: type === NavGroupType.SYSTEM || id === ALL_USE_CASE_ID,
-  order,
-  icon,
-});
+}: NavGroupItemInMap): WorkspaceUseCase => {
+  const features: WorkspaceUseCaseFeature[] = [];
+  const category2NavLinks: { [key: string]: WorkspaceUseCaseFeature & { details: string[] } } = {};
+  for (const { id: featureId, title: featureTitle, category } of navLinks) {
+    // Filter out overview link
+    if (featureId.endsWith('overview')) {
+      continue;
+    }
+    if (!category) {
+      features.push({ id: featureId, title: featureTitle });
+      continue;
+    }
+    if (!category2NavLinks[category.id]) {
+      category2NavLinks[category.id] = {
+        id: category.id,
+        title: category.label,
+        details: [],
+      };
+    }
+    if (featureTitle) {
+      category2NavLinks[category.id].details.push(featureTitle);
+    }
+  }
+  for (const feature of Object.values(category2NavLinks)) {
+    features.push(feature);
+  }
+  return {
+    id,
+    title,
+    description,
+    features,
+    systematic: type === NavGroupType.SYSTEM || id === ALL_USE_CASE_ID,
+    order,
+    icon,
+  };
+};
 
 const compareFeatures = (
   features1: WorkspaceUseCaseFeature[],
@@ -384,7 +411,7 @@ const compareFeatures = (
 ) => {
   const featuresSerializer = (features: WorkspaceUseCaseFeature[]) =>
     features
-      .map(({ id, title }) => `${id}-${title}`)
+      .map(({ id, title, details }) => `${id}-${title}-${details?.join('')}`)
       .sort()
       .join();
   return featuresSerializer(features1) === featuresSerializer(features2);

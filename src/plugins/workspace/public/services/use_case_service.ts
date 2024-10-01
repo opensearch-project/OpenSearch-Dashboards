@@ -169,17 +169,23 @@ export class UseCaseService {
               .filter((useCase) => {
                 return useCase.features.some((featureId) => configurableAppsId.includes(featureId));
               })
-              .map((item) => ({
-                ...item,
-                features: item.features.map((featureId) => ({
-                  title: configurableApps.find((app) => app.id === featureId)?.title,
-                  id: featureId,
-                })),
-              }))
+              .map(
+                (item) =>
+                  ({
+                    ...item,
+                    features: item.features.map((featureId) => ({
+                      title: configurableApps.find((app) => app.id === featureId)?.title,
+                      id: featureId,
+                    })),
+                  } as WorkspaceUseCase)
+              )
               .concat({
                 ...DEFAULT_NAV_GROUPS.all,
-                features: configurableApps.map((app) => ({ id: app.id, title: app.title })),
-              }) as WorkspaceUseCase[];
+                features: configurableApps.map((app) => ({
+                  id: app.id,
+                  title: app.title,
+                })),
+              } as WorkspaceUseCase);
           })
         );
       },

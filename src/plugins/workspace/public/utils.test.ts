@@ -562,6 +562,32 @@ describe('workspace utils: convertNavGroupToWorkspaceUseCase', () => {
       systematic: true,
     });
   });
+
+  it('should grouped nav links by category', () => {
+    expect(
+      convertNavGroupToWorkspaceUseCase({
+        id: 'foo',
+        title: 'Foo',
+        description: 'Foo description',
+        navLinks: [
+          { id: 'bar', title: 'Bar', category: { id: 'category-1', label: 'Category 1' } },
+          { id: 'baz', title: 'Baz' },
+          { id: 'qux', title: 'Qux', category: { id: 'category-1', label: 'Category 1' } },
+        ],
+        icon: 'wsAnalytics',
+      })
+    ).toEqual({
+      id: 'foo',
+      title: 'Foo',
+      description: 'Foo description',
+      features: [
+        { id: 'baz', title: 'Baz' },
+        { id: 'category-1', title: 'Category 1', details: ['Bar', 'Qux'] },
+      ],
+      systematic: false,
+      icon: 'wsAnalytics',
+    });
+  });
 });
 
 describe('workspace utils: isEqualWorkspaceUseCase', () => {
