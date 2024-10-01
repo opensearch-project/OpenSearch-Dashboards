@@ -8,7 +8,7 @@ import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { useEffect } from 'react';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { useLocation } from 'react-router-dom';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
@@ -33,6 +33,7 @@ import {
 } from '../../../opensearch_dashboards_services';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { syncQueryStateWithUrl } from '../../../../../data/public';
+import { trackQueryMetric } from '../../../ui_metric';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -183,6 +184,12 @@ export const useSearch = (services: DiscoverViewServices) => {
       searchSource.getSearchRequestBody().then((body: object) => {
         inspectorRequest.json(body);
       });
+
+      // Track the dataset type and language used
+      const query = searchSource.getField('query');
+      if (query && query.dataset?.type && query.language) {
+        trackQueryMetric(query);
+      }
 
       // Execute the search
       const fetchResp = await searchSource.fetch({
