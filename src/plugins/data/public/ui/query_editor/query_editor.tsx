@@ -366,15 +366,8 @@ export default class QueryEditorUI extends Component<Props, State> {
         editor.setValue(`\n`.repeat(10));
         this.setState({ lineCount: editor.getModel()?.getLineCount() });
         this.inputRef = editor;
-        const handleEnterPress = () => {
-          this.onSubmit(this.props.query);
-        };
-
-        const disposable = editor.onKeyDown((e) => {
-          if (e.metaKey && e.keyCode === monaco.KeyCode.Enter) {
-            e.preventDefault();
-            handleEnterPress();
-          }
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+            this.onSubmit(this.props.query);
         });
 
         return () => {
