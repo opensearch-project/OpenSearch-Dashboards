@@ -47,6 +47,12 @@ const allNavLinksMock: ChromeNavLink[] = [
   { id: 'baz', title: 'Baz', baseUrl: '', href: '' },
   { id: 'qux', title: 'Qux', baseUrl: '', href: '' },
   { id: 'observability_overview', title: 'Observability Overview', baseUrl: '', href: '' },
+  {
+    id: 'observability-gettingStarted',
+    title: 'Observability Getting Started',
+    baseUrl: '',
+    href: '',
+  },
 ];
 
 describe('workspace utils: featureMatchesConfig', () => {
@@ -584,6 +590,32 @@ describe('workspace utils: convertNavGroupToWorkspaceUseCase', () => {
           title: 'Foo',
           description: 'Foo description',
           navLinks: [{ id: 'observability_overview', title: 'Observability Overview' }],
+          icon: 'wsAnalytics',
+        },
+        allNavLinksMock
+      )
+    ).toEqual(
+      expect.objectContaining({
+        id: 'foo',
+        title: 'Foo',
+        description: 'Foo description',
+        features: [],
+        systematic: false,
+        icon: 'wsAnalytics',
+      })
+    );
+  });
+
+  it('should filter out getting started features', () => {
+    expect(
+      convertNavGroupToWorkspaceUseCase(
+        {
+          id: 'foo',
+          title: 'Foo',
+          description: 'Foo description',
+          navLinks: [
+            { id: 'observability-gettingStarted', title: 'Observability Getting Started' },
+          ],
           icon: 'wsAnalytics',
         },
         allNavLinksMock

@@ -372,8 +372,9 @@ export const convertNavGroupToWorkspaceUseCase = (
   const features: WorkspaceUseCaseFeature[] = [];
   const category2NavLinks: { [key: string]: WorkspaceUseCaseFeature & { details: string[] } } = {};
   for (const { id: featureId, title: featureTitle, category } of visibleNavLinksWithinNavGroup) {
-    // Filter out overview link
-    if (featureId.endsWith('overview')) {
+    const lowerFeatureId = featureId.toLowerCase();
+    // Filter out overview and getting started links
+    if (lowerFeatureId.endsWith('overview') || lowerFeatureId.endsWith('started')) {
       continue;
     }
     if (!category) {
