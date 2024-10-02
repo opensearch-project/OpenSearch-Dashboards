@@ -101,7 +101,7 @@
     }
 
     &.bottom-container-expanded {
-      @include euiBottomShadowLarge($euiShadowColorLarge, 0.1, true, true);
+      @include euiBottomShadowLarge($euiColorMediumShade, 0.1, true, true);
 
       gap: 16px;
       padding-top: $euiSizeM;

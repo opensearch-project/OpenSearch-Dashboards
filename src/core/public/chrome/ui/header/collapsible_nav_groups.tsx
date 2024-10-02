@@ -157,9 +157,11 @@ export function NavGroups({
         name: (
           <CollapsibleNavGroupsLabel
             label={
-              <h3 className="euiCollapsibleNavGroup__heading nav-link-item">
-                {navLink.category?.label ?? ''}
-              </h3>
+              <EuiText size="s">
+                <span className="euiCollapsibleNavGroup__heading nav-link-item">
+                  {navLink.category?.label ?? ''}
+                </span>
+              </EuiText>
             }
             collapsible={!!categoryCollapsible}
             storageKey={categoryOpenKey}

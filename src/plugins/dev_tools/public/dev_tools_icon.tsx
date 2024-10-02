@@ -67,6 +67,7 @@ export function DevToolsIcon({
           onClick={() => {
             setModalVisible(true);
           }}
+          color="text"
         />
       </EuiToolTip>
       {modalVisible ? (
