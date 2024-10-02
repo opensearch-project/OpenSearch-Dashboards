@@ -28,7 +28,6 @@
  * under the License.
  */
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeader,
