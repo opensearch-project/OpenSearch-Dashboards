@@ -49,9 +49,10 @@ const PANEL_MIN_WIDTH = '100px';
 interface Props {
   loading: boolean;
   dataSourceId?: string;
+  useUpdatedUX?: boolean;
 }
 
-export const Editor = memo(({ loading, dataSourceId }: Props) => {
+export const Editor = memo(({ loading, dataSourceId, useUpdatedUX }: Props) => {
   const {
     services: { storage },
   } = useServicesContext();
@@ -101,7 +102,12 @@ export const Editor = memo(({ loading, dataSourceId }: Props) => {
           )}
         </Panel>
         <Panel
-          style={{ height: '100%', position: 'relative', minWidth: PANEL_MIN_WIDTH }}
+          style={{
+            height: '100%',
+            position: 'relative',
+            minWidth: PANEL_MIN_WIDTH,
+            flexGrow: useUpdatedUX ? 1 : 0,
+          }}
           initialWidth={secondPanelWidth}
         >
           {loading ? <EditorContentSpinner /> : <EditorOutput />}
