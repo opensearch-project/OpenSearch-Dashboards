@@ -32,10 +32,10 @@ export const FeatureCards = ({
 }: FeatureCardsProps) => {
   const groupedCardForDisplay = useMemo(() => {
     const grouped: Array<{ category?: AppCategory; navLinks: ChromeNavLink[] }> = [];
+    let lastGroup: { category?: AppCategory; navLinks: ChromeNavLink[] } | undefined;
     // The navLinks has already been sorted based on link / category's order,
     // so it is safe to group the links here.
     navLinks.forEach((link) => {
-      let lastGroup = grouped.length ? grouped[grouped.length - 1] : undefined;
       if (!lastGroup || lastGroup.category?.id !== link.category?.id) {
         lastGroup = { category: link.category, navLinks: [] };
         grouped.push(lastGroup);
@@ -77,7 +77,7 @@ export const FeatureCards = ({
                       description={link.description || ''}
                       onClick={() => navigateToApp(link.id)}
                       titleSize="xs"
-                      style={{ maxWidth: 240 }}
+                      style={{ width: 240 }}
                     />
                   </EuiFlexItem>
                 );
