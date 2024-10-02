@@ -233,7 +233,7 @@ export const WorkspaceUseCaseFlyout = ({
                   )}
                 </EuiText>
               </EuiAccordion>
-              {index < availableUseCases.length - 1 && <EuiSpacer size="m" />}
+              {index < useCaseWithDisplayedFeatures.length - 1 && <EuiSpacer size="m" />}
             </React.Fragment>
           )
         )}
