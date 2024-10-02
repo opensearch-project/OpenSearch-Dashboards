@@ -248,7 +248,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                       <span
                         class="euiTableCellContent__text"
                       >
-                        Analytics (all features)
+                        Analytics
                       </span>
                     </div>
                   </td>
