@@ -7,6 +7,16 @@ import { Dataset, DatasetField, DatasetSearchOptions, DataStructure } from '../.
 import { IDataPluginServices } from '../../../types';
 
 /**
+ * Options for fetching the data structure.
+ */
+export interface DataStructureFetchOptions {
+  /** Search string to filter results */
+  search?: string;
+  /** Token for paginated results */
+  paginationToken?: string;
+}
+
+/**
  * Configuration for handling dataset operations.
  */
 export interface DatasetTypeConfig {
@@ -28,12 +38,17 @@ export interface DatasetTypeConfig {
    */
   toDataset: (path: DataStructure[]) => Dataset;
   /**
-   * Fetches child options for a given DataStructure.
+   * Fetches child data structures and populates corresponding properties for a given DataStructure.
    * @param {IDataPluginServices} services - The data plugin services.
    * @param {DataStructure} dataStructure - The parent DataStructure.
-   * @returns {Promise<DatasetHandlerFetchResponse>} A promise that resolves to a DatasetHandlerFetchResponse.
+   * @param {DataStructureFetchOptions} options - The fetch options for pagination and search.
+   * @returns {Promise<DataStructure>} A promise that resolves to the updated DataStructure.
    */
-  fetch: (services: IDataPluginServices, path: DataStructure[]) => Promise<DataStructure>;
+  fetch: (
+    services: IDataPluginServices,
+    path: DataStructure[],
+    options?: DataStructureFetchOptions
+  ) => Promise<DataStructure>;
   /**
    * Fetches fields for the dataset.
    * @returns {Promise<DatasetField[]>} A promise that resolves to an array of DatasetFields.

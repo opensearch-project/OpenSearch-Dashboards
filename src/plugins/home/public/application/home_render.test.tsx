@@ -130,22 +130,14 @@ describe('initHome', () => {
     };
     initHome(contentManagementStartMock, core);
 
-    expect(registerHomeListCard).toHaveBeenCalledTimes(2);
-
-    expect(registerHomeListCard).toHaveBeenCalledWith(contentManagementStartMock, {
-      id: 'whats_new',
-      order: 10,
-      config: getWhatsNewConfig(core.docLinks),
-      target: HOME_CONTENT_AREAS.SERVICE_CARDS,
-      width: 16,
-    });
+    expect(registerHomeListCard).toHaveBeenCalledTimes(1);
 
     expect(registerHomeListCard).toHaveBeenCalledWith(contentManagementStartMock, {
       id: 'learn_opensearch_new',
       order: 11,
       config: getLearnOpenSearchConfig(core.docLinks),
       target: HOME_CONTENT_AREAS.SERVICE_CARDS,
-      width: 16,
+      width: 48,
     });
   });
 });
