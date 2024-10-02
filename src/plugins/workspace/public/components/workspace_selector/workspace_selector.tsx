@@ -112,11 +112,7 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
                       color="subdued"
                       data-test-subj="workspace-selector-current-title"
                     >
-                      <small>
-                        {i18n.translate('workspace.left.nav.selector.title', {
-                          defaultMessage: getUseCase(currentWorkspace)?.title || '',
-                        })}
-                      </small>
+                      <small>{getUseCase(currentWorkspace)?.title}</small>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
