@@ -144,7 +144,7 @@ export const WorkspacePermissionSettingInput = ({
           placeholder={
             type === WorkspacePermissionItemType.User
               ? i18n.translate('workspaceForm.permissionSetting.selectUser', {
-                  defaultMessage: 'Enter user name or uer ID',
+                  defaultMessage: 'Enter user name or user ID',
                 })
               : i18n.translate('workspaceForm.permissionSetting.selectUserGroup', {
                   defaultMessage: 'Enter group name or group ID',
