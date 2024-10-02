@@ -7,10 +7,12 @@ import { updateWorkspaceState } from '../../../../core/server/utils';
 import { SavedObject } from '../../../../core/public';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { WorkspaceIdConsumerWrapper } from './workspace_id_consumer_wrapper';
+import { workspaceClientMock } from '../workspace_client.mock';
 
 describe('WorkspaceIdConsumerWrapper', () => {
   const requestHandlerContext = coreMock.createRequestHandlerContext();
-  const wrapperInstance = new WorkspaceIdConsumerWrapper();
+  const mockedWorkspaceClient = workspaceClientMock.create();
+  const wrapperInstance = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
   const mockedClient = savedObjectsClientMock.create();
   const workspaceEnabledMockRequest = httpServerMock.createOpenSearchDashboardsRequest();
   updateWorkspaceState(workspaceEnabledMockRequest, {
@@ -103,6 +105,29 @@ describe('WorkspaceIdConsumerWrapper', () => {
   describe('find', () => {
     beforeEach(() => {
       mockedClient.find.mockClear();
+      mockedWorkspaceClient.get.mockImplementation((requestContext, id) => {
+        if (id === 'foo') {
+          return {
+            success: true,
+          };
+        }
+
+        return {
+          success: false,
+        };
+      });
+      mockedWorkspaceClient.list.mockResolvedValue({
+        success: true,
+        result: {
+          workspaces: [
+            {
+              id: 'foo',
+            },
+          ],
+        },
+      });
+      mockedWorkspaceClient.get.mockClear();
+      mockedWorkspaceClient.list.mockClear();
     });
 
     it(`Should add workspaces parameters when find`, async () => {
@@ -113,10 +138,12 @@ describe('WorkspaceIdConsumerWrapper', () => {
         type: 'dashboard',
         workspaces: ['foo'],
       });
+      expect(mockedWorkspaceClient.get).toBeCalledTimes(1);
+      expect(mockedWorkspaceClient.list).toBeCalledTimes(0);
     });
 
     it(`Should pass a empty workspace array`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper();
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, {});
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
@@ -126,6 +153,43 @@ describe('WorkspaceIdConsumerWrapper', () => {
       });
       await mockedWrapperClient.find({
         type: ['dashboard', 'visualization'],
+      });
+      expect(mockedClient.find).toBeCalledWith({
+        type: ['dashboard', 'visualization'],
+      });
+    });
+
+    it(`Should throw error when passing in invalid workspaces`, async () => {
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+      updateWorkspaceState(mockRequest, {});
+      const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
+        client: mockedClient,
+        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+        request: mockRequest,
+      });
+      expect(
+        mockedWrapperClient.find({
+          type: ['dashboard', 'visualization'],
+          workspaces: ['foo', 'not-exist'],
+        })
+      ).rejects.toMatchInlineSnapshot(`[Error: Invalid workspaces]`);
+      expect(mockedWorkspaceClient.get).toBeCalledTimes(0);
+      expect(mockedWorkspaceClient.list).toBeCalledTimes(1);
+    });
+
+    it(`Should not throw error when passing in '*'`, async () => {
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+      updateWorkspaceState(mockRequest, {});
+      const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
+        client: mockedClient,
+        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+        request: mockRequest,
+      });
+      await mockedWrapperClient.find({
+        type: ['dashboard', 'visualization'],
+        workspaces: ['*'],
       });
       expect(mockedClient.find).toBeCalledWith({
         type: ['dashboard', 'visualization'],
