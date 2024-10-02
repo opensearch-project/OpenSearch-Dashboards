@@ -166,26 +166,11 @@ export const registerHomeListCardToPage = (
   docLinks: DocLinksStart
 ) => {
   registerHomeListCard(contentManagement, {
-    id: 'whats_new',
-    order: 10,
-    config: getWhatsNewConfig(docLinks),
-    target: ESSENTIAL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
-    width: 24,
-  });
-
-  registerHomeListCard(contentManagement, {
     id: 'learn_opensearch_new',
     order: 20,
     config: getLearnOpenSearchConfig(docLinks),
     target: ESSENTIAL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
-    width: 24,
-  });
-
-  registerHomeListCard(contentManagement, {
-    id: 'whats_new',
-    order: 30,
-    config: getWhatsNewConfig(docLinks),
-    target: ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
+    width: 48,
   });
 
   registerHomeListCard(contentManagement, {
@@ -193,5 +178,6 @@ export const registerHomeListCardToPage = (
     order: 40,
     config: getLearnOpenSearchConfig(docLinks),
     target: ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS.SERVICE_CARDS,
+    width: 16,
   });
 };
