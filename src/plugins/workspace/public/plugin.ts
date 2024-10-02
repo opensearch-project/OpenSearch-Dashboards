@@ -60,6 +60,7 @@ import { UseCaseService } from './services/use_case_service';
 import { WorkspaceListCard } from './components/service_card';
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
 import { WorkspacePickerContent } from './components/workspace_picker_content/workspace_picker_content';
+import { WorkspaceSelector } from './components/workspace_selector/workspace_selector';
 import { HOME_CONTENT_AREAS } from '../../../plugins/content_management/public';
 import {
   registerEssentialOverviewContent,
@@ -121,7 +122,6 @@ export class WorkspacePlugin
    */
   private filterNavLinks = (core: CoreStart) => {
     const currentWorkspace$ = core.workspaces.currentWorkspace$;
-
     this.workspaceAndUseCasesCombineSubscription?.unsubscribe();
     this.workspaceAndUseCasesCombineSubscription = combineLatest([
       currentWorkspace$,
@@ -536,25 +536,15 @@ export class WorkspacePlugin
       },
     ]);
 
-    if (core.chrome.navGroup.getNavGroupEnabled()) {
-      /**
-       * Show workspace picker content when outside of workspace and not in any nav group
-       */
+    if (workspaceId) {
       core.chrome.registerCollapsibleNavHeader(() => {
         if (!this.coreStart) {
           return null;
         }
-        return React.createElement(EuiPanel, {
-          hasShadow: false,
-          hasBorder: false,
-          paddingSize: 's',
-          children: [
-            React.createElement(WorkspacePickerContent, {
-              key: 'workspacePickerContent',
-              coreStart: this.coreStart,
-              registeredUseCases$: this.registeredUseCases$,
-            }),
-          ],
+        return React.createElement(WorkspaceSelector, {
+          key: 'workspaceSelector',
+          coreStart: this.coreStart,
+          registeredUseCases$: this.registeredUseCases$,
         });
       });
     }

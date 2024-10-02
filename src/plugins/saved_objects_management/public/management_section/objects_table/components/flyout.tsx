@@ -885,7 +885,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             isLegacyFile={isLegacyFile}
             updateSelection={(newValues: ImportMode) => this.changeImportMode(newValues)}
             optionLabel={i18n.translate(
-              'savedObjectsManagement.objectsTable.importModeControl.importOptionsTitle',
+              'savedObjectsManagement.objectsTable.importModeControl.conflictManagementTitle',
               { defaultMessage: 'Conflict management' }
             )}
             useUpdatedUX={this.props.useUpdatedUX}
