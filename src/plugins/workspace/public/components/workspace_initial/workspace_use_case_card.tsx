@@ -12,6 +12,7 @@ import {
   EuiToolTip,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiButtonIcon,
   EuiSplitPanel,
   EuiSmallButton,
   EuiHorizontalRule,
@@ -21,7 +22,7 @@ import {
   EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useMemo } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import {
   UpdatedWorkspaceObject,
   getWorkspacesWithRecentMessage,
@@ -29,6 +30,7 @@ import {
 } from './utils';
 import { WorkspaceUseCase } from '../../types';
 import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
+import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
 
 interface WorkspaceUseCaseCardProps {
   useCase: WorkspaceUseCase;
@@ -36,6 +38,7 @@ interface WorkspaceUseCaseCardProps {
   application: ApplicationStart;
   http: HttpSetup;
   isDashboardAdmin: boolean;
+  handleClickUseCaseInformation: (useCaseId: string) => void;
 }
 
 export const WorkspaceUseCaseCard = ({
@@ -44,6 +47,7 @@ export const WorkspaceUseCaseCard = ({
   application,
   http,
   isDashboardAdmin,
+  handleClickUseCaseInformation,
 }: WorkspaceUseCaseCardProps) => {
   const useCaseIcon = useCase.icon || 'logoOpenSearch';
 
@@ -77,9 +81,8 @@ export const WorkspaceUseCaseCard = ({
 
   const workspaceToItem = (workspace: UpdatedWorkspaceObject) => {
     return (
-      <>
+      <Fragment key={workspace.id}>
         <EuiContextMenuItem
-          key={workspace.id}
           href={getUseCaseUrl(useCase, workspace, application, http)}
           icon={<EuiIcon type={useCaseIcon} color={workspace.color} size="m" />}
           toolTipContent={workspace.name}
@@ -95,12 +98,12 @@ export const WorkspaceUseCaseCard = ({
           </EuiText>
         </EuiContextMenuItem>
         <EuiHorizontalRule margin="none" />
-      </>
+      </Fragment>
     );
   };
 
   return (
-    <EuiSplitPanel.Outer style={{ height: '426px' }}>
+    <EuiSplitPanel.Outer style={{ height: '416px' }}>
       <EuiSplitPanel.Inner paddingSize="m" grow={!hasWorkspaces} className={useCase.id}>
         <EuiFlexGroup alignItems="center" direction="column" gutterSize="s" responsive={false}>
           <EuiFlexItem>
@@ -110,14 +113,37 @@ export const WorkspaceUseCaseCard = ({
             <EuiTitle size="xs">
               <h4 style={{ display: 'flex', alignItems: 'center' }}>
                 {useCase.title}
-                &nbsp;
-                <EuiIcon size="m" type="iInCircle" />
+                <EuiToolTip
+                  position="top"
+                  content={i18n.translate(
+                    'workspace.initial.useCaseCard.{useCaseId}.information.tooltip',
+                    {
+                      defaultMessage: '{title} information',
+                      values: { useCaseId: useCase.id, title: useCase.title },
+                    }
+                  )}
+                >
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'workspace.initial.useCaseCard.{useCaseId}.information.button',
+                      {
+                        defaultMessage: '{title} information button',
+                        values: { useCaseId: useCase.id, title: useCase.title },
+                      }
+                    )}
+                    data-test-subj={`workspace-initial-useCaseCard-${useCase.id}-button-information`}
+                    iconSize="m"
+                    color="text"
+                    iconType="iInCircle"
+                    onClick={() => handleClickUseCaseInformation(useCase.id)}
+                  />
+                </EuiToolTip>
               </h4>
             </EuiTitle>
           </EuiFlexItem>
           {!hasWorkspaces && (
             <EuiFlexItem>
-              <EuiText textAlign="center" size="xs">
+              <EuiText textAlign="center" size="s">
                 {useCase.description}
               </EuiText>
             </EuiFlexItem>
@@ -128,7 +154,7 @@ export const WorkspaceUseCaseCard = ({
       {hasWorkspaces ? (
         <>
           <EuiSplitPanel.Inner paddingSize="none">
-            <div className="eui-yScrollWithShadows" style={{ maxHeight: '286px' }}>
+            <div className="eui-yScrollWithShadows" style={{ maxHeight: '272px' }}>
               <EuiContextMenuPanel
                 size="s"
                 items={sortedWorkspaceList.map(workspaceToItem)}
@@ -142,6 +168,7 @@ export const WorkspaceUseCaseCard = ({
               <EuiFlexItem grow={false}>
                 <EuiSmallButtonEmpty
                   data-test-subj={`workspace-initial-useCaseCard-${useCase.id}-button-view`}
+                  href={application.getUrlForApp(WORKSPACE_LIST_APP_ID, { absolute: true })}
                 >
                   {i18n.translate('workspace.initial.useCaseCard.{useCaseId}.button.view', {
                     defaultMessage: 'View all',
@@ -162,6 +189,14 @@ export const WorkspaceUseCaseCard = ({
                     )}
                   >
                     <EuiSmallButtonIcon
+                      aria-label={i18n.translate(
+                        'workspace.initial.useCaseCard.{useCaseId}.button.plus',
+                        {
+                          defaultMessage: 'Create {title} workspace',
+                          values: { useCaseId: useCase.id, title: useCase.title },
+                        }
+                      )}
+                      href={application.getUrlForApp(WORKSPACE_CREATE_APP_ID, { absolute: true })}
                       display="base"
                       iconType="plus"
                       data-test-subj={`workspace-initial-useCaseCard-${useCase.id}-button-createWorkspace`}
@@ -174,7 +209,7 @@ export const WorkspaceUseCaseCard = ({
         </>
       ) : (
         <EuiSplitPanel.Inner
-          paddingSize="s"
+          paddingSize="m"
           style={{
             display: 'grid',
             placeItems: 'center',
@@ -198,8 +233,8 @@ export const WorkspaceUseCaseCard = ({
                 </h4>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText textAlign="center" size="xs" color="subdued">
+            <EuiFlexItem grow={false} style={{ width: '192px' }}>
+              <EuiText textAlign="center" size="s" color="subdued">
                 {isDashboardAdmin ? adminCreateWorkspaceText : noAdminCreateWorkspaceText}
               </EuiText>
             </EuiFlexItem>
@@ -209,6 +244,7 @@ export const WorkspaceUseCaseCard = ({
                   iconType="plus"
                   color="primary"
                   data-test-subj={`workspace-initial-useCaseCard-${useCase.id}-button-createWorkspace`}
+                  href={application.getUrlForApp(WORKSPACE_CREATE_APP_ID, { absolute: true })}
                 >
                   {i18n.translate(
                     'workspace.initial.useCaseCard.{useCaseId}.button.createWorkspace',

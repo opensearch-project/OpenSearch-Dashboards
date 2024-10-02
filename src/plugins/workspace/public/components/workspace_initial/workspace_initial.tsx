@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import './workspace_use_case_card.scss';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { ChromeNavControl, CoreStart } from 'opensearch-dashboards/public';
 import {
   EuiLink,
@@ -25,6 +26,7 @@ import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceUseCase } from '../../types';
 import { WorkspaceUseCaseCard } from './workspace_use_case_card';
+import { WorkspaceUseCaseFlyout } from '../workspace_form';
 
 export interface WorkspaceInitialProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -39,6 +41,16 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
     .getValue()
     .filter((item) => !item.systematic || item.id === 'all');
   const workspaceList = workspaces.workspaceList$.getValue();
+  const [isUseCaseFlyoutVisible, setIsUseCaseFlyoutVisible] = useState(false);
+  const [defaultUseCaseId, setDefaultUseCaseId] = useState(availableUseCases[0].id);
+
+  const handleClickUseCaseInformation = useCallback((useCaseId: string) => {
+    setIsUseCaseFlyoutVisible(true);
+    setDefaultUseCaseId(useCaseId);
+  }, []);
+  const handleFlyoutClose = useCallback(() => {
+    setIsUseCaseFlyoutVisible(false);
+  }, []);
 
   const useCaseCards = availableUseCases.map((useCase) => {
     return (
@@ -49,6 +61,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
           application={application}
           http={http}
           isDashboardAdmin={isDashboardAdmin}
+          handleClickUseCaseInformation={handleClickUseCaseInformation}
         />
       </EuiFlexItem>
     );
@@ -138,23 +151,22 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
         <EuiTitle size="l">
-          <h1 style={{ fontWeight: 400 }}>
+          <h1>
             {i18n.translate('workspace.initial.title', {
               defaultMessage: 'Welcome to OpenSearch',
             })}
           </h1>
         </EuiTitle>
       </EuiFlexItem>
-      <EuiSpacer size="xl" />
-      <EuiSpacer size="xxl" />
+      <EuiSpacer size="l" />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <EuiIcon type="wsSelector" size="l" />
+              <EuiIcon type="wsSelector" size="m" />
               &nbsp;
               <EuiTitle size="m">
-                <h2 style={{ fontWeight: 400 }}>
+                <h2>
                   {i18n.translate('workspace.initial.title', {
                     defaultMessage: 'My workspaces',
                   })}
@@ -178,14 +190,14 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
           <EuiFlexItem grow={2}>
-            <EuiText size="s">
+            <EuiText size="s" style={{ display: 'flex', alignItems: 'center' }}>
+              <EuiIcon type="reporter" size="s" color="primary" />
+              &nbsp;
               <EuiLink
                 href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html"
                 target="_blank"
-                style={{ fontWeight: 'normal', display: 'flex', alignItems: 'center' }}
+                style={{ fontWeight: 'normal' }}
               >
-                <EuiIcon type="reporter" size="s" className="eui-alignMiddle" />
-                &nbsp;
                 {i18n.translate('workspace.initial.button.openSearch', {
                   defaultMessage: 'Learn more from documentation',
                 })}
@@ -193,14 +205,14 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={6}>
-            <EuiText size="s">
+            <EuiText size="s" style={{ display: 'flex', alignItems: 'center' }}>
+              <EuiIcon type="dashboardApp" size="s" color="primary" />
+              &nbsp;
               <EuiLink
                 href="https://playground.opensearch.org/"
                 target="_blank"
-                style={{ fontWeight: 'normal', display: 'flex', alignItems: 'center' }}
+                style={{ fontWeight: 'normal' }}
               >
-                <EuiIcon type="dashboardApp" size="s" />
-                &nbsp;
                 {i18n.translate('workspace.initial.button.openSearch', {
                   defaultMessage: 'Explore live demo environment at playground.opensearch.org',
                 })}
@@ -239,12 +251,21 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <div ref={mountSettingRef} />
-        <EuiSpacer size="s" />
-        <div ref={mountDevToolsRef} />
-        <EuiSpacer size="s" />
-        <div ref={mountUserAccountRef} />
+        <div className="fixedLeftBottomIcon">
+          <div ref={mountSettingRef} />
+          <EuiSpacer size="s" />
+          <div ref={mountDevToolsRef} />
+          <EuiSpacer size="s" />
+          <div ref={mountUserAccountRef} />
+        </div>
       </EuiPageBody>
+      {isUseCaseFlyoutVisible && (
+        <WorkspaceUseCaseFlyout
+          availableUseCases={availableUseCases}
+          onClose={handleFlyoutClose}
+          defaultExpandUseCase={defaultUseCaseId}
+        />
+      )}
     </EuiPage>
   );
 };

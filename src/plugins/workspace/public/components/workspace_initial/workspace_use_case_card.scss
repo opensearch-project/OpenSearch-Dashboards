@@ -27,10 +27,16 @@
 }
 
 .createWorkspaceTextBorder {
-    border: 2px dashed;
+    border: 1px dashed;
     border-radius: 8px;
     max-height: 160px;
-    width: 200px;
+    width: 210px;
     padding: 10px;
-    border-color: $ouiButtonColorDisabledText;
+    border-color: $ouiColorDarkShade;
 }
+
+.fixedLeftBottomIcon {
+    position: fixed;
+    bottom: 12px;
+    left: 12px;
+  }

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`WorkspaceInitial user is OSD admin render workspace initial page normally when user is dashboard admin 1`] = `
+exports[`WorkspaceInitial render workspace initial page normally when user is OSD admin 1`] = `
 <div>
   <div
     class="euiPage euiPage--paddingMedium euiPage--grow"
@@ -28,16 +28,12 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
             >
               <h1
                 class="euiTitle euiTitle--large"
-                style="font-weight: 400;"
               >
                 Welcome to OpenSearch
               </h1>
             </div>
             <div
-              class="euiSpacer euiSpacer--xl"
-            />
-            <div
-              class="euiSpacer euiSpacer--xxl"
+              class="euiSpacer euiSpacer--l"
             />
             <div
               class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -57,7 +53,6 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                      
                     <h2
                       class="euiTitle euiTitle--medium"
-                      style="font-weight: 400;"
                     >
                       My workspaces
                     </h2>
@@ -117,10 +112,10 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                 >
                   <div
                     class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
-                    style="height: 426px;"
+                    style="height: 416px;"
                   >
                     <div
-                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner observability"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner observability"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
@@ -135,22 +130,35 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                         <div
                           class="euiFlexItem"
                         >
-                          <h3
+                          <h4
                             class="euiTitle euiTitle--xsmall"
                             style="display: flex; align-items: center;"
                           >
                             Observability
-                             
                             <span
-                              data-euiicon-type="iInCircle"
-                            />
-                          </h3>
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="Observability information button"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="workspace-initial-useCaseCard-observability-button-information"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="iInCircle"
+                                />
+                              </button>
+                            </span>
+                          </h4>
                         </div>
                         <div
                           class="euiFlexItem"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small"
                           >
                             <div
                               class="euiTextAlign euiTextAlign--center"
@@ -165,7 +173,7 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                       class="euiHorizontalRule euiHorizontalRule--full"
                     />
                     <div
-                      class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
                       style="display: grid; place-items: center;"
                     >
                       <div
@@ -182,9 +190,10 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                         </div>
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="width: 192px;"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small"
                           >
                             <div
                               class="euiTextAlign euiTextAlign--center"
@@ -230,10 +239,10 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                 >
                   <div
                     class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
-                    style="height: 426px;"
+                    style="height: 416px;"
                   >
                     <div
-                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner security-analytics"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner security-analytics"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
@@ -248,22 +257,35 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                         <div
                           class="euiFlexItem"
                         >
-                          <h3
+                          <h4
                             class="euiTitle euiTitle--xsmall"
                             style="display: flex; align-items: center;"
                           >
                             Security Analytics
-                             
                             <span
-                              data-euiicon-type="iInCircle"
-                            />
-                          </h3>
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="Security Analytics information button"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="workspace-initial-useCaseCard-security-analytics-button-information"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="iInCircle"
+                                />
+                              </button>
+                            </span>
+                          </h4>
                         </div>
                         <div
                           class="euiFlexItem"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small"
                           >
                             <div
                               class="euiTextAlign euiTextAlign--center"
@@ -278,7 +300,7 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                       class="euiHorizontalRule euiHorizontalRule--full"
                     />
                     <div
-                      class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
                       style="display: grid; place-items: center;"
                     >
                       <div
@@ -295,9 +317,10 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                         </div>
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="width: 192px;"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small"
                           >
                             <div
                               class="euiTextAlign euiTextAlign--center"
@@ -343,10 +366,10 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                 >
                   <div
                     class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
-                    style="height: 426px;"
+                    style="height: 416px;"
                   >
                     <div
-                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner essentials"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner essentials"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
@@ -361,22 +384,35 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                         <div
                           class="euiFlexItem"
                         >
-                          <h3
+                          <h4
                             class="euiTitle euiTitle--xsmall"
                             style="display: flex; align-items: center;"
                           >
                             Essentials
-                             
                             <span
-                              data-euiicon-type="iInCircle"
-                            />
-                          </h3>
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="Essentials information button"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="workspace-initial-useCaseCard-essentials-button-information"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="iInCircle"
+                                />
+                              </button>
+                            </span>
+                          </h4>
                         </div>
                         <div
                           class="euiFlexItem"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small"
                           >
                             <div
                               class="euiTextAlign euiTextAlign--center"
@@ -391,7 +427,7 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                       class="euiHorizontalRule euiHorizontalRule--full"
                     />
                     <div
-                      class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
                       style="display: grid; place-items: center;"
                     >
                       <div
@@ -408,9 +444,10 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                         </div>
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="width: 192px;"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small"
                           >
                             <div
                               class="euiTextAlign euiTextAlign--center"
@@ -456,10 +493,10 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                 >
                   <div
                     class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
-                    style="height: 426px;"
+                    style="height: 416px;"
                   >
                     <div
-                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner search"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner search"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
@@ -474,22 +511,35 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                         <div
                           class="euiFlexItem"
                         >
-                          <h3
+                          <h4
                             class="euiTitle euiTitle--xsmall"
                             style="display: flex; align-items: center;"
                           >
                             Search
-                             
                             <span
-                              data-euiicon-type="iInCircle"
-                            />
-                          </h3>
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="Search information button"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="workspace-initial-useCaseCard-search-button-information"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="iInCircle"
+                                />
+                              </button>
+                            </span>
+                          </h4>
                         </div>
                         <div
                           class="euiFlexItem"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small"
                           >
                             <div
                               class="euiTextAlign euiTextAlign--center"
@@ -504,7 +554,7 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                       class="euiHorizontalRule euiHorizontalRule--full"
                     />
                     <div
-                      class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
                       style="display: grid; place-items: center;"
                     >
                       <div
@@ -521,9 +571,10 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                         </div>
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="width: 192px;"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small"
                           >
                             <div
                               class="euiTextAlign euiTextAlign--center"
@@ -577,19 +628,20 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                 >
                   <div
                     class="euiText euiText--small"
+                    style="display: flex; align-items: center;"
                   >
+                    <span
+                      color="primary"
+                      data-euiicon-type="reporter"
+                    />
+                     
                     <a
                       class="euiLink euiLink--primary"
                       href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html"
                       rel="noopener noreferrer"
-                      style="font-weight: normal; display: flex; align-items: center;"
+                      style="font-weight: normal;"
                       target="_blank"
                     >
-                      <span
-                        class="eui-alignMiddle"
-                        data-euiicon-type="reporter"
-                      />
-                       
                       Learn more from documentation
                       <span
                         aria-label="External link"
@@ -609,18 +661,20 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
                 >
                   <div
                     class="euiText euiText--small"
+                    style="display: flex; align-items: center;"
                   >
+                    <span
+                      color="primary"
+                      data-euiicon-type="dashboardApp"
+                    />
+                     
                     <a
                       class="euiLink euiLink--primary"
                       href="https://playground.opensearch.org/"
                       rel="noopener noreferrer"
-                      style="font-weight: normal; display: flex; align-items: center;"
+                      style="font-weight: normal;"
                       target="_blank"
                     >
-                      <span
-                        data-euiicon-type="dashboardApp"
-                      />
-                       
                       Explore live demo environment at playground.opensearch.org
                       <span
                         aria-label="External link"
@@ -659,21 +713,25 @@ exports[`WorkspaceInitial user is OSD admin render workspace initial page normal
           </div>
         </div>
       </div>
-      <div />
       <div
-        class="euiSpacer euiSpacer--s"
-      />
-      <div />
-      <div
-        class="euiSpacer euiSpacer--s"
-      />
-      <div />
+        class="fixedLeftBottomIcon"
+      >
+        <div />
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div />
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div />
+      </div>
     </div>
   </div>
 </div>
 `;
 
-exports[`WorkspaceInitial user is not OSD admin render workspace initial page normally when user is non dashboard admin 1`] = `
+exports[`WorkspaceInitial render workspace initial page normally when user is non OSD admin 1`] = `
 <div>
   <div
     class="euiPage euiPage--paddingMedium euiPage--grow"
@@ -701,16 +759,12 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
             >
               <h1
                 class="euiTitle euiTitle--large"
-                style="font-weight: 400;"
               >
                 Welcome to OpenSearch
               </h1>
             </div>
             <div
-              class="euiSpacer euiSpacer--xl"
-            />
-            <div
-              class="euiSpacer euiSpacer--xxl"
+              class="euiSpacer euiSpacer--l"
             />
             <div
               class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -730,7 +784,6 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                      
                     <h2
                       class="euiTitle euiTitle--medium"
-                      style="font-weight: 400;"
                     >
                       My workspaces
                     </h2>
@@ -757,10 +810,10 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                 >
                   <div
                     class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
-                    style="height: 426px;"
+                    style="height: 416px;"
                   >
                     <div
-                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner observability"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner observability"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
@@ -775,22 +828,35 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                         <div
                           class="euiFlexItem"
                         >
-                          <h3
+                          <h4
                             class="euiTitle euiTitle--xsmall"
                             style="display: flex; align-items: center;"
                           >
                             Observability
-                             
                             <span
-                              data-euiicon-type="iInCircle"
-                            />
-                          </h3>
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="Observability information button"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="workspace-initial-useCaseCard-observability-button-information"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="iInCircle"
+                                />
+                              </button>
+                            </span>
+                          </h4>
                         </div>
                         <div
                           class="euiFlexItem"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small"
                           >
                             <div
                               class="euiTextAlign euiTextAlign--center"
@@ -805,7 +871,7 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                       class="euiHorizontalRule euiHorizontalRule--full"
                     />
                     <div
-                      class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
                       style="display: grid; place-items: center;"
                     >
                       <div
@@ -822,9 +888,10 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                         </div>
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="width: 192px;"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small"
                           >
                             <div
                               class="euiTextAlign euiTextAlign--center"
@@ -846,10 +913,10 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                 >
                   <div
                     class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
-                    style="height: 426px;"
+                    style="height: 416px;"
                   >
                     <div
-                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner security-analytics"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner security-analytics"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
@@ -864,22 +931,35 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                         <div
                           class="euiFlexItem"
                         >
-                          <h3
+                          <h4
                             class="euiTitle euiTitle--xsmall"
                             style="display: flex; align-items: center;"
                           >
                             Security Analytics
-                             
                             <span
-                              data-euiicon-type="iInCircle"
-                            />
-                          </h3>
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="Security Analytics information button"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="workspace-initial-useCaseCard-security-analytics-button-information"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="iInCircle"
+                                />
+                              </button>
+                            </span>
+                          </h4>
                         </div>
                         <div
                           class="euiFlexItem"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small"
                           >
                             <div
                               class="euiTextAlign euiTextAlign--center"
@@ -894,7 +974,7 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                       class="euiHorizontalRule euiHorizontalRule--full"
                     />
                     <div
-                      class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
                       style="display: grid; place-items: center;"
                     >
                       <div
@@ -911,9 +991,10 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                         </div>
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="width: 192px;"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small"
                           >
                             <div
                               class="euiTextAlign euiTextAlign--center"
@@ -935,10 +1016,10 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                 >
                   <div
                     class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
-                    style="height: 426px;"
+                    style="height: 416px;"
                   >
                     <div
-                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner essentials"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner essentials"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
@@ -953,22 +1034,35 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                         <div
                           class="euiFlexItem"
                         >
-                          <h3
+                          <h4
                             class="euiTitle euiTitle--xsmall"
                             style="display: flex; align-items: center;"
                           >
                             Essentials
-                             
                             <span
-                              data-euiicon-type="iInCircle"
-                            />
-                          </h3>
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="Essentials information button"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="workspace-initial-useCaseCard-essentials-button-information"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="iInCircle"
+                                />
+                              </button>
+                            </span>
+                          </h4>
                         </div>
                         <div
                           class="euiFlexItem"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small"
                           >
                             <div
                               class="euiTextAlign euiTextAlign--center"
@@ -983,7 +1077,7 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                       class="euiHorizontalRule euiHorizontalRule--full"
                     />
                     <div
-                      class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
                       style="display: grid; place-items: center;"
                     >
                       <div
@@ -1000,9 +1094,10 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                         </div>
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="width: 192px;"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small"
                           >
                             <div
                               class="euiTextAlign euiTextAlign--center"
@@ -1024,10 +1119,10 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                 >
                   <div
                     class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
-                    style="height: 426px;"
+                    style="height: 416px;"
                   >
                     <div
-                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner search"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner search"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
@@ -1042,22 +1137,35 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                         <div
                           class="euiFlexItem"
                         >
-                          <h3
+                          <h4
                             class="euiTitle euiTitle--xsmall"
                             style="display: flex; align-items: center;"
                           >
                             Search
-                             
                             <span
-                              data-euiicon-type="iInCircle"
-                            />
-                          </h3>
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="Search information button"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="workspace-initial-useCaseCard-search-button-information"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="iInCircle"
+                                />
+                              </button>
+                            </span>
+                          </h4>
                         </div>
                         <div
                           class="euiFlexItem"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small"
                           >
                             <div
                               class="euiTextAlign euiTextAlign--center"
@@ -1072,7 +1180,7 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                       class="euiHorizontalRule euiHorizontalRule--full"
                     />
                     <div
-                      class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner"
                       style="display: grid; place-items: center;"
                     >
                       <div
@@ -1089,9 +1197,10 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                         </div>
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
+                          style="width: 192px;"
                         >
                           <div
-                            class="euiText euiText--extraSmall"
+                            class="euiText euiText--small"
                           >
                             <div
                               class="euiTextAlign euiTextAlign--center"
@@ -1121,19 +1230,20 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                 >
                   <div
                     class="euiText euiText--small"
+                    style="display: flex; align-items: center;"
                   >
+                    <span
+                      color="primary"
+                      data-euiicon-type="reporter"
+                    />
+                     
                     <a
                       class="euiLink euiLink--primary"
                       href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html"
                       rel="noopener noreferrer"
-                      style="font-weight: normal; display: flex; align-items: center;"
+                      style="font-weight: normal;"
                       target="_blank"
                     >
-                      <span
-                        class="eui-alignMiddle"
-                        data-euiicon-type="reporter"
-                      />
-                       
                       Learn more from documentation
                       <span
                         aria-label="External link"
@@ -1153,18 +1263,20 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
                 >
                   <div
                     class="euiText euiText--small"
+                    style="display: flex; align-items: center;"
                   >
+                    <span
+                      color="primary"
+                      data-euiicon-type="dashboardApp"
+                    />
+                     
                     <a
                       class="euiLink euiLink--primary"
                       href="https://playground.opensearch.org/"
                       rel="noopener noreferrer"
-                      style="font-weight: normal; display: flex; align-items: center;"
+                      style="font-weight: normal;"
                       target="_blank"
                     >
-                      <span
-                        data-euiicon-type="dashboardApp"
-                      />
-                       
                       Explore live demo environment at playground.opensearch.org
                       <span
                         aria-label="External link"
@@ -1203,15 +1315,19 @@ exports[`WorkspaceInitial user is not OSD admin render workspace initial page no
           </div>
         </div>
       </div>
-      <div />
       <div
-        class="euiSpacer euiSpacer--s"
-      />
-      <div />
-      <div
-        class="euiSpacer euiSpacer--s"
-      />
-      <div />
+        class="fixedLeftBottomIcon"
+      >
+        <div />
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div />
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div />
+      </div>
     </div>
   </div>
 </div>

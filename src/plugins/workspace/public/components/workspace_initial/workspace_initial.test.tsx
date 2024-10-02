@@ -49,28 +49,35 @@ const WorkspaceInitialPage = (props: { isDashboardAdmin: boolean }) => {
 };
 
 describe('WorkspaceInitial', () => {
-  describe('user is OSD admin', () => {
-    it('render workspace initial page normally when user is dashboard admin', async () => {
-      const { container } = render(<WorkspaceInitialPage isDashboardAdmin={true} />);
-      expect(container).toMatchSnapshot();
-    });
-
-    it('it should click create workspace button popover ', async () => {
-      const { getByTestId, queryByTestId } = render(
-        <WorkspaceInitialPage isDashboardAdmin={true} />
-      );
-      const button = getByTestId('workspace-initial-card-createWorkspace-button');
-      expect(button).toBeInTheDocument();
-      expect(queryByTestId('workspace-initial-button-create-search-workspace')).toBeNull();
-      fireEvent.click(button);
-      expect(getByTestId('workspace-initial-button-create-search-workspace')).toBeInTheDocument();
-    });
+  it('render workspace initial page normally when user is OSD admin', async () => {
+    const { container } = render(<WorkspaceInitialPage isDashboardAdmin={true} />);
+    expect(container).toMatchSnapshot();
   });
 
-  describe('user is not OSD admin', () => {
-    it('render workspace initial page normally when user is non dashboard admin', async () => {
-      const { container } = render(<WorkspaceInitialPage isDashboardAdmin={false} />);
-      expect(container).toMatchSnapshot();
-    });
+  it('render workspace initial page normally when user is non OSD admin', async () => {
+    const { container } = render(<WorkspaceInitialPage isDashboardAdmin={false} />);
+    expect(container).toMatchSnapshot();
+  });
+
+  it('it should click create workspace button popover when user is OSD admin', async () => {
+    const { getByTestId, queryByTestId } = render(<WorkspaceInitialPage isDashboardAdmin={true} />);
+    const button = getByTestId('workspace-initial-card-createWorkspace-button');
+    expect(button).toBeInTheDocument();
+    expect(queryByTestId('workspace-initial-button-create-search-workspace')).toBeNull();
+    fireEvent.click(button);
+    expect(getByTestId('workspace-initial-button-create-search-workspace')).toBeInTheDocument();
+  });
+
+  it('it should click use case information button and show the flyout', async () => {
+    const { getByTestId, getByText, queryByText } = render(
+      <WorkspaceInitialPage isDashboardAdmin={true} />
+    );
+    const button = getByTestId('workspace-initial-useCaseCard-search-button-information');
+    expect(button).toBeInTheDocument();
+    expect(queryByText('Use cases')).toBeNull();
+    fireEvent.click(button);
+    expect(getByText('Use cases')).toBeInTheDocument();
+    fireEvent.click(getByTestId('euiFlyoutCloseButton'));
+    expect(queryByText('Use cases')).toBeNull();
   });
 });
