@@ -475,6 +475,7 @@ export function Header({
         navigateToUrl={application.navigateToUrl}
         renderBreadcrumbs={renderBreadcrumbs(true, true)}
         buttonSize={useApplicationHeader ? 's' : 'xs'}
+        loadingCount$={observables.loadingCount$}
       />
     </EuiHeaderSectionItem>
   );
