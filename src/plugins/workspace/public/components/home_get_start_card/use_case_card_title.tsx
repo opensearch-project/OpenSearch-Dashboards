@@ -51,8 +51,9 @@ export const UseCaseCardTitle = ({ filterWorkspaces, useCase, core }: UseCaseCar
 
   const iconButton = (
     <EuiButtonIcon
-      aria-label={i18n.translate(`workspace.getStartCard.${useCase.id}.icon.button`, {
-        defaultMessage: `show available workspace menu for ${useCase}`,
+      aria-label={i18n.translate('workspace.getStartCard.{useCaseId}.icon.button', {
+        defaultMessage: 'show available workspace menu for {useCaseId}',
+        values: { useCaseId: useCase.id },
       })}
       size="xs"
       iconType="arrowDown"
@@ -146,7 +147,7 @@ export const UseCaseCardTitle = ({ filterWorkspaces, useCase, core }: UseCaseCar
           anchorPosition="downCenter"
         >
           <EuiPopoverTitle paddingSize="s">
-            {i18n.translate('workspace.getStartCard.popover.title.', {
+            {i18n.translate('workspace.getStartCard.popover.title', {
               defaultMessage: 'SELECT WORKSPACE',
             })}
           </EuiPopoverTitle>

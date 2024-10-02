@@ -8,7 +8,6 @@ import {
   EuiFlyout,
   EuiPanel,
   EuiHorizontalRule,
-  EuiSpacer,
   EuiHideFor,
   EuiFlyoutProps,
   EuiShowFor,
@@ -23,7 +22,6 @@ import { ChromeNavControl, ChromeNavLink } from '../..';
 import { AppCategory, NavGroupType } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { OnIsLockedUpdate } from './';
 import { createEuiListItem } from './nav_link';
 import type { Logos } from '../../../../common/types';
 import {
@@ -42,11 +40,9 @@ export interface CollapsibleNavGroupEnabledProps {
   collapsibleNavHeaderRender?: () => JSX.Element | null;
   basePath: HttpStart['basePath'];
   id: string;
-  isLocked: boolean;
   isNavOpen: boolean;
   navLinks$: Rx.Observable<ChromeNavLink[]>;
   storage?: Storage;
-  onIsLockedUpdate: OnIsLockedUpdate;
   closeNav: () => void;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
@@ -80,10 +76,9 @@ enum NavWidth {
 export function CollapsibleNavGroupEnabled({
   basePath,
   id,
-  isLocked,
   isNavOpen,
   storage = window.localStorage,
-  onIsLockedUpdate,
+  currentWorkspace$,
   closeNav,
   navigateToApp,
   navigateToUrl,
@@ -99,7 +94,6 @@ export function CollapsibleNavGroupEnabled({
   const appId = useObservable(observables.appId$, '');
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
-
   const visibleUseCases = useMemo(() => getVisibleUseCases(navGroupsMap), [navGroupsMap]);
 
   const currentNavGroupId = useMemo(() => {
@@ -119,9 +113,6 @@ export function CollapsibleNavGroupEnabled({
   const shouldAppendManageCategory = capabilities.workspaces.enabled
     ? !currentNavGroupId
     : currentNavGroupId === ALL_USE_CASE_ID;
-
-  const shouldShowCollapsedNavHeaderContent =
-    isNavOpen && !!collapsibleNavHeaderRender && !currentNavGroupId;
 
   const navLinksForRender: ChromeNavLink[] = useMemo(() => {
     const getSystemNavGroups = () => {
@@ -305,6 +296,7 @@ export function CollapsibleNavGroupEnabled({
             <CollapsibleNavTop
               homeLink={homeLink}
               navGroupsMap={navGroupsMap}
+              collapsibleNavHeaderRender={collapsibleNavHeaderRender}
               navLinks={navLinks}
               navigateToApp={navigateToApp}
               logos={logos}
@@ -313,7 +305,7 @@ export function CollapsibleNavGroupEnabled({
               shouldShrinkNavigation={!isNavOpen}
               onClickShrink={closeNav}
               visibleUseCases={visibleUseCases}
-              currentWorkspace$={observables.currentWorkspace$}
+              currentWorkspace$={currentWorkspace$}
             />
           </EuiPanel>
         )}
@@ -325,12 +317,6 @@ export function CollapsibleNavGroupEnabled({
             hasShadow={false}
             className="eui-yScroll flex-1-container"
           >
-            {shouldShowCollapsedNavHeaderContent && collapsibleNavHeaderRender ? (
-              <>
-                {collapsibleNavHeaderRender()}
-                <EuiSpacer />
-              </>
-            ) : null}
             <NavGroups
               navLinks={navLinksForRender}
               navigateToApp={navigateToApp}

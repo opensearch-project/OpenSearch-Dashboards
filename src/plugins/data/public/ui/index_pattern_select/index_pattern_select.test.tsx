@@ -49,7 +49,7 @@ describe('IndexPatternSelect', () => {
 
     bulkGetMock.mockResolvedValue({ savedObjects: [{ attributes: { title: 'test1' } }] });
     compInstance.debouncedFetch('');
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 600));
     await nextTick();
     expect(bulkGetMock).toBeCalledWith([{ id: 'testDataSourceId', type: 'data-source' }]);
   });

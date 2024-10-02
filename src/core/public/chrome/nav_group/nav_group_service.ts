@@ -12,7 +12,6 @@ import {
   WorkspacesStart,
 } from 'opensearch-dashboards/public';
 import { map, switchMap, takeUntil } from 'rxjs/operators';
-import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from '../../ui_settings';
 import {
   fulfillRegistrationLinksToChromeNavLinks,
@@ -348,13 +347,7 @@ export class ChromeNavGroupService {
         }
       },
     };
-    const homeBreadcrumb: ChromeBreadcrumb = {
-      text: i18n.translate('core.breadcrumbs.homeTitle', { defaultMessage: 'Home' }),
-      onClick: () => {
-        navigateToApp('home');
-      },
-    };
-    return [homeBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
+    return [navGroupBreadcrumb, ...breadcrumbs];
   }
 
   async stop() {

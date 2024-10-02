@@ -245,21 +245,21 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
     );
   })();
 
-  const description = i18n.translate(
-    'indexPatternManagement.indexPatternTable.indexPatternExplanation',
-    currentWorkspace
-      ? {
+  const description = currentWorkspace
+    ? i18n.translate(
+        'indexPatternManagement.indexPatternTable.indexPatternExplanationWithWorkspace',
+        {
           defaultMessage:
             'Create and manage the index patterns that help you retrieve your data from OpenSearch for {name} workspace.',
           values: {
             name: currentWorkspace.name,
           },
         }
-      : {
-          defaultMessage:
-            'Create and manage the index patterns that help you retrieve your data from OpenSearch.',
-        }
-  );
+      )
+    : i18n.translate('indexPatternManagement.indexPatternTable.indexPatternExplanation', {
+        defaultMessage:
+          'Create and manage the index patterns that help you retrieve your data from OpenSearch.',
+      });
   const pageTitleAndDescription = useUpdatedUX ? (
     <HeaderControl
       controls={[{ description }]}

@@ -221,7 +221,20 @@ describe('Workspace plugin', () => {
     );
   });
 
-  it('#setup should register registerCollapsibleNavHeader when new left nav is turned on', async () => {
+  it('#setup should register registerCollapsibleNavHeader when enter a workspace', async () => {
+    const windowSpy = jest.spyOn(window, 'window', 'get');
+    windowSpy.mockImplementation(
+      () =>
+        ({
+          location: {
+            href: 'http://localhost/w/workspaceId/app',
+          },
+        } as any)
+    );
+    workspaceClientMock.enterWorkspace.mockResolvedValueOnce({
+      success: true,
+      error: 'error',
+    });
     const setupMock = coreMock.createSetup();
     let collapsibleNavHeaderImplementation = () => null;
     setupMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
@@ -234,6 +247,7 @@ describe('Workspace plugin', () => {
     const startMock = coreMock.createStart();
     await workspacePlugin.start(startMock, getMockDependencies());
     expect(collapsibleNavHeaderImplementation()).not.toEqual(null);
+    windowSpy.mockRestore();
   });
 
   it('#setup should register workspace essential use case when new home is disabled', async () => {
