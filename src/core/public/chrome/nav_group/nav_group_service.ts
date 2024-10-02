@@ -141,6 +141,54 @@ export class ChromeNavGroupService {
 
     // Append all the links that do not have use case info to keep backward compatible
     const linkIdsWithNavGroupInfo = Object.values(navGroupsMap).reduce((accumulator, navGroup) => {
+      if (!navGroup.type) {
+        // Append use case section into left navigation
+        const categoryInfo = {
+          id: navGroup.id,
+          label: navGroup.title,
+          order: navGroup.order,
+        };
+
+        const fulfilledLinksOfNavGroup = fulfillRegistrationLinksToChromeNavLinks(
+          navGroup.navLinks,
+          navLinks
+        );
+
+        const linksForAllUseCaseWithinNavGroup: ChromeRegistrationNavLink[] = [];
+
+        fulfilledLinksOfNavGroup.forEach((navLink) => {
+          if (!navLink.showInAllNavGroup) {
+            return;
+          }
+
+          linksForAllUseCaseWithinNavGroup.push({
+            ...navLink,
+            category: categoryInfo,
+          });
+        });
+
+        navLinksResult.push(...linksForAllUseCaseWithinNavGroup);
+
+        if (!linksForAllUseCaseWithinNavGroup.length) {
+          /**
+           * Find if there are any links inside a use case but without a `see all` entry.
+           * If so, append these features into custom category as a fallback
+           */
+          fulfillRegistrationLinksToChromeNavLinks(navGroup.navLinks, navLinks).forEach(
+            (navLink) => {
+              // Links that already exists in all use case do not need to reappend
+              if (navLinksResult.find((navLinkInAll) => navLinkInAll.id === navLink.id)) {
+                return;
+              }
+              navLinksResult.push({
+                ...navLink,
+                category: customCategory,
+              });
+            }
+          );
+        }
+      }
+
       return [...accumulator, ...navGroup.navLinks.map((navLink) => navLink.id)];
     }, [] as string[]);
     navLinks.forEach((navLink) => {
@@ -151,55 +199,6 @@ export class ChromeNavGroupService {
         ...navLink,
         category: customCategory,
       });
-    });
-
-    // Append use case section into left navigation
-    Object.values(navGroupsMap).forEach((group) => {
-      if (group.type) {
-        return;
-      }
-      const categoryInfo = {
-        id: group.id,
-        label: group.title,
-        order: group.order,
-      };
-
-      const fulfilledLinksOfNavGroup = fulfillRegistrationLinksToChromeNavLinks(
-        group.navLinks,
-        navLinks
-      );
-
-      const linksForAllUseCaseWithinNavGroup: ChromeRegistrationNavLink[] = [];
-
-      fulfilledLinksOfNavGroup.forEach((navLink) => {
-        if (!navLink.showInAllNavGroup) {
-          return;
-        }
-
-        linksForAllUseCaseWithinNavGroup.push({
-          ...navLink,
-          category: categoryInfo,
-        });
-      });
-
-      navLinksResult.push(...linksForAllUseCaseWithinNavGroup);
-
-      if (!linksForAllUseCaseWithinNavGroup.length) {
-        /**
-         * Find if there are any links inside a use case but without a `see all` entry.
-         * If so, append these features into custom category as a fallback
-         */
-        fulfillRegistrationLinksToChromeNavLinks(group.navLinks, navLinks).forEach((navLink) => {
-          // Links that already exists in all use case do not need to reappend
-          if (navLinksResult.find((navLinkInAll) => navLinkInAll.id === navLink.id)) {
-            return;
-          }
-          navLinksResult.push({
-            ...navLink,
-            category: customCategory,
-          });
-        });
-      }
     });
 
     return navLinksResult;
