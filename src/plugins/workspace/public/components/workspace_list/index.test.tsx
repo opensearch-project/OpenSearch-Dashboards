@@ -153,7 +153,7 @@ describe('WorkspaceList', () => {
     expect(getByText('name2')).toBeInTheDocument();
 
     // should display use case
-    expect(getByText('Analytics (all features)')).toBeInTheDocument();
+    expect(getByText('Analytics')).toBeInTheDocument();
     expect(getByText('Observability')).toBeInTheDocument();
   });
 
