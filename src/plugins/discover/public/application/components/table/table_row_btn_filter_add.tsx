@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiToolTip, EuiSmallButtonIcon } from '@elastic/eui';
+import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 export interface Props {
@@ -53,7 +53,7 @@ export function DocViewTableRowBtnFilterAdd({ onClick, disabled = false }: Props
 
   return (
     <EuiToolTip content={tooltipContent}>
-      <EuiSmallButtonIcon
+      <EuiButtonIcon
         aria-label={i18n.translate('discover.docViews.table.filterForValueButtonAriaLabel', {
           defaultMessage: 'Filter for value',
         })}
@@ -63,6 +63,7 @@ export function DocViewTableRowBtnFilterAdd({ onClick, disabled = false }: Props
         onClick={onClick}
         iconType={'magnifyWithPlus'}
         iconSize={'s'}
+        size={'xs'}
       />
     </EuiToolTip>
   );
