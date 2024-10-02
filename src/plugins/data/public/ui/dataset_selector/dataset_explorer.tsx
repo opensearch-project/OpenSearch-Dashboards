@@ -20,8 +20,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { BaseDataset, DATA_STRUCTURE_META_TYPES, DataStructure } from '../../../common';
-import { QueryStringContract } from '../../query';
+import { DataStructureFetchOptions, QueryStringContract } from '../../query';
 import { IDataPluginServices } from '../../types';
+import { DatasetTable } from './dataset_table';
 
 export const DatasetExplorer = ({
   services,
@@ -40,12 +41,23 @@ export const DatasetExplorer = ({
 }) => {
   const [explorerDataset, setExplorerDataset] = useState<BaseDataset | undefined>(undefined);
   const [loading, setLoading] = useState<boolean>(false);
+  const datasetService = queryString.getDatasetService();
 
-  const selectDataStructure = async (item: DataStructure, newPath: DataStructure[]) => {
+  const fetchNextDataStructure = async (
+    nextPath: DataStructure[],
+    dataType: string,
+    options?: DataStructureFetchOptions
+  ) => datasetService.fetchOptions(services, nextPath, dataType, options);
+
+  const selectDataStructure = async (item: DataStructure | undefined, newPath: DataStructure[]) => {
+    if (!item) {
+      setExplorerDataset(undefined);
+      return;
+    }
     const lastPathItem = newPath[newPath.length - 1];
     const nextPath = [...newPath, item];
 
-    const typeConfig = queryString.getDatasetService().getType(nextPath[1].id);
+    const typeConfig = datasetService.getType(nextPath[1].id);
     if (!typeConfig) return;
 
     if (!lastPathItem.hasNext) {
@@ -55,9 +67,7 @@ export const DatasetExplorer = ({
     }
 
     setLoading(true);
-    const nextDataStructure = await queryString
-      .getDatasetService()
-      .fetchOptions(services, nextPath, typeConfig.id);
+    const nextDataStructure = await fetchNextDataStructure(nextPath, typeConfig.id);
     setLoading(false);
 
     setPath([...newPath, nextDataStructure]);
@@ -116,41 +126,52 @@ export const DatasetExplorer = ({
                 <EuiTitle size="xxs" className="datasetExplorer__columnTitle">
                   <h3>{current.columnHeader}</h3>
                 </EuiTitle>
-                <EuiSelectable
-                  options={(current.children || []).map((child) => ({
-                    label: child.parent ? `${child.parent.title}::${child.title}` : child.title,
-                    value: child.id,
-                    prepend: child.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE &&
-                      child.meta?.icon && <EuiIcon {...child.meta.icon} />,
-                    append: appendIcon(child),
-                    checked: isChecked(child, index, path, explorerDataset),
-                  }))}
-                  onChange={(options) => {
-                    const selected = options.find((option) => option.checked);
-                    if (selected) {
-                      const item = current.children?.find((child) => child.id === selected.value);
-                      if (item) {
-                        selectDataStructure(item, path.slice(0, index + 1));
+                {current.multiSelect ? (
+                  <DatasetTable
+                    path={path}
+                    setPath={setPath}
+                    index={index}
+                    explorerDataset={explorerDataset}
+                    selectDataStructure={selectDataStructure}
+                    fetchNextDataStructure={fetchNextDataStructure}
+                  />
+                ) : (
+                  <EuiSelectable
+                    options={(current.children || []).map((child) => ({
+                      label: child.parent ? `${child.parent.title}::${child.title}` : child.title,
+                      value: child.id,
+                      prepend: child.meta?.type === DATA_STRUCTURE_META_TYPES.TYPE &&
+                        child.meta?.icon && <EuiIcon {...child.meta.icon} />,
+                      append: appendIcon(child),
+                      checked: isChecked(child, index, path, explorerDataset),
+                    }))}
+                    onChange={(options) => {
+                      const selected = options.find((option) => option.checked);
+                      if (selected) {
+                        const item = current.children?.find((child) => child.id === selected.value);
+                        if (item) {
+                          selectDataStructure(item, path.slice(0, index + 1));
+                        }
                       }
-                    }
-                  }}
-                  singleSelection
-                  {...(isFinal && {
-                    searchProps: {
-                      compressed: true,
-                    },
-                    searchable: true,
-                  })}
-                  height="full"
-                  className="datasetExplorer__selectable"
-                >
-                  {(list, search) => (
-                    <>
-                      {isFinal && search}
-                      {list}
-                    </>
-                  )}
-                </EuiSelectable>
+                    }}
+                    singleSelection
+                    {...(isFinal && {
+                      searchProps: {
+                        compressed: true,
+                      },
+                      searchable: true,
+                    })}
+                    height="full"
+                    className="datasetExplorer__selectable"
+                  >
+                    {(list, search) => (
+                      <>
+                        {isFinal && search}
+                        {list}
+                      </>
+                    )}
+                  </EuiSelectable>
+                )}
               </div>
             );
           })}
