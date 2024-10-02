@@ -124,11 +124,15 @@ exports[`<NavGroups /> should render correctly 1`] = `
                   <div
                     class="euiFlexItem"
                   >
-                    <h3
-                      class="euiCollapsibleNavGroup__heading nav-link-item"
+                    <div
+                      class="euiText euiText--small"
                     >
-                      category-1
-                    </h3>
+                      <span
+                        class="euiCollapsibleNavGroup__heading nav-link-item"
+                      >
+                        category-1
+                      </span>
+                    </div>
                   </div>
                 </div>
               </span>

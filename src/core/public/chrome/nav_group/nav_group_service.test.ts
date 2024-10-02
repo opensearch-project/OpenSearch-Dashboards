@@ -280,12 +280,12 @@ describe('ChromeNavGroupService#start()', () => {
         id: 'foo',
       },
       {
-        id: 'customized_app',
+        id: 'bar',
+        title: 'bar',
         category: { id: 'custom', label: 'Custom', order: 8500 },
       },
       {
-        id: 'bar',
-        title: 'bar',
+        id: 'customized_app',
         category: { id: 'custom', label: 'Custom', order: 8500 },
       },
     ]);
