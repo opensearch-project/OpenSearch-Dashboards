@@ -46,7 +46,7 @@ jest.mock('./get_changes.ts', () => ({
 }));
 
 jest.mock('./get_mtimes.ts', () => ({
-  getMtimes: async (paths: string[]) => new Map(paths.map((path) => [path, 12345])),
+  getMtimes: async (paths: string[]) => new Map(paths.map((path) => [path, '<content hash>'])),
 }));
 
 jest.mock('execa');
@@ -90,8 +90,8 @@ describe('getOptimizerCacheKey()', () => {
               ],
               "lastCommit": "<last commit sha>",
               "modifiedTimes": Object {
-                "/foo/bar/a": 12345,
-                "/foo/bar/b": 12345,
+                "/foo/bar/a": "<content hash>",
+                "/foo/bar/b": "<content hash>",
               },
               "workerConfig": Object {
                 "browserslistEnv": "dev",

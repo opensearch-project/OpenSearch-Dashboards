@@ -105,7 +105,7 @@ export class Bundle {
    * Calculate the cache key for this bundle based from current
    * mtime values.
    */
-  createCacheKey(files: string[], mtimes: Map<string, number | undefined>): unknown {
+  createCacheKey(files: string[], mtimes: Map<string, string | undefined>): unknown {
     return {
       spec: this.toSpec(),
       mtimes: entriesToObject(

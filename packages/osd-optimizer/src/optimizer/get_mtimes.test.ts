@@ -32,7 +32,7 @@ jest.mock('fs');
 
 import { getMtimes } from './get_mtimes';
 
-const { stat }: { stat: jest.Mock } = jest.requireMock('fs');
+const { stat, readFile }: { stat: jest.Mock; readFile: jest.Mock } = jest.requireMock('fs');
 
 it('returns mtimes Map', async () => {
   stat.mockImplementation((path, cb) => {
@@ -47,11 +47,21 @@ it('returns mtimes Map', async () => {
     }
   });
 
+  readFile.mockImplementation((path, cb) => {
+    if (path.includes('missing')) {
+      const error = new Error('file not found');
+      (error as any).code = 'ENOENT';
+      cb(error);
+    } else {
+      cb(null, `Content of ${path}`);
+    }
+  });
+
   await expect(getMtimes(['/foo/bar', '/foo/missing', '/foo/baz', '/foo/bar'])).resolves
     .toMatchInlineSnapshot(`
     Map {
-      "/foo/bar" => 1234,
-      "/foo/baz" => 1234,
+      "/foo/bar" => "OwCtruddjWkB6ROdbLRM0NnWOhs=",
+      "/foo/baz" => "mb6SFQi4VuH8jbwW3h6YoolklXc=",
     }
   `);
 });

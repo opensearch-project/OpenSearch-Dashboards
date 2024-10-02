@@ -138,7 +138,7 @@ export interface OptimizerCacheKey {
   readonly bootstrap: string | undefined;
   readonly workerConfig: CacheableWorkerConfig;
   readonly deletedPaths: string[];
-  readonly modifiedTimes: Record<string, number>;
+  readonly modifiedTimes: Record<string, string>;
 }
 
 async function getLastCommit() {
@@ -181,13 +181,13 @@ export async function getOptimizerCacheKey(config: OptimizerConfig) {
     lastCommit,
     bootstrap,
     deletedPaths,
-    modifiedTimes: {} as Record<string, number>,
+    modifiedTimes: {} as Record<string, string>,
     workerConfig: config.getCacheableWorkerConfig(),
   };
 
   const mtimes = await getMtimes(modifiedPaths);
   for (const [path, mtime] of Array.from(mtimes.entries()).sort(ascending((e) => e[0]))) {
-    if (typeof mtime === 'number') {
+    if (typeof mtime === 'string') {
       cacheKeys.modifiedTimes[path] = mtime;
     }
   }
