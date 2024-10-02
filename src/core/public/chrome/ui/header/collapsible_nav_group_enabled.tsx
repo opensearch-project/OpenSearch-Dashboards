@@ -8,7 +8,6 @@ import {
   EuiFlyout,
   EuiPanel,
   EuiHorizontalRule,
-  EuiSpacer,
   EuiHideFor,
   EuiFlyoutProps,
   EuiShowFor,
@@ -107,9 +106,6 @@ export function CollapsibleNavGroupEnabled({
   const shouldAppendManageCategory = capabilities.workspaces.enabled
     ? !currentNavGroupId
     : currentNavGroupId === ALL_USE_CASE_ID;
-
-  const shouldShowCollapsedNavHeaderContent =
-    isNavOpen && !!collapsibleNavHeaderRender && !currentNavGroupId;
 
   const navLinksForRender: ChromeNavLink[] = useMemo(() => {
     const getSystemNavGroups = () => {
@@ -216,6 +212,7 @@ export function CollapsibleNavGroupEnabled({
           >
             <CollapsibleNavTop
               homeLink={homeLink}
+              collapsibleNavHeaderRender={collapsibleNavHeaderRender}
               navigateToApp={navigateToApp}
               logos={logos}
               currentNavGroup={currentNavGroupId ? navGroupsMap[currentNavGroupId] : undefined}
@@ -234,12 +231,6 @@ export function CollapsibleNavGroupEnabled({
             color="transparent"
             style={{ paddingTop: 0 }}
           >
-            {shouldShowCollapsedNavHeaderContent && collapsibleNavHeaderRender ? (
-              <>
-                {collapsibleNavHeaderRender()}
-                <EuiSpacer />
-              </>
-            ) : null}
             <NavGroups
               navLinks={navLinksForRender}
               navigateToApp={navigateToApp}

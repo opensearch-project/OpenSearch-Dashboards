@@ -35,7 +35,7 @@ export function getWorkspaceColumn(
     euiColumn: {
       align: 'left',
       field: 'workspaces',
-      name: i18n.translate('savedObjectsManagement.objectsTable.table.columnWorkspacesName', {
+      name: i18n.translate('workspace.objectsTable.table.columnWorkspacesName', {
         defaultMessage: 'Workspace',
       }),
       render: (workspaces: string[]) => {

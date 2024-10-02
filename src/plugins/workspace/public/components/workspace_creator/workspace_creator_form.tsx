@@ -6,11 +6,11 @@
 import React, { useCallback, useRef } from 'react';
 import {
   EuiSpacer,
-  EuiTitle,
   EuiForm,
   EuiText,
   EuiFlexItem,
   EuiFlexGroup,
+  EuiDescribedFormGroup,
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -146,28 +146,44 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
             </>
           )}
           {permissionEnabled && (
-            <>
-              <EuiTitle
+            <EuiPanel>
+              <EuiText
                 {...generateRightSidebarScrollProps(RightSidebarScrollField.Collaborators)}
                 size="s"
               >
-                <h3>{usersAndPermissionsCreatePageTitle}</h3>
-              </EuiTitle>
+                <h2>{usersAndPermissionsCreatePageTitle}</h2>
+              </EuiText>
               <EuiText size="xs">
                 {i18n.translate('workspace.creator.form.usersAndPermissionsDescription', {
-                  defaultMessage:
-                    'You will be added as an owner to the workspace. Select additional users and user groups as workspace collaborators with different access levels.',
+                  defaultMessage: 'Manage access and permissions',
                 })}
               </EuiText>
               <EuiSpacer size="m" />
-              <WorkspacePermissionSettingPanel
-                errors={formErrors.permissionSettings?.fields}
-                onChange={setPermissionSettings}
-                permissionSettings={formData.permissionSettings}
-                disabledUserOrGroupInputIds={disabledUserOrGroupInputIdsRef.current}
-                data-test-subj={`workspaceForm-permissionSettingPanel`}
-              />
-            </>
+              <EuiDescribedFormGroup
+                title={
+                  <h4 {...generateRightSidebarScrollProps(RightSidebarScrollField.Name)}>
+                    {i18n.translate('workspace.creator.collaborators.panel.fields.name.title', {
+                      defaultMessage: 'Workspace access',
+                    })}
+                  </h4>
+                }
+                description={i18n.translate(
+                  'workspace.creator.collaborators.panel.fields.name.description',
+                  {
+                    defaultMessage:
+                      'You will be added as an owner to the workspace. Select additional users and user groups as workspace collaborators with different access levels.',
+                  }
+                )}
+              >
+                <WorkspacePermissionSettingPanel
+                  errors={formErrors.permissionSettings?.fields}
+                  onChange={setPermissionSettings}
+                  permissionSettings={formData.permissionSettings}
+                  disabledUserOrGroupInputIds={disabledUserOrGroupInputIdsRef.current}
+                  data-test-subj={`workspaceForm-permissionSettingPanel`}
+                />
+              </EuiDescribedFormGroup>
+            </EuiPanel>
           )}
         </EuiForm>
       </EuiFlexItem>
