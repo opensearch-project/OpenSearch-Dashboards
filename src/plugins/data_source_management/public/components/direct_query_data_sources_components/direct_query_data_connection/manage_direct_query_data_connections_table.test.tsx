@@ -34,6 +34,7 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
         component = await mount(
           wrapWithIntl(
             <ManageDirectQueryDataConnectionsTable
+              featureFlagStatus={true}
               history={history}
               location={({} as unknown) as RouteComponentProps['location']}
               match={({} as unknown) as RouteComponentProps['match']}
@@ -60,11 +61,13 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
       spyOn(utils, 'fetchDataSourceConnections').and.returnValue(
         Promise.resolve(getMappedDataSources)
       );
+      spyOn(utils, 'getHideLocalCluster').and.returnValue(false);
       spyOn(uiSettings, 'get').and.returnValue('test1');
       await act(async () => {
         component = await mount(
           wrapWithIntl(
             <ManageDirectQueryDataConnectionsTable
+              featureFlagStatus={true}
               history={history}
               location={({} as unknown) as RouteComponentProps['location']}
               match={({} as unknown) as RouteComponentProps['match']}

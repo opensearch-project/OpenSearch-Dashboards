@@ -428,13 +428,22 @@ export class Table extends PureComponent<TableProps, TableState> {
           toolsRight={[
             <>
               {useUpdatedUX && (
-                <EuiButtonIcon
-                  iconType="refresh"
-                  size="s"
-                  display="base"
-                  type="base"
-                  onClick={onRefresh}
-                />
+                <EuiToolTip
+                  content={i18n.translate(
+                    'savedObjectsManagement.objectsTable.table.refreshButtonTooltip',
+                    {
+                      defaultMessage: 'Refresh',
+                    }
+                  )}
+                >
+                  <EuiButtonIcon
+                    iconType="refresh"
+                    size="s"
+                    display="base"
+                    type="base"
+                    onClick={onRefresh}
+                  />
+                </EuiToolTip>
               )}
             </>,
             <>{showDuplicate && duplicateButton}</>,
@@ -478,7 +487,10 @@ export class Table extends PureComponent<TableProps, TableState> {
                   label={
                     <FormattedMessage
                       id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                      defaultMessage="Include related objects"
+                      defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
+                      values={{
+                        useUpdatedUX: this.props.useUpdatedUX,
+                      }}
                     />
                   }
                   checked={this.state.isIncludeReferencesDeepChecked}
@@ -502,7 +514,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           ]}
         />
         {queryParseError}
-        <EuiSpacer size="s" />
+        <EuiSpacer size={useUpdatedUX ? 'm' : 's'} />
         <div data-test-subj="savedObjectsTable">
           <EuiBasicTable
             loading={isSearching}

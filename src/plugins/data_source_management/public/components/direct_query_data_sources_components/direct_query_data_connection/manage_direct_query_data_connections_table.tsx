@@ -28,6 +28,7 @@ import {
   DataSourceConnectionType,
   DataSourceManagementContext,
   DataSourceTableItem,
+  DirectQueryDatasourceDetails,
 } from '../../../types';
 import {
   isPluginInstalled,
@@ -36,11 +37,20 @@ import {
   deleteMultipleDataSources,
   getDefaultDataSourceId,
   setFirstDataSourceAsDefault,
+  getHideLocalCluster,
 } from '../../utils';
 import { LoadingMask } from '../../loading_mask';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { DATACONNECTIONS_BASE, LOCAL_CLUSTER } from '../../../constants';
 
-export const ManageDirectQueryDataConnectionsTable = ({ history }: RouteComponentProps) => {
+interface DirectQueryDataConnectionsProps extends RouteComponentProps {
+  featureFlagStatus: boolean;
+}
+
+export const ManageDirectQueryDataConnectionsTable = ({
+  featureFlagStatus,
+  history,
+}: DirectQueryDataConnectionsProps) => {
   const { savedObjects, http, notifications, uiSettings } = useOpenSearchDashboards<
     DataSourceManagementContext
   >().services;
@@ -63,8 +73,11 @@ export const ManageDirectQueryDataConnectionsTable = ({ history }: RouteComponen
     setSelectedDataSources(selected);
   };
 
-  const selection = {
+  const selection = featureFlagStatus && {
     onSelectionChange,
+    selectable: (item: DataSourceTableItem) => {
+      return item.id !== LOCAL_CLUSTER;
+    },
   };
 
   const setDefaultDataSource = async () => {
@@ -200,12 +213,38 @@ export const ManageDirectQueryDataConnectionsTable = ({ history }: RouteComponen
   const fetchDataSources = useCallback(() => {
     setIsLoading(true);
 
-    getDataSources(savedObjects.client)
-      .then((response: DataSourceTableItem[]) => {
-        return fetchDataSourceConnections(response, http, notifications);
+    const fetchConnections = featureFlagStatus
+      ? getDataSources(savedObjects.client)
+      : http.get(`${DATACONNECTIONS_BASE}`);
+
+    fetchConnections
+      .then((response) => {
+        return featureFlagStatus
+          ? fetchDataSourceConnections(
+              response,
+              http,
+              notifications,
+              true,
+              getHideLocalCluster().enabled
+            )
+          : response.map((dataConnection: DirectQueryDatasourceDetails) => ({
+              id: dataConnection.name,
+              title: dataConnection.name,
+              type:
+                {
+                  S3GLUE: 'Amazon S3',
+                  PROMETHEUS: 'Prometheus',
+                }[dataConnection.connector] || dataConnection.connector,
+              connectionType: dataConnection.connector,
+              description: dataConnection.description,
+            }));
       })
       .then((finalData) => {
-        setData(finalData.filter((item) => item.relatedConnections?.length > 0));
+        setData(
+          featureFlagStatus
+            ? finalData.filter((item) => item.relatedConnections?.length > 0)
+            : finalData
+        );
       })
       .catch(() => {
         setData([]);
@@ -218,7 +257,7 @@ export const ManageDirectQueryDataConnectionsTable = ({ history }: RouteComponen
       .finally(() => {
         setIsLoading(false);
       });
-  }, [http, savedObjects, notifications]);
+  }, [http, savedObjects, notifications, featureFlagStatus]);
 
   useEffect(() => {
     fetchDataSources();
@@ -229,7 +268,7 @@ export const ManageDirectQueryDataConnectionsTable = ({ history }: RouteComponen
   }, [fetchDataSources]);
 
   const tableColumns = [
-    {
+    featureFlagStatus && {
       align: LEFT_ALIGNMENT,
       width: '40px',
       isExpander: true,
@@ -243,7 +282,7 @@ export const ManageDirectQueryDataConnectionsTable = ({ history }: RouteComponen
         ) : null,
     },
     {
-      width: '25%',
+      width: '32%',
       field: 'title',
       name: i18n.translate('dataSourcesManagement.directQueryTable.dataSourceField', {
         defaultMessage: 'Data source',
@@ -254,21 +293,32 @@ export const ManageDirectQueryDataConnectionsTable = ({ history }: RouteComponen
         const path =
           record.connectionType === DataSourceConnectionType.OpenSearchConnection
             ? record.id
-            : `manage/${name}?dataSourceMDSId=${record.parentId}`;
+            : `manage/${name}${
+                record.parentId && record.parentId !== LOCAL_CLUSTER
+                  ? `?dataSourceMDSId=${record.parentId}`
+                  : ''
+              }`;
 
         const indentStyle =
+          featureFlagStatus &&
           record.connectionType !== DataSourceConnectionType.OpenSearchConnection
             ? { marginLeft: '20px' }
             : {};
         return (
-          <EuiButtonEmpty size="xs" href={`${window.location.href}/${path}`} style={indentStyle}>
+          <EuiButtonEmpty
+            size="xs"
+            href={`${window.location.href.replace(/\/$/, '')}/${path}`}
+            style={indentStyle}
+            disabled={record.id === LOCAL_CLUSTER}
+            flush="left"
+          >
             {name}
           </EuiButtonEmpty>
         );
       },
     },
     {
-      width: '15%',
+      width: '22%',
       field: 'type',
       name: i18n.translate('dataSourcesManagement.directQueryTable.typeField', {
         defaultMessage: 'Type',
@@ -276,7 +326,7 @@ export const ManageDirectQueryDataConnectionsTable = ({ history }: RouteComponen
       truncateText: true,
     },
     {
-      width: '35%',
+      width: '45%',
       field: 'description',
       name: i18n.translate('dataSourcesManagement.directQueryTable.descriptionField', {
         defaultMessage: 'Description',
@@ -286,7 +336,7 @@ export const ManageDirectQueryDataConnectionsTable = ({ history }: RouteComponen
         show: false,
       },
     },
-    {
+    featureFlagStatus && {
       field: 'relatedConnections',
       name: i18n.translate('dataSourcesManagement.directQueryTable.relatedConnectionsField', {
         defaultMessage: 'Related connections',
@@ -295,7 +345,7 @@ export const ManageDirectQueryDataConnectionsTable = ({ history }: RouteComponen
       truncateText: true,
       render: (relatedConnections: DataSourceTableItem[]) => relatedConnections?.length,
     },
-  ] as Array<EuiTableFieldDataColumnType<DataSourceTableItem>>;
+  ].filter(Boolean) as Array<EuiTableFieldDataColumnType<DataSourceTableItem>>;
 
   const customSearchBar: EuiSearchBarProps = {
     toolsLeft: renderToolsLeft(),

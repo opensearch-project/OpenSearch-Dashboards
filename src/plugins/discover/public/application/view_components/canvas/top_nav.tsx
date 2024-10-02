@@ -124,7 +124,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     setScreenTitle(
       savedSearch?.title ||
         i18n.translate('discover.savedSearch.newTitle', {
-          defaultMessage: 'Untitled',
+          defaultMessage: 'New search',
         })
     );
   }, [savedSearch?.title]);

@@ -3,19 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './setup_get_start_card.scss';
 import {
   EuiText,
   EuiTitle,
   EuiPanel,
-  EuiAvatar,
   EuiPopover,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiFieldSearch,
   EuiContextMenu,
   EuiButtonIcon,
   EuiSmallButton,
   EuiPopoverTitle,
+  EuiCompressedFieldSearch,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
@@ -51,8 +51,9 @@ export const UseCaseCardTitle = ({ filterWorkspaces, useCase, core }: UseCaseCar
 
   const iconButton = (
     <EuiButtonIcon
-      aria-label={i18n.translate(`workspace.getStartCard.${useCase.id}.icon.button`, {
-        defaultMessage: `show available workspace menu for ${useCase}`,
+      aria-label={i18n.translate('workspace.getStartCard.{useCaseId}.icon.button', {
+        defaultMessage: 'show available workspace menu for {useCaseId}',
+        values: { useCaseId: useCase.id },
       })}
       size="xs"
       iconType="arrowDown"
@@ -111,23 +112,16 @@ export const UseCaseCardTitle = ({ filterWorkspaces, useCase, core }: UseCaseCar
 
     return {
       name: (
-        <EuiText className="eui-textTruncate" size="s">
+        <EuiText className="eui-textTruncate" size="s" color="default">
           {workspaceName}
         </EuiText>
       ),
       key: workspace.id,
-      icon: (
-        <EuiAvatar
-          size="s"
-          type="space"
-          name={workspaceName}
-          color={workspace.color}
-          initialsLength={2}
-        />
-      ),
+      icon: useCase.icon || 'logoOpenSearch',
       onClick: () => {
         window.location.assign(useCaseUrl);
       },
+      className: 'homeGettingStartedWorkspaceCardsIcon',
     };
   };
   const panels = [
@@ -153,12 +147,12 @@ export const UseCaseCardTitle = ({ filterWorkspaces, useCase, core }: UseCaseCar
           anchorPosition="downCenter"
         >
           <EuiPopoverTitle paddingSize="s">
-            {i18n.translate('workspace.getStartCard.popover.title.', {
+            {i18n.translate('workspace.getStartCard.popover.title', {
               defaultMessage: 'SELECT WORKSPACE',
             })}
           </EuiPopoverTitle>
           <EuiPanel hasBorder={false} color="transparent" paddingSize="s">
-            <EuiFieldSearch
+            <EuiCompressedFieldSearch
               placeholder={i18n.translate('workspace.getStartCard.popover.search.placeholder', {
                 defaultMessage: 'Search workspace name',
               })}

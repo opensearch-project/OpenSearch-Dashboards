@@ -1,2 +1,0 @@
-fix:
-- Add validation for data source in get and bulk_get methods ([#7596](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7596))

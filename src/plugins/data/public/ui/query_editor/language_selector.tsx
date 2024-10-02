@@ -3,17 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
 import {
-  PopoverAnchorPosition,
+  EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
-  EuiButtonEmpty,
-  EuiContextMenuItem,
+  EuiSmallButtonEmpty,
+  PopoverAnchorPosition,
 } from '@elastic/eui';
-import { getQueryService } from '../../services';
-import { LanguageConfig } from '../../query';
+import React, { useEffect, useState } from 'react';
 import { Query } from '../..';
+import { LanguageConfig } from '../../query';
+import { getQueryService } from '../../services';
 
 export interface QueryLanguageSelectorProps {
   query: Query;
@@ -36,6 +36,13 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
   const queryString = getQueryService().queryString;
   const languageService = queryString.getLanguageService();
 
+  const datasetSupportedLanguages = props.query.dataset
+    ? queryString
+        .getDatasetService()
+        .getType(props.query.dataset.type)
+        ?.supportedLanguages(props.query.dataset)
+    : undefined;
+
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query: Query) => {
       if (query.language !== currentLanguage) {
@@ -57,10 +64,11 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
   languageService.getLanguages().forEach((language) => {
     if (
       (language && props.appName && !language.editorSupportedAppNames?.includes(props.appName)) ||
-      languageService.getUserQueryLanguageBlocklist().includes(language?.id)
+      languageService.getUserQueryLanguageBlocklist().includes(language?.id) ||
+      (datasetSupportedLanguages && !datasetSupportedLanguages.includes(language.id))
     )
       return;
-    languageOptions.unshift(mapExternalLanguageToOptions(language!));
+    languageOptions.unshift(mapExternalLanguageToOptions(language));
   });
 
   const selectedLanguage = {
@@ -101,7 +109,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
     <EuiPopover
       className="languageSelector"
       button={
-        <EuiButtonEmpty
+        <EuiSmallButtonEmpty
           iconSide="right"
           iconSize="s"
           onClick={onButtonClick}
@@ -109,7 +117,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
           iconType="arrowDown"
         >
           {selectedLanguage.label}
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
       }
       isOpen={isPopoverOpen}
       closePopover={() => setPopover(false)}

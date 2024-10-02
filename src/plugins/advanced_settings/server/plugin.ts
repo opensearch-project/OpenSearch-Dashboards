@@ -34,27 +34,57 @@ import {
   CoreStart,
   Plugin,
   Logger,
+  SharedGlobalConfig,
 } from 'opensearch-dashboards/server';
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { capabilitiesProvider } from './capabilities_provider';
+import { UserUISettingsClientWrapper } from './saved_objects/user_ui_settings_client_wrapper';
 
 export class AdvancedSettingsServerPlugin implements Plugin<object, object> {
   private readonly logger: Logger;
+  private userUiSettingsClientWrapper?: UserUISettingsClientWrapper;
+  private readonly globalConfig$: Observable<SharedGlobalConfig>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.globalConfig$ = initializerContext.config.legacy.globalConfig$;
   }
 
-  public setup(core: CoreSetup) {
+  public async setup(core: CoreSetup) {
     this.logger.debug('advancedSettings: Setup');
 
     core.capabilities.registerProvider(capabilitiesProvider);
 
-    core.capabilities.registerSwitcher(async (request, capabilites) => {
-      return await core.security.readonlyService().hideForReadonly(request, capabilites, {
+    core.capabilities.registerSwitcher(async (request, capabilities) => {
+      return await core.security.readonlyService().hideForReadonly(request, capabilities, {
         advancedSettings: {
           save: false,
         },
       });
+    });
+
+    const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
+    const isPermissionControlEnabled = globalConfig.savedObjects.permission.enabled === true;
+
+    const userUiSettingsClientWrapper = new UserUISettingsClientWrapper(
+      this.logger,
+      isPermissionControlEnabled
+    );
+    this.userUiSettingsClientWrapper = userUiSettingsClientWrapper;
+    core.savedObjects.addClientWrapper(
+      3, // The wrapper should be triggered after workspace_id_consumer wrapper which id is -3 to avoid creating user settings within any workspace.
+      'user_ui_settings',
+      userUiSettingsClientWrapper.wrapperFactory
+    );
+
+    core.capabilities.registerSwitcher(async (request, capabilities) => {
+      return {
+        ...capabilities,
+        userSettings: {
+          enabled: false,
+        },
+      };
     });
 
     return {};
@@ -62,6 +92,8 @@ export class AdvancedSettingsServerPlugin implements Plugin<object, object> {
 
   public start(core: CoreStart) {
     this.logger.debug('advancedSettings: Started');
+    this.userUiSettingsClientWrapper?.setCore(core);
+
     return {};
   }
 

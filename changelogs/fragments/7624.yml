@@ -1,2 +1,0 @@
-fix:
-- [contentManagement] display cards by specifying a column size or display all cards in one row ([#7624](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7624))

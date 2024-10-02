@@ -12,10 +12,16 @@ import {
   Permissions,
   SavedObjectsClientContract,
   IUiSettingsClient,
+  Principals,
 } from '../../../core/server';
 import { updateWorkspaceState } from '../../../core/server/utils';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../data_source_management/common';
-import { CURRENT_USER_PLACEHOLDER } from '../common/constants';
+import {
+  CURRENT_USER_PLACEHOLDER,
+  WorkspacePermissionMode,
+  WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
+} from '../common/constants';
+import { PermissionModeId } from '../../../core/server';
 
 /**
  * Generate URL friendly random ID
@@ -83,8 +89,8 @@ export const transferCurrentUserInPermissions = (
 export const getDataSourcesList = (client: SavedObjectsClientContract, workspaces: string[]) => {
   return client
     .find({
-      type: 'data-source',
-      fields: ['id', 'title'],
+      type: WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
+      fields: ['id', 'title', 'type'],
       perPage: 10000,
       workspaces,
     })
@@ -93,8 +99,10 @@ export const getDataSourcesList = (client: SavedObjectsClientContract, workspace
       if (objects) {
         return objects.map((source) => {
           const id = source.id;
+          const type = source.type;
           return {
             id,
+            type,
           };
         });
       } else {
@@ -123,4 +131,52 @@ export const checkAndSetDefaultDataSource = async (
     // If there is no data source left, clear workspace level default data source.
     await uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, undefined);
   }
+};
+
+/**
+ * translate workspace permission object into PermissionModeId
+ * @param permissions workspace permissions object
+ * @param isPermissionControlEnabled permission control flag
+ * @param principals
+ * @returns PermissionModeId
+ */
+export const translatePermissionsToRole = (
+  isPermissionControlEnabled: boolean,
+  permissions?: Permissions,
+  principals?: Principals
+): PermissionModeId => {
+  let permissionMode = PermissionModeId.Owner;
+  if (isPermissionControlEnabled && permissions) {
+    const modes = [] as WorkspacePermissionMode[];
+    const currentUserId = principals?.users?.[0] || '';
+    const currentGroupId = principals?.groups?.[0] || '';
+    [
+      WorkspacePermissionMode.Write,
+      WorkspacePermissionMode.LibraryWrite,
+      WorkspacePermissionMode.LibraryRead,
+      WorkspacePermissionMode.Read,
+    ].forEach((mode) => {
+      if (
+        permissions[mode] &&
+        (permissions[mode].users?.includes(currentUserId) ||
+          permissions[mode].groups?.includes(currentGroupId))
+      ) {
+        modes.push(mode);
+      }
+    });
+
+    if (
+      modes.includes(WorkspacePermissionMode.LibraryWrite) &&
+      modes.includes(WorkspacePermissionMode.Write)
+    ) {
+      permissionMode = PermissionModeId.Owner;
+    } else if (modes.includes(WorkspacePermissionMode.LibraryWrite)) {
+      permissionMode = PermissionModeId.ReadAndWrite;
+    } else {
+      permissionMode = PermissionModeId.Read;
+    }
+  } else {
+    permissionMode = PermissionModeId.Read;
+  }
+  return permissionMode;
 };

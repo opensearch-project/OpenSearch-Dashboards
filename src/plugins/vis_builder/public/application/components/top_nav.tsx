@@ -7,6 +7,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { useUnmount } from 'react-use';
+import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { getLegacyTopNavConfig, getNavActions, getTopNavConfig } from '../utils/get_top_nav_config';
 import { VisBuilderServices } from '../../types';
@@ -151,7 +152,10 @@ export const TopNav = () => {
         onSavedQueryIdChange={updateSavedQueryId}
         groupActions={showActionsInGroup}
         screenTitle={
-          savedVisBuilderVis?.title.length ? savedVisBuilderVis?.title : 'New visualization'
+          savedVisBuilderVis?.title ||
+          i18n.translate('discover.savedSearch.newTitle', {
+            defaultMessage: 'New visualization',
+          })
         }
       />
     </div>

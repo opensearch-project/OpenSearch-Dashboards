@@ -79,7 +79,7 @@ export const SelectDataSourcePanel = ({
       data-test-subj="workspace-creator-dataSources-assign-button"
     >
       {i18n.translate('workspace.form.selectDataSourcePanel.addNew', {
-        defaultMessage: 'Add OpenSearch connections',
+        defaultMessage: 'Associate OpenSearch connections',
       })}
     </EuiSmallButton>
   );
@@ -94,7 +94,7 @@ export const SelectDataSourcePanel = ({
       data-test-subj="workspace-creator-dqc-assign-button"
     >
       {i18n.translate('workspace.form.selectDataSourcePanel.addNewDQCs', {
-        defaultMessage: 'Add direct query connections',
+        defaultMessage: 'Associate direct query connections',
       })}
     </EuiSmallButton>
   );
@@ -130,10 +130,8 @@ export const SelectDataSourcePanel = ({
           <EuiFlexItem grow={false}>{addDirectQueryConnectionsButton}</EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <EuiFlexItem style={{ maxWidth: 768 }}>
-        {assignedDataSourceConnections.length > 0 && renderTableContent()}
-      </EuiFlexItem>
+      {assignedDataSourceConnections.length > 0 && <EuiSpacer size="m" />}
+      {assignedDataSourceConnections.length > 0 && renderTableContent()}
       {modalVisible && chrome && (
         <AssociationDataSourceModal
           savedObjects={savedObjects}

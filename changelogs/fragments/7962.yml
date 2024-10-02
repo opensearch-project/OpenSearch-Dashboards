@@ -1,0 +1,2 @@
+fix:
+- Make left nav compatible with small screen. ([#7962](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7962))

@@ -4,7 +4,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
-import { IStorageWrapper, Storage } from '../../opensearch_dashboards_utils/public';
 import { ConfigSchema } from '../common/config';
 import { setData, setStorage } from './services';
 import { createQueryAssistExtension } from './query_assist';
@@ -19,6 +18,7 @@ import { LanguageConfig, Query } from '../../data/public';
 import { s3TypeConfig } from './datasets';
 import { createEditor, DefaultInput, SingleLineInput } from '../../data/public';
 import { QueryLanguageReference } from './query_editor/query_language_reference';
+import { DataStorage } from '../../data/common';
 
 export class QueryEnhancementsPlugin
   implements
@@ -28,17 +28,17 @@ export class QueryEnhancementsPlugin
       QueryEnhancementsPluginSetupDependencies,
       QueryEnhancementsPluginStartDependencies
     > {
-  private readonly storage: IStorageWrapper;
+  private readonly storage: DataStorage;
   private readonly config: ConfigSchema;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
-    this.storage = new Storage(window.localStorage);
+    this.storage = new DataStorage(window.localStorage, 'discover.queryAssist.');
   }
 
   public setup(
     core: CoreSetup<QueryEnhancementsPluginStartDependencies>,
-    { data }: QueryEnhancementsPluginSetupDependencies
+    { data, usageCollection }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
     const { queryString } = data.query;
     const pplSearchInterceptor = new PPLSearchInterceptor({
@@ -80,6 +80,7 @@ export class QueryEnhancementsPlugin
       showDocLinks: false,
       editor: enhancedPPLQueryEditor,
       editorSupportedAppNames: ['discover'],
+      supportedAppNames: ['discover', 'data-explorer'],
     };
     queryString.getLanguageService().registerLanguage(pplLanguageConfig);
 
@@ -98,12 +99,18 @@ export class QueryEnhancementsPlugin
       showDocLinks: false,
       editor: enhancedSQLQueryEditor,
       editorSupportedAppNames: ['discover'],
+      supportedAppNames: ['discover', 'data-explorer'],
     };
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
 
     data.__enhance({
       editor: {
-        queryEditorExtension: createQueryAssistExtension(core.http, data, this.config.queryAssist),
+        queryEditorExtension: createQueryAssistExtension(
+          core,
+          data,
+          this.config.queryAssist,
+          usageCollection
+        ),
       },
     });
 

@@ -13,7 +13,8 @@
     "urlForwarding",
     "navigation",
     "uiActions",
-    "visualizations"
+    "visualizations",
+    "usageCollection"
   ],
   "optionalPlugins": ["home", "share"],
   "requiredBundles": [

@@ -1,2 +1,0 @@
-fix:
-- [Workspace] Revert new home page ui setting for workspace default route ([#7858](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7858))

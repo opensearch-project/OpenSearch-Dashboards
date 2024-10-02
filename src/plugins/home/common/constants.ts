@@ -31,4 +31,8 @@
 export const PLUGIN_ID = 'home';
 export const HOME_APP_BASE_PATH = `/app/${PLUGIN_ID}`;
 export const USE_NEW_HOME_PAGE = 'home:useNewHomePage';
+
+/**
+ * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
+ */
 export const IMPORT_SAMPLE_DATA_APP_ID = 'import_sample_data';

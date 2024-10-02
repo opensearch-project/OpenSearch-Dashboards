@@ -15,10 +15,11 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { QueryAssistParameters } from '../../../common/query_assist';
 import { getStorage } from '../../services';
 import { useGenerateQuery } from '../hooks';
-import { getPersistedLog, ProhibitedQueryError } from '../utils';
+import { getPersistedLog, AgentError, ProhibitedQueryError } from '../utils';
 import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
 import { QueryAssistInput } from './query_assist_input';
 import { QueryAssistSubmitButton } from './submit_button';
+import { useQueryAssist } from '../hooks';
 
 interface QueryAssistInputProps {
   dependencies: QueryEditorExtensionDependencies;
@@ -36,11 +37,13 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const { generateQuery, loading } = useGenerateQuery();
   const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
   const dismissCallout = () => setCallOutType(undefined);
+  const [agentError, setAgentError] = useState<AgentError>();
   const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(
     queryString.getQuery().dataset
   );
   const selectedIndex = selectedDataset?.title;
   const previousQuestionRef = useRef<string>();
+  const { updateQuestion, isQueryAssistCollapsed } = useQueryAssist();
 
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query) => {
@@ -60,8 +63,10 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
       return;
     }
     dismissCallout();
+    setAgentError(undefined);
     previousQuestionRef.current = inputRef.current.value;
     persistedLog.add(inputRef.current.value);
+    updateQuestion(inputRef.current.value);
     const params: QueryAssistParameters = {
       question: inputRef.current.value,
       index: selectedIndex,
@@ -72,6 +77,8 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     if (error) {
       if (error instanceof ProhibitedQueryError) {
         setCallOutType('invalid_query');
+      } else if (error instanceof AgentError) {
+        setAgentError(error);
       } else {
         services.notifications.toasts.addError(error, { title: 'Failed to generate results' });
       }
@@ -86,12 +93,12 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     }
   };
 
-  if (props.dependencies.isCollapsed) return null;
+  if (props.dependencies.isCollapsed || isQueryAssistCollapsed) return null;
 
   return (
     <EuiForm component="form" onSubmit={onSubmit} className="queryAssist queryAssist__form">
       <EuiFormRow fullWidth>
-        <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
+        <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
           <EuiFlexItem>
             <QueryAssistInput
               inputRef={inputRef}
@@ -99,6 +106,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
               isDisabled={loading}
               selectedIndex={selectedIndex}
               previousQuestion={previousQuestionRef.current}
+              error={agentError}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

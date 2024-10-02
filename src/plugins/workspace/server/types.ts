@@ -6,7 +6,6 @@
 import {
   Logger,
   OpenSearchDashboardsRequest,
-  RequestHandlerContext,
   SavedObjectsFindResponse,
   CoreSetup,
   WorkspaceAttribute,
@@ -14,9 +13,10 @@ import {
   Permissions,
   UiSettingsServiceStart,
 } from '../../../core/server';
-
+import { PermissionModeId } from '../../../core/server';
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
+  permissionMode?: PermissionModeId;
 }
 import { WorkspacePermissionMode } from '../common/constants';
 
@@ -32,7 +32,6 @@ export interface WorkspaceFindOptions {
 
 export interface IRequestDetail {
   request: OpenSearchDashboardsRequest;
-  logger: Logger;
 }
 
 export interface IWorkspaceClientImpl {
@@ -82,7 +81,7 @@ export interface IWorkspaceClientImpl {
   ): Promise<
     IResponse<
       {
-        workspaces: WorkspaceAttribute[];
+        workspaces: WorkspaceAttributeWithPermission[];
       } & Pick<SavedObjectsFindResponse, 'page' | 'per_page' | 'total'>
     >
   >;

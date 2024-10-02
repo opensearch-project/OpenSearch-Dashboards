@@ -12,14 +12,26 @@
   }
 }
 
-.globalDatePicker {
-  text-align: right;
+@include euiBreakpoint("m", "l", "xl", "xxl") {
+  .globalDatePicker {
+    text-align: right;
+  }
+}
+
+@include euiBreakpoint("s", "xs") {
+  .headerAppActionMenu {
+    .osdTopNavMenuScreenTitle,
+    .osdTopNavMenu,
+    .osdTopNavSearchBar,
+    .globalDatePicker {
+      margin-bottom: 0 !important;
+    }
+  }
 }
 
 .headerAppActionMenu .globalQueryBar,
 .headerAppActionMenu .globalDatePicker {
-  // The left-padding is a magic number just to add some space to the left that reduces with screen width
-  padding: 0 0 0 calc(100vw - 1600px);
+  padding: 0;
 }
 
 .globalFilterGroup__filterBar {

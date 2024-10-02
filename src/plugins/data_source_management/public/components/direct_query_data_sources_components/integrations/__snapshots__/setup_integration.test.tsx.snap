@@ -16,6 +16,12 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm 1`] = `
             "enabledWorkflows": Array [],
           }
         }
+        http={
+          Object {
+            "get": [MockFunction],
+            "post": [MockFunction],
+          }
+        }
         integration={
           Object {
             "assets": Array [],
@@ -104,7 +110,54 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
           },
         ],
       },
-      "post": [MockFunction],
+      "post": [MockFunction] {
+        "calls": Array [
+          Array [
+            "/api/console/proxy",
+            Object {
+              "body": "{}",
+              "query": Object {
+                "method": "GET",
+                "path": "_data_stream/ss4o_*",
+              },
+            },
+          ],
+          Array [
+            "/api/console/proxy",
+            Object {
+              "body": "{}",
+              "query": Object {
+                "method": "GET",
+                "path": "_data_stream/ss4o_*",
+              },
+            },
+          ],
+          Array [
+            "/api/console/proxy",
+            Object {
+              "body": "{}",
+              "query": Object {
+                "method": "GET",
+                "path": "_data_stream/ss4o_*",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
     }
   }
   integration="test_integration"
@@ -134,6 +187,85 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                   "connectionType": "index",
                   "displayName": "test_integration Integration",
                   "enabledWorkflows": Array [],
+                }
+              }
+              http={
+                Object {
+                  "get": [MockFunction] {
+                    "calls": Array [
+                      Array [
+                        "/api/integrations/repository/test_integration",
+                      ],
+                      Array [
+                        "/api/integrations/repository/test_integration",
+                      ],
+                      Array [
+                        "/api/integrations/repository/test_integration",
+                      ],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": Promise {},
+                      },
+                      Object {
+                        "type": "return",
+                        "value": Promise {},
+                      },
+                      Object {
+                        "type": "return",
+                        "value": Promise {},
+                      },
+                    ],
+                  },
+                  "post": [MockFunction] {
+                    "calls": Array [
+                      Array [
+                        "/api/console/proxy",
+                        Object {
+                          "body": "{}",
+                          "query": Object {
+                            "method": "GET",
+                            "path": "_data_stream/ss4o_*",
+                          },
+                        },
+                      ],
+                      Array [
+                        "/api/console/proxy",
+                        Object {
+                          "body": "{}",
+                          "query": Object {
+                            "method": "GET",
+                            "path": "_data_stream/ss4o_*",
+                          },
+                        },
+                      ],
+                      Array [
+                        "/api/console/proxy",
+                        Object {
+                          "body": "{}",
+                          "query": Object {
+                            "method": "GET",
+                            "path": "_data_stream/ss4o_*",
+                          },
+                        },
+                      ],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": undefined,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": undefined,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": undefined,
+                      },
+                    ],
+                  },
                 }
               }
               integration={
@@ -328,6 +460,85 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                         "connectionType": "index",
                         "displayName": "test_integration Integration",
                         "enabledWorkflows": Array [],
+                      }
+                    }
+                    http={
+                      Object {
+                        "get": [MockFunction] {
+                          "calls": Array [
+                            Array [
+                              "/api/integrations/repository/test_integration",
+                            ],
+                            Array [
+                              "/api/integrations/repository/test_integration",
+                            ],
+                            Array [
+                              "/api/integrations/repository/test_integration",
+                            ],
+                          ],
+                          "results": Array [
+                            Object {
+                              "type": "return",
+                              "value": Promise {},
+                            },
+                            Object {
+                              "type": "return",
+                              "value": Promise {},
+                            },
+                            Object {
+                              "type": "return",
+                              "value": Promise {},
+                            },
+                          ],
+                        },
+                        "post": [MockFunction] {
+                          "calls": Array [
+                            Array [
+                              "/api/console/proxy",
+                              Object {
+                                "body": "{}",
+                                "query": Object {
+                                  "method": "GET",
+                                  "path": "_data_stream/ss4o_*",
+                                },
+                              },
+                            ],
+                            Array [
+                              "/api/console/proxy",
+                              Object {
+                                "body": "{}",
+                                "query": Object {
+                                  "method": "GET",
+                                  "path": "_data_stream/ss4o_*",
+                                },
+                              },
+                            ],
+                            Array [
+                              "/api/console/proxy",
+                              Object {
+                                "body": "{}",
+                                "query": Object {
+                                  "method": "GET",
+                                  "path": "_data_stream/ss4o_*",
+                                },
+                              },
+                            ],
+                          ],
+                          "results": Array [
+                            Object {
+                              "type": "return",
+                              "value": undefined,
+                            },
+                            Object {
+                              "type": "return",
+                              "value": undefined,
+                            },
+                            Object {
+                              "type": "return",
+                              "value": undefined,
+                            },
+                          ],
+                        },
                       }
                     }
                     integration={
@@ -956,7 +1167,54 @@ exports[`SetupIntegrationForm tests renders SetupIntegrationForm and matches sna
                       },
                     ],
                   },
-                  "post": [MockFunction],
+                  "post": [MockFunction] {
+                    "calls": Array [
+                      Array [
+                        "/api/console/proxy",
+                        Object {
+                          "body": "{}",
+                          "query": Object {
+                            "method": "GET",
+                            "path": "_data_stream/ss4o_*",
+                          },
+                        },
+                      ],
+                      Array [
+                        "/api/console/proxy",
+                        Object {
+                          "body": "{}",
+                          "query": Object {
+                            "method": "GET",
+                            "path": "_data_stream/ss4o_*",
+                          },
+                        },
+                      ],
+                      Array [
+                        "/api/console/proxy",
+                        Object {
+                          "body": "{}",
+                          "query": Object {
+                            "method": "GET",
+                            "path": "_data_stream/ss4o_*",
+                          },
+                        },
+                      ],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": undefined,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": undefined,
+                      },
+                      Object {
+                        "type": "return",
+                        "value": undefined,
+                      },
+                    ],
+                  },
                 }
               }
               integration={

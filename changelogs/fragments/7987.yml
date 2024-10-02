@@ -1,2 +1,0 @@
-fix:
-- Hide delete button for non OSD admin ([#7987](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7987))

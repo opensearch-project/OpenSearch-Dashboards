@@ -4,7 +4,14 @@
  */
 
 import './collapsible_nav_group_enabled.scss';
-import { EuiFlyout, EuiPanel, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlyout,
+  EuiPanel,
+  EuiHorizontalRule,
+  EuiHideFor,
+  EuiFlyoutProps,
+  EuiShowFor,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -15,7 +22,6 @@ import { ChromeNavControl, ChromeNavLink } from '../..';
 import { AppCategory, NavGroupType } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { OnIsLockedUpdate } from './';
 import { createEuiListItem } from './nav_link';
 import type { Logos } from '../../../../common/types';
 import {
@@ -34,11 +40,9 @@ export interface CollapsibleNavGroupEnabledProps {
   collapsibleNavHeaderRender?: () => JSX.Element | null;
   basePath: HttpStart['basePath'];
   id: string;
-  isLocked: boolean;
   isNavOpen: boolean;
   navLinks$: Rx.Observable<ChromeNavLink[]>;
   storage?: Storage;
-  onIsLockedUpdate: OnIsLockedUpdate;
   closeNav: () => void;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
@@ -72,10 +76,9 @@ enum NavWidth {
 export function CollapsibleNavGroupEnabled({
   basePath,
   id,
-  isLocked,
   isNavOpen,
   storage = window.localStorage,
-  onIsLockedUpdate,
+  currentWorkspace$,
   closeNav,
   navigateToApp,
   navigateToUrl,
@@ -91,7 +94,6 @@ export function CollapsibleNavGroupEnabled({
   const appId = useObservable(observables.appId$, '');
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
-
   const visibleUseCases = useMemo(() => getVisibleUseCases(navGroupsMap), [navGroupsMap]);
 
   const currentNavGroupId = useMemo(() => {
@@ -111,9 +113,6 @@ export function CollapsibleNavGroupEnabled({
   const shouldAppendManageCategory = capabilities.workspaces.enabled
     ? !currentNavGroupId
     : currentNavGroupId === ALL_USE_CASE_ID;
-
-  const shouldShowCollapsedNavHeaderContent =
-    isNavOpen && !!collapsibleNavHeaderRender && !currentNavGroupId;
 
   const navLinksForRender: ChromeNavLink[] = useMemo(() => {
     const getSystemNavGroups = () => {
@@ -266,7 +265,7 @@ export function CollapsibleNavGroupEnabled({
     }
   };
 
-  return (
+  const rendeLeftNav = (props?: Partial<EuiFlyoutProps>) => (
     <EuiFlyout
       data-test-subj="collapsibleNav"
       id={id}
@@ -283,19 +282,21 @@ export function CollapsibleNavGroupEnabled({
       hideCloseButton
       paddingSize="none"
       ownFocus={false}
+      {...props}
     >
       <div className="eui-fullHeight left-navigation-wrapper">
         {!isNavOpen ? null : (
           <EuiPanel
             hasBorder={false}
             borderRadius="none"
-            paddingSize={!isNavOpen ? 's' : 'l'}
+            paddingSize="s"
             hasShadow={false}
-            style={{ flexGrow: 0, paddingBottom: 0 }}
+            style={{ flexGrow: 0 }}
           >
             <CollapsibleNavTop
               homeLink={homeLink}
               navGroupsMap={navGroupsMap}
+              collapsibleNavHeaderRender={collapsibleNavHeaderRender}
               navLinks={navLinks}
               navigateToApp={navigateToApp}
               logos={logos}
@@ -304,7 +305,7 @@ export function CollapsibleNavGroupEnabled({
               shouldShrinkNavigation={!isNavOpen}
               onClickShrink={closeNav}
               visibleUseCases={visibleUseCases}
-              currentWorkspace$={observables.currentWorkspace$}
+              currentWorkspace$={currentWorkspace$}
             />
           </EuiPanel>
         )}
@@ -316,12 +317,6 @@ export function CollapsibleNavGroupEnabled({
             hasShadow={false}
             className="eui-yScroll flex-1-container"
           >
-            {shouldShowCollapsedNavHeaderContent && collapsibleNavHeaderRender ? (
-              <>
-                {collapsibleNavHeaderRender()}
-                <EuiSpacer />
-              </>
-            ) : null}
             <NavGroups
               navLinks={navLinksForRender}
               navigateToApp={navigateToApp}
@@ -355,5 +350,22 @@ export function CollapsibleNavGroupEnabled({
         </div>
       </div>
     </EuiFlyout>
+  );
+
+  return (
+    <>
+      <EuiHideFor sizes={['xs', 's', 'm']}>{rendeLeftNav()}</EuiHideFor>
+      <EuiShowFor sizes={['xs', 's', 'm']}>
+        {isNavOpen
+          ? rendeLeftNav({
+              type: 'overlay',
+              size: undefined,
+              outsideClickCloses: true,
+              paddingSize: undefined,
+              ownFocus: true,
+            })
+          : null}
+      </EuiShowFor>
+    </>
   );
 }

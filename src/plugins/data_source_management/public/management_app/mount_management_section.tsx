@@ -79,6 +79,7 @@ export async function mountManagementSection(
             setBreadcrumbs={params.setBreadcrumbs}
             application={application}
             useNewUX={useNewUX}
+            savedObjects={savedObjects}
           />
         </Route>
         {canManageDataSource && (

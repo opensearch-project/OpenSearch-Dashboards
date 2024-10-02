@@ -98,7 +98,6 @@ export const WorkspaceDetailFormDetails = ({
           value={formData.description}
           onChange={setDescription}
           readOnly={!isEditing}
-          error={formErrors.name?.message}
         />
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup title={<h3>{detailsUseCaseLabel}</h3>}>

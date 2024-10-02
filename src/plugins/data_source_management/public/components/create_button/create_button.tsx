@@ -13,9 +13,10 @@ interface Props {
   history: History;
   isEmptyState?: boolean;
   dataTestSubj: string;
+  featureFlagStatus: boolean;
 }
 
-export const CreateButton = ({ history, isEmptyState, dataTestSubj }: Props) => {
+export const CreateButton = ({ history, isEmptyState, dataTestSubj, featureFlagStatus }: Props) => {
   return (
     <EuiSmallButton
       data-test-subj={dataTestSubj}
@@ -24,7 +25,9 @@ export const CreateButton = ({ history, isEmptyState, dataTestSubj }: Props) => 
     >
       <FormattedMessage
         id="dataSourcesManagement.dataSourceListing.createButton"
-        defaultMessage="Create data source connection"
+        defaultMessage={
+          featureFlagStatus ? 'Create data source connection' : 'Create direct query connection'
+        }
       />
     </EuiSmallButton>
   );

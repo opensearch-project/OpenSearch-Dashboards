@@ -148,6 +148,14 @@ export class DataSourcePermissionClientWrapper {
       delete: deleteWithManageableBy,
       update: updateWithManageableBy,
       bulkUpdate: bulkUpdateWithManageableBy,
+      get: wrapperOptions.client.get,
+      checkConflicts: wrapperOptions.client.checkConflicts,
+      errors: wrapperOptions.client.errors,
+      addToNamespaces: wrapperOptions.client.addToNamespaces,
+      deleteFromNamespaces: wrapperOptions.client.deleteFromNamespaces,
+      find: wrapperOptions.client.find,
+      bulkGet: wrapperOptions.client.bulkGet,
+      deleteByWorkspace: wrapperOptions.client.deleteByWorkspace,
     };
   };
 

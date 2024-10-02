@@ -1,0 +1,2 @@
+fix:
+- [Workspace]Fix workspace description error when name invalid ([#8079](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8079))

@@ -82,7 +82,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     setIsLoading(true);
     getDataSources(savedObjects.client)
       .then((response: DataSourceTableItem[]) => {
-        return fetchDataSourceConnections(response, http, notifications);
+        return fetchDataSourceConnections(response, http, notifications, false);
       })
       .then((finalData) => {
         setDataSources(finalData);
@@ -166,7 +166,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         }
       ) => (
         <>
-          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `${index.id}`)}>
+          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `${index.id}`)} flush="left">
             {name}
           </EuiButtonEmpty>
           {index.id === getDefaultDataSourceId(uiSettings) ? (

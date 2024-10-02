@@ -160,8 +160,8 @@ export const Configurator = ({
           />
         </EuiButton>
         <EuiButton
-          onClick={() => {
-            queryString.getDatasetService().cacheDataset(dataset);
+          onClick={async () => {
+            await queryString.getDatasetService().cacheDataset(dataset);
             onConfirm(dataset);
           }}
           fill

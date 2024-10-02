@@ -4,7 +4,10 @@
  */
 
 import { i18n } from '@osd/i18n';
-
+import {
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+  DATA_SOURCE_SAVED_OBJECT_TYPE,
+} from '../../data_source/common';
 export const WORKSPACE_FATAL_ERROR_APP_ID = 'workspace_fatal_error';
 export const WORKSPACE_CREATE_APP_ID = 'workspace_create';
 export const WORKSPACE_LIST_APP_ID = 'workspace_list';
@@ -16,6 +19,10 @@ export const WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID = 'workspace';
 export const WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID =
   'workspace_conflict_control';
 export const WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID = 'workspace_ui_settings';
+/**
+ * UI setting for user default workspace
+ */
+export const DEFAULT_WORKSPACE = 'defaultWorkspace';
 
 export enum WorkspacePermissionMode {
   Read = 'read',
@@ -154,3 +161,9 @@ export enum AssociationDataSourceModalMode {
   DirectQueryConnections = 'direction-query-connections',
 }
 export const USE_CASE_PREFIX = 'use-case-';
+
+// Workspace will handle both data source and data connection type saved object.
+export const WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES = [
+  DATA_SOURCE_SAVED_OBJECT_TYPE,
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+];

@@ -34,6 +34,7 @@ import { EuiModal } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 import { METRIC_TYPE, UiStatsMetricType } from '@osd/analytics';
+import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { ApplicationStart, IUiSettingsClient, SavedObjectsStart } from '../../../../core/public';
 import { SearchSelection } from './search_selection';
 import { TypeSelection } from './type_selection';
@@ -55,6 +56,7 @@ interface TypeSelectionProps {
   outsideVisualizeApp?: boolean;
   stateTransfer?: EmbeddableStateTransfer;
   originatingApp?: string;
+  data: DataPublicPluginStart;
 }
 
 interface TypeSelectionState {
@@ -112,6 +114,8 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
             visType={this.state.visType}
             uiSettings={this.props.uiSettings}
             savedObjects={this.props.savedObjects}
+            application={this.props.application}
+            data={this.props.data}
           />
         </EuiModal>
       ) : (

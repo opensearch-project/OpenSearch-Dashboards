@@ -53,19 +53,16 @@ export function getExternalSearchParamsFromRequest(
   searchRequest: SearchRequest,
   dependencies: {
     getConfig: GetConfigFn;
-    getDataFrame: GetDataFrameFn;
   }
 ): ISearchRequestParams {
-  const { getConfig, getDataFrame } = dependencies;
+  const { getConfig } = dependencies;
   const searchParams = getSearchParams(getConfig);
-  const dataFrame = getDataFrame();
   const indexTitle = searchRequest.index.title || searchRequest.index;
 
   return {
     index: indexTitle,
     body: {
       ...searchRequest.body,
-      ...(dataFrame && dataFrame?.name === indexTitle ? { df: dataFrame } : {}),
     },
     ...searchParams,
   };

@@ -8,9 +8,11 @@ import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
 
-type DataSourceHeaderProps = RouteComponentProps;
+interface DataSourceHeaderProps extends RouteComponentProps {
+  featureFlagStatus: boolean;
+}
 
-export const DataSourceHeader: React.FC<DataSourceHeaderProps> = () => {
+export const DataSourceHeader: React.FC<DataSourceHeaderProps> = ({ featureFlagStatus }) => {
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -25,10 +27,17 @@ export const DataSourceHeader: React.FC<DataSourceHeaderProps> = () => {
         <EuiSpacer size="s" />
         <EuiText size="s">
           <p>
-            <FormattedMessage
-              id="dataSourcesManagement.dataSourcesTable.description"
-              defaultMessage="Create and manage data source connections."
-            />
+            {featureFlagStatus ? (
+              <FormattedMessage
+                id="dataSourcesManagement.dataSourcesTable.mdsEnabled.description"
+                defaultMessage="Create and manage data source connections."
+              />
+            ) : (
+              <FormattedMessage
+                id="dataSourcesManagement.dataSourcesTable.mdsDisabled.description"
+                defaultMessage="Manage direct query data source connections."
+              />
+            )}
           </p>
         </EuiText>
       </EuiFlexItem>

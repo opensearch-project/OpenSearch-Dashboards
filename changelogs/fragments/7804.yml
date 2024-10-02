@@ -1,2 +1,0 @@
-fix:
-- Fix query assistant fetching agent bug ([#7804](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7804))

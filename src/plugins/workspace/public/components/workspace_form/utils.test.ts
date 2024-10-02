@@ -10,15 +10,13 @@ import {
   getNumberOfChanges,
   getNumberOfErrors,
   isWorkspacePermissionSetting,
+  getPermissionModeName,
 } from './utils';
 import { WorkspacePermissionMode } from '../../../common/constants';
-import {
-  WorkspacePermissionItemType,
-  optionIdToWorkspacePermissionModesMap,
-  PermissionModeId,
-} from './constants';
+import { WorkspacePermissionItemType, optionIdToWorkspacePermissionModesMap } from './constants';
 import { DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceFormErrorCode } from './types';
+import { PermissionModeId } from '../../../../../core/public';
 
 describe('convertPermissionSettingsToPermissions', () => {
   it('should return undefined if permission items not provided', () => {
@@ -696,5 +694,27 @@ describe('isWorkspacePermissionSetting', () => {
     };
     const result = isWorkspacePermissionSetting(permissionSettingWithoutGroup);
     expect(result).toBe(false);
+  });
+});
+
+describe('getPermissionModeName', () => {
+  it('should return Owner for a valid WorkspacePermissionMode mode', () => {
+    const result = getPermissionModeName(['library_write', 'write'] as WorkspacePermissionMode[]);
+    expect(result).toBe('Owner');
+  });
+
+  it('should return Read & write for a valid WorkspacePermissionMode mode', () => {
+    const result = getPermissionModeName(['library_write', 'read'] as WorkspacePermissionMode[]);
+    expect(result).toBe('Read & Write');
+  });
+
+  it('should return Read for a valid WorkspacePermissionMode mode', () => {
+    const result = getPermissionModeName(['library_read', 'read'] as WorkspacePermissionMode[]);
+    expect(result).toBe('Read');
+  });
+
+  it('should return Read for a invalid WorkspacePermissionMode mode', () => {
+    const result = getPermissionModeName([] as WorkspacePermissionMode[]);
+    expect(result).toBe('Read');
   });
 });

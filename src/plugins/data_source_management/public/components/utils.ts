@@ -42,7 +42,7 @@ import {
   defaultDataSourceSelection,
 } from '../service/data_source_selection_service';
 import { DataSourceError } from '../types';
-import { DATACONNECTIONS_BASE } from '../constants';
+import { DATACONNECTIONS_BASE, LOCAL_CLUSTER } from '../constants';
 
 export const getDirectQueryConnections = async (dataSourceId: string, http: HttpSetup) => {
   const endpoint = `${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceId}`;
@@ -67,9 +67,29 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
   return directQueryConnections;
 };
 
+export const getLocalClusterConnections = async (http: HttpSetup) => {
+  const res = await http.get(`${DATACONNECTIONS_BASE}`);
+  const localClusterConnections: DataSourceTableItem[] = res.map(
+    (dataConnection: DirectQueryDatasourceDetails) => ({
+      id: `${dataConnection.name}`,
+      title: dataConnection.name,
+      type:
+        {
+          S3GLUE: 'Amazon S3',
+          PROMETHEUS: 'Prometheus',
+        }[dataConnection.connector] || dataConnection.connector,
+      connectionType: DataSourceConnectionType.DirectQueryConnection,
+      description: dataConnection.description,
+      parentId: LOCAL_CLUSTER,
+    })
+  );
+  return localClusterConnections;
+};
+
 export const mergeDataSourcesWithConnections = (
   dataSources: DataSourceTableItem[],
-  directQueryConnections: DataSourceTableItem[]
+  directQueryConnections: DataSourceTableItem[],
+  localClusterConnections?: DataSourceTableItem[]
 ): DataSourceTableItem[] => {
   const dataSourcesList: DataSourceTableItem[] = [];
   dataSources.forEach((ds) => {
@@ -87,13 +107,25 @@ export const mergeDataSourcesWithConnections = (
     });
   });
 
+  if (localClusterConnections) {
+    dataSourcesList.push({
+      id: LOCAL_CLUSTER,
+      type: 'OpenSearch',
+      connectionType: DataSourceConnectionType.OpenSearchConnection,
+      title: LOCAL_CLUSTER,
+      relatedConnections: localClusterConnections,
+    });
+  }
+
   return dataSourcesList;
 };
 
 export const fetchDataSourceConnections = async (
   dataSources: DataSourceTableItem[],
   http: HttpSetup | undefined,
-  notifications: NotificationsStart | undefined
+  notifications: NotificationsStart | undefined,
+  directQueryTable: boolean,
+  hideLocalCluster: boolean
 ) => {
   try {
     const directQueryConnectionsPromises = dataSources.map((ds) =>
@@ -101,7 +133,13 @@ export const fetchDataSourceConnections = async (
     );
     const directQueryConnectionsResult = await Promise.all(directQueryConnectionsPromises);
     const directQueryConnections = directQueryConnectionsResult.flat();
-    return mergeDataSourcesWithConnections(dataSources, directQueryConnections);
+    const localClusterConnections =
+      directQueryTable && !hideLocalCluster ? await getLocalClusterConnections(http!) : undefined;
+    return mergeDataSourcesWithConnections(
+      dataSources,
+      directQueryConnections,
+      localClusterConnections
+    );
   } catch (error) {
     notifications?.toasts.addDanger(
       i18n.translate('dataSource.fetchDataSourceConnections', {

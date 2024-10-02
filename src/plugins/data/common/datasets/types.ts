@@ -120,6 +120,8 @@ export interface DataStructure {
   /** Optional array of child data structures */
   children?: DataStructure[];
   hasNext?: boolean;
+  paginationToken?: string;
+  multiSelect?: boolean;
   columnHeader?: string;
   /** Optional metadata for the data structure */
   meta?: DataStructureMeta;
@@ -250,4 +252,8 @@ export interface DatasetField {
   type: string;
   displayName?: string;
   // TODO:  osdFieldType?
+}
+
+export interface DatasetSearchOptions {
+  strategy?: string;
 }

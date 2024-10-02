@@ -6,9 +6,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import { CoreStart } from 'opensearch-dashboards/public';
+import { AppMountParameters, CoreStart } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
-import { EuiBreadcrumb } from '@elastic/eui';
 import { of } from 'rxjs';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { WorkspaceDetail, WorkspaceDetailProps } from './workspace_detail/workspace_detail';
@@ -41,7 +40,11 @@ function getFormDataFromWorkspace(
   };
 }
 
-export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
+export interface WorkspaceDetailPropsWithOnAppLeave extends WorkspaceDetailProps {
+  onAppLeave: AppMountParameters['onAppLeave'];
+}
+
+export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) => {
   const {
     services: {
       workspaces,
@@ -59,34 +62,20 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const availableUseCases = useObservable(props.registeredUseCases$, []);
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
+  const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
   /**
    * set breadcrumbs to chrome
    */
   useEffect(() => {
-    const breadcrumbs: EuiBreadcrumb[] = [
+    chrome?.setBreadcrumbs([
       {
-        text: 'Home',
-        onClick: () => {
-          application?.navigateToApp('home');
-        },
-      },
-    ];
-    if (currentWorkspace) {
-      breadcrumbs.push({
-        text: currentWorkspace.name,
-      });
-      breadcrumbs.push({
         text: i18n.translate('workspace.detail.title', {
-          defaultMessage: '{name} settings',
-          values: {
-            name: currentWorkspace.name,
-          },
+          defaultMessage: 'Workspace settings',
         }),
-      });
-    }
-    chrome?.setBreadcrumbs(breadcrumbs);
-  }, [chrome, currentWorkspace, application]);
+      },
+    ]);
+  }, [chrome]);
 
   useEffect(() => {
     const rawFormData = getFormDataFromWorkspace(currentWorkspace);
@@ -105,14 +94,18 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
       let result;
+      if (isFormSubmitting) {
+        return;
+      }
       if (!currentWorkspace) {
         notifications?.toasts.addDanger({
-          title: i18n.translate('Cannot find current workspace', {
+          title: i18n.translate('workspace.detail.notFoundError', {
             defaultMessage: 'Cannot update workspace',
           }),
         });
         return;
       }
+      setIsFormSubmitting(true);
 
       try {
         const { permissionSettings, selectedDataSourceConnections, ...attributes } = data;
@@ -148,6 +141,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
           }
           return;
         } else {
+          setIsFormSubmitting(false);
           throw new Error(result?.error ? result?.error : 'update workspace failed');
         }
       } catch (error) {
@@ -157,10 +151,11 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
           }),
           text: error instanceof Error ? error.message : JSON.stringify(error),
         });
+        setIsFormSubmitting(false);
         return;
       }
     },
-    [notifications?.toasts, currentWorkspace, http, application, workspaceClient]
+    [isFormSubmitting, currentWorkspace, notifications?.toasts, workspaceClient, application, http]
   );
 
   if (!workspaces || !application || !http || !savedObjects || !currentWorkspaceFormData) {
@@ -176,9 +171,10 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
       onSubmit={handleWorkspaceFormSubmit}
       defaultValues={currentWorkspaceFormData}
       availableUseCases={availableUseCases}
+      onAppLeave={props.onAppLeave}
     >
       <I18nProvider>
-        <WorkspaceDetail {...props} />
+        <WorkspaceDetail {...props} isFormSubmitting={isFormSubmitting} />
       </I18nProvider>
     </WorkspaceFormProvider>
   );

@@ -11,8 +11,8 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
       class="eui-fullHeight left-navigation-wrapper"
     >
       <div
-        class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
-        style="flex-grow: 0; padding-bottom: 0px;"
+        class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
+        style="flex-grow: 0;"
       >
         <button
           data-test-subj="back"
@@ -278,8 +278,8 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case by default and 
       class="eui-fullHeight left-navigation-wrapper"
     >
       <div
-        class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
-        style="flex-grow: 0; padding-bottom: 0px;"
+        class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
+        style="flex-grow: 0;"
       >
         <button
           data-test-subj="back"
@@ -351,8 +351,8 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case when current na
       class="eui-fullHeight left-navigation-wrapper"
     >
       <div
-        class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
-        style="flex-grow: 0; padding-bottom: 0px;"
+        class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
+        style="flex-grow: 0;"
       >
         <button
           data-test-subj="back"

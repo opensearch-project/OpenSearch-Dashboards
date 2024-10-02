@@ -55,6 +55,7 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
         }}
         suggestionProvider={{
           provideCompletionItems,
+          triggerCharacters: [' '],
         }}
         languageConfiguration={{
           autoClosingPairs: [
@@ -65,6 +66,7 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
             { open: "'", close: "'" },
           ],
         }}
+        triggerSuggestOnFocus={true}
       />
       <div className="defaultEditor__footer">
         {footerItems && (

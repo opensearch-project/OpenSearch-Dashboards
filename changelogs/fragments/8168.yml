@@ -1,0 +1,2 @@
+fix:
+- Sync query and filter when refreshing discover page ([#8168](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8168))

@@ -1,2 +1,0 @@
-fix:
-- [Workspace]Fix page crash caused by invalid workspace color ([#7671](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7671))
