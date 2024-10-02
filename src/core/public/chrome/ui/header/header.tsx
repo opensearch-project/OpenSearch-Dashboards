@@ -286,16 +286,20 @@ export function Header({
           )}
         >
           {props.isSmallScreen ? (
-            <EuiButtonIcon
-              iconType="menu"
-              size="xs"
-              title={i18n.translate('core.ui.primaryNav.menu', {
-                defaultMessage: 'Menu',
-              })}
-              display="base"
-              color="subdued"
-              iconSize="s"
-            />
+            /**
+             * Using <EuiButtonIcon type="base" /> here will introduce a warning in console
+             * because button can not be a child of a button. In order to give the looks of a bordered icon,
+             * here we use the classes to imitate the style
+             */
+            <span className="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall ">
+              <EuiIcon
+                title={i18n.translate('core.ui.primaryNav.menu', {
+                  defaultMessage: 'Menu',
+                })}
+                type="menu"
+                size="s"
+              />
+            </span>
           ) : (
             <EuiIcon
               type="menu"
