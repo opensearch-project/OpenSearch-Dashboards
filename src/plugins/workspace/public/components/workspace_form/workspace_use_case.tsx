@@ -16,6 +16,7 @@ import {
   EuiIcon,
   EuiSpacer,
 } from '@elastic/eui';
+import { ALL_USE_CASE_ID } from '../../../../../core/public';
 
 import { WorkspaceFormErrors, AvailableUseCaseItem } from './types';
 import { WorkspaceUseCaseFlyout } from './workspace_use_case_flyout';
@@ -56,7 +57,25 @@ const WorkspaceUseCaseCard = ({
               <EuiIcon color="subdued" size="l" type={icon} />
             </EuiFlexItem>
           )}
-          <EuiFlexItem>{title}</EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <h4>
+                {title}
+                {id === ALL_USE_CASE_ID && (
+                  <>
+                    &nbsp;
+                    <EuiText style={{ display: 'inline' }}>
+                      <i>
+                        {i18n.translate('workspace.forms.useCaseCard.allUseCaseSuffix', {
+                          defaultMessage: '(all features)',
+                        })}
+                      </i>
+                    </EuiText>
+                  </>
+                )}
+              </h4>
+            </EuiText>
+          </EuiFlexItem>
         </EuiFlexGroup>
       }
       checked={checked}

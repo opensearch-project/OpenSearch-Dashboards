@@ -122,4 +122,17 @@ describe('WorkspaceUseCase', () => {
       expect(renderResult.queryByText('dialog')).toBeNull();
     });
   });
+
+  it('should render "(all features)" suffix for "all use case"', () => {
+    const { renderResult } = setup({
+      availableUseCases: [
+        {
+          ...DEFAULT_NAV_GROUPS.all,
+          features: [],
+        },
+      ],
+    });
+
+    expect(renderResult.getByText('(all features)')).toBeInTheDocument();
+  });
 });

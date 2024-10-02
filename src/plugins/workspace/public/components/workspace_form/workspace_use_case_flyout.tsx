@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiIcon,
 } from '@elastic/eui';
+import { ALL_USE_CASE_ID } from '../../../../../core/public';
 
 import { AvailableUseCaseItem } from './types';
 
@@ -54,13 +55,31 @@ export const WorkspaceUseCaseFlyout = ({
             <EuiAccordion
               id={id}
               buttonContent={
-                <EuiFlexGroup gutterSize="s">
+                <EuiFlexGroup gutterSize="s" alignItems="center">
                   {icon && (
                     <EuiFlexItem grow={false}>
                       <EuiIcon color="subdued" type={icon} size="l" />
                     </EuiFlexItem>
                   )}
-                  <EuiFlexItem>{title}</EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiText size="s">
+                      <h3>
+                        {title}
+                        {id === ALL_USE_CASE_ID && (
+                          <>
+                            &nbsp;
+                            <EuiText style={{ display: 'inline' }}>
+                              <i>
+                                {i18n.translate('workspace.forms.useCaseFlyout.allUseCaseSuffix', {
+                                  defaultMessage: '(all features)',
+                                })}
+                              </i>
+                            </EuiText>
+                          </>
+                        )}
+                      </h3>
+                    </EuiText>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               }
               paddingSize="l"

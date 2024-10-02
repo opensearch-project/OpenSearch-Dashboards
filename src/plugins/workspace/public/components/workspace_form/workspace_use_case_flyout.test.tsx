@@ -4,6 +4,8 @@
  */
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
+
 import { WorkspaceUseCaseFlyout } from './workspace_use_case_flyout';
 
 const mockAvailableUseCases = [
@@ -65,5 +67,15 @@ describe('WorkspaceUseCaseFlyout', () => {
     );
     const useCaseDescription = screen.getByText(/This is the description for Use Case 1/);
     expect(useCaseDescription).toBeInTheDocument();
+  });
+
+  it('should render "(all features)" suffix for "all use case"', () => {
+    render(
+      <WorkspaceUseCaseFlyout
+        onClose={jest.fn()}
+        availableUseCases={[{ ...DEFAULT_NAV_GROUPS.all, features: [] }]}
+      />
+    );
+    expect(screen.getByText('(all features)')).toBeInTheDocument();
   });
 });
