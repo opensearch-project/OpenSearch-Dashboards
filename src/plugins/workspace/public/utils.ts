@@ -15,8 +15,6 @@ import {
   ApplicationStart,
   HttpSetup,
   NotificationsStart,
-  fulfillRegistrationLinksToChromeNavLinks,
-  ChromeNavLink,
   App,
   AppCategory,
   AppNavLinkStatus,
