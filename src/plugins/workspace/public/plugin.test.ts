@@ -23,7 +23,10 @@ import { WorkspacePlugin } from './plugin';
 import { contentManagementPluginMocks } from '../../content_management/public';
 import { navigationPluginMock } from '../../navigation/public/mocks';
 import * as applicationExports from './application';
-import { WorkspaceCreationPostProcessorService } from './services';
+import {
+  WorkspaceCreationPostProcessorService,
+  WorkspaceDetailCustomizedTabsService,
+} from './services';
 
 // Expect 6 app registrations: create, fatal error, detail, initial, navigation, and list apps.
 const registrationAppNumber = 6;
@@ -400,6 +403,20 @@ describe('Workspace plugin', () => {
     workspacePluginSetup.registerWorkspaceCreationPostProcessor(mockProcessor);
 
     expect(WorkspaceCreationPostProcessorService.getInstance().getProcessor()).toBe(mockProcessor);
+  });
+
+  it('#setup able to registerWorkspaceDetailCustomizedTab', async () => {
+    const setupMock = coreMock.createSetup();
+    const initializerContext = coreMock.createPluginInitializerContext();
+    const workspacePlugin = new WorkspacePlugin(initializerContext);
+    const workspacePluginSetup = await workspacePlugin.setup(setupMock, {});
+
+    const mockTab = { id: 'tab-1', title: 'Tab 1', order: 123, render: () => null };
+    workspacePluginSetup.registerWorkspaceDetailCustomizedTab(mockTab);
+
+    expect(
+      WorkspaceDetailCustomizedTabsService.getInstance().getCustomizedTabs$().getValue()[0]
+    ).toBe(mockTab);
   });
 
   it('#start add workspace detail page to breadcrumbs when start', async () => {

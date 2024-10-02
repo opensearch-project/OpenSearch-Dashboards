@@ -61,6 +61,8 @@ import {
   UseCaseService,
   WorkspaceCreationPostProcessor,
   WorkspaceCreationPostProcessorService,
+  WorkspaceDetailCustomizedTab,
+  WorkspaceDetailCustomizedTabsService,
 } from './services';
 import { WorkspaceListCard } from './components/service_card';
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
@@ -568,6 +570,8 @@ export class WorkspacePlugin
     return {
       registerWorkspaceCreationPostProcessor: (fn: WorkspaceCreationPostProcessor) =>
         WorkspaceCreationPostProcessorService.getInstance().registerProcessor(fn),
+      registerWorkspaceDetailCustomizedTab: (tab: WorkspaceDetailCustomizedTab) =>
+        WorkspaceDetailCustomizedTabsService.getInstance().registerCustomizedTab(tab),
     };
   }
 

@@ -13,6 +13,7 @@ export { WorkspaceNameField, WorkspaceDescriptionField } from './fields';
 export { ConnectionTypeIcon } from './connection_type_icon';
 export { DataSourceConnectionTable } from './data_source_connection_table';
 export { WorkspaceUseCaseFlyout } from './workspace_use_case_flyout';
+export { WorkspaceDetailTabPanel } from './workspace_detail_tab_panel';
 
 export { WorkspaceFormSubmitData, WorkspaceFormProps, WorkspaceFormDataState } from './types';
 export {

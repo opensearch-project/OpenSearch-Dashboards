@@ -8,3 +8,7 @@ export {
   WorkspaceCreationPostProcessor,
   WorkspaceCreationPostProcessorService,
 } from './workspace_creation_post_processor_service';
+export {
+  WorkspaceDetailCustomizedTabsService,
+  WorkspaceDetailCustomizedTab,
+} from './workspace_detail_customized_tabs_service';

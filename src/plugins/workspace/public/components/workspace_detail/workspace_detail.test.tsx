@@ -16,6 +16,7 @@ import { WorkspaceFormProvider, WorkspaceOperationType } from '../workspace_form
 import { DataSourceConnectionType } from '../../../common/types';
 import * as utilsExports from '../../utils';
 import { IntlProvider } from 'react-intl';
+import { WorkspaceDetailCustomizedTabsService } from '../../services';
 
 // all applications
 const PublicAPPInfoMap = new Map([
@@ -252,6 +253,24 @@ describe('WorkspaceDetail', () => {
       })
     );
     expect(queryByText('Collaborators')).toBeNull();
+  });
+
+  it('should render customized tab', () => {
+    WorkspaceDetailCustomizedTabsService.getInstance().registerCustomizedTab({
+      id: 'customized-tab',
+      title: 'Customized Tab',
+      render: () => 'This is content of customized tab.',
+      order: 1000,
+    });
+    const { getByText } = render(
+      WorkspaceDetailPage({
+        permissionEnabled: true,
+        collaboratorEditorEnabled: false,
+      })
+    );
+    expect(getByText('Customized Tab')).toBeInTheDocument();
+    fireEvent.click(getByText('Customized Tab'));
+    expect(getByText('This is content of customized tab.')).toBeInTheDocument();
   });
 
   it('click on tab button will show navigate modal when number of changes > 1', async () => {

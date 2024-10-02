@@ -17,13 +17,17 @@ import { useObservable } from 'react-use';
 import { BehaviorSubject, of } from 'rxjs';
 import { useHistory, useLocation } from 'react-router-dom';
 import { WorkspaceDependServices, WorkspaceUseCase } from '../../types';
-import { WorkspaceDetailForm, useWorkspaceFormContext } from '../workspace_form';
+import {
+  WorkspaceDetailForm,
+  useWorkspaceFormContext,
+  WorkspaceDetailTabPanel,
+} from '../workspace_form';
 import { WorkspaceDetailPanel } from './workspace_detail_panel';
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
 import { DEFAULT_WORKSPACE, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
 import { cleanWorkspaceId } from '../../../../../core/public/utils';
 import { DetailTab, DetailTabTitles, WorkspaceOperationType } from '../workspace_form/constants';
-import { CoreStart, WorkspaceAttribute } from '../../../../../core/public';
+import { WorkspaceAttribute } from '../../../../../core/public';
 import {
   fetchDataSourceConnectionsByDataSourceIds,
   fulfillRelatedConnections,
@@ -31,15 +35,14 @@ import {
   getUseCaseUrl,
 } from '../../utils';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { SelectDataSourceDetailPanel } from './select_data_source_panel';
 import { WorkspaceBottomBar } from './workspace_bottom_bar';
 import {
-  NavigationPublicPluginStart,
   TopNavControlButtonData,
   TopNavControlDescriptionData,
   TopNavControlIconData,
 } from '../../../../navigation/public';
+import { WorkspaceDetailCustomizedTabsService } from '../../services';
 
 export interface WorkspaceDetailProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -82,6 +85,9 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
   const [tabId, setTabId] = useState<string>(DetailTab.Details);
   const [isDQCFilled, setIsDQCFilled] = useState(false);
   const [isSettingDefaultWorkspace, setIsSettingDefaultWorkspace] = useState(false);
+  const customizedTabs = useObservable(
+    WorkspaceDetailCustomizedTabsService.getInstance().getCustomizedTabs$()
+  );
 
   const availableUseCases = useObservable(props.registeredUseCases$, []);
   const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
@@ -248,6 +254,18 @@ export const WorkspaceDetail = (props: WorkspaceDetailPropsWithFormSubmitting) =
       : []),
     ...(isPermissionEnabled
       ? [createDetailTab(DetailTab.Collaborators, DetailTabTitles.collaborators)]
+      : []),
+    ...(customizedTabs
+      ? customizedTabs.map((tab) => ({
+          id: tab.id,
+          name: tab.title,
+          content: (
+            <>
+              <EuiSpacer size="m" />
+              <WorkspaceDetailTabPanel title={tab.title}>{tab.render()}</WorkspaceDetailTabPanel>
+            </>
+          ),
+        }))
       : []),
   ];
 
