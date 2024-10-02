@@ -140,8 +140,8 @@ export class ChromeNavGroupService {
     ];
 
     // Append all the links that do not have use case info to keep backward compatible
-    const linkIdsWithNavGroupInfo = Object.values(navGroupsMap).reduce((total, navGroup) => {
-      return [...total, ...navGroup.navLinks.map((navLink) => navLink.id)];
+    const linkIdsWithNavGroupInfo = Object.values(navGroupsMap).reduce((accumulator, navGroup) => {
+      return [...accumulator, ...navGroup.navLinks.map((navLink) => navLink.id)];
     }, [] as string[]);
     navLinks.forEach((navLink) => {
       if (linkIdsWithNavGroupInfo.includes(navLink.id)) {
