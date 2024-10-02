@@ -103,12 +103,12 @@ export const WorkspaceUseCase = ({
   formErrors,
   availableUseCases,
 }: WorkspaceUseCaseProps) => {
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+  const [isUseCaseFlyoutVisible, setIsUseCaseFlyoutVisible] = useState(false);
   const handleLearnMoreClick = useCallback(() => {
-    setIsFlyoutVisible(true);
+    setIsUseCaseFlyoutVisible(true);
   }, []);
   const handleFlyoutClose = useCallback(() => {
-    setIsFlyoutVisible(false);
+    setIsUseCaseFlyoutVisible(false);
   }, []);
 
   return (
@@ -131,7 +131,7 @@ export const WorkspaceUseCase = ({
             defaultMessage: 'Learn more.',
           })}
         </EuiLink>
-        {isFlyoutVisible && (
+        {isUseCaseFlyoutVisible && (
           <WorkspaceUseCaseFlyout
             availableUseCases={availableUseCases}
             onClose={handleFlyoutClose}
