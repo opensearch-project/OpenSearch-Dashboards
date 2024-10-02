@@ -17,11 +17,11 @@ import { USE_NEW_HOME_PAGE } from '../common/constants';
 
 export const uiSettings: Record<string, UiSettingsParams> = {
   [USE_NEW_HOME_PAGE]: {
-    name: i18n.translate('core.ui_settings.params.useNewHomePage', {
+    name: i18n.translate('home.ui_settings.useNewHomePage.label', {
       defaultMessage: 'Use New Home Page',
     }),
     value: false,
-    description: i18n.translate('core.ui_settings.params.useNewHomePage', {
+    description: i18n.translate('home.ui_settings.useNewHomePage.description', {
       defaultMessage: 'Try the new home page',
     }),
     schema: schema.boolean(),
