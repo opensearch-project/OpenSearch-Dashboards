@@ -105,7 +105,7 @@ export const CollapsibleNavTop = ({
             <EuiSpacer />
             {currentNavGroup?.type ? (
               <EuiText size="s">
-                <h3>{currentNavGroup?.title}</h3>
+                <h3>{currentNavGroup.title}</h3>
               </EuiText>
             ) : (
               collapsibleNavHeaderRender?.()
