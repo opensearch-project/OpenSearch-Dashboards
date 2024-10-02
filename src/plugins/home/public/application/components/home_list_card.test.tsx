@@ -75,21 +75,9 @@ describe('Register HomeListCardToPages', () => {
 
   it('register to use case overview page', () => {
     registerHomeListCardToPage(contentManagementStartMock, docLinkMock);
-    expect(contentManagementStartMock.registerContentProvider).toHaveBeenCalledTimes(4);
+    expect(contentManagementStartMock.registerContentProvider).toHaveBeenCalledTimes(2);
 
-    let whatsNewCall = registerContentProviderFn.mock.calls[0];
-    expect(whatsNewCall[0].getTargetArea()).toEqual('essentials_overview/service_cards');
-    expect(whatsNewCall[0].getContent()).toMatchInlineSnapshot(`
-      Object {
-        "id": "whats_new",
-        "kind": "custom",
-        "order": 10,
-        "render": [Function],
-        "width": 24,
-      }
-    `);
-
-    let learnOpenSearchCall = registerContentProviderFn.mock.calls[1];
+    let learnOpenSearchCall = registerContentProviderFn.mock.calls[0];
     expect(learnOpenSearchCall[0].getTargetArea()).toEqual('essentials_overview/service_cards');
     expect(learnOpenSearchCall[0].getContent()).toMatchInlineSnapshot(`
       Object {
@@ -97,23 +85,11 @@ describe('Register HomeListCardToPages', () => {
         "kind": "custom",
         "order": 20,
         "render": [Function],
-        "width": 24,
+        "width": 48,
       }
     `);
 
-    whatsNewCall = registerContentProviderFn.mock.calls[2];
-    expect(whatsNewCall[0].getTargetArea()).toEqual('all_overview/service_cards');
-    expect(whatsNewCall[0].getContent()).toMatchInlineSnapshot(`
-      Object {
-        "id": "whats_new",
-        "kind": "custom",
-        "order": 30,
-        "render": [Function],
-        "width": undefined,
-      }
-    `);
-
-    learnOpenSearchCall = registerContentProviderFn.mock.calls[3];
+    learnOpenSearchCall = registerContentProviderFn.mock.calls[1];
     expect(learnOpenSearchCall[0].getTargetArea()).toEqual('all_overview/service_cards');
     expect(learnOpenSearchCall[0].getContent()).toMatchInlineSnapshot(`
       Object {
@@ -121,7 +97,7 @@ describe('Register HomeListCardToPages', () => {
         "kind": "custom",
         "order": 40,
         "render": [Function],
-        "width": undefined,
+        "width": 16,
       }
     `);
   });

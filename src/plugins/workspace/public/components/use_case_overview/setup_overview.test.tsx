@@ -141,7 +141,7 @@ describe('Setup use case overview', () => {
           "titleElement": "h4",
           "titleSize": "s",
         },
-        "description": "Gain visibility into your applications and infrastructure.",
+        "description": "Gain visibility into system health, performance, and reliability through monitoring of logs, metrics and traces.",
         "getIcon": [Function],
         "id": "observability",
         "kind": "card",

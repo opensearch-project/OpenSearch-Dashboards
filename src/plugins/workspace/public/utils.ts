@@ -15,8 +15,8 @@ import {
   ApplicationStart,
   HttpSetup,
   NotificationsStart,
-} from '../../../core/public';
-import {
+  fulfillRegistrationLinksToChromeNavLinks,
+  ChromeNavLink,
   App,
   AppCategory,
   AppNavLinkStatus,
@@ -360,23 +360,53 @@ export const getIsOnlyAllowEssentialUseCase = async (client: SavedObjectsStart['
   return false;
 };
 
-export const convertNavGroupToWorkspaceUseCase = ({
-  id,
-  title,
-  description,
-  navLinks,
-  type,
-  order,
-  icon,
-}: NavGroupItemInMap): WorkspaceUseCase => ({
-  id,
-  title,
-  description,
-  features: navLinks.map((item) => ({ id: item.id, title: item.title })),
-  systematic: type === NavGroupType.SYSTEM || id === ALL_USE_CASE_ID,
-  order,
-  icon,
-});
+export const convertNavGroupToWorkspaceUseCase = (
+  { id, title, description, navLinks, type, order, icon }: NavGroupItemInMap,
+  allNavLinks: ChromeNavLink[]
+): WorkspaceUseCase => {
+  const visibleNavLinks = allNavLinks.filter((link) => !link.hidden);
+  const visibleNavLinksWithinNavGroup = fulfillRegistrationLinksToChromeNavLinks(
+    navLinks,
+    visibleNavLinks
+  );
+  const features: WorkspaceUseCaseFeature[] = [];
+  const category2NavLinks: { [key: string]: WorkspaceUseCaseFeature & { details: string[] } } = {};
+  for (const { id: featureId, title: featureTitle, category } of visibleNavLinksWithinNavGroup) {
+    const lowerFeatureId = featureId.toLowerCase();
+    // Filter out overview and getting started links
+    if (lowerFeatureId.endsWith('overview') || lowerFeatureId.endsWith('started')) {
+      continue;
+    }
+    if (!category) {
+      features.push({ id: featureId, title: featureTitle });
+      continue;
+    }
+    // Filter out custom features
+    if (category.id === 'custom') {
+      continue;
+    }
+    if (!category2NavLinks[category.id]) {
+      category2NavLinks[category.id] = {
+        id: category.id,
+        title: category.label,
+        details: [],
+      };
+    }
+    if (featureTitle) {
+      category2NavLinks[category.id].details.push(featureTitle);
+    }
+  }
+  features.push(...Object.values(category2NavLinks));
+  return {
+    id,
+    title,
+    description,
+    features,
+    systematic: type === NavGroupType.SYSTEM || id === ALL_USE_CASE_ID,
+    order,
+    icon,
+  };
+};
 
 const compareFeatures = (
   features1: WorkspaceUseCaseFeature[],
@@ -384,7 +414,7 @@ const compareFeatures = (
 ) => {
   const featuresSerializer = (features: WorkspaceUseCaseFeature[]) =>
     features
-      .map(({ id, title }) => `${id}-${title}`)
+      .map(({ id, title, details }) => `${id}-${title}-${details?.join('')}`)
       .sort()
       .join();
   return featuresSerializer(features1) === featuresSerializer(features2);
