@@ -23,6 +23,7 @@ import { WorkspacePlugin } from './plugin';
 import { contentManagementPluginMocks } from '../../content_management/public';
 import { navigationPluginMock } from '../../navigation/public/mocks';
 import * as applicationExports from './application';
+import { WorkspaceCreationPostProcessorService } from './services';
 
 // Expect 6 app registrations: create, fatal error, detail, initial, navigation, and list apps.
 const registrationAppNumber = 6;
@@ -387,6 +388,18 @@ describe('Workspace plugin', () => {
         navLinkStatus: AppNavLinkStatus.hidden,
       })
     );
+  });
+
+  it('#setup able to registerWorkspaceCreationPostProcessor', async () => {
+    const setupMock = coreMock.createSetup();
+    const initializerContext = coreMock.createPluginInitializerContext();
+    const workspacePlugin = new WorkspacePlugin(initializerContext);
+    const workspacePluginSetup = await workspacePlugin.setup(setupMock, {});
+
+    const mockProcessor = () => {};
+    workspacePluginSetup.registerWorkspaceCreationPostProcessor(mockProcessor);
+
+    expect(WorkspaceCreationPostProcessorService.getInstance().getProcessor()).toBe(mockProcessor);
   });
 
   it('#start add workspace detail page to breadcrumbs when start', async () => {

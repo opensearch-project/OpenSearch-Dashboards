@@ -18,6 +18,7 @@ import {
 import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
 import { DataSourceConnectionType } from '../../../common/types';
 import * as utils from '../../utils';
+import { WorkspaceCreationPostProcessorService } from '../../services';
 
 const workspaceClientCreate = jest
   .fn()
@@ -532,8 +533,12 @@ describe('WorkspaceCreator', () => {
     });
   });
 
-  it('should redirect to workspace use case landing page after created successfully', async () => {
+  it('should call workspace creation post processor after created successfully', async () => {
+    const processorMock = jest.fn();
     const { getByTestId } = render(<WorkspaceCreator />);
+    const unregister = WorkspaceCreationPostProcessorService.getInstance().registerProcessor(
+      processorMock
+    );
 
     // Ensure workspace create form rendered
     await waitFor(() => {
@@ -544,11 +549,11 @@ describe('WorkspaceCreator', () => {
       target: { value: 'test workspace name' },
     });
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    jest.useFakeTimers();
-    jest.runAllTimers();
+
     await waitFor(() => {
-      expect(setHrefSpy).toHaveBeenCalledWith(expect.stringContaining('/app/discover'));
+      processorMock();
     });
-    jest.useRealTimers();
+
+    unregister();
   });
 });

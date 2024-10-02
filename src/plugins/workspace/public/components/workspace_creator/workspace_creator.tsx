@@ -12,13 +12,13 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
 import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
 import { getUseCaseFeatureConfig } from '../../../common/utils';
-import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { convertPermissionSettingsToPermissions } from '../workspace_form';
 import { WorkspaceDependServices, WorkspaceUseCase } from '../../types';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
 import { DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
+import { WorkspaceCreationPostProcessorService } from '../../services';
 
 export interface WorkspaceCreatorProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -92,20 +92,17 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
             }),
           });
           if (application && http) {
-            const newWorkspaceId = result.result.id;
+            const postProcessor = WorkspaceCreationPostProcessorService.getInstance().getProcessor();
             const useCaseId = getFirstUseCaseOfFeatureConfigs(attributes.features);
             const useCaseLandingAppId = availableUseCases?.find(({ id }) => useCaseId === id)
               ?.features[0].id;
-            // Redirect page after one second, leave one second time to show create successful toast.
-            window.setTimeout(() => {
-              window.location.href = formatUrlWithWorkspaceId(
-                application.getUrlForApp(useCaseLandingAppId || WORKSPACE_DETAIL_APP_ID, {
-                  absolute: true,
-                }),
-                newWorkspaceId,
-                http.basePath
-              );
-            }, 1000);
+
+            postProcessor({
+              workspaceId: result.result.id,
+              http,
+              application,
+              useCaseLandingAppId: useCaseLandingAppId || WORKSPACE_DETAIL_APP_ID,
+            });
           }
           return;
         } else {

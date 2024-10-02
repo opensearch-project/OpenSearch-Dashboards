@@ -57,7 +57,11 @@ import {
 } from './utils';
 import { recentWorkspaceManager } from './recent_workspace_manager';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
-import { UseCaseService } from './services/use_case_service';
+import {
+  UseCaseService,
+  WorkspaceCreationPostProcessor,
+  WorkspaceCreationPostProcessorService,
+} from './services';
 import { WorkspaceListCard } from './components/service_card';
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
 import { WorkspacePickerContent } from './components/workspace_picker_content/workspace_picker_content';
@@ -561,7 +565,10 @@ export class WorkspacePlugin
       });
     }
 
-    return {};
+    return {
+      registerWorkspaceCreationPostProcessor: (fn: WorkspaceCreationPostProcessor) =>
+        WorkspaceCreationPostProcessorService.getInstance().registerProcessor(fn),
+    };
   }
 
   public start(core: CoreStart, { contentManagement, navigation }: WorkspacePluginStartDeps) {
