@@ -58,8 +58,8 @@ export const FeatureCards = ({
         setMountPoint={setAppDescriptionControls}
       />
       <EuiPageContent hasShadow={false} hasBorder={false} color="transparent" paddingSize="m">
-        {groupedCardForDisplay.map((group) => (
-          <div key={group.category?.id}>
+        {groupedCardForDisplay.map((group, groupIndex) => (
+          <div key={group.category?.id || groupIndex}>
             {group.category && (
               <EuiTitle>
                 <h3>{group.category.label}</h3>
