@@ -1,0 +1,2 @@
+fix:
+- Fix dynamic uses of i18n and correct duplicate i18n identifiers in console plugin ([#8393](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8393))

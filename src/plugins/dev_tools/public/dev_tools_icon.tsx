@@ -67,6 +67,7 @@ export function DevToolsIcon({
           onClick={() => {
             setModalVisible(true);
           }}
+          color="text"
         />
       </EuiToolTip>
       {modalVisible ? (
@@ -123,7 +124,7 @@ export function DevToolsIcon({
                     className="devToolsCloseButton"
                     minWidth="unset"
                   >
-                    {i18n.translate('dev_tools.modal.close.label', {
+                    {i18n.translate('devTools.modal.close.label', {
                       defaultMessage: 'Close',
                     })}
                   </EuiSmallButton>

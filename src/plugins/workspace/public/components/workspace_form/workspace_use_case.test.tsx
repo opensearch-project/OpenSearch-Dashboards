@@ -5,33 +5,60 @@
 
 import React from 'react';
 import { fireEvent, render, waitFor, within } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
+
 import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
+import { coreMock } from '../../../../../core/public/mocks';
+import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { WorkspaceUseCase, WorkspaceUseCaseProps } from './workspace_use_case';
 import { WorkspaceFormErrors } from './types';
 
 const setup = (options?: Partial<WorkspaceUseCaseProps>) => {
+  const coreStartMock = coreMock.createStart();
   const onChangeMock = jest.fn();
   const formErrors: WorkspaceFormErrors = {};
-  const renderResult = render(
-    <WorkspaceUseCase
-      availableUseCases={[
-        { ...DEFAULT_NAV_GROUPS.observability, features: [] },
-        { ...DEFAULT_NAV_GROUPS['security-analytics'], features: [] },
-        { ...DEFAULT_NAV_GROUPS.essentials, features: [] },
-        { ...DEFAULT_NAV_GROUPS.search, features: [] },
-        {
-          id: 'system-use-case',
-          title: 'System use case',
-          description: 'System use case description',
-          systematic: true,
-          features: [],
+  coreStartMock.chrome.navGroup.getNavGroupsMap$.mockImplementation(
+    () =>
+      new BehaviorSubject({
+        [DEFAULT_NAV_GROUPS.observability.id]: {
+          ...DEFAULT_NAV_GROUPS.observability,
+          navLinks: [
+            { id: 'feature1', title: 'Feature 1' },
+            { id: 'feature2', title: 'Feature 2' },
+          ],
         },
-      ]}
-      value=""
-      onChange={onChangeMock}
-      formErrors={formErrors}
-      {...options}
-    />
+      })
+  );
+
+  coreStartMock.chrome.navLinks.getNavLinks$.mockImplementation(
+    () =>
+      new BehaviorSubject([
+        { id: 'feature1', title: 'Feature 1', baseUrl: '', href: '' },
+        { id: 'feature2', title: 'Feature 2', baseUrl: '', href: '' },
+      ])
+  );
+  const renderResult = render(
+    <OpenSearchDashboardsContextProvider services={coreStartMock}>
+      <WorkspaceUseCase
+        availableUseCases={[
+          { ...DEFAULT_NAV_GROUPS.observability, features: [] },
+          { ...DEFAULT_NAV_GROUPS['security-analytics'], features: [] },
+          { ...DEFAULT_NAV_GROUPS.essentials, features: [] },
+          { ...DEFAULT_NAV_GROUPS.search, features: [] },
+          {
+            id: 'system-use-case',
+            title: 'System use case',
+            description: 'System use case description',
+            systematic: true,
+            features: [],
+          },
+        ]}
+        value=""
+        onChange={onChangeMock}
+        formErrors={formErrors}
+        {...options}
+      />
+    </OpenSearchDashboardsContextProvider>
   );
   return {
     renderResult,
