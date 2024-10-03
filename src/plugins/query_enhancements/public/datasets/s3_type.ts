@@ -17,13 +17,7 @@ import {
   castSQLTypeToOSDFieldType,
 } from '../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
-import {
-  API,
-  DATASET,
-  S3_COMMENT_FIELD,
-  S3_PARTITION_FIELD,
-  handleQueryStatus,
-} from '../../common';
+import { API, DATASET, EXCLUDED_FIELD_TYPES, handleQueryStatus } from '../../common';
 import S3_ICON from '../assets/s3_mark.svg';
 
 export const s3TypeConfig: DatasetTypeConfig = {
@@ -102,9 +96,13 @@ export const s3TypeConfig: DatasetTypeConfig = {
     }
   },
 
-  fetchFields: async (services: IDataPluginServices, dataset: Dataset): Promise<DatasetField[]> => {
-    const { http } = services;
-    return fetchFields(http, dataset);
+  fetchFields: async (
+    dataset: Dataset,
+    services?: IDataPluginServices
+  ): Promise<DatasetField[]> => {
+    if (!services) return [];
+    const { http } = services!;
+    return await fetchFields(http, dataset);
   },
 
   supportedLanguages: (dataset: Dataset): string[] => {
@@ -267,7 +265,10 @@ export function mapResponseToFields(sqlOutput: {
   return sqlOutput.datarows
     .filter(
       (row) =>
-        row[1] && row[1] !== '' && row[0] !== S3_PARTITION_FIELD && row[2] !== S3_COMMENT_FIELD
+        row[1] &&
+        row[1] !== '' &&
+        row[0] !== EXCLUDED_FIELD_TYPES.PARTITION &&
+        row[2] !== EXCLUDED_FIELD_TYPES.COMMENT
     ) // Filter out rows with empty, comment or partition type
     .map((row) => {
       const [name, type, _] = row;

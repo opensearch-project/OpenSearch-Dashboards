@@ -42,7 +42,7 @@ export const Configurator = ({
   const indexPatternsService = getIndexPatterns();
   const type = queryString.getDatasetService().getType(baseDataset.type);
   const languages = type?.supportedLanguages(baseDataset) || [];
-  const [isFieldsLoading, setIsFieldsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [dataset, setDataset] = useState<Dataset>(baseDataset);
   const [timeFields, setTimeFields] = useState<DatasetField[]>([]);
@@ -80,7 +80,7 @@ export const Configurator = ({
           ? await queryString
               .getDatasetService()
               .getType(baseDataset.type)
-              ?.fetchFields(services, baseDataset)
+              ?.fetchFields(baseDataset, services)
           : [];
 
       const dateFields = datasetFields?.filter((field) => field.type === 'date');
@@ -199,18 +199,18 @@ export const Configurator = ({
         </EuiButton>
         <EuiButton
           onClick={async () => {
-            setIsFieldsLoading(true);
-            await queryString.getDatasetService().cacheDataset(services, dataset);
-            setIsFieldsLoading(false);
+            setIsLoading(true);
+            await queryString.getDatasetService().cacheDataset(dataset, services);
+            setIsLoading(false);
             onConfirm(dataset);
           }}
           fill
-          isLoading={isFieldsLoading}
-          disabled={submitDisabled || isFieldsLoading}
+          isLoading={isLoading}
+          disabled={submitDisabled || isLoading}
         >
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"
-            defaultMessage={isFieldsLoading ? 'Loading Fields' : 'Select Data'}
+            defaultMessage={isLoading ? 'Loading' : 'Select Data'}
           />
         </EuiButton>
       </EuiModalFooter>

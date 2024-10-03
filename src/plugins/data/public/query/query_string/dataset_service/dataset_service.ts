@@ -62,11 +62,11 @@ export class DatasetService {
     return this.defaultDataset;
   }
 
-  public async cacheDataset(services: IDataPluginServices, dataset: Dataset): Promise<void> {
+  public async cacheDataset(dataset: Dataset, services?: IDataPluginServices): Promise<void> {
     const type = this.getType(dataset.type);
     try {
       if (dataset && dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
-        const fetchedFields = await type?.fetchFields(services, dataset);
+        const fetchedFields = await type?.fetchFields(dataset, services);
         const spec = {
           id: dataset.id,
           title: dataset.title,
@@ -89,7 +89,7 @@ export class DatasetService {
         }
       }
     } catch (error) {
-      throw new Error(`Failed to load cacheDataset for dataset: ${dataset}`);
+      throw new Error(`Failed to load dataset: ${dataset.id}`);
     }
   }
 

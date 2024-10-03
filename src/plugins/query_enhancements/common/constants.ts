@@ -55,5 +55,7 @@ export const UI_SETTINGS = {
 
 export const ERROR_DETAILS = { GUARDRAILS_TRIGGERED: 'guardrails triggered' };
 
-export const S3_PARTITION_FIELD = '# Partition Information';
-export const S3_COMMENT_FIELD = 'comment';
+export const EXCLUDED_FIELD_TYPES = {
+  PARTITION: '# Partition Information',
+  COMMENT: 'comment',
+};

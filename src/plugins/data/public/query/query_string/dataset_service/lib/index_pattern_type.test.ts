@@ -8,7 +8,6 @@
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { DATA_STRUCTURE_META_TYPES, DataStructure, Dataset } from '../../../../../common';
 import * as services from '../../../../services';
-import { IDataPluginServices } from '../../../../types';
 import { indexPatternTypeConfig } from './index_pattern_type';
 
 jest.mock('../../../../services', () => ({
@@ -61,10 +60,7 @@ describe('indexPatternTypeConfig', () => {
     (services.getIndexPatterns as jest.Mock).mockReturnValue({ get: mockGet });
 
     const mockDataset: Dataset = { id: 'test-pattern', title: 'Test', type: 'INDEX_PATTERN' };
-    const result = await indexPatternTypeConfig.fetchFields(
-      mockServices as IDataPluginServices,
-      mockDataset
-    );
+    const result = await indexPatternTypeConfig.fetchFields(mockDataset);
 
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual({ name: 'field1', type: 'string' });
