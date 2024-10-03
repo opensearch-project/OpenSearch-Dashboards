@@ -30,6 +30,8 @@ export interface DatasetTypeConfig {
     icon: EuiIconProps;
     /** Optional tooltip text */
     tooltip?: string;
+    /** Optional requiresTimeFilter determines if a time filter is needed */
+    requiresTimeFilter?: boolean;
   };
   /**
    * Converts a DataStructure to a Dataset.

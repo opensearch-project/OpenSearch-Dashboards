@@ -17,7 +17,13 @@ import {
   castSQLTypeToOSDFieldType,
 } from '../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
-import { API, DATASET, EXCLUDED_FIELD_TYPES, handleQueryStatus } from '../../common';
+import {
+  API,
+  DATASET,
+  S3_PARTITION_INFO_COLUMN,
+  SQLQueryResponse,
+  handleQueryStatus,
+} from '../../common';
 import S3_ICON from '../assets/s3_mark.svg';
 
 export const s3TypeConfig: DatasetTypeConfig = {
@@ -26,6 +32,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
   meta: {
     icon: { type: S3_ICON },
     tooltip: 'Amazon S3 Connections',
+    requiresTimeFilter: false,
   },
 
   toDataset: (path: DataStructure[]): Dataset => {
@@ -43,7 +50,10 @@ export const s3TypeConfig: DatasetTypeConfig = {
             id: dataSource.id,
             title: dataSource.title,
             type: dataSource.type,
-            meta: table.meta as DataSourceMeta,
+            meta: {
+              ...table.meta,
+              requiresTimeFilter: s3TypeConfig.meta.requiresTimeFilter,
+            } as DataSourceMeta,
           }
         : DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE,
     };
@@ -255,29 +265,27 @@ const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<Data
 };
 
 // Function to process the input and map types using the new SQL to OSD mapping
-export function mapResponseToFields(sqlOutput: {
-  status: string;
-  schema: Array<{ name: string; type: string }>;
-  datarows: Array<Array<string | null>>;
-  total: number;
-  size: number;
-}): DatasetField[] {
-  return sqlOutput.datarows
-    .filter(
-      (row) =>
-        row[1] &&
-        row[1] !== '' &&
-        row[0] !== EXCLUDED_FIELD_TYPES.PARTITION &&
-        row[2] !== EXCLUDED_FIELD_TYPES.COMMENT
-    ) // Filter out rows with empty, comment or partition type
-    .map((row) => {
-      const [name, type, _] = row;
-      const sqlType = type as OPENSEARCH_SQL_FIELD_TYPES; // Cast the type to SQL_TYPES enum
-      return {
-        name: name as string,
+export function mapResponseToFields(sqlOutput: SQLQueryResponse): DatasetField[] {
+  const datasetFields: DatasetField[] = [];
+
+  for (const row of sqlOutput.datarows) {
+    const [colName, dataType] = row;
+
+    // Stop processing once we hit the partition info row
+    if (colName === S3_PARTITION_INFO_COLUMN) {
+      break;
+    }
+
+    // Only include rows with valid types
+    if (dataType && dataType !== '') {
+      const sqlType = dataType as OPENSEARCH_SQL_FIELD_TYPES;
+      datasetFields.push({
+        name: colName as string,
         type: castSQLTypeToOSDFieldType(sqlType),
-      };
-    });
+      });
+    }
+  }
+  return datasetFields;
 }
 
 const fetchFields = async (http: HttpSetup, dataset: Dataset): Promise<DatasetField[]> => {
@@ -312,6 +320,6 @@ const fetchFields = async (http: HttpSetup, dataset: Dataset): Promise<DatasetFi
     });
     return mapResponseToFields(fetchResponse);
   } catch (error) {
-    throw error;
+    throw new Error(`Failed to load table fields from ${dataset.title}: ${error}`);
   }
 };
