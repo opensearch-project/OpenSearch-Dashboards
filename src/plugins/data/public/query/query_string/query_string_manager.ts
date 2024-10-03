@@ -104,7 +104,7 @@ export class QueryStringManager {
   }
 
   public getUpdates$ = () => {
-    return this.query$.asObservable().pipe(skip(1));
+    return this.query$.asObservable().pipe();
   };
 
   public getQuery = (): Query => {

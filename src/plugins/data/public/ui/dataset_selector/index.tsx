@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import React from 'react';
 import { Dataset, Query, TimeRange } from '../../../common';
 import { DatasetSelector } from './dataset_selector';
@@ -18,8 +18,20 @@ const ConnectedDatasetSelector = ({ onSubmit }: ConnectedDatasetSelectorProps) =
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const queryString = services.data.query.queryString;
   const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(
-    () => queryString.getQuery().dataset || queryString.getDefaultQuery().dataset
+    () => queryString.getQuery().dataset
   );
+
+  useEffect(() => {
+    const subscription = queryString.getUpdates$().subscribe((query: Query) => {
+      if (query.dataset !== selectedDataset) {
+        setSelectedDataset(query.dataset);
+      }
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryString]);
 
   const handleDatasetChange = useCallback(
     (dataset?: Dataset) => {
