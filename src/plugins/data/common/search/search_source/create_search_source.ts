@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { QueryStringContract } from 'src/plugins/data/public/';
 import { migrateLegacyQuery } from './migrate_legacy_query';
 import { SearchSource, SearchSourceDependencies } from './search_source';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
@@ -52,9 +53,19 @@ import { SearchSourceFields } from './types';
  * @public */
 export const createSearchSource = (
   indexPatterns: IndexPatternsContract,
+  queryStringService: QueryStringContract,
   searchSourceDependencies: SearchSourceDependencies
 ) => async (searchSourceFields: SearchSourceFields = {}) => {
   const fields = { ...searchSourceFields };
+
+  // When we load a saved search and the saved search contains a non index pattern data source this step creates the temperary index patterns and sets the appriopriate query
+  if (
+    fields.query?.dataset &&
+    fields.query?.dataset?.type !== 'INDEX_PATTERN' &&
+    !indexPatterns.isPresentInCache(fields.query.dataset.id)
+  ) {
+    await queryStringService.getDatasetService().cacheDataset(fields.query?.dataset);
+  }
 
   // hydrating index pattern
   if (fields.index && typeof fields.index === 'string') {
