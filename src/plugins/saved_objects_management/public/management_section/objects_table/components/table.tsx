@@ -423,6 +423,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         {activeActionContents}
         <EuiSearchBar
           box={{ 'data-test-subj': 'savedObjectSearchBar' }}
+          compressed
           filters={filters}
           onChange={this.onChange}
           toolsRight={[
