@@ -6,7 +6,6 @@
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCheckbox,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,8 +18,9 @@ import {
   EuiSpacer,
   EuiTablePagination,
   EuiTitle,
+  Pager,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { SavedQuery } from '../../query';
 import { SavedQueryCard } from './saved_query_card';
 
@@ -42,13 +42,20 @@ export function OpenSavedQueryFlyout({
   onClose,
   onQueryOpen,
 }: OpenSavedQueryFlyoutProps) {
-  const [shouldRunOnOpen, setShouldRunOnOpen] = useState(false);
+  // const [shouldRunOnOpen, setShouldRunOnOpen] = useState(false);
   const [selectedQuery, setSelectedQuery] = useState<SavedQuery | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const pager = useRef(new Pager(savedQueries.length, itemsPerPage));
+  const [firstItemIndex, setFirstItemIndex] = useState(pager.current.getFirstItemIndex());
+  const [lastItemIndex, setLastItemIndex] = useState(pager.current.getLastItemIndex());
 
   const onChange: EuiSearchBarProps['onChange'] = ({ query, error }) => {
     if (!error) {
       setSearchQuery(query);
+      pager.current.goToPageIndex(0);
+      setFirstItemIndex(pager.current.getFirstItemIndex());
+      setLastItemIndex(pager.current.getLastItemIndex());
     }
   };
 
@@ -92,6 +99,9 @@ export function OpenSavedQueryFlyout({
     }
   );
 
+  pager.current.setTotalItems(filteredSavedQueries.length);
+  const queriesOnCurrentPage = filteredSavedQueries.slice(firstItemIndex, lastItemIndex + 1);
+
   return (
     <EuiFlyout onClose={onClose} hideCloseButton>
       <EuiFlyoutHeader hasBorder>
@@ -121,8 +131,8 @@ export function OpenSavedQueryFlyout({
           onChange={onChange}
         />
         <EuiSpacer />
-        {filteredSavedQueries.length > 0 ? (
-          filteredSavedQueries.map((query) => (
+        {queriesOnCurrentPage.length > 0 ? (
+          queriesOnCurrentPage.map((query) => (
             <SavedQueryCard
               key={query.id}
               savedQuery={queryMap[query.id].savedQuery}
@@ -136,7 +146,23 @@ export function OpenSavedQueryFlyout({
           <EuiEmptyPrompt content={'No saved query present'} />
         )}
         <EuiSpacer />
-        <EuiTablePagination />
+        <EuiTablePagination
+          itemsPerPageOptions={[5, 10, 20]}
+          itemsPerPage={itemsPerPage}
+          activePage={pager.current.getCurrentPageIndex()}
+          pageCount={pager.current.getTotalPages()}
+          onChangeItemsPerPage={(pageSize) => {
+            pager.current.setItemsPerPage(pageSize);
+            setItemsPerPage(pageSize);
+            setFirstItemIndex(pager.current.getFirstItemIndex());
+            setLastItemIndex(pager.current.getLastItemIndex());
+          }}
+          onChangePage={(pageIndex) => {
+            pager.current.goToPageIndex(pageIndex);
+            setFirstItemIndex(pager.current.getFirstItemIndex());
+            setLastItemIndex(pager.current.getLastItemIndex());
+          }}
+        />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
@@ -147,7 +173,7 @@ export function OpenSavedQueryFlyout({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={false}>
+              {/* <EuiFlexItem grow={false}>
                 <EuiCheckbox
                   id="run-saved-query-automatically"
                   checked={shouldRunOnOpen}
@@ -156,7 +182,7 @@ export function OpenSavedQueryFlyout({
                   }}
                   label={'Run automatically'}
                 />
-              </EuiFlexItem>
+              </EuiFlexItem> */}
               <EuiFlexItem grow={false}>
                 <EuiButton
                   disabled={!selectedQuery}
