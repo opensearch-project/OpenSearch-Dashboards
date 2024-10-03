@@ -173,7 +173,13 @@ export const WorkspaceUseCaseCard = ({
               <EuiFlexItem grow={false}>
                 <EuiSmallButtonEmpty
                   data-test-subj={`workspace-initial-useCaseCard-${useCase.id}-button-view`}
-                  onClick={handleClickCreateButton}
+                  onClick={() =>
+                    navigateToWorkspacePageWithUseCase(
+                      application,
+                      useCase.title,
+                      WORKSPACE_LIST_APP_ID
+                    )
+                  }
                 >
                   {i18n.translate('workspace.initial.useCaseCard.{useCaseId}.button.view', {
                     defaultMessage: 'View all',
@@ -249,13 +255,7 @@ export const WorkspaceUseCaseCard = ({
                   iconType="plus"
                   color="primary"
                   data-test-subj={`workspace-initial-useCaseCard-${useCase.id}-button-createWorkspace`}
-                  onClick={() => {
-                    navigateToWorkspacePageWithUseCase(
-                      application,
-                      useCase.title,
-                      WORKSPACE_CREATE_APP_ID
-                    );
-                  }}
+                  onClick={handleClickCreateButton}
                 >
                   {i18n.translate(
                     'workspace.initial.useCaseCard.{useCaseId}.button.createWorkspace',
