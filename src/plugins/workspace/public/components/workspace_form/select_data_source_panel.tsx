@@ -4,7 +4,15 @@
  */
 
 import React, { useState } from 'react';
-import { EuiSpacer, EuiFlexItem, EuiSmallButton, EuiFlexGroup, EuiPanel } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiFlexItem,
+  EuiSmallButton,
+  EuiFlexGroup,
+  EuiPanel,
+  EuiEmptyPrompt,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { SavedObjectsStart, CoreStart } from '../../../../../core/public';
 import { DataSourceConnection } from '../../../common/types';
@@ -55,28 +63,16 @@ export const SelectDataSourcePanel = ({
     handleUnassignDataSources([connection]);
   };
 
-  const renderTableContent = () => {
-    return (
-      <EuiPanel paddingSize="none" hasBorder={false}>
-        <DataSourceConnectionTable
-          isDashboardAdmin={showDataSourceManagement}
-          dataSourceConnections={assignedDataSourceConnections}
-          onUnlinkDataSource={handleSingleDataSourceUnAssign}
-          connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
-          onSelectionChange={setSelectedItems}
-        />
-      </EuiPanel>
-    );
-  };
-
-  const addOpenSearchConnectionsButton = (
+  const renderAddOpenSearchConnectionsButton = (
+    testingId = 'workspace-creator-dataSources-assign-button'
+  ) => (
     <EuiSmallButton
       iconType="plusInCircle"
       onClick={() => {
         setToggleIdSelected(AssociationDataSourceModalMode.OpenSearchConnections);
         setModalVisible(true);
       }}
-      data-test-subj="workspace-creator-dataSources-assign-button"
+      data-test-subj={testingId}
     >
       {i18n.translate('workspace.form.selectDataSourcePanel.addNew', {
         defaultMessage: 'Associate OpenSearch connections',
@@ -84,14 +80,16 @@ export const SelectDataSourcePanel = ({
     </EuiSmallButton>
   );
 
-  const addDirectQueryConnectionsButton = (
+  const renderAddDirectQueryConnectionsButton = (
+    testingId = 'workspace-creator-dqc-assign-button'
+  ) => (
     <EuiSmallButton
       iconType="plusInCircle"
       onClick={() => {
         setToggleIdSelected(AssociationDataSourceModalMode.DirectQueryConnections);
         setModalVisible(true);
       }}
-      data-test-subj="workspace-creator-dqc-assign-button"
+      data-test-subj={testingId}
     >
       {i18n.translate('workspace.form.selectDataSourcePanel.addNewDQCs', {
         defaultMessage: 'Associate direct query connections',
@@ -114,6 +112,60 @@ export const SelectDataSourcePanel = ({
     </EuiSmallButton>
   );
 
+  const renderTableContent = () => {
+    const message =
+      assignedDataSourceConnections.length === 0 ? (
+        <EuiEmptyPrompt
+          iconType="database"
+          iconColor="default"
+          title={
+            <EuiText size="s">
+              <h3>
+                {i18n.translate('workspaces.forms.selectDataSourcePanel.emptyTableTitle', {
+                  defaultMessage: 'Associated data sources will appear here',
+                })}
+              </h3>
+            </EuiText>
+          }
+          body={
+            <EuiText size="s">
+              {i18n.translate('workspaces.forms.selectDataSourcePanel.emptyTableDescription', {
+                defaultMessage: 'At least one data source is required to create a workspace.',
+              })}
+            </EuiText>
+          }
+          actions={
+            showDataSourceManagement && (
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem>
+                  {renderAddOpenSearchConnectionsButton(
+                    'workspace-creator-emptyPrompt-dataSources-assign-button'
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {renderAddDirectQueryConnectionsButton(
+                    'workspace-creator-emptyPrompt-dqc-assign-button'
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )
+          }
+        />
+      ) : undefined;
+    return (
+      <EuiPanel paddingSize="none" hasBorder={false}>
+        <DataSourceConnectionTable
+          isDashboardAdmin={showDataSourceManagement}
+          dataSourceConnections={assignedDataSourceConnections}
+          onUnlinkDataSource={handleSingleDataSourceUnAssign}
+          connectionType={AssociationDataSourceModalMode.OpenSearchConnections}
+          onSelectionChange={setSelectedItems}
+          tableProps={{ message }}
+        />
+      </EuiPanel>
+    );
+  };
+
   return (
     <div>
       <EuiSpacer size="m" />
@@ -124,14 +176,14 @@ export const SelectDataSourcePanel = ({
             <EuiFlexItem grow={false}>{removeButton}</EuiFlexItem>
           )}
         {showDataSourceManagement && (
-          <EuiFlexItem grow={false}>{addOpenSearchConnectionsButton}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{renderAddOpenSearchConnectionsButton()}</EuiFlexItem>
         )}
         {showDataSourceManagement && (
-          <EuiFlexItem grow={false}>{addDirectQueryConnectionsButton}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{renderAddDirectQueryConnectionsButton()}</EuiFlexItem>
         )}
       </EuiFlexGroup>
-      {assignedDataSourceConnections.length > 0 && <EuiSpacer size="m" />}
-      {assignedDataSourceConnections.length > 0 && renderTableContent()}
+      <EuiSpacer size="m" />
+      {renderTableContent()}
       {modalVisible && chrome && (
         <AssociationDataSourceModal
           savedObjects={savedObjects}

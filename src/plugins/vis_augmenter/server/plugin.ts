@@ -53,23 +53,23 @@ export class VisAugmenterPlugin
     if (isAugmentationEnabled) {
       core.uiSettings.register({
         [PLUGIN_AUGMENTATION_ENABLE_SETTING]: {
-          name: i18n.translate('visualization.enablePluginAugmentationTitle', {
+          name: i18n.translate('visAugmenter.enablePluginAugmentationTitle', {
             defaultMessage: 'Enable plugin augmentation',
           }),
           value: true,
-          description: i18n.translate('visualization.enablePluginAugmentationText', {
+          description: i18n.translate('visAugmenter.enablePluginAugmentationText', {
             defaultMessage: 'Plugin functionality can be accessed from line chart visualizations',
           }),
           category: ['visualization'],
           schema: schema.boolean(),
         },
         [PLUGIN_AUGMENTATION_MAX_OBJECTS_SETTING]: {
-          name: i18n.translate('visualization.enablePluginAugmentation.maxPluginObjectsTitle', {
+          name: i18n.translate('visAugmenter.enablePluginAugmentation.maxPluginObjectsTitle', {
             defaultMessage: 'Max number of associated augmentations',
           }),
           value: 10,
           description: i18n.translate(
-            'visualization.enablePluginAugmentation.maxPluginObjectsText',
+            'visAugmenter.enablePluginAugmentation.maxPluginObjectsText',
             {
               defaultMessage:
                 'Associating more than 10 plugin resources per visualization can lead to performance ' +

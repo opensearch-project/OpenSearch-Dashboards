@@ -41,6 +41,7 @@ import {
   mergeConfigs,
   ListrContext,
 } from './i18n/tasks';
+import { DEFAULT_DIRS_WITH_RC_FILES } from './i18n/constants';
 
 const skipOnNoTranslations = (context: ListrContext) =>
   !context.config?.translations?.length && 'No translations found.';
@@ -83,7 +84,7 @@ run(
       throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --fix can't have a value`);
     }
 
-    const srcPaths = Array().concat(path || ['./src', './packages']);
+    const srcPaths = Array().concat(path || DEFAULT_DIRS_WITH_RC_FILES);
 
     const list = new Listr<ListrContext>(
       [
@@ -104,7 +105,6 @@ run(
         },
         {
           title: 'Validating Default Messages',
-          skip: skipOnNoTranslations,
           task: ({ config }) => {
             return new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true });
           },

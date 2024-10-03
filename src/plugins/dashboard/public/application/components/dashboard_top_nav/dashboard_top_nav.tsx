@@ -147,7 +147,7 @@ const TopNav = ({
         className={isFullScreenMode ? 'osdTopNavMenu-isFullScreen' : undefined}
         screenTitle={
           currentAppState.title ||
-          i18n.translate('discover.savedSearch.newTitle', {
+          i18n.translate('dashboard.savedSearch.newTitle', {
             defaultMessage: 'New dashboard',
           })
         }

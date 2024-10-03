@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { navigateToWorkspaceDetail } from './workspace';
+import { navigateToWorkspaceDetail, navigateToWorkspaceListWithUseCase } from './workspace';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 jest.mock('../../../../../core/public/utils');
 
@@ -60,6 +60,18 @@ describe('workspace utils', () => {
         ''
       );
       expect(mockNavigateToUrl).not.toBeCalled();
+    });
+  });
+
+  describe('navigateToWorkspaceListWithUseCase', () => {
+    it('should redirect if newUrl is returned', () => {
+      coreStartMock.application.getUrlForApp.mockImplementation(
+        () => 'localhost:5601/app/workspace_list'
+      );
+      navigateToWorkspaceListWithUseCase(coreStartMock.application, 'Search');
+      expect(mockNavigateToUrl).toHaveBeenCalledWith(
+        'localhost:5601/app/workspace_list#/?useCase=Search'
+      );
     });
   });
 });

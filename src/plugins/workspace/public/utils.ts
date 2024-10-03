@@ -15,8 +15,6 @@ import {
   ApplicationStart,
   HttpSetup,
   NotificationsStart,
-} from '../../../core/public';
-import {
   App,
   AppCategory,
   AppNavLinkStatus,
@@ -24,6 +22,7 @@ import {
   PublicAppInfo,
   WorkspaceObject,
   WorkspaceAvailability,
+  DEFAULT_NAV_GROUPS,
 } from '../../../core/public';
 
 import { WORKSPACE_DETAIL_APP_ID, USE_CASE_PREFIX } from '../common/constants';
@@ -368,15 +367,17 @@ export const convertNavGroupToWorkspaceUseCase = ({
   type,
   order,
   icon,
-}: NavGroupItemInMap): WorkspaceUseCase => ({
-  id,
-  title,
-  description,
-  features: navLinks.map((item) => ({ id: item.id, title: item.title })),
-  systematic: type === NavGroupType.SYSTEM || id === ALL_USE_CASE_ID,
-  order,
-  icon,
-});
+}: NavGroupItemInMap): WorkspaceUseCase => {
+  return {
+    id,
+    title,
+    description,
+    features: navLinks.map((navLink) => ({ id: navLink.id, title: navLink.title })),
+    systematic: type === NavGroupType.SYSTEM || id === ALL_USE_CASE_ID,
+    order,
+    icon,
+  };
+};
 
 const compareFeatures = (
   features1: WorkspaceUseCaseFeature[],
@@ -429,6 +430,23 @@ export function enrichBreadcrumbsWithWorkspace(
     prependWorkspaceToBreadcrumbs(core, currentWorkspace, navGroupsMap, registeredUseCases);
   });
 }
+
+export const extractUseCaseTitleFromFeatures = (
+  registeredUseCases: WorkspaceUseCase[],
+  features: string[]
+) => {
+  if (!features || features.length === 0) {
+    return '';
+  }
+  const useCaseId = getFirstUseCaseOfFeatureConfigs(features);
+  const usecase =
+    useCaseId === DEFAULT_NAV_GROUPS.all.id
+      ? DEFAULT_NAV_GROUPS.all
+      : registeredUseCases?.find(({ id }) => id === useCaseId);
+  if (usecase) {
+    return usecase.title;
+  }
+};
 
 /**
  * prepend workspace or its use case to breadcrumbs
