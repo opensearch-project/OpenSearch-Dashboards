@@ -200,7 +200,7 @@ export const WorkspaceUseCaseFlyout = ({
                 <EuiText size="s">
                   {description}
                   <br />
-                  {displayedFeatures && displayedFeatures.length > 0 && (
+                  {Array.isArray(displayedFeatures) && displayedFeatures.length > 0 && (
                     <>
                       {i18n.translate('workspace.forms.useCaseFlyout.featuresIncluded', {
                         defaultMessage: 'Features included:',
