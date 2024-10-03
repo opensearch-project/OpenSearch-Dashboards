@@ -11,8 +11,8 @@ import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import classNames from 'classnames';
 import { WorkspacesStart } from 'src/core/public/workspace';
-import { ChromeNavControl, ChromeNavLink } from '../..';
 import { NavGroupType } from '../../../../types';
+import { ChromeNavControl, ChromeNavLink, SearchStrategy } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { createEuiListItem } from './nav_link';
@@ -27,6 +27,7 @@ import { ALL_USE_CASE_ID, DEFAULT_APP_CATEGORIES } from '../../../../../core/uti
 import { CollapsibleNavTop } from './collapsible_nav_group_enabled_top';
 import { HeaderNavControls } from './header_nav_controls';
 import { NavGroups } from './collapsible_nav_groups';
+import { GlobalSearchBar, GlobalSearchBarIcon } from './global_search_bar';
 
 export interface CollapsibleNavGroupEnabledProps {
   appId$: InternalApplicationStart['currentAppId$'];
@@ -47,6 +48,7 @@ export interface CollapsibleNavGroupEnabledProps {
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
   capabilities: InternalApplicationStart['capabilities'];
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
+  globalSearchers?: SearchStrategy[];
 }
 
 const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
@@ -70,6 +72,7 @@ export function CollapsibleNavGroupEnabled({
   setCurrentNavGroup,
   capabilities,
   collapsibleNavHeaderRender,
+  globalSearchers,
   ...observables
 }: CollapsibleNavGroupEnabledProps) {
   const allNavLinks = useObservable(observables.navLinks$, []);
@@ -212,6 +215,23 @@ export function CollapsibleNavGroupEnabled({
               shouldShrinkNavigation={!isNavOpen}
               onClickShrink={closeNav}
             />
+          </EuiPanel>
+        )}
+        {!isNavOpen ? (
+          <div className="searchBarIcon euiHeaderSectionItemButton">
+            {globalSearchers && <GlobalSearchBarIcon searchStrategies={globalSearchers} />}
+          </div>
+        ) : (
+          <EuiPanel
+            hasBorder={false}
+            borderRadius="none"
+            paddingSize="s"
+            hasShadow={false}
+            className="searchBar-wrapper"
+            color="transparent"
+            style={{ flexGrow: 0 }}
+          >
+            {globalSearchers && <GlobalSearchBar searchStrategies={globalSearchers} />}
           </EuiPanel>
         )}
         {!isNavOpen ? null : (

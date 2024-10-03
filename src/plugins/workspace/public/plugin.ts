@@ -75,6 +75,8 @@ import {
 } from './services';
 import { AddCollaboratorsModal } from './components/add_collaborators_modal';
 import { registerDefaultCollaboratorTypes } from './register_default_collaborator_types';
+import { SearchObjectTypes } from '../../../core/public';
+import { searchPageWithInWorkspace } from './components/global_search/search_pages';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -542,6 +544,13 @@ export class WorkspacePlugin
       },
     ]);
 
+    core.chrome.globalSearch.registerSearchStrategy({
+      id: 'workspaceSearchStrategy',
+      type: SearchObjectTypes.PAGES,
+      doSearch: async (query: string) =>
+        searchPageWithInWorkspace(query, this.registeredUseCases$, this.coreStart),
+    });
+
     if (workspaceId) {
       core.chrome.registerCollapsibleNavHeader(() => {
         if (!this.coreStart) {
@@ -566,6 +575,7 @@ export class WorkspacePlugin
         AddCollaboratorsModal,
       },
     };
+    return {};
   }
 
   public start(core: CoreStart, { contentManagement, navigation }: WorkspacePluginStartDeps) {

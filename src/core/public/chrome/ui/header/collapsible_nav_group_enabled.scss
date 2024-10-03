@@ -114,4 +114,16 @@
     padding: 0 $euiSizeS;
     padding-left: $euiSize;
   }
+
+  .searchBar-wrapper {
+    padding: $euiSize;
+    padding-top: $euiSizeS;
+    margin-right: $euiSize;
+  }
+
+  .searchBarIcon {
+    position: fixed;
+    top: $ouiHeaderChildSize;
+    left: 0;
+  }
 }

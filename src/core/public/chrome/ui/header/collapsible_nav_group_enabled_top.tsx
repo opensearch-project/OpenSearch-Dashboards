@@ -19,7 +19,6 @@ import { InternalApplicationStart } from 'src/core/public/application';
 import { createEuiListItem } from './nav_link';
 import { NavGroupItemInMap } from '../../nav_group';
 import { ChromeNavLink } from '../../nav_links';
-
 export interface CollapsibleNavTopProps {
   collapsibleNavHeaderRender?: () => JSX.Element | null;
   homeLink?: ChromeNavLink;

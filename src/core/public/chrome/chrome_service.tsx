@@ -66,6 +66,11 @@ import {
   ChromeNavGroupServiceSetupContract,
   ChromeNavGroupServiceStartContract,
 } from './nav_group';
+import {
+  GlobalSearchService,
+  GlobalSearchServiceSetupContract,
+  GlobalSearchServiceStartContract,
+} from './global_search';
 
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -136,6 +141,7 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
   private readonly navGroup = new ChromeNavGroupService();
+  private readonly globalSearch = new GlobalSearchService();
   private useUpdatedHeader = false;
   private updatedHeaderSubscription: Subscription | undefined;
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
@@ -198,6 +204,7 @@ export class ChromeService {
 
   public setup({ uiSettings }: SetupDeps): ChromeSetup {
     const navGroup = this.navGroup.setup({ uiSettings });
+    const globalSearch = this.globalSearch.setup();
     return {
       registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => {
         if (this.collapsibleNavHeaderRender) {
@@ -209,6 +216,7 @@ export class ChromeService {
         this.collapsibleNavHeaderRender = render;
       },
       navGroup,
+      globalSearch,
     };
   }
 
@@ -254,6 +262,8 @@ export class ChromeService {
       breadcrumbsEnricher$,
       workspaces,
     });
+
+    const globalSearch = this.globalSearch.start();
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -346,6 +356,7 @@ export class ChromeService {
       docTitle,
       logos,
       navGroup,
+      globalSearch,
 
       getHeaderComponent: () => (
         <Header
@@ -388,6 +399,7 @@ export class ChromeService {
           workspaceList$={workspaces.workspaceList$}
           currentWorkspace$={workspaces.currentWorkspace$}
           useUpdatedHeader={this.useUpdatedHeader}
+          globalSearchers={globalSearch.getAllSearchStrategies()}
         />
       ),
 
@@ -476,6 +488,7 @@ export class ChromeService {
 export interface ChromeSetup {
   registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => void;
   navGroup: ChromeNavGroupServiceSetupContract;
+  globalSearch: GlobalSearchServiceSetupContract;
 }
 
 /**
@@ -517,6 +530,8 @@ export interface ChromeStart {
   navGroup: ChromeNavGroupServiceStartContract;
   /** {@inheritdoc Logos} */
   readonly logos: Logos;
+  /** {@inheritdoc GlobalSearchService} */
+  globalSearch: GlobalSearchServiceStartContract;
 
   /**
    * Sets the current app's title
