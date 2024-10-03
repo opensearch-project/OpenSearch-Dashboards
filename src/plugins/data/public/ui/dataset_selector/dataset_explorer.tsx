@@ -117,13 +117,13 @@ export const DatasetExplorer = ({
                   <EuiText size="s">
                     <FormattedMessage
                       id="data.explorer.datasetSelector.advancedSelector.lastUpdatedTime"
-                      defaultMessage={'Last updated at: {timestamp}. '}
+                      defaultMessage="Last updated at: {timestamp}."
                       values={{
                         timestamp: moment(queryString.getDatasetService().getLastCacheTime())
                           .format(uiSettings.get('dateFormat'))
                           .toString(),
                       }}
-                    />
+                    />{' '}
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

@@ -1,0 +1,2 @@
+fix:
+- Fix dynamic uses of i18n in opensearchDashboardsReact plugin ([#8404](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8404))

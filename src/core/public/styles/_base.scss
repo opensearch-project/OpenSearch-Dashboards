@@ -83,6 +83,8 @@ $euiCollapsibleNavWidth: $euiSize * 20;
 .euiFlyoutBody .euiFlyoutBody__overflow.euiFlyoutBody__overflow--hasBanner,
 .euiModalBody .euiModalBody__overflow,
 .euiSelectableList__list,
+// From @elastic/charts: any ruleset containing mask-image
+.echLegend .echLegendListContainer,
 // For OSD: consumers of eui?ScrollWithShadows
 .osdQueryBar__textarea:not(:focus):not(:invalid),
 .osdSavedQueryManagement__list,
