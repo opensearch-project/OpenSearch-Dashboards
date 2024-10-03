@@ -20,6 +20,16 @@ import { DataSourceConnectionType } from '../../../common/types';
 import * as utils from '../../utils';
 import { WorkspaceCreationPostProcessorService } from '../../services';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({
+    search: '',
+    pathname: '',
+    hash: '',
+    state: undefined,
+  }),
+}));
+
 const workspaceClientCreate = jest
   .fn()
   .mockReturnValue({ result: { id: 'successResult' }, success: true });
