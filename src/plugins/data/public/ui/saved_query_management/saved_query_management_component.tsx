@@ -56,6 +56,7 @@ import {
   OpenSavedQueryFlyout,
   OpenSavedQueryFlyoutProps,
 } from '../saved_query_flyouts/open_saved_query_flyout';
+import { SavedQueryMeta } from '../saved_query_form';
 
 const perPage = 50;
 interface Props {
@@ -63,23 +64,25 @@ interface Props {
   loadedSavedQuery?: SavedQuery;
   savedQueryService: SavedQueryService;
   useNewSavedQueryUI?: boolean;
-  onSave: () => void;
-  onSaveAsNew: () => void;
+  onInitiateSave: () => void;
+  onInitiateSaveAsNew: () => void;
   onLoad: OpenSavedQueryFlyoutProps['onQueryOpen'];
   onClearSavedQuery: () => void;
   closeMenuPopover: () => void;
+  saveQuery: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
 }
 
 export function SavedQueryManagementComponent({
   showSaveQuery,
   loadedSavedQuery,
-  onSave,
-  onSaveAsNew,
+  onInitiateSave,
+  onInitiateSaveAsNew,
   onLoad,
   onClearSavedQuery,
   savedQueryService,
   closeMenuPopover,
   useNewSavedQueryUI,
+  saveQuery,
 }: Props) {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
@@ -117,13 +120,13 @@ export function SavedQueryManagementComponent({
 
   const handleSave = useCallback(() => {
     handleClosePopover();
-    onSave();
-  }, [handleClosePopover, onSave]);
+    onInitiateSave();
+  }, [handleClosePopover, onInitiateSave]);
 
   const handleSaveAsNew = useCallback(() => {
     handleClosePopover();
-    onSaveAsNew();
-  }, [handleClosePopover, onSaveAsNew]);
+    onInitiateSaveAsNew();
+  }, [handleClosePopover, onInitiateSaveAsNew]);
 
   const handleSelect = useCallback(
     (savedQueryToSelect) => {
@@ -212,9 +215,17 @@ export function SavedQueryManagementComponent({
           iconType={'save'}
           onClick={() => {
             closeMenuPopover();
-            // Opent the save flyout with the save stuff inside it
             const saveQueryFlyout = overlays?.openFlyout(
-              toMountPoint(<SaveQueryFlyout onClose={() => saveQueryFlyout?.close().then()} />)
+              toMountPoint(
+                <SaveQueryFlyout
+                  savedQueryService={savedQueryService}
+                  onClose={() => saveQueryFlyout?.close().then()}
+                  onSave={saveQuery}
+                  showFilterOption={true}
+                  showTimeFilterOption={true}
+                  savedQuery={loadedSavedQuery?.attributes}
+                />
+              )
             );
           }}
         />
@@ -223,7 +234,6 @@ export function SavedQueryManagementComponent({
           iconType={'folderOpen'}
           onClick={() => {
             closeMenuPopover();
-            // Opent the existing saved query flyout
             const openSavedQueryFlyout = overlays?.openFlyout(
               toMountPoint(
                 <OpenSavedQueryFlyout

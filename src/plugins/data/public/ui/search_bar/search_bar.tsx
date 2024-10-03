@@ -332,7 +332,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       if (this.props.onSaved) {
         this.props.onSaved(response);
       }
-    } catch (error) {
+    } catch (error: any) {
       this.services.notifications.toasts.addDanger(
         `An error occured while saving your query: ${error.message}`
       );
@@ -445,13 +445,14 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             indexPatterns={this.props.indexPatterns!}
             showSaveQuery={this.props.showSaveQuery}
             loadedSavedQuery={this.props.savedQuery}
-            onSave={this.onInitiateSave}
-            onSaveAsNew={this.onInitiateSaveNew}
+            onInitiateSave={this.onInitiateSave}
+            onInitiateSaveAsNew={this.onInitiateSaveNew}
             onLoad={this.onLoadSavedQuery}
             savedQueryService={this.savedQueryService}
             onClearSavedQuery={this.props.onClearSavedQuery}
             useSaveQueryMenu={useSaveQueryMenu}
             isQueryEditorControl={isQueryEditorControl}
+            saveQuery={this.onSave}
           />
         )
       );
@@ -566,6 +567,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
+            formUiType="Modal"
             savedQuery={this.props.savedQuery ? this.props.savedQuery.attributes : undefined}
             savedQueryService={this.savedQueryService}
             onSave={this.onSave}
@@ -576,6 +578,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         ) : null}
         {this.state.showSaveNewQueryModal ? (
           <SaveQueryForm
+            formUiType="Modal"
             savedQueryService={this.savedQueryService}
             onSave={(savedQueryMeta) => this.onSave(savedQueryMeta, true)}
             onClose={() => this.setState({ showSaveNewQueryModal: false })}

@@ -55,12 +55,12 @@ import {
   unpinFilter,
   UI_SETTINGS,
   IIndexPattern,
-  isQueryStringFilter,
 } from '../../../common';
 import { FilterEditor } from './filter_editor';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { SavedQueryManagementComponent } from '../saved_query_management';
 import { SavedQuery, SavedQueryService } from '../../query';
+import { SavedQueryMeta } from '../saved_query_form';
 
 interface Props {
   intl: InjectedIntl;
@@ -69,14 +69,15 @@ interface Props {
   savedQueryService: SavedQueryService;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
-  onSave: () => void;
-  onSaveAsNew: () => void;
+  onInitiateSave: () => void;
+  onInitiateSaveAsNew: () => void;
   onLoad: (savedQuery: SavedQuery) => void;
   onClearSavedQuery: () => void;
   onFiltersUpdated?: (filters: Filter[]) => void;
   loadedSavedQuery?: SavedQuery;
   useSaveQueryMenu: boolean;
   isQueryEditorControl: boolean;
+  saveQuery: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
 }
 const maxFilterWidth = 600;
 
@@ -287,8 +288,8 @@ const FilterOptionsUI = (props: Props) => {
   ];
 
   const handleSave = () => {
-    if (props.onSave) {
-      props.onSave();
+    if (props.onInitiateSave) {
+      props.onInitiateSave();
     }
     setIsPopoverOpen(false);
   };
@@ -299,8 +300,8 @@ const FilterOptionsUI = (props: Props) => {
         <SavedQueryManagementComponent
           showSaveQuery={props.showSaveQuery}
           loadedSavedQuery={props.loadedSavedQuery}
-          onSave={handleSave}
-          onSaveAsNew={props.onSaveAsNew!}
+          onInitiateSave={handleSave}
+          onInitiateSaveAsNew={props.onInitiateSaveAsNew!}
           onLoad={props.onLoad!}
           savedQueryService={props.savedQueryService!}
           onClearSavedQuery={props.onClearSavedQuery!}
@@ -309,6 +310,7 @@ const FilterOptionsUI = (props: Props) => {
           }}
           key={'savedQueryManagement'}
           useNewSavedQueryUI={useNewSavedQueryUI}
+          saveQuery={props.saveQuery}
         />,
       ]}
       data-test-subj="save-query-panel"
