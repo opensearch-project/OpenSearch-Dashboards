@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
+import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceUseCase } from '../../types';
 import { WorkspaceUseCaseCard } from './workspace_use_case_card';
@@ -226,7 +226,9 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
             <EuiText size="s">
               <EuiLink
                 style={{ fontWeight: 'normal' }}
-                href={application.getUrlForApp('workspace_list', { absolute: false })}
+                onClick={() => {
+                  application.navigateToApp(WORKSPACE_LIST_APP_ID);
+                }}
               >
                 {i18n.translate('workspace.initial.button.view', {
                   defaultMessage: 'View all workspaces',
