@@ -39,9 +39,9 @@ import { allValuesFrom } from '../common';
 const readFile$ = Rx.bindNodeCallback<Fs.PathLike, Buffer>(Fs.readFile);
 
 /**
- * get mtimes of referenced paths concurrently, limit concurrency to 100
+ * Get content hashes of referenced paths concurrently, with at most 100 concurrent files
  */
-export async function getMtimes(paths: Iterable<string>): Promise<Map<string, string>> {
+export async function getHashes(paths: Iterable<string>): Promise<Map<string, string>> {
   return new Map(
     await allValuesFrom(
       Rx.from(paths).pipe(

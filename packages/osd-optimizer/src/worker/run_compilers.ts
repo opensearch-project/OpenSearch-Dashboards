@@ -58,7 +58,7 @@ import {
   isConcatenatedModule,
   getModulePath,
 } from './webpack_helpers';
-import { getMtimes } from '../optimizer/get_mtimes';
+import { getHashes } from '../optimizer/get_hashes';
 
 const PLUGIN_NAME = '@osd/optimizer';
 
@@ -180,12 +180,12 @@ const observeCompiler = (
 
       const files = Array.from(referencedFiles).sort(ascending((p) => p));
 
-      getMtimes(files)
-        .then((mtimes) => {
+      getHashes(files)
+        .then((hashes) => {
           bundle.cache.set({
             bundleRefExportIds,
             optimizerCacheKey: workerConfig.optimizerCacheKey,
-            cacheKey: bundle.createCacheKey(files, mtimes),
+            cacheKey: bundle.createCacheKey(files, hashes),
             moduleCount,
             workUnits,
             files,

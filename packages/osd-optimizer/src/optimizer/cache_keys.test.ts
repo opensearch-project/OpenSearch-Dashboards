@@ -45,8 +45,8 @@ jest.mock('./get_changes.ts', () => ({
     ]),
 }));
 
-jest.mock('./get_mtimes.ts', () => ({
-  getMtimes: async (paths: string[]) => new Map(paths.map((path) => [path, '<content hash>'])),
+jest.mock('./get_hashes.ts', () => ({
+  getHashes: async (paths: string[]) => new Map(paths.map((path) => [path, '<content hash>'])),
 }));
 
 jest.mock('execa');
@@ -88,11 +88,11 @@ describe('getOptimizerCacheKey()', () => {
               "deletedPaths": Array [
                 "/foo/bar/c",
               ],
-              "lastCommit": "<last commit sha>",
-              "modifiedTimes": Object {
+              "fileHashes": Object {
                 "/foo/bar/a": "<content hash>",
                 "/foo/bar/b": "<content hash>",
               },
+              "lastCommit": "<last commit sha>",
               "workerConfig": Object {
                 "browserslistEnv": "dev",
                 "dist": false,
