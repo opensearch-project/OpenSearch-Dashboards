@@ -175,7 +175,9 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
             </div>
             <EuiText size="s">
               {i18n.translate('workspace.initial.createWorkspace.describe', {
-                defaultMessage: 'Collaborate on use-case based projects with workspaces.',
+                defaultMessage:
+                  'Collaborate on use-case based projects with workspaces. {hasWorkspace, select, true { Select a workspace to get started.} false {}}',
+                values: { hasWorkspace: workspaceList.length > 0 },
               })}
             </EuiText>
           </EuiFlexItem>
@@ -189,7 +191,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
-          <EuiFlexItem grow={2}>
+          <EuiFlexItem grow={false}>
             <EuiText size="s" style={{ display: 'flex', alignItems: 'center' }}>
               <EuiIcon type="reporter" size="s" color="primary" />
               &nbsp;
@@ -202,11 +204,12 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
                   defaultMessage: 'Learn more from documentation',
                 })}
               </EuiLink>
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={6}>
-            <EuiText size="s" style={{ display: 'flex', alignItems: 'center' }}>
-              <EuiIcon type="dashboardApp" size="s" color="primary" />
+              <EuiIcon
+                type="dashboardApp"
+                size="s"
+                color="primary"
+                style={{ marginLeft: '16px' }}
+              />
               &nbsp;
               <EuiLink
                 href="https://playground.opensearch.org/"
@@ -219,8 +222,8 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
               </EuiLink>
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <EuiText size="s" textAlign="right">
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">
               <EuiLink
                 style={{ fontWeight: 'normal' }}
                 href={application.getUrlForApp('workspace_list', { absolute: false })}

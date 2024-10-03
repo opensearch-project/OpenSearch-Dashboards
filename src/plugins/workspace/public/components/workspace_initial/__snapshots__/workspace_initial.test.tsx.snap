@@ -60,7 +60,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                   <div
                     class="euiText euiText--small"
                   >
-                    Collaborate on use-case based projects with workspaces.
+                    Collaborate on use-case based projects with workspaces. 
                   </div>
                 </div>
                 <div
@@ -624,7 +624,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                 class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrow2"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
                     class="euiText euiText--small"
@@ -654,18 +654,10 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                         (opens in a new tab or window)
                       </span>
                     </a>
-                  </div>
-                </div>
-                <div
-                  class="euiFlexItem euiFlexItem--flexGrow6"
-                >
-                  <div
-                    class="euiText euiText--small"
-                    style="display: flex; align-items: center;"
-                  >
                     <span
                       color="primary"
                       data-euiicon-type="dashboardApp"
+                      style="margin-left: 16px;"
                     />
                      
                     <a
@@ -690,22 +682,18 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrow1"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
                     class="euiText euiText--small"
                   >
-                    <div
-                      class="euiTextAlign euiTextAlign--right"
+                    <button
+                      class="euiLink euiLink--primary"
+                      style="font-weight: normal;"
+                      type="button"
                     >
-                      <button
-                        class="euiLink euiLink--primary"
-                        style="font-weight: normal;"
-                        type="button"
-                      >
-                        View all workspaces
-                      </button>
-                    </div>
+                      View all workspaces
+                    </button>
                   </div>
                 </div>
               </div>
@@ -791,7 +779,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                   <div
                     class="euiText euiText--small"
                   >
-                    Collaborate on use-case based projects with workspaces.
+                    Collaborate on use-case based projects with workspaces. 
                   </div>
                 </div>
                 <div
@@ -1226,7 +1214,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                 class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrow2"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
                     class="euiText euiText--small"
@@ -1256,18 +1244,10 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                         (opens in a new tab or window)
                       </span>
                     </a>
-                  </div>
-                </div>
-                <div
-                  class="euiFlexItem euiFlexItem--flexGrow6"
-                >
-                  <div
-                    class="euiText euiText--small"
-                    style="display: flex; align-items: center;"
-                  >
                     <span
                       color="primary"
                       data-euiicon-type="dashboardApp"
+                      style="margin-left: 16px;"
                     />
                      
                     <a
@@ -1292,22 +1272,18 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrow1"
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
                   <div
                     class="euiText euiText--small"
                   >
-                    <div
-                      class="euiTextAlign euiTextAlign--right"
+                    <button
+                      class="euiLink euiLink--primary"
+                      style="font-weight: normal;"
+                      type="button"
                     >
-                      <button
-                        class="euiLink euiLink--primary"
-                        style="font-weight: normal;"
-                        type="button"
-                      >
-                        View all workspaces
-                      </button>
-                    </div>
+                      View all workspaces
+                    </button>
                   </div>
                 </div>
               </div>
