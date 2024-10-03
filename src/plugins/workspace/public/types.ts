@@ -20,7 +20,6 @@ export type Services = CoreStart & {
 export interface WorkspaceUseCaseFeature {
   id: string;
   title?: string;
-  details?: string[];
 }
 
 export interface WorkspaceUseCase {

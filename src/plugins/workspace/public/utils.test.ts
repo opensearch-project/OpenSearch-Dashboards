@@ -37,23 +37,10 @@ const useCaseMock = {
   id: 'foo',
   title: 'Foo',
   description: 'Foo description',
-  features: [{ id: 'bar' }, { id: 'baz', title: 'Baz', details: ['Qux'] }],
+  features: [{ id: 'bar' }, { id: 'baz', title: 'Baz' }],
   systematic: false,
   order: 1,
 };
-const allNavLinksMock: ChromeNavLink[] = [
-  { id: 'foo', title: 'Foo', baseUrl: '', href: '' },
-  { id: 'bar', title: 'Bar', baseUrl: '', href: '' },
-  { id: 'baz', title: 'Baz', baseUrl: '', href: '' },
-  { id: 'qux', title: 'Qux', baseUrl: '', href: '' },
-  { id: 'observability_overview', title: 'Observability Overview', baseUrl: '', href: '' },
-  {
-    id: 'observability-gettingStarted',
-    title: 'Observability Getting Started',
-    baseUrl: '',
-    href: '',
-  },
-];
 
 describe('workspace utils: featureMatchesConfig', () => {
   it('feature configured with `*` should match any features', () => {
@@ -543,16 +530,13 @@ describe('workspace utils: getIsOnlyAllowEssentialUseCase', () => {
 describe('workspace utils: convertNavGroupToWorkspaceUseCase', () => {
   it('should convert nav group to consistent workspace use case', () => {
     expect(
-      convertNavGroupToWorkspaceUseCase(
-        {
-          id: 'foo',
-          title: 'Foo',
-          description: 'Foo description',
-          navLinks: [{ id: 'bar', title: 'Bar' }],
-          icon: 'wsAnalytics',
-        },
-        allNavLinksMock
-      )
+      convertNavGroupToWorkspaceUseCase({
+        id: 'foo',
+        title: 'Foo',
+        description: 'Foo description',
+        navLinks: [{ id: 'bar', title: 'Bar' }],
+        icon: 'wsAnalytics',
+      })
     ).toEqual({
       id: 'foo',
       title: 'Foo',
@@ -563,16 +547,13 @@ describe('workspace utils: convertNavGroupToWorkspaceUseCase', () => {
     });
 
     expect(
-      convertNavGroupToWorkspaceUseCase(
-        {
-          id: 'foo',
-          title: 'Foo',
-          description: 'Foo description',
-          navLinks: [{ id: 'bar', title: 'Bar' }],
-          type: NavGroupType.SYSTEM,
-        },
-        allNavLinksMock
-      )
+      convertNavGroupToWorkspaceUseCase({
+        id: 'foo',
+        title: 'Foo',
+        description: 'Foo description',
+        navLinks: [{ id: 'bar', title: 'Bar' }],
+        type: NavGroupType.SYSTEM,
+      })
     ).toEqual({
       id: 'foo',
       title: 'Foo',
@@ -580,111 +561,6 @@ describe('workspace utils: convertNavGroupToWorkspaceUseCase', () => {
       features: [{ id: 'bar', title: 'Bar' }],
       systematic: true,
     });
-  });
-
-  it('should filter out overview features', () => {
-    expect(
-      convertNavGroupToWorkspaceUseCase(
-        {
-          id: 'foo',
-          title: 'Foo',
-          description: 'Foo description',
-          navLinks: [{ id: 'observability_overview', title: 'Observability Overview' }],
-          icon: 'wsAnalytics',
-        },
-        allNavLinksMock
-      )
-    ).toEqual(
-      expect.objectContaining({
-        id: 'foo',
-        title: 'Foo',
-        description: 'Foo description',
-        features: [],
-        systematic: false,
-        icon: 'wsAnalytics',
-      })
-    );
-  });
-
-  it('should filter out getting started features', () => {
-    expect(
-      convertNavGroupToWorkspaceUseCase(
-        {
-          id: 'foo',
-          title: 'Foo',
-          description: 'Foo description',
-          navLinks: [
-            { id: 'observability-gettingStarted', title: 'Observability Getting Started' },
-          ],
-          icon: 'wsAnalytics',
-        },
-        allNavLinksMock
-      )
-    ).toEqual(
-      expect.objectContaining({
-        id: 'foo',
-        title: 'Foo',
-        description: 'Foo description',
-        features: [],
-        systematic: false,
-        icon: 'wsAnalytics',
-      })
-    );
-  });
-
-  it('should grouped nav links by category', () => {
-    expect(
-      convertNavGroupToWorkspaceUseCase(
-        {
-          id: 'foo',
-          title: 'Foo',
-          description: 'Foo description',
-          navLinks: [
-            { id: 'bar', title: 'Bar', category: { id: 'category-1', label: 'Category 1' } },
-            { id: 'baz', title: 'Baz' },
-            { id: 'qux', title: 'Qux', category: { id: 'category-1', label: 'Category 1' } },
-          ],
-          icon: 'wsAnalytics',
-        },
-        allNavLinksMock
-      )
-    ).toEqual(
-      expect.objectContaining({
-        id: 'foo',
-        title: 'Foo',
-        description: 'Foo description',
-        features: [
-          { id: 'baz', title: 'Baz' },
-          { id: 'category-1', title: 'Category 1', details: ['Bar', 'Qux'] },
-        ],
-        systematic: false,
-        icon: 'wsAnalytics',
-      })
-    );
-  });
-
-  it('should filter out custom features', () => {
-    expect(
-      convertNavGroupToWorkspaceUseCase(
-        {
-          id: 'foo',
-          title: 'Foo',
-          description: 'Foo description',
-          navLinks: [{ id: 'bar', title: 'Bar', category: { id: 'custom', label: 'Custom' } }],
-          icon: 'wsAnalytics',
-        },
-        allNavLinksMock
-      )
-    ).toEqual(
-      expect.objectContaining({
-        id: 'foo',
-        title: 'Foo',
-        description: 'Foo description',
-        features: [],
-        systematic: false,
-        icon: 'wsAnalytics',
-      })
-    );
   });
 });
 
@@ -786,27 +662,6 @@ describe('workspace utils: isEqualWorkspaceUseCase', () => {
     ).toEqual(true);
   });
 
-  it('should return false for different feature details', () => {
-    const featureWithDetails = {
-      id: 'foo',
-      title: 'Foo',
-      details: ['Bar'],
-    };
-    const featureWithOtherDetails = {
-      id: 'foo',
-      title: 'Foo',
-      details: ['Baz'],
-    };
-    expect(
-      isEqualWorkspaceUseCase(
-        { ...useCaseMock, features: [featureWithDetails] },
-        {
-          ...useCaseMock,
-          features: [featureWithOtherDetails],
-        }
-      )
-    ).toEqual(false);
-  });
   it('should return true when all properties equal', () => {
     expect(
       isEqualWorkspaceUseCase(useCaseMock, {
