@@ -46,6 +46,7 @@ export interface BuildOptions {
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   targetPlatforms: TargetPlatforms;
+  withTranslations: boolean;
 }
 
 export async function buildDistributables(log: ToolingLog, options: BuildOptions) {
@@ -70,6 +71,11 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
    * run platform-generic build tasks
    */
   await run(Tasks.CopySource);
+
+  if (options.withTranslations) {
+    // control w/ --with-translations
+    await run(Tasks.CopyTranslations);
+  }
   await run(Tasks.CopyBinScripts);
   await run(Tasks.CreateEmptyDirsAndFiles);
   await run(Tasks.CreateReadme);
