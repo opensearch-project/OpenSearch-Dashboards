@@ -15,6 +15,7 @@ import {
   IIndexPattern,
 } from '../../../../../common';
 import { getIndexPatterns } from '../../../../services';
+import { IDataPluginServices } from '../../../../types';
 import { DatasetTypeConfig } from '../types';
 import { injectMetaToDataStructures } from './utils';
 
@@ -55,7 +56,10 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     };
   },
 
-  fetchFields: async (_services, dataset: Dataset): Promise<DatasetField[]> => {
+  fetchFields: async (
+    dataset: Dataset,
+    _services?: IDataPluginServices
+  ): Promise<DatasetField[]> => {
     const indexPattern = await getIndexPatterns().get(dataset.id);
     return indexPattern.fields.map((field: any) => ({
       name: field.name,

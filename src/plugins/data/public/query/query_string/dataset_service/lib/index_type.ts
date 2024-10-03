@@ -13,6 +13,7 @@ import {
   DatasetField,
 } from '../../../../../common';
 import { getIndexPatterns, getSearchService } from '../../../../services';
+import { IDataPluginServices } from '../../../../types';
 import { DatasetTypeConfig } from '../types';
 import { injectMetaToDataStructures } from './utils';
 
@@ -73,7 +74,10 @@ export const indexTypeConfig: DatasetTypeConfig = {
     }
   },
 
-  fetchFields: async (_services, dataset: Dataset): Promise<DatasetField[]> => {
+  fetchFields: async (
+    dataset: Dataset,
+    _services?: IDataPluginServices
+  ): Promise<DatasetField[]> => {
     const fields = await getIndexPatterns().getFieldsForWildcard({
       pattern: dataset.title,
       dataSourceId: dataset.dataSource?.id,
