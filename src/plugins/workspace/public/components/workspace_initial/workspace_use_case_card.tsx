@@ -29,8 +29,9 @@ import {
   sortByRecentVisitedAndAlphabetical,
 } from './utils';
 import { WorkspaceUseCase } from '../../types';
-import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
 import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
+import { navigateToWorkspacePageWithUseCase } from '../utils/workspace';
+import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
 
 interface WorkspaceUseCaseCardProps {
   useCase: WorkspaceUseCase;
@@ -79,6 +80,10 @@ export const WorkspaceUseCaseCard = ({
     }
   );
 
+  const handleClickCreateButton = () => {
+    navigateToWorkspacePageWithUseCase(application, useCase.title, WORKSPACE_CREATE_APP_ID);
+  };
+
   const workspaceToItem = (workspace: UpdatedWorkspaceObject) => {
     return (
       <Fragment key={workspace.id}>
@@ -103,7 +108,7 @@ export const WorkspaceUseCaseCard = ({
   };
 
   return (
-    <EuiSplitPanel.Outer style={{ height: '416px' }}>
+    <EuiSplitPanel.Outer style={{ height: '416px', minWidth: '235px' }}>
       <EuiSplitPanel.Inner paddingSize="m" grow={!hasWorkspaces} className={useCase.id}>
         <EuiFlexGroup alignItems="center" direction="column" gutterSize="s" responsive={false}>
           <EuiFlexItem>
@@ -168,7 +173,7 @@ export const WorkspaceUseCaseCard = ({
               <EuiFlexItem grow={false}>
                 <EuiSmallButtonEmpty
                   data-test-subj={`workspace-initial-useCaseCard-${useCase.id}-button-view`}
-                  href={application.getUrlForApp(WORKSPACE_LIST_APP_ID, { absolute: true })}
+                  onClick={handleClickCreateButton}
                 >
                   {i18n.translate('workspace.initial.useCaseCard.{useCaseId}.button.view', {
                     defaultMessage: 'View all',
@@ -196,7 +201,7 @@ export const WorkspaceUseCaseCard = ({
                           values: { useCaseId: useCase.id, title: useCase.title },
                         }
                       )}
-                      href={application.getUrlForApp(WORKSPACE_CREATE_APP_ID, { absolute: true })}
+                      onClick={handleClickCreateButton}
                       display="base"
                       iconType="plus"
                       data-test-subj={`workspace-initial-useCaseCard-${useCase.id}-button-createWorkspace`}
@@ -244,7 +249,13 @@ export const WorkspaceUseCaseCard = ({
                   iconType="plus"
                   color="primary"
                   data-test-subj={`workspace-initial-useCaseCard-${useCase.id}-button-createWorkspace`}
-                  href={application.getUrlForApp(WORKSPACE_CREATE_APP_ID, { absolute: true })}
+                  onClick={() => {
+                    navigateToWorkspacePageWithUseCase(
+                      application,
+                      useCase.title,
+                      WORKSPACE_CREATE_APP_ID
+                    );
+                  }}
                 >
                   {i18n.translate(
                     'workspace.initial.useCaseCard.{useCaseId}.button.createWorkspace',

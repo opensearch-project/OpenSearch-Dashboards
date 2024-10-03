@@ -17,7 +17,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
         style="padding-top: 24px;"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero eui-displayInline"
+          class="euiFlexItem euiFlexItem--flexGrowZero"
           style="width: 1264px;"
         >
           <div
@@ -112,7 +112,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                 >
                   <div
                     class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
-                    style="height: 416px;"
+                    style="height: 416px; min-width: 235px;"
                   >
                     <div
                       class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner observability"
@@ -239,7 +239,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                 >
                   <div
                     class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
-                    style="height: 416px;"
+                    style="height: 416px; min-width: 235px;"
                   >
                     <div
                       class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner security-analytics"
@@ -366,7 +366,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                 >
                   <div
                     class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
-                    style="height: 416px;"
+                    style="height: 416px; min-width: 235px;"
                   >
                     <div
                       class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner essentials"
@@ -493,7 +493,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                 >
                   <div
                     class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
-                    style="height: 416px;"
+                    style="height: 416px; min-width: 235px;"
                   >
                     <div
                       class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner search"
@@ -736,7 +736,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
         style="padding-top: 24px;"
       >
         <div
-          class="euiFlexItem euiFlexItem--flexGrowZero eui-displayInline"
+          class="euiFlexItem euiFlexItem--flexGrowZero"
           style="width: 1264px;"
         >
           <div
@@ -798,7 +798,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                 >
                   <div
                     class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
-                    style="height: 416px;"
+                    style="height: 416px; min-width: 235px;"
                   >
                     <div
                       class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner observability"
@@ -901,7 +901,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                 >
                   <div
                     class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
-                    style="height: 416px;"
+                    style="height: 416px; min-width: 235px;"
                   >
                     <div
                       class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner security-analytics"
@@ -1004,7 +1004,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                 >
                   <div
                     class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
-                    style="height: 416px;"
+                    style="height: 416px; min-width: 235px;"
                   >
                     <div
                       class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner essentials"
@@ -1107,7 +1107,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                 >
                   <div
                     class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--flexGrowZero euiSplitPanel"
-                    style="height: 416px;"
+                    style="height: 416px; min-width: 235px;"
                   >
                     <div
                       class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner search"

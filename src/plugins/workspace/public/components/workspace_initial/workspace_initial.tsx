@@ -27,6 +27,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { WorkspaceUseCase } from '../../types';
 import { WorkspaceUseCaseCard } from './workspace_use_case_card';
 import { WorkspaceUseCaseFlyout } from '../workspace_form';
+import { navigateToWorkspacePageWithUseCase } from '../utils/workspace';
 
 export interface WorkspaceInitialProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -138,7 +139,13 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
                 'data-test-subj': `workspace-initial-button-create-${useCase.id}-workspace`,
                 name: useCase.title,
                 icon: useCase.icon,
-                href: application.getUrlForApp(WORKSPACE_CREATE_APP_ID, { absolute: true }),
+                onClick: () => {
+                  navigateToWorkspacePageWithUseCase(
+                    application,
+                    useCase.title,
+                    WORKSPACE_CREATE_APP_ID
+                  );
+                },
               };
             }),
           },
@@ -251,7 +258,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
           justifyContent="flexStart"
           style={{ paddingTop: '24px' }}
         >
-          <EuiFlexItem grow={false} className="eui-displayInline" style={{ width: '1264px' }}>
+          <EuiFlexItem grow={false} style={{ width: '1264px' }}>
             {content}
           </EuiFlexItem>
         </EuiFlexGroup>
