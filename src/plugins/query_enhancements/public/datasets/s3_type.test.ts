@@ -154,7 +154,7 @@ describe('s3TypeConfig', () => {
     });
   });
 
-  test('fetchFields returns empty array', async () => {
+  test('fetchFields returns table fields', async () => {
     const postResponse = {
       queryId: 'd09ZbTgxRHlnWW15czM=',
       sessionId: 'VHg1d0Z1NXlCS215czM=',
