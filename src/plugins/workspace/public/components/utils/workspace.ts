@@ -23,10 +23,16 @@ export const navigateToWorkspaceDetail = (
   );
 };
 
-export const navigateToWorkspaceListWithUseCase = ({ application }: Core, useCaseTitle: string) => {
-  const url = application.getUrlForApp(WORKSPACE_LIST_APP_ID, { absolute: true });
-  const search = `/?useCase=${useCaseTitle}`;
-  application.navigateToUrl(url + search);
+export const navigateToWorkspaceListWithUseCase = (
+  application: Core['application'],
+  useCaseTitle: string
+) => {
+  const newUrl = application.getUrlForApp(WORKSPACE_LIST_APP_ID, { absolute: true });
+  if (newUrl) {
+    const url = new URL(newUrl);
+    url.hash = `/?useCase=${useCaseTitle}`;
+    application.navigateToUrl(url.toString());
+  }
 };
 
 export const navigateToAppWithinWorkspace = (
