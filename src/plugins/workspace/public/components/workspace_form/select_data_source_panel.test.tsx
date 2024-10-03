@@ -239,6 +239,6 @@ describe('SelectDataSourcePanel', () => {
     expect(
       getByTestId('workspace-creator-emptyPrompt-dataSources-assign-button')
     ).toBeInTheDocument();
-    expect(getByTestId('workspace-creator-dqc-assign-button')).toBeInTheDocument();
+    expect(getByTestId('workspace-creator-emptyPrompt-dqc-assign-button')).toBeInTheDocument();
   });
 });
