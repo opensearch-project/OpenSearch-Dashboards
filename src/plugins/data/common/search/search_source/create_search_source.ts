@@ -53,18 +53,20 @@ import { SearchSourceFields } from './types';
  * @public */
 export const createSearchSource = (
   indexPatterns: IndexPatternsContract,
-  queryStringService: QueryStringContract,
   searchSourceDependencies: SearchSourceDependencies
 ) => async (searchSourceFields: SearchSourceFields = {}) => {
   const fields = { ...searchSourceFields };
 
   // When we load a saved search and the saved search contains a non index pattern data source this step creates the temperary index patterns and sets the appriopriate query
   if (
+    searchSourceDependencies.queryStringService &&
     fields.query?.dataset &&
     fields.query?.dataset?.type !== 'INDEX_PATTERN' &&
     !indexPatterns.isPresentInCache(fields.query.dataset.id)
   ) {
-    await queryStringService.getDatasetService().cacheDataset(fields.query?.dataset);
+    await searchSourceDependencies.queryStringService
+      .getDatasetService()
+      .cacheDataset(fields.query?.dataset);
   }
 
   // hydrating index pattern

@@ -28,23 +28,18 @@
  * under the License.
  */
 
-import { QueryStringContract } from 'src/plugins/data/public';
 import { createSearchSource, SearchSource, SearchSourceDependencies } from './';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 
 export class SearchSourceService {
   public setup() {}
 
-  public start(
-    indexPatterns: IndexPatternsContract,
-    queryStringService: QueryStringContract,
-    dependencies: SearchSourceDependencies
-  ) {
+  public start(indexPatterns: IndexPatternsContract, dependencies: SearchSourceDependencies) {
     return {
       /**
        * creates searchsource based on serialized search source fields
        */
-      create: createSearchSource(indexPatterns, queryStringService, dependencies),
+      create: createSearchSource(indexPatterns, dependencies),
       /**
        * creates an enpty search source
        */
