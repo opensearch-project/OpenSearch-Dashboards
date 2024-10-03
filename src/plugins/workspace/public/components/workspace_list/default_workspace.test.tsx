@@ -38,6 +38,16 @@ jest.mock('../../utils', () => {
   };
 });
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({
+    search: '',
+    pathname: '',
+    hash: '',
+    state: undefined,
+  }),
+}));
+
 function getWrapUserDefaultWorkspaceList(
   workspaceList = [
     {
