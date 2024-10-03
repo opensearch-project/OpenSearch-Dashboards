@@ -10,6 +10,7 @@ exports[`Search should render normally 1`] = `
         "incremental": true,
       }
     }
+    compressed={true}
     filters={
       Array [
         Object {

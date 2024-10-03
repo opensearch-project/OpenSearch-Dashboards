@@ -241,7 +241,6 @@ export class AdvancedSettingsComponent extends Component<
       if (!this.props.useUpdatedUX) {
         return (
           <>
-            <EuiSpacer size="m" />
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem>
                 <PageTitle />
@@ -257,6 +256,7 @@ export class AdvancedSettingsComponent extends Component<
             <PageSubtitle />
             <EuiSpacer size="m" />
             <CallOuts />
+            <EuiSpacer size="m" />
           </>
         );
       } else {
@@ -272,7 +272,7 @@ export class AdvancedSettingsComponent extends Component<
               ]}
             />
             <Search query={query} categories={this.categories} onQueryChange={this.onQueryChange} />
-            <EuiSpacer size="m" />
+            <EuiSpacer size="s" />
           </>
         );
       }
