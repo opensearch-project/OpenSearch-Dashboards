@@ -43,7 +43,12 @@ export const Configurator = ({
   const [dataset, setDataset] = useState<Dataset>(baseDataset);
   const [timeFields, setTimeFields] = useState<DatasetField[]>([]);
   const [timeFieldName, setTimeFieldName] = useState<string | undefined>(dataset.timeFieldName);
-  const noTimeFilter = "I don't want to use the time filter";
+  const noTimeFilter = i18n.translate(
+    'data.explorer.datasetSelector.advancedSelector.configurator.timeField.noTimeFieldOptionLabel',
+    {
+      defaultMessage: "I don't want to use the time filter",
+    }
+  );
   const [language, setLanguage] = useState<string>(() => {
     const currentLanguage = queryString.getQuery().language;
     if (languages.includes(currentLanguage)) {
