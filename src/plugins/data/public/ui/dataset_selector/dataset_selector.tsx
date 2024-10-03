@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { i18n } from '@osd/i18n';
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
 import { Dataset, DEFAULT_DATA } from '../../../common';
 import { getQueryService } from '../../services';
@@ -117,13 +118,19 @@ export const DatasetSelector = ({
       return datasetOptions.length > 1 ? datasetOptions : [];
     };
     const recentDatasetOptions = buildDatasetOptions(
-      'Recently selected data',
+      i18n.translate('data.dataSelector.recentDatasetsGroupLabel', {
+        defaultMessage: 'Recently selected data',
+      }),
       recentDatasets,
       selectedDataset?.id
     );
     const indexPatternOptions = buildDatasetOptions(
-      'Index patterns',
-      indexPatterns.filter((dataset) => !recentDatasets.includes(dataset)),
+      i18n.translate('data.dataSelector.indexPatternsGroupLabel', {
+        defaultMessage: 'Index patterns',
+      }),
+      indexPatterns.filter(
+        (dataset) => !recentDatasets.some((recentDataset) => recentDataset.id === dataset.id)
+      ),
       selectedDataset?.id
     );
 
