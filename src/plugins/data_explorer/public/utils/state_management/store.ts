@@ -87,11 +87,7 @@ export const getPreloadedStore = async (services: DataExplorerServices) => {
 
     // If the url state is different from the current state, then we need to update the store
     // the state should have a view property if it was loaded from the url
-    if (
-      (action === 'POP' || action === 'REPLACE') &&
-      urlState.metadata?.view &&
-      !isEqual(urlState, currentState)
-    ) {
+    if (action === 'POP' && urlState.metadata?.view && !isEqual(urlState, currentState)) {
       store.dispatch(hydrate(urlState as RootState));
     }
   });

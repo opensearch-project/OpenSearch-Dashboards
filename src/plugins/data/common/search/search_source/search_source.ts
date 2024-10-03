@@ -83,6 +83,7 @@
 import { setWith } from '@elastic/safer-lodash-set';
 import { stringify } from '@osd/std';
 import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
+import { QueryStringContract } from 'src/plugins/data/public';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../opensearch_dashboards_utils/common';
@@ -157,6 +158,7 @@ export interface SearchSourceDependencies extends FetchHandlers {
     set: (dataFrame: IDataFrame) => void;
     clear: () => void;
   };
+  queryStringService?: QueryStringContract;
 }
 
 /** @public **/

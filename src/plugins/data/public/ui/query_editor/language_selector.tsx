@@ -44,7 +44,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
     : undefined;
 
   useEffect(() => {
-    const subscription = queryString.getUpdates$().subscribe((query: Query) => {
+    const subscription = queryString.getUpdates$(0).subscribe((query: Query) => {
       if (query.language !== currentLanguage) {
         setCurrentLanguage(query.language);
       }
