@@ -75,19 +75,20 @@ export const Configurator = ({
 
   useEffect(() => {
     const fetchFields = async () => {
-      const datasetFields =
-        baseDataset.type !== 'S3'
-          ? await queryString
-              .getDatasetService()
-              .getType(baseDataset.type)
-              ?.fetchFields(baseDataset, services)
-          : [];
+      const datasetFields = await queryString
+        .getDatasetService()
+        .getType(baseDataset.type)
+        ?.fetchFields(baseDataset, services);
 
       const dateFields = datasetFields?.filter((field) => field.type === 'date');
       setTimeFields(dateFields || []);
     };
 
-    if (baseDataset) fetchFields();
+    if (baseDataset?.dataSource?.meta?.requiresTimeFilter === false) {
+      setTimeFields([]);
+      return;
+    }
+    fetchFields();
   }, [baseDataset, indexPatternsService, queryString, services]);
 
   return (
