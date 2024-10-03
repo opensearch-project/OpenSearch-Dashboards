@@ -207,9 +207,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         loadingCount$,
       },
       df: dfService,
+      queryStringService: uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)
+        ? getQueryService().queryString
+        : undefined,
     };
-
-    const queryString = getQueryService().queryString;
 
     return {
       aggs: this.aggsService.start({ fieldFormats, uiSettings }),
@@ -217,11 +218,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       showError: (e: Error) => {
         this.searchInterceptor.showError(e);
       },
-      searchSource: this.searchSourceService.start(
-        indexPatterns,
-        queryString,
-        searchSourceDependencies
-      ),
+      searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),
       __enhance: (enhancements: SearchEnhancements) => {
         this.searchInterceptor = enhancements.searchInterceptor;
       },
