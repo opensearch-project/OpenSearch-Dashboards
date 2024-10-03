@@ -61,6 +61,7 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
             aria-label="show-apps"
             iconType="managementApp"
             onClick={() => setPopover(true)}
+            color="text"
           />
         </EuiToolTip>
       }
