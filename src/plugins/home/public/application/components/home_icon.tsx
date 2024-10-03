@@ -18,6 +18,7 @@ export function HomeIcon({ core, appId }: { core: CoreStart; appId: string }) {
       <EuiButtonIcon
         aria-label="go-to-home"
         iconType="home"
+        color="text"
         onClick={() => {
           core.application.navigateToApp(appId);
         }}

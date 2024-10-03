@@ -7,7 +7,6 @@ import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { map } from 'rxjs/operators';
-import { EuiPanel } from '@elastic/eui';
 import {
   Plugin,
   CoreStart,
@@ -59,7 +58,6 @@ import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { UseCaseService } from './services/use_case_service';
 import { WorkspaceListCard } from './components/service_card';
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
-import { WorkspacePickerContent } from './components/workspace_picker_content/workspace_picker_content';
 import { WorkspaceSelector } from './components/workspace_selector/workspace_selector';
 import { HOME_CONTENT_AREAS } from '../../../plugins/content_management/public';
 import {
