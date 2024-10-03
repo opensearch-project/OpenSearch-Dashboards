@@ -19,6 +19,16 @@ import { DataSourceEngineType } from '../../../../data_source/common/data_source
 import { DataSourceConnectionType } from '../../../common/types';
 import * as utils from '../../utils';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({
+    search: '',
+    pathname: '',
+    hash: '',
+    state: undefined,
+  }),
+}));
+
 const workspaceClientCreate = jest
   .fn()
   .mockReturnValue({ result: { id: 'successResult' }, success: true });

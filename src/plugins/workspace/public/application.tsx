@@ -26,7 +26,13 @@ export const renderCreatorApp = (
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceCreatorApp {...props} />
+      <Router>
+        <Switch>
+          <Route>
+            <WorkspaceCreatorApp {...props} />
+          </Route>
+        </Switch>
+      </Router>
     </OpenSearchDashboardsContextProvider>,
     element
   );
@@ -57,7 +63,13 @@ export const renderListApp = (
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceListApp {...props} />
+      <Router>
+        <Switch>
+          <Route>
+            <WorkspaceListApp {...props} />
+          </Route>
+        </Switch>
+      </Router>
     </OpenSearchDashboardsContextProvider>,
     element
   );

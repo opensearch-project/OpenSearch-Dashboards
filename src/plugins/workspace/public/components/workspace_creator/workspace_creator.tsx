@@ -3,11 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
 
+import { useLocation } from 'react-router-dom';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
 import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
@@ -53,16 +54,28 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     onlyAllowEssentialEnabled: true,
   });
 
-  const defaultSelectedUseCase = availableUseCases?.[0];
-  const defaultWorkspaceFormValues: Partial<WorkspaceFormSubmitData> = {
-    color: euiPaletteColorBlind()[0],
-    ...(defaultSelectedUseCase
-      ? {
-          name: defaultSelectedUseCase.title,
-          features: [getUseCaseFeatureConfig(defaultSelectedUseCase.id)],
-        }
-      : {}),
-  };
+  const location = useLocation();
+
+  const defaultWorkspaceFormValues = useMemo(() => {
+    let defaultSelectedUseCase;
+    const params = new URLSearchParams(location.search);
+    const useCaseTitle = params.get('useCase');
+    if (useCaseTitle) {
+      defaultSelectedUseCase =
+        availableUseCases?.find(({ title }) => title === useCaseTitle) || availableUseCases?.[0];
+    } else {
+      defaultSelectedUseCase = availableUseCases?.[0];
+    }
+    return {
+      color: euiPaletteColorBlind()[0],
+      ...(defaultSelectedUseCase
+        ? {
+            name: defaultSelectedUseCase.title,
+            features: [getUseCaseFeatureConfig(defaultSelectedUseCase.id)],
+          }
+        : {}),
+    };
+  }, [location.search, availableUseCases]);
 
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
