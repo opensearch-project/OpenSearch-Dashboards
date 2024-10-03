@@ -35,6 +35,7 @@ export class DatasetService {
     this.recentDatasets = new LRUCache({
       max: this.uiSettings.get(UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS),
     });
+    this.deserializeRecentDatasets();
   }
 
   /**
@@ -66,6 +67,17 @@ export class DatasetService {
     return this.defaultDataset;
   }
 
+  private serializeRecentDatasets(): void {
+    this.sessionStorage.set('recentDatasets', this.getRecentDatasets());
+  }
+
+  private deserializeRecentDatasets(): void {
+    const cacheData = this.sessionStorage.get('recentDatasets');
+    if (cacheData) {
+      cacheData.forEach((dataset: Dataset) => this.addRecentDataset(dataset, false));
+    }
+  }
+
   public getRecentDataset(datasetID: string | undefined): Dataset | undefined {
     if (datasetID) {
       return this.recentDatasets.get(datasetID);
@@ -73,12 +85,15 @@ export class DatasetService {
   }
 
   public getRecentDatasets(): Dataset[] {
-    return Array.from(this.recentDatasets.values());
+    return this.recentDatasets.values();
   }
 
-  public addRecentDataset(dataset: Dataset | undefined): void {
+  public addRecentDataset(dataset: Dataset | undefined, serialize: boolean = true): void {
     if (dataset) {
       this.recentDatasets.set(dataset.id, dataset);
+    }
+    if (serialize) {
+      this.serializeRecentDatasets();
     }
   }
 

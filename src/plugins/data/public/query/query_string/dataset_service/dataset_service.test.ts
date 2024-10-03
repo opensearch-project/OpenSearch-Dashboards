@@ -143,9 +143,8 @@ describe('DatasetService', () => {
     };
 
     service.addRecentDataset(mockDataset1);
-    const recents = service.getRecentDatasets();
-    expect(recents).toContainEqual(mockDataset1);
-    expect(recents.length).toEqual(1);
+    expect(service.getRecentDataset(mockDataset1.id)).toEqual(mockDataset1);
+    expect(service.getRecentDatasets().length).toEqual(1);
     expect(sessionStorage.get('recentDatasets')).toContainEqual(mockDataset1);
   });
 
