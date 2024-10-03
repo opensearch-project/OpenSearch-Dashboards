@@ -21,9 +21,10 @@ import {
 
 interface WorkspaceCreateActionPanelProps {
   formId: string;
-  formData: Pick<WorkspaceFormDataState, 'name' | 'description'>;
+  formData: Pick<WorkspaceFormDataState, 'name' | 'description' | 'selectedDataSourceConnections'>;
   application: ApplicationStart;
   isSubmitting: boolean;
+  dataSourceEnabled: boolean;
 }
 
 export const WorkspaceCreateActionPanel = ({
@@ -31,13 +32,15 @@ export const WorkspaceCreateActionPanel = ({
   formData,
   application,
   isSubmitting,
+  dataSourceEnabled,
 }: WorkspaceCreateActionPanelProps) => {
   const [isCancelModalVisible, setIsCancelModalVisible] = useState(false);
   const closeCancelModal = useCallback(() => setIsCancelModalVisible(false), []);
   const showCancelModal = useCallback(() => setIsCancelModalVisible(true), []);
   const createButtonDisabled =
     (formData.name?.length ?? 0) > MAX_WORKSPACE_NAME_LENGTH ||
-    (formData.description?.length ?? 0) > MAX_WORKSPACE_DESCRIPTION_LENGTH;
+    (formData.description?.length ?? 0) > MAX_WORKSPACE_DESCRIPTION_LENGTH ||
+    (dataSourceEnabled && formData.selectedDataSourceConnections.length === 0);
 
   return (
     <>

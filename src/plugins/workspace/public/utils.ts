@@ -15,8 +15,6 @@ import {
   ApplicationStart,
   HttpSetup,
   NotificationsStart,
-  fulfillRegistrationLinksToChromeNavLinks,
-  ChromeNavLink,
   App,
   AppCategory,
   AppNavLinkStatus,
@@ -24,6 +22,7 @@ import {
   PublicAppInfo,
   WorkspaceObject,
   WorkspaceAvailability,
+  DEFAULT_NAV_GROUPS,
 } from '../../../core/public';
 
 import { WORKSPACE_DETAIL_APP_ID, USE_CASE_PREFIX } from '../common/constants';
@@ -360,48 +359,20 @@ export const getIsOnlyAllowEssentialUseCase = async (client: SavedObjectsStart['
   return false;
 };
 
-export const convertNavGroupToWorkspaceUseCase = (
-  { id, title, description, navLinks, type, order, icon }: NavGroupItemInMap,
-  allNavLinks: ChromeNavLink[]
-): WorkspaceUseCase => {
-  const visibleNavLinks = allNavLinks.filter((link) => !link.hidden);
-  const visibleNavLinksWithinNavGroup = fulfillRegistrationLinksToChromeNavLinks(
-    navLinks,
-    visibleNavLinks
-  );
-  const features: WorkspaceUseCaseFeature[] = [];
-  const category2NavLinks: { [key: string]: WorkspaceUseCaseFeature & { details: string[] } } = {};
-  for (const { id: featureId, title: featureTitle, category } of visibleNavLinksWithinNavGroup) {
-    const lowerFeatureId = featureId.toLowerCase();
-    // Filter out overview and getting started links
-    if (lowerFeatureId.endsWith('overview') || lowerFeatureId.endsWith('started')) {
-      continue;
-    }
-    if (!category) {
-      features.push({ id: featureId, title: featureTitle });
-      continue;
-    }
-    // Filter out custom features
-    if (category.id === 'custom') {
-      continue;
-    }
-    if (!category2NavLinks[category.id]) {
-      category2NavLinks[category.id] = {
-        id: category.id,
-        title: category.label,
-        details: [],
-      };
-    }
-    if (featureTitle) {
-      category2NavLinks[category.id].details.push(featureTitle);
-    }
-  }
-  features.push(...Object.values(category2NavLinks));
+export const convertNavGroupToWorkspaceUseCase = ({
+  id,
+  title,
+  description,
+  navLinks,
+  type,
+  order,
+  icon,
+}: NavGroupItemInMap): WorkspaceUseCase => {
   return {
     id,
     title,
     description,
-    features,
+    features: navLinks.map((navLink) => ({ id: navLink.id, title: navLink.title })),
     systematic: type === NavGroupType.SYSTEM || id === ALL_USE_CASE_ID,
     order,
     icon,
@@ -414,7 +385,7 @@ const compareFeatures = (
 ) => {
   const featuresSerializer = (features: WorkspaceUseCaseFeature[]) =>
     features
-      .map(({ id, title, details }) => `${id}-${title}-${details?.join('')}`)
+      .map(({ id, title }) => `${id}-${title}`)
       .sort()
       .join();
   return featuresSerializer(features1) === featuresSerializer(features2);
@@ -459,6 +430,23 @@ export function enrichBreadcrumbsWithWorkspace(
     prependWorkspaceToBreadcrumbs(core, currentWorkspace, navGroupsMap, registeredUseCases);
   });
 }
+
+export const extractUseCaseTitleFromFeatures = (
+  registeredUseCases: WorkspaceUseCase[],
+  features: string[]
+) => {
+  if (!features || features.length === 0) {
+    return '';
+  }
+  const useCaseId = getFirstUseCaseOfFeatureConfigs(features);
+  const usecase =
+    useCaseId === DEFAULT_NAV_GROUPS.all.id
+      ? DEFAULT_NAV_GROUPS.all
+      : registeredUseCases?.find(({ id }) => id === useCaseId);
+  if (usecase) {
+    return usecase.title;
+  }
+};
 
 /**
  * prepend workspace or its use case to breadcrumbs

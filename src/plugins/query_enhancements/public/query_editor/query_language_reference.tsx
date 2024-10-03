@@ -28,7 +28,7 @@ export class QueryLanguageReference {
     const button = (
       <EuiButtonIcon
         iconType={'iInCircle'}
-        aria-label={i18n.translate('discover.queryControls.languageReference', {
+        aria-label={i18n.translate('queryEnhancements.queryControls.languageReference', {
           defaultMessage: `PPL language Reference`,
         })}
         onClick={() => {

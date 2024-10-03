@@ -10124,7 +10124,6 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
               className="newAppTopNavExpander navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l eui-hideFor--xxl eui-hideFor--xxxl"
               data-test-subj="toggleNavButton"
               flush="both"
-              isSmallScreen={true}
               onClick={[Function]}
             >
               <EuiButtonEmpty
@@ -10152,18 +10151,14 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                           <span
                             class="euiHeaderSectionItemButton__content"
                           >
-                            <button
-                              class="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall"
-                              title="Menu"
-                              type="button"
+                            <span
+                              class="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall "
                             >
                               <span
-                                aria-hidden="true"
-                                class="euiButtonIcon__icon"
-                                color="inherit"
                                 data-euiicon-type="menu"
+                                title="Menu"
                               />
-                            </button>
+                            </span>
                           </span>
                         </span>
                       </span>
@@ -10174,7 +10169,6 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                 color="text"
                 data-test-subj="toggleNavButton"
                 flush="both"
-                isSmallScreen={true}
                 onClick={[Function]}
               >
                 <button
@@ -10185,7 +10179,6 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                   className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushBoth euiHeaderSectionItemButton newAppTopNavExpander navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l eui-hideFor--xxl eui-hideFor--xxxl"
                   data-test-subj="toggleNavButton"
                   disabled={false}
-                  isSmallScreen={true}
                   onClick={[Function]}
                   type="button"
                 >
@@ -10209,37 +10202,21 @@ exports[`Header renders application header without title and breadcrumbs 1`] = `
                         <span
                           className="euiHeaderSectionItemButton__content"
                         >
-                          <EuiButtonIcon
-                            color="subdued"
-                            display="base"
-                            iconSize="s"
-                            iconType="menu"
-                            size="xs"
-                            title="Menu"
+                          <span
+                            className="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall "
                           >
-                            <button
-                              className="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall"
-                              disabled={false}
+                            <EuiIcon
+                              size="s"
                               title="Menu"
-                              type="button"
+                              type="menu"
                             >
-                              <EuiIcon
-                                aria-hidden="true"
-                                className="euiButtonIcon__icon"
-                                color="inherit"
+                              <span
+                                data-euiicon-type="menu"
                                 size="s"
-                                type="menu"
-                              >
-                                <span
-                                  aria-hidden="true"
-                                  className="euiButtonIcon__icon"
-                                  color="inherit"
-                                  data-euiicon-type="menu"
-                                  size="s"
-                                />
-                              </EuiIcon>
-                            </button>
-                          </EuiButtonIcon>
+                                title="Menu"
+                              />
+                            </EuiIcon>
+                          </span>
                         </span>
                       </span>
                     </span>
@@ -19493,7 +19470,6 @@ exports[`Header renders page header with application title 1`] = `
               className="newPageTopNavExpander navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l eui-hideFor--xxl eui-hideFor--xxxl"
               data-test-subj="toggleNavButton"
               flush="both"
-              isSmallScreen={true}
               onClick={[Function]}
             >
               <EuiButtonEmpty
@@ -19521,18 +19497,14 @@ exports[`Header renders page header with application title 1`] = `
                           <span
                             class="euiHeaderSectionItemButton__content"
                           >
-                            <button
-                              class="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall"
-                              title="Menu"
-                              type="button"
+                            <span
+                              class="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall "
                             >
                               <span
-                                aria-hidden="true"
-                                class="euiButtonIcon__icon"
-                                color="inherit"
                                 data-euiicon-type="menu"
+                                title="Menu"
                               />
-                            </button>
+                            </span>
                           </span>
                         </span>
                       </span>
@@ -19543,7 +19515,6 @@ exports[`Header renders page header with application title 1`] = `
                 color="text"
                 data-test-subj="toggleNavButton"
                 flush="both"
-                isSmallScreen={true}
                 onClick={[Function]}
               >
                 <button
@@ -19554,7 +19525,6 @@ exports[`Header renders page header with application title 1`] = `
                   className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--flushBoth euiHeaderSectionItemButton newPageTopNavExpander navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l eui-hideFor--xxl eui-hideFor--xxxl"
                   data-test-subj="toggleNavButton"
                   disabled={false}
-                  isSmallScreen={true}
                   onClick={[Function]}
                   type="button"
                 >
@@ -19578,37 +19548,21 @@ exports[`Header renders page header with application title 1`] = `
                         <span
                           className="euiHeaderSectionItemButton__content"
                         >
-                          <EuiButtonIcon
-                            color="subdued"
-                            display="base"
-                            iconSize="s"
-                            iconType="menu"
-                            size="xs"
-                            title="Menu"
+                          <span
+                            className="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall "
                           >
-                            <button
-                              className="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall"
-                              disabled={false}
+                            <EuiIcon
+                              size="s"
                               title="Menu"
-                              type="button"
+                              type="menu"
                             >
-                              <EuiIcon
-                                aria-hidden="true"
-                                className="euiButtonIcon__icon"
-                                color="inherit"
+                              <span
+                                data-euiicon-type="menu"
                                 size="s"
-                                type="menu"
-                              >
-                                <span
-                                  aria-hidden="true"
-                                  className="euiButtonIcon__icon"
-                                  color="inherit"
-                                  data-euiicon-type="menu"
-                                  size="s"
-                                />
-                              </EuiIcon>
-                            </button>
-                          </EuiButtonIcon>
+                                title="Menu"
+                              />
+                            </EuiIcon>
+                          </span>
                         </span>
                       </span>
                     </span>
