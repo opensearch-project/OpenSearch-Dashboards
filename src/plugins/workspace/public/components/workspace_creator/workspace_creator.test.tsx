@@ -102,8 +102,9 @@ jest.spyOn(utils, 'fetchDataSourceConnections').mockImplementation(async (passed
 
 const WorkspaceCreator = ({
   isDashboardAdmin = false,
+  dataSourceEnabled = false,
   ...props
-}: Partial<WorkspaceCreatorProps & { isDashboardAdmin: boolean }>) => {
+}: Partial<WorkspaceCreatorProps & { isDashboardAdmin: boolean; dataSourceEnabled?: boolean }>) => {
   const { Provider } = createOpenSearchDashboardsReactContext({
     ...mockCoreStart,
     ...{
@@ -143,7 +144,7 @@ const WorkspaceCreator = ({
           }),
         },
       },
-      dataSourceManagement: {},
+      dataSourceManagement: dataSourceEnabled ? {} : undefined,
       navigationUI: {
         HeaderControl: () => null,
       },
@@ -364,7 +365,7 @@ describe('WorkspaceCreator', () => {
       value: 600,
     });
     const { getByTestId, getAllByText, getByText } = render(
-      <WorkspaceCreator isDashboardAdmin={true} />
+      <WorkspaceCreator isDashboardAdmin={true} dataSourceEnabled />
     );
 
     // Ensure workspace create form rendered
@@ -422,7 +423,7 @@ describe('WorkspaceCreator', () => {
       value: 600,
     });
     const { getByTestId, getAllByText, getByText } = render(
-      <WorkspaceCreator isDashboardAdmin={true} />
+      <WorkspaceCreator isDashboardAdmin={true} dataSourceEnabled />
     );
 
     // Ensure workspace create form rendered
