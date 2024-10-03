@@ -69,8 +69,9 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
         isLoading
         data-test-subj="queryResultLoading"
       >
-        {i18n.translate('data.query.languageService.queryResults.completeTime', {
-          defaultMessage: `Loading ${time} s`,
+        {i18n.translate('data.query.languageService.queryResults.loadTime', {
+          defaultMessage: 'Loading {time} s',
+          values: { time },
         })}
       </EuiButtonEmpty>
     );
@@ -79,19 +80,21 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
   if (props.queryStatus.status === ResultStatus.READY) {
     let message;
     if (!props.queryStatus.elapsedMs) {
-      message = i18n.translate('data.query.languageService.queryResults.completeTime', {
-        defaultMessage: `Completed`,
+      message = i18n.translate('data.query.languageService.queryResults.completeNoTime', {
+        defaultMessage: 'Completed',
       });
     } else if (props.queryStatus.elapsedMs < 1000) {
       message = i18n.translate(
         'data.query.languageService.queryResults.completeTimeInMiliseconds',
         {
-          defaultMessage: `Completed in ${props.queryStatus.elapsedMs} ms`,
+          defaultMessage: 'Completed in {timeMS} ms',
+          values: { timeMS: props.queryStatus.elapsedMs },
         }
       );
     } else {
       message = i18n.translate('data.query.languageService.queryResults.completeTimeInSeconds', {
-        defaultMessage: `Completed in ${(props.queryStatus.elapsedMs / 1000).toFixed(1)} s`,
+        defaultMessage: 'Completed in {time} s',
+        values: { time: (props.queryStatus.elapsedMs / 1000).toFixed(1) },
       });
     }
 
