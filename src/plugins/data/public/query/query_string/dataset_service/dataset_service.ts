@@ -78,12 +78,6 @@ export class DatasetService {
     }
   }
 
-  public getRecentDataset(datasetID: string | undefined): Dataset | undefined {
-    if (datasetID) {
-      return this.recentDatasets.get(datasetID);
-    }
-  }
-
   public getRecentDatasets(): Dataset[] {
     return this.recentDatasets.values();
   }

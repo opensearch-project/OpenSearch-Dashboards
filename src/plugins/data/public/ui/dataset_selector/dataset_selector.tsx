@@ -44,7 +44,6 @@ export const DatasetSelector = ({
 }: DatasetSelectorProps) => {
   const isMounted = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [indexPatterns, setIndexPatterns] = useState<Dataset[]>([]);
   const { overlays } = services;
   const datasetService = getQueryService().queryString.getDatasetService();
@@ -82,10 +81,11 @@ export const DatasetSelector = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datasetService]);
 
-  useEffect(() => {
-    const recentDatasets = datasetService.getRecentDatasets();
-    setDatasets([...recentDatasets, ...indexPatterns]);
-  }, [isOpen, datasetService, indexPatterns]);
+  const recentDatasets = useMemo(() => {
+    return datasetService.getRecentDatasets();
+    // NOTE: Intentionally adding dependencies to ensure that we have the latest recentDatasets
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, datasetService]);
 
   const togglePopover = useCallback(async () => {
     setIsOpen(!isOpen);
@@ -118,30 +118,32 @@ export const DatasetSelector = ({
     };
     const recentDatasetOptions = buildDatasetOptions(
       'Recently selected data',
-      datasetService.getRecentDatasets(),
+      recentDatasets,
       selectedDataset?.id
     );
     const indexPatternOptions = buildDatasetOptions(
       'Index patterns',
-      indexPatterns.filter((indexPattern) => !datasetService.getRecentDataset(indexPattern.id)),
+      indexPatterns.filter((dataset) => !recentDatasets.includes(dataset)),
       selectedDataset?.id
     );
 
     return [...recentDatasetOptions, ...indexPatternOptions];
-  }, [indexPatterns, selectedDataset?.id, datasetService]);
+  }, [indexPatterns, selectedDataset?.id, datasetService, recentDatasets]);
 
   const handleOptionChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
       const selectedOption = newOptions.find((option) => option.checked === 'on');
       if (selectedOption) {
-        const foundDataset = datasets.find((dataset) => dataset.id === selectedOption.key);
+        const foundDataset =
+          recentDatasets.find((dataset) => dataset.id === selectedOption.key) ||
+          indexPatterns.find((dataset) => dataset.id === selectedOption.key);
         if (foundDataset) {
           closePopover();
           setSelectedDataset(foundDataset);
         }
       }
     },
-    [datasets, setSelectedDataset, closePopover]
+    [recentDatasets, indexPatterns, setSelectedDataset, closePopover]
   );
 
   const datasetTitle = useMemo(() => {
