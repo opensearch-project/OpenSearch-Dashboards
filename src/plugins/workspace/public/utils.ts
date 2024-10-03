@@ -24,6 +24,7 @@ import {
   PublicAppInfo,
   WorkspaceObject,
   WorkspaceAvailability,
+  DEFAULT_NAV_GROUPS,
 } from '../../../core/public';
 
 import { WORKSPACE_DETAIL_APP_ID, USE_CASE_PREFIX } from '../common/constants';
@@ -459,6 +460,23 @@ export function enrichBreadcrumbsWithWorkspace(
     prependWorkspaceToBreadcrumbs(core, currentWorkspace, navGroupsMap, registeredUseCases);
   });
 }
+
+export const extractUseCaseTitleFromFeatures = (
+  registeredUseCases: WorkspaceUseCase[],
+  features: string[]
+) => {
+  if (!features || features.length === 0) {
+    return '';
+  }
+  const useCaseId = getFirstUseCaseOfFeatureConfigs(features);
+  const usecase =
+    useCaseId === DEFAULT_NAV_GROUPS.all.id
+      ? DEFAULT_NAV_GROUPS.all
+      : registeredUseCases?.find(({ id }) => id === useCaseId);
+  if (usecase) {
+    return usecase.title;
+  }
+};
 
 /**
  * prepend workspace or its use case to breadcrumbs
