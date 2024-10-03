@@ -27,7 +27,7 @@ const ConnectedDatasetSelector = ({
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const queryString = services.data.query.queryString;
   const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(
-    () => queryString.getQuery().dataset || queryString.getDefaultQuery().dataset
+    () => queryString.getQuery().dataset
   );
 
   useEffect(() => {
