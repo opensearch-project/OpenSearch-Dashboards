@@ -46,6 +46,7 @@ describe('SearchSource service', () => {
         callMsearch: jest.fn(),
         loadingCount$: new BehaviorSubject(0),
       },
+      queryStringService: (jest.fn() as unknown) as jest.Mocked<QueryStringContract>,
     };
   });
 
@@ -53,7 +54,6 @@ describe('SearchSource service', () => {
     test('exposes proper contract', () => {
       const start = new SearchSourceService().start(
         (jest.fn() as unknown) as jest.Mocked<IndexPatternsContract>,
-        (jest.fn() as unknown) as jest.Mocked<QueryStringContract>,
         dependencies
       );
 

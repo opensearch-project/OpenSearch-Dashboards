@@ -22,7 +22,7 @@ const ConnectedDatasetSelector = ({ onSubmit }: ConnectedDatasetSelectorProps) =
   );
 
   useEffect(() => {
-    const subscription = queryString.getUpdates$().subscribe((query: Query) => {
+    const subscription = queryString.getUpdates$(0).subscribe((query: Query) => {
       if (query.dataset !== selectedDataset) {
         setSelectedDataset(query.dataset);
       }
