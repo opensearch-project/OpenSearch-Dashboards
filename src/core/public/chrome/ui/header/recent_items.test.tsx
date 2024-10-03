@@ -53,6 +53,7 @@ const defaultMockProps = {
   basePath: httpServiceMock.createStartContract().basePath,
   http: httpServiceMock.createSetupContract(),
   renderBreadcrumbs: <></>,
+  loadingCount$: new BehaviorSubject(0),
 };
 
 jest.spyOn(defaultMockProps.http, 'get').mockImplementation(
@@ -149,5 +150,12 @@ describe('Recent items', () => {
     const preferencesButton = screen.getByTestId('preferencesSettingButton');
     fireEvent.click(preferencesButton);
     expect(screen.getByTestId('preferencesSettingPopover')).toBeInTheDocument();
+  });
+
+  it('should show loading indicator if loading count > 0', () => {
+    const { baseElement } = render(
+      <RecentItems {...defaultMockProps} loadingCount$={new BehaviorSubject(1)} />
+    );
+    expect(baseElement).toMatchSnapshot();
   });
 });
