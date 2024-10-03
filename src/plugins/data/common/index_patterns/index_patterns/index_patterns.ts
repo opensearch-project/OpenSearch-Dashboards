@@ -234,6 +234,14 @@ export class IndexPatternsService {
     indexPatternCache.set(id, indexPattern);
   };
 
+  isPresentInCache(id: string) {
+    const indexPattern = indexPatternCache.get(id);
+    if (indexPattern) {
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Get default index pattern
    */

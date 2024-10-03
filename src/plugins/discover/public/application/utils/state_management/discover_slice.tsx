@@ -11,7 +11,11 @@ import { RootState, DefaultViewState } from '../../../../../data_explorer/public
 import { buildColumns } from '../columns';
 import * as utils from './common';
 import { SortOrder } from '../../../saved_searches/types';
-import { DEFAULT_COLUMNS_SETTING, PLUGIN_ID } from '../../../../common';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  PLUGIN_ID,
+  QUERY_ENHANCEMENT_ENABLED_SETTING,
+} from '../../../../common';
 
 export interface DiscoverState {
   /**
@@ -88,12 +92,22 @@ export const getPreloadedState = async ({
       preloadedState.state.sort = savedSearchInstance.sort;
       preloadedState.state.savedSearch = savedSearchInstance.id;
       const indexPatternId = savedSearchInstance.searchSource.getField('index')?.id;
-      preloadedState.root = {
-        metadata: {
-          indexPattern: indexPatternId,
-          view: PLUGIN_ID,
-        },
-      };
+
+      // If the query enhancement is enabled don't add the indexpattern id to the root since they will be migrated into the _q state
+      if (config.get(QUERY_ENHANCEMENT_ENABLED_SETTING)) {
+        preloadedState.root = {
+          metadata: {
+            view: PLUGIN_ID,
+          },
+        };
+      } else {
+        preloadedState.root = {
+          metadata: {
+            indexPattern: indexPatternId,
+            view: PLUGIN_ID,
+          },
+        };
+      }
 
       savedSearchInstance.destroy(); // this instance is no longer needed, will create another one later
     }

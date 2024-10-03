@@ -31,6 +31,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { IndexPatternsContract } from '../../index_patterns/index_patterns';
 import { SearchSourceService, SearchSourceDependencies } from './';
+import { QueryStringContract } from 'src/plugins/data/public';
 
 describe('SearchSource service', () => {
   let dependencies: jest.Mocked<SearchSourceDependencies>;
@@ -52,6 +53,7 @@ describe('SearchSource service', () => {
     test('exposes proper contract', () => {
       const start = new SearchSourceService().start(
         (jest.fn() as unknown) as jest.Mocked<IndexPatternsContract>,
+        (jest.fn() as unknown) as jest.Mocked<QueryStringContract>,
         dependencies
       );
 
