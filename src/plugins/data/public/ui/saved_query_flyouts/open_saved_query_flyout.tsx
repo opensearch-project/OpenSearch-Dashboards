@@ -15,6 +15,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSearchBar,
+  EuiSearchBarProps,
   EuiSpacer,
   EuiTablePagination,
   EuiTitle,
@@ -29,6 +30,13 @@ export interface OpenSavedQueryFlyoutProps {
   onQueryOpen: (query: SavedQuery) => void;
 }
 
+interface SavedQuerySearchableItem {
+  id: string;
+  title: string;
+  description: string;
+  language: string;
+}
+
 export function OpenSavedQueryFlyout({
   savedQueries,
   onClose,
@@ -36,6 +44,53 @@ export function OpenSavedQueryFlyout({
 }: OpenSavedQueryFlyoutProps) {
   const [shouldRunOnOpen, setShouldRunOnOpen] = useState(false);
   const [selectedQuery, setSelectedQuery] = useState<SavedQuery | undefined>(undefined);
+  const [searchQuery, setSearchQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
+
+  const onChange: EuiSearchBarProps['onChange'] = ({ query, error }) => {
+    if (!error) {
+      setSearchQuery(query);
+    }
+  };
+
+  const schema = {
+    strict: true,
+    fields: {
+      title: {
+        type: 'string',
+      },
+      description: {
+        type: 'string',
+      },
+      language: {
+        type: 'string',
+      },
+    },
+  };
+
+  const queryMap: {
+    [id: string]: { savedQuery: SavedQuery; savedQuerySearchableItem: SavedQuerySearchableItem };
+  } = {};
+  const queryLanguageSet = new Set<string>();
+  savedQueries.forEach((q) => {
+    queryLanguageSet.add(q.attributes.query.language);
+    queryMap[q.id] = {
+      savedQuery: q,
+      savedQuerySearchableItem: {
+        id: q.id,
+        title: q.attributes.title,
+        description: q.attributes.description,
+        language: q.attributes.query.language,
+      },
+    };
+  });
+
+  const filteredSavedQueries = EuiSearchBar.Query.execute(
+    searchQuery,
+    Object.values(queryMap).map((obj) => obj.savedQuerySearchableItem),
+    {
+      defaultFields: ['language', 'title', 'description'],
+    }
+  );
 
   return (
     <EuiFlyout onClose={onClose} hideCloseButton>
@@ -48,22 +103,33 @@ export function OpenSavedQueryFlyout({
         <EuiSearchBar
           box={{
             placeholder: 'Search saved query',
+            incremental: true,
+            schema,
           }}
           filters={[
             {
-              type: 'is',
-              field: '',
+              type: 'field_value_selection',
+              field: 'language',
               name: 'Query language',
+              multiSelect: 'or',
+              options: Array.from(queryLanguageSet).map((language) => ({
+                value: language,
+                view: language.toUpperCase(),
+              })),
             },
           ]}
+          onChange={onChange}
         />
         <EuiSpacer />
-        {savedQueries.length > 0 ? (
-          savedQueries.map((query) => (
+        {filteredSavedQueries.length > 0 ? (
+          filteredSavedQueries.map((query) => (
             <SavedQueryCard
-              savedQuery={query}
+              key={query.id}
+              savedQuery={queryMap[query.id].savedQuery}
               selectedQuery={selectedQuery}
               onSelect={setSelectedQuery}
+              onRunPreview={onQueryOpen}
+              onClose={onClose}
             />
           ))
         ) : (

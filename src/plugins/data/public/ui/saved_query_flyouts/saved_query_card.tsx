@@ -25,9 +25,17 @@ export interface SavedQueryCardProps {
   savedQuery: SavedQuery;
   selectedQuery?: SavedQuery;
   onSelect: (query: SavedQuery) => void;
+  onRunPreview: (query: SavedQuery) => void;
+  onClose: () => void;
 }
 
-export function SavedQueryCard({ savedQuery, selectedQuery, onSelect }: SavedQueryCardProps) {
+export function SavedQueryCard({
+  savedQuery,
+  selectedQuery,
+  onSelect,
+  onRunPreview,
+  onClose,
+}: SavedQueryCardProps) {
   const [shouldTruncate, setShouldTruncate] = useState(false);
   const [isTruncated, setIsTruncated] = useState(true);
   const [editorHeight, setEditorHeight] = useState(60);
@@ -87,31 +95,43 @@ export function SavedQueryCard({ savedQuery, selectedQuery, onSelect }: SavedQue
           onSelect(savedQuery);
         }}
         label={
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="s">
-                    <h4>{savedQuery.attributes.title}</h4>
-                  </EuiTitle>
-                  {savedQuery.attributes.description && (
-                    <EuiText>
-                      <p>{savedQuery.attributes.description}</p>
-                    </EuiText>
-                  )}
-                  <EuiText color="subdued">
-                    <p>{savedQuery.attributes.query.dataset?.dataSource?.title}</p>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge>{savedQuery.attributes.query.language}</EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton size="s">Run preview</EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <>
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiFlexItem>
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="s">
+                      <h4>{savedQuery.attributes.title}</h4>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge>{savedQuery.attributes.query.language}</EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  onClick={() => {
+                    onRunPreview(savedQuery);
+                    onClose();
+                  }}
+                >
+                  Run preview
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {savedQuery.attributes.description && (
+              <EuiText>
+                <p>{savedQuery.attributes.description}</p>
+              </EuiText>
+            )}
+            {savedQuery.attributes.query.dataset?.dataSource?.title && (
+              <EuiText color="subdued">
+                <p>{savedQuery.attributes.query.dataset.dataSource.title}</p>
+              </EuiText>
+            )}
+          </>
         }
       >
         <EuiFlexGroup gutterSize="s" alignItems="flexStart">
