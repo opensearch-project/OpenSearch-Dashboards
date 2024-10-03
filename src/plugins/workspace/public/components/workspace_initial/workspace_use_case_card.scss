@@ -1,42 +1,80 @@
+/* stylelint-disable */
 .observability {
-    background-color: hsla(30, 24%, 96%, 1);
-    background-image: radial-gradient(circle at 0% 48%, hsla(64.00000000000001, 81%, 77%, 0.4) 0%, transparent 82%), radial-gradient(circle at 100% 54%, hsla(5, 77%, 74%, 0.35) 3%, transparent 73%), radial-gradient(circle at 40% 0%, hsla(315, 77%, 74%, 0) 3.1210986267166043%, transparent 40%), radial-gradient(circle at 60% 0%, hsla(256, 77%, 74%, 0) 3.1210986267166043%, transparent 40%), radial-gradient(circle at 80% 0%, hsla(191, 77%, 74%, 0) 3.1210986267166043%, transparent 40%), radial-gradient(circle at 100% 0%, hsla(152, 77%, 74%, 0) 3%, transparent 40%), radial-gradient(circle at 49% 70%, hsla(23.999999999999968, 23%, 91%, 0) 30.719457311450917%, transparent 72.48279374983174%);
-    background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
+  background-color: hsla(30deg, 24%, 96%, 100%);
+  background-image:
+    radial-gradient(circle at 0% 48%, hsla(64deg, 81%, 77%, 40%) 0%, transparent 82%),
+    radial-gradient(circle at 100% 54%, hsla(5deg, 77%, 74%, 35%) 3%, transparent 73%),
+    radial-gradient(circle at 40% 0%, hsla(315deg, 77%, 74%, 0%) 3.12%, transparent 40%),
+    radial-gradient(circle at 60% 0%, hsla(256deg, 77%, 74%, 0%) 3.12%, transparent 40%),
+    radial-gradient(circle at 80% 0%, hsla(191deg, 77%, 74%, 0%) 3.12%, transparent 40%),
+    radial-gradient(circle at 100% 0%, hsla(152deg, 77%, 74%, 0%) 3%, transparent 40%),
+    radial-gradient(circle at 49% 70%, hsla(24deg, 23%, 91%, 0%) 30.72%, transparent 72.48%);
+  background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
 }
 
 .security-analytics {
-    background-color: hsla(30, 28%, 97%, 1);
-    background-image: radial-gradient(circle at 0% 0%, hsla(64.00000000000001, 81%, 77%, 0) 0%, transparent 82%), radial-gradient(circle at 1% 2%, hsla(5, 77%, 74%, 0.35) 0%, transparent 82%), radial-gradient(circle at 99% 2%, hsla(315, 77%, 74%, 0.35) 0%, transparent 80%), radial-gradient(circle at 60% 0%, hsla(256, 77%, 74%, 0) 3.1210986267166043%, transparent 40%), radial-gradient(circle at 80% 0%, hsla(191, 77%, 74%, 0) 3.1210986267166043%, transparent 40%), radial-gradient(circle at 100% 0%, hsla(152, 77%, 74%, 0) 3%, transparent 40%), radial-gradient(circle at 49% 70%, hsla(23.999999999999968, 23%, 91%, 0) 30.719457311450917%, transparent 72.48279374983174%);
-    background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
+  background-color: hsla(30, 28%, 97%, 100%);
+  background-image:
+    radial-gradient(circle at 0% 0%, hsla(64deg, 81%, 77%, 0%) 0%, transparent 82%),
+    radial-gradient(circle at 1% 2%, hsla(5deg, 77%, 74%, 35%) 0%, transparent 82%),
+    radial-gradient(circle at 99% 2%, hsla(315deg, 77%, 74%, 35%) 0%, transparent 80%),
+    radial-gradient(circle at 60% 0%, hsla(256deg, 77%, 74%, 0%) 3.12%, transparent 40%),
+    radial-gradient(circle at 80% 0%, hsla(191deg, 77%, 74%, 0%) 3.12%, transparent 40%),
+    radial-gradient(circle at 100% 0%, hsla(152deg, 77%, 74%, 0%) 3%, transparent 40%),
+    radial-gradient(circle at 49% 70%, hsla(24deg, 23%, 91%, 0%) 30.72%, transparent 72.48%);
+  background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
 }
 
 .essentials {
-    background-color: hsla(30, 28%, 97%, 1);
-    background-image: radial-gradient(circle at 0% 0%, hsla(64.00000000000001, 81%, 77%, 0) 0%, transparent 82%), radial-gradient(circle at 1% 2%, hsla(5, 77%, 74%, 0) 0%, transparent 82%), radial-gradient(circle at 1% 2%, hsla(315, 77%, 74%, 0) 0%, transparent 80%), radial-gradient(circle at 1% 2%, hsla(256, 77%, 74%, 0.35) 0%, transparent 80%), radial-gradient(circle at 98% 2%, hsla(191, 77%, 74%, 0.35) 0%, transparent 80%), radial-gradient(circle at 100% 0%, hsla(152, 77%, 74%, 0) 3%, transparent 40%), radial-gradient(circle at 49% 70%, hsla(23.999999999999968, 23%, 91%, 0) 30.719457311450917%, transparent 72.48279374983174%);
-    background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
+  background-color: hsla(30deg, 28%, 97%, 100%);
+  background-image:
+    radial-gradient(circle at 0% 0%, hsla(64deg, 81%, 77%, 0%) 0%, transparent 82%),
+    radial-gradient(circle at 1% 2%, hsla(5deg, 77%, 74%, 0%) 0%, transparent 82%),
+    radial-gradient(circle at 1% 2%, hsla(315deg, 77%, 74%, 0%) 0%, transparent 80%),
+    radial-gradient(circle at 1% 2%, hsla(256deg, 77%, 74%, 35%) 0%, transparent 80%),
+    radial-gradient(circle at 98% 2%, hsla(191deg, 77%, 74%, 35%) 0%, transparent 80%),
+    radial-gradient(circle at 100% 0%, hsla(152deg, 77%, 74%, 0%) 3%, transparent 40%),
+    radial-gradient(circle at 49% 70%, hsla(24deg, 23%, 91%, 0%) 30.72%, transparent 72.48%);
+  background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
 }
+
 .search {
-    background-color: hsla(30, 28%, 97%, 1);
-    background-image: radial-gradient(circle at 0% 0%, hsla(64.00000000000001, 81%, 77%, 0) 0%, transparent 82%), radial-gradient(circle at 1% 2%, hsla(5, 77%, 74%, 0) 0%, transparent 82%), radial-gradient(circle at 1% 2%, hsla(315, 77%, 74%, 0.35) 0%, transparent 80%), radial-gradient(circle at 98% 3%, hsla(256, 77%, 74%, 0.35) 0%, transparent 80%), radial-gradient(circle at 80% 0%, hsla(191, 77%, 74%, 0) 3.1210986267166043%, transparent 40%), radial-gradient(circle at 100% 0%, hsla(152, 77%, 74%, 0) 3%, transparent 40%), radial-gradient(circle at 49% 70%, hsla(23.999999999999968, 23%, 91%, 0) 30.719457311450917%, transparent 72.48279374983174%);
-    background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
+  background-color: hsla(30deg, 28%, 97%, 100%);
+  background-image:
+    radial-gradient(circle at 0% 0%, hsla(64deg, 81%, 77%, 0%) 0%, transparent 82%),
+    radial-gradient(circle at 1% 2%, hsla(5deg, 77%, 74%, 0%) 0%, transparent 82%),
+    radial-gradient(circle at 1% 2%, hsla(315deg, 77%, 74%, 35%) 0%, transparent 80%),
+    radial-gradient(circle at 98% 3%, hsla(256deg, 77%, 74%, 35%) 0%, transparent 80%),
+    radial-gradient(circle at 80% 0%, hsla(191deg, 77%, 74%, 0%) 3.12%, transparent 40%),
+    radial-gradient(circle at 100% 0%, hsla(152deg, 77%, 74%, 0%) 3%, transparent 40%),
+    radial-gradient(circle at 49% 70%, hsla(24deg, 23%, 91%, 0%) 30.72%, transparent 72.48%);
+  background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
 }
+
 .all {
-    background-color: hsla(30, 28%, 97%, 1);
-    background-image: radial-gradient(circle at 0% 0%, hsla(64.00000000000001, 81%, 77%, 0) 0%, transparent 82%), radial-gradient(circle at 1% 2%, hsla(5, 77%, 74%, 0) 0%, transparent 82%), radial-gradient(circle at 1% 2%, hsla(315, 77%, 74%, 0) 0%, transparent 80%), radial-gradient(circle at 1% 2%, hsla(256, 77%, 74%, 0) 0%, transparent 80%), radial-gradient(circle at 1% 2%, hsla(191, 77%, 74%, 0.35) 0%, transparent 80%), radial-gradient(circle at 99% 2%, hsla(152, 77%, 74%, 0.35) 0%, transparent 80%), radial-gradient(circle at 49% 70%, hsla(23.999999999999968, 23%, 91%, 0) 30.719457311450917%, transparent 72.48279374983174%);
-    background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
+  background-color: hsla(30deg, 28%, 97%, 100%);
+  background-image:
+    radial-gradient(circle at 0% 0%, hsla(64deg, 81%, 77%, 0%) 0%, transparent 82%),
+    radial-gradient(circle at 1% 2%, hsla(5deg, 77%, 74%, 0%) 0%, transparent 82%),
+    radial-gradient(circle at 1% 2%, hsla(315deg, 77%, 74%, 0%) 0%, transparent 80%),
+    radial-gradient(circle at 1% 2%, hsla(256deg, 77%, 74%, 0%) 0%, transparent 80%),
+    radial-gradient(circle at 1% 2%, hsla(191deg, 77%, 74%, 35%) 0%, transparent 80%),
+    radial-gradient(circle at 99% 2%, hsla(152deg, 77%, 74%, 35%) 0%, transparent 80%),
+    radial-gradient(circle at 49% 70%, hsla(24deg, 23%, 91%, 0%) 30.7%, transparent 72.5%);
+  background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
 }
 
 .createWorkspaceTextBorder {
-    border: 1px dashed;
-    border-radius: 8px;
-    max-height: 160px;
-    width: 210px;
-    padding: 10px;
-    border-color: $ouiColorDarkShade;
+  border: 1px dashed;
+  border-radius: 8px;
+  max-height: 160px;
+  width: 210px;
+  padding: 10px;
+  border-color: $ouiColorDarkShade;
 }
 
 .fixedLeftBottomIcon {
-    position: fixed;
-    bottom: 12px;
-    left: 12px;
-  }
+  position: fixed;
+  bottom: 12px;
+  left: 12px;
+}
