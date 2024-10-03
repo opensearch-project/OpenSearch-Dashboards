@@ -204,6 +204,7 @@ export class WorkspaceClient implements IWorkspaceClient {
     settings: {
       dataSources?: string[];
       permissions?: SavedObjectPermissions;
+      dataConnections?: string[];
     }
   ): Promise<IResponse<Pick<WorkspaceAttributeWithPermission, 'id'>>> {
     const path = this.getPath();
@@ -298,6 +299,7 @@ export class WorkspaceClient implements IWorkspaceClient {
     settings: {
       dataSources?: string[];
       permissions?: SavedObjectPermissions;
+      dataConnections?: string[];
     }
   ): Promise<IResponse<boolean>> {
     const path = this.getPath(id);

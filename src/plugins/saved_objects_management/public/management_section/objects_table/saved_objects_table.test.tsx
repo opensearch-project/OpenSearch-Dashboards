@@ -735,7 +735,7 @@ describe('SavedObjectsTable', () => {
       expect(filters[1].options[1].value).toBe('bar');
     });
 
-    it('workspace filter only include current workspaces when in a workspace', async () => {
+    it('should hide workspace filter when in a workspace', async () => {
       const applications = applicationServiceMock.createStartContract();
       applications.capabilities = {
         navLinks: {},
@@ -775,9 +775,7 @@ describe('SavedObjectsTable', () => {
       const props = component.find('Table').props() as TableProps;
       const filters = props.filters;
       const wsFilter = filters.filter((f) => f.field === 'workspaces');
-      expect(wsFilter.length).toBe(1);
-      expect(wsFilter[0].options.length).toBe(1);
-      expect(wsFilter[0].options[0].value).toBe('foo');
+      expect(wsFilter.length).toBe(0);
     });
 
     it('current workspace in find options when workspace on', async () => {

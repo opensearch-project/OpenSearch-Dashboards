@@ -102,6 +102,8 @@ export const registerContentToSearchUseCasePage = (
         title: card.title,
         description: card.description,
         cardProps: {
+          titleElement: 'h4',
+          titleSize: 's',
           selectable: {
             onClick: () => {
               window.open(card.documentURL, '_blank');
@@ -115,7 +117,7 @@ export const registerContentToSearchUseCasePage = (
     });
   });
 
-  const searchIcon = <EuiIcon color="subdued" size="l" type="search" />;
+  const searchIcon = <EuiIcon className="searchIcon" size="l" type="search" />;
 
   const searchTypeCards = [
     {
@@ -133,7 +135,7 @@ export const registerContentToSearchUseCasePage = (
         <EuiLink
           external
           target="_blank"
-          href="https://opensearch.org/docs/latest/query-dsl/full-text/query-string/"
+          href="https://opensearch.org/docs/latest/query-dsl/full-text/"
         >
           View Documentation
         </EuiLink>
@@ -194,7 +196,7 @@ export const registerContentToSearchUseCasePage = (
         'home.searchOverview.searchTypes.neuralSparseSearch.description',
         {
           defaultMessage:
-            'Neural sparse search combines many of the advantages of Lexical and semantic search.',
+            'Neural sparse search combines many of the advantages of lexical and semantic search.',
         }
       ),
       icon: searchIcon,
@@ -216,7 +218,7 @@ export const registerContentToSearchUseCasePage = (
       }),
       description: i18n.translate('home.searchOverview.searchTypes.hybridSearch.description', {
         defaultMessage:
-          'For many uses, lexical and semantic search are complementary: Lexical search performs better on highly specific queries, while semantic search performs better on broader queries. Hybrid search runs both search types and combines the results, generally producing better results than either one separately.',
+          'For many uses, lexical and semantic search are complementary: lexical search performs better on highly specific queries, while semantic search performs better on broader queries. Hybrid search runs both search types and combines the results, generally producing better results than either one separately.',
       }),
       icon: searchIcon,
       footer: (
@@ -244,6 +246,8 @@ export const registerContentToSearchUseCasePage = (
         cardProps: {
           children: <div className="euiCard__footer">{card.footer}</div>,
           layout: 'horizontal',
+          titleElement: 'h3',
+          titleSize: 's',
         },
       }),
       getTargetArea: () => SEARCH_OVERVIEW_CONTENT_AREAS.DIFFERENT_SEARCH_TYPES,

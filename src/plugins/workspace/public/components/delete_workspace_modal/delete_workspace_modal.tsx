@@ -25,9 +25,11 @@ export interface DeleteWorkspaceModalProps {
   onClose: () => void;
   selectedWorkspaces?: WorkspaceAttribute[];
   onDeleteSuccess?: () => void;
+  typeTextToConfirm?: string;
 }
 
 export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
+  const typeTextToConfirm = props.typeTextToConfirm ?? 'delete';
   const [value, setValue] = useState('');
   const { onClose, selectedWorkspaces, onDeleteSuccess } = props;
   const {
@@ -94,10 +96,10 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
             </ul>
             <EuiSpacer />
             <EuiText color="subdued">
-              To confirm your action, type <b>delete</b>.
+              To confirm your action, type <b>{typeTextToConfirm}</b>.
             </EuiText>
             <EuiCompressedFieldText
-              placeholder="delete"
+              placeholder={typeTextToConfirm}
               fullWidth
               value={value}
               data-test-subj="delete-workspace-modal-input"
@@ -119,7 +121,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
           onClick={deleteWorkspaces}
           fill
           color="danger"
-          disabled={value !== 'delete'}
+          disabled={value !== typeTextToConfirm}
         >
           Delete
         </EuiSmallButton>

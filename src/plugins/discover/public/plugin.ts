@@ -51,6 +51,7 @@ import {
   setScopedHistory,
   syncHistoryLocations,
   getServices,
+  setUsageCollector,
 } from './opensearch_dashboards_services';
 import { createSavedSearchesLoader } from './saved_searches';
 import { buildServices } from './build_services';
@@ -75,6 +76,7 @@ declare module '../../share/public' {
     [DISCOVER_APP_URL_GENERATOR]: UrlGeneratorState<DiscoverUrlGeneratorState>;
   }
 }
+import { UsageCollectionSetup } from '../../usage_collection/public';
 
 /**
  * @public
@@ -128,6 +130,7 @@ export interface DiscoverSetupPlugins {
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
   dataExplorer: DataExplorerPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 /**
@@ -174,6 +177,7 @@ export class DiscoverPlugin
       );
     }
 
+    setUsageCollector(plugins.usageCollection);
     this.docViewsRegistry = new DocViewsRegistry();
     setDocViewsRegistry(this.docViewsRegistry);
     this.docViewsRegistry.addDocView({

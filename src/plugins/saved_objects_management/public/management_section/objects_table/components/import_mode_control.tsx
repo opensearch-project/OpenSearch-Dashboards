@@ -47,6 +47,7 @@ export interface ImportModeControlProps {
   isLegacyFile: boolean;
   updateSelection: (result: ImportMode) => void;
   optionLabel: string;
+  useUpdatedUX?: boolean;
 }
 
 export interface ImportMode {
@@ -54,32 +55,43 @@ export interface ImportMode {
   overwrite: boolean;
 }
 
-const createNewCopiesDisabled = {
+const generateCreateNewCopiesDisabled = (useUpdatedUX?: boolean) => ({
   id: 'createNewCopiesDisabled',
   text: i18n.translate(
     'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.disabledTitle',
-    { defaultMessage: 'Check for existing objects' }
+    {
+      defaultMessage: 'Check for existing {useUpdatedUX, select, true {assets} other {objects}}',
+      values: { useUpdatedUX },
+    }
   ),
   tooltip: i18n.translate(
     'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.disabledText',
     {
-      defaultMessage: 'Check if objects were previously copied or imported.',
+      defaultMessage:
+        'Check if {useUpdatedUX, select, true {assets} other {objects}} were previously copied or imported.',
+      values: { useUpdatedUX },
     }
   ),
-};
-const createNewCopiesEnabled = {
+});
+const generateCreateNewCopiesEnabled = (useUpdatedUX?: boolean) => ({
   id: 'createNewCopiesEnabled',
   text: i18n.translate(
     'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.enabledTitle',
-    { defaultMessage: 'Create new objects with unique IDs' }
+    {
+      defaultMessage:
+        'Create new {useUpdatedUX, select, true {assets} other {objects}} with unique IDs',
+      values: { useUpdatedUX },
+    }
   ),
   tooltip: i18n.translate(
     'savedObjectsManagement.objectsTable.importModeControl.createNewCopies.enabledText',
     {
-      defaultMessage: 'Use this option to create one or more copies of the object.',
+      defaultMessage:
+        'Use this option to create one or more copies of the {useUpdatedUX, select, true {asset} other {object}}.',
+      values: { useUpdatedUX },
     }
   ),
-};
+});
 const overwriteEnabled = {
   id: 'overwriteEnabled',
   label: i18n.translate(
@@ -123,9 +135,12 @@ export const ImportModeControl = ({
   isLegacyFile,
   updateSelection,
   optionLabel,
+  useUpdatedUX,
 }: ImportModeControlProps) => {
   const [createNewCopies, setCreateNewCopies] = useState(initialValues.createNewCopies);
   const [overwrite, setOverwrite] = useState(initialValues.overwrite);
+  const createNewCopiesEnabled = generateCreateNewCopiesEnabled(useUpdatedUX);
+  const createNewCopiesDisabled = generateCreateNewCopiesDisabled(useUpdatedUX);
 
   const onChange = (partial: Partial<ImportMode>) => {
     if (partial.createNewCopies !== undefined) {

@@ -328,7 +328,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
         : datePicker}
       {renderQueryEditor()}
       <EuiFlexItem>
-        <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
+        <EuiFlexGroup responsive={false} gutterSize="s" direction="column">
           <EuiFlexItem>{renderSharingMetaFields()}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

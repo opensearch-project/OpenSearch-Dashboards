@@ -29,8 +29,10 @@
  */
 
 import { isObject } from 'lodash';
-import { SavedObjectsClientContract, SavedObjectAttributes } from 'src/core/public';
+import { SavedObjectsClientContract, SavedObjectAttributes, CoreStart } from 'src/core/public';
+import { first } from 'rxjs/operators';
 import { SavedQueryAttributes, SavedQuery, SavedQueryService } from './types';
+import { QueryStringContract } from '../query_string';
 
 type SerializedSavedQueryAttributes = SavedObjectAttributes &
   SavedQueryAttributes & {
@@ -41,7 +43,9 @@ type SerializedSavedQueryAttributes = SavedObjectAttributes &
   };
 
 export const createSavedQueryService = (
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  queryStringManager?: QueryStringContract,
+  application?: CoreStart['application']
 ): SavedQueryService => {
   const saveQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
     if (!attributes.title.length) {
@@ -117,12 +121,29 @@ export const createSavedQueryService = (
       page: activePage,
     });
 
+    let queries = response.savedObjects.map(
+      (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
+        parseSavedQueryObject(savedObject)
+    );
+
+    const currentAppId =
+      (await application?.currentAppId$?.pipe(first()).toPromise()) ?? Promise.resolve(undefined);
+    const languageService = queryStringManager?.getLanguageService();
+
+    // Filtering saved queries based on language supported by cirrent application
+    if (currentAppId && languageService) {
+      queries = queries.filter((query) => {
+        const languageId = query.attributes.query.language;
+        return (
+          languageService?.getLanguage(languageId)?.supportedAppNames?.includes(currentAppId) ??
+          true
+        );
+      });
+    }
+
     return {
       total: response.total,
-      queries: response.savedObjects.map(
-        (savedObject: { id: string; attributes: SerializedSavedQueryAttributes }) =>
-          parseSavedQueryObject(savedObject)
-      ),
+      queries,
     };
   };
 

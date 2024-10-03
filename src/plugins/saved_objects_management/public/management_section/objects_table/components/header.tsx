@@ -130,8 +130,8 @@ export const Header = ({
                 disabled: objectCount === 0,
                 iconType: 'copy',
                 label: i18n.translate(
-                  'savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel',
-                  { defaultMessage: 'Copy all objects to...' }
+                  'savedObjectsManagement.objectsTable.header.duplicateAllAssetsButtonLabel',
+                  { defaultMessage: 'Copy all assets to...' }
                 ),
               } as TopNavControlButtonData,
             ]
@@ -141,9 +141,12 @@ export const Header = ({
           run: onExportAll,
           controlType: 'button',
           iconType: 'exportAction',
-          label: i18n.translate('savedObjectsManagement.objectsTable.header.exportButtonLabel', {
-            defaultMessage: 'Export all objects',
-          }),
+          label: i18n.translate(
+            'savedObjectsManagement.objectsTable.header.exportAssetsButtonLabel',
+            {
+              defaultMessage: 'Export all assets',
+            }
+          ),
         } as TopNavControlButtonData,
         ...(showImportButton
           ? [

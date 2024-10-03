@@ -4,3 +4,4 @@
  */
 
 export * from './use_generate';
+export * from './use_query_assist';

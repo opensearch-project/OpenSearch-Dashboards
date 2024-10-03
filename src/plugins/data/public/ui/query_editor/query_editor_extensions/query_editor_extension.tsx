@@ -14,6 +14,7 @@ interface QueryEditorExtensionProps {
   dependencies: QueryEditorExtensionDependencies;
   componentContainer: Element;
   bannerContainer: Element;
+  queryControlsContainer: Element;
 }
 
 export interface QueryEditorExtensionDependencies {
@@ -69,6 +70,10 @@ export interface QueryEditorExtensionConfig {
    * @returns The component the query editor extension.
    */
   getBanner?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
+
+  getSearchBarButton?: (
+    dependencies: QueryEditorExtensionDependencies
+  ) => React.ReactElement | null;
 }
 const QueryEditorExtensionPortal: React.FC<{ container: Element }> = (props) => {
   if (!props.children) return null;
@@ -89,6 +94,11 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
   ]);
 
   const component = useMemo(() => props.config.getComponent?.(props.dependencies), [
+    props.config,
+    props.dependencies,
+  ]);
+
+  const queryControlButtons = useMemo(() => props.config.getSearchBarButton?.(props.dependencies), [
     props.config,
     props.dependencies,
   ]);
@@ -116,6 +126,9 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
       </QueryEditorExtensionPortal>
       <QueryEditorExtensionPortal container={props.componentContainer}>
         {component}
+      </QueryEditorExtensionPortal>
+      <QueryEditorExtensionPortal container={props.queryControlsContainer}>
+        {queryControlButtons}
       </QueryEditorExtensionPortal>
     </>
   );

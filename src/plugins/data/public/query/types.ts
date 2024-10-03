@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IUiSettingsClient, SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import {
+  ApplicationSetup,
+  ApplicationStart,
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+} from 'opensearch-dashboards/public';
 import { Observable } from 'rxjs';
 import { DataStorage } from '../../common';
 import { IndexPattern, IndexPatternsService } from '../index_patterns';
@@ -38,6 +43,7 @@ export interface QueryServiceSetupDependencies {
   storage: DataStorage;
   sessionStorage: DataStorage;
   defaultSearchInterceptor: ISearchInterceptor;
+  applicaton: ApplicationSetup;
 }
 
 /** @internal */
@@ -46,4 +52,5 @@ export interface QueryServiceStartDependencies {
   storage: DataStorage;
   uiSettings: IUiSettingsClient;
   indexPatterns: IndexPatternsService;
+  applicaton: ApplicationStart;
 }

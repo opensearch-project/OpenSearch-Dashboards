@@ -14,6 +14,7 @@ import {
   ContentManagementPluginStart,
   SEARCH_OVERVIEW_PAGE_ID,
 } from '../../../../../content_management/public';
+import { SEARCH_USE_CASE_ID } from '../../../../../../core/public';
 
 interface Props {
   contentManagement: ContentManagementPluginStart;
@@ -21,21 +22,31 @@ interface Props {
 
 export const SearchUseCaseOverviewApp = ({ contentManagement }: Props) => {
   const {
-    services: { workspaces, chrome },
+    services: { chrome },
   } = useOpenSearchDashboards<CoreStart>();
 
-  const currentWorkspace = useObservable(workspaces.currentWorkspace$);
-
-  const title = i18n.translate('home.usecase.search.title', { defaultMessage: 'Search overview' });
+  const currentNavGroup = useObservable(chrome.navGroup.getCurrentNavGroup$());
+  const isSearchUseCase = currentNavGroup?.id === SEARCH_USE_CASE_ID;
 
   useEffect(() => {
+    const title = i18n.translate('home.searchOverview.title', { defaultMessage: 'Overview' });
+    const titleWithUseCase = i18n.translate('home.searchOverview.titleWithUseCase', {
+      defaultMessage: 'Search Overview',
+    });
+
+    /**
+     * There have three cases for the page title:
+     * 1. Search workspace which currentNavGroup is Search, then the page title is "Overview" as workspace name has the use case information
+     * 2. Analytics(All) workspace which currentNavGroup is All, then the page title is "Search Overview" to differentiate with other overview pages like Observability/Security Analytics
+     * 3. workspace is disable, the currentNavGroup is undefined or All, then the page title is "Search Overview" to indicate this overview page is for search
+     */
     const breadcrumbs: EuiBreadcrumb[] = [
       {
-        text: currentWorkspace?.name || title,
+        text: isSearchUseCase ? title : titleWithUseCase,
       },
     ];
     chrome.setBreadcrumbs(breadcrumbs);
-  }, [chrome, currentWorkspace, title]);
+  }, [chrome, isSearchUseCase]);
 
   return (
     <I18nProvider>

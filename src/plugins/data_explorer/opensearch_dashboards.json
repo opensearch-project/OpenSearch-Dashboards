@@ -8,7 +8,8 @@
     "data",
     "navigation",
     "embeddable",
-    "expressions"
+    "expressions",
+    "usageCollection"
   ],
   "optionalPlugins": [],
   "requiredBundles": [

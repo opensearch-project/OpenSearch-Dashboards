@@ -1,0 +1,2 @@
+fix:
+- [Workspace]Remove what's new card in workspace overview page ([#8435](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8435))

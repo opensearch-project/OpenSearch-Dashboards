@@ -223,13 +223,13 @@ describe('Header', () => {
     const component = mountWithIntl(<Header {...props} />);
     expect(component.find('[data-test-subj="headerApplicationTitle"]').exists()).toBeTruthy();
     expect(component.find('[data-test-subj="breadcrumb first"]').exists()).toBeTruthy();
-    expect(component.find('[data-test-subj="headerBadgeControl"]').exists()).toBeTruthy();
-    expect(component.find('HeaderBadge').exists()).toBeTruthy();
-    expect(component.find('[data-test-subj="headerLeftControl"]').exists()).toBeTruthy();
-    expect(component.find('HeaderNavControls').exists()).toBeTruthy();
-    expect(component.find('[data-test-subj="headerCenterControl"]').exists()).toBeTruthy();
-    expect(component.find('[data-test-subj="headerRightControl"]').exists()).toBeTruthy();
-    expect(component.find('HeaderActionMenu').exists()).toBeTruthy();
+    expect(component.find('[data-test-subj="headerBadgeControl"]').exists()).toBeFalsy();
+    expect(component.find('HeaderBadge').exists()).toBeFalsy();
+    expect(component.find('[data-test-subj="headerLeftControl"]').exists()).toBeFalsy();
+    expect(component.find('HeaderNavControls').exists()).toBeFalsy();
+    expect(component.find('[data-test-subj="headerCenterControl"]').exists()).toBeFalsy();
+    expect(component.find('[data-test-subj="headerRightControl"]').exists()).toBeFalsy();
+    expect(component.find('HeaderActionMenu').exists()).toBeFalsy();
     expect(component.find('[data-test-subj="headerDescriptionControl"]').exists()).toBeTruthy();
     expect(component.find('[data-test-subj="headerBottomControl"]').exists()).toBeTruthy();
     expect(component).toMatchSnapshot();
@@ -252,9 +252,24 @@ describe('Header', () => {
     const component = mountWithIntl(<Header {...props} />);
     expect(component.find('[data-test-subj="headerApplicationTitle"]').exists()).toBeFalsy();
     expect(component.find('[data-test-subj="breadcrumb first"]').exists()).toBeFalsy();
-    expect(component.find('HeaderActionMenu').exists()).toBeTruthy();
+    expect(component.find('HeaderActionMenu').exists()).toBeFalsy();
     expect(component.find('RecentItems').exists()).toBeTruthy();
-    expect(component.find('[data-test-subj="headerRightControl"]').exists()).toBeTruthy();
+    expect(component.find('[data-test-subj="headerRightControl"]').exists()).toBeFalsy();
     expect(component).toMatchSnapshot();
+  });
+
+  it('should remember the collapse state when new nav is enabled', () => {
+    const branding = {
+      useExpandedHeader: false,
+    };
+    const props = {
+      ...mockProps(),
+      branding,
+      useUpdatedHeader: true,
+      onIsLockedUpdate: jest.fn(),
+    };
+    const component = mountWithIntl(<Header {...props} />);
+    component.find(EuiHeaderSectionItemButton).first().simulate('click');
+    expect(props.onIsLockedUpdate).toBeCalledWith(true);
   });
 });
