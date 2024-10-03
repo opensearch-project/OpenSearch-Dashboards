@@ -52,6 +52,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     color: euiPaletteColorBlind()[0],
     ...(defaultSelectedUseCase
       ? {
+          name: defaultSelectedUseCase.title,
           features: [getUseCaseFeatureConfig(defaultSelectedUseCase.id)],
         }
       : {}),
