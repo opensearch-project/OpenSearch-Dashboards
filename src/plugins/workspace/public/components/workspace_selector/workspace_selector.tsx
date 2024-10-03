@@ -25,6 +25,7 @@ import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { WorkspaceUseCase } from '../../types';
 import { validateWorkspaceColor } from '../../../common/utils';
 import { WorkspacePickerContent } from '../workspace_picker_content/workspace_picker_content';
+import './workspace_selector.scss';
 
 const createWorkspaceButton = i18n.translate('workspace.menu.button.createWorkspace', {
   defaultMessage: 'Create workspace',
@@ -82,13 +83,13 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
           padding: '0 5px',
         }}
       >
-        <small>
+        <small className="workspaceNameLabel">
           {i18n.translate('workspace.left.nav.selector.label', {
             defaultMessage: 'WORKSPACE',
           })}
         </small>
       </EuiText>
-      <EuiPanel paddingSize="s" borderRadius="m">
+      <EuiPanel paddingSize="s" borderRadius="m" color="transparent" hasBorder>
         <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="s" justifyContent="flexStart">

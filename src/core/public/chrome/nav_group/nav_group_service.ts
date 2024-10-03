@@ -141,6 +141,8 @@ export class ChromeNavGroupService {
 
     // Append all the links that do not have use case info to keep backward compatible
     const linkIdsWithNavGroupInfo = Object.values(navGroupsMap).reduce((accumulator, navGroup) => {
+      // Nav groups without type will be regarded as use case,
+      // we should transform use cases to a category and append links with `showInAllNavGroup: true` under the category
       if (!navGroup.type) {
         // Append use case section into left navigation
         const categoryInfo = {
@@ -362,7 +364,9 @@ export class ChromeNavGroupService {
           });
         };
         if (visibleUseCases.length === 1) {
-          // It means we are in a workspace, we should only use the visible use cases
+          // The length will be 1 if inside a workspace
+          // as workspace plugin will register a filter to only make the selected nav group visible.
+          // In order to tell which nav group we are in, we should use the only visible use case if the visibleUseCases.length equals 1.
           visibleUseCases.forEach((navGroup) => mapAppIdToNavGroup(navGroup));
         } else {
           // Nav group of Hidden status should be filtered out when counting navGroups the currentApp belongs to

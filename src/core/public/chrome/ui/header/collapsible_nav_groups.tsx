@@ -116,6 +116,9 @@ export function NavGroups({
          */
         href: undefined,
         onClick: undefined,
+        /**
+         * The data-test-subj has to be undefined because we render the element with the attribute in CollapsibleNavGroupsLabel
+         */
         'data-test-subj': undefined,
         className: classNames(props.className, 'nav-link-parent-item'),
         name: (
