@@ -47,18 +47,12 @@ const setupUseCaseStart = (options?: { navGroupEnabled?: boolean }) => {
   ]);
   const navGroupsMap$ = new BehaviorSubject<Record<string, NavGroupItemInMap>>(mockNavGroupsMap);
   const useCase = new UseCaseService();
-  const navLinks$ = new BehaviorSubject([
-    { id: 'dashboards', title: 'Dashboards', baseUrl: '', href: '' },
-    { id: 'searchRelevance', title: 'Search Relevance', baseUrl: '', href: '' },
-  ]);
 
   chrome.navGroup.getNavGroupEnabled.mockImplementation(() => options?.navGroupEnabled ?? true);
   chrome.navGroup.getNavGroupsMap$.mockImplementation(() => navGroupsMap$);
-  chrome.navLinks.getNavLinks$.mockImplementation(() => navLinks$);
 
   return {
     chrome,
-    navLinks$,
     navGroupsMap$,
     workspaceConfigurableApps$,
     useCaseStart: useCase.start({
@@ -191,22 +185,6 @@ describe('UseCaseService', () => {
           navLinks: [{ id: 'bar' }],
         },
       });
-      expect(fn).toHaveBeenCalledTimes(2);
-    });
-
-    it('should not emit after navLinks$ emit same value', async () => {
-      const { useCaseStart, navLinks$ } = setupUseCaseStart();
-      const registeredUseCases$ = useCaseStart.getRegisteredUseCases$();
-      const fn = jest.fn();
-
-      registeredUseCases$.subscribe(fn);
-
-      expect(fn).toHaveBeenCalledTimes(1);
-
-      navLinks$.next([...navLinks$.getValue()]);
-      expect(fn).toHaveBeenCalledTimes(1);
-
-      navLinks$.next([...navLinks$.getValue()].slice(1));
       expect(fn).toHaveBeenCalledTimes(2);
     });
 
