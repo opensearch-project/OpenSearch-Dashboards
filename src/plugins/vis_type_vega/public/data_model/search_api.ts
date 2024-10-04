@@ -156,21 +156,21 @@ export class SearchAPI {
   private getPPLRawResponseInspectorStats(response: RawPPLStrategySearchResponse['rawResponse']) {
     const stats: RequestStatistics = {};
     stats.hitsTotal = {
-      label: i18n.translate('data.search.searchSource.hitsTotalLabel', {
+      label: i18n.translate('visTypeVega.search.searchSource.hitsTotalLabel', {
         defaultMessage: 'Hits (total)',
       }),
       value: `${response.total}`,
-      description: i18n.translate('data.search.searchSource.hitsTotalDescription', {
+      description: i18n.translate('visTypeVega.search.searchSource.hitsTotalDescription', {
         defaultMessage: 'The number of documents that match the query.',
       }),
     };
 
     stats.hits = {
-      label: i18n.translate('data.search.searchSource.hitsLabel', {
+      label: i18n.translate('visTypeVega.search.searchSource.hitsLabel', {
         defaultMessage: 'Hits',
       }),
       value: `${response.size}`,
-      description: i18n.translate('data.search.searchSource.hitsDescription', {
+      description: i18n.translate('visTypeVega.search.searchSource.hitsDescription', {
         defaultMessage: 'The number of documents returned by the query.',
       }),
     };
