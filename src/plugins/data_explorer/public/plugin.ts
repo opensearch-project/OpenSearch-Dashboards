@@ -13,6 +13,7 @@ import {
   AppNavLinkStatus,
   ScopedHistory,
   AppUpdater,
+  DEFAULT_NAV_GROUPS,
 } from '../../../core/public';
 import {
   DataExplorerPluginSetup,
@@ -30,6 +31,7 @@ import {
 } from '../../opensearch_dashboards_utils/public';
 import { getPreloadedStore } from './utils/state_management';
 import { opensearchFilters } from '../../data/public';
+import { setUsageCollector } from './services';
 
 export class DataExplorerPlugin
   implements
@@ -46,10 +48,11 @@ export class DataExplorerPlugin
 
   public setup(
     core: CoreSetup<DataExplorerPluginStartDependencies, DataExplorerPluginStart>,
-    { data }: DataExplorerPluginSetupDependencies
+    { data, usageCollection }: DataExplorerPluginSetupDependencies
   ): DataExplorerPluginSetup {
     const viewService = this.viewService;
 
+    setUsageCollector(usageCollection);
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
       baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
       defaultSubUrl: '#/',
@@ -122,6 +125,41 @@ export class DataExplorerPlugin
         };
       },
     });
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: PLUGIN_ID,
+        order: 301, // The nav link should be put behind discover
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
+      {
+        id: PLUGIN_ID,
+        order: 301,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
+      {
+        id: PLUGIN_ID,
+        order: 201,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
+      {
+        id: PLUGIN_ID,
+        order: 201,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: PLUGIN_ID,
+        order: 201,
+      },
+    ]);
 
     return {
       ...this.viewService.setup(),

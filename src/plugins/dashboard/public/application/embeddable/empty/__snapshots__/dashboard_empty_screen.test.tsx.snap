@@ -708,6 +708,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                 >
                   <EuiButtonContent
                     className="euiButton__content"
+                    iconGap="m"
                     iconSide="left"
                     iconType="plus"
                     textProps={

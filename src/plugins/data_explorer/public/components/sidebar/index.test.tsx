@@ -47,14 +47,6 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => {
               ),
             },
           },
-          ui: {
-            Settings: {
-              getEnabledQueryEnhancementsUpdated$: jest
-                .fn()
-                .mockImplementation(() => createObservable(false)),
-            },
-            container$: jest.fn().mockImplementation(() => createObservable(null)),
-          },
         },
         notifications: {
           toasts: {
@@ -66,6 +58,9 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => {
         },
         overlays: {
           openConfirm: jest.fn(),
+        },
+        uiSettings: {
+          get: jest.fn(),
         },
       },
     }),

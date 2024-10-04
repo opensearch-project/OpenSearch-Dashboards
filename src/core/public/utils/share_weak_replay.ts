@@ -40,7 +40,7 @@ import { takeUntil } from 'rxjs/operators';
  * - Replay-ability is only maintained while the source is active, if it completes or errors
  *   then complete/error is sent to the current subscribers and the replay buffer is cleared.
  *
- * - Any subscription after the the source completes or errors will create a new subscription
+ * - Any subscription after the source completes or errors will create a new subscription
  *   to the source observable.
  *
  * @param bufferSize Optional, default is `Number.POSITIVE_INFINITY`

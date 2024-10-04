@@ -4,21 +4,25 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { AppCategory } from '../../../core/types';
-
+import {
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+  DATA_SOURCE_SAVED_OBJECT_TYPE,
+} from '../../data_source/common';
 export const WORKSPACE_FATAL_ERROR_APP_ID = 'workspace_fatal_error';
 export const WORKSPACE_CREATE_APP_ID = 'workspace_create';
 export const WORKSPACE_LIST_APP_ID = 'workspace_list';
 export const WORKSPACE_DETAIL_APP_ID = 'workspace_detail';
-/**
- * Since every workspace always have overview and update page, these features will be selected by default
- * and can't be changed in the workspace form feature selector
- */
-export const DEFAULT_SELECTED_FEATURES_IDS = [WORKSPACE_DETAIL_APP_ID];
+export const WORKSPACE_INITIAL_APP_ID = 'workspace_initial';
+export const WORKSPACE_NAVIGATION_APP_ID = 'workspace_navigation';
+
 export const WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID = 'workspace';
 export const WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID =
   'workspace_conflict_control';
 export const WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID = 'workspace_ui_settings';
+/**
+ * UI setting for user default workspace
+ */
+export const DEFAULT_WORKSPACE = 'defaultWorkspace';
 
 export enum WorkspacePermissionMode {
   Read = 'read',
@@ -40,44 +44,6 @@ export const PRIORITY_FOR_WORKSPACE_UI_SETTINGS_WRAPPER = -2;
 export const PRIORITY_FOR_WORKSPACE_CONFLICT_CONTROL_WRAPPER = -1;
 export const PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER = 0;
 
-export const WORKSPACE_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze({
-  // below categories are for workspace
-  getStarted: {
-    id: 'getStarted',
-    label: i18n.translate('core.ui.getStarted.label', {
-      defaultMessage: 'Get started',
-    }),
-    order: 10000,
-  },
-  dashboardAndReport: {
-    id: 'dashboardReport',
-    label: i18n.translate('core.ui.dashboardReport.label', {
-      defaultMessage: 'Dashboard and report',
-    }),
-    order: 11000,
-  },
-  investigate: {
-    id: 'investigate',
-    label: i18n.translate('core.ui.investigate.label', {
-      defaultMessage: 'Investigate',
-    }),
-    order: 12000,
-  },
-  detect: {
-    id: 'detect',
-    label: i18n.translate('core.ui.detect.label', {
-      defaultMessage: 'Detect',
-    }),
-    order: 13000,
-  },
-  searchSolution: {
-    id: 'searchSolution',
-    label: i18n.translate('core.ui.searchSolution.label', {
-      defaultMessage: 'Build search solution',
-    }),
-    order: 14000,
-  },
-});
 /**
  *
  * This is a temp solution to store relationships between use cases  and features.
@@ -86,6 +52,7 @@ export const WORKSPACE_APP_CATEGORIES: Record<string, AppCategory> = Object.free
  * store a static map in workspace.
  *
  */
+
 export const WORKSPACE_USE_CASES = Object.freeze({
   observability: {
     id: 'observability',
@@ -93,9 +60,9 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       defaultMessage: 'Observability',
     }),
     description: i18n.translate('workspace.usecase.observability.description', {
-      defaultMessage:
-        'Gain visibility into system health, performance, and reliability through monitoring and analysis of logs, metrics, and traces.',
+      defaultMessage: 'Gain visibility into your application and infrastructure',
     }),
+    icon: 'wsObservability',
     features: [
       'discover',
       'dashboards',
@@ -119,9 +86,9 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       defaultMessage: 'Security Analytics',
     }),
     description: i18n.translate('workspace.usecase.analytics.description', {
-      defaultMessage:
-        'Detect and investigate potential security threats and vulnerabilities across your systems and data.',
+      defaultMessage: 'Enhance your security posture with advanced analytics',
     }),
+    icon: 'wsSecurityAnalytics',
     features: [
       'discover',
       'dashboards',
@@ -138,14 +105,14 @@ export const WORKSPACE_USE_CASES = Object.freeze({
     ] as string[],
   },
   essentials: {
-    id: 'analytics',
+    id: 'essentials',
     title: i18n.translate('workspace.usecase.essentials.title', {
       defaultMessage: 'Essentials',
     }),
     description: i18n.translate('workspace.usecase.essentials.description', {
-      defaultMessage:
-        'Analyze data to derive insights, identify patterns and trends, and make data-driven decisions.',
+      defaultMessage: 'Get start with just the basics',
     }),
+    icon: 'wsEssentials',
     features: [
       'discover',
       'dashboards',
@@ -166,9 +133,9 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       defaultMessage: 'Search',
     }),
     description: i18n.translate('workspace.usecase.search.description', {
-      defaultMessage:
-        "Quickly find and explore relevant information across your organization's data sources.",
+      defaultMessage: 'Discover and query your data with ease',
     }),
+    icon: 'wsSearch',
     features: [
       'discover',
       'dashboards',
@@ -188,3 +155,15 @@ export const CURRENT_USER_PLACEHOLDER = '%me%';
 
 export const MAX_WORKSPACE_NAME_LENGTH = 40;
 export const MAX_WORKSPACE_DESCRIPTION_LENGTH = 200;
+
+export enum AssociationDataSourceModalMode {
+  OpenSearchConnections = 'opensearch-connections',
+  DirectQueryConnections = 'direction-query-connections',
+}
+export const USE_CASE_PREFIX = 'use-case-';
+
+// Workspace will handle both data source and data connection type saved object.
+export const WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES = [
+  DATA_SOURCE_SAVED_OBJECT_TYPE,
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+];

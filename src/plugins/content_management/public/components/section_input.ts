@@ -14,6 +14,8 @@ import { CARD_EMBEDDABLE } from './card_container/card_embeddable';
 import { CardContainerInput } from './card_container/types';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
+export const DASHBOARD_PANEL_WIDTH = 12;
+export const DASHBOARD_PANEL_HEIGHT = 15;
 
 export const createCardInput = (
   section: Section,
@@ -29,8 +31,11 @@ export const createCardInput = (
     id: section.id,
     title: section.title ?? '',
     hidePanelTitles: true,
+    hidePanelActions: true,
     viewMode: ViewMode.VIEW,
     columns: section.columns,
+    wrap: section.wrap,
+    grid: section.grid,
     panels,
     ...section.input,
   };
@@ -41,11 +46,14 @@ export const createCardInput = (
         type: CARD_EMBEDDABLE,
         explicitInput: {
           id: content.id,
-          title: content.title,
+          title: content?.title,
           description: content.description,
+          toolTipContent: content?.toolTipContent,
+          getTitle: content?.getTitle,
           onClick: content.onClick,
           getIcon: content?.getIcon,
           getFooter: content?.getFooter,
+          cardProps: content.cardProps,
         },
       };
     }
@@ -71,12 +79,26 @@ export const createDashboardInput = async (
   const panels: DashboardContainerInput['panels'] = {};
   let x = 0;
   let y = 0;
-  const w = 12;
-  const h = 15;
   const counter = new BehaviorSubject(0);
 
   contents.forEach(async (content) => {
     counter.next(counter.value + 1);
+
+    let w = DASHBOARD_PANEL_WIDTH;
+    let h = DASHBOARD_PANEL_HEIGHT;
+
+    if ('width' in content && typeof content.width === 'number') {
+      if (content.width > 0 && content.width <= DASHBOARD_GRID_COLUMN_COUNT) {
+        w = content.width;
+      }
+    }
+
+    if ('height' in content && typeof content.height === 'number') {
+      if (content.height > 0) {
+        h = content.height;
+      }
+    }
+
     try {
       if (content.kind === 'dashboard') {
         let dashboardId = '';
@@ -120,7 +142,13 @@ export const createDashboardInput = async (
         return;
       }
 
-      const config: DashboardContainerInput['panels'][string] = {
+      // If current panel exceed the max dashboard container width, add the panel to the next row
+      if (x + w > DASHBOARD_GRID_COLUMN_COUNT) {
+        x = 0;
+        y = y + h;
+      }
+
+      const panelConfig: DashboardContainerInput['panels'][string] = {
         gridData: {
           w,
           h,
@@ -135,28 +163,27 @@ export const createDashboardInput = async (
         },
       };
 
+      // The new x starts from the current panel x + current panel width
       x = x + w;
-      if (x >= DASHBOARD_GRID_COLUMN_COUNT) {
-        x = 0;
-        y = y + h;
-      }
 
       if (content.kind === 'visualization') {
-        config.type = 'visualization';
+        panelConfig.type = 'visualization';
         if (content.input.kind === 'dynamic') {
-          config.explicitInput.savedObjectId = await content.input.get();
+          panelConfig.explicitInput.savedObjectId = await content.input.get();
         }
         if (content.input.kind === 'static') {
-          config.explicitInput.savedObjectId = content.input.id;
+          panelConfig.explicitInput.savedObjectId = content.input.id;
         }
       }
 
       if (content.kind === 'custom') {
-        config.type = CUSTOM_CONTENT_EMBEDDABLE;
-        config.explicitInput.render = content.render;
+        panelConfig.type = CUSTOM_CONTENT_EMBEDDABLE;
+        panelConfig.explicitInput.render = content.render;
+        // Currently, for custom content, there is no case that requires panel actions, so hide it
+        panelConfig.explicitInput.hidePanelActions = true;
       }
 
-      panels[content.id] = config;
+      panels[content.id] = panelConfig;
     } catch (e) {
       // eslint-disable-next-line
       console.log(e);

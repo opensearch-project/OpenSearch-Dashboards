@@ -352,15 +352,6 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on header w
         "closed": false,
         "hasError": false,
         "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "workspace1",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
         "observers": Array [
           Subscriber {
             "_parentOrParents": null,
@@ -400,6 +391,15 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on header w
             "syncErrorValue": null,
           },
         ],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "workspace1",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
         "thrownError": null,
       },
       "initialized$": BehaviorSubject {
@@ -539,15 +539,6 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
         "closed": false,
         "hasError": false,
         "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "workspace1",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
         "observers": Array [
           Subscriber {
             "_parentOrParents": null,
@@ -587,6 +578,15 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
             "syncErrorValue": null,
           },
         ],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "workspace1",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
         "thrownError": null,
       },
       "initialized$": BehaviorSubject {
@@ -738,15 +738,6 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
         "closed": false,
         "hasError": false,
         "isStopped": false,
-        "observers": Array [],
-        "thrownError": null,
-      },
-      "currentWorkspaceId$": BehaviorSubject {
-        "_isScalar": false,
-        "_value": "workspace1",
-        "closed": false,
-        "hasError": false,
-        "isStopped": false,
         "observers": Array [
           Subscriber {
             "_parentOrParents": null,
@@ -786,6 +777,15 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
             "syncErrorValue": null,
           },
         ],
+        "thrownError": null,
+      },
+      "currentWorkspaceId$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": "workspace1",
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
         "thrownError": null,
       },
       "initialized$": BehaviorSubject {
@@ -869,11 +869,12 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
       >
         <h2>
           <FormattedMessage
-            defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
+            defaultMessage="Export {useUpdatedUX, select, true {{filteredItemCount, plural, one{# asset} other {# assets}}} other {{filteredItemCount, plural, one{# object} other {# objects}}}}"
             id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
             values={
               Object {
                 "filteredItemCount": 4,
+                "useUpdatedUX": undefined,
               }
             }
           />
@@ -936,9 +937,13 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
       checked={true}
       label={
         <FormattedMessage
-          defaultMessage="Include related objects"
+          defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
           id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-          values={Object {}}
+          values={
+            Object {
+              "useUpdatedUX": undefined,
+            }
+          }
         />
       }
       name="includeReferencesDeep"
@@ -992,11 +997,57 @@ exports[`SavedObjectsTable should render normally 1`] = `
   horizontalPosition="center"
 >
   <Header
+    applications={
+      Object {
+        "applications$": BehaviorSubject {
+          "_isScalar": false,
+          "_value": Map {},
+          "closed": false,
+          "hasError": false,
+          "isStopped": false,
+          "observers": Array [],
+          "thrownError": null,
+        },
+        "capabilities": Object {
+          "catalogue": Object {},
+          "management": Object {},
+          "navLinks": Object {},
+          "savedObjectsManagement": Object {
+            "delete": false,
+            "edit": false,
+            "read": true,
+          },
+          "workspaces": Object {},
+        },
+        "currentAppId$": Observable {
+          "_isScalar": false,
+          "source": Subject {
+            "_isScalar": false,
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        },
+        "getUrlForApp": [MockFunction],
+        "navigateToApp": [MockFunction],
+        "navigateToUrl": [MockFunction],
+        "registerMountContext": [MockFunction],
+        "setAppBadgeControls": [MockFunction],
+        "setAppBottomControls": [MockFunction],
+        "setAppCenterControls": [MockFunction],
+        "setAppDescriptionControls": [MockFunction],
+        "setAppLeftControls": [MockFunction],
+        "setAppRightControls": [MockFunction],
+      }
+    }
     objectCount={4}
     onDuplicate={[Function]}
     onExportAll={[Function]}
     onImport={[Function]}
     onRefresh={[Function]}
+    showImportButton={true}
   />
   <EuiSpacer
     size="xs"
@@ -1075,7 +1126,6 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "has": [MockFunction],
         }
       }
-      currentWorkspaceId=""
       filters={
         Array [
           Object {
@@ -1174,6 +1224,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
       onDuplicateSingle={[Function]}
       onExport={[Function]}
       onQueryChange={[Function]}
+      onRefresh={[Function]}
       onShowRelationships={[Function]}
       onTableChange={[Function]}
       pageIndex={0}

@@ -31,7 +31,7 @@
 export function collectBranch(leaf) {
   // walk up the branch for each parent
   function walk(item, memo) {
-    // record the the depth
+    // record the depth
     const depth = item.depth - 1;
 
     // For buckets, we use the column name to determine what the field name is.

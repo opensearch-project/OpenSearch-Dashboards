@@ -62,9 +62,8 @@ import {
   IDataFrame,
   IDataFrameResponse,
   createDataFrameCache,
-  dataFrameToSpec,
 } from '../../common/data_frames';
-import { getQueryService, getUiService } from '../services';
+import { getQueryService } from '../services';
 import { UI_SETTINGS } from '../../common';
 
 /** @internal */
@@ -86,6 +85,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchInterceptor!: ISearchInterceptor;
   private defaultSearchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
+  private dataFrame$ = new BehaviorSubject<IDataFrame | undefined>(undefined);
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -121,12 +121,31 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       expressions.registerFunction(aggShardDelay);
     }
 
+    const dfService: DataFrameService = {
+      get: () => {
+        const df = this.dfCache.get();
+        this.dataFrame$.next(df);
+        return df;
+      },
+      set: (dataFrame: IDataFrame) => {
+        this.dfCache.set(dataFrame);
+      },
+      clear: () => {
+        if (this.dfCache.get() === undefined) return;
+        this.dfCache.clear();
+        this.dataFrame$.next(undefined);
+      },
+      df$: this.dataFrame$,
+    };
+
     return {
       aggs,
       usageCollector: this.usageCollector!,
       __enhance: (enhancements: SearchEnhancements) => {
         this.searchInterceptor = enhancements.searchInterceptor;
       },
+      getDefaultSearchInterceptor: () => this.defaultSearchInterceptor,
+      df: dfService,
     };
   }
 
@@ -135,56 +154,38 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options) => {
-      const selectedLanguage = getQueryService().queryString.getQuery().language;
-      const uiService = getUiService();
-      const enhancement = uiService.Settings.getQueryEnhancements(selectedLanguage);
-      uiService.Settings.setUiOverridesByUserQueryLanguage(selectedLanguage);
       const isEnhancedEnabled = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
+      if (isEnhancedEnabled) {
+        const queryStringManager = getQueryService().queryString;
+        const language = queryStringManager.getQuery().language;
+        const languageConfig = queryStringManager.getLanguageService().getLanguage(language);
+        queryStringManager.getLanguageService().setUiOverridesByUserQueryLanguage(language);
 
-      if (enhancement) {
-        if (!isEnhancedEnabled) {
-          notifications.toasts.addWarning(
-            `Query enhancements are disabled. Please enable to use: ${selectedLanguage}.`
-          );
+        if (languageConfig) {
+          return languageConfig.search.search(request, options);
         }
-        return enhancement.search.search(request, options);
       }
+
       return this.defaultSearchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
-
     const dfService: DataFrameService = {
-      get: () => this.dfCache.get(),
-      set: async (dataFrame: IDataFrame) => {
-        if (this.dfCache.get() && this.dfCache.get()?.name !== dataFrame.name) {
-          indexPatterns.clearCache(this.dfCache.get()!.name, false);
-        }
-
-        if (
-          dataFrame.meta &&
-          dataFrame.meta.queryConfig &&
-          'dataSource' in dataFrame.meta.queryConfig
-        ) {
-          const dataSource = await indexPatterns.findDataSourceByTitle(
-            dataFrame.meta.queryConfig.dataSource
-          );
-          dataFrame.meta.queryConfig.dataSourceId = dataSource?.id;
-        }
+      get: () => {
+        const df = this.dfCache.get();
+        this.dataFrame$.next(df);
+        return df;
+      },
+      set: (dataFrame: IDataFrame) => {
         this.dfCache.set(dataFrame);
-        const dataSetName = `${dataFrame.meta?.queryConfig?.dataSourceId ?? ''}.${dataFrame.name}`;
-        const existingIndexPattern = await indexPatterns.get(dataSetName, true);
-        const dataSet = await indexPatterns.create(
-          dataFrameToSpec(dataFrame, existingIndexPattern?.id ?? dataSetName),
-          !existingIndexPattern?.id
-        );
-        indexPatterns.saveToCache(dataSetName, dataSet);
       },
       clear: () => {
         if (this.dfCache.get() === undefined) return;
         this.dfCache.clear();
+        this.dataFrame$.next(undefined);
       },
+      df$: this.dataFrame$,
     };
 
     const searchSourceDependencies: SearchSourceDependencies = {

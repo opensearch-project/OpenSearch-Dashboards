@@ -29,7 +29,6 @@
  */
 
 import { monaco } from '@osd/monaco';
-import { CoreSetup } from 'opensearch-dashboards/public';
 import { IFieldType, IndexPattern } from '../../../common/index_patterns';
 import { IDataPluginServices } from '../../types';
 
@@ -56,17 +55,15 @@ export interface QuerySuggestionGetFnArgs {
   boolFilter?: any;
   position?: monaco.Position;
   services?: IDataPluginServices;
-  core?: CoreSetup;
 }
 
 /** @public **/
 export interface QuerySuggestionBasic {
-  type: QuerySuggestionTypes | monaco.languages.CompletionItemKind;
+  type: QuerySuggestionTypes;
   description?: string | JSX.Element;
   end: number;
   start: number;
   text: string;
-  insertText: string;
   cursorIndex?: number;
 }
 
@@ -76,5 +73,19 @@ export interface QuerySuggestionField extends QuerySuggestionBasic {
   field: IFieldType;
 }
 
+export interface MonacoCompatibleQuerySuggestion
+  extends Pick<QuerySuggestionBasic, 'description' | 'cursorIndex'> {
+  type: monaco.languages.CompletionItemKind;
+  text: string;
+  detail: string;
+  insertText?: string;
+  insertTextRules?: monaco.languages.CompletionItemInsertTextRule;
+  replacePosition?: monaco.Range;
+  sortText?: string;
+}
+
 /** @public **/
-export type QuerySuggestion = QuerySuggestionBasic | QuerySuggestionField;
+export type QuerySuggestion =
+  | QuerySuggestionBasic
+  | QuerySuggestionField
+  | MonacoCompatibleQuerySuggestion;

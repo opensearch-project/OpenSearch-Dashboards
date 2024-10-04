@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import { dynamicConfigServiceMock } from '../../../config/dynamic_config_service.mock';
+
 jest.mock('../../export', () => ({
   exportSavedObjectsToStream: jest.fn(),
 }));
@@ -62,7 +64,8 @@ describe('POST /api/saved_objects/_export', () => {
     const router = httpSetup.createRouter('/api/saved_objects/');
     registerExportRoute(router, config);
 
-    await server.start();
+    const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
+    await server.start({ dynamicConfigService });
   });
 
   afterEach(async () => {

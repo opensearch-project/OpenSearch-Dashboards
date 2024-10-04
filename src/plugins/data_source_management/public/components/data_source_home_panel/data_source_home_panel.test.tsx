@@ -9,10 +9,10 @@ import { RouteComponentProps } from 'react-router-dom';
 import { EuiTab } from '@elastic/eui';
 import { DataSourceHomePanel } from './data_source_home_panel';
 import { DataSourceTableWithRouter } from '../data_source_table/data_source_table';
-import { ManageDirectQueryDataConnectionsTable } from '../direct_query_data_sources_components/direct_query_data_connection/manage_direct_query_data_connections_table';
-import { CreateButton } from '../create_button';
+import { ManageDirectQueryDataConnectionsTableWithRouter } from '../direct_query_data_sources_components/direct_query_data_connection/manage_direct_query_data_connections_table';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { getListBreadcrumbs } from '../breadcrumbs';
+import { navigationPluginMock } from 'src/plugins/navigation/public/mocks';
 
 jest.mock('../../../../opensearch_dashboards_react/public');
 jest.mock('../breadcrumbs');
@@ -22,7 +22,9 @@ jest.mock('../data_source_table/data_source_table', () => ({
 jest.mock(
   '../direct_query_data_sources_components/direct_query_data_connection/manage_direct_query_data_connections_table',
   () => ({
-    ManageDirectQueryDataConnectionsTable: () => <div>ManageDirectQueryDataConnectionsTable</div>,
+    ManageDirectQueryDataConnectionsTableWithRouter: () => (
+      <div>ManageDirectQueryDataConnectionsTableWithRouter</div>
+    ),
   })
 );
 jest.mock('../create_button', () => ({
@@ -42,6 +44,16 @@ describe('DataSourceHomePanel', () => {
       savedObjects: {},
       uiSettings: {},
       application: { capabilities: { dataSource: { canManage: true } } },
+      docLinks: {
+        links: {
+          opensearchDashboards: {
+            dataSource: {
+              guide: 'https://opensearch.org/docs/latest/dashboards/discover/multi-data-sources/',
+            },
+          },
+        },
+      },
+      navigation: navigationPluginMock.createStartContract(),
     },
   };
 
@@ -57,8 +69,10 @@ describe('DataSourceHomePanel', () => {
     match: {} as any,
   };
 
-  const shallowComponent = (props = defaultProps) => shallow(<DataSourceHomePanel {...props} />);
-  const mountComponent = (props = defaultProps) => mount(<DataSourceHomePanel {...props} />);
+  const shallowComponent = (props = defaultProps) =>
+    shallow(<DataSourceHomePanel useNewUX={false} {...props} />);
+  const mountComponent = (props = defaultProps) =>
+    mount(<DataSourceHomePanel useNewUX={false} {...props} />);
 
   test('renders correctly', () => {
     const wrapper = shallowComponent();
@@ -69,13 +83,13 @@ describe('DataSourceHomePanel', () => {
     const wrapper = mountComponent();
     wrapper.find(EuiTab).at(0).simulate('click');
     expect(wrapper.find(DataSourceTableWithRouter)).toHaveLength(1);
-    expect(wrapper.find(ManageDirectQueryDataConnectionsTable)).toHaveLength(0);
+    expect(wrapper.find(ManageDirectQueryDataConnectionsTableWithRouter)).toHaveLength(0);
   });
 
   test('renders ManageDirectQueryDataConnectionsTable when manageDirectQueryDataSources tab is selected', () => {
     const wrapper = mountComponent();
     wrapper.find(EuiTab).at(1).simulate('click');
-    expect(wrapper.find(ManageDirectQueryDataConnectionsTable)).toHaveLength(1);
+    expect(wrapper.find(ManageDirectQueryDataConnectionsTableWithRouter)).toHaveLength(1);
     expect(wrapper.find(DataSourceTableWithRouter)).toHaveLength(0);
   });
 
@@ -83,12 +97,12 @@ describe('DataSourceHomePanel', () => {
     const wrapper = mountComponent();
     expect(wrapper.find(DataSourceTableWithRouter)).toHaveLength(1);
     wrapper.find(EuiTab).at(1).simulate('click');
-    expect(wrapper.find(ManageDirectQueryDataConnectionsTable)).toHaveLength(1);
+    expect(wrapper.find(ManageDirectQueryDataConnectionsTableWithRouter)).toHaveLength(1);
   });
 
-  test('does not render OpenSearch connections tab when featureFlagStatus is false', () => {
+  test('does not render any tab when featureFlagStatus is false', () => {
     const wrapper = shallowComponent({ ...defaultProps, featureFlagStatus: false });
-    expect(wrapper.find(EuiTab)).toHaveLength(1);
+    expect(wrapper.find(EuiTab)).toHaveLength(0);
   });
 
   test('calls history.push when CreateButton is clicked', () => {

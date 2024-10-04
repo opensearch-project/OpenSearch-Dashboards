@@ -38,7 +38,6 @@ import { QuerySetup, QueryStart } from '../query_service';
 import { connectToQueryState } from './connect_to_query_state';
 import { QueryState } from './types';
 import { FilterStateStore } from '../../../common/opensearch_query/filters';
-import { UI_SETTINGS } from '../../../common';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 
@@ -48,26 +47,18 @@ const GLOBAL_STATE_STORAGE_KEY = '_g';
  * @param osdUrlStateStorage to use for syncing
  */
 export const syncQueryStateWithUrl = (
-  query: Pick<
-    QueryStart | QuerySetup,
-    'filterManager' | 'timefilter' | 'queryString' | 'dataSetManager' | 'state$'
-  >,
+  query: Pick<QueryStart | QuerySetup, 'filterManager' | 'timefilter' | 'queryString' | 'state$'>,
   osdUrlStateStorage: IOsdUrlStateStorage,
   uiSettings?: CoreStart['uiSettings']
 ) => {
   const {
     timefilter: { timefilter },
     filterManager,
-    dataSetManager,
   } = query;
   const defaultState: QueryState = {
     time: timefilter.getTime(),
     refreshInterval: timefilter.getRefreshInterval(),
     filters: filterManager.getGlobalFilters(),
-    ...(uiSettings &&
-      uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) && {
-        dataSet: dataSetManager.getDataSet(),
-      }),
   };
 
   // retrieve current state from `_g` url
@@ -89,7 +80,6 @@ export const syncQueryStateWithUrl = (
     refreshInterval: true,
     time: true,
     filters: FilterStateStore.GLOBAL_STATE,
-    dataSet: true,
   });
 
   // if there weren't any initial state in url,

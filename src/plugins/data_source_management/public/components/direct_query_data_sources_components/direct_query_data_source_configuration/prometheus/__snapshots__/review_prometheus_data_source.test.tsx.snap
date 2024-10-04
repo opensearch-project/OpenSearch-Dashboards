@@ -146,6 +146,7 @@ exports[`ReviewPrometheusDatasource renders correctly 1`] = `
                           >
                             <EuiButtonContent
                               className="euiButton__content"
+                              iconGap="m"
                               iconSide="left"
                               textProps={
                                 Object {

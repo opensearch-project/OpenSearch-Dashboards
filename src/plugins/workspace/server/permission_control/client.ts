@@ -16,7 +16,7 @@ import {
   HttpAuth,
 } from '../../../../core/server';
 import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../../common/constants';
-import { getPrincipalsFromRequest } from '../utils';
+import { getPrincipalsFromRequest } from '../../../../core/server/utils';
 
 export type SavedObjectsPermissionControlContract = Pick<
   SavedObjectsPermissionControl,
@@ -184,7 +184,7 @@ export class SavedObjectsPermissionControl {
     if (!savedObjectsGet.length) {
       return {
         success: false,
-        error: i18n.translate('savedObjects.permission.notFound', {
+        error: i18n.translate('workspace.savedObjects.permission.notFound', {
           defaultMessage: 'Can not find target saved objects.',
         }),
       };

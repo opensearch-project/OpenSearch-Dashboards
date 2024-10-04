@@ -99,6 +99,7 @@ const createInternalSetupContractMock = () => {
       start: jest.fn(),
       stop: jest.fn(),
       config: jest.fn().mockReturnValue(configMock.create()),
+      ext: jest.fn(),
       // @ts-expect-error it thinks that `Server` isn't a `Construtable`
     } as unknown) as jest.MockedClass<Server>,
     createCookieSessionStorageFactory: jest.fn(),

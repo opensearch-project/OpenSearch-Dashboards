@@ -265,7 +265,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
 
     return (
       <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
-        <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
+        <EuiFlexGroup responsive={false} gutterSize="s" justifyContent="flexStart">
           {renderDatePicker()}
           <EuiFlexItem grow={false}>{button}</EuiFlexItem>
         </EuiFlexGroup>
@@ -306,7 +306,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     });
 
     return (
-      <EuiFlexItem className={wrapperClasses}>
+      <EuiFlexItem className={wrapperClasses} grow={false}>
         <EuiSuperDatePicker
           start={props.dateRangeFrom}
           end={props.dateRangeTo}
@@ -333,7 +333,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     if (
       language === 'kuery' &&
       typeof query === 'string' &&
-      (!storage || !storage.get('opensearchDashboards.luceneSyntaxWarningOptOut')) &&
+      (!storage || !storage.get('luceneSyntaxWarningOptOut')) &&
       doesKueryExpressionHaveLuceneSyntaxError(query)
     ) {
       const toast = notifications!.toasts.addWarning({
@@ -379,7 +379,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
 
   function onLuceneSyntaxWarningOptOut(toast: Toast) {
     if (!storage) return;
-    storage.set('opensearchDashboards.luceneSyntaxWarningOptOut', true);
+    storage.set('luceneSyntaxWarningOptOut', true);
     notifications!.toasts.remove(toast);
   }
 

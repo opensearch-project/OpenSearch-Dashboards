@@ -28,7 +28,7 @@
       "src/plugins/discover/public/application/components/sidebar/discover_sidebar.scss",
       "src/plugins/data/public/ui/query_string_input/_query_bar.scss",
       "src/plugins/data/public/ui/query_editor/_query_editor.scss",
-      "src/plugins/data/public/ui/dataset_navigator/_dataset_navigator.scss"
+      "src/plugins/data/public/ui/dataset_selector/_dataset_selector.scss"
     ]
   }
 }

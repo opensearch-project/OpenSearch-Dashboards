@@ -18,10 +18,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import {
+  NavigationPublicPluginStart,
+  TopNavControlComponentData,
+} from 'src/plugins/navigation/public';
+import { ApplicationStart } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext } from '../../../../types';
 
 export const Header = ({
+  navigation,
+  application,
+  useNewUX,
   showDeleteIcon,
   isFormValid,
   onClickDeleteIcon,
@@ -31,6 +39,9 @@ export const Header = ({
   isDefault,
   canManageDataSource,
 }: {
+  navigation: NavigationPublicPluginStart;
+  application: ApplicationStart;
+  useNewUX: boolean;
   showDeleteIcon: boolean;
   isFormValid: boolean;
   onClickDeleteIcon: () => void;
@@ -67,6 +78,7 @@ export const Header = ({
         iconType={isDefaultDataSourceState ? 'starFilled' : 'starEmpty'}
         aria-label={setDefaultAriaLabel}
         data-test-subj="editSetDefaultDataSource"
+        iconSize="s"
       >
         {isDefaultDataSourceState ? 'Default' : 'Set as default'}
       </EuiSmallButtonEmpty>
@@ -88,14 +100,13 @@ export const Header = ({
               setIsDeleteModalVisible(true);
             }}
             iconType="trash"
-            iconSize="m"
-            size="m"
             aria-label={i18n.translate(
               'dataSourcesManagement.editDataSource.deleteThisDataSource',
               {
                 defaultMessage: 'Delete this Data Source',
               }
             )}
+            iconSize="s"
           />
         </EuiToolTip>
 
@@ -154,6 +165,7 @@ export const Header = ({
           onClickTestConnection();
         }}
         data-test-subj="datasource-edit-testConnectionButton"
+        iconSize="s"
       >
         <FormattedMessage
           id="dataSourcesManagement.createDataSource.testConnectionButton"
@@ -163,7 +175,31 @@ export const Header = ({
     );
   };
 
-  return (
+  const rightSideActions = [
+    {
+      renderComponent: (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            {/* Test default button */}
+            <EuiFlexItem grow={false}>{renderDefaultIcon()}</EuiFlexItem>
+            {/* Test connection button */}
+            <EuiFlexItem grow={false}>{renderTestConnectionButton()}</EuiFlexItem>
+            {/* Delete icon button */}
+            {canManageDataSource ? (
+              <EuiFlexItem grow={false}>{showDeleteIcon ? renderDeleteButton() : null}</EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      ),
+    } as TopNavControlComponentData,
+  ];
+
+  return useNewUX ? (
+    <navigation.ui.HeaderControl
+      setMountPoint={application.setAppRightControls}
+      controls={rightSideActions}
+    />
+  ) : (
     <EuiFlexGroup justifyContent="spaceBetween">
       {/* Title */}
       <EuiFlexItem grow={false}>

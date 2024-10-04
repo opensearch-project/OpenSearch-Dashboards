@@ -1,21 +1,9 @@
-.defaultEditor__footer {
-  display: flex;
-  flex-wrap: nowrap;
-  background-color: $euiColorLightestShade;
-  padding: $euiSizeXS;
-  gap: $euiSizeS;
-
-  .defaultEditor__footerSpacer {
-    flex-grow: 1;
-  }
-
-  .defaultEditor__footerItem {
-    padding: 0 $euiSizeXS;
-  }
-}
-
 .defaultEditor {
   border: $euiBorderThin;
   border-radius: $euiSizeXS;
   margin: 0 $euiSizeXS $euiSizeXS;
+
+  &__footer {
+    margin-left: $euiSizeXS;
+  }
 }

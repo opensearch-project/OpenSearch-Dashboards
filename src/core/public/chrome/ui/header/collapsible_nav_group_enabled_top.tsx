@@ -3,63 +3,43 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { Logos, WorkspacesStart } from 'opensearch-dashboards/public';
+import React, { useCallback, useMemo } from 'react';
+import { Logos } from 'opensearch-dashboards/public';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
   EuiText,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
 import { InternalApplicationStart } from 'src/core/public/application';
-import { i18n } from '@osd/i18n';
 import { createEuiListItem } from './nav_link';
-import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
+import { NavGroupItemInMap } from '../../nav_group';
 import { ChromeNavLink } from '../../nav_links';
-import { ALL_USE_CASE_ID } from '../../../../../core/utils';
 
 export interface CollapsibleNavTopProps {
+  collapsibleNavHeaderRender?: () => JSX.Element | null;
   homeLink?: ChromeNavLink;
-  firstVisibleNavLinkOfAllUseCase?: ChromeNavLink;
   currentNavGroup?: NavGroupItemInMap;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   logos: Logos;
   onClickShrink?: () => void;
   shouldShrinkNavigation: boolean;
-  visibleUseCases: NavGroupItemInMap[];
-  currentWorkspace$: WorkspacesStart['currentWorkspace$'];
-  setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
 }
 
 export const CollapsibleNavTop = ({
+  collapsibleNavHeaderRender,
   currentNavGroup,
   navigateToApp,
   logos,
   onClickShrink,
   shouldShrinkNavigation,
-  visibleUseCases,
-  currentWorkspace$,
-  setCurrentNavGroup,
   homeLink,
-  firstVisibleNavLinkOfAllUseCase,
 }: CollapsibleNavTopProps) => {
-  const currentWorkspace = useObservable(currentWorkspace$);
-
-  /**
-   * We can ensure that left nav is inside second level once all the following conditions are met:
-   * 1. Inside a workspace
-   * 2. The use case type of current workspace is all use case
-   * 3. current nav group is not all use case
-   */
-  const isInsideSecondLevelOfAllWorkspace =
-    visibleUseCases.length > 1 && !!currentWorkspace && currentNavGroup?.id !== ALL_USE_CASE_ID;
-
-  const shouldShowBackButton = !shouldShrinkNavigation && isInsideSecondLevelOfAllWorkspace;
-  const shouldShowHomeLink = !shouldShrinkNavigation && !shouldShowBackButton;
+  const homeIcon = logos.Mark.url;
 
   const homeLinkProps = useMemo(() => {
     if (homeLink) {
@@ -72,39 +52,37 @@ export const CollapsibleNavTop = ({
       return {
         'data-test-subj': propsForHomeIcon['data-test-subj'],
         onClick: propsForHomeIcon.onClick,
-        href: propsForHomeIcon.href,
       };
     }
 
     return {};
   }, [homeLink, navigateToApp]);
 
+  const onIconClick = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      homeLinkProps.onClick?.(e);
+    },
+    [homeLinkProps]
+  );
+
   return (
-    <div>
-      <EuiFlexGroup responsive={false} alignItems="center" justifyContent="spaceBetween">
-        {shouldShowHomeLink ? (
+    <EuiPanel
+      color="transparent"
+      hasBorder={false}
+      hasShadow={false}
+      className="navGroupEnabledNavTopWrapper"
+    >
+      {/* The spacer here is used for align with the page header */}
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
+        {!shouldShrinkNavigation ? (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="l" {...homeLinkProps}>
-              <EuiIcon type={logos.Mark.url} size="l" />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        ) : null}
-        {shouldShowBackButton ? (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="l"
-              onClick={() => {
-                if (firstVisibleNavLinkOfAllUseCase) {
-                  navigateToApp(firstVisibleNavLinkOfAllUseCase.id);
-                }
-                setCurrentNavGroup(ALL_USE_CASE_ID);
-              }}
-              data-test-subj="collapsibleNavBackButton"
-            >
-              <EuiIcon type="arrowLeft" />
-              {i18n.translate('core.ui.primaryNav.backButtonLabel', {
-                defaultMessage: 'Back',
-              })}
+            <EuiButtonEmpty flush="both" {...homeLinkProps} onClick={onIconClick}>
+              <EuiIcon
+                type={homeIcon}
+                size="xl"
+                data-test-subj={`collapsibleNavIcon-${homeIcon}`}
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         ) : null}
@@ -112,23 +90,29 @@ export const CollapsibleNavTop = ({
           <EuiButtonIcon
             onClick={onClickShrink}
             iconType={shouldShrinkNavigation ? 'menu' : 'menuLeft'}
-            color="text"
-            display={shouldShrinkNavigation ? 'empty' : 'base'}
+            color="subdued"
+            display="empty"
             aria-label="shrink-button"
             data-test-subj="collapsibleNavShrinkButton"
+            size="xs"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {currentNavGroup?.title && (
-        <>
-          <EuiSpacer />
-          <EuiText>
-            <div className="nav-link-item" style={{ fontWeight: 'normal' }}>
-              {currentNavGroup?.title}
-            </div>
-          </EuiText>
-        </>
-      )}
-    </div>
+      {
+        // Nav groups with type are system(global) nav group and we should show title for those nav groups
+        (currentNavGroup?.type || collapsibleNavHeaderRender) && (
+          <>
+            <EuiSpacer />
+            {currentNavGroup?.type ? (
+              <EuiText size="s">
+                <h3>{currentNavGroup.title}</h3>
+              </EuiText>
+            ) : (
+              collapsibleNavHeaderRender?.()
+            )}
+          </>
+        )
+      }
+    </EuiPanel>
   );
 };

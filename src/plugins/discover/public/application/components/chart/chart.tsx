@@ -94,7 +94,7 @@ export const DiscoverChart = ({
     </div>
   );
 
-  const toggleLabel = i18n.translate('histogram.collapse', {
+  const toggleLabel = i18n.translate('discover.histogram.collapse', {
     defaultMessage: 'Toggle histogram',
   });
 
@@ -118,7 +118,6 @@ export const DiscoverChart = ({
       <EuiFlexItem grow={true} style={{ justifyContent: 'flex-start' }}>
         {isTimeBased && timeChartHeader}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{discoverOptions}</EuiFlexItem>
     </EuiFlexGroup>
   );
 

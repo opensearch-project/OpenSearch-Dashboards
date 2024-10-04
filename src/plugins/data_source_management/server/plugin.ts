@@ -21,8 +21,17 @@ import { DataSourceManagementPluginSetup, DataSourceManagementPluginStart } from
 import { OpenSearchDataSourceManagementPlugin } from './adaptors/opensearch_data_source_management_plugin';
 import { PPLPlugin } from './adaptors/ppl_plugin';
 import { ConfigSchema } from '../config';
-import { getWorkspaceState } from '../../../../src/core/server/utils';
-import { ManageableBy } from '../common';
+import {
+  getPrincipalsFromRequest,
+  getWorkspaceState,
+  updateWorkspaceState,
+} from '../../../../src/core/server/utils';
+import {
+  DATA_SOURCE_PERMISSION_CLIENT_WRAPPER_ID,
+  ManageableBy,
+  ORDER_FOR_DATA_SOURCE_PERMISSION_WRAPPER,
+} from '../common';
+import { DataSourcePermissionClientWrapper } from './saved_objects/data_source_premission_client_wrapper';
 
 export interface DataSourceManagementPluginDependencies {
   dataSource: DataSourcePluginSetup;
@@ -32,6 +41,35 @@ export class DataSourceManagementPlugin
   implements Plugin<DataSourceManagementPluginSetup, DataSourceManagementPluginStart> {
   private readonly config$: Observable<ConfigSchema>;
   private readonly logger: Logger;
+
+  private setupDataSourcePermission(core: CoreSetup, config: ConfigSchema) {
+    core.http.registerOnPostAuth(async (request, response, toolkit) => {
+      let groups: string[];
+      const [coreStart] = await core.getStartServices();
+
+      try {
+        ({ groups = [] } = getPrincipalsFromRequest(request, coreStart.http.auth));
+      } catch (e) {
+        return toolkit.next();
+      }
+
+      const configGroups = config.dataSourceAdmin.groups;
+      const isDataSourceAdmin = configGroups.some((configGroup) => groups.includes(configGroup));
+      updateWorkspaceState(request, {
+        isDataSourceAdmin,
+      });
+      return toolkit.next();
+    });
+
+    const dataSourcePermissionWrapper = new DataSourcePermissionClientWrapper(config.manageableBy);
+
+    // Add data source permission client wrapper factory
+    core.savedObjects.addClientWrapper(
+      ORDER_FOR_DATA_SOURCE_PERMISSION_WRAPPER,
+      DATA_SOURCE_PERMISSION_CLIENT_WRAPPER_ID,
+      dataSourcePermissionWrapper.wrapperFactory
+    );
+  }
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -82,6 +120,8 @@ export class DataSourceManagementPlugin
     if (dataSourceEnabled) {
       dataSource.registerCustomApiSchema(PPLPlugin);
       dataSource.registerCustomApiSchema(OpenSearchDataSourceManagementPlugin);
+
+      this.setupDataSourcePermission(core, config);
     }
     // @ts-ignore
     core.http.registerRouteHandlerContext(

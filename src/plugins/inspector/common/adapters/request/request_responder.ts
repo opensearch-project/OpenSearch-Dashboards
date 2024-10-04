@@ -86,4 +86,8 @@ export class RequestResponder {
   public error(response: Response): void {
     this.finish(RequestStatus.ERROR, response);
   }
+
+  public getTime() {
+    return this.request.time;
+  }
 }

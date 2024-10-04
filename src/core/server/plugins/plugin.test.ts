@@ -46,6 +46,7 @@ import {
   createPluginSetupContext,
   InstanceInfo,
 } from './plugin_context';
+import { dynamicConfigServiceMock } from '../config/dynamic_config_service.mock';
 
 const { join } = posix;
 const mockPluginInitializer = jest.fn();
@@ -83,6 +84,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
   };
 }
 
+const dynamicConfigService = dynamicConfigServiceMock.create();
 const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 
@@ -100,7 +102,7 @@ beforeEach(() => {
     uuid: 'instance-uuid',
   };
 
-  coreContext = { coreId, env, logger, configService: configService as any };
+  coreContext = { coreId, env, logger, configService: configService as any, dynamicConfigService };
 });
 
 afterEach(() => {

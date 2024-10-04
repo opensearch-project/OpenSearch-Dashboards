@@ -35,6 +35,7 @@ import {
   EuiGlobalToastListToast,
   EuiPageContent,
   EuiHorizontalRule,
+  EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
@@ -65,6 +66,7 @@ import { DataSourceRef, IndexPatternManagmentContextValue } from '../../types';
 import { MatchedItem } from './types';
 import { DuplicateIndexPatternError, IndexPattern } from '../../../../data/public';
 import { StepDataSource } from './components/step_data_source';
+import { TopNavControlDescriptionData } from '../../../../navigation/public';
 
 interface CreateIndexPatternWizardState {
   step: StepType;
@@ -273,7 +275,14 @@ export class CreateIndexPatternWizard extends Component<
   }
 
   renderContent() {
-    const { allIndices, isInitiallyLoadingIndices, step, indexPattern, dataSourceRef } = this.state;
+    const {
+      allIndices,
+      isInitiallyLoadingIndices,
+      step,
+      indexPattern,
+      dataSourceRef,
+      docLinks,
+    } = this.state;
 
     const stepInfo = {
       totalStepNumber: this.totalSteps,
@@ -281,6 +290,9 @@ export class CreateIndexPatternWizard extends Component<
     };
 
     const hideLocalCluster = this.context.services.hideLocalCluster;
+    const useUpdatedUX = this.context.services.uiSettings.get('home:useNewHomePage');
+    const { HeaderControl } = this.context.services.navigationUI;
+    const application = this.context.services.application;
 
     if (isInitiallyLoadingIndices) {
       return <LoadingState />;
@@ -288,16 +300,57 @@ export class CreateIndexPatternWizard extends Component<
 
     const header = this.renderHeader();
 
+    const descriptionHeaderControl = useUpdatedUX ? (
+      <HeaderControl
+        controls={[
+          {
+            description: ((
+              <FormattedMessage
+                id="indexPatternManagement.createIndexPattern.description"
+                defaultMessage="An index pattern can match a single source, for example, {single}, or {multiple} data sources, {star}."
+                values={{
+                  multiple: <strong>multiple</strong>,
+                  single: <EuiCode>filebeat-4-3-22</EuiCode>,
+                  star: <EuiCode>filebeat-*</EuiCode>,
+                }}
+              />
+            ) as unknown) as string,
+            links: [
+              {
+                href: docLinks.links.noDocumentation.indexPatterns.introduction,
+                controlType: 'link',
+                flush: 'both',
+                target: '_blank',
+                label: i18n.translate('indexPatternManagement.createIndexPattern.documentation', {
+                  defaultMessage: 'Read documentation',
+                }),
+              },
+            ],
+          } as TopNavControlDescriptionData,
+        ]}
+        setMountPoint={application.setAppDescriptionControls}
+      />
+    ) : null;
+
     if (step === DATA_SOURCE_STEP) {
-      return (
+      const component = (
+        <StepDataSource
+          goToNextStep={this.goToNextFromDataSource}
+          stepInfo={stepInfo}
+          hideLocalCluster={hideLocalCluster}
+        />
+      );
+
+      return useUpdatedUX ? (
+        <>
+          {component}
+          {descriptionHeaderControl}
+        </>
+      ) : (
         <EuiPageContent>
           {header}
           <EuiHorizontalRule />
-          <StepDataSource
-            goToNextStep={this.goToNextFromDataSource}
-            stepInfo={stepInfo}
-            hideLocalCluster={hideLocalCluster}
-          />
+          {component}
         </EuiPageContent>
       );
     }
@@ -305,43 +358,62 @@ export class CreateIndexPatternWizard extends Component<
     if (step === INDEX_PATTERN_STEP) {
       const { location } = this.props;
       const initialQuery = new URLSearchParams(location.search).get('id') || undefined;
+      const component = (
+        <StepIndexPattern
+          allIndices={allIndices}
+          initialQuery={indexPattern || initialQuery}
+          indexPatternCreationType={this.state.indexPatternCreationType}
+          goToPreviousStep={this.goToPreviousStep}
+          goToNextStep={this.goToNextFromIndexPattern}
+          showSystemIndices={
+            this.state.indexPatternCreationType.getShowSystemIndices() &&
+            this.state.step === INDEX_PATTERN_STEP
+          }
+          dataSourceRef={dataSourceRef}
+          stepInfo={stepInfo}
+          catchAndWarn={this.catchAndWarn}
+        />
+      );
 
-      return (
+      return useUpdatedUX ? (
+        <>
+          {/* Except StepDataSource, other components need to use PageContent to wrap when using new UX */}
+          <EuiPageContent>{component}</EuiPageContent>
+          {descriptionHeaderControl}
+        </>
+      ) : (
         <EuiPageContent>
           {header}
           <EuiHorizontalRule />
-          <StepIndexPattern
-            allIndices={allIndices}
-            initialQuery={indexPattern || initialQuery}
-            indexPatternCreationType={this.state.indexPatternCreationType}
-            goToPreviousStep={this.goToPreviousStep}
-            goToNextStep={this.goToNextFromIndexPattern}
-            showSystemIndices={
-              this.state.indexPatternCreationType.getShowSystemIndices() &&
-              this.state.step === INDEX_PATTERN_STEP
-            }
-            dataSourceRef={dataSourceRef}
-            stepInfo={stepInfo}
-            catchAndWarn={this.catchAndWarn}
-          />
+          {component}
         </EuiPageContent>
       );
     }
 
     if (step === TIME_FIELD_STEP) {
-      return (
+      const component = (
+        <StepTimeField
+          indexPattern={indexPattern}
+          goToPreviousStep={this.goToPreviousStep}
+          createIndexPattern={this.createIndexPattern}
+          indexPatternCreationType={this.state.indexPatternCreationType}
+          selectedTimeField={this.state.selectedTimeField}
+          dataSourceRef={dataSourceRef}
+          stepInfo={stepInfo}
+        />
+      );
+
+      return useUpdatedUX ? (
+        <>
+          {/* Except StepDataSource, other components need to use PageContent to wrap when using new UX */}
+          <EuiPageContent>{component}</EuiPageContent>
+          {descriptionHeaderControl}
+        </>
+      ) : (
         <EuiPageContent>
           {header}
           <EuiHorizontalRule />
-          <StepTimeField
-            indexPattern={indexPattern}
-            goToPreviousStep={this.goToPreviousStep}
-            createIndexPattern={this.createIndexPattern}
-            indexPatternCreationType={this.state.indexPatternCreationType}
-            selectedTimeField={this.state.selectedTimeField}
-            dataSourceRef={dataSourceRef}
-            stepInfo={stepInfo}
-          />
+          {component}
         </EuiPageContent>
       );
     }

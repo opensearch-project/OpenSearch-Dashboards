@@ -10,6 +10,6 @@ interface DQLBodyProps extends React.JSX.IntrinsicAttributes {
   filterBar?: any;
 }
 
-const DQLBody: React.FC<DQLBodyProps> = ({ filterBar }) => <div>{filterBar}</div>;
+export const DQLBody: React.FC<DQLBodyProps> = ({ filterBar }) => <div>{filterBar}</div>;
 
 export const createDQLEditor = createEditor(SingleLineInput, SingleLineInput, DQLBody);

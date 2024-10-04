@@ -30,9 +30,9 @@
 
 import React, { Component } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiSpacer, EuiPageContent } from '@elastic/eui';
+import { EuiSpacer, EuiPageContent, EuiTitle } from '@elastic/eui';
 import {
-  Capabilities,
+  ApplicationStart,
   SavedObjectsClientContract,
   OverlayStart,
   NotificationsStart,
@@ -45,18 +45,21 @@ import { canViewInApp } from '../../lib';
 import { SubmittedFormData } from '../types';
 import { UiActionsStart } from '../../../../ui_actions/public';
 import { SAVED_OBJECT_DELETE_TRIGGER } from '../../triggers';
+import { NavigationPublicPluginStart } from '../../../../navigation/public';
 
 interface SavedObjectEditionProps {
   id: string;
   serviceName: string;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
-  capabilities: Capabilities;
   overlays: OverlayStart;
   notifications: NotificationsStart;
   uiActions: UiActionsStart;
   notFoundType?: string;
   savedObjectsClient: SavedObjectsClientContract;
   history: ScopedHistory;
+  useUpdatedUX: boolean;
+  navigationUI: NavigationPublicPluginStart['ui'];
+  application: ApplicationStart;
 }
 
 interface SavedObjectEditionState {
@@ -92,21 +95,23 @@ export class SavedObjectEdition extends Component<
 
   render() {
     const {
-      capabilities,
+      application,
       notFoundType,
       serviceRegistry,
       id,
       serviceName,
       savedObjectsClient,
+      useUpdatedUX,
+      navigationUI,
     } = this.props;
     const { type } = this.state;
     const { object } = this.state;
-    const { edit: canEdit, delete: canDelete } = capabilities.savedObjectsManagement as Record<
-      string,
-      boolean
-    >;
-    const canView = canViewInApp(capabilities, type);
+    const { edit: canEdit, delete: canDelete } = application.capabilities
+      .savedObjectsManagement as Record<string, boolean>;
+    const canView = canViewInApp(application.capabilities, type);
     const service = serviceRegistry.get(serviceName)!.service;
+    const { HeaderControl } = navigationUI;
+    const typeWithFirstLetterToUpperCase = type.charAt(0).toUpperCase() + type.slice(1);
 
     return (
       <EuiPageContent horizontalPosition="center" data-test-subj="savedObjectsEdit">
@@ -117,22 +122,56 @@ export class SavedObjectEdition extends Component<
           type={type}
           onDeleteClick={() => this.delete()}
           viewUrl={service.urlFor(id)}
+          useUpdatedUX={useUpdatedUX}
+          navigationUI={navigationUI}
+          application={application}
         />
-        {notFoundType && (
-          <>
-            <EuiSpacer size="s" />
-            <NotFoundErrors type={notFoundType} />
-          </>
-        )}
-        {canEdit && (
-          <>
-            <EuiSpacer size="s" />
-            <Intro />
-          </>
-        )}
+        {notFoundType &&
+          (useUpdatedUX ? (
+            <HeaderControl
+              controls={[
+                {
+                  renderComponent: <NotFoundErrors type={notFoundType} />,
+                },
+              ]}
+              setMountPoint={application.setAppBottomControls}
+            />
+          ) : (
+            <>
+              <EuiSpacer size="s" />
+              <NotFoundErrors type={notFoundType} />
+            </>
+          ))}
+        {canEdit &&
+          (useUpdatedUX ? (
+            <HeaderControl
+              controls={[
+                {
+                  renderComponent: <Intro />,
+                },
+              ]}
+              setMountPoint={application.setAppBottomControls}
+            />
+          ) : (
+            <>
+              <EuiSpacer size="s" />
+              <Intro />
+            </>
+          ))}
         {object && (
           <>
-            <EuiSpacer size="m" />
+            {useUpdatedUX ? (
+              <EuiTitle size="s">
+                <h2>
+                  {i18n.translate('savedObjectsManagement.view.form.title', {
+                    defaultMessage: '{type} details',
+                    values: { type: typeWithFirstLetterToUpperCase },
+                  })}
+                </h2>
+              </EuiTitle>
+            ) : (
+              <EuiSpacer size="m" />
+            )}
             <Form
               object={object}
               savedObjectsClient={savedObjectsClient}

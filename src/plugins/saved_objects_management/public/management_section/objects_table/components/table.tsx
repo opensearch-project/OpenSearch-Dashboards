@@ -47,6 +47,7 @@ import {
   EuiTableFieldDataColumnType,
   EuiTableActionsColumnType,
   EuiSearchBarProps,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -90,6 +91,8 @@ export interface TableProps {
   availableWorkspaces?: WorkspaceAttribute[];
   currentWorkspaceId?: string;
   showDuplicate: boolean;
+  useUpdatedUX: boolean;
+  onRefresh: () => void;
 }
 
 interface TableState {
@@ -189,6 +192,8 @@ export class Table extends PureComponent<TableProps, TableState> {
       availableWorkspaces,
       currentWorkspaceId,
       showDuplicate,
+      useUpdatedUX,
+      onRefresh,
     } = this.props;
 
     const visibleWsIds = availableWorkspaces?.map((ws) => ws.id) || [];
@@ -245,15 +250,19 @@ export class Table extends PureComponent<TableProps, TableState> {
           if (!canGoInApp) {
             return <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>;
           }
-          let inAppUrl = basePath.prepend(path);
+          let finalPath = path;
+          if (this.props.useUpdatedUX && finalPath) {
+            finalPath = finalPath.replace(/^\/app\/management\/opensearch-dashboards/, '/app');
+          }
+          let inAppUrl = basePath.prepend(finalPath);
           if (object.workspaces?.length) {
             if (currentWorkspaceId) {
-              inAppUrl = formatUrlWithWorkspaceId(path, currentWorkspaceId, basePath);
+              inAppUrl = formatUrlWithWorkspaceId(finalPath, currentWorkspaceId, basePath);
             } else {
               // find first workspace user have permission
               const workspaceId = object.workspaces.find((wsId) => visibleWsIds.includes(wsId));
               if (workspaceId) {
-                inAppUrl = formatUrlWithWorkspaceId(path, workspaceId, basePath);
+                inAppUrl = formatUrlWithWorkspaceId(finalPath, workspaceId, basePath);
               }
             }
           }
@@ -414,9 +423,30 @@ export class Table extends PureComponent<TableProps, TableState> {
         {activeActionContents}
         <EuiSearchBar
           box={{ 'data-test-subj': 'savedObjectSearchBar' }}
+          compressed
           filters={filters}
           onChange={this.onChange}
           toolsRight={[
+            <>
+              {useUpdatedUX && (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'savedObjectsManagement.objectsTable.table.refreshButtonTooltip',
+                    {
+                      defaultMessage: 'Refresh',
+                    }
+                  )}
+                >
+                  <EuiButtonIcon
+                    iconType="refresh"
+                    size="s"
+                    display="base"
+                    type="base"
+                    onClick={onRefresh}
+                  />
+                </EuiToolTip>
+              )}
+            </>,
             <>{showDuplicate && duplicateButton}</>,
             <EuiSmallButton
               key="deleteSO"
@@ -458,7 +488,10 @@ export class Table extends PureComponent<TableProps, TableState> {
                   label={
                     <FormattedMessage
                       id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                      defaultMessage="Include related objects"
+                      defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
+                      values={{
+                        useUpdatedUX: this.props.useUpdatedUX,
+                      }}
                     />
                   }
                   checked={this.state.isIncludeReferencesDeepChecked}
@@ -482,7 +515,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           ]}
         />
         {queryParseError}
-        <EuiSpacer size="s" />
+        <EuiSpacer size={useUpdatedUX ? 'm' : 's'} />
         <div data-test-subj="savedObjectsTable">
           <EuiBasicTable
             loading={isSearching}

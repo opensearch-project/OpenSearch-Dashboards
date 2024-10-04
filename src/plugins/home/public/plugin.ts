@@ -37,6 +37,7 @@ import {
 } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { first } from 'rxjs/operators';
+import React from 'react';
 
 import { Branding } from 'src/core/types';
 import {
@@ -58,18 +59,28 @@ import {
 import { DataPublicPluginStart } from '../../data/public';
 import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
+import { NavigationPublicPluginStart } from '../../navigation/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { AppNavLinkStatus, WorkspaceAvailability } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH, IMPORT_SAMPLE_DATA_APP_ID } from '../common/constants';
 import { DataSourcePluginStart } from '../../data_source/public';
 import { workWithDataSection } from './application/components/homepage/sections/work_with_data';
 import { learnBasicsSection } from './application/components/homepage/sections/learn_basics';
-import { DEFAULT_NAV_GROUPS } from '../../../core/public';
 import {
   ContentManagementPluginSetup,
   ContentManagementPluginStart,
+  SEARCH_OVERVIEW_PAGE_ID,
 } from '../../content_management/public';
 import { initHome, setupHome } from './application/home_render';
+import { registerSampleDataCard } from './application/components/sample_data/sample_data_card';
+import { registerHomeListCardToPage } from './application/components/home_list_card';
+import { toMountPoint } from '../../opensearch_dashboards_react/public';
+import { HomeIcon } from './application/components/home_icon';
+import {
+  registerContentToSearchUseCasePage,
+  setupSearchUseCase,
+} from './application/components/usecase_overview/search_use_case_setup';
+import { DEFAULT_NAV_GROUPS } from '../../../core/public';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -77,6 +88,7 @@ export interface HomePluginStartDependencies {
   urlForwarding: UrlForwardingStart;
   dataSource?: DataSourcePluginStart;
   contentManagement: ContentManagementPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -151,27 +163,57 @@ export class HomePublicPlugin
     core.application.register({
       id: PLUGIN_ID,
       title: 'Home',
-      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
-        ? undefined
-        : AppNavLinkStatus.hidden,
+      navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, { navigation }] = await core.getStartServices();
         setCommonService();
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
         );
         const { renderApp } = await import('./application');
-        return await renderApp(params.element, coreStart, params.history);
+        return await renderApp(
+          params.element,
+          {
+            ...coreStart,
+            navigation,
+            setHeaderActionMenu: params.setHeaderActionMenu,
+          },
+          params.history
+        );
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: PLUGIN_ID,
-        title: 'Home',
-      },
-    ]);
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      // register search use case overview page
+      core.application.register({
+        id: SEARCH_OVERVIEW_PAGE_ID,
+        title: 'Overview',
+        mount: async (params: AppMountParameters) => {
+          const [
+            coreStart,
+            { contentManagement: contentManagementStart },
+          ] = await core.getStartServices();
+          setCommonService();
+
+          const { renderSearchUseCaseOverviewApp } = await import('./application');
+          return await renderSearchUseCaseOverviewApp(
+            params.element,
+            coreStart,
+            contentManagementStart
+          );
+        },
+      });
+
+      // add to search group
+      core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
+        {
+          id: SEARCH_OVERVIEW_PAGE_ID,
+          order: -1,
+          showInAllNavGroup: true,
+        },
+      ]);
+    }
 
     // Register import sample data as a standalone app so that it is available inside workspace.
     core.application.register({
@@ -179,9 +221,11 @@ export class HomePublicPlugin
       title: i18n.translate('home.tutorialDirectory.featureCatalogueTitle', {
         defaultMessage: 'Add sample data',
       }),
-      navLinkStatus: AppNavLinkStatus.hidden,
+      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppNavLinkStatus.default
+        : AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, { navigation }] = await core.getStartServices();
         setCommonService();
         coreStart.chrome.docTitle.change(
           i18n.translate('home.tutorialDirectory.featureCatalogueTitle', {
@@ -189,7 +233,11 @@ export class HomePublicPlugin
           })
         );
         const { renderImportSampleDataApp } = await import('./application');
-        return await renderImportSampleDataApp(params.element, coreStart);
+        return await renderImportSampleDataApp(params.element, {
+          ...coreStart,
+          navigation,
+          setHeaderActionMenu: params.setHeaderActionMenu,
+        });
       },
     });
     urlForwarding.forwardApp('home', 'home');
@@ -216,6 +264,7 @@ export class HomePublicPlugin
     sectionTypes.registerSection(workWithDataSection);
     sectionTypes.registerSection(learnBasicsSection);
     setupHome(contentManagement);
+    setupSearchUseCase(contentManagement);
 
     return {
       featureCatalogue,
@@ -237,6 +286,13 @@ export class HomePublicPlugin
     // initialize homepage
     initHome(contentManagement, core);
 
+    // register sample data card to use case overview page
+    registerSampleDataCard(contentManagement, core);
+    registerContentToSearchUseCasePage(contentManagement, core);
+
+    // register what's new learn opensearch card to use case overview page
+    registerHomeListCardToPage(contentManagement, core.docLinks);
+
     this.featuresCatalogueRegistry.start({ capabilities });
     this.sectionTypeService.start({ core, data });
 
@@ -252,6 +308,18 @@ export class HomePublicPlugin
           // This doesn't do anything as along as the default settings are kept.
           urlForwarding.navigateToDefaultApp({ overwriteHash: false });
         }
+      });
+    }
+
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.chrome.navControls.registerLeftBottom({
+        order: 0,
+        mount: toMountPoint(
+          React.createElement(HomeIcon, {
+            core,
+            appId: PLUGIN_ID,
+          })
+        ),
       });
     }
 

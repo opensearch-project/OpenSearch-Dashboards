@@ -106,17 +106,25 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                   <div
                     className="euiTextColor euiTextColor--subdued"
                   >
-                    Connect to Prometheus with OpenSearch and OpenSearch Dashboards. 
+                    <FormattedMessage
+                      defaultMessage="Connect to Prometheus with OpenSearch and OpenSearch Dashboards. "
+                      id="dataSourcesManagement.configurePrometheusDataSource.description"
+                      values={Object {}}
+                    >
+                      <span>
+                        Connect to Prometheus with OpenSearch and OpenSearch Dashboards. 
+                      </span>
+                    </FormattedMessage>
                     <EuiLink
                       external={true}
                       href="https://opensearch.org/docs/latest/dashboards/management/data-sources/"
-                      target="_blank"
+                      target="blank"
                     >
                       <a
                         className="euiLink euiLink--primary"
                         href="https://opensearch.org/docs/latest/dashboards/management/data-sources/"
-                        rel="noopener noreferrer"
-                        target="_blank"
+                        rel="noreferrer"
+                        target="blank"
                       >
                         Learn more
                         <EuiIcon
@@ -132,18 +140,6 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                             size="s"
                           />
                         </EuiIcon>
-                        <EuiScreenReaderOnly>
-                          <span
-                            className="euiScreenReaderOnly"
-                          >
-                            <EuiI18n
-                              default="(opens in a new tab or window)"
-                              token="euiLink.newTarget.screenReaderOnlyText"
-                            >
-                              (opens in a new tab or window)
-                            </EuiI18n>
-                          </span>
-                        </EuiScreenReaderOnly>
                       </a>
                     </EuiLink>
                   </div>
@@ -161,13 +157,15 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
               <form
                 className="euiForm"
               >
-                <EuiText>
+                <EuiText
+                  size="s"
+                >
                   <div
-                    className="euiText euiText--medium"
+                    className="euiText euiText--small"
                   >
-                    <h3>
+                    <h2>
                       Data source details
-                    </h3>
+                    </h2>
                   </div>
                 </EuiText>
                 <EuiSpacer
@@ -371,13 +369,15 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                     className="euiSpacer euiSpacer--l"
                   />
                 </EuiSpacer>
-                <EuiText>
+                <EuiText
+                  size="s"
+                >
                   <div
-                    className="euiText euiText--medium"
+                    className="euiText euiText--small"
                   >
-                    <h3>
+                    <h2>
                       Prometheus data location
-                    </h3>
+                    </h2>
                   </div>
                 </EuiText>
                 <EuiSpacer
@@ -483,13 +483,15 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                     className="euiSpacer euiSpacer--l"
                   />
                 </EuiSpacer>
-                <EuiText>
+                <EuiText
+                  size="s"
+                >
                   <div
-                    className="euiText euiText--medium"
+                    className="euiText euiText--small"
                   >
-                    <h3>
+                    <h2>
                       Authentication details
-                    </h3>
+                    </h2>
                   </div>
                 </EuiText>
                 <EuiSpacer
@@ -947,13 +949,15 @@ exports[`ConfigurePrometheusDatasourcePanel renders correctly 1`] = `
                             <div
                               className="euiFlexItem"
                             >
-                              <EuiText>
+                              <EuiText
+                                size="s"
+                              >
                                 <div
-                                  className="euiText euiText--medium"
+                                  className="euiText euiText--small"
                                 >
-                                  <h3>
+                                  <h2>
                                     Query permissions
-                                  </h3>
+                                  </h2>
                                 </div>
                               </EuiText>
                               <EuiText

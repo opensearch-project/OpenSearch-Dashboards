@@ -1,2 +1,0 @@
-feat:
-- Change the locale dynamically by adding &i18n-locale to URL ([#7686](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7686))

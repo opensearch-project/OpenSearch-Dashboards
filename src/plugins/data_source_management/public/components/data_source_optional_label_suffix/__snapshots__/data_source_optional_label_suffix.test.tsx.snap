@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Datasource Management: Optional Label Suffix should render normally 1`] = `
+<span
+  className="dataSourceManagement-optionalSuffix"
+>
+  – 
+  <FormattedMessage
+    defaultMessage="optional"
+    id="dataSourcesManagement.createDataSource.optionalText"
+    values={Object {}}
+  />
+</span>
+`;

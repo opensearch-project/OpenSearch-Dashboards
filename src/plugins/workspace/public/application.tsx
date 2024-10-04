@@ -5,7 +5,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { HashRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
+import { HashRouter as Router, Route, Switch } from 'react-router-dom';
 import { AppMountParameters, ScopedHistory } from '../../../core/public';
 import { OpenSearchDashboardsContextProvider } from '../../opensearch_dashboards_react/public';
 import { WorkspaceFatalError } from './components/workspace_fatal_error';
@@ -15,7 +15,8 @@ import { Services } from './types';
 import { WorkspaceCreatorProps } from './components/workspace_creator/workspace_creator';
 import { WorkspaceDetailApp } from './components/workspace_detail_app';
 import { WorkspaceDetailProps } from './components/workspace_detail/workspace_detail';
-import { DetailTab } from './components/workspace_form/constants';
+import { WorkspaceInitialApp } from './components/workspace_initial_app';
+import { WorkspaceUseCaseOverviewApp } from './components/workspace_use_case_overview_app';
 
 export const renderCreatorApp = (
   { element }: AppMountParameters,
@@ -24,7 +25,13 @@ export const renderCreatorApp = (
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceCreatorApp {...props} />
+      <Router>
+        <Switch>
+          <Route>
+            <WorkspaceCreatorApp {...props} />
+          </Route>
+        </Switch>
+      </Router>
     </OpenSearchDashboardsContextProvider>,
     element
   );
@@ -55,7 +62,13 @@ export const renderListApp = (
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceListApp {...props} />
+      <Router>
+        <Switch>
+          <Route>
+            <WorkspaceListApp {...props} />
+          </Route>
+        </Switch>
+      </Router>
     </OpenSearchDashboardsContextProvider>,
     element
   );
@@ -66,7 +79,7 @@ export const renderListApp = (
 };
 
 export const renderDetailApp = (
-  { element }: AppMountParameters,
+  { element, onAppLeave }: AppMountParameters,
   services: Services,
   props: WorkspaceDetailProps
 ) => {
@@ -75,10 +88,42 @@ export const renderDetailApp = (
       <Router>
         <Switch>
           <Route>
-            <WorkspaceDetailApp {...props} />
+            <WorkspaceDetailApp {...props} onAppLeave={onAppLeave} />
           </Route>
         </Switch>
       </Router>
+    </OpenSearchDashboardsContextProvider>,
+    element
+  );
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
+};
+
+export const renderInitialApp = ({}: AppMountParameters, services: Services) => {
+  const rootElement = document.getElementById('opensearch-dashboards-body');
+
+  ReactDOM.render(
+    <OpenSearchDashboardsContextProvider services={services}>
+      <WorkspaceInitialApp />
+    </OpenSearchDashboardsContextProvider>,
+    rootElement
+  );
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(rootElement!);
+  };
+};
+
+export const renderUseCaseOverviewApp = async (
+  { element }: AppMountParameters,
+  services: Services,
+  pageId: string
+) => {
+  ReactDOM.render(
+    <OpenSearchDashboardsContextProvider services={services}>
+      <WorkspaceUseCaseOverviewApp pageId={pageId} />
     </OpenSearchDashboardsContextProvider>,
     element
   );

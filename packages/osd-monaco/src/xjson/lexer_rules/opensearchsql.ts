@@ -155,3 +155,7 @@ export const lexerRules = {
     ],
   },
 } as monaco.languages.IMonarchLanguage;
+
+monaco.languages.register({
+  id: ID,
+});

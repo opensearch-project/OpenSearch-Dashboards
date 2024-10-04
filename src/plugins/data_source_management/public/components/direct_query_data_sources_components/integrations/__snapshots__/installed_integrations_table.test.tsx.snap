@@ -124,6 +124,7 @@ exports[`Installed Integrations Table test Renders the empty installed integrati
                       >
                         <EuiButtonContent
                           className="euiButton__content"
+                          iconGap="m"
                           iconSide="left"
                           textProps={
                             Object {
@@ -337,6 +338,7 @@ exports[`Installed Integrations Table test Renders the installed integrations ta
                     >
                       <EuiButtonContent
                         className="euiButton__content"
+                        iconGap="m"
                         iconSide="left"
                         textProps={
                           Object {

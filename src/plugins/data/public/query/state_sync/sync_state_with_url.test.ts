@@ -32,15 +32,19 @@ import { Subscription } from 'rxjs';
 import { createBrowserHistory, History } from 'history';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
-import { Filter, FilterStateStore, IndexPatternsService, UI_SETTINGS } from '../../../common';
+import {
+  DataStorage,
+  Filter,
+  FilterStateStore,
+  IndexPatternsService,
+  UI_SETTINGS,
+} from '../../../common';
 import { coreMock } from '../../../../../core/public/mocks';
 import {
   createOsdUrlStateStorage,
   IOsdUrlStateStorage,
-  Storage,
 } from '../../../../opensearch_dashboards_utils/public';
 import { QueryService, QueryStart } from '../query_service';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { TimefilterContract } from '../timefilter';
 import { syncQueryStateWithUrl } from './sync_state_with_url';
 import { QueryState } from './types';
@@ -94,12 +98,12 @@ describe('sync_query_state_with_url', () => {
     const queryService = new QueryService();
     queryService.setup({
       uiSettings: setupMock.uiSettings,
-      storage: new Storage(new StubBrowserStorage()),
+      storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
     });
     queryServiceStart = queryService.start({
       indexPatterns: indexPatternsMock,
       uiSettings: startMock.uiSettings,
-      storage: new Storage(new StubBrowserStorage()),
+      storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       savedObjectsClient: startMock.savedObjects.client,
     });
     filterManager = queryServiceStart.filterManager;

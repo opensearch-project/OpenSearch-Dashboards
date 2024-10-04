@@ -38,12 +38,7 @@ import {
 } from '../../../../opensearch_dashboards_utils/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { QueryState, QueryStateChange } from './types';
-import {
-  FilterStateStore,
-  COMPARE_ALL_OPTIONS,
-  compareFilters,
-  UI_SETTINGS,
-} from '../../../common';
+import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';
 import { validateTimeRange } from '../timefilter';
 
 /**
@@ -56,14 +51,10 @@ import { validateTimeRange } from '../timefilter';
  */
 export const connectStorageToQueryState = async (
   {
-    dataSetManager,
     filterManager,
     queryString,
     state$,
-  }: Pick<
-    QueryStart | QuerySetup,
-    'timefilter' | 'filterManager' | 'queryString' | 'dataSetManager' | 'state$'
-  >,
+  }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'queryString' | 'state$'>,
   OsdUrlStateStorage: IOsdUrlStateStorage,
   syncConfig: {
     filters: FilterStateStore;
@@ -80,17 +71,10 @@ export const connectStorageToQueryState = async (
     if (syncConfig.filters === FilterStateStore.APP_STATE) {
       syncKeys.push('appFilters');
     }
-    if (syncConfig.dataSet) {
-      syncKeys.push('dataSet');
-    }
 
     const initialStateFromURL: QueryState = OsdUrlStateStorage.get('_q') ?? {
       query: queryString.getDefaultQuery(),
       filters: filterManager.getAppFilters(),
-      ...(uiSettings &&
-        uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) && {
-          dataSet: dataSetManager.getDataSet(),
-        }),
     };
 
     // set up initial '_q' flag in the URL to sync query and filter changes
@@ -103,20 +87,6 @@ export const connectStorageToQueryState = async (
     if (syncConfig.query && !_.isEqual(initialStateFromURL.query, queryString.getQuery())) {
       if (initialStateFromURL.query) {
         queryString.setQuery(_.cloneDeep(initialStateFromURL.query));
-      }
-    }
-
-    if (
-      syncConfig.dataSet &&
-      !_.isEqual(initialStateFromURL.dataSet, dataSetManager.getDataSet())
-    ) {
-      if (initialStateFromURL.dataSet) {
-        dataSetManager.setDataSet(_.cloneDeep(initialStateFromURL.dataSet));
-      } else {
-        const defaultDataSet = await dataSetManager.getDefaultDataSet();
-        if (defaultDataSet) {
-          dataSetManager.setDataSet(defaultDataSet);
-        }
       }
     }
 
@@ -152,10 +122,6 @@ export const connectStorageToQueryState = async (
                 newState.filters = filterManager.getAppFilters();
               }
 
-              if (syncConfig.dataSet && changes.dataSet) {
-                newState.dataSet = dataSetManager.getDataSet();
-              }
-
               return newState;
             })
           )
@@ -185,12 +151,8 @@ export const connectToQueryState = <S extends QueryState>(
     timefilter: { timefilter },
     filterManager,
     queryString,
-    dataSetManager,
     state$,
-  }: Pick<
-    QueryStart | QuerySetup,
-    'timefilter' | 'filterManager' | 'dataSetManager' | 'queryString' | 'state$'
-  >,
+  }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'queryString' | 'state$'>,
   stateContainer: BaseStateContainer<S>,
   syncConfig: {
     time?: boolean;
@@ -222,9 +184,6 @@ export const connectToQueryState = <S extends QueryState>(
         syncKeys.push('globalFilters');
         break;
     }
-  }
-  if (syncConfig.dataSet) {
-    syncKeys.push('dataSet');
   }
 
   // initial syncing
@@ -280,11 +239,6 @@ export const connectToQueryState = <S extends QueryState>(
     }
   }
 
-  if (syncConfig.dataSet && !initialState.dataSet) {
-    initialState.dataSet = dataSetManager.getDefaultDataSet();
-    initialDirty = true;
-  }
-
   if (initialDirty) {
     stateContainer.set({ ...stateContainer.get(), ...initialState });
   }
@@ -321,9 +275,6 @@ export const connectToQueryState = <S extends QueryState>(
             } else if (syncConfig.filters === FilterStateStore.APP_STATE && changes.appFilters) {
               newState.filters = filterManager.getAppFilters();
             }
-          }
-          if (syncConfig.dataSet && changes.dataSet) {
-            newState.dataSet = dataSetManager.getDataSet();
           }
           return newState;
         })
@@ -380,21 +331,6 @@ export const connectToQueryState = <S extends QueryState>(
             })
           ) {
             filterManager.setGlobalFilters(_.cloneDeep(filters));
-          }
-        }
-      }
-
-      if (syncConfig.dataSet) {
-        const currentDataSet = dataSetManager.getDataSet();
-        if (!_.isEqual(state.dataSet, currentDataSet)) {
-          if (state.dataSet) {
-            dataSetManager.setDataSet(state.dataSet);
-          } else {
-            const defaultDataSet = dataSetManager.getDefaultDataSet();
-            if (defaultDataSet) {
-              dataSetManager.setDataSet(defaultDataSet);
-              stateContainer.set({ ...stateContainer.get(), dataSet: defaultDataSet });
-            }
           }
         }
       }

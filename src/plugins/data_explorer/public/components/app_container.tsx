@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { memo, useRef } from 'react';
+import React, { memo, useEffect, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,6 +23,13 @@ import './app_container.scss';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { IDataPluginServices } from '../../../data/public';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from './constants';
+import {
+  DISCOVER_LOAD_EVENT,
+  NEW_DISCOVER_LOAD_EVENT,
+  NEW_DISCOVER_OPT_IN,
+  NEW_DISCOVER_OPT_OUT,
+  trackUiMetric,
+} from '../ui_metric';
 
 export const AppContainer = React.memo(
   ({ view, params }: { view?: View; params: AppMountParameters }) => {
@@ -31,11 +38,18 @@ export const AppContainer = React.memo(
     const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
     const { uiSettings } = opensearchDashboards.services;
     const isEnhancementsEnabled = uiSettings?.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
+    const showActionsInGroup = uiSettings?.get('home:useNewHomePage');
 
     const topLinkRef = useRef<HTMLDivElement>(null);
     const datePickerRef = useRef<HTMLDivElement>(null);
+
     if (!view) {
       return <NoView />;
+    }
+
+    trackUiMetric(DISCOVER_LOAD_EVENT);
+    if (isEnhancementsEnabled) {
+      trackUiMetric(NEW_DISCOVER_LOAD_EVENT);
     }
 
     const { Canvas, Panel, Context } = view;
@@ -47,21 +61,22 @@ export const AppContainer = React.memo(
       topLinkRef,
       datePickerRef,
     };
-
     // Render the application DOM.
     return (
       <div className="mainPage">
         {isEnhancementsEnabled && (
           <EuiFlexGroup
             direction="row"
-            className="mainPage navBar"
+            className={showActionsInGroup ? '' : 'mainPage navBar'}
             gutterSize="none"
             alignItems="center"
             justifyContent="spaceBetween"
           >
-            <EuiFlexItem grow={false}>
-              <div ref={topLinkRef} />
-            </EuiFlexItem>
+            {!showActionsInGroup && (
+              <EuiFlexItem grow={false}>
+                <div ref={topLinkRef} />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <div ref={datePickerRef} />
             </EuiFlexItem>

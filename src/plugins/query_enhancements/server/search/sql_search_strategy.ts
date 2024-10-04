@@ -8,46 +8,47 @@ import { Observable } from 'rxjs';
 import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import {
   DATA_FRAME_TYPES,
-  IDataFrameError,
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
-  PartialDataFrame,
+  Query,
   createDataFrame,
 } from '../../../data/common';
+import { getFields } from '../../common/utils';
 import { Facet } from '../utils';
 
 export const sqlSearchStrategyProvider = (
-  _config$: Observable<SharedGlobalConfig>,
+  config$: Observable<SharedGlobalConfig>,
   logger: Logger,
   client: ILegacyClusterClient,
   usage?: SearchUsage
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
-  const sqlFacet = new Facet({ client, logger, endpoint: 'enhancements.sqlQuery' });
+  const sqlFacet = new Facet({
+    client,
+    logger,
+    endpoint: 'enhancements.sqlQuery',
+    useJobs: false,
+    shimResponse: true,
+  });
 
   return {
-    search: async (context, request: any, _options) => {
+    search: async (context, request: any, options) => {
       try {
-        request.body.query = request.body.query.qs;
+        const query: Query = request.body.query;
         const rawResponse: any = await sqlFacet.describeQuery(context, request);
 
         if (!rawResponse.success) {
-          return {
-            type: DATA_FRAME_TYPES.ERROR,
-            body: { error: rawResponse.data },
-            took: rawResponse.took,
-          } as IDataFrameError;
+          const error = new Error(rawResponse.data.body);
+          error.name = rawResponse.data.status;
+          throw error;
         }
 
-        const partial: PartialDataFrame = {
-          ...request.body.df,
-          fields: rawResponse.data?.schema || [],
-        };
-        const dataFrame = createDataFrame(partial);
-        dataFrame.fields?.forEach((field, index) => {
-          field.values = rawResponse.data.datarows.map((row: any) => row[index]);
+        const dataFrame = createDataFrame({
+          name: query.dataset?.id,
+          schema: rawResponse.data.schema,
+          fields: getFields(rawResponse),
         });
 
-        dataFrame.size = rawResponse.data.datarows?.length || 0;
+        dataFrame.size = rawResponse.data.datarows.length;
 
         if (usage) usage.trackSuccess(rawResponse.took);
 

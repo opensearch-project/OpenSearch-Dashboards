@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import { dynamicConfigServiceMock } from '../config/dynamic_config_service.mock';
+
 jest.mock('fs', () => {
   const original = jest.requireActual('fs');
   return {
@@ -121,10 +123,12 @@ describe('timeouts', () => {
         allowFromAnyIp: true,
         ipAllowlist: [],
       },
+      updateConfigs: jest.fn(),
     } as any);
     registerRouter(router);
 
-    await server.start();
+    const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
+    await server.start(dynamicConfigService);
 
     expect(supertest(innerServer.listener).get('/a')).rejects.toThrow('socket hang up');
 

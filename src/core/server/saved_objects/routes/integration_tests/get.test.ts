@@ -35,6 +35,7 @@ import { savedObjectsClientMock } from '../../service/saved_objects_client.mock'
 import { HttpService, InternalHttpServiceSetup } from '../../../http';
 import { createHttpServer, createCoreContext } from '../../../http/test_utils';
 import { coreMock } from '../../../mocks';
+import { dynamicConfigServiceMock } from '../../../config/dynamic_config_service.mock';
 
 const coreId = Symbol('core');
 
@@ -63,7 +64,8 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
     const router = httpSetup.createRouter('/api/saved_objects/');
     registerGetRoute(router);
 
-    await server.start();
+    const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
+    await server.start({ dynamicConfigService });
   });
 
   afterEach(async () => {

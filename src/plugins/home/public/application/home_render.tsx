@@ -5,27 +5,26 @@
 
 import React from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
+import { DEFAULT_NAV_GROUPS } from '../../../../core/public';
 import {
   ContentManagementPluginSetup,
   ContentManagementPluginStart,
+  HOME_PAGE_ID,
+  SECTIONS,
+  HOME_CONTENT_AREAS,
+  SEARCH_OVERVIEW_PAGE_ID,
+  OBSERVABILITY_OVERVIEW_PAGE_ID,
+  SECURITY_ANALYTICS_OVERVIEW_PAGE_ID,
 } from '../../../../plugins/content_management/public';
-import { HOME_PAGE_ID, SECTIONS, HOME_CONTENT_AREAS } from '../../common/constants';
-import {
-  WHATS_NEW_CONFIG,
-  LEARN_OPENSEARCH_CONFIG,
-  HomeListCard,
-} from './components/home_list_card';
+import { getLearnOpenSearchConfig, registerHomeListCard } from './components/home_list_card';
+
+import { registerUseCaseCard } from './components/use_case_card';
 
 export const setupHome = (contentManagement: ContentManagementPluginSetup) => {
   contentManagement.registerPage({
     id: HOME_PAGE_ID,
     title: 'Home',
     sections: [
-      {
-        id: SECTIONS.SERVICE_CARDS,
-        order: 3000,
-        kind: 'dashboard',
-      },
       {
         id: SECTIONS.RECENTLY_VIEWED,
         order: 2000,
@@ -46,40 +45,52 @@ export const setupHome = (contentManagement: ContentManagementPluginSetup) => {
         },
       },
       {
+        id: SECTIONS.SERVICE_CARDS,
+        order: 3000,
+        kind: 'dashboard',
+      },
+      {
         id: SECTIONS.GET_STARTED,
         order: 1000,
-        title: 'Define your path forward with OpenSearch',
+        title: "Get started with OpenSearch's powerful features",
         kind: 'card',
+        collapsible: true,
       },
     ],
   });
 };
 
 export const initHome = (contentManagement: ContentManagementPluginStart, core: CoreStart) => {
-  contentManagement.registerContentProvider({
-    id: 'whats_new_cards',
-    getContent: () => ({
-      id: 'whats_new',
-      kind: 'custom',
-      order: 3,
-      render: () =>
-        React.createElement(HomeListCard, {
-          config: WHATS_NEW_CONFIG,
-        }),
-    }),
-    getTargetArea: () => HOME_CONTENT_AREAS.SERVICE_CARDS,
-  });
-  contentManagement.registerContentProvider({
-    id: 'learn_opensearch_new_cards',
-    getContent: () => ({
-      id: 'learn_opensearch',
-      kind: 'custom',
-      order: 4,
-      render: () =>
-        React.createElement(HomeListCard, {
-          config: LEARN_OPENSEARCH_CONFIG,
-        }),
-    }),
-    getTargetArea: () => HOME_CONTENT_AREAS.SERVICE_CARDS,
+  const workspaceEnabled = core.application.capabilities.workspaces.enabled;
+
+  if (!workspaceEnabled) {
+    const useCases = [
+      { ...DEFAULT_NAV_GROUPS.observability, navigateAppId: OBSERVABILITY_OVERVIEW_PAGE_ID },
+      { ...DEFAULT_NAV_GROUPS.search, navigateAppId: SEARCH_OVERVIEW_PAGE_ID },
+      {
+        ...DEFAULT_NAV_GROUPS['security-analytics'],
+        navigateAppId: SECURITY_ANALYTICS_OVERVIEW_PAGE_ID,
+      },
+    ];
+
+    useCases.forEach((useCase, index) => {
+      registerUseCaseCard(contentManagement, core, {
+        id: useCase.id,
+        order: index + 1,
+        description: useCase.description,
+        title: useCase.title,
+        target: HOME_CONTENT_AREAS.GET_STARTED,
+        icon: useCase.icon ?? '',
+        navigateAppId: useCase.navigateAppId,
+      });
+    });
+  }
+
+  registerHomeListCard(contentManagement, {
+    id: 'learn_opensearch_new',
+    order: 11,
+    config: getLearnOpenSearchConfig(core.docLinks),
+    target: HOME_CONTENT_AREAS.SERVICE_CARDS,
+    width: workspaceEnabled ? 32 : 48,
   });
 };

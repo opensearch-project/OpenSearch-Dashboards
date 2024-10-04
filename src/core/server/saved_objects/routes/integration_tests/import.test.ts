@@ -36,6 +36,7 @@ import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { SavedObjectConfig } from '../../saved_objects_config';
 import { setupServer, createExportableType } from '../test_utils';
 import { SavedObjectsErrorHelpers } from '../..';
+import { dynamicConfigServiceMock } from '../../../config/dynamic_config_service.mock';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -84,7 +85,8 @@ describe(`POST ${URL}`, () => {
     const router = httpSetup.createRouter('/internal/saved_objects/');
     registerImportRoute(router, config);
 
-    await server.start();
+    const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
+    await server.start({ dynamicConfigService });
   });
 
   afterEach(async () => {

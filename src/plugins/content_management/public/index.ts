@@ -13,3 +13,5 @@ export const plugin = (initializerContext: PluginInitializerContext) =>
 
 export * from './components';
 export * from './mocks';
+export * from './services/content_management';
+export * from './constants';

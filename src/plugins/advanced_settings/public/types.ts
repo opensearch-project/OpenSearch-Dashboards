@@ -28,10 +28,15 @@
  * under the License.
  */
 
+import {
+  ContentManagementPluginStart,
+  ContentManagementPluginSetup,
+} from '../../content_management/public';
 import { ComponentRegistry } from './component_registry';
 import { HomePublicPluginSetup } from '../../home/public';
 
 import { ManagementSetup } from '../../management/public';
+import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
 
 export interface AdvancedSettingsSetup {
   component: ComponentRegistry['setup'];
@@ -43,6 +48,12 @@ export interface AdvancedSettingsStart {
 export interface AdvancedSettingsPluginSetup {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
+  contentManagement: ContentManagementPluginSetup;
+}
+
+export interface AdvancedSettingsPluginStart {
+  navigation: NavigationPublicPluginStart;
+  contentManagement: ContentManagementPluginStart;
 }
 
 export { ComponentRegistry };

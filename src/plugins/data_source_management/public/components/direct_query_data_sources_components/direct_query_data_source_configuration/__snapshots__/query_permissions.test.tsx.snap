@@ -34,13 +34,15 @@ exports[`QueryPermissionsConfiguration renders correctly 1`] = `
               <div
                 className="euiFlexItem"
               >
-                <EuiText>
+                <EuiText
+                  size="s"
+                >
                   <div
-                    className="euiText euiText--medium"
+                    className="euiText euiText--small"
                   >
-                    <h3>
+                    <h2>
                       Query permissions
-                    </h3>
+                    </h2>
                   </div>
                 </EuiText>
                 <EuiText

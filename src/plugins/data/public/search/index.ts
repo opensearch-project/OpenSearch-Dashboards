@@ -56,5 +56,5 @@ export {
 
 export { getOpenSearchPreference } from './opensearch_search';
 
-export { SearchInterceptor, SearchInterceptorDeps } from './search_interceptor';
+export { SearchInterceptor, SearchInterceptorDeps, ISearchInterceptor } from './search_interceptor';
 export * from './errors';

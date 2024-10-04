@@ -46,38 +46,46 @@ interface ManagementRouterProps {
 }
 
 export const ManagementRouter = memo(
-  ({ dependencies, history, setBreadcrumbs, onAppMounted, sections }: ManagementRouterProps) => (
-    <Router history={history}>
-      <EuiPageBody component="main" restrictWidth={false} className="mgtPage__body">
-        <Switch>
-          {sections.map((section) =>
-            section
-              .getAppsEnabled()
-              .map((app) => (
-                <Route
-                  path={`${app.basePath}`}
-                  component={() => (
-                    <ManagementAppWrapper
-                      app={app}
-                      setBreadcrumbs={setBreadcrumbs}
-                      onAppMounted={onAppMounted}
-                      history={history}
-                    />
-                  )}
-                />
-              ))
-          )}
-          <Route
-            path={'/'}
-            component={() => (
-              <ManagementLandingPage
-                version={dependencies.opensearchDashboardsVersion}
-                setBreadcrumbs={setBreadcrumbs}
-              />
+  ({ dependencies, history, setBreadcrumbs, onAppMounted, sections }: ManagementRouterProps) => {
+    const useUpdatedUX = dependencies.uiSettings.get('home:useNewHomePage');
+    return (
+      <Router history={history}>
+        <EuiPageBody
+          component="main"
+          restrictWidth={false}
+          className="mgtPage__body"
+          style={useUpdatedUX ? { maxWidth: 'unset' } : {}}
+        >
+          <Switch>
+            {sections.map((section) =>
+              section
+                .getAppsEnabled()
+                .map((app) => (
+                  <Route
+                    path={`${app.basePath}`}
+                    component={() => (
+                      <ManagementAppWrapper
+                        app={app}
+                        setBreadcrumbs={setBreadcrumbs}
+                        onAppMounted={onAppMounted}
+                        history={history}
+                      />
+                    )}
+                  />
+                ))
             )}
-          />
-        </Switch>
-      </EuiPageBody>
-    </Router>
-  )
+            <Route
+              path={'/'}
+              component={() => (
+                <ManagementLandingPage
+                  version={dependencies.opensearchDashboardsVersion}
+                  setBreadcrumbs={setBreadcrumbs}
+                />
+              )}
+            />
+          </Switch>
+        </EuiPageBody>
+      </Router>
+    );
+  }
 );

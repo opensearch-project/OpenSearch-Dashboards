@@ -7,12 +7,14 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { Observable } from 'rxjs';
+import { DataStructureMeta } from '../../../../common';
 
 interface QueryEditorExtensionProps {
   config: QueryEditorExtensionConfig;
   dependencies: QueryEditorExtensionDependencies;
   componentContainer: Element;
   bannerContainer: Element;
+  queryControlsContainer: Element;
 }
 
 export interface QueryEditorExtensionDependencies {
@@ -49,6 +51,12 @@ export interface QueryEditorExtensionConfig {
    */
   isEnabled$: (dependencies: QueryEditorExtensionDependencies) => Observable<boolean>;
   /**
+   * @returns DataStructureMeta for a given data source id.
+   */
+  getDataStructureMeta?: (
+    dataSourceId: string | undefined
+  ) => Promise<DataStructureMeta | undefined>;
+  /**
    * A function that returns the query editor extension component. The component
    * will be displayed on top of the query editor in the search bar.
    * @param dependencies - The dependencies required for the extension.
@@ -62,6 +70,10 @@ export interface QueryEditorExtensionConfig {
    * @returns The component the query editor extension.
    */
   getBanner?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
+
+  getSearchBarButton?: (
+    dependencies: QueryEditorExtensionDependencies
+  ) => React.ReactElement | null;
 }
 const QueryEditorExtensionPortal: React.FC<{ container: Element }> = (props) => {
   if (!props.children) return null;
@@ -82,6 +94,11 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
   ]);
 
   const component = useMemo(() => props.config.getComponent?.(props.dependencies), [
+    props.config,
+    props.dependencies,
+  ]);
+
+  const queryControlButtons = useMemo(() => props.config.getSearchBarButton?.(props.dependencies), [
     props.config,
     props.dependencies,
   ]);
@@ -109,6 +126,9 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
       </QueryEditorExtensionPortal>
       <QueryEditorExtensionPortal container={props.componentContainer}>
         {component}
+      </QueryEditorExtensionPortal>
+      <QueryEditorExtensionPortal container={props.queryControlsContainer}>
+        {queryControlButtons}
       </QueryEditorExtensionPortal>
     </>
   );

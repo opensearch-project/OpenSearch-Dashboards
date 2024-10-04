@@ -1,0 +1,248 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<NavGroups /> should render correctly 1`] = `
+<div>
+  <div
+    class="euiFlexItem"
+  >
+    <nav
+      class="euiSideNav euiSideNav-isOpenMobile"
+    >
+      <div
+        class="euiSideNav__content"
+        id="euiSideNavContent_generated-id"
+      >
+        <div
+          class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems nav-link-fake-item"
+        >
+          <div
+            class="euiSideNavItemButton nav-link-fake-item-button"
+          >
+            <span
+              class="euiSideNavItemButton__content"
+            >
+              <span
+                class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+              />
+            </span>
+          </div>
+          <div
+            class="euiSideNavItem__items"
+          >
+            <div
+              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item  nav-link-parent-item"
+            >
+              <button
+                aria-label="pure link"
+                class="euiSideNavItemButton euiSideNavItemButton-isOpen nav-link-item-btn"
+                type="button"
+              >
+                <span
+                  class="euiSideNavItemButton__content"
+                >
+                  <span
+                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                    title="pure link"
+                  >
+                    <div
+                      class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiAccordion__button"
+                      data-test-subj="collapsibleNavAppLink-pure"
+                    >
+                      <div
+                        class="euiFlexItem"
+                      >
+                        <div
+                          class="euiText euiText--medium"
+                        >
+                          pure link
+                        </div>
+                      </div>
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <span
+                          class="leftNavCustomizedAccordionIcon"
+                          data-euiicon-type="minus"
+                        />
+                      </div>
+                    </div>
+                  </span>
+                  <span
+                    data-euiicon-type="arrowDown"
+                  />
+                </span>
+              </button>
+              <div
+                class="euiSideNavItem__items"
+              >
+                <div
+                  class="euiSideNavItem euiSideNavItem--branch nav-link-item nav-nested-item"
+                >
+                  <button
+                    aria-label="subLink"
+                    class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
+                    data-test-subj="collapsibleNavAppLink-subLink"
+                    type="button"
+                  >
+                    <span
+                      class="euiSideNavItemButton__content"
+                    >
+                      <span
+                        class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                        title="subLink"
+                      >
+                        <div
+                          class="euiText euiText--medium"
+                        >
+                          subLink
+                        </div>
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems nav-link-item-category-item"
+        >
+          <div
+            aria-label="category-1"
+            class="euiSideNavItemButton nav-link-item-category-button"
+          >
+            <span
+              class="euiSideNavItemButton__content"
+            >
+              <span
+                class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                title="category-1"
+              >
+                <div
+                  class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive undefined"
+                >
+                  <div
+                    class="euiFlexItem"
+                  >
+                    <div
+                      class="euiText euiText--small"
+                    >
+                      <span
+                        class="euiCollapsibleNavGroup__heading nav-link-item"
+                      >
+                        category-1
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </span>
+            </span>
+          </div>
+          <div
+            class="euiSideNavItem__items"
+          >
+            <div
+              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item  nav-link-parent-item"
+            >
+              <button
+                aria-label="link-in-category"
+                class="euiSideNavItemButton euiSideNavItemButton-isOpen nav-link-item-btn"
+                type="button"
+              >
+                <span
+                  class="euiSideNavItemButton__content"
+                >
+                  <span
+                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                    title="link-in-category"
+                  >
+                    <div
+                      class="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiAccordion__button"
+                      data-test-subj="collapsibleNavAppLink-link-in-category"
+                    >
+                      <div
+                        class="euiFlexItem"
+                      >
+                        <div
+                          class="euiText euiText--medium"
+                        >
+                          link-in-category
+                        </div>
+                      </div>
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <span
+                          class="leftNavCustomizedAccordionIcon"
+                          data-euiicon-type="minus"
+                        />
+                      </div>
+                    </div>
+                  </span>
+                  <span
+                    data-euiicon-type="arrowDown"
+                  />
+                </span>
+              </button>
+              <div
+                class="euiSideNavItem__items"
+              >
+                <div
+                  class="euiSideNavItem euiSideNavItem--branch nav-link-item nav-nested-item"
+                >
+                  <button
+                    aria-label="sub-link-in-category"
+                    class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
+                    data-test-subj="collapsibleNavAppLink-sub-link-in-category"
+                    type="button"
+                  >
+                    <span
+                      class="euiSideNavItemButton__content"
+                    >
+                      <span
+                        class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                        title="sub-link-in-category"
+                      >
+                        <div
+                          class="euiText euiText--medium"
+                        >
+                          sub-link-in-category
+                        </div>
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiSideNavItem euiSideNavItem--trunk nav-link-item "
+            >
+              <button
+                aria-label="link-2-in-category"
+                class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
+                data-test-subj="collapsibleNavAppLink-link-2-in-category"
+                type="button"
+              >
+                <span
+                  class="euiSideNavItemButton__content"
+                >
+                  <span
+                    class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                    title="link-2-in-category"
+                  >
+                    <div
+                      class="euiText euiText--medium"
+                    >
+                      link-2-in-category
+                    </div>
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+</div>
+`;

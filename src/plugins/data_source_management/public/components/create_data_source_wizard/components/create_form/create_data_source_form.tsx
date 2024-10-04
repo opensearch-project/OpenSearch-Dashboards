@@ -23,6 +23,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+import { ApplicationStart } from 'opensearch-dashboards/public';
 import { AuthenticationMethodRegistry } from '../../../../auth_registry';
 import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import {
@@ -45,8 +47,12 @@ import {
   getDefaultAuthMethod,
   isValidUrl,
 } from '../../../utils';
+import { DataSourceOptionalLabelSuffix } from '../../../data_source_optional_label_suffix';
 
 export interface CreateDataSourceProps {
+  useNewUX: boolean;
+  navigation: NavigationPublicPluginStart;
+  application: ApplicationStart;
   existingDatasourceNamesList: string[];
   handleSubmit: (formValues: DataSourceAttributes) => void;
   handleTestConnection: (formValues: DataSourceAttributes) => void;
@@ -367,40 +373,30 @@ export class CreateDataSourceForm extends React.Component<
     return null;
   };
 
+  description = [
+    {
+      renderComponent: (
+        <EuiText size="s" color="subdued">
+          <FormattedMessage
+            id="dataSourcesManagement.createDataSource.description"
+            defaultMessage="Create a new data source connection to help you retrieve data from an external OpenSearch compatible source."
+          />
+        </EuiText>
+      ),
+    },
+  ];
+
   /* Render methods */
 
   /* Render header*/
   renderHeader = () => {
-    return <Header />;
-  };
-
-  /* Render Section header*/
-  renderSectionHeader = (i18nId: string, defaultMessage: string) => {
-    return (
-      <>
-        <EuiText grow={false}>
-          <h4>
-            <FormattedMessage id={i18nId} defaultMessage={defaultMessage} />
-          </h4>
-        </EuiText>
-      </>
-    );
-  };
-  /* Render field label with Optional text*/
-  renderFieldLabelAsOptional = (i18nId: string, defaultMessage: string) => {
-    return (
-      <>
-        {<FormattedMessage id={i18nId} defaultMessage={defaultMessage} />}{' '}
-        <i style={{ fontWeight: 'normal' }}>
-          -{' '}
-          {
-            <FormattedMessage
-              id="dataSourcesManagement.createDataSource.optionalText"
-              defaultMessage="optional"
-            />
-          }
-        </i>
-      </>
+    return this.props.useNewUX ? (
+      <this.props.navigation.ui.HeaderControl
+        setMountPoint={this.props.application.setAppDescriptionControls}
+        controls={this.description}
+      />
+    ) : (
+      <Header />
     );
   };
 
@@ -554,13 +550,16 @@ export class CreateDataSourceForm extends React.Component<
       <>
         <EuiPageContent>
           {this.renderHeader()}
-          <EuiSpacer size="m" />
           <EuiForm data-test-subj="data-source-creation">
             {/* Endpoint section */}
-            {this.renderSectionHeader(
-              'dataSourceManagement.connectToDataSource.connectionDetails',
-              'Connection Details'
-            )}
+            <EuiText grow={false} size="s">
+              <h2>
+                <FormattedMessage
+                  id="dataSourcesManagement.connectToDataSource.connectionDetails"
+                  defaultMessage="Connection Details"
+                />
+              </h2>
+            </EuiText>
             <EuiSpacer size="s" />
 
             {/* Title */}
@@ -589,10 +588,13 @@ export class CreateDataSourceForm extends React.Component<
 
             {/* Description */}
             <EuiCompressedFormRow
-              label={this.renderFieldLabelAsOptional(
-                'dataSourceManagement.createDataSource.description',
-                'Description'
-              )}
+              label={
+                <FormattedMessage
+                  id="dataSourcesManagement.createDataSource.descriptionOptional"
+                  defaultMessage="Description {optionalLabel}"
+                  values={{ optionalLabel: <DataSourceOptionalLabelSuffix /> }}
+                />
+              }
             >
               <EuiCompressedFieldText
                 name="dataSourceDescription"
@@ -636,31 +638,30 @@ export class CreateDataSourceForm extends React.Component<
 
             <EuiSpacer size="xl" />
 
-            {this.renderSectionHeader(
-              'dataSourceManagement.connectToDataSource.authenticationHeader',
-              'Authentication Method'
-            )}
+            <EuiText grow={false} size="s">
+              <h2>
+                <FormattedMessage
+                  id="dataSourcesManagement.connectToDataSource.authenticationHeader"
+                  defaultMessage="Authentication Method"
+                />
+              </h2>
+            </EuiText>
+
             <EuiSpacer size="m" />
 
             <EuiCompressedFormRow>
               <EuiText size="s">
-                <FormattedMessage
-                  id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
-                  defaultMessage="Enter the authentication details to access the endpoint."
-                />
-                {this.isNoAuthOptionEnabled && (
+                {this.isNoAuthOptionEnabled ? (
+                  <FormattedMessage
+                    id="dataSourcesManagement.createDataSource.authenticationMethodDescriptionWithNoAuth"
+                    defaultMessage="Enter the authentication details to access the endpoint. If no authentication is required, select {buttonLabel}."
+                    values={{ buttonLabel: <b>No authentication</b> }}
+                  />
+                ) : (
                   <FormattedMessage
                     id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
-                    defaultMessage=" If no authentication is required, select "
+                    defaultMessage="Enter the authentication details to access the endpoint."
                   />
-                )}
-                {this.isNoAuthOptionEnabled && (
-                  <b>
-                    <FormattedMessage
-                      id="dataSourcesManagement.createDataSource.noAuthentication"
-                      defaultMessage="No authentication"
-                    />
-                  </b>
                 )}
               </EuiText>
             </EuiCompressedFormRow>
@@ -749,7 +750,7 @@ export class CreateDataSourceForm extends React.Component<
             >
               <FormattedMessage
                 id="dataSourcesManagement.createDataSource.createButtonLabel"
-                defaultMessage="Create data source"
+                defaultMessage="Connect to OpenSearch Cluster"
               />
             </EuiButton>
           </EuiFlexItem>

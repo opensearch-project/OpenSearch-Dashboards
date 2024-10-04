@@ -66,7 +66,17 @@ export async function mountManagementSection(
   dataSource?: DataSourcePluginSetup
 ) {
   const [
-    { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
+    {
+      chrome,
+      application,
+      savedObjects,
+      uiSettings,
+      notifications,
+      overlays,
+      http,
+      docLinks,
+      workspaces,
+    },
     { data, navigation },
     indexPatternManagementStart,
   ] = await getStartServices();
@@ -94,6 +104,7 @@ export async function mountManagementSection(
     getMlCardState,
     dataSourceEnabled,
     hideLocalCluster,
+    workspaces,
   };
 
   const showActionsInHeader = uiSettings.get('home:useNewHomePage');

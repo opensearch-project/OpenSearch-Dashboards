@@ -325,15 +325,6 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
-                "dataSetManager": Object {
-                  "fetchDefaultDataSet": [MockFunction],
-                  "getDataSet": [MockFunction],
-                  "getDefaultDataSet": [MockFunction],
-                  "getUpdates$": [MockFunction],
-                  "init": [MockFunction],
-                  "initWithIndexPattern": [MockFunction],
-                  "setDataSet": [MockFunction],
-                },
                 "filterManager": Object {
                   "addFilters": [MockFunction],
                   "getAppFilters": [MockFunction],
@@ -352,10 +343,19 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 },
                 "getOpenSearchQuery": [MockFunction],
                 "queryString": Object {
+                  "addToQueryHistory": [MockFunction],
+                  "changeQueryHistory": [MockFunction],
                   "clearQuery": [MockFunction],
+                  "clearQueryHistory": [MockFunction],
                   "formatQuery": [MockFunction],
+                  "getDatasetService": [MockFunction],
                   "getDefaultQuery": [MockFunction],
+                  "getInitialQuery": [MockFunction],
+                  "getInitialQueryByDataset": [MockFunction],
+                  "getInitialQueryByLanguage": [MockFunction],
+                  "getLanguageService": [MockFunction],
                   "getQuery": [MockFunction],
+                  "getQueryHistory": [MockFunction],
                   "getUpdates$": [MockFunction],
                   "setQuery": [MockFunction],
                 },
@@ -417,14 +417,9 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "showError": [MockFunction],
               },
               "ui": Object {
-                "DataSetNavigator": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
-                "Settings": undefined,
                 "SuggestionsComponent": [MockFunction],
-                "dataSetContainer$": Observable {
-                  "_isScalar": false,
-                },
               },
             },
             "docLinks": Object {
@@ -742,6 +737,10 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 },
                 "opensearchDashboards": Object {
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                  "dashboards": Object {
+                    "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                    "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                  },
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                     "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -777,7 +776,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   },
                   "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                   "visualize": Object {
-                    "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                    "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
                 },
               },
@@ -1391,15 +1390,6 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
-                "dataSetManager": Object {
-                  "fetchDefaultDataSet": [MockFunction],
-                  "getDataSet": [MockFunction],
-                  "getDefaultDataSet": [MockFunction],
-                  "getUpdates$": [MockFunction],
-                  "init": [MockFunction],
-                  "initWithIndexPattern": [MockFunction],
-                  "setDataSet": [MockFunction],
-                },
                 "filterManager": Object {
                   "addFilters": [MockFunction],
                   "getAppFilters": [MockFunction],
@@ -1418,10 +1408,19 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 },
                 "getOpenSearchQuery": [MockFunction],
                 "queryString": Object {
+                  "addToQueryHistory": [MockFunction],
+                  "changeQueryHistory": [MockFunction],
                   "clearQuery": [MockFunction],
+                  "clearQueryHistory": [MockFunction],
                   "formatQuery": [MockFunction],
+                  "getDatasetService": [MockFunction],
                   "getDefaultQuery": [MockFunction],
+                  "getInitialQuery": [MockFunction],
+                  "getInitialQueryByDataset": [MockFunction],
+                  "getInitialQueryByLanguage": [MockFunction],
+                  "getLanguageService": [MockFunction],
                   "getQuery": [MockFunction],
+                  "getQueryHistory": [MockFunction],
                   "getUpdates$": [MockFunction],
                   "setQuery": [MockFunction],
                 },
@@ -1483,14 +1482,9 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "showError": [MockFunction],
               },
               "ui": Object {
-                "DataSetNavigator": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
-                "Settings": undefined,
                 "SuggestionsComponent": [MockFunction],
-                "dataSetContainer$": Observable {
-                  "_isScalar": false,
-                },
               },
             },
             "docLinks": Object {
@@ -1808,6 +1802,10 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 },
                 "opensearchDashboards": Object {
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                  "dashboards": Object {
+                    "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                    "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                  },
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                     "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -1843,7 +1841,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   },
                   "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                   "visualize": Object {
-                    "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                    "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
                 },
               },
@@ -2457,15 +2455,6 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
-                "dataSetManager": Object {
-                  "fetchDefaultDataSet": [MockFunction],
-                  "getDataSet": [MockFunction],
-                  "getDefaultDataSet": [MockFunction],
-                  "getUpdates$": [MockFunction],
-                  "init": [MockFunction],
-                  "initWithIndexPattern": [MockFunction],
-                  "setDataSet": [MockFunction],
-                },
                 "filterManager": Object {
                   "addFilters": [MockFunction],
                   "getAppFilters": [MockFunction],
@@ -2484,10 +2473,19 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 },
                 "getOpenSearchQuery": [MockFunction],
                 "queryString": Object {
+                  "addToQueryHistory": [MockFunction],
+                  "changeQueryHistory": [MockFunction],
                   "clearQuery": [MockFunction],
+                  "clearQueryHistory": [MockFunction],
                   "formatQuery": [MockFunction],
+                  "getDatasetService": [MockFunction],
                   "getDefaultQuery": [MockFunction],
+                  "getInitialQuery": [MockFunction],
+                  "getInitialQueryByDataset": [MockFunction],
+                  "getInitialQueryByLanguage": [MockFunction],
+                  "getLanguageService": [MockFunction],
                   "getQuery": [MockFunction],
+                  "getQueryHistory": [MockFunction],
                   "getUpdates$": [MockFunction],
                   "setQuery": [MockFunction],
                 },
@@ -2549,14 +2547,9 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "showError": [MockFunction],
               },
               "ui": Object {
-                "DataSetNavigator": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
-                "Settings": undefined,
                 "SuggestionsComponent": [MockFunction],
-                "dataSetContainer$": Observable {
-                  "_isScalar": false,
-                },
               },
             },
             "docLinks": Object {
@@ -2874,6 +2867,10 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 },
                 "opensearchDashboards": Object {
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                  "dashboards": Object {
+                    "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                    "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                  },
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                     "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -2909,7 +2906,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   },
                   "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                   "visualize": Object {
-                    "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                    "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
                 },
               },
@@ -3523,15 +3520,6 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
-                "dataSetManager": Object {
-                  "fetchDefaultDataSet": [MockFunction],
-                  "getDataSet": [MockFunction],
-                  "getDefaultDataSet": [MockFunction],
-                  "getUpdates$": [MockFunction],
-                  "init": [MockFunction],
-                  "initWithIndexPattern": [MockFunction],
-                  "setDataSet": [MockFunction],
-                },
                 "filterManager": Object {
                   "addFilters": [MockFunction],
                   "getAppFilters": [MockFunction],
@@ -3550,10 +3538,19 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 },
                 "getOpenSearchQuery": [MockFunction],
                 "queryString": Object {
+                  "addToQueryHistory": [MockFunction],
+                  "changeQueryHistory": [MockFunction],
                   "clearQuery": [MockFunction],
+                  "clearQueryHistory": [MockFunction],
                   "formatQuery": [MockFunction],
+                  "getDatasetService": [MockFunction],
                   "getDefaultQuery": [MockFunction],
+                  "getInitialQuery": [MockFunction],
+                  "getInitialQueryByDataset": [MockFunction],
+                  "getInitialQueryByLanguage": [MockFunction],
+                  "getLanguageService": [MockFunction],
                   "getQuery": [MockFunction],
+                  "getQueryHistory": [MockFunction],
                   "getUpdates$": [MockFunction],
                   "setQuery": [MockFunction],
                 },
@@ -3615,14 +3612,9 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "showError": [MockFunction],
               },
               "ui": Object {
-                "DataSetNavigator": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
-                "Settings": undefined,
                 "SuggestionsComponent": [MockFunction],
-                "dataSetContainer$": Observable {
-                  "_isScalar": false,
-                },
               },
             },
             "docLinks": Object {
@@ -3940,6 +3932,10 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 },
                 "opensearchDashboards": Object {
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                  "dashboards": Object {
+                    "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                    "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                  },
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                     "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -3975,7 +3971,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   },
                   "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                   "visualize": Object {
-                    "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                    "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
                 },
               },
@@ -4589,15 +4585,6 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
-                "dataSetManager": Object {
-                  "fetchDefaultDataSet": [MockFunction],
-                  "getDataSet": [MockFunction],
-                  "getDefaultDataSet": [MockFunction],
-                  "getUpdates$": [MockFunction],
-                  "init": [MockFunction],
-                  "initWithIndexPattern": [MockFunction],
-                  "setDataSet": [MockFunction],
-                },
                 "filterManager": Object {
                   "addFilters": [MockFunction],
                   "getAppFilters": [MockFunction],
@@ -4616,10 +4603,19 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 },
                 "getOpenSearchQuery": [MockFunction],
                 "queryString": Object {
+                  "addToQueryHistory": [MockFunction],
+                  "changeQueryHistory": [MockFunction],
                   "clearQuery": [MockFunction],
+                  "clearQueryHistory": [MockFunction],
                   "formatQuery": [MockFunction],
+                  "getDatasetService": [MockFunction],
                   "getDefaultQuery": [MockFunction],
+                  "getInitialQuery": [MockFunction],
+                  "getInitialQueryByDataset": [MockFunction],
+                  "getInitialQueryByLanguage": [MockFunction],
+                  "getLanguageService": [MockFunction],
                   "getQuery": [MockFunction],
+                  "getQueryHistory": [MockFunction],
                   "getUpdates$": [MockFunction],
                   "setQuery": [MockFunction],
                 },
@@ -4681,14 +4677,9 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "showError": [MockFunction],
               },
               "ui": Object {
-                "DataSetNavigator": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
-                "Settings": undefined,
                 "SuggestionsComponent": [MockFunction],
-                "dataSetContainer$": Observable {
-                  "_isScalar": false,
-                },
               },
             },
             "docLinks": Object {
@@ -5006,6 +4997,10 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 },
                 "opensearchDashboards": Object {
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                  "dashboards": Object {
+                    "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                    "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                  },
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                     "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -5041,7 +5036,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   },
                   "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                   "visualize": Object {
-                    "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                    "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
                 },
               },
@@ -5655,15 +5650,6 @@ exports[`Dashboard top nav render with all components 1`] = `
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
-                "dataSetManager": Object {
-                  "fetchDefaultDataSet": [MockFunction],
-                  "getDataSet": [MockFunction],
-                  "getDefaultDataSet": [MockFunction],
-                  "getUpdates$": [MockFunction],
-                  "init": [MockFunction],
-                  "initWithIndexPattern": [MockFunction],
-                  "setDataSet": [MockFunction],
-                },
                 "filterManager": Object {
                   "addFilters": [MockFunction],
                   "getAppFilters": [MockFunction],
@@ -5682,10 +5668,19 @@ exports[`Dashboard top nav render with all components 1`] = `
                 },
                 "getOpenSearchQuery": [MockFunction],
                 "queryString": Object {
+                  "addToQueryHistory": [MockFunction],
+                  "changeQueryHistory": [MockFunction],
                   "clearQuery": [MockFunction],
+                  "clearQueryHistory": [MockFunction],
                   "formatQuery": [MockFunction],
+                  "getDatasetService": [MockFunction],
                   "getDefaultQuery": [MockFunction],
+                  "getInitialQuery": [MockFunction],
+                  "getInitialQueryByDataset": [MockFunction],
+                  "getInitialQueryByLanguage": [MockFunction],
+                  "getLanguageService": [MockFunction],
                   "getQuery": [MockFunction],
+                  "getQueryHistory": [MockFunction],
                   "getUpdates$": [MockFunction],
                   "setQuery": [MockFunction],
                 },
@@ -5747,14 +5742,9 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "showError": [MockFunction],
               },
               "ui": Object {
-                "DataSetNavigator": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
-                "Settings": undefined,
                 "SuggestionsComponent": [MockFunction],
-                "dataSetContainer$": Observable {
-                  "_isScalar": false,
-                },
               },
             },
             "docLinks": Object {
@@ -6072,6 +6062,10 @@ exports[`Dashboard top nav render with all components 1`] = `
                 },
                 "opensearchDashboards": Object {
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                  "dashboards": Object {
+                    "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                    "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                  },
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                     "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -6107,7 +6101,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                   },
                   "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                   "visualize": Object {
-                    "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                    "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
                 },
               },

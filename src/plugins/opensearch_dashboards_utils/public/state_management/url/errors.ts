@@ -61,11 +61,13 @@ export const withNotifyOnErrors = (toasts: NotificationsStart['toasts']) => {
   return {
     onGetError: (error: Error) => {
       toasts.addError(error, {
+        id: 'opensearch_dashboards_utils.state_management.url.restoreUrlError',
         title: restoreUrlErrorTitle,
       });
     },
     onSetError: (error: Error) => {
       toasts.addError(error, {
+        id: 'opensearch_dashboards_utils.state_management.url.saveStateInUrlError',
         title: saveStateInUrlErrorTitle,
       });
     },

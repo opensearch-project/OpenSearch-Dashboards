@@ -12,10 +12,12 @@ describe('updateWorkspaceState', () => {
     updateWorkspaceState(requestMock, {
       requestWorkspaceId: 'foo',
       isDashboardAdmin: true,
+      isDataSourceAdmin: true,
     });
     expect(getWorkspaceState(requestMock)).toEqual({
       requestWorkspaceId: 'foo',
       isDashboardAdmin: true,
+      isDataSourceAdmin: true,
     });
   });
 });

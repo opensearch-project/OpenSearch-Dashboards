@@ -67,7 +67,6 @@ describe('HeaderBreadcrumbs', () => {
       />
     );
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
-    expect(wrapper.find('.headerBreadcrumbs').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="breadcrumb first"]').exists()).toBeFalsy();
 
     act(() => breadcrumbs$.next([{ text: 'First' }, { text: 'Second' }]));
@@ -107,5 +106,29 @@ describe('HeaderBreadcrumbs', () => {
     act(() => breadcrumbs$.next([]));
     wrapper.update();
     expect(wrapper.find('.euiBreadcrumbWrapper')).toHaveLength(2);
+  });
+});
+
+describe('EuiSimplifiedBreadcrumbs', () => {
+  it('renders updates to the breadcrumbs$ observable', () => {
+    const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
+    const wrapper = mount(
+      <HeaderBreadcrumbs
+        appTitle$={new BehaviorSubject('')}
+        breadcrumbs$={breadcrumbs$}
+        breadcrumbsEnricher$={new BehaviorSubject(undefined)}
+        renderFullLength={true}
+        hideTrailingSeparator={true}
+      />
+    );
+    expect(wrapper.find('.euiBreadcrumbSeparator .euiBreadcrumbSeparator')).toHaveLength(0);
+
+    act(() => breadcrumbs$.next([{ text: 'First' }, { text: 'Second' }]));
+    wrapper.update();
+    expect(wrapper.find('.euiSimplifiedBreadcrumbs .euiBreadcrumbSeparator')).toHaveLength(1);
+
+    act(() => breadcrumbs$.next([]));
+    wrapper.update();
+    expect(wrapper.find('.euiSimplifiedBreadcrumbs')).toMatchSnapshot();
   });
 });

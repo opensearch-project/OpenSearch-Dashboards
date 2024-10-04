@@ -3,10 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiPageSideBar, EuiPortal, EuiSplitPanel } from '@elastic/eui';
+import React, { FC, useCallback, useEffect, useState } from 'react';
+import { EuiPageSideBar, EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { DataSource, DataSourceGroup, DataSourceSelectable } from '../../../../data/public';
+import {
+  DataSource,
+  DataSourceGroup,
+  DataSourceSelectable,
+  UI_SETTINGS,
+} from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
@@ -19,48 +24,21 @@ export const Sidebar: FC = ({ children }) => {
   const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
   const [activeDataSources, setActiveDataSources] = useState<DataSource[]>([]);
-  const [isEnhancementsEnabled, setIsEnhancementsEnabled] = useState<boolean>(false);
-  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const {
     services: {
-      data: { indexPatterns, dataSources, ui },
+      data: { indexPatterns, dataSources },
       notifications: { toasts },
       application,
+      uiSettings,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
-  const { DataSetNavigator } = ui;
+  const [isEnhancementEnabled, setIsEnhancementEnabled] = useState<boolean>(false);
 
   useEffect(() => {
-    const subscriptions = ui.Settings.getEnabledQueryEnhancementsUpdated$().subscribe(
-      (enabledQueryEnhancements) => {
-        setIsEnhancementsEnabled(enabledQueryEnhancements);
-      }
-    );
-
-    return () => {
-      subscriptions.unsubscribe();
-    };
-  }, [ui.Settings]);
-
-  const setContainerRef = useCallback((uiContainerRef) => {
-    uiContainerRef.appendChild(containerRef.current);
-  }, []);
-
-  useEffect(() => {
-    if (!isEnhancementsEnabled) return;
-    const subscriptions = ui.dataSetContainer$.subscribe((dataSetContainer) => {
-      if (dataSetContainer === null) return;
-      if (containerRef.current) {
-        setContainerRef(dataSetContainer);
-      }
-    });
-
-    return () => {
-      subscriptions.unsubscribe();
-    };
-  }, [ui.dataSetContainer$, containerRef, setContainerRef, isEnhancementsEnabled]);
+    setIsEnhancementEnabled(uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED));
+  }, [uiSettings]);
 
   useEffect(() => {
     let isMounted = true;
@@ -144,16 +122,7 @@ export const Sidebar: FC = ({ children }) => {
         borderRadius="none"
         color="transparent"
       >
-        {isEnhancementsEnabled && (
-          <EuiPortal
-            portalRef={(node) => {
-              containerRef.current = node;
-            }}
-          >
-            <DataSetNavigator />
-          </EuiPortal>
-        )}
-        {!isEnhancementsEnabled && (
+        {!isEnhancementEnabled && (
           <EuiSplitPanel.Inner
             paddingSize="s"
             grow={false}

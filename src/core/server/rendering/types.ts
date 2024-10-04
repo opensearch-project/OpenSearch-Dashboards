@@ -31,7 +31,7 @@
 import { i18n } from '@osd/i18n';
 
 import { Branding } from 'src/core/types';
-import { EnvironmentMode, PackageInfo } from '../config';
+import { EnvironmentMode, InternalDynamicConfigServiceSetup, PackageInfo } from '../config';
 import { ICspConfig } from '../csp';
 import { InternalHttpServiceSetup, OpenSearchDashboardsRequest, LegacyRequest } from '../http';
 import { UiPlugins, DiscoveredPlugin } from '../plugins';
@@ -83,6 +83,7 @@ export interface RenderingSetupDeps {
   http: InternalHttpServiceSetup;
   status: InternalStatusServiceSetup;
   uiPlugins: UiPlugins;
+  dynamicConfig: InternalDynamicConfigServiceSetup;
 }
 
 /** @public */

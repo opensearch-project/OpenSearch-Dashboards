@@ -28,17 +28,43 @@
  * under the License.
  */
 
+import { of } from 'rxjs';
 import { QueryStringContract } from '.';
+import { Query, Dataset } from '../../../common';
+import { datasetServiceMock } from './dataset_service/dataset_service.mock';
+import { languageServiceMock } from './language_service/language_service.mock';
 
-const createSetupContractMock = () => {
+const createSetupContractMock = (isEnhancementsEnabled: boolean = false) => {
+  const datasetService = datasetServiceMock.createSetupContract();
+  const languageService = languageServiceMock.createSetupContract();
+
+  const defaultQuery: Query = {
+    query: '',
+    language: 'kuery',
+    ...(isEnhancementsEnabled ? { dataset: datasetService.getDefault() } : {}),
+  };
+
   const queryStringManagerMock: jest.Mocked<QueryStringContract> = {
-    getQuery: jest.fn(),
+    getQuery: jest.fn().mockReturnValue(defaultQuery),
     setQuery: jest.fn(),
-    getUpdates$: jest.fn(),
-    getDefaultQuery: jest.fn(),
+    getUpdates$: jest.fn().mockReturnValue(of(defaultQuery)),
+    getDefaultQuery: jest.fn().mockReturnValue(defaultQuery),
     formatQuery: jest.fn(),
     clearQuery: jest.fn(),
+    addToQueryHistory: jest.fn(),
+    getQueryHistory: jest.fn().mockReturnValue([]),
+    clearQueryHistory: jest.fn(),
+    changeQueryHistory: jest.fn().mockReturnValue(() => {}),
+    getInitialQuery: jest.fn().mockReturnValue(defaultQuery),
+    getInitialQueryByLanguage: jest.fn().mockReturnValue(defaultQuery),
+    getDatasetService: jest.fn().mockReturnValue(datasetService),
+    getLanguageService: jest.fn().mockReturnValue(languageService),
+    getInitialQueryByDataset: jest.fn().mockImplementation((newDataset: Dataset) => ({
+      ...defaultQuery,
+      dataset: newDataset,
+    })),
   };
+
   return queryStringManagerMock;
 };
 

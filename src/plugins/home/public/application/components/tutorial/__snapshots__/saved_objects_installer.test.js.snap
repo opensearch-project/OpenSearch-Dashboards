@@ -278,6 +278,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                           >
                             <EuiButtonContent
                               className="euiButton__content"
+                              iconGap="m"
                               iconSide="left"
                               isLoading={false}
                               textProps={
@@ -617,6 +618,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                           >
                             <EuiButtonContent
                               className="euiButton__content"
+                              iconGap="m"
                               iconSide="left"
                               isLoading={false}
                               textProps={

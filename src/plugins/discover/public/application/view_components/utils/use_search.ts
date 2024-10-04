@@ -8,7 +8,7 @@ import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { useEffect } from 'react';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqual } from 'lodash';
 import { useLocation } from 'react-router-dom';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
@@ -33,12 +33,14 @@ import {
 } from '../../../opensearch_dashboards_services';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { syncQueryStateWithUrl } from '../../../../../data/public';
+import { trackQueryMetric } from '../../../ui_metric';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
   LOADING = 'loading', // initial data load
   READY = 'ready', // results came back
   NO_RESULTS = 'none', // no results came back
+  ERROR = 'error', // error occurred
 }
 
 export interface SearchData {
@@ -50,6 +52,17 @@ export interface SearchData {
   bucketInterval?: TimechartHeaderBucketInterval | {};
   chartData?: Chart;
   title?: string;
+  queryStatus?: {
+    body?: {
+      error?: {
+        reason?: string;
+        details: string;
+      };
+      statusCode?: number;
+    };
+    elapsedMs?: number;
+    startTime?: number;
+  };
 }
 
 export type SearchRefetch = 'refetch' | undefined;
@@ -108,18 +121,20 @@ export const useSearch = (services: DiscoverViewServices) => {
     );
   }, [savedSearch, services.uiSettings, timefilter]);
 
+  const startTime = Date.now();
   const data$ = useMemo(
     () =>
       new BehaviorSubject<SearchData>({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
+        queryStatus: { startTime },
       }),
-    [shouldSearchOnPageLoad]
+    [shouldSearchOnPageLoad, startTime]
   );
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
   const fetch = useCallback(async () => {
-    let dataSet = indexPattern;
-    if (!dataSet) {
+    let dataset = indexPattern;
+    if (!dataset) {
       data$.next({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
       });
@@ -136,19 +151,20 @@ export const useSearch = (services: DiscoverViewServices) => {
     // Abort any in-progress requests before fetching again
     if (fetchStateRef.current.abortController) fetchStateRef.current.abortController.abort();
     fetchStateRef.current.abortController = new AbortController();
-    const histogramConfigs = dataSet.timeFieldName
-      ? createHistogramConfigs(dataSet, interval || 'auto', data)
+    const histogramConfigs = dataset.timeFieldName
+      ? createHistogramConfigs(dataset, interval || 'auto', data)
       : undefined;
     const searchSource = await updateSearchSource({
-      indexPattern: dataSet,
+      indexPattern: dataset,
       services,
       sort,
       searchSource: savedSearch?.searchSource,
       histogramConfigs,
     });
 
-    dataSet = searchSource.getField('index');
+    dataset = searchSource.getField('index');
 
+    let elapsedMs;
     try {
       // Only show loading indicator if we are fetching when the rows are empty
       if (fetchStateRef.current.rows?.length === 0) {
@@ -169,6 +185,12 @@ export const useSearch = (services: DiscoverViewServices) => {
         inspectorRequest.json(body);
       });
 
+      // Track the dataset type and language used
+      const query = searchSource.getField('query');
+      if (query && query.dataset?.type && query.language) {
+        trackQueryMetric(query);
+      }
+
       // Execute the search
       const fetchResp = await searchSource.fetch({
         abortSignal: fetchStateRef.current.abortController.signal,
@@ -180,10 +202,11 @@ export const useSearch = (services: DiscoverViewServices) => {
         .ok({ json: fetchResp });
       const hits = fetchResp.hits.total as number;
       const rows = fetchResp.hits.hits;
+      elapsedMs = inspectorRequest.getTime();
       let bucketInterval = {};
       let chartData;
       for (const row of rows) {
-        const fields = Object.keys(dataSet!.flattenHit(row));
+        const fields = Object.keys(dataset!.flattenHit(row));
         for (const fieldName of fields) {
           fetchStateRef.current.fieldCounts[fieldName] =
             (fetchStateRef.current.fieldCounts[fieldName] || 0) + 1;
@@ -216,30 +239,51 @@ export const useSearch = (services: DiscoverViewServices) => {
           indexPattern?.title !== searchSource.getDataFrame()?.name
             ? searchSource.getDataFrame()?.name
             : indexPattern?.title,
+        queryStatus: {
+          elapsedMs,
+        },
       });
     } catch (error) {
       // If the request was aborted then no need to surface this error in the UI
       if (error instanceof Error && error.name === 'AbortError') return;
 
-      data$.next({
-        status: ResultStatus.NO_RESULTS,
-        rows: [],
-      });
+      const queryLanguage = data.query.queryString.getQuery().language;
+      if (queryLanguage === 'kuery' || queryLanguage === 'lucene') {
+        data$.next({
+          status: ResultStatus.NO_RESULTS,
+          rows: [],
+        });
 
-      data.search.showError(error as Error);
+        data.search.showError(error as Error);
+        return;
+      }
+      let errorBody;
+      try {
+        errorBody = JSON.parse(error.body.message);
+      } catch (e) {
+        errorBody = error.body.message;
+      }
+
+      data$.next({
+        status: ResultStatus.ERROR,
+        queryStatus: {
+          body: errorBody,
+          elapsedMs,
+        },
+      });
     } finally {
       initalSearchComplete.current = true;
     }
   }, [
     indexPattern,
-    interval,
     timefilter,
     toastNotifications,
+    interval,
     data,
     services,
+    sort,
     savedSearch?.searchSource,
     data$,
-    sort,
     shouldSearchOnPageLoad,
     inspectorAdapters.requests,
   ]);
@@ -251,8 +295,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       timefilter.getFetch$(),
       timefilter.getTimeUpdate$(),
       timefilter.getAutoRefreshFetch$(),
-      data.query.queryString.getUpdates$(),
-      data.query.dataSetManager.getUpdates$()
+      data.query.queryString.getUpdates$()
     ).pipe(debounceTime(100));
 
     const subscription = fetch$.subscribe(() => {
@@ -282,7 +325,6 @@ export const useSearch = (services: DiscoverViewServices) => {
     fetch,
     core.fatalErrors,
     shouldSearchOnPageLoad,
-    data.query.dataSetManager,
   ]);
 
   // Get savedSearch if it exists
@@ -290,6 +332,11 @@ export const useSearch = (services: DiscoverViewServices) => {
     (async () => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
       setSavedSearch(savedSearchInstance);
+
+      // if saved search does not exist, do not atempt to sync filters and query from savedObject
+      if (!savedSearch) {
+        return;
+      }
 
       // sync initial app filters from savedObject to filterManager
       const filters = cloneDeep(savedSearchInstance.searchSource.getOwnField('filter'));

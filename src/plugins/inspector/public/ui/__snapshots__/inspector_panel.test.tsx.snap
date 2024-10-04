@@ -257,6 +257,7 @@ exports[`InspectorPanel should render as expected 1`] = `
                         >
                           <EuiButtonContent
                             className="euiButtonEmpty__content"
+                            iconGap="m"
                             iconSide="right"
                             iconSize="m"
                             iconType="arrowDown"

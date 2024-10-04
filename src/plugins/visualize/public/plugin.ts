@@ -228,39 +228,48 @@ export class VisualizePlugin
       },
     });
 
+    const titleInLeftNav = i18n.translate('visualize.leftNav.visualizeTitle', {
+      defaultMessage: 'Visualizations',
+    });
+
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
         id: visualizeAppId,
         category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-        order: 200,
+        order: 100,
+        title: titleInLeftNav,
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
       {
         id: visualizeAppId,
         category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-        order: 200,
+        order: 100,
+        title: titleInLeftNav,
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
       {
         id: visualizeAppId,
-        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
-        order: 200,
+        category: undefined,
+        order: 400,
+        title: titleInLeftNav,
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
       {
         id: visualizeAppId,
-        category: DEFAULT_APP_CATEGORIES.analyzeSearch,
-        order: 400,
+        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+        order: 100,
+        title: titleInLeftNav,
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
       {
         id: visualizeAppId,
-        category: undefined,
-        order: 400,
+        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
+        order: 100,
+        title: titleInLeftNav,
       },
     ]);
 

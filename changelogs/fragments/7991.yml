@@ -1,0 +1,2 @@
+feat:
+- Keep Autocomplete suggestion window open and put user hints below the suggestion window ([#7991](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7991))

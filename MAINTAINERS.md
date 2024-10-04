@@ -29,6 +29,8 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Viraj Sanghvi             | [virajsanghvi](https://github.com/virajsanghvi)     | Amazon      |
 | Sean Li                   | [sejli](https://github.com/sejli)                   | Amazon      |
 | Joshua Li                 | [joshuali925](https://github.com/joshuali925)       | Amazon      |
+| Huy Nguyen                | [huyaboo](https://github.com/huyaboo)               | Amazon      |
+| Hailong Cui               | [Hailong-am](https://github.com/Hailong-am)         | Amazon      |
 
 ## Emeritus
 

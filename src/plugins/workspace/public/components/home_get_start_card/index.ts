@@ -3,4 +3,5 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { UseCaseFooter } from './use_case_footer';
+export { UseCaseCardTitle } from './use_case_card_title';
+export { registerGetStartedCardToNewHome } from './setup_get_start_card';

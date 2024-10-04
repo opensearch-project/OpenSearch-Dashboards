@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { BehaviorSubject } from 'rxjs';
-import { EuiButtonIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiButtonIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { Content, Section } from '../services';
 import { EmbeddableInput, EmbeddableRenderer, EmbeddableStart } from '../../../embeddable/public';
@@ -41,7 +41,12 @@ const DashboardSection = ({ section, embeddable, contents$, savedObjectsClient }
 
   if (section.kind === 'dashboard' && factory && input) {
     // const input = createDashboardSection(section, contents ?? []);
-    return <EmbeddableRenderer factory={factory} input={input} />;
+    return (
+      // to make dashboard section align with others add margin left and right -8px
+      <div style={{ margin: '-8px -8px 0 -8px' }}>
+        <EmbeddableRenderer factory={factory} input={input} />
+      </div>
+    );
   }
 
   return null;
@@ -49,9 +54,6 @@ const DashboardSection = ({ section, embeddable, contents$, savedObjectsClient }
 
 const CardSection = ({ section, embeddable, contents$ }: Props) => {
   const [isCardVisible, setIsCardVisible] = useState(true);
-  const toggleCardVisibility = () => {
-    setIsCardVisible(!isCardVisible);
-  };
   const contents = useObservable(contents$);
   const input = useMemo(() => {
     return createCardInput(section, contents ?? []);
@@ -60,25 +62,30 @@ const CardSection = ({ section, embeddable, contents$ }: Props) => {
   const factory = embeddable.getEmbeddableFactory(CARD_CONTAINER);
 
   if (section.kind === 'card' && factory && input) {
+    const isCardCollapsible = section.collapsible;
     return (
-      <EuiPanel>
-        <EuiTitle size="s">
-          <h2>
-            <EuiButtonIcon
-              iconType={isCardVisible ? 'arrowDown' : 'arrowUp'}
-              onClick={toggleCardVisibility}
-              color="text"
-              aria-label={isCardVisible ? 'Show panel' : 'Hide panel'}
-            />
-            {section.title}
-          </h2>
-        </EuiTitle>
+      <>
+        {section.title ? (
+          <EuiTitle size="s">
+            <h2>
+              {isCardCollapsible ? (
+                <EuiButtonIcon
+                  iconType={isCardVisible ? 'arrowDown' : 'arrowRight'}
+                  onClick={() => setIsCardVisible(!isCardVisible)}
+                  color="text"
+                  aria-label={isCardVisible ? 'Show panel' : 'Hide panel'}
+                />
+              ) : null}
+              {section.title}
+            </h2>
+          </EuiTitle>
+        ) : null}
         {isCardVisible && (
           <>
             <EuiSpacer size="m" /> <EmbeddableRenderer factory={factory} input={input} />
           </>
         )}
-      </EuiPanel>
+      </>
     );
   }
 

@@ -488,28 +488,11 @@ export class SavedObjectsClient {
     const newWorkspaces = existingWorkspaces.filter((item) => {
       return targetWorkspaces.indexOf(item) === -1;
     });
-    if (newWorkspaces.length > 0) {
-      return await this.update<T>(type, id, object.attributes, {
-        ...options,
-        workspaces: newWorkspaces,
-        version: object.version,
-      });
-    } else {
-      // If there is no workspaces assigned, will create object with overwrite to delete workspace property.
-      return await this.create(
-        type,
-        {
-          ...object.attributes,
-        },
-        {
-          ...options,
-          id,
-          permissions: object.permissions,
-          overwrite: true,
-          version: object.version,
-        }
-      );
-    }
+    return await this.update<T>(type, id, object.attributes, {
+      ...options,
+      workspaces: newWorkspaces,
+      version: object.version,
+    });
   };
 
   /**

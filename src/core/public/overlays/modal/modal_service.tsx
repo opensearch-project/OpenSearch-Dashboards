@@ -31,7 +31,7 @@
 /* eslint-disable max-classes-per-file */
 
 import { i18n as t } from '@osd/i18n';
-import { EuiModal, EuiConfirmModal, EuiConfirmModalProps } from '@elastic/eui';
+import { EuiModal, EuiConfirmModal, EuiConfirmModalProps, EuiModalProps } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subject } from 'rxjs';
@@ -111,7 +111,7 @@ export interface OverlayModalStart {
 /**
  * @public
  */
-export interface OverlayModalOpenOptions {
+export interface OverlayModalOpenOptions extends Pick<EuiModalProps, 'maxWidth'> {
   className?: string;
   closeButtonAriaLabel?: string;
   'data-test-subj'?: string;

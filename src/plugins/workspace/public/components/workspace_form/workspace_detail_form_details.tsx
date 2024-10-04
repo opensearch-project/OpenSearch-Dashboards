@@ -4,11 +4,10 @@
  */
 
 import {
-  EuiSuperSelect,
-  EuiColorPicker,
+  EuiCompressedSuperSelect,
+  EuiCompressedColorPicker,
   EuiCompressedFormRow,
   EuiDescribedFormGroup,
-  EuiCompressedTextArea,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useObservable } from 'react-use';
@@ -17,7 +16,6 @@ import {
   detailsColorLabel,
   detailsUseCaseLabel,
   detailsColorHelpText,
-  detailsDescriptionPlaceholder,
   detailsDescriptionIntroduction,
   detailsUseCaseHelpText,
 } from './constants';
@@ -36,7 +34,7 @@ interface WorkspaceDetailFormDetailsProps {
   >;
 }
 
-export const WorkspaceDetailFormDetailsProps = ({
+export const WorkspaceDetailFormDetails = ({
   availableUseCases,
 }: WorkspaceDetailFormDetailsProps) => {
   const {
@@ -66,7 +64,11 @@ export const WorkspaceDetailFormDetailsProps = ({
       // Essential can be changed to other use cases;
       // Analytics (all) cannot be changed back to a single use case;
       // Other use cases can only be changed to Analytics (all) use case.
-      return currentUseCase === 'analytics' || id === 'all' || id === currentUseCase;
+      return (
+        currentUseCase === DEFAULT_NAV_GROUPS.essentials.id ||
+        id === DEFAULT_NAV_GROUPS.all.id ||
+        id === currentUseCase
+      );
     })
     .map((useCase) => ({
       value: useCase.id,
@@ -96,7 +98,6 @@ export const WorkspaceDetailFormDetailsProps = ({
           value={formData.description}
           onChange={setDescription}
           readOnly={!isEditing}
-          error={formErrors.name?.message}
         />
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup title={<h3>{detailsUseCaseLabel}</h3>}>
@@ -106,7 +107,7 @@ export const WorkspaceDetailFormDetailsProps = ({
           error={formErrors.features?.message}
           helpText={detailsUseCaseHelpText}
         >
-          <EuiSuperSelect
+          <EuiCompressedSuperSelect
             options={options}
             valueOfSelected={value}
             onChange={(id) => {
@@ -127,7 +128,7 @@ export const WorkspaceDetailFormDetailsProps = ({
           isInvalid={!!formErrors.color}
           error={formErrors.color?.message}
         >
-          <EuiColorPicker
+          <EuiCompressedColorPicker
             color={formData.color}
             onChange={handleColorChange}
             readOnly={!isEditing}

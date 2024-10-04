@@ -7,8 +7,9 @@ import React, { useEffect, useState, useRef } from 'react';
 import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { useUnmount } from 'react-use';
+import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { getTopNavConfig } from '../utils/get_top_nav_config';
+import { getLegacyTopNavConfig, getNavActions, getTopNavConfig } from '../utils/get_top_nav_config';
 import { VisBuilderServices } from '../../types';
 
 import './top_nav.scss';
@@ -18,7 +19,7 @@ import { setSavedQuery } from '../utils/state_management/visualization_slice';
 import { setEditorState } from '../utils/state_management/metadata_slice';
 import { useCanSave } from '../utils/use/use_can_save';
 import { saveStateToSavedObject } from '../../saved_visualizations/transforms';
-import { TopNavMenuData } from '../../../../navigation/public';
+import { TopNavMenuData, TopNavMenuItemRenderType } from '../../../../navigation/public';
 import { opensearchFilters, connectStorageToQueryState } from '../../../../data/public';
 import { RootState } from '../../../../data_explorer/public';
 
@@ -41,11 +42,13 @@ export const TopNav = () => {
     navigation: {
       ui: { TopNavMenu },
     },
+    uiSettings,
     appName,
     capabilities,
   } = services;
   const rootState = useTypedSelector((state: RootState) => state);
   const dispatch = useTypedDispatch();
+  const showActionsInGroup = uiSettings.get('home:useNewHomePage');
 
   useDeepEffect(() => {
     dispatch(setEditorState({ state: 'dirty' }));
@@ -67,7 +70,7 @@ export const TopNav = () => {
     const getConfig = () => {
       if (!savedVisBuilderVis || !indexPattern) return;
 
-      return getTopNavConfig(
+      const navActions = getNavActions(
         {
           visualizationIdFromUrl,
           savedVisBuilderVis: saveStateToSavedObject(savedVisBuilderVis, rootState, indexPattern),
@@ -77,6 +80,38 @@ export const TopNav = () => {
         },
         services
       );
+
+      return showActionsInGroup
+        ? getTopNavConfig(
+            {
+              visualizationIdFromUrl,
+              savedVisBuilderVis: saveStateToSavedObject(
+                savedVisBuilderVis,
+                rootState,
+                indexPattern
+              ),
+              saveDisabledReason,
+              dispatch,
+              originatingApp,
+            },
+            services,
+            navActions
+          )
+        : getLegacyTopNavConfig(
+            {
+              visualizationIdFromUrl,
+              savedVisBuilderVis: saveStateToSavedObject(
+                savedVisBuilderVis,
+                rootState,
+                indexPattern
+              ),
+              saveDisabledReason,
+              dispatch,
+              originatingApp,
+            },
+            services,
+            navActions
+          );
     };
 
     setConfig(getConfig());
@@ -89,6 +124,7 @@ export const TopNav = () => {
     dispatch,
     indexPattern,
     originatingApp,
+    showActionsInGroup,
   ]);
 
   // reset validity before component destroyed
@@ -109,11 +145,18 @@ export const TopNav = () => {
         setMenuMountPoint={setHeaderActionMenu}
         indexPatterns={indexPattern ? [indexPattern] : []}
         showDatePicker={!!indexPattern?.timeFieldName ?? true}
-        showSearchBar
+        showSearchBar={TopNavMenuItemRenderType.IN_PORTAL}
         showSaveQuery={showSaveQuery}
         useDefaultBehaviors
         savedQueryId={rootState.visualization.savedQuery}
         onSavedQueryIdChange={updateSavedQueryId}
+        groupActions={showActionsInGroup}
+        screenTitle={
+          savedVisBuilderVis?.title ||
+          i18n.translate('visBuilder.savedSearch.newTitle', {
+            defaultMessage: 'New visualization',
+          })
+        }
       />
     </div>
   );

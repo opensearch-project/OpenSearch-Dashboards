@@ -12,12 +12,15 @@ import {
   ApplicationStart,
   CoreStart,
   NotificationsStart,
+  HttpSetup,
 } from 'src/core/public';
 import { deepFreeze } from '@osd/std';
 import uuid from 'uuid';
 import {
   DataSourceAttributes,
+  DataSourceConnectionType,
   DataSourceTableItem,
+  DirectQueryDatasourceDetails,
   defaultAuthType,
   noAuthCredentialAuthMethod,
 } from '../types';
@@ -27,24 +30,132 @@ import { DataSourceGroupLabelOption } from './data_source_menu/types';
 import { createGetterSetter } from '../../../opensearch_dashboards_utils/public';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 import { getManageDataSourceButton, getReloadButton } from './toast_button';
-import {
-  ADD_COMPATIBLE_DATASOURCES_MESSAGE,
-  CONNECT_DATASOURCES_MESSAGE,
-  NO_COMPATIBLE_DATASOURCES_MESSAGE,
-  NO_DATASOURCES_CONNECTED_MESSAGE,
-  DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
-} from './constants';
+import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from './constants';
 import {
   DataSourceSelectionService,
   defaultDataSourceSelection,
 } from '../service/data_source_selection_service';
 import { DataSourceError } from '../types';
+import { DATACONNECTIONS_BASE, LOCAL_CLUSTER } from '../constants';
+
+export const getDirectQueryConnections = async (dataSourceId: string, http: HttpSetup) => {
+  const endpoint = `${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceId}`;
+  const res = await http.get(endpoint);
+  if (!Array.isArray(res)) {
+    throw new Error('Unexpected response format: expected an array of direct query connections.');
+  }
+  const directQueryConnections: DataSourceTableItem[] = res.map(
+    (dataConnection: DirectQueryDatasourceDetails) => ({
+      id: `${dataSourceId}-${dataConnection.name}`,
+      title: dataConnection.name,
+      type:
+        {
+          S3GLUE: 'Amazon S3',
+          PROMETHEUS: 'Prometheus',
+        }[dataConnection.connector] || dataConnection.connector,
+      connectionType: DataSourceConnectionType.DirectQueryConnection,
+      description: dataConnection.description,
+      parentId: dataSourceId,
+    })
+  );
+  return directQueryConnections;
+};
+
+export const getLocalClusterConnections = async (http: HttpSetup) => {
+  const res = await http.get(`${DATACONNECTIONS_BASE}`);
+  const localClusterConnections: DataSourceTableItem[] = res.map(
+    (dataConnection: DirectQueryDatasourceDetails) => ({
+      id: `${dataConnection.name}`,
+      title: dataConnection.name,
+      type:
+        {
+          S3GLUE: 'Amazon S3',
+          PROMETHEUS: 'Prometheus',
+        }[dataConnection.connector] || dataConnection.connector,
+      connectionType: DataSourceConnectionType.DirectQueryConnection,
+      description: dataConnection.description,
+      parentId: LOCAL_CLUSTER,
+    })
+  );
+  return localClusterConnections;
+};
+
+export const mergeDataSourcesWithConnections = (
+  dataSources: DataSourceTableItem[],
+  directQueryConnections: DataSourceTableItem[],
+  localClusterConnections?: DataSourceTableItem[]
+): DataSourceTableItem[] => {
+  const dataSourcesList: DataSourceTableItem[] = [];
+  dataSources.forEach((ds) => {
+    const relatedConnections = directQueryConnections.filter(
+      (directQueryConnection) => directQueryConnection.parentId === ds.id
+    );
+
+    dataSourcesList.push({
+      id: ds.id,
+      type: ds.type,
+      connectionType: DataSourceConnectionType.OpenSearchConnection,
+      title: ds.title,
+      description: ds.description,
+      relatedConnections,
+    });
+  });
+
+  if (localClusterConnections) {
+    dataSourcesList.push({
+      id: LOCAL_CLUSTER,
+      type: 'OpenSearch',
+      connectionType: DataSourceConnectionType.OpenSearchConnection,
+      title: LOCAL_CLUSTER,
+      relatedConnections: localClusterConnections,
+    });
+  }
+
+  return dataSourcesList;
+};
+
+export const fetchDataSourceConnections = async (
+  dataSources: DataSourceTableItem[],
+  http: HttpSetup | undefined,
+  notifications: NotificationsStart | undefined,
+  directQueryTable: boolean,
+  hideLocalCluster: boolean
+) => {
+  try {
+    const directQueryConnectionsPromises = dataSources.map((ds) =>
+      getDirectQueryConnections(ds.id, http!).catch(() => [])
+    );
+    const directQueryConnectionsResult = await Promise.all(directQueryConnectionsPromises);
+    const directQueryConnections = directQueryConnectionsResult.flat();
+    const localClusterConnections =
+      directQueryTable && !hideLocalCluster ? await getLocalClusterConnections(http!) : undefined;
+    return mergeDataSourcesWithConnections(
+      dataSources,
+      directQueryConnections,
+      localClusterConnections
+    );
+  } catch (error) {
+    notifications?.toasts.addDanger(
+      i18n.translate('dataSourcesManagement.fetchDataSourceConnections', {
+        defaultMessage: 'Cannot fetch data sources',
+      })
+    );
+    return [];
+  }
+};
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
     .find({
       type: 'data-source',
-      fields: ['id', 'description', 'title', 'dataSourceVersion', 'installedPlugins'],
+      fields: [
+        'id',
+        'description',
+        'title',
+        'dataSourceVersion',
+        'dataSourceEngineType',
+        'installedPlugins',
+      ],
       perPage: 10000,
     })
     .then(
@@ -54,6 +165,7 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
           const title = source.get('title');
           const description = source.get('description');
           const datasourceversion = source.get('dataSourceVersion');
+          const type = source.get('dataSourceEngineType');
           const installedplugins = source.get('installedPlugins');
 
           return {
@@ -62,6 +174,7 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
             description,
             sort: `${title}`,
             datasourceversion,
+            type,
             installedplugins,
           };
         }) || []
@@ -116,14 +229,18 @@ export interface HandleNoAvailableDataSourceErrorProps {
 export function handleNoAvailableDataSourceError(props: HandleNoAvailableDataSourceErrorProps) {
   const { changeState, notifications, application, callback, incompatibleDataSourcesExist } = props;
 
-  const defaultMessage = incompatibleDataSourcesExist
-    ? `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`
-    : `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
+  const notificationTitle = incompatibleDataSourcesExist
+    ? i18n.translate('dataSourcesManagement.noCompatibleDataSourceError', {
+        defaultMessage: 'No compatible data sources are available. Add a compatible data source.',
+      })
+    : i18n.translate('dataSourcesManagement.noAvailableDataSourceError', {
+        defaultMessage: 'No data sources connected yet. Connect your data sources to get started.',
+      });
 
   changeState();
   if (callback) callback([]);
   notifications.add({
-    title: i18n.translate('dataSource.noAvailableDataSourceError', { defaultMessage }),
+    title: notificationTitle,
     text: toMountPoint(getManageDataSourceButton(application)),
     color: 'warning',
   });
@@ -336,7 +453,7 @@ export const handleDataSourceFetchError = (
   changeState({ showError: true });
   if (callback) callback([]);
   notifications.add({
-    title: i18n.translate('dataSource.fetchDataSourceError', {
+    title: i18n.translate('dataSourcesManagement.error.fetchDataSources', {
       defaultMessage: 'Failed to fetch data sources',
     }),
     text: toMountPoint(getReloadButton()),

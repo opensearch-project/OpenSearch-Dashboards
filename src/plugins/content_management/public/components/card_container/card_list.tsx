@@ -4,8 +4,9 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
+import { FlexGridColumns } from '@elastic/eui/src/components/flex/flex_grid';
 import {
   IContainer,
   withEmbeddableSubscription,
@@ -22,19 +23,57 @@ interface Props {
 }
 
 const CardListInner = ({ embeddable, input, embeddableServices }: Props) => {
+  if (input.columns && !input.grid) {
+    const width = `${(1 / input.columns) * 100}%`;
+    const cards = Object.values(input.panels).map((panel) => {
+      const child = embeddable.getChild(panel.explicitInput.id);
+      return (
+        <EuiFlexItem key={panel.explicitInput.id} style={{ minWidth: `calc(${width} - 8px)` }}>
+          <embeddableServices.EmbeddablePanel
+            embeddable={child}
+            hideHeader
+            hasBorder={false}
+            hasShadow={false}
+          />
+        </EuiFlexItem>
+      );
+    });
+    return (
+      <EuiFlexGroup
+        wrap={!!input.wrap}
+        style={input.wrap ? {} : { overflowX: 'auto' }}
+        gutterSize="m"
+      >
+        {cards}
+      </EuiFlexGroup>
+    );
+  }
+
   const cards = Object.values(input.panels).map((panel) => {
     const child = embeddable.getChild(panel.explicitInput.id);
     return (
       <EuiFlexItem key={panel.explicitInput.id}>
-        <embeddableServices.EmbeddablePanel embeddable={child} />
+        <embeddableServices.EmbeddablePanel
+          embeddable={child}
+          hideHeader
+          hasBorder={false}
+          hasShadow={false}
+        />
       </EuiFlexItem>
     );
   });
 
-  // TODO: we should perhaps display the cards in multiple rows when the actual number of cards exceed the column size
+  if (input.grid && input.columns) {
+    return (
+      <EuiFlexGrid columns={input.columns as FlexGridColumns} gutterSize="m">
+        {cards}
+      </EuiFlexGrid>
+    );
+  }
+
   return (
-    <EuiFlexGroup gutterSize="s">
-      {input.columns ? cards.slice(0, input.columns) : cards}
+    <EuiFlexGroup wrap={input.wrap} gutterSize="m">
+      {cards}
     </EuiFlexGroup>
   );
 };

@@ -41,6 +41,7 @@ import {
   getUsageCollector,
   getApplication,
   getEmbeddable,
+  getDataStart,
 } from '../services';
 
 export interface ShowNewVisModalParams {
@@ -90,6 +91,7 @@ export function showNewVisModal({
         savedObjects={getSavedObjects()}
         usageCollection={getUsageCollector()}
         application={getApplication()}
+        data={getDataStart()}
       />
     </I18nProvider>
   );

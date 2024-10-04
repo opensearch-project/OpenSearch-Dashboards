@@ -45,6 +45,7 @@ import { createHttpServer } from '../../../../../core/server/test_utils';
 import { registerStatsRoute } from '../stats';
 import supertest from 'supertest';
 import { CollectorSet } from '../../collector';
+import { dynamicConfigServiceMock } from '../../../../../core/server/mocks';
 
 type HttpService = ReturnType<typeof createHttpServer>;
 type HttpSetup = UnwrapPromise<ReturnType<HttpService['setup']>>;
@@ -54,6 +55,7 @@ describe('/api/stats', () => {
   let httpSetup: HttpSetup;
   let overallStatus$: BehaviorSubject<ServiceStatus>;
   let metrics: MetricsServiceSetup;
+  const mockDynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
 
   beforeEach(async () => {
     server = createHttpServer();
@@ -87,7 +89,7 @@ describe('/api/stats', () => {
       overallStatus$,
     });
 
-    await server.start();
+    await server.start({ dynamicConfigService: mockDynamicConfigService });
   });
 
   afterEach(async () => {

@@ -116,4 +116,4 @@ export type RenderState = Omit<RootState, 'metadata'>; // Remaining state after 
 export type Store = ReturnType<typeof configurePreloadedStore>;
 export type AppDispatch = Store['dispatch'];
 
-export { MetadataState, setIndexPattern, setDataSet, setOriginatingApp } from './metadata_slice';
+export { MetadataState, setIndexPattern, setOriginatingApp } from './metadata_slice';

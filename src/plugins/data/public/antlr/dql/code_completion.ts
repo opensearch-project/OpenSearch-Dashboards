@@ -5,30 +5,34 @@
 
 import { CharStream, CommonTokenStream, TokenStream } from 'antlr4ng';
 import { CodeCompletionCore } from 'antlr4-c3';
-import { HttpSetup } from 'opensearch-dashboards/public';
 import { monaco } from '@osd/monaco';
 import { DQLLexer } from './.generated/DQLLexer';
-import { DQLParser, KeyValueExpressionContext } from './.generated/DQLParser';
+import {
+  DQLParser,
+  GroupContentContext,
+  GroupExpressionContext,
+  KeyValueExpressionContext,
+} from './.generated/DQLParser';
 import { getTokenPosition } from '../shared/cursor';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
-import { QuerySuggestionGetFnArgs } from '../../autocomplete';
+import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './.generated/DQLParserVisitor';
-import { getUiService } from '../../services';
+import { IDataPluginServices } from '../..';
+import { fetchFieldSuggestions } from '../shared/utils';
+import { SuggestionItemDetailsTags } from '../shared/constants';
 
 const findCursorIndex = (
   tokenStream: TokenStream,
   cursorColumn: number,
-  cursorLine: number,
-  whitespaceToken: number
+  cursorLine: number
 ): number | undefined => {
-  const actualCursorCol = cursorColumn - 1;
-
   for (let i = 0; i < tokenStream.size; i++) {
     const token = tokenStream.get(i);
-    const { startLine, endColumn, endLine } = getTokenPosition(token, whitespaceToken);
+    const { startLine, endColumn, endLine } = getTokenPosition(token, DQLParser.WS);
 
-    if (endLine > cursorLine || (startLine === cursorLine && endColumn >= actualCursorCol)) {
-      if (tokenStream.get(i).type === whitespaceToken || tokenStream.get(i).type === DQLParser.EQ) {
+    const moveToNextToken = [DQLParser.WS, DQLParser.EQ, DQLParser.LPAREN];
+    if (endLine > cursorLine || (startLine === cursorLine && endColumn >= cursorColumn)) {
+      if (moveToNextToken.includes(tokenStream.get(i).type)) {
         return i + 1;
       }
       return i;
@@ -38,45 +42,13 @@ const findCursorIndex = (
   return undefined;
 };
 
-const findFieldSuggestions = (indexPattern: IndexPattern) => {
-  const fieldNames: string[] = indexPattern.fields
-    .filter((idxField: IndexPatternField) => !idxField?.subType) // filter removed .keyword fields
-    .map((idxField: { name: string }) => {
-      return idxField.name;
-    });
-
-  const fieldSuggestions: Array<{
-    text: string;
-    type: monaco.languages.CompletionItemKind;
-  }> = fieldNames.map((field: string) => {
-    return {
-      text: field,
-      type: monaco.languages.CompletionItemKind.Field,
-      insertText: `${field}: `,
-    };
-  });
-
-  return fieldSuggestions;
-};
-
-const getFieldSuggestedValues = async (
-  indexTitle: string,
-  fieldName: string,
-  currentValue: string,
-  http?: HttpSetup
-) => {
-  if (!http) return [];
-  return await http.fetch(`/api/opensearch-dashboards/suggestions/values/${indexTitle}`, {
-    method: 'POST',
-    body: JSON.stringify({ query: currentValue, field: fieldName, boolFilter: [] }),
-  });
-};
-
 const findValueSuggestions = async (
   index: IndexPattern,
   field: string,
   value: string,
-  http?: HttpSetup
+  services: IDataPluginServices,
+  boolFilter?: any,
+  signal?: AbortSignal
 ) => {
   // check to see if last field is within index and if it can suggest values, first check
   // if .keyword appended field exists because that has values
@@ -90,37 +62,16 @@ const findValueSuggestions = async (
       if (idxField.name === field) return idxField;
     });
 
-  if (matchedField?.type === 'boolean') {
-    return ['true', 'false'];
-  }
+  if (!matchedField) return;
 
-  if (!matchedField || !matchedField.aggregatable || matchedField.type !== 'string') return;
-
-  // ask api for suggestions
-  return await getFieldSuggestedValues(index.title, matchedField.name, value, http);
+  return await services?.data.autocomplete.getValueSuggestions({
+    indexPattern: index,
+    field: matchedField,
+    query: value,
+    boolFilter,
+    signal,
+  });
 };
-
-// visitor for parsing the current query
-class QueryVisitor extends DQLParserVisitor<{ field: string; value: string }> {
-  public visitKeyValueExpression = (ctx: KeyValueExpressionContext) => {
-    let foundValue = '';
-    const getTextWithoutQuotes = (text: string | undefined) => text?.replace(/^["']|["']$/g, '');
-
-    if (ctx.value()?.PHRASE()) {
-      const phraseText = getTextWithoutQuotes(ctx.value()?.PHRASE()?.getText());
-      if (phraseText) foundValue = phraseText;
-    } else if (ctx.value()?.tokenSearch()) {
-      const valueText = ctx.value()?.getText();
-      if (valueText) foundValue = valueText;
-    } else if (ctx.groupExpression()) {
-      const lastGroupContent = getTextWithoutQuotes(
-        ctx.groupExpression()?.groupContent().at(-1)?.getText()
-      );
-      if (lastGroupContent) foundValue = lastGroupContent;
-    }
-    return { field: ctx.field().getText(), value: foundValue };
-  };
-}
 
 export const getSuggestions = async ({
   query,
@@ -128,18 +79,21 @@ export const getSuggestions = async ({
   position,
   selectionEnd,
   services,
-}: QuerySuggestionGetFnArgs) => {
+  boolFilter,
+  signal,
+}: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
   if (
     !services ||
     !services.appName ||
-    !getUiService().Settings.supportsEnhancementsEnabled(services.appName) ||
+    // TODO: might need to get language then pass here paul needs this to prevent this failing on other pages
+    // !getQueryService()
+    //   .queryString.getLanguageService()
+    //   .supportsEnhancementsEnabled(services.appName) ||
     !indexPattern
   ) {
     return [];
   }
   try {
-    const http = services.http;
-
     const inputStream = CharStream.fromString(query);
     const lexer = new DQLLexer(inputStream);
     const tokenStream = new CommonTokenStream(lexer);
@@ -147,13 +101,11 @@ export const getSuggestions = async ({
     parser.removeErrorListeners();
     const tree = parser.query();
 
-    const visitor = new QueryVisitor();
-
     // find token index
-    const cursorColumn = position?.column ?? selectionEnd;
+    const cursorColumn = position?.column !== undefined ? position.column - 1 : selectionEnd;
     const cursorLine = position?.lineNumber ?? 1;
 
-    const cursorIndex = findCursorIndex(tokenStream, cursorColumn, cursorLine, DQLParser.WS) ?? 0;
+    const cursorIndex = findCursorIndex(tokenStream, cursorColumn, cursorLine) ?? 0;
 
     const core = new CodeCompletionCore(parser);
 
@@ -174,25 +126,135 @@ export const getSuggestions = async ({
     // gets candidates at specified token index
     const candidates = core.collectCandidates(cursorIndex);
 
-    const completions = [];
+    // manually remove NOT from candidates when cursor is in a phrase
+    if (tokenStream.get(cursorIndex).type === DQLParser.PHRASE) {
+      candidates.tokens.delete(DQLParser.NOT);
+    }
+
+    const completions: QuerySuggestion[] = [];
 
     // check to see if field rule is a candidate. if so, suggest field names
     if (candidates.rules.has(DQLParser.RULE_field)) {
-      completions.push(...findFieldSuggestions(indexPattern));
+      completions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f}: `));
     }
 
+    interface FoundLastValue {
+      field: string | undefined;
+      value: string | undefined;
+    }
+
+    // visitor for parsing the current query
+    class QueryVisitor extends DQLParserVisitor<FoundLastValue> {
+      public defaultResult = () => {
+        return { field: undefined, value: undefined };
+      };
+
+      public aggregateResult = (aggregate: FoundLastValue, nextResult: FoundLastValue) => {
+        if (nextResult.field) {
+          return nextResult;
+        }
+        return aggregate;
+      };
+
+      public visitKeyValueExpression = (ctx: KeyValueExpressionContext) => {
+        const startPos = ctx.start?.start ?? -1;
+        let endPos = ctx.stop?.stop ?? -1;
+
+        // find the WS token after the last KV token, pushing endPos out if applicable
+        const { stop: lastKVToken } = ctx.getSourceInterval();
+        if (tokenStream.get(lastKVToken + 1).type === DQLParser.WS) {
+          endPos = tokenStream.get(lastKVToken + 1).stop;
+        }
+
+        // early return if the cursor is not within the bounds of this KV pair
+        if (!(startPos <= cursorColumn && endPos + 1 >= cursorColumn))
+          return { field: undefined, value: undefined };
+
+        // keep as empty string to intentionally return so if no value is found in value()
+        let foundValue = '';
+        const getTextWithoutQuotes = (text: string | undefined) =>
+          text?.replace(/^["']|["']$/g, '');
+
+        if (ctx.value()?.PHRASE()) {
+          const phraseText = getTextWithoutQuotes(ctx.value()?.PHRASE()?.getText());
+          if (phraseText) foundValue = phraseText;
+        } else if (ctx.value()?.tokenSearch()) {
+          const valueText = ctx.value()?.getText();
+          if (valueText) foundValue = valueText;
+        } else if (ctx.groupExpression()) {
+          // continue calls down the tree for value group expressions
+          const groupRes = this.visitGroupExpression(ctx.groupExpression()!);
+          // only pull value off of groupRes, field should be undefined
+          const lastGroupContent = getTextWithoutQuotes(groupRes.value);
+          if (lastGroupContent) foundValue = lastGroupContent;
+        }
+        return { field: ctx.field().getText(), value: foundValue };
+      };
+
+      public visitGroupExpression = (ctx: GroupExpressionContext) => {
+        let foundValue = '';
+
+        // within the multiple group contents, call visitor on each one
+        ctx.groupContent().forEach((child) => {
+          const ret = this.visitGroupContent(child);
+          if (ret.value) foundValue = ret.value;
+        });
+
+        return { field: undefined, value: foundValue };
+      };
+
+      public visitGroupContent = (ctx: GroupContentContext) => {
+        const startPos = ctx.start?.start ?? -1;
+        const endPos = ctx.stop?.stop ?? -1;
+
+        // NOTE: currently there is no support to look for tokens after whitespace, only
+        // returning if the cursor is directly touching a token
+
+        if (!(startPos <= cursorColumn && endPos + 1 >= cursorColumn))
+          return { field: undefined, value: undefined };
+
+        // trigger group expression to find content within
+        const foundValue = !!ctx.groupExpression()
+          ? this.visitGroupExpression(ctx.groupExpression()!).value
+          : ctx.getText();
+
+        return { field: undefined, value: foundValue };
+      };
+    }
+
+    const visitor = new QueryVisitor();
     // find suggested values for the last found field (only for kvexpression rule)
     const { field: lastField = '', value: lastValue = '' } = visitor.visit(tree) ?? {};
     if (!!lastField && candidates.tokens.has(DQLParser.PHRASE)) {
-      const values = await findValueSuggestions(indexPattern, lastField, lastValue ?? '', http);
+      const values = await findValueSuggestions(
+        indexPattern,
+        lastField,
+        lastValue ?? '',
+        services,
+        boolFilter,
+        signal
+      );
       if (!!values) {
         completions.push(
           ...values?.map((val: any) => {
-            return { text: val, type: monaco.languages.CompletionItemKind.Value };
+            return {
+              text: val,
+              type: monaco.languages.CompletionItemKind.Value,
+              detail: SuggestionItemDetailsTags.Value,
+              replacePosition: new monaco.Range(
+                cursorLine,
+                cursorColumn - lastValue.length + 1,
+                cursorLine,
+                cursorColumn + 1
+              ),
+              insertText: `${val} `,
+            };
           })
         );
       }
     }
+
+    const dqlOperators = new Set([DQLParser.AND, DQLParser.OR, DQLParser.NOT]);
 
     // suggest other candidates, mainly keywords
     [...candidates.tokens.keys()].forEach((token: number) => {
@@ -202,10 +264,21 @@ export const getSuggestions = async ({
       }
 
       const tokenSymbolName = parser.vocabulary.getSymbolicName(token)?.toLowerCase();
-      completions.push({
-        text: tokenSymbolName,
-        type: monaco.languages.CompletionItemKind.Keyword,
-      });
+
+      if (tokenSymbolName) {
+        let type = monaco.languages.CompletionItemKind.Keyword;
+        let detail = SuggestionItemDetailsTags.Keyword;
+        if (dqlOperators.has(token)) {
+          type = monaco.languages.CompletionItemKind.Operator;
+          detail = SuggestionItemDetailsTags.Operator;
+        }
+        completions.push({
+          text: tokenSymbolName,
+          type,
+          detail,
+          insertText: `${tokenSymbolName} `,
+        });
+      }
     });
 
     return completions;

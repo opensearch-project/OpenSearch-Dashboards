@@ -8,14 +8,19 @@ import { Observable } from 'rxjs';
 import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import {
   DATA_FRAME_TYPES,
-  IDataFrameError,
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
-  PartialDataFrame,
+  Query,
   createDataFrame,
 } from '../../../data/common';
 import { Facet } from '../utils';
-import { SEARCH_STRATEGY } from '../../common';
+import {
+  buildQueryStatusConfig,
+  getFields,
+  handleFacetError,
+  handleQueryStatus,
+  SEARCH_STRATEGY,
+} from '../../common';
 
 export const sqlAsyncSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -38,77 +43,45 @@ export const sqlAsyncSearchStrategyProvider = (
   return {
     search: async (context, request: any, options) => {
       try {
-        // Create job: this should return a queryId and sessionId
-        if (request?.body?.query?.qs) {
-          const df = request.body?.df;
-          request.body = {
-            query: request.body.query.qs,
-            datasource: df?.meta?.queryConfig?.dataSourceName,
-            lang: SEARCH_STRATEGY.SQL,
-            sessionId: df?.meta?.sessionId,
-          };
-          const rawResponse: any = await sqlAsyncFacet.describeQuery(context, request);
-          // handles failure
-          if (!rawResponse.success) {
-            return {
-              type: DATA_FRAME_TYPES.POLLING,
-              body: { error: rawResponse.data },
-              took: rawResponse.took,
-            } as IDataFrameError;
-          }
-          const queryId = rawResponse.data?.queryId;
-          const sessionId = rawResponse.data?.sessionId;
+        const query: Query = request.body.query;
+        const startTime = Date.now();
+        request.body = { ...request.body, lang: SEARCH_STRATEGY.SQL };
+        const rawResponse: any = await sqlAsyncFacet.describeQuery(context, request);
 
-          const partial: PartialDataFrame = {
-            ...request.body.df,
-            fields: rawResponse?.data?.schema || [],
-          };
-          const dataFrame = createDataFrame(partial);
-          dataFrame.meta = {
-            ...dataFrame.meta,
-            query: request.body.query,
-            queryId,
-            sessionId,
-          };
-          dataFrame.name = request.body?.datasource;
-          return {
-            type: DATA_FRAME_TYPES.POLLING,
-            body: dataFrame,
-            took: rawResponse.took,
-          } as IDataFrameResponse;
-        } else {
-          const queryId = request.params.queryId;
-          request.params = { queryId };
-          const asyncResponse: any = await sqlAsyncJobsFacet.describeQuery(context, request);
-          const status = asyncResponse.data.status;
-          const partial: PartialDataFrame = {
-            ...request.body.df,
-            fields: asyncResponse?.data?.schema || [],
-          };
-          const dataFrame = createDataFrame(partial);
-          dataFrame.fields?.forEach((field, index) => {
-            field.values = asyncResponse?.data.datarows.map((row: any) => row[index]);
-          });
+        if (!rawResponse.success) handleFacetError(rawResponse);
 
-          dataFrame.size = asyncResponse?.data?.datarows?.length || 0;
+        const statusConfig = buildQueryStatusConfig(rawResponse);
+        request.params = { queryId: statusConfig.queryId };
 
-          dataFrame.meta = {
-            ...dataFrame.meta,
-            status,
-            queryId,
-            error: status === 'FAILED' && asyncResponse.data?.error,
-          };
-          dataFrame.name = request.body?.datasource;
+        const response = await handleQueryStatus({
+          fetchStatus: async () => {
+            const status: any = await sqlAsyncJobsFacet.describeQuery(context, request);
+            logger.info(
+              `sqlAsyncSearchStrategy: JOB: ${statusConfig.queryId} - STATUS: ${status.data?.status}`
+            );
+            return status;
+          },
+          isServer: true,
+        });
 
-          // TODO: MQL should this be the time for polling or the time for job creation?
-          if (usage) usage.trackSuccess(asyncResponse.took);
+        const dataFrame = createDataFrame({
+          name: query.dataset?.id,
+          schema: response.data.schema,
+          meta: statusConfig,
+          fields: getFields(response),
+        });
 
-          return {
-            type: DATA_FRAME_TYPES.POLLING,
-            body: dataFrame,
-            took: asyncResponse.took,
-          } as IDataFrameResponse;
-        }
+        const elapsedMs = Date.now() - startTime;
+
+        dataFrame.size = response.data.datarows.length;
+
+        if (usage) usage.trackSuccess(elapsedMs);
+
+        return {
+          type: DATA_FRAME_TYPES.POLLING,
+          body: dataFrame,
+          took: elapsedMs,
+        } as IDataFrameResponse;
       } catch (e) {
         logger.error(`sqlAsyncSearchStrategy: ${e.message}`);
         if (usage) usage.trackError();

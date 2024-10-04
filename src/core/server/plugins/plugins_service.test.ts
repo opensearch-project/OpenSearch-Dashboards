@@ -48,6 +48,7 @@ import { PluginsSystem } from './plugins_system';
 import { config } from './plugins_config';
 import { take } from 'rxjs/operators';
 import { DiscoveredPlugin, CompatibleEnginePluginVersions } from './types';
+import { dynamicConfigServiceMock } from '../config/dynamic_config_service.mock';
 
 const { join } = posix;
 const MockPluginsSystem: jest.Mock<PluginsSystem> = PluginsSystem as any;
@@ -60,6 +61,7 @@ let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
 let environmentSetup: ReturnType<typeof environmentServiceMock.createSetupContract>;
 
+const dynamicConfigService = dynamicConfigServiceMock.create();
 const setupDeps = coreMock.createInternalSetup();
 const logger = loggingSystemMock.create();
 
@@ -140,7 +142,13 @@ describe('PluginsService', () => {
     const rawConfigService = rawConfigServiceMock.create({ rawConfig$: config$ });
     configService = new ConfigService(rawConfigService, env, logger);
     await configService.setSchema(config.path, config.schema);
-    pluginsService = new PluginsService({ coreId, env, logger, configService });
+    pluginsService = new PluginsService({
+      coreId,
+      env,
+      logger,
+      configService,
+      dynamicConfigService,
+    });
 
     [mockPluginSystem] = MockPluginsSystem.mock.instances as any;
     mockPluginSystem.uiPlugins.mockReturnValue(new Map());
@@ -411,7 +419,7 @@ describe('PluginsService', () => {
             resolve(process.cwd(), '..', 'opensearch-dashboards-extra'),
           ],
         },
-        { coreId, env, logger, configService },
+        { coreId, env, logger, configService, dynamicConfigService },
         { uuid: 'uuid' }
       );
 

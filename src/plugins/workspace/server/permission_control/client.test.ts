@@ -10,7 +10,7 @@ import {
   httpServiceMock,
   savedObjectsClientMock,
 } from '../../../../core/server/mocks';
-import * as utilsExports from '../utils';
+import * as utilsExports from '../../../../core/server/utils/auth_info';
 
 describe('PermissionControl', () => {
   jest.spyOn(utilsExports, 'getPrincipalsFromRequest').mockImplementation(() => ({

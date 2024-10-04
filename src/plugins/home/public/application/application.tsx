@@ -31,17 +31,23 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@osd/i18n';
-import { ScopedHistory, CoreStart } from 'opensearch-dashboards/public';
+import { ScopedHistory, CoreStart, MountPoint } from 'opensearch-dashboards/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
+import { NavigationPublicPluginStart } from '../../../navigation/public';
 // @ts-ignore
 import { HomeApp, ImportSampleDataApp } from './components/home_app';
 import { getServices } from './opensearch_dashboards_services';
 
 import './index.scss';
+import { ContentManagementPluginStart } from '../../../../plugins/content_management/public';
+import { SearchUseCaseOverviewApp } from './components/usecase_overview/search_use_case_app';
 
 export const renderApp = async (
   element: HTMLElement,
-  coreStart: CoreStart,
+  startServices: CoreStart & {
+    navigation: NavigationPublicPluginStart;
+    setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+  },
   history: ScopedHistory
 ) => {
   const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
@@ -66,7 +72,7 @@ export const renderApp = async (
   });
 
   render(
-    <OpenSearchDashboardsContextProvider services={{ ...coreStart }}>
+    <OpenSearchDashboardsContextProvider services={startServices}>
       <HomeApp directories={directories} solutions={solutions} />
     </OpenSearchDashboardsContextProvider>,
     element
@@ -78,10 +84,33 @@ export const renderApp = async (
   };
 };
 
-export const renderImportSampleDataApp = async (element: HTMLElement, coreStart: CoreStart) => {
+export const renderImportSampleDataApp = async (
+  element: HTMLElement,
+  startServices: CoreStart & {
+    navigation: NavigationPublicPluginStart;
+    setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+  }
+) => {
+  render(
+    <OpenSearchDashboardsContextProvider services={startServices}>
+      <ImportSampleDataApp />
+    </OpenSearchDashboardsContextProvider>,
+    element
+  );
+
+  return () => {
+    unmountComponentAtNode(element);
+  };
+};
+
+export const renderSearchUseCaseOverviewApp = async (
+  element: HTMLElement,
+  coreStart: CoreStart,
+  contentManagementStart: ContentManagementPluginStart
+) => {
   render(
     <OpenSearchDashboardsContextProvider services={{ ...coreStart }}>
-      <ImportSampleDataApp />
+      <SearchUseCaseOverviewApp contentManagement={contentManagementStart} />
     </OpenSearchDashboardsContextProvider>,
     element
   );

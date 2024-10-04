@@ -6,26 +6,6 @@ exports[`WorkspaceList should render title and table normally 1`] = `
     class="euiPage euiPage--paddingMedium euiPage--grow"
   >
     Organize collaborative projects with use-case-specific workspaces.
-    <button
-      class="euiButton euiButton--primary euiButton--small"
-      data-test-subj="workspaceList-create-workspace"
-      type="button"
-    >
-      <span
-        class="euiButtonContent euiButton__content"
-      >
-        <span
-          class="euiButtonContent__icon"
-          color="inherit"
-          data-euiicon-type="plus"
-        />
-        <span
-          class="euiButton__text"
-        >
-          Create workspace
-        </span>
-      </span>
-    </button>
     <div
       class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
       role="main"
@@ -66,6 +46,48 @@ exports[`WorkspaceList should render title and table normally 1`] = `
               </div>
             </div>
           </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero euiSearchBar__filtersHolder"
+          >
+            <div
+              class="euiFilterGroup"
+            >
+              <div
+                class="euiPopover euiPopover--anchorDownCenter"
+                id="field_value_selection_0"
+              >
+                <div
+                  class="euiPopover__anchor"
+                >
+                  <button
+                    class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--hasIcon"
+                    type="button"
+                  >
+                    <span
+                      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                    >
+                      <span
+                        class="euiButtonContent__icon"
+                        color="inherit"
+                        data-euiicon-type="arrowDown"
+                      />
+                      <span
+                        class="euiButtonEmpty__text"
+                      >
+                        <span
+                          class="euiFilterButton__textShift"
+                          data-text="Use Case"
+                          title="Use Case"
+                        >
+                          Use Case
+                        </span>
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <div
           class="euiSpacer euiSpacer--l"
@@ -82,7 +104,27 @@ exports[`WorkspaceList should render title and table normally 1`] = `
               >
                 <div
                   class="euiFlexItem euiFlexItem--flexGrowZero"
-                />
+                >
+                  <div
+                    class="euiCheckbox"
+                  >
+                    <input
+                      aria-label="Select all rows"
+                      class="euiCheckbox__input"
+                      id="_selection_column-checkbox_generated-id"
+                      type="checkbox"
+                    />
+                    <div
+                      class="euiCheckbox__square"
+                    />
+                    <label
+                      class="euiCheckbox__label"
+                      for="_selection_column-checkbox_generated-id"
+                    >
+                      Select all rows
+                    </label>
+                  </div>
+                </div>
                 <div
                   class="euiFlexItem euiFlexItem--flexGrowZero"
                 >
@@ -121,7 +163,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
               </div>
             </div>
             <table
-              class="euiTable euiTable--responsive"
+              class="euiTable euiTable--compressed euiTable--responsive"
               id="__table_generated-id"
               tabindex="-1"
             >
@@ -131,12 +173,36 @@ exports[`WorkspaceList should render title and table normally 1`] = `
               <thead>
                 <tr>
                   <th
+                    class="euiTableHeaderCellCheckbox"
+                    scope="col"
+                  >
+                    <div
+                      class="euiTableCellContent"
+                    >
+                      <div
+                        class="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                      >
+                        <input
+                          aria-label="Select all rows"
+                          class="euiCheckbox__input"
+                          data-test-subj="checkboxSelectAll"
+                          id="_selection_column-checkbox_generated-id"
+                          type="checkbox"
+                        />
+                        <div
+                          class="euiCheckbox__square"
+                        />
+                      </div>
+                    </div>
+                  </th>
+                  <th
                     aria-live="polite"
                     aria-sort="ascending"
                     class="euiTableHeaderCell"
                     data-test-subj="tableHeaderCell_name_0"
                     role="columnheader"
                     scope="col"
+                    style="width: 18%;"
                   >
                     <button
                       class="euiTableHeaderButton euiTableHeaderButton-isSorted"
@@ -160,35 +226,29 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                     </button>
                   </th>
                   <th
-                    aria-live="polite"
-                    aria-sort="none"
                     class="euiTableHeaderCell"
-                    data-test-subj="tableHeaderCell_id_1"
+                    data-test-subj="tableHeaderCell_useCase_1"
                     role="columnheader"
                     scope="col"
+                    style="width: 12%;"
                   >
-                    <button
-                      class="euiTableHeaderButton"
-                      data-test-subj="tableHeaderSortButton"
-                      type="button"
+                    <span
+                      class="euiTableCellContent"
                     >
                       <span
-                        class="euiTableCellContent"
+                        class="euiTableCellContent__text"
+                        title="Use case"
                       >
-                        <span
-                          class="euiTableCellContent__text"
-                          title="ID"
-                        >
-                          ID
-                        </span>
+                        Use case
                       </span>
-                    </button>
+                    </span>
                   </th>
                   <th
                     class="euiTableHeaderCell"
                     data-test-subj="tableHeaderCell_description_2"
                     role="columnheader"
                     scope="col"
+                    style="width: 18%;"
                   >
                     <span
                       class="euiTableCellContent"
@@ -203,18 +263,37 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </th>
                   <th
                     class="euiTableHeaderCell"
-                    data-test-subj="tableHeaderCell_features_3"
+                    data-test-subj="tableHeaderCell_lastUpdatedTime_3"
                     role="columnheader"
                     scope="col"
+                    style="width: 18%;"
                   >
                     <span
                       class="euiTableCellContent"
                     >
                       <span
                         class="euiTableCellContent__text"
-                        title="Use case"
+                        title="Last updated"
                       >
-                        Use case
+                        Last updated
+                      </span>
+                    </span>
+                  </th>
+                  <th
+                    class="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_dataSources_4"
+                    role="columnheader"
+                    scope="col"
+                    style="width: 18%;"
+                  >
+                    <span
+                      class="euiTableCellContent"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                        title="Data sources"
+                      >
+                        Data sources
                       </span>
                     </span>
                   </th>
@@ -241,7 +320,31 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
                 >
                   <td
+                    class="euiTableRowCellCheckbox"
+                  >
+                    <div
+                      class="euiTableCellContent"
+                    >
+                      <div
+                        class="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                      >
+                        <input
+                          aria-label="Select this row"
+                          class="euiCheckbox__input"
+                          data-test-subj="checkboxSelectRow-id1"
+                          id="_selection_column_id1-checkbox"
+                          title="Select this row"
+                          type="checkbox"
+                        />
+                        <div
+                          class="euiCheckbox__square"
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  <td
                     class="euiTableRowCell"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -258,47 +361,26 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                           class="euiLink euiLink--primary"
                           type="button"
                         >
-                          name1
+                          <div
+                            class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          >
+                            <div
+                              class="euiFlexItem"
+                            >
+                              <div
+                                class="euiText euiText--small"
+                              >
+                                name1
+                              </div>
+                            </div>
+                          </div>
                         </button>
                       </span>
                     </div>
                   </td>
                   <td
                     class="euiTableRowCell"
-                  >
-                    <div
-                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                    >
-                      ID
-                    </div>
-                    <div
-                      class="euiTableCellContent"
-                    >
-                      <span
-                        class="euiTableCellContent__text"
-                      >
-                        id1
-                      </span>
-                    </div>
-                  </td>
-                  <td
-                    class="euiTableRowCell"
-                  >
-                    <div
-                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                    >
-                      Description
-                    </div>
-                    <div
-                      class="euiTableCellContent euiTableCellContent--truncateText"
-                    >
-                      <span
-                        class="euiTableCellContent__text"
-                      />
-                    </div>
-                  </td>
-                  <td
-                    class="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--isExpander"
+                    style="width: 12%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -306,112 +388,18 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                       Use case
                     </div>
                     <div
-                      class="euiTableCellContent euiTableCellContent--overflowingContent"
-                    >
-                      Analytics (All)
-                    </div>
-                  </td>
-                  <td
-                    class="euiTableRowCell euiTableRowCell--hasActions"
-                  >
-                    <div
-                      class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
-                    >
-                      <span
-                        class="euiToolTipAnchor"
-                      >
-                        <button
-                          aria-labelledby="generated-id"
-                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
-                          data-test-subj="workspace-list-edit-icon"
-                          type="button"
-                        >
-                          <span
-                            aria-hidden="true"
-                            class="euiButtonIcon__icon"
-                            color="inherit"
-                            data-euiicon-type="pencil"
-                          />
-                        </button>
-                        <span
-                          class="euiScreenReaderOnly"
-                          id="generated-id"
-                        >
-                          Edit
-                        </span>
-                      </span>
-                      <span
-                        class="euiToolTipAnchor"
-                      >
-                        <button
-                          aria-labelledby="generated-id"
-                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
-                          data-test-subj="workspace-list-delete-icon"
-                          type="button"
-                        >
-                          <span
-                            aria-hidden="true"
-                            class="euiButtonIcon__icon"
-                            color="inherit"
-                            data-euiicon-type="trash"
-                          />
-                        </button>
-                        <span
-                          class="euiScreenReaderOnly"
-                          id="generated-id"
-                        >
-                          Delete
-                        </span>
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-                <tr
-                  class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
-                >
-                  <td
-                    class="euiTableRowCell"
-                  >
-                    <div
-                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                    >
-                      Name
-                    </div>
-                    <div
-                      class="euiTableCellContent euiTableCellContent--overflowingContent"
-                    >
-                      <span
-                        class=""
-                      >
-                        <button
-                          class="euiLink euiLink--primary"
-                          type="button"
-                        >
-                          name2
-                        </button>
-                      </span>
-                    </div>
-                  </td>
-                  <td
-                    class="euiTableRowCell"
-                  >
-                    <div
-                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                    >
-                      ID
-                    </div>
-                    <div
                       class="euiTableCellContent"
                     >
                       <span
                         class="euiTableCellContent__text"
                       >
-                        id2
+                        Analytics
                       </span>
                     </div>
                   </td>
                   <td
                     class="euiTableRowCell"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -419,20 +407,43 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                       Description
                     </div>
                     <div
-                      class="euiTableCellContent euiTableCellContent--truncateText"
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
                       <span
-                        class="euiTableCellContent__text"
-                      />
+                        class="euiToolTipAnchor"
+                      >
+                        <div
+                          class="euiText euiText--extraSmall eui-textTruncate"
+                          style="max-width: 150px;"
+                        >
+                          should be able to see the description tooltip when hovering over the description
+                        </div>
+                      </span>
                     </div>
                   </td>
                   <td
-                    class="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--isExpander"
+                    class="euiTableRowCell"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                     >
-                      Use case
+                      Last updated
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      Aug 5, 1999 @ 22:00:00.000
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 18%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Data sources
                     </div>
                     <div
                       class="euiTableCellContent euiTableCellContent--overflowingContent"
@@ -444,52 +455,36 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                     <div
                       class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
                     >
-                      <span
-                        class="euiToolTipAnchor"
+                      <div
+                        class="euiTableCellContent__hoverItem"
                       >
-                        <button
-                          aria-labelledby="generated-id"
-                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
-                          data-test-subj="workspace-list-edit-icon"
-                          type="button"
+                        <div
+                          class="euiPopover euiPopover--anchorLeftCenter"
+                          id="id1-actions"
                         >
-                          <span
-                            aria-hidden="true"
-                            class="euiButtonIcon__icon"
-                            color="inherit"
-                            data-euiicon-type="pencil"
-                          />
-                        </button>
-                        <span
-                          class="euiScreenReaderOnly"
-                          id="generated-id"
-                        >
-                          Edit
-                        </span>
-                      </span>
-                      <span
-                        class="euiToolTipAnchor"
-                      >
-                        <button
-                          aria-labelledby="generated-id"
-                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
-                          data-test-subj="workspace-list-delete-icon"
-                          type="button"
-                        >
-                          <span
-                            aria-hidden="true"
-                            class="euiButtonIcon__icon"
-                            color="inherit"
-                            data-euiicon-type="trash"
-                          />
-                        </button>
-                        <span
-                          class="euiScreenReaderOnly"
-                          id="generated-id"
-                        >
-                          Delete
-                        </span>
-                      </span>
+                          <div
+                            class="euiPopover__anchor"
+                          >
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="All actions"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="euiCollapsedItemActionsButton"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="boxesHorizontal"
+                                />
+                              </button>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -497,7 +492,31 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
                 >
                   <td
+                    class="euiTableRowCellCheckbox"
+                  >
+                    <div
+                      class="euiTableCellContent"
+                    >
+                      <div
+                        class="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                      >
+                        <input
+                          aria-label="Select this row"
+                          class="euiCheckbox__input"
+                          data-test-subj="checkboxSelectRow-id2"
+                          id="_selection_column_id2-checkbox"
+                          title="Select this row"
+                          type="checkbox"
+                        />
+                        <div
+                          class="euiCheckbox__square"
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  <td
                     class="euiTableRowCell"
+                    style="width: 18%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -514,47 +533,26 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                           class="euiLink euiLink--primary"
                           type="button"
                         >
-                          name3
+                          <div
+                            class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          >
+                            <div
+                              class="euiFlexItem"
+                            >
+                              <div
+                                class="euiText euiText--small"
+                              >
+                                name2
+                              </div>
+                            </div>
+                          </div>
                         </button>
                       </span>
                     </div>
                   </td>
                   <td
                     class="euiTableRowCell"
-                  >
-                    <div
-                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                    >
-                      ID
-                    </div>
-                    <div
-                      class="euiTableCellContent"
-                    >
-                      <span
-                        class="euiTableCellContent__text"
-                      >
-                        id3
-                      </span>
-                    </div>
-                  </td>
-                  <td
-                    class="euiTableRowCell"
-                  >
-                    <div
-                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                    >
-                      Description
-                    </div>
-                    <div
-                      class="euiTableCellContent euiTableCellContent--truncateText"
-                    >
-                      <span
-                        class="euiTableCellContent__text"
-                      />
-                    </div>
-                  </td>
-                  <td
-                    class="euiTableRowCell euiTableRowCell--hasActions euiTableRowCell--isExpander"
+                    style="width: 12%;"
                   >
                     <div
                       class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
@@ -562,10 +560,66 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                       Use case
                     </div>
                     <div
+                      class="euiTableCellContent"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                      >
+                        Observability
+                      </span>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 18%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Description
+                    </div>
+                    <div
                       class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
-                      Observability
+                      <span
+                        class="euiToolTipAnchor"
+                      >
+                        <div
+                          class="euiText euiText--extraSmall eui-textTruncate"
+                          style="max-width: 150px;"
+                        >
+                          should be able to see the description tooltip when hovering over the description
+                        </div>
+                      </span>
                     </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 18%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Last updated
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      Aug 5, 1999 @ 20:00:00.000
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 18%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Data sources
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    />
                   </td>
                   <td
                     class="euiTableRowCell euiTableRowCell--hasActions"
@@ -573,52 +627,206 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                     <div
                       class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
                     >
+                      <div
+                        class="euiTableCellContent__hoverItem"
+                      >
+                        <div
+                          class="euiPopover euiPopover--anchorLeftCenter"
+                          id="id2-actions"
+                        >
+                          <div
+                            class="euiPopover__anchor"
+                          >
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="All actions"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="euiCollapsedItemActionsButton"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="boxesHorizontal"
+                                />
+                              </button>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr
+                  class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                >
+                  <td
+                    class="euiTableRowCellCheckbox"
+                  >
+                    <div
+                      class="euiTableCellContent"
+                    >
+                      <div
+                        class="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                      >
+                        <input
+                          aria-label="Select this row"
+                          class="euiCheckbox__input"
+                          data-test-subj="checkboxSelectRow-id3"
+                          id="_selection_column_id3-checkbox"
+                          title="Select this row"
+                          type="checkbox"
+                        />
+                        <div
+                          class="euiCheckbox__square"
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 18%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Name
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      <span
+                        class=""
+                      >
+                        <button
+                          class="euiLink euiLink--primary"
+                          type="button"
+                        >
+                          <div
+                            class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                          >
+                            <div
+                              class="euiFlexItem"
+                            >
+                              <div
+                                class="euiText euiText--small"
+                              >
+                                name3
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      </span>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 12%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Use case
+                    </div>
+                    <div
+                      class="euiTableCellContent"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                      >
+                        Search
+                      </span>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 18%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Description
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
                       <span
                         class="euiToolTipAnchor"
                       >
-                        <button
-                          aria-labelledby="generated-id"
-                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
-                          data-test-subj="workspace-list-edit-icon"
-                          type="button"
-                        >
-                          <span
-                            aria-hidden="true"
-                            class="euiButtonIcon__icon"
-                            color="inherit"
-                            data-euiicon-type="pencil"
-                          />
-                        </button>
-                        <span
-                          class="euiScreenReaderOnly"
-                          id="generated-id"
-                        >
-                          Edit
-                        </span>
+                        <div
+                          class="euiText euiText--extraSmall eui-textTruncate"
+                          style="max-width: 150px;"
+                        />
                       </span>
-                      <span
-                        class="euiToolTipAnchor"
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 18%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Last updated
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      Aug 5, 1999 @ 21:00:00.000
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                    style="width: 18%;"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Data sources
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    />
+                  </td>
+                  <td
+                    class="euiTableRowCell euiTableRowCell--hasActions"
+                  >
+                    <div
+                      class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                    >
+                      <div
+                        class="euiTableCellContent__hoverItem"
                       >
-                        <button
-                          aria-labelledby="generated-id"
-                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
-                          data-test-subj="workspace-list-delete-icon"
-                          type="button"
+                        <div
+                          class="euiPopover euiPopover--anchorLeftCenter"
+                          id="id3-actions"
                         >
-                          <span
-                            aria-hidden="true"
-                            class="euiButtonIcon__icon"
-                            color="inherit"
-                            data-euiicon-type="trash"
-                          />
-                        </button>
-                        <span
-                          class="euiScreenReaderOnly"
-                          id="generated-id"
-                        >
-                          Delete
-                        </span>
-                      </span>
+                          <div
+                            class="euiPopover__anchor"
+                          >
+                            <span
+                              class="euiToolTipAnchor"
+                            >
+                              <button
+                                aria-label="All actions"
+                                class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                                data-test-subj="euiCollapsedItemActionsButton"
+                                type="button"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiButtonIcon__icon"
+                                  color="inherit"
+                                  data-euiicon-type="boxesHorizontal"
+                                />
+                              </button>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </td>
                 </tr>
@@ -659,7 +867,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         >
                           Rows per page
                           : 
-                          5
+                          10
                         </span>
                       </span>
                     </button>

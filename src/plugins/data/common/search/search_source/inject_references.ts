@@ -32,7 +32,7 @@ import { SavedObjectReference } from 'src/core/types';
 import { SearchSourceFields } from './types';
 
 export const injectReferences = (
-  searchSourceFields: SearchSourceFields & { indexRefName: string },
+  searchSourceFields: SearchSourceFields & { indexRefName?: string },
   references: SavedObjectReference[]
 ) => {
   const searchSourceReturnFields: SearchSourceFields = { ...searchSourceFields };

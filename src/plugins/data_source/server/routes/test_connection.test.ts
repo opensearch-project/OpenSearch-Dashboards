@@ -16,6 +16,7 @@ import { registerTestConnectionRoute } from './test_connection';
 import { AuthType } from '../../common/data_sources';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { opensearchClientMock } from '../../../../../src/core/server/opensearch/client/mocks';
+import { dynamicConfigServiceMock } from '../../../../../src/core/server/mocks';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -41,6 +42,7 @@ describe(`Test connection ${URL}`, () => {
       },
     },
   };
+  const dynamicConfigServiceStart = dynamicConfigServiceMock.createInternalStartContract();
 
   const dataSourceAttrMissingCredentialForNoAuth = {
     endpoint: 'https://test.com',
@@ -175,7 +177,7 @@ describe(`Test connection ${URL}`, () => {
       customApiSchemaRegistryPromise
     );
 
-    await server.start();
+    await server.start({ dynamicConfigService: dynamicConfigServiceStart });
   });
 
   afterEach(async () => {

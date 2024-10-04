@@ -15,6 +15,7 @@ exports[`DataSourceHomePanel renders correctly 1`] = `
             grow={false}
           >
             <DataSourceHeader
+              featureFlagStatus={true}
               history={
                 Object {
                   "push": [MockFunction],
@@ -27,6 +28,7 @@ exports[`DataSourceHomePanel renders correctly 1`] = `
           >
             <CreateButton
               dataTestSubj="createDataSourceButton"
+              featureFlagStatus={true}
               history={
                 Object {
                   "push": [MockFunction],
@@ -61,9 +63,6 @@ exports[`DataSourceHomePanel renders correctly 1`] = `
       </EuiTabs>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiSpacer
-        size="s"
-      />
       <DataSourceTableWithRouter
         history={
           Object {

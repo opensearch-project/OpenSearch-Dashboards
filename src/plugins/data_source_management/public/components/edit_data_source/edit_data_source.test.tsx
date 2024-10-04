@@ -142,7 +142,12 @@ describe('Datasource Management: Edit Datasource Wizard', () => {
     test('should delete datasource successfully', async () => {
       spyOn(utils, 'deleteDataSourceById').and.returnValue({});
       spyOn(utils, 'setFirstDataSourceAsDefault').and.returnValue({});
-      spyOn(uiSettings, 'get').and.returnValue('test1');
+      spyOn(uiSettings, 'get').and.callFake((key) => {
+        if (key === 'home:useNewHomePage') {
+          return false;
+        }
+        return 'test1';
+      });
       await act(async () => {
         // @ts-ignore
         await component.find(formIdentifier).first().prop('onDeleteDataSource')(

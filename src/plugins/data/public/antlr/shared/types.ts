@@ -41,6 +41,7 @@ export interface TokenPosition {
 
 export interface KeywordSuggestion {
   value: string;
+  id: number;
 }
 
 export type ColumnSuggestion = TableContextSuggestion;
@@ -87,10 +88,20 @@ export interface OpenSearchSqlAutocompleteResult extends AutocompleteResultBase 
   suggestViewsOrTables?: TableOrViewSuggestion;
 }
 
+export interface OpenSearchPplAutocompleteResult extends AutocompleteResultBase {
+  suggestSourcesOrTables?: SourceOrTableSuggestion;
+}
+
 export enum TableOrViewSuggestion {
   ALL = 'ALL',
   TABLES = 'TABLES',
   VIEWS = 'VIEWS',
+}
+
+export enum SourceOrTableSuggestion {
+  ALL = 'ALL',
+  TABLES = 'TABLES',
+  SOURCES = 'SOURCES',
 }
 
 export type ConstraintSuggestion = TableContextSuggestion;
@@ -122,3 +133,16 @@ export type ProcessVisitedRulesResult<A extends AutocompleteResultBase> = Partia
   shouldSuggestColumnAliases?: boolean;
   shouldSuggestConstraints?: boolean;
 };
+
+export interface ParsingSubject<A extends AutocompleteResultBase, L, P> {
+  Lexer: LexerConstructor<L>;
+  Parser: ParserConstructor<P>;
+  tokenDictionary: TokenDictionary;
+  ignoredTokens: Set<number>;
+  rulesToVisit: Set<number>;
+  getParseTree: GetParseTree<P>;
+  enrichAutocompleteResult: EnrichAutocompleteResult<A>;
+  query: string;
+  cursor: CursorPosition;
+  context?: ParserRuleContext;
+}

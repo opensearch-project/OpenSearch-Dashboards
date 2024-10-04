@@ -1,0 +1,2 @@
+security:
+- Bump `micromatch` from 4.0.7 to 4.0.8 ([#8026](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8026))

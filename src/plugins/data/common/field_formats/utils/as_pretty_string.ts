@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import { stringify } from '@osd/std';
+
 /**
  * Convert a value to a presentable string
  */
@@ -37,7 +39,7 @@ export function asPrettyString(val: any): string {
     case 'string':
       return val;
     case 'object':
-      return JSON.stringify(val, null, '  ');
+      return stringify(val, null, '  ');
     default:
       return '' + val;
   }

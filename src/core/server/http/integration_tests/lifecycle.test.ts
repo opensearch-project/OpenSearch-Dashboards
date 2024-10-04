@@ -38,6 +38,7 @@ import { HttpService } from '../http_service';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
+import { dynamicConfigServiceMock } from '../../config/dynamic_config_service.mock';
 
 let server: HttpService;
 
@@ -48,6 +49,8 @@ const contextSetup = contextServiceMock.createSetupContract();
 const setupDeps = {
   context: contextSetup,
 };
+
+const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
 
 beforeEach(() => {
   logger = loggingSystemMock.create();
@@ -87,7 +90,7 @@ describe('OnPreRouting', () => {
       callingOrder.push('second');
       return t.next();
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(200, 'ok');
 
@@ -120,7 +123,7 @@ describe('OnPreRouting', () => {
       return t.next();
     });
 
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/initial').expect(200, 'redirected');
 
@@ -144,7 +147,7 @@ describe('OnPreRouting', () => {
         },
       })
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/initial').expect(302);
 
@@ -166,7 +169,7 @@ describe('OnPreRouting', () => {
         },
       })
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -184,7 +187,7 @@ describe('OnPreRouting', () => {
     registerOnPreRouting((req, res, t) => {
       throw new Error('reason');
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -207,7 +210,7 @@ describe('OnPreRouting', () => {
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
     registerOnPreRouting((req, res, t) => ({} as any));
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -244,7 +247,7 @@ describe('OnPreRouting', () => {
       res.ok({ body: { customField: String((req as any).customField) } })
     );
 
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(200, { customField: 'undefined' });
   });
@@ -267,7 +270,7 @@ describe('OnPreAuth', () => {
       callingOrder.push('second');
       return t.next();
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(200, 'ok');
 
@@ -288,7 +291,7 @@ describe('OnPreAuth', () => {
         },
       })
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/initial').expect(302);
 
@@ -308,7 +311,7 @@ describe('OnPreAuth', () => {
         },
       })
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -324,7 +327,7 @@ describe('OnPreAuth', () => {
     registerOnPreAuth((req, res, t) => {
       throw new Error('reason');
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -345,7 +348,7 @@ describe('OnPreAuth', () => {
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
     registerOnPreAuth((req, res, t) => ({} as any));
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -380,7 +383,7 @@ describe('OnPreAuth', () => {
       res.ok({ body: { customField: String(req.customField) } })
     );
 
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(200, { customField: 'undefined' });
   });
@@ -406,7 +409,7 @@ describe('OnPreAuth', () => {
       (context, req, res) => res.ok({ body: req.body.term })
     );
 
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener)
       .post('/')
@@ -436,7 +439,7 @@ describe('OnPostAuth', () => {
       callingOrder.push('second');
       return t.next();
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(200, 'ok');
 
@@ -457,7 +460,7 @@ describe('OnPostAuth', () => {
         },
       })
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/initial').expect(302);
 
@@ -476,7 +479,7 @@ describe('OnPostAuth', () => {
         },
       })
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -491,7 +494,7 @@ describe('OnPostAuth', () => {
     registerOnPostAuth((req, res, t) => {
       throw new Error('reason');
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -511,7 +514,7 @@ describe('OnPostAuth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     registerOnPostAuth((req, res, t) => ({} as any));
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -547,7 +550,7 @@ describe('OnPostAuth', () => {
       res.ok({ body: { customField: String((req as any).customField) } })
     );
 
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(200, { customField: 'undefined' });
   });
@@ -573,7 +576,7 @@ describe('OnPostAuth', () => {
       (context, req, res) => res.ok({ body: req.body.term })
     );
 
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener)
       .post('/')
@@ -610,7 +613,7 @@ describe('Auth', () => {
       res.ok({ body: { content: 'ok' } })
     );
     registerAuth((req, res, t) => t.authenticated());
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(200, { content: 'ok' });
   });
@@ -623,7 +626,7 @@ describe('Auth', () => {
       res.ok({ body: { content: 'ok' } })
     );
     registerAuth((req, res, t) => t.notHandled());
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -640,7 +643,7 @@ describe('Auth', () => {
     const authenticate = jest.fn().mockImplementation((req, res, t) => t.authenticated());
     registerAuth(authenticate);
 
-    await server.start();
+    await server.start({ dynamicConfigService });
     await supertest(innerServer.listener).get('/').expect(200, { authRequired: true });
 
     expect(authenticate).toHaveBeenCalledTimes(1);
@@ -658,7 +661,7 @@ describe('Auth', () => {
     const authenticate = jest.fn();
     registerAuth(authenticate);
 
-    await server.start();
+    await server.start({ dynamicConfigService });
     await supertest(innerServer.listener).get('/').expect(200, { authRequired: false });
 
     expect(authenticate).toHaveBeenCalledTimes(0);
@@ -676,7 +679,7 @@ describe('Auth', () => {
     const authenticate = jest.fn().mockImplementation((req, res, t) => t.authenticated({}));
     await registerAuth(authenticate);
 
-    await server.start();
+    await server.start({ dynamicConfigService });
     await supertest(innerServer.listener).get('/').expect(200, { authRequired: true });
 
     expect(authenticate).toHaveBeenCalledTimes(1);
@@ -688,7 +691,7 @@ describe('Auth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     registerAuth((req, res) => res.unauthorized());
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(401);
   });
@@ -704,7 +707,7 @@ describe('Auth', () => {
         location: redirectTo,
       })
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const response = await supertest(innerServer.listener).get('/').expect(302);
     expect(response.header.location).toBe(redirectTo);
@@ -716,7 +719,7 @@ describe('Auth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     registerAuth((req, res, t) => t.redirected({} as any));
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(500);
   });
@@ -729,7 +732,7 @@ describe('Auth', () => {
     registerAuth((req, t) => {
       throw new Error('reason');
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -764,7 +767,7 @@ describe('Auth', () => {
       return toolkit.authenticated({ state: user });
     });
 
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const response = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -808,7 +811,7 @@ describe('Auth', () => {
       sessionStorage.clear();
       return res.ok();
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const responseToSetCookie = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -857,7 +860,7 @@ describe('Auth', () => {
       fromRouteHandler = req.headers.authorization;
       return res.ok();
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const token = 'Basic: user:password';
     await supertest(innerServer.listener).get('/').set('Authorization', token).expect(200);
@@ -880,7 +883,7 @@ describe('Auth', () => {
     });
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const response = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -899,7 +902,7 @@ describe('Auth', () => {
     });
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.badRequest());
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const response = await supertest(innerServer.listener).get('/').expect(400);
 
@@ -926,7 +929,7 @@ describe('Auth', () => {
         },
       })
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const response = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -959,7 +962,7 @@ describe('Auth', () => {
         },
       })
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const response = await supertest(innerServer.listener).get('/').expect(400);
 
@@ -986,7 +989,7 @@ describe('Auth', () => {
         },
       })
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/initial').expect(302);
 
@@ -1006,7 +1009,7 @@ describe('Auth', () => {
         },
       })
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -1021,7 +1024,7 @@ describe('Auth', () => {
     registerOnPostAuth((req, res, t) => {
       throw new Error('reason');
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1041,7 +1044,7 @@ describe('Auth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     registerOnPostAuth((req, res, t) => ({} as any));
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1076,7 +1079,7 @@ describe('Auth', () => {
       res.ok({ body: { customField: String((req as any).customField) } })
     );
 
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(200, { customField: 'undefined' });
   });
@@ -1102,7 +1105,7 @@ describe('Auth', () => {
       (context, req, res) => res.ok({ body: req.body.term })
     );
 
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener)
       .post('/')
@@ -1134,7 +1137,7 @@ describe('OnPreResponse', () => {
       callingOrder.push('second');
       return t.next();
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(200, 'ok');
 
@@ -1162,7 +1165,7 @@ describe('OnPreResponse', () => {
         },
       })
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -1186,7 +1189,7 @@ describe('OnPreResponse', () => {
         headers: { 'x-opensearch-dashboards-header': 'value' },
       })
     );
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(200);
 
@@ -1209,7 +1212,7 @@ describe('OnPreResponse', () => {
     registerOnPreResponse((req, res, t) => {
       throw new Error('reason');
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1231,7 +1234,7 @@ describe('OnPreResponse', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     registerOnPreResponse((req, res, t) => ({} as any));
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1258,7 +1261,7 @@ describe('OnPreResponse', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
 
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(200);
   });
@@ -1286,7 +1289,7 @@ describe('OnPreResponse', () => {
       (context, req, res) => res.ok({ body: req.body.term })
     );
 
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener)
       .post('/')
@@ -1317,7 +1320,7 @@ describe('OnPreResponse', () => {
       return t.render({ body: 'overridden' });
     });
 
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(200, 'overridden');
 
@@ -1350,7 +1353,7 @@ describe('OnPreResponse', () => {
       });
     });
 
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const result = await supertest(innerServer.listener).get('/').expect(200, 'overridden');
 
@@ -1398,7 +1401,7 @@ describe('run interceptors in the right order', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
 
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(200);
     expect(executionOrder).toEqual([
@@ -1442,7 +1445,7 @@ describe('run interceptors in the right order', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
 
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(200);
     expect(executionOrder).toEqual(['onPreRouting', 'onPreAuth', 'onPostAuth', 'onPreResponse']);
@@ -1485,7 +1488,7 @@ describe('run interceptors in the right order', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
 
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await supertest(innerServer.listener).get('/').expect(403);
     expect(executionOrder).toEqual(['onPreRouting', 'onPreAuth', 'auth', 'onPreResponse']);

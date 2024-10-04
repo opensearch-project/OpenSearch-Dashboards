@@ -43,6 +43,7 @@ import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
 import { CoreContext } from '../../core_context';
 import { PROCESS_WORKING_DIR, standardize } from '@osd/cross-platform';
+import { dynamicConfigServiceMock } from '../../config/dynamic_config_service.mock';
 
 const Plugins = {
   invalid: () => ({
@@ -117,12 +118,14 @@ describe('plugins discovery system', () => {
       logger
     );
     await configService.setSchema(config.path, config.schema);
+    const dynamicConfigService = dynamicConfigServiceMock.create();
 
     coreContext = {
       coreId: Symbol(),
       configService,
       env,
       logger,
+      dynamicConfigService,
     };
 
     pluginConfig = await configService
@@ -408,6 +411,7 @@ describe('plugins discovery system', () => {
         cliArgs: { dev: false, envName: 'development' },
       })
     );
+    const dynamicConfigService = dynamicConfigServiceMock.create();
 
     discover(
       new PluginsConfig({ ...pluginConfig, paths: [extraPluginTestPath] }, env),
@@ -416,6 +420,7 @@ describe('plugins discovery system', () => {
         configService,
         env,
         logger,
+        dynamicConfigService,
       },
       instanceInfo
     );
@@ -436,6 +441,7 @@ describe('plugins discovery system', () => {
         cliArgs: { dev: false, envName: 'production' },
       })
     );
+    const dynamicConfigService = dynamicConfigServiceMock.create();
 
     discover(
       new PluginsConfig({ ...pluginConfig, paths: [extraPluginTestPath] }, env),
@@ -444,6 +450,7 @@ describe('plugins discovery system', () => {
         configService,
         env,
         logger,
+        dynamicConfigService,
       },
       instanceInfo
     );

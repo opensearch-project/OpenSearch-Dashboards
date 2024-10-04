@@ -26,6 +26,8 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import deepEqual from 'fast-deep-equal';
+import { ApplicationStart } from 'opensearch-dashboards/public';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { AuthenticationMethodRegistry } from '../../../../auth_registry';
 import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import { Header } from '../header';
@@ -33,8 +35,8 @@ import {
   AuthType,
   DataSourceAttributes,
   DataSourceManagementContextValue,
+  DataSourceManagementToastMessageItem,
   sigV4ServiceOptions,
-  ToastMessageItem,
   UsernamePasswordTypedContent,
 } from '../../../../types';
 import { context as contextType } from '../../../../../../opensearch_dashboards_react/public';
@@ -47,8 +49,12 @@ import {
 import { UpdatePasswordModal } from '../update_password_modal';
 import { UpdateAwsCredentialModal } from '../update_aws_credential_modal';
 import { extractRegisteredAuthTypeCredentials, getDefaultAuthMethod } from '../../../utils';
+import { DataSourceOptionalLabelSuffix } from '../../../data_source_optional_label_suffix';
 
 export interface EditDataSourceProps {
+  navigation: NavigationPublicPluginStart;
+  application: ApplicationStart;
+  useNewUX: boolean;
   existingDataSource: DataSourceAttributes;
   existingDatasourceNamesList: string[];
   isDefault: boolean;
@@ -56,7 +62,7 @@ export interface EditDataSourceProps {
   handleTestConnection: (formValues: DataSourceAttributes) => Promise<void>;
   onDeleteDataSource?: () => Promise<void>;
   onSetDefaultDataSource: () => Promise<void>;
-  displayToastMessage: (info: ToastMessageItem) => void;
+  displayToastMessage: (info: DataSourceManagementToastMessageItem) => void;
   canManageDataSource: boolean;
 }
 export interface EditDataSourceState {
@@ -389,8 +395,9 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         this.setFormValuesForEditMode();
       } catch (e) {
         this.props.displayToastMessage({
-          id: 'dataSourcesManagement.editDataSource.editDataSourceFailMsg',
-          defaultMessage: 'Updating the Data Source failed with some errors.',
+          message: i18n.translate('dataSourcesManagement.editDataSource.editDataSourceFailMsg', {
+            defaultMessage: 'Updating the Data Source failed with some errors.',
+          }),
         });
       } finally {
         this.setState({ isLoading: false });
@@ -458,16 +465,18 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       await this.props.handleTestConnection(formValues);
 
       this.props.displayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.testConnectionSuccessMsg',
-        defaultMessage:
-          'Connecting to the endpoint using the provided authentication method was successful.',
+        message: i18n.translate('dataSourcesManagement.editDataSource.testConnectionSuccessMsg', {
+          defaultMessage:
+            'Connecting to the endpoint using the provided authentication method was successful.',
+        }),
         success: true,
       });
     } catch (e) {
       this.props.displayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.testConnectionFailMsg',
-        defaultMessage:
-          'Failed Connecting to the endpoint using the provided authentication method.',
+        message: i18n.translate('dataSourcesManagement.editDataSource.testConnectionFailMsg', {
+          defaultMessage:
+            'Failed Connecting to the endpoint using the provided authentication method.',
+        }),
       });
     } finally {
       this.setState({ isLoading: false });
@@ -509,14 +518,16 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     try {
       await this.props.handleSubmit(updateAttributes);
       this.props.displayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.updatePasswordSuccessMsg',
-        defaultMessage: 'Password updated successfully.',
+        message: i18n.translate('dataSourcesManagement.editDataSource.updatePasswordSuccessMsg', {
+          defaultMessage: 'Password updated successfully.',
+        }),
         success: true,
       });
     } catch (e) {
       this.props.displayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.updatePasswordFailMsg',
-        defaultMessage: 'Updating the stored password failed with some errors.',
+        message: i18n.translate('dataSourcesManagement.editDataSource.updatePasswordFailMsg', {
+          defaultMessage: 'Updating the stored password failed with some errors.',
+        }),
       });
     }
   };
@@ -542,14 +553,16 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     try {
       await this.props.handleSubmit(updateAttributes);
       this.props.displayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.updatePasswordSuccessMsg',
-        defaultMessage: 'Password updated successfully.',
+        message: i18n.translate('dataSourcesManagement.editDataSource.updatePasswordSuccessMsg', {
+          defaultMessage: 'Password updated successfully.',
+        }),
         success: true,
       });
     } catch (e) {
       this.props.displayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.updatePasswordFailMsg',
-        defaultMessage: 'Updating the stored password failed with some errors.',
+        message: i18n.translate('dataSourcesManagement.editDataSource.updatePasswordFailMsg', {
+          defaultMessage: 'Updating the stored password failed with some errors.',
+        }),
       });
     }
   };
@@ -643,6 +656,9 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   renderHeader = () => {
     return (
       <Header
+        navigation={this.props.navigation}
+        application={this.props.application}
+        useNewUX={this.props.useNewUX}
         showDeleteIcon={true}
         isFormValid={this.isFormValid()}
         onClickDeleteIcon={this.onClickDeleteDataSource}
@@ -655,51 +671,35 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     );
   };
 
-  /* Render field label with Optional text*/
-  renderFieldLabelAsOptional = (i18nId: string, defaultMessage: string) => {
-    return (
-      <>
-        {<FormattedMessage id={i18nId} defaultMessage={defaultMessage} />}{' '}
-        <i style={{ fontWeight: 'normal' }}>
-          -{' '}
-          {
-            <FormattedMessage
-              id="dataSourcesManagement.editDataSource.optionalText"
-              defaultMessage="optional"
-            />
-          }
-        </i>
-      </>
-    );
-  };
-
   /* Render Connection Details Panel */
   renderConnectionDetailsSection = () => {
     return (
       <EuiPanel paddingSize="m">
-        <EuiText size="m">
-          <h3>
+        <EuiText size="s">
+          <h2>
             {
               <FormattedMessage
                 id="dataSourcesManagement.editDataSource.connectionDetailsText"
                 defaultMessage="Connection Details"
               />
             }
-          </h3>
+          </h2>
         </EuiText>
 
         <EuiHorizontalRule margin="m" />
 
         <EuiDescribedFormGroup
           title={
-            <h4>
-              {
-                <FormattedMessage
-                  id="dataSourcesManagement.editDataSource.objectDetailsText"
-                  defaultMessage="Object Details"
-                />
-              }
-            </h4>
+            <EuiText size="s">
+              <h3>
+                {
+                  <FormattedMessage
+                    id="dataSourcesManagement.editDataSource.objectDetailsText"
+                    defaultMessage="Object Details"
+                  />
+                }
+              </h3>
+            </EuiText>
           }
           description={
             <p>
@@ -735,10 +735,13 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
           </EuiCompressedFormRow>
           {/* Description */}
           <EuiCompressedFormRow
-            label={this.renderFieldLabelAsOptional(
-              'dataSourceManagement.editDataSource.description',
-              'Description'
-            )}
+            label={
+              <FormattedMessage
+                id="dataSourcesManagement.editDataSource.descriptionOptional"
+                defaultMessage="Description {optionalLabel}"
+                values={{ optionalLabel: <DataSourceOptionalLabelSuffix /> }}
+              />
+            }
             data-test-subj="editDataSourceDescriptionFormRow"
           >
             <EuiCompressedFieldText
@@ -763,15 +766,15 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   renderEndpointSection = () => {
     return (
       <EuiPanel paddingSize="m">
-        <EuiText size="m">
-          <h3>
+        <EuiText size="s">
+          <h2>
             {
               <FormattedMessage
                 id="dataSourcesManagement.editDataSource.endpointTitle"
                 defaultMessage="Endpoint"
               />
             }
-          </h3>
+          </h2>
         </EuiText>
 
         <EuiHorizontalRule margin="m" />
@@ -799,29 +802,31 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   renderAuthenticationSection = () => {
     return (
       <EuiPanel paddingSize="m">
-        <EuiText size="m">
-          <h3>
+        <EuiText size="s">
+          <h2>
             {
               <FormattedMessage
                 id="dataSourcesManagement.editDataSource.authenticationTitle"
                 defaultMessage="Authentication"
               />
             }
-          </h3>
+          </h2>
         </EuiText>
 
         <EuiHorizontalRule margin="m" />
 
         <EuiDescribedFormGroup
           title={
-            <h4>
-              {
-                <FormattedMessage
-                  id="dataSourcesManagement.editDataSource.authenticationMethod"
-                  defaultMessage="Authentication Method"
-                />
-              }
-            </h4>
+            <EuiText size="s">
+              <h3>
+                {
+                  <FormattedMessage
+                    id="dataSourcesManagement.editDataSource.authenticationMethod"
+                    defaultMessage="Authentication Method"
+                  />
+                }
+              </h3>
+            </EuiText>
           }
         >
           {this.renderCredentialsSection()}

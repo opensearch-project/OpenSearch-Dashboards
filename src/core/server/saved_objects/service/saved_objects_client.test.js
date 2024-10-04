@@ -246,30 +246,6 @@ test(`#deleteFromWorkspaces Should use update if there is existing workspaces`, 
   });
 });
 
-test(`#deleteFromWorkspaces Should use overwrite create if there is no existing workspaces`, async () => {
-  const returnValue = Symbol();
-  const create = jest.fn();
-  const mockRepository = {
-    get: jest.fn().mockResolvedValue({
-      workspaces: [],
-    }),
-    update: jest.fn().mockResolvedValue(returnValue),
-    create,
-  };
-  const client = new SavedObjectsClient(mockRepository);
-
-  const type = Symbol();
-  const id = Symbol();
-  const workspaces = ['id1'];
-  await client.deleteFromWorkspaces(type, id, workspaces);
-  expect(mockRepository.get).toHaveBeenCalledWith(type, id, {});
-  expect(mockRepository.create).toHaveBeenCalledWith(
-    type,
-    {},
-    { id, overwrite: true, permissions: undefined, version: undefined }
-  );
-});
-
 test(`#deleteFromWorkspaces should throw error if no workspaces passed`, () => {
   const mockRepository = {};
   const client = new SavedObjectsClient(mockRepository);

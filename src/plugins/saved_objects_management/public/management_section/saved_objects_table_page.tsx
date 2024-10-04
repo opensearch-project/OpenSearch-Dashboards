@@ -33,6 +33,7 @@ import { get } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
+import { useObservable } from 'react-use';
 import { DataPublicPluginStart } from '../../../data/public';
 import {
   ISavedObjectsManagementServiceRegistry,
@@ -41,6 +42,7 @@ import {
   SavedObjectsManagementNamespaceServiceStart,
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
+import { NavigationPublicPluginStart } from '../../../navigation/public';
 
 const SavedObjectsTablePage = ({
   coreStart,
@@ -53,6 +55,8 @@ const SavedObjectsTablePage = ({
   setBreadcrumbs,
   dataSourceEnabled,
   dataSourceManagement,
+  navigation,
+  useUpdatedUX,
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
@@ -64,21 +68,36 @@ const SavedObjectsTablePage = ({
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   dataSourceEnabled: boolean;
   dataSourceManagement?: DataSourceManagementPluginSetup;
+  navigation: NavigationPublicPluginStart;
+  useUpdatedUX: boolean;
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
   const dateFormat = coreStart.uiSettings.get<string>('dateFormat');
+  const currentWorkspace = useObservable(coreStart.workspaces.currentWorkspace$);
 
   useEffect(() => {
     setBreadcrumbs([
-      {
-        text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
-          defaultMessage: 'Saved objects',
-        }),
-        href: '/',
-      },
+      useUpdatedUX
+        ? currentWorkspace
+          ? {
+              text: i18n.translate('savedObjectsManagement.updatedUX.workspace.title', {
+                defaultMessage: 'Workspace assets',
+              }),
+            }
+          : {
+              text: i18n.translate('savedObjectsManagement.updatedUX.title', {
+                defaultMessage: 'Assets',
+              }),
+            }
+        : {
+            text: i18n.translate('savedObjectsManagement.breadcrumb.index', {
+              defaultMessage: 'Saved objects',
+            }),
+            href: '/',
+          },
     ]);
-  }, [setBreadcrumbs]);
+  }, [setBreadcrumbs, useUpdatedUX, currentWorkspace]);
 
   return (
     <SavedObjectsTable
@@ -98,9 +117,13 @@ const SavedObjectsTablePage = ({
       perPageConfig={itemsPerPage}
       goInspectObject={(savedObject) => {
         const { editUrl } = savedObject.meta;
-        if (editUrl) {
+        let finalEditUrl = editUrl;
+        if (useUpdatedUX && finalEditUrl) {
+          finalEditUrl = finalEditUrl.replace(/^\/management\/opensearch-dashboards/, '');
+        }
+        if (finalEditUrl) {
           return coreStart.application.navigateToUrl(
-            coreStart.http.basePath.prepend(`/app${editUrl}`)
+            coreStart.http.basePath.prepend(`/app${finalEditUrl}`)
           );
         }
       }}
@@ -111,6 +134,8 @@ const SavedObjectsTablePage = ({
       }}
       dataSourceEnabled={dataSourceEnabled}
       dataSourceManagement={dataSourceManagement}
+      navigationUI={navigation.ui}
+      useUpdatedUX={useUpdatedUX}
     />
   );
 };

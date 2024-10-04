@@ -30,3 +30,5 @@ export {
   QueryEditorExtensionDependencies,
   QueryEditorExtensionConfig,
 } from './query_editor_extensions';
+
+export { createEditor, DefaultInput, DQLBody, SingleLineInput } from './editors';

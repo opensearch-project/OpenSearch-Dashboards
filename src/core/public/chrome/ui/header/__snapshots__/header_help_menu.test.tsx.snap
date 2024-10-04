@@ -1721,6 +1721,7 @@ exports[`Header help menu hides survey link 1`] = `
                   >
                     <EuiButtonContent
                       className="euiButtonEmpty__content"
+                      iconGap="m"
                       iconSide="left"
                       iconSize="m"
                       textProps={
@@ -2025,6 +2026,7 @@ exports[`Header help menu hides survey link 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButtonEmpty__content"
+                                iconGap="m"
                                 iconSide="left"
                                 iconSize="s"
                                 textProps={
@@ -2071,6 +2073,7 @@ exports[`Header help menu hides survey link 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButtonEmpty__content"
+                                iconGap="m"
                                 iconSide="left"
                                 iconSize="s"
                                 textProps={
@@ -2126,6 +2129,7 @@ exports[`Header help menu hides survey link 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButtonEmpty__content"
+                                iconGap="m"
                                 iconSide="left"
                                 iconSize="s"
                                 iconType="logoGithub"
@@ -3902,6 +3906,7 @@ exports[`Header help menu renders survey link 1`] = `
                   >
                     <EuiButtonContent
                       className="euiButtonEmpty__content"
+                      iconGap="m"
                       iconSide="left"
                       iconSize="m"
                       textProps={
@@ -4226,6 +4231,7 @@ exports[`Header help menu renders survey link 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButtonEmpty__content"
+                                iconGap="m"
                                 iconSide="left"
                                 iconSize="s"
                                 textProps={
@@ -4272,6 +4278,7 @@ exports[`Header help menu renders survey link 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButtonEmpty__content"
+                                iconGap="m"
                                 iconSide="left"
                                 iconSize="s"
                                 textProps={
@@ -4320,6 +4327,7 @@ exports[`Header help menu renders survey link 1`] = `
                               >
                                 <EuiButtonContent
                                   className="euiButtonEmpty__content"
+                                  iconGap="m"
                                   iconSide="left"
                                   iconSize="s"
                                   textProps={
@@ -4376,6 +4384,7 @@ exports[`Header help menu renders survey link 1`] = `
                             >
                               <EuiButtonContent
                                 className="euiButtonEmpty__content"
+                                iconGap="m"
                                 iconSide="left"
                                 iconSize="s"
                                 iconType="logoGithub"

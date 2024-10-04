@@ -1,0 +1,2 @@
+fix:
+- Necessary functions are missing from data source permission saved object wrapper ([#8118](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8118))

@@ -140,6 +140,7 @@ exports[`DataSourceTable should get datasources failed should render empty table
                 >
                   <EuiButtonContent
                     className="euiButton__content"
+                    iconGap="m"
                     iconSide="left"
                     textProps={
                       Object {
@@ -154,12 +155,12 @@ exports[`DataSourceTable should get datasources failed should render empty table
                         className="euiButton__text"
                       >
                         <FormattedMessage
-                          defaultMessage="Create data source connection"
-                          id="dataSourcesManagement.dataSourceListing.createButton"
+                          defaultMessage="Create direct query connection"
+                          id="dataSourcesManagement.dataSourceListing.createDirectQueryButton"
                           values={Object {}}
                         >
                           <span>
-                            Create data source connection
+                            Create direct query connection
                           </span>
                         </FormattedMessage>
                       </span>
@@ -206,12 +207,12 @@ exports[`DataSourceTable should get datasources successful should render normall
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -226,12 +227,12 @@ exports[`DataSourceTable should get datasources successful should render normall
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
           ],
@@ -297,9 +298,14 @@ exports[`DataSourceTable should get datasources successful should render normall
           Object {
             "dataType": "string",
             "field": "title",
-            "name": "Title",
+            "name": "Data source",
             "render": [Function],
             "sortable": [Function],
+          },
+          Object {
+            "field": "type",
+            "name": "Type",
+            "truncateText": true,
           },
           Object {
             "dataType": "string",
@@ -311,6 +317,13 @@ exports[`DataSourceTable should get datasources successful should render normall
             "sortable": [Function],
             "truncateText": true,
           },
+          Object {
+            "align": "right",
+            "field": "relatedConnections",
+            "name": "Related connections",
+            "render": [Function],
+            "truncateText": true,
+          },
         ]
       }
       isSelectable={true}
@@ -318,28 +331,36 @@ exports[`DataSourceTable should get datasources successful should render normall
       items={
         Array [
           Object {
-            "description": "test datasource",
-            "id": "test",
-            "sort": "test",
-            "title": "test",
+            "connectionType": 0,
+            "description": "test datasource1",
+            "id": "test1",
+            "relatedConnections": Array [],
+            "title": "test1",
+            "type": "OpenSearch",
           },
           Object {
+            "connectionType": 0,
             "description": "test datasource2",
             "id": "test2",
-            "sort": "test",
+            "relatedConnections": Array [],
             "title": "test",
+            "type": "OpenSearch",
           },
           Object {
+            "connectionType": 0,
             "description": "alpha test datasource",
             "id": "alpha-test",
-            "sort": "alpha-test",
+            "relatedConnections": Array [],
             "title": "alpha-test",
+            "type": "OpenSearch",
           },
           Object {
+            "connectionType": 0,
             "description": "beta test datasource",
             "id": "beta-test",
-            "sort": "beta-test",
+            "relatedConnections": Array [],
             "title": "beta-test",
+            "type": "OpenSearch",
           },
         ]
       }
@@ -368,22 +389,23 @@ exports[`DataSourceTable should get datasources successful should render normall
               },
             },
           },
-          "toolsRight": <EuiFlexItem
-            grow={false}
-          >
-            <EuiSmallButton
-              color="danger"
-              data-test-subj="deleteDataSourceConnections"
-              disabled={true}
-              onClick={[Function]}
-            >
-              Delete 
-              
-               
-              
-              
-            </EuiSmallButton>
-          </EuiFlexItem>,
+          "compressed": true,
+          "filters": Array [
+            Object {
+              "field": "type",
+              "multiSelect": "or",
+              "name": "Type",
+              "options": Array [
+                Object {
+                  "key": "type-option-0",
+                  "name": "OpenSearch",
+                  "value": "OpenSearch",
+                },
+              ],
+              "type": "field_value_selection",
+            },
+          ],
+          "toolsLeft": Array [],
         }
       }
       selection={
@@ -415,33 +437,34 @@ exports[`DataSourceTable should get datasources successful should render normall
               },
             }
           }
-          onChange={[Function]}
-          toolsRight={
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiSmallButton
-                color="danger"
-                data-test-subj="deleteDataSourceConnections"
-                disabled={true}
-                onClick={[Function]}
-              >
-                Delete 
-                
-                 
-                
-                
-              </EuiSmallButton>
-            </EuiFlexItem>
+          compressed={true}
+          filters={
+            Array [
+              Object {
+                "field": "type",
+                "multiSelect": "or",
+                "name": "Type",
+                "options": Array [
+                  Object {
+                    "key": "type-option-0",
+                    "name": "OpenSearch",
+                    "value": "OpenSearch",
+                  },
+                ],
+                "type": "field_value_selection",
+              },
+            ]
           }
+          onChange={[Function]}
+          toolsLeft={Array []}
         >
           <EuiFlexGroup
             alignItems="center"
-            gutterSize="m"
+            gutterSize="s"
             wrap={true}
           >
             <div
-              className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+              className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
             >
               <EuiFlexItem
                 className="euiSearchBar__searchHolder"
@@ -451,6 +474,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                   className="euiFlexItem euiSearchBar__searchHolder"
                 >
                   <EuiSearchBox
+                    compressed={true}
                     incremental={true}
                     isInvalid={false}
                     onSearch={[Function]}
@@ -459,7 +483,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                   >
                     <EuiFieldSearch
                       aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-                      compressed={false}
+                      compressed={true}
                       defaultValue=""
                       fullWidth={true}
                       incremental={true}
@@ -471,13 +495,13 @@ exports[`DataSourceTable should get datasources successful should render normall
                       placeholder="Search..."
                     >
                       <EuiFormControlLayout
-                        compressed={false}
+                        compressed={true}
                         fullWidth={true}
                         icon="search"
                         isLoading={false}
                       >
                         <div
-                          className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                          className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                         >
                           <div
                             className="euiFormControlLayout__childrenWrapper"
@@ -487,7 +511,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                             >
                               <input
                                 aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-                                className="euiFieldSearch euiFieldSearch--fullWidth"
+                                className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
                                 defaultValue=""
                                 onKeyUp={[Function]}
                                 placeholder="Search..."
@@ -495,7 +519,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                               />
                             </EuiValidatableControl>
                             <EuiFormControlLayoutIcons
-                              compressed={false}
+                              compressed={true}
                               icon="search"
                               isLoading={false}
                             >
@@ -503,7 +527,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 className="euiFormControlLayoutIcons"
                               >
                                 <EuiFormControlLayoutCustomIcon
-                                  size="m"
+                                  size="s"
                                   type="search"
                                 >
                                   <span
@@ -512,14 +536,14 @@ exports[`DataSourceTable should get datasources successful should render normall
                                     <EuiIcon
                                       aria-hidden="true"
                                       className="euiFormControlLayoutCustomIcon__icon"
-                                      size="m"
+                                      size="s"
                                       type="search"
                                     >
                                       <span
                                         aria-hidden="true"
                                         className="euiFormControlLayoutCustomIcon__icon"
                                         data-euiicon-type="search"
-                                        size="m"
+                                        size="s"
                                       />
                                     </EuiIcon>
                                   </span>
@@ -534,90 +558,214 @@ exports[`DataSourceTable should get datasources successful should render normall
                 </div>
               </EuiFlexItem>
               <EuiFlexItem
+                className="euiSearchBar__filtersHolder"
                 grow={false}
               >
                 <div
-                  className="euiFlexItem euiFlexItem--flexGrowZero"
+                  className="euiFlexItem euiFlexItem--flexGrowZero euiSearchBar__filtersHolder"
                 >
-                  <EuiFlexItem
-                    grow={false}
-                    key="delete"
+                  <EuiSearchFilters
+                    compressed={true}
+                    filters={
+                      Array [
+                        Object {
+                          "field": "type",
+                          "multiSelect": "or",
+                          "name": "Type",
+                          "options": Array [
+                            Object {
+                              "key": "type-option-0",
+                              "name": "OpenSearch",
+                              "value": "OpenSearch",
+                            },
+                          ],
+                          "type": "field_value_selection",
+                        },
+                      ]
+                    }
+                    onChange={[Function]}
+                    query={
+                      Query {
+                        "ast": _AST {
+                          "_clauses": Array [],
+                          "_indexedClauses": Object {
+                            "field": Object {},
+                            "group": Array [],
+                            "is": Object {},
+                            "term": Array [],
+                          },
+                        },
+                        "syntax": Object {
+                          "parse": [Function],
+                          "print": [Function],
+                          "printClause": [Function],
+                        },
+                        "text": "",
+                      }
+                    }
                   >
-                    <div
-                      className="euiFlexItem euiFlexItem--flexGrowZero"
-                    >
-                      <EuiSmallButton
-                        color="danger"
-                        data-test-subj="deleteDataSourceConnections"
-                        disabled={true}
-                        onClick={[Function]}
+                    <EuiFilterGroup>
+                      <div
+                        className="euiFilterGroup"
                       >
-                        <EuiButton
-                          color="danger"
-                          data-test-subj="deleteDataSourceConnections"
-                          disabled={true}
-                          onClick={[Function]}
-                          size="s"
-                        >
-                          <EuiButtonDisplay
-                            baseClassName="euiButton"
-                            color="danger"
-                            data-test-subj="deleteDataSourceConnections"
-                            disabled={true}
-                            element="button"
-                            isDisabled={true}
-                            onClick={[Function]}
-                            size="s"
-                            type="button"
-                          >
-                            <button
-                              className="euiButton euiButton--danger euiButton--small euiButton-isDisabled"
-                              data-test-subj="deleteDataSourceConnections"
-                              disabled={true}
-                              onClick={[Function]}
-                              style={
+                        <FieldValueSelectionFilter
+                          config={
+                            Object {
+                              "compressed": true,
+                              "field": "type",
+                              "multiSelect": "or",
+                              "name": "Type",
+                              "options": Array [
                                 Object {
-                                  "minWidth": undefined,
-                                }
-                              }
-                              type="button"
-                            >
-                              <EuiButtonContent
-                                className="euiButton__content"
-                                iconSide="left"
-                                textProps={
-                                  Object {
-                                    "className": "euiButton__text",
-                                  }
-                                }
+                                  "key": "type-option-0",
+                                  "name": "OpenSearch",
+                                  "value": "OpenSearch",
+                                },
+                              ],
+                              "type": "field_value_selection",
+                            }
+                          }
+                          index={0}
+                          onChange={[Function]}
+                          query={
+                            Query {
+                              "ast": _AST {
+                                "_clauses": Array [],
+                                "_indexedClauses": Object {
+                                  "field": Object {},
+                                  "group": Array [],
+                                  "is": Object {},
+                                  "term": Array [],
+                                },
+                              },
+                              "syntax": Object {
+                                "parse": [Function],
+                                "print": [Function],
+                                "printClause": [Function],
+                              },
+                              "text": "",
+                            }
+                          }
+                        >
+                          <EuiPopover
+                            anchorPosition="downCenter"
+                            button={
+                              <EuiFilterButton
+                                grow={true}
+                                hasActiveFilters={false}
+                                iconSide="right"
+                                iconType="arrowDown"
+                                onClick={[Function]}
+                                size="s"
                               >
-                                <span
-                                  className="euiButtonContent euiButton__content"
+                                Type
+                              </EuiFilterButton>
+                            }
+                            closePopover={[Function]}
+                            display="inlineBlock"
+                            hasArrow={true}
+                            id="field_value_selection_0"
+                            isOpen={false}
+                            ownFocus={true}
+                            panelClassName="euiFilterGroup__popoverPanel"
+                            panelPaddingSize="none"
+                          >
+                            <div
+                              className="euiPopover euiPopover--anchorDownCenter"
+                              id="field_value_selection_0"
+                            >
+                              <div
+                                className="euiPopover__anchor"
+                              >
+                                <EuiFilterButton
+                                  grow={true}
+                                  hasActiveFilters={false}
+                                  iconSide="right"
+                                  iconType="arrowDown"
+                                  onClick={[Function]}
+                                  size="s"
                                 >
-                                  <span
-                                    className="euiButton__text"
+                                  <EuiButtonEmpty
+                                    className="euiFilterButton euiFilterButton--hasIcon"
+                                    color="text"
+                                    iconSide="right"
+                                    iconType="arrowDown"
+                                    onClick={[Function]}
+                                    size="s"
+                                    textProps={
+                                      Object {
+                                        "className": "",
+                                      }
+                                    }
+                                    type="button"
                                   >
-                                    Delete 
-                                     
-                                  </span>
-                                </span>
-                              </EuiButtonContent>
-                            </button>
-                          </EuiButtonDisplay>
-                        </EuiButton>
-                      </EuiSmallButton>
-                    </div>
-                  </EuiFlexItem>
+                                    <button
+                                      className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiFilterButton euiFilterButton--hasIcon"
+                                      disabled={false}
+                                      onClick={[Function]}
+                                      type="button"
+                                    >
+                                      <EuiButtonContent
+                                        className="euiButtonEmpty__content"
+                                        iconGap="m"
+                                        iconSide="right"
+                                        iconSize="m"
+                                        iconType="arrowDown"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButtonEmpty__text",
+                                          }
+                                        }
+                                      >
+                                        <span
+                                          className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                        >
+                                          <EuiIcon
+                                            className="euiButtonContent__icon"
+                                            color="inherit"
+                                            size="m"
+                                            type="arrowDown"
+                                          >
+                                            <span
+                                              className="euiButtonContent__icon"
+                                              color="inherit"
+                                              data-euiicon-type="arrowDown"
+                                              size="m"
+                                            />
+                                          </EuiIcon>
+                                          <span
+                                            className="euiButtonEmpty__text"
+                                          >
+                                            <span
+                                              className="euiFilterButton__textShift"
+                                              data-text="Type"
+                                              title="Type"
+                                            >
+                                              Type
+                                            </span>
+                                          </span>
+                                        </span>
+                                      </EuiButtonContent>
+                                    </button>
+                                  </EuiButtonEmpty>
+                                </EuiFilterButton>
+                              </div>
+                            </div>
+                          </EuiPopover>
+                        </FieldValueSelectionFilter>
+                      </div>
+                    </EuiFilterGroup>
+                  </EuiSearchFilters>
                 </div>
               </EuiFlexItem>
             </div>
           </EuiFlexGroup>
         </EuiSearchBar>
         <EuiSpacer
-          size="l"
+          size="m"
         >
           <div
-            className="euiSpacer euiSpacer--l"
+            className="euiSpacer euiSpacer--m"
           />
         </EuiSpacer>
         <EuiBasicTable
@@ -626,9 +774,14 @@ exports[`DataSourceTable should get datasources successful should render normall
               Object {
                 "dataType": "string",
                 "field": "title",
-                "name": "Title",
+                "name": "Data source",
                 "render": [Function],
                 "sortable": [Function],
+              },
+              Object {
+                "field": "type",
+                "name": "Type",
+                "truncateText": true,
               },
               Object {
                 "dataType": "string",
@@ -640,6 +793,13 @@ exports[`DataSourceTable should get datasources successful should render normall
                 "sortable": [Function],
                 "truncateText": true,
               },
+              Object {
+                "align": "right",
+                "field": "relatedConnections",
+                "name": "Related connections",
+                "render": [Function],
+                "truncateText": true,
+              },
             ]
           }
           isSelectable={true}
@@ -647,28 +807,36 @@ exports[`DataSourceTable should get datasources successful should render normall
           items={
             Array [
               Object {
+                "connectionType": 0,
                 "description": "alpha test datasource",
                 "id": "alpha-test",
-                "sort": "alpha-test",
+                "relatedConnections": Array [],
                 "title": "alpha-test",
+                "type": "OpenSearch",
               },
               Object {
+                "connectionType": 0,
                 "description": "beta test datasource",
                 "id": "beta-test",
-                "sort": "beta-test",
+                "relatedConnections": Array [],
                 "title": "beta-test",
+                "type": "OpenSearch",
               },
               Object {
-                "description": "test datasource",
-                "id": "test",
-                "sort": "test",
-                "title": "test",
-              },
-              Object {
+                "connectionType": 0,
                 "description": "test datasource2",
                 "id": "test2",
-                "sort": "test",
+                "relatedConnections": Array [],
                 "title": "test",
+                "type": "OpenSearch",
+              },
+              Object {
+                "connectionType": 0,
+                "description": "test datasource1",
+                "id": "test1",
+                "relatedConnections": Array [],
+                "title": "test1",
+                "type": "OpenSearch",
               },
             ]
           }
@@ -700,7 +868,7 @@ exports[`DataSourceTable should get datasources successful should render normall
               "allowNeutralSort": false,
               "sort": Object {
                 "direction": "asc",
-                "field": "Title",
+                "field": "Data source",
               },
             }
           }
@@ -781,13 +949,13 @@ exports[`DataSourceTable should get datasources successful should render normall
                                   "isSortAscending": true,
                                   "isSorted": true,
                                   "key": "_data_s_title_0",
-                                  "name": "Title",
+                                  "name": "Data source",
                                   "onSort": [Function],
                                 },
                                 Object {
                                   "isSortAscending": undefined,
                                   "isSorted": false,
-                                  "key": "_data_s_description_1",
+                                  "key": "_data_s_description_2",
                                   "name": "Description",
                                   "onSort": [Function],
                                 },
@@ -841,6 +1009,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                       >
                                         <EuiButtonContent
                                           className="euiButtonEmpty__content"
+                                          iconGap="m"
                                           iconSide="right"
                                           iconSize="s"
                                           iconType="arrowDown"
@@ -1009,15 +1178,15 @@ exports[`DataSourceTable should get datasources successful should render normall
                                       values={
                                         Object {
                                           "description": undefined,
-                                          "innerText": "Title",
+                                          "innerText": "Data source",
                                         }
                                       }
                                     >
                                       <span
                                         className="euiTableCellContent__text"
-                                        title="Title"
+                                        title="Data source"
                                       >
-                                        Title
+                                        Data source
                                       </span>
                                     </EuiI18n>
                                   </EuiInnerText>
@@ -1039,9 +1208,55 @@ exports[`DataSourceTable should get datasources successful should render normall
                         </EuiTableHeaderCell>
                         <EuiTableHeaderCell
                           align="left"
-                          data-test-subj="tableHeaderCell_description_1"
+                          data-test-subj="tableHeaderCell_type_1"
+                          key="_data_h_type_1"
+                        >
+                          <th
+                            className="euiTableHeaderCell"
+                            data-test-subj="tableHeaderCell_type_1"
+                            role="columnheader"
+                            scope="col"
+                            style={
+                              Object {
+                                "width": undefined,
+                              }
+                            }
+                          >
+                            <CellContents
+                              className="euiTableCellContent"
+                              showSortMsg={false}
+                            >
+                              <span
+                                className="euiTableCellContent"
+                              >
+                                <EuiInnerText>
+                                  <EuiI18n
+                                    default="{innerText}; {description}"
+                                    token="euiTableHeaderCell.titleTextWithDesc"
+                                    values={
+                                      Object {
+                                        "description": undefined,
+                                        "innerText": "Type",
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiTableCellContent__text"
+                                      title="Type"
+                                    >
+                                      Type
+                                    </span>
+                                  </EuiI18n>
+                                </EuiInnerText>
+                              </span>
+                            </CellContents>
+                          </th>
+                        </EuiTableHeaderCell>
+                        <EuiTableHeaderCell
+                          align="left"
+                          data-test-subj="tableHeaderCell_description_2"
                           isSorted={false}
-                          key="_data_h_description_1"
+                          key="_data_h_description_2"
                           mobileOptions={
                             Object {
                               "show": false,
@@ -1053,7 +1268,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                             aria-live="polite"
                             aria-sort="none"
                             className="euiTableHeaderCell euiTableHeaderCell--hideForMobile"
-                            data-test-subj="tableHeaderCell_description_1"
+                            data-test-subj="tableHeaderCell_description_2"
                             role="columnheader"
                             scope="col"
                             style={
@@ -1098,6 +1313,52 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 </span>
                               </CellContents>
                             </button>
+                          </th>
+                        </EuiTableHeaderCell>
+                        <EuiTableHeaderCell
+                          align="right"
+                          data-test-subj="tableHeaderCell_relatedConnections_3"
+                          key="_data_h_relatedConnections_3"
+                        >
+                          <th
+                            className="euiTableHeaderCell"
+                            data-test-subj="tableHeaderCell_relatedConnections_3"
+                            role="columnheader"
+                            scope="col"
+                            style={
+                              Object {
+                                "width": undefined,
+                              }
+                            }
+                          >
+                            <CellContents
+                              className="euiTableCellContent euiTableCellContent--alignRight"
+                              showSortMsg={false}
+                            >
+                              <span
+                                className="euiTableCellContent euiTableCellContent--alignRight"
+                              >
+                                <EuiInnerText>
+                                  <EuiI18n
+                                    default="{innerText}; {description}"
+                                    token="euiTableHeaderCell.titleTextWithDesc"
+                                    values={
+                                      Object {
+                                        "description": undefined,
+                                        "innerText": "Related connections",
+                                      }
+                                    }
+                                  >
+                                    <span
+                                      className="euiTableCellContent__text"
+                                      title="Related connections"
+                                    >
+                                      Related connections
+                                    </span>
+                                  </EuiI18n>
+                                </EuiInnerText>
+                              </span>
+                            </CellContents>
                           </th>
                         </EuiTableHeaderCell>
                       </tr>
@@ -1167,7 +1428,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                             key="_data_column_title_alpha-test_0"
                             mobileOptions={
                               Object {
-                                "header": "Title",
+                                "header": "Data source",
                                 "render": undefined,
                               }
                             }
@@ -1185,23 +1446,25 @@ exports[`DataSourceTable should get datasources successful should render normall
                               <div
                                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                               >
-                                Title
+                                Data source
                               </div>
                               <div
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  flush="left"
                                   onClick={[Function]}
                                   size="xs"
                                 >
                                   <button
-                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                     disabled={false}
                                     onClick={[Function]}
                                     type="button"
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="left"
                                       iconSize="s"
                                       textProps={
@@ -1227,7 +1490,44 @@ exports[`DataSourceTable should get datasources successful should render normall
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_description_alpha-test_1"
+                            key="_data_column_type_alpha-test_1"
+                            mobileOptions={
+                              Object {
+                                "header": "Type",
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={true}
+                            truncateText={true}
+                          >
+                            <td
+                              className="euiTableRowCell"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Type
+                              </div>
+                              <div
+                                className="euiTableCellContent euiTableCellContent--truncateText"
+                              >
+                                <span
+                                  className="euiTableCellContent__text"
+                                >
+                                  OpenSearch
+                                </span>
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="left"
+                            key="_data_column_description_alpha-test_2"
                             mobileOptions={
                               Object {
                                 "header": "Description",
@@ -1255,6 +1555,39 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 >
                                   alpha test datasource
                                 </span>
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="right"
+                            key="_data_column_relatedConnections_alpha-test_3"
+                            mobileOptions={
+                              Object {
+                                "header": "Related connections",
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={false}
+                            truncateText={true}
+                          >
+                            <td
+                              className="euiTableRowCell"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Related connections
+                              </div>
+                              <div
+                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                              >
+                                0
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -1320,7 +1653,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                             key="_data_column_title_beta-test_0"
                             mobileOptions={
                               Object {
-                                "header": "Title",
+                                "header": "Data source",
                                 "render": undefined,
                               }
                             }
@@ -1338,23 +1671,25 @@ exports[`DataSourceTable should get datasources successful should render normall
                               <div
                                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                               >
-                                Title
+                                Data source
                               </div>
                               <div
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  flush="left"
                                   onClick={[Function]}
                                   size="xs"
                                 >
                                   <button
-                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                     disabled={false}
                                     onClick={[Function]}
                                     type="button"
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="left"
                                       iconSize="s"
                                       textProps={
@@ -1380,7 +1715,44 @@ exports[`DataSourceTable should get datasources successful should render normall
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_description_beta-test_1"
+                            key="_data_column_type_beta-test_1"
+                            mobileOptions={
+                              Object {
+                                "header": "Type",
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={true}
+                            truncateText={true}
+                          >
+                            <td
+                              className="euiTableRowCell"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Type
+                              </div>
+                              <div
+                                className="euiTableCellContent euiTableCellContent--truncateText"
+                              >
+                                <span
+                                  className="euiTableCellContent__text"
+                                >
+                                  OpenSearch
+                                </span>
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="left"
+                            key="_data_column_description_beta-test_2"
                             mobileOptions={
                               Object {
                                 "header": "Description",
@@ -1411,74 +1783,18 @@ exports[`DataSourceTable should get datasources successful should render normall
                               </div>
                             </td>
                           </EuiTableRowCell>
-                        </tr>
-                      </EuiTableRow>
-                      <EuiTableRow
-                        isSelectable={true}
-                        isSelected={false}
-                      >
-                        <tr
-                          className="euiTableRow euiTableRow-isSelectable"
-                        >
-                          <EuiTableRowCellCheckbox
-                            key="_selection_column_test"
-                          >
-                            <td
-                              className="euiTableRowCellCheckbox"
-                            >
-                              <div
-                                className="euiTableCellContent"
-                              >
-                                <EuiI18n
-                                  default="Select this row"
-                                  token="euiBasicTable.selectThisRow"
-                                >
-                                  <EuiCheckbox
-                                    aria-label="Select this row"
-                                    checked={false}
-                                    compressed={false}
-                                    data-test-subj="checkboxSelectRow-test"
-                                    disabled={false}
-                                    id="_selection_column_test-checkbox"
-                                    indeterminate={false}
-                                    onChange={[Function]}
-                                    title="Select this row"
-                                    type="inList"
-                                  >
-                                    <div
-                                      className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
-                                    >
-                                      <input
-                                        aria-label="Select this row"
-                                        checked={false}
-                                        className="euiCheckbox__input"
-                                        data-test-subj="checkboxSelectRow-test"
-                                        disabled={false}
-                                        id="_selection_column_test-checkbox"
-                                        onChange={[Function]}
-                                        title="Select this row"
-                                        type="checkbox"
-                                      />
-                                      <div
-                                        className="euiCheckbox__square"
-                                      />
-                                    </div>
-                                  </EuiCheckbox>
-                                </EuiI18n>
-                              </div>
-                            </td>
-                          </EuiTableRowCellCheckbox>
                           <EuiTableRowCell
-                            align="left"
-                            key="_data_column_title_test_0"
+                            align="right"
+                            key="_data_column_relatedConnections_beta-test_3"
                             mobileOptions={
                               Object {
-                                "header": "Title",
+                                "header": "Related connections",
                                 "render": undefined,
                               }
                             }
                             setScopeRow={false}
                             textOnly={false}
+                            truncateText={true}
                           >
                             <td
                               className="euiTableRowCell"
@@ -1491,116 +1807,12 @@ exports[`DataSourceTable should get datasources successful should render normall
                               <div
                                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                               >
-                                Title
+                                Related connections
                               </div>
                               <div
-                                className="euiTableCellContent euiTableCellContent--overflowingContent"
+                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
                               >
-                                <EuiButtonEmpty
-                                  onClick={[Function]}
-                                  size="xs"
-                                >
-                                  <button
-                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
-                                    disabled={false}
-                                    onClick={[Function]}
-                                    type="button"
-                                  >
-                                    <EuiButtonContent
-                                      className="euiButtonEmpty__content"
-                                      iconSide="left"
-                                      iconSize="s"
-                                      textProps={
-                                        Object {
-                                          "className": "euiButtonEmpty__text",
-                                        }
-                                      }
-                                    >
-                                      <span
-                                        className="euiButtonContent euiButtonEmpty__content"
-                                      >
-                                        <span
-                                          className="euiButtonEmpty__text"
-                                        >
-                                          test
-                                        </span>
-                                      </span>
-                                    </EuiButtonContent>
-                                  </button>
-                                </EuiButtonEmpty>
-                                <EuiBadge
-                                  iconSide="left"
-                                  iconType="starFilled"
-                                >
-                                  <EuiInnerText>
-                                    <span
-                                      className="euiBadge euiBadge--iconLeft"
-                                      style={
-                                        Object {
-                                          "backgroundColor": "#d3dae6",
-                                          "color": "#000",
-                                        }
-                                      }
-                                      title="Default"
-                                    >
-                                      <span
-                                        className="euiBadge__content"
-                                      >
-                                        <span
-                                          className="euiBadge__text"
-                                        >
-                                          Default
-                                        </span>
-                                        <EuiIcon
-                                          className="euiBadge__icon"
-                                          color="inherit"
-                                          size="s"
-                                          type="starFilled"
-                                        >
-                                          <span
-                                            className="euiBadge__icon"
-                                            color="inherit"
-                                            data-euiicon-type="starFilled"
-                                            size="s"
-                                          />
-                                        </EuiIcon>
-                                      </span>
-                                    </span>
-                                  </EuiInnerText>
-                                </EuiBadge>
-                              </div>
-                            </td>
-                          </EuiTableRowCell>
-                          <EuiTableRowCell
-                            align="left"
-                            key="_data_column_description_test_1"
-                            mobileOptions={
-                              Object {
-                                "header": "Description",
-                                "render": undefined,
-                                "show": false,
-                              }
-                            }
-                            setScopeRow={false}
-                            textOnly={true}
-                            truncateText={true}
-                          >
-                            <td
-                              className="euiTableRowCell euiTableRowCell--hideForMobile"
-                              style={
-                                Object {
-                                  "width": undefined,
-                                }
-                              }
-                            >
-                              <div
-                                className="euiTableCellContent euiTableCellContent--truncateText"
-                              >
-                                <span
-                                  className="euiTableCellContent__text"
-                                >
-                                  test datasource
-                                </span>
+                                0
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -1666,7 +1878,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                             key="_data_column_title_test2_0"
                             mobileOptions={
                               Object {
-                                "header": "Title",
+                                "header": "Data source",
                                 "render": undefined,
                               }
                             }
@@ -1684,23 +1896,25 @@ exports[`DataSourceTable should get datasources successful should render normall
                               <div
                                 className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
                               >
-                                Title
+                                Data source
                               </div>
                               <div
                                 className="euiTableCellContent euiTableCellContent--overflowingContent"
                               >
                                 <EuiButtonEmpty
+                                  flush="left"
                                   onClick={[Function]}
                                   size="xs"
                                 >
                                   <button
-                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
                                     disabled={false}
                                     onClick={[Function]}
                                     type="button"
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="left"
                                       iconSize="s"
                                       textProps={
@@ -1726,7 +1940,44 @@ exports[`DataSourceTable should get datasources successful should render normall
                           </EuiTableRowCell>
                           <EuiTableRowCell
                             align="left"
-                            key="_data_column_description_test2_1"
+                            key="_data_column_type_test2_1"
+                            mobileOptions={
+                              Object {
+                                "header": "Type",
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={true}
+                            truncateText={true}
+                          >
+                            <td
+                              className="euiTableRowCell"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Type
+                              </div>
+                              <div
+                                className="euiTableCellContent euiTableCellContent--truncateText"
+                              >
+                                <span
+                                  className="euiTableCellContent__text"
+                                >
+                                  OpenSearch
+                                </span>
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="left"
+                            key="_data_column_description_test2_2"
                             mobileOptions={
                               Object {
                                 "header": "Description",
@@ -1754,6 +2005,304 @@ exports[`DataSourceTable should get datasources successful should render normall
                                 >
                                   test datasource2
                                 </span>
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="right"
+                            key="_data_column_relatedConnections_test2_3"
+                            mobileOptions={
+                              Object {
+                                "header": "Related connections",
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={false}
+                            truncateText={true}
+                          >
+                            <td
+                              className="euiTableRowCell"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Related connections
+                              </div>
+                              <div
+                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                              >
+                                0
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
+                        </tr>
+                      </EuiTableRow>
+                      <EuiTableRow
+                        isSelectable={true}
+                        isSelected={false}
+                      >
+                        <tr
+                          className="euiTableRow euiTableRow-isSelectable"
+                        >
+                          <EuiTableRowCellCheckbox
+                            key="_selection_column_test1"
+                          >
+                            <td
+                              className="euiTableRowCellCheckbox"
+                            >
+                              <div
+                                className="euiTableCellContent"
+                              >
+                                <EuiI18n
+                                  default="Select this row"
+                                  token="euiBasicTable.selectThisRow"
+                                >
+                                  <EuiCheckbox
+                                    aria-label="Select this row"
+                                    checked={false}
+                                    compressed={false}
+                                    data-test-subj="checkboxSelectRow-test1"
+                                    disabled={false}
+                                    id="_selection_column_test1-checkbox"
+                                    indeterminate={false}
+                                    onChange={[Function]}
+                                    title="Select this row"
+                                    type="inList"
+                                  >
+                                    <div
+                                      className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                                    >
+                                      <input
+                                        aria-label="Select this row"
+                                        checked={false}
+                                        className="euiCheckbox__input"
+                                        data-test-subj="checkboxSelectRow-test1"
+                                        disabled={false}
+                                        id="_selection_column_test1-checkbox"
+                                        onChange={[Function]}
+                                        title="Select this row"
+                                        type="checkbox"
+                                      />
+                                      <div
+                                        className="euiCheckbox__square"
+                                      />
+                                    </div>
+                                  </EuiCheckbox>
+                                </EuiI18n>
+                              </div>
+                            </td>
+                          </EuiTableRowCellCheckbox>
+                          <EuiTableRowCell
+                            align="left"
+                            key="_data_column_title_test1_0"
+                            mobileOptions={
+                              Object {
+                                "header": "Data source",
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={false}
+                          >
+                            <td
+                              className="euiTableRowCell"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Data source
+                              </div>
+                              <div
+                                className="euiTableCellContent euiTableCellContent--overflowingContent"
+                              >
+                                <EuiButtonEmpty
+                                  flush="left"
+                                  onClick={[Function]}
+                                  size="xs"
+                                >
+                                  <button
+                                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushLeft"
+                                    disabled={false}
+                                    onClick={[Function]}
+                                    type="button"
+                                  >
+                                    <EuiButtonContent
+                                      className="euiButtonEmpty__content"
+                                      iconGap="m"
+                                      iconSide="left"
+                                      iconSize="s"
+                                      textProps={
+                                        Object {
+                                          "className": "euiButtonEmpty__text",
+                                        }
+                                      }
+                                    >
+                                      <span
+                                        className="euiButtonContent euiButtonEmpty__content"
+                                      >
+                                        <span
+                                          className="euiButtonEmpty__text"
+                                        >
+                                          test1
+                                        </span>
+                                      </span>
+                                    </EuiButtonContent>
+                                  </button>
+                                </EuiButtonEmpty>
+                                <EuiBadge
+                                  iconSide="left"
+                                  iconType="starFilled"
+                                >
+                                  <EuiInnerText>
+                                    <span
+                                      className="euiBadge euiBadge--iconLeft"
+                                      style={
+                                        Object {
+                                          "backgroundColor": "#d3dae6",
+                                          "color": "#000",
+                                        }
+                                      }
+                                      title="Default"
+                                    >
+                                      <span
+                                        className="euiBadge__content"
+                                      >
+                                        <span
+                                          className="euiBadge__text"
+                                        >
+                                          Default
+                                        </span>
+                                        <EuiIcon
+                                          className="euiBadge__icon"
+                                          color="inherit"
+                                          size="s"
+                                          type="starFilled"
+                                        >
+                                          <span
+                                            className="euiBadge__icon"
+                                            color="inherit"
+                                            data-euiicon-type="starFilled"
+                                            size="s"
+                                          />
+                                        </EuiIcon>
+                                      </span>
+                                    </span>
+                                  </EuiInnerText>
+                                </EuiBadge>
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="left"
+                            key="_data_column_type_test1_1"
+                            mobileOptions={
+                              Object {
+                                "header": "Type",
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={true}
+                            truncateText={true}
+                          >
+                            <td
+                              className="euiTableRowCell"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Type
+                              </div>
+                              <div
+                                className="euiTableCellContent euiTableCellContent--truncateText"
+                              >
+                                <span
+                                  className="euiTableCellContent__text"
+                                >
+                                  OpenSearch
+                                </span>
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="left"
+                            key="_data_column_description_test1_2"
+                            mobileOptions={
+                              Object {
+                                "header": "Description",
+                                "render": undefined,
+                                "show": false,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={true}
+                            truncateText={true}
+                          >
+                            <td
+                              className="euiTableRowCell euiTableRowCell--hideForMobile"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableCellContent euiTableCellContent--truncateText"
+                              >
+                                <span
+                                  className="euiTableCellContent__text"
+                                >
+                                  test datasource1
+                                </span>
+                              </div>
+                            </td>
+                          </EuiTableRowCell>
+                          <EuiTableRowCell
+                            align="right"
+                            key="_data_column_relatedConnections_test1_3"
+                            mobileOptions={
+                              Object {
+                                "header": "Related connections",
+                                "render": undefined,
+                              }
+                            }
+                            setScopeRow={false}
+                            textOnly={false}
+                            truncateText={true}
+                          >
+                            <td
+                              className="euiTableRowCell"
+                              style={
+                                Object {
+                                  "width": undefined,
+                                }
+                              }
+                            >
+                              <div
+                                className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Related connections
+                              </div>
+                              <div
+                                className="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                              >
+                                0
                               </div>
                             </td>
                           </EuiTableRowCell>
@@ -1870,6 +2419,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                   >
                                     <EuiButtonContent
                                       className="euiButtonEmpty__content"
+                                      iconGap="m"
                                       iconSide="right"
                                       iconSize="s"
                                       iconType="arrowDown"
@@ -2040,6 +2590,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                                             >
                                               <EuiButtonContent
                                                 className="euiButtonEmpty__content"
+                                                iconGap="m"
                                                 iconSide="left"
                                                 iconSize="m"
                                                 textProps={
@@ -2154,12 +2705,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2174,12 +2725,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2194,12 +2745,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2214,12 +2765,32 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "test1",
               },
             ],
             Array [
               Object {
                 "pathname": "test2",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "beta-test",
+              },
+            ],
+            Array [
+              Object {
+                "pathname": "alpha-test",
               },
             ],
             Array [
@@ -2234,12 +2805,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2254,12 +2825,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2274,12 +2845,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2294,12 +2865,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2314,12 +2885,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2334,12 +2905,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2354,12 +2925,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2374,12 +2945,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2394,12 +2965,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2414,12 +2985,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2434,12 +3005,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2454,12 +3025,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2474,12 +3045,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2494,12 +3065,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2514,12 +3085,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2534,12 +3105,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2554,12 +3125,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2574,12 +3145,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2594,12 +3165,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2614,12 +3185,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2634,12 +3205,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2654,12 +3225,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2674,12 +3245,12 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
             Array [
@@ -2694,16 +3265,32 @@ exports[`DataSourceTable should not manage datasources when canManageDataSource 
             ],
             Array [
               Object {
-                "pathname": "test",
+                "pathname": "test2",
               },
             ],
             Array [
               Object {
-                "pathname": "test2",
+                "pathname": "test1",
               },
             ],
           ],
           "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
             Object {
               "type": "return",
               "value": undefined,

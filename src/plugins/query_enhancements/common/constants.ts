@@ -8,6 +8,10 @@ export const PLUGIN_NAME = 'queryEnhancements';
 
 export const BASE_API = '/api/enhancements';
 
+export const DATASET = {
+  S3: 'S3',
+};
+
 export const SEARCH_STRATEGY = {
   PPL: 'ppl',
   PPL_RAW: 'pplraw',
@@ -25,9 +29,8 @@ export const API = {
     GENERATE: `${BASE_API}/assist/generate`,
   },
   DATA_SOURCE: {
-    EXTERNAL: `${BASE_API}/datasource/external`,
-    ASYNC_JOBS: `${BASE_API}/datasource/jobs`,
-    CONNECTIONS: `${BASE_API}/datasource/connections`,
+    ASYNC_JOBS: `${BASE_API}/jobs`,
+    CONNECTIONS: `${BASE_API}/connections`,
   },
 };
 

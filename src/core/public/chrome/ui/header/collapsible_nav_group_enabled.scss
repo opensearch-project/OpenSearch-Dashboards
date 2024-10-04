@@ -1,31 +1,56 @@
 .context-nav-wrapper {
   border: none !important;
+  border-top-right-radius: $euiSizeL;
+  border-bottom-right-radius: $euiSizeL;
+  background-color: $euiSideNavBackgroundColor;
+  overflow: hidden;
 
   .nav-link-item {
-    padding: calc($euiSize / 4) $euiSize;
-    border-radius: $euiSize;
+    padding: $euiSizeS;
+    border-radius: $euiSizeS;
     box-shadow: none;
     margin-bottom: 0;
     margin-top: 0;
 
     .nav-link-item-btn {
       margin-bottom: 0;
-
-      &::after {
-        display: none;
-      }
+      padding-top: 0;
+      padding-bottom: 0;
     }
   }
 
-  .nav-link-parent-item-button {
-    > span {
-      flex-direction: row-reverse;
+  .nav-link-parent-item {
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-bottom: $euiSizeS;
 
-      > * {
-        margin-right: $euiSizeS;
-        margin-left: 2px;
-      }
+    > .nav-link-item-btn {
+      padding: $euiSizeS;
+      margin-bottom: $euiSizeXS;
     }
+
+    // Hide the expand / collapse button as we will use + / -
+    svg {
+      display: none;
+    }
+
+    // Show the customized icon
+    .leftNavCustomizedAccordionIcon {
+      display: inline-block;
+    }
+  }
+
+  .nav-link-item-category-button {
+    margin-bottom: $euiSizeXS;
+
+    // Use a smaller vertical padding so that category title looks more grouped to the items
+    .nav-link-item {
+      padding: $euiSizeXS $euiSizeS;
+    }
+  }
+
+  .nav-link-item-category-item {
+    margin-top: $euiSizeL;
   }
 
   .nav-link-fake-item {
@@ -37,22 +62,22 @@
   }
 
   .nav-nested-item {
-    margin-bottom: 4px;
+    padding: $euiSizeS 0;
 
-    &::after {
-      height: unset;
+    &::after,
+    .nav-link-item-btn::after {
+      background-color: $euiColorDarkShade;
     }
 
-    .nav-link-item-btn {
-      padding-left: 0;
-      padding-right: 0;
+    // The height is used to comply with the extra padding
+    &:last-of-type::after {
+      height: 20px;
     }
   }
 
   .left-navigation-wrapper {
     display: flex;
     flex-direction: column;
-    border-right: $euiBorderThin;
   }
 
   .flex-1-container {
@@ -62,6 +87,7 @@
   .bottom-container {
     padding: 0 $euiSize;
     display: flex;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
 
     &.bottom-container-collapsed {
       flex-direction: column;
@@ -76,9 +102,16 @@
     }
 
     &.bottom-container-expanded {
+      @include euiBottomShadowLarge($euiColorMediumShade, 0.1, true, true);
+
       gap: 16px;
-      padding-top: $euiSize;
-      padding-bottom: $euiSize;
+      padding-top: $euiSizeM;
+      padding-bottom: $euiSizeM;
     }
+  }
+
+  .navGroupEnabledNavTopWrapper {
+    padding: 0 $euiSizeS;
+    padding-left: $euiSize;
   }
 }

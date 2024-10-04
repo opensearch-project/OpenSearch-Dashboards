@@ -76,7 +76,7 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
 </EuiPopover>
 `;
 
-exports[`DataSourceSelectable should render normally with local cluster is hidden 1`] = `
+exports[`DataSourceSelectable should render normally when local cluster is hidden 1`] = `
 <EuiPopover
   anchorPosition="downLeft"
   button={
@@ -136,7 +136,7 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
 </EuiPopover>
 `;
 
-exports[`DataSourceSelectable should render normally with local cluster not hidden 1`] = `
+exports[`DataSourceSelectable should render normally when local cluster is not hidden 1`] = `
 <EuiPopover
   anchorPosition="downLeft"
   button={
@@ -196,7 +196,7 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
 </EuiPopover>
 `;
 
-exports[`DataSourceSelectable should show popover when click on button 1`] = `
+exports[`DataSourceSelectable should show popover with button click 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -214,7 +214,7 @@ Object {
             data-label="Data source"
           >
             <button
-              aria-label="dataSourceSelectableButton"
+              aria-label="Data source selector"
               class="euiButton euiButton--text euiButton--small dataSourceMenuPopoverButtonLabel"
               data-test-subj="dataSourceSelectableButton"
               type="button"
@@ -394,7 +394,7 @@ Object {
           data-label="Data source"
         >
           <button
-            aria-label="dataSourceSelectableButton"
+            aria-label="Data source selector"
             class="euiButton euiButton--text euiButton--small dataSourceMenuPopoverButtonLabel"
             data-test-subj="dataSourceSelectableButton"
             type="button"

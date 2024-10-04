@@ -35,6 +35,7 @@ import { UnwrapPromise } from '@osd/utility-types';
 import { registerFindRoute } from '../find';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { setupServer } from '../test_utils';
+import { dynamicConfigServiceMock } from '../../../config/dynamic_config_service.mock';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -60,7 +61,8 @@ describe('GET /api/saved_objects/_find', () => {
     const router = httpSetup.createRouter('/api/saved_objects/');
     registerFindRoute(router);
 
-    await server.start();
+    const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
+    await server.start({ dynamicConfigService });
   });
 
   afterEach(async () => {

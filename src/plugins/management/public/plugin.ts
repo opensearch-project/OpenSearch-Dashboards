@@ -110,6 +110,7 @@ export class ManagementPlugin
           opensearchDashboardsVersion,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
           hideInAppNavigation,
+          uiSettings: coreStart.uiSettings,
         });
       },
     });

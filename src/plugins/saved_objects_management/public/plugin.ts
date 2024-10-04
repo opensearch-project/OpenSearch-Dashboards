@@ -65,8 +65,13 @@ import { registerServices } from './register_services';
 import { bootstrap } from './ui_actions_bootstrap';
 import { DEFAULT_NAV_GROUPS } from '../../../core/public';
 import { RecentWork } from './management_section/recent_work';
-import { HOME_CONTENT_AREAS } from '../../../plugins/home/public';
+import {
+  HOME_CONTENT_AREAS,
+  ESSENTIAL_OVERVIEW_CONTENT_AREAS,
+  ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS,
+} from '../../../plugins/content_management/public';
 import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
+import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
 
 /**
  * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
@@ -104,6 +109,7 @@ export interface StartDependencies {
   visBuilder?: VisBuilderStart;
   uiActions: UiActionsStart;
   contentManagement?: ContentManagementPluginStart;
+  navigation: NavigationPublicPluginStart;
 }
 
 export class SavedObjectsManagementPlugin
@@ -196,7 +202,7 @@ export class SavedObjectsManagementPlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
       {
         id: APP_ID,
-        order: 300,
+        order: 400,
       },
     ]);
 
@@ -234,7 +240,11 @@ export class SavedObjectsManagementPlugin
             }),
         };
       },
-      getTargetArea: () => HOME_CONTENT_AREAS.RECENTLY_VIEWED,
+      getTargetArea: () => [
+        HOME_CONTENT_AREAS.RECENTLY_VIEWED,
+        ESSENTIAL_OVERVIEW_CONTENT_AREAS.RECENTLY_VIEWED,
+        ANALYTICS_ALL_OVERVIEW_CONTENT_AREAS.RECENTLY_VIEWED,
+      ],
     });
 
     return {

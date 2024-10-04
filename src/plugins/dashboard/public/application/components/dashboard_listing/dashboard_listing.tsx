@@ -34,6 +34,7 @@ export const DashboardListing = () => {
       dashboardProviders,
       data: { query },
       osdUrlStateStorage,
+      navigation,
     },
   } = useOpenSearchDashboards<DashboardServices>();
 
@@ -41,6 +42,9 @@ export const DashboardListing = () => {
   const queryParameters = useMemo(() => new URLSearchParams(location.search), [location]);
   const initialFiltersFromURL = queryParameters.get('filter');
   const [initialFilter, setInitialFilter] = useState<string | null>(initialFiltersFromURL);
+  const showUpdatedUx = uiSettings?.get('home:useNewHomePage');
+  const { HeaderControl } = navigation.ui;
+  const { setAppRightControls } = application;
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
@@ -201,31 +205,40 @@ export const DashboardListing = () => {
     );
   });
 
+  const createButton = <CreateButton dashboardProviders={dashboardProviders()} />;
+
   return (
-    <TableListView
-      headingId="dashboardListingHeading"
-      createItem={hideWriteControls ? undefined : createItem}
-      createButton={
-        hideWriteControls ? undefined : <CreateButton dashboardProviders={dashboardProviders()} />
-      }
-      findItems={find}
-      deleteItems={hideWriteControls ? undefined : deleteItems}
-      editItem={hideWriteControls ? undefined : editItem}
-      tableColumns={tableColumns}
-      listingLimit={listingLimit}
-      initialFilter={initialFilter ?? ''}
-      initialPageSize={initialPageSize}
-      noItemsFragment={noItemsFragment}
-      entityName={i18n.translate('dashboard.listing.table.entityName', {
-        defaultMessage: 'dashboard',
-      })}
-      entityNamePlural={i18n.translate('dashboard.listing.table.entityNamePlural', {
-        defaultMessage: 'dashboards',
-      })}
-      tableListTitle={i18n.translate('dashboard.listing.dashboardsTitle', {
-        defaultMessage: 'Dashboards',
-      })}
-      toastNotifications={notifications.toasts}
-    />
+    <>
+      {showUpdatedUx && !hideWriteControls && (
+        <HeaderControl
+          setMountPoint={setAppRightControls}
+          controls={[{ renderComponent: createButton }]}
+        />
+      )}
+      <TableListView
+        headingId="dashboardListingHeading"
+        createItem={hideWriteControls ? undefined : createItem}
+        createButton={hideWriteControls ? undefined : createButton}
+        findItems={find}
+        deleteItems={hideWriteControls ? undefined : deleteItems}
+        editItem={hideWriteControls ? undefined : editItem}
+        tableColumns={tableColumns}
+        listingLimit={listingLimit}
+        initialFilter={initialFilter ?? ''}
+        initialPageSize={initialPageSize}
+        noItemsFragment={noItemsFragment}
+        entityName={i18n.translate('dashboard.listing.table.entityName', {
+          defaultMessage: 'dashboard',
+        })}
+        entityNamePlural={i18n.translate('dashboard.listing.table.entityNamePlural', {
+          defaultMessage: 'dashboards',
+        })}
+        tableListTitle={i18n.translate('dashboard.listing.dashboardsTitle', {
+          defaultMessage: 'Dashboards',
+        })}
+        toastNotifications={notifications.toasts}
+        showUpdatedUx={showUpdatedUx}
+      />
+    </>
   );
 };

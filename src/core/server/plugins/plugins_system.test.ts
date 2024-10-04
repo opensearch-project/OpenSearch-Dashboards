@@ -46,6 +46,7 @@ import { PluginName, CompatibleEnginePluginVersions } from './types';
 import { PluginsSystem } from './plugins_system';
 import { coreMock } from '../mocks';
 import { Logger } from '../logging';
+import { dynamicConfigServiceMock } from '../config/dynamic_config_service.mock';
 
 const logger = loggingSystemMock.create();
 function createPlugin(
@@ -84,6 +85,7 @@ function createPlugin(
 }
 
 let pluginsSystem: PluginsSystem;
+const dynamicConfigService = dynamicConfigServiceMock.create();
 const configService = configServiceMock.create();
 configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 let env: Env;
@@ -95,7 +97,13 @@ const startDeps = coreMock.createInternalStart();
 beforeEach(() => {
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
-  coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
+  coreContext = {
+    coreId: Symbol(),
+    env,
+    logger,
+    configService: configService as any,
+    dynamicConfigService,
+  };
 
   pluginsSystem = new PluginsSystem(coreContext);
 });

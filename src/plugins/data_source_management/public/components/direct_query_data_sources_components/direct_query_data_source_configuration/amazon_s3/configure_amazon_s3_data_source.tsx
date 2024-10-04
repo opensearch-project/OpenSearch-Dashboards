@@ -7,7 +7,6 @@ import React, { useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {
   EuiPanel,
-  EuiTitle,
   EuiSpacer,
   EuiText,
   EuiLink,
@@ -17,6 +16,9 @@ import {
   EuiCompressedSelect,
   EuiCallOut,
 } from '@elastic/eui';
+import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
+import { ApplicationStart } from 'opensearch-dashboards/public';
+import { FormattedMessage } from '@osd/i18n/react';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { AuthMethod } from '../../../constants';
 import { QueryPermissionsConfiguration } from '../query_permissions';
@@ -25,6 +27,9 @@ import { AuthDetails } from '../direct_query_data_source_auth_details';
 import { NameRow } from '../name_row';
 
 interface ConfigureS3DatasourceProps extends RouteComponentProps {
+  useNewUX: boolean;
+  navigation: NavigationPublicPluginStart;
+  application: ApplicationStart;
   roles: Role[];
   selectedQueryPermissionRoles?: Role[];
   setSelectedQueryPermissionRoles: React.Dispatch<React.SetStateAction<Role[]>>;
@@ -49,6 +54,9 @@ interface ConfigureS3DatasourceProps extends RouteComponentProps {
 
 export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = (props) => {
   const {
+    useNewUX,
+    navigation,
+    application,
     setNameForRequest,
     setDetailsForRequest,
     setArnForRequest,
@@ -83,30 +91,68 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
     { value: 'noauth', text: 'No authentication' },
   ];
 
+  const description = [
+    {
+      renderComponent: (
+        <EuiText size="s" color="subdued">
+          <FormattedMessage
+            id="dataSourcesManagement.configureS3DataSource.description"
+            defaultMessage="Connect to Amazon S3 via AWS Glue Data Catalog. "
+          />
+          {docLinks && (
+            <EuiLink
+              external={true}
+              href={docLinks.links.opensearchDashboards.dataSource.s3DataSource}
+              target="blank"
+            >
+              Learn more
+            </EuiLink>
+          )}
+        </EuiText>
+      ),
+    },
+  ];
+
+  const callOut = (
+    <EuiCallOut title="Setup Amazon EMR as execution engine first" iconType="iInCircle">
+      <EuiText size="s" color="subdued">
+        {`Make sure you connected to Amazon S3 via AWS Glue Data Catalog with Amazon EMR as an execution engine. `}
+        {docLinks && (
+          <EuiLink
+            external={true}
+            href={docLinks.links.opensearchDashboards.dataSource.s3DataSource}
+            target="blank"
+          >
+            Learn more
+          </EuiLink>
+        )}
+      </EuiText>
+    </EuiCallOut>
+  );
+
   return (
     <div>
       <EuiPanel>
+        <EuiText size="s">{!useNewUX && <h1>{`Configure Amazon S3 data source`}</h1>}</EuiText>
+        {useNewUX ? (
+          <>
+            <navigation.ui.HeaderControl
+              setMountPoint={application.setAppBottomControls}
+              controls={[{ renderComponent: callOut }]}
+            />
+            <navigation.ui.HeaderControl
+              setMountPoint={application.setAppDescriptionControls}
+              controls={description}
+            />
+          </>
+        ) : (
+          <>
+            <EuiSpacer size="s" />
+            {callOut} <EuiSpacer />
+          </>
+        )}
         <EuiText size="s">
-          <h1>{`Configure Amazon S3 data source`}</h1>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiCallOut title="Setup Amazon EMR as execution engine first" iconType="iInCircle">
-          <EuiText size="s" color="subdued">
-            {`Connect to Amazon S3 via AWS Glue Data Catalog with Amazon EMR as an execution engine. `}
-            {docLinks && (
-              <EuiLink
-                external={true}
-                href={docLinks.links.opensearchDashboards.dataSource.s3DataSource}
-                target="blank"
-              >
-                Learn more
-              </EuiLink>
-            )}
-          </EuiText>
-        </EuiCallOut>
-        <EuiSpacer />
-        <EuiText>
-          <h3>Data source details</h3>
+          <h2>Data source details</h2>
         </EuiText>
         <EuiSpacer size="m" />
         <NameRow
@@ -129,8 +175,8 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
         </EuiCompressedFormRow>
         <EuiSpacer />
 
-        <EuiText>
-          <h3>AWS Glue Data Catalog authentication details</h3>
+        <EuiText size="s">
+          <h2>AWS Glue Data Catalog authentication details</h2>
         </EuiText>
         <EuiSpacer size="m" />
 
@@ -171,8 +217,8 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
 
         <EuiSpacer />
 
-        <EuiText>
-          <h3>AWS Glue Data Catalog index store details</h3>
+        <EuiText size="s">
+          <h2>AWS Glue Data Catalog index store details</h2>
         </EuiText>
         <EuiSpacer size="m" />
 

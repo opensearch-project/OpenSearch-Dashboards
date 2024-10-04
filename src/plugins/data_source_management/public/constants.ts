@@ -7,6 +7,7 @@ import { DirectQueryDatasourceType } from './types';
 
 export const QUERY_RESTRICTED = 'query-restricted';
 export const QUERY_ALL = 'query-all';
+export const LOCAL_CLUSTER = 'local_cluster';
 
 export const DatasourceTypeToDisplayName: { [key in DirectQueryDatasourceType]: string } = {
   PROMETHEUS: 'Prometheus',

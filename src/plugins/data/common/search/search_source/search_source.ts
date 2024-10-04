@@ -94,7 +94,6 @@ import {
   IDataFrameResponse,
   convertResult,
   createDataFrame,
-  getRawQueryString,
 } from '../../data_frames';
 import { IOpenSearchSearchRequest, IOpenSearchSearchResponse, ISearchOptions } from '../..';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
@@ -132,6 +131,7 @@ export const searchSourceRequiredUiSettings = [
   UI_SETTINGS.SEARCH_INCLUDE_FROZEN,
   UI_SETTINGS.SORT_OPTIONS,
   UI_SETTINGS.QUERY_DATAFRAME_HYDRATION_STRATEGY,
+  UI_SETTINGS.SEARCH_INCLUDE_ALL_FIELDS,
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
@@ -148,7 +148,7 @@ export interface SearchSourceDependencies extends FetchHandlers {
   ) => Promise<SearchStrategyResponse>;
   df: {
     get: () => IDataFrame | undefined;
-    set: (dataFrame: IDataFrame) => Promise<void>;
+    set: (dataFrame: IDataFrame) => void;
     clear: () => void;
   };
 }
@@ -320,16 +320,9 @@ export class SearchSource {
    * @return {undefined|IDataFrame}
    */
   async createDataFrame(searchRequest: SearchRequest) {
-    const rawQueryString = this.getRawQueryStringFromRequest(searchRequest);
     const dataFrame = createDataFrame({
       name: searchRequest.index.title || searchRequest.index,
       fields: [],
-      ...(rawQueryString && {
-        meta: {
-          queryConfig: { qs: rawQueryString },
-          ...(searchRequest.dataSourceId && { dataSource: searchRequest.dataSourceId }),
-        },
-      }),
     });
     await this.setDataFrame(dataFrame);
     return this.getDataFrame();
@@ -438,7 +431,6 @@ export class SearchSource {
 
     const params = getExternalSearchParamsFromRequest(searchRequest, {
       getConfig,
-      getDataFrame: this.getDataFrame.bind(this),
     });
 
     return search({ params }, options).then(async (response: any) => {
@@ -448,11 +440,15 @@ export class SearchSource {
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
           return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
         }
+        if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
+          const dataFrameResponse = response as IDataFrameResponse;
+          await this.setDataFrame(dataFrameResponse.body as IDataFrame);
+          return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+        }
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.ERROR) {
           const dataFrameError = response as IDataFrameError;
           throw new RequestFailure(null, dataFrameError);
         }
-        // TODO: MQL else if data_frame_polling then poll for the data frame updating the df fields only
       }
       return onResponse(searchRequest, response.rawResponse);
     });
@@ -481,10 +477,6 @@ export class SearchSource {
 
   private isUnsupportedRequest(request: SearchRequest): boolean {
     return request.body!.query.hasOwnProperty('type') && request.body!.query.type === 'unsupported';
-  }
-
-  private getRawQueryStringFromRequest(request: SearchRequest): string | undefined {
-    return getRawQueryString({ params: request });
   }
 
   /**
@@ -594,6 +586,7 @@ export class SearchSource {
 
   flatten() {
     const searchRequest = this.mergeProps();
+    const { getConfig } = this.dependencies;
 
     searchRequest.body = searchRequest.body || {};
     const { body, index, fields, query, filters, highlightAll } = searchRequest;
@@ -603,6 +596,9 @@ export class SearchSource {
 
     body.stored_fields = computedFields.storedFields;
     body.script_fields = body.script_fields || {};
+    if (getConfig(UI_SETTINGS.SEARCH_INCLUDE_ALL_FIELDS)) {
+      body.fields = ['*'];
+    }
     extend(body.script_fields, computedFields.scriptFields);
 
     const defaultDocValueFields = computedFields.docvalueFields
@@ -613,8 +609,6 @@ export class SearchSource {
     if (!body.hasOwnProperty('_source') && index) {
       body._source = index.getSourceFiltering();
     }
-
-    const { getConfig } = this.dependencies;
 
     if (body._source) {
       // exclude source fields for this index pattern specified by the user

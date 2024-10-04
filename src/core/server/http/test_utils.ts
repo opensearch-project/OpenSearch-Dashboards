@@ -36,6 +36,7 @@ import { HttpService } from './http_service';
 import { CoreContext } from '../core_context';
 import { getEnvOptions, configServiceMock } from '../config/mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
+import { dynamicConfigServiceMock } from '../config/dynamic_config_service.mock';
 
 const coreId = Symbol('core');
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -66,11 +67,14 @@ configService.atPath.mockReturnValue(
   } as any)
 );
 
+const dynamicConfigService = dynamicConfigServiceMock.create();
+
 const defaultContext: CoreContext = {
   coreId,
   env,
   logger,
   configService,
+  dynamicConfigService,
 };
 
 export const createCoreContext = (overrides: Partial<CoreContext> = {}): CoreContext => ({

@@ -3,145 +3,261 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './direct_query_table.scss';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
-  EuiIcon,
+  EuiButtonIcon,
   EuiInMemoryTable,
-  EuiLink,
-  EuiOverlayMask,
+  EuiSmallButton,
+  EuiConfirmModal,
   EuiPageBody,
   EuiSpacer,
   EuiTableFieldDataColumnType,
-  EuiCompressedFieldSearch,
+  EuiSearchBarProps,
   EuiLoadingSpinner,
   EuiText,
+  LEFT_ALIGNMENT,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
+import { i18n } from '@osd/i18n';
+import { FormattedMessage } from 'react-intl';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {
-  ApplicationStart,
-  HttpStart,
-  IUiSettingsClient,
-  NotificationsStart,
-  SavedObjectsStart,
-} from 'opensearch-dashboards/public';
-import { useHistory } from 'react-router-dom';
-import {
+  DataSourceConnectionType,
+  DataSourceManagementContext,
+  DataSourceTableItem,
   DirectQueryDatasourceDetails,
-  DirectQueryDatasourceStatus,
-  DirectQueryDatasourceType,
 } from '../../../types';
-import { DeleteModal } from './direct_query_data_source_delete_modal';
-import PrometheusLogo from '../icons/prometheus_logo.svg';
-import S3Logo from '../icons/s3_logo.svg';
-import { DataSourceSelector } from '../../data_source_selector';
-import { DataSourceOption } from '../../data_source_menu/types';
-import { DATACONNECTIONS_BASE, observabilityMetricsID } from '../../../constants';
-import { getRenderCreateAccelerationFlyout } from '../../../plugin';
-import { InstallIntegrationFlyout } from '../integrations/installed_integrations_table';
-import { redirectToExplorerS3 } from '../associated_object_management/utils/associated_objects_tab_utils';
-import { isPluginInstalled, getHideLocalCluster } from '../../utils';
+import {
+  isPluginInstalled,
+  fetchDataSourceConnections,
+  getDataSources,
+  deleteMultipleDataSources,
+  getDefaultDataSourceId,
+  setFirstDataSourceAsDefault,
+  getHideLocalCluster,
+} from '../../utils';
+import { LoadingMask } from '../../loading_mask';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { DATACONNECTIONS_BASE, LOCAL_CLUSTER } from '../../../constants';
 
-interface DataConnection {
-  connectionType: DirectQueryDatasourceType;
-  name: string;
-  dsStatus: DirectQueryDatasourceStatus;
-}
-
-interface ManageDirectQueryDataConnectionsTableProps {
-  http: HttpStart;
-  notifications: NotificationsStart;
-  savedObjects: SavedObjectsStart;
-  uiSettings: IUiSettingsClient;
+interface DirectQueryDataConnectionsProps extends RouteComponentProps {
   featureFlagStatus: boolean;
-  application: ApplicationStart;
 }
 
-// Custom truncate function
-const truncate = (text: string, length: number) => {
-  if (text.length <= length) return text;
-  return text.substring(0, length) + '...';
-};
-
-export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDataConnectionsTableProps> = ({
-  http,
-  notifications,
-  savedObjects,
-  uiSettings,
+export const ManageDirectQueryDataConnectionsTable = ({
   featureFlagStatus,
-  application,
-}) => {
+  history,
+}: DirectQueryDataConnectionsProps) => {
+  const { savedObjects, http, notifications, uiSettings } = useOpenSearchDashboards<
+    DataSourceManagementContext
+  >().services;
   const [observabilityDashboardsExists, setObservabilityDashboardsExists] = useState(false);
   const [showIntegrationsFlyout, setShowIntegrationsFlyout] = useState(false);
   const [integrationsFlyout, setIntegrationsFlyout] = useState<React.JSX.Element | null>(null);
 
-  const [data, setData] = useState<DataConnection[]>([]);
+  const [data, setData] = useState<DataSourceTableItem[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
-  const [selectedConnection, setSelectedConnection] = useState<string | undefined>(undefined);
-  const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | undefined>(undefined);
-  const [searchText, setSearchText] = useState<string>('');
+  const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
+  const [selectedDataSources, setSelectedDataSources] = useState<DataSourceTableItem[]>([]);
+
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+    Record<string, React.ReactNode>
+  >({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const history = useHistory();
+
+  /* Table selection handlers */
+  const onSelectionChange = (selected: DataSourceTableItem[]) => {
+    setSelectedDataSources(selected);
+  };
+
+  const selection = featureFlagStatus && {
+    onSelectionChange,
+    selectable: (item: DataSourceTableItem) => {
+      return item.id !== LOCAL_CLUSTER;
+    },
+  };
+
+  const setDefaultDataSource = async () => {
+    try {
+      for (const dataSource of selectedDataSources) {
+        if (getDefaultDataSourceId(uiSettings) === dataSource.id) {
+          await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+          break;
+        }
+      }
+    } catch (e) {
+      notifications.toasts.addDanger(
+        i18n.translate('dataSourcesManagement.directQueryTable.setDefaultDataSourceFailMsg', {
+          defaultMessage:
+            'No default data source has been set. Please select a new default data source.',
+        })
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  /* Delete selected data sources*/
+  const onClickDelete = () => {
+    setIsDeleting(true);
+
+    deleteMultipleDataSources(savedObjects.client, selectedDataSources)
+      .then(() => {
+        setSelectedDataSources([]);
+        // Fetch data sources
+        fetchDataSources();
+        setIsModalVisible(false);
+        // Check if default data source is deleted or not.
+        // if yes, then set the first existing datasource as default datasource.
+        setDefaultDataSource();
+      })
+      .catch(() => {
+        notifications.toasts.addDanger(
+          i18n.translate('dataSourcesManagement.directQueryTable.deleteDataSourceFailMsg', {
+            defaultMessage:
+              'An error occurred while attempting to delete the selected data sources. Please try it again',
+          })
+        );
+      })
+      .finally(() => {
+        setIsDeleting(false);
+      });
+  };
+
+  /* render delete modal*/
+  const tableRenderDeleteModal = () => {
+    return isModalVisible ? (
+      <EuiConfirmModal
+        title={i18n.translate('dataSourcesManagement.directQueryTable.multiDeleteTitle', {
+          defaultMessage: 'Delete data source connection(s)',
+        })}
+        onCancel={() => {
+          setIsModalVisible(false);
+        }}
+        onConfirm={() => {
+          setIsModalVisible(false);
+          onClickDelete();
+        }}
+        cancelButtonText={i18n.translate('dataSourcesManagement.directQueryTable.cancel', {
+          defaultMessage: 'Cancel',
+        })}
+        confirmButtonText={i18n.translate('dataSourcesManagement.directQueryTable.delete', {
+          defaultMessage: 'Delete',
+        })}
+        buttonColor="danger"
+        defaultFocusedButton="confirm"
+      >
+        <p>
+          <FormattedMessage
+            id="dataSourcesManagement.directQueryTable.deleteDescription"
+            defaultMessage="This action will delete the selected data source connections"
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="dataSourcesManagement.directQueryTable.deleteConfirmation"
+            defaultMessage="Any objects created using data from these sources, including Index Patterns, Visualizations, and Observability Panels, will be impacted."
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="dataSourcesManagement.directQueryTable.deleteWarning"
+            defaultMessage="This action cannot be undone."
+          />
+        </p>
+      </EuiConfirmModal>
+    ) : null;
+  };
+
+  const renderToolsLeft = useCallback(() => {
+    return selectedDataSources.length > 0
+      ? [
+          <EuiSmallButton
+            color="danger"
+            onClick={() => setIsModalVisible(true)}
+            data-test-subj="deleteDataSourceConnections"
+          >
+            <FormattedMessage
+              id="dataSourcesManagement.directQueryTable.deleteToolLabel"
+              defaultMessage="{selectionSize, plural, one {Delete # connection} other {Delete # connections}}"
+              values={{ selectionSize: selectedDataSources.length }}
+            />
+          </EuiSmallButton>,
+        ]
+      : [];
+  }, [selectedDataSources]);
+
+  const toggleDetails = (item: DataSourceTableItem) => {
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    if (itemIdToExpandedRowMapValues[item.id]) {
+      delete itemIdToExpandedRowMapValues[item.id];
+    } else {
+      itemIdToExpandedRowMapValues[item.id] = (
+        <EuiInMemoryTable
+          items={item?.relatedConnections ?? []}
+          itemId="id"
+          columns={tableColumns}
+          className="direct-query-expanded-table"
+          rowProps={{
+            className: 'direct-query-expanded-row',
+          }}
+        />
+      );
+    }
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
 
   const fetchDataSources = useCallback(() => {
-    if (featureFlagStatus && selectedDataSourceId === undefined) return;
-
-    const endpoint =
-      featureFlagStatus && selectedDataSourceId !== undefined
-        ? `${DATACONNECTIONS_BASE}/dataSourceMDSId=${selectedDataSourceId}`
-        : `${DATACONNECTIONS_BASE}`;
-
     setIsLoading(true);
 
-    http
-      .get(endpoint)
-      .then((res: DirectQueryDatasourceDetails[]) => {
-        const dataConnections = res.map((dataConnection: DirectQueryDatasourceDetails) => ({
-          name: dataConnection.name,
-          connectionType: dataConnection.connector,
-          dsStatus: dataConnection.status,
-        }));
-        setData(dataConnections);
+    const fetchConnections = featureFlagStatus
+      ? getDataSources(savedObjects.client)
+      : http.get(`${DATACONNECTIONS_BASE}`);
+
+    fetchConnections
+      .then((response) => {
+        return featureFlagStatus
+          ? fetchDataSourceConnections(
+              response,
+              http,
+              notifications,
+              true,
+              getHideLocalCluster().enabled
+            )
+          : response.map((dataConnection: DirectQueryDatasourceDetails) => ({
+              id: dataConnection.name,
+              title: dataConnection.name,
+              type:
+                {
+                  S3GLUE: 'Amazon S3',
+                  PROMETHEUS: 'Prometheus',
+                }[dataConnection.connector] || dataConnection.connector,
+              connectionType: dataConnection.connector,
+              description: dataConnection.description,
+            }));
       })
-      .catch((err) => {
-        notifications.toasts.addDanger('Could not fetch data sources');
+      .then((finalData) => {
+        setData(
+          featureFlagStatus
+            ? finalData.filter((item) => item.relatedConnections?.length > 0)
+            : finalData
+        );
+      })
+      .catch(() => {
+        setData([]);
+        notifications.toasts.addDanger(
+          i18n.translate('dataSourcesManagement.directQueryTable.fetchDataSources', {
+            defaultMessage: 'Could not fetch data sources',
+          })
+        );
       })
       .finally(() => {
         setIsLoading(false);
       });
-  }, [http, notifications.toasts, selectedDataSourceId, featureFlagStatus]);
-
-  const deleteDataSources = useCallback(
-    (connectionName: string | undefined) => {
-      if (!connectionName || (featureFlagStatus && selectedDataSourceId === undefined)) return;
-
-      const endpoint =
-        featureFlagStatus && selectedDataSourceId !== undefined
-          ? `${DATACONNECTIONS_BASE}/${connectionName}/dataSourceMDSId=${selectedDataSourceId}`
-          : `${DATACONNECTIONS_BASE}/${connectionName}`;
-
-      setIsLoading(true);
-
-      http
-        .delete(endpoint)
-        .then(() => {
-          notifications.toasts.addSuccess(`Data connection ${connectionName} deleted successfully`);
-          setData(data.filter((connection) => connection.name !== connectionName));
-        })
-        .catch((err) => {
-          notifications.toasts.addDanger(
-            `Data connection ${connectionName} not deleted. See output for more details.`
-          );
-        })
-        .finally(() => {
-          setIsLoading(false);
-          setSelectedConnection(undefined); // Clear the selected connection after deletion
-        });
-    },
-    [http, notifications.toasts, selectedDataSourceId, featureFlagStatus, data]
-  );
+  }, [http, savedObjects, notifications, featureFlagStatus]);
 
   useEffect(() => {
     fetchDataSources();
@@ -151,191 +267,114 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchDataSources]);
 
-  const handleSelectedDataSourceChange = (e: DataSourceOption[]) => {
-    const dataSourceId = e[0] ? e[0].id : undefined;
-    setSelectedDataSourceId(dataSourceId);
-  };
-
-  const displayDeleteModal = (connectionName: string) => {
-    setSelectedConnection(connectionName);
-    setModalLayout(
-      <DeleteModal
-        onConfirm={() => {
-          setIsModalVisible(false);
-          deleteDataSources(connectionName);
-        }}
-        onCancel={() => {
-          setIsModalVisible(false);
-          setSelectedConnection(undefined); // Clear the selected connection if cancel is clicked
-        }}
-        title={`Delete ${connectionName}`}
-        message={`Are you sure you want to delete ${connectionName}?`}
-      />
-    );
-    setIsModalVisible(true);
-  };
-
-  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
-
-  const actions = [
-    {
-      name: (datasource: DataConnection) =>
-        `Query in ${
-          datasource.connectionType === 'PROMETHEUS' ? 'Metrics Analytics' : 'Observability Logs'
-        }`,
-      isPrimary: true,
-      icon: 'discoverApp',
-      type: 'icon',
-      available: (datasource: DataConnection) => observabilityDashboardsExists,
-      onClick: (datasource: DataConnection) => {
-        if (datasource.connectionType === 'PROMETHEUS') {
-          application!.navigateToApp(observabilityMetricsID);
-        } else if (datasource.connectionType === 'S3GLUE') {
-          redirectToExplorerS3(datasource.name, application);
-        }
-      },
-      'data-test-subj': 'action-query',
-    },
-    {
-      name: 'Accelerate performance',
-      isPrimary: false,
-      icon: 'bolt',
-      type: 'icon',
-      available: (datasource: DataConnection) => datasource.connectionType !== 'PROMETHEUS',
-      onClick: (datasource: DataConnection) => {
-        renderCreateAccelerationFlyout({
-          dataSourceName: datasource.name,
-          dataSourceMDSId: selectedDataSourceId ?? '',
-        });
-      },
-      'data-test-subj': 'action-accelerate',
-    },
-    {
-      name: 'Integrate data',
-      isPrimary: false,
-      icon: 'integrationGeneral',
-      type: 'icon',
-      available: (datasource: DataConnection) =>
-        !featureFlagStatus &&
-        observabilityDashboardsExists &&
-        datasource.connectionType !== 'PROMETHEUS',
-      onClick: (datasource: DataConnection) => {
-        setIntegrationsFlyout(
-          <InstallIntegrationFlyout
-            closeFlyout={() => setShowIntegrationsFlyout(false)}
-            datasourceType={datasource.connectionType}
-            datasourceName={datasource.name}
-            http={http}
-          />
-        );
-        setShowIntegrationsFlyout(true);
-      },
-      'data-test-subj': 'action-integrate',
-    },
-    {
-      name: 'Delete',
-      description: 'Delete this data source',
-      icon: 'trash',
-      color: 'danger',
-      type: 'icon',
-      onClick: (datasource: DataConnection) => displayDeleteModal(datasource.name),
-      isPrimary: false,
-      'data-test-subj': 'action-delete',
-    },
-  ];
-
-  const icon = (record: DataConnection) => {
-    switch (record.connectionType) {
-      case 'S3GLUE':
-        return <EuiIcon type={S3Logo} />;
-      case 'PROMETHEUS':
-        return <EuiIcon type={PrometheusLogo} />;
-      default:
-        return <></>;
-    }
-  };
-
   const tableColumns = [
-    {
-      field: 'name',
-      name: 'Name',
-      sortable: true,
-      truncateText: true,
-      render: (value, record: DataConnection) => (
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>{icon(record)}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiLink
-              data-test-subj={`${record.name}DataConnectionsLink`}
-              onClick={() =>
-                history.push(`/manage/${record.name}?dataSourceMDSId=${selectedDataSourceId ?? ''}`)
-              }
-            >
-              {truncate(record.name, 100)}
-            </EuiLink>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    },
-    {
-      field: 'status',
-      name: 'Status',
-      sortable: true,
-      truncateText: true,
-      render: (value, record: DataConnection) =>
-        record.dsStatus === 'ACTIVE' ? (
-          <EuiHealth color="success">Active</EuiHealth>
-        ) : (
-          <EuiHealth color="subdued">Inactive</EuiHealth>
-        ),
-    },
-    {
-      field: 'actions',
-      name: 'Actions',
-      actions,
-    },
-  ] as Array<EuiTableFieldDataColumnType<unknown>>;
-
-  const customSearchBar = (
-    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-      {featureFlagStatus && (
-        <EuiFlexItem grow={false} style={{ width: '30%' }}>
-          <DataSourceSelector
-            savedObjectsClient={savedObjects.client}
-            notifications={notifications.toasts}
-            onSelectedDataSource={handleSelectedDataSourceChange}
-            fullWidth={true}
-            uiSettings={uiSettings}
-            disabled={false}
-            compressed={true}
-            hideLocalCluster={getHideLocalCluster().enabled}
-            isClearable={false}
+    featureFlagStatus && {
+      align: LEFT_ALIGNMENT,
+      width: '40px',
+      isExpander: true,
+      render: (item: DataSourceTableItem) =>
+        item?.relatedConnections?.length ? (
+          <EuiButtonIcon
+            onClick={() => toggleDetails(item)}
+            aria-label={itemIdToExpandedRowMap[item.id] ? 'Collapse' : 'Expand'}
+            iconType={itemIdToExpandedRowMap[item.id] ? 'arrowUp' : 'arrowDown'}
           />
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem grow={true}>
-        <EuiCompressedFieldSearch
-          placeholder="Search..."
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          isClearable
-          fullWidth={true}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+        ) : null,
+    },
+    {
+      width: '32%',
+      field: 'title',
+      name: i18n.translate('dataSourcesManagement.directQueryTable.dataSourceField', {
+        defaultMessage: 'Data source',
+      }),
+      sortable: true,
+      truncateText: true,
+      render: (name: string, record: DataSourceTableItem) => {
+        const path =
+          record.connectionType === DataSourceConnectionType.OpenSearchConnection
+            ? record.id
+            : `manage/${name}${
+                record.parentId && record.parentId !== LOCAL_CLUSTER
+                  ? `?dataSourceMDSId=${record.parentId}`
+                  : ''
+              }`;
 
-  const entries = data.filter((dataconnection) =>
-    dataconnection.name.toLowerCase().includes(searchText.toLowerCase())
-  );
+        const indentStyle =
+          featureFlagStatus &&
+          record.connectionType !== DataSourceConnectionType.OpenSearchConnection
+            ? { marginLeft: '20px' }
+            : {};
+        return (
+          <EuiButtonEmpty
+            size="xs"
+            href={`${window.location.href.replace(/\/$/, '')}/${path}`}
+            style={indentStyle}
+            disabled={record.id === LOCAL_CLUSTER}
+            flush="left"
+          >
+            {name}
+          </EuiButtonEmpty>
+        );
+      },
+    },
+    {
+      width: '22%',
+      field: 'type',
+      name: i18n.translate('dataSourcesManagement.directQueryTable.typeField', {
+        defaultMessage: 'Type',
+      }),
+      truncateText: true,
+    },
+    {
+      width: '45%',
+      field: 'description',
+      name: i18n.translate('dataSourcesManagement.directQueryTable.descriptionField', {
+        defaultMessage: 'Description',
+      }),
+      truncateText: true,
+      mobileOptions: {
+        show: false,
+      },
+    },
+    featureFlagStatus && {
+      field: 'relatedConnections',
+      name: i18n.translate('dataSourcesManagement.directQueryTable.relatedConnectionsField', {
+        defaultMessage: 'Related connections',
+      }),
+      align: 'right',
+      truncateText: true,
+      render: (relatedConnections: DataSourceTableItem[]) => relatedConnections?.length,
+    },
+  ].filter(Boolean) as Array<EuiTableFieldDataColumnType<DataSourceTableItem>>;
+
+  const customSearchBar: EuiSearchBarProps = {
+    toolsLeft: renderToolsLeft(),
+    box: {
+      incremental: true,
+    },
+    compressed: true,
+    filters: [
+      {
+        type: 'field_value_selection',
+        field: 'type',
+        name: i18n.translate('dataSourcesManagement.directQueryTable.type', {
+          defaultMessage: 'Type',
+        }),
+        multiSelect: 'or',
+        options: Array.from(new Set(data.map(({ type }) => type).filter(Boolean))).map((type) => ({
+          value: type!,
+          name: type!,
+          view: <>{type}</>,
+        })),
+      },
+    ],
+  };
 
   return (
     <EuiPageBody component="div">
-      <EuiSpacer size="s" />
       <EuiFlexGroup justifyContent="center">
+        {tableRenderDeleteModal()}
         <EuiFlexItem grow={false} style={{ width: '100%' }}>
-          {customSearchBar}
-          <EuiSpacer size="s" />
           {isLoading ? (
             <div style={{ textAlign: 'center', marginTop: '2rem' }}>
               <EuiLoadingSpinner size="xl" />
@@ -344,8 +383,16 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
             </div>
           ) : (
             <EuiInMemoryTable
-              items={entries}
+              items={data}
               itemId="id"
+              itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+              isExpandable={true}
+              sorting={{
+                sort: {
+                  field: 'title',
+                  direction: 'asc' as const,
+                },
+              }}
               columns={tableColumns}
               tableLayout="auto"
               pagination={{
@@ -354,12 +401,19 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
               }}
               allowNeutralSort={false}
               isSelectable={true}
+              selection={selection}
+              search={customSearchBar}
+              className="direct-query-table"
             />
           )}
         </EuiFlexItem>
+        {isDeleting ? <LoadingMask /> : null}
       </EuiFlexGroup>
-      {isModalVisible && modalLayout}
       {showIntegrationsFlyout && integrationsFlyout}
     </EuiPageBody>
   );
 };
+
+export const ManageDirectQueryDataConnectionsTableWithRouter = withRouter(
+  ManageDirectQueryDataConnectionsTable
+);

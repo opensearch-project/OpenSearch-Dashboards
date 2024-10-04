@@ -25,6 +25,8 @@ interface AddIntegrationRequestParams {
   skipRedirect?: boolean;
   dataSourceInfo?: { dataSource: string; tableName: string };
   http: HttpStart;
+  dataSourceMDSId?: string;
+  dataSourceMDSLabel?: string;
 }
 
 interface ComponentMappingPayload {
@@ -133,13 +135,13 @@ export const checkDataSourceName = (
 
 export const fetchDataSourceMappings = async (
   targetDataSource: string,
-  http: HttpStart
+  http: HttpStart,
+  dataSourceMDSId?: string
 ): Promise<{ [key: string]: { properties: Properties } } | null> => {
   return http
-    .post(CONSOLE_PROXY, {
+    .post(`/api/dsl/integrations/mapping`, {
       query: {
-        path: `${targetDataSource}/_mapping`,
-        method: 'GET',
+        dataSourceMDSId,
       },
     })
     .then((response) => {
@@ -209,7 +211,8 @@ export const doExistingDataSourceValidation = async (
 const createComponentMapping = async (
   componentName: string,
   payload: ComponentMappingPayload,
-  http: HttpStart
+  http: HttpStart,
+  dataSourceMDSId?: string
 ): Promise<{ [key: string]: { properties: Properties } } | null> => {
   const version = payload.template.mappings._meta.version;
   return http.post(CONSOLE_PROXY, {
@@ -217,6 +220,7 @@ const createComponentMapping = async (
     query: {
       path: `_component_template/ss4o_${componentName}-${version}-template`,
       method: 'POST',
+      dataSourceId: dataSourceMDSId,
     },
   });
 };
@@ -226,7 +230,8 @@ const createIndexMapping = async (
   payload: ComponentMappingPayload,
   dataSourceName: string,
   integration: IntegrationConfig,
-  http: HttpStart
+  http: HttpStart,
+  dataSourceMDSId?: string
 ): Promise<{ [key: string]: { properties: Properties } } | null> => {
   const version = payload.template.mappings._meta.version;
   payload.index_patterns = [dataSourceName];
@@ -235,6 +240,7 @@ const createIndexMapping = async (
     query: {
       path: `_index_template/ss4o_${componentName}-${integration.name}-${version}-sample`,
       method: 'POST',
+      dataSourceId: dataSourceMDSId,
     },
   });
 };
@@ -244,7 +250,8 @@ const createIndexPatternMappings = async (
   integrationTemplateId: string,
   integration: IntegrationConfig,
   setToast: (title: string, color?: Color, text?: string | undefined) => void,
-  http: HttpStart
+  http: HttpStart,
+  dataSourceMDSId?: string
 ): Promise<void> => {
   // TODO the nested methods still need the dataSource -> indexPattern rename applied, sub-methods
   // here still have old naming convention
@@ -266,14 +273,18 @@ const createIndexPatternMappings = async (
         if (key === integration.type) {
           return Promise.resolve();
         }
-        return createComponentMapping(key, mapping as ComponentMappingPayload, http);
+        return createComponentMapping(
+          key,
+          mapping as ComponentMappingPayload,
+          http,
+          dataSourceMDSId
+        );
       })
     );
     // In order to see our changes, we need to manually provoke a refresh
-    await http.post(CONSOLE_PROXY, {
+    await http.post(`/api/dsl/integrations/refresh`, {
       query: {
-        path: '_refresh',
-        method: 'GET',
+        dataSourceMDSId,
       },
     });
     await createIndexMapping(
@@ -281,7 +292,8 @@ const createIndexPatternMappings = async (
       mappings[integration.type],
       targetDataSource,
       integration,
-      http
+      http,
+      dataSourceMDSId
     );
   } catch (err) {
     error = err.message;
@@ -305,6 +317,8 @@ export async function addIntegrationRequest({
   skipRedirect,
   dataSourceInfo,
   http,
+  dataSourceMDSId,
+  dataSourceMDSLabel,
 }: AddIntegrationRequestParams): Promise<boolean> {
   if (addSample) {
     createIndexPatternMappings(
@@ -312,19 +326,24 @@ export async function addIntegrationRequest({
       templateName,
       integration,
       setToast,
-      http
+      http,
+      dataSourceMDSId
     );
     name = `${templateName}-sample`;
     indexPattern = `ss4o_${integration.type}-${templateName}-sample-sample`;
   }
 
   const createReqBody: {
+    dataSourceMDSId?: string;
+    dataSourceMDSLabel?: string;
     name?: string;
     indexPattern?: string;
     workflows?: string[];
     dataSource?: string;
     tableName?: string;
   } = {
+    dataSourceMDSId,
+    dataSourceMDSLabel,
     name,
     indexPattern,
     workflows,

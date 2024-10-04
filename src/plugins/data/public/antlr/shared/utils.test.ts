@@ -5,20 +5,20 @@
 
 import { of } from 'rxjs';
 import { fetchData } from './utils';
-import { DataSetManager } from '../../query';
+import { QueryStringManager } from '../../query';
 
 describe('fetchData', () => {
   it('should fetch data using the dataSourceRequestHandler', async () => {
     const mockTables = ['table1', 'table2'];
+    const mockQuery = {
+      language: 'kuery',
+      dataset: { id: 'db', title: 'db', dataSource: { id: 'testId', title: 'testTitle' } },
+    };
     const mockQueryFormatter = jest.fn((table, dataSourceId, title) => ({
-      query: { qs: `formatted ${table}`, format: 'jdbc' },
-      df: {
-        meta: {
-          queryConfig: {
-            dataSourceId,
-            title,
-          },
-        },
+      query: {
+        query: `formatted ${table}`,
+        format: 'jdbc',
+        ...mockQuery,
       },
     }));
     const mockApi = {
@@ -26,18 +26,16 @@ describe('fetchData', () => {
         fetch: jest.fn().mockResolvedValue('fetchedData'),
       },
     };
-    const mockDataSetManager: Partial<DataSetManager> = {
-      getUpdates$: jest
-        .fn()
-        .mockReturnValue(of({ dataSourceRef: { id: 'testId', name: 'testTitle' } })),
-      getDataSet: jest.fn().mockReturnValue({ dataSourceRef: { id: 'testId', name: 'testTitle' } }),
+    const mockQueryString: Partial<QueryStringManager> = {
+      getUpdates$: jest.fn().mockReturnValue(of(mockQuery)),
+      getQuery: jest.fn().mockReturnValue(mockQuery),
     };
 
     const result = await fetchData(
       mockTables,
       mockQueryFormatter,
       mockApi,
-      mockDataSetManager as DataSetManager
+      mockQueryString as QueryStringManager
     );
     expect(result).toEqual(['fetchedData', 'fetchedData']);
     expect(mockQueryFormatter).toHaveBeenCalledWith('table1', 'testId', 'testTitle');
@@ -46,29 +44,28 @@ describe('fetchData', () => {
 
   it('should fetch data using the defaultRequestHandler', async () => {
     const mockTables = ['table1', 'table2'];
+    const mockQuery = {
+      language: 'kuery',
+      dataset: { id: 'db', title: 'db', dataSource: { id: 'testId', title: 'testTitle' } },
+    };
     const mockQueryFormatter = jest.fn((table) => ({
-      query: { qs: `formatted ${table}`, format: 'jdbc' },
-      df: {
-        meta: {
-          queryConfig: {},
-        },
-      },
+      query: { qs: `formatted ${table}`, format: 'jdbc', ...mockQuery },
     }));
     const mockApi = {
       http: {
         fetch: jest.fn().mockResolvedValue('fetchedData'),
       },
     };
-    const mockDataSetManager: Partial<DataSetManager> = {
+    const mockQueryString: Partial<QueryStringManager> = {
       getUpdates$: jest.fn().mockReturnValue(of(undefined)),
-      getDataSet: jest.fn().mockReturnValue(undefined),
+      getQuery: jest.fn().mockReturnValue(undefined),
     };
 
     const result = await fetchData(
       mockTables,
       mockQueryFormatter,
       mockApi,
-      mockDataSetManager as DataSetManager
+      mockQueryString as QueryStringManager
     );
     expect(result).toEqual(['fetchedData', 'fetchedData']);
     expect(mockQueryFormatter).toHaveBeenCalledWith('table1');

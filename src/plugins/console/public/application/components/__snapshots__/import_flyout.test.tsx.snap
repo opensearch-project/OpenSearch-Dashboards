@@ -399,6 +399,7 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                       >
                         <EuiButtonContent
                           className="euiButtonEmpty__content"
+                          iconGap="m"
                           iconSide="left"
                           iconSize="m"
                           textProps={
@@ -469,6 +470,7 @@ exports[`ImportFlyout Component renders correctly 1`] = `
                         >
                           <EuiButtonContent
                             className="euiButton__content"
+                            iconGap="m"
                             iconSide="left"
                             isLoading={false}
                             textProps={

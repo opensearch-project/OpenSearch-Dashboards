@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { EuiCardProps } from '@elastic/eui';
 import { CardContainerExplicitInput } from '../../components/card_container/types';
 import { DashboardContainerExplicitInput } from '../../components/types';
 
@@ -35,8 +36,11 @@ export type Section =
       id: string;
       order: number;
       title?: string;
-      columns?: number;
+      collapsible?: boolean;
       input?: CardContainerExplicitInput;
+      columns?: number;
+      wrap?: boolean;
+      grid?: boolean;
     };
 
 export type Content =
@@ -45,28 +49,37 @@ export type Content =
       id: string;
       order: number;
       input: SavedObjectInput;
+      width?: number;
+      height?: number;
     }
   | {
       kind: 'dashboard';
       id: string;
       order: number;
       input: SavedObjectInput;
+      width?: number;
+      height?: number;
     }
   | {
       kind: 'custom';
       id: string;
       order: number;
       render: () => JSX.Element;
+      width?: number;
+      height?: number;
     }
   | {
       kind: 'card';
       id: string;
       order: number;
-      title: string;
+      title?: string;
       description: string;
+      toolTipContent?: string;
+      getTitle?: () => React.ReactElement;
       onClick?: () => void;
       getIcon?: () => React.ReactElement;
       getFooter?: () => React.ReactElement;
+      cardProps?: Omit<EuiCardProps, 'title' | 'description'>;
     };
 
 export type SavedObjectInput =
@@ -88,5 +101,5 @@ export type SavedObjectInput =
 export interface ContentProvider {
   id: string;
   getContent: () => Content;
-  getTargetArea: () => string;
+  getTargetArea: () => string | string[];
 }

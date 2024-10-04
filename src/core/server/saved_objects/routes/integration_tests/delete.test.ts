@@ -33,6 +33,7 @@ import { UnwrapPromise } from '@osd/utility-types';
 import { registerDeleteRoute } from '../delete';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { setupServer } from '../test_utils';
+import { dynamicConfigServiceMock } from '../../../config/dynamic_config_service.mock';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
@@ -49,7 +50,8 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
     const router = httpSetup.createRouter('/api/saved_objects/');
     registerDeleteRoute(router);
 
-    await server.start();
+    const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
+    await server.start({ dynamicConfigService });
   });
 
   afterEach(async () => {

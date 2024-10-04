@@ -16,6 +16,7 @@ const testWorkspace: WorkspaceAttribute = {
   id: 'fake_id',
   name: 'test_workspace',
   description: 'test_workspace_description',
+  features: ['use-case-all'],
 };
 
 describe('workspace service api integration test', () => {

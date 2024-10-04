@@ -7,6 +7,10 @@ import { i18n } from '@osd/i18n';
 import { ChromeNavGroup, NavGroupType } from '../types';
 
 export const ALL_USE_CASE_ID = 'all';
+export const OBSERVABILITY_USE_CASE_ID = 'observability';
+export const SECURITY_ANALYTICS_USE_CASE_ID = 'security-analytics';
+export const ESSENTIAL_USE_CASE_ID = 'essentials';
+export const SEARCH_USE_CASE_ID = 'search';
 
 const defaultNavGroups = {
   dataAdministration: {
@@ -34,26 +38,29 @@ const defaultNavGroups = {
   all: {
     id: ALL_USE_CASE_ID,
     title: i18n.translate('core.ui.group.all.title', {
-      defaultMessage: 'Analytics (All)',
+      defaultMessage: 'Analytics',
     }),
     description: i18n.translate('core.ui.group.all.description', {
-      defaultMessage: 'This is a use case contains all the features.',
+      defaultMessage:
+        'If you aren’t sure where to start with OpenSearch, or if you have needs that cut across multiple use cases.',
     }),
     order: 3000,
+    icon: 'wsAnalytics',
   },
   observability: {
-    id: 'observability',
+    id: OBSERVABILITY_USE_CASE_ID,
     title: i18n.translate('core.ui.group.observability.title', {
       defaultMessage: 'Observability',
     }),
     description: i18n.translate('core.ui.group.observability.description', {
       defaultMessage:
-        'Gain visibility into system health, performance, and reliability through monitoring and analysis of logs, metrics, and traces.',
+        'Gain visibility into system health, performance, and reliability through monitoring of logs, metrics and traces.',
     }),
     order: 4000,
+    icon: 'wsObservability',
   },
   'security-analytics': {
-    id: 'security-analytics',
+    id: SECURITY_ANALYTICS_USE_CASE_ID,
     title: i18n.translate('core.ui.group.security.analytics.title', {
       defaultMessage: 'Security Analytics',
     }),
@@ -62,9 +69,10 @@ const defaultNavGroups = {
         'Detect and investigate potential security threats and vulnerabilities across your systems and data.',
     }),
     order: 5000,
+    icon: 'wsSecurityAnalytics',
   },
   essentials: {
-    id: 'analytics',
+    id: ESSENTIAL_USE_CASE_ID,
     title: i18n.translate('core.ui.group.essential.title', {
       defaultMessage: 'Essentials',
     }),
@@ -73,9 +81,10 @@ const defaultNavGroups = {
         'Analyze data to derive insights, identify patterns and trends, and make data-driven decisions.',
     }),
     order: 7000,
+    icon: 'wsEssentials',
   },
   search: {
-    id: 'search',
+    id: SEARCH_USE_CASE_ID,
     title: i18n.translate('core.ui.group.search.title', {
       defaultMessage: 'Search',
     }),
@@ -84,6 +93,7 @@ const defaultNavGroups = {
         "Quickly find and explore relevant information across your organization's data sources.",
     }),
     order: 6000,
+    icon: 'wsSearch',
   },
 } as const;
 

@@ -3,16 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { MemoryRouter } from 'react-router-dom';
 import { PublicAppInfo, WorkspaceObject } from 'opensearch-dashboards/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
-import { WORKSPACE_USE_CASES } from '../../../common/constants';
+import { createMockedRegisteredUseCases$ } from '../../mocks';
 import { WorkspaceDetail } from './workspace_detail';
 import { WorkspaceFormProvider, WorkspaceOperationType } from '../workspace_form';
-import { MemoryRouter } from 'react-router-dom';
+import { DataSourceConnectionType } from '../../../common/types';
+import * as utilsExports from '../../utils';
+import { IntlProvider } from 'react-intl';
 
 // all applications
 const PublicAPPInfoMap = new Map([
@@ -52,12 +55,13 @@ const defaultValues = {
       modes: ['library_write', 'write'],
     },
   ],
-  selectedDataSources: [
+  selectedDataSourceConnections: [
     {
       id: 'ds-1',
-      title: 'ds-1-title',
+      name: 'ds-1-title',
       description: 'ds-1-description',
-      dataSourceEngineType: 'OpenSearch',
+      type: 'OpenSearch',
+      connectionType: DataSourceConnectionType.OpenSearchConnection,
     },
   ],
 };
@@ -119,31 +123,38 @@ const WorkspaceDetailPage = (props: any) => {
         },
       },
       dataSourceManagement,
+      navigationUI: {
+        HeaderControl: ({ controls }) => {
+          if (props.showDeleteModal) {
+            controls?.[0]?.run?.();
+          }
+          return null;
+        },
+      },
     },
   });
 
-  const registeredUseCases$ = new BehaviorSubject([
-    WORKSPACE_USE_CASES.observability,
-    WORKSPACE_USE_CASES['security-analytics'],
-    WORKSPACE_USE_CASES.essentials,
-    WORKSPACE_USE_CASES.search,
-  ]);
+  const registeredUseCases$ = createMockedRegisteredUseCases$();
+
   return (
-    <MemoryRouter>
-      <WorkspaceFormProvider
-        application={mockCoreStart.application}
-        savedObjects={mockCoreStart.savedObjects}
-        operationType={WorkspaceOperationType.Update}
-        permissionEnabled={true}
-        onSubmit={jest.fn()}
-        defaultValues={values}
-        availableUseCases={[]}
-      >
-        <Provider>
-          <WorkspaceDetail registeredUseCases$={registeredUseCases$} {...props} />
-        </Provider>
-      </WorkspaceFormProvider>
-    </MemoryRouter>
+    <IntlProvider locale="en">
+      <MemoryRouter>
+        <WorkspaceFormProvider
+          application={mockCoreStart.application}
+          savedObjects={mockCoreStart.savedObjects}
+          operationType={WorkspaceOperationType.Update}
+          permissionEnabled={true}
+          onSubmit={jest.fn()}
+          defaultValues={values}
+          availableUseCases={[]}
+          onAppLeave={jest.fn()}
+        >
+          <Provider>
+            <WorkspaceDetail registeredUseCases$={registeredUseCases$} {...props} />
+          </Provider>
+        </WorkspaceFormProvider>
+      </MemoryRouter>
+    </IntlProvider>
   );
 };
 
@@ -191,23 +202,25 @@ describe('WorkspaceDetail', () => {
     expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
   });
 
-  it('click on Data Sources tab when dataSource enabled', async () => {
+  it('click on Data sources tab when dataSource enabled', async () => {
     const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
     const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
-    fireEvent.click(getByText('Data Sources'));
+    fireEvent.click(getByText('Data sources'));
     expect(document.querySelector('#dataSources')).toHaveClass('euiTab-isSelected');
+    await waitFor(() => {
+      expect(getByText('Loading data sources...')).toBeInTheDocument();
+    });
   });
 
-  it('click on delete button will show delete modal', async () => {
+  it('delete button will been shown at page header', async () => {
     const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
-    const { getByText, getByTestId, queryByText } = render(
-      WorkspaceDetailPage({ workspacesService: workspaceService })
+    const { getByText, getByTestId } = render(
+      WorkspaceDetailPage({
+        workspacesService: workspaceService,
+        showDeleteModal: true,
+      })
     );
-    fireEvent.click(getByText('delete'));
     expect(getByText('Delete workspace')).toBeInTheDocument();
-    fireEvent.click(getByText('Cancel'));
-    expect(queryByText('Delete workspace')).toBeNull();
-    fireEvent.click(getByText('delete'));
     const input = getByTestId('delete-workspace-modal-input');
     fireEvent.change(input, {
       target: { value: 'delete' },
@@ -245,7 +258,7 @@ describe('WorkspaceDetail', () => {
     fireEvent.click(getByText('Cancel'));
     expect(queryByText('Any unsaved changes will be lost.')).toBeNull();
     fireEvent.click(getByText('Collaborators'));
-    const button = getByText('Navigate away');
+    const button = getByText('Confirm');
     fireEvent.click(button);
     expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
   });
@@ -267,7 +280,7 @@ describe('WorkspaceDetail', () => {
     fireEvent.click(getByText('+1 more'));
     expect(getByText('Any unsaved changes will be lost.')).toBeInTheDocument();
 
-    fireEvent.click(getByText('Navigate away'));
+    fireEvent.click(getByText('Confirm'));
     expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
   });
 
@@ -281,14 +294,47 @@ describe('WorkspaceDetail', () => {
 
   it('will not render xss content', async () => {
     const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
-    const workspaceService = createWorkspacesSetupContractMockWithValue({
-      ...workspaceObject,
-      name: '<script>alert("name")</script>',
-      description: '<script>alert("description")</script>',
-    });
-    const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
-    expect(getByText('<script>alert("description")</script>')).toBeInTheDocument();
+    const workspaceService = createWorkspacesSetupContractMockWithValue();
+    const { getByTestId } = render(
+      WorkspaceDetailPage({
+        workspacesService: workspaceService,
+        defaultValues: { ...defaultValues, description: '<script>alert("description")</script>' },
+      })
+    );
+    expect(getByTestId('workspaceForm-workspaceDetails-descriptionInputText').value).toEqual(
+      '<script>alert("description")</script>'
+    );
     expect(alertSpy).toBeCalledTimes(0);
     alertSpy.mockRestore();
+  });
+
+  it('should show loaded data sources', async () => {
+    jest.spyOn(utilsExports, 'fetchDataSourceConnectionsByDataSourceIds').mockResolvedValue([
+      {
+        id: 'dqc-1',
+        name: 'dqc-1-title',
+        description: 'dqc-1-description',
+        type: 'Amazon S3',
+        parentId: 'ds-1',
+        connectionType: DataSourceConnectionType.DirectQueryConnection,
+      },
+      {
+        id: 'dqc-2',
+        name: 'dqc-1-title',
+        description: 'dqc-1-description',
+        type: 'Amazon S3',
+        parentId: 'ds-1',
+        connectionType: DataSourceConnectionType.DirectQueryConnection,
+      },
+    ]);
+    const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
+    const { getByText, getByRole } = render(
+      WorkspaceDetailPage({ workspacesService: workspaceService })
+    );
+    fireEvent.click(getByText('Data sources'));
+    await waitFor(() => {
+      expect(getByText('ds-1-title')).toBeInTheDocument();
+      expect(getByRole('button', { name: '2' })).toBeInTheDocument();
+    });
   });
 });

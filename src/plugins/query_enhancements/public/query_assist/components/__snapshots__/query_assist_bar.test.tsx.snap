@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`QueryAssistBar matches snapshot 1`] = `
+<div>
+  <form
+    class="euiForm queryAssist queryAssist__form"
+  >
+    <div
+      class="euiFormRow euiFormRow--fullWidth"
+      id="generated-id-row"
+    >
+      <div
+        class="euiFormRow__fieldWrapper"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+          id="generated-id"
+        >
+          <div
+            class="euiFlexItem"
+          >
+            <input />
+            <div />
+          </div>
+          <div
+            class="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              aria-label="Submit question to query assistant"
+              class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--small"
+              data-test-subj="query-assist-submit-button"
+              type="submit"
+            >
+              <span
+                aria-hidden="true"
+                class="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="returnKey"
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+`;

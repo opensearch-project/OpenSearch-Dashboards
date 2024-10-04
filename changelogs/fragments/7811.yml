@@ -1,0 +1,2 @@
+security:
+- [CVE-2017-16100] Use a patched version for the `dns-sync` dependency ([#7811](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7811))

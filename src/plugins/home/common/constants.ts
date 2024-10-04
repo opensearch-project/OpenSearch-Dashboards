@@ -31,16 +31,8 @@
 export const PLUGIN_ID = 'home';
 export const HOME_APP_BASE_PATH = `/app/${PLUGIN_ID}`;
 export const USE_NEW_HOME_PAGE = 'home:useNewHomePage';
-export const IMPORT_SAMPLE_DATA_APP_ID = 'import_sample_data';
-export const HOME_PAGE_ID = 'osd_homepage';
-export enum SECTIONS {
-  GET_STARTED = `get_started`,
-  SERVICE_CARDS = `service_cards`,
-  RECENTLY_VIEWED = `recently_viewed`,
-}
 
-export enum HOME_CONTENT_AREAS {
-  GET_STARTED = `${HOME_PAGE_ID}/${SECTIONS.GET_STARTED}`,
-  SERVICE_CARDS = `${HOME_PAGE_ID}/${SECTIONS.SERVICE_CARDS}`,
-  RECENTLY_VIEWED = `${HOME_PAGE_ID}/${SECTIONS.RECENTLY_VIEWED}`,
-}
+/**
+ * The id is used in src/plugins/workspace/public/plugin.ts and please change that accordingly if you change the id here.
+ */
+export const IMPORT_SAMPLE_DATA_APP_ID = 'import_sample_data';

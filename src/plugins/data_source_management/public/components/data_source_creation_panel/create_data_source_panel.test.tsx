@@ -10,8 +10,8 @@ import { CreateDataSourcePanelHeader } from './create_data_source_panel_header';
 import { CreateDataSourceCardView } from './create_data_source_card_view';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { getCreateBreadcrumbs } from '../breadcrumbs';
-import { DataSourceManagementContext } from '../../types';
 import { RouteComponentProps } from 'react-router-dom';
+import { navigationPluginMock } from 'src/plugins/navigation/public/mocks';
 
 jest.mock('../../../../opensearch_dashboards_react/public');
 jest.mock('../breadcrumbs');
@@ -34,6 +34,7 @@ describe('CreateDataSourcePanel', () => {
         },
       },
       uiSettings: {},
+      navigation: navigationPluginMock.createStartContract(),
     },
   };
 

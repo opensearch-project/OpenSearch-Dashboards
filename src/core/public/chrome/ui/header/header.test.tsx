@@ -50,6 +50,7 @@ function mockProps() {
   const application = applicationServiceMock.createInternalStartContract();
 
   return {
+    http,
     application,
     opensearchDashboardsVersion: '1.0.0',
     appTitle$: new BehaviorSubject('test'),
@@ -194,24 +195,6 @@ describe('Header', () => {
     expect(component.find('CollapsibleNavGroupEnabled').exists()).toBeTruthy();
   });
 
-  it('show hide expand icon in top left navigation when workspace enabled + homepage + new navigation enabled', () => {
-    const branding = {
-      useExpandedHeader: false,
-    };
-    const props = {
-      ...mockProps(),
-      branding,
-    };
-    props.application.currentAppId$ = new BehaviorSubject('home');
-    props.application.capabilities = { ...props.application.capabilities };
-    (props.application.capabilities.workspaces as Record<string, unknown>) = {};
-    (props.application.capabilities.workspaces as Record<string, unknown>).enabled = true;
-
-    const component = mountWithIntl(<Header {...props} navGroupEnabled />);
-
-    expect(component.find('.header__toggleNavButtonSection').exists()).toBeFalsy();
-  });
-
   it('toggles primary navigation menu when clicked', () => {
     const branding = {
       useExpandedHeader: false,
@@ -240,13 +223,13 @@ describe('Header', () => {
     const component = mountWithIntl(<Header {...props} />);
     expect(component.find('[data-test-subj="headerApplicationTitle"]').exists()).toBeTruthy();
     expect(component.find('[data-test-subj="breadcrumb first"]').exists()).toBeTruthy();
-    expect(component.find('[data-test-subj="headerBadgeControl"]').exists()).toBeTruthy();
-    expect(component.find('HeaderBadge').exists()).toBeTruthy();
-    expect(component.find('[data-test-subj="headerLeftControl"]').exists()).toBeTruthy();
-    expect(component.find('HeaderNavControls').exists()).toBeTruthy();
-    expect(component.find('[data-test-subj="headerCenterControl"]').exists()).toBeTruthy();
-    expect(component.find('[data-test-subj="headerRightControl"]').exists()).toBeTruthy();
-    expect(component.find('HeaderActionMenu').exists()).toBeTruthy();
+    expect(component.find('[data-test-subj="headerBadgeControl"]').exists()).toBeFalsy();
+    expect(component.find('HeaderBadge').exists()).toBeFalsy();
+    expect(component.find('[data-test-subj="headerLeftControl"]').exists()).toBeFalsy();
+    expect(component.find('HeaderNavControls').exists()).toBeFalsy();
+    expect(component.find('[data-test-subj="headerCenterControl"]').exists()).toBeFalsy();
+    expect(component.find('[data-test-subj="headerRightControl"]').exists()).toBeFalsy();
+    expect(component.find('HeaderActionMenu').exists()).toBeFalsy();
     expect(component.find('[data-test-subj="headerDescriptionControl"]').exists()).toBeTruthy();
     expect(component.find('[data-test-subj="headerBottomControl"]').exists()).toBeTruthy();
     expect(component).toMatchSnapshot();
@@ -269,9 +252,24 @@ describe('Header', () => {
     const component = mountWithIntl(<Header {...props} />);
     expect(component.find('[data-test-subj="headerApplicationTitle"]').exists()).toBeFalsy();
     expect(component.find('[data-test-subj="breadcrumb first"]').exists()).toBeFalsy();
-    expect(component.find('HeaderActionMenu').exists()).toBeTruthy();
+    expect(component.find('HeaderActionMenu').exists()).toBeFalsy();
     expect(component.find('RecentItems').exists()).toBeTruthy();
-    expect(component.find('[data-test-subj="headerRightControl"]').exists()).toBeTruthy();
+    expect(component.find('[data-test-subj="headerRightControl"]').exists()).toBeFalsy();
     expect(component).toMatchSnapshot();
+  });
+
+  it('should remember the collapse state when new nav is enabled', () => {
+    const branding = {
+      useExpandedHeader: false,
+    };
+    const props = {
+      ...mockProps(),
+      branding,
+      useUpdatedHeader: true,
+      onIsLockedUpdate: jest.fn(),
+    };
+    const component = mountWithIntl(<Header {...props} />);
+    component.find(EuiHeaderSectionItemButton).first().simulate('click');
+    expect(props.onIsLockedUpdate).toBeCalledWith(true);
   });
 });

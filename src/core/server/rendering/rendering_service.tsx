@@ -66,6 +66,7 @@ export class RenderingService {
     http,
     status,
     uiPlugins,
+    dynamicConfig,
   }: RenderingSetupDeps): Promise<InternalRenderingServiceSetup> {
     const [opensearchDashboardsConfig, serverConfig] = await Promise.all([
       this.coreContext.configService
@@ -99,6 +100,8 @@ export class RenderingService {
           opensearchDashboardsConfig as OpenSearchDashboardsConfigType
         );
 
+        const dynamicConfigStartServices = await dynamicConfig.getStartService();
+
         const metadata: RenderingMetadata = {
           strictCsp: http.csp.strict,
           uiPublicUrl,
@@ -123,7 +126,15 @@ export class RenderingService {
               [...uiPlugins.public].map(async ([id, plugin]) => ({
                 id,
                 plugin,
-                config: await this.getUiConfig(uiPlugins, id),
+                // TODO Scope the client so that only exposedToBrowser configs are exposed
+                config: this.coreContext.dynamicConfigService.hasDefaultConfigs({ name: id })
+                  ? await dynamicConfigStartServices.getClient().getConfig(
+                      { name: id },
+                      {
+                        asyncLocalStorageContext: dynamicConfigStartServices.getAsyncLocalStore()!,
+                      }
+                    )
+                  : await this.getUiConfig(uiPlugins, id),
               }))
             ),
             legacyMetadata: {
