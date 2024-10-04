@@ -12,7 +12,7 @@ import { cloneDeep } from 'lodash';
 import { useLocation } from 'react-router-dom';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
-import { search } from '../../../../../data/public';
+import { QueryState, search } from '../../../../../data/public';
 import { validateTimeRange } from '../../helpers/validate_time_range';
 import { updateSearchSource } from './update_search_source';
 import { useIndexPattern } from './use_index_pattern';
@@ -352,19 +352,23 @@ export const useSearch = (services: DiscoverViewServices) => {
   useEffect(() => {
     (async () => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
+      setSavedSearch(savedSearchInstance);
 
-      // if saved search does not exist, do not atempt to sync filters and query from savedObject
-      if (!savedSearchInstance) {
+      // if saved search does not exist, or the URL has filter tyhen don't sync the saved search state with that
+      if (!savedSearchInstance || !savedSearchId) {
         return;
       }
 
-      setSavedSearch(savedSearchInstance);
-
-      // sync initial app filters from savedObject to filterManager
-      const filters = cloneDeep(savedSearchInstance.searchSource.getOwnField('filter'));
+      // Sync Query from the saved search
       const query =
         savedSearchInstance.searchSource.getField('query') ||
         data.query.queryString.getDefaultQuery();
+
+      data.query.queryString.setQuery(query);
+
+      // Sync Filters from the saved search
+      const filters = cloneDeep(savedSearchInstance.searchSource.getOwnField('filter'));
+
       const actualFilters = [];
 
       if (filters !== undefined) {
@@ -374,8 +378,11 @@ export const useSearch = (services: DiscoverViewServices) => {
         }
       }
 
-      filterManager.setAppFilters(actualFilters);
-      data.query.queryString.setQuery(query);
+      // Filters in URL are higher priority than the filters in saved search
+      const urlFilters = (osdUrlStateStorage.get('_q') as QueryState)?.filters ?? [];
+      if (!urlFilters || urlFilters.length === 0) {
+        filterManager.setAppFilters(actualFilters);
+      }
 
       if (savedSearchInstance?.id) {
         chrome.recentlyAccessed.add(
