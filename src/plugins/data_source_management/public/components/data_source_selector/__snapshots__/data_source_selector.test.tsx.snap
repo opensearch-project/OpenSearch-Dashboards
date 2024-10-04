@@ -321,7 +321,7 @@ exports[`DataSourceSelector: check dataSource options should return empty option
 
 exports[`DataSourceSelector: check dataSource options should show custom placeholder text if configured 1`] = `
 <EuiComboBox
-  aria-label="Make a selection"
+  aria-label="Select a data source"
   async={false}
   compressed={false}
   data-test-subj="dataSourceSelectorComboBox"
