@@ -32,7 +32,7 @@ import {
   WORKSPACE_NAVIGATION_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
-import { Services, WorkspaceUseCase } from './types';
+import { Services, WorkspaceUseCase, WorkspacePluginSetup } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
 import { ManagementSetup } from '../../../plugins/management/public';
@@ -94,7 +94,7 @@ export interface WorkspacePluginStartDeps {
 }
 
 export class WorkspacePlugin
-  implements Plugin<{}, {}, WorkspacePluginSetupDeps, WorkspacePluginStartDeps> {
+  implements Plugin<WorkspacePluginSetup, {}, WorkspacePluginSetupDeps, WorkspacePluginStartDeps> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private breadcrumbsSubscription?: Subscription;

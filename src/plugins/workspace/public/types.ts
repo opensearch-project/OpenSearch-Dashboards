@@ -9,7 +9,7 @@ import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_ma
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
 import { ContentManagementPluginStart } from '../../../plugins/content_management/public';
 import { DataSourceAttributes } from '../../../plugins/data_source/common/data_sources';
-import { WorkspaceCollaboratorTypesService } from './services';
+import { WorkspaceCollaboratorType, WorkspaceCollaboratorTypesService } from './services';
 
 export type Services = CoreStart & {
   workspaceClient: WorkspaceClient;
@@ -36,4 +36,8 @@ export interface WorkspaceUseCase {
 
 export interface DataSourceAttributesWithWorkspaces extends Omit<DataSourceAttributes, 'endpoint'> {
   workspaces?: string[];
+}
+
+export interface WorkspacePluginSetup {
+  setCollaboratorTypes: (collaboratorTypes: WorkspaceCollaboratorType[]) => void;
 }

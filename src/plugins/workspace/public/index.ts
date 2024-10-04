@@ -8,3 +8,5 @@ import { WorkspacePlugin } from './plugin';
 export function plugin() {
   return new WorkspacePlugin();
 }
+
+export { WorkspacePluginSetup } from './types';
