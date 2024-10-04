@@ -229,4 +229,16 @@ describe('SelectDataSourcePanel', () => {
       )
     ).toBeNull();
   });
+
+  it('should render empty message and action buttons', () => {
+    const { getByText, getByTestId } = setup({
+      assignedDataSourceConnections: [],
+    });
+
+    expect(getByText('Associated data sources will appear here')).toBeInTheDocument();
+    expect(
+      getByTestId('workspace-creator-emptyPrompt-dataSources-assign-button')
+    ).toBeInTheDocument();
+    expect(getByTestId('workspace-creator-emptyPrompt-dqc-assign-button')).toBeInTheDocument();
+  });
 });
