@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AddCollaboratorsModal } from './add_collaborators_modal';
+
 describe('AddCollaboratorsModal', () => {
   const defaultProps = {
     title: 'Add Collaborators',
