@@ -4,14 +4,7 @@
  */
 
 import './collapsible_nav_group_enabled.scss';
-import {
-  EuiFlyout,
-  EuiPanel,
-  EuiHorizontalRule,
-  EuiHideFor,
-  EuiFlyoutProps,
-  EuiShowFor,
-} from '@elastic/eui';
+import { EuiFlyout, EuiPanel, EuiHideFor, EuiFlyoutProps, EuiShowFor } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
