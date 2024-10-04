@@ -148,7 +148,7 @@ export const WorkspaceUseCase = ({
         error={formErrors.features?.message}
         fullWidth
       >
-        <EuiFlexGroup direction="column">
+        <EuiFlexGroup direction="column" gutterSize="s">
           {availableUseCases.map(({ id, icon, title, description, features, disabled }) => (
             <EuiFlexItem key={id}>
               <WorkspaceUseCaseCard
