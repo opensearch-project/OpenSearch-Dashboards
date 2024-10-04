@@ -250,7 +250,6 @@ export function CollapsibleNavGroupEnabled({
           // This element is used to push icons to the bottom of left navigation when collapsed
           !isNavOpen ? <div className="flex-1-container" /> : null
         }
-        <EuiHorizontalRule margin="none" />
         <div
           className={classNames({
             'bottom-container': true,
