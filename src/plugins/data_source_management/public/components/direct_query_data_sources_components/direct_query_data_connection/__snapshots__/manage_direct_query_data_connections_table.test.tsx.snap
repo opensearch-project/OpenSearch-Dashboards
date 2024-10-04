@@ -176,11 +176,11 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                     >
                       <EuiFlexGroup
                         alignItems="center"
-                        gutterSize="m"
+                        gutterSize="s"
                         wrap={true}
                       >
                         <div
-                          className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+                          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
                         >
                           <EuiFlexItem
                             className="euiSearchBar__searchHolder"
@@ -1340,11 +1340,11 @@ exports[`ManageDirectQueryDataConnectionsTable should get direct query connectio
                     >
                       <EuiFlexGroup
                         alignItems="center"
-                        gutterSize="m"
+                        gutterSize="s"
                         wrap={true}
                       >
                         <div
-                          className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+                          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
                         >
                           <EuiFlexItem
                             className="euiSearchBar__searchHolder"
