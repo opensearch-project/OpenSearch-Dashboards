@@ -35,7 +35,7 @@ function TableVizOptions() {
   return (
     <>
       <Option
-        title={i18n.translate('visTypeTableNewNew.params.settingsTitle', {
+        title={i18n.translate('visBuilder.params.settingsTitle', {
           defaultMessage: 'Settings',
         })}
         initialIsOpen
@@ -43,13 +43,13 @@ function TableVizOptions() {
         <NumberInputOption
           label={
             <>
-              {i18n.translate('visTypeTableNewNew.params.perPageLabel', {
+              {i18n.translate('visBuilder.params.perPageLabel', {
                 defaultMessage: 'Max rows per page',
               })}
               <EuiIconTip
                 content={
                   <FormattedMessage
-                    id="visTypeTableNewNews.field.emptyTooltip"
+                    id="visBuilder.field.emptyTooltip"
                     defaultMessage="Leaving this field empty means it will use number of buckets from the response."
                   />
                 }
@@ -69,7 +69,7 @@ function TableVizOptions() {
         />
 
         <SwitchOption
-          label={i18n.translate('visTypeTableNewNew.params.showMetricsLabel', {
+          label={i18n.translate('visBuilder.params.showMetricsLabel', {
             defaultMessage: 'Show metrics for every bucket/level',
           })}
           paramName="showMetricsAtAllLevels"
@@ -83,10 +83,10 @@ function TableVizOptions() {
         />
 
         <SwitchOption
-          label={i18n.translate('visTypeTableNewNew.params.showPartialRowsLabel', {
+          label={i18n.translate('visBuilder.params.showPartialRowsLabel', {
             defaultMessage: 'Show partial rows',
           })}
-          tooltip={i18n.translate('visTypeTableNewNew.params.showPartialRowsTip', {
+          tooltip={i18n.translate('visBuilder.params.showPartialRowsTip', {
             defaultMessage:
               'Show rows that have partial data. This will still calculate metrics for every bucket/level, even if they are not displayed.',
           })}

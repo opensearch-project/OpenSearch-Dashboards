@@ -523,10 +523,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
       search
     </Search>
     <EuiSpacer
-      size="m"
+      size="s"
     >
       <div
-        className="euiSpacer euiSpacer--m"
+        className="euiSpacer euiSpacer--s"
       />
     </EuiSpacer>
     <AdvancedSettingsVoiceAnnouncement
