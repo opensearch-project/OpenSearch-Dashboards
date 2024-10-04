@@ -14,7 +14,7 @@ export interface WorkspaceCollaboratorType {
   id: string;
   name: string;
   buttonLabel: string;
-  getDisplayedType?: (collaborator: WorkspaceCollaborator) => boolean;
+  getDisplayedType?: (collaborator: WorkspaceCollaborator) => string | void;
   onAdd: ({ onAddCollaborators }: OnAddOptions) => Promise<void>;
 }
 
