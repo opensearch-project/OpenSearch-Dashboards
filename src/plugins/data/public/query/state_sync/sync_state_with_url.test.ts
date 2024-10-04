@@ -48,6 +48,7 @@ import { QueryService, QueryStart } from '../query_service';
 import { TimefilterContract } from '../timefilter';
 import { syncQueryStateWithUrl } from './sync_state_with_url';
 import { QueryState } from './types';
+import { ISearchInterceptor } from '../../search';
 
 const setupMock = coreMock.createSetup();
 const startMock = coreMock.createStart();
@@ -89,6 +90,7 @@ describe('sync_query_state_with_url', () => {
 
   let filterManagerChangeSub: Subscription;
   let filterManagerChangeTriggered = jest.fn();
+  let mockSearchInterceptor: jest.Mocked<ISearchInterceptor>;
 
   let gF: Filter;
   let aF: Filter;
@@ -101,12 +103,16 @@ describe('sync_query_state_with_url', () => {
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
+      sessionStorage: new DataStorage(window.sessionStorage, 'opensearch_dashboards.'),
+      defaultSearchInterceptor: mockSearchInterceptor,
+      application: setupMock.application,
     });
     queryServiceStart = queryService.start({
       indexPatterns: indexPatternsMock,
       uiSettings: startMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       savedObjectsClient: startMock.savedObjects.client,
+      application: startMock.application,
     });
     filterManager = queryServiceStart.filterManager;
     timefilter = queryServiceStart.timefilter.timefilter;

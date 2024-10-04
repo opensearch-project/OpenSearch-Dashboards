@@ -123,13 +123,16 @@ describe('connect_storage_to_query_state', () => {
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
+      sessionStorage: new DataStorage(window.sessionStorage, 'opensearch_dashboards.'),
       defaultSearchInterceptor: mockSearchInterceptor,
+      application: setupMock.application,
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       savedObjectsClient: startMock.savedObjects.client,
       indexPatterns: indexPatternsMock,
+      application: startMock.application,
     });
     indexPatternsMock = ({
       get: jest.fn(),
@@ -234,13 +237,16 @@ describe('connect_to_global_state', () => {
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
+      sessionStorage: new DataStorage(window.sessionStorage, 'opensearch_dashboards.'),
       defaultSearchInterceptor: mockSearchInterceptor,
+      application: setupMock.application,
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       savedObjectsClient: startMock.savedObjects.client,
       indexPatterns: indexPatternsMock,
+      application: startMock.application,
     });
     filterManager = queryServiceStart.filterManager;
     timeFilter = queryServiceStart.timefilter.timefilter;
@@ -475,13 +481,16 @@ describe('connect_to_app_state', () => {
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
+      sessionStorage: new DataStorage(window.sessionStorage, 'opensearch_dashboards.'),
       defaultSearchInterceptor: mockSearchInterceptor,
+      application: setupMock.application,
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       savedObjectsClient: startMock.savedObjects.client,
       indexPatterns: indexPatternsMock,
+      application: startMock.application,
     });
     filterManager = queryServiceStart.filterManager;
     indexPatternsMock = ({
@@ -661,13 +670,16 @@ describe('filters with different state', () => {
     queryService.setup({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
+      sessionStorage: new DataStorage(window.sessionStorage, 'opensearch_dashboards.'),
       defaultSearchInterceptor: mockSearchInterceptor,
+      application: setupMock.application,
     });
     queryServiceStart = queryService.start({
       uiSettings: setupMock.uiSettings,
       storage: new DataStorage(window.localStorage, 'opensearch_dashboards.'),
       savedObjectsClient: startMock.savedObjects.client,
       indexPatterns: indexPatternsMock,
+      application: startMock.application,
     });
     filterManager = queryServiceStart.filterManager;
     indexPatternsMock = ({
