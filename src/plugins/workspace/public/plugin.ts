@@ -563,10 +563,10 @@ export class WorkspacePlugin
     });
 
     return {
-      setCollaboratorTypes: (types: WorkspaceCollaboratorType[]) => {
-        this.collaboratorTypes.setTypes(types);
+      collaboratorTypes: this.collaboratorTypes,
+      ui: {
+        AddCollaboratorsModal,
       },
-      getAddCollaboratorsModal: () => AddCollaboratorsModal,
     };
   }
 

@@ -91,19 +91,17 @@ export const WorkspaceCollaboratorsPanel = ({
         </>
       )}
       {collaborators.map((item, index) => (
-        <React.Fragment key={item.id}>
-          <EuiCompressedFormRow fullWidth>
-            <WorkspaceCollaboratorInput
-              index={index}
-              accessLevel={item.accessLevel}
-              collaboratorId={item.collaboratorId}
-              onCollaboratorIdChange={handleCollaboratorIdChange}
-              onAccessLevelChange={handleAccessLevelChange}
-              onDelete={handleDelete}
-              collaboratorIdInputPlaceholder={collaboratorIdInputPlaceholder}
-            />
-          </EuiCompressedFormRow>
-        </React.Fragment>
+        <EuiCompressedFormRow key={item.id} fullWidth>
+          <WorkspaceCollaboratorInput
+            index={index}
+            accessLevel={item.accessLevel}
+            collaboratorId={item.collaboratorId}
+            onCollaboratorIdChange={handleCollaboratorIdChange}
+            onAccessLevelChange={handleAccessLevelChange}
+            onDelete={handleDelete}
+            collaboratorIdInputPlaceholder={collaboratorIdInputPlaceholder}
+          />
+        </EuiCompressedFormRow>
       ))}
       <EuiCompressedFormRow fullWidth>
         <EuiSmallButton

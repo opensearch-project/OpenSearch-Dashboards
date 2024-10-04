@@ -10,7 +10,7 @@ import { NavigationPublicPluginStart } from '../../../plugins/navigation/public'
 import { ContentManagementPluginStart } from '../../../plugins/content_management/public';
 import { DataSourceAttributes } from '../../../plugins/data_source/common/data_sources';
 import type { AddCollaboratorsModal } from './components/add_collaborators_modal';
-import { WorkspaceCollaboratorType, WorkspaceCollaboratorTypesService } from './services';
+import { WorkspaceCollaboratorTypesService } from './services';
 
 export type Services = CoreStart & {
   workspaceClient: WorkspaceClient;
@@ -49,6 +49,8 @@ export interface WorkspaceCollaborator {
 }
 
 export interface WorkspacePluginSetup {
-  setCollaboratorTypes: (collaboratorTypes: WorkspaceCollaboratorType[]) => void;
-  getAddCollaboratorsModal: () => typeof AddCollaboratorsModal;
+  collaboratorTypes: WorkspaceCollaboratorTypesService;
+  ui: {
+    AddCollaboratorsModal: typeof AddCollaboratorsModal;
+  };
 }

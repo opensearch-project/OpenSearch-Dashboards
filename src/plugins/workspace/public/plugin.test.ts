@@ -17,11 +17,7 @@ import {
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
 import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
-import {
-  UseCaseService,
-  WorkspaceCollaboratorTypesService,
-  WorkspaceCollaboratorType,
-} from './services';
+import { UseCaseService, WorkspaceCollaboratorTypesService } from './services';
 import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
 import { WorkspacePlugin } from './plugin';
 import { contentManagementPluginMocks } from '../../content_management/public';
@@ -354,19 +350,12 @@ describe('Workspace plugin', () => {
     expect(registerDefaultCollaboratorTypesMock).toHaveBeenCalled();
   });
 
-  it('#setup should return setCollaboratorsTypes method', async () => {
-    const setTypeMock = jest.fn();
+  it('#setup should return WorkspaceCollaboratorTypesService', async () => {
     const setupMock = coreMock.createSetup();
     const workspacePlugin = new WorkspacePlugin();
     const result = await workspacePlugin.setup(setupMock, {});
-    const mockCollaboratorTypes: WorkspaceCollaboratorType[] = [];
-    jest
-      .spyOn(WorkspaceCollaboratorTypesService.prototype, 'setTypes')
-      .mockImplementationOnce(setTypeMock);
 
-    expect(setTypeMock).not.toHaveBeenCalled();
-    result.setCollaboratorTypes(mockCollaboratorTypes);
-    expect(setTypeMock).toHaveBeenCalledWith(mockCollaboratorTypes);
+    expect(result.collaboratorTypes).toBeInstanceOf(WorkspaceCollaboratorTypesService);
   });
 
   it('#setup should return getAddCollaboratorsModal method', async () => {
@@ -374,7 +363,7 @@ describe('Workspace plugin', () => {
     const workspacePlugin = new WorkspacePlugin();
     const result = await workspacePlugin.setup(setupMock, {});
 
-    expect(result.getAddCollaboratorsModal()).toBe(AddCollaboratorsModal);
+    expect(result.ui.AddCollaboratorsModal).toBe(AddCollaboratorsModal);
   });
 
   it('#start add workspace detail page to breadcrumbs when start', async () => {
