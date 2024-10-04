@@ -186,7 +186,7 @@
     "dashboard.listing.createButtonText": "Cree",
     "dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription": "Puede combinar las vistas de datos de cualquier aplicación de OpenSearch Dashboards en un solo panel y ver todo en un mismo lugar.",
     "dashboard.listing.createNewDashboard.createButtonLabel": "Crear un panel",
-    "dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription": "¿Es la primera vez que usa OpenSearch Dashboards? {SampleDataInstallLink} para probarlo.",
+    "dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription": "¿Es la primera vez que usa OpenSearch Dashboards? {sampleDataInstallLink} para probarlo.",
     "dashboard.listing.createNewDashboard.sampleDataInstallLinkText": "Instale algunos datos de muestra",
     "dashboard.listing.createNewDashboard.title": "Cree su primer panel",
     "dashboard.listing.dashboardsTitle": "Paneles",
