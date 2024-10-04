@@ -17,7 +17,11 @@ import {
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
 import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
-import { UseCaseService } from './services/use_case_service';
+import {
+  UseCaseService,
+  WorkspaceCollaboratorTypesService,
+  WorkspaceCollaboratorType,
+} from './services';
 import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
 import { WorkspacePlugin } from './plugin';
 import { contentManagementPluginMocks } from '../../content_management/public';
@@ -336,6 +340,21 @@ describe('Workspace plugin', () => {
     );
   });
 
+  it('#setup should return setCollaboratorsTypes method', async () => {
+    const setTypeMock = jest.fn();
+    jest
+      .spyOn(WorkspaceCollaboratorTypesService.prototype, 'setTypes')
+      .mockImplementationOnce(setTypeMock);
+    const setupMock = coreMock.createSetup();
+    const workspacePlugin = new WorkspacePlugin();
+    const result = await workspacePlugin.setup(setupMock, {});
+    const mockCollaboratorTypes: WorkspaceCollaboratorType[] = [];
+
+    expect(setTypeMock).not.toHaveBeenCalled();
+    result.setCollaboratorTypes(mockCollaboratorTypes);
+    expect(setTypeMock).toHaveBeenCalledWith(mockCollaboratorTypes);
+  });
+
   it('#start add workspace detail page to breadcrumbs when start', async () => {
     const startMock = coreMock.createStart();
     const workspaceObject = {
@@ -579,5 +598,19 @@ describe('Workspace plugin', () => {
 
     registeredUseCases$.next([]);
     expect(appUpdaterChangeMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('#stop should call collaboratorTypesService.stop', async () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const stopMock = jest.fn();
+    jest
+      .spyOn(WorkspaceCollaboratorTypesService.prototype, 'stop')
+      .mockImplementationOnce(stopMock);
+    await workspacePlugin.setup(setupMock, {});
+
+    expect(stopMock).not.toHaveBeenCalled();
+    workspacePlugin.stop();
+    expect(stopMock).toHaveBeenCalled();
   });
 });

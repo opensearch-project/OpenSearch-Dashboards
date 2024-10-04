@@ -9,12 +9,14 @@ import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_ma
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
 import { ContentManagementPluginStart } from '../../../plugins/content_management/public';
 import { DataSourceAttributes } from '../../../plugins/data_source/common/data_sources';
+import { WorkspaceCollaboratorTypesService } from './services';
 
 export type Services = CoreStart & {
   workspaceClient: WorkspaceClient;
   dataSourceManagement?: DataSourceManagementPluginSetup;
   navigationUI?: NavigationPublicPluginStart['ui'];
   contentManagement?: ContentManagementPluginStart;
+  collaboratorTypes: WorkspaceCollaboratorTypesService;
 };
 
 export interface WorkspaceUseCaseFeature {
