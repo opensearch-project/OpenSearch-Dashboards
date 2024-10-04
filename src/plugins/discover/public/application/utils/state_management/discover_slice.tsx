@@ -94,20 +94,13 @@ export const getPreloadedState = async ({
       const indexPatternId = savedSearchInstance.searchSource.getField('index')?.id;
 
       // If the query enhancement is enabled don't add the indexpattern id to the root since they will be migrated into the _q state
-      if (config.get(QUERY_ENHANCEMENT_ENABLED_SETTING)) {
-        preloadedState.root = {
-          metadata: {
-            view: PLUGIN_ID,
-          },
-        };
-      } else {
-        preloadedState.root = {
-          metadata: {
-            indexPattern: indexPatternId,
-            view: PLUGIN_ID,
-          },
-        };
-      }
+      preloadedState.root = {
+        metadata: {
+          ...(indexPatternId &&
+            !config.get(QUERY_ENHANCEMENT_ENABLED_SETTING) && { indexPattern: indexPatternId }),
+          view: PLUGIN_ID,
+        },
+      };
 
       savedSearchInstance.destroy(); // this instance is no longer needed, will create another one later
     }
