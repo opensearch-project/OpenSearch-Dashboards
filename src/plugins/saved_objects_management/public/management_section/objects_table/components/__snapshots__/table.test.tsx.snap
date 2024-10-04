@@ -8,6 +8,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
         "data-test-subj": "savedObjectSearchBar",
       }
     }
+    compressed={true}
     filters={
       Array [
         Object {
@@ -84,7 +85,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
               checked={true}
               label={
                 <FormattedMessage
-                  defaultMessage="Include related related {useUpdatedUX, select, true {assets} other {objects}}"
+                  defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
                   values={
                     Object {
@@ -240,6 +241,7 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
         "data-test-subj": "savedObjectSearchBar",
       }
     }
+    compressed={true}
     filters={
       Array [
         Object {
@@ -328,7 +330,7 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
               checked={true}
               label={
                 <FormattedMessage
-                  defaultMessage="Include related related {useUpdatedUX, select, true {assets} other {objects}}"
+                  defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
                   values={
                     Object {
@@ -493,6 +495,7 @@ exports[`Table should render normally 1`] = `
         "data-test-subj": "savedObjectSearchBar",
       }
     }
+    compressed={true}
     filters={
       Array [
         Object {
@@ -568,7 +571,7 @@ exports[`Table should render normally 1`] = `
               checked={true}
               label={
                 <FormattedMessage
-                  defaultMessage="Include related related {useUpdatedUX, select, true {assets} other {objects}}"
+                  defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
                   values={
                     Object {
@@ -724,6 +727,7 @@ exports[`Table should render normally when use updated UX 1`] = `
         "data-test-subj": "savedObjectSearchBar",
       }
     }
+    compressed={true}
     filters={
       Array [
         Object {
@@ -812,7 +816,7 @@ exports[`Table should render normally when use updated UX 1`] = `
               checked={true}
               label={
                 <FormattedMessage
-                  defaultMessage="Include related related {useUpdatedUX, select, true {assets} other {objects}}"
+                  defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
                   values={
                     Object {

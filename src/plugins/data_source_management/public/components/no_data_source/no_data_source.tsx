@@ -20,12 +20,6 @@ import { FormattedMessage } from 'react-intl';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import { DSM_APP_ID } from '../../plugin';
 import { EmptyIcon } from '../custom_database_icon';
-import {
-  ADD_COMPATIBLE_DATASOURCES_MESSAGE,
-  CONNECT_DATASOURCES_MESSAGE,
-  NO_COMPATIBLE_DATASOURCES_MESSAGE,
-  NO_DATASOURCES_CONNECTED_MESSAGE,
-} from '../constants';
 
 interface DataSourceDropDownHeaderProps {
   incompatibleDataSourcesExist: boolean;
@@ -41,7 +35,7 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
     <EuiButtonIcon
       className="euiHeaderLink"
       data-test-subj="dataSourceEmptyMenuHeaderLink"
-      aria-label={i18n.translate('dataSourceEmpty.dataSourceEmptyMenuHeaderLink', {
+      aria-label={i18n.translate('dataSourcesManagement.dataSourceEmptyMenuHeaderLink', {
         defaultMessage: 'dataSourceEmptyMenuHeaderLink',
       })}
       iconType={() => <EmptyIcon />}
@@ -70,29 +64,31 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
   const text = (
     <>
       <EuiText size="s" textAlign="center">
-        {
+        {incompatibleDataSourcesExist ? (
           <FormattedMessage
-            id="dataSourcesManagement.dataSourceEmptyMenu.noData"
-            defaultMessage={
-              incompatibleDataSourcesExist
-                ? NO_COMPATIBLE_DATASOURCES_MESSAGE
-                : NO_DATASOURCES_CONNECTED_MESSAGE
-            }
+            id="dataSourcesManagement.dataSourceEmptyMenu.noCompatibleDataSource"
+            defaultMessage="No compatible data sources are available."
           />
-        }
+        ) : (
+          <FormattedMessage
+            id="dataSourcesManagement.dataSourceEmptyMenu.noConnectedDataSource"
+            defaultMessage="No data sources connected yet."
+          />
+        )}
       </EuiText>
 
       <EuiText size="s" textAlign="center">
-        {
+        {incompatibleDataSourcesExist ? (
+          <FormattedMessage
+            id="dataSourcesManagement.dataSourceEmptyMenu.addCompatible"
+            defaultMessage="Add a compatible data source."
+          />
+        ) : (
           <FormattedMessage
             id="dataSourcesManagement.dataSourceEmptyMenu.connect"
-            defaultMessage={
-              incompatibleDataSourcesExist
-                ? ADD_COMPATIBLE_DATASOURCES_MESSAGE
-                : CONNECT_DATASOURCES_MESSAGE
-            }
+            defaultMessage="Connect your data sources to get started."
           />
-        }
+        )}
       </EuiText>
     </>
   );

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AppNavLinkStatus, NavGroupType, PublicAppInfo } from '../../../core/public';
+import { AppNavLinkStatus, ChromeNavLink, NavGroupType, PublicAppInfo } from '../../../core/public';
 import {
   featureMatchesConfig,
   filterWorkspaceConfigurableApps,
@@ -19,7 +19,7 @@ import {
 } from './utils';
 import { WorkspaceAvailability } from '../../../core/public';
 import { coreMock } from '../../../core/public/mocks';
-import { WORKSPACE_DETAIL_APP_ID, USE_CASE_PREFIX } from '../common/constants';
+import { USE_CASE_PREFIX } from '../common/constants';
 import {
   SigV4ServiceName,
   DataSourceEngineType,
@@ -37,7 +37,7 @@ const useCaseMock = {
   id: 'foo',
   title: 'Foo',
   description: 'Foo description',
-  features: [{ id: 'bar' }],
+  features: [{ id: 'bar' }, { id: 'baz', title: 'Baz' }],
   systematic: false,
   order: 1,
 };
@@ -661,6 +661,7 @@ describe('workspace utils: isEqualWorkspaceUseCase', () => {
       )
     ).toEqual(true);
   });
+
   it('should return true when all properties equal', () => {
     expect(
       isEqualWorkspaceUseCase(useCaseMock, {

@@ -89,7 +89,7 @@ export const VisualizeListing = () => {
     if (showUpdatedUx) {
       chrome.setBreadcrumbs([
         {
-          text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
+          text: i18n.translate('visualize.listingBreadcrumbsTitle', {
             defaultMessage: 'Visualizations',
           }),
         },
@@ -97,7 +97,7 @@ export const VisualizeListing = () => {
     } else {
       chrome.setBreadcrumbs([
         {
-          text: i18n.translate('visualize.visualizeListingBreadcrumbsTitle', {
+          text: i18n.translate('visualize.legacy.listingBreadcrumbsTitle', {
             defaultMessage: 'Visualize',
           }),
         },

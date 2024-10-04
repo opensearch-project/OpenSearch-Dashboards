@@ -141,7 +141,6 @@ export function registerRoutes({
       const result = await client.list(
         {
           request: req,
-          logger,
         },
         req.body
       );
@@ -180,7 +179,6 @@ export function registerRoutes({
       const result = await client.get(
         {
           request: req,
-          logger,
         },
         id
       );
@@ -225,7 +223,6 @@ export function registerRoutes({
       const result = await client.create(
         {
           request: req,
-          logger,
         },
         createPayload
       );
@@ -252,7 +249,6 @@ export function registerRoutes({
       const result = await client.update(
         {
           request: req,
-          logger,
         },
         id,
         {
@@ -280,7 +276,6 @@ export function registerRoutes({
       const result = await client.delete(
         {
           request: req,
-          logger,
         },
         id
       );

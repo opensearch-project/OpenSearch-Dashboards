@@ -19,6 +19,16 @@ import { DataSourceEngineType } from '../../../../data_source/common/data_source
 import { DataSourceConnectionType } from '../../../common/types';
 import * as utils from '../../utils';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({
+    search: '',
+    pathname: '',
+    hash: '',
+    state: undefined,
+  }),
+}));
+
 const workspaceClientCreate = jest
   .fn()
   .mockReturnValue({ result: { id: 'successResult' }, success: true });
@@ -102,8 +112,9 @@ jest.spyOn(utils, 'fetchDataSourceConnections').mockImplementation(async (passed
 
 const WorkspaceCreator = ({
   isDashboardAdmin = false,
+  dataSourceEnabled = false,
   ...props
-}: Partial<WorkspaceCreatorProps & { isDashboardAdmin: boolean }>) => {
+}: Partial<WorkspaceCreatorProps & { isDashboardAdmin: boolean; dataSourceEnabled?: boolean }>) => {
   const { Provider } = createOpenSearchDashboardsReactContext({
     ...mockCoreStart,
     ...{
@@ -143,7 +154,7 @@ const WorkspaceCreator = ({
           }),
         },
       },
-      dataSourceManagement: {},
+      dataSourceManagement: dataSourceEnabled ? {} : undefined,
       navigationUI: {
         HeaderControl: () => null,
       },
@@ -364,7 +375,7 @@ describe('WorkspaceCreator', () => {
       value: 600,
     });
     const { getByTestId, getAllByText, getByText } = render(
-      <WorkspaceCreator isDashboardAdmin={true} />
+      <WorkspaceCreator isDashboardAdmin={true} dataSourceEnabled />
     );
 
     // Ensure workspace create form rendered
@@ -422,7 +433,7 @@ describe('WorkspaceCreator', () => {
       value: 600,
     });
     const { getByTestId, getAllByText, getByText } = render(
-      <WorkspaceCreator isDashboardAdmin={true} />
+      <WorkspaceCreator isDashboardAdmin={true} dataSourceEnabled />
     );
 
     // Ensure workspace create form rendered
@@ -482,6 +493,10 @@ describe('WorkspaceCreator', () => {
     await waitFor(() => {
       expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
     });
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).toHaveBeenCalledTimes(1);
 
@@ -501,6 +516,10 @@ describe('WorkspaceCreator', () => {
     // Ensure workspace create form rendered
     await waitFor(() => {
       expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
     });
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     jest.useFakeTimers();

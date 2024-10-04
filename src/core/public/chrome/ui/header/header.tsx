@@ -28,7 +28,6 @@
  * under the License.
  */
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeader,
@@ -262,49 +261,56 @@ export function Header({
   const renderNavToggle = () => {
     const renderNavToggleWithExtraProps = (
       props: EuiHeaderSectionItemButtonProps & { isSmallScreen?: boolean }
-    ) => (
-      <EuiHeaderSectionItemButton
-        data-test-subj="toggleNavButton"
-        aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
-          defaultMessage: 'Toggle primary navigation',
-        })}
-        onClick={() => setIsNavOpen(!isNavOpen)}
-        aria-expanded={isNavOpen}
-        aria-pressed={isNavOpen}
-        aria-controls={navId}
-        ref={toggleCollapsibleNavRef}
-        {...props}
-        className={classnames(
-          useUpdatedHeader
-            ? useApplicationHeader
-              ? 'newAppTopNavExpander'
-              : 'newPageTopNavExpander'
-            : undefined,
-          props.className
-        )}
-      >
-        {props.isSmallScreen ? (
-          <EuiButtonIcon
-            iconType="menu"
-            size="xs"
-            title={i18n.translate('core.ui.primaryNav.menu', {
-              defaultMessage: 'Menu',
-            })}
-            display="base"
-            color="subdued"
-            iconSize="s"
-          />
-        ) : (
-          <EuiIcon
-            type="menu"
-            size="m"
-            title={i18n.translate('core.ui.primaryNav.menu', {
-              defaultMessage: 'Menu',
-            })}
-          />
-        )}
-      </EuiHeaderSectionItemButton>
-    );
+    ) => {
+      const { isSmallScreen, ...others } = props;
+      return (
+        <EuiHeaderSectionItemButton
+          data-test-subj="toggleNavButton"
+          aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+            defaultMessage: 'Toggle primary navigation',
+          })}
+          onClick={() => setIsNavOpen(!isNavOpen)}
+          aria-expanded={isNavOpen}
+          aria-pressed={isNavOpen}
+          aria-controls={navId}
+          ref={toggleCollapsibleNavRef}
+          {...others}
+          className={classnames(
+            useUpdatedHeader
+              ? useApplicationHeader
+                ? 'newAppTopNavExpander'
+                : 'newPageTopNavExpander'
+              : undefined,
+            props.className
+          )}
+        >
+          {props.isSmallScreen ? (
+            /**
+             * Using <EuiButtonIcon type="base" /> here will introduce a warning in console
+             * because button can not be a child of a button. In order to give the looks of a bordered icon,
+             * here we use the classes to imitate the style
+             */
+            <span className="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall ">
+              <EuiIcon
+                title={i18n.translate('core.ui.primaryNav.menu', {
+                  defaultMessage: 'Menu',
+                })}
+                type="menu"
+                size="s"
+              />
+            </span>
+          ) : (
+            <EuiIcon
+              type="menu"
+              size="m"
+              title={i18n.translate('core.ui.primaryNav.menu', {
+                defaultMessage: 'Menu',
+              })}
+            />
+          )}
+        </EuiHeaderSectionItemButton>
+      );
+    };
     return useUpdatedHeader ? (
       <>
         {isNavOpen
@@ -491,6 +497,7 @@ export function Header({
         navigateToUrl={application.navigateToUrl}
         renderBreadcrumbs={renderBreadcrumbs(true, true)}
         buttonSize={useApplicationHeader ? 's' : 'xs'}
+        loadingCount$={observables.loadingCount$}
       />
     </EuiHeaderSectionItem>
   );
