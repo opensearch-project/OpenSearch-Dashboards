@@ -95,7 +95,7 @@ export const registerDefaultCollaboratorTypes = ({
           defaultMessage: 'Group ID',
         }),
         inputPlaceholder: i18n.translate(
-          'workspace.collaboratorType.defaultUser.inputPlaceholder',
+          'workspace.collaboratorType.defaultGroup.inputPlaceholder',
           {
             defaultMessage: 'Enter Group ID',
           }
