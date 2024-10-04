@@ -153,7 +153,7 @@ export const TopNav = () => {
         groupActions={showActionsInGroup}
         screenTitle={
           savedVisBuilderVis?.title ||
-          i18n.translate('discover.savedSearch.newTitle', {
+          i18n.translate('visBuilder.savedSearch.newTitle', {
             defaultMessage: 'New visualization',
           })
         }

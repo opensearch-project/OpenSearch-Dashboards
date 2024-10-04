@@ -109,8 +109,6 @@ export class VisBuilderEmbeddableFactory
   }
 
   public getDisplayName() {
-    return i18n.translate('visBuilder.displayName', {
-      defaultMessage: PLUGIN_ID,
-    });
+    return PLUGIN_ID;
   }
 }

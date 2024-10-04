@@ -29,7 +29,7 @@ export const createHistogramConfig = (): VisualizationTypeOptions<HistogramOptio
           {
             group: AggGroupNames.Metrics,
             name: 'metric',
-            title: i18n.translate('visTypeVislib.histogram.metricTitle', {
+            title: i18n.translate('visBuilder.histogram.metricTitle', {
               defaultMessage: 'Y-axis',
             }),
             min: 1,
@@ -40,7 +40,7 @@ export const createHistogramConfig = (): VisualizationTypeOptions<HistogramOptio
           {
             group: AggGroupNames.Buckets,
             name: 'segment',
-            title: i18n.translate('visTypeVislib.histogram.segmentTitle', {
+            title: i18n.translate('visBuilder.histogram.segmentTitle', {
               defaultMessage: 'X-axis',
             }),
             min: 0,
@@ -51,7 +51,7 @@ export const createHistogramConfig = (): VisualizationTypeOptions<HistogramOptio
           {
             group: AggGroupNames.Buckets,
             name: 'group',
-            title: i18n.translate('visTypeVislib.histogram.groupTitle', {
+            title: i18n.translate('visBuilder.histogram.groupTitle', {
               defaultMessage: 'Split series',
             }),
             min: 0,
@@ -62,7 +62,7 @@ export const createHistogramConfig = (): VisualizationTypeOptions<HistogramOptio
           {
             group: AggGroupNames.Buckets,
             name: 'split',
-            title: i18n.translate('visTypeVislib.histogram.splitTitle', {
+            title: i18n.translate('visBuilder.histogram.splitTitle', {
               defaultMessage: 'Split chart',
             }),
             min: 0,

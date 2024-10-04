@@ -48,7 +48,7 @@ export const createMetricConfig = (): VisualizationTypeOptions<MetricOptionsDefa
           {
             group: AggGroupNames.Metrics,
             name: 'metric',
-            title: i18n.translate('visTypeMetric.schemas.metricTitle', {
+            title: i18n.translate('visBuilder.schemas.metricTitle', {
               defaultMessage: 'Metric',
             }),
             min: 1,
@@ -73,7 +73,7 @@ export const createMetricConfig = (): VisualizationTypeOptions<MetricOptionsDefa
           {
             group: AggGroupNames.Buckets,
             name: 'group',
-            title: i18n.translate('visTypeMetric.schemas.splitGroupTitle', {
+            title: i18n.translate('visBuilder.schemas.splitGroupTitle', {
               defaultMessage: 'Split group',
             }),
             min: 0,
