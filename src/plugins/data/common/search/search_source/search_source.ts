@@ -89,9 +89,14 @@ import { fieldWildcardFilter } from '../../../../opensearch_dashboards_utils/com
 import { IIndexPattern } from '../../index_patterns';
 import {
   DATA_FRAME_TYPES,
+  FetchStatusResponse,
   IDataFrame,
+  IDataFrameDefaultResponse,
   IDataFrameError,
+  IDataFramePollingResponse,
   IDataFrameResponse,
+  QueryStartedResponse,
+  QuerySuccessStatusResponse,
   convertResult,
   createDataFrame,
 } from '../../data_frames';
@@ -115,6 +120,7 @@ import {
 import { getHighlightRequest } from '../../../common/field_formats';
 import { fetchSoon } from './legacy';
 import { extractReferences } from './extract_references';
+import { handleQueryResults } from '../../utils/helpers';
 
 /** @internal */
 export const searchSourceRequiredUiSettings = [
@@ -436,14 +442,35 @@ export class SearchSource {
     return search({ params }, options).then(async (response: any) => {
       if (response.hasOwnProperty('type')) {
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.DEFAULT) {
-          const dataFrameResponse = response as IDataFrameResponse;
+          const dataFrameResponse = response as IDataFrameDefaultResponse;
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
           return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
         }
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
-          const dataFrameResponse = response as IDataFrameResponse;
-          await this.setDataFrame(dataFrameResponse.body as IDataFrame);
-          return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+          const { status } = response as IDataFramePollingResponse;
+          let results;
+          if (status === 'success') {
+            results = response as QuerySuccessStatusResponse;
+          } else if (status === 'started') {
+            const {
+              body: { queryId },
+            } = response as QueryStartedResponse;
+
+            if (!queryId) {
+              throw new Error('Cannot poll results for undefined query id');
+            }
+
+            results = await handleQueryResults({
+              pollQueryResults: async () =>
+                search({ params: { ...params, queryId } }, options) as Promise<FetchStatusResponse>,
+              queryId,
+            });
+          } else {
+            throw new Error('Invalid query state');
+          }
+
+          await this.setDataFrame((results as QuerySuccessStatusResponse).body as IDataFrame);
+          return onResponse(searchRequest, convertResult(results as IDataFrameResponse));
         }
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.ERROR) {
           const dataFrameError = response as IDataFrameError;

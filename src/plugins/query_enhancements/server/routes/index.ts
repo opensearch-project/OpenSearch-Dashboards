@@ -71,6 +71,7 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
               format: schema.string(),
             }),
             aggConfig: schema.nullable(schema.object({}, { unknowns: 'allow' })),
+            queryId: schema.maybe(schema.string()),
           }),
         },
       },

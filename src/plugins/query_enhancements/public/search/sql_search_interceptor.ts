@@ -41,6 +41,9 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       http: this.deps.http,
       path: trimEnd(`${API.SEARCH}/${strategy}`),
       signal,
+      body: {
+        queryId: request.params?.queryId,
+      },
     };
 
     if (isAsync) this.notifications.toasts.add('Fetching data...');

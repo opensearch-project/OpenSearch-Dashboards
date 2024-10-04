@@ -25,6 +25,7 @@ export interface EnhancedFetchContext {
   http: CoreSetup['http'];
   path: string;
   signal?: AbortSignal;
+  body?: { queryId?: string };
 }
 
 export interface QueryStatusOptions<T> {
