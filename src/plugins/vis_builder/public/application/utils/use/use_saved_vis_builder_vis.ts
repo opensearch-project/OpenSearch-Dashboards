@@ -45,7 +45,7 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
     } = services;
     const toastNotification = (message: string) => {
       toastNotifications.addDanger({
-        title: i18n.translate('visualize.createVisualization.failedToLoadErrorMessage', {
+        title: i18n.translate('visBuilder.createVisualization.failedToLoadErrorMessage', {
           defaultMessage: 'Failed to load the visualization',
         }),
         text: message,

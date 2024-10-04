@@ -27,7 +27,7 @@ function HistogramVisOptions() {
   return (
     <>
       <Option
-        title={i18n.translate('visTypeVislib.histogram.params.settingsTitle', {
+        title={i18n.translate('visBuilder.histogram.params.settingsTitle', {
           defaultMessage: 'Settings',
         })}
         initialIsOpen
