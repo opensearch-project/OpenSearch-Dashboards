@@ -54,6 +54,7 @@ const getLegacyTopNavLinks = (
       defaultMessage: 'New Search',
     }),
     run() {
+      query.filterManager.setFilters([]); // resetting the filters while we are loading a new search
       core.application.navigateToApp('discover', {
         path: '#/',
       });
@@ -306,6 +307,7 @@ export const getTopNavLinks = (
       defaultMessage: 'New',
     }),
     run() {
+      query.filterManager.setFilters([]); // resetting the filters while we are loading a new search
       core.application.navigateToApp('discover', {
         path: '#/',
       });

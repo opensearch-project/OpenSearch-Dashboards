@@ -92,6 +92,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
             },
           ]}
           onChoose={(id) => {
+            data.query.filterManager.setFilters([]); // resetting the filters
             application.navigateToApp('discover', { path: `#/view/${id}` });
             onClose();
           }}
