@@ -78,7 +78,7 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     label: i18n.translate('core.ui.investigate.label', {
       defaultMessage: 'Investigate',
     }),
-    order: 1000,
+    order: 2000,
   },
   // TODO remove this default category
   dashboardAndReport: {
@@ -86,14 +86,14 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     label: i18n.translate('core.ui.visualizeAndReport.label', {
       defaultMessage: 'Visualize and report',
     }),
-    order: 3000,
+    order: 2000,
   },
   visualizeAndReport: {
     id: 'visualizeAndReport',
     label: i18n.translate('core.ui.visualizeAndReport.label', {
       defaultMessage: 'Visualize and report',
     }),
-    order: 3000,
+    order: 1000,
   },
   analyzeSearch: {
     id: 'analyzeSearch',
@@ -107,14 +107,14 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     label: i18n.translate('core.ui.detect.label', {
       defaultMessage: 'Detect',
     }),
-    order: 3000,
+    order: 8000,
   },
   configure: {
     id: 'configure',
     label: i18n.translate('core.ui.configure.label', {
       defaultMessage: 'Configure',
     }),
-    order: 2000,
+    order: 3000,
   },
   manage: {
     id: 'manage',
@@ -135,6 +135,6 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     label: i18n.translate('core.ui.manageWorkspaceNav.label', {
       defaultMessage: 'Manage workspace',
     }),
-    order: 8000,
+    order: 9000,
   },
 });

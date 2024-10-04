@@ -37,7 +37,7 @@ describe('<DevToolsIcon />', () => {
         >
           <button
             aria-label="go-to-dev-tools"
-            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
             data-test-subj="openDevToolsModal"
             type="button"
           >

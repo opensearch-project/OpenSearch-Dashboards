@@ -82,6 +82,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
         onClick={openPopover}
         aria-label="workspace-select-button"
         data-test-subj="workspace-select-button"
+        color="text"
       />
     </EuiToolTip>
   );

@@ -333,7 +333,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
       >
         <EuiButtonIcon
           iconType="iInCircle"
-          color="primary"
+          color="text"
           size="xs"
           aria-expanded={this.state.isOpen}
           aria-haspopup="true"
