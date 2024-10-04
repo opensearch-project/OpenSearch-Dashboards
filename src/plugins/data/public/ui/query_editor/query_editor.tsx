@@ -326,7 +326,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           iconType={this.state.isCollapsed ? 'expand' : 'minimize'}
-          aria-label={i18n.translate('discover.queryControls.languageToggle', {
+          aria-label={i18n.translate('data.queryControls.languageToggle', {
             defaultMessage: `Language Toggle`,
           })}
           onClick={() => this.setIsCollapsed(!this.state.isCollapsed)}
