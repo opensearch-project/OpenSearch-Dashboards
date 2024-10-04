@@ -1,0 +1,2 @@
+feat:
+- [Workspace]Restrict at least one data source in workspace creation page ([#8461](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8461))

@@ -34,7 +34,10 @@ interface DataSourceConnectionTableProps {
   onUnlinkDataSource: (dataSources: DataSourceConnection) => void;
   onSelectionChange: (selections: DataSourceConnection[]) => void;
   dataSourceConnections: DataSourceConnection[];
-  tableProps?: Pick<EuiInMemoryTableProps<DataSourceConnection>, 'pagination' | 'search'>;
+  tableProps?: Pick<
+    EuiInMemoryTableProps<DataSourceConnection>,
+    'pagination' | 'search' | 'message'
+  >;
 }
 
 export const DataSourceConnectionTable = forwardRef<

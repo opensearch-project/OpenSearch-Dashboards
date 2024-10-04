@@ -197,6 +197,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
               formId={formId}
               application={application}
               isSubmitting={props.isSubmitting}
+              dataSourceEnabled={!!isDataSourceEnabled}
             />
           </div>
         </div>

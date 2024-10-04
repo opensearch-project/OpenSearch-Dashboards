@@ -165,6 +165,7 @@ interface WorkspaceFormSummaryPanelProps {
   formId: string;
   application: ApplicationStart;
   isSubmitting: boolean;
+  dataSourceEnabled: boolean;
 }
 
 export const WorkspaceFormSummaryPanel = ({
@@ -174,6 +175,7 @@ export const WorkspaceFormSummaryPanel = ({
   formId,
   application,
   isSubmitting,
+  dataSourceEnabled,
 }: WorkspaceFormSummaryPanelProps) => {
   const useCase = availableUseCases.find((item) => item.id === formData.useCase);
   const userAndGroups: UserAndGroups[] = formData.permissionSettings.flatMap((setting) => {
@@ -213,18 +215,20 @@ export const WorkspaceFormSummaryPanel = ({
       <FieldSummaryItem field={RightSidebarScrollField.UseCase}>
         {useCase && <EuiText size="xs">{useCase.title}</EuiText>}
       </FieldSummaryItem>
-      <FieldSummaryItem field={RightSidebarScrollField.DataSource}>
-        {formData.selectedDataSourceConnections.length > 0 && (
-          <ExpandableTextList
-            items={formData.selectedDataSourceConnections.map((connection) => (
-              <ul key={connection.id} style={{ marginBottom: 0 }}>
-                <li>{connection.name}</li>
-              </ul>
-            ))}
-            collapseDisplayCount={3}
-          />
-        )}
-      </FieldSummaryItem>
+      {dataSourceEnabled && (
+        <FieldSummaryItem field={RightSidebarScrollField.DataSource}>
+          {formData.selectedDataSourceConnections.length > 0 && (
+            <ExpandableTextList
+              items={formData.selectedDataSourceConnections.map((connection) => (
+                <ul key={connection.id} style={{ marginBottom: 0 }}>
+                  <li>{connection.name}</li>
+                </ul>
+              ))}
+              collapseDisplayCount={3}
+            />
+          )}
+        </FieldSummaryItem>
+      )}
       {permissionEnabled && (
         <FieldSummaryItem bottomGap={false} field={RightSidebarScrollField.Collaborators}>
           {userAndGroups.length > 0 && (
@@ -240,6 +244,7 @@ export const WorkspaceFormSummaryPanel = ({
         formId={formId}
         application={application}
         isSubmitting={isSubmitting}
+        dataSourceEnabled={dataSourceEnabled}
       />
     </EuiCard>
   );
