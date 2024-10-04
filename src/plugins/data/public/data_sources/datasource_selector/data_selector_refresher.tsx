@@ -4,7 +4,6 @@
  */
 
 import { EuiButtonIconProps, EuiSmallButtonIcon, EuiToolTip, EuiToolTipProps } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
 import React from 'react';
 
 interface IDataSelectorRefresherProps {
@@ -19,9 +18,7 @@ export const DataSelectorRefresher: React.FC<IDataSelectorRefresherProps> = Reac
     return (
       <EuiToolTip
         position="right"
-        content={i18n.translate('data.datasource.selector.refreshDataSources', {
-          defaultMessage: tooltipText,
-        })}
+        content={tooltipText}
         display="block"
         data-test-subj="sourceRefreshButtonToolTip"
         {...toolTipProps}

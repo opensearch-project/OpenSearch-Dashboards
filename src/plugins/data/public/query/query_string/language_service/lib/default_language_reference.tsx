@@ -27,7 +27,7 @@ export const DefaultLanguageReference = () => {
     <div>
       <EuiButtonIcon
         iconType={'iInCircle'}
-        aria-label={i18n.translate('discover.queryControls.languageReference', {
+        aria-label={i18n.translate('data.queryControls.languageReference', {
           defaultMessage: `Language Reference`,
         })}
         onClick={() => setIsLanguageReferenceOpen(!isLanguageReferenceOpen)}
