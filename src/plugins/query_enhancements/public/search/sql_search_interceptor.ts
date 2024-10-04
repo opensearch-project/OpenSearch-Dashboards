@@ -42,7 +42,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       path: trimEnd(`${API.SEARCH}/${strategy}`),
       signal,
       body: {
-        queryId: request.params?.queryId,
+        pollQueryResultsParams: request.params?.pollQueryResultsParams,
       },
     };
 

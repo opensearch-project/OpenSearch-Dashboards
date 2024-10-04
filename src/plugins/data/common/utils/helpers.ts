@@ -29,11 +29,11 @@
  */
 
 import { timer } from 'rxjs';
-import { filter, map, mergeMap, take, takeWhile } from 'rxjs/operators';
+import { filter, mergeMap, take, takeWhile } from 'rxjs/operators';
 import {
   PollQueryResultsHandler,
   FetchStatusResponse,
-  QuerySuccessStatusResponse,
+  QueryFailedStatusResponse,
 } from '../data_frames';
 
 export interface QueryStatusOptions {
@@ -57,7 +57,10 @@ export const handleQueryResults = <T>(
       filter((response: FetchStatusResponse) => {
         const status = response?.status?.toUpperCase();
         if (status === 'FAILED') {
-          throw new Error(`Failed to fetch results ${queryId ?? ''}`);
+          throw (
+            (response as QueryFailedStatusResponse).body.error ??
+            new Error(`Failed to fetch results ${queryId ?? ''}`)
+          );
         }
         return status === 'SUCCESS';
       }),

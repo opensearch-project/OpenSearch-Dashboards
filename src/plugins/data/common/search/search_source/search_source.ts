@@ -447,27 +447,34 @@ export class SearchSource {
           return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
         }
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
+          const startTime = Date.now();
           const { status } = response as IDataFramePollingResponse;
           let results;
           if (status === 'success') {
             results = response as QuerySuccessStatusResponse;
           } else if (status === 'started') {
             const {
-              body: { queryId },
+              body: { queryStatusConfig },
             } = response as QueryStartedResponse;
 
-            if (!queryId) {
-              throw new Error('Cannot poll results for undefined query id');
+            if (!queryStatusConfig) {
+              throw new Error('Cannot poll results for undefined query status config');
             }
 
             results = await handleQueryResults({
               pollQueryResults: async () =>
-                search({ params: { ...params, queryId } }, options) as Promise<FetchStatusResponse>,
-              queryId,
+                search(
+                  { params: { ...params, pollQueryResultsParams: { ...queryStatusConfig } } },
+                  options
+                ) as Promise<FetchStatusResponse>,
+              queryId: queryStatusConfig.queryId,
             });
           } else {
             throw new Error('Invalid query state');
           }
+
+          const elapsedMs = Date.now() - startTime;
+          (results as any).took = elapsedMs;
 
           await this.setDataFrame((results as QuerySuccessStatusResponse).body as IDataFrame);
           return onResponse(searchRequest, convertResult(results as IDataFrameResponse));

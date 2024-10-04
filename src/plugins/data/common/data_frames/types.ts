@@ -124,15 +124,21 @@ export interface IDataFrameError extends SearchResponse<any> {
   error: Error;
 }
 
+export interface PollQueryResultsParams {
+  queryId?: string;
+  sessionId?: string;
+}
+
+export type QueryStatusConfig = PollQueryResultsParams;
+
 export interface QuerySuccessStatusResponse {
   status: 'success';
   body: IDataFrame | IDataFrameWithAggs | IDataFrameError;
-  took: number;
 }
 
 export interface QueryStartedResponse {
   status: 'started';
-  body: { queryId: string };
+  body: { queryStatusConfig: QueryStatusConfig };
 }
 
 export interface QueryFailedStatusResponse {
