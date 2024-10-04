@@ -1,10 +1,8 @@
-@import "./variables";
-
 .context-nav-wrapper {
   border: none !important;
   border-top-right-radius: $euiSizeL;
   border-bottom-right-radius: $euiSizeL;
-  background-color: $ouiSideNavBackgroundColorTemp;
+  background-color: $euiSideNavBackgroundColor;
   overflow: hidden;
 
   .nav-link-item {
