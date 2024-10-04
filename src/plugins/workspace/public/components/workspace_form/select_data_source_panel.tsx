@@ -121,7 +121,7 @@ export const SelectDataSourcePanel = ({
           title={
             <EuiText size="s">
               <h3>
-                {i18n.translate('workspaces.forms.selectDataSourcePanel.emptyTableTitle', {
+                {i18n.translate('workspace.forms.selectDataSourcePanel.emptyTableTitle', {
                   defaultMessage: 'Associated data sources will appear here',
                 })}
               </h3>
@@ -129,7 +129,7 @@ export const SelectDataSourcePanel = ({
           }
           body={
             <EuiText size="s">
-              {i18n.translate('workspaces.forms.selectDataSourcePanel.emptyTableDescription', {
+              {i18n.translate('workspace.forms.selectDataSourcePanel.emptyTableDescription', {
                 defaultMessage: 'At least one data source is required to create a workspace.',
               })}
             </EuiText>
