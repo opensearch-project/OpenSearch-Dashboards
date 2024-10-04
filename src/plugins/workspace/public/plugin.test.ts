@@ -26,6 +26,8 @@ import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.moc
 import { WorkspacePlugin } from './plugin';
 import { contentManagementPluginMocks } from '../../content_management/public';
 import { navigationPluginMock } from '../../navigation/public/mocks';
+import * as registerDefaultCollaboratorTypesExports from './register_default_collaborator_types';
+import { AddCollaboratorsModal } from './components/add_collaborators_modal';
 
 // Expect 6 app registrations: create, fatal error, detail, initial, navigation, and list apps.
 const registrationAppNumber = 6;
@@ -340,19 +342,39 @@ describe('Workspace plugin', () => {
     );
   });
 
+  it('#setup should call registerDefaultCollaboratorTypes', async () => {
+    const registerDefaultCollaboratorTypesMock = jest.fn();
+    jest
+      .spyOn(registerDefaultCollaboratorTypesExports, 'registerDefaultCollaboratorTypes')
+      .mockImplementationOnce(registerDefaultCollaboratorTypesMock);
+    const setupMock = coreMock.createSetup();
+    const workspacePlugin = new WorkspacePlugin();
+    expect(registerDefaultCollaboratorTypesMock).not.toHaveBeenCalled();
+    await workspacePlugin.setup(setupMock, {});
+    expect(registerDefaultCollaboratorTypesMock).toHaveBeenCalled();
+  });
+
   it('#setup should return setCollaboratorsTypes method', async () => {
     const setTypeMock = jest.fn();
-    jest
-      .spyOn(WorkspaceCollaboratorTypesService.prototype, 'setTypes')
-      .mockImplementationOnce(setTypeMock);
     const setupMock = coreMock.createSetup();
     const workspacePlugin = new WorkspacePlugin();
     const result = await workspacePlugin.setup(setupMock, {});
     const mockCollaboratorTypes: WorkspaceCollaboratorType[] = [];
+    jest
+      .spyOn(WorkspaceCollaboratorTypesService.prototype, 'setTypes')
+      .mockImplementationOnce(setTypeMock);
 
     expect(setTypeMock).not.toHaveBeenCalled();
     result.setCollaboratorTypes(mockCollaboratorTypes);
     expect(setTypeMock).toHaveBeenCalledWith(mockCollaboratorTypes);
+  });
+
+  it('#setup should return getAddCollaboratorsModal method', async () => {
+    const setupMock = coreMock.createSetup();
+    const workspacePlugin = new WorkspacePlugin();
+    const result = await workspacePlugin.setup(setupMock, {});
+
+    expect(result.getAddCollaboratorsModal()).toBe(AddCollaboratorsModal);
   });
 
   it('#start add workspace detail page to breadcrumbs when start', async () => {

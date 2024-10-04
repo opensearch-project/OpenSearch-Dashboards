@@ -74,6 +74,8 @@ import {
   UseCaseService,
   WorkspaceCollaboratorType,
 } from './services';
+import { AddCollaboratorsModal } from './components/add_collaborators_modal';
+import { registerDefaultCollaboratorTypes } from './register_default_collaborator_types';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -464,6 +466,7 @@ export class WorkspacePlugin
             workspaceClient,
             dataSourceManagement,
             contentManagement: contentManagementStart,
+            collaboratorTypes: this.collaboratorTypes,
           };
 
           return renderUseCaseOverviewApp(params, services, ESSENTIAL_OVERVIEW_PAGE_ID);
@@ -499,6 +502,7 @@ export class WorkspacePlugin
             workspaceClient,
             dataSourceManagement,
             contentManagement: contentManagementStart,
+            collaboratorTypes: this.collaboratorTypes,
           };
 
           return renderUseCaseOverviewApp(params, services, ANALYTICS_ALL_OVERVIEW_PAGE_ID);
@@ -553,10 +557,16 @@ export class WorkspacePlugin
       });
     }
 
+    registerDefaultCollaboratorTypes({
+      getStartServices: core.getStartServices,
+      collaboratorTypesService: this.collaboratorTypes,
+    });
+
     return {
       setCollaboratorTypes: (types: WorkspaceCollaboratorType[]) => {
         this.collaboratorTypes.setTypes(types);
       },
+      getAddCollaboratorsModal: () => AddCollaboratorsModal,
     };
   }
 
@@ -644,6 +654,7 @@ export class WorkspacePlugin
         ...coreStart,
         workspaceClient: this.workspaceClient!,
         navigationUI: navigation.ui,
+        collaboratorTypes: this.collaboratorTypes,
       };
       contentManagement.registerContentProvider({
         id: 'default_workspace_list',

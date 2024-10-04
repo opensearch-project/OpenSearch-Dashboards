@@ -5,7 +5,6 @@
 
 export { UseCaseService } from './use_case_service';
 export {
-  WorkspaceCollaboratorTypesService,
   WorkspaceCollaboratorType,
-  defaultWorkspaceCollaboratorTypes,
+  WorkspaceCollaboratorTypesService,
 } from './workspace_collaborator_types_service';

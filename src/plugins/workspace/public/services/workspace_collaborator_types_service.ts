@@ -4,75 +4,22 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { i18n } from '@osd/i18n';
+import { WorkspaceCollaborator } from '../types';
 
-// Use string literal avoid import enum from workspace self
-type WorkspaceCollaboratorPermissionSettingType = 'user' | 'group';
+interface OnAddOptions {
+  onAddCollaborators: (collaborators: WorkspaceCollaborator[]) => Promise<void>;
+}
 
 export interface WorkspaceCollaboratorType {
   id: string;
   name: string;
-  pluralName: string;
-  // Will be assigned to this type in the final ACL permissions object
-  permissionSettingType: WorkspaceCollaboratorPermissionSettingType;
-  modal: {
-    title: string;
-    description?: string;
-    // Will use name with ID suffix for fallback
-    inputLabel?: string;
-    inputDescription?: string;
-    // Will use name with ID suffix for fallback
-    inputPlaceholder?: string;
-  };
-  instruction?: {
-    title: string;
-    detail: string;
-    link?: string;
-  };
-  // To match wether passed collaborator match this collaborator type
-  collaboratorMatcher?: (collaborator: {
-    type: WorkspaceCollaboratorPermissionSettingType;
-    userOrGroupId: string;
-  }) => boolean;
+  buttonLabel: string;
+  getDisplayedType?: (collaborator: WorkspaceCollaborator) => boolean;
+  onAdd: ({ onAddCollaborators }: OnAddOptions) => Promise<void>;
 }
 
-export const defaultWorkspaceCollaboratorTypes: WorkspaceCollaboratorType[] = [
-  {
-    id: 'user',
-    name: i18n.translate('workspace.collaboratorType.defaultUser.name', { defaultMessage: 'User' }),
-    pluralName: i18n.translate('workspace.collaboratorType.defaultUser.pluralName', {
-      defaultMessage: 'Users',
-    }),
-    permissionSettingType: 'user',
-    modal: {
-      title: i18n.translate('workspace.collaboratorType.defaultUser.modal.title', {
-        defaultMessage: 'Add Users',
-      }),
-    },
-    collaboratorMatcher: (collaborator) => collaborator.type === 'user',
-  },
-  {
-    id: 'group',
-    name: i18n.translate('workspace.collaboratorType.defaultGroup.name', {
-      defaultMessage: 'Group',
-    }),
-    pluralName: i18n.translate('workspace.collaboratorType.defaultGroup.pluralName', {
-      defaultMessage: 'Groups',
-    }),
-    permissionSettingType: 'group',
-    modal: {
-      title: i18n.translate('workspace.collaboratorType.defaultGroup.modal.title', {
-        defaultMessage: 'Add Groups',
-      }),
-    },
-    collaboratorMatcher: (collaborator) => collaborator.type === 'group',
-  },
-];
-
 export class WorkspaceCollaboratorTypesService {
-  private _collaboratorTypes$ = new BehaviorSubject<WorkspaceCollaboratorType[]>(
-    defaultWorkspaceCollaboratorTypes
-  );
+  private _collaboratorTypes$ = new BehaviorSubject<WorkspaceCollaboratorType[]>([]);
 
   public getTypes$() {
     return this._collaboratorTypes$;
