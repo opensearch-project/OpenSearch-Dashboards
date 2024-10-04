@@ -1,0 +1,2 @@
+fix:
+- Fix unprefixed i18n identifiers in examples ([#8412](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8412))
