@@ -30,10 +30,10 @@
 
 import { i18n } from '@osd/i18n';
 import { schema } from '@osd/config-schema';
-import { UiSettingsParams } from 'opensearch-dashboards/server';
 // @ts-ignore untyped module
 import numeralLanguages from '@elastic/numeral/languages';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common';
+import { UiSettingsParams, UiSettingScope } from '../../../core/server';
 
 const luceneQueryLanguageLabel = i18n.translate('data.advancedSettings.searchQueryLanguageLucene', {
   defaultMessage: 'Lucene',
@@ -79,7 +79,9 @@ const numeralLanguageIds = [
   }),
 ];
 
-export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
+export function getUiSettings(
+  workspaceEnabled: boolean
+): Record<string, UiSettingsParams<unknown>> {
   return {
     [UI_SETTINGS.META_FIELDS]: {
       name: i18n.translate('data.advancedSettings.metaFieldsTitle', {
@@ -200,6 +202,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         defaultMessage: 'The index to access if no index is set',
       }),
       schema: schema.nullable(schema.string()),
+      scope: workspaceEnabled ? UiSettingScope.WORKSPACE : UiSettingScope.GLOBAL,
     },
     [UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX]: {
       name: i18n.translate('data.advancedSettings.courier.ignoreFilterTitle', {
@@ -757,7 +760,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       value: ['none'],
       description: i18n.translate('data.advancedSettings.searchQueryLanguageBlocklistText', {
-        defaultMessage: `Additional languages that are blocked from being used in the query editor. 
+        defaultMessage: `Additional languages that are blocked from being used in the query editor.
          <strong>Note</strong>: DQL and Lucene will not be blocked even if set.`,
       }),
       schema: schema.arrayOf(schema.string()),
