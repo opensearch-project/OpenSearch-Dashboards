@@ -367,7 +367,7 @@ describe('ui settings', () => {
       const value = chance.word();
       const override = chance.word();
       const defaults = { key: { value } };
-      const overrides = { key: { value: override } };
+      const overrides = { key: override };
       const { uiSettings } = setup({ defaults, overrides });
       expect(uiSettings.getOverrideOrDefault('key')).toEqual(override);
     });
