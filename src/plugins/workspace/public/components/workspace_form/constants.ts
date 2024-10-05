@@ -129,7 +129,7 @@ export const permissionModeOptions = [
     inputDisplay: i18n.translate(
       'workspace.form.permissionSettingPanel.permissionModeOptions.read',
       {
-        defaultMessage: 'Read',
+        defaultMessage: 'Read only',
       }
     ),
   },
@@ -138,7 +138,7 @@ export const permissionModeOptions = [
     inputDisplay: i18n.translate(
       'workspace.form.permissionSettingPanel.permissionModeOptions.readAndWrite',
       {
-        defaultMessage: 'Read & Write',
+        defaultMessage: 'Read and write',
       }
     ),
   },
@@ -147,8 +147,23 @@ export const permissionModeOptions = [
     inputDisplay: i18n.translate(
       'workspace.form.permissionSettingPanel.permissionModeOptions.owner',
       {
-        defaultMessage: 'Owner',
+        defaultMessage: 'Admin',
       }
     ),
+  },
+];
+
+export const typeOptions = [
+  {
+    value: WorkspacePermissionItemType.User,
+    inputDisplay: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.user', {
+      defaultMessage: 'User',
+    }),
+  },
+  {
+    value: WorkspacePermissionItemType.Group,
+    inputDisplay: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.group', {
+      defaultMessage: 'Group',
+    }),
   },
 ];

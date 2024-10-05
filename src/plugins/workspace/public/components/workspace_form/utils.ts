@@ -423,24 +423,24 @@ export const generatePermissionSettingsState = (
   }
 
   const finalPermissionSettings = [...(permissionSettings ?? [])];
-  const userPermissionExists = finalPermissionSettings.find(
-    (setting) => setting.type === WorkspacePermissionItemType.User
-  );
-  const groupPermissionExists = finalPermissionSettings.find(
-    (setting) => setting.type === WorkspacePermissionItemType.Group
-  );
-  if (!userPermissionExists) {
-    finalPermissionSettings.push({
-      ...emptyUserPermission,
-      id: generateNextPermissionSettingsId(finalPermissionSettings),
-    } as typeof finalPermissionSettings[0]);
-  }
-  if (!groupPermissionExists) {
-    finalPermissionSettings.push({
-      ...emptyUserGroupPermission,
-      id: generateNextPermissionSettingsId(finalPermissionSettings),
-    } as typeof finalPermissionSettings[0]);
-  }
+  // const userPermissionExists = finalPermissionSettings.find(
+  //   (setting) => setting.type === WorkspacePermissionItemType.User
+  // );
+  // const groupPermissionExists = finalPermissionSettings.find(
+  //   (setting) => setting.type === WorkspacePermissionItemType.Group
+  // );
+  // if (!userPermissionExists) {
+  //   finalPermissionSettings.push({
+  //     ...emptyUserPermission,
+  //     id: generateNextPermissionSettingsId(finalPermissionSettings),
+  //   } as typeof finalPermissionSettings[0]);
+  // }
+  // if (!groupPermissionExists) {
+  //   finalPermissionSettings.push({
+  //     ...emptyUserGroupPermission,
+  //     id: generateNextPermissionSettingsId(finalPermissionSettings),
+  //   } as typeof finalPermissionSettings[0]);
+  // }
   return finalPermissionSettings;
 };
 
