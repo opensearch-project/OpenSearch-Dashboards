@@ -1,0 +1,2 @@
+fix:
+- Data.search() should not ignore the strategy passed as parameter ([#8368](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8368))

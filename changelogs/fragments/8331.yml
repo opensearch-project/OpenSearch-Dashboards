@@ -1,0 +1,2 @@
+fix:
+- Discover query input background not shrink when window resize ([#8331](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8331))

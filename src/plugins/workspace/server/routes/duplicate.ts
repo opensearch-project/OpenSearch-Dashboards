@@ -59,7 +59,6 @@ export const registerDuplicateRoute = (
       const getTargetWorkspaceResult = await client.get(
         {
           request: req,
-          logger,
         },
         targetWorkspace
       );

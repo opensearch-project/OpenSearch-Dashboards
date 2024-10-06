@@ -14,6 +14,8 @@ export interface WorkspaceNameFieldProps {
   onChange: (newValue: string) => void;
   error?: string;
   readOnly?: boolean;
+  placeholder?: string;
+  showDescription?: boolean;
 }
 
 export const WorkspaceNameField = ({
@@ -21,6 +23,8 @@ export const WorkspaceNameField = ({
   error,
   readOnly,
   onChange,
+  placeholder,
+  showDescription = true,
 }: WorkspaceNameFieldProps) => {
   const handleChange = useCallback(
     (e) => {
@@ -46,11 +50,15 @@ export const WorkspaceNameField = ({
               },
             })}
           </EuiTextColor>
-          <br />
-          {i18n.translate('workspace.form.workspaceDetails.name.helpText', {
-            defaultMessage:
-              'Use a unique name for the workspace. Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
-          })}
+          {showDescription && (
+            <>
+              <br />
+              {i18n.translate('workspace.form.workspaceDetails.name.helpTextLong', {
+                defaultMessage:
+                  'Use a unique name for the workspace. Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
+              })}
+            </>
+          )}
         </>
       }
       isInvalid={!!error || charactersOverflow}
@@ -61,9 +69,12 @@ export const WorkspaceNameField = ({
         onChange={handleChange}
         readOnly={readOnly}
         data-test-subj="workspaceForm-workspaceDetails-nameInputText"
-        placeholder={i18n.translate('workspace.form.workspaceDetails.name.placeholder', {
-          defaultMessage: 'Enter a name',
-        })}
+        placeholder={
+          placeholder ||
+          i18n.translate('workspace.form.workspaceDetails.name.placeholder', {
+            defaultMessage: 'Enter a name',
+          })
+        }
       />
     </EuiCompressedFormRow>
   );

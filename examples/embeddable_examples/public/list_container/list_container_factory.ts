@@ -60,7 +60,7 @@ export class ListContainerFactoryDefinition
   };
 
   public getDisplayName() {
-    return i18n.translate('embeddableExamples.searchableListContainer.displayName', {
+    return i18n.translate('embeddableExamples.listContainer.displayName', {
       defaultMessage: 'List container',
     });
   }

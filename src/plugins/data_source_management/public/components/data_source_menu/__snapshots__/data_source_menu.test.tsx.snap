@@ -80,7 +80,7 @@ Object {
             data-label="Data source"
           >
             <button
-              aria-label="dataSourceAggregatedViewButton"
+              aria-label="Data source selector"
               class="euiButton euiButton--text euiButton--small euiButton-isDisabled dataSourceMenuPopoverButtonLabel"
               data-test-subj="dataSourceAggregatedViewButton"
               disabled=""
@@ -117,7 +117,7 @@ Object {
           data-label="Data source"
         >
           <button
-            aria-label="dataSourceAggregatedViewButton"
+            aria-label="Data source selector"
             class="euiButton euiButton--text euiButton--small euiButton-isDisabled dataSourceMenuPopoverButtonLabel"
             data-test-subj="dataSourceAggregatedViewButton"
             disabled=""

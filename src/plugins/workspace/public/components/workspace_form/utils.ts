@@ -10,6 +10,7 @@ import { CURRENT_USER_PLACEHOLDER, WorkspacePermissionMode } from '../../../comm
 import { isUseCaseFeatureConfig } from '../../utils';
 import {
   optionIdToWorkspacePermissionModesMap,
+  permissionModeOptions,
   WorkspaceOperationType,
   WorkspacePermissionItemType,
 } from './constants';
@@ -88,6 +89,16 @@ export const getPermissionModeId = (modes: WorkspacePermissionMode[]) => {
     }
   }
   return PermissionModeId.Read;
+};
+
+export const getPermissionModeName = (modes: WorkspacePermissionMode[]) => {
+  for (const key in optionIdToWorkspacePermissionModesMap) {
+    if (optionIdToWorkspacePermissionModesMap[key].every((mode) => modes?.includes(mode))) {
+      return permissionModeOptions.find((option) => option.value === key)?.inputDisplay;
+    }
+  }
+  return permissionModeOptions.find((option) => option.value === PermissionModeId.Read)
+    ?.inputDisplay;
 };
 
 export const convertPermissionSettingsToPermissions = (
@@ -320,7 +331,7 @@ export const validateWorkspaceForm = (
   if (!features || !features.some((featureConfig) => isUseCaseFeatureConfig(featureConfig))) {
     formErrors.features = {
       code: WorkspaceFormErrorCode.UseCaseMissing,
-      message: i18n.translate('workspace.form.features.empty', {
+      message: i18n.translate('workspace.form.features.emptyUseCase', {
         defaultMessage: 'Use case is required. Select a use case.',
       }),
     };
@@ -328,7 +339,7 @@ export const validateWorkspaceForm = (
   if (color && !validateWorkspaceColor(color)) {
     formErrors.color = {
       code: WorkspaceFormErrorCode.InvalidColor,
-      message: i18n.translate('workspace.form.features.empty', {
+      message: i18n.translate('workspace.form.features.invalidColor', {
         defaultMessage: 'Color is invalid. Enter a valid color.',
       }),
     };

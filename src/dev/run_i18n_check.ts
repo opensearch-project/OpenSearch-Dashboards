@@ -41,9 +41,11 @@ import {
   mergeConfigs,
   ListrContext,
 } from './i18n/tasks';
+import { DEFAULT_DIRS_WITH_RC_FILES } from './i18n/constants';
 
 const skipOnNoTranslations = (context: ListrContext) =>
   !context.config?.translations?.length && 'No translations found.';
+
 run(
   async ({
     flags: {
@@ -53,6 +55,7 @@ run(
       'ignore-unused': ignoreUnused,
       'include-config': includeConfig,
       'ignore-untracked': ignoreUntracked,
+      'ignore-missing-formats': ignoreMissingFormats,
       fix = false,
       path,
     },
@@ -83,7 +86,7 @@ run(
       throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --fix can't have a value`);
     }
 
-    const srcPaths = Array().concat(path || ['./src', './packages']);
+    const srcPaths = Array().concat(path || DEFAULT_DIRS_WITH_RC_FILES);
 
     const list = new Listr<ListrContext>(
       [
@@ -104,7 +107,6 @@ run(
         },
         {
           title: 'Validating Default Messages',
-          skip: skipOnNoTranslations,
           task: ({ config }) => {
             return new Listr(extractDefaultMessages(config, srcPaths), { exitOnError: true });
           },
@@ -121,11 +123,13 @@ run(
                   ignoreIncompatible: !!ignoreIncompatible,
                   ignoreUnused: !!ignoreUnused,
                   ignoreMissing: !!ignoreMissing,
+                  // By default ignore missing formats
+                  ignoreMissingFormats: ignoreMissingFormats !== false,
                   fix,
                 },
                 log
               ),
-              { exitOnError: true }
+              { exitOnError: false }
             );
           },
         },
@@ -154,6 +158,16 @@ run(
     flags: {
       allowUnexpected: true,
       guessTypesForUnexpectedFlags: true,
+      help: `
+      --ignore-incompatible           Ignore mismatched keys in values and tokens in translations
+      --ignore-malformed              Ignore malformed ICU format usages
+      --ignore-missing                Ignore missing translations in locale files
+      --ignore-unused                 Ignore unused translations in locale files
+      --ignore-untracked              Ignore untracked files with i18n labels
+      --ignore-missing-formats        Ignore missing 'formats' key in locale files
+                                      (default: true, use --ignore-missing-formats=false to disable)
+      `,
     },
+    description: 'Checks i18n usage in code and validates translation files',
   }
 );

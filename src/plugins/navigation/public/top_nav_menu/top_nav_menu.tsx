@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHeaderLinks, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHeaderLinks, EuiText, EuiTitle } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { ReactElement, useRef } from 'react';
 
@@ -137,7 +137,12 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     const menuClassName = classNames(className, { osdTopNavMenuSpread: spreadSections });
 
     return (
-      <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={menuClassName}>
+      <EuiHeaderLinks
+        data-test-subj="top-nav"
+        gutterSize="xs"
+        className={menuClassName}
+        popoverBreakpoints={'none'}
+      >
         {renderItems()}
         {renderDataSourceMenu()}
       </EuiHeaderLinks>
@@ -177,10 +182,16 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                 <MountPointPortal setMountPoint={setMenuMountPoint}>
                   <EuiFlexGroup alignItems="stretch" gutterSize="none">
                     <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
-                      <EuiText size="s">{screenTitle}</EuiText>
+                      <EuiTitle size="xs">
+                        <h1>{screenTitle}</h1>
+                      </EuiTitle>
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>{renderMenu(menuClassName)}</EuiFlexItem>
-                    <EuiFlexItem>{renderSearchBar({ isFilterBarPortable: true })}</EuiFlexItem>
+                    <EuiFlexItem grow={false} className="osdTopNavMenu">
+                      {renderMenu(menuClassName)}
+                    </EuiFlexItem>
+                    <EuiFlexItem className="osdTopNavSearchBar">
+                      {renderSearchBar({ isFilterBarPortable: true })}
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 </MountPointPortal>
               </>
@@ -192,9 +203,13 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
               <MountPointPortal setMountPoint={setMenuMountPoint}>
                 <EuiFlexGroup alignItems="stretch" gutterSize="none">
                   <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
-                    <EuiText size="s">{screenTitle}</EuiText>
+                    <EuiTitle size="xs">
+                      <h1>{screenTitle}</h1>
+                    </EuiTitle>
                   </EuiFlexItem>
-                  <EuiFlexItem>{renderMenu(menuClassName, true)}</EuiFlexItem>
+                  <EuiFlexItem className="osdTopNavMenu">
+                    {renderMenu(menuClassName, true)}
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </MountPointPortal>
             ) : (
@@ -210,9 +225,13 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
                 <MountPointPortal setMountPoint={setMenuMountPoint}>
                   <EuiFlexGroup alignItems="stretch" gutterSize="none">
                     <EuiFlexItem grow={false} className="osdTopNavMenuScreenTitle">
-                      <EuiText size="s">{screenTitle}</EuiText>
+                      <EuiTitle size="xs">
+                        <h1>{screenTitle}</h1>
+                      </EuiTitle>
                     </EuiFlexItem>
-                    <EuiFlexItem grow={false}>{renderMenu(menuClassName)}</EuiFlexItem>
+                    <EuiFlexItem grow={false} className="osdTopNavMenu">
+                      {renderMenu(menuClassName)}
+                    </EuiFlexItem>
                     <EuiFlexItem className="globalDatePicker">
                       <div ref={datePickerRef} />
                     </EuiFlexItem>

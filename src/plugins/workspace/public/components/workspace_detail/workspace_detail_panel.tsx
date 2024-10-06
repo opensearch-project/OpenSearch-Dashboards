@@ -5,7 +5,6 @@
 
 import React from 'react';
 import {
-  EuiLink,
   EuiText,
   EuiCopy,
   EuiBadge,
@@ -36,28 +35,18 @@ const detailID = i18n.translate('workspace.detail.id', {
   defaultMessage: 'ID',
 });
 
-const workspaceOverview = i18n.translate('workspace.detail.workspaceOverview', {
-  defaultMessage: 'Workspace overview',
-});
-
-const overview = i18n.translate('workspace.detail.overview', {
-  defaultMessage: 'Overview',
-});
-
 function getOwners(currentWorkspace: WorkspaceAttributeWithPermission) {
   const { groups = [], users = [] } = currentWorkspace?.permissions?.write || {};
   return [...groups, ...users];
 }
 
 interface WorkspaceDetailPanelProps {
-  useCaseUrl: string;
   handleBadgeClick: () => void;
   currentUseCase: WorkspaceUseCase | undefined;
   currentWorkspace: WorkspaceObject;
   dateFormat: string;
 }
 export const WorkspaceDetailPanel = ({
-  useCaseUrl,
   currentUseCase,
   handleBadgeClick,
   currentWorkspace,
@@ -130,16 +119,6 @@ export const WorkspaceDetailPanel = ({
                 />
               )}
             </EuiCopy>
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText>
-          <h4>{workspaceOverview}</h4>
-          <p>
-            <EuiLink href={useCaseUrl} external={true} style={{ fontWeight: 'normal' }}>
-              {overview}
-            </EuiLink>
           </p>
         </EuiText>
       </EuiFlexItem>
