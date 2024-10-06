@@ -258,6 +258,8 @@ class TutorialDirectoryUi extends React.Component {
               onSelectedDataSources: this.onSelectedDataSourceChange,
             }}
             application={application}
+            hideLocalCluster={isLocalClusterHidden}
+            uiSettings={uiSettings}
           />
         </MountPointPortal>
       );
