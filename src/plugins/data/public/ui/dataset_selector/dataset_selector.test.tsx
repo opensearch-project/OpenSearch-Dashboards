@@ -57,7 +57,7 @@ describe('DatasetSelector', () => {
         getDatasetService: jest.fn().mockReturnValue({
           getType: getTypeMock,
           getRecentDatasets: jest.fn().mockReturnValue([]),
-          addRecentDatasets: jest.fn(),
+          addRecentDataset: jest.fn(),
         }),
       },
     });
