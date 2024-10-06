@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { setTimeout } from 'timers/promises';
 import { EmbeddableChildPanel } from './embeddable_child_panel';
 import { CONTACT_CARD_EMBEDDABLE } from '../test_samples/embeddables/contact_card/contact_card_embeddable_factory';
 import { SlowContactCardEmbeddableFactory } from '../test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
@@ -82,7 +82,7 @@ test('EmbeddableChildPanel renders an embeddable when it is done loading', async
     />
   );
 
-  await nextTick();
+  await setTimeout();
   component.update();
 
   // Due to the way embeddables mount themselves on the dom node, they are not forced to be
@@ -111,7 +111,7 @@ test(`EmbeddableChildPanel renders an error message if the factory doesn't exist
     <EmbeddableChildPanel container={container} embeddableId={'1'} PanelComponent={testPanel} />
   );
 
-  await nextTick();
+  await setTimeout();
   component.update();
 
   expect(

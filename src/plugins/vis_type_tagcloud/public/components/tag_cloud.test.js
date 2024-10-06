@@ -34,7 +34,7 @@ import 'jest-canvas-mock';
 
 import { TagCloud } from './tag_cloud';
 import { setHTMLElementOffset, setSVGElementGetBBox } from '../../../../test_utils/public';
-import { nextTick } from '../../../../test_utils/public/helpers';
+import { setTimeout } from 'timers/promises';
 
 describe('tag cloud tests', () => {
   let SVGElementGetBBoxSpyInstance;
@@ -329,7 +329,7 @@ describe('tag cloud tests', () => {
       tagCloud.setData(logScaleTest.data);
       tagCloud.setOptions(logScaleTest.options);
 
-      await nextTick(1000); //let layout run
+      await setTimeout(1000); //let layout run
 
       SVGElementGetBBoxSpyInstance.mockRestore();
       SVGElementGetBBoxSpyInstance = setSVGElementGetBBox(600, 600);

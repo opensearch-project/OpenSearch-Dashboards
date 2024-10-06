@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { nextTick } from 'src/test_utils/public/helpers';
+import { setTimeout } from 'timers/promises';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function LoginPageProvider({ getService }: FtrProviderContext) {
@@ -84,7 +84,7 @@ export function LoginPageProvider({ getService }: FtrProviderContext) {
 
     async sleep(sleepMilliseconds: number) {
       log.debug(`... sleep(${sleepMilliseconds}) start`);
-      await nextTick(sleepMilliseconds);
+      await setTimeout(sleepMilliseconds);
       log.debug(`... sleep(${sleepMilliseconds}) end`);
     }
   }

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { nextTick } from '../../../../../../src/test_utils/public/helpers';
+import { setTimeout } from 'timers/promises';
 
 export default function () {
   return {
@@ -44,13 +44,13 @@ export default function () {
 
         lifecycle.testFailure.add(async (err, test) => {
           log.info('testFailure %s %s', err.message, test.fullTitle());
-          await nextTick(10);
+          await setTimeout(10);
           log.info('testFailureAfterDelay %s %s', err.message, test.fullTitle());
         });
 
         lifecycle.testHookFailure.add(async (err, test) => {
           log.info('testHookFailure %s %s', err.message, test.fullTitle());
-          await nextTick(10);
+          await setTimeout(10);
           log.info('testHookFailureAfterDelay %s %s', err.message, test.fullTitle());
         });
       },

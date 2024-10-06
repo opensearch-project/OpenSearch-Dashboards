@@ -6,7 +6,8 @@
 import React, { ReactElement } from 'react';
 import { act } from '@testing-library/react-hooks';
 import { ShallowWrapper, shallow } from 'enzyme';
-import { nextTick, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { setTimeout } from 'timers/promises';
 import { ImportModeControl } from './import_mode_control';
 import { EuiFormLegendProps, EuiRadioGroupProps } from '@elastic/eui';
 
@@ -26,7 +27,7 @@ describe('ImportModeControl Component', () => {
         />
       );
     });
-    await nextTick();
+    await setTimeout();
     component.update();
   });
 

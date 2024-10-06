@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { nextTick } from 'src/test_utils/public/helpers';
+import { setTimeout } from 'timers/promises';
 import expect from '@osd/expect';
 // @ts-ignore
 import fetch from 'node-fetch';
@@ -222,7 +222,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     async sleep(sleepMilliseconds: number) {
       log.debug(`... sleep(${sleepMilliseconds}) start`);
-      await nextTick(sleepMilliseconds);
+      await setTimeout(sleepMilliseconds);
       log.debug(`... sleep(${sleepMilliseconds}) end`);
     }
 

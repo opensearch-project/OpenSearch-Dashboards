@@ -30,14 +30,13 @@
 
 import sinon from 'sinon';
 import expect from '@osd/expect';
+import { setTimeout } from 'timers/promises';
 
 import { createListStream, createPromiseFromStreams, createConcatStream } from '../streams';
 
 import { createGenerateDocRecordsStream } from './generate_doc_records_stream';
 import { Progress } from '../progress';
 import { createStubStats, createStubClient } from './test_stubs';
-
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
   it('scolls 1000 documents at a time', async () => {
@@ -104,7 +103,7 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
       async (name, params) => {
         expect(name).to.be('search');
         expect(params).to.have.property('index', 'index1');
-        await delay(200);
+        await setTimeout(200);
         return {
           body: {
             _scroll_id: 'index1ScrollId',
@@ -117,7 +116,7 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
         expect(params).to.have.property('scroll_id', 'index1ScrollId');
         expect(Date.now() - checkpoint).to.not.be.lessThan(200);
         checkpoint = Date.now();
-        await delay(200);
+        await setTimeout(200);
         return { body: { hits: { total: 2, hits: [{ _id: 2, _index: 'foo' }] } } };
       },
       async (name, params) => {
@@ -125,7 +124,7 @@ describe('opensearchArchiver: createGenerateDocRecordsStream()', () => {
         expect(params).to.have.property('index', 'index2');
         expect(Date.now() - checkpoint).to.not.be.lessThan(200);
         checkpoint = Date.now();
-        await delay(200);
+        await setTimeout(200);
         return { body: { hits: { total: 0, hits: [] } } };
       },
     ]);
