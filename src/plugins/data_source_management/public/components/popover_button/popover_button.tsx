@@ -31,8 +31,8 @@ export const DataSourceMenuPopoverButton: React.FC<DataSourceMenuPopoverButtonPr
         className="dataSourceMenuPopoverButtonLabel"
         data-test-subj={`${className}Button`}
         onClick={onClick}
-        aria-label={i18n.translate(`${className}.dataSourceOptionsViewAriaLabel`, {
-          defaultMessage: `${className}Button`,
+        aria-label={i18n.translate('dataSourcesManagement.popoverButton.ariaLabel', {
+          defaultMessage: 'Data source selector',
         })}
         iconType="database"
         iconSide="left"

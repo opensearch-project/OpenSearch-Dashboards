@@ -1,0 +1,2 @@
+fix:
+- Fix dynamic and correct unprefixed and duplicate i18n identifiers in dataSourceManagement plugin ([#8394](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8394))

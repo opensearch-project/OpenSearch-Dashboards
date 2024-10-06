@@ -25,7 +25,13 @@ export const renderCreatorApp = (
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceCreatorApp {...props} />
+      <Router>
+        <Switch>
+          <Route>
+            <WorkspaceCreatorApp {...props} />
+          </Route>
+        </Switch>
+      </Router>
     </OpenSearchDashboardsContextProvider>,
     element
   );
@@ -56,7 +62,13 @@ export const renderListApp = (
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceListApp {...props} />
+      <Router>
+        <Switch>
+          <Route>
+            <WorkspaceListApp {...props} />
+          </Route>
+        </Switch>
+      </Router>
     </OpenSearchDashboardsContextProvider>,
     element
   );
@@ -67,7 +79,7 @@ export const renderListApp = (
 };
 
 export const renderDetailApp = (
-  { element }: AppMountParameters,
+  { element, onAppLeave }: AppMountParameters,
   services: Services,
   props: WorkspaceDetailProps
 ) => {
@@ -76,7 +88,7 @@ export const renderDetailApp = (
       <Router>
         <Switch>
           <Route>
-            <WorkspaceDetailApp {...props} />
+            <WorkspaceDetailApp {...props} onAppLeave={onAppLeave} />
           </Route>
         </Switch>
       </Router>

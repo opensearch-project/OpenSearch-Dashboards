@@ -35,6 +35,8 @@ export { extractUntrackedMessages } from './extract_untracked_translations';
 export { checkCompatibility } from './check_compatibility';
 export { mergeConfigs } from './merge_configs';
 export { checkConfigs } from './check_configs';
+export { checkFilesForUntrackedMessages } from './check_files_for_untracked_translations';
+export { checkDefaultMessagesInFiles } from './check_default_messages_in_files';
 
 export interface ListrContext {
   config?: I18nConfig;

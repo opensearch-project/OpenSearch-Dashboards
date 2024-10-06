@@ -122,3 +122,33 @@ export const DetailTabTitles: { [key in DetailTab]: string } = {
 export const PERMISSION_TYPE_LABEL_ID = 'workspace-form-permission-type-label';
 export const PERMISSION_COLLABORATOR_LABEL_ID = 'workspace-form-permission-collaborator-label';
 export const PERMISSION_ACCESS_LEVEL_LABEL_ID = 'workspace-form-permission-access-level-label';
+
+export const permissionModeOptions = [
+  {
+    value: PermissionModeId.Read,
+    inputDisplay: i18n.translate(
+      'workspace.form.permissionSettingPanel.permissionModeOptions.read',
+      {
+        defaultMessage: 'Read',
+      }
+    ),
+  },
+  {
+    value: PermissionModeId.ReadAndWrite,
+    inputDisplay: i18n.translate(
+      'workspace.form.permissionSettingPanel.permissionModeOptions.readAndWrite',
+      {
+        defaultMessage: 'Read & Write',
+      }
+    ),
+  },
+  {
+    value: PermissionModeId.Owner,
+    inputDisplay: i18n.translate(
+      'workspace.form.permissionSettingPanel.permissionModeOptions.owner',
+      {
+        defaultMessage: 'Owner',
+      }
+    ),
+  },
+];

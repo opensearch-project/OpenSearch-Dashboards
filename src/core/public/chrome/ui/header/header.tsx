@@ -28,7 +28,6 @@
  * under the License.
  */
 import {
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeader,
@@ -45,7 +44,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import classnames from 'classnames';
-import React, { createRef, useMemo, useState } from 'react';
+import React, { createRef, useCallback, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { LoadingIndicator } from '../';
@@ -61,6 +60,7 @@ import type { Logos } from '../../../../common/types';
 import { WorkspaceObject, WorkspacesStart } from '../../../../public/workspace';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
+import { useObservableValue } from '../../../utils';
 import { getOsdSidecarPaddingStyle, ISidecarConfig } from '../../../overlays';
 import {
   ChromeBranding,
@@ -152,14 +152,45 @@ export function Header({
   const isVisible = useObservable(observables.isVisible$, false);
   const headerVariant = useObservable(observables.headerVariant$, HeaderVariant.PAGE);
   const isLocked = useObservable(observables.isLocked$, false);
-  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isNavOpenState, setIsNavOpenState] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
   const breadcrumbs = useObservable(observables.breadcrumbs$, []);
-  const currentWorkspace = useObservable(observables.currentWorkspace$, undefined);
+
+  const currentLeftControls = useObservableValue(application.currentLeftControls$);
+  const navControlsLeft = useObservable(observables.navControlsLeft$);
+
+  const currentCenterControls = useObservableValue(application.currentCenterControls$);
+  const navControlsExpandedCenter = useObservable(observables.navControlsExpandedCenter$);
+  const navControlsCenter = useObservable(observables.navControlsCenter$);
+
+  const currentRightControls = useObservableValue(application.currentRightControls$);
+  const navControlsExpandedRight = useObservable(observables.navControlsExpandedRight$);
+  const navControlsRight = useObservable(observables.navControlsRight$);
+
+  const currentActionMenu = useObservableValue(application.currentActionMenu$);
+
+  const currentBadgeControls = useObservableValue(application.currentBadgeControls$);
+  const observableBadge = useObservable(observables.badge$);
 
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
   }, [sidecarConfig]);
+
+  const isNavOpen = useUpdatedHeader ? isLocked : isNavOpenState;
+
+  const setIsNavOpen = useCallback(
+    (value) => {
+      /**
+       * When use updated header, we will regard the lock state as source of truth
+       */
+      if (useUpdatedHeader) {
+        onIsLockedUpdate(value);
+      } else {
+        setIsNavOpenState(value);
+      }
+    },
+    [setIsNavOpenState, onIsLockedUpdate, useUpdatedHeader]
+  );
 
   if (!isVisible) {
     return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
@@ -197,7 +228,7 @@ export function Header({
         },
         {
           items: [
-            <EuiShowFor sizes={['m', 'l', 'xl']}>
+            <EuiShowFor sizes={['m', 'l', 'xl', 'xxl', 'xxxl']}>
               <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
             </EuiShowFor>,
           ],
@@ -205,7 +236,7 @@ export function Header({
         },
         {
           items: [
-            <EuiHideFor sizes={['m', 'l', 'xl']}>
+            <EuiHideFor sizes={['m', 'l', 'xl', 'xxl', 'xxxl']}>
               <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
             </EuiHideFor>,
             <HeaderNavControls navControls$={observables.navControlsExpandedRight$} />,
@@ -216,63 +247,70 @@ export function Header({
     />
   );
 
-  const renderBreadcrumbs = (renderFullLength?: boolean, dropHomeFromBreadcrumb?: boolean) => (
+  const renderBreadcrumbs = (renderFullLength?: boolean, hideTrailingSeparator?: boolean) => (
     <HeaderBreadcrumbs
       appTitle$={observables.appTitle$}
       breadcrumbs$={observables.breadcrumbs$}
       breadcrumbsEnricher$={observables.breadcrumbsEnricher$}
       useUpdatedHeader={useUpdatedHeader}
       renderFullLength={renderFullLength}
-      dropHomeFromBreadcrumb={dropHomeFromBreadcrumb}
+      hideTrailingSeparator={hideTrailingSeparator}
     />
   );
 
   const renderNavToggle = () => {
     const renderNavToggleWithExtraProps = (
       props: EuiHeaderSectionItemButtonProps & { isSmallScreen?: boolean }
-    ) => (
-      <EuiHeaderSectionItemButton
-        data-test-subj="toggleNavButton"
-        aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
-          defaultMessage: 'Toggle primary navigation',
-        })}
-        onClick={() => setIsNavOpen(!isNavOpen)}
-        aria-expanded={isNavOpen}
-        aria-pressed={isNavOpen}
-        aria-controls={navId}
-        ref={toggleCollapsibleNavRef}
-        {...props}
-        className={classnames(
-          useUpdatedHeader
-            ? useApplicationHeader
-              ? 'newAppTopNavExpander'
-              : 'newPageTopNavExpander'
-            : undefined,
-          props.className
-        )}
-      >
-        {props.isSmallScreen ? (
-          <EuiButtonIcon
-            iconType="menu"
-            size="xs"
-            title={i18n.translate('core.ui.primaryNav.menu', {
-              defaultMessage: 'Menu',
-            })}
-            display="base"
-            color="subdued"
-            iconSize="s"
-          />
-        ) : (
-          <EuiIcon
-            type="menu"
-            size="m"
-            title={i18n.translate('core.ui.primaryNav.menu', {
-              defaultMessage: 'Menu',
-            })}
-          />
-        )}
-      </EuiHeaderSectionItemButton>
-    );
+    ) => {
+      const { isSmallScreen, ...others } = props;
+      return (
+        <EuiHeaderSectionItemButton
+          data-test-subj="toggleNavButton"
+          aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+            defaultMessage: 'Toggle primary navigation',
+          })}
+          onClick={() => setIsNavOpen(!isNavOpen)}
+          aria-expanded={isNavOpen}
+          aria-pressed={isNavOpen}
+          aria-controls={navId}
+          ref={toggleCollapsibleNavRef}
+          {...others}
+          className={classnames(
+            useUpdatedHeader
+              ? useApplicationHeader
+                ? 'newAppTopNavExpander'
+                : 'newPageTopNavExpander'
+              : undefined,
+            props.className
+          )}
+        >
+          {props.isSmallScreen ? (
+            /**
+             * Using <EuiButtonIcon type="base" /> here will introduce a warning in console
+             * because button can not be a child of a button. In order to give the looks of a bordered icon,
+             * here we use the classes to imitate the style
+             */
+            <span className="euiButtonIcon euiButtonIcon--subdued euiButtonIcon--xSmall ">
+              <EuiIcon
+                title={i18n.translate('core.ui.primaryNav.menu', {
+                  defaultMessage: 'Menu',
+                })}
+                type="menu"
+                size="s"
+              />
+            </span>
+          ) : (
+            <EuiIcon
+              type="menu"
+              size="m"
+              title={i18n.translate('core.ui.primaryNav.menu', {
+                defaultMessage: 'Menu',
+              })}
+            />
+          )}
+        </EuiHeaderSectionItemButton>
+      );
+    };
     return useUpdatedHeader ? (
       <>
         {isNavOpen
@@ -282,7 +320,8 @@ export function Header({
             })}
         {renderNavToggleWithExtraProps({
           flush: 'both',
-          className: 'navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l',
+          className:
+            'navToggleInSmallScreen eui-hideFor--xl eui-hideFor--l eui-hideFor--xxl eui-hideFor--xxxl',
           isSmallScreen: true,
         })}
       </>
@@ -292,15 +331,8 @@ export function Header({
   };
 
   const renderLeftControls = () => {
-    let hasLeftControls;
-    let hasNavControlsLeft;
-
-    application.currentLeftControls$.subscribe((value) => {
-      hasLeftControls = hasValue(value);
-    });
-    observables.navControlsLeft$.subscribe((value) => {
-      hasNavControlsLeft = hasValue(value);
-    });
+    const hasLeftControls = hasValue(currentLeftControls);
+    const hasNavControlsLeft = hasValue(navControlsLeft);
 
     if (!hasLeftControls && !hasNavControlsLeft && useUpdatedHeader) {
       return null;
@@ -327,19 +359,9 @@ export function Header({
   };
 
   const renderCenterControls = () => {
-    let hasCenterControls;
-    let hasNavControlsExpandedCenter;
-    let hasNavControlsCenter;
-
-    application.currentCenterControls$.subscribe((value) => {
-      hasCenterControls = hasValue(value);
-    });
-    observables.navControlsExpandedCenter$.subscribe((value) => {
-      hasNavControlsExpandedCenter = hasValue(value);
-    });
-    observables.navControlsCenter$.subscribe((value) => {
-      hasNavControlsCenter = hasValue(value);
-    });
+    const hasCenterControls = hasValue(currentCenterControls);
+    const hasNavControlsExpandedCenter = hasValue(navControlsExpandedCenter);
+    const hasNavControlsCenter = hasValue(navControlsCenter);
 
     if (
       !hasCenterControls &&
@@ -375,19 +397,9 @@ export function Header({
   };
 
   const renderRightControls = () => {
-    let hasNavControlsExpandedRight;
-    let hasRightControls;
-    let hasNavControlsRight;
-
-    application.currentRightControls$.subscribe((value) => {
-      hasRightControls = hasValue(value);
-    });
-    observables.navControlsExpandedRight$.subscribe((value) => {
-      hasNavControlsExpandedRight = hasValue(value);
-    });
-    observables.navControlsRight$.subscribe((value) => {
-      hasNavControlsRight = hasValue(value);
-    });
+    const hasNavControlsExpandedRight = hasValue(navControlsExpandedRight);
+    const hasRightControls = hasValue(currentRightControls);
+    const hasNavControlsRight = hasValue(navControlsRight);
 
     if (
       !hasRightControls &&
@@ -422,10 +434,7 @@ export function Header({
     );
   };
   const renderActionMenu = () => {
-    let hasActionMenu;
-    application.currentActionMenu$.subscribe((value) => {
-      hasActionMenu = hasValue(value);
-    });
+    const hasActionMenu = hasValue(currentActionMenu);
 
     if (!hasActionMenu && useUpdatedHeader) {
       return null;
@@ -439,15 +448,8 @@ export function Header({
   };
 
   const renderBadge = () => {
-    let hasBadge;
-    let hasCurrentBadgeControls;
-
-    application.currentBadgeControls$.subscribe((value) => {
-      hasBadge = hasValue(value);
-    });
-    observables.badge$.subscribe((value) => {
-      hasCurrentBadgeControls = hasValue(value);
-    });
+    const hasBadge = hasValue(observableBadge);
+    const hasCurrentBadgeControls = hasValue(currentBadgeControls);
 
     if (!hasBadge && !hasCurrentBadgeControls && useUpdatedHeader) {
       return null;
@@ -493,8 +495,9 @@ export function Header({
         recentlyAccessed$={observables.recentlyAccessed$}
         workspaceList$={observables.workspaceList$}
         navigateToUrl={application.navigateToUrl}
-        renderBreadcrumbs={renderBreadcrumbs(true, false)}
+        renderBreadcrumbs={renderBreadcrumbs(true, true)}
         buttonSize={useApplicationHeader ? 's' : 'xs'}
+        loadingCount$={observables.loadingCount$}
       />
     </EuiHeaderSectionItem>
   );
@@ -547,7 +550,7 @@ export function Header({
 
         <EuiHeaderSection grow={false}>{renderRecentItems()}</EuiHeaderSection>
 
-        {renderBreadcrumbs(false, !!currentWorkspace)}
+        {renderBreadcrumbs(false, false)}
       </EuiHeader>
 
       {/* Secondary header */}
@@ -636,13 +639,11 @@ export function Header({
             appId$={application.currentAppId$}
             collapsibleNavHeaderRender={collapsibleNavHeaderRender}
             id={navId}
-            isLocked={isLocked}
             navLinks$={observables.navLinks$}
             isNavOpen={isNavOpen}
             basePath={basePath}
             navigateToApp={application.navigateToApp}
             navigateToUrl={application.navigateToUrl}
-            onIsLockedUpdate={onIsLockedUpdate}
             closeNav={() => {
               setIsNavOpen(false);
               if (toggleCollapsibleNavRef.current) {

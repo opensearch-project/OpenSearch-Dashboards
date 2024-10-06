@@ -187,6 +187,7 @@ describe('UseCaseService', () => {
       });
       expect(fn).toHaveBeenCalledTimes(2);
     });
+
     it('should move all use case to the last one', async () => {
       const { useCaseStart, navGroupsMap$ } = setupUseCaseStart();
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import {
   EuiSpacer,
   EuiForm,
@@ -50,7 +50,7 @@ const FormGroup = ({ title, children, describe }: FormGroupProps) => (
   </>
 );
 
-interface WorkspaceDetailedFormProps extends WorkspaceFormProps {
+interface WorkspaceDetailedFormProps extends Omit<WorkspaceFormProps, 'onAppLeave'> {
   detailTab?: DetailTab;
   detailTitle?: string;
 }
@@ -64,7 +64,6 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
     formErrors,
     setIsEditing,
     numberOfErrors,
-    numberOfChanges,
     handleResetForm,
     handleFormSubmit,
     setPermissionSettings,
@@ -73,28 +72,10 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
     defaultValues?.permissionSettings?.map((item) => item.id) ?? []
   );
 
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Handle beforeunload event
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!isSaving && isEditing && numberOfChanges > 0) {
-        event.preventDefault();
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [isEditing, isSaving, numberOfChanges]);
-
   return (
     <EuiForm
       id={formId}
       onSubmit={(event) => {
-        setIsSaving(true);
         handleFormSubmit(event);
       }}
       component="form"

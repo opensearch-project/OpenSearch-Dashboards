@@ -26,7 +26,7 @@ export const getManageDataSourceButton = (application?: ApplicationStart) => {
               })
             }
           >
-            {i18n.translate('dataSourceMenu.manageDataSourceToastButtonLabel', {
+            {i18n.translate('dataSourcesManagement.manageDataSourceToastButtonLabel', {
               defaultMessage: 'Manage data sources',
             })}
           </EuiButton>

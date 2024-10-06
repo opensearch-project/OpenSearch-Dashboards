@@ -48,7 +48,7 @@ const generateWorkspacePermissionError = () =>
 const generateSavedObjectsPermissionError = () =>
   SavedObjectsErrorHelpers.decorateForbiddenError(
     new Error(
-      i18n.translate('saved_objects.permission.invalidate', {
+      i18n.translate('workspace.saved_objects.permission.invalidate', {
         defaultMessage: 'Invalid saved objects permission',
       })
     )
@@ -57,7 +57,7 @@ const generateSavedObjectsPermissionError = () =>
 const generateDataSourcePermissionError = () =>
   SavedObjectsErrorHelpers.decorateForbiddenError(
     new Error(
-      i18n.translate('saved_objects.data_source.invalidate', {
+      i18n.translate('workspace.saved_objects.data_source.invalidate', {
         defaultMessage: 'Invalid data source permission, please associate it to current workspace',
       })
     )
@@ -66,7 +66,7 @@ const generateDataSourcePermissionError = () =>
 const generateOSDAdminPermissionError = () =>
   SavedObjectsErrorHelpers.decorateForbiddenError(
     new Error(
-      i18n.translate('dashboard.admin.permission.invalidate', {
+      i18n.translate('workspace.admin.permission.invalidate', {
         defaultMessage: 'Invalid permission, please contact OSD admin',
       })
     )

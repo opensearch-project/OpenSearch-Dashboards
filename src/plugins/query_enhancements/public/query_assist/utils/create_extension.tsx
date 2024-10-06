@@ -105,7 +105,7 @@ export const createQueryAssistExtension = (
         return {
           type: DATA_STRUCTURE_META_TYPES.FEATURE,
           icon: { type: assistantMark },
-          tooltip: i18n.translate('queryAssist.meta.icon.tooltip', {
+          tooltip: i18n.translate('queryEnhancements.meta.icon.tooltip', {
             defaultMessage: 'Query assist is available',
           }),
         };

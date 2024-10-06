@@ -1,0 +1,2 @@
+fix:
+- Fix unprefixed i18n identifiers in visTypeVega plugin ([#8406](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8406))
