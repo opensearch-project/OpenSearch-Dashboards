@@ -13,8 +13,10 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
         data-euiicon-type="logoOpenSearch"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
-        style="padding-top: 24px;"
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive workspace-initial__flex-group-responsive"
       >
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -732,8 +734,10 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
         data-euiicon-type="logoOpenSearch"
       />
       <div
-        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
-        style="padding-top: 24px;"
+        class="euiSpacer euiSpacer--l"
+      />
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive workspace-initial__flex-group-responsive"
       >
         <div
           class="euiFlexItem euiFlexItem--flexGrowZero"

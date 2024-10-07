@@ -75,12 +75,13 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
   const mountDevToolsRef = useRef<HTMLDivElement>(null);
 
   const leftBottom$Ref = useRef(chrome.navControls.getLeftBottom$());
-  const items = useObservable(leftBottom$Ref.current);
+  const leftBottomNavItems = useObservable(leftBottom$Ref.current);
 
   useEffect(() => {
-    const settingMount = items?.find((item) => item.order === 3)?.mount;
-    const devToolsMount = items?.find((item) => item.order === 4)?.mount;
-    const userAccountMount = items?.find((item) => item.order === 10000)?.mount;
+    // TODO: We will refactor ChromeNavControl in the future and obtain mount through ID.
+    const settingMount = leftBottomNavItems?.find((item) => item.order === 3)?.mount;
+    const devToolsMount = leftBottomNavItems?.find((item) => item.order === 4)?.mount;
+    const userAccountMount = leftBottomNavItems?.find((item) => item.order === 10000)?.mount;
 
     if (settingMount && mountSettingRef.current) {
       settingMount(mountSettingRef.current);
@@ -91,7 +92,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
     if (userAccountMount && mountUserAccountRef.current) {
       userAccountMount(mountUserAccountRef.current);
     }
-  }, [chrome.navControls, items]);
+  }, [chrome.navControls, leftBottomNavItems]);
 
   const createButton = (
     <EuiSmallButton
@@ -163,7 +164,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
               &nbsp;
               <EuiTitle size="m">
                 <h2>
-                  {i18n.translate('workspace.initial.title', {
+                  {i18n.translate('workspace.initial.workspace.title', {
                     defaultMessage: 'My workspaces',
                   })}
                 </h2>
@@ -196,7 +197,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
                 target="_blank"
                 style={{ fontWeight: 'normal' }}
               >
-                {i18n.translate('workspace.initial.button.openSearch', {
+                {i18n.translate('workspace.initial.link.documentation', {
                   defaultMessage: 'Learn more from documentation',
                 })}
               </EuiLink>
@@ -212,7 +213,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
                 target="_blank"
                 style={{ fontWeight: 'normal' }}
               >
-                {i18n.translate('workspace.initial.button.openSearch', {
+                {i18n.translate('workspace.initial.link.playground', {
                   defaultMessage: 'Explore live demo environment at playground.opensearch.org',
                 })}
               </EuiLink>
@@ -241,11 +242,12 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
     <EuiPage style={{ minHeight: '100vh' }}>
       <EuiPageBody>
         <EuiIcon type="logoOpenSearch" size="xl" />
+        <EuiSpacer size="l" />
         <EuiFlexGroup
           direction="column"
           alignItems="center"
           justifyContent="flexStart"
-          style={{ paddingTop: '24px' }}
+          className="workspace-initial__flex-group-responsive"
         >
           <EuiFlexItem grow={false} style={{ width: '1264px' }}>
             {content}

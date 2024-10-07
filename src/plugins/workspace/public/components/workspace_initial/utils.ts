@@ -12,7 +12,9 @@ export interface UpdatedWorkspaceObject extends WorkspaceObject {
   visitedMessage?: string;
 }
 
-export const getWorkspacesWithRecentMessage = (workspaces: WorkspaceObject[]) => {
+export const getWorkspacesWithRecentMessage = (
+  workspaces: WorkspaceObject[]
+): UpdatedWorkspaceObject[] => {
   const recentWorkspaces = recentWorkspaceManager.getRecentWorkspaces();
   return workspaces.map((workspace) => {
     const recentWorkspace = recentWorkspaces.find((recent) => recent.id === workspace.id);
@@ -23,7 +25,7 @@ export const getWorkspacesWithRecentMessage = (workspaces: WorkspaceObject[]) =>
       visitedMessage: recentWorkspace
         ? `Viewed ${moment(recentWorkspace.timestamp).fromNow()}`
         : `Not visited recently`,
-    } as UpdatedWorkspaceObject;
+    };
   });
 };
 
