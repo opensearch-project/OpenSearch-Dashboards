@@ -141,21 +141,21 @@ export const WorkspacePermissionSettingPanel = ({
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem style={{ maxWidth: 150 }}>
               <EuiFormLabel id={PERMISSION_TYPE_LABEL_ID}>
-                {i18n.translate('workspaceForm.permissionSetting.typeLabel', {
+                {i18n.translate('workspace.form.permissionSetting.typeLabel', {
                   defaultMessage: 'Type',
                 })}
               </EuiFormLabel>
             </EuiFlexItem>
             <EuiFlexItem style={{ maxWidth: 400 }}>
               <EuiFormLabel id={PERMISSION_COLLABORATOR_LABEL_ID}>
-                {i18n.translate('workspaceForm.permissionSetting.collaboratorLabel', {
+                {i18n.translate('workspace.form.permissionSetting.collaboratorLabel', {
                   defaultMessage: 'Collaborator',
                 })}
               </EuiFormLabel>
             </EuiFlexItem>
             <EuiFlexItem style={{ maxWidth: 150 }}>
               <EuiFormLabel id={PERMISSION_ACCESS_LEVEL_LABEL_ID}>
-                {i18n.translate('workspaceForm.permissionSetting.accessLevelLabel', {
+                {i18n.translate('workspace.form.permissionSetting.accessLevelLabel', {
                   defaultMessage: 'Access level',
                 })}
               </EuiFormLabel>

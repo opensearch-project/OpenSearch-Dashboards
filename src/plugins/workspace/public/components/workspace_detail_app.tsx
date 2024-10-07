@@ -99,7 +99,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
       }
       if (!currentWorkspace) {
         notifications?.toasts.addDanger({
-          title: i18n.translate('Cannot find current workspace', {
+          title: i18n.translate('workspace.detail.notFoundError', {
             defaultMessage: 'Cannot update workspace',
           }),
         });
