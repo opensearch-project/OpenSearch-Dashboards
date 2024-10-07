@@ -102,11 +102,11 @@
     }
 
     &.bottom-container-expanded {
-      @include euiBottomShadowLarge($euiColorMediumShade, 0.1, true, true);
-
       gap: 16px;
       padding-top: $euiSizeM;
       padding-bottom: $euiSizeM;
+      border-top: $euiBorderThin;
+      border-color: $euiColorMediumShade;
     }
   }
 
