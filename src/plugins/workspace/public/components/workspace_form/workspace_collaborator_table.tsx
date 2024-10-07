@@ -103,40 +103,47 @@ export const WorkspaceCollaboratorTable = ({
     );
   }, [displayedCollaboratorTypes, permissionSettings, handleSubmitPermissionSettings]);
 
+  const openDeleteConfirmModal = ({ onConfirm }: { onConfirm: () => void }) => {
+    const modal = overlays.openModal(
+      <EuiConfirmModal
+        title={i18n.translate('workspace.detail.collaborator.actions.delete', {
+          defaultMessage: 'Delete collaborator',
+        })}
+        onCancel={() => modal.close()}
+        onConfirm={onConfirm}
+        cancelButtonText="Cancel"
+        confirmButtonText="Confirm"
+      >
+        <EuiText>
+          <p>
+            {i18n.translate('workspace.detail.collaborator.delete.confirm', {
+              defaultMessage:
+                'Delete collaborator? The collaborators will not have access to the workspace.',
+            })}
+          </p>
+        </EuiText>
+      </EuiConfirmModal>
+    );
+    return modal;
+  };
+
   const renderToolsLeft = () => {
     if (selection.length === 0) {
       return;
     }
 
     const onClick = () => {
-      const modal = overlays.openModal(
-        <EuiConfirmModal
-          title={i18n.translate('workspace.detail.collaborator.actions.delete', {
-            defaultMessage: 'Delete collaborator',
-          })}
-          onCancel={() => modal.close()}
-          onConfirm={async () => {
-            let newSettings = permissionSettings;
-            selection.forEach(({ id }) => {
-              newSettings = newSettings.filter((_item) => _item.id !== id);
-            });
-            handleSubmitPermissionSettings(newSettings as WorkspacePermissionSetting[]);
-            setSelection([]);
-            modal.close();
-          }}
-          cancelButtonText="Cancel"
-          confirmButtonText="Confirm"
-        >
-          <EuiText>
-            <p>
-              {i18n.translate('workspace.detail.collaborator.delete.confirm', {
-                defaultMessage:
-                  'Delete collaborator? The collaborators will not have access to the workspace.',
-              })}
-            </p>
-          </EuiText>
-        </EuiConfirmModal>
-      );
+      const modal = openDeleteConfirmModal({
+        onConfirm: () => {
+          let newSettings = permissionSettings;
+          selection.forEach(({ id }) => {
+            newSettings = newSettings.filter((_item) => _item.id !== id);
+          });
+          handleSubmitPermissionSettings(newSettings as WorkspacePermissionSetting[]);
+          setSelection([]);
+          modal.close();
+        },
+      });
     };
 
     return (
@@ -221,6 +228,7 @@ export const WorkspaceCollaboratorTable = ({
           selection={[item]}
           permissionSettings={permissionSettings}
           handleSubmitPermissionSettings={handleSubmitPermissionSettings}
+          openDeleteConfirmModal={openDeleteConfirmModal}
         />
       ),
     },
@@ -248,11 +256,13 @@ const Actions = ({
   selection,
   permissionSettings,
   handleSubmitPermissionSettings,
+  openDeleteConfirmModal,
 }: {
   isTableAction: boolean;
   selection?: PermissionSetting[];
   permissionSettings: PermissionSetting[];
   handleSubmitPermissionSettings: (permissionSettings: WorkspacePermissionSetting[]) => void;
+  openDeleteConfirmModal?: ({ onConfirm }: { onConfirm: () => void }) => { close: () => void };
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { overlays } = useOpenSearchDashboards();
@@ -317,34 +327,17 @@ const Actions = ({
           }),
           onClick: () => {
             setIsPopoverOpen(false);
-            if (selection) {
-              const modal = overlays.openModal(
-                <EuiConfirmModal
-                  title={i18n.translate('workspace.detail.collaborator.actions.delete', {
-                    defaultMessage: 'Delete collaborator',
-                  })}
-                  onCancel={() => modal.close()}
-                  onConfirm={async () => {
-                    let newSettings = permissionSettings;
-                    selection.forEach(({ id }) => {
-                      newSettings = newSettings.filter((_item) => _item.id !== id);
-                    });
-                    handleSubmitPermissionSettings(newSettings as WorkspacePermissionSetting[]);
-                    modal.close();
-                  }}
-                  cancelButtonText="Cancel"
-                  confirmButtonText="Confirm"
-                >
-                  <EuiText>
-                    <p>
-                      {i18n.translate('workspace.detail.collaborator.delete.confirm', {
-                        defaultMessage:
-                          'Delete collaborator? The collaborators will not have access to the workspace.',
-                      })}
-                    </p>
-                  </EuiText>
-                </EuiConfirmModal>
-              );
+            if (selection && openDeleteConfirmModal) {
+              const modal = openDeleteConfirmModal({
+                onConfirm: () => {
+                  let newSettings = permissionSettings;
+                  selection.forEach(({ id }) => {
+                    newSettings = newSettings.filter((_item) => _item.id !== id);
+                  });
+                  handleSubmitPermissionSettings(newSettings as WorkspacePermissionSetting[]);
+                  modal.close();
+                },
+              });
             }
           },
         },
