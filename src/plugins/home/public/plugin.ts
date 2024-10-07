@@ -214,6 +214,7 @@ export class HomePublicPlugin
         {
           id: SEARCH_OVERVIEW_PAGE_ID,
           order: -1,
+          showInAllNavGroup: true,
         },
       ]);
     }

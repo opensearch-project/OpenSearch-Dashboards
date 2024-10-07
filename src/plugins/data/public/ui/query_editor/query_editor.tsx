@@ -326,7 +326,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           iconType={this.state.isCollapsed ? 'expand' : 'minimize'}
-          aria-label={i18n.translate('discover.queryControls.languageToggle', {
+          aria-label={i18n.translate('data.queryControls.languageToggle', {
             defaultMessage: `Language Toggle`,
           })}
           onClick={() => this.setIsCollapsed(!this.state.isCollapsed)}
@@ -366,6 +366,14 @@ export default class QueryEditorUI extends Component<Props, State> {
         editor.setValue(`\n`.repeat(10));
         this.setState({ lineCount: editor.getModel()?.getLineCount() });
         this.inputRef = editor;
+        // eslint-disable-next-line no-bitwise
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+          this.onSubmit(this.props.query);
+        });
+
+        return () => {
+          disposable.dispose();
+        };
       },
       footerItems: {
         start: [
