@@ -4,8 +4,9 @@
  */
 
 import { Query } from 'src/plugins/data/common';
-import { from, throwError, timer } from 'rxjs';
+import { from, timer } from 'rxjs';
 import { filter, mergeMap, take, takeWhile } from 'rxjs/operators';
+import { stringify } from '@osd/std';
 import {
   EnhancedFetchContext,
   QueryAggConfig,
@@ -49,7 +50,11 @@ export const handleFacetError = (response: any) => {
 
 export const fetch = (context: EnhancedFetchContext, query: Query, aggConfig?: QueryAggConfig) => {
   const { http, path, signal } = context;
-  const body = JSON.stringify({ query: { ...query, format: 'jdbc' }, aggConfig });
+  const body = stringify({
+    query: { ...query, format: 'jdbc' },
+    aggConfig,
+    pollQueryResultsParams: context.body?.pollQueryResultsParams,
+  });
   return from(
     http.fetch({
       method: 'POST',

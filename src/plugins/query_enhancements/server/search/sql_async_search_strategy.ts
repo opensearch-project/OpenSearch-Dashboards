@@ -14,13 +14,7 @@ import {
   createDataFrame,
 } from '../../../data/common';
 import { Facet } from '../utils';
-import {
-  buildQueryStatusConfig,
-  getFields,
-  handleFacetError,
-  handleQueryStatus,
-  SEARCH_STRATEGY,
-} from '../../common';
+import { buildQueryStatusConfig, getFields, handleFacetError, SEARCH_STRATEGY } from '../../common';
 
 export const sqlAsyncSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -44,45 +38,61 @@ export const sqlAsyncSearchStrategyProvider = (
     search: async (context, request: any, options) => {
       try {
         const query: Query = request.body.query;
-        const startTime = Date.now();
-        request.body = { ...request.body, lang: SEARCH_STRATEGY.SQL };
-        const rawResponse: any = await sqlAsyncFacet.describeQuery(context, request);
+        const pollQueryResultsParams = request.body.pollQueryResultsParams;
+        const inProgressQueryId = pollQueryResultsParams?.queryId;
 
-        if (!rawResponse.success) handleFacetError(rawResponse);
+        if (!inProgressQueryId) {
+          request.body = { ...request.body, lang: SEARCH_STRATEGY.SQL };
+          const rawResponse: any = await sqlAsyncFacet.describeQuery(context, request);
 
-        const statusConfig = buildQueryStatusConfig(rawResponse);
-        request.params = { queryId: statusConfig.queryId };
+          if (!rawResponse.success) handleFacetError(rawResponse);
 
-        const response = await handleQueryStatus({
-          fetchStatus: async () => {
-            const status: any = await sqlAsyncJobsFacet.describeQuery(context, request);
-            logger.info(
-              `sqlAsyncSearchStrategy: JOB: ${statusConfig.queryId} - STATUS: ${status.data?.status}`
-            );
-            return status;
-          },
-          isServer: true,
-        });
+          const statusConfig = buildQueryStatusConfig(rawResponse);
 
-        const dataFrame = createDataFrame({
-          name: query.dataset?.id,
-          schema: response.data.schema,
-          meta: statusConfig,
-          fields: getFields(response),
-        });
+          return {
+            type: DATA_FRAME_TYPES.POLLING,
+            status: 'started',
+            body: {
+              queryStatusConfig: statusConfig,
+            },
+          } as IDataFrameResponse;
+        } else {
+          request.params = { queryId: inProgressQueryId };
+          const queryStatusResponse: any = await sqlAsyncJobsFacet.describeQuery(context, request);
+          const queryStatus = queryStatusResponse?.data?.status;
+          logger.info(`sqlAsyncSearchStrategy: JOB: ${inProgressQueryId} - STATUS: ${queryStatus}`);
 
-        const elapsedMs = Date.now() - startTime;
+          if (queryStatus?.toUpperCase() === 'SUCCESS') {
+            const dataFrame = createDataFrame({
+              name: query.dataset?.id,
+              schema: queryStatusResponse.data.schema,
+              meta: { ...pollQueryResultsParams },
+              fields: getFields(queryStatusResponse),
+            });
 
-        dataFrame.size = response.data.datarows.length;
+            dataFrame.size = queryStatusResponse.data.datarows.length;
 
-        if (usage) usage.trackSuccess(elapsedMs);
+            return {
+              type: DATA_FRAME_TYPES.POLLING,
+              status: 'success',
+              body: dataFrame,
+            } as IDataFrameResponse;
+          } else if (queryStatus?.toUpperCase() === 'FAILED') {
+            return {
+              type: DATA_FRAME_TYPES.POLLING,
+              status: 'failed',
+              body: {
+                error: new Error(`JOB: ${pollQueryResultsParams.queryId} failed`),
+              },
+            } as IDataFrameResponse;
+          }
 
-        return {
-          type: DATA_FRAME_TYPES.POLLING,
-          body: dataFrame,
-          took: elapsedMs,
-        } as IDataFrameResponse;
-      } catch (e) {
+          return {
+            type: DATA_FRAME_TYPES.POLLING,
+            status: queryStatus,
+          } as IDataFrameResponse;
+        }
+      } catch (e: any) {
         logger.error(`sqlAsyncSearchStrategy: ${e.message}`);
         if (usage) usage.trackError();
         throw e;

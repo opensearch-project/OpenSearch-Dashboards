@@ -8,7 +8,7 @@ import { BehaviorSubject, Subject, merge } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { useEffect } from 'react';
-import { cloneDeep, isEqual } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { useLocation } from 'react-router-dom';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
@@ -243,7 +243,7 @@ export const useSearch = (services: DiscoverViewServices) => {
           elapsedMs,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       // If the request was aborted then no need to surface this error in the UI
       if (error instanceof Error && error.name === 'AbortError') return;
 
@@ -259,9 +259,9 @@ export const useSearch = (services: DiscoverViewServices) => {
       }
       let errorBody;
       try {
-        errorBody = JSON.parse(error.body.message);
+        errorBody = JSON.parse(error.message);
       } catch (e) {
-        errorBody = error.body.message;
+        errorBody = error.message;
       }
 
       data$.next({
