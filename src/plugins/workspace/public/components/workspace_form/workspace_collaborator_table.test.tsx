@@ -60,7 +60,7 @@ describe('WorkspaceCollaboratorTable', () => {
     expect(getByText('group')).toBeInTheDocument();
   });
 
-  it('should openModal when clicking actions', () => {
+  it('should openModal when clicking box actions menu', () => {
     const permissionSettings = [
       {
         id: 0,
@@ -79,6 +79,68 @@ describe('WorkspaceCollaboratorTable', () => {
     fireEvent.click(action);
     const deleteCollaborator = getByText('Delete collaborator');
     fireEvent.click(deleteCollaborator);
+    expect(mockOverlays.openModal).toHaveBeenCalled();
+
+    const changeAccessLevel = getByText('Change access level');
+    fireEvent.click(changeAccessLevel);
+    expect(mockOverlays.openModal).toHaveBeenCalled();
+  });
+
+  it('should openModal when clicking multi selection delete', () => {
+    const permissionSettings = [
+      {
+        id: 0,
+        modes: ['library_write', 'write'],
+        type: 'user',
+        userId: 'admin',
+      },
+      {
+        id: 1,
+        modes: ['library_read', 'read'],
+        type: 'group',
+        group: 'group',
+      },
+    ];
+
+    const { getByText, getByTestId } = render(
+      <Provider>
+        <WorkspaceCollaboratorTable {...mockProps} permissionSettings={permissionSettings} />
+      </Provider>
+    );
+    fireEvent.click(getByTestId('checkboxSelectRow-0'));
+    fireEvent.click(getByTestId('checkboxSelectRow-1'));
+    const deleteCollaborator = getByText('Delete 2 collaborators');
+    fireEvent.click(deleteCollaborator);
+    expect(mockOverlays.openModal).toHaveBeenCalled();
+  });
+
+  it('should openModal when clicking action tools when multi selection', () => {
+    const permissionSettings = [
+      {
+        id: 0,
+        modes: ['library_write', 'write'],
+        type: 'user',
+        userId: 'admin',
+      },
+      {
+        id: 1,
+        modes: ['library_read', 'read'],
+        type: 'group',
+        group: 'group',
+      },
+    ];
+
+    const { getByText, getByTestId } = render(
+      <Provider>
+        <WorkspaceCollaboratorTable {...mockProps} permissionSettings={permissionSettings} />
+      </Provider>
+    );
+    fireEvent.click(getByTestId('checkboxSelectRow-0'));
+    fireEvent.click(getByTestId('checkboxSelectRow-1'));
+    const actions = getByTestId('workspace-detail-collaborator-table-actions');
+    fireEvent.click(actions);
+    const changeAccessLevel = getByText('Change access level');
+    fireEvent.click(changeAccessLevel);
     expect(mockOverlays.openModal).toHaveBeenCalled();
   });
 });
