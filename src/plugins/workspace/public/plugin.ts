@@ -32,7 +32,7 @@ import {
   WORKSPACE_NAVIGATION_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
-import { Services, WorkspaceUseCase } from './types';
+import { Services, WorkspaceUseCase, WorkspacePluginSetup } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
 import { ManagementSetup } from '../../../plugins/management/public';
@@ -55,7 +55,6 @@ import {
 } from './utils';
 import { recentWorkspaceManager } from './recent_workspace_manager';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
-import { UseCaseService } from './services/use_case_service';
 import { WorkspaceListCard } from './components/service_card';
 import { NavigationPublicPluginStart } from '../../../plugins/navigation/public';
 import { WorkspaceSelector } from './components/workspace_selector/workspace_selector';
@@ -70,6 +69,13 @@ import {
 } from './components/use_case_overview/setup_overview';
 import { UserDefaultWorkspace } from './components/workspace_list/default_workspace';
 import { registerGetStartedCardToNewHome } from './components/home_get_start_card';
+import {
+  WorkspaceCollaboratorTypesService,
+  UseCaseService,
+  WorkspaceCollaboratorType,
+} from './services';
+import { AddCollaboratorsModal } from './components/add_collaborators_modal';
+import { registerDefaultCollaboratorTypes } from './register_default_collaborator_types';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -90,7 +96,7 @@ export interface WorkspacePluginStartDeps {
 }
 
 export class WorkspacePlugin
-  implements Plugin<{}, {}, WorkspacePluginSetupDeps, WorkspacePluginStartDeps> {
+  implements Plugin<WorkspacePluginSetup, {}, WorkspacePluginSetupDeps, WorkspacePluginStartDeps> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private breadcrumbsSubscription?: Subscription;
@@ -104,6 +110,7 @@ export class WorkspacePlugin
   private workspaceAndUseCasesCombineSubscription?: Subscription;
   private useCase = new UseCaseService();
   private workspaceClient?: WorkspaceClient;
+  private collaboratorTypes = new WorkspaceCollaboratorTypesService();
 
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
@@ -330,6 +337,7 @@ export class WorkspacePlugin
         ...coreStart,
         workspaceClient,
         dataSourceManagement,
+        collaboratorTypes: this.collaboratorTypes,
         navigationUI: navigation.ui,
       };
 
@@ -458,6 +466,7 @@ export class WorkspacePlugin
             workspaceClient,
             dataSourceManagement,
             contentManagement: contentManagementStart,
+            collaboratorTypes: this.collaboratorTypes,
           };
 
           return renderUseCaseOverviewApp(params, services, ESSENTIAL_OVERVIEW_PAGE_ID);
@@ -493,6 +502,7 @@ export class WorkspacePlugin
             workspaceClient,
             dataSourceManagement,
             contentManagement: contentManagementStart,
+            collaboratorTypes: this.collaboratorTypes,
           };
 
           return renderUseCaseOverviewApp(params, services, ANALYTICS_ALL_OVERVIEW_PAGE_ID);
@@ -547,7 +557,17 @@ export class WorkspacePlugin
       });
     }
 
-    return {};
+    registerDefaultCollaboratorTypes({
+      getStartServices: core.getStartServices,
+      collaboratorTypesService: this.collaboratorTypes,
+    });
+
+    return {
+      collaboratorTypes: this.collaboratorTypes,
+      ui: {
+        AddCollaboratorsModal,
+      },
+    };
   }
 
   public start(core: CoreStart, { contentManagement, navigation }: WorkspacePluginStartDeps) {
@@ -634,6 +654,7 @@ export class WorkspacePlugin
         ...coreStart,
         workspaceClient: this.workspaceClient!,
         navigationUI: navigation.ui,
+        collaboratorTypes: this.collaboratorTypes,
       };
       contentManagement.registerContentProvider({
         id: 'default_workspace_list',
@@ -661,5 +682,6 @@ export class WorkspacePlugin
     this.registeredUseCasesUpdaterSubscription?.unsubscribe();
     this.workspaceAndUseCasesCombineSubscription?.unsubscribe();
     this.useCase.stop();
+    this.collaboratorTypes.stop();
   }
 }

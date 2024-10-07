@@ -163,7 +163,7 @@
     "dashboard.dashboardGrid.toast.unableToLoadDashboardDangerMessage": "无法加载控制面板。",
     "dashboard.dashboardListingDeleteErrorTitle": "删除控制面板时出错",
     "dashboard.dashboardPageTitle": "控制面板",
-    "dashboard.dashboardWasNotSavedDangerMessage": "控制面板“{dashTitle}”未保存。错误:  ",
+    "dashboard.dashboardWasNotSavedDangerMessage": "控制面板“{dashTitle}”未保存。错误: {errorMessage}",
     "dashboard.dashboardWasSavedSuccessMessage": "控制面板“{dashTitle}”已保存",
     "dashboard.embedUrlParamExtension.filterBar": "筛选栏",
     "dashboard.embedUrlParamExtension.include": "包括",

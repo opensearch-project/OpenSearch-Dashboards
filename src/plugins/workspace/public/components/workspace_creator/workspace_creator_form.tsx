@@ -52,33 +52,15 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
     setDescription,
     handleFormSubmit,
     handleColorChange,
-    handleUseCaseChange: handleUseCaseChangeInHook,
+    handleUseCaseChange,
     setPermissionSettings,
     setSelectedDataSourceConnections,
   } = useWorkspaceForm(props);
-  const nameManualChangedRef = useRef(false);
 
   const disabledUserOrGroupInputIdsRef = useRef(
     defaultValues?.permissionSettings?.map((item) => item.id) ?? []
   );
   const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin ?? false;
-  const handleNameInputChange = useCallback(
-    (newName) => {
-      setName(newName);
-      nameManualChangedRef.current = true;
-    },
-    [setName]
-  );
-  const handleUseCaseChange = useCallback(
-    (newUseCase) => {
-      handleUseCaseChangeInHook(newUseCase);
-      const useCase = availableUseCases.find((item) => newUseCase === item.id);
-      if (!nameManualChangedRef.current && useCase) {
-        setName(useCase.title);
-      }
-    },
-    [handleUseCaseChangeInHook, availableUseCases, setName]
-  );
 
   return (
     <EuiFlexGroup className="workspaceCreateFormContainer">
@@ -99,7 +81,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
             name={formData.name}
             color={formData.color}
             description={formData.description}
-            onNameChange={handleNameInputChange}
+            onNameChange={setName}
             onColorChange={handleColorChange}
             onDescriptionChange={setDescription}
           />

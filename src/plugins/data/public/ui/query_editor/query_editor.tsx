@@ -366,6 +366,14 @@ export default class QueryEditorUI extends Component<Props, State> {
         editor.setValue(`\n`.repeat(10));
         this.setState({ lineCount: editor.getModel()?.getLineCount() });
         this.inputRef = editor;
+        // eslint-disable-next-line no-bitwise
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+          this.onSubmit(this.props.query);
+        });
+
+        return () => {
+          disposable.dispose();
+        };
       },
       footerItems: {
         start: [

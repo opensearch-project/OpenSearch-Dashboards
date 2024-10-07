@@ -1,10 +1,8 @@
-@import "./variables";
-
 .context-nav-wrapper {
   border: none !important;
   border-top-right-radius: $euiSizeL;
   border-bottom-right-radius: $euiSizeL;
-  background-color: $ouiSideNavBackgroundColorTemp;
+  background-color: $euiSideNavBackgroundColor;
   overflow: hidden;
 
   .nav-link-item {
@@ -104,11 +102,11 @@
     }
 
     &.bottom-container-expanded {
-      @include euiBottomShadowLarge($euiColorMediumShade, 0.1, true, true);
-
       gap: 16px;
       padding-top: $euiSizeM;
       padding-bottom: $euiSizeM;
+      border-top: $euiBorderThin;
+      border-color: $euiColorMediumShade;
     }
   }
 
