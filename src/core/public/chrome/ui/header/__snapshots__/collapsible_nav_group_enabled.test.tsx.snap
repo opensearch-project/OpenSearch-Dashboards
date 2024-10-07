@@ -63,9 +63,6 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
           </nav>
         </div>
       </div>
-      <hr
-        class="euiHorizontalRule euiHorizontalRule--full"
-      />
       <div
         class="bottom-container eui-xScroll bottom-container-expanded"
       />
@@ -86,9 +83,6 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 2`] = `
     >
       <div
         class="flex-1-container"
-      />
-      <hr
-        class="euiHorizontalRule euiHorizontalRule--full"
       />
       <div
         class="bottom-container bottom-container-collapsed"
@@ -161,9 +155,6 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
           </nav>
         </div>
       </div>
-      <hr
-        class="euiHorizontalRule euiHorizontalRule--full"
-      />
       <div
         class="bottom-container eui-xScroll bottom-container-expanded"
       />
