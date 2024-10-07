@@ -11,7 +11,6 @@ import { AddCollaboratorButton } from './add_collaborator_button';
 describe('AddCollaboratorButton', () => {
   const mockProps = {
     displayedTypes: [],
-    onChange: jest.fn(),
     permissionSettings: [
       {
         id: 0,
@@ -67,7 +66,7 @@ describe('AddCollaboratorButton', () => {
     expect(mockOnAdd).toHaveBeenCalled();
   });
 
-  it('should call onChange with newPermissionSettings when adding in modal', () => {
+  it('should call handleSubmitPermissionSettings with newPermissionSettings when adding in modal', () => {
     const mockOnAdd = jest.fn().mockImplementation(({ onAddCollaborators }) => {
       onAddCollaborators([
         {
@@ -100,7 +99,7 @@ describe('AddCollaboratorButton', () => {
     const addUserButton = getByText('add user');
     fireEvent.click(addUserButton);
     expect(mockOnAdd).toHaveBeenCalled();
-    expect(mockProps.onChange).toHaveBeenCalledWith([
+    expect(mockProps.handleSubmitPermissionSettings).toHaveBeenCalledWith([
       { id: 0, modes: ['library_write', 'write'], type: 'user', userId: 'admin' },
       { group: 'group', id: 1, modes: ['library_read', 'read'], type: 'group' },
       { id: 2, modes: ['library_read', 'read'], type: 'user', userId: '2' },

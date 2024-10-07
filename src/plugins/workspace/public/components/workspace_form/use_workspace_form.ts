@@ -136,6 +136,7 @@ export const useWorkspaceForm = ({
   );
 
   const handleSubmitPermissionSettings = (settings: WorkspacePermissionSetting[]) => {
+    setPermissionSettings(settings);
     const currentFormData = getFormDataRef.current();
     onSubmit?.(
       {

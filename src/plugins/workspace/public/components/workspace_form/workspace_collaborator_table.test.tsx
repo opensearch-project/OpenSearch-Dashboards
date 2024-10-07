@@ -2,28 +2,50 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+process.env.DEBUG_PRINT_LIMIT = 100000;
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 
 import { WorkspaceCollaboratorTable } from './workspace_collaborator_table';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
 
+// jest.mock('@elastic/eui', () => {
+//   return {
+//     ...jest.requireActual('@elastic/eui'),
+//     EuiConfirmModal: <div>shabi</div>,
+//   };
+// });
+
 const mockCoreStart = coreMock.createStart();
+// const mockOverlays = {
+//   openModal: jest.fn().mockImplementation((element: React.ReactElement) => {
+//     const container = document.createElement('div');
+//     container.className = 'test-container';
+//     document.body.appendChild(container);
+
+//     const modal = render(element, { container });
+
+//     return {
+//       close: () => {
+//         modal.unmount();
+//       },
+//     };
+//   }),
+// };
+
 const mockOverlays = {
   openModal: jest.fn(),
 };
+
 const { Provider } = createOpenSearchDashboardsReactContext({
   ...mockCoreStart,
-  ...{
-    overlays: mockOverlays,
-  },
+  overlays: mockOverlays,
 });
 
 describe('WorkspaceCollaboratorTable', () => {
   const mockProps = {
-    onChange: jest.fn(),
     displayedCollaboratorTypes: [],
     permissionSettings: [
       {
@@ -82,4 +104,36 @@ describe('WorkspaceCollaboratorTable', () => {
     fireEvent.click(deleteCollaborator);
     expect(mockOverlays.openModal).toHaveBeenCalled();
   });
+
+  // it('should call handleSubmitPermissionSettings when changing access level in modal', async () => {
+  //   const permissionSettings = [
+  //     {
+  //       id: 0,
+  //       modes: ['library_write', 'write'],
+  //       type: 'user',
+  //       userId: 'admin',
+  //     },
+  //   ];
+
+  //   const { getByText, getByTestId } = render(
+  //     <Provider>
+  //       <WorkspaceCollaboratorTable {...mockProps} permissionSettings={permissionSettings} />
+  //     </Provider>
+  //   );
+  //   const action = getByTestId('workspace-detail-collaborator-table-actions-box');
+  //   fireEvent.click(action);
+  //   const changeAccessLevel = getByText('Change access level');
+  //   fireEvent.click(changeAccessLevel);
+
+  //   let readOnlyItem;
+  //   await waitFor(() => {
+  //     readOnlyItem = getByText('Read only');
+  //     fireEvent.click(readOnlyItem);
+  //   });
+
+  //   const modalElement = mockOverlays.openModal.mock.calls[0][0];
+  //   console.log('modal', modalElement);
+  //   const modalResult = render(modalElement);
+  //   fireEvent.click(screen.getByText('Cancel'));
+  // });
 });

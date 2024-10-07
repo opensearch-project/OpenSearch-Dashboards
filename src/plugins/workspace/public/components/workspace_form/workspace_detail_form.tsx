@@ -44,7 +44,6 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
     numberOfErrors,
     handleResetForm,
     handleFormSubmit,
-    setPermissionSettings,
     handleSubmitPermissionSettings,
   } = useWorkspaceFormContext();
 
@@ -73,7 +72,6 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
             {detailTab === DetailTab.Collaborators ? (
               <AddCollaboratorButton
                 displayedTypes={displayedCollaboratorTypes}
-                onChange={setPermissionSettings}
                 permissionSettings={formData.permissionSettings}
                 handleSubmitPermissionSettings={handleSubmitPermissionSettings}
               />
@@ -119,7 +117,6 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
         )}
         {detailTab === DetailTab.Collaborators && (
           <WorkspaceCollaboratorTable
-            onChange={setPermissionSettings}
             permissionSettings={formData.permissionSettings}
             displayedCollaboratorTypes={displayedCollaboratorTypes}
             handleSubmitPermissionSettings={handleSubmitPermissionSettings}

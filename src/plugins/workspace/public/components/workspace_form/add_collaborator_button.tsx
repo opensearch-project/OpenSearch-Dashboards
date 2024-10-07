@@ -16,14 +16,12 @@ import { WorkspacePermissionSetting } from './types';
 
 interface Props {
   displayedTypes: WorkspaceCollaboratorType[];
-  onChange: (permissionSettings: PermissionSetting[]) => void;
   permissionSettings: PermissionSetting[];
   handleSubmitPermissionSettings: (permissionSettings: WorkspacePermissionSetting[]) => void;
 }
 
 export const AddCollaboratorButton = ({
   displayedTypes,
-  onChange,
   permissionSettings,
   handleSubmitPermissionSettings,
 }: Props) => {
@@ -51,7 +49,6 @@ export const AddCollaboratorButton = ({
           }),
     }));
     const newPermissionSettings = [...permissionSettings, ...addedSettings];
-    onChange(newPermissionSettings);
     handleSubmitPermissionSettings(newPermissionSettings as WorkspacePermissionSetting[]);
   };
 

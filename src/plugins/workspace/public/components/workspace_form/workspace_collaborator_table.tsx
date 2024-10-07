@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiSearchBarProps,
   EuiBasicTableColumn,
@@ -36,26 +36,18 @@ export type PermissionSetting = Pick<WorkspacePermissionSetting, 'id'> &
 
 interface Props {
   permissionSettings: PermissionSetting[];
-  onChange?: (value: PermissionSetting[]) => void;
   displayedCollaboratorTypes: WorkspaceCollaboratorType[];
   handleSubmitPermissionSettings: (permissionSettings: WorkspacePermissionSetting[]) => void;
 }
 
 export const WorkspaceCollaboratorTable = ({
   permissionSettings,
-  onChange,
   displayedCollaboratorTypes,
   handleSubmitPermissionSettings,
 }: Props) => {
   const [selection, setSelection] = useState<PermissionSetting[]>([]);
   const { overlays } = useOpenSearchDashboards();
 
-  const handlePermissionSettingsChange = useCallback(
-    (newSettings) => {
-      onChange?.([...newSettings]);
-    },
-    [onChange]
-  );
   const items = useMemo(() => {
     return permissionSettings.map((setting) => {
       const basicSettings = {
@@ -103,19 +95,13 @@ export const WorkspaceCollaboratorTable = ({
         actions={
           <AddCollaboratorButton
             displayedTypes={displayedCollaboratorTypes}
-            onChange={handlePermissionSettingsChange}
             permissionSettings={permissionSettings}
             handleSubmitPermissionSettings={handleSubmitPermissionSettings}
           />
         }
       />
     );
-  }, [
-    displayedCollaboratorTypes,
-    permissionSettings,
-    handlePermissionSettingsChange,
-    handleSubmitPermissionSettings,
-  ]);
+  }, [displayedCollaboratorTypes, permissionSettings, handleSubmitPermissionSettings]);
 
   const renderToolsLeft = () => {
     if (selection.length === 0) {
@@ -134,7 +120,6 @@ export const WorkspaceCollaboratorTable = ({
             selection.forEach(({ id }) => {
               newSettings = newSettings.filter((_item) => _item.id !== id);
             });
-            onChange?.(newSettings);
             handleSubmitPermissionSettings(newSettings as WorkspacePermissionSetting[]);
             setSelection([]);
             modal.close();
@@ -143,7 +128,12 @@ export const WorkspaceCollaboratorTable = ({
           confirmButtonText="Confirm"
         >
           <EuiText>
-            <p>Delete collaborator? The collaborators will not have access to the workspace.</p>
+            <p>
+              {i18n.translate('workspace.detail.collaborator.delete.confirm', {
+                defaultMessage:
+                  'Delete collaborator? The collaborators will not have access to the workspace.',
+              })}
+            </p>
           </EuiText>
         </EuiConfirmModal>
       );
@@ -169,7 +159,6 @@ export const WorkspaceCollaboratorTable = ({
       <Actions
         permissionSettings={permissionSettings}
         isTableAction={false}
-        onChange={onChange}
         selection={selection}
         handleSubmitPermissionSettings={handleSubmitPermissionSettings}
       />
@@ -230,7 +219,6 @@ export const WorkspaceCollaboratorTable = ({
         <Actions
           isTableAction={true}
           selection={[item]}
-          onChange={onChange}
           permissionSettings={permissionSettings}
           handleSubmitPermissionSettings={handleSubmitPermissionSettings}
         />
@@ -258,13 +246,11 @@ export const WorkspaceCollaboratorTable = ({
 const Actions = ({
   isTableAction,
   selection,
-  onChange,
   permissionSettings,
   handleSubmitPermissionSettings,
 }: {
   isTableAction: boolean;
   selection?: PermissionSetting[];
-  onChange?: (newSettings: PermissionSetting[]) => void;
   permissionSettings: PermissionSetting[];
   handleSubmitPermissionSettings: (permissionSettings: WorkspacePermissionSetting[]) => void;
 }) => {
@@ -295,7 +281,6 @@ const Actions = ({
                     : item
                 );
               });
-              onChange?.(newSettings);
               handleSubmitPermissionSettings(newSettings as WorkspacePermissionSetting[]);
               modal.close();
             }}
@@ -344,7 +329,6 @@ const Actions = ({
                     selection.forEach(({ id }) => {
                       newSettings = newSettings.filter((_item) => _item.id !== id);
                     });
-                    onChange?.(newSettings);
                     handleSubmitPermissionSettings(newSettings as WorkspacePermissionSetting[]);
                     modal.close();
                   }}
@@ -353,7 +337,10 @@ const Actions = ({
                 >
                   <EuiText>
                     <p>
-                      Delete collaborator? The collaborators will not have access to the workspace.
+                      {i18n.translate('workspace.detail.collaborator.delete.confirm', {
+                        defaultMessage:
+                          'Delete collaborator? The collaborators will not have access to the workspace.',
+                      })}
                     </p>
                   </EuiText>
                 </EuiConfirmModal>
