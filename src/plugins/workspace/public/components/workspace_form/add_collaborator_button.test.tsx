@@ -12,7 +12,20 @@ describe('AddCollaboratorButton', () => {
   const mockProps = {
     displayedTypes: [],
     onChange: jest.fn(),
-    permissionSettings: [],
+    permissionSettings: [
+      {
+        id: 0,
+        modes: ['library_write', 'write'],
+        type: 'user',
+        userId: 'admin',
+      },
+      {
+        id: 1,
+        modes: ['library_read', 'read'],
+        type: 'group',
+        group: 'group',
+      },
+    ],
     handleSubmitPermissionSettings: jest.fn(),
   };
 
@@ -28,18 +41,19 @@ describe('AddCollaboratorButton', () => {
   });
 
   it('should emit onAdd when clicked menu item', () => {
+    const mockOnAdd = jest.fn();
     const displayedTypes = [
       {
         name: 'add user',
         buttonLabel: 'add user',
-        onAdd: jest.fn(),
-        id: '',
+        onAdd: mockOnAdd,
+        id: 'user',
       },
       {
         name: 'add group',
         buttonLabel: 'add group',
-        onAdd: jest.fn(),
-        id: '',
+        onAdd: mockOnAdd,
+        id: 'group',
       },
     ];
     const { getByTestId, getByText } = render(
@@ -50,6 +64,46 @@ describe('AddCollaboratorButton', () => {
     expect(getByTestId('add-collaborator-popover')).toBeInTheDocument();
     const addUserButton = getByText('add user');
     fireEvent.click(addUserButton);
-    expect(displayedTypes[0].onAdd).toHaveBeenCalled();
+    expect(mockOnAdd).toHaveBeenCalled();
+  });
+
+  it('should call onChange with newPermissionSettings when adding in modal', () => {
+    const mockOnAdd = jest.fn().mockImplementation(({ onAddCollaborators }) => {
+      onAddCollaborators([
+        {
+          accessLevel: 'readOnly',
+          collaboratorId: '2',
+          permissionType: 'user',
+        },
+      ]);
+    });
+    const displayedTypes = [
+      {
+        name: 'add user',
+        buttonLabel: 'add user',
+        onAdd: mockOnAdd,
+        id: 'user',
+      },
+      {
+        name: 'add group',
+        buttonLabel: 'add group',
+        onAdd: mockOnAdd,
+        id: 'group',
+      },
+    ];
+    const { getByTestId, getByText } = render(
+      <AddCollaboratorButton {...mockProps} displayedTypes={displayedTypes} />
+    );
+    const button = getByTestId('add-collaborator-button');
+    fireEvent.click(button);
+    expect(getByTestId('add-collaborator-popover')).toBeInTheDocument();
+    const addUserButton = getByText('add user');
+    fireEvent.click(addUserButton);
+    expect(mockOnAdd).toHaveBeenCalled();
+    expect(mockProps.onChange).toHaveBeenCalledWith([
+      { id: 0, modes: ['library_write', 'write'], type: 'user', userId: 'admin' },
+      { group: 'group', id: 1, modes: ['library_read', 'read'], type: 'group' },
+      { id: 2, modes: ['library_read', 'read'], type: 'user', userId: '2' },
+    ]);
   });
 });
