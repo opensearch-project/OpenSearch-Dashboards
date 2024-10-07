@@ -52,7 +52,7 @@ export const validateAggregations = (aggs: AggConfig[], schemas?: any[]): Valida
   }
 
   const splitSchema = schemas?.find((s) => s.name === 'split');
-  if (splitSchema && splitSchema.mustBeFirst) {
+  if (splitSchema?.mustBeFirst) {
     const firstGroupSchemaIndex = aggs.findIndex((item) => item.schema === 'group');
     if (firstGroupSchemaIndex !== -1) {
       return {

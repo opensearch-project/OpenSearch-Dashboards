@@ -12,9 +12,26 @@ import {
   createAreaConfig,
   createPieConfig,
 } from './vislib';
+import { VisualizationTypeOptions } from '../services/type_service';
+import {
+  HistogramOptionsDefaults,
+  LineOptionsDefaults,
+  AreaOptionsDefaults,
+  PieOptionsDefaults,
+} from './vislib';
+import { MetricOptionsDefaults } from './metric/metric_viz_type';
+import { TableOptionsDefaults } from './table/table_viz_type';
+
+type VisualizationConfigFunction =
+  | (() => VisualizationTypeOptions<HistogramOptionsDefaults>)
+  | (() => VisualizationTypeOptions<LineOptionsDefaults>)
+  | (() => VisualizationTypeOptions<AreaOptionsDefaults>)
+  | (() => VisualizationTypeOptions<MetricOptionsDefaults>)
+  | (() => VisualizationTypeOptions<TableOptionsDefaults>)
+  | (() => VisualizationTypeOptions<PieOptionsDefaults>);
 
 export function registerDefaultTypes(typeServiceSetup: TypeServiceSetup, useVega: boolean) {
-  const defaultVisualizationTypes = [
+  const visualizationTypes: VisualizationConfigFunction[] = [
     createHistogramConfig,
     createLineConfig,
     createAreaConfig,
@@ -22,9 +39,7 @@ export function registerDefaultTypes(typeServiceSetup: TypeServiceSetup, useVega
     createTableConfig,
   ];
 
-  const visualizationTypes = useVega
-    ? [...defaultVisualizationTypes, createPieConfig]
-    : defaultVisualizationTypes;
+  if (useVega) visualizationTypes.push(createPieConfig);
 
   visualizationTypes.forEach((createTypeConfig) => {
     typeServiceSetup.createVisualizationType(createTypeConfig());

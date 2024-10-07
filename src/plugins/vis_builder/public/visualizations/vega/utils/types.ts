@@ -4,7 +4,8 @@
  */
 
 import { VegaEncoding } from '../components/encoding';
-import { VegaLiteMark } from '../components/mark';
+import { VegaLiteMark } from '../components/mark/mark';
+
 export interface AxisFormat {
   id: string;
 }

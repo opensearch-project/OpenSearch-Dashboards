@@ -4,8 +4,6 @@
  */
 
 import { generateVegaSpecForSlices } from './vega_spec_slices_builder';
-import { buildSlicesMarkForVega } from './components/mark/mark_slices';
-import { buildLegend } from './components/legend';
 
 // Mock the imported functions
 jest.mock('./components/mark/mark_slices', () => ({
@@ -40,7 +38,7 @@ describe('generateVegaSpecForSlices', () => {
     expect(result.signals).toHaveLength(8);
     expect(result.data).toHaveLength(2);
     expect(result.scales).toHaveLength(1);
-    expect(result.scales[0].range.scheme).toBe('category20');
+    expect(result.scales?.[0].range.scheme).toBe('category20');
     expect(result.marks).toEqual([{ type: 'mock-slices-mark' }]);
     expect(result.legends).toEqual([{ type: 'mock-legend' }]);
   });
@@ -53,9 +51,9 @@ describe('generateVegaSpecForSlices', () => {
 
     const result = generateVegaSpecForSlices(mockData, splitVisConfig, mockStyle);
 
-    expect(result.signals[0].update).toBe("length(data('splits'))");
+    expect(result.signals?.[0].update).toBe("length(data('splits'))");
     expect(result.layout).toBeDefined();
-    expect(result.layout.columns).toEqual({ signal: 'splitCount' });
+    if (result.layout) expect(result.layout.columns).toEqual({ signal: 'splitCount' });
   });
 
   it('should not add legend when addLegend is false', () => {
@@ -72,6 +70,6 @@ describe('generateVegaSpecForSlices', () => {
   it('should use default color schema when not provided in style', () => {
     const result = generateVegaSpecForSlices(mockData, mockVisConfig, {});
 
-    expect(result.scales[0].range.scheme).toBe('category20');
+    expect(result.scales?.[0].range.scheme).toBe('category20');
   });
 });

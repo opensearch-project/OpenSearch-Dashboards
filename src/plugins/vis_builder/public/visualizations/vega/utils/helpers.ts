@@ -110,12 +110,12 @@ const flattenHierarchy = (data, group): FlattenHierarchyResult => {
       const currentLabels = { ...parentLabels, [`level${level}`]: child.name };
       levelSet.add(`level${level}`);
 
-      if (child.children && child.children.length > 0) {
+      if (Array.isArray(child.children) && child.children.length > 0) {
         flattenSlices(child, split, level + 1, currentLabels);
       } else {
         const dataPoint: FlattenedSliceItem = {
           ...currentLabels,
-          value: child.size,
+          value: child.size !== undefined ? child.size : null,
         };
         if (split !== undefined) {
           dataPoint.split = split;
@@ -125,7 +125,7 @@ const flattenHierarchy = (data, group): FlattenHierarchyResult => {
     });
   };
 
-  if (group && group.length !== 0) {
+  if (Array.isArray(group) && group.length !== 0) {
     group.forEach((splitData) => {
       flattenSlices(splitData.slices, splitData.label);
     });
@@ -156,7 +156,7 @@ export const flattenDataHandler = (context, dimensions, handlerType = 'series') 
 
   if (handlerType === 'series') {
     // Determine the group based on split dimensions
-    if (group && group.length !== 0) {
+    if (Array.isArray(group) && group.length !== 0) {
       converted.series = group.flatMap((split) => flattenSeries(split.series, split.label));
       setAxisProperties(converted, group);
     } else {
