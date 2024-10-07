@@ -30,10 +30,11 @@
 
 import { i18n } from '@osd/i18n';
 import { schema } from '@osd/config-schema';
+import { UiSettingsParams } from 'opensearch-dashboards/server';
 // @ts-ignore untyped module
 import numeralLanguages from '@elastic/numeral/languages';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../common';
-import { UiSettingsParams, UiSettingScope } from '../../../core/server';
+import { UiSettingScope } from '../../../core/server/ui_settings/types';
 
 const luceneQueryLanguageLabel = i18n.translate('data.advancedSettings.searchQueryLanguageLucene', {
   defaultMessage: 'Lucene',
