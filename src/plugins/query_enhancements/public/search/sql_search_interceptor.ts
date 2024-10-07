@@ -5,7 +5,7 @@
 
 import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators';
 import { CoreStart } from 'opensearch-dashboards/public';
 import {
   DataPublicPluginStart,
@@ -36,16 +36,16 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     signal?: AbortSignal,
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
-    const isAsync = strategy === SEARCH_STRATEGY.SQL_ASYNC;
     const context: EnhancedFetchContext = {
       http: this.deps.http,
       path: trimEnd(`${API.SEARCH}/${strategy}`),
       signal,
+      body: {
+        pollQueryResultsParams: request.params?.pollQueryResultsParams,
+      },
     };
 
-    if (isAsync) this.notifications.toasts.add('Fetching data...');
     return fetch(context, this.queryService.queryString.getQuery()).pipe(
-      tap(() => isAsync && this.notifications.toasts.addSuccess('Fetch complete...')),
       catchError((error) => {
         return throwError(error);
       })
