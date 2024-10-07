@@ -1,5 +1,5 @@
 /* stylelint-disable */
-.observability {
+.workspace-initial-use-case-card__observability {
   background-color: hsla(30deg, 24%, 96%, 100%);
   background-image:
     radial-gradient(circle at 0% 48%, hsla(64deg, 81%, 77%, 40%) 0%, transparent 82%),
@@ -12,7 +12,7 @@
   background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
 }
 
-.security-analytics {
+.workspace-initial-use-case-card__security-analytics {
   background-color: hsla(30, 28%, 97%, 100%);
   background-image:
     radial-gradient(circle at 0% 0%, hsla(64deg, 81%, 77%, 0%) 0%, transparent 82%),
@@ -25,7 +25,7 @@
   background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
 }
 
-.essentials {
+.workspace-initial-use-case-card__essentials {
   background-color: hsla(30deg, 28%, 97%, 100%);
   background-image:
     radial-gradient(circle at 0% 0%, hsla(64deg, 81%, 77%, 0%) 0%, transparent 82%),
@@ -38,7 +38,7 @@
   background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
 }
 
-.search {
+.workspace-initial-use-case-card__search {
   background-color: hsla(30deg, 28%, 97%, 100%);
   background-image:
     radial-gradient(circle at 0% 0%, hsla(64deg, 81%, 77%, 0%) 0%, transparent 82%),
@@ -51,7 +51,7 @@
   background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
 }
 
-.all {
+.workspace-initial-use-case-card__all {
   background-color: hsla(30deg, 28%, 97%, 100%);
   background-image:
     radial-gradient(circle at 0% 0%, hsla(64deg, 81%, 77%, 0%) 0%, transparent 82%),
@@ -62,19 +62,4 @@
     radial-gradient(circle at 99% 2%, hsla(152deg, 77%, 74%, 35%) 0%, transparent 80%),
     radial-gradient(circle at 49% 70%, hsla(24deg, 23%, 91%, 0%) 30.7%, transparent 72.5%);
   background-blend-mode: normal, normal, normal, normal, normal, normal, normal;
-}
-
-.createWorkspaceTextBorder {
-  border: 1px dashed;
-  border-radius: 8px;
-  max-height: 160px;
-  width: 210px;
-  padding: 10px;
-  border-color: $ouiColorDarkShade;
-}
-
-.fixedLeftBottomIcon {
-  position: fixed;
-  bottom: 12px;
-  left: 12px;
 }

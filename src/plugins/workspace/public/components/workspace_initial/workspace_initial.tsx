@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './workspace_use_case_card.scss';
+import './workspace_initial.scss';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { ChromeNavControl, CoreStart } from 'opensearch-dashboards/public';
+import { CoreStart } from 'opensearch-dashboards/public';
 import {
   EuiLink,
   EuiPage,
@@ -22,6 +22,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
+import { useObservable } from 'react-use';
+import { ALL_USE_CASE_ID } from '../../../../../core/public';
 import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceUseCase } from '../../types';
@@ -40,14 +42,14 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
   const isDashboardAdmin = !!application.capabilities.dashboards?.isDashboardAdmin;
   const availableUseCases = registeredUseCases$
     .getValue()
-    .filter((item) => !item.systematic || item.id === 'all');
+    .filter((item) => !item.systematic || item.id === ALL_USE_CASE_ID);
   const workspaceList = workspaces.workspaceList$.getValue();
   const [isUseCaseFlyoutVisible, setIsUseCaseFlyoutVisible] = useState(false);
-  const [defaultUseCaseId, setDefaultUseCaseId] = useState(availableUseCases[0].id);
+  const [defaultExpandedUseCaseId, setDefaultExpandedUseCaseId] = useState(availableUseCases[0].id);
 
   const handleClickUseCaseInformation = useCallback((useCaseId: string) => {
     setIsUseCaseFlyoutVisible(true);
-    setDefaultUseCaseId(useCaseId);
+    setDefaultExpandedUseCaseId(useCaseId);
   }, []);
   const handleFlyoutClose = useCallback(() => {
     setIsUseCaseFlyoutVisible(false);
@@ -67,42 +69,29 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
       </EuiFlexItem>
     );
   });
-
+  const [isCreateWorkspacePopoverOpen, setIsCreateWorkspacePopoverOpen] = useState(false);
   const mountUserAccountRef = useRef<HTMLDivElement>(null);
   const mountSettingRef = useRef<HTMLDivElement>(null);
   const mountDevToolsRef = useRef<HTMLDivElement>(null);
 
-  const [isCreateWorkspacePopoverOpen, setIsCreateWorkspacePopoverOpen] = useState(false);
-  const [userAccountMount, setUserAccountMount] = useState<ChromeNavControl | undefined>(undefined);
-  const [settingMount, setSettingMount] = useState<ChromeNavControl | undefined>(undefined);
-  const [devToolsMount, setDevToolsMount] = useState<ChromeNavControl | undefined>(undefined);
+  const leftBottom$Ref = useRef(chrome.navControls.getLeftBottom$());
+  const items = useObservable(leftBottom$Ref.current);
 
   useEffect(() => {
-    const subscription = chrome.navControls.getLeftBottom$().subscribe((items) => {
-      setSettingMount(items.at(2));
-      setDevToolsMount(items.at(3));
-      setUserAccountMount(items.at(-1));
-    });
+    const settingMount = items?.find((item) => item.order === 3)?.mount;
+    const devToolsMount = items?.find((item) => item.order === 4)?.mount;
+    const userAccountMount = items?.find((item) => item.order === 10000)?.mount;
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [chrome.navControls]);
-
-  useEffect(() => {
-    if (
-      userAccountMount?.mount &&
-      settingMount?.mount &&
-      devToolsMount?.mount &&
-      mountUserAccountRef.current &&
-      mountSettingRef.current &&
-      mountDevToolsRef.current
-    ) {
-      userAccountMount.mount(mountUserAccountRef.current);
-      devToolsMount.mount(mountDevToolsRef.current);
-      settingMount.mount(mountSettingRef.current);
+    if (settingMount && mountSettingRef.current) {
+      settingMount(mountSettingRef.current);
     }
-  }, [devToolsMount, settingMount, userAccountMount]);
+    if (devToolsMount && mountDevToolsRef.current) {
+      devToolsMount(mountDevToolsRef.current);
+    }
+    if (userAccountMount && mountUserAccountRef.current) {
+      userAccountMount(mountUserAccountRef.current);
+    }
+  }, [chrome.navControls, items]);
 
   const createButton = (
     <EuiSmallButton
@@ -263,7 +252,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <div className="fixedLeftBottomIcon">
+        <div className="workspace-initial__fixed-left-bottom-icon">
           <div ref={mountSettingRef} />
           <EuiSpacer size="s" />
           <div ref={mountDevToolsRef} />
@@ -275,7 +264,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
         <WorkspaceUseCaseFlyout
           availableUseCases={availableUseCases}
           onClose={handleFlyoutClose}
-          defaultExpandUseCase={defaultUseCaseId}
+          defaultExpandUseCase={defaultExpandedUseCaseId}
         />
       )}
     </EuiPage>

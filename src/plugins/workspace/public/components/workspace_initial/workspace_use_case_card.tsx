@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './workspace_use_case_card.scss';
+import './workspace_initial.scss';
+import './workspace_use_case_card_gradient_variables.scss';
 import { ApplicationStart, HttpSetup, WorkspaceObject } from 'opensearch-dashboards/public';
 import {
   EuiText,
@@ -29,7 +30,11 @@ import {
   sortByRecentVisitedAndAlphabetical,
 } from './utils';
 import { WorkspaceUseCase } from '../../types';
-import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
+import {
+  USE_CASE_CARD_GRADIENT_PREFIX,
+  WORKSPACE_CREATE_APP_ID,
+  WORKSPACE_LIST_APP_ID,
+} from '../../../common/constants';
 import { navigateToWorkspacePageWithUseCase } from '../utils/workspace';
 import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
 
@@ -109,7 +114,11 @@ export const WorkspaceUseCaseCard = ({
 
   return (
     <EuiSplitPanel.Outer style={{ height: '416px', minWidth: '235px' }}>
-      <EuiSplitPanel.Inner paddingSize="m" grow={!hasWorkspaces} className={useCase.id}>
+      <EuiSplitPanel.Inner
+        paddingSize="m"
+        grow={!hasWorkspaces}
+        className={`${USE_CASE_CARD_GRADIENT_PREFIX}__${useCase.id}`}
+      >
         <EuiFlexGroup alignItems="center" direction="column" gutterSize="s" responsive={false}>
           <EuiFlexItem>
             <EuiIcon size="l" type={useCaseIcon} />
@@ -123,8 +132,8 @@ export const WorkspaceUseCaseCard = ({
                   content={i18n.translate(
                     'workspace.initial.useCaseCard.{useCaseId}.information.tooltip',
                     {
-                      defaultMessage: '{title} information',
-                      values: { useCaseId: useCase.id, title: useCase.title },
+                      defaultMessage: 'Learn more',
+                      values: { useCaseId: useCase.id },
                     }
                   )}
                 >
@@ -231,7 +240,7 @@ export const WorkspaceUseCaseCard = ({
             alignItems="center"
             justifyContent="center"
             gutterSize="s"
-            className="createWorkspaceTextBorder"
+            className="workspace-initial__create-workspace-text-border"
             responsive={false}
           >
             <EuiFlexItem grow={false}>

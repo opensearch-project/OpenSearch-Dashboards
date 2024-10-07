@@ -168,6 +168,7 @@ export class HomePublicPlugin
         const [coreStart, { navigation }] = await core.getStartServices();
         if (!!coreStart.application.capabilities.workspaces?.enabled) {
           coreStart.application.navigateToApp('workspace_initial');
+          return () => {};
         }
         setCommonService();
         coreStart.chrome.docTitle.change(
