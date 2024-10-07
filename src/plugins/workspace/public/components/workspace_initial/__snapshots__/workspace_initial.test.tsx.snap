@@ -115,7 +115,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                     style="height: 416px; min-width: 235px;"
                   >
                     <div
-                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner observability"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner workspace-initial-use-case-card__observability"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
@@ -177,7 +177,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                       style="display: grid; place-items: center;"
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn createWorkspaceTextBorder"
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn workspace-initial__create-workspace-text-border"
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -242,7 +242,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                     style="height: 416px; min-width: 235px;"
                   >
                     <div
-                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner security-analytics"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner workspace-initial-use-case-card__security-analytics"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
@@ -304,7 +304,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                       style="display: grid; place-items: center;"
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn createWorkspaceTextBorder"
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn workspace-initial__create-workspace-text-border"
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -369,7 +369,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                     style="height: 416px; min-width: 235px;"
                   >
                     <div
-                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner essentials"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner workspace-initial-use-case-card__essentials"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
@@ -431,7 +431,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                       style="display: grid; place-items: center;"
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn createWorkspaceTextBorder"
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn workspace-initial__create-workspace-text-border"
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -496,7 +496,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                     style="height: 416px; min-width: 235px;"
                   >
                     <div
-                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner search"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner workspace-initial-use-case-card__search"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
@@ -558,7 +558,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                       style="display: grid; place-items: center;"
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn createWorkspaceTextBorder"
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn workspace-initial__create-workspace-text-border"
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -702,7 +702,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
         </div>
       </div>
       <div
-        class="fixedLeftBottomIcon"
+        class="workspace-initial__fixed-left-bottom-icon"
       >
         <div />
         <div
@@ -801,7 +801,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                     style="height: 416px; min-width: 235px;"
                   >
                     <div
-                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner observability"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner workspace-initial-use-case-card__observability"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
@@ -863,7 +863,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                       style="display: grid; place-items: center;"
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn createWorkspaceTextBorder"
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn workspace-initial__create-workspace-text-border"
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -904,7 +904,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                     style="height: 416px; min-width: 235px;"
                   >
                     <div
-                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner security-analytics"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner workspace-initial-use-case-card__security-analytics"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
@@ -966,7 +966,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                       style="display: grid; place-items: center;"
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn createWorkspaceTextBorder"
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn workspace-initial__create-workspace-text-border"
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -1007,7 +1007,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                     style="height: 416px; min-width: 235px;"
                   >
                     <div
-                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner essentials"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner workspace-initial-use-case-card__essentials"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
@@ -1069,7 +1069,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                       style="display: grid; place-items: center;"
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn createWorkspaceTextBorder"
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn workspace-initial__create-workspace-text-border"
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -1110,7 +1110,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                     style="height: 416px; min-width: 235px;"
                   >
                     <div
-                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner search"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow euiPanel--noBorder euiSplitPanel__inner workspace-initial-use-case-card__search"
                     >
                       <div
                         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn"
@@ -1172,7 +1172,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                       style="display: grid; place-items: center;"
                     >
                       <div
-                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn createWorkspaceTextBorder"
+                        class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionColumn workspace-initial__create-workspace-text-border"
                       >
                         <div
                           class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -1292,7 +1292,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
         </div>
       </div>
       <div
-        class="fixedLeftBottomIcon"
+        class="workspace-initial__fixed-left-bottom-icon"
       >
         <div />
         <div
