@@ -101,12 +101,54 @@ export interface IDataFrameWithAggs extends IDataFrame {
   aggs: Record<string, DataFrameAgg | DataFrameBucketAgg | DataFrameBucketAgg[]>;
 }
 
-export interface IDataFrameResponse extends SearchResponse<any> {
-  type: DATA_FRAME_TYPES;
-  body: IDataFrame | IDataFrameWithAggs | IDataFrameError;
+export interface IDataFrameDefaultResponse {
+  type: DATA_FRAME_TYPES.DEFAULT;
+  body: IDataFrame | IDataFrameWithAggs;
   took: number;
 }
 
-export interface IDataFrameError extends IDataFrameResponse {
+export type IDataFramePollingResponse = {
+  type: DATA_FRAME_TYPES.POLLING;
+} & (FetchStatusResponse | QueryStartedResponse);
+
+export interface IDataFrameErrorResponse {
+  type: DATA_FRAME_TYPES.ERROR;
+  body: IDataFrameError;
+  took: number;
+}
+
+export type IDataFrameResponse = SearchResponse<any> &
+  (IDataFrameDefaultResponse | IDataFramePollingResponse | IDataFrameErrorResponse);
+
+export interface IDataFrameError extends SearchResponse<any> {
   error: Error;
 }
+
+export interface PollQueryResultsParams {
+  queryId?: string;
+  sessionId?: string;
+}
+
+export type QueryStatusConfig = PollQueryResultsParams;
+
+export interface QuerySuccessStatusResponse {
+  status: 'success';
+  body: IDataFrame | IDataFrameWithAggs | IDataFrameError;
+}
+
+export interface QueryStartedResponse {
+  status: 'started';
+  body: { queryStatusConfig: QueryStatusConfig };
+}
+
+export interface QueryFailedStatusResponse {
+  status: 'failed';
+  body: IDataFrameError;
+}
+
+export type FetchStatusResponse =
+  | QueryFailedStatusResponse
+  | QuerySuccessStatusResponse
+  | { status?: string };
+
+export type PollQueryResultsHandler = () => Promise<FetchStatusResponse>;
