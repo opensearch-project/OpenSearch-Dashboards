@@ -5,15 +5,19 @@
 
 import { DatasetService } from './dataset_service';
 import { coreMock } from '../../../../../../core/public/mocks';
-import { DataStorage } from 'src/plugins/data/common';
+import { DEFAULT_DATA, DataStorage, Dataset } from 'src/plugins/data/common';
 import { DataStructure } from '../../../../common';
 import { IDataPluginServices } from '../../../types';
+import { indexPatternTypeConfig } from './lib';
+import { dataPluginMock } from '../../../mocks';
+import { IndexPatternsContract } from '../../..';
 
 describe('DatasetService', () => {
   let service: DatasetService;
   let uiSettings: ReturnType<typeof coreMock.createSetup>['uiSettings'];
   let sessionStorage: DataStorage;
   let mockDataPluginServices: jest.Mocked<IDataPluginServices>;
+  let indexPatterns: IndexPatternsContract;
 
   beforeEach(() => {
     uiSettings = coreMock.createSetup().uiSettings;
@@ -21,6 +25,8 @@ describe('DatasetService', () => {
     mockDataPluginServices = {} as jest.Mocked<IDataPluginServices>;
 
     service = new DatasetService(uiSettings, sessionStorage);
+    indexPatterns = dataPluginMock.createStartContract().indexPatterns;
+    service.init(indexPatterns);
   });
 
   const mockResult = {
@@ -97,5 +103,30 @@ describe('DatasetService', () => {
     await service.fetchOptions(mockDataPluginServices, mockPath, 'test-type');
 
     expect(service.getLastCacheTime()).toEqual(time);
+  });
+  test('calling cacheDataset on dataset caches it', async () => {
+    const mockDataset = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      type: mockType.id,
+    } as Dataset;
+    service.registerType(mockType);
+
+    await service.cacheDataset(mockDataset);
+    expect(indexPatterns.create).toHaveBeenCalledTimes(1);
+    expect(indexPatterns.saveToCache).toHaveBeenCalledTimes(1);
+  });
+
+  test('calling cacheDataset on index pattern does not cache it', async () => {
+    service.registerType(indexPatternTypeConfig);
+    const mockDataset = {
+      id: 'test-index-pattern',
+      title: 'Test Index Pattern',
+      type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+    } as Dataset;
+
+    await service.cacheDataset(mockDataset);
+    expect(indexPatterns.create).toHaveBeenCalledTimes(0);
+    expect(indexPatterns.saveToCache).toHaveBeenCalledTimes(0);
   });
 });
