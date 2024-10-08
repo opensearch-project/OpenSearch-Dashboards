@@ -5,19 +5,19 @@
 
 import { CoreStart } from 'opensearch-dashboards/public';
 import {
+  CachedDataStructure,
   Dataset,
+  DataStorage,
   DataStructure,
-  IndexPatternSpec,
   DEFAULT_DATA,
   IFieldType,
+  IndexPatternSpec,
   UI_SETTINGS,
-  DataStorage,
-  CachedDataStructure,
 } from '../../../../common';
-import { DatasetTypeConfig, DataStructureFetchOptions } from './types';
-import { indexPatternTypeConfig, indexTypeConfig } from './lib';
 import { IndexPatternsContract } from '../../../index_patterns';
 import { IDataPluginServices } from '../../../types';
+import { indexPatternTypeConfig, indexTypeConfig } from './lib';
+import { DatasetTypeConfig, DataStructureFetchOptions } from './types';
 
 export class DatasetService {
   private indexPatterns?: IndexPatternsContract;
@@ -62,29 +62,34 @@ export class DatasetService {
     return this.defaultDataset;
   }
 
-  public async cacheDataset(dataset: Dataset): Promise<void> {
-    const type = this.getType(dataset.type);
-    if (dataset) {
-      const spec = {
-        id: dataset.id,
-        title: dataset.title,
-        timeFieldName: {
-          name: dataset.timeFieldName,
-          type: 'date',
-        } as Partial<IFieldType>,
-        fields: await type?.fetchFields(dataset),
-        dataSourceRef: dataset.dataSource
-          ? {
-              id: dataset.dataSource.id!,
-              name: dataset.dataSource.title,
-              type: dataset.dataSource.type,
-            }
-          : undefined,
-      } as IndexPatternSpec;
-      const temporaryIndexPattern = await this.indexPatterns?.create(spec, true);
-      if (temporaryIndexPattern) {
-        this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
+  public async cacheDataset(dataset: Dataset, services?: IDataPluginServices): Promise<void> {
+    const type = this.getType(dataset?.type);
+    try {
+      if (dataset) {
+        const fetchedFields = await type?.fetchFields(dataset, services);
+        const spec = {
+          id: dataset.id,
+          title: dataset.title,
+          timeFieldName: {
+            name: dataset.timeFieldName,
+            type: 'date',
+          } as Partial<IFieldType>,
+          fields: fetchedFields,
+          dataSourceRef: dataset.dataSource
+            ? {
+                id: dataset.dataSource.id!,
+                name: dataset.dataSource.title,
+                type: dataset.dataSource.type,
+              }
+            : undefined,
+        } as IndexPatternSpec;
+        const temporaryIndexPattern = await this.indexPatterns?.create(spec, true);
+        if (temporaryIndexPattern) {
+          this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
+        }
       }
+    } catch (error) {
+      throw new Error(`Failed to load dataset: ${dataset?.id}`);
     }
   }
 

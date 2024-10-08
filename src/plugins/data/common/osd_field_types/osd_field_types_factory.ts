@@ -29,7 +29,7 @@
  */
 
 import { OsdFieldType } from './osd_field_type';
-import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from './types';
+import { OPENSEARCH_FIELD_TYPES, OPENSEARCH_SQL_FIELD_TYPES, OSD_FIELD_TYPES } from './types';
 
 export const OsdFieldTypeUnknown = new OsdFieldType({
   name: OSD_FIELD_TYPES.UNKNOWN,
@@ -46,6 +46,11 @@ export const createOsdFieldTypes = (): OsdFieldType[] => [
       OPENSEARCH_FIELD_TYPES.KEYWORD,
       OPENSEARCH_FIELD_TYPES._TYPE,
       OPENSEARCH_FIELD_TYPES._ID,
+    ],
+    osSQLTypes: [
+      OPENSEARCH_SQL_FIELD_TYPES.KEYWORD,
+      OPENSEARCH_SQL_FIELD_TYPES.TEXT,
+      OPENSEARCH_SQL_FIELD_TYPES.STRING,
     ],
   }),
   new OsdFieldType({
@@ -64,28 +69,47 @@ export const createOsdFieldTypes = (): OsdFieldType[] => [
       OPENSEARCH_FIELD_TYPES.BYTE,
       OPENSEARCH_FIELD_TYPES.TOKEN_COUNT,
     ],
+    osSQLTypes: [
+      OPENSEARCH_SQL_FIELD_TYPES.BYTE,
+      OPENSEARCH_SQL_FIELD_TYPES.SHORT,
+      OPENSEARCH_SQL_FIELD_TYPES.INTEGER,
+      OPENSEARCH_SQL_FIELD_TYPES.INT,
+      OPENSEARCH_SQL_FIELD_TYPES.LONG,
+      OPENSEARCH_SQL_FIELD_TYPES.FLOAT,
+      OPENSEARCH_SQL_FIELD_TYPES.DOUBLE,
+    ],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.DATE,
     sortable: true,
     filterable: true,
     esTypes: [OPENSEARCH_FIELD_TYPES.DATE, OPENSEARCH_FIELD_TYPES.DATE_NANOS],
+    osSQLTypes: [
+      OPENSEARCH_SQL_FIELD_TYPES.TIMESTAMP,
+      OPENSEARCH_SQL_FIELD_TYPES.DATE,
+      OPENSEARCH_SQL_FIELD_TYPES.DATE_NANOS,
+      OPENSEARCH_SQL_FIELD_TYPES.TIME,
+      OPENSEARCH_SQL_FIELD_TYPES.INTERVAL,
+    ],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.IP,
     sortable: true,
     filterable: true,
     esTypes: [OPENSEARCH_FIELD_TYPES.IP],
+    osSQLTypes: [OPENSEARCH_SQL_FIELD_TYPES.IP],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.BOOLEAN,
     sortable: true,
     filterable: true,
     esTypes: [OPENSEARCH_FIELD_TYPES.BOOLEAN],
+    osSQLTypes: [OPENSEARCH_SQL_FIELD_TYPES.BOOLEAN],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.OBJECT,
     esTypes: [OPENSEARCH_FIELD_TYPES.OBJECT],
+    osSQLTypes: [OPENSEARCH_SQL_FIELD_TYPES.STRUCT, OPENSEARCH_SQL_FIELD_TYPES.ARRAY],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.NESTED,
@@ -94,6 +118,7 @@ export const createOsdFieldTypes = (): OsdFieldType[] => [
   new OsdFieldType({
     name: OSD_FIELD_TYPES.GEO_POINT,
     esTypes: [OPENSEARCH_FIELD_TYPES.GEO_POINT],
+    osSQLTypes: [OPENSEARCH_SQL_FIELD_TYPES.GEO_POINT],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.GEO_SHAPE,
@@ -102,6 +127,7 @@ export const createOsdFieldTypes = (): OsdFieldType[] => [
   new OsdFieldType({
     name: OSD_FIELD_TYPES.ATTACHMENT,
     esTypes: [OPENSEARCH_FIELD_TYPES.ATTACHMENT],
+    osSQLTypes: [OPENSEARCH_SQL_FIELD_TYPES.BINARY],
   }),
   new OsdFieldType({
     name: OSD_FIELD_TYPES.MURMUR3,

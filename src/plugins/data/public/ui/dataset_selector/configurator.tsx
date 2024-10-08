@@ -21,13 +21,16 @@ import { FormattedMessage } from '@osd/i18n/react';
 import React, { useEffect, useState } from 'react';
 import { BaseDataset, Dataset, DatasetField } from '../../../common';
 import { getIndexPatterns, getQueryService } from '../../services';
+import { IDataPluginServices } from '../../types';
 
 export const Configurator = ({
+  services,
   baseDataset,
   onConfirm,
   onCancel,
   onPrevious,
 }: {
+  services: IDataPluginServices;
   baseDataset: BaseDataset;
   onConfirm: (dataset: Dataset) => void;
   onCancel: () => void;
@@ -39,6 +42,7 @@ export const Configurator = ({
   const indexPatternsService = getIndexPatterns();
   const type = queryString.getDatasetService().getType(baseDataset.type);
   const languages = type?.supportedLanguages(baseDataset) || [];
+  const [isLoading, setIsLoading] = useState(false);
 
   const [dataset, setDataset] = useState<Dataset>(baseDataset);
   const [timeFields, setTimeFields] = useState<DatasetField[]>();
@@ -56,14 +60,18 @@ export const Configurator = ({
       const datasetFields = await queryString
         .getDatasetService()
         .getType(baseDataset.type)
-        ?.fetchFields(baseDataset);
+        ?.fetchFields(baseDataset, services);
 
       const dateFields = datasetFields?.filter((field) => field.type === 'date');
       setTimeFields(dateFields || []);
     };
 
+    if (baseDataset?.dataSource?.meta?.requiresTimeFilter === false) {
+      setTimeFields([]);
+      return;
+    }
     fetchFields();
-  }, [baseDataset, indexPatternsService, queryString]);
+  }, [baseDataset, indexPatternsService, queryString, services]);
 
   return (
     <>
@@ -161,14 +169,18 @@ export const Configurator = ({
         </EuiButton>
         <EuiButton
           onClick={async () => {
-            await queryString.getDatasetService().cacheDataset(dataset);
+            setIsLoading(true);
+            await queryString.getDatasetService().cacheDataset(dataset, services);
+            setIsLoading(false);
             onConfirm(dataset);
           }}
           fill
+          isLoading={isLoading}
+          disabled={isLoading}
         >
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"
-            defaultMessage="Select Data"
+            defaultMessage={isLoading ? 'Loading' : 'Select Data'}
           />
         </EuiButton>
       </EuiModalFooter>

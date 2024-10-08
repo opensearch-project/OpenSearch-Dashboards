@@ -30,6 +30,8 @@ export interface DatasetTypeConfig {
     icon: EuiIconProps;
     /** Optional tooltip text */
     tooltip?: string;
+    /** Optional requiresTimeFilter determines if a time filter is needed */
+    requiresTimeFilter?: boolean;
   };
   /**
    * Converts a DataStructure to a Dataset.
@@ -53,7 +55,7 @@ export interface DatasetTypeConfig {
    * Fetches fields for the dataset.
    * @returns {Promise<DatasetField[]>} A promise that resolves to an array of DatasetFields.
    */
-  fetchFields: (dataset: Dataset) => Promise<DatasetField[]>;
+  fetchFields: (dataset: Dataset, services?: IDataPluginServices) => Promise<DatasetField[]>;
   /**
    * Retrieves the supported query languages for this dataset type.
    * @returns {Promise<string[]>} A promise that resolves to an array of supported language ids.

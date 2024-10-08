@@ -5,10 +5,9 @@
 
 // index_type.test.ts
 
-import { indexTypeConfig } from './index_type';
-import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { DATA_STRUCTURE_META_TYPES, DataStructure, Dataset } from '../../../../../common';
 import * as services from '../../../../services';
+import { indexTypeConfig } from './index_type';
 
 jest.mock('../../../../services', () => ({
   getSearchService: jest.fn(),
@@ -16,11 +15,6 @@ jest.mock('../../../../services', () => ({
 }));
 
 describe('indexTypeConfig', () => {
-  const mockSavedObjectsClient = {} as SavedObjectsClientContract;
-  const mockServices = {
-    savedObjects: { client: mockSavedObjectsClient },
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
