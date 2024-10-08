@@ -509,49 +509,6 @@ describe('Workspace plugin', () => {
     });
   });
 
-  it('#start should only register get started cards of use cases to new home page', async () => {
-    const workspacePlugin = new WorkspacePlugin();
-    const setupMock = getSetupMock();
-    const coreStart = coreMock.createStart();
-    await workspacePlugin.setup(setupMock, {});
-    const registeredUseCases$ = new BehaviorSubject([
-      {
-        id: 'foo',
-        title: 'Foo',
-        systematic: true,
-        description: '',
-        features: [],
-      },
-      {
-        id: 'bar',
-        title: 'Bar',
-        description: '',
-        features: [],
-      },
-    ]);
-    jest.spyOn(UseCaseService.prototype, 'start').mockImplementationOnce(() => ({
-      getRegisteredUseCases$: jest.fn(() => registeredUseCases$),
-    }));
-
-    coreStart.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
-
-    const mockDependencies = getMockDependencies();
-
-    workspacePlugin.start(coreStart, mockDependencies);
-    await waitFor(() => {
-      expect(mockDependencies.contentManagement.registerContentProvider).toBeCalledWith(
-        expect.objectContaining({
-          id: `home_get_start_bar`,
-        })
-      );
-      expect(mockDependencies.contentManagement.registerContentProvider).not.toBeCalledWith(
-        expect.objectContaining({
-          id: `home_get_start_foo`,
-        })
-      );
-    });
-  });
-
   it('#stop should call unregisterNavGroupUpdater', async () => {
     const workspacePlugin = new WorkspacePlugin();
     const setupMock = getSetupMock();

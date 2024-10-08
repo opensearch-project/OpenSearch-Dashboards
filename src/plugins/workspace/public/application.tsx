@@ -17,6 +17,7 @@ import { WorkspaceDetailApp } from './components/workspace_detail_app';
 import { WorkspaceDetailProps } from './components/workspace_detail/workspace_detail';
 import { WorkspaceInitialApp } from './components/workspace_initial_app';
 import { WorkspaceUseCaseOverviewApp } from './components/workspace_use_case_overview_app';
+import { WorkspaceInitialProps } from './components/workspace_initial/workspace_initial';
 
 export const renderCreatorApp = (
   { element }: AppMountParameters,
@@ -101,18 +102,20 @@ export const renderDetailApp = (
   };
 };
 
-export const renderInitialApp = ({}: AppMountParameters, services: Services) => {
-  const rootElement = document.getElementById('opensearch-dashboards-body');
-
+export const renderInitialApp = (
+  { element }: AppMountParameters,
+  services: Services,
+  props: WorkspaceInitialProps
+) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceInitialApp />
+      <WorkspaceInitialApp {...props} />
     </OpenSearchDashboardsContextProvider>,
-    rootElement
+    element
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(rootElement!);
+    ReactDOM.unmountComponentAtNode(element);
   };
 };
 

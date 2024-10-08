@@ -68,7 +68,6 @@ import {
   setAnalyticsAllOverviewSection,
 } from './components/use_case_overview/setup_overview';
 import { UserDefaultWorkspace } from './components/workspace_list/default_workspace';
-import { registerGetStartedCardToNewHome } from './components/home_get_start_card';
 import {
   WorkspaceCollaboratorTypesService,
   UseCaseService,
@@ -395,6 +394,7 @@ export class WorkspacePlugin
         defaultMessage: 'Workspace Initial',
       }),
       navLinkStatus: AppNavLinkStatus.hidden,
+      chromeless: true,
       async mount(params: AppMountParameters) {
         const { renderInitialApp } = await import('./application');
         return mountWorkspaceApp(params, renderInitialApp);
@@ -606,9 +606,6 @@ export class WorkspacePlugin
 
       // register workspace list in home page
       this.registerWorkspaceListToHome(core, contentManagement);
-
-      // register get started card in new home page
-      registerGetStartedCardToNewHome(core, contentManagement, this.registeredUseCases$);
 
       // register workspace list to user settings page
       this.registerWorkspaceListToUserSettings(core, contentManagement, navigation);

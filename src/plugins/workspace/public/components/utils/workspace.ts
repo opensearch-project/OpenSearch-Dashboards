@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WORKSPACE_DETAIL_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
+import {
+  WORKSPACE_CREATE_APP_ID,
+  WORKSPACE_DETAIL_APP_ID,
+  WORKSPACE_LIST_APP_ID,
+} from '../../../common/constants';
 import { CoreStart } from '../../../../../core/public';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { DetailTab } from '../workspace_form/constants';
@@ -23,11 +27,12 @@ export const navigateToWorkspaceDetail = (
   );
 };
 
-export const navigateToWorkspaceListWithUseCase = (
+export const navigateToWorkspacePageWithUseCase = (
   application: Core['application'],
-  useCaseTitle: string
+  useCaseTitle: string,
+  appId: string
 ) => {
-  const newUrl = application.getUrlForApp(WORKSPACE_LIST_APP_ID, { absolute: true });
+  const newUrl = application.getUrlForApp(appId, { absolute: true });
   if (newUrl) {
     const url = new URL(newUrl);
     url.hash = `/?useCase=${useCaseTitle}`;
