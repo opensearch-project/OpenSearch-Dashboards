@@ -70,18 +70,16 @@ export const WorkspaceUseCaseCard = ({
   const hasWorkspaces = sortedWorkspaceList.length > 0;
 
   const adminCreateWorkspaceText = i18n.translate(
-    'workspace.initial.useCaseCard.{useCaseId}.adminCreateWorkspaceText',
+    'workspace.initial.useCaseCard.adminCreateWorkspaceText',
     {
       defaultMessage:
         'Create a workspace or request a workspace owner to add you as a collaborator.',
-      values: { useCaseId: useCase.id },
     }
   );
   const noAdminCreateWorkspaceText = i18n.translate(
-    'workspace.initial.useCaseCard.{useCaseId}.noAdminCreateWorkspaceText',
+    'workspace.initial.useCaseCard.noAdminCreateWorkspaceText',
     {
       defaultMessage: 'Request a workspace owner to add you as a collaborator.',
-      values: { useCaseId: useCase.id },
     }
   );
 
@@ -129,22 +127,14 @@ export const WorkspaceUseCaseCard = ({
                 {useCase.title}
                 <EuiToolTip
                   position="top"
-                  content={i18n.translate(
-                    'workspace.initial.useCaseCard.{useCaseId}.information.tooltip',
-                    {
-                      defaultMessage: 'Learn more',
-                      values: { useCaseId: useCase.id },
-                    }
-                  )}
+                  content={i18n.translate('workspace.initial.useCaseCard.information.tooltip', {
+                    defaultMessage: 'Learn more',
+                  })}
                 >
                   <EuiButtonIcon
-                    aria-label={i18n.translate(
-                      'workspace.initial.useCaseCard.{useCaseId}.information.button',
-                      {
-                        defaultMessage: '{title} information button',
-                        values: { useCaseId: useCase.id, title: useCase.title },
-                      }
-                    )}
+                    aria-label={i18n.translate('workspace.initial.useCaseCard.information.button', {
+                      defaultMessage: 'Learn more',
+                    })}
                     data-test-subj={`workspace-initial-useCaseCard-${useCase.id}-button-information`}
                     iconSize="m"
                     color="text"
@@ -190,9 +180,8 @@ export const WorkspaceUseCaseCard = ({
                     )
                   }
                 >
-                  {i18n.translate('workspace.initial.useCaseCard.{useCaseId}.button.view', {
+                  {i18n.translate('workspace.initial.useCaseCard.button.view', {
                     defaultMessage: 'View all',
-                    values: { useCaseId: useCase.id },
                   })}
                 </EuiSmallButtonEmpty>
               </EuiFlexItem>
@@ -200,22 +189,14 @@ export const WorkspaceUseCaseCard = ({
                 <EuiFlexItem grow={false}>
                   <EuiToolTip
                     position="top"
-                    content={i18n.translate(
-                      'workspace.initial.useCaseCard.{useCaseId}.button.create',
-                      {
-                        defaultMessage: 'Create workspace',
-                        values: { useCaseId: useCase.id },
-                      }
-                    )}
+                    content={i18n.translate('workspace.initial.useCaseCard.button.create', {
+                      defaultMessage: 'Create workspace',
+                    })}
                   >
                     <EuiSmallButtonIcon
-                      aria-label={i18n.translate(
-                        'workspace.initial.useCaseCard.{useCaseId}.button.plus',
-                        {
-                          defaultMessage: 'Create {title} workspace',
-                          values: { useCaseId: useCase.id, title: useCase.title },
-                        }
-                      )}
+                      aria-label={i18n.translate('workspace.initial.useCaseCard.button.plus', {
+                        defaultMessage: 'Create workspace',
+                      })}
                       onClick={handleClickCreateButton}
                       display="base"
                       iconType="plus"
@@ -246,9 +227,8 @@ export const WorkspaceUseCaseCard = ({
             <EuiFlexItem grow={false}>
               <EuiTitle size="xs">
                 <h4>
-                  {i18n.translate('workspace.initial.useCaseCard.{useCaseId}.noWorkspaces.title', {
+                  {i18n.translate('workspace.initial.useCaseCard.noWorkspaces.title', {
                     defaultMessage: 'No workspaces',
-                    values: { useCaseId: useCase.id },
                   })}
                 </h4>
               </EuiTitle>
@@ -266,13 +246,9 @@ export const WorkspaceUseCaseCard = ({
                   data-test-subj={`workspace-initial-useCaseCard-${useCase.id}-button-createWorkspace`}
                   onClick={handleClickCreateButton}
                 >
-                  {i18n.translate(
-                    'workspace.initial.useCaseCard.{useCaseId}.button.createWorkspace',
-                    {
-                      defaultMessage: 'Create workspace',
-                      values: { useCaseId: useCase.id },
-                    }
-                  )}
+                  {i18n.translate('workspace.initial.useCaseCard.button.createWorkspace', {
+                    defaultMessage: 'Create workspace',
+                  })}
                 </EuiSmallButton>
               </EuiFlexItem>
             )}

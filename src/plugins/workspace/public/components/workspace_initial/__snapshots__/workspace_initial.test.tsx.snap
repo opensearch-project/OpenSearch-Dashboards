@@ -141,7 +141,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                               class="euiToolTipAnchor"
                             >
                               <button
-                                aria-label="Observability information button"
+                                aria-label="Learn more"
                                 class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                                 data-test-subj="workspace-initial-useCaseCard-observability-button-information"
                                 type="button"
@@ -268,7 +268,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                               class="euiToolTipAnchor"
                             >
                               <button
-                                aria-label="Security Analytics information button"
+                                aria-label="Learn more"
                                 class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                                 data-test-subj="workspace-initial-useCaseCard-security-analytics-button-information"
                                 type="button"
@@ -395,7 +395,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                               class="euiToolTipAnchor"
                             >
                               <button
-                                aria-label="Essentials information button"
+                                aria-label="Learn more"
                                 class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                                 data-test-subj="workspace-initial-useCaseCard-essentials-button-information"
                                 type="button"
@@ -522,7 +522,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is OS
                               class="euiToolTipAnchor"
                             >
                               <button
-                                aria-label="Search information button"
+                                aria-label="Learn more"
                                 class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                                 data-test-subj="workspace-initial-useCaseCard-search-button-information"
                                 type="button"
@@ -829,7 +829,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                               class="euiToolTipAnchor"
                             >
                               <button
-                                aria-label="Observability information button"
+                                aria-label="Learn more"
                                 class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                                 data-test-subj="workspace-initial-useCaseCard-observability-button-information"
                                 type="button"
@@ -932,7 +932,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                               class="euiToolTipAnchor"
                             >
                               <button
-                                aria-label="Security Analytics information button"
+                                aria-label="Learn more"
                                 class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                                 data-test-subj="workspace-initial-useCaseCard-security-analytics-button-information"
                                 type="button"
@@ -1035,7 +1035,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                               class="euiToolTipAnchor"
                             >
                               <button
-                                aria-label="Essentials information button"
+                                aria-label="Learn more"
                                 class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                                 data-test-subj="workspace-initial-useCaseCard-essentials-button-information"
                                 type="button"
@@ -1138,7 +1138,7 @@ exports[`WorkspaceInitial render workspace initial page normally when user is no
                               class="euiToolTipAnchor"
                             >
                               <button
-                                aria-label="Search information button"
+                                aria-label="Learn more"
                                 class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
                                 data-test-subj="workspace-initial-useCaseCard-search-button-information"
                                 type="button"
