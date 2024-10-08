@@ -102,8 +102,10 @@ describe('DataSourceManagement: Utils.ts', () => {
 
   describe('Handle no available data source error', () => {
     let toasts: IToasts;
-    const noDataSourcesConnectedMessage = `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
-    const noCompatibleDataSourcesMessage = `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`;
+    const noDataSourcesConnectedMessage =
+      'No data sources connected yet. Connect your data sources to get started.';
+    const noCompatibleDataSourcesMessage =
+      'No compatible data sources are available. Add a compatible data source.';
 
     beforeEach(() => {
       toasts = notificationServiceMock.createStartContract().toasts;
@@ -128,11 +130,7 @@ describe('DataSourceManagement: Utils.ts', () => {
           incompatibleDataSourcesExist,
         });
         expect(toasts.add).toBeCalledTimes(1);
-        expect(toasts.add).toBeCalledWith(
-          expect.objectContaining({
-            title: i18n.translate('dataSource.noAvailableDataSourceError', { defaultMessage }),
-          })
-        );
+        expect(toasts.add).toBeCalledWith(expect.objectContaining({ title: defaultMessage }));
       }
     );
   });

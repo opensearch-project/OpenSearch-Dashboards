@@ -44,11 +44,6 @@ import {
   getAccelerationName,
 } from '../acceleration_management/acceleration_utils';
 import {
-  ACCE_NO_DATA_DESCRIPTION,
-  ACCE_NO_DATA_TITLE,
-  CREATE_ACCELERATION_DESCRIPTION,
-} from './utils/associated_objects_tab_utils';
-import {
   isCatalogCacheFetching,
   redirectToExplorerWithDataSrc,
 } from './utils/associated_objects_tab_utils';
@@ -193,16 +188,19 @@ export const AssociatedObjectsDetailsFlyout = ({
     <EuiEmptyPrompt
       title={
         <h2>
-          {i18n.translate('datasources.associatedObjectsFlyout.noAccelerationTitle', {
-            defaultMessage: ACCE_NO_DATA_TITLE,
+          {i18n.translate('dataSourcesManagement.associatedObjectsFlyout.noAccelerationTitle', {
+            defaultMessage: 'You have no accelerations',
           })}
         </h2>
       }
       body={
         <p>
-          {i18n.translate('datasources.associatedObjectsFlyout.noAccelerationDescription', {
-            defaultMessage: ACCE_NO_DATA_DESCRIPTION,
-          })}
+          {i18n.translate(
+            'dataSourcesManagement.associatedObjectsFlyout.noAccelerationDescription',
+            {
+              defaultMessage: 'Accelerate query performing through OpenSearch Indexing',
+            }
+          )}
         </p>
       }
       actions={
@@ -221,9 +219,12 @@ export const AssociatedObjectsDetailsFlyout = ({
           iconType="popout"
           iconSide="left"
         >
-          {i18n.translate('datasources.associatedObjectsFlyout.createAccelerationButton', {
-            defaultMessage: CREATE_ACCELERATION_DESCRIPTION,
-          })}
+          {i18n.translate(
+            'dataSourcesManagement.associatedObjectsFlyout.createAccelerationButton',
+            {
+              defaultMessage: 'Create Acceleration',
+            }
+          )}
         </EuiButton>
       }
     />

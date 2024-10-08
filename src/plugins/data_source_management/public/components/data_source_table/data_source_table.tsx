@@ -23,7 +23,11 @@ import {
   reactRouterNavigate,
   useOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
-import { DataSourceManagementContext, DataSourceTableItem, ToastMessageItem } from '../../types';
+import {
+  DataSourceManagementContext,
+  DataSourceManagementToastMessageItem,
+  DataSourceTableItem,
+} from '../../types';
 import { CreateButton } from '../create_button';
 import {
   deleteMultipleDataSources,
@@ -90,8 +94,12 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       .catch(() => {
         setDataSources([]);
         handleDisplayToastMessage({
-          id: 'dataSourcesManagement.dataSourceListing.fetchDataSourceFailMsg',
-          defaultMessage: 'Error occurred while fetching the records for Data sources.',
+          message: i18n.translate(
+            'dataSourcesManagement.dataSourceListing.fetchDataSourceFailMsg',
+            {
+              defaultMessage: 'Error occurred while fetching the records for Data sources.',
+            }
+          ),
         });
       })
       .finally(() => {
@@ -270,9 +278,13 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       })
       .catch(() => {
         handleDisplayToastMessage({
-          id: 'dataSourcesManagement.dataSourceListing.deleteDataSourceFailMsg',
-          defaultMessage:
-            'Error occurred while deleting selected records for Data sources. Please try it again',
+          message: i18n.translate(
+            'dataSourcesManagement.dataSourceListing.deleteDataSourceFailMsg',
+            {
+              defaultMessage:
+                'Error occurred while deleting selected records for Data sources. Please try it again',
+            }
+          ),
         });
       })
       .finally(() => {
@@ -290,8 +302,13 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       }
     } catch (e) {
       handleDisplayToastMessage({
-        id: 'dataSourcesManagement.editDataSource.setDefaultDataSourceFailMsg',
-        defaultMessage: 'Unable to find a default datasource. Please set a new default datasource.',
+        message: i18n.translate(
+          'dataSourcesManagement.editDataSource.setDefaultDataSourceFailMsg',
+          {
+            defaultMessage:
+              'Unable to find a default datasource. Please set a new default datasource.',
+          }
+        ),
       });
     } finally {
       setIsDeleting(false);
@@ -309,12 +326,8 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
 
   /* Toast Handlers */
 
-  const handleDisplayToastMessage = ({ id, defaultMessage }: ToastMessageItem) => {
-    notifications.toasts.addDanger(
-      i18n.translate(id, {
-        defaultMessage,
-      })
-    );
+  const handleDisplayToastMessage = ({ message }: DataSourceManagementToastMessageItem) => {
+    notifications.toasts.addDanger(message);
   };
 
   /* Render Ui elements*/

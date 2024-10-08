@@ -188,7 +188,7 @@ export const UpdateAwsCredentialModal = ({
             disabled={!isFormValid()}
           >
             {i18n.translate('dataSourcesManagement.editDataSource.updateStoredAwsCredential', {
-              defaultMessage: 'Update stored aws credential',
+              defaultMessage: 'Update stored AWS credential',
             })}
           </EuiSmallButton>
         </EuiModalFooter>

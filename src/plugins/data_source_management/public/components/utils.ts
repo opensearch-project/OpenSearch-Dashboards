@@ -30,13 +30,7 @@ import { DataSourceGroupLabelOption } from './data_source_menu/types';
 import { createGetterSetter } from '../../../opensearch_dashboards_utils/public';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 import { getManageDataSourceButton, getReloadButton } from './toast_button';
-import {
-  ADD_COMPATIBLE_DATASOURCES_MESSAGE,
-  CONNECT_DATASOURCES_MESSAGE,
-  NO_COMPATIBLE_DATASOURCES_MESSAGE,
-  NO_DATASOURCES_CONNECTED_MESSAGE,
-  DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
-} from './constants';
+import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from './constants';
 import {
   DataSourceSelectionService,
   defaultDataSourceSelection,
@@ -142,7 +136,7 @@ export const fetchDataSourceConnections = async (
     );
   } catch (error) {
     notifications?.toasts.addDanger(
-      i18n.translate('dataSource.fetchDataSourceConnections', {
+      i18n.translate('dataSourcesManagement.fetchDataSourceConnections', {
         defaultMessage: 'Cannot fetch data sources',
       })
     );
@@ -235,14 +229,18 @@ export interface HandleNoAvailableDataSourceErrorProps {
 export function handleNoAvailableDataSourceError(props: HandleNoAvailableDataSourceErrorProps) {
   const { changeState, notifications, application, callback, incompatibleDataSourcesExist } = props;
 
-  const defaultMessage = incompatibleDataSourcesExist
-    ? `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`
-    : `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
+  const notificationTitle = incompatibleDataSourcesExist
+    ? i18n.translate('dataSourcesManagement.noCompatibleDataSourceError', {
+        defaultMessage: 'No compatible data sources are available. Add a compatible data source.',
+      })
+    : i18n.translate('dataSourcesManagement.noAvailableDataSourceError', {
+        defaultMessage: 'No data sources connected yet. Connect your data sources to get started.',
+      });
 
   changeState();
   if (callback) callback([]);
   notifications.add({
-    title: i18n.translate('dataSource.noAvailableDataSourceError', { defaultMessage }),
+    title: notificationTitle,
     text: toMountPoint(getManageDataSourceButton(application)),
     color: 'warning',
   });
@@ -455,7 +453,7 @@ export const handleDataSourceFetchError = (
   changeState({ showError: true });
   if (callback) callback([]);
   notifications.add({
-    title: i18n.translate('dataSource.fetchDataSourceError', {
+    title: i18n.translate('dataSourcesManagement.error.fetchDataSources', {
       defaultMessage: 'Failed to fetch data sources',
     }),
     text: toMountPoint(getReloadButton()),

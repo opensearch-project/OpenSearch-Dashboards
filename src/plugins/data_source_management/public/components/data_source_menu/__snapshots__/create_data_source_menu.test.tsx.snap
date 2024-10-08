@@ -127,7 +127,7 @@ Object {
             data-label="Data source"
           >
             <button
-              aria-label="dataSourceSelectableButton"
+              aria-label="Data source selector"
               class="euiButton euiButton--text euiButton--small dataSourceMenuPopoverButtonLabel"
               data-test-subj="dataSourceSelectableButton"
               type="button"
@@ -168,7 +168,7 @@ Object {
           data-label="Data source"
         >
           <button
-            aria-label="dataSourceSelectableButton"
+            aria-label="Data source selector"
             class="euiButton euiButton--text euiButton--small dataSourceMenuPopoverButtonLabel"
             data-test-subj="dataSourceSelectableButton"
             type="button"
@@ -274,7 +274,7 @@ Object {
                 data-label="Data source"
               >
                 <button
-                  aria-label="dataSourceSelectableButton"
+                  aria-label="Data source selector"
                   class="euiButton euiButton--text euiButton--small dataSourceMenuPopoverButtonLabel"
                   data-test-subj="dataSourceSelectableButton"
                   type="button"

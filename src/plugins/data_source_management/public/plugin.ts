@@ -151,7 +151,7 @@ export class DataSourceManagementPlugin
         id: DSM_APP_ID,
         title: PLUGIN_NAME,
         order: 100,
-        description: i18n.translate('data_source_management.description', {
+        description: i18n.translate('dataSourcesManagement.description', {
           defaultMessage: 'Create and manage data source connections.',
         }),
         mount: async (params: AppMountParameters) => {

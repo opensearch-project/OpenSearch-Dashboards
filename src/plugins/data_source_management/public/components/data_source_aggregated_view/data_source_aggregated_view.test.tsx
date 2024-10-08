@@ -425,7 +425,8 @@ describe('DataSourceAggregatedView empty state test due to filter out with local
           dataSourceFilter={filter}
         />
       );
-      const noCompatibleDataSourcesMessage = `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`;
+      const noCompatibleDataSourcesMessage =
+        'No compatible data sources are available. Add a compatible data source.';
 
       expect(component).toMatchSnapshot();
       await nextTick();
@@ -528,8 +529,10 @@ describe('DataSourceAggregatedView warning messages', () => {
   const dataSourceSelection = new DataSourceSelectionService();
   const nextTick = () => new Promise((res) => process.nextTick(res));
   let toasts: IToasts;
-  const noDataSourcesConnectedMessage = `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
-  const noCompatibleDataSourcesMessage = `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`;
+  const noDataSourcesConnectedMessage =
+    'No data sources connected yet. Connect your data sources to get started.';
+  const noCompatibleDataSourcesMessage =
+    'No compatible data sources are available. Add a compatible data source.';
 
   beforeEach(() => {
     toasts = notificationServiceMock.createStartContract().toasts;
@@ -576,11 +579,7 @@ describe('DataSourceAggregatedView warning messages', () => {
       );
       await nextTick();
 
-      expect(toasts.add).toBeCalledWith(
-        expect.objectContaining({
-          title: i18n.translate('dataSource.noAvailableDataSourceError', { defaultMessage }),
-        })
-      );
+      expect(toasts.add).toBeCalledWith(expect.objectContaining({ title: defaultMessage }));
     }
   );
 });

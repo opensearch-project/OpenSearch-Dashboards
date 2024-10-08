@@ -31,8 +31,10 @@ describe('DataSourceSelectable', () => {
 
   const { toasts } = notificationServiceMock.createStartContract();
   const nextTick = () => new Promise((res) => process.nextTick(res));
-  const noDataSourcesConnectedMessage = `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
-  const noCompatibleDataSourcesMessage = `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`;
+  const noDataSourcesConnectedMessage =
+    'No data sources connected yet. Connect your data sources to get started.';
+  const noCompatibleDataSourcesMessage =
+    'No compatible data sources are available. Add a compatible data source.';
   const dataSourceSelection = new DataSourceSelectionService();
 
   beforeEach(() => {
@@ -43,7 +45,7 @@ describe('DataSourceSelectable', () => {
     spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
   });
 
-  it('should render normally with local cluster not hidden', () => {
+  it('should render normally when local cluster is not hidden', () => {
     component = shallow(
       <DataSourceSelectable
         savedObjectsClient={client}
@@ -63,7 +65,7 @@ describe('DataSourceSelectable', () => {
     expect(toasts.addWarning).toBeCalledTimes(0);
   });
 
-  it('should render normally with local cluster is hidden', () => {
+  it('should render normally when local cluster is hidden', () => {
     component = shallow(
       <DataSourceSelectable
         savedObjectsClient={client}
@@ -101,7 +103,7 @@ describe('DataSourceSelectable', () => {
     expect(toasts.addWarning).toBeCalledTimes(0);
   });
 
-  it('should show popover when click on button', async () => {
+  it('should show popover with button click', async () => {
     const onSelectedDataSource = jest.fn();
     const container = render(
       <DataSourceSelectable
@@ -124,7 +126,7 @@ describe('DataSourceSelectable', () => {
     expect(container).toMatchSnapshot();
   });
 
-  it('should callback if changed state', async () => {
+  it('should invoke the onSelectedDataSource callback when state changes', async () => {
     const onSelectedDataSource = jest.fn();
     spyOn(utils, 'getDefaultDataSource').and.returnValue([{ id: 'test2', label: 'test2' }]);
     const container = mount(
@@ -194,7 +196,7 @@ describe('DataSourceSelectable', () => {
     expect(utils.getDefaultDataSource).toHaveBeenCalled();
   });
 
-  it('should display selected option label normally', async () => {
+  it(`should display selectedOption[0]'s label when available`, async () => {
     const onSelectedDataSource = jest.fn();
     const container = render(
       <DataSourceSelectable
@@ -214,7 +216,7 @@ describe('DataSourceSelectable', () => {
     expect(button).toHaveTextContent('test2');
   });
 
-  it('should render normally even only provide dataSourceId', async () => {
+  it(`should display selectedOption[0]'s id when label is not available`, async () => {
     const onSelectedDataSource = jest.fn();
     const container = render(
       <DataSourceSelectable
@@ -233,7 +235,7 @@ describe('DataSourceSelectable', () => {
     expect(button).toHaveTextContent('test2');
   });
 
-  it('should render warning if provide undefined dataSourceId', async () => {
+  it(`should display a warning when selectedOption[0]'s id is undefined`, async () => {
     const onSelectedDataSource = jest.fn();
     const container = render(
       <DataSourceSelectable
@@ -250,10 +252,10 @@ describe('DataSourceSelectable', () => {
     await nextTick();
     const button = await container.findByTestId('dataSourceSelectableButton');
     expect(button).toHaveTextContent('');
-    expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
+    expect(toasts.addWarning).toBeCalledWith('Data source with ID "" is not available');
   });
 
-  it('should render warning if provide empty object', async () => {
+  it(`should display a warning when selectedOption[0] is an empty object`, async () => {
     const onSelectedDataSource = jest.fn();
     const container = render(
       <DataSourceSelectable
@@ -270,9 +272,9 @@ describe('DataSourceSelectable', () => {
     await nextTick();
     const button = await container.findByTestId('dataSourceSelectableButton');
     expect(button).toHaveTextContent('');
-    expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
+    expect(toasts.addWarning).toBeCalledWith('Data source with ID "" is not available');
   });
-  it('should warning if only provide label', async () => {
+  it(`should display a warning when selectedOption[0] is missing id but has a label`, async () => {
     const onSelectedDataSource = jest.fn();
     const container = render(
       <DataSourceSelectable
@@ -287,11 +289,11 @@ describe('DataSourceSelectable', () => {
       />
     );
     await nextTick();
-    expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
+    expect(toasts.addWarning).toBeCalledWith('Data source with ID "" is not available');
   });
-  it('should warning if only provide empty label', async () => {
+  it(`should display a warning when selectedOption[0] is missing id but has a blank label`, async () => {
     const onSelectedDataSource = jest.fn();
-    const container = render(
+    render(
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -304,12 +306,12 @@ describe('DataSourceSelectable', () => {
       />
     );
     await nextTick();
-    expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
+    expect(toasts.addWarning).toBeCalledWith('Data source with ID "" is not available');
   });
 
-  it('should warning if only provide empty array', async () => {
+  it(`should display a warning when selectedOption is an empty array`, async () => {
     const onSelectedDataSource = jest.fn();
-    const container = render(
+    render(
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -321,10 +323,10 @@ describe('DataSourceSelectable', () => {
       />
     );
     await nextTick();
-    expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
+    expect(toasts.addWarning).toBeCalledWith('Data source with ID "" is not available');
   });
 
-  it('should render the selected option when pass in the valid dataSourceId', async () => {
+  it(`should render the selected option when selectedOption[0]'s id is found`, async () => {
     const onSelectedDataSource = jest.fn();
     const container = mount(
       <DataSourceSelectable
@@ -470,7 +472,7 @@ describe('DataSourceSelectable', () => {
 
       expect(toasts.add).toBeCalledWith(
         expect.objectContaining({
-          title: i18n.translate('dataSource.noAvailableDataSourceError', { defaultMessage }),
+          title: defaultMessage,
         })
       );
       expect(onSelectedDataSource).toBeCalledWith([]);
