@@ -28,10 +28,10 @@
  * under the License.
  */
 
-// @ts-ignore
-export { extractMessagesFromPathToMap } from './extract_default_translations';
-// @ts-ignore
-export { matchEntriesWithExctractors } from './extract_default_translations';
+export {
+  extractMessagesFromPathToMap,
+  matchEntriesWithExctractors,
+} from './extract_default_translations';
 export {
   arrayify,
   writeFileAsync,
@@ -39,6 +39,7 @@ export {
   accessAsync,
   normalizePath,
   ErrorReporter,
+  FailReporter,
 } from './utils';
 export { serializeToJson, serializeToJson5 } from './serializers';
 export {

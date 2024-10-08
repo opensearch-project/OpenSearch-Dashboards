@@ -342,6 +342,18 @@ export class ErrorReporter {
   }
 }
 
+export class FailReporter {
+  errors = [];
+
+  withContext(context) {
+    return { report: (error) => this.report(error, context) };
+  }
+
+  report(error, context) {
+    this.errors.push(createFailError(`Error in ${normalizePath(context.name)}\n${error}`));
+  }
+}
+
 // export function arrayify<Subj = any>(subj: Subj | Subj[]): Subj[] {
 export function arrayify(subj) {
   return Array.isArray(subj) ? subj : [subj];

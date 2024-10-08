@@ -31,7 +31,7 @@
 import { run, combineErrors } from '@osd/dev-utils';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
-import { getFilesForCommit, checkFileCasing } from './precommit_hook';
+import { getFilesForCommit, checkFileCasing, checkI18n } from './precommit_hook';
 
 run(
   async ({ log, flags }) => {
@@ -40,6 +40,13 @@ run(
 
     try {
       await checkFileCasing(log, files);
+    } catch (error) {
+      errors.push(error);
+    }
+
+    try {
+      const result = await checkI18n(log, files);
+      if (Array.isArray(result)) errors.push(...result);
     } catch (error) {
       errors.push(error);
     }
