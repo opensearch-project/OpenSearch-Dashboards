@@ -466,7 +466,6 @@ export class WorkspacePlugin
             workspaceClient,
             dataSourceManagement,
             contentManagement: contentManagementStart,
-            collaboratorTypes: this.collaboratorTypes,
           };
 
           return renderUseCaseOverviewApp(params, services, ESSENTIAL_OVERVIEW_PAGE_ID);
@@ -502,7 +501,6 @@ export class WorkspacePlugin
             workspaceClient,
             dataSourceManagement,
             contentManagement: contentManagementStart,
-            collaboratorTypes: this.collaboratorTypes,
           };
 
           return renderUseCaseOverviewApp(params, services, ANALYTICS_ALL_OVERVIEW_PAGE_ID);

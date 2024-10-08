@@ -121,7 +121,7 @@ export const renderInitialApp = (
 
 export const renderUseCaseOverviewApp = async (
   { element }: AppMountParameters,
-  services: Services,
+  services: Omit<Services, 'collaboratorTypes'>,
   pageId: string
 ) => {
   ReactDOM.render(
