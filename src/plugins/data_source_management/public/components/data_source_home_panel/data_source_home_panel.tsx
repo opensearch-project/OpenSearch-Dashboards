@@ -103,11 +103,13 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
   ];
 
   const description = {
-    description: i18n.translate('dataSourcesManagement.dataSourcesTable.description', {
-      defaultMessage: featureFlagStatus
-        ? 'Create and manage data source connections.'
-        : 'Manage direct query data source connections.',
-    }),
+    description: featureFlagStatus
+      ? i18n.translate('dataSourcesManagement.dataSourcesTable.descriptionWithDataSource', {
+          defaultMessage: 'Create and manage data source connections.',
+        })
+      : i18n.translate('dataSourcesManagement.dataSourcesTable.description', {
+          defaultMessage: 'Manage direct query data source connections.',
+        }),
     links: [
       {
         href: docLinks.links.opensearchDashboards.dataSource.guide,
