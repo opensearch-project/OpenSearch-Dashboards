@@ -37,7 +37,7 @@ export interface WorkspaceInitialProps {
 
 export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps) => {
   const {
-    services: { application, chrome, workspaces, http },
+    services: { application, chrome, workspaces, http, docLinks },
   } = useOpenSearchDashboards<CoreStart>();
   const isDashboardAdmin = !!application.capabilities.dashboards?.isDashboardAdmin;
   const availableUseCases = registeredUseCases$
@@ -193,7 +193,7 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
               <EuiIcon type="reporter" size="s" color="primary" />
               &nbsp;
               <EuiLink
-                href="https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html"
+                href={docLinks.links.opensearch.introduction}
                 target="_blank"
                 style={{ fontWeight: 'normal' }}
               >
