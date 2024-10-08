@@ -13,6 +13,7 @@ import {
   EuiFormControlLayout,
   EuiFormRow,
   EuiPanel,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { EuiColorPickerOutput } from '@elastic/eui/src/components/color_picker/color_picker';
@@ -46,6 +47,7 @@ export const CreatorDetailsPanel = ({
           })}
         </h2>
       </EuiText>
+      <EuiSpacer size="m" />
       <EuiDescribedFormGroup
         title={
           <h4 {...generateRightSidebarScrollProps(RightSidebarScrollField.Name)}>

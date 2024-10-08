@@ -53,7 +53,7 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
       id="popoverForSettingsIcon"
       button={
         <EuiToolTip
-          content={i18n.translate('settings.icon.nav.title', {
+          content={i18n.translate('management.settings.icon.nav.title', {
             defaultMessage: 'Settings',
           })}
         >
@@ -61,6 +61,7 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
             aria-label="show-apps"
             iconType="managementApp"
             onClick={() => setPopover(true)}
+            color="text"
           />
         </EuiToolTip>
       }

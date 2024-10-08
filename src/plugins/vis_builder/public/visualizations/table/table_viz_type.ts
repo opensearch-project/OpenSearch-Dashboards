@@ -29,7 +29,7 @@ export const createTableConfig = (): VisualizationTypeOptions<TableOptionsDefaul
           {
             group: AggGroupNames.Metrics,
             name: 'metric',
-            title: i18n.translate('visTypeTableNewNew.tableVisEditorConfig.schemas.metricTitle', {
+            title: i18n.translate('visBuilder.tableVisEditorConfig.schemas.metricTitle', {
               defaultMessage: 'Metric',
             }),
             min: 1,
@@ -46,7 +46,7 @@ export const createTableConfig = (): VisualizationTypeOptions<TableOptionsDefaul
           {
             group: AggGroupNames.Buckets,
             name: 'bucket',
-            title: i18n.translate('visTypeTableNewNew.tableVisEditorConfig.schemas.bucketTitle', {
+            title: i18n.translate('visBuilder.tableVisEditorConfig.schemas.bucketTitle', {
               defaultMessage: 'Split rows',
             }),
             aggFilter: ['!filter'],
@@ -57,7 +57,7 @@ export const createTableConfig = (): VisualizationTypeOptions<TableOptionsDefaul
           {
             group: AggGroupNames.Buckets,
             name: 'split_row',
-            title: i18n.translate('visTypeTableNewNew.tableVisEditorConfig.schemas.splitTitle', {
+            title: i18n.translate('visBuilder.tableVisEditorConfig.schemas.splitTitleInRows', {
               defaultMessage: 'Split table in rows',
             }),
             min: 0,
@@ -70,7 +70,7 @@ export const createTableConfig = (): VisualizationTypeOptions<TableOptionsDefaul
           {
             group: AggGroupNames.Buckets,
             name: 'split_column',
-            title: i18n.translate('visTypeTableNewNew.tableVisEditorConfig.schemas.splitTitle', {
+            title: i18n.translate('visBuilder.tableVisEditorConfig.schemas.splitTitleInColumns', {
               defaultMessage: 'Split table in columns',
             }),
             min: 0,

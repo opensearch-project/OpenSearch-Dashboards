@@ -248,7 +248,8 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
                     type={'iInCircle'}
                     content={`Summary based on first ${sampleSize} records`}
                     aria-label={i18n.translate('queryEnhancements.queryAssist.summary.sampletip', {
-                      defaultMessage: `Summary based on first ${sampleSize} records`,
+                      defaultMessage: 'Summary based on first {sampleSize} records',
+                      values: { sampleSize },
                     })}
                   />
                 </EuiFlexItem>

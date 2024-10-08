@@ -88,7 +88,10 @@ export interface WorkspaceFormProps {
 }
 
 export interface AvailableUseCaseItem
-  extends Pick<WorkspaceUseCase, 'id' | 'title' | 'features' | 'description' | 'systematic'> {
+  extends Pick<
+    WorkspaceUseCase,
+    'id' | 'title' | 'features' | 'description' | 'systematic' | 'icon'
+  > {
   disabled?: boolean;
 }
 

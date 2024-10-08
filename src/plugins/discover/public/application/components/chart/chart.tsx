@@ -94,7 +94,7 @@ export const DiscoverChart = ({
     </div>
   );
 
-  const toggleLabel = i18n.translate('histogram.collapse', {
+  const toggleLabel = i18n.translate('discover.histogram.collapse', {
     defaultMessage: 'Toggle histogram',
   });
 

@@ -9,6 +9,8 @@ import { WorkspaceFormSummaryPanel, FieldSummaryItem } from './workspace_form_su
 import { RightSidebarScrollField } from './utils';
 import { WorkspacePermissionItemType } from '../workspace_form';
 import { applicationServiceMock } from '../../../../../../src/core/public/mocks';
+import { DataSourceConnectionType } from '../../../common/types';
+import { WorkspacePermissionMode } from '../../../common/constants';
 
 describe('WorkspaceFormSummaryPanel', () => {
   const formData = {
@@ -18,28 +20,43 @@ describe('WorkspaceFormSummaryPanel', () => {
     description: 'This is a test workspace',
     color: '#000000',
     selectedDataSourceConnections: [
-      { id: 'data-source-1', name: 'Data Source 1' },
-      { id: 'data-source-2', name: 'Data Source 2' },
-      { id: 'data-source-3', name: 'Data Source 3' },
+      {
+        id: 'data-source-1',
+        name: 'Data Source 1',
+        type: '',
+        connectionType: DataSourceConnectionType.OpenSearchConnection,
+      },
+      {
+        id: 'data-source-2',
+        name: 'Data Source 2',
+        type: '',
+        connectionType: DataSourceConnectionType.OpenSearchConnection,
+      },
+      {
+        id: 'data-source-3',
+        name: 'Data Source 3',
+        type: '',
+        connectionType: DataSourceConnectionType.OpenSearchConnection,
+      },
     ],
     permissionSettings: [
       {
         id: 1,
         type: WorkspacePermissionItemType.User,
         userId: 'user1',
-        modes: ['library_write', 'write'],
+        modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
       },
       {
         id: 2,
         type: WorkspacePermissionItemType.Group,
         group: 'group1',
-        modes: ['library_read', 'read'],
+        modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
       },
       {
         id: 3,
         type: WorkspacePermissionItemType.User,
         userId: 'user2',
-        modes: ['library_write', 'read'],
+        modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Read],
       },
     ],
   };
@@ -71,6 +88,7 @@ describe('WorkspaceFormSummaryPanel', () => {
         formId="id"
         application={applicationMock}
         isSubmitting={false}
+        dataSourceEnabled
       />
     );
 
@@ -107,6 +125,7 @@ describe('WorkspaceFormSummaryPanel', () => {
         formId="id"
         application={applicationMock}
         isSubmitting={false}
+        dataSourceEnabled
       />
     );
 
@@ -148,6 +167,7 @@ describe('WorkspaceFormSummaryPanel', () => {
         formId="id"
         application={applicationMock}
         isSubmitting={false}
+        dataSourceEnabled
       />
     );
     expect(screen.getByText('user1')).toBeInTheDocument();
@@ -160,6 +180,21 @@ describe('WorkspaceFormSummaryPanel', () => {
 
     fireEvent.click(screen.getByText('Show less'));
     expect(screen.queryByText('user2')).toBeNull();
+  });
+
+  it('should hide "Data sources" if data source not enabled', () => {
+    render(
+      <WorkspaceFormSummaryPanel
+        formData={formData}
+        availableUseCases={availableUseCases}
+        permissionEnabled
+        formId="id"
+        application={applicationMock}
+        isSubmitting={false}
+        dataSourceEnabled={false}
+      />
+    );
+    expect(screen.queryByText('Data sources')).toBeNull();
   });
 });
 

@@ -37,6 +37,7 @@ export interface I18nFlags {
   ignoreIncompatible: boolean;
   ignoreUnused: boolean;
   ignoreMissing: boolean;
+  ignoreMissingFormats: boolean;
 }
 
 export function checkCompatibility(
@@ -47,16 +48,24 @@ export function checkCompatibility(
   if (!config) {
     throw new Error('Config is missing');
   }
-  const { fix, ignoreIncompatible, ignoreUnused, ignoreMalformed, ignoreMissing } = flags;
+  const {
+    fix,
+    ignoreIncompatible,
+    ignoreUnused,
+    ignoreMalformed,
+    ignoreMissing,
+    ignoreMissingFormats,
+  } = flags;
   return config.translations.map((translationsPath) => ({
     task: async ({ messages }: { messages: Map<string, { message: string }> }) => {
-      // If `fix` is set we should try apply all possible fixes and override translations file.
+      // If `fix` is set we should try to apply all possible fixes and override translations file.
       await integrateLocaleFiles(messages, {
         dryRun: !fix,
         ignoreIncompatible: fix || ignoreIncompatible,
         ignoreUnused: fix || ignoreUnused,
         ignoreMissing: fix || ignoreMissing,
         ignoreMalformed: fix || ignoreMalformed,
+        ignoreMissingFormats,
         sourceFileName: translationsPath,
         targetFileName: fix ? translationsPath : undefined,
         config,
