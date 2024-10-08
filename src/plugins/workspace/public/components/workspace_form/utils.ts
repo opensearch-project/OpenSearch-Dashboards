@@ -413,13 +413,7 @@ export const generatePermissionSettingsState = (
   };
 
   if (operationType === WorkspaceOperationType.Create) {
-    return [
-      {
-        ...emptyUserPermission,
-        userId: CURRENT_USER_PLACEHOLDER,
-      },
-      emptyUserGroupPermission,
-    ];
+    return [];
   }
 
   const finalPermissionSettings = [...(permissionSettings ?? [])];

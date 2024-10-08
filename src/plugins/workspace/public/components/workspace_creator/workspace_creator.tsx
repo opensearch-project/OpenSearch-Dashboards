@@ -15,7 +15,6 @@ import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
 import { getUseCaseFeatureConfig } from '../../../common/utils';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
-import { convertPermissionSettingsToPermissions } from '../workspace_form';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { WorkspaceUseCase } from '../../types';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
@@ -47,7 +46,6 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   }>();
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
 
-  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
   const { isOnlyAllowEssential, availableUseCases } = useFormAvailableUseCases({
     savedObjects,
     registeredUseCases$,
@@ -102,7 +100,6 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
         result = await workspaceClient.create(attributes, {
           dataSources: selectedDataSourceIds,
           dataConnections: selectedDataConnectionIds,
-          permissions: convertPermissionSettingsToPermissions(permissionSettings),
         });
         if (result?.success) {
           notifications?.toasts.addSuccess({
@@ -177,7 +174,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               savedObjects={savedObjects}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Create}
-              permissionEnabled={isPermissionEnabled}
+              permissionEnabled={false}
               dataSourceManagement={dataSourceManagement}
               availableUseCases={availableUseCases}
               defaultValues={defaultWorkspaceFormValues}

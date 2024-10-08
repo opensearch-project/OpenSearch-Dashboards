@@ -272,10 +272,6 @@ describe('WorkspaceCreator', () => {
       {
         dataSources: [],
         dataConnections: [],
-        permissions: {
-          library_write: { users: ['%me%'] },
-          write: { users: ['%me%'] },
-        },
       }
     );
     await waitFor(() => {
@@ -328,43 +324,6 @@ describe('WorkspaceCreator', () => {
     expect(notificationToastsAddSuccess).not.toHaveBeenCalled();
   });
 
-  it('create workspace with customized permissions', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
-
-    // Ensure workspace create form rendered
-    await waitFor(() => {
-      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
-    });
-    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
-    fireEvent.input(nameInput, {
-      target: { value: 'test workspace name' },
-    });
-    fireEvent.click(getByTestId('workspaceUseCase-observability'));
-    fireEvent.click(getByTestId('workspaceForm-permissionSettingPanel-addNew'));
-    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    expect(workspaceClientCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'test workspace name',
-      }),
-      {
-        dataConnections: [],
-        dataSources: [],
-        permissions: {
-          write: {
-            users: ['%me%'],
-          },
-          library_write: {
-            users: ['%me%'],
-          },
-        },
-      }
-    );
-    await waitFor(() => {
-      expect(notificationToastsAddSuccess).toHaveBeenCalled();
-    });
-    expect(notificationToastsAddDanger).not.toHaveBeenCalled();
-  });
-
   it('create workspace with customized selected dataSources', async () => {
     Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
       configurable: true,
@@ -407,14 +366,6 @@ describe('WorkspaceCreator', () => {
       {
         dataConnections: [],
         dataSources: ['id1'],
-        permissions: {
-          library_write: {
-            users: ['%me%'],
-          },
-          write: {
-            users: ['%me%'],
-          },
-        },
       }
     );
     await waitFor(() => {
@@ -465,14 +416,6 @@ describe('WorkspaceCreator', () => {
       {
         dataConnections: ['id3'],
         dataSources: [],
-        permissions: {
-          library_write: {
-            users: ['%me%'],
-          },
-          write: {
-            users: ['%me%'],
-          },
-        },
       }
     );
     await waitFor(() => {
