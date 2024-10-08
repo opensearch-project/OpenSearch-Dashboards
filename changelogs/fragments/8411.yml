@@ -1,0 +1,9 @@
+infra:
+- Add i18n checks to PR workflows ([#8411](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8411))
+
+feat:
+- Ignore missing `formats` while checking locale files ([#8411](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8411))
+- Add help text and description to `i18n-check` ([#8411](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8411))
+
+fix:
+- Fix malformed translations ([#8411](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8411))
