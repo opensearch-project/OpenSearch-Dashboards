@@ -144,8 +144,8 @@ Object {
   "legacyMetadata": Object {
     "uiSettings": Object {
       "defaults": Object {
-        "registered": Object {
-          "name": "title",
+        "theme:darkMode": Object {
+          "value": true,
         },
       },
       "user": Object {},
@@ -306,11 +306,7 @@ Object {
   },
   "legacyMetadata": Object {
     "uiSettings": Object {
-      "defaults": Object {
-        "registered": Object {
-          "name": "title",
-        },
-      },
+      "defaults": Object {},
       "user": Object {},
     },
   },

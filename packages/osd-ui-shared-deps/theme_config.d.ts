@@ -4,6 +4,16 @@
  */
 
 /**
+ * Types for valid theme versions
+ */
+type ThemeVersion = 'v7' | 'v8' | 'v9';
+
+/**
+ * Types for valid theme color-scheme modes
+ */
+type ThemeMode = 'light' | 'dark';
+
+/**
  * Types for valid theme tags (themeVersion + themeMode)
  * Note: used by @osd/optimizer
  */
@@ -15,6 +25,12 @@ export type ThemeTags = readonly ThemeTag[];
  * Note: used by @osd/optimizer
  */
 export const themeTags: ThemeTags;
+
+/**
+ * Map of themeTag values to their version and mode
+ * Note: this is used for ui display
+ */
+export const themeTagDetailMap: Map<ThemeTag, { version: ThemeVersion; mode: ThemeMode }>;
 
 /**
  * Map of themeVersion values to labels

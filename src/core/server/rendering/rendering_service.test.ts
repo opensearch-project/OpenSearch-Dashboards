@@ -106,9 +106,433 @@ describe('RenderingService', () => {
         expect(data).toMatchSnapshot(INJECTED_METADATA);
       });
 
+      it('renders "core" page driven by configured defaults', async () => {
+        // Defaults: Y, User: N, Overrides: N, themeTag: N
+        const defaultsConfig: Record<string, unknown> = {
+          'theme:darkMode': true,
+          'theme:version': 'v7',
+        };
+        uiSettings.getOverrideOrDefault.mockImplementation((name) => defaultsConfig[name]);
+        uiSettings.getRegistered.mockReturnValue(
+          Object.keys(defaultsConfig).reduce(
+            (acc, key) => ({ ...acc, [key]: { value: defaultsConfig[key] } }),
+            {}
+          )
+        );
+        uiSettings.getUserProvided.mockResolvedValue({});
+
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {});
+        const dom = load(content);
+        const $elStyle = dom('style[data-theme][data-color-scheme]');
+
+        expect($elStyle.attr('data-color-scheme')).toBe('dark');
+        expect($elStyle.attr('data-theme')).toBe('v7');
+      });
+
+      it('renders "core" page driven by user settings', async () => {
+        // Defaults: Y, User: Y, Overrides: N, themeTag: N
+        const defaultsConfig: Record<string, unknown> = {
+          'theme:darkMode': true,
+          'theme:version': 'v7',
+        };
+        const userSettings: Record<string, unknown> = {
+          'theme:darkMode': false,
+          'theme:version': 'v8',
+        };
+        uiSettings.getOverrideOrDefault.mockImplementation((name) => defaultsConfig[name]);
+        uiSettings.getRegistered.mockReturnValue(
+          Object.keys(defaultsConfig).reduce(
+            (acc, key) => ({ ...acc, [key]: { value: defaultsConfig[key] } }),
+            {}
+          )
+        );
+        uiSettings.getUserProvided.mockResolvedValue(
+          Object.keys(userSettings).reduce(
+            (acc, key) => ({ ...acc, [key]: { userValue: userSettings[key] } }),
+            {}
+          )
+        );
+
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {});
+        const dom = load(content);
+        const $elStyle = dom('style[data-theme][data-color-scheme]');
+
+        expect($elStyle.attr('data-color-scheme')).toBe('light');
+        expect($elStyle.attr('data-theme')).toBe('v8');
+      });
+
+      it('renders "core" page driven by configured overrides', async () => {
+        // Defaults: Y, User: N, Overrides: Y, themeTag: N
+        const defaultsConfig: Record<string, unknown> = {
+          'theme:darkMode': true,
+          'theme:version': 'v7',
+        };
+        const overridesConfig: Record<string, unknown> = {
+          'theme:darkMode': false,
+          'theme:version': 'v8',
+        };
+        uiSettings.getOverrideOrDefault.mockImplementation((name) => overridesConfig[name]);
+        uiSettings.getRegistered.mockReturnValue(
+          Object.keys(defaultsConfig).reduce(
+            (acc, key) => ({ ...acc, [key]: { value: defaultsConfig[key] } }),
+            {}
+          )
+        );
+        uiSettings.isOverridden.mockImplementation((name) => name in overridesConfig);
+
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {});
+        const dom = load(content);
+        const $elStyle = dom('style[data-theme][data-color-scheme]');
+
+        expect($elStyle.attr('data-color-scheme')).toBe('light');
+        expect($elStyle.attr('data-theme')).toBe('v8');
+      });
+
+      it('renders "core" page driven by configured theme-tag', async () => {
+        // Defaults: Y, User: N, Overrides: N, themeTag: Y
+        const defaultsConfig: Record<string, unknown> = {
+          'theme:darkMode': true,
+          'theme:version': 'v7',
+        };
+        uiSettings.getOverrideOrDefault.mockImplementation((name) => defaultsConfig[name]);
+        uiSettings.getRegistered.mockReturnValue(
+          Object.keys(defaultsConfig).reduce(
+            (acc, key) => ({ ...acc, [key]: { value: defaultsConfig[key] } }),
+            {}
+          )
+        );
+        uiSettings.getUserProvided.mockResolvedValue({});
+
+        const content = await render(
+          createOpenSearchDashboardsRequest({ query: { themeTag: 'v9light' } }),
+          uiSettings,
+          {}
+        );
+        const dom = load(content);
+        const $elStyle = dom('style[data-theme][data-color-scheme]');
+
+        expect($elStyle.attr('data-color-scheme')).toBe('light');
+        expect($elStyle.attr('data-theme')).toBe('v9');
+      });
+
+      it('renders "core" page driven by theme-tag despite user settings', async () => {
+        // Defaults: Y, User: Y, Overrides: N, themeTag: Y
+        const defaultsConfig: Record<string, unknown> = {
+          'theme:darkMode': true,
+          'theme:version': 'v7',
+        };
+        const userSettings: Record<string, unknown> = {
+          'theme:darkMode': false,
+          'theme:version': 'v8',
+        };
+        uiSettings.getOverrideOrDefault.mockImplementation((name) => defaultsConfig[name]);
+        uiSettings.getRegistered.mockReturnValue(
+          Object.keys(defaultsConfig).reduce(
+            (acc, key) => ({ ...acc, [key]: { value: defaultsConfig[key] } }),
+            {}
+          )
+        );
+        uiSettings.getUserProvided.mockResolvedValue(
+          Object.keys(userSettings).reduce(
+            (acc, key) => ({ ...acc, [key]: { userValue: userSettings[key] } }),
+            {}
+          )
+        );
+
+        const content = await render(
+          createOpenSearchDashboardsRequest({ query: { themeTag: 'v9dark' } }),
+          uiSettings,
+          {}
+        );
+        const dom = load(content);
+        const $elStyle = dom('style[data-theme][data-color-scheme]');
+
+        expect($elStyle.attr('data-color-scheme')).toBe('dark');
+        expect($elStyle.attr('data-theme')).toBe('v9');
+      });
+
+      it('renders "core" page driven by configured overrides despite user settings', async () => {
+        // Defaults: Y, User: Y, Overrides: Y
+        const defaultsConfig: Record<string, unknown> = {
+          'theme:darkMode': false,
+          'theme:version': 'v7',
+        };
+        const userSettings: Record<string, unknown> = {
+          'theme:darkMode': false,
+          'theme:version': 'v8',
+        };
+        const overridesConfig: Record<string, unknown> = {
+          'theme:darkMode': true,
+          'theme:version': 'v9',
+        };
+        uiSettings.getOverrideOrDefault.mockImplementation((name) => overridesConfig[name]);
+        uiSettings.getRegistered.mockReturnValue(
+          Object.keys(defaultsConfig).reduce(
+            (acc, key) => ({ ...acc, [key]: { value: defaultsConfig[key] } }),
+            {}
+          )
+        );
+        uiSettings.getUserProvided.mockResolvedValue(
+          Object.keys(userSettings).reduce(
+            (acc, key) => ({ ...acc, [key]: { userValue: userSettings[key] } }),
+            {}
+          )
+        );
+        uiSettings.isOverridden.mockImplementation((name) => name in overridesConfig);
+
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {});
+        const dom = load(content);
+        const $elStyle = dom('style[data-theme][data-color-scheme]');
+
+        expect($elStyle.attr('data-color-scheme')).toBe('dark');
+        expect($elStyle.attr('data-theme')).toBe('v9');
+      });
+
+      it('renders "core" page driven by configured overrides despite theme-tag', async () => {
+        // Defaults: Y, User: Y, Overrides: Y
+        const defaultsConfig: Record<string, unknown> = {
+          'theme:darkMode': false,
+          'theme:version': 'v7',
+        };
+        const userSettings: Record<string, unknown> = {
+          'theme:darkMode': false,
+          'theme:version': 'v8',
+        };
+        const overridesConfig: Record<string, unknown> = {
+          'theme:darkMode': true,
+          'theme:version': 'v9',
+        };
+        uiSettings.getOverrideOrDefault.mockImplementation((name) => overridesConfig[name]);
+        uiSettings.getRegistered.mockReturnValue(
+          Object.keys(defaultsConfig).reduce(
+            (acc, key) => ({ ...acc, [key]: { value: defaultsConfig[key] } }),
+            {}
+          )
+        );
+        uiSettings.getUserProvided.mockResolvedValue(
+          Object.keys(userSettings).reduce(
+            (acc, key) => ({ ...acc, [key]: { userValue: userSettings[key] } }),
+            {}
+          )
+        );
+        uiSettings.isOverridden.mockImplementation((name) => name in overridesConfig);
+
+        const content = await render(
+          createOpenSearchDashboardsRequest({ query: { themeTag: 'v7light' } }),
+          uiSettings,
+          {}
+        );
+        const dom = load(content);
+        const $elStyle = dom('style[data-theme][data-color-scheme]');
+
+        expect($elStyle.attr('data-color-scheme')).toBe('dark');
+        expect($elStyle.attr('data-theme')).toBe('v9');
+      });
+
+      it('renders "core" page using defaults when user setting is invalid', async () => {
+        // Defaults: Y, User: INVALID, Overrides: N
+        const defaultsConfig: Record<string, unknown> = {
+          'theme:darkMode': true,
+          'theme:version': 'v7',
+        };
+        const userSettings: Record<string, unknown> = {
+          'theme:darkMode': undefined,
+          'theme:version': 'invalid',
+        };
+        uiSettings.getOverrideOrDefault.mockImplementation((name) => defaultsConfig[name]);
+        uiSettings.getRegistered.mockReturnValue(
+          Object.keys(defaultsConfig).reduce(
+            (acc, key) => ({ ...acc, [key]: { value: defaultsConfig[key] } }),
+            {}
+          )
+        );
+        uiSettings.getUserProvided.mockResolvedValue(
+          Object.keys(userSettings).reduce(
+            (acc, key) => ({ ...acc, [key]: { userValue: userSettings[key] } }),
+            {}
+          )
+        );
+
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {});
+        const dom = load(content);
+        const $elStyle = dom('style[data-theme][data-color-scheme]');
+
+        expect($elStyle.attr('data-color-scheme')).toBe('dark');
+        expect($elStyle.attr('data-theme')).toBe('v7');
+      });
+
+      it('renders "core" page using defaults when configured override in invalid', async () => {
+        // Defaults: Y, User: N, Overrides: INVALID
+        const defaultsConfig: Record<string, unknown> = {
+          'theme:darkMode': true,
+          'theme:version': 'v7',
+        };
+        const overridesConfig: Record<string, unknown> = {
+          'theme:darkMode': undefined,
+          'theme:version': 'invalid',
+        };
+        uiSettings.getOverrideOrDefault.mockImplementation((name) => overridesConfig[name]);
+        uiSettings.getRegistered.mockReturnValue(
+          Object.keys(defaultsConfig).reduce(
+            (acc, key) => ({ ...acc, [key]: { value: defaultsConfig[key] } }),
+            {}
+          )
+        );
+        uiSettings.isOverridden.mockImplementation((name) => name in overridesConfig);
+
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {});
+        const dom = load(content);
+        const $elStyle = dom('style[data-theme][data-color-scheme]');
+
+        expect($elStyle.attr('data-color-scheme')).toBe('dark');
+        expect($elStyle.attr('data-theme')).toBe('v7');
+      });
+
+      it('renders "core" page using defaults when configured override in invalid despite user settings', async () => {
+        // Defaults: Y, User: Y, Overrides: INVALID
+        const defaultsConfig: Record<string, unknown> = {
+          'theme:darkMode': false,
+          'theme:version': 'v7',
+        };
+        const userSettings: Record<string, unknown> = {
+          'theme:darkMode': false,
+          'theme:version': 'v8',
+        };
+        const overridesConfig: Record<string, unknown> = {
+          'theme:darkMode': undefined,
+          'theme:version': 'invalid',
+        };
+        uiSettings.getOverrideOrDefault.mockImplementation((name) => overridesConfig[name]);
+        uiSettings.getRegistered.mockReturnValue(
+          Object.keys(defaultsConfig).reduce(
+            (acc, key) => ({ ...acc, [key]: { value: defaultsConfig[key] } }),
+            {}
+          )
+        );
+        uiSettings.getUserProvided.mockResolvedValue(
+          Object.keys(userSettings).reduce(
+            (acc, key) => ({ ...acc, [key]: { userValue: userSettings[key] } }),
+            {}
+          )
+        );
+        uiSettings.isOverridden.mockImplementation((name) => name in overridesConfig);
+
+        const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {});
+        const dom = load(content);
+        const $elStyle = dom('style[data-theme][data-color-scheme]');
+
+        expect($elStyle.attr('data-color-scheme')).toBe('light');
+        expect($elStyle.attr('data-theme')).toBe('v7');
+      });
+
+      it('renders "core" page driven by configured defaults when theme-tag is invalid', async () => {
+        // Defaults: Y, User: N, Overrides: N, themeTag: N
+        const defaultsConfig: Record<string, unknown> = {
+          'theme:darkMode': true,
+          'theme:version': 'v7',
+        };
+        uiSettings.getOverrideOrDefault.mockImplementation((name) => defaultsConfig[name]);
+        uiSettings.getRegistered.mockReturnValue(
+          Object.keys(defaultsConfig).reduce(
+            (acc, key) => ({ ...acc, [key]: { value: defaultsConfig[key] } }),
+            {}
+          )
+        );
+        uiSettings.getUserProvided.mockResolvedValue({});
+
+        const content = await render(
+          createOpenSearchDashboardsRequest({ query: { themeTag: 'invalid' } }),
+          uiSettings,
+          {}
+        );
+        const dom = load(content);
+        const $elStyle = dom('style[data-theme][data-color-scheme]');
+
+        expect($elStyle.attr('data-color-scheme')).toBe('dark');
+        expect($elStyle.attr('data-theme')).toBe('v7');
+      });
+
+      it('renders "core" page driven by user settings when theme-tag is invalid', async () => {
+        // Defaults: Y, User: Y, Overrides: N, themeTag: N
+        const defaultsConfig: Record<string, unknown> = {
+          'theme:darkMode': true,
+          'theme:version': 'v7',
+        };
+        const userSettings: Record<string, unknown> = {
+          'theme:darkMode': false,
+          'theme:version': 'v8',
+        };
+        uiSettings.getOverrideOrDefault.mockImplementation((name) => defaultsConfig[name]);
+        uiSettings.getRegistered.mockReturnValue(
+          Object.keys(defaultsConfig).reduce(
+            (acc, key) => ({ ...acc, [key]: { value: defaultsConfig[key] } }),
+            {}
+          )
+        );
+        uiSettings.getUserProvided.mockResolvedValue(
+          Object.keys(userSettings).reduce(
+            (acc, key) => ({ ...acc, [key]: { userValue: userSettings[key] } }),
+            {}
+          )
+        );
+
+        const content = await render(
+          createOpenSearchDashboardsRequest({ query: { themeTag: 'invalid' } }),
+          uiSettings,
+          {}
+        );
+        const dom = load(content);
+        const $elStyle = dom('style[data-theme][data-color-scheme]');
+
+        expect($elStyle.attr('data-color-scheme')).toBe('light');
+        expect($elStyle.attr('data-theme')).toBe('v8');
+      });
+
+      it('renders "core" page driven by configured overrides despite an invalid theme-tag', async () => {
+        // Defaults: Y, User: Y, Overrides: Y
+        const defaultsConfig: Record<string, unknown> = {
+          'theme:darkMode': false,
+          'theme:version': 'v7',
+        };
+        const userSettings: Record<string, unknown> = {
+          'theme:darkMode': false,
+          'theme:version': 'v8',
+        };
+        const overridesConfig: Record<string, unknown> = {
+          'theme:darkMode': true,
+          'theme:version': 'v9',
+        };
+        uiSettings.getOverrideOrDefault.mockImplementation((name) => overridesConfig[name]);
+        uiSettings.getRegistered.mockReturnValue(
+          Object.keys(defaultsConfig).reduce(
+            (acc, key) => ({ ...acc, [key]: { value: defaultsConfig[key] } }),
+            {}
+          )
+        );
+        uiSettings.getUserProvided.mockResolvedValue(
+          Object.keys(userSettings).reduce(
+            (acc, key) => ({ ...acc, [key]: { userValue: userSettings[key] } }),
+            {}
+          )
+        );
+        uiSettings.isOverridden.mockImplementation((name) => name in overridesConfig);
+
+        const content = await render(
+          createOpenSearchDashboardsRequest({ query: { themeTag: 'invalid' } }),
+          uiSettings,
+          {}
+        );
+        const dom = load(content);
+        const $elStyle = dom('style[data-theme][data-color-scheme]');
+
+        expect($elStyle.attr('data-color-scheme')).toBe('dark');
+        expect($elStyle.attr('data-theme')).toBe('v9');
+      });
+
       it('renders "core" page driven by defaults', async () => {
         uiSettings.getUserProvided.mockResolvedValue({ 'theme:darkMode': { userValue: false } });
         uiSettings.getOverrideOrDefault.mockImplementation((name) => name === 'theme:darkMode');
+        uiSettings.getRegistered.mockReturnValue({ 'theme:darkMode': { value: true } });
         const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {
           includeUserSettings: false,
         });
@@ -134,6 +558,7 @@ describe('RenderingService', () => {
         uiSettings.getOverrideOrDefault.mockImplementation((name) =>
           name === 'theme:darkMode' ? undefined : false
         );
+        uiSettings.getRegistered.mockReturnValue({});
         const content = await render(createOpenSearchDashboardsRequest(), uiSettings, {
           includeUserSettings: false,
         });

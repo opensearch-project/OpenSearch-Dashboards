@@ -33,7 +33,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { first, take } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { Agent as HttpsAgent } from 'https';
-import { themeVersionValueMap } from '@osd/ui-shared-deps';
+import { themeVersionValueMap, themeTagDetailMap, ThemeTag } from '@osd/ui-shared-deps';
 
 import Axios from 'axios';
 // @ts-expect-error untyped internal module used to prevent axios from using xhr adapter in tests
@@ -53,6 +53,7 @@ import { OpenSearchDashboardsConfigType } from '../opensearch_dashboards_config'
 import { HttpConfigType } from '../http/http_config';
 import { SslConfig } from '../http/ssl_config';
 import { LoggerFactory } from '../logging';
+import { IUiSettingsClient, PublicUiSettingsParams, UserProvidedValues } from '../ui_settings';
 
 const DEFAULT_TITLE = 'OpenSearch Dashboards';
 
@@ -97,21 +98,24 @@ export class RenderingService {
           defaults: uiSettings.getRegistered(),
           user: includeUserSettings ? await uiSettings.getUserProvided() : {},
         };
-        // Cannot use `uiSettings.get()` since a user might not be authenticated
-        const darkMode =
-          (settings.user?.['theme:darkMode']?.userValue ??
-            uiSettings.getOverrideOrDefault('theme:darkMode')) ||
-          false;
 
-        // At the very least, the schema should define a default theme; the '' will be unreachable
-        const configuredThemeVersion =
-          (settings.user?.['theme:version']?.userValue ??
-            uiSettings.getOverrideOrDefault('theme:version')) ||
-          '';
-        // Validate themeVersion is in valid format
-        const themeVersion =
-          themeVersionValueMap[configuredThemeVersion] ||
-          (uiSettings.getDefault('theme:version') as string);
+        const themeTagOverride = (request.query as any).themeTag;
+        /* At the very least, the schema should define a default theme and darkMode;
+         * the false and '' below will be unreachable.
+         */
+        const { darkMode = false, version: themeVersion = '' } = this.getThemeDetails(
+          // Cannot use `uiSettings.get()` since a user might not be authenticated
+          {
+            darkMode: settings.user?.['theme:darkMode'],
+            version: settings.user?.['theme:version'],
+          },
+          {
+            darkMode: settings.defaults?.['theme:darkMode'],
+            version: settings.defaults?.['theme:version'],
+          },
+          uiSettings,
+          themeTagOverride
+        );
 
         const brandingAssignment = await this.assignBrandingConfig(
           darkMode,
@@ -428,5 +432,84 @@ export class RenderingService {
       return false;
     }
     return true;
+  };
+
+  /**
+   * Determines the color-scheme mode and version of the theme to be applied.
+   *
+   * The theme values are selected in the following order of precedence:
+   *   1. A configured override from the YAML config file.
+   *   2. A requested override from the `themeTag` parameter in the URL.
+   *   3. A value configured by the user.
+   *   4. The default value specified in the YAML file or the schema.
+   *
+   *   If `themeTag` is invalid, it is ignored.
+   *   If any other extracted detail is invalid, the system default is used.
+   */
+  private getThemeDetails = (
+    userSettings: Record<'darkMode' | 'version', UserProvidedValues<any> | undefined>,
+    defaults: Record<'darkMode' | 'version', PublicUiSettingsParams | undefined>,
+    uiSettings: IUiSettingsClient,
+    themeTagOverride?: string
+  ): { darkMode: boolean; version: string } => {
+    const darkMode = (() => {
+      /* eslint-disable dot-notation */
+      // 1. A configured override from the YAML config file
+      if (uiSettings.isOverridden('theme:darkMode')) {
+        // The override value is stored in `userValue`
+        return uiSettings.getOverrideOrDefault('theme:darkMode') as string;
+      }
+
+      // Check validity of `themeTagOverride` and get its details
+      const themeTagDetail = themeTagOverride
+        ? themeTagDetailMap.get(themeTagOverride as ThemeTag)
+        : undefined;
+
+      // 2. A requested override from the `themeTag` parameter in the URL
+      if (themeTagDetail?.mode !== undefined) return themeTagDetail.mode === 'dark';
+
+      // 3. A value configured by the user
+      if (userSettings.darkMode?.userValue !== undefined) return userSettings.darkMode.userValue;
+
+      // 4. The default value specified in the YAML file or the schema
+      return defaults['darkMode']?.value;
+    })();
+
+    const version = (() => {
+      /* eslint-disable dot-notation */
+      // 1. A configured override from the YAML config file
+      if (uiSettings.isOverridden('theme:version')) {
+        // The override value is stored in `userValue`
+        return uiSettings.getOverrideOrDefault('theme:version') as string;
+      }
+
+      // Check validity of `themeTagOverride` and get its details
+      const themeTagDetail = themeTagOverride
+        ? themeTagDetailMap.get(themeTagOverride as ThemeTag)
+        : undefined;
+
+      // The version is a `string` and the best test is `||`
+      return (
+        // 2. A requested override from the `themeTag` parameter in the URL
+        themeTagDetail?.version ||
+        // 3. A value configured by the user
+        userSettings.version?.userValue ||
+        // 4. The default value specified in the YAML file or the schema
+        defaults['version']?.value
+      );
+    })();
+
+    return {
+      /* eslint-disable dot-notation */
+      // If the value for `darkMode` couldn't be deduced, system default is used.
+      // The `false` is unreachable since schema will always have a default; set to accommodate tests.
+      darkMode: (darkMode as boolean) ?? defaults['darkMode']?.value ?? false,
+      // Checking `themeVersionValueMap` makes sure the version is valid; if not system default is used
+      version:
+        themeVersionValueMap[version as string] ||
+        (defaults['version']?.value as string) ||
+        // The `''` is unreachable since schema will always have a default; set to accommodate tests.
+        '',
+    };
   };
 }
