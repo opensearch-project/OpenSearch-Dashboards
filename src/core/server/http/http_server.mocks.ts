@@ -153,6 +153,7 @@ function createRawRequestMock(customization: DeepPartial<Request> = {}) {
         isAuthenticated: true,
       },
       headers: {},
+      query: {},
       path,
       route: { settings: {} },
       url,

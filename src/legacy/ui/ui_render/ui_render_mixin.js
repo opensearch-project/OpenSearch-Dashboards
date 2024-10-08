@@ -132,11 +132,14 @@ export function uiRenderMixin(osdServer, server, config) {
           ? await uiSettings.get('theme:darkMode')
           : uiSettings.getOverrideOrDefault('theme:darkMode');
       const themeMode = darkMode ? 'dark' : 'light';
+      const isThemeModeOverridden = uiSettings.isOverridden('theme:darkMode');
 
       const configuredThemeVersion =
         !authEnabled || request.auth.isAuthenticated
           ? await uiSettings.get('theme:version')
           : uiSettings.getOverrideOrDefault('theme:version');
+      const isThemeVersionOverridden = uiSettings.isOverridden('theme:version');
+
       // Validate themeVersion is in valid format
       const themeVersion =
         UiSharedDeps.themeVersionValueMap[configuredThemeVersion] ||
@@ -150,12 +153,25 @@ export function uiRenderMixin(osdServer, server, config) {
 
       const regularBundlePath = `${basePath}/${buildHash}/bundles`;
 
-      const styleSheetPaths = [
-        `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
-        `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.themeCssDistFilenames[themeVersion][themeMode]}`,
-        `${basePath}/node_modules/@osd/ui-framework/dist/${UiSharedDeps.kuiCssDistFilenames[themeVersion][themeMode]}`,
-        `${basePath}/ui/legacy_${themeMode}_theme.css`,
-      ];
+      /**
+       * If the theme's version or darkMode is overridden in the YAML configuration
+       * file, all the CSS assets offered will have their version or darkMode enforced
+       * based on the configured override. This is so a `themeTag` override will not be
+       * able to supersede the configuration overrides.
+       */
+      const themeTagStyleSheetPaths = {};
+      for (const [themeTag, { version, mode }] of UiSharedDeps.themeTagDetailMap) {
+        // Override the version or mode offered for themeTags if needed
+        const effectiveVersion = isThemeVersionOverridden ? themeVersion : version;
+        const effectiveMode = isThemeModeOverridden ? themeMode : mode;
+
+        themeTagStyleSheetPaths[themeTag] = [
+          `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.baseCssDistFilename}`,
+          `${regularBundlePath}/osd-ui-shared-deps/${UiSharedDeps.themeCssDistFilenames[effectiveVersion][effectiveMode]}`,
+          `${basePath}/node_modules/@osd/ui-framework/dist/${UiSharedDeps.kuiCssDistFilenames[effectiveVersion][effectiveMode]}`,
+          `${basePath}/ui/legacy_${mode}_theme.css`,
+        ];
+      }
 
       const kpUiPlugins = osdServer.newPlatform.__internals.uiPlugins;
       const kpPluginPublicPaths = new Map();
@@ -196,8 +212,9 @@ export function uiRenderMixin(osdServer, server, config) {
       const bootstrap = new AppBootstrap({
         templateData: {
           themeTag,
+          validThemeTags: UiSharedDeps.themeTags.join(','),
           jsDependencyPaths,
-          styleSheetPaths,
+          themeTagStyleSheetPaths: JSON.stringify(themeTagStyleSheetPaths),
           publicPathMap,
         },
       });

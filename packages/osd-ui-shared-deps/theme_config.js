@@ -4,10 +4,11 @@
  */
 
 /**
- * The purpose of this file is to centalize theme configuration so it can be used across server,
+ * The purpose of this file is to centralize theme configuration so it can be used across server,
  * client, and dev tooling. DO NOT add dependencies that wouldn't operate in all of these contexts.
  *
  * Default theme is specified in the uiSettings schema.
+ * A version (key) and color-scheme mode cannot contain a backtick character.
  */
 
 const THEME_MODES = ['light', 'dark'];
@@ -23,13 +24,25 @@ const THEME_VERSION_VALUE_MAP = {
   ...Object.fromEntries(Object.keys(THEME_VERSION_LABEL_MAP).map((v) => [v, v])),
 };
 const THEME_VERSIONS = Object.keys(THEME_VERSION_LABEL_MAP);
-const THEME_TAGS = THEME_VERSIONS.flatMap((v) => THEME_MODES.map((m) => `${v}${m}`));
+const THEME_TAGS = [];
+
+const themeTagDetailMap = new Map();
+THEME_VERSIONS.forEach((version) => {
+  THEME_MODES.forEach((mode) => {
+    const key = `${version}${mode}`;
+
+    themeTagDetailMap.set(key, { version, mode });
+    THEME_TAGS.push(key);
+  });
+});
 
 exports.themeVersionLabelMap = THEME_VERSION_LABEL_MAP;
 
 exports.themeVersionValueMap = THEME_VERSION_VALUE_MAP;
 
 exports.themeTags = THEME_TAGS;
+
+exports.themeTagDetailMap = themeTagDetailMap;
 
 exports.themeCssDistFilenames = THEME_VERSIONS.reduce((map, v) => {
   map[v] = THEME_MODES.reduce((acc, m) => {

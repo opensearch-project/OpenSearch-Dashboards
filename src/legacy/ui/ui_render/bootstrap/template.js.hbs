@@ -2,7 +2,18 @@ var osdCsp = JSON.parse(document.querySelector('osd-csp').getAttribute('data'));
 window.__osdStrictCsp__ = osdCsp.strictCsp;
 window.__osdThemeTag__ = "{{themeTag}}";
 window.__osdPublicPath__ = {{publicPathMap}};
-window.__osdBundles__ = {{osdBundlesLoaderSource}}
+window.__osdBundles__ = {{osdBundlesLoaderSource}};
+
+
+// Handle theme overridden via query-string
+var themeTagOverride = new URLSearchParams(window.location.search).get('themeTag');
+if (themeTagOverride) {
+  if (`{{{validThemeTags}}}`.split(',').includes(themeTagOverride)) {
+    window.__osdThemeTag__ = themeTagOverride;
+  } else {
+    console.warn('Ignoring invalid `themeTag` override');
+  }
+}
 
 if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
   var legacyBrowserError = document.getElementById('osd_legacy_browser_error');
@@ -79,11 +90,8 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
     ], function () {
       __osdBundles__.get('entry/core/public').__osdBootstrap__();
 
-      load([
-        {{#each styleSheetPaths}}
-          '{{this}}',
-        {{/each}}
-      ]);
+      var styleSheetPaths = JSON.parse(`{{themeTagStyleSheetPaths}}`)[window.__osdThemeTag__];
+      load(styleSheetPaths);
     });
   }
 }

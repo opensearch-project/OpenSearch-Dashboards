@@ -49,7 +49,6 @@ export const DEFAULT_THEME_VERSION = 'v8';
  *
  * The schema below exposes only a limited set of settings to be set in the config file.
  *
- * ToDo: Remove overrides; these were added to force the lock down the theme version.
  * The schema is temporarily relaxed to allow overriding the `darkMode` and setting
  * `defaults`. An upcoming change would relax them further to allow setting them.
  */

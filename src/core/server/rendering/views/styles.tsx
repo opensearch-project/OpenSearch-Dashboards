@@ -48,6 +48,8 @@ export const Styles: FunctionComponent<Props> = ({ theme, darkMode }) => {
 
   return (
     <style
+      data-theme={theme}
+      data-color-scheme={darkMode ? 'dark' : 'light'}
       dangerouslySetInnerHTML={{
         __html: `
           :root {

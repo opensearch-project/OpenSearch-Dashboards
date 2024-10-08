@@ -120,7 +120,7 @@ export class UiSettingsClient implements IUiSettingsClient {
   }
 
   getOverrideOrDefault(key: string): unknown {
-    return this.isOverridden(key) ? this.overrides[key].value : this.defaults[key]?.value;
+    return this.isOverridden(key) ? this.overrides[key] : this.defaults[key]?.value;
   }
 
   getDefault(key: string): unknown {
@@ -155,7 +155,7 @@ export class UiSettingsClient implements IUiSettingsClient {
       }
     }
 
-    // write all overridden keys, dropping the userValue is override is null and
+    // write all overridden keys, dropping the userValue if override is null and
     // adding keys for overrides that are not in saved object
     for (const [key, value] of Object.entries(this.overrides)) {
       userProvided[key] =
