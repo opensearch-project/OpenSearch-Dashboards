@@ -1,0 +1,2 @@
+feat:
+- Add a tag parameter to createInternalRepository API ([#8521](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8521)) 
