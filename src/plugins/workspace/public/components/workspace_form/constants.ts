@@ -6,6 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { WorkspacePermissionMode } from '../../../common/constants';
 import { PermissionModeId } from '../../../../../core/public';
+import { WORKSPACE_ACCESS_LEVEL_NAMES } from '../../constants';
 
 export enum WorkspaceOperationType {
   Create = 'create',
@@ -126,30 +127,15 @@ export const PERMISSION_ACCESS_LEVEL_LABEL_ID = 'workspace-form-permission-acces
 export const permissionModeOptions = [
   {
     value: PermissionModeId.Read,
-    inputDisplay: i18n.translate(
-      'workspace.form.permissionSettingPanel.permissionModeOptions.read',
-      {
-        defaultMessage: 'Read only',
-      }
-    ),
+    inputDisplay: WORKSPACE_ACCESS_LEVEL_NAMES.readOnly,
   },
   {
     value: PermissionModeId.ReadAndWrite,
-    inputDisplay: i18n.translate(
-      'workspace.form.permissionSettingPanel.permissionModeOptions.readAndWrite',
-      {
-        defaultMessage: 'Read and write',
-      }
-    ),
+    inputDisplay: WORKSPACE_ACCESS_LEVEL_NAMES.readAndWrite,
   },
   {
     value: PermissionModeId.Owner,
-    inputDisplay: i18n.translate(
-      'workspace.form.permissionSettingPanel.permissionModeOptions.owner',
-      {
-        defaultMessage: 'Admin',
-      }
-    ),
+    inputDisplay: WORKSPACE_ACCESS_LEVEL_NAMES.admin,
   },
 ];
 

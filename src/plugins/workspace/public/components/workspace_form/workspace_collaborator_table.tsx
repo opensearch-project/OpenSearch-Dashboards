@@ -267,26 +267,27 @@ const Actions = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { overlays } = useOpenSearchDashboards();
 
-  const accessLevelOptions = Object.keys(WORKSPACE_ACCESS_LEVEL_NAMES).map((level) => ({
-    name: WORKSPACE_ACCESS_LEVEL_NAMES[level as WorkspaceCollaboratorAccessLevel],
+  const accessLevelOptions = (Object.keys(
+    WORKSPACE_ACCESS_LEVEL_NAMES
+  ) as WorkspaceCollaboratorAccessLevel[]).map((level) => ({
+    name: WORKSPACE_ACCESS_LEVEL_NAMES[level],
     onClick: async () => {
       setIsPopoverOpen(false);
       if (selection) {
         const modal = overlays.openModal(
           <EuiConfirmModal
-            title="Change access level"
+            title={i18n.translate('workspace.detail.collaborator.table.change.access.level', {
+              defaultMessage: 'Change access level',
+            })}
             onCancel={() => modal.close()}
-            onConfirm={async () => {
+            onConfirm={() => {
               let newSettings = permissionSettings;
               selection.forEach(({ id }) => {
                 newSettings = newSettings.map((item) =>
                   id === item.id
                     ? {
                         ...item,
-                        modes:
-                          accessLevelNameToWorkspacePermissionModesMap[
-                            level as WorkspaceCollaboratorAccessLevel
-                          ],
+                        modes: accessLevelNameToWorkspacePermissionModesMap[level],
                       }
                     : item
                 );
@@ -299,9 +300,15 @@ const Actions = ({
           >
             <EuiText>
               <p>
-                Do you want to change access level to {selection.length} collaborator
-                {`${selection.length > 1 ? 's' : ''}`} to{' '}
-                {`"${WORKSPACE_ACCESS_LEVEL_NAMES[level as WorkspaceCollaboratorAccessLevel]}"`}?
+                {i18n.translate('workspace.detail.collaborator.changeAccessLevel.confirmation', {
+                  defaultMessage:
+                    'Do you want to change access level to {numCollaborators} collaborator{pluralSuffix} to "{accessLevel}"?',
+                  values: {
+                    numCollaborators: selection.length,
+                    pluralSuffix: selection.length > 1 ? 's' : '',
+                    accessLevel: WORKSPACE_ACCESS_LEVEL_NAMES[level],
+                  },
+                })}
               </p>
             </EuiText>
           </EuiConfirmModal>
