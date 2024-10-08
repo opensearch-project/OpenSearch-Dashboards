@@ -34,7 +34,7 @@ export interface AddCollaboratorsModalProps {
   inputPlaceholder?: string;
   instruction?: {
     title: string;
-    detail: string;
+    detail: React.ReactNode;
     link?: string;
   };
   permissionType: WorkspaceCollaboratorPermissionType;
