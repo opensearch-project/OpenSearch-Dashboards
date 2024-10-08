@@ -86,7 +86,7 @@ export class UsageCollectionPlugin implements Plugin<CollectorSet> {
 
   public start({ savedObjects }: CoreStart) {
     this.logger.debug('Starting plugin');
-    this.savedObjects = savedObjects.createInternalRepository();
+    this.savedObjects = savedObjects.createInternalRepository([], 'usage_collection');
   }
 
   public stop() {

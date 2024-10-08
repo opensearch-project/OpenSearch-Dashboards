@@ -237,7 +237,10 @@ export interface SavedObjectsServiceStart {
    *
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    */
-  createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
+  createInternalRepository: (
+    includedHiddenTypes?: string[],
+    tag?: string
+  ) => ISavedObjectsRepository;
   /**
    * Creates a {@link SavedObjectsSerializer | serializer} that is aware of all registered types.
    */
@@ -275,7 +278,10 @@ export interface SavedObjectsRepositoryFactory {
    *
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    */
-  createInternalRepository: (includedHiddenTypes?: string[]) => ISavedObjectsRepository;
+  createInternalRepository: (
+    includedHiddenTypes?: string[],
+    tag?: string
+  ) => ISavedObjectsRepository;
 }
 
 /** @internal */
@@ -491,13 +497,15 @@ export class SavedObjectsService
 
     const createRepository = (
       opensearchClient: OpenSearchClient,
-      includedHiddenTypes: string[] = []
+      includedHiddenTypes: string[] = [],
+      tag?: string
     ) => {
       if (this.respositoryFactoryProvider) {
         return this.respositoryFactoryProvider({
           migrator,
           typeRegistry: this.typeRegistry,
           includedHiddenTypes,
+          tag,
         });
       } else {
         return SavedObjectsRepository.createRepository(
@@ -511,8 +519,8 @@ export class SavedObjectsService
     };
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
-      createInternalRepository: (includedHiddenTypes?: string[]) =>
-        createRepository(client.asInternalUser, includedHiddenTypes),
+      createInternalRepository: (includedHiddenTypes?: string[], tag?: string) =>
+        createRepository(client.asInternalUser, includedHiddenTypes, tag),
       createScopedRepository: (req: OpenSearchDashboardsRequest, includedHiddenTypes?: string[]) =>
         createRepository(client.asScoped(req).asCurrentUser, includedHiddenTypes),
     };

@@ -47,6 +47,7 @@ export interface SavedObjectsRepositoryOptions {
   migrator: IOpenSearchDashboardsMigrator;
   typeRegistry: SavedObjectTypeRegistry;
   includedHiddenTypes: string[];
+  tag?: string;
 }
 
 /**
