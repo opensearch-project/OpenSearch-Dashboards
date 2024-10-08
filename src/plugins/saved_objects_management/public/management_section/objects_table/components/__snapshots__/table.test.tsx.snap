@@ -160,6 +160,13 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             "sortable": true,
           },
           Object {
+            "data-test-subj": "savedObjectsTableRowWorkspace",
+            "dataType": "string",
+            "name": "Workspace",
+            "render": [Function],
+            "sortable": false,
+          },
+          Object {
             "actions": Array [
               Object {
                 "available": [Function],
@@ -405,6 +412,13 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
             "sortable": true,
           },
           Object {
+            "data-test-subj": "savedObjectsTableRowWorkspace",
+            "dataType": "string",
+            "name": "Workspace",
+            "render": [Function],
+            "sortable": false,
+          },
+          Object {
             "actions": Array [
               Object {
                 "available": [Function],
@@ -644,6 +658,13 @@ exports[`Table should render normally 1`] = `
             "name": "Last updated",
             "render": [Function],
             "sortable": true,
+          },
+          Object {
+            "data-test-subj": "savedObjectsTableRowWorkspace",
+            "dataType": "string",
+            "name": "Workspace",
+            "render": [Function],
+            "sortable": false,
           },
           Object {
             "actions": Array [
@@ -889,6 +910,13 @@ exports[`Table should render normally when use updated UX 1`] = `
             "name": "Last updated",
             "render": [Function],
             "sortable": true,
+          },
+          Object {
+            "data-test-subj": "savedObjectsTableRowWorkspace",
+            "dataType": "string",
+            "name": "Workspace",
+            "render": [Function],
+            "sortable": false,
           },
           Object {
             "actions": Array [

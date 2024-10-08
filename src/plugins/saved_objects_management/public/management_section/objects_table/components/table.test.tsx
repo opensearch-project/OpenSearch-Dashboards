@@ -38,7 +38,7 @@ import { columnServiceMock } from '../../../services/column_service.mock';
 import { SavedObjectsManagementAction } from '../../..';
 import { Table, TableProps } from './table';
 import { WorkspaceAttribute } from 'opensearch-dashboards/public';
-import { render } from '@testing-library/react';
+import { render, waitFor, fireEvent } from '@testing-library/react';
 
 const defaultProps: TableProps = {
   basePath: httpServiceMock.createSetupContract().basePath,
@@ -84,6 +84,12 @@ const defaultProps: TableProps = {
   canGoInApp: () => true,
   pageIndex: 1,
   pageSize: 2,
+  workspaceIdNameMap: new Map([
+    ['test1', 'jVyiM7'],
+    ['test2', '8rZ0OL'],
+    ['test3', 'evIuNZ'],
+    ['test4', '4MQ3uu'],
+  ]),
   items: [
     {
       id: '1',
@@ -289,5 +295,38 @@ describe('Table', () => {
         '[href="/app/indexPatterns/patterns/1"]'
       )
     ).toBeInTheDocument();
+  });
+  it('should render more workspace badge when more than 1 workspace', async () => {
+    const customizedProps = {
+      ...defaultProps,
+      useUpdatedUX: true,
+      items: [
+        {
+          id: '1',
+          type: 'index-pattern',
+          attributes: {},
+          references: [],
+          meta: {
+            title: `MyIndexPattern*`,
+            icon: 'indexPatternApp',
+            editUrl: '#/management/opensearch-dashboards/indexPatterns/patterns/1',
+            inAppUrl: {
+              path: '/app/management/opensearch-dashboards/indexPatterns/patterns/1',
+              uiCapabilitiesPath: 'management.opensearchDashboards.indexPatterns',
+            },
+          },
+          workspaces: ['jVyiM7', '8rZ0OL'],
+        },
+      ],
+    };
+    const { getByTestId, getByText } = render(<Table {...customizedProps} />);
+    await waitFor(() => {
+      const badge = getByTestId('workspace-column-more-workspaces-badge');
+      expect(badge).toBeInTheDocument();
+      fireEvent.click(badge);
+    });
+    expect(getByTestId('workspace-column-popover')).toBeInTheDocument();
+    expect(getByText('test1')).toBeInTheDocument();
+    expect(getByText('test2')).toBeInTheDocument();
   });
 });

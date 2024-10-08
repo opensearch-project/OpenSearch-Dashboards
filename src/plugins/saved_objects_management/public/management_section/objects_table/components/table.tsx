@@ -44,6 +44,7 @@ import {
   EuiCompressedSwitch,
   EuiCompressedFormRow,
   EuiText,
+  EuiBadge,
   EuiTableFieldDataColumnType,
   EuiTableActionsColumnType,
   EuiSearchBarProps,
@@ -80,6 +81,7 @@ export interface TableProps {
   pageIndex: number;
   pageSize: number;
   items: SavedObjectWithMetadata[];
+  workspaceIdNameMap: Map<string, string>;
   itemId: string | (() => string);
   totalItemCount: number;
   onQueryChange: (query: any, filterFields: string[]) => void;
@@ -97,6 +99,7 @@ export interface TableProps {
 
 interface TableState {
   isSearchTextValid: boolean;
+  showBadgePopover: boolean;
   parseErrorMessage: any;
   isExportPopoverOpen: boolean;
   isIncludeReferencesDeepChecked: boolean;
@@ -108,6 +111,7 @@ export class Table extends PureComponent<TableProps, TableState> {
   state: TableState = {
     isSearchTextValid: true,
     parseErrorMessage: null,
+    showBadgePopover: false,
     isExportPopoverOpen: false,
     isIncludeReferencesDeepChecked: true,
     activeAction: undefined,
@@ -125,6 +129,18 @@ export class Table extends PureComponent<TableProps, TableState> {
   loadColumnData = async () => {
     await Promise.all(this.props.columnRegistry.getAll().map((column) => column.loadData()));
     this.setState({ isColumnDataLoaded: true });
+  };
+
+  toggleBadgePopover = () => {
+    this.setState((prev) => ({
+      showBadgePopover: !prev.showBadgePopover,
+    }));
+  };
+
+  closeBadgePopover = () => {
+    this.setState({
+      showBadgePopover: false,
+    });
   };
 
   onChange = ({ query, error }: any) => {
@@ -172,6 +188,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       pageSize,
       itemId,
       items,
+      workspaceIdNameMap,
       totalItemCount,
       isSearching,
       filters,
@@ -186,8 +203,6 @@ export class Table extends PureComponent<TableProps, TableState> {
       onShowRelationships,
       basePath,
       actionRegistry,
-      columnRegistry,
-      namespaceRegistry,
       dateFormat,
       availableWorkspaces,
       currentWorkspaceId,
@@ -220,8 +235,6 @@ export class Table extends PureComponent<TableProps, TableState> {
         sortable: false,
         'data-test-subj': 'savedObjectsTableRowType',
         render: (type: string, object: SavedObjectWithMetadata) => {
-          // eslint-disable-next-line
-          console.log('lalal', object);
           return (
             <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
               <EuiIcon
@@ -285,13 +298,71 @@ export class Table extends PureComponent<TableProps, TableState> {
         'data-test-subj': 'updated-at',
         render: (updatedAt: string) => updatedAt && moment(updatedAt).format(dateFormat),
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
-      ...columnRegistry.getAll().map((column) => {
-        return {
-          ...column.euiColumn,
-          sortable: false,
-          'data-test-subj': `savedObjectsTableColumn-${column.id}`,
-        };
-      }),
+      {
+        name: i18n.translate('savedObjectsManagement.objectsTable.table.columnWorkspaceName', {
+          defaultMessage: 'Workspace',
+        }),
+        'data-test-subj': 'savedObjectsTableRowWorkspace',
+        dataType: 'string',
+        sortable: false,
+        render: (object: SavedObjectWithMetadata) => {
+          if (!object?.workspaces || object?.workspaces.length === 0) {
+            return <EuiText size="s">&mdash;</EuiText>;
+          }
+          const workspaces = object.workspaces;
+          const displayedWorkspaces = workspaces.slice(0, 1);
+          const remainingWorkspaces = workspaces.length - 1;
+          const getWorkspaceNameById = (workspaceId: string) => {
+            for (const [name, id] of workspaceIdNameMap) {
+              if (id === workspaceId) {
+                return name;
+              }
+            }
+            return workspaceId;
+          };
+          return (
+            <>
+              <EuiText size="s">
+                {displayedWorkspaces.map((workspaceId: string) =>
+                  getWorkspaceNameById(workspaceId)
+                )}
+              </EuiText>
+              {remainingWorkspaces > 0 && (
+                <>
+                  &nbsp;&nbsp;
+                  <EuiBadge
+                    color="hollow"
+                    iconType="popout"
+                    iconSide="right"
+                    onClick={this.toggleBadgePopover}
+                    iconOnClick={this.toggleBadgePopover}
+                    iconOnClickAriaLabel="Open workspaces popover"
+                    onClickAriaLabel="Open workspaces popover"
+                    data-test-subj="workspace-column-more-workspaces-badge"
+                  >
+                    + {remainingWorkspaces} more
+                  </EuiBadge>
+                  {this.state.showBadgePopover && (
+                    <EuiPopover
+                      isOpen={this.state.showBadgePopover}
+                      closePopover={this.closeBadgePopover}
+                      anchorPosition="rightCenter"
+                      panelPaddingSize="s"
+                      data-test-subj="workspace-column-popover"
+                    >
+                      {workspaces.slice(1).map((workspaceId, index) => (
+                        <EuiText key={index} size="xs">
+                          {getWorkspaceNameById(workspaceId)}
+                        </EuiText>
+                      ))}
+                    </EuiPopover>
+                  )}
+                </>
+              )}
+            </>
+          );
+        },
+      },
       {
         name: i18n.translate('savedObjectsManagement.objectsTable.table.columnActionsName', {
           defaultMessage: 'Actions',
