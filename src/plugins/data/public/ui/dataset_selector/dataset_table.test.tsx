@@ -100,17 +100,12 @@ describe('DataSetTable', () => {
   });
 
   it('calls selectDataStructure with undefined when all items are deselected', async () => {
-    const propsWithSelection = {
-      ...mockProps,
-      explorerDataset: { id: 'child1,child2', title: 'Child 1,Child 2', type: 'index' },
-    };
-    renderWithIntl(<DatasetTable {...propsWithSelection} />);
+    renderWithIntl(<DatasetTable {...mockProps} />);
 
     const checkbox1 = screen.getByTestId('checkboxSelectRow-child1');
-    const checkbox2 = screen.getByTestId('checkboxSelectRow-child2');
 
     fireEvent.click(checkbox1);
-    fireEvent.click(checkbox2);
+    fireEvent.click(checkbox1);
 
     await waitFor(() => {
       expect(mockProps.selectDataStructure).toHaveBeenCalledWith(undefined, mockPath.slice(0, 3));
