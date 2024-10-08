@@ -18,6 +18,7 @@ import {
 import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
 import { DataSourceConnectionType } from '../../../common/types';
 import * as utils from '../../utils';
+import * as workspaceUtilsExports from '../utils/workspace';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -178,7 +179,6 @@ function clearMockedFunctions() {
 describe('WorkspaceCreator', () => {
   beforeEach(() => clearMockedFunctions());
   const { location } = window;
-  const setHrefSpy = jest.fn((href) => href);
 
   beforeAll(() => {
     if (window.location) {
@@ -186,10 +186,6 @@ describe('WorkspaceCreator', () => {
       delete window.location;
     }
     window.location = {} as Location;
-    Object.defineProperty(window.location, 'href', {
-      get: () => 'http://localhost/w/workspace/app/workspace_create',
-      set: setHrefSpy,
-    });
   });
 
   afterAll(() => {
@@ -455,6 +451,10 @@ describe('WorkspaceCreator', () => {
 
   it('should redirect to workspace use case landing page after created successfully', async () => {
     const { getByTestId } = render(<WorkspaceCreator />);
+    const navigateToWorkspaceDetailMock = jest.fn();
+    jest
+      .spyOn(workspaceUtilsExports, 'navigateToWorkspaceDetail')
+      .mockImplementation(navigateToWorkspaceDetailMock);
 
     // Ensure workspace create form rendered
     await waitFor(() => {
@@ -468,7 +468,11 @@ describe('WorkspaceCreator', () => {
     jest.useFakeTimers();
     jest.runAllTimers();
     await waitFor(() => {
-      expect(setHrefSpy).toHaveBeenCalledWith(expect.stringContaining('/app/discover'));
+      expect(navigateToWorkspaceDetailMock).toHaveBeenCalledWith(
+        expect.anything(),
+        'successResult',
+        'collaborators'
+      );
     });
     jest.useRealTimers();
   });

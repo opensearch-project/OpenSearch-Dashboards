@@ -10,17 +10,15 @@ import { BehaviorSubject } from 'rxjs';
 
 import { useLocation } from 'react-router-dom';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
-import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
+import { WorkspaceFormSubmitData, WorkspaceOperationType, DetailTab } from '../workspace_form';
 import { getUseCaseFeatureConfig } from '../../../common/utils';
-import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { WorkspaceUseCase } from '../../types';
-import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
 import { DataSourceConnectionType } from '../../../common/types';
+import { navigateToWorkspaceDetail } from '../utils/workspace';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
 
 export interface WorkspaceCreatorProps {
@@ -109,17 +107,12 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           });
           if (application && http) {
             const newWorkspaceId = result.result.id;
-            const useCaseId = getFirstUseCaseOfFeatureConfigs(attributes.features);
-            const useCaseLandingAppId = availableUseCases?.find(({ id }) => useCaseId === id)
-              ?.features[0].id;
             // Redirect page after one second, leave one second time to show create successful toast.
             window.setTimeout(() => {
-              window.location.href = formatUrlWithWorkspaceId(
-                application.getUrlForApp(useCaseLandingAppId || WORKSPACE_DETAIL_APP_ID, {
-                  absolute: true,
-                }),
+              navigateToWorkspaceDetail(
+                { application, http },
                 newWorkspaceId,
-                http.basePath
+                DetailTab.Collaborators
               );
             }, 1000);
           }
@@ -139,7 +132,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
         setIsFormSubmitting(false);
       }
     },
-    [notifications?.toasts, http, application, workspaceClient, isFormSubmitting, availableUseCases]
+    [notifications?.toasts, http, application, workspaceClient, isFormSubmitting]
   );
 
   const isFormReadyToRender =
