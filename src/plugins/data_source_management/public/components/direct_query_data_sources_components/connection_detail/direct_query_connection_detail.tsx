@@ -3,55 +3,55 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
 import {
+  EuiAccordion,
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiPage,
   EuiPageBody,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   EuiTabbedContent,
-  EuiIcon,
-  EuiCard,
-  EuiAccordion,
+  EuiText,
 } from '@elastic/eui';
+import { escapeRegExp } from 'lodash';
 import {
   ApplicationStart,
   HttpStart,
   NotificationsStart,
   SavedObjectsStart,
 } from 'opensearch-dashboards/public';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { escapeRegExp } from 'lodash';
-import { DATACONNECTIONS_BASE } from '../../../constants';
-import { DirectQueryDatasourceDetails, PrometheusProperties } from '../../../types';
-import { NoAccess } from './utils/no_access_page';
-import { InactiveDataConnectionCallout } from './utils/inactive_data_connection_callout';
-import { AccessControlTab } from './access_control_tab';
-import { getManageDirectQueryDataSourceBreadcrumbs } from '../../breadcrumbs';
 import {
   useLoadAccelerationsToCache,
   useLoadDatabasesToCache,
   useLoadTablesToCache,
 } from '../../../../framework/catalog_cache/cache_loader';
-import { AccelerationTable } from '../acceleration_management/acceleration_table';
+import {
+  IntegrationInstanceResult,
+  IntegrationInstancesSearchResult,
+} from '../../../../framework/types';
+import { INTEGRATIONS_BASE } from '../../../../framework/utils/shared';
+import { DATACONNECTIONS_BASE } from '../../../constants';
 import { getRenderCreateAccelerationFlyout } from '../../../plugin';
+import { DirectQueryDatasourceDetails, PrometheusProperties } from '../../../types';
+import { getManageDirectQueryDataSourceBreadcrumbs } from '../../breadcrumbs';
+import { getDataSourcesWithFields, isPluginInstalled } from '../../utils';
+import { AccelerationTable } from '../acceleration_management/acceleration_table';
 import { AssociatedObjectsTab } from '../associated_object_management/associated_objects_tab';
 import { redirectToExplorerS3 } from '../associated_object_management/utils/associated_objects_tab_utils';
 import {
   InstallIntegrationFlyout,
   InstalledIntegrationsTable,
 } from '../integrations/installed_integrations_table';
-import {
-  IntegrationInstanceResult,
-  IntegrationInstancesSearchResult,
-} from '../../../../framework/types';
-import { INTEGRATIONS_BASE } from '../../../../framework/utils/shared';
-import { isPluginInstalled, getDataSourcesWithFields } from '../../utils';
+import { AccessControlTab } from './access_control_tab';
+import { InactiveDataConnectionCallout } from './utils/inactive_data_connection_callout';
+import { NoAccess } from './utils/no_access_page';
 
 interface DirectQueryDataConnectionDetailProps {
   featureFlagStatus: boolean;
@@ -322,7 +322,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
             <EuiFlexItem grow={false}>
               <EuiText className="overview-title">Description</EuiText>
               <EuiText size="s" className="overview-content">
-                {datasourceDetails.description || '-'}
+                {datasourceDetails.description || '\u2014'}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -352,13 +352,13 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
             <EuiFlexItem grow={false}>
               <EuiText className="overview-title">Connection title</EuiText>
               <EuiText size="s" className="overview-content">
-                {datasourceDetails.name || '-'}
+                {datasourceDetails.name || '\u2014'}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText className="overview-title">Data source description</EuiText>
               <EuiText size="s" className="overview-content">
-                {datasourceDetails.description || '-'}
+                {datasourceDetails.description || '\u2014'}
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
