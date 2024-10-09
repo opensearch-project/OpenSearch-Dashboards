@@ -86,40 +86,6 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   </button>
                 </div>
               </div>
-              <div
-                class="euiPopover euiPopover--anchorDownCenter"
-                id="field_value_selection_1"
-              >
-                <div
-                  class="euiPopover__anchor"
-                >
-                  <button
-                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiFilterButton euiFilterButton--hasIcon"
-                    type="button"
-                  >
-                    <span
-                      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-                    >
-                      <span
-                        class="euiButtonContent__icon"
-                        color="inherit"
-                        data-euiicon-type="arrowDown"
-                      />
-                      <span
-                        class="euiButtonEmpty__text"
-                      >
-                        <span
-                          class="euiFilterButton__textShift"
-                          data-text="Owner"
-                          title="Owner"
-                        >
-                          Owner
-                        </span>
-                      </span>
-                    </span>
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
@@ -448,7 +414,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--extraSmall eui-textTruncate"
+                          class="euiText euiText--small eui-textTruncate"
                           style="max-width: 150px;"
                         >
                           should be able to see the description tooltip when hovering over the description
@@ -621,7 +587,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--extraSmall eui-textTruncate"
+                          class="euiText euiText--small eui-textTruncate"
                           style="max-width: 150px;"
                         >
                           should be able to see the description tooltip when hovering over the description
@@ -794,7 +760,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--extraSmall eui-textTruncate"
+                          class="euiText euiText--small eui-textTruncate"
                           style="max-width: 150px;"
                         >
                           —
