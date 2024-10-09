@@ -167,7 +167,6 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               savedObjects={savedObjects}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Create}
-              permissionEnabled={false}
               dataSourceManagement={dataSourceManagement}
               availableUseCases={availableUseCases}
               defaultValues={defaultWorkspaceFormValues}
