@@ -155,22 +155,24 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
 
     urlForwarding.forwardApp('dev_tools', 'dev_tools');
 
-    /**
-     * register search strategy for dev tools modals
-     */
-    coreSetup.chrome.globalSearch.registerSearchStrategy({
-      id: 'devtools',
-      type: SearchObjectTypes.PAGES,
-      doSearch: async (query: string, callback?: () => void) =>
-        searchForDevTools(query, {
-          devTools: this.getSortedDevTools.bind(this),
-          title: this.title,
-          uiActionsApi: this.getUiActionsStart.bind(this),
-          callback,
-        }),
-    });
+    if (coreSetup.chrome.navGroup.getNavGroupEnabled()) {
+      /**
+       * register search strategy for dev tools modals
+       */
+      coreSetup.chrome.globalSearch.registerSearchStrategy({
+        id: 'devtools',
+        type: SearchObjectTypes.PAGES,
+        doSearch: async (query: string, callback?: () => void) =>
+          searchForDevTools(query, {
+            devTools: this.getSortedDevTools.bind(this),
+            title: this.title,
+            uiActionsApi: this.getUiActionsStart.bind(this),
+            callback,
+          }),
+      });
 
-    uiActions.registerTrigger(devToolsTrigger);
+      uiActions.registerTrigger(devToolsTrigger);
+    }
 
     return {
       register: (devToolArgs: CreateDevToolArgs) => {
