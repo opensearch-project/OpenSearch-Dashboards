@@ -84,7 +84,10 @@ export const AppContainer = React.memo(
         )}
 
         <EuiPage
-          className={classNames('deLayout', isEnhancementsEnabled && 'dsc--next')}
+          className={classNames(
+            'deLayout',
+            isEnhancementsEnabled && !showActionsInGroup ? 'dsc--next' : undefined
+          )}
           paddingSize="none"
           grow={false}
         >

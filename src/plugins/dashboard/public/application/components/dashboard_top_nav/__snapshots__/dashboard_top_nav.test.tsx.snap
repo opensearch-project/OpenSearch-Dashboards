@@ -315,6 +315,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -322,6 +323,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -1380,6 +1382,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -1387,6 +1390,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -2445,6 +2449,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -2452,6 +2457,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -3510,6 +3516,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -3517,6 +3524,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -4575,6 +4583,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -4582,6 +4591,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -5640,6 +5650,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -5647,6 +5658,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],

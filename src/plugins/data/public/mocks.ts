@@ -91,6 +91,12 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
         })
       ),
       clearCache: jest.fn(),
+      create: jest.fn().mockResolvedValue({
+        id: 'test-index-pattern',
+        title: 'Test Index Pattern',
+        type: 'INDEX_PATTERN',
+      }),
+      saveToCache: jest.fn(),
     } as unknown) as IndexPatternsContract,
     dataSources: dataSourceServiceMock.createStartContract(),
   };
