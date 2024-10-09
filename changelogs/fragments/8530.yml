@@ -1,0 +1,2 @@
+fix:
+- Fix issue for adding a new visualization, the visualization id would be decoded. ([#8530](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8530))
