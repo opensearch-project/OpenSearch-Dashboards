@@ -101,9 +101,9 @@ describe('WorkspaceFormSummaryPanel', () => {
     expect(screen.getByText('Data Source 2')).toBeInTheDocument();
     expect(screen.getByText('Data Source 3')).toBeInTheDocument();
     expect(screen.getByText('user1')).toBeInTheDocument();
-    expect(screen.getByText('Owner')).toBeInTheDocument();
+    expect(screen.getByText('Admin')).toBeInTheDocument();
     expect(screen.getByText('group1')).toBeInTheDocument();
-    expect(screen.getByText('Read')).toBeInTheDocument();
+    expect(screen.getByText('Read only')).toBeInTheDocument();
     expect(screen.getByText('+1 more')).toBeInTheDocument();
     expect(screen.queryByText('user2')).toBeNull();
     expect(screen.getByText('Cancel')).toBeInTheDocument();
