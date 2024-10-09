@@ -112,21 +112,9 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     isEnhancementsEnabledOverride,
   } = props;
 
-  useEffect(() => {
-    console.log('selectedIndexPattern in DiscoverSidebar: ', selectedIndexPattern);
-  }, [selectedIndexPattern]);
-
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const services = useMemo(() => getServices(), []);
-
-  useEffect(() => {
-    console.log('fields in DiscoverSidebar: ', fields);
-  }, [fields]);
-
-  useEffect(() => {
-    console.log('areFieldsLoading in DiscoverSidebar: ', selectedIndexPattern?.areFieldsLoading);
-  }, [selectedIndexPattern?.areFieldsLoading]);
 
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
@@ -210,9 +198,6 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
   );
 
   if (!selectedIndexPattern || !fields) {
-    // console.log('no index pattern or fields');
-    console.log('is selectedIndexPattern empty', !selectedIndexPattern);
-    console.log('is fields empty', !fields);
     return null;
   }
 
