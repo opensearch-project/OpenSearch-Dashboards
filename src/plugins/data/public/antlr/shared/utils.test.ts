@@ -21,10 +21,8 @@ describe('fetchData', () => {
         ...mockQuery,
       },
     }));
-    const mockApi = {
-      http: {
-        fetch: jest.fn().mockResolvedValue('fetchedData'),
-      },
+    const mockApi: any = {
+      fetch: jest.fn().mockResolvedValue('fetchedData'),
     };
     const mockQueryString: Partial<QueryStringManager> = {
       getUpdates$: jest.fn().mockReturnValue(of(mockQuery)),
@@ -51,10 +49,8 @@ describe('fetchData', () => {
     const mockQueryFormatter = jest.fn((table) => ({
       query: { qs: `formatted ${table}`, format: 'jdbc', ...mockQuery },
     }));
-    const mockApi = {
-      http: {
-        fetch: jest.fn().mockResolvedValue('fetchedData'),
-      },
+    const mockApi: any = {
+      fetch: jest.fn().mockResolvedValue('fetchedData'),
     };
     const mockQueryString: Partial<QueryStringManager> = {
       getUpdates$: jest.fn().mockReturnValue(of(undefined)),
