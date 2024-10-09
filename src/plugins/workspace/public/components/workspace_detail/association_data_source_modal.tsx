@@ -30,7 +30,6 @@ import { DataSourceConnection, DataSourceConnectionType } from '../../../common/
 import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../../core/public';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { Logos } from '../../../../../core/common';
-import './association_data_source_modal.scss';
 import { ConnectionTypeIcon } from '../workspace_form';
 
 const ConnectionIcon = ({
