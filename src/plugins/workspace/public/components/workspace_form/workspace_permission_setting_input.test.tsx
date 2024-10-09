@@ -76,7 +76,7 @@ describe('WorkspacePermissionSettingInput', () => {
     });
 
     expect(renderResult.getByDisplayValue('foo')).toBeInTheDocument();
-    expect(renderResult.getByText('Read')).toBeInTheDocument();
+    expect(renderResult.getByText('Read only')).toBeInTheDocument();
   });
   it('should render consistent group id and permission modes', () => {
     const { renderResult } = setup({
@@ -86,7 +86,7 @@ describe('WorkspacePermissionSettingInput', () => {
     });
 
     expect(renderResult.getByDisplayValue('bar')).toBeInTheDocument();
-    expect(renderResult.getByText('Read & Write')).toBeInTheDocument();
+    expect(renderResult.getByText('Read and write')).toBeInTheDocument();
   });
   it('should call onGroupOrUserIdChange with user id', () => {
     const { renderResult, onGroupOrUserIdChangeMock } = setup();
@@ -116,7 +116,7 @@ describe('WorkspacePermissionSettingInput', () => {
 
     expect(onPermissionModesChangeMock).not.toHaveBeenCalled();
     fireEvent.click(renderResult.getAllByTestId('workspace-permissionModeOptions')[0]);
-    fireEvent.click(renderResult.getByText('Owner'));
+    fireEvent.click(renderResult.getByText('Admin'));
     expect(onPermissionModesChangeMock).toHaveBeenCalledWith(['library_write', 'write'], 0);
   });
 
@@ -133,7 +133,7 @@ describe('WorkspacePermissionSettingInput', () => {
     expect(onTypeChangeMock).not.toHaveBeenCalled();
 
     fireEvent.click(renderResult.getByTestId('workspace-typeOptions'));
-    fireEvent.click(renderResult.getByText('User Group'));
+    fireEvent.click(renderResult.getByText('Group'));
     expect(onTypeChangeMock).toHaveBeenCalledWith('group', 0);
   });
 });

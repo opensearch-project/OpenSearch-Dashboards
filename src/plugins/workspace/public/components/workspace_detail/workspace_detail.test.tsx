@@ -16,6 +16,7 @@ import { WorkspaceFormProvider, WorkspaceOperationType } from '../workspace_form
 import { DataSourceConnectionType } from '../../../common/types';
 import * as utilsExports from '../../utils';
 import { IntlProvider } from 'react-intl';
+import { of } from 'rxjs';
 
 // all applications
 const PublicAPPInfoMap = new Map([
@@ -130,6 +131,9 @@ const WorkspaceDetailPage = (props: any) => {
           }
           return null;
         },
+      },
+      collaboratorTypes: {
+        getTypes$: jest.fn().mockReturnValue(of([])),
       },
     },
   });
