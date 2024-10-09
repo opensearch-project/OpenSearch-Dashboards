@@ -33,6 +33,7 @@ import {
 } from '../../../opensearch_dashboards_services';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { syncQueryStateWithUrl } from '../../../../../data/public';
+import { trackQueryMetric } from '../../../ui_metric';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -184,6 +185,12 @@ export const useSearch = (services: DiscoverViewServices) => {
         inspectorRequest.json(body);
       });
 
+      // Track the dataset type and language used
+      const query = searchSource.getField('query');
+      if (query && query.dataset?.type && query.language) {
+        trackQueryMetric(query);
+      }
+
       // Execute the search
       const fetchResp = await searchSource.fetch({
         abortSignal: fetchStateRef.current.abortController.signal,
@@ -236,7 +243,7 @@ export const useSearch = (services: DiscoverViewServices) => {
           elapsedMs,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       // If the request was aborted then no need to surface this error in the UI
       if (error instanceof Error && error.name === 'AbortError') return;
 
@@ -252,9 +259,9 @@ export const useSearch = (services: DiscoverViewServices) => {
       }
       let errorBody;
       try {
-        errorBody = JSON.parse(error.body.message);
+        errorBody = JSON.parse(error.message);
       } catch (e) {
-        errorBody = error.body.message;
+        errorBody = error.message;
       }
 
       data$.next({

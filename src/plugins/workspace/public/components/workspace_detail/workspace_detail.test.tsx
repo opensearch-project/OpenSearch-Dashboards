@@ -15,6 +15,8 @@ import { WorkspaceDetail } from './workspace_detail';
 import { WorkspaceFormProvider, WorkspaceOperationType } from '../workspace_form';
 import { DataSourceConnectionType } from '../../../common/types';
 import * as utilsExports from '../../utils';
+import { IntlProvider } from 'react-intl';
+import { of } from 'rxjs';
 
 // all applications
 const PublicAPPInfoMap = new Map([
@@ -130,27 +132,33 @@ const WorkspaceDetailPage = (props: any) => {
           return null;
         },
       },
+      collaboratorTypes: {
+        getTypes$: jest.fn().mockReturnValue(of([])),
+      },
     },
   });
 
   const registeredUseCases$ = createMockedRegisteredUseCases$();
 
   return (
-    <MemoryRouter>
-      <WorkspaceFormProvider
-        application={mockCoreStart.application}
-        savedObjects={mockCoreStart.savedObjects}
-        operationType={WorkspaceOperationType.Update}
-        permissionEnabled={true}
-        onSubmit={jest.fn()}
-        defaultValues={values}
-        availableUseCases={[]}
-      >
-        <Provider>
-          <WorkspaceDetail registeredUseCases$={registeredUseCases$} {...props} />
-        </Provider>
-      </WorkspaceFormProvider>
-    </MemoryRouter>
+    <IntlProvider locale="en">
+      <MemoryRouter>
+        <WorkspaceFormProvider
+          application={mockCoreStart.application}
+          savedObjects={mockCoreStart.savedObjects}
+          operationType={WorkspaceOperationType.Update}
+          permissionEnabled={true}
+          onSubmit={jest.fn()}
+          defaultValues={values}
+          availableUseCases={[]}
+          onAppLeave={jest.fn()}
+        >
+          <Provider>
+            <WorkspaceDetail registeredUseCases$={registeredUseCases$} {...props} />
+          </Provider>
+        </WorkspaceFormProvider>
+      </MemoryRouter>
+    </IntlProvider>
   );
 };
 
@@ -254,7 +262,7 @@ describe('WorkspaceDetail', () => {
     fireEvent.click(getByText('Cancel'));
     expect(queryByText('Any unsaved changes will be lost.')).toBeNull();
     fireEvent.click(getByText('Collaborators'));
-    const button = getByText('Navigate away');
+    const button = getByText('Confirm');
     fireEvent.click(button);
     expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
   });
@@ -276,7 +284,7 @@ describe('WorkspaceDetail', () => {
     fireEvent.click(getByText('+1 more'));
     expect(getByText('Any unsaved changes will be lost.')).toBeInTheDocument();
 
-    fireEvent.click(getByText('Navigate away'));
+    fireEvent.click(getByText('Confirm'));
     expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
   });
 

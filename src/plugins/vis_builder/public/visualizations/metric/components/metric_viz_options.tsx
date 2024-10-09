@@ -28,19 +28,19 @@ import { Option } from '../../../application/app';
 const METRIC_COLOR_MODES = [
   {
     id: ColorModes.NONE,
-    label: i18n.translate('visTypeMetric.colorModes.noneOptionLabel', {
+    label: i18n.translate('visBuilder.colorModes.noneOptionLabel', {
       defaultMessage: 'None',
     }),
   },
   {
     id: ColorModes.LABELS,
-    label: i18n.translate('visTypeMetric.colorModes.labelsOptionLabel', {
+    label: i18n.translate('visBuilder.colorModes.labelsOptionLabel', {
       defaultMessage: 'Labels',
     }),
   },
   {
     id: ColorModes.BACKGROUND,
-    label: i18n.translate('visTypeMetric.colorModes.backgroundOptionLabel', {
+    label: i18n.translate('visBuilder.colorModes.backgroundOptionLabel', {
       defaultMessage: 'Background',
     }),
   },
@@ -59,18 +59,18 @@ function MetricVizOptions() {
     [dispatch, styleState]
   );
 
-  const metricColorModeLabel = i18n.translate('visTypeMetric.params.color.useForLabel', {
+  const metricColorModeLabel = i18n.translate('visBuilder.params.color.useForLabel', {
     defaultMessage: 'Use color for',
   });
 
   return (
     <>
       <Option
-        title={i18n.translate('visTypeMetric.params.settingsTitle', { defaultMessage: 'Settings' })}
+        title={i18n.translate('visBuilder.params.settingsTitle', { defaultMessage: 'Settings' })}
         initialIsOpen
       >
         <SwitchOption
-          label={i18n.translate('visTypeMetric.params.percentageModeLabel', {
+          label={i18n.translate('visBuilder.params.percentageModeLabel', {
             defaultMessage: 'Percentage mode',
           })}
           paramName="percentageMode"
@@ -83,7 +83,7 @@ function MetricVizOptions() {
         />
 
         <SwitchOption
-          label={i18n.translate('visTypeMetric.params.showTitleLabel', {
+          label={i18n.translate('visBuilder.params.showTitleLabel', {
             defaultMessage: 'Show title',
           })}
           paramName="show"
@@ -95,9 +95,7 @@ function MetricVizOptions() {
           }
         />
       </Option>
-      <Option
-        title={i18n.translate('visTypeMetric.params.rangesTitle', { defaultMessage: 'Ranges' })}
-      >
+      <Option title={i18n.translate('visBuilder.params.rangesTitle', { defaultMessage: 'Ranges' })}>
         <ColorRanges
           data-test-subj="metricColorRange"
           colorsRange={metric.colorsRange}
@@ -143,10 +141,10 @@ function MetricVizOptions() {
         />
       </Option>
       <Option
-        title={i18n.translate('visTypeMetric.params.style.styleTitle', { defaultMessage: 'Style' })}
+        title={i18n.translate('visBuilder.params.style.styleTitle', { defaultMessage: 'Style' })}
       >
         <RangeOption
-          label={i18n.translate('visTypeMetric.params.style.fontSizeLabel', {
+          label={i18n.translate('visBuilder.params.style.fontSizeLabel', {
             defaultMessage: 'Metric font size in points',
           })}
           min={12}

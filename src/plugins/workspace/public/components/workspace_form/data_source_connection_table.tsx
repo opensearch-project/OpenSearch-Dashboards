@@ -34,7 +34,10 @@ interface DataSourceConnectionTableProps {
   onUnlinkDataSource: (dataSources: DataSourceConnection) => void;
   onSelectionChange: (selections: DataSourceConnection[]) => void;
   dataSourceConnections: DataSourceConnection[];
-  tableProps?: Pick<EuiInMemoryTableProps<DataSourceConnection>, 'pagination' | 'search'>;
+  tableProps?: Pick<
+    EuiInMemoryTableProps<DataSourceConnection>,
+    'pagination' | 'search' | 'message'
+  >;
 }
 
 export const DataSourceConnectionTable = forwardRef<
@@ -158,6 +161,7 @@ export const DataSourceConnectionTable = forwardRef<
         name: i18n.translate('workspace.detail.dataSources.table.relatedConnections', {
           defaultMessage: 'Related connections',
         }),
+        align: 'right',
         truncateText: true,
         render: (relatedConnections: DataSourceConnection[], record) =>
           relatedConnections?.length > 0 ? (
@@ -171,7 +175,7 @@ export const DataSourceConnectionTable = forwardRef<
                 <EuiButtonEmpty
                   data-test-subj={`workspace-detail-dataSources-table-dqc-${record.id}-related-button`}
                   size="xs"
-                  flush="left"
+                  flush="right"
                   color="text"
                   onClick={() => togglePopover(record.id)}
                 >

@@ -10,15 +10,17 @@
  */
 
 .osdQueryBar__wrap {
-  max-width: 100%;
-  z-index: $euiZContentMenu;
-
   .euiToolTipAnchor {
     height: 100%;
   }
 
   &.euiFormControlLayout--group.euiFormControlLayout--compressed {
     overflow: initial;
+  }
+
+  @include euiBreakpoint("m", "l", "xl", "xxl", "xxxl") {
+    max-width: 100%;
+    z-index: $euiZContentMenu;
   }
 }
 

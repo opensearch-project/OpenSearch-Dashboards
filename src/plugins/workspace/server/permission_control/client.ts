@@ -184,7 +184,7 @@ export class SavedObjectsPermissionControl {
     if (!savedObjectsGet.length) {
       return {
         success: false,
-        error: i18n.translate('savedObjects.permission.notFound', {
+        error: i18n.translate('workspace.savedObjects.permission.notFound', {
           defaultMessage: 'Can not find target saved objects.',
         }),
       };

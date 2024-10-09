@@ -16,6 +16,16 @@ import { WorkspaceList } from './index';
 
 jest.mock('../utils/workspace');
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({
+    search: '',
+    pathname: '',
+    hash: '',
+    state: undefined,
+  }),
+}));
+
 const mockNavigatorWrite = jest.fn();
 
 jest.mock('@elastic/eui', () => {
@@ -153,7 +163,7 @@ describe('WorkspaceList', () => {
     expect(getByText('name2')).toBeInTheDocument();
 
     // should display use case
-    expect(getByText('Analytics (All)')).toBeInTheDocument();
+    expect(getByText('Analytics')).toBeInTheDocument();
     expect(getByText('Observability')).toBeInTheDocument();
   });
 
@@ -274,17 +284,6 @@ describe('WorkspaceList', () => {
     expect(navigateToWorkspaceDetail).not.toHaveBeenCalled();
     await waitFor(() => {
       const badge = getByTestId('workspaceList-more-dataSources-badge');
-      expect(badge).toBeInTheDocument();
-      fireEvent.click(badge);
-    });
-    expect(navigateToWorkspaceDetail).toHaveBeenCalledTimes(1);
-  });
-
-  it('should render owners badge when more than one owners', async () => {
-    const { getByTestId } = render(getWrapWorkspaceListInContext());
-    expect(navigateToWorkspaceDetail).not.toHaveBeenCalled();
-    await waitFor(() => {
-      const badge = getByTestId('workspaceList-more-collaborators-badge');
       expect(badge).toBeInTheDocument();
       fireEvent.click(badge);
     });

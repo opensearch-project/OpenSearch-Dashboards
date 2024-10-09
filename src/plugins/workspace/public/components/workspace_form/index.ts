@@ -12,6 +12,7 @@ export { WorkspaceCancelModal } from './workspace_cancel_modal';
 export { WorkspaceNameField, WorkspaceDescriptionField } from './fields';
 export { ConnectionTypeIcon } from './connection_type_icon';
 export { DataSourceConnectionTable } from './data_source_connection_table';
+export { WorkspaceUseCaseFlyout } from './workspace_use_case_flyout';
 
 export { WorkspaceFormSubmitData, WorkspaceFormProps, WorkspaceFormDataState } from './types';
 export {
@@ -23,6 +24,7 @@ export {
   selectDataSourceTitle,
   workspaceDetailsTitle,
   workspaceUseCaseTitle,
+  permissionModeOptions,
 } from './constants';
 export {
   convertPermissionsToPermissionSettings,

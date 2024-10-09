@@ -50,7 +50,8 @@ export const WorkspaceDetailConnectionTable = ({
             data-test-subj="workspace-detail-dataSources-table-bulkRemove"
           >
             {i18n.translate('workspace.detail.dataSources.table.remove.button', {
-              defaultMessage: 'Remove {numberOfSelect} association(s)',
+              defaultMessage:
+                'Remove {numberOfSelect, plural, one {# association} other {# associations}}',
               values: { numberOfSelect: selectedItems.length },
             })}
           </EuiSmallButton>,
@@ -108,7 +109,9 @@ export const WorkspaceDetailConnectionTable = ({
         <EuiConfirmModal
           data-test-subj="workspaceForm-cancelModal"
           title={i18n.translate('workspace.detail.dataSources.modal.title', {
-            defaultMessage: 'Remove association(s)',
+            defaultMessage:
+              'Remove {numberOfSelect, plural, one {# association} other {# associations}}',
+            values: { numberOfSelect: selectedItems.length },
           })}
           onCancel={() => {
             setModalVisible(false);
@@ -122,7 +125,9 @@ export const WorkspaceDetailConnectionTable = ({
             defaultMessage: 'Cancel',
           })}
           confirmButtonText={i18n.translate('workspace.detail.dataSources.Modal.confirmButton', {
-            defaultMessage: 'Remove association(s)',
+            defaultMessage:
+              'Remove {numberOfSelect, plural, one {# association} other {# associations}}',
+            values: { numberOfSelect: selectedItems.length },
           })}
           buttonColor="danger"
           defaultFocusedButton="confirm"
