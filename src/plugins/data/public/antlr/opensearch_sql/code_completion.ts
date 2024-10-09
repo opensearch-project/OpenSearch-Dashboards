@@ -29,7 +29,6 @@ export const getSuggestions = async ({
   position,
   query,
   services,
-  dataset,
 }: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
   if (!services || !services.appName || !indexPattern) return [];
   try {
@@ -49,6 +48,9 @@ export const getSuggestions = async ({
     }
 
     if (suggestions.suggestValuesForColumn) {
+      // get dataset for connecting to the cluster currently engaged
+      const dataset = services.data.query.queryString.getQuery().dataset;
+
       const res = await fetchColumnValues(
         [indexPattern.title],
         suggestions.suggestValuesForColumn,

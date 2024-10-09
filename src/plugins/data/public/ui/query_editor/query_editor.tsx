@@ -288,7 +288,6 @@ export default class QueryEditorUI extends Component<Props, State> {
       indexPattern,
       position,
       services: this.services,
-      dataset: this.queryString.getQuery().dataset,
     });
 
     // current completion item range being given as last 'word' at pos

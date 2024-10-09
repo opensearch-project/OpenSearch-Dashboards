@@ -56,7 +56,6 @@ export interface QuerySuggestionGetFnArgs {
   boolFilter?: any;
   position?: monaco.Position;
   services?: IDataPluginServices;
-  dataset?: Dataset;
 }
 
 /** @public **/
