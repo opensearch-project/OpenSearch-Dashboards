@@ -28,31 +28,31 @@
  * under the License.
  */
 
-import './discover_sidebar.scss';
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { i18n } from '@osd/i18n';
 import {
-  EuiDragDropContext,
   DropResult,
-  EuiDroppable,
+  EuiButtonEmpty,
+  EuiDragDropContext,
   EuiDraggable,
+  EuiDroppable,
   EuiPanel,
   EuiSplitPanel,
-  EuiButtonEmpty,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
-import { DiscoverField } from './discover_field';
-import { DiscoverFieldSearch } from './discover_field_search';
-import { DiscoverFieldDataFrame } from './discover_field_data_frame';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { IndexPattern, IndexPatternField, UI_SETTINGS } from '../../../../../data/public';
 import { FIELDS_LIMIT_SETTING } from '../../../../common';
-import { groupFields } from './lib/group_fields';
-import { IndexPatternField, IndexPattern, UI_SETTINGS } from '../../../../../data/public';
-import { getDetails } from './lib/get_details';
-import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
-import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { getServices } from '../../../opensearch_dashboards_services';
-import { FieldDetails } from './types';
+import { DiscoverField } from './discover_field';
+import { DiscoverFieldDataFrame } from './discover_field_data_frame';
+import { DiscoverFieldSearch } from './discover_field_search';
+import './discover_sidebar.scss';
 import { displayIndexPatternCreation } from './lib/display_index_pattern_creation';
+import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
+import { getDetails } from './lib/get_details';
+import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
+import { groupFields } from './lib/group_fields';
+import { FieldDetails } from './types';
 
 export interface DiscoverSidebarProps {
   /**
@@ -111,9 +111,22 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     selectedIndexPattern,
     isEnhancementsEnabledOverride,
   } = props;
+
+  useEffect(() => {
+    console.log('selectedIndexPattern in DiscoverSidebar: ', selectedIndexPattern);
+  }, [selectedIndexPattern]);
+
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const services = useMemo(() => getServices(), []);
+
+  useEffect(() => {
+    console.log('fields in DiscoverSidebar: ', fields);
+  }, [fields]);
+
+  useEffect(() => {
+    console.log('areFieldsLoading in DiscoverSidebar: ', selectedIndexPattern?.areFieldsLoading);
+  }, [selectedIndexPattern?.areFieldsLoading]);
 
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
@@ -197,6 +210,9 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
   );
 
   if (!selectedIndexPattern || !fields) {
+    // console.log('no index pattern or fields');
+    console.log('is selectedIndexPattern empty', !selectedIndexPattern);
+    console.log('is fields empty', !fields);
     return null;
   }
 
@@ -236,7 +252,7 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
             </EuiSplitPanel.Inner>
           ) : null}
           <EuiSplitPanel.Inner className="eui-yScroll" paddingSize="none">
-            {fields.length > 0 && (
+            {(fields.length > 0 || selectedIndexPattern.areFieldsLoading) && (
               <>
                 <FieldList
                   category="selected"
@@ -312,7 +328,10 @@ const FieldList = ({
         onClick={() => setExpanded(!expanded)}
         size="xs"
         className="dscSideBar_fieldGroup"
-        aria-label={title}
+        aria-label={i18n.translate('discover.fieldChooser.fieldGroupLabel', {
+          defaultMessage: title,
+        })}
+        isLoading={selectedIndexPattern.areFieldsLoading ?? false}
       >
         {title}
       </EuiButtonEmpty>

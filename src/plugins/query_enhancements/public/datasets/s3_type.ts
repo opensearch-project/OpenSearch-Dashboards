@@ -110,7 +110,9 @@ export const s3TypeConfig: DatasetTypeConfig = {
     dataset: Dataset,
     services?: IDataPluginServices
   ): Promise<DatasetField[]> => {
+    console.log('reached ff call');
     if (!services) return [];
+    console.log('services look good');
     const { http } = services!;
     return await fetchFields(http, dataset);
   },

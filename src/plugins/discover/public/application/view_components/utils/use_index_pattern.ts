@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { IndexPattern, useQueryStringManager } from '../../../../../data/public';
-import { useSelector, updateIndexPattern } from '../../utils/state_management';
+import { IQueryStart } from '../../../../../data/public/query';
+import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
-import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
+import { updateIndexPattern, useSelector } from '../../utils/state_management';
 
 /**
  * Custom hook to fetch and manage the index pattern based on the provided services.
@@ -41,6 +42,26 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     data.indexPatterns,
   ]);
 
+  const loadFieldsInPattern = async (indexPattern: IndexPattern, IQuery: IQueryStart) => {
+    if (query.dataset) {
+      const type = IQuery.queryString.getDatasetService().getType(query.dataset?.type);
+      const fetchedFields = await type?.fetchFields(query.dataset, {
+        appName: services.appName,
+        uiSettings: services.uiSettings,
+        savedObjects: services.savedObjects,
+        notifications: services.notifications,
+        http: services.http,
+        storage: services.storage,
+        data: services.data,
+      });
+      indexPattern.updateFieldLoadingStatus(true);
+      indexPattern?.fields.replaceAll([...fetchedFields]);
+      indexPattern?.updateFieldLoadingStatus(false);
+      services.indexPatterns?.saveToCache(query.dataset.id, indexPattern);
+      setIndexPattern(indexPattern);
+    }
+  };
+
   useEffect(() => {
     let isMounted = true;
 
@@ -51,7 +72,15 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
           query.dataset.type !== 'INDEX_PATTERN'
         );
         if (!pattern) {
-          await data.query.queryString.getDatasetService().cacheDataset(query.dataset);
+          await data.query.queryString.getDatasetService().cacheDataset(query.dataset, {
+            appName: services.appName,
+            uiSettings: services.uiSettings,
+            savedObjects: services.savedObjects,
+            notifications: services.notifications,
+            http: services.http,
+            storage: services.storage,
+            data: services.data,
+          });
           pattern = await data.indexPatterns.get(
             query.dataset.id,
             query.dataset.type !== 'INDEX_PATTERN'
@@ -59,7 +88,9 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
         }
 
         if (isMounted && pattern) {
+          console.log('setIndexPattern is set now, ', setIndexPattern);
           setIndexPattern(pattern);
+          await loadFieldsInPattern(pattern, data.query);
         }
       } else if (!isQueryEnhancementEnabled) {
         if (!indexPatternIdFromState) {
@@ -78,6 +109,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
             const ip = await fetchIndexPatternDetails(indexPatternIdFromState);
             if (isMounted) {
               setIndexPattern(ip);
+              await loadFieldsInPattern(ip, data.query);
             }
           } catch (error) {
             if (isMounted) {
