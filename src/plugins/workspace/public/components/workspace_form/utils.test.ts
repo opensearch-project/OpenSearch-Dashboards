@@ -700,21 +700,21 @@ describe('isWorkspacePermissionSetting', () => {
 describe('getPermissionModeName', () => {
   it('should return Owner for a valid WorkspacePermissionMode mode', () => {
     const result = getPermissionModeName(['library_write', 'write'] as WorkspacePermissionMode[]);
-    expect(result).toBe('Owner');
+    expect(result).toBe('Admin');
   });
 
   it('should return Read & write for a valid WorkspacePermissionMode mode', () => {
     const result = getPermissionModeName(['library_write', 'read'] as WorkspacePermissionMode[]);
-    expect(result).toBe('Read & Write');
+    expect(result).toBe('Read and write');
   });
 
   it('should return Read for a valid WorkspacePermissionMode mode', () => {
     const result = getPermissionModeName(['library_read', 'read'] as WorkspacePermissionMode[]);
-    expect(result).toBe('Read');
+    expect(result).toBe('Read only');
   });
 
   it('should return Read for a invalid WorkspacePermissionMode mode', () => {
     const result = getPermissionModeName([] as WorkspacePermissionMode[]);
-    expect(result).toBe('Read');
+    expect(result).toBe('Read only');
   });
 });

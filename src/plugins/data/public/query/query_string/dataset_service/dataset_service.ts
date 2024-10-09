@@ -9,7 +9,6 @@ import {
   DataStructure,
   IndexPatternSpec,
   DEFAULT_DATA,
-  IFieldType,
   UI_SETTINGS,
   DataStorage,
   CachedDataStructure,
@@ -64,14 +63,11 @@ export class DatasetService {
 
   public async cacheDataset(dataset: Dataset): Promise<void> {
     const type = this.getType(dataset.type);
-    if (dataset) {
+    if (dataset && dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
       const spec = {
         id: dataset.id,
         title: dataset.title,
-        timeFieldName: {
-          name: dataset.timeFieldName,
-          type: 'date',
-        } as Partial<IFieldType>,
+        timeFieldName: dataset.timeFieldName,
         fields: await type?.fetchFields(dataset),
         dataSourceRef: dataset.dataSource
           ? {
