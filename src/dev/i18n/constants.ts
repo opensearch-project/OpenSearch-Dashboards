@@ -32,3 +32,6 @@ export const DEFAULT_MESSAGE_KEY = 'defaultMessage';
 export const DESCRIPTION_KEY = 'description';
 export const VALUES_KEY = 'values';
 export const I18N_RC = '.i18nrc.json';
+
+// ToDo: Recursively look for I18N_RC in these 3 locations
+export const DEFAULT_DIRS_WITH_RC_FILES: string[] = ['src', 'examples', 'packages'];

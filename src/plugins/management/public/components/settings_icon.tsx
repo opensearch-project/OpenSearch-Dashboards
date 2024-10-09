@@ -4,7 +4,14 @@
  */
 
 import React, { useState, useRef } from 'react';
-import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiToolTip,
+} from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
 import { Observable } from 'rxjs';
@@ -45,11 +52,18 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
     <EuiPopover
       id="popoverForSettingsIcon"
       button={
-        <EuiButtonIcon
-          aria-label="show-apps"
-          iconType="managementApp"
-          onClick={() => setPopover(true)}
-        />
+        <EuiToolTip
+          content={i18n.translate('management.settings.icon.nav.title', {
+            defaultMessage: 'Settings',
+          })}
+        >
+          <EuiButtonIcon
+            aria-label="show-apps"
+            iconType="managementApp"
+            onClick={() => setPopover(true)}
+            color="text"
+          />
+        </EuiToolTip>
       }
       isOpen={isPopoverOpen}
       closePopover={() => setPopover(false)}

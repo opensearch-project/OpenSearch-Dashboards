@@ -231,6 +231,66 @@ describe('ChromeNavGroupService#start()', () => {
     expect(groupsMap[mockedGroupBar.id].navLinks.length).toEqual(1);
   });
 
+  it('should populate links with custom category if the nav link is inside second level but no entry in all use case', async () => {
+    const chromeNavGroupService = new ChromeNavGroupService();
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    const chromeNavGroupServiceSetup = chromeNavGroupService.setup({ uiSettings });
+
+    chromeNavGroupServiceSetup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: 'foo',
+      },
+    ]);
+    chromeNavGroupServiceSetup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
+      {
+        id: 'bar',
+        title: 'bar',
+      },
+      {
+        id: 'foo',
+        title: 'foo',
+      },
+    ]);
+    const navLinkServiceStart = mockedNavLink.start({
+      http: mockedHttpService,
+      application: mockedApplicationService,
+    });
+    navLinkServiceStart.getNavLinks$ = jest.fn().mockReturnValue(
+      new Rx.BehaviorSubject([
+        {
+          id: 'foo',
+        },
+        {
+          id: 'bar',
+        },
+        {
+          id: 'customized_app',
+        },
+      ])
+    );
+    const chromeStart = await chromeNavGroupService.start({
+      navLinks: navLinkServiceStart,
+      application: mockedApplicationService,
+      breadcrumbsEnricher$: new Rx.BehaviorSubject<ChromeBreadcrumbEnricher | undefined>(undefined),
+      workspaces: workspacesServiceMock.createStartContract(),
+    });
+    const groupsMap = await chromeStart.getNavGroupsMap$().pipe(first()).toPromise();
+    expect(groupsMap[ALL_USE_CASE_ID].navLinks).toEqual([
+      {
+        id: 'foo',
+      },
+      {
+        id: 'bar',
+        title: 'bar',
+        category: { id: 'custom', label: 'Custom', order: 8500 },
+      },
+      {
+        id: 'customized_app',
+        category: { id: 'custom', label: 'Custom', order: 8500 },
+      },
+    ]);
+  });
+
   it('should return navGroupEnabled from ui settings', async () => {
     const chromeNavGroupService = new ChromeNavGroupService();
     const uiSettings = uiSettingsServiceMock.createSetupContract();
@@ -326,7 +386,7 @@ describe('ChromeNavGroupService#start()', () => {
     expect(currentNavGroup).toBeUndefined();
   });
 
-  it('should set current nav group automatically if application only belongs 1 nav group', async () => {
+  it('should set current nav group automatically if application only belongs to 1 visible nav group', async () => {
     const uiSettings = uiSettingsServiceMock.createSetupContract();
     const navGroupEnabled$ = new Rx.BehaviorSubject(true);
     uiSettings.get$.mockImplementation(() => navGroupEnabled$);
@@ -381,7 +441,7 @@ describe('ChromeNavGroupService#start()', () => {
     expect(currentNavGroup?.title).toEqual('barGroupTitle');
   });
 
-  it('should be able to find the right nav group when visible nav group is all', async () => {
+  it('should be able to find the right nav group when visible nav group length is 1 and is not all nav group', async () => {
     const uiSettings = uiSettingsServiceMock.createSetupContract();
     const navGroupEnabled$ = new Rx.BehaviorSubject(true);
     uiSettings.get$.mockImplementation(() => navGroupEnabled$);
@@ -391,21 +451,11 @@ describe('ChromeNavGroupService#start()', () => {
 
     chromeNavGroupServiceSetup.addNavLinksToGroup(
       {
-        id: ALL_USE_CASE_ID,
+        id: 'foo',
         title: 'fooGroupTitle',
         description: 'foo description',
       },
       [mockedNavLinkFoo]
-    );
-
-    chromeNavGroupServiceSetup.addNavLinksToGroup(
-      {
-        id: 'bar-group',
-        title: 'barGroupTitle',
-        description: 'bar description',
-        status: NavGroupStatus.Hidden,
-      },
-      [mockedNavLinkFoo, mockedNavLinkBar]
     );
 
     const chromeNavGroupServiceStart = await chromeNavGroupService.start({
@@ -414,14 +464,14 @@ describe('ChromeNavGroupService#start()', () => {
       breadcrumbsEnricher$: new Rx.BehaviorSubject<ChromeBreadcrumbEnricher | undefined>(undefined),
       workspaces: workspacesServiceMock.createStartContract(),
     });
-    mockedApplicationService.navigateToApp(mockedNavLinkBar.id);
+    mockedApplicationService.navigateToApp(mockedNavLinkFoo.id);
 
     const currentNavGroup = await chromeNavGroupServiceStart
       .getCurrentNavGroup$()
       .pipe(first())
       .toPromise();
 
-    expect(currentNavGroup?.id).toEqual('bar-group');
+    expect(currentNavGroup?.id).toEqual('foo');
   });
 
   it('should erase current nav group if application can not be found in any of the visible nav groups', async () => {
@@ -454,6 +504,59 @@ describe('ChromeNavGroupService#start()', () => {
     const chromeNavGroupServiceStart = await chromeNavGroupService.start({
       navLinks: mockedNavLinkService,
       application: mockedApplicationService,
+      breadcrumbsEnricher$: new Rx.BehaviorSubject<ChromeBreadcrumbEnricher | undefined>(undefined),
+      workspaces: workspacesServiceMock.createStartContract(),
+    });
+
+    chromeNavGroupServiceStart.setCurrentNavGroup('foo-group');
+
+    mockedApplicationService.navigateToApp(mockedNavLinkBar.id);
+    const currentNavGroup = await chromeNavGroupServiceStart
+      .getCurrentNavGroup$()
+      .pipe(first())
+      .toPromise();
+
+    expect(currentNavGroup).toBeFalsy();
+  });
+
+  it('should erase current nav group if application can only be found in use case but outside workspace', async () => {
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    const navGroupEnabled$ = new Rx.BehaviorSubject(true);
+    uiSettings.get$.mockImplementation(() => navGroupEnabled$);
+
+    const chromeNavGroupService = new ChromeNavGroupService();
+    const chromeNavGroupServiceSetup = chromeNavGroupService.setup({ uiSettings });
+
+    chromeNavGroupServiceSetup.addNavLinksToGroup(
+      {
+        id: 'foo-group',
+        title: 'fooGroupTitle',
+        description: 'foo description',
+      },
+      [mockedNavLinkFoo]
+    );
+
+    chromeNavGroupServiceSetup.addNavLinksToGroup(
+      {
+        id: 'bar-group',
+        title: 'barGroupTitle',
+        description: 'bar description',
+      },
+      [mockedNavLinkFoo, mockedNavLinkBar]
+    );
+
+    const chromeNavGroupServiceStart = await chromeNavGroupService.start({
+      navLinks: mockedNavLinkService,
+      application: {
+        ...mockedApplicationService,
+        capabilities: Object.freeze({
+          ...mockedApplicationService.capabilities,
+          workspaces: {
+            ...mockedApplicationService.capabilities.workspaces,
+            enabled: true,
+          },
+        }),
+      },
       breadcrumbsEnricher$: new Rx.BehaviorSubject<ChromeBreadcrumbEnricher | undefined>(undefined),
       workspaces: workspacesServiceMock.createStartContract(),
     });
@@ -513,8 +616,8 @@ describe('ChromeNavGroupService#start()', () => {
     const breadcrumbs = [{ text: 'test' }];
     const enrichedBreadcrumbs = breadcrumbsEnricher$.getValue()?.(breadcrumbs);
 
-    // home -> bar-group -> test
-    expect(enrichedBreadcrumbs).toHaveLength(3);
+    // bar-group -> test
+    expect(enrichedBreadcrumbs).toHaveLength(2);
 
     // reset current nav group
     chromeNavGroupServiceStart.setCurrentNavGroup(undefined);

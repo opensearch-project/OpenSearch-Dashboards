@@ -315,6 +315,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -322,6 +323,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -737,6 +739,10 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 },
                 "opensearchDashboards": Object {
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                  "dashboards": Object {
+                    "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                    "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                  },
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                     "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -772,7 +778,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   },
                   "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                   "visualize": Object {
-                    "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                    "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
                 },
               },
@@ -1376,6 +1382,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -1383,6 +1390,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -1798,6 +1806,10 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 },
                 "opensearchDashboards": Object {
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                  "dashboards": Object {
+                    "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                    "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                  },
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                     "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -1833,7 +1845,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   },
                   "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                   "visualize": Object {
-                    "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                    "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
                 },
               },
@@ -2437,6 +2449,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -2444,6 +2457,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -2859,6 +2873,10 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 },
                 "opensearchDashboards": Object {
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                  "dashboards": Object {
+                    "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                    "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                  },
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                     "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -2894,7 +2912,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   },
                   "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                   "visualize": Object {
-                    "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                    "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
                 },
               },
@@ -3498,6 +3516,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -3505,6 +3524,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -3920,6 +3940,10 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 },
                 "opensearchDashboards": Object {
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                  "dashboards": Object {
+                    "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                    "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                  },
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                     "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -3955,7 +3979,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   },
                   "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                   "visualize": Object {
-                    "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                    "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
                 },
               },
@@ -4559,6 +4583,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -4566,6 +4591,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -4981,6 +5007,10 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 },
                 "opensearchDashboards": Object {
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                  "dashboards": Object {
+                    "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                    "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                  },
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                     "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -5016,7 +5046,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   },
                   "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                   "visualize": Object {
-                    "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                    "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
                 },
               },
@@ -5620,6 +5650,7 @@ exports[`Dashboard top nav render with all components 1`] = `
               },
               "indexPatterns": Object {
                 "clearCache": [MockFunction],
+                "create": [MockFunction],
                 "createField": [MockFunction],
                 "createFieldList": [MockFunction],
                 "ensureDefaultIndexPattern": [MockFunction],
@@ -5627,6 +5658,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "get": [MockFunction],
                 "getDefault": [MockFunction],
                 "make": [Function],
+                "saveToCache": [MockFunction],
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
@@ -6042,6 +6074,10 @@ exports[`Dashboard top nav render with all components 1`] = `
                 },
                 "opensearchDashboards": Object {
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                  "dashboards": Object {
+                    "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                    "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                  },
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                     "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -6077,7 +6113,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                   },
                   "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                   "visualize": Object {
-                    "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                    "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                   },
                 },
               },

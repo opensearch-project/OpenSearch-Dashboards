@@ -29,7 +29,7 @@ export const createLineConfig = (): VisualizationTypeOptions<LineOptionsDefaults
           {
             group: AggGroupNames.Metrics,
             name: 'metric',
-            title: i18n.translate('visTypeVislib.line.metricTitle', {
+            title: i18n.translate('visBuilder.line.metricTitle', {
               defaultMessage: 'Y-axis',
             }),
             min: 1,
@@ -40,7 +40,7 @@ export const createLineConfig = (): VisualizationTypeOptions<LineOptionsDefaults
           {
             group: AggGroupNames.Buckets,
             name: 'segment',
-            title: i18n.translate('visTypeVislib.line.segmentTitle', {
+            title: i18n.translate('visBuilder.line.segmentTitle', {
               defaultMessage: 'X-axis',
             }),
             min: 0,
@@ -51,7 +51,7 @@ export const createLineConfig = (): VisualizationTypeOptions<LineOptionsDefaults
           {
             group: AggGroupNames.Buckets,
             name: 'group',
-            title: i18n.translate('visTypeVislib.line.groupTitle', {
+            title: i18n.translate('visBuilder.line.groupTitle', {
               defaultMessage: 'Split series',
             }),
             min: 0,
@@ -62,7 +62,7 @@ export const createLineConfig = (): VisualizationTypeOptions<LineOptionsDefaults
           {
             group: AggGroupNames.Buckets,
             name: 'split',
-            title: i18n.translate('visTypeVislib.line.splitTitle', {
+            title: i18n.translate('visBuilder.line.splitTitle', {
               defaultMessage: 'Split chart',
             }),
             min: 0,
@@ -73,7 +73,7 @@ export const createLineConfig = (): VisualizationTypeOptions<LineOptionsDefaults
           {
             group: AggGroupNames.Metrics,
             name: 'radius',
-            title: i18n.translate('visTypeVislib.line.radiusTitle', {
+            title: i18n.translate('visBuilder.line.radiusTitle', {
               defaultMessage: 'Dot size',
             }),
             min: 0,

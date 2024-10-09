@@ -49,7 +49,7 @@ const TableCellUI = ({
             size="xs"
             onClick={() => onFilter?.(columnId, fieldMapping, '+')}
             iconType="plusInCircle"
-            aria-label={i18n.translate('discover.filterForValueLabel', {
+            aria-label={i18n.translate('discover.filterForValue', {
               defaultMessage: 'Filter for value',
             })}
             data-test-subj="filterForValue"
@@ -65,7 +65,7 @@ const TableCellUI = ({
             size="xs"
             onClick={() => onFilter?.(columnId, fieldMapping, '-')}
             iconType="minusInCircle"
-            aria-label={i18n.translate('discover.filterOutValueLabel', {
+            aria-label={i18n.translate('discover.filterOutValue', {
               defaultMessage: 'Filter out value',
             })}
             data-test-subj="filterOutValue"

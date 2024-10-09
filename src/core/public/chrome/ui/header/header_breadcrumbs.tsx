@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { EuiHeaderBreadcrumbs } from '@elastic/eui';
+import { EuiHeaderBreadcrumbs, EuiSimplifiedBreadcrumbs } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
@@ -41,7 +41,7 @@ interface Props {
   breadcrumbsEnricher$: Observable<ChromeBreadcrumbEnricher | undefined>;
   useUpdatedHeader?: boolean;
   renderFullLength?: boolean;
-  dropHomeFromBreadcrumb?: boolean;
+  hideTrailingSeparator?: boolean;
 }
 
 export function HeaderBreadcrumbs({
@@ -50,7 +50,7 @@ export function HeaderBreadcrumbs({
   breadcrumbsEnricher$,
   useUpdatedHeader,
   renderFullLength,
-  dropHomeFromBreadcrumb,
+  hideTrailingSeparator,
 }: Props) {
   const appTitle = useObservable(appTitle$, 'OpenSearch Dashboards');
   const breadcrumbs = useObservable(breadcrumbs$, []);
@@ -75,10 +75,6 @@ export function HeaderBreadcrumbs({
     crumbs = breadcrumbEnricher(crumbs);
   }
 
-  if (dropHomeFromBreadcrumb && crumbs.length && crumbs[0].hasOwnProperty('home')) {
-    crumbs = crumbs.slice(1);
-  }
-
   crumbs = crumbs.map((breadcrumb, i) => ({
     ...breadcrumb,
     'data-test-subj': classNames(
@@ -91,12 +87,25 @@ export function HeaderBreadcrumbs({
 
   const remainingCrumbs = useUpdatedHeader ? crumbs.slice(0, -1) : crumbs;
 
-  return (
-    <EuiHeaderBreadcrumbs
-      breadcrumbs={renderFullLength ? crumbs : remainingCrumbs}
-      max={10}
-      data-test-subj="breadcrumbs"
-      simplify={!!useUpdatedHeader}
-    />
-  );
+  if (hideTrailingSeparator) {
+    return (
+      <EuiSimplifiedBreadcrumbs
+        breadcrumbs={crumbs}
+        hideLastBreadCrumb={!renderFullLength}
+        max={10}
+        data-test-subj="breadcrumbs"
+        hideTrailingSeparator
+        disableTrailingLink
+      />
+    );
+  } else {
+    return (
+      <EuiHeaderBreadcrumbs
+        breadcrumbs={renderFullLength ? crumbs : remainingCrumbs}
+        max={10}
+        data-test-subj="breadcrumbs"
+        simplify={!!useUpdatedHeader}
+      />
+    );
+  }
 }

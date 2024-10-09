@@ -47,6 +47,7 @@ import {
   getDefaultAuthMethod,
   isValidUrl,
 } from '../../../utils';
+import { DataSourceOptionalLabelSuffix } from '../../../data_source_optional_label_suffix';
 
 export interface CreateDataSourceProps {
   useNewUX: boolean;
@@ -399,36 +400,6 @@ export class CreateDataSourceForm extends React.Component<
     );
   };
 
-  /* Render Section header*/
-  renderSectionHeader = (i18nId: string, defaultMessage: string) => {
-    return (
-      <>
-        <EuiText grow={false} size="s">
-          <h2>
-            <FormattedMessage id={i18nId} defaultMessage={defaultMessage} />
-          </h2>
-        </EuiText>
-      </>
-    );
-  };
-  /* Render field label with Optional text*/
-  renderFieldLabelAsOptional = (i18nId: string, defaultMessage: string) => {
-    return (
-      <>
-        {<FormattedMessage id={i18nId} defaultMessage={defaultMessage} />}{' '}
-        <i style={{ fontWeight: 'normal' }}>
-          -{' '}
-          {
-            <FormattedMessage
-              id="dataSourcesManagement.createDataSource.optionalText"
-              defaultMessage="optional"
-            />
-          }
-        </i>
-      </>
-    );
-  };
-
   /* Render create new credentials*/
   renderCreateNewCredentialsForm = (type: AuthType) => {
     switch (type) {
@@ -581,10 +552,14 @@ export class CreateDataSourceForm extends React.Component<
           {this.renderHeader()}
           <EuiForm data-test-subj="data-source-creation">
             {/* Endpoint section */}
-            {this.renderSectionHeader(
-              'dataSourceManagement.connectToDataSource.connectionDetails',
-              'Connection Details'
-            )}
+            <EuiText grow={false} size="s">
+              <h2>
+                <FormattedMessage
+                  id="dataSourcesManagement.connectToDataSource.connectionDetails"
+                  defaultMessage="Connection Details"
+                />
+              </h2>
+            </EuiText>
             <EuiSpacer size="s" />
 
             {/* Title */}
@@ -613,10 +588,13 @@ export class CreateDataSourceForm extends React.Component<
 
             {/* Description */}
             <EuiCompressedFormRow
-              label={this.renderFieldLabelAsOptional(
-                'dataSourceManagement.createDataSource.description',
-                'Description'
-              )}
+              label={
+                <FormattedMessage
+                  id="dataSourcesManagement.createDataSource.descriptionOptional"
+                  defaultMessage="Description {optionalLabel}"
+                  values={{ optionalLabel: <DataSourceOptionalLabelSuffix /> }}
+                />
+              }
             >
               <EuiCompressedFieldText
                 name="dataSourceDescription"
@@ -660,31 +638,30 @@ export class CreateDataSourceForm extends React.Component<
 
             <EuiSpacer size="xl" />
 
-            {this.renderSectionHeader(
-              'dataSourceManagement.connectToDataSource.authenticationHeader',
-              'Authentication Method'
-            )}
+            <EuiText grow={false} size="s">
+              <h2>
+                <FormattedMessage
+                  id="dataSourcesManagement.connectToDataSource.authenticationHeader"
+                  defaultMessage="Authentication Method"
+                />
+              </h2>
+            </EuiText>
+
             <EuiSpacer size="m" />
 
             <EuiCompressedFormRow>
               <EuiText size="s">
-                <FormattedMessage
-                  id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
-                  defaultMessage="Enter the authentication details to access the endpoint."
-                />
-                {this.isNoAuthOptionEnabled && (
+                {this.isNoAuthOptionEnabled ? (
+                  <FormattedMessage
+                    id="dataSourcesManagement.createDataSource.authenticationMethodDescriptionWithNoAuth"
+                    defaultMessage="Enter the authentication details to access the endpoint. If no authentication is required, select {buttonLabel}."
+                    values={{ buttonLabel: <b>No authentication</b> }}
+                  />
+                ) : (
                   <FormattedMessage
                     id="dataSourcesManagement.createDataSource.authenticationMethodDescription"
-                    defaultMessage=" If no authentication is required, select "
+                    defaultMessage="Enter the authentication details to access the endpoint."
                   />
-                )}
-                {this.isNoAuthOptionEnabled && (
-                  <b>
-                    <FormattedMessage
-                      id="dataSourcesManagement.createDataSource.noAuthentication"
-                      defaultMessage="No authentication"
-                    />
-                  </b>
                 )}
               </EuiText>
             </EuiCompressedFormRow>

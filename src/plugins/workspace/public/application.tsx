@@ -17,6 +17,7 @@ import { WorkspaceDetailApp } from './components/workspace_detail_app';
 import { WorkspaceDetailProps } from './components/workspace_detail/workspace_detail';
 import { WorkspaceInitialApp } from './components/workspace_initial_app';
 import { WorkspaceUseCaseOverviewApp } from './components/workspace_use_case_overview_app';
+import { WorkspaceInitialProps } from './components/workspace_initial/workspace_initial';
 
 export const renderCreatorApp = (
   { element }: AppMountParameters,
@@ -25,7 +26,13 @@ export const renderCreatorApp = (
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceCreatorApp {...props} />
+      <Router>
+        <Switch>
+          <Route>
+            <WorkspaceCreatorApp {...props} />
+          </Route>
+        </Switch>
+      </Router>
     </OpenSearchDashboardsContextProvider>,
     element
   );
@@ -56,27 +63,10 @@ export const renderListApp = (
 ) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceListApp {...props} />
-    </OpenSearchDashboardsContextProvider>,
-    element
-  );
-
-  return () => {
-    ReactDOM.unmountComponentAtNode(element);
-  };
-};
-
-export const renderDetailApp = (
-  { element }: AppMountParameters,
-  services: Services,
-  props: WorkspaceDetailProps
-) => {
-  ReactDOM.render(
-    <OpenSearchDashboardsContextProvider services={services}>
       <Router>
         <Switch>
           <Route>
-            <WorkspaceDetailApp {...props} />
+            <WorkspaceListApp {...props} />
           </Route>
         </Switch>
       </Router>
@@ -89,24 +79,49 @@ export const renderDetailApp = (
   };
 };
 
-export const renderInitialApp = ({}: AppMountParameters, services: Services) => {
-  const rootElement = document.getElementById('opensearch-dashboards-body');
-
+export const renderDetailApp = (
+  { element, onAppLeave }: AppMountParameters,
+  services: Services,
+  props: WorkspaceDetailProps
+) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceInitialApp />
+      <Router>
+        <Switch>
+          <Route>
+            <WorkspaceDetailApp {...props} onAppLeave={onAppLeave} />
+          </Route>
+        </Switch>
+      </Router>
     </OpenSearchDashboardsContextProvider>,
-    rootElement
+    element
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(rootElement!);
+    ReactDOM.unmountComponentAtNode(element);
+  };
+};
+
+export const renderInitialApp = (
+  { element }: AppMountParameters,
+  services: Services,
+  props: WorkspaceInitialProps
+) => {
+  ReactDOM.render(
+    <OpenSearchDashboardsContextProvider services={services}>
+      <WorkspaceInitialApp {...props} />
+    </OpenSearchDashboardsContextProvider>,
+    element
+  );
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
   };
 };
 
 export const renderUseCaseOverviewApp = async (
   { element }: AppMountParameters,
-  services: Services,
+  services: Omit<Services, 'collaboratorTypes'>,
   pageId: string
 ) => {
   ReactDOM.render(

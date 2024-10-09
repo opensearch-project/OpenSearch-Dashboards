@@ -106,6 +106,7 @@ export default class QueryEditorUI extends Component<Props, State> {
   private services = this.props.opensearchDashboards.services;
   private headerRef: RefObject<HTMLDivElement> = createRef();
   private bannerRef: RefObject<HTMLDivElement> = createRef();
+  private queryControlsContainer: RefObject<HTMLDivElement> = createRef();
   private extensionMap = this.languageManager.getQueryEditorExtensionMap();
 
   private getQueryString = () => {
@@ -121,6 +122,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       !(
         this.headerRef.current &&
         this.bannerRef.current &&
+        this.queryControlsContainer.current &&
         this.props.query.language &&
         this.extensionMap &&
         Object.keys(this.extensionMap).length > 0
@@ -137,6 +139,7 @@ export default class QueryEditorUI extends Component<Props, State> {
         configMap={this.extensionMap}
         componentContainer={this.headerRef.current}
         bannerContainer={this.bannerRef.current}
+        queryControlsContainer={this.queryControlsContainer.current}
       />
     );
   }
@@ -324,7 +327,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
           iconType={this.state.isCollapsed ? 'expand' : 'minimize'}
-          aria-label={i18n.translate('discover.queryControls.languageToggle', {
+          aria-label={i18n.translate('data.queryControls.languageToggle', {
             defaultMessage: `Language Toggle`,
           })}
           onClick={() => this.setIsCollapsed(!this.state.isCollapsed)}
@@ -335,25 +338,6 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   private renderQueryControls = (queryControls: React.ReactElement[]) => {
     return <QueryControls queryControls={queryControls} />;
-  };
-
-  private renderExtensionSearchBarButton = () => {
-    if (!this.extensionMap || Object.keys(this.extensionMap).length === 0) return null;
-    const sortedConfigs = Object.values(this.extensionMap).sort((a, b) => a.order - b.order);
-    return (
-      <>
-        {sortedConfigs.map((config) => {
-          return config.getSearchBarButton
-            ? config.getSearchBarButton({
-                language: this.props.query.language,
-                onSelectLanguage: this.onSelectLanguage,
-                isCollapsed: this.state.isCollapsed,
-                setIsCollapsed: this.setIsCollapsed,
-              })
-            : null;
-        })}
-      </>
-    );
   };
 
   public render() {
@@ -383,6 +367,14 @@ export default class QueryEditorUI extends Component<Props, State> {
         editor.setValue(`\n`.repeat(10));
         this.setState({ lineCount: editor.getModel()?.getLineCount() });
         this.inputRef = editor;
+        // eslint-disable-next-line no-bitwise
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+          this.onSubmit(this.props.query);
+        });
+
+        return () => {
+          disposable.dispose();
+        };
       },
       footerItems: {
         start: [
@@ -472,9 +464,12 @@ export default class QueryEditorUI extends Component<Props, State> {
           {languageSelector}
           <div className="osdQueryEditor__querycontrols">
             <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              <div
+                ref={this.queryControlsContainer}
+                className="osdQueryEditor__extensionQueryControls"
+              />
               {this.renderQueryControls(languageEditor.TopBar.Controls)}
               {!languageEditor.TopBar.Expanded && this.renderToggleIcon()}
-              {!languageEditor.TopBar.Expanded && this.renderExtensionSearchBarButton()}
               {this.props.savedQueryManagement}
             </EuiFlexGroup>
           </div>

@@ -39,3 +39,4 @@ export {
   cleanWorkspaceId,
 } from '../../utils';
 export { debounce } from './debounce';
+export { useObservableValue } from './use_observable_value';
