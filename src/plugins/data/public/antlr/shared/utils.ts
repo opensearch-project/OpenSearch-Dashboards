@@ -19,6 +19,7 @@ import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestion } from '../../autocomplete';
 import { IDataPluginServices } from '../../types';
 import { Dataset, UI_SETTINGS } from '../../../common';
+import { HttpSetup } from 'opensearch-dashboards/public';
 
 export interface IDataSourceRequestHandlerParams {
   dataSourceId: string;
@@ -48,7 +49,7 @@ export const getRawSuggestionData$ = (
     })
   );
 
-const fetchFromAPI = async (http: any, body: string) => {
+const fetchFromAPI = async (http: HttpSetup, body: string) => {
   try {
     return await http.fetch({
       method: 'POST',
@@ -65,7 +66,7 @@ const fetchFromAPI = async (http: any, body: string) => {
 export const fetchData = (
   tables: string[],
   queryFormatter: (table: string, dataSourceId?: string, title?: string) => any,
-  http: any,
+  http: HttpSetup,
   queryString: QueryStringContract
 ) => {
   return new Promise((resolve, reject) => {
