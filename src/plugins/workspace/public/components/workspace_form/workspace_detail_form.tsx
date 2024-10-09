@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useRef } from 'react';
+import React from 'react';
 import {
   EuiSpacer,
   EuiForm,
@@ -17,38 +17,16 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
+import { useObservable } from 'react-use';
 import { WorkspaceFormProps } from './types';
-import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
-import { DetailTab, usersAndPermissionsTitle } from './constants';
+import { DetailTab } from './constants';
 import { WorkspaceFormErrorCallout } from './workspace_form_error_callout';
 import { useWorkspaceFormContext } from './workspace_form_context';
 import { WorkspaceDetailFormDetails } from './workspace_detail_form_details';
-
-interface FormGroupProps {
-  title: React.ReactNode;
-  children: React.ReactNode;
-  describe?: string;
-}
-
-const FormGroup = ({ title, children, describe }: FormGroupProps) => (
-  <>
-    <EuiFlexGroup gutterSize="xl">
-      <EuiFlexItem grow={false} style={{ width: '15%' }}>
-        <EuiTitle size="xs">
-          <h3>{title}</h3>
-        </EuiTitle>
-        <EuiText size="xs" color="subdued">
-          {describe}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiSpacer size="s" />
-        {children}
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer />
-  </>
-);
+import { WorkspaceCollaboratorTable } from './workspace_collaborator_table';
+import { WorkspaceCollaboratorTypesService } from '../../services/workspace_collaborator_types_service';
+import { AddCollaboratorButton } from './add_collaborator_button';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
 interface WorkspaceDetailedFormProps extends Omit<WorkspaceFormProps, 'onAppLeave'> {
   detailTab?: DetailTab;
@@ -56,7 +34,7 @@ interface WorkspaceDetailedFormProps extends Omit<WorkspaceFormProps, 'onAppLeav
 }
 
 export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
-  const { detailTab, detailTitle, defaultValues, availableUseCases } = props;
+  const { detailTab, detailTitle, availableUseCases } = props;
   const {
     formId,
     formData,
@@ -66,11 +44,14 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
     numberOfErrors,
     handleResetForm,
     handleFormSubmit,
-    setPermissionSettings,
+    handleSubmitPermissionSettings,
   } = useWorkspaceFormContext();
-  const disabledUserOrGroupInputIdsRef = useRef(
-    defaultValues?.permissionSettings?.map((item) => item.id) ?? []
-  );
+
+  const {
+    services: { collaboratorTypes },
+  } = useOpenSearchDashboards<{ collaboratorTypes: WorkspaceCollaboratorTypesService }>();
+
+  const displayedCollaboratorTypes = useObservable(collaboratorTypes.getTypes$()) ?? [];
 
   return (
     <EuiForm
@@ -88,7 +69,13 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {isEditing ? (
+            {detailTab === DetailTab.Collaborators ? (
+              <AddCollaboratorButton
+                displayedTypes={displayedCollaboratorTypes}
+                permissionSettings={formData.permissionSettings}
+                handleSubmitPermissionSettings={handleSubmitPermissionSettings}
+              />
+            ) : isEditing ? (
               <EuiSmallButton
                 onClick={handleResetForm}
                 data-test-subj="workspaceForm-workspaceDetails-discardChanges"
@@ -109,7 +96,16 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiHorizontalRule margin="m" />
+        <EuiText size="s">
+          {i18n.translate('workspace.detail.collaborator.description', {
+            defaultMessage: 'Manage workspace access and permissions.',
+          })}
+        </EuiText>
+        {detailTab === DetailTab.Collaborators ? (
+          <EuiSpacer size="m" />
+        ) : (
+          <EuiHorizontalRule margin="m" />
+        )}
         {numberOfErrors > 0 && (
           <>
             <WorkspaceFormErrorCallout errors={formErrors} />
@@ -120,21 +116,11 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
           <WorkspaceDetailFormDetails availableUseCases={availableUseCases} />
         )}
         {detailTab === DetailTab.Collaborators && (
-          <FormGroup
-            title={usersAndPermissionsTitle}
-            describe={i18n.translate('workspace.detail.collaborators.permissionSetting.describe', {
-              defaultMessage: 'Manage access and permissions.',
-            })}
-          >
-            <WorkspacePermissionSettingPanel
-              errors={formErrors.permissionSettings?.fields}
-              onChange={setPermissionSettings}
-              permissionSettings={formData.permissionSettings}
-              disabledUserOrGroupInputIds={disabledUserOrGroupInputIdsRef.current}
-              data-test-subj={`workspaceForm-permissionSettingPanel`}
-              readOnly={!isEditing}
-            />
-          </FormGroup>
+          <WorkspaceCollaboratorTable
+            permissionSettings={formData.permissionSettings}
+            displayedCollaboratorTypes={displayedCollaboratorTypes}
+            handleSubmitPermissionSettings={handleSubmitPermissionSettings}
+          />
         )}
       </EuiPanel>
       <EuiSpacer />
