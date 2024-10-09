@@ -16,9 +16,11 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { useEffectOnce } from 'react-use';
+import { useEffectOnce, useObservable } from 'react-use';
+import { of } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { TopNavControlComponentData } from 'src/plugins/navigation/public';
 import {
   reactRouterNavigate,
   useOpenSearchDashboards,
@@ -59,7 +61,12 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     notifications,
     uiSettings,
     application,
+    navigation,
+    workspaces,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
+  const { HeaderControl } = navigation.ui;
+  const workspaceClient = useObservable(workspaces.client$);
+  const DataSourceAssociation = workspaceClient?.ui().DataSourceAssociation;
 
   /* Component state variables */
   const [dataSources, setDataSources] = useState<DataSourceTableItem[]>([]);
@@ -68,6 +75,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = React.useState(false);
   const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
+  const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
 
   /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
@@ -81,6 +89,17 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     /* fetch data sources*/
     fetchDataSources();
   });
+
+  const associateDataSourceButton = DataSourceAssociation && [
+    {
+      renderComponent: (
+        <DataSourceAssociation
+          excludedDataSourceIds={dataSources.map((ds) => ds.id)}
+          onComplete={() => fetchDataSources()}
+        />
+      ),
+    } as TopNavControlComponentData,
+  ];
 
   const fetchDataSources = () => {
     setIsLoading(true);
@@ -384,8 +403,18 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     );
   };
 
+  const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
+  const dataSourceAssociationVisible =
+    !!currentWorkspace && !currentWorkspace.readonly && isDashboardAdmin;
+
   return (
     <>
+      {dataSourceAssociationVisible && associateDataSourceButton && (
+        <HeaderControl
+          setMountPoint={application.setAppRightControls}
+          controls={associateDataSourceButton}
+        />
+      )}
       {tableRenderDeleteModal()}
       {!isLoading && (!dataSources || !dataSources.length)
         ? renderEmptyState()

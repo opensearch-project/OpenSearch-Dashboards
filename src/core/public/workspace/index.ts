@@ -8,5 +8,6 @@ export {
   WorkspacesService,
   WorkspacesSetup,
   WorkspaceObject,
-  IWorkspaceClient,
 } from './workspaces_service';
+
+export { IWorkspaceClient, IWorkspaceResponse } from './types';

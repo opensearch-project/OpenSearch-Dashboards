@@ -122,6 +122,26 @@ export interface IWorkspaceClientImpl {
    * @public
    */
   destroy(): Promise<IResponse<boolean>>;
+
+  /**
+   * Associates a list of objects with the given workspace ID.
+   *
+   * This method takes a workspace ID and an array of objects, where each object contains
+   * an `id` and `type`. It attempts to associate each object with the specified workspace.
+   * If the association succeeds, the object is included in the result without an error.
+   * If there is an issue associating an object, an error message is returned for that object.
+   *
+   * @returns A promise that resolves to a response object containing an array of results for each object.
+   *          Each result will include the object's `id` and, if there was an error during association, an `error` field
+   *          with the error message.
+   *
+   * @public
+   */
+  associate(
+    requestDetail: IRequestDetail,
+    workspaceId: string,
+    objects: Array<{ id: string; type: string }>
+  ): Promise<IResponse<Array<{ id: string; error?: string }>>>;
 }
 
 export type IResponse<T> =
