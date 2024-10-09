@@ -6,7 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { IndexPattern, useQueryStringManager } from '../../../../../data/public';
-import { IQueryStart } from '../../../../../data/public/query';
+import { IQueryStart } from '../../../../../data/public/query/types';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
@@ -42,25 +42,28 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     data.indexPatterns,
   ]);
 
-  const loadFieldsInPattern = async (indexPattern: IndexPattern, IQuery: IQueryStart) => {
-    if (query.dataset) {
-      const type = IQuery.queryString.getDatasetService().getType(query.dataset?.type);
-      const fetchedFields = await type?.fetchFields(query.dataset, {
-        appName: services.appName,
-        uiSettings: services.uiSettings,
-        savedObjects: services.savedObjects,
-        notifications: services.notifications,
-        http: services.http,
-        storage: services.storage,
-        data: services.data,
-      });
-      indexPattern.updateFieldLoadingStatus(true);
-      indexPattern?.fields.replaceAll([...fetchedFields]);
-      indexPattern?.updateFieldLoadingStatus(false);
-      services.indexPatterns?.saveToCache(query.dataset.id, indexPattern);
-      setIndexPattern(indexPattern);
-    }
-  };
+  const loadFieldsInPattern = useCallback(
+    async (selectedIndexPattern: IndexPattern, IQuery: IQueryStart) => {
+      if (query.dataset) {
+        const type = IQuery.queryString.getDatasetService().getType(query.dataset?.type);
+        const fetchedFields = await type?.fetchFields(query.dataset, {
+          appName: services.appName,
+          uiSettings: services.uiSettings,
+          savedObjects: services.savedObjects,
+          notifications: services.notifications,
+          http: services.http,
+          storage: services.storage,
+          data: services.data,
+        });
+        selectedIndexPattern.updateFieldLoadingStatus(true);
+        selectedIndexPattern?.fields.replaceAll([...fetchedFields]);
+        selectedIndexPattern?.updateFieldLoadingStatus(false);
+        services.indexPatterns?.saveToCache(query.dataset.id, selectedIndexPattern);
+        setIndexPattern(selectedIndexPattern);
+      }
+    },
+    [services, query.dataset]
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -88,7 +91,6 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
         }
 
         if (isMounted && pattern) {
-          console.log('setIndexPattern is set now, ', setIndexPattern);
           setIndexPattern(pattern);
           await loadFieldsInPattern(pattern, data.query);
         }
@@ -130,6 +132,9 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
       isMounted = false;
     };
   }, [
+    data.query,
+    services,
+    loadFieldsInPattern,
     isQueryEnhancementEnabled,
     indexPatternIdFromState,
     fetchIndexPatternDetails,

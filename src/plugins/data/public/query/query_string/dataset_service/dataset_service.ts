@@ -80,18 +80,10 @@ export class DatasetService {
               }
             : undefined,
         } as IndexPatternSpec;
-        console.log('temporaryIndexPattern creation started');
         const temporaryIndexPattern = await this.indexPatterns?.create(spec, true);
-        console.log('temporaryIndexPattern is created');
-
-        // const fetchedFields = await type?.fetchFields(dataset, services);
-        // console.log(' \n fetchedFields:', fetchedFields);
-        // temporaryIndexPattern?.fields.replaceAll([...fetchedFields]);
-        // temporaryIndexPattern?.updateFieldLoadingStatus(false);
 
         if (temporaryIndexPattern) {
           this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
-          console.log('temporaryIndexPattern is saved to cache');
         }
       }
     } catch (error) {
