@@ -162,7 +162,11 @@ export const Configurator = ({
         <EuiButton
           onClick={async () => {
             await queryString.getDatasetService().cacheDataset(dataset);
-            onConfirm(dataset);
+            onConfirm({
+              ...dataset,
+              timeFieldName,
+              language,
+            });
           }}
           fill
         >
