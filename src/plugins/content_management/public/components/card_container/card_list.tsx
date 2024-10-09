@@ -42,7 +42,7 @@ const CardListInner = ({ embeddable, input, embeddableServices }: Props) => {
       <EuiFlexGroup
         wrap={!!input.wrap}
         style={input.wrap ? {} : { overflowX: 'auto' }}
-        gutterSize="s"
+        gutterSize="m"
       >
         {cards}
       </EuiFlexGroup>
@@ -65,14 +65,14 @@ const CardListInner = ({ embeddable, input, embeddableServices }: Props) => {
 
   if (input.grid && input.columns) {
     return (
-      <EuiFlexGrid columns={input.columns as FlexGridColumns} gutterSize="s">
+      <EuiFlexGrid columns={input.columns as FlexGridColumns} gutterSize="m">
         {cards}
       </EuiFlexGrid>
     );
   }
 
   return (
-    <EuiFlexGroup wrap={input.wrap} gutterSize="s">
+    <EuiFlexGroup wrap={input.wrap} gutterSize="m">
       {cards}
     </EuiFlexGroup>
   );

@@ -33,6 +33,7 @@ import {
 } from '../../../opensearch_dashboards_services';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
 import { syncQueryStateWithUrl } from '../../../../../data/public';
+import { trackQueryMetric } from '../../../ui_metric';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -60,6 +61,7 @@ export interface SearchData {
       statusCode?: number;
     };
     elapsedMs?: number;
+    startTime?: number;
   };
 }
 
@@ -119,12 +121,14 @@ export const useSearch = (services: DiscoverViewServices) => {
     );
   }, [savedSearch, services.uiSettings, timefilter]);
 
+  const startTime = Date.now();
   const data$ = useMemo(
     () =>
       new BehaviorSubject<SearchData>({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
+        queryStatus: { startTime },
       }),
-    [shouldSearchOnPageLoad]
+    [shouldSearchOnPageLoad, startTime]
   );
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
@@ -161,7 +165,6 @@ export const useSearch = (services: DiscoverViewServices) => {
     dataset = searchSource.getField('index');
 
     let elapsedMs;
-
     try {
       // Only show loading indicator if we are fetching when the rows are empty
       if (fetchStateRef.current.rows?.length === 0) {
@@ -181,6 +184,12 @@ export const useSearch = (services: DiscoverViewServices) => {
       searchSource.getSearchRequestBody().then((body: object) => {
         inspectorRequest.json(body);
       });
+
+      // Track the dataset type and language used
+      const query = searchSource.getField('query');
+      if (query && query.dataset?.type && query.language) {
+        trackQueryMetric(query);
+      }
 
       // Execute the search
       const fetchResp = await searchSource.fetch({
@@ -234,7 +243,7 @@ export const useSearch = (services: DiscoverViewServices) => {
           elapsedMs,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       // If the request was aborted then no need to surface this error in the UI
       if (error instanceof Error && error.name === 'AbortError') return;
 
@@ -250,9 +259,9 @@ export const useSearch = (services: DiscoverViewServices) => {
       }
       let errorBody;
       try {
-        errorBody = JSON.parse(error.body.message);
+        errorBody = JSON.parse(error.message);
       } catch (e) {
-        errorBody = error.body.message;
+        errorBody = error.message;
       }
 
       data$.next({
@@ -267,14 +276,14 @@ export const useSearch = (services: DiscoverViewServices) => {
     }
   }, [
     indexPattern,
-    interval,
     timefilter,
     toastNotifications,
+    interval,
     data,
     services,
+    sort,
     savedSearch?.searchSource,
     data$,
-    sort,
     shouldSearchOnPageLoad,
     inspectorAdapters.requests,
   ]);
@@ -323,6 +332,11 @@ export const useSearch = (services: DiscoverViewServices) => {
     (async () => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
       setSavedSearch(savedSearchInstance);
+
+      // if saved search does not exist, do not atempt to sync filters and query from savedObject
+      if (!savedSearch) {
+        return;
+      }
 
       // sync initial app filters from savedObject to filterManager
       const filters = cloneDeep(savedSearchInstance.searchSource.getOwnField('filter'));

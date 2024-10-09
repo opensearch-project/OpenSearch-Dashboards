@@ -42,11 +42,14 @@ const validate = {
   body: schema.object({
     value: schema.any(),
   }),
-  query: schema.object({
-    scope: schema.maybe(
-      schema.oneOf([schema.literal(UiSettingScope.GLOBAL), schema.literal(UiSettingScope.USER)])
-    ),
-  }),
+  query: schema.object(
+    {
+      scope: schema.maybe(
+        schema.oneOf([schema.literal(UiSettingScope.GLOBAL), schema.literal(UiSettingScope.USER)])
+      ),
+    },
+    { unknowns: 'allow' }
+  ),
 };
 
 export function registerSetRoute(router: IRouter) {

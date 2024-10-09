@@ -20,7 +20,7 @@ export const WorkspaceCreatorApp = (props: WorkspaceCreatorProps) => {
    */
   useEffect(() => {
     const homeBreadcrumb = {
-      text: i18n.translate('core.breadcrumbs.homeTitle', { defaultMessage: 'Home' }),
+      text: i18n.translate('workspace.breadcrumbs.homeTitle', { defaultMessage: 'Home' }),
       onClick: () => {
         application?.navigateToApp('home');
       },

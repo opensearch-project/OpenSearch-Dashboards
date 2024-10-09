@@ -9,12 +9,11 @@ import {
   DataStructure,
   IndexPatternSpec,
   DEFAULT_DATA,
-  IFieldType,
   UI_SETTINGS,
   DataStorage,
   CachedDataStructure,
 } from '../../../../common';
-import { DatasetTypeConfig } from './types';
+import { DatasetTypeConfig, DataStructureFetchOptions } from './types';
 import { indexPatternTypeConfig, indexTypeConfig } from './lib';
 import { IndexPatternsContract } from '../../../index_patterns';
 import { IDataPluginServices } from '../../../types';
@@ -64,14 +63,11 @@ export class DatasetService {
 
   public async cacheDataset(dataset: Dataset): Promise<void> {
     const type = this.getType(dataset.type);
-    if (dataset) {
+    if (dataset && dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
       const spec = {
         id: dataset.id,
         title: dataset.title,
-        timeFieldName: {
-          name: dataset.timeFieldName,
-          type: 'date',
-        } as Partial<IFieldType>,
+        timeFieldName: dataset.timeFieldName,
         fields: await type?.fetchFields(dataset),
         dataSourceRef: dataset.dataSource
           ? {
@@ -91,7 +87,8 @@ export class DatasetService {
   public async fetchOptions(
     services: IDataPluginServices,
     path: DataStructure[],
-    dataType: string
+    dataType: string,
+    options?: DataStructureFetchOptions
   ): Promise<DataStructure> {
     const type = this.typesRegistry.get(dataType);
     if (!type) {
@@ -99,14 +96,19 @@ export class DatasetService {
     }
 
     const lastPathItem = path[path.length - 1];
-    const cacheKey = `${dataType}.${lastPathItem.id}`;
+    const fetchOptionsKey = Object.entries(options || {})
+      .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+      .map(([key, value]) => `${key}=${value}`)
+      .join('&');
+    const cacheKey =
+      `${dataType}.${lastPathItem.id}` + (fetchOptionsKey.length ? `?${fetchOptionsKey}` : '');
 
     const cachedDataStructure = this.sessionStorage.get<CachedDataStructure>(cacheKey);
     if (cachedDataStructure?.children?.length > 0) {
       return this.cacheToDataStructure(dataType, cachedDataStructure);
     }
 
-    const fetchedDataStructure = await type.fetch(services, path);
+    const fetchedDataStructure = await type.fetch(services, path, options);
     this.cacheDataStructure(dataType, fetchedDataStructure);
     return fetchedDataStructure;
   }
@@ -138,6 +140,7 @@ export class DatasetService {
   }
 
   private cacheDataStructure(dataType: string, dataStructure: DataStructure) {
+    this.setLastCacheTime(Date.now());
     const cachedDataStructure: CachedDataStructure = {
       id: dataStructure.id,
       title: dataStructure.title,
@@ -145,6 +148,8 @@ export class DatasetService {
       parent: dataStructure.parent?.id || '',
       children: dataStructure.children?.map((child) => child.id) || [],
       hasNext: dataStructure.hasNext,
+      paginationToken: dataStructure.paginationToken,
+      multiSelect: dataStructure.multiSelect,
       columnHeader: dataStructure.columnHeader,
       meta: dataStructure.meta,
     };
@@ -162,6 +167,18 @@ export class DatasetService {
       };
       this.sessionStorage.set(`${dataType}.${child.id}`, cachedChild);
     });
+  }
+
+  public clearCache(): void {
+    this.sessionStorage.clear();
+  }
+
+  public getLastCacheTime(): number | undefined {
+    return Number(this.sessionStorage.get('lastCacheTime')) || undefined;
+  }
+
+  private setLastCacheTime(time: number): void {
+    this.sessionStorage.set('lastCacheTime', time);
   }
 
   private async fetchDefaultDataset(): Promise<Dataset | undefined> {

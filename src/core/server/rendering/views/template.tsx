@@ -170,11 +170,14 @@ export const Template: FunctionComponent<Props> = ({
             <div
               className="osdWelcomeText"
               data-error-message={i18n('core.ui.welcomeErrorMessage', {
-                defaultMessage: `${applicationTitle} did not load properly. Check the server output for more information.`,
+                defaultMessage:
+                  '{applicationTitle} did not load properly. Check the server output for more information.',
+                values: { applicationTitle },
               })}
             >
               {i18n('core.ui.welcomeMessage', {
-                defaultMessage: `Loading ${applicationTitle}`,
+                defaultMessage: 'Loading {applicationTitle}',
+                values: { applicationTitle },
               })}
             </div>
             {/* Show a progress bar if a static custom branded logo is used */}

@@ -10,6 +10,7 @@ exports[`disabled 1`] = `
   <ValidatedDualRange
     allowEmptyRange={true}
     disabled={true}
+    formRowDisplay="rowCompressed"
     fullWidth={false}
     showInput={true}
   />

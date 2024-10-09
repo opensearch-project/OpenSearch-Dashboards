@@ -5,12 +5,16 @@
 
 import { SearchResponse } from '../../../opensearch';
 import { opensearchClientMock } from '../../../opensearch/client/mocks';
-import { DYNAMIC_APP_CONFIG_ALIAS } from '../../utils/constants';
+import { DYNAMIC_APP_CONFIG_ALIAS, DYNAMIC_APP_CONFIG_INDEX_PREFIX } from '../../utils/constants';
 import { OpenSearchConfigStoreClient } from './opensearch_config_store_client';
 import { ConfigDocument } from './types';
 import _ from 'lodash';
 import { ConfigBlob } from '../../types';
-import { BulkOperationContainer } from '@opensearch-project/opensearch/api/types';
+import {
+  BulkOperationContainer,
+  CatIndicesResponse,
+  IndicesGetAliasResponse,
+} from '@opensearch-project/opensearch/api/types';
 import { getDynamicConfigIndexName } from '../../utils/utils';
 
 describe('OpenSearchConfigStoreClient', () => {
@@ -32,10 +36,12 @@ describe('OpenSearchConfigStoreClient', () => {
     isListConfig: boolean;
     configDocuments: ConfigDocument[];
     existsAliasResult: boolean;
+    getAliasIndicesResult: IndicesGetAliasResponse;
+    catIndicesResult: CatIndicesResponse;
   }
 
   /**
-   * Creates a new OpenSearch client mock complete with a mock for existsAlias() and search() results
+   * Creates a new OpenSearch client mock complete with a mock for existsAlias(), cat.indices(), and search() results
    *
    * @param param0
    * @returns
@@ -44,12 +50,26 @@ describe('OpenSearchConfigStoreClient', () => {
     isListConfig,
     configDocuments,
     existsAliasResult,
+    getAliasIndicesResult,
+    catIndicesResult,
   }: OpenSearchClientMockProps) => {
     const mockClient = opensearchClientMock.createOpenSearchClient();
 
     mockClient.indices.existsAlias.mockResolvedValue(
       opensearchClientMock.createApiResponse<boolean>({
         body: existsAliasResult as any,
+      })
+    );
+
+    mockClient.cat.indices.mockResolvedValue(
+      opensearchClientMock.createApiResponse<CatIndicesResponse>({
+        body: catIndicesResult,
+      })
+    );
+
+    mockClient.indices.getAlias.mockResolvedValue(
+      opensearchClientMock.createApiResponse<IndicesGetAliasResponse>({
+        body: getAliasIndicesResult,
       })
     );
 
@@ -81,6 +101,49 @@ describe('OpenSearchConfigStoreClient', () => {
     });
 
     return mockClient;
+  };
+
+  const noDynamicConfigIndexResults: CatIndicesResponse = [
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_`,
+    },
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_foo`,
+    },
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_foo_2`,
+    },
+  ];
+
+  const oneDynamicConfigIndexResult: CatIndicesResponse = [
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_1`,
+    },
+  ];
+
+  const multipleDynamicConfigIndexResults: CatIndicesResponse = [
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_2`,
+    },
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_4`,
+    },
+    {
+      index: `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_800`,
+    },
+  ];
+
+  const validAliasIndicesResponse: IndicesGetAliasResponse = {
+    [`${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_4`]: { aliases: { DYNAMIC_APP_CONFIG_ALIAS: {} } },
+  };
+
+  const multipleAliasIndicesResponse: IndicesGetAliasResponse = {
+    [`${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_4`]: { aliases: { DYNAMIC_APP_CONFIG_ALIAS: {} } },
+    [`${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_2`]: { aliases: { DYNAMIC_APP_CONFIG_ALIAS: {} } },
+  };
+
+  const invalidAliasIndicesResponse: IndicesGetAliasResponse = {
+    [`.some_random_index_8`]: { aliases: { DYNAMIC_APP_CONFIG_ALIAS: {} } },
   };
 
   const configDocument: ConfigDocument = {
@@ -143,26 +206,88 @@ describe('OpenSearchConfigStoreClient', () => {
     it.each([
       {
         existsAliasResult: false,
+        catIndicesResult: noDynamicConfigIndexResults,
+        getAliasIndicesResult: validAliasIndicesResponse,
         numCreateCalls: 1,
+        numUpdateCalls: 0,
+        errorThrown: false,
+      },
+      {
+        existsAliasResult: false,
+        catIndicesResult: multipleDynamicConfigIndexResults,
+        getAliasIndicesResult: validAliasIndicesResponse,
+        numCreateCalls: 0,
+        numUpdateCalls: 1,
+        errorThrown: false,
+      },
+      {
+        existsAliasResult: false,
+        catIndicesResult: oneDynamicConfigIndexResult,
+        getAliasIndicesResult: validAliasIndicesResponse,
+        numCreateCalls: 0,
+        numUpdateCalls: 1,
+        errorThrown: false,
       },
       {
         existsAliasResult: true,
+        catIndicesResult: multipleDynamicConfigIndexResults,
+        getAliasIndicesResult: {},
         numCreateCalls: 0,
+        numUpdateCalls: 0,
+        errorThrown: true,
+      },
+      {
+        existsAliasResult: true,
+        catIndicesResult: multipleDynamicConfigIndexResults,
+        getAliasIndicesResult: multipleAliasIndicesResponse,
+        numCreateCalls: 0,
+        numUpdateCalls: 0,
+        errorThrown: true,
+      },
+      {
+        existsAliasResult: true,
+        catIndicesResult: multipleDynamicConfigIndexResults,
+        getAliasIndicesResult: invalidAliasIndicesResponse,
+        numCreateCalls: 0,
+        numUpdateCalls: 0,
+        errorThrown: true,
+      },
+      {
+        existsAliasResult: true,
+        catIndicesResult: multipleDynamicConfigIndexResults,
+        getAliasIndicesResult: validAliasIndicesResponse,
+        numCreateCalls: 0,
+        numUpdateCalls: 0,
+        errorThrown: false,
       },
     ])(
-      'should create config index $numCreateCalls times when existsAlias() is $existsAliasResult',
-      async ({ existsAliasResult, numCreateCalls }) => {
+      'should throw error should be $errorThrown, create() should be called $numCreateCalls times, and update() should be called $numUpdateCalls times',
+      async ({
+        existsAliasResult,
+        catIndicesResult,
+        getAliasIndicesResult,
+        numCreateCalls,
+        numUpdateCalls,
+        errorThrown,
+      }) => {
         const mockClient = createOpenSearchClientMock({
           isListConfig: false,
           configDocuments: [],
           existsAliasResult,
+          getAliasIndicesResult,
+          catIndicesResult,
         });
         const configStoreClient = new OpenSearchConfigStoreClient(mockClient);
-        await configStoreClient.createDynamicConfigIndex();
+
+        if (errorThrown) {
+          expect(configStoreClient.createDynamicConfigIndex()).rejects.toThrowError();
+        } else {
+          await configStoreClient.createDynamicConfigIndex();
+        }
 
         expect(mockClient.indices.existsAlias).toBeCalled();
         expect(mockClient.indices.create).toBeCalledTimes(numCreateCalls);
-        expect(mockClient.indices.updateAliases).toBeCalledTimes(numCreateCalls);
+        expect(mockClient.indices.updateAliases).toBeCalledTimes(numUpdateCalls);
       }
     );
   });
@@ -175,6 +300,8 @@ describe('OpenSearchConfigStoreClient', () => {
         isListConfig: false,
         configDocuments: [configDocument],
         existsAliasResult: false,
+        catIndicesResult: oneDynamicConfigIndexResult,
+        getAliasIndicesResult: validAliasIndicesResponse,
       });
       const configStoreClient = new OpenSearchConfigStoreClient(mockClient);
 
@@ -210,6 +337,8 @@ describe('OpenSearchConfigStoreClient', () => {
         isListConfig: false,
         configDocuments,
         existsAliasResult: false,
+        catIndicesResult: oneDynamicConfigIndexResult,
+        getAliasIndicesResult: validAliasIndicesResponse,
       });
       const configStoreClient = new OpenSearchConfigStoreClient(mockClient);
 
@@ -274,6 +403,8 @@ describe('OpenSearchConfigStoreClient', () => {
           isListConfig: true,
           configDocuments: allConfigDocuments,
           existsAliasResult: false,
+          catIndicesResult: oneDynamicConfigIndexResult,
+          getAliasIndicesResult: validAliasIndicesResponse,
         });
         const configStoreClient = new OpenSearchConfigStoreClient(mockClient);
         const actualMap = await configStoreClient.listConfigs();
@@ -342,6 +473,8 @@ describe('OpenSearchConfigStoreClient', () => {
           isListConfig: false,
           configDocuments: newConfigDocuments,
           existsAliasResult: false,
+          catIndicesResult: oneDynamicConfigIndexResult,
+          getAliasIndicesResult: validAliasIndicesResponse,
         });
         const configStoreClient = new OpenSearchConfigStoreClient(mockClient);
         await configStoreClient.createConfig({
@@ -540,6 +673,8 @@ describe('OpenSearchConfigStoreClient', () => {
           isListConfig: false,
           configDocuments: existingConfigs,
           existsAliasResult: false,
+          catIndicesResult: oneDynamicConfigIndexResult,
+          getAliasIndicesResult: validAliasIndicesResponse,
         });
         const configStoreClient = new OpenSearchConfigStoreClient(mockClient);
         await configStoreClient.bulkCreateConfigs({
@@ -565,6 +700,8 @@ describe('OpenSearchConfigStoreClient', () => {
         isListConfig: false,
         configDocuments: [],
         existsAliasResult: false,
+        catIndicesResult: oneDynamicConfigIndexResult,
+        getAliasIndicesResult: validAliasIndicesResponse,
       });
       const configStoreClient = new OpenSearchConfigStoreClient(mockClient);
       await configStoreClient.deleteConfig({ name: 'some_config_name' });
@@ -604,6 +741,8 @@ describe('OpenSearchConfigStoreClient', () => {
         isListConfig: false,
         configDocuments: [],
         existsAliasResult: false,
+        catIndicesResult: oneDynamicConfigIndexResult,
+        getAliasIndicesResult: validAliasIndicesResponse,
       });
       const configStoreClient = new OpenSearchConfigStoreClient(mockClient);
       await configStoreClient.bulkDeleteConfigs({

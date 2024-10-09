@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
-import { combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
+import React from 'react';
 import {
   NavGroupType,
   SavedObjectsStart,
@@ -14,9 +15,6 @@ import {
   ApplicationStart,
   HttpSetup,
   NotificationsStart,
-  DEFAULT_NAV_GROUPS,
-} from '../../../core/public';
-import {
   App,
   AppCategory,
   AppNavLinkStatus,
@@ -24,6 +22,7 @@ import {
   PublicAppInfo,
   WorkspaceObject,
   WorkspaceAvailability,
+  DEFAULT_NAV_GROUPS,
 } from '../../../core/public';
 
 import { WORKSPACE_DETAIL_APP_ID, USE_CASE_PREFIX } from '../common/constants';
@@ -36,14 +35,18 @@ import {
   DATACONNECTIONS_BASE,
   DatasourceTypeToDisplayName,
 } from '../../data_source_management/public';
-import { DataSource, DataSourceConnection, DataSourceConnectionType } from '../common/types';
 import {
-  ANALYTICS_ALL_OVERVIEW_PAGE_ID,
-  ESSENTIAL_OVERVIEW_PAGE_ID,
-  OBSERVABILITY_OVERVIEW_PAGE_ID,
-  SEARCH_OVERVIEW_PAGE_ID,
-  SECURITY_ANALYTICS_OVERVIEW_PAGE_ID,
-} from '../../../plugins/content_management/public';
+  DataSource,
+  DataSourceConnection,
+  DataSourceConnectionType,
+  DataConnection,
+} from '../common/types';
+import { WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES } from '../common/constants';
+import {
+  DATA_SOURCE_SAVED_OBJECT_TYPE,
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+} from '../../data_source/common';
+import { WorkspaceTitleDisplay } from './components/workspace_name/workspace_name';
 
 export const isUseCaseFeatureConfig = (featureConfig: string) =>
   featureConfig.startsWith(USE_CASE_PREFIX);
@@ -202,8 +205,8 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
         navLinkStatus !== AppNavLinkStatus.hidden &&
         !chromeless &&
         workspaceAvailability !== WorkspaceAvailability.outsideWorkspace;
-      // If the category is management, only retain Dashboards Management which contains saved objets and index patterns.
-      // Saved objets can show all saved objects in the current workspace and index patterns is at workspace level.
+      // If the category is management, only retain Dashboards Management which contains saved objects and index patterns.
+      // Saved objects can show all saved objects in the current workspace and index patterns is at workspace level.
       if (category?.id === DEFAULT_APP_CATEGORIES.management.id) {
         return filterCondition && id === 'management';
       }
@@ -220,8 +223,16 @@ export const getDataSourcesList = (
 ) => {
   return client
     .find({
-      type: 'data-source',
-      fields: ['id', 'title', 'auth', 'description', 'dataSourceEngineType'],
+      type: WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
+      fields: [
+        'id',
+        'title',
+        'auth',
+        'description',
+        'dataSourceEngineType',
+        'type',
+        'connectionId',
+      ],
       perPage: 10000,
       workspaces: targetWorkspaces,
     })
@@ -230,11 +241,15 @@ export const getDataSourcesList = (
       if (objects) {
         return objects.map((source) => {
           const id = source.id;
-          const title = source.get('title');
+          // Data connection doesn't have title for now, would use connectionId instead to display.
+          const title = source.get('title') ?? source.get('connectionId') ?? '';
           const workspaces = source.workspaces ?? [];
           const auth = source.get('auth');
           const description = source.get('description');
           const dataSourceEngineType = source.get('dataSourceEngineType');
+          const type = source.type;
+          // This is a field only for detail type of data connection in order not to mix with saved object type.
+          const connectionType = source.get('type');
           return {
             id,
             title,
@@ -242,6 +257,8 @@ export const getDataSourcesList = (
             description,
             dataSourceEngineType,
             workspaces,
+            type,
+            connectionType,
           };
         });
       } else {
@@ -266,19 +283,37 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
   return directQueryConnections;
 };
 
-export const convertDataSourcesToOpenSearchConnections = (
-  dataSources: DataSource[]
-): DataSourceConnection[] =>
-  dataSources.map((ds) => {
-    return {
-      id: ds.id,
-      type: ds.dataSourceEngineType,
-      connectionType: DataSourceConnectionType.OpenSearchConnection,
-      name: ds.title,
-      description: ds.description,
-      relatedConnections: [],
-    };
-  });
+export const convertDataSourcesToOpenSearchAndDataConnections = (
+  dataSources: DataConnection[] | DataSource[]
+): Record<'openSearchConnections' | 'dataConnections', DataSourceConnection[]> => {
+  const openSearchConnections = dataSources
+    .filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE)
+    .map((ds: DataSource) => {
+      return {
+        id: ds.id,
+        type: ds.dataSourceEngineType,
+        connectionType: DataSourceConnectionType.OpenSearchConnection,
+        name: ds.title,
+        description: ds.description,
+        relatedConnections: [],
+      };
+    });
+  const dataConnections = dataSources
+    .filter((ds) => ds.type === DATA_CONNECTION_SAVED_OBJECT_TYPE)
+    .map((ds) => {
+      return {
+        id: ds.id,
+        type: (ds as DataConnection).connectionType,
+        connectionType: DataSourceConnectionType.DataConnection,
+        name: ds.title,
+        description: ds.description,
+      };
+    });
+  return {
+    openSearchConnections,
+    dataConnections,
+  };
+};
 
 export const fulfillRelatedConnections = (
   connections: DataSourceConnection[],
@@ -297,15 +332,20 @@ export const fulfillRelatedConnections = (
 
 // Helper function to merge data sources with direct query connections
 export const mergeDataSourcesWithConnections = (
-  dataSources: DataSource[],
+  dataSources: DataSource[] | DataConnection[],
   directQueryConnections: DataSourceConnection[]
 ): DataSourceConnection[] => {
-  const openSearchConnections = convertDataSourcesToOpenSearchConnections(dataSources);
-
-  return [
+  const {
+    openSearchConnections,
+    dataConnections,
+  } = convertDataSourcesToOpenSearchAndDataConnections(dataSources);
+  const result = [
     ...fulfillRelatedConnections(openSearchConnections, directQueryConnections),
     ...directQueryConnections,
+    ...dataConnections,
   ].sort((a, b) => a.name.localeCompare(b.name));
+
+  return result;
 };
 
 // If all connected data sources are serverless, will only allow to select essential use case.
@@ -327,15 +367,17 @@ export const convertNavGroupToWorkspaceUseCase = ({
   type,
   order,
   icon,
-}: NavGroupItemInMap): WorkspaceUseCase => ({
-  id,
-  title,
-  description,
-  features: navLinks.map((item) => ({ id: item.id, title: item.title })),
-  systematic: type === NavGroupType.SYSTEM || id === ALL_USE_CASE_ID,
-  order,
-  icon,
-});
+}: NavGroupItemInMap): WorkspaceUseCase => {
+  return {
+    id,
+    title,
+    description,
+    features: navLinks.map((navLink) => ({ id: navLink.id, title: navLink.title })),
+    systematic: type === NavGroupType.SYSTEM || id === ALL_USE_CASE_ID,
+    order,
+    icon,
+  };
+};
 
 const compareFeatures = (
   features1: WorkspaceUseCaseFeature[],
@@ -376,16 +418,35 @@ const isNotNull = <T extends unknown>(value: T | null): value is T => !!value;
 export const getFirstUseCaseOfFeatureConfigs = (featureConfigs: string[]): string | undefined =>
   featureConfigs.map(getUseCaseFromFeatureConfig).filter(isNotNull)[0];
 
-export function enrichBreadcrumbsWithWorkspace(core: CoreStart) {
+export function enrichBreadcrumbsWithWorkspace(
+  core: CoreStart,
+  registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>
+) {
   return combineLatest([
     core.workspaces.currentWorkspace$,
-    core.application.currentAppId$,
-    core.chrome.navGroup.getCurrentNavGroup$(),
     core.chrome.navGroup.getNavGroupsMap$(),
-  ]).subscribe(([currentWorkspace, appId, currentNavGroup, navGroupsMap]) => {
-    prependWorkspaceToBreadcrumbs(core, currentWorkspace, appId, currentNavGroup, navGroupsMap);
+    registeredUseCases$,
+  ]).subscribe(([currentWorkspace, navGroupsMap, registeredUseCases]) => {
+    prependWorkspaceToBreadcrumbs(core, currentWorkspace, navGroupsMap, registeredUseCases);
   });
 }
+
+export const extractUseCaseTitleFromFeatures = (
+  registeredUseCases: WorkspaceUseCase[],
+  features: string[]
+) => {
+  if (!features || features.length === 0) {
+    return '';
+  }
+  const useCaseId = getFirstUseCaseOfFeatureConfigs(features);
+  const usecase =
+    useCaseId === DEFAULT_NAV_GROUPS.all.id
+      ? DEFAULT_NAV_GROUPS.all
+      : registeredUseCases?.find(({ id }) => id === useCaseId);
+  if (usecase) {
+    return usecase.title;
+  }
+};
 
 /**
  * prepend workspace or its use case to breadcrumbs
@@ -394,23 +455,9 @@ export function enrichBreadcrumbsWithWorkspace(core: CoreStart) {
 export function prependWorkspaceToBreadcrumbs(
   core: CoreStart,
   currentWorkspace: WorkspaceObject | null,
-  appId: string | undefined,
-  currentNavGroup: NavGroupItemInMap | undefined,
-  navGroupsMap: Record<string, NavGroupItemInMap>
+  navGroupsMap: Record<string, NavGroupItemInMap>,
+  availableUseCases: WorkspaceUseCase[]
 ) {
-  if (appId === WORKSPACE_DETAIL_APP_ID) {
-    core.chrome.setBreadcrumbsEnricher(undefined);
-    return;
-  }
-
-  const homeBreadcrumb: ChromeBreadcrumb & { home: boolean } = {
-    text: 'Home',
-    home: true,
-    onClick: () => {
-      core.application.navigateToApp('home');
-    },
-  };
-
   /**
    * There has 3 cases
    * nav group is enable + workspace enable + in a workspace -> workspace enricher
@@ -421,37 +468,12 @@ export function prependWorkspaceToBreadcrumbs(
    * so we don't need to have reset logic for workspace
    */
   if (currentWorkspace) {
-    // use case overview page only show workspace name
-    if (
-      appId === SEARCH_OVERVIEW_PAGE_ID ||
-      appId === OBSERVABILITY_OVERVIEW_PAGE_ID ||
-      appId === SECURITY_ANALYTICS_OVERVIEW_PAGE_ID ||
-      appId === ESSENTIAL_OVERVIEW_PAGE_ID ||
-      appId === ANALYTICS_ALL_OVERVIEW_PAGE_ID
-    ) {
-      core.chrome.setBreadcrumbsEnricher((breadcrumbs) => [
-        homeBreadcrumb,
-        { text: currentWorkspace.name },
-      ]);
-      return;
-    }
     const useCase = getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features || []);
-    // get workspace the only use case
-    if (useCase && useCase !== ALL_USE_CASE_ID) {
-      currentNavGroup = navGroupsMap[useCase];
-    }
-    const navGroupBreadcrumb: ChromeBreadcrumb = {
-      text: currentNavGroup?.title,
-      onClick: () => {
-        // current nav group links are sorted, we don't need to sort it again here
-        if (currentNavGroup?.navLinks[0].id) {
-          core.application.navigateToApp(currentNavGroup?.navLinks[0].id);
-        }
-      },
-    };
-
     const workspaceBreadcrumb: ChromeBreadcrumb = {
-      text: currentWorkspace.name,
+      text: React.createElement(WorkspaceTitleDisplay, {
+        workspace: currentWorkspace,
+        availableUseCases,
+      }),
       onClick: () => {
         if (useCase) {
           const allNavGroups = navGroupsMap[useCase];
@@ -462,16 +484,7 @@ export function prependWorkspaceToBreadcrumbs(
 
     core.chrome.setBreadcrumbsEnricher((breadcrumbs) => {
       if (!breadcrumbs || !breadcrumbs.length) return breadcrumbs;
-
-      if (useCase === ALL_USE_CASE_ID) {
-        if (currentNavGroup && currentNavGroup.id !== DEFAULT_NAV_GROUPS.all.id) {
-          return [homeBreadcrumb, workspaceBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
-        } else {
-          return [homeBreadcrumb, workspaceBreadcrumb, ...breadcrumbs];
-        }
-      } else {
-        return [homeBreadcrumb, workspaceBreadcrumb, ...breadcrumbs];
-      }
+      return [workspaceBreadcrumb, ...breadcrumbs];
     });
   }
 }
@@ -482,7 +495,7 @@ export const getUseCaseUrl = (
   application: ApplicationStart,
   http: HttpSetup
 ): string => {
-  const appId = useCase?.features?.[0].id || WORKSPACE_DETAIL_APP_ID;
+  const appId = useCase?.features?.[0]?.id || WORKSPACE_DETAIL_APP_ID;
   const useCaseURL = formatUrlWithWorkspaceId(
     application.getUrlForApp(appId, {
       absolute: false,
@@ -505,16 +518,17 @@ export const fetchDataSourceConnectionsByDataSourceIds = async (
 };
 
 export const fetchDataSourceConnections = async (
-  assignedDataSources: DataSource[],
+  dataSources: DataSource[],
   http: HttpSetup | undefined,
   notifications: NotificationsStart | undefined
 ) => {
   try {
     const directQueryConnections = await fetchDataSourceConnectionsByDataSourceIds(
-      assignedDataSources.map((ds) => ds.id),
+      // Only data source saved object type needs to fetch data source connections, data connection type object not.
+      dataSources.filter((ds) => ds.type === DATA_SOURCE_SAVED_OBJECT_TYPE).map((ds) => ds.id),
       http
     );
-    return mergeDataSourcesWithConnections(assignedDataSources, directQueryConnections);
+    return mergeDataSourcesWithConnections(dataSources, directQueryConnections);
   } catch (error) {
     notifications?.toasts.addDanger(
       i18n.translate('workspace.detail.dataSources.error.message', {
@@ -523,4 +537,12 @@ export const fetchDataSourceConnections = async (
     );
     return [];
   }
+};
+
+export const getUseCase = (workspace: WorkspaceObject, availableUseCases: WorkspaceUseCase[]) => {
+  if (!workspace.features) {
+    return;
+  }
+  const useCaseId = getFirstUseCaseOfFeatureConfigs(workspace.features);
+  return availableUseCases.find((useCase) => useCase.id === useCaseId);
 };

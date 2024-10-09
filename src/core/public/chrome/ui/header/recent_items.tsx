@@ -30,6 +30,7 @@ import { WorkspaceObject } from '../../../workspace';
 import { HttpStart } from '../../../http';
 import { createRecentNavLink } from './nav_link';
 import { ChromeNavLink } from '../../../';
+import { LoadingIndicator } from '../loading_indicator';
 import './recent_items.scss';
 
 const widthForRightMargin = 8;
@@ -44,6 +45,7 @@ export interface Props {
   buttonSize?: EuiHeaderSectionItemButtonProps['size'];
   http: HttpStart;
   workspaceEnabled: boolean | undefined;
+  loadingCount$: Rx.Observable<number>;
 }
 
 interface SavedObjectMetadata {
@@ -111,6 +113,7 @@ export const RecentItems = ({
   buttonSize = 's',
   http,
   workspaceEnabled,
+  loadingCount$,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isPreferencesPopoverOpen, setIsPreferencesPopoverOpen] = useState(false);
@@ -120,7 +123,8 @@ export const RecentItems = ({
   const [detailedSavedObjects, setDetailedSavedObjects] = useState<DetailedRecentlyAccessedItem[]>(
     []
   );
-  const navLinks = useObservable(navLinks$, []).filter((link) => !link.hidden);
+  const navLinks = useObservable(navLinks$, []);
+  const loadingCount = useObservable(loadingCount$, 0);
 
   const handleItemClick = (link: string) => {
     navigateToUrl(link);
@@ -165,6 +169,15 @@ export const RecentItems = ({
       />
     </EuiPopover>
   );
+
+  const recentButtonCommonProps = {
+    'aria-expanded': isPopoverOpen,
+    'aria-label': i18n.translate('core.ui.chrome.headerGlobalNav.viewRecentItemsAriaLabel', {
+      defaultMessage: 'View recents',
+    }),
+    onClick: () => setIsPopoverOpen((prev) => !prev),
+    'data-test-subj': 'recentItemsSectionButton',
+  };
   const recentButton = (
     <EuiToolTip
       content={i18n.translate('core.ui.chrome.headerGlobalNav.viewRecentItemsTooltip', {
@@ -173,21 +186,25 @@ export const RecentItems = ({
       delay="long"
       position="bottom"
     >
-      <EuiButtonIcon
-        iconType="recent"
-        color="text"
-        size="xs"
-        aria-expanded={isPopoverOpen}
-        aria-haspopup="true"
-        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.viewRecentItemsAriaLabel', {
-          defaultMessage: 'View recents',
-        })}
-        onClick={() => {
-          setIsPopoverOpen((prev) => !prev);
-        }}
-        data-test-subj="recentItemsSectionButton"
-        className="headerRecentItemsButton"
-      />
+      {!(loadingCount > 0) ? (
+        <EuiButtonIcon
+          iconType="recent"
+          color="text"
+          size="xs"
+          aria-haspopup="true"
+          className="headerRecentItemsButton"
+          {...recentButtonCommonProps}
+        />
+      ) : (
+        <EuiButtonEmpty
+          size="xs"
+          aria-haspopup="true"
+          className="headerRecentItemsButton headerRecentItemsButton--loadingIndicator"
+          {...recentButtonCommonProps}
+        >
+          <LoadingIndicator loadingCount$={loadingCount$} />
+        </EuiButtonEmpty>
+      )}
     </EuiToolTip>
   );
 
@@ -201,6 +218,7 @@ export const RecentItems = ({
 
     if (savedObjects.length) {
       bulkGetDetail(savedObjects, http).then((res) => {
+        const filteredNavLinks = navLinks.filter((link) => !link.hidden);
         const formatDetailedSavedObjects = res.map((obj) => {
           const recentAccessItem = recentlyAccessedItems.find(
             (item) => item.id === obj.id
@@ -217,7 +235,7 @@ export const RecentItems = ({
             workspaceName: findWorkspace?.name,
             link: createRecentNavLink(
               recentAccessItem,
-              navLinks,
+              filteredNavLinks,
               basePath,
               navigateToUrl,
               !!workspaceEnabled

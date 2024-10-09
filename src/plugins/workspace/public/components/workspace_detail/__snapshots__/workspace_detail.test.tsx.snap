@@ -21,16 +21,23 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
             <h4>
               Use case
             </h4>
-            <p
-              style="display: flex; align-items: center;"
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
-              <button
-                class="euiColorPickerSwatch"
-                style="background: transparent; width: 14px; height: 14px; margin-right: 8px;"
-                type="button"
-              />
-              Observability
-            </p>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <span
+                  color=""
+                  data-euiicon-type="wsObservability"
+                />
+              </div>
+              <div
+                class="euiFlexItem"
+              >
+                Observability
+              </div>
+            </div>
           </div>
         </div>
         <div
@@ -40,7 +47,7 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
             class="euiText euiText--medium"
           >
             <h4>
-              Owner
+              Owners
             </h4>
             <p
               style="display: inline-flex;"
@@ -111,36 +118,10 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
             </p>
           </div>
         </div>
-        <div
-          class="euiFlexItem"
-        >
-          <div
-            class="euiText euiText--medium"
-          >
-            <h4>
-              Workspace overview
-            </h4>
-            <p>
-              <a
-                class="euiLink euiLink--primary"
-                href="http://localhost/w/foo_id/undefined"
-                rel="noreferrer"
-                style="font-weight: normal;"
-              >
-                Overview
-                <span
-                  aria-label="External link"
-                  class="euiLink__externalIcon"
-                  data-euiicon-type="popout"
-                />
-              </a>
-            </p>
-          </div>
-        </div>
       </div>
     </div>
     <div
-      class="euiSpacer euiSpacer--l"
+      class="euiSpacer euiSpacer--m"
     />
     <div
       class="euiPageBody euiPageBody--borderRadiusNone"
@@ -200,6 +181,9 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
           id="generated-id"
           role="tabpanel"
         >
+          <div
+            class="euiSpacer euiSpacer--m"
+          />
           <form
             class="euiForm"
             id="generated-id"
@@ -239,8 +223,13 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
                   </button>
                 </div>
               </div>
+              <div
+                class="euiText euiText--small"
+              >
+                Manage workspace access and permissions.
+              </div>
               <hr
-                class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+                class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
               />
               <div
                 class="euiDescribedFormGroup"

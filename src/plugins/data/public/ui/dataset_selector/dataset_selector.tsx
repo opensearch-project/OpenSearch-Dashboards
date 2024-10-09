@@ -3,23 +3,23 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiIcon,
   EuiPopover,
   EuiPopoverFooter,
   EuiSelectable,
   EuiSelectableOption,
+  EuiSmallButtonEmpty,
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
 import { Dataset, DEFAULT_DATA } from '../../../common';
+import { getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
 import { AdvancedSelector } from './advanced_selector';
-import { getQueryService } from '../../services';
 
 interface DatasetSelectorProps {
   selectedDataset?: Dataset;
@@ -27,58 +27,63 @@ interface DatasetSelectorProps {
   services: IDataPluginServices;
 }
 
+/**
+ * This component provides a dropdown selector for datasets and an advanced selector modal.
+ * It fetches datasets once on mount to populate the selector options.
+ *
+ * @remarks
+ * The component uses several optimizations to prevent unnecessary re-renders:
+ * 1. It uses `useRef` and `useEffect` to ensure datasets are fetched only once on mount.
+ * 2. It uses `useMemo` and `useCallback` to memoize computed values and functions.
+ * 3. It intentionally omits some dependencies from the `useEffect` dependency array to prevent re-fetching.
+ */
 export const DatasetSelector = ({
   selectedDataset,
   setSelectedDataset,
   services,
 }: DatasetSelectorProps) => {
+  const isMounted = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const { overlays } = services;
-
-  const isMounted = useRef(true);
-
-  useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
   const datasetService = getQueryService().queryString.getDatasetService();
-
   const datasetIcon =
     datasetService.getType(selectedDataset?.type || '')?.meta.icon.type || 'database';
 
-  const fetchDatasets = useCallback(async () => {
-    const typeConfig = datasetService.getType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
-    if (!typeConfig) return;
-
-    const fetchedIndexPatternDataStructures = await typeConfig.fetch(services, []);
-
-    if (!isMounted.current) return;
-
-    const fetchedDatasets =
-      fetchedIndexPatternDataStructures.children?.map((pattern) =>
-        typeConfig.toDataset([pattern])
-      ) ?? [];
-    setDatasets(fetchedDatasets);
-
-    // If no dataset is selected, select the first one
-    if (!selectedDataset && fetchedDatasets.length > 0) {
-      setSelectedDataset(fetchedDatasets[0]);
-    }
-  }, [datasetService, selectedDataset, services, setSelectedDataset]);
-
   useEffect(() => {
+    isMounted.current = true;
+    const fetchDatasets = async () => {
+      if (!isMounted.current) return;
+
+      const typeConfig = datasetService.getType(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
+      if (!typeConfig) return;
+
+      const fetchedIndexPatternDataStructures = await typeConfig.fetch(services, []);
+
+      const fetchedDatasets =
+        fetchedIndexPatternDataStructures.children?.map((pattern) =>
+          typeConfig.toDataset([pattern])
+        ) ?? [];
+      setDatasets(fetchedDatasets);
+
+      // If no dataset is selected, select the first one
+      if (!selectedDataset && fetchedDatasets.length > 0) {
+        setSelectedDataset(fetchedDatasets[0]);
+      }
+    };
+
     fetchDatasets();
-  }, [fetchDatasets]);
+
+    return () => {
+      isMounted.current = false;
+    };
+    // NOTE: Intentionally omitting dependencies which can cause unnecessary re-renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [datasetService]);
 
   const togglePopover = useCallback(async () => {
-    if (!isOpen) {
-      await fetchDatasets();
-    }
     setIsOpen(!isOpen);
-  }, [isOpen, fetchDatasets]);
+  }, [isOpen]);
 
   const closePopover = useCallback(() => setIsOpen(false), []);
 
@@ -133,7 +138,7 @@ export const DatasetSelector = ({
     <EuiPopover
       button={
         <EuiToolTip content={`${selectedDataset?.title ?? 'Select data'}`}>
-          <EuiButtonEmpty
+          <EuiSmallButtonEmpty
             className="datasetSelector__button"
             iconType="arrowDown"
             iconSide="right"
@@ -141,7 +146,7 @@ export const DatasetSelector = ({
           >
             <EuiIcon type={datasetIcon} className="datasetSelector__icon" />
             {datasetTitle}
-          </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
         </EuiToolTip>
       }
       isOpen={isOpen}

@@ -35,11 +35,14 @@ import { SavedObjectsErrorHelpers } from '../../saved_objects';
 import { UiSettingScope } from '../types';
 
 const validate = {
-  query: schema.object({
-    scope: schema.maybe(
-      schema.oneOf([schema.literal(UiSettingScope.GLOBAL), schema.literal(UiSettingScope.USER)])
-    ),
-  }),
+  query: schema.object(
+    {
+      scope: schema.maybe(
+        schema.oneOf([schema.literal(UiSettingScope.GLOBAL), schema.literal(UiSettingScope.USER)])
+      ),
+    },
+    { unknowns: 'allow' }
+  ),
 };
 
 export function registerGetRoute(router: IRouter) {
