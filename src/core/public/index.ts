@@ -81,7 +81,6 @@ import {
   LinkItemType,
   getSortedNavLinks,
   SearchObjectTypes,
-  SearchStrategy,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -397,7 +396,6 @@ export {
   LinkItemType,
   getSortedNavLinks,
   SearchObjectTypes,
-  SearchStrategy,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';

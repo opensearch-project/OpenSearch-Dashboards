@@ -3,15 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ReactNode } from 'react';
+
 export enum SearchObjectTypes {
   PAGES = 'pages',
   SAVED_OBJECTS = 'saved_objects',
 }
-
 /**
  * @experimental
  */
-export interface SearchStrategy {
+export interface GlobalSearchStrategy {
   /**
    * unique id of this strategy
    */
@@ -19,29 +20,28 @@ export interface SearchStrategy {
   /**
    * search object type
    * @type {SearchObjectTypes}
-   * @memberof SearchStrategy
    */
   type: SearchObjectTypes;
   /**
    * do the search and return search result with a React element
    * @param value search query
    */
-  doSearch(value: string): Promise<React.JSX.Element | undefined>;
+  doSearch(value: string, callback?: () => void): Promise<ReactNode[]>;
 }
 
 export interface GlobalSearchServiceSetupContract {
-  registerSearchStrategy(searchStrategy: SearchStrategy): void;
+  registerSearchStrategy(searchStrategy: GlobalSearchStrategy): void;
 }
 
 export interface GlobalSearchServiceStartContract {
-  getAllSearchStrategies(): SearchStrategy[];
+  getAllSearchStrategies(): GlobalSearchStrategy[];
 }
 
 /** @experimental */
 export class GlobalSearchService {
-  private searchStrategies = [] as SearchStrategy[];
+  private searchStrategies = [] as GlobalSearchStrategy[];
 
-  private registerSearchStrategy(searchStrategy: SearchStrategy) {
+  private registerSearchStrategy(searchStrategy: GlobalSearchStrategy) {
     const exists = this.searchStrategies.find((item) => {
       return item.id === searchStrategy.id;
     });

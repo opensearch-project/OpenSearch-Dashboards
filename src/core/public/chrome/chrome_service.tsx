@@ -399,7 +399,7 @@ export class ChromeService {
           workspaceList$={workspaces.workspaceList$}
           currentWorkspace$={workspaces.currentWorkspace$}
           useUpdatedHeader={this.useUpdatedHeader}
-          globalSearchers={globalSearch.getAllSearchStrategies()}
+          GlobalSearchStrategies={globalSearch.getAllSearchStrategies()}
         />
       ),
 
@@ -620,7 +620,7 @@ export interface ChromeStart {
   setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
 
   /**
-   * Get an observable of the current custom help conttent
+   * Get an observable of the current custom help content
    */
   getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
 

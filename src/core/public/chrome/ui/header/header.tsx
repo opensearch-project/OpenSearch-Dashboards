@@ -81,7 +81,7 @@ import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
 import { HomeLoader } from './home_loader';
 import { RecentItems } from './recent_items';
-import { SearchStrategy } from '../../global_search';
+import { GlobalSearchStrategy } from '../../global_search';
 
 export interface HeaderProps {
   http: HttpStart;
@@ -123,7 +123,7 @@ export interface HeaderProps {
   workspaceList$: Observable<WorkspaceObject[]>;
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
-  globalSearchers?: SearchStrategy[];
+  GlobalSearchStrategies?: GlobalSearchStrategy[];
 }
 
 const hasValue = (value: any) => {
@@ -149,7 +149,7 @@ export function Header({
   navGroupEnabled,
   setCurrentNavGroup,
   useUpdatedHeader,
-  globalSearchers,
+  GlobalSearchStrategies,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -661,7 +661,7 @@ export function Header({
             setCurrentNavGroup={setCurrentNavGroup}
             capabilities={application.capabilities}
             currentWorkspace$={observables.currentWorkspace$}
-            globalSearchers={globalSearchers}
+            globalSearchStrategies={GlobalSearchStrategies}
           />
         ) : (
           <CollapsibleNav

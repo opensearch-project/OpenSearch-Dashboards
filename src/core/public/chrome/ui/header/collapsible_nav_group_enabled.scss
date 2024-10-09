@@ -119,6 +119,8 @@
     padding: $euiSize;
     padding-top: $euiSizeS;
     margin-right: $euiSize;
+    background-color: transparent;
+    flex-grow: 0;
   }
 
   .searchBarIcon {

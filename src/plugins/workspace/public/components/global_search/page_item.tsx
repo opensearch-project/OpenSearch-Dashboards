@@ -24,6 +24,7 @@ interface Props {
   application: ApplicationStart;
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
   search: string;
+  callback?: () => void;
 }
 
 export const GlobalSearchPageItem = ({
@@ -32,6 +33,7 @@ export const GlobalSearchPageItem = ({
   application,
   registeredUseCases$,
   search,
+  callback,
 }: Props) => {
   const availableUseCases = useObservable(registeredUseCases$);
   const breadcrumbs = [];
@@ -60,12 +62,27 @@ export const GlobalSearchPageItem = ({
     breadcrumbs.push({ text: link.category.label });
   }
 
+  const onNavItemClick = (id: string) => {
+    callback?.();
+    application.navigateToApp(id);
+  };
+
   breadcrumbs.push({
     text,
     onClick: () => {
-      application.navigateToUrl(link.baseUrl);
+      onNavItemClick(link.id);
     },
   });
 
-  return <EuiSimplifiedBreadcrumbs breadcrumbs={breadcrumbs} hideTrailingSeparator responsive />;
+  return (
+    <div
+      key={link.id}
+      aria-hidden="true"
+      onClick={() => {
+        onNavItemClick(link.id);
+      }}
+    >
+      <EuiSimplifiedBreadcrumbs breadcrumbs={breadcrumbs} hideTrailingSeparator responsive />
+    </div>
+  );
 };
