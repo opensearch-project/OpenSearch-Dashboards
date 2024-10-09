@@ -85,7 +85,7 @@ export const hasSameUserIdOrGroup = (
 export const getPermissionModeId = (modes: WorkspacePermissionMode[]) => {
   for (const key in optionIdToWorkspacePermissionModesMap) {
     if (optionIdToWorkspacePermissionModesMap[key].every((mode) => modes?.includes(mode))) {
-      return key;
+      return key as PermissionModeId;
     }
   }
   return PermissionModeId.Read;
