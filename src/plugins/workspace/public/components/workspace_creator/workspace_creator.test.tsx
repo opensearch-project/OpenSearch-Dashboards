@@ -114,8 +114,15 @@ jest.spyOn(utils, 'fetchDataSourceConnections').mockImplementation(async (passed
 const WorkspaceCreator = ({
   isDashboardAdmin = false,
   dataSourceEnabled = false,
+  isPermissionEnabled = true,
   ...props
-}: Partial<WorkspaceCreatorProps & { isDashboardAdmin: boolean; dataSourceEnabled?: boolean }>) => {
+}: Partial<
+  WorkspaceCreatorProps & {
+    isDashboardAdmin: boolean;
+    dataSourceEnabled?: boolean;
+    isPermissionEnabled?: boolean;
+  }
+>) => {
   const { Provider } = createOpenSearchDashboardsReactContext({
     ...mockCoreStart,
     ...{
@@ -124,7 +131,7 @@ const WorkspaceCreator = ({
         capabilities: {
           ...mockCoreStart.application.capabilities,
           workspaces: {
-            permissionEnabled: true,
+            permissionEnabled: isPermissionEnabled,
           },
           dashboards: {
             isDashboardAdmin,
@@ -179,6 +186,7 @@ function clearMockedFunctions() {
 describe('WorkspaceCreator', () => {
   beforeEach(() => clearMockedFunctions());
   const { location } = window;
+  const setHrefSpy = jest.fn((href) => href);
 
   beforeAll(() => {
     if (window.location) {
@@ -186,6 +194,10 @@ describe('WorkspaceCreator', () => {
       delete window.location;
     }
     window.location = {} as Location;
+    Object.defineProperty(window.location, 'href', {
+      get: () => 'http://localhost/w/workspace/app/workspace_create',
+      set: setHrefSpy,
+    });
   });
 
   afterAll(() => {
@@ -449,7 +461,27 @@ describe('WorkspaceCreator', () => {
     });
   });
 
-  it('should redirect to workspace use case landing page after created successfully', async () => {
+  it('should redirect to workspace use case landing page if permission not enabled', async () => {
+    const { getByTestId } = render(<WorkspaceCreator isPermissionEnabled={false} />);
+
+    // Ensure workspace create form rendered
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    jest.useFakeTimers();
+    jest.runAllTimers();
+    await waitFor(() => {
+      expect(setHrefSpy).toHaveBeenCalledWith(expect.stringContaining('/app/discover'));
+    });
+    jest.useRealTimers();
+  });
+
+  it('should redirect to workspace setting collaborators tab if permission enabled', async () => {
     const { getByTestId } = render(<WorkspaceCreator />);
     const navigateToWorkspaceDetailMock = jest.fn();
     jest
