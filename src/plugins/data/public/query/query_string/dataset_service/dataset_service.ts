@@ -11,6 +11,7 @@ import {
   DataStructure,
   DEFAULT_DATA,
   IFieldType,
+  IndexPatternFieldMap,
   IndexPatternSpec,
   UI_SETTINGS,
 } from '../../../../common';
@@ -66,7 +67,11 @@ export class DatasetService {
     const type = this.getType(dataset?.type);
     try {
       if (dataset) {
-        const fetchedFields = await type?.fetchFields(dataset, services);
+        const fetchedFields =
+          type?.id !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+            ? ({} as IndexPatternFieldMap)
+            : await type?.fetchFields(dataset, services);
+        console.log('dataset:', dataset);
         const spec = {
           id: dataset.id,
           title: dataset.title,
@@ -75,6 +80,8 @@ export class DatasetService {
             type: 'date',
           } as Partial<IFieldType>,
           fields: fetchedFields,
+          // fields: {} as IndexPatternFieldMap,
+          areFieldsLoading: type?.id !== 'INDEX_PATTERN',
           dataSourceRef: dataset.dataSource
             ? {
                 id: dataset.dataSource.id!,
@@ -83,9 +90,18 @@ export class DatasetService {
               }
             : undefined,
         } as IndexPatternSpec;
+        console.log('temporaryIndexPattern creation started');
         const temporaryIndexPattern = await this.indexPatterns?.create(spec, true);
+        console.log('temporaryIndexPattern is created');
+
+        // const fetchedFields = await type?.fetchFields(dataset, services);
+        // console.log(' \n fetchedFields:', fetchedFields);
+        // temporaryIndexPattern?.fields.replaceAll([...fetchedFields]);
+        // temporaryIndexPattern?.updateFieldLoadingStatus(false);
+
         if (temporaryIndexPattern) {
           this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
+          console.log('temporaryIndexPattern is saved to cache');
         }
       }
     } catch (error) {
