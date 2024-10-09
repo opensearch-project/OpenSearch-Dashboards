@@ -6,13 +6,14 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AddCollaboratorsModal } from './add_collaborators_modal';
+import { DuplicateCollaboratorError } from './duplicate_collaborator_error';
 
 describe('AddCollaboratorsModal', () => {
   const defaultProps = {
     title: 'Add Collaborators',
     inputLabel: 'Collaborator ID',
     addAnotherButtonLabel: 'Add Another',
-    permissionType: 'readOnly',
+    permissionType: 'user' as const,
     onClose: jest.fn(),
     onAddCollaborators: jest.fn(),
   };
@@ -46,7 +47,7 @@ describe('AddCollaboratorsModal', () => {
     fireEvent.click(addCollaboratorsButton);
     await waitFor(() => {
       expect(defaultProps.onAddCollaborators).toHaveBeenCalledWith([
-        { collaboratorId: 'user1', accessLevel: 'readOnly', permissionType: 'readOnly' },
+        { collaboratorId: 'user1', accessLevel: 'readOnly', permissionType: 'user' },
       ]);
     });
   });
@@ -73,5 +74,38 @@ describe('AddCollaboratorsModal', () => {
     render(<AddCollaboratorsModal {...props} />);
     expect(screen.getByText(instruction.title)).toBeInTheDocument();
     expect(screen.getByText(instruction.detail)).toBeInTheDocument();
+  });
+
+  it('should display consistent errors for duplicate collaborator id input', async () => {
+    render(<AddCollaboratorsModal {...defaultProps} />);
+    const collaboratorIdInput0 = screen.getByTestId('workspaceCollaboratorIdInput-0');
+    fireEvent.change(collaboratorIdInput0, { target: { value: 'user1' } });
+
+    fireEvent.click(screen.getByText('Add Another'));
+    const collaboratorIdInput1 = screen.getByTestId('workspaceCollaboratorIdInput-1');
+    fireEvent.change(collaboratorIdInput1, { target: { value: 'user1' } });
+
+    const addCollaboratorsButton = screen.getByRole('button', { name: 'Add collaborators' });
+    fireEvent.click(addCollaboratorsButton);
+    await waitFor(() => {
+      expect(screen.getByText('A collaborator with this ID already exists.')).toBeInTheDocument();
+      expect(defaultProps.onAddCollaborators).not.toHaveBeenCalled();
+    });
+  });
+
+  it('should display consistent errors when onAddCollaborators throw DuplicateCollaboratorError', async () => {
+    const mockOnAddCollaborators = () => {
+      throw new DuplicateCollaboratorError(['user1']);
+    };
+    render(<AddCollaboratorsModal {...defaultProps} onAddCollaborators={mockOnAddCollaborators} />);
+    const collaboratorIdInput0 = screen.getByTestId('workspaceCollaboratorIdInput-0');
+    fireEvent.change(collaboratorIdInput0, { target: { value: 'user1' } });
+
+    const addCollaboratorsButton = screen.getByRole('button', { name: 'Add collaborators' });
+    fireEvent.click(addCollaboratorsButton);
+    await waitFor(() => {
+      expect(screen.getByText('A collaborator with this ID already exists.')).toBeInTheDocument();
+      expect(defaultProps.onAddCollaborators).not.toHaveBeenCalled();
+    });
   });
 });

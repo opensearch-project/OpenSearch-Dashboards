@@ -41,4 +41,9 @@ describe('WorkspaceCollaboratorInput', () => {
     fireEvent.click(deleteButton);
     expect(defaultProps.onDelete).toHaveBeenCalledWith(0);
   });
+
+  it('collaborator id input should be invalid when error passed', () => {
+    render(<WorkspaceCollaboratorInput {...defaultProps} error="error" />);
+    expect(screen.getByTestId('workspaceCollaboratorIdInput-0')).toBeInvalid();
+  });
 });

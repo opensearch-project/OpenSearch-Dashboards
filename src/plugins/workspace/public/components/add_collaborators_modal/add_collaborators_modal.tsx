@@ -24,6 +24,23 @@ import {
   WorkspaceCollaboratorsPanel,
   WorkspaceCollaboratorInner,
 } from './workspace_collaborators_panel';
+import { DuplicateCollaboratorError } from './duplicate_collaborator_error';
+
+const DUPLICATE_COLLABORATOR_ERROR_MESSAGE = i18n.translate(
+  'workspace.addCollaboratorsModal.errors.duplicateCollaborator',
+  {
+    defaultMessage: 'A collaborator with this ID already exists.',
+  }
+);
+
+const generateDuplicateCollaboratorErrors = (duplicateIds: number[]) =>
+  duplicateIds.reduce<{ [key: number]: string }>(
+    (previousValue, id) => ({
+      ...previousValue,
+      [id]: DUPLICATE_COLLABORATOR_ERROR_MESSAGE,
+    }),
+    {}
+  );
 
 export interface AddCollaboratorsModalProps {
   title: string;
@@ -57,15 +74,60 @@ export const AddCollaboratorsModal = ({
   const [collaborators, setCollaborators] = useState<WorkspaceCollaboratorInner[]>([
     { id: 0, accessLevel: 'readOnly', collaboratorId: '' },
   ]);
-  const validCollaborators = collaborators.flatMap(({ collaboratorId, accessLevel }) => {
-    if (!collaboratorId) {
+  const [errors, setErrors] = useState<{ [key: number]: string }>({});
+
+  const validInnerCollaborators = collaborators.flatMap((collaborator) => {
+    if (!collaborator.collaboratorId) {
       return [];
     }
-    return { collaboratorId, accessLevel, permissionType };
+    return collaborator;
   });
 
-  const handleAddCollaborators = () => {
-    onAddCollaborators(validCollaborators);
+  const handleAddCollaborators = async () => {
+    const collaboratorId2IdsMap = validInnerCollaborators.reduce<{
+      [key: string]: number[];
+    }>((previousValue, collaborator) => {
+      const key = collaborator.collaboratorId;
+      const existingIds = previousValue[key];
+
+      if (!existingIds) {
+        return {
+          ...previousValue,
+          [key]: [collaborator.id],
+        };
+      }
+      existingIds.push(collaborator.id);
+      return previousValue;
+    }, {});
+    const duplicateIds = Object.keys(collaboratorId2IdsMap).flatMap((key) => {
+      if (collaboratorId2IdsMap[key].length === 1) {
+        return [];
+      }
+      return collaboratorId2IdsMap[key].slice(1);
+    });
+    setErrors(generateDuplicateCollaboratorErrors(duplicateIds));
+    if (duplicateIds.length > 0) {
+      return;
+    }
+    try {
+      await onAddCollaborators(
+        validInnerCollaborators.map(({ id, ...collaborator }) => ({
+          ...collaborator,
+          permissionType,
+        }))
+      );
+    } catch (e) {
+      if (e instanceof DuplicateCollaboratorError) {
+        setErrors(
+          generateDuplicateCollaboratorErrors(
+            e.duplicateCollaboratorIds.flatMap(
+              (collaboratorId) => collaboratorId2IdsMap[collaboratorId] ?? []
+            )
+          )
+        );
+        return;
+      }
+    }
   };
 
   return (
@@ -103,6 +165,7 @@ export const AddCollaboratorsModal = ({
           description={inputDescription}
           collaboratorIdInputPlaceholder={inputPlaceholder}
           addAnotherButtonLabel={addAnotherButtonLabel}
+          errors={errors}
         />
       </EuiModalBody>
 
@@ -113,7 +176,7 @@ export const AddCollaboratorsModal = ({
           })}
         </EuiSmallButtonEmpty>
         <EuiSmallButton
-          disabled={validCollaborators.length === 0}
+          disabled={validInnerCollaborators.length === 0}
           type="submit"
           onClick={handleAddCollaborators}
           fill

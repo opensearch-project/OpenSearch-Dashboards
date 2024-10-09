@@ -91,4 +91,12 @@ describe('WorkspaceCollaboratorsPanel', () => {
       { id: 3, collaboratorId: '', accessLevel: 'readOnly' },
     ]);
   });
+
+  it('should display error message if provided', () => {
+    render(
+      <WorkspaceCollaboratorsPanel {...defaultProps} errors={{ 2: 'A test error message' }} />
+    );
+
+    expect(screen.getByText('A test error message')).toBeInTheDocument();
+  });
 });
