@@ -9,7 +9,6 @@ import { fireEvent, render } from '@testing-library/react';
 import { WorkspaceCollaboratorTable, getDisplayedType } from './workspace_collaborator_table';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
-import { WorkspacePermissionItemType } from './constants';
 
 const mockCoreStart = coreMock.createStart();
 const displayedCollaboratorTypes = [
@@ -40,25 +39,27 @@ const { Provider } = createOpenSearchDashboardsReactContext({
 
 describe('getDisplayedTypes', () => {
   it('should return undefined if not match any collaborator type', () => {
-    expect(getDisplayedType(displayedCollaboratorTypes, { type: 'unknown' })).toBeUndefined();
+    expect(
+      getDisplayedType(displayedCollaboratorTypes, { permissionType: 'unknown' })
+    ).toBeUndefined();
   });
   it('should return "User"', () => {
     expect(
       getDisplayedType(displayedCollaboratorTypes, {
-        type: WorkspacePermissionItemType.User,
-        userId: 'foo',
-        id: 0,
+        collaboratorId: 'foo',
+        permissionType: 'user',
+        accessLevel: 'readOnly',
       })
-    ).toBeUndefined();
+    ).toEqual('User');
   });
   it('should return "Group"', () => {
     expect(
       getDisplayedType(displayedCollaboratorTypes, {
-        type: WorkspacePermissionItemType.Group,
-        group: 'foo',
-        id: 0,
+        collaboratorId: 'foo',
+        permissionType: 'group',
+        accessLevel: 'readOnly',
       })
-    ).toBeUndefined();
+    ).toEqual('Group');
   });
 });
 
