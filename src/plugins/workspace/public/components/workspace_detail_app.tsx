@@ -92,7 +92,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
   }, [currentWorkspace, savedObjects, http, notifications]);
 
   const handleWorkspaceFormSubmit = useCallback(
-    async (data: WorkspaceFormSubmitData) => {
+    async (data: WorkspaceFormSubmitData, refresh?: boolean) => {
       let result;
       if (isFormSubmitting) {
         return;
@@ -127,7 +127,8 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
               defaultMessage: 'Update workspace successfully',
             }),
           });
-          if (application && http) {
+          setIsFormSubmitting(false);
+          if (application && http && refresh) {
             // Redirect page after one second, leave one second time to show update successful toast.
             window.setTimeout(() => {
               window.location.href = formatUrlWithWorkspaceId(

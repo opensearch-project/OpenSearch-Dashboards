@@ -223,6 +223,11 @@ exports[`WorkspaceDetail render workspace detail page normally 1`] = `
                   </button>
                 </div>
               </div>
+              <div
+                class="euiText euiText--small"
+              >
+                Manage workspace access and permissions.
+              </div>
               <hr
                 class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
               />

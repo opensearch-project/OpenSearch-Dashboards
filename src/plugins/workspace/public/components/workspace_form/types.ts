@@ -39,6 +39,7 @@ export interface WorkspaceFormSubmitData {
   color?: string;
   permissionSettings?: WorkspacePermissionSetting[];
   selectedDataSourceConnections?: DataSourceConnection[];
+  shouldNavigate?: boolean;
 }
 
 export enum WorkspaceFormErrorCode {
@@ -78,7 +79,7 @@ export type WorkspaceFormErrors = {
 export interface WorkspaceFormProps {
   application: ApplicationStart;
   savedObjects: SavedObjectsStart;
-  onSubmit?: (formData: WorkspaceFormSubmitData) => void;
+  onSubmit?: (formData: WorkspaceFormSubmitData, refresh?: boolean) => void;
   defaultValues?: Partial<WorkspaceFormSubmitData>;
   operationType: WorkspaceOperationType;
   permissionEnabled?: boolean;
