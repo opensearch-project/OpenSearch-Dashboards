@@ -8,6 +8,7 @@ import { distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
 import { CodeCompletionCore } from 'antlr4-c3';
 import { Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
 import { monaco } from '@osd/monaco';
+import { HttpSetup } from 'opensearch-dashboards/public';
 import { QueryStringContract } from '../../query';
 import { findCursorTokenIndex } from './cursor';
 import { GeneralErrorListener } from './general_error_listerner';
@@ -19,7 +20,6 @@ import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestion } from '../../autocomplete';
 import { IDataPluginServices } from '../../types';
 import { Dataset, UI_SETTINGS } from '../../../common';
-import { HttpSetup } from 'opensearch-dashboards/public';
 
 export interface IDataSourceRequestHandlerParams {
   dataSourceId: string;
