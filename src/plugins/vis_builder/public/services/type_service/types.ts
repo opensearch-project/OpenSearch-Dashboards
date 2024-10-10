@@ -34,4 +34,5 @@ export interface VisualizationTypeOptions<T = any> {
     searchContext: IExpressionLoaderParams['searchContext'],
     useVega: boolean
   ) => Promise<string | undefined>;
+  readonly hierarchicalData?: boolean | ((vis: { params: T }) => boolean);
 }
