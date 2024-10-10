@@ -9,10 +9,11 @@ import { i18n } from '@osd/i18n';
 import { WorkspaceCollaboratorType } from '../../services/workspace_collaborator_types_service';
 import { WorkspaceCollaborator } from '../../types';
 import { PermissionSetting } from './workspace_collaborator_table';
-import { generateNextPermissionSettingsId } from './utils';
+import { generateNextPermissionSettingsId, hasSameUserIdOrGroup } from './utils';
 import { accessLevelNameToWorkspacePermissionModesMap } from '../../constants';
 import { WorkspacePermissionItemType } from './constants';
 import { WorkspacePermissionSetting } from './types';
+import { DuplicateCollaboratorError } from '../add_collaborators_modal';
 
 interface Props {
   displayedTypes: WorkspaceCollaboratorType[];
@@ -37,7 +38,7 @@ export const AddCollaboratorButton = ({
 
   const onAddCollaborators = async (collaborators: WorkspaceCollaborator[]) => {
     const addedSettings = collaborators.map(({ permissionType, accessLevel, collaboratorId }) => ({
-      type: permissionType as WorkspacePermissionItemType,
+      type: permissionType,
       modes: accessLevelNameToWorkspacePermissionModesMap[accessLevel],
       id: nextIdGenerator(),
       ...(permissionType === WorkspacePermissionItemType.User
@@ -47,7 +48,23 @@ export const AddCollaboratorButton = ({
         : {
             group: collaboratorId,
           }),
-    }));
+    })) as WorkspacePermissionSetting[];
+    const duplicateSettings = addedSettings.filter((permissionSettingToAdd) =>
+      hasSameUserIdOrGroup(permissionSettings, permissionSettingToAdd)
+    );
+    if (duplicateSettings.length > 0) {
+      throw new DuplicateCollaboratorError(
+        Array.from(
+          new Set(
+            Array.from(
+              duplicateSettings.map((setting) =>
+                setting.type === WorkspacePermissionItemType.User ? setting.userId : setting.group
+              )
+            )
+          )
+        )
+      );
+    }
     const newPermissionSettings = [...permissionSettings, ...addedSettings];
     handleSubmitPermissionSettings(newPermissionSettings as WorkspacePermissionSetting[]);
   };

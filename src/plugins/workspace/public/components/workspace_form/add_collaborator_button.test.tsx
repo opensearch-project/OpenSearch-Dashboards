@@ -7,6 +7,8 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 
 import { AddCollaboratorButton } from './add_collaborator_button';
+import { WorkspacePermissionSetting } from './types';
+import { DuplicateCollaboratorError } from '../add_collaborators_modal';
 
 describe('AddCollaboratorButton', () => {
   const mockProps = {
@@ -24,7 +26,7 @@ describe('AddCollaboratorButton', () => {
         type: 'group',
         group: 'group',
       },
-    ],
+    ] as WorkspacePermissionSetting[],
     handleSubmitPermissionSettings: jest.fn(),
   };
 
@@ -104,5 +106,55 @@ describe('AddCollaboratorButton', () => {
       { group: 'group', id: 1, modes: ['library_read', 'read'], type: 'group' },
       { id: 2, modes: ['library_read', 'read'], type: 'user', userId: '2' },
     ]);
+  });
+
+  it('should throw DuplicateCollaboratorError', async () => {
+    let errorCached: DuplicateCollaboratorError | undefined;
+    const mockOnAdd = jest.fn(async ({ onAddCollaborators }) => {
+      try {
+        await onAddCollaborators([
+          {
+            accessLevel: 'readOnly',
+            collaboratorId: 'admin',
+            permissionType: 'user',
+          },
+          {
+            accessLevel: 'readOnly',
+            collaboratorId: 'group',
+            permissionType: 'group',
+          },
+        ]);
+      } catch (e) {
+        errorCached = e;
+      }
+    });
+    const displayedTypes = [
+      {
+        name: 'add user',
+        buttonLabel: 'add user',
+        onAdd: mockOnAdd,
+        id: 'user',
+      },
+      {
+        name: 'add group',
+        buttonLabel: 'add group',
+        onAdd: mockOnAdd,
+        id: 'group',
+      },
+    ];
+    const { getByTestId, getByText } = render(
+      <AddCollaboratorButton {...mockProps} displayedTypes={displayedTypes} />
+    );
+    const button = getByTestId('add-collaborator-button');
+    fireEvent.click(button);
+    expect(getByTestId('add-collaborator-popover')).toBeInTheDocument();
+    const addUserButton = getByText('add user');
+    fireEvent.click(addUserButton);
+    await mockOnAdd.mock.results;
+
+    expect(errorCached).toBeInstanceOf(DuplicateCollaboratorError);
+    if (errorCached instanceof DuplicateCollaboratorError) {
+      expect(errorCached.duplicateCollaboratorIds).toEqual(['admin', 'group']);
+    }
   });
 });

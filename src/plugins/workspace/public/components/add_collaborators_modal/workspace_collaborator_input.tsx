@@ -20,6 +20,7 @@ export const COLLABORATOR_ID_INPUT_LABEL_ID = 'collaborator_id_input_label';
 
 export interface WorkspaceCollaboratorInputProps {
   index: number;
+  error?: string;
   collaboratorId?: string;
   accessLevel: WorkspaceCollaboratorAccessLevel;
   collaboratorIdInputPlaceholder?: string;
@@ -42,6 +43,7 @@ const isAccessLevelKey = (test: string): test is WorkspaceCollaboratorAccessLeve
 
 export const WorkspaceCollaboratorInput = ({
   index,
+  error,
   accessLevel,
   collaboratorId,
   onDelete,
@@ -79,6 +81,7 @@ export const WorkspaceCollaboratorInput = ({
           data-test-subj={`workspaceCollaboratorIdInput-${index}`}
           placeholder={collaboratorIdInputPlaceholder}
           aria-labelledby={COLLABORATOR_ID_INPUT_LABEL_ID}
+          isInvalid={!!error}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
