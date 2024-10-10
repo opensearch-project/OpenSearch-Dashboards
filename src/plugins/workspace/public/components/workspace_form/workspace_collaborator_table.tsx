@@ -20,19 +20,53 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { WorkspacePermissionSetting } from './types';
-import { WorkspacePermissionItemType, permissionModeOptions, typeOptions } from './constants';
-import { getPermissionModeId } from './utils';
+import { WorkspacePermissionItemType } from './constants';
+import { getPermissionModeId, isWorkspacePermissionSetting } from './utils';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { PermissionModeId } from '../../../../../core/public';
 import { AddCollaboratorButton } from './add_collaborator_button';
 import { WorkspaceCollaboratorType } from '../../services/workspace_collaborator_types_service';
 import {
   WORKSPACE_ACCESS_LEVEL_NAMES,
   accessLevelNameToWorkspacePermissionModesMap,
 } from '../../constants';
-import { WorkspaceCollaboratorAccessLevel } from '../../types';
+import { WorkspaceCollaborator, WorkspaceCollaboratorAccessLevel } from '../../types';
 
 export type PermissionSetting = Pick<WorkspacePermissionSetting, 'id'> &
   Partial<WorkspacePermissionSetting>;
+
+// TODO: Update PermissionModeId to align with WorkspaceCollaboratorAccessLevel
+const permissionModeId2WorkspaceAccessLevelMap: {
+  [key in PermissionModeId]: WorkspaceCollaboratorAccessLevel;
+} = {
+  [PermissionModeId.Owner]: 'admin',
+  [PermissionModeId.Read]: 'readOnly',
+  [PermissionModeId.ReadAndWrite]: 'readAndWrite',
+};
+
+const convertPermissionSettingToWorkspaceCollaborator = (
+  permissionSetting: WorkspacePermissionSetting
+) => ({
+  collaboratorId:
+    permissionSetting.type === WorkspacePermissionItemType.User
+      ? permissionSetting.userId
+      : permissionSetting.group,
+  permissionType: permissionSetting.type,
+  accessLevel:
+    permissionModeId2WorkspaceAccessLevelMap[getPermissionModeId(permissionSetting.modes)],
+});
+
+export const getDisplayedType = (
+  supportCollaboratorTypes: WorkspaceCollaboratorType[],
+  collaborator: WorkspaceCollaborator
+) => {
+  for (const collaboratorType of supportCollaboratorTypes) {
+    const displayedType = collaboratorType.getDisplayedType?.(collaborator);
+    if (displayedType) {
+      return displayedType;
+    }
+  }
+};
 
 interface Props {
   permissionSettings: PermissionSetting[];
@@ -50,15 +84,18 @@ export const WorkspaceCollaboratorTable = ({
 
   const items = useMemo(() => {
     return permissionSettings.map((setting) => {
+      const collaborator = isWorkspacePermissionSetting(setting)
+        ? convertPermissionSettingToWorkspaceCollaborator(setting)
+        : undefined;
       const basicSettings = {
         ...setting,
         // This is used for table display and search match.
-        displayedType:
-          typeOptions.find((option) => option.value === setting.type)?.inputDisplay ?? '',
-        accessLevel:
-          permissionModeOptions.find(
-            (option) => option.value === getPermissionModeId(setting.modes ?? [])
-          )?.inputDisplay ?? '',
+        displayedType: collaborator
+          ? getDisplayedType(displayedCollaboratorTypes, collaborator)
+          : undefined,
+        accessLevel: collaborator
+          ? WORKSPACE_ACCESS_LEVEL_NAMES[collaborator.accessLevel]
+          : undefined,
       };
       // Unique primary key and filter null value
       if (setting.type === WorkspacePermissionItemType.User) {
@@ -75,7 +112,7 @@ export const WorkspaceCollaboratorTable = ({
       }
       return basicSettings;
     });
-  }, [permissionSettings]);
+  }, [permissionSettings, displayedCollaboratorTypes]);
 
   const emptyStateMessage = useMemo(() => {
     return (
@@ -182,24 +219,24 @@ export const WorkspaceCollaboratorTable = ({
         field: 'displayedType',
         name: 'Type',
         multiSelect: false,
-        options: Array.from(new Set(items.map(({ displayedType }) => displayedType ?? ''))).map(
-          (item) => ({
-            value: item,
-            name: item,
-          })
-        ),
+        options: Array.from(
+          new Set(items.flatMap(({ displayedType }) => (!!displayedType ? [displayedType] : [])))
+        ).map((item) => ({
+          value: item,
+          name: item,
+        })),
       },
       {
         type: 'field_value_selection',
         field: 'accessLevel',
         name: 'Access level',
         multiSelect: false,
-        options: Array.from(new Set(items.map(({ accessLevel }) => accessLevel ?? ''))).map(
-          (item) => ({
-            value: item,
-            name: item,
-          })
-        ),
+        options: Array.from(
+          new Set(items.flatMap(({ accessLevel }) => (!!accessLevel ? [accessLevel] : [])))
+        ).map((item) => ({
+          value: item,
+          name: item,
+        })),
       },
     ],
     toolsLeft: renderToolsLeft(),
@@ -214,10 +251,12 @@ export const WorkspaceCollaboratorTable = ({
     {
       field: 'displayedType',
       name: 'Type',
+      render: (displayedType: string) => displayedType || <>&mdash;</>,
     },
     {
       field: 'accessLevel',
       name: 'Access level',
+      render: (accessLevel: string) => accessLevel || <>&mdash;</>,
     },
     {
       name: 'Actions',

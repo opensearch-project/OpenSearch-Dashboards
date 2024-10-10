@@ -18,6 +18,7 @@ import {
 import { DataSourceEngineType } from '../../../../data_source/common/data_sources';
 import { DataSourceConnectionType } from '../../../common/types';
 import * as utils from '../../utils';
+import * as workspaceUtilsExports from '../utils/workspace';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -113,8 +114,15 @@ jest.spyOn(utils, 'fetchDataSourceConnections').mockImplementation(async (passed
 const WorkspaceCreator = ({
   isDashboardAdmin = false,
   dataSourceEnabled = false,
+  isPermissionEnabled = true,
   ...props
-}: Partial<WorkspaceCreatorProps & { isDashboardAdmin: boolean; dataSourceEnabled?: boolean }>) => {
+}: Partial<
+  WorkspaceCreatorProps & {
+    isDashboardAdmin: boolean;
+    dataSourceEnabled?: boolean;
+    isPermissionEnabled?: boolean;
+  }
+>) => {
   const { Provider } = createOpenSearchDashboardsReactContext({
     ...mockCoreStart,
     ...{
@@ -123,7 +131,7 @@ const WorkspaceCreator = ({
         capabilities: {
           ...mockCoreStart.application.capabilities,
           workspaces: {
-            permissionEnabled: true,
+            permissionEnabled: isPermissionEnabled,
           },
           dashboards: {
             isDashboardAdmin,
@@ -272,10 +280,6 @@ describe('WorkspaceCreator', () => {
       {
         dataSources: [],
         dataConnections: [],
-        permissions: {
-          library_write: { users: ['%me%'] },
-          write: { users: ['%me%'] },
-        },
       }
     );
     await waitFor(() => {
@@ -328,43 +332,6 @@ describe('WorkspaceCreator', () => {
     expect(notificationToastsAddSuccess).not.toHaveBeenCalled();
   });
 
-  it('create workspace with customized permissions', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
-
-    // Ensure workspace create form rendered
-    await waitFor(() => {
-      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
-    });
-    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
-    fireEvent.input(nameInput, {
-      target: { value: 'test workspace name' },
-    });
-    fireEvent.click(getByTestId('workspaceUseCase-observability'));
-    fireEvent.click(getByTestId('workspaceForm-permissionSettingPanel-addNew'));
-    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
-    expect(workspaceClientCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'test workspace name',
-      }),
-      {
-        dataConnections: [],
-        dataSources: [],
-        permissions: {
-          write: {
-            users: ['%me%'],
-          },
-          library_write: {
-            users: ['%me%'],
-          },
-        },
-      }
-    );
-    await waitFor(() => {
-      expect(notificationToastsAddSuccess).toHaveBeenCalled();
-    });
-    expect(notificationToastsAddDanger).not.toHaveBeenCalled();
-  });
-
   it('create workspace with customized selected dataSources', async () => {
     Object.defineProperty(HTMLElement.prototype, 'offsetHeight', {
       configurable: true,
@@ -407,14 +374,6 @@ describe('WorkspaceCreator', () => {
       {
         dataConnections: [],
         dataSources: ['id1'],
-        permissions: {
-          library_write: {
-            users: ['%me%'],
-          },
-          write: {
-            users: ['%me%'],
-          },
-        },
       }
     );
     await waitFor(() => {
@@ -465,14 +424,6 @@ describe('WorkspaceCreator', () => {
       {
         dataConnections: ['id3'],
         dataSources: [],
-        permissions: {
-          library_write: {
-            users: ['%me%'],
-          },
-          write: {
-            users: ['%me%'],
-          },
-        },
       }
     );
     await waitFor(() => {
@@ -510,8 +461,8 @@ describe('WorkspaceCreator', () => {
     });
   });
 
-  it('should redirect to workspace use case landing page after created successfully', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+  it('should redirect to workspace use case landing page if permission not enabled', async () => {
+    const { getByTestId } = render(<WorkspaceCreator isPermissionEnabled={false} />);
 
     // Ensure workspace create form rendered
     await waitFor(() => {
@@ -526,6 +477,34 @@ describe('WorkspaceCreator', () => {
     jest.runAllTimers();
     await waitFor(() => {
       expect(setHrefSpy).toHaveBeenCalledWith(expect.stringContaining('/app/discover'));
+    });
+    jest.useRealTimers();
+  });
+
+  it('should redirect to workspace setting collaborators tab if permission enabled', async () => {
+    const { getByTestId } = render(<WorkspaceCreator />);
+    const navigateToWorkspaceDetailMock = jest.fn();
+    jest
+      .spyOn(workspaceUtilsExports, 'navigateToWorkspaceDetail')
+      .mockImplementation(navigateToWorkspaceDetailMock);
+
+    // Ensure workspace create form rendered
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    jest.useFakeTimers();
+    jest.runAllTimers();
+    await waitFor(() => {
+      expect(navigateToWorkspaceDetailMock).toHaveBeenCalledWith(
+        expect.anything(),
+        'successResult',
+        'collaborators'
+      );
     });
     jest.useRealTimers();
   });

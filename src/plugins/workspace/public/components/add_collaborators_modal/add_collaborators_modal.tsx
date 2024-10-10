@@ -6,6 +6,7 @@
 import {
   EuiAccordion,
   EuiHorizontalRule,
+  EuiLink,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -34,7 +35,7 @@ export interface AddCollaboratorsModalProps {
   inputPlaceholder?: string;
   instruction?: {
     title: string;
-    detail: string;
+    detail: React.ReactNode;
     link?: string;
   };
   permissionType: WorkspaceCollaboratorPermissionType;
@@ -91,6 +92,19 @@ export const AddCollaboratorsModal = ({
               <EuiSpacer size="xs" />
               <EuiSpacer size="s" />
               <EuiText size="xs">{instruction.detail}</EuiText>
+              {instruction.link && (
+                <>
+                  <EuiSpacer size="xs" />
+                  <EuiLink href={instruction.link} target="_blank" external>
+                    {i18n.translate(
+                      'workspace.addCollaboratorsModal.instruction.learnMoreLinkText',
+                      {
+                        defaultMessage: 'Learn more in Documentation',
+                      }
+                    )}
+                  </EuiLink>
+                </>
+              )}
             </EuiAccordion>
             <EuiHorizontalRule margin="xs" />
             <EuiSpacer size="s" />

@@ -6,11 +6,27 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 
-import { WorkspaceCollaboratorTable } from './workspace_collaborator_table';
+import { WorkspaceCollaboratorTable, getDisplayedType } from './workspace_collaborator_table';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
 
 const mockCoreStart = coreMock.createStart();
+const displayedCollaboratorTypes = [
+  {
+    id: 'user',
+    name: 'User',
+    buttonLabel: 'Add Users',
+    onAdd: async () => {},
+    getDisplayedType: ({ permissionType }) => (permissionType === 'user' ? 'User' : undefined),
+  },
+  {
+    id: 'group',
+    name: 'Group',
+    buttonLabel: 'Add Groups',
+    onAdd: async () => {},
+    getDisplayedType: ({ permissionType }) => (permissionType === 'group' ? 'Group' : undefined),
+  },
+];
 
 const mockOverlays = {
   openModal: jest.fn(),
@@ -21,9 +37,35 @@ const { Provider } = createOpenSearchDashboardsReactContext({
   overlays: mockOverlays,
 });
 
+describe('getDisplayedTypes', () => {
+  it('should return undefined if not match any collaborator type', () => {
+    expect(
+      getDisplayedType(displayedCollaboratorTypes, { permissionType: 'unknown' })
+    ).toBeUndefined();
+  });
+  it('should return "User"', () => {
+    expect(
+      getDisplayedType(displayedCollaboratorTypes, {
+        collaboratorId: 'foo',
+        permissionType: 'user',
+        accessLevel: 'readOnly',
+      })
+    ).toEqual('User');
+  });
+  it('should return "Group"', () => {
+    expect(
+      getDisplayedType(displayedCollaboratorTypes, {
+        collaboratorId: 'foo',
+        permissionType: 'group',
+        accessLevel: 'readOnly',
+      })
+    ).toEqual('Group');
+  });
+});
+
 describe('WorkspaceCollaboratorTable', () => {
   const mockProps = {
-    displayedCollaboratorTypes: [],
+    displayedCollaboratorTypes,
     permissionSettings: [
       {
         id: 0,
@@ -36,6 +78,11 @@ describe('WorkspaceCollaboratorTable', () => {
         modes: ['library_read', 'read'],
         type: 'group',
         group: 'group',
+      },
+      {
+        id: 2,
+        modes: ['library_read', 'read'],
+        type: 'unknown',
       },
     ],
     handleSubmitPermissionSettings: jest.fn(),

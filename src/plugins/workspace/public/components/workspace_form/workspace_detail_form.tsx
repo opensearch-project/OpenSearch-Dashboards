@@ -24,9 +24,14 @@ import { WorkspaceFormErrorCallout } from './workspace_form_error_callout';
 import { useWorkspaceFormContext } from './workspace_form_context';
 import { WorkspaceDetailFormDetails } from './workspace_detail_form_details';
 import { WorkspaceCollaboratorTable } from './workspace_collaborator_table';
-import { WorkspaceCollaboratorTypesService } from '../../services/workspace_collaborator_types_service';
+import {
+  WorkspaceCollaboratorType,
+  WorkspaceCollaboratorTypesService,
+} from '../../services/workspace_collaborator_types_service';
 import { AddCollaboratorButton } from './add_collaborator_button';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+
+const EMPTY_COLLABORATOR_TYPES: WorkspaceCollaboratorType[] = [];
 
 interface WorkspaceDetailedFormProps extends Omit<WorkspaceFormProps, 'onAppLeave'> {
   detailTab?: DetailTab;
@@ -51,7 +56,8 @@ export const WorkspaceDetailForm = (props: WorkspaceDetailedFormProps) => {
     services: { collaboratorTypes },
   } = useOpenSearchDashboards<{ collaboratorTypes: WorkspaceCollaboratorTypesService }>();
 
-  const displayedCollaboratorTypes = useObservable(collaboratorTypes.getTypes$()) ?? [];
+  const displayedCollaboratorTypes =
+    useObservable(collaboratorTypes.getTypes$()) ?? EMPTY_COLLABORATOR_TYPES;
 
   return (
     <EuiForm

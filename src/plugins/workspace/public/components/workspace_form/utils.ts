@@ -85,7 +85,7 @@ export const hasSameUserIdOrGroup = (
 export const getPermissionModeId = (modes: WorkspacePermissionMode[]) => {
   for (const key in optionIdToWorkspacePermissionModesMap) {
     if (optionIdToWorkspacePermissionModesMap[key].every((mode) => modes?.includes(mode))) {
-      return key;
+      return key as PermissionModeId;
     }
   }
   return PermissionModeId.Read;
@@ -413,13 +413,7 @@ export const generatePermissionSettingsState = (
   };
 
   if (operationType === WorkspaceOperationType.Create) {
-    return [
-      {
-        ...emptyUserPermission,
-        userId: CURRENT_USER_PLACEHOLDER,
-      },
-      emptyUserGroupPermission,
-    ];
+    return [];
   }
 
   return [...(permissionSettings ?? [])];

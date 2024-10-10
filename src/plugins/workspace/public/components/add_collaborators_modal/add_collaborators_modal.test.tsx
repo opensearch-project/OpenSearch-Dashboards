@@ -12,7 +12,7 @@ describe('AddCollaboratorsModal', () => {
     title: 'Add Collaborators',
     inputLabel: 'Collaborator ID',
     addAnotherButtonLabel: 'Add Another',
-    permissionType: 'readOnly',
+    permissionType: 'user' as const,
     onClose: jest.fn(),
     onAddCollaborators: jest.fn(),
   };
@@ -46,7 +46,7 @@ describe('AddCollaboratorsModal', () => {
     fireEvent.click(addCollaboratorsButton);
     await waitFor(() => {
       expect(defaultProps.onAddCollaborators).toHaveBeenCalledWith([
-        { collaboratorId: 'user1', accessLevel: 'readOnly', permissionType: 'readOnly' },
+        { collaboratorId: 'user1', accessLevel: 'readOnly', permissionType: 'user' },
       ]);
     });
   });
@@ -68,10 +68,12 @@ describe('AddCollaboratorsModal', () => {
     const instruction = {
       title: 'Instructions',
       detail: 'Follow these instructions to add collaborators',
+      link: 'foo',
     };
     const props = { ...defaultProps, instruction };
     render(<AddCollaboratorsModal {...props} />);
     expect(screen.getByText(instruction.title)).toBeInTheDocument();
     expect(screen.getByText(instruction.detail)).toBeInTheDocument();
+    expect(screen.getByText('Learn more in Documentation')).toBeInTheDocument();
   });
 });

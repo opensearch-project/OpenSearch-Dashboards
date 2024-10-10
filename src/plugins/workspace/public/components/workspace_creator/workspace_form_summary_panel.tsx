@@ -22,7 +22,6 @@ import { WorkspaceUseCase } from '../../types';
 import { RightSidebarScrollField, RIGHT_SIDEBAR_SCROLL_KEY } from './utils';
 import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
 import { WorkspacePermissionMode } from '../../../common/constants';
-import { getPermissionModeName } from '../workspace_form/utils';
 
 const SCROLL_FIELDS = {
   [RightSidebarScrollField.Name]: i18n.translate('workspace.form.summary.panel.name.title', {
@@ -53,11 +52,6 @@ const SCROLL_FIELDS = {
     }
   ),
 };
-
-interface UserAndGroups {
-  key: string;
-  modes: WorkspacePermissionMode[] | undefined;
-}
 
 export const FieldSummaryItem = ({
   field,
@@ -138,30 +132,9 @@ export const ExpandableTextList = ({
   );
 };
 
-const mapUserAndGroupToList = (userAndGroups: UserAndGroups[]) => {
-  return userAndGroups.map((userAndGroup) => {
-    return (
-      <EuiFlexGroup
-        key={userAndGroup.key}
-        gutterSize="none"
-        justifyContent="spaceBetween"
-        alignItems="center"
-      >
-        <EuiFlexItem grow={false}>{userAndGroup.key}</EuiFlexItem>
-        {userAndGroup.modes && (
-          <EuiFlexItem grow={false}>
-            <em>{getPermissionModeName(userAndGroup.modes)}</em>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    );
-  });
-};
-
 interface WorkspaceFormSummaryPanelProps {
-  formData: WorkspaceFormDataState;
+  formData: Omit<WorkspaceFormDataState, 'permissionSettings'>;
   availableUseCases: WorkspaceUseCase[];
-  permissionEnabled?: boolean;
   formId: string;
   application: ApplicationStart;
   isSubmitting: boolean;
@@ -171,23 +144,12 @@ interface WorkspaceFormSummaryPanelProps {
 export const WorkspaceFormSummaryPanel = ({
   formData,
   availableUseCases,
-  permissionEnabled,
   formId,
   application,
   isSubmitting,
   dataSourceEnabled,
 }: WorkspaceFormSummaryPanelProps) => {
   const useCase = availableUseCases.find((item) => item.id === formData.useCase);
-  const userAndGroups: UserAndGroups[] = formData.permissionSettings.flatMap((setting) => {
-    const modesExist = 'modes' in setting && !!setting.modes;
-    if ('userId' in setting && !!setting.userId && modesExist) {
-      return [{ key: setting.userId, modes: setting.modes }];
-    }
-    if ('group' in setting && !!setting.group && modesExist) {
-      return [{ key: setting.group, modes: setting.modes }];
-    }
-    return [];
-  });
   const useCaseIcon = useCase?.icon || 'logoOpenSearch';
 
   return (
@@ -225,16 +187,6 @@ export const WorkspaceFormSummaryPanel = ({
                 </ul>
               ))}
               collapseDisplayCount={3}
-            />
-          )}
-        </FieldSummaryItem>
-      )}
-      {permissionEnabled && (
-        <FieldSummaryItem bottomGap={false} field={RightSidebarScrollField.Collaborators}>
-          {userAndGroups.length > 0 && (
-            <ExpandableTextList
-              items={mapUserAndGroupToList(userAndGroups)}
-              collapseDisplayCount={2}
             />
           )}
         </FieldSummaryItem>

@@ -55,6 +55,12 @@ export const registerDefaultCollaboratorTypes = ({
       buttonLabel: i18n.translate('workspace.collaboratorType.defaultUser.buttonLabel', {
         defaultMessage: 'Add Users',
       }),
+      getDisplayedType: ({ permissionType }) =>
+        permissionType === 'user'
+          ? i18n.translate('workspace.collaboratorType.defaultUser.displayedType', {
+              defaultMessage: 'User',
+            })
+          : undefined,
       onAdd: generateOnAddCallback({
         getStartServices,
         title: i18n.translate('workspace.collaboratorType.defaultUser.modalTitle', {
@@ -86,6 +92,12 @@ export const registerDefaultCollaboratorTypes = ({
       buttonLabel: i18n.translate('workspace.collaboratorType.defaultGroup.buttonLabel', {
         defaultMessage: 'Add Groups',
       }),
+      getDisplayedType: ({ permissionType }) =>
+        permissionType === 'group'
+          ? i18n.translate('workspace.collaboratorType.defaultGroup.displayedType', {
+              defaultMessage: 'Group',
+            })
+          : undefined,
       onAdd: generateOnAddCallback({
         getStartServices,
         title: i18n.translate('workspace.collaboratorType.defaultGroup.modalTitle', {

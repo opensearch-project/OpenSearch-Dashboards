@@ -48,7 +48,7 @@ describe('generateOnAddCallback', () => {
     title: 'Test Title',
     inputLabel: 'Test Input Label',
     addAnotherButtonLabel: 'Test Add Another Button Label',
-    permissionType: 'test',
+    permissionType: 'user' as const,
   };
 
   beforeEach(() => {
@@ -126,5 +126,31 @@ describe('registerDefaultCollaboratorTypes', () => {
 
     expect(groupType?.name).toBe('Group');
     expect(groupType?.buttonLabel).toBe('Add Groups');
+  });
+
+  it('should return consistent displayed types', () => {
+    registerDefaultCollaboratorTypes({ collaboratorTypesService, getStartServices });
+
+    const registeredTypes = collaboratorTypesService.getTypes$().getValue();
+    expect(registeredTypes).toHaveLength(2);
+
+    const userType = registeredTypes.find((type) => type.id === 'user');
+    const groupType = registeredTypes.find((type) => type.id === 'group');
+    const adminUserCollaborator = {
+      permissionType: 'user' as const,
+      collaboratorId: '',
+      accessLevel: 'admin' as const,
+    };
+    const adminGroupCollaborator = {
+      permissionType: 'group' as const,
+      collaboratorId: '',
+      accessLevel: 'admin' as const,
+    };
+
+    expect(userType?.getDisplayedType?.(adminUserCollaborator)).toBe('User');
+    expect(userType?.getDisplayedType?.(adminGroupCollaborator)).toBeUndefined();
+
+    expect(groupType?.getDisplayedType?.(adminUserCollaborator)).toBeUndefined();
+    expect(groupType?.getDisplayedType?.(adminGroupCollaborator)).toBe('Group');
   });
 });
