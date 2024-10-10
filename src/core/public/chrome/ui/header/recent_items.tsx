@@ -9,11 +9,10 @@ import {
   EuiPanel,
   EuiListGroup,
   EuiListGroupItem,
-  EuiTitle,
   EuiPopoverTitle,
+  EuiButtonEmpty,
   EuiIcon,
   EuiText,
-  EuiButtonEmpty,
   EuiSpacer,
   EuiHeaderSectionItemButtonProps,
   EuiButtonIcon,
@@ -124,6 +123,9 @@ export const RecentItems = ({
   const navLinks = useObservable(navLinks$, []);
   const loadingCount = useObservable(loadingCount$, 0);
 
+  // eslint-disable-next-line
+  console.log('loadingCount', loadingCount);
+
   const handleItemClick = (link: string) => {
     navigateToUrl(link);
     setIsPopoverOpen(false);
@@ -135,16 +137,15 @@ export const RecentItems = ({
       ownFocus={false}
       panelPaddingSize="s"
       button={
-        <EuiButtonEmpty
-          data-test-subj="preferencesSettingButton"
-          flush="left"
+        <EuiButtonIcon
           color="primary"
+          size="xs"
           onClick={() => {
             setIsPreferencesPopoverOpen((IsPreferencesPopoverOpe) => !IsPreferencesPopoverOpe);
           }}
-        >
-          Preferences
-        </EuiButtonEmpty>
+          iconType="managementApp"
+          data-test-subj="preferencesSettingButton"
+        />
       }
       isOpen={isPreferencesPopoverOpen}
       anchorPosition="downLeft"
@@ -268,16 +269,17 @@ export const RecentItems = ({
       panelPaddingSize="m"
     >
       {renderBreadcrumbs}
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <EuiPanel
         hasShadow={false}
         hasBorder={false}
         paddingSize="none"
-        style={{ maxHeight: '35vh', overflow: 'auto' }}
+        style={{ maxHeight: '35vh' }}
+        className="euiYScrollWithShadows"
       >
-        <EuiTitle size="xxs">
+        <EuiText size="s">
           <h4>Recent</h4>
-        </EuiTitle>
+        </EuiText>
         <EuiSpacer size="s" />
         {selectedRecentsItems.length > 0 ? (
           <EuiListGroup flush={true} gutterSize="s">
@@ -291,8 +293,9 @@ export const RecentItems = ({
                     <EuiIcon
                       style={{ marginRight: widthForRightMargin }}
                       type={item.meta.icon || 'apps'}
+                      color="text"
                     />
-                    {item.label}
+                    {item.label + ' '}
                     {item.workspaceName ? (
                       <EuiTextColor color="subdued">({item.workspaceName})</EuiTextColor>
                     ) : null}
@@ -308,7 +311,7 @@ export const RecentItems = ({
             No recently viewed items
           </EuiText>
         )}
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
       </EuiPanel>
       {preferencePopover}
     </EuiPopover>
