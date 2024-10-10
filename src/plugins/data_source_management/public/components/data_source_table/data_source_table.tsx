@@ -13,8 +13,10 @@ import {
   EuiSpacer,
   EuiText,
   EuiSearchBarProps,
+  EuiBasicTableColumn,
+  EuiButtonIcon,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useEffectOnce, useObservable } from 'react-use';
 import { of } from 'rxjs';
@@ -35,10 +37,10 @@ import {
   deleteMultipleDataSources,
   getDataSources,
   setFirstDataSourceAsDefault,
-  getDefaultDataSourceId,
   fetchDataSourceConnections,
 } from '../utils';
 import { LoadingMask } from '../loading_mask';
+import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../constants';
 
 /* Table config */
 const pagination = {
@@ -63,10 +65,16 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     application,
     navigation,
     workspaces,
+    overlays,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
   const { HeaderControl } = navigation.ui;
   const workspaceClient = useObservable(workspaces.client$);
   const DataSourceAssociation = workspaceClient?.ui().DataSourceAssociation;
+  const defaultDataSourceIdRef = useRef(
+    uiSettings.get$<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID)
+  );
+  const defaultDataSourceId = useObservable(defaultDataSourceIdRef.current);
+  const useUpdatedUX = uiSettings.get('home:useNewHomePage');
 
   /* Component state variables */
   const [dataSources, setDataSources] = useState<DataSourceTableItem[]>([]);
@@ -126,6 +134,25 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       });
   };
 
+  const onDissociate = async (item: DataSourceTableItem) => {
+    const confirmed = await overlays.openConfirm('', {
+      title: i18n.translate('dataSourcesManagement.dataSourcesTable.removeAssociation', {
+        defaultMessage: 'Remove association',
+      }),
+      buttonColor: 'danger',
+    });
+    if (confirmed) {
+      setIsLoading(true);
+      if (workspaceClient && currentWorkspace) {
+        await workspaceClient.dissociate(
+          [{ id: item.id, type: 'data-source' }],
+          currentWorkspace.id
+        );
+      }
+      fetchDataSources();
+    }
+  };
+
   /* Table search config */
   const renderToolsLeft = useCallback(() => {
     return selectedDataSources.length > 0
@@ -176,7 +203,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   };
 
   /* Table columns */
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<DataSourceTableItem>> = [
     {
       field: 'title',
       name: i18n.translate('dataSourcesManagement.dataSourcesTable.dataSourceField', {
@@ -196,7 +223,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `${index.id}`)} flush="left">
             {name}
           </EuiButtonEmpty>
-          {index.id === getDefaultDataSourceId(uiSettings) ? (
+          {index.id === defaultDataSourceId ? (
             <EuiBadge iconType="starFilled" iconSide="left">
               Default
             </EuiBadge>
@@ -314,7 +341,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const setDefaultDataSource = async () => {
     try {
       for (const dataSource of selectedDataSources) {
-        if (getDefaultDataSourceId(uiSettings) === dataSource.id) {
+        if (defaultDataSourceId === dataSource.id) {
           await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
           break;
         }
@@ -404,12 +431,64 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   };
 
   const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
-  const dataSourceAssociationVisible =
+  const canAssociateDataSource =
     !!currentWorkspace && !currentWorkspace.readonly && isDashboardAdmin;
+
+  const actionColumn: EuiBasicTableColumn<DataSourceTableItem> = {
+    name: 'Action',
+    actions: [],
+  };
+
+  // Add remove association action
+  if (canAssociateDataSource) {
+    actionColumn.actions.push({
+      name: i18n.translate('dataSourcesManagement.dataSourcesTable.removeAssociation.label', {
+        defaultMessage: 'Remove association',
+      }),
+      isPrimary: true,
+      description: i18n.translate(
+        'dataSourcesManagement.dataSourcesTable.removeAssociation.description',
+        {
+          defaultMessage: 'Remove association',
+        }
+      ),
+      icon: 'unlink',
+      type: 'icon',
+      onClick: async (item: DataSourceTableItem) => {
+        onDissociate(item);
+      },
+      'data-test-subj': 'dataSourcesManagement-dataSourceTable-dissociateButton',
+    });
+  }
+
+  // Add set as default action when data source list page opened within a workspace
+  if (currentWorkspace) {
+    actionColumn.actions.push({
+      render: (item) => {
+        return (
+          <EuiButtonIcon
+            isDisabled={defaultDataSourceId === item.id}
+            aria-label="Set as default data source"
+            title={i18n.translate('dataSourcesManagement.dataSourcesTable.setAsDefault.label', {
+              defaultMessage: 'Set as default',
+            })}
+            iconType="flag"
+            onClick={async () => {
+              await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, item.id);
+            }}
+          />
+        );
+      },
+    });
+  }
+
+  if (actionColumn.actions.length > 0) {
+    columns.push(actionColumn);
+  }
 
   return (
     <>
-      {dataSourceAssociationVisible && associateDataSourceButton && (
+      {useUpdatedUX && canAssociateDataSource && associateDataSourceButton && (
         <HeaderControl
           setMountPoint={application.setAppRightControls}
           controls={associateDataSourceButton}

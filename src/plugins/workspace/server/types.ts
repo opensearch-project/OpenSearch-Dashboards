@@ -142,6 +142,26 @@ export interface IWorkspaceClientImpl {
     workspaceId: string,
     objects: Array<{ id: string; type: string }>
   ): Promise<IResponse<Array<{ id: string; error?: string }>>>;
+
+  /**
+   * Dissociates a list of objects from the given workspace ID.
+   *
+   * This method takes a workspace ID and an array of objects, where each object contains
+   * an `id` and `type`. It attempts to dissociate each object from the specified workspace.
+   * If the dissociation succeeds, the object is included in the result without an error.
+   * If there is an issue dissociating an object, an error message is returned for that object.
+   *
+   * @returns A promise that resolves to a response object containing an array of results for each object.
+   *          Each result will include the object's `id` and, if there was an error during dissociation, an `error` field
+   *          with the error message.
+   *
+   * @public
+   */
+  dissociate(
+    requestDetail: IRequestDetail,
+    workspaceId: string,
+    objects: Array<{ id: string; type: string }>
+  ): Promise<IResponse<Array<{ id: string; error?: string }>>>;
 }
 
 export type IResponse<T> =

@@ -419,6 +419,32 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     };
   }
 
+  public async dissociate(
+    requestDetail: IRequestDetail,
+    workspaceId: string,
+    objects: Array<{ id: string; type: string }>
+  ): Promise<IResponse<Array<{ id: string; error?: string }>>> {
+    const savedObjectClient = this.getSavedObjectClientsFromRequestDetail(requestDetail);
+    const promises = objects.map(async (obj) => {
+      try {
+        await savedObjectClient.deleteFromWorkspaces(obj.type, obj.id, [workspaceId]);
+        return {
+          id: obj.id,
+        };
+      } catch (e) {
+        return {
+          id: obj.id,
+          error: this.formatError(e),
+        };
+      }
+    });
+    const result = await Promise.all(promises);
+    return {
+      success: true,
+      result,
+    };
+  }
+
   public setSavedObjects(savedObjects: SavedObjectsServiceStart) {
     this.savedObjects = savedObjects;
   }

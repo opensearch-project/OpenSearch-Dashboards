@@ -354,6 +354,20 @@ export class WorkspaceClient implements IWorkspaceClient {
     return result;
   }
 
+  public async dissociate(savedObjects: Array<{ id: string; type: string }>, workspaceId: string) {
+    const path = this.getPath('_dissociate');
+    const body = {
+      savedObjects,
+      workspaceId,
+    };
+    const result = await this.safeFetch<Array<{ id: string; type: string }>>(path, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+
+    return result;
+  }
+
   ui() {
     return {
       DataSourceAssociation,

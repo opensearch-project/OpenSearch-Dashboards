@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { WorkspaceAttribute } from '../../types';
+
+export type WorkspaceObject = WorkspaceAttribute & { readonly?: boolean };
+
 export type IWorkspaceResponse<T> =
   | {
       result: T;
@@ -45,6 +49,24 @@ export interface IWorkspaceClient {
     savedObjects: Array<{ id: string; type: string }>,
     workspaceId: string
   ): Promise<IWorkspaceResponse<AssociationResult[]>>;
+
+  /**
+   * Dissociates a list of objects from the given workspace ID.
+   *
+   * This method takes a workspace ID and an array of objects, where each object contains
+   * an `id` and `type`. It attempts to dissociate each object from the specified workspace.
+   * If the dissociation succeeds, the object is included in the result without an error.
+   * If there is an issue dissociating an object, an error message is returned for that object.
+   *
+   * @returns A promise that resolves to a response object containing an array of results for each object.
+   *          Each result will include the object's `id` and, if there was an error during dissociation, an `error` field
+   *          with the error message.
+   */
+  dissociate(
+    savedObjects: Array<{ id: string; type: string }>,
+    workspaceId: string
+  ): Promise<IWorkspaceResponse<AssociationResult[]>>;
+
   ui(): WorkspaceUI;
 }
 
