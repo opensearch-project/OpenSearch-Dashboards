@@ -1,0 +1,2 @@
+fix:
+- Add discover summary error info and button click logic enhancement ([#8352](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8352))

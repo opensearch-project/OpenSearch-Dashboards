@@ -23,3 +23,9 @@ export enum QueryAssistContextType {
   QUERY,
   DATA,
 }
+
+export enum FeedbackStatus {
+  NONE = 'none',
+  THUMB_UP = 'thumbup',
+  THUMB_DOWN = 'thumbdown',
+}
