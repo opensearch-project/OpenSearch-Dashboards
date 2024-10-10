@@ -79,7 +79,10 @@ export type WorkspaceFormErrors = {
 export interface WorkspaceFormProps {
   application: ApplicationStart;
   savedObjects: SavedObjectsStart;
-  onSubmit?: (formData: WorkspaceFormSubmitData, refresh?: boolean) => void;
+  onSubmit?: (
+    formData: WorkspaceFormSubmitData,
+    refresh?: boolean
+  ) => Promise<{ result: boolean; success: true } | undefined>;
   defaultValues?: Partial<WorkspaceFormSubmitData>;
   operationType: WorkspaceOperationType;
   permissionEnabled?: boolean;
