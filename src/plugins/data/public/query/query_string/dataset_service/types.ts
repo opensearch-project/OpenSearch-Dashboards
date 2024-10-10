@@ -30,6 +30,8 @@ export interface DatasetTypeConfig {
     icon: EuiIconProps;
     /** Optional tooltip text */
     tooltip?: string;
+    /** Optional preference for search on page load else defaulted to true */
+    searchOnLoad?: boolean;
   };
   /**
    * Converts a DataStructure to a Dataset.
