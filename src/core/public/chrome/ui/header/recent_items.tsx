@@ -276,7 +276,11 @@ export const RecentItems = ({
         style={{ maxHeight: '35vh', overflow: 'auto' }}
       >
         <EuiTitle size="xxs">
-          <h4>Recent</h4>
+          <h4>
+            {i18n.translate('core.header.recent.title', {
+              defaultMessage: 'Recent assets',
+            })}
+          </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
         {selectedRecentsItems.length > 0 ? (
