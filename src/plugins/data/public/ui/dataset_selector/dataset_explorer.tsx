@@ -173,6 +173,7 @@ export const DatasetExplorer = ({
                 </EuiTitle>
                 {current.multiSelect ? (
                   <DatasetTable
+                    services={services}
                     path={path}
                     setPath={setPath}
                     index={index}

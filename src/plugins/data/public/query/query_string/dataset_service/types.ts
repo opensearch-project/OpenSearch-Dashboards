@@ -64,4 +64,9 @@ export interface DatasetTypeConfig {
    * with this Dataset
    */
   getSearchOptions?: () => DatasetSearchOptions;
+  /**
+   * Combines a list of user selected data structures into a single one to use in discover.
+   * @see https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8362.
+   */
+  combineDataStructures?: (dataStructures: DataStructure[]) => DataStructure | undefined;
 }

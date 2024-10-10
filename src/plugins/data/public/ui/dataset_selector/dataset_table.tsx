@@ -6,11 +6,14 @@
 import { EuiBasicTable, EuiFieldSearch, EuiLink, EuiText } from '@elastic/eui';
 import React, { useRef, useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 import { DataStructure } from '../../../common';
 import { getQueryService } from '../../services';
-import { DataStructureFetchOptions } from '../../query';
+import { DatasetTypeConfig, DataStructureFetchOptions } from '../../query';
+import { IDataPluginServices } from '../..';
 
 interface DatasetTableProps {
+  services: IDataPluginServices;
   path: DataStructure[];
   setPath: (newPath: DataStructure[]) => void;
   index: number;
@@ -28,7 +31,6 @@ export const DatasetTable: React.FC<DatasetTableProps> = (props) => {
   const [loading, setLoading] = useState(false);
   const searchRef = useRef<HTMLInputElement | null>(null);
 
-  const initialSelectedIds = props.explorerDataset?.id.split(',');
   const dataStructures = props.path[props.index].children || [];
   const paginationToken = props.path[props.index].paginationToken;
 
@@ -45,6 +47,34 @@ export const DatasetTable: React.FC<DatasetTableProps> = (props) => {
       .finally(() => setLoading(false));
   };
 
+  const onSelectionChange = (items: DataStructure[]) => {
+    if (items.length === 0) {
+      props.selectDataStructure(undefined, props.path.slice(0, props.index + 1));
+      return;
+    }
+    if (!items.every((item) => item.type === items[0].type)) {
+      props.services.notifications.toasts.addWarning(
+        i18n.translate(
+          'data.explorer.datasetSelector.advancedSelector.datasetTable.multipleItemTypeMessage',
+          {
+            defaultMessage: 'All selected datasets must be of the same type.',
+          }
+        )
+      );
+      return;
+    }
+    const typeConfig = datasetService.getType(props.path[1].id);
+    const combineDataStructures: NonNullable<DatasetTypeConfig['combineDataStructures']> =
+      typeConfig?.combineDataStructures ??
+      ((ds) => ({
+        id: ds.map((item) => item.id).join(','),
+        title: ds.map((item) => item.title).join(','),
+        type: ds[0].type,
+      }));
+
+    props.selectDataStructure(combineDataStructures(items), props.path.slice(0, props.index + 1));
+  };
+
   return (
     <div className="datasetTable">
       <EuiFieldSearch
@@ -59,27 +89,7 @@ export const DatasetTable: React.FC<DatasetTableProps> = (props) => {
         columns={[{ field: 'title', name: 'Name' }]}
         loading={loading}
         isSelectable
-        selection={{
-          onSelectionChange: (items) => {
-            if (items.length === 0) {
-              props.selectDataStructure(undefined, props.path.slice(0, props.index + 1));
-              return;
-            }
-            if (!items.every((item) => item.type === items[0].type)) {
-              throw new Error('All items must be of the same type');
-            }
-            const newItem: DataStructure = {
-              id: items.map((item) => item.id).join(','),
-              title: items.map((item) => item.title).join(','),
-              type: items[0].type,
-            };
-            props.selectDataStructure(newItem, props.path.slice(0, props.index + 1));
-          },
-          initialSelected:
-            (initialSelectedIds?.length &&
-              dataStructures?.filter((item) => initialSelectedIds.includes(item.id))) ||
-            [],
-        }}
+        selection={{ onSelectionChange }}
       />
 
       {paginationToken && (
