@@ -90,6 +90,7 @@ interface Props {
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   logos: Logos;
+  workspaceEnabled: boolean | undefined;
 }
 
 export function CollapsibleNav({
@@ -105,6 +106,7 @@ export function CollapsibleNav({
   navigateToApp,
   navigateToUrl,
   logos,
+  workspaceEnabled,
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
@@ -193,7 +195,8 @@ export function CollapsibleNav({
                 link,
                 navLinks,
                 basePath,
-                navigateToUrl
+                navigateToUrl,
+                !!workspaceEnabled
               );
 
               return {
