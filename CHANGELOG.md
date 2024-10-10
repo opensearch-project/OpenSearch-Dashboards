@@ -39,6 +39,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
  - Deprecating `CssDistFilename` exports in favor of `themeCssDistFilenames` in `@osd/ui-shared-deps` ([#7625](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7625))
 
 ### 🛡 Security
+ - Use NodeJS v18.20.4 to remediate CVE-2024-27980, CVE-2024-27983 and CVE-2024-36138 ([#8294](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8294))
 
 ### 📈 Features/Enhancements
 
