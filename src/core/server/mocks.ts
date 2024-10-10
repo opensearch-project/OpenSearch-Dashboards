@@ -53,6 +53,7 @@ import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_serv
 import { securityServiceMock } from './security/security_service.mock';
 import { crossCompatibilityServiceMock } from './cross_compatibility/cross_compatibility.mock';
 import { dynamicConfigServiceMock } from './config/dynamic_config_service.mock';
+import { workspaceServiceMock } from './workspace/mocks';
 
 export { configServiceMock } from './config/mocks';
 export { dynamicConfigServiceMock } from './config/mocks';
@@ -170,6 +171,7 @@ function createCoreSetupMock({
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),
     security: securityServiceMock.createSetupContract(),
     dynamicConfigService: dynamicConfigServiceMock.createSetupContract(),
+    workspace: workspaceServiceMock.createSetupContract(),
   };
 
   return mock;
@@ -187,6 +189,7 @@ function createCoreStartMock() {
     coreUsageData: coreUsageDataServiceMock.createStartContract(),
     crossCompatibility: crossCompatibilityServiceMock.createStartContract(),
     dynamicConfig: dynamicConfigServiceMock.createStartContract(),
+    workspace: workspaceServiceMock.createStartContract(),
   };
 
   return mock;
@@ -209,6 +212,7 @@ function createInternalCoreSetupMock() {
     metrics: metricsServiceMock.createInternalSetupContract(),
     security: securityServiceMock.createSetupContract(),
     dynamicConfig: dynamicConfigServiceMock.createInternalSetupContract(),
+    workspace: workspaceServiceMock.createInternalSetupContract(),
   };
   return setupDeps;
 }
@@ -225,6 +229,7 @@ function createInternalCoreStartMock() {
     coreUsageData: coreUsageDataServiceMock.createStartContract(),
     crossCompatibility: crossCompatibilityServiceMock.createStartContract(),
     dynamicConfig: dynamicConfigServiceMock.createInternalStartContract(),
+    workspace: workspaceServiceMock.createInternalStartContract(),
   };
   return startDeps;
 }
