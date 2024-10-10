@@ -111,7 +111,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
 
   const fetchDataSources = () => {
     setIsLoading(true);
-    getDataSources(savedObjects.client)
+    return getDataSources(savedObjects.client)
       .then((response: DataSourceTableItem[]) => {
         return fetchDataSourceConnections(response, http, notifications, false);
       })
@@ -149,7 +149,10 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           currentWorkspace.id
         );
       }
-      fetchDataSources();
+      await fetchDataSources();
+      if (defaultDataSourceId === item.id) {
+        setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      }
     }
   };
 

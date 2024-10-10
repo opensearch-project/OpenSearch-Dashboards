@@ -238,7 +238,7 @@ export const ManageDirectQueryDataConnectionsTable = ({
       ? getDataSources(savedObjects.client)
       : http.get(`${DATACONNECTIONS_BASE}`);
 
-    fetchConnections
+    return fetchConnections
       .then((response) => {
         return featureFlagStatus
           ? fetchDataSourceConnections(
@@ -406,7 +406,10 @@ export const ManageDirectQueryDataConnectionsTable = ({
           currentWorkspace.id
         );
       }
-      fetchDataSources();
+      await fetchDataSources();
+      if (defaultDataSourceId === item.id) {
+        setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      }
     }
   };
 
