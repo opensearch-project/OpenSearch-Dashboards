@@ -1,3 +1,9 @@
 .workspaceNameLabel {
   background-color: $euiSideNavBackgroundColor;
 }
+
+.popoverButton:hover,
+.popoverButton:focus {
+  transition: none !important;
+  transform: none !important;
+}
