@@ -43,7 +43,7 @@ import { replaceVars } from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
 import { getInterval } from '../../lib/get_interval';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
-import { STACKED_OPTIONS } from '../../../visualizations/constants';
+import { STACKED_OPTIONS, AXIS_POSITION } from '../../../visualizations/constants';
 import { getCoreStart } from '../../../../services';
 
 export class TimeseriesVisualization extends Component {
@@ -202,7 +202,11 @@ export class TimeseriesVisualization extends Component {
         seriesGroup.axisFormatter = 'percent';
         seriesGroup.axis_min = seriesGroup.axis_min || 0;
         seriesGroup.axis_max = seriesGroup.axis_max || 1;
-        seriesGroup.axis_position = model.axis_position;
+        // If the axis is hidden, arbitrarily set it to left
+        seriesGroup.axis_position =
+          seriesGroup.axis_position === AXIS_POSITION.HIDDEN
+            ? AXIS_POSITION.LEFT
+            : model.axis_position;
       }
 
       series
@@ -219,8 +223,11 @@ export class TimeseriesVisualization extends Component {
           domain,
           groupId,
           id: yAxisIdGenerator(seriesGroup.id),
-          position: seriesGroup.axis_position,
-          hide: isStackedWithinSeries,
+          position:
+            seriesGroup.axis_position === AXIS_POSITION.HIDDEN
+              ? AXIS_POSITION.LEFT
+              : seriesGroup.axis_position,
+          hide: isStackedWithinSeries || seriesGroup.axis_position === AXIS_POSITION.HIDDEN,
           tickFormatter:
             seriesGroup.stacked === STACKED_OPTIONS.PERCENT
               ? this.yAxisStackedByPercentFormatter
@@ -231,7 +238,11 @@ export class TimeseriesVisualization extends Component {
           tickFormatter: allSeriesHaveSameFormatters ? seriesGroupTickFormatter : (val) => val,
           id: yAxisIdGenerator('main'),
           groupId: mainAxisGroupId,
-          position: model.axis_position,
+          position:
+            seriesGroup.axis_position === AXIS_POSITION.HIDDEN
+              ? AXIS_POSITION.LEFT
+              : model.axis_position,
+          hide: seriesGroup.axis_position === AXIS_POSITION.HIDDEN,
           domain: mainAxisDomain,
         });
 
