@@ -53,6 +53,7 @@ export const HeaderSearchBarIcon = ({ globalSearchStrategies }: Props) => {
             data-test-subj="search-icon"
             onClick={() => {
               setIsSearchPopoverOpen(!isSearchPopoverOpen);
+              // remove focus from the button to dismiss the tooltip
               buttonRef.current?.blur();
             }}
           />
