@@ -75,7 +75,7 @@ export const SelectDataSourcePanel = ({
       data-test-subj={testingId}
     >
       {i18n.translate('workspace.form.selectDataSourcePanel.addNew', {
-        defaultMessage: 'Associate OpenSearch connections',
+        defaultMessage: 'Associate OpenSearch data sources',
       })}
     </EuiSmallButton>
   );
@@ -92,7 +92,7 @@ export const SelectDataSourcePanel = ({
       data-test-subj={testingId}
     >
       {i18n.translate('workspace.form.selectDataSourcePanel.addNewDQCs', {
-        defaultMessage: 'Associate direct query connections',
+        defaultMessage: 'Associate direct query data sources',
       })}
     </EuiSmallButton>
   );
