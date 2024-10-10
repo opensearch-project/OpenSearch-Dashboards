@@ -173,7 +173,23 @@ export class AdvancedSettingsComponent extends Component<
     const all = config.getAll();
     const userSettingsEnabled = config.get('theme:enableUserControl');
     return Object.entries(all)
-      .filter(([, setting]) => setting.scope !== UiSettingScope.USER)
+      .filter(([, setting]) => {
+        const scope = setting.scope;
+        // if scope is not defined, then it's a global ui setting
+        if (!scope) {
+          return true;
+        }
+
+        if (typeof scope === 'string') {
+          return scope === UiSettingScope.GLOBAL;
+        }
+
+        if (Array.isArray(scope)) {
+          return scope.includes(UiSettingScope.GLOBAL);
+        }
+
+        return false;
+      })
       .map((setting) => {
         return toEditableConfig({
           def: setting[1],

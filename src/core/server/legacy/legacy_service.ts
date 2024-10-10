@@ -239,6 +239,7 @@ export class LegacyService implements CoreService {
         getAsyncLocalStore: startDeps.core.dynamicConfig.getAsyncLocalStore,
         createStoreFromRequest: startDeps.core.dynamicConfig.createStoreFromRequest,
       },
+      workspace: startDeps.core.workspace,
     };
 
     const router = setupDeps.core.http.createRouter('', this.legacyId);
@@ -308,6 +309,7 @@ export class LegacyService implements CoreService {
       auditTrail: setupDeps.core.auditTrail,
       getStartServices: () => Promise.resolve([coreStart, startDeps.plugins, {}]),
       security: setupDeps.core.security,
+      workspace: setupDeps.core.workspace,
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
