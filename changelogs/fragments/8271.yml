@@ -1,0 +1,2 @@
+feat:
+- Cached data structures TTL to prevent stale objects in session ([#8271](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8271))
