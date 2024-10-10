@@ -118,13 +118,15 @@
   .searchBar-wrapper {
     padding: $euiSize;
     padding-top: $euiSizeS;
-    margin-right: $euiSize;
     background-color: transparent;
     flex-grow: 0;
 
     .searchInput {
-      border-radius: $euiSizeS;
-      background-color: transparent;
+      background-color: transparentize(white, 0.5);
+    }
+
+    .searchInput:focus {
+      background-color: white;
     }
   }
 

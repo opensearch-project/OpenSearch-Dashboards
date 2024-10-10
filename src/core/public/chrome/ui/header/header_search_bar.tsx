@@ -166,6 +166,7 @@ export const HeaderSearchBar = ({ globalSearchStrategies, panel, onSearchResultC
       setIsLoading(false);
       setResults(sections);
     } else {
+      setIsPopoverOpen(false);
       setResults([]);
     }
   };
