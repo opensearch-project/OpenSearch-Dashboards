@@ -1,0 +1,2 @@
+feat:
+- Refactor data source list page to include data source association features for workspace ([#8545](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8545))

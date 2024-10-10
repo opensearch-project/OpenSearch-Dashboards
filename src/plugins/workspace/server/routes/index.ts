@@ -283,6 +283,58 @@ export function registerRoutes({
     })
   );
 
+  router.post(
+    {
+      path: `${WORKSPACES_API_BASE_URL}/_associate`,
+      validate: {
+        body: schema.object({
+          workspaceId: schema.string(),
+          savedObjects: schema.arrayOf(
+            schema.object({ id: schema.string(), type: schema.string() })
+          ),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const { workspaceId, savedObjects } = req.body;
+
+      const result = await client.associate(
+        {
+          request: req,
+        },
+        workspaceId,
+        savedObjects
+      );
+      return res.ok({ body: result });
+    })
+  );
+
+  router.post(
+    {
+      path: `${WORKSPACES_API_BASE_URL}/_dissociate`,
+      validate: {
+        body: schema.object({
+          workspaceId: schema.string(),
+          savedObjects: schema.arrayOf(
+            schema.object({ id: schema.string(), type: schema.string() })
+          ),
+        }),
+      },
+    },
+    router.handleLegacyErrors(async (context, req, res) => {
+      const { workspaceId, savedObjects } = req.body;
+
+      const result = await client.dissociate(
+        {
+          request: req,
+        },
+        workspaceId,
+        savedObjects
+      );
+      return res.ok({ body: result });
+    })
+  );
+
   // duplicate saved objects among workspaces
   registerDuplicateRoute(router, logger, client, maxImportExportSize);
 }
