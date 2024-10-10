@@ -52,6 +52,7 @@ import {
   EuiHorizontalRule,
   EuiCode,
   EuiText,
+  EuiFormControlLayout,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { QueryBarWrapper } from '../query_bar_wrapper';
@@ -164,16 +165,18 @@ export class TablePanelConfig extends Component {
                       />
                     }
                   >
-                    {/*
-                      EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-                      Should it be number or string?
-                    */}
-                    <input
-                      className="tvbAgg__input"
-                      type="number"
-                      onChange={handleTextChange('pivot_rows')}
-                      value={model.pivot_rows}
-                    />
+                    <EuiFormControlLayout compressed={true}>
+                      {/*
+                        EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+                        Should it be number or string?
+                      */}
+                      <input
+                        className="euiFieldText euiFieldText--compressed"
+                        type="number"
+                        onChange={handleTextChange('pivot_rows')}
+                        value={model.pivot_rows}
+                      />
+                    </EuiFormControlLayout>
                   </EuiCompressedFormRow>
                 </EuiFlexItem>
               </EuiFlexGroup>

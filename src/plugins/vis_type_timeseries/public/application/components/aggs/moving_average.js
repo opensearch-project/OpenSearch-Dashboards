@@ -45,6 +45,7 @@ import {
   EuiSpacer,
   EuiCompressedFormRow,
   EuiCompressedFieldNumber,
+  EuiFormControlLayout,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { MODEL_TYPES } from '../../../../common/model_options';
@@ -207,16 +208,18 @@ export const MovingAverageAgg = (props) => {
               })
             }
           >
-            {/*
-              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-              Should it be text or number?
-            */}
-            <input
-              className="tvbAgg__input"
-              type="text"
-              onChange={handleNumberChange('window')}
-              value={model.window}
-            />
+            <EuiFormControlLayout compressed={true}>
+              {/*
+                EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+                Should it be text or number?
+              */}
+              <input
+                className="euiFieldText euiFieldText--compressed"
+                type="text"
+                onChange={handleNumberChange('window')}
+                value={model.window}
+              />
+            </EuiFormControlLayout>
           </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -65,6 +65,7 @@ export const metricsVisDefinition = {
           ],
           separate_axis: 0,
           axis_position: 'right',
+          axis_scale: 'normal',
           formatter: 'number',
           chart_type: 'line',
           line_width: 1,

@@ -47,13 +47,14 @@ import {
   EuiCompressedFieldNumber,
   EuiFormLabel,
   EuiSpacer,
+  EuiFormControlLayout,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@osd/i18n/react';
 import { getDefaultQueryLanguage } from '../../lib/get_default_query_language';
 import { QueryBarWrapper } from '../../query_bar_wrapper';
 
 import { isPercentDisabled } from '../../lib/stacked';
-import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
+import { STACKED_OPTIONS, AXIS_POSITION } from '../../../visualizations/constants/chart';
 
 export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
@@ -114,18 +115,46 @@ export const TimeseriesConfig = injectI18n(function (props) {
         id: 'visTypeTimeseries.timeSeries.rightLabel',
         defaultMessage: 'Right',
       }),
-      value: 'right',
+      value: AXIS_POSITION.RIGHT,
     },
     {
       label: intl.formatMessage({
         id: 'visTypeTimeseries.timeSeries.leftLabel',
         defaultMessage: 'Left',
       }),
-      value: 'left',
+      value: AXIS_POSITION.LEFT,
+    },
+    {
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.timeSeries.hiddenLabel',
+        defaultMessage: 'Hidden',
+      }),
+      value: AXIS_POSITION.HIDDEN,
     },
   ];
+
   const selectedAxisPosOption = positionOptions.find((option) => {
     return model.axis_position === option.value;
+  });
+
+  const scaleOptions = [
+    {
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.timeseries.scaleOptions.normalLabel',
+        defaultMessage: 'Normal',
+      }),
+      value: 'normal',
+    },
+    {
+      label: intl.formatMessage({
+        id: 'visTypeTimeseries.timeseries.scaleOptions.logLabel',
+        defaultMessage: 'Log',
+      }),
+      value: 'log',
+    },
+  ];
+  const selectedAxisScaleOption = scaleOptions.find((option) => {
+    return model.axis_scale === option.value;
   });
 
   const chartTypeOptions = [
@@ -505,17 +534,19 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            {/*
-              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-              It accepts a null value, but is passed a empty string.
-            */}
-            <input
-              className="tvbAgg__input"
-              type="number"
-              disabled={disableSeparateYaxis}
-              onChange={handleTextChange('axis_min')}
-              value={model.axis_min}
-            />
+            <EuiFormControlLayout compressed={true}>
+              {/*
+                EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+                It accepts a null value, but is passed a empty string.
+              */}
+              <input
+                className="euiFieldText euiFieldText--compressed"
+                type="number"
+                disabled={disableSeparateYaxis}
+                onChange={handleTextChange('axis_min')}
+                value={model.axis_min}
+              />
+            </EuiFormControlLayout>
           </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -528,16 +559,19 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            {/*
-              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-              It accepts a null value, but is passed a empty string.
-            */}
-            <input
-              className="tvbAgg__input"
-              disabled={disableSeparateYaxis}
-              onChange={handleTextChange('axis_max')}
-              value={model.axis_max}
-            />
+            <EuiFormControlLayout compressed={true}>
+              {/*
+                EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+                It accepts a null value, but is passed a empty string.
+              */}
+              <input
+                className="euiFieldText euiFieldText--compressed"
+                type="number"
+                disabled={disableSeparateYaxis}
+                onChange={handleTextChange('axis_max')}
+                value={model.axis_max}
+              />
+            </EuiFormControlLayout>
           </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -556,6 +590,26 @@ export const TimeseriesConfig = injectI18n(function (props) {
               options={positionOptions}
               selectedOptions={selectedAxisPosOption ? [selectedAxisPosOption] : []}
               onChange={handleSelectChange('axis_position')}
+              singleSelection={{ asPlainText: true }}
+            />
+          </EuiCompressedFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiCompressedFormRow
+            id={htmlId('axisScale')}
+            label={
+              <FormattedMessage
+                id="visTypeTimeseries.timeseries.optionsTab.axisScaleLabel"
+                defaultMessage="Axis scale"
+              />
+            }
+          >
+            <EuiCompressedComboBox
+              isClearable={false}
+              isDisabled={disableSeparateYaxis}
+              options={scaleOptions}
+              selectedOptions={selectedAxisScaleOption ? [selectedAxisScaleOption] : []}
+              onChange={handleSelectChange('axis_scale')}
               singleSelection={{ asPlainText: true }}
             />
           </EuiCompressedFormRow>
