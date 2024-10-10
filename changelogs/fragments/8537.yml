@@ -1,0 +1,2 @@
+fix:
+- [MDS] Mute the non-mds endpoints for direct query data connections ([#8537](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8537))
