@@ -177,7 +177,7 @@ tableSourceClause
    ;
 
 renameClasue
-   : orignalField = wcFieldExpression AS renamedField = wcFieldExpression
+   : orignalField = fieldExpression AS renamedField = ID
    ;
 
 byClause
@@ -258,7 +258,7 @@ logicalExpression
    ;
 
 comparisonExpression
-   : left = valueExpression comparisonOperator right = valueExpression  # compareExpr
+   : left = valueExpression comparisonOperator right = literalValue  # compareExpr
    | valueExpression IN valueList                                       # inExpr
    ;
 
@@ -696,11 +696,11 @@ stringLiteral
    ;
 
 integerLiteral
-   : (PLUS | MINUS)? INTEGER_LITERAL
+   : INTEGER_LITERAL
    ;
 
 decimalLiteral
-   : (PLUS | MINUS)? DECIMAL_LITERAL
+   : DECIMAL_LITERAL
    ;
 
 booleanLiteral
