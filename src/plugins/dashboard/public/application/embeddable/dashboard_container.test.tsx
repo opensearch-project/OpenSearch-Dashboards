@@ -29,7 +29,7 @@
  */
 
 import { I18nProvider } from '@osd/i18n/react';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { setTimeout } from 'timers/promises';
 import {
   CONTEXT_MENU_TRIGGER,
   EmbeddablePanel,
@@ -136,7 +136,7 @@ test('Container view mode change propagates to existing children', async () => {
     },
   });
   const container = new DashboardContainer(initialInput, options);
-  await nextTick();
+  await setTimeout();
 
   const embeddable = await container.getChild('123');
   expect(embeddable.getInput().viewMode).toBe(ViewMode.VIEW);
@@ -228,18 +228,18 @@ test('DashboardContainer in edit mode shows edit mode actions', async () => {
   expect(editAction.length).toBe(0);
 
   container.updateInput({ viewMode: ViewMode.EDIT });
-  await nextTick();
+  await setTimeout();
   component.update();
   findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  await nextTick();
+  await setTimeout();
   component.update();
   expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(0);
   findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  await nextTick();
+  await setTimeout();
   component.update();
   expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(1);
 
-  await nextTick();
+  await setTimeout();
   component.update();
 
   // TODO: Address this.
