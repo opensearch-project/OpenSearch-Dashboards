@@ -58,6 +58,7 @@ import {
   isConcatenatedModule,
   getModulePath,
 } from './webpack_helpers';
+import { getHashes } from '../optimizer/get_hashes';
 
 const PLUGIN_NAME = '@osd/optimizer';
 
@@ -178,28 +179,21 @@ const observeCompiler = (
       }
 
       const files = Array.from(referencedFiles).sort(ascending((p) => p));
-      const mtimes = new Map(
-        files.map((path): [string, number | undefined] => {
-          try {
-            return [path, compiler.inputFileSystem.statSync(path)?.mtimeMs];
-          } catch (error) {
-            if (error?.code === 'ENOENT') {
-              return [path, undefined];
-            }
 
-            throw error;
-          }
+      getHashes(files)
+        .then((hashes) => {
+          bundle.cache.set({
+            bundleRefExportIds,
+            optimizerCacheKey: workerConfig.optimizerCacheKey,
+            cacheKey: bundle.createCacheKey(files, hashes),
+            moduleCount,
+            workUnits,
+            files,
+          });
         })
-      );
-
-      bundle.cache.set({
-        bundleRefExportIds,
-        optimizerCacheKey: workerConfig.optimizerCacheKey,
-        cacheKey: bundle.createCacheKey(files, mtimes),
-        moduleCount,
-        workUnits,
-        files,
-      });
+        .catch((_err) => {
+          // If cache fails to write, it's alright to ignore and reattempt next build
+        });
 
       return compilerMsgs.compilerSuccess({
         moduleCount,
