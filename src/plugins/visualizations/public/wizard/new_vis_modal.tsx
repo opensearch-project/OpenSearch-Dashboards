@@ -170,7 +170,6 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
     }
 
     params = [`type=${encodeURIComponent(visType.name)}`];
-    searchId = encodeURIComponent(searchId || '');
 
     if (searchType) {
       params.push(`${searchType === 'search' ? 'savedSearchId' : 'indexPattern'}=${searchId}`);
