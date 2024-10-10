@@ -80,6 +80,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
     return fields.map((field: any) => ({
       name: field.name,
       type: field.type,
+      aggregatable: field?.aggregatable,
     }));
   },
 

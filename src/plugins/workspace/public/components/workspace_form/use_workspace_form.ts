@@ -120,17 +120,36 @@ export const useWorkspaceForm = ({
         return;
       }
 
-      onSubmit?.({
+      onSubmit?.(
+        {
+          name: currentFormData.name!,
+          description: currentFormData.description,
+          color: currentFormData.color || '#FFFFFF',
+          features: currentFormData.features,
+          permissionSettings: currentFormData.permissionSettings as WorkspacePermissionSetting[],
+          selectedDataSourceConnections: currentFormData.selectedDataSourceConnections,
+        },
+        true
+      );
+    },
+    [onSubmit, permissionEnabled]
+  );
+
+  const handleSubmitPermissionSettings = (settings: WorkspacePermissionSetting[]) => {
+    setPermissionSettings(settings);
+    const currentFormData = getFormDataRef.current();
+    onSubmit?.(
+      {
         name: currentFormData.name!,
         description: currentFormData.description,
         color: currentFormData.color || '#FFFFFF',
         features: currentFormData.features,
-        permissionSettings: currentFormData.permissionSettings as WorkspacePermissionSetting[],
+        permissionSettings: settings,
         selectedDataSourceConnections: currentFormData.selectedDataSourceConnections,
-      });
-    },
-    [onSubmit, permissionEnabled]
-  );
+      },
+      false
+    );
+  };
 
   const handleColorChange = useCallback<Required<EuiColorPickerProps>['onChange']>((text) => {
     setColor(text);
@@ -165,5 +184,6 @@ export const useWorkspaceForm = ({
     setPermissionSettings,
     setSelectedDataSourceConnections,
     onAppLeave,
+    handleSubmitPermissionSettings,
   };
 };
