@@ -140,7 +140,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
               );
             }, 1000);
           }
-          return;
+          return result;
         } else {
           setIsFormSubmitting(false);
           throw new Error(result?.error ? result?.error : 'update workspace failed');
