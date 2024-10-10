@@ -34,6 +34,7 @@ import { promisify } from 'util';
 
 import { unique } from './core/helper';
 import { Translation } from './translation';
+import { normalizeLocale } from './core';
 
 const TRANSLATION_FILE_EXTENSION = '.json';
 
@@ -69,7 +70,9 @@ function getLocaleFromFileName(fullFileName: string) {
     );
   }
 
-  return path.basename(fullFileName, TRANSLATION_FILE_EXTENSION);
+  const basename = path.basename(fullFileName, TRANSLATION_FILE_EXTENSION);
+
+  return normalizeLocale(basename);
 }
 
 /**
@@ -129,6 +132,15 @@ export function registerTranslationFiles(arrayOfPaths: string[] = []) {
  */
 export function getRegisteredLocales() {
   return Object.keys(translationsRegistry);
+}
+
+/**
+ * Check if a locale is registered; returns undefined if i18n is uninitialized
+ */
+export function isRegisteredLocale(locale: string): boolean | undefined {
+  const normalizedLocale = normalizeLocale(locale);
+
+  return translationsRegistry?.hasOwnProperty(normalizedLocale);
 }
 
 /**

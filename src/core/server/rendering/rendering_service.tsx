@@ -31,7 +31,7 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { first, take } from 'rxjs/operators';
-import { i18n } from '@osd/i18n';
+import { i18n, i18nLoader } from '@osd/i18n';
 import { Agent as HttpsAgent } from 'https';
 
 import Axios from 'axios';
@@ -100,6 +100,15 @@ export class RenderingService {
           opensearchDashboardsConfig as OpenSearchDashboardsConfigType
         );
 
+        let locale = i18n.getLocale();
+        const localeOverride = (request.query as any)?.locale?.trim?.();
+        if (localeOverride) {
+          const normalizedLocale = i18n.normalizeLocale(localeOverride);
+          if (i18nLoader.isRegisteredLocale(normalizedLocale)) {
+            locale = normalizedLocale;
+          }
+        }
+
         const dynamicConfigStartServices = await dynamicConfig.getStartService();
 
         const metadata: RenderingMetadata = {
@@ -108,7 +117,7 @@ export class RenderingService {
           bootstrapScriptUrl: `${basePath}/bootstrap.js`,
           startupScriptUrl: `${basePath}/startup.js`,
           i18n: i18n.translate,
-          locale: i18n.getLocale(),
+          locale,
           injectedMetadata: {
             version: env.packageInfo.version,
             buildNumber: env.packageInfo.buildNum,
@@ -118,7 +127,7 @@ export class RenderingService {
             env,
             anonymousStatusPage: status.isStatusPageAnonymous(),
             i18n: {
-              translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
+              translationsUrl: `${basePath}/translations/${locale}.json`,
             },
             csp: { warnLegacyBrowsers: http.csp.warnLegacyBrowsers },
             vars: vars ?? {},
