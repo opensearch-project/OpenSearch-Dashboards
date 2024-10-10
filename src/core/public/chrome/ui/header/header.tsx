@@ -661,7 +661,7 @@ export function Header({
             setCurrentNavGroup={setCurrentNavGroup}
             capabilities={application.capabilities}
             currentWorkspace$={observables.currentWorkspace$}
-            globalSearchStrategies={GlobalSearchStrategies}
+            globalSearchStrategies={globalSearchStrategies}
           />
         ) : (
           <CollapsibleNav
