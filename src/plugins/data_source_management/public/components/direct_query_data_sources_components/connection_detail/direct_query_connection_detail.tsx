@@ -492,19 +492,19 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
 
   return (
     <>
-      {dataSourceMenuView}
       <EuiPage paddingSize="none">
         <EuiPageBody>
           <EuiPageHeader style={{ justifyContent: 'spaceBetween' }}>
             <EuiPageHeaderSection style={{ width: '100%', justifyContent: 'space-between' }}>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem>
                   {!useNewUX && (
                     <EuiText data-test-subj="datasourceTitle" size="s">
                       <h1>{datasourceDetails.name}</h1>
                     </EuiText>
                   )}
                 </EuiFlexItem>
+                <EuiFlexItem grow={false}>{dataSourceMenuView}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageHeaderSection>
           </EuiPageHeader>
