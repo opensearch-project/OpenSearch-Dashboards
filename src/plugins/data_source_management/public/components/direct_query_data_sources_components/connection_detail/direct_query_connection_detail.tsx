@@ -491,48 +491,46 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   const tabs = [...conditionalTabs, ...genericTabs];
 
   return (
-    <>
-      <EuiPage paddingSize="none">
-        <EuiPageBody>
-          <EuiPageHeader style={{ justifyContent: 'spaceBetween' }}>
-            <EuiPageHeaderSection style={{ width: '100%', justifyContent: 'space-between' }}>
-              <EuiFlexGroup alignItems="center">
-                <EuiFlexItem>
-                  {!useNewUX && (
-                    <EuiText data-test-subj="datasourceTitle" size="s">
-                      <h1>{datasourceDetails.name}</h1>
-                    </EuiText>
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>{dataSourceMenuView}</EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPageHeaderSection>
-          </EuiPageHeader>
-          <DatasourceOverview />
-          <EuiSpacer />
-          {integrationsFlyout}
-          {datasourceDetails.status !== 'ACTIVE' ? (
-            <InactiveDataConnectionCallout
-              datasourceDetails={datasourceDetails}
-              fetchSelectedDatasource={fetchSelectedDatasource}
-            />
-          ) : (
-            <>
-              <EuiAccordion
-                id="queryOrAccelerateAccordion"
-                buttonContent={'Get started'}
-                initialIsOpen={true}
-                paddingSize="m"
-              >
-                <QueryOrAccelerateData />
-              </EuiAccordion>
-              <EuiTabbedContent tabs={tabs} size="s" />
-            </>
-          )}
+    <EuiPage paddingSize="none">
+      <EuiPageBody>
+        <EuiPageHeader style={{ justifyContent: 'spaceBetween' }}>
+          <EuiPageHeaderSection style={{ width: '100%', justifyContent: 'space-between' }}>
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem>
+                {!useNewUX && (
+                  <EuiText data-test-subj="datasourceTitle" size="s">
+                    <h1>{datasourceDetails.name}</h1>
+                  </EuiText>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{dataSourceMenuView}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPageHeaderSection>
+        </EuiPageHeader>
+        <DatasourceOverview />
+        <EuiSpacer />
+        {integrationsFlyout}
+        {datasourceDetails.status !== 'ACTIVE' ? (
+          <InactiveDataConnectionCallout
+            datasourceDetails={datasourceDetails}
+            fetchSelectedDatasource={fetchSelectedDatasource}
+          />
+        ) : (
+          <>
+            <EuiAccordion
+              id="queryOrAccelerateAccordion"
+              buttonContent={'Get started'}
+              initialIsOpen={true}
+              paddingSize="m"
+            >
+              <QueryOrAccelerateData />
+            </EuiAccordion>
+            <EuiTabbedContent tabs={tabs} size="s" />
+          </>
+        )}
 
-          <EuiSpacer />
-        </EuiPageBody>
-      </EuiPage>
-    </>
+        <EuiSpacer />
+      </EuiPageBody>
+    </EuiPage>
   );
 };
