@@ -109,7 +109,6 @@ import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { DuplicateObject } from '../types';
 import { formatWorkspaceIdParams } from '../../utils';
 import { NavigationPublicPluginStart } from '../../../../navigation/public';
-import { WorkspaceObject } from '../../../../workspaces/public';
 
 interface ExportAllOption {
   id: string;
@@ -162,6 +161,7 @@ export interface SavedObjectsTableState {
   isIncludeReferencesDeepChecked: boolean;
   currentWorkspace?: WorkspaceObject;
   workspaceEnabled: boolean;
+  workspaceIdNameMap: Map<string, string>;
   availableWorkspaces?: WorkspaceAttribute[];
   isShowingDuplicateResultFlyout: boolean;
   failedCopies: SavedObjectsImportError[];
@@ -202,6 +202,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions: [],
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
+      workspaceIdNameMap: new Map<string, string>(),
       currentWorkspace: this.props.workspaces.currentWorkspace$.getValue(),
       availableWorkspaces: this.props.workspaces.workspaceList$.getValue(),
       workspaceEnabled: this.props.applications.capabilities.workspaces.enabled,
@@ -379,6 +380,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     this.workspacesSubscription = workspace.workspaceList$.subscribe((workspaceList) => {
       this.setState({ availableWorkspaces: workspaceList });
     });
+    this.setState({ workspaceIdNameMap: this.workspaceNameIdLookup });
   };
 
   unSubscribeWorkspace = () => {
@@ -1083,6 +1085,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       page,
       perPage,
       savedObjects,
+      workspaceIdNameMap,
       filteredItemCount,
       isSearching,
       savedObjectCounts,
@@ -1169,7 +1172,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         searchThreshold: 1,
       });
     }
-
     return (
       <EuiPageContent horizontalPosition="center" paddingSize={useUpdatedUX ? 'm' : undefined}>
         {this.renderFlyout()}
@@ -1223,6 +1225,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             pageIndex={page}
             pageSize={perPage}
             items={savedObjects}
+            workspaceIdNameMap={workspaceIdNameMap}
             totalItemCount={filteredItemCount}
             isSearching={isSearching}
             onShowRelationships={this.onShowRelationships}
