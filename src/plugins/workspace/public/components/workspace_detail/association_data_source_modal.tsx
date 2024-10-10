@@ -266,11 +266,13 @@ export const AssociationDataSourceModal = ({
               'workspace.detail.dataSources.associateModal.searchPlaceholder',
               { defaultMessage: 'Search' }
             ),
+            compressed: true,
           }}
           options={options}
           onChange={handleSelectionChange}
           isLoading={isLoading}
           renderOption={renderOption}
+          height={256}
         >
           {(list, search) => (
             <Fragment>
@@ -285,7 +287,7 @@ export const AssociationDataSourceModal = ({
         <EuiSmallButton onClick={closeModal}>
           <FormattedMessage
             id="workspace.detail.dataSources.associateModal.close.button"
-            defaultMessage="Close"
+            defaultMessage="Cancel"
           />
         </EuiSmallButton>
         <EuiSmallButton

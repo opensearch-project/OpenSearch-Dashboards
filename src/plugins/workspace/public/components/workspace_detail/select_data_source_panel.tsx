@@ -257,6 +257,7 @@ export const SelectDataSourceDetailPanel = ({
           />
         </EuiText>
       )}
+      <EuiSpacer />
     </EuiTextAlign>
   );
 
@@ -303,8 +304,11 @@ export const SelectDataSourceDetailPanel = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiHorizontalRule margin="m" />
+      {formData.selectedDataSourceConnections.length > 0 ? (
+        <EuiHorizontalRule margin="m" />
+      ) : (
+        <EuiSpacer size="xl" />
+      )}
       {renderTableContent()}
       {isVisible && (
         <AssociationDataSourceModal
