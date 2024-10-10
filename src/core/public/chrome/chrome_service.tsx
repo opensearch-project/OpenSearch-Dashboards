@@ -399,7 +399,7 @@ export class ChromeService {
           workspaceList$={workspaces.workspaceList$}
           currentWorkspace$={workspaces.currentWorkspace$}
           useUpdatedHeader={this.useUpdatedHeader}
-          GlobalSearchStrategies={globalSearch.getAllSearchStrategies()}
+          globalSearchStrategies={globalSearch.getAllSearchStrategies()}
         />
       ),
 
@@ -488,6 +488,7 @@ export class ChromeService {
 export interface ChromeSetup {
   registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => void;
   navGroup: ChromeNavGroupServiceSetupContract;
+  /** {@inheritdoc GlobalSearchService} */
   globalSearch: GlobalSearchServiceSetupContract;
 }
 

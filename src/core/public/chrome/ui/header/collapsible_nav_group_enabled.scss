@@ -121,6 +121,11 @@
     margin-right: $euiSize;
     background-color: transparent;
     flex-grow: 0;
+
+    .searchInput {
+      border-radius: $euiSizeS;
+      background-color: transparent;
+    }
   }
 
   .searchBarIcon {

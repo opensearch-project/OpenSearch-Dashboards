@@ -78,6 +78,7 @@ export const GlobalSearchPageItem = ({
     <div
       key={link.id}
       aria-hidden="true"
+      data-test-subj={`global-search-item-${link.id}`}
       onClick={() => {
         onNavItemClick(link.id);
       }}

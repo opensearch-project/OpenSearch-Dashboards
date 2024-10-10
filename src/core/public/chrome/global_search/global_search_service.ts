@@ -25,6 +25,7 @@ export interface GlobalSearchStrategy {
   /**
    * do the search and return search result with a React element
    * @param value search query
+   * @param callback callback function when search is done
    */
   doSearch(value: string, callback?: () => void): Promise<ReactNode[]>;
 }
@@ -37,7 +38,23 @@ export interface GlobalSearchServiceStartContract {
   getAllSearchStrategies(): GlobalSearchStrategy[];
 }
 
-/** @experimental */
+/**
+ * {@link GlobalSearchStrategy | APIs} for registering new global search strategy when do search from header search bar .
+ *
+ * @example
+ * Register a GlobalSearchStrategy to search pages
+ * ```jsx
+ * chrome.globalSearch.registerSearchStrategy({
+ *   id: 'test',
+ *   type: SearchObjectTypes.PAGES,
+ *   doSearch: async (query) => {
+ *     return [];
+ *   },
+ * })
+ * ```
+ *
+ * @experimental
+ */
 export class GlobalSearchService {
   private searchStrategies = [] as GlobalSearchStrategy[];
 
@@ -47,7 +64,7 @@ export class GlobalSearchService {
     });
     if (exists) {
       // eslint-disable-next-line no-console
-      console.warn('duplicate SearchStrategy id found');
+      console.warn('Duplicate SearchStrategy id found');
       return;
     }
     this.searchStrategies.push(searchStrategy);
@@ -58,6 +75,7 @@ export class GlobalSearchService {
       registerSearchStrategy: this.registerSearchStrategy.bind(this),
     };
   }
+
   public start() {
     return {
       getAllSearchStrategies: () => this.searchStrategies,

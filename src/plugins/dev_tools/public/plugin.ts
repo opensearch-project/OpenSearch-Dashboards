@@ -157,7 +157,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
 
     if (coreSetup.chrome.navGroup.getNavGroupEnabled()) {
       /**
-       * register search strategy for dev tools modals
+       * register search strategy for dev tools
        */
       coreSetup.chrome.globalSearch.registerSearchStrategy({
         id: 'devtools',

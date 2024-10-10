@@ -123,7 +123,7 @@ export interface HeaderProps {
   workspaceList$: Observable<WorkspaceObject[]>;
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
-  GlobalSearchStrategies?: GlobalSearchStrategy[];
+  globalSearchStrategies?: GlobalSearchStrategy[];
 }
 
 const hasValue = (value: any) => {
@@ -149,7 +149,7 @@ export function Header({
   navGroupEnabled,
   setCurrentNavGroup,
   useUpdatedHeader,
-  GlobalSearchStrategies,
+  globalSearchStrategies,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);

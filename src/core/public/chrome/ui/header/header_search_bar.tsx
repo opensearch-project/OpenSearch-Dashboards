@@ -24,23 +24,23 @@ import { GlobalSearchStrategy, SearchObjectTypes } from '../../global_search';
 interface Props {
   globalSearchStrategies: GlobalSearchStrategy[];
   panel?: boolean;
-  onClick?: () => void;
+  onSearchResultClick?: () => void;
 }
 
 export const HeaderSearchBarIcon = ({ globalSearchStrategies }: Props) => {
-  const [isSearchBarOpen, setIsSearchBarOpen] = useState(false);
+  const [isSearchPopoverOpen, setIsSearchPopoverOpen] = useState(false);
   return (
     <EuiPopover
       panelPaddingSize="s"
       anchorPosition="downCenter"
       repositionOnScroll={true}
-      isOpen={isSearchBarOpen}
+      isOpen={isSearchPopoverOpen}
       closePopover={() => {
-        setIsSearchBarOpen(false);
+        setIsSearchPopoverOpen(false);
       }}
       button={
         <EuiToolTip
-          content={i18n.translate('core.globalSearch.title', {
+          content={i18n.translate('core.globalSearch.icon.toolTip', {
             defaultMessage: 'Search',
           })}
         >
@@ -48,8 +48,9 @@ export const HeaderSearchBarIcon = ({ globalSearchStrategies }: Props) => {
             aria-label="search"
             iconType="search"
             color="text"
+            data-test-subj="search-icon"
             onClick={() => {
-              setIsSearchBarOpen(!isSearchBarOpen);
+              setIsSearchPopoverOpen(!isSearchPopoverOpen);
             }}
           />
         </EuiToolTip>
@@ -64,14 +65,14 @@ export const HeaderSearchBarIcon = ({ globalSearchStrategies }: Props) => {
         <HeaderSearchBar
           globalSearchStrategies={globalSearchStrategies}
           panel
-          onClick={() => setIsSearchBarOpen(false)}
+          onSearchResultClick={() => setIsSearchPopoverOpen(false)}
         />
       </EuiPanel>
     </EuiPopover>
   );
 };
 
-export const HeaderSearchBar = ({ globalSearchStrategies, panel, onClick }: Props) => {
+export const HeaderSearchBar = ({ globalSearchStrategies, panel, onSearchResultClick }: Props) => {
   const [results, setResults] = useState([] as React.JSX.Element[]);
   const [isLoading, setIsLoading] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -79,44 +80,46 @@ export const HeaderSearchBar = ({ globalSearchStrategies, panel, onClick }: Prop
   const inputRef = (node: HTMLElement | null) => setInputEl(node);
   const [inputEl, setInputEl] = useState<HTMLElement | null>(null);
 
-  const noResult = [
-    <EuiText color="subdued" size="xs">
-      {i18n.translate('core.globalSearch.result.empty.description', {
-        defaultMessage: 'No results found.',
-      })}
-    </EuiText>,
-  ];
-
   const closePopover = () => {
     setIsPopoverOpen(false);
   };
 
-  const PagesSection = (items: ReactNode[]) => {
+  const pagesSection = (items: ReactNode[]) => {
     return (
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem>
           <EuiTitle size="s">
             <EuiText size="xs" color="subdued">
-              {i18n.translate('core.searchBar.pages.section.title', { defaultMessage: 'Pages' })}
+              {i18n.translate('core.globalSearch.pageSection.title', { defaultMessage: 'Pages' })}
             </EuiText>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem>
           {items.length ? (
             <EuiListGroup flush={true} gutterSize="none" maxWidth={false}>
-              {items.map((item) => (
-                <EuiListGroupItem label={item} size="s" />
+              {items.map((item, index) => (
+                <EuiListGroupItem key={index} label={item} size="s" />
               ))}
             </EuiListGroup>
           ) : (
             <EuiText color="subdued" size="xs">
-              No results found.
+              {i18n.translate('core.globalSearch.emptyResult.description', {
+                defaultMessage: 'No results found.',
+              })}
             </EuiText>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
   };
+
+  const searchResultSections = results && (
+    <EuiFlexGroup direction="column" gutterSize="none">
+      {results.map((result) => (
+        <EuiFlexItem key={result.key}>{result}</EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  );
 
   const onSearch = async (value: string) => {
     // do page search
@@ -125,7 +128,7 @@ export const HeaderSearchBar = ({ globalSearchStrategies, panel, onClick }: Prop
       setIsLoading(true);
       const settleResults = await Promise.allSettled(
         globalSearchStrategies.map((strategy) => {
-          const callback = onClick || closePopover;
+          const callback = onSearchResultClick || closePopover;
           return strategy.doSearch(value, callback).then((items) => {
             return { items, type: strategy.type };
           });
@@ -149,13 +152,13 @@ export const HeaderSearchBar = ({ globalSearchStrategies, panel, onClick }: Prop
       const sections = Object.entries(searchResults).map(([key, items]) => {
         switch (key) {
           case SearchObjectTypes.PAGES:
-            return PagesSection(items);
+            return pagesSection(items);
         }
         return <></>;
       });
 
       setIsLoading(false);
-      setResults(sections.length > 0 ? sections : noResult);
+      setResults(sections);
     } else {
       setResults([]);
     }
@@ -166,10 +169,14 @@ export const HeaderSearchBar = ({ globalSearchStrategies, panel, onClick }: Prop
       compressed
       incremental
       onSearch={onSearch}
-      placeholder="Search the menu"
+      fullWidth
+      placeholder={i18n.translate('core.globalSearch.input.placeholder', {
+        defaultMessage: 'Search the menu',
+      })}
       isLoading={isLoading}
-      aria-label="Search for menus"
-      style={{ borderRadius: '8px', backgroundColor: 'transparent' }}
+      aria-label="Search the menus"
+      data-test-subj="search-input"
+      className="searchInput"
       onFocus={() => {
         if (inputEl) {
           const width = inputEl.getBoundingClientRect().width;
@@ -188,16 +195,15 @@ export const HeaderSearchBar = ({ globalSearchStrategies, panel, onClick }: Prop
 
   if (panel) {
     return (
-      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+      <EuiPanel
+        hasBorder={false}
+        hasShadow={false}
+        paddingSize="s"
+        data-test-subj="search-result-panel"
+      >
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>{searchBar}</EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="none">
-              {results?.map((result) => (
-                <EuiFlexItem key={result.key}>{result}</EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          <EuiFlexItem>{searchResultSections}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
     );
@@ -214,21 +220,14 @@ export const HeaderSearchBar = ({ globalSearchStrategies, panel, onClick }: Prop
         zIndex={2000}
         panelPaddingSize="s"
         attachToAnchor={true}
-        hasArrow={false}
         ownFocus={false}
         display="block"
-        repositionOnScroll={false}
         isOpen={isPopoverOpen}
         closePopover={() => {
-          setResults([]);
           setIsPopoverOpen(false);
         }}
       >
-        <EuiFlexGroup direction="column">
-          {results?.map((result) => (
-            <EuiFlexItem key={result.key}>{result}</EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+        {searchResultSections}
       </EuiPopover>
     );
   }

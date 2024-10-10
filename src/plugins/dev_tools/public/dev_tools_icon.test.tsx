@@ -8,10 +8,12 @@ import { fireEvent, render } from '@testing-library/react';
 import { DevToolsIcon } from './dev_tools_icon';
 import { coreMock } from '../../../core/public/mocks';
 import { urlForwardingPluginMock } from 'src/plugins/url_forwarding/public/mocks';
+import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 
 const createDepsMock = () => {
   return {
     urlForwarding: urlForwardingPluginMock.createSetupContract(),
+    uiActions: uiActionsPluginMock.createSetupContract(),
   };
 };
 
@@ -54,5 +56,13 @@ describe('<DevToolsIcon />', () => {
 
     fireEvent.click(getByTestId('openDevToolsModal'));
     await findByText('Dev tools title');
+  });
+
+  it('should register uiActions to show dev tools', async () => {
+    const coreStartMock = coreMock.createStart();
+    const deps = createDepsMock();
+    render(<DevToolsIcon core={coreStartMock} devTools={[]} deps={deps} title="Dev tools title" />);
+
+    expect(deps.uiActions.addTriggerAction).toHaveBeenCalled();
   });
 });

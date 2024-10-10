@@ -82,6 +82,7 @@ export const DevToolItem = ({
         uiActionsApi.getTrigger(DEVTOOL_TRIGGER_ID).exec({ defaultRoute: toolId });
       }}
       aria-hidden={true}
+      data-test-subj={`toolId-${toolId}`}
     >
       <EuiSimplifiedBreadcrumbs breadcrumbs={breadcrumbs} hideTrailingSeparator />
     </div>

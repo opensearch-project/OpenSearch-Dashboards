@@ -24,9 +24,6 @@ import { DEVTOOL_OPEN_ACTION, DevToolsSetupDependencies, devToolsTrigger } from 
 import './dev_tools_icon.scss';
 import { createAction } from '../../ui_actions/public';
 
-export const DEVTOOL_OPEN_KEY = 'core.dev_tools.open';
-export const DEVTOOL_DEFAULT_ROUTE_KEY = 'core.dev_tools.defaultRoute';
-
 export function DevToolsIcon({
   core,
   devTools,
