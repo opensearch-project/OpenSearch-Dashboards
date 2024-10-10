@@ -17,7 +17,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { ReactNode, useCallback, useState } from 'react';
+import React, { ReactNode, useCallback, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { GlobalSearchStrategy, SearchObjectTypes } from '../../global_search';
 
@@ -29,6 +29,7 @@ interface Props {
 
 export const HeaderSearchBarIcon = ({ globalSearchStrategies }: Props) => {
   const [isSearchPopoverOpen, setIsSearchPopoverOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   return (
     <EuiPopover
       panelPaddingSize="s"
@@ -48,9 +49,11 @@ export const HeaderSearchBarIcon = ({ globalSearchStrategies }: Props) => {
             aria-label="search"
             iconType="search"
             color="text"
+            buttonRef={buttonRef}
             data-test-subj="search-icon"
             onClick={() => {
               setIsSearchPopoverOpen(!isSearchPopoverOpen);
+              buttonRef.current?.blur();
             }}
           />
         </EuiToolTip>
@@ -65,7 +68,10 @@ export const HeaderSearchBarIcon = ({ globalSearchStrategies }: Props) => {
         <HeaderSearchBar
           globalSearchStrategies={globalSearchStrategies}
           panel
-          onSearchResultClick={() => setIsSearchPopoverOpen(false)}
+          onSearchResultClick={() => {
+            setIsSearchPopoverOpen(false);
+            buttonRef.current?.blur();
+          }}
         />
       </EuiPanel>
     </EuiPopover>
