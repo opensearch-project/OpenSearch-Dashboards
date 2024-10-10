@@ -243,6 +243,7 @@ export function MainApp(
   props: {
     devTools: readonly DevToolApp[];
     RouterComponent?: React.ComponentClass;
+    defaultRoute?: string;
   } & Pick<
     DevToolsWrapperProps,
     | 'savedObjects'
@@ -262,7 +263,9 @@ export function MainApp(
     useUpdatedUX,
     setMenuMountPoint,
     RouterComponent = Router,
+    defaultRoute,
   } = props;
+  const defaultTool = devTools.find((devTool) => devTool.id === defaultRoute) || devTools[0];
   return (
     <I18nProvider>
       <RouterComponent>
@@ -291,7 +294,7 @@ export function MainApp(
               />
             ))}
           <Route path="/">
-            <Redirect to={`/${devTools[0].id}`} />
+            <Redirect to={`/${defaultTool.id}`} />
           </Route>
         </Switch>
       </RouterComponent>

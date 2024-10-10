@@ -20,8 +20,9 @@ import { CoreStart } from 'opensearch-dashboards/public';
 import { MemoryRouter } from 'react-router-dom';
 import { MainApp } from './application';
 import { DevToolApp } from './dev_tool';
-import { DevToolsSetupDependencies } from './plugin';
+import { DEVTOOL_OPEN_ACTION, DevToolsSetupDependencies, devToolsTrigger } from './plugin';
 import './dev_tools_icon.scss';
+import { createAction } from '../../ui_actions/public';
 
 export function DevToolsIcon({
   core,
@@ -35,6 +36,20 @@ export function DevToolsIcon({
   title: string;
 }) {
   const [modalVisible, setModalVisible] = useState(false);
+
+  const [devToolTab, setDevToolTab] = useState('');
+
+  const createOpenDevToolAction = createAction<typeof DEVTOOL_OPEN_ACTION>({
+    type: DEVTOOL_OPEN_ACTION,
+    getDisplayName: () => 'Open DevTools',
+    execute: async ({ defaultRoute }) => {
+      setModalVisible(true);
+      setDevToolTab(defaultRoute);
+    },
+  });
+
+  deps.uiActions.addTriggerAction(devToolsTrigger.id, createOpenDevToolAction);
+
   const elementRef = useRef<HTMLDivElement | null>(null);
   const setMountPoint = useCallback((renderFn) => {
     renderFn(elementRef.current);
@@ -114,6 +129,7 @@ export function DevToolsIcon({
                     useUpdatedUX
                     setMenuMountPoint={setMountPoint}
                     RouterComponent={MemoryRouter}
+                    defaultRoute={devToolTab}
                   />
                   <EuiSpacer size="s" />
                   <EuiSmallButton
