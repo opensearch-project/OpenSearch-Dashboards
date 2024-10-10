@@ -63,6 +63,7 @@ import { auditTrailServiceMock } from '../audit_trail/audit_trail_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
 import { securityServiceMock } from '../security/security_service.mock';
+import { workspaceServiceMock } from '../workspace/mocks';
 
 const MockOsdServer: jest.Mock<OsdServer> = OsdServer as any;
 
@@ -114,6 +115,7 @@ beforeEach(() => {
       metrics: metricsServiceMock.createInternalSetupContract(),
       security: securityServiceMock.createSetupContract(),
       dynamicConfig: dynamicConfigServiceMock.createInternalSetupContract(),
+      workspace: workspaceServiceMock.createInternalSetupContract(),
     },
     plugins: { 'plugin-id': 'plugin-value' },
     uiPlugins: {

@@ -93,6 +93,7 @@ import {
   CoreEnvironmentUsageData,
   CoreServicesUsageData,
 } from './core_usage_data';
+import { WorkspaceSetup, WorkspaceStart } from './workspace';
 
 export { CoreUsageData, CoreConfigUsageData, CoreEnvironmentUsageData, CoreServicesUsageData };
 
@@ -480,6 +481,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   auditTrail: AuditTrailSetup;
   /** {@link DynamicConfigServiceSetup} */
   dynamicConfigService: DynamicConfigServiceSetup;
+  /** {@link WorkspaceSetup} */
+  workspace: WorkspaceSetup;
 }
 
 /**
@@ -521,6 +524,8 @@ export interface CoreStart {
   crossCompatibility: CrossCompatibilityServiceStart;
   /** {@link DynamicConfigServiceStart} */
   dynamicConfig: DynamicConfigServiceStart;
+  /** {@link WorkspaceStart} */
+  workspace: WorkspaceStart;
 }
 
 export {

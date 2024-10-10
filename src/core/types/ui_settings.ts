@@ -63,6 +63,7 @@ export interface DeprecationSettings {
 export enum UiSettingScope {
   GLOBAL = 'global',
   USER = 'user',
+  WORKSPACE = 'workspace',
 }
 
 /**
