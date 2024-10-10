@@ -18,6 +18,7 @@ import {
   EuiIcon,
   EuiCard,
   EuiAccordion,
+  EuiTitle,
 } from '@elastic/eui';
 import {
   ApplicationStart,
@@ -27,6 +28,8 @@ import {
 } from 'opensearch-dashboards/public';
 import { useLocation, useParams } from 'react-router-dom';
 import { escapeRegExp } from 'lodash';
+import s3Svg from '../../direct_query_data_sources_components/icons/s3_logo.svg';
+import prometheusSvg from '../../direct_query_data_sources_components/icons/prometheus_logo.svg';
 import { DATACONNECTIONS_BASE } from '../../../constants';
 import { DirectQueryDatasourceDetails, PrometheusProperties } from '../../../types';
 import { NoAccess } from './utils/no_access_page';
@@ -317,6 +320,25 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   const S3DatasourceOverview = () => (
     <EuiPanel>
       <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="column" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText className="overview-title">Data Source Type</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={s3Svg} size="xl" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h3>Amazon S3</h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
@@ -347,6 +369,25 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   const PrometheusDatasourceOverview = () => (
     <EuiPanel>
       <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="column" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText className="overview-title">Data Source Type</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={prometheusSvg} size="xl" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h3>Prometheus</h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
