@@ -135,10 +135,9 @@ export const useWorkspaceForm = ({
     [onSubmit, permissionEnabled]
   );
 
-  const handleSubmitPermissionSettings = (settings: WorkspacePermissionSetting[]) => {
-    setPermissionSettings(settings);
+  const handleSubmitPermissionSettings = async (settings: WorkspacePermissionSetting[]) => {
     const currentFormData = getFormDataRef.current();
-    onSubmit?.(
+    const result = await onSubmit?.(
       {
         name: currentFormData.name!,
         description: currentFormData.description,
@@ -149,6 +148,9 @@ export const useWorkspaceForm = ({
       },
       false
     );
+    if (result) {
+      setPermissionSettings(settings);
+    }
   };
 
   const handleColorChange = useCallback<Required<EuiColorPickerProps>['onChange']>((text) => {

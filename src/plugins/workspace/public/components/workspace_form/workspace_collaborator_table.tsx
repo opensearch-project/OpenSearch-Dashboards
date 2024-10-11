@@ -17,6 +17,8 @@ import {
   EuiEmptyPrompt,
   EuiContextMenuPanelDescriptor,
   EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { WorkspacePermissionSetting } from './types';
@@ -30,6 +32,7 @@ import {
   accessLevelNameToWorkspacePermissionModesMap,
 } from '../../constants';
 import { WorkspaceCollaboratorAccessLevel } from '../../types';
+import { BackgroundPic } from '../../assets/background_pic';
 
 export type PermissionSetting = Pick<WorkspacePermissionSetting, 'id'> &
   Partial<WorkspacePermissionSetting>;
@@ -79,27 +82,34 @@ export const WorkspaceCollaboratorTable = ({
 
   const emptyStateMessage = useMemo(() => {
     return (
-      <EuiEmptyPrompt
-        title={
-          <h3>
-            {i18n.translate('workspace.workspaceDetail.collaborator.emptyState.title', {
-              defaultMessage: 'Your workspace doesn’t have any collaborators.',
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiEmptyPrompt
+            title={
+              <h3>
+                {i18n.translate('workspace.workspaceDetail.collaborator.emptyState.title', {
+                  defaultMessage: 'Your workspace doesn’t have any collaborators.',
+                })}
+              </h3>
+            }
+            titleSize="s"
+            body={i18n.translate('workspace.workspaceDetail.collaborator.emptyState.body', {
+              defaultMessage:
+                'Currently you’re the only user who has access to the workspace as an owner. Share this workspace by adding collaborators.',
             })}
-          </h3>
-        }
-        titleSize="s"
-        body={i18n.translate('workspace.workspaceDetail.collaborator.emptyState.body', {
-          defaultMessage:
-            'Currently you’re the only user who has access to the workspace as an owner. Share this workspace by adding collaborators.',
-        })}
-        actions={
-          <AddCollaboratorButton
-            displayedTypes={displayedCollaboratorTypes}
-            permissionSettings={permissionSettings}
-            handleSubmitPermissionSettings={handleSubmitPermissionSettings}
+            actions={
+              <AddCollaboratorButton
+                displayedTypes={displayedCollaboratorTypes}
+                permissionSettings={permissionSettings}
+                handleSubmitPermissionSettings={handleSubmitPermissionSettings}
+              />
+            }
           />
-        }
-      />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <BackgroundPic />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }, [displayedCollaboratorTypes, permissionSettings, handleSubmitPermissionSettings]);
 
