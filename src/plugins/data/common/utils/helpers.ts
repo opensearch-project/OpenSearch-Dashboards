@@ -29,11 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import {
-  PollQueryResultsHandler,
-  FetchStatusResponse,
-  QueryFailedStatusResponse,
-} from '../data_frames';
+import { PollQueryResultsHandler, FetchStatusResponse } from '../data_frames';
 
 export interface QueryStatusOptions {
   pollQueryResults: PollQueryResultsHandler;
@@ -46,7 +42,7 @@ export const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 export const handleQueryResults = async <T>(
   options: QueryStatusOptions
 ): Promise<FetchStatusResponse> => {
-  const { pollQueryResults, interval = 5000, queryId } = options;
+  const { pollQueryResults, interval = 5000 } = options;
   let queryResultsRes: FetchStatusResponse;
   let queryStatus;
   do {
@@ -57,14 +53,10 @@ export const handleQueryResults = async <T>(
   } while (queryStatus !== 'SUCCESS' && queryStatus !== 'FAILED');
 
   if (queryStatus === 'FAILED') {
-    throw (
-      (queryResultsRes as QueryFailedStatusResponse).body.error ??
-      new Error(
-        i18n.translate('data.search.request.failed', {
-          defaultMessage: 'Failed to fetch results for queryId: {queryId}',
-          values: { queryId: queryId ?? '' },
-        })
-      )
+    throw new Error(
+      i18n.translate('data.search.request.failed', {
+        defaultMessage: 'An error occurred while executing the search query',
+      })
     );
   }
 
