@@ -1,0 +1,2 @@
+feat:
+- Introducing workspace level ui settings and hide non-global ui settings from advance settings page ([#8500](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8500))
