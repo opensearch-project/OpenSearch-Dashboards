@@ -13,7 +13,7 @@ export const CLIENT_CALL_AUDITOR_KEY = {
 /**
  * This class will be used to audit all the async calls to saved objects client.
  * For example, `/api/sample_data` will call savedObjectsClient.get() 3 times parallely and for ACL auditor,
- * it can only `checkout` only if the incoming calls equal outgoing call.
+ * it should only `checkout` when the incoming calls equal outgoing call.
  */
 export class ClientCallAuditor {
   private state: Record<
