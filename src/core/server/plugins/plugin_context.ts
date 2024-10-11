@@ -226,6 +226,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerAsyncLocalStoreRequestHeader: deps.dynamicConfig.registerAsyncLocalStoreRequestHeader,
       getStartService: deps.dynamicConfig.getStartService,
     },
+    workspace: deps.workspace,
   };
 }
 
@@ -282,5 +283,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
       getClient: deps.dynamicConfig.getClient,
       createStoreFromRequest: deps.dynamicConfig.createStoreFromRequest,
     },
+    workspace: deps.workspace,
   };
 }

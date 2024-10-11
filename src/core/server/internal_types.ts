@@ -54,6 +54,7 @@ import { InternalLoggingServiceSetup } from './logging';
 import { CoreUsageDataStart } from './core_usage_data';
 import { InternalSecurityServiceSetup } from './security/types';
 import { CrossCompatibilityServiceStart } from './cross_compatibility';
+import { InternalWorkspaceServiceSetup, InternalWorkspaceServiceStart } from './workspace';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -72,6 +73,7 @@ export interface InternalCoreSetup {
   metrics: InternalMetricsServiceSetup;
   security: InternalSecurityServiceSetup;
   dynamicConfig: InternalDynamicConfigServiceSetup;
+  workspace: InternalWorkspaceServiceSetup;
 }
 
 /**
@@ -88,6 +90,7 @@ export interface InternalCoreStart {
   coreUsageData: CoreUsageDataStart;
   crossCompatibility: CrossCompatibilityServiceStart;
   dynamicConfig: InternalDynamicConfigServiceStart;
+  workspace: InternalWorkspaceServiceStart;
 }
 
 /**
