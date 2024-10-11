@@ -399,7 +399,7 @@ export class ChromeService {
           workspaceList$={workspaces.workspaceList$}
           currentWorkspace$={workspaces.currentWorkspace$}
           useUpdatedHeader={this.useUpdatedHeader}
-          globalSearchStrategies={globalSearch.getAllSearchStrategies()}
+          globalSearchHandlers={globalSearch.getAllSearchHandlers()}
         />
       ),
 

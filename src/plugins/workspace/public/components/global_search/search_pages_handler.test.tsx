@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { searchPageWithInWorkspace } from './search_pages_strategy';
+import { searchPageWithInWorkspace } from './search_pages_handler';
 import { WorkspaceUseCase } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';

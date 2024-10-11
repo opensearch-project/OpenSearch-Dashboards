@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { DevToolItem, searchForDevTools } from './devtool_search_strategy';
+import { DevToolItem, searchForDevTools } from './search_devtool_handler';
 import { fireEvent, render } from '@testing-library/react';
 import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 import { DEVTOOL_TRIGGER_ID } from '../plugin';

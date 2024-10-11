@@ -76,7 +76,7 @@ import {
 import { AddCollaboratorsModal } from './components/add_collaborators_modal';
 import { registerDefaultCollaboratorTypes } from './register_default_collaborator_types';
 import { SearchObjectTypes } from '../../../core/public';
-import { searchPageWithInWorkspace } from './components/global_search/search_pages_strategy';
+import { searchPageWithInWorkspace } from './components/global_search/search_pages_handler';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -544,10 +544,10 @@ export class WorkspacePlugin
       },
     ]);
 
-    core.chrome.globalSearch.registerSearchStrategy({
+    core.chrome.globalSearch.registerSearchHandler({
       id: 'workspaceSearchStrategy',
       type: SearchObjectTypes.PAGES,
-      doSearch: async (query: string, callback: () => void) =>
+      invoke: async (query: string, callback: () => void) =>
         searchPageWithInWorkspace(query, this.registeredUseCases$, this.coreStart, callback),
     });
 

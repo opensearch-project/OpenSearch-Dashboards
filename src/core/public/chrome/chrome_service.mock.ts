@@ -42,7 +42,7 @@ const createSetupContractMock = () => {
       registerNavGroupUpdater: jest.fn(),
     },
     globalSearch: {
-      registerSearchStrategy: jest.fn(),
+      registerSearchHandler: jest.fn(),
     },
   };
 };
@@ -87,7 +87,7 @@ const createStartContractMock = () => {
       setCurrentNavGroup: jest.fn(),
     },
     globalSearch: {
-      getAllSearchStrategies: jest.fn(() => []),
+      getAllSearchHandlers: jest.fn(() => []),
     },
     setAppTitle: jest.fn(),
     setIsVisible: jest.fn(),

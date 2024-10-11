@@ -12,22 +12,43 @@ import {
   EuiListGroupItem,
   EuiPanel,
   EuiPopover,
-  EuiResizeObserver,
   EuiText,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { ReactNode, useCallback, useRef, useState } from 'react';
+import React, { ReactNode, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { GlobalSearchStrategy, SearchObjectTypes } from '../../global_search';
+import { GlobalSearchHandler, SearchObjectTypes } from '../../global_search';
 
 interface Props {
-  globalSearchStrategies: GlobalSearchStrategy[];
+  globalSearchHandlers: GlobalSearchHandler[];
   panel?: boolean;
   onSearchResultClick?: () => void;
 }
 
-export const HeaderSearchBarIcon = ({ globalSearchStrategies }: Props) => {
+/**
+ * search input match with `@` will handled by saved objects handlers
+ * search input match with `>` will handled by commands handlers
+ */
+export const SAVED_OBJECTS_SYMBOL = '@';
+export const COMMANDS_SYMBOL = '>';
+
+export const SearchHandlerFilters = {
+  [SearchObjectTypes.PAGES]: (value: string) => {
+    return {
+      match: !value.startsWith(SAVED_OBJECTS_SYMBOL) && !value.startsWith(COMMANDS_SYMBOL),
+      searchValue: value,
+    };
+  },
+  [SearchObjectTypes.SAVED_OBJECTS]: (value: string) => {
+    return {
+      match: value.startsWith(SAVED_OBJECTS_SYMBOL),
+      searchValue: value.replace(SAVED_OBJECTS_SYMBOL, '').trim(),
+    };
+  },
+};
+
+export const HeaderSearchBarIcon = ({ globalSearchHandlers }: Props) => {
   const [isSearchPopoverOpen, setIsSearchPopoverOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   return (
@@ -67,7 +88,7 @@ export const HeaderSearchBarIcon = ({ globalSearchStrategies }: Props) => {
         style={{ minHeight: '300px', minWidth: '400px' }}
       >
         <HeaderSearchBar
-          globalSearchStrategies={globalSearchStrategies}
+          globalSearchHandlers={globalSearchHandlers}
           panel
           onSearchResultClick={() => {
             setIsSearchPopoverOpen(false);
@@ -79,13 +100,13 @@ export const HeaderSearchBarIcon = ({ globalSearchStrategies }: Props) => {
   );
 };
 
-export const HeaderSearchBar = ({ globalSearchStrategies, panel, onSearchResultClick }: Props) => {
+export const HeaderSearchBar = ({ globalSearchHandlers, panel, onSearchResultClick }: Props) => {
   const [results, setResults] = useState([] as React.JSX.Element[]);
   const [isLoading, setIsLoading] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [panelWidth, setPanelWidth] = useState(0);
-  const inputRef = (node: HTMLElement | null) => setInputEl(node);
-  const [inputEl, setInputEl] = useState<HTMLElement | null>(null);
+  const inputElRef = useRef<HTMLElement | null>();
+  const inputRef = (node: HTMLElement | null) => (inputElRef.current = node);
 
   const closePopover = () => {
     setIsPopoverOpen(false);
@@ -130,14 +151,20 @@ export const HeaderSearchBar = ({ globalSearchStrategies, panel, onSearchResultC
 
   const onSearch = async (value: string) => {
     // do page search
-    if (value) {
+    const filteredHandlers = globalSearchHandlers.filter((handler) => {
+      return SearchHandlerFilters[handler.type](value).match;
+    });
+
+    if (value && filteredHandlers && filteredHandlers.length) {
       setIsPopoverOpen(true);
       setIsLoading(true);
+
       const settleResults = await Promise.allSettled(
-        globalSearchStrategies.map((strategy) => {
+        filteredHandlers.map((handler) => {
           const callback = onSearchResultClick || closePopover;
-          return strategy.doSearch(value, callback).then((items) => {
-            return { items, type: strategy.type };
+          const queryValue = SearchHandlerFilters[handler.type](value).searchValue;
+          return handler.invoke(queryValue, callback).then((items) => {
+            return { items, type: handler.type };
           });
         })
       );
@@ -186,6 +213,7 @@ export const HeaderSearchBar = ({ globalSearchStrategies, panel, onSearchResultC
       data-test-subj="search-input"
       className="searchInput"
       onFocus={() => {
+        const inputEl = inputElRef.current;
         if (inputEl) {
           const width = inputEl.getBoundingClientRect().width;
           setPanelWidth(width);
@@ -193,13 +221,6 @@ export const HeaderSearchBar = ({ globalSearchStrategies, panel, onSearchResultC
       }}
     />
   );
-
-  const onResize = useCallback(() => {
-    if (inputEl) {
-      const width = inputEl.getBoundingClientRect().width;
-      setPanelWidth(width);
-    }
-  }, [inputEl, setPanelWidth]);
 
   if (panel) {
     return (
@@ -218,11 +239,7 @@ export const HeaderSearchBar = ({ globalSearchStrategies, panel, onSearchResultC
   } else {
     return (
       <EuiPopover
-        button={
-          <EuiResizeObserver onResize={onResize}>
-            {(resizeRef) => <div ref={resizeRef}>{searchBar}</div>}
-          </EuiResizeObserver>
-        }
+        button={searchBar}
         buttonRef={inputRef}
         panelStyle={{ minWidth: panelWidth }}
         zIndex={2000}

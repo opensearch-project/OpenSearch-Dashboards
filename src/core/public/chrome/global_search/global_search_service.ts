@@ -9,10 +9,11 @@ export enum SearchObjectTypes {
   PAGES = 'pages',
   SAVED_OBJECTS = 'saved_objects',
 }
+
 /**
  * @experimental
  */
-export interface GlobalSearchStrategy {
+export interface GlobalSearchHandler {
   /**
    * unique id of this strategy
    */
@@ -27,27 +28,27 @@ export interface GlobalSearchStrategy {
    * @param value search query
    * @param callback callback function when search is done
    */
-  doSearch(value: string, callback?: () => void): Promise<ReactNode[]>;
+  invoke(value: string, callback?: () => void): Promise<ReactNode[]>;
 }
 
 export interface GlobalSearchServiceSetupContract {
-  registerSearchStrategy(searchStrategy: GlobalSearchStrategy): void;
+  registerSearchHandler(searchStrategy: GlobalSearchHandler): void;
 }
 
 export interface GlobalSearchServiceStartContract {
-  getAllSearchStrategies(): GlobalSearchStrategy[];
+  getAllSearchHandlers(): GlobalSearchHandler[];
 }
 
 /**
- * {@link GlobalSearchStrategy | APIs} for registering new global search strategy when do search from header search bar .
+ * {@link GlobalSearchHandler | APIs} for registering new global search strategy when do search from header search bar .
  *
  * @example
- * Register a GlobalSearchStrategy to search pages
+ * Register a GlobalSearchHandler to search pages
  * ```jsx
- * chrome.globalSearch.registerSearchStrategy({
+ * chrome.globalSearch.registerSearchHandler({
  *   id: 'test',
  *   type: SearchObjectTypes.PAGES,
- *   doSearch: async (query) => {
+ *   run: async (query) => {
  *     return [];
  *   },
  * })
@@ -56,29 +57,29 @@ export interface GlobalSearchServiceStartContract {
  * @experimental
  */
 export class GlobalSearchService {
-  private searchStrategies = [] as GlobalSearchStrategy[];
+  private searchHandlers = [] as GlobalSearchHandler[];
 
-  private registerSearchStrategy(searchStrategy: GlobalSearchStrategy) {
-    const exists = this.searchStrategies.find((item) => {
-      return item.id === searchStrategy.id;
+  private registerSearchHandler(searchHandler: GlobalSearchHandler) {
+    const exists = this.searchHandlers.find((item) => {
+      return item.id === searchHandler.id;
     });
     if (exists) {
       // eslint-disable-next-line no-console
-      console.warn('Duplicate SearchStrategy id found');
+      console.warn('Duplicate SearchHandlers id found');
       return;
     }
-    this.searchStrategies.push(searchStrategy);
+    this.searchHandlers.push(searchHandler);
   }
 
   public setup() {
     return {
-      registerSearchStrategy: this.registerSearchStrategy.bind(this),
+      registerSearchHandler: this.registerSearchHandler.bind(this),
     };
   }
 
   public start() {
     return {
-      getAllSearchStrategies: () => this.searchStrategies,
+      getAllSearchHandlers: () => this.searchHandlers,
     };
   }
 }
