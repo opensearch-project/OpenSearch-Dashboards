@@ -29,7 +29,7 @@ interface Props {
   onError?: () => void;
 }
 
-export const DataSourceAssociation = (props: Props) => {
+export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onError }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const associationModalRef = useRef<OverlayRef>();
 
@@ -69,10 +69,14 @@ export const DataSourceAssociation = (props: Props) => {
             // If failed to workspaceClient.associate, all data sources association is failed
             failedCount = objects.length;
           }
-          props.onComplete?.();
+          if (onComplete) {
+            onComplete();
+          }
         } catch (e) {
           failedCount = objects.length;
-          props.onError?.();
+          if (onError) {
+            onError();
+          }
         } finally {
           associationModalRef.current?.close();
         }
@@ -82,7 +86,7 @@ export const DataSourceAssociation = (props: Props) => {
             id: 'workspace_data_source_association_failed',
             title: i18n.translate('workspace.dataSource.association.failedTitle', {
               defaultMessage:
-                'Failed to associate {failedCount, plural, one {the data source} other {# data sources}} to the workspace',
+                'Failed to associate {failedCount, plural, one {# data source} other {# data sources}} to the workspace',
               values: { failedCount },
             }),
           });
@@ -92,14 +96,14 @@ export const DataSourceAssociation = (props: Props) => {
             id: 'workspace_data_source_association_succeed',
             title: i18n.translate('workspace.dataSource.association.succeedTitle', {
               defaultMessage:
-                '{succeedCount, plural, one {the data source} other {# data sources}} been associated to the workspace',
+                '{succeedCount, plural, one {# data source} other {# data sources}} been associated to the workspace',
               values: { succeedCount: objects.length - failedCount },
             }),
           });
         }
       }
     },
-    [workspaceClient, currentWorkspaceId, notifications]
+    [workspaceClient, currentWorkspaceId, notifications, onComplete, onError]
   );
 
   const showAssociationModal = useCallback(
@@ -112,7 +116,7 @@ export const DataSourceAssociation = (props: Props) => {
               http={http}
               savedObjects={savedObjects}
               notifications={notifications}
-              excludedConnectionIds={props.excludedDataSourceIds}
+              excludedConnectionIds={excludedDataSourceIds}
               closeModal={() => associationModalRef.current?.close()}
               handleAssignDataSourceConnections={onAssociateDataSource}
               mode={mode}
@@ -129,13 +133,20 @@ export const DataSourceAssociation = (props: Props) => {
       notifications,
       savedObjects,
       closePopover,
-      props.excludedDataSourceIds,
+      excludedDataSourceIds,
       onAssociateDataSource,
     ]
   );
 
   const button = (
-    <EuiButton size="s" fill iconType="arrowDown" iconSide="right" onClick={openPopover}>
+    <EuiButton
+      data-test-subj="workspaceAssociateDataSourceButton"
+      size="s"
+      fill
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={openPopover}
+    >
       <EuiIcon type="plusInCircle" />{' '}
       {i18n.translate('workspace.dataSources.associationButton.label', {
         defaultMessage: 'Associate data sources',

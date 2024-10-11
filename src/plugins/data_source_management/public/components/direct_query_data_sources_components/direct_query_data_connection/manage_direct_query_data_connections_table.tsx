@@ -74,6 +74,10 @@ export const ManageDirectQueryDataConnectionsTable = ({
     uiSettings.get$<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID)
   );
   const defaultDataSourceId = useObservable(defaultDataSourceIdRef.current);
+  const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
+  const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
+  const canAssociateDataSource =
+    !!currentWorkspace && !currentWorkspace.readonly && isDashboardAdmin;
 
   const [observabilityDashboardsExists, setObservabilityDashboardsExists] = useState(false);
   const [showIntegrationsFlyout, setShowIntegrationsFlyout] = useState(false);
@@ -119,116 +123,6 @@ export const ManageDirectQueryDataConnectionsTable = ({
     } finally {
       setIsDeleting(false);
     }
-  };
-
-  /* Delete selected data sources*/
-  const onClickDelete = () => {
-    setIsDeleting(true);
-
-    deleteMultipleDataSources(savedObjects.client, selectedDataSources)
-      .then(() => {
-        setSelectedDataSources([]);
-        // Fetch data sources
-        fetchDataSources();
-        setIsModalVisible(false);
-        // Check if default data source is deleted or not.
-        // if yes, then set the first existing datasource as default datasource.
-        setDefaultDataSource();
-      })
-      .catch(() => {
-        notifications.toasts.addDanger(
-          i18n.translate('dataSourcesManagement.directQueryTable.deleteDataSourceFailMsg', {
-            defaultMessage:
-              'An error occurred while attempting to delete the selected data sources. Please try it again',
-          })
-        );
-      })
-      .finally(() => {
-        setIsDeleting(false);
-      });
-  };
-
-  /* render delete modal*/
-  const tableRenderDeleteModal = () => {
-    return isModalVisible ? (
-      <EuiConfirmModal
-        title={i18n.translate('dataSourcesManagement.directQueryTable.multiDeleteTitle', {
-          defaultMessage: 'Delete data source connection(s)',
-        })}
-        onCancel={() => {
-          setIsModalVisible(false);
-        }}
-        onConfirm={() => {
-          setIsModalVisible(false);
-          onClickDelete();
-        }}
-        cancelButtonText={i18n.translate('dataSourcesManagement.directQueryTable.cancel', {
-          defaultMessage: 'Cancel',
-        })}
-        confirmButtonText={i18n.translate('dataSourcesManagement.directQueryTable.delete', {
-          defaultMessage: 'Delete',
-        })}
-        buttonColor="danger"
-        defaultFocusedButton="confirm"
-      >
-        <p>
-          <FormattedMessage
-            id="dataSourcesManagement.directQueryTable.deleteDescription"
-            defaultMessage="This action will delete the selected data source connections"
-          />
-        </p>
-        <p>
-          <FormattedMessage
-            id="dataSourcesManagement.directQueryTable.deleteConfirmation"
-            defaultMessage="Any objects created using data from these sources, including Index Patterns, Visualizations, and Observability Panels, will be impacted."
-          />
-        </p>
-        <p>
-          <FormattedMessage
-            id="dataSourcesManagement.directQueryTable.deleteWarning"
-            defaultMessage="This action cannot be undone."
-          />
-        </p>
-      </EuiConfirmModal>
-    ) : null;
-  };
-
-  const renderToolsLeft = useCallback(() => {
-    return selectedDataSources.length > 0
-      ? [
-          <EuiSmallButton
-            color="danger"
-            onClick={() => setIsModalVisible(true)}
-            data-test-subj="deleteDataSourceConnections"
-          >
-            <FormattedMessage
-              id="dataSourcesManagement.directQueryTable.deleteToolLabel"
-              defaultMessage="{selectionSize, plural, one {Delete # connection} other {Delete # connections}}"
-              values={{ selectionSize: selectedDataSources.length }}
-            />
-          </EuiSmallButton>,
-        ]
-      : [];
-  }, [selectedDataSources]);
-
-  const toggleDetails = (item: DataSourceTableItem) => {
-    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-    if (itemIdToExpandedRowMapValues[item.id]) {
-      delete itemIdToExpandedRowMapValues[item.id];
-    } else {
-      itemIdToExpandedRowMapValues[item.id] = (
-        <EuiInMemoryTable
-          items={item?.relatedConnections ?? []}
-          itemId="id"
-          columns={tableColumns}
-          className="direct-query-expanded-table"
-          rowProps={{
-            className: 'direct-query-expanded-row',
-          }}
-        />
-      );
-    }
-    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
 
   const fetchDataSources = useCallback(() => {
@@ -279,6 +173,172 @@ export const ManageDirectQueryDataConnectionsTable = ({
         setIsLoading(false);
       });
   }, [http, savedObjects, notifications, featureFlagStatus]);
+
+  /* Delete selected data sources*/
+  const onClickDelete = () => {
+    setIsDeleting(true);
+
+    deleteMultipleDataSources(savedObjects.client, selectedDataSources)
+      .then(() => {
+        setSelectedDataSources([]);
+        // Fetch data sources
+        fetchDataSources();
+        setIsModalVisible(false);
+        // Check if default data source is deleted or not.
+        // if yes, then set the first existing datasource as default datasource.
+        setDefaultDataSource();
+      })
+      .catch(() => {
+        notifications.toasts.addDanger(
+          i18n.translate('dataSourcesManagement.directQueryTable.deleteDataSourceFailMsg', {
+            defaultMessage:
+              'An error occurred while attempting to delete the selected data sources. Please try it again',
+          })
+        );
+      })
+      .finally(() => {
+        setIsDeleting(false);
+      });
+  };
+
+  const onDissociate = useCallback(
+    async (item: DataSourceTableItem | DataSourceTableItem[]) => {
+      const itemsToDissociate = Array<DataSourceTableItem>().concat(item);
+      const payload = itemsToDissociate.map((ds) => ({ id: ds.id, type: 'data-source' }));
+      const confirmed = await overlays.openConfirm('', {
+        title: i18n.translate('dataSourcesManagement.dataSourcesTable.removeAssociation', {
+          defaultMessage:
+            '{selectionSize, plural, one {Remove # association} other {Remove # associations}}',
+          values: { selectionSize: itemsToDissociate.length },
+        }),
+        buttonColor: 'danger',
+      });
+      if (confirmed) {
+        setIsLoading(true);
+        if (workspaceClient && currentWorkspace) {
+          await workspaceClient.dissociate(payload, currentWorkspace.id);
+          await fetchDataSources();
+          setSelectedDataSources([]);
+          if (payload.some((p) => p.id === defaultDataSourceId)) {
+            setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+          }
+        }
+      }
+    },
+    [
+      currentWorkspace,
+      defaultDataSourceId,
+      fetchDataSources,
+      overlays,
+      savedObjects.client,
+      uiSettings,
+      workspaceClient,
+    ]
+  );
+
+  /* render delete modal*/
+  const tableRenderDeleteModal = () => {
+    return isModalVisible ? (
+      <EuiConfirmModal
+        title={i18n.translate('dataSourcesManagement.directQueryTable.multiDeleteTitle', {
+          defaultMessage: 'Delete data source connection(s)',
+        })}
+        onCancel={() => {
+          setIsModalVisible(false);
+        }}
+        onConfirm={() => {
+          setIsModalVisible(false);
+          onClickDelete();
+        }}
+        cancelButtonText={i18n.translate('dataSourcesManagement.directQueryTable.cancel', {
+          defaultMessage: 'Cancel',
+        })}
+        confirmButtonText={i18n.translate('dataSourcesManagement.directQueryTable.delete', {
+          defaultMessage: 'Delete',
+        })}
+        buttonColor="danger"
+        defaultFocusedButton="confirm"
+      >
+        <p>
+          <FormattedMessage
+            id="dataSourcesManagement.directQueryTable.deleteDescription"
+            defaultMessage="This action will delete the selected data source connections"
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="dataSourcesManagement.directQueryTable.deleteConfirmation"
+            defaultMessage="Any objects created using data from these sources, including Index Patterns, Visualizations, and Observability Panels, will be impacted."
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="dataSourcesManagement.directQueryTable.deleteWarning"
+            defaultMessage="This action cannot be undone."
+          />
+        </p>
+      </EuiConfirmModal>
+    ) : null;
+  };
+
+  const renderToolsLeft = useCallback(() => {
+    if (selectedDataSources.length === 0) {
+      return [];
+    }
+    if (canManageDataSource) {
+      return [
+        <EuiSmallButton
+          color="danger"
+          onClick={() => setIsModalVisible(true)}
+          data-test-subj="deleteDataSourceConnections"
+        >
+          <FormattedMessage
+            id="dataSourcesManagement.directQueryTable.deleteToolLabel"
+            defaultMessage="{selectionSize, plural, one {Delete # connection} other {Delete # connections}}"
+            values={{ selectionSize: selectedDataSources.length }}
+          />
+        </EuiSmallButton>,
+      ];
+    }
+    if (canAssociateDataSource) {
+      return [
+        <EuiSmallButton
+          color="danger"
+          onClick={() => {
+            onDissociate(selectedDataSources);
+          }}
+          data-test-subj="dissociateSelectedDataSources"
+        >
+          <FormattedMessage
+            id="dataSourcesManagement.dataSourcesTable.dissociateSelectedDataSources"
+            defaultMessage="{selectionSize, plural, one {Remove # association} other {Remove # associations}}"
+            values={{ selectionSize: selectedDataSources.length }}
+          />
+        </EuiSmallButton>,
+      ];
+    }
+    return [];
+  }, [selectedDataSources, canManageDataSource, canAssociateDataSource, onDissociate]);
+
+  const toggleDetails = (item: DataSourceTableItem) => {
+    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
+    if (itemIdToExpandedRowMapValues[item.id]) {
+      delete itemIdToExpandedRowMapValues[item.id];
+    } else {
+      itemIdToExpandedRowMapValues[item.id] = (
+        <EuiInMemoryTable
+          items={item?.relatedConnections ?? []}
+          itemId="id"
+          columns={tableColumns}
+          className="direct-query-expanded-table"
+          rowProps={{
+            className: 'direct-query-expanded-row',
+          }}
+        />
+      );
+    }
+    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
+  };
 
   useEffect(() => {
     fetchDataSources();
@@ -391,28 +451,6 @@ export const ManageDirectQueryDataConnectionsTable = ({
     ],
   };
 
-  const onDissociate = async (item: DataSourceTableItem) => {
-    const confirmed = await overlays.openConfirm('', {
-      title: i18n.translate('dataSourcesManagement.dataSourcesTable.removeAssociation', {
-        defaultMessage: 'Remove association',
-      }),
-      buttonColor: 'danger',
-    });
-    if (confirmed) {
-      setIsLoading(true);
-      if (workspaceClient && currentWorkspace) {
-        await workspaceClient.dissociate(
-          [{ id: item.id, type: 'data-source' }],
-          currentWorkspace.id
-        );
-      }
-      await fetchDataSources();
-      if (defaultDataSourceId === item.id) {
-        setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
-      }
-    }
-  };
-
   const associateDataSourceButton = DataSourceAssociation && [
     {
       renderComponent: (
@@ -423,10 +461,6 @@ export const ManageDirectQueryDataConnectionsTable = ({
       ),
     } as TopNavControlComponentData,
   ];
-
-  const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
-  const canAssociateDataSource =
-    !!currentWorkspace && !currentWorkspace.readonly && isDashboardAdmin;
 
   const actionColumn: EuiBasicTableColumn<DataSourceTableItem> = {
     name: 'Action',

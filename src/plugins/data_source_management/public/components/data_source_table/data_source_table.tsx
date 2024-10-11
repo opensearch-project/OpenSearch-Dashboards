@@ -84,6 +84,8 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const [confirmDeleteVisible, setConfirmDeleteVisible] = React.useState(false);
   const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
+  const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
+  const canAssociateDataSource = !!currentWorkspace && isDashboardAdmin;
 
   /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
@@ -109,7 +111,15 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     } as TopNavControlComponentData,
   ];
 
-  const fetchDataSources = () => {
+  /* Toast Handlers */
+  const handleDisplayToastMessage = useCallback(
+    ({ message }: DataSourceManagementToastMessageItem) => {
+      notifications.toasts.addDanger(message);
+    },
+    [notifications.toasts]
+  );
+
+  const fetchDataSources = useCallback(() => {
     setIsLoading(true);
     return getDataSources(savedObjects.client)
       .then((response: DataSourceTableItem[]) => {
@@ -132,53 +142,87 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       .finally(() => {
         setIsLoading(false);
       });
-  };
+  }, [handleDisplayToastMessage, http, notifications, savedObjects.client]);
 
-  const onDissociate = async (item: DataSourceTableItem) => {
-    const confirmed = await overlays.openConfirm('', {
-      title: i18n.translate('dataSourcesManagement.dataSourcesTable.removeAssociation', {
-        defaultMessage: 'Remove association',
-      }),
-      buttonColor: 'danger',
-    });
-    if (confirmed) {
-      setIsLoading(true);
-      if (workspaceClient && currentWorkspace) {
-        await workspaceClient.dissociate(
-          [{ id: item.id, type: 'data-source' }],
-          currentWorkspace.id
-        );
+  const onDissociate = useCallback(
+    async (item: DataSourceTableItem | DataSourceTableItem[]) => {
+      const itemsToDissociate = Array<DataSourceTableItem>().concat(item);
+      const payload = itemsToDissociate.map((ds) => ({ id: ds.id, type: 'data-source' }));
+      const confirmed = await overlays.openConfirm('', {
+        title: i18n.translate('dataSourcesManagement.dataSourcesTable.removeAssociation', {
+          defaultMessage:
+            '{selectionSize, plural, one {Remove # association} other {Remove # associations}}',
+          values: { selectionSize: itemsToDissociate.length },
+        }),
+        buttonColor: 'danger',
+      });
+      if (confirmed) {
+        setIsLoading(true);
+        if (workspaceClient && currentWorkspace) {
+          await workspaceClient.dissociate(payload, currentWorkspace.id);
+          await fetchDataSources();
+          setSelectedDataSources([]);
+          if (payload.some((p) => p.id === defaultDataSourceId)) {
+            setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+          }
+        }
       }
-      await fetchDataSources();
-      if (defaultDataSourceId === item.id) {
-        setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
-      }
-    }
-  };
+    },
+    [
+      currentWorkspace,
+      defaultDataSourceId,
+      fetchDataSources,
+      overlays,
+      savedObjects.client,
+      uiSettings,
+      workspaceClient,
+    ]
+  );
 
   /* Table search config */
   const renderToolsLeft = useCallback(() => {
-    return selectedDataSources.length > 0
-      ? [
-          <EuiSmallButton
-            color="danger"
-            onClick={() => {
-              setConfirmDeleteVisible(true);
-            }}
-            data-test-subj="deleteDataSourceConnections"
-          >
-            <FormattedMessage
-              id="dataSourcesManagement.dataSourcesTable.deleteToolLabel"
-              defaultMessage="{selectionSize, plural, one {Delete # connection} other {Delete # connections}}"
-              values={{ selectionSize: selectedDataSources.length }}
-            />
-          </EuiSmallButton>,
-        ]
-      : [];
-  }, [selectedDataSources]);
+    if (selectedDataSources.length === 0) {
+      return [];
+    }
+    if (canManageDataSource) {
+      return [
+        <EuiSmallButton
+          color="danger"
+          onClick={() => {
+            setConfirmDeleteVisible(true);
+          }}
+          data-test-subj="deleteDataSourceConnections"
+        >
+          <FormattedMessage
+            id="dataSourcesManagement.dataSourcesTable.deleteToolLabel"
+            defaultMessage="{selectionSize, plural, one {Delete # connection} other {Delete # connections}}"
+            values={{ selectionSize: selectedDataSources.length }}
+          />
+        </EuiSmallButton>,
+      ];
+    }
+    if (canAssociateDataSource) {
+      return [
+        <EuiSmallButton
+          color="danger"
+          onClick={() => {
+            onDissociate(selectedDataSources);
+          }}
+          data-test-subj="dissociateSelectedDataSources"
+        >
+          <FormattedMessage
+            id="dataSourcesManagement.dataSourcesTable.dissociateSelectedDataSources"
+            defaultMessage="{selectionSize, plural, one {Remove # association} other {Remove # associations}}"
+            values={{ selectionSize: selectedDataSources.length }}
+          />
+        </EuiSmallButton>,
+      ];
+    }
+    return [];
+  }, [selectedDataSources, canManageDataSource, canAssociateDataSource, onDissociate]);
 
   const search: EuiSearchBarProps = {
-    toolsLeft: canManageDataSource ? renderToolsLeft() : undefined,
+    toolsLeft: renderToolsLeft(),
     compressed: true,
     box: {
       incremental: true,
@@ -373,12 +417,6 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     onSelectionChange,
   };
 
-  /* Toast Handlers */
-
-  const handleDisplayToastMessage = ({ message }: DataSourceManagementToastMessageItem) => {
-    notifications.toasts.addDanger(message);
-  };
-
   /* Render Ui elements*/
   /* Render table */
   const renderTableContent = () => {
@@ -433,10 +471,6 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     );
   };
 
-  const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
-  const canAssociateDataSource =
-    !!currentWorkspace && !currentWorkspace.readonly && isDashboardAdmin;
-
   const actionColumn: EuiBasicTableColumn<DataSourceTableItem> = {
     name: 'Action',
     actions: [],
@@ -470,6 +504,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       render: (item) => {
         return (
           <EuiButtonIcon
+            data-test-subj="dataSourcesManagement-dataSourceTable-setAsDefaultButton"
             isDisabled={defaultDataSourceId === item.id}
             aria-label="Set as default data source"
             title={i18n.translate('dataSourcesManagement.dataSourcesTable.setAsDefault.label', {
