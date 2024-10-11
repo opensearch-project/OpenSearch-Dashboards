@@ -42,7 +42,6 @@ export const Configurator = ({
   const indexPatternsService = getIndexPatterns();
   const type = queryString.getDatasetService().getType(baseDataset.type);
   const languages = type?.supportedLanguages(baseDataset) || [];
-  const [isLoading, setIsLoading] = useState(false);
 
   const [dataset, setDataset] = useState<Dataset>(baseDataset);
   const [timeFields, setTimeFields] = useState<DatasetField[]>([]);
@@ -200,18 +199,15 @@ export const Configurator = ({
         </EuiButton>
         <EuiButton
           onClick={async () => {
-            setIsLoading(true);
-            await queryString.getDatasetService().cacheDataset(dataset, services);
-            setIsLoading(false);
+            await queryString.getDatasetService().cacheDataset(dataset);
             onConfirm(dataset);
           }}
           fill
-          isLoading={isLoading}
-          disabled={submitDisabled || isLoading}
+          disabled={submitDisabled}
         >
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"
-            defaultMessage={isLoading ? 'Loading' : 'Select Data'}
+            defaultMessage="Select Data"
           />
         </EuiButton>
       </EuiModalFooter>

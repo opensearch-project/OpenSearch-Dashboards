@@ -62,7 +62,7 @@ export class DatasetService {
     return this.defaultDataset;
   }
 
-  public async cacheDataset(dataset: Dataset, services?: IDataPluginServices): Promise<void> {
+  public async cacheDataset(dataset: Dataset): Promise<void> {
     const type = this.getType(dataset?.type);
     try {
       if (dataset && dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {

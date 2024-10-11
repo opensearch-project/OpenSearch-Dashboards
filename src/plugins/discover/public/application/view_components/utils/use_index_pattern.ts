@@ -6,7 +6,6 @@
 import { i18n } from '@osd/i18n';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { IndexPattern, useQueryStringManager } from '../../../../../data/public';
-import { IQueryStart } from '../../../../../data/public/query/types';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
@@ -43,7 +42,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
   ]);
 
   const loadFieldsInPattern = useCallback(
-    async (selectedIndexPattern: IndexPattern, IQuery: IQueryStart) => {
+    async (selectedIndexPattern: IndexPattern, IQuery) => {
       if (query.dataset) {
         const type = IQuery.queryString.getDatasetService().getType(query.dataset?.type);
         const fetchedFields = await type?.fetchFields(query.dataset, {
@@ -55,7 +54,6 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
           storage: services.storage,
           data: services.data,
         });
-        selectedIndexPattern.updateFieldLoadingStatus(true);
         selectedIndexPattern?.fields.replaceAll([...fetchedFields]);
         selectedIndexPattern?.updateFieldLoadingStatus(false);
         services.indexPatterns?.saveToCache(query.dataset.id, selectedIndexPattern);
@@ -75,15 +73,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
           query.dataset.type !== 'INDEX_PATTERN'
         );
         if (!pattern) {
-          await data.query.queryString.getDatasetService().cacheDataset(query.dataset, {
-            appName: services.appName,
-            uiSettings: services.uiSettings,
-            savedObjects: services.savedObjects,
-            notifications: services.notifications,
-            http: services.http,
-            storage: services.storage,
-            data: services.data,
-          });
+          await data.query.queryString.getDatasetService().cacheDataset(query.dataset);
           pattern = await data.indexPatterns.get(
             query.dataset.id,
             query.dataset.type !== 'INDEX_PATTERN'
@@ -111,7 +101,6 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
             const ip = await fetchIndexPatternDetails(indexPatternIdFromState);
             if (isMounted) {
               setIndexPattern(ip);
-              await loadFieldsInPattern(ip, data.query);
             }
           } catch (error) {
             if (isMounted) {
