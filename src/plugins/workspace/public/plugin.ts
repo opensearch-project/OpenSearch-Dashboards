@@ -544,10 +544,10 @@ export class WorkspacePlugin
       },
     ]);
 
-    core.chrome.globalSearch.registerSearchHandler({
-      id: 'workspaceSearchStrategy',
+    core.chrome.globalSearch.registerSearchCommand({
+      id: 'workspacePagesSearchCommand',
       type: SearchObjectTypes.PAGES,
-      invoke: async (query: string, callback: () => void) =>
+      run: async (query: string, callback: () => void) =>
         searchPageWithInWorkspace(query, this.registeredUseCases$, this.coreStart, callback),
     });
 

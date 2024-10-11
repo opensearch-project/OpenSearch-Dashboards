@@ -18,22 +18,22 @@ import {
 } from '@elastic/eui';
 import React, { ReactNode, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { GlobalSearchHandler, SearchObjectTypes } from '../../global_search';
+import { GlobalSearchCommand, SearchObjectTypes } from '../../global_search';
 
 interface Props {
-  globalSearchHandlers: GlobalSearchHandler[];
+  globalSearchCommands: GlobalSearchCommand[];
   panel?: boolean;
   onSearchResultClick?: () => void;
 }
 
 /**
- * search input match with `@` will handled by saved objects handlers
- * search input match with `>` will handled by commands handlers
+ * search input match with `@` will handled by saved objects search command
+ * search input match with `>` will handled by plugin customized commands
  */
 export const SAVED_OBJECTS_SYMBOL = '@';
 export const COMMANDS_SYMBOL = '>';
 
-export const SearchHandlerFilters = {
+export const SearchCommandFilters = {
   [SearchObjectTypes.PAGES]: (value: string) => {
     return {
       match: !value.startsWith(SAVED_OBJECTS_SYMBOL) && !value.startsWith(COMMANDS_SYMBOL),
@@ -48,7 +48,7 @@ export const SearchHandlerFilters = {
   },
 };
 
-export const HeaderSearchBarIcon = ({ globalSearchHandlers }: Props) => {
+export const HeaderSearchBarIcon = ({ globalSearchCommands }: Props) => {
   const [isSearchPopoverOpen, setIsSearchPopoverOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   return (
@@ -88,7 +88,7 @@ export const HeaderSearchBarIcon = ({ globalSearchHandlers }: Props) => {
         style={{ minHeight: '300px', minWidth: '400px' }}
       >
         <HeaderSearchBar
-          globalSearchHandlers={globalSearchHandlers}
+          globalSearchCommands={globalSearchCommands}
           panel
           onSearchResultClick={() => {
             setIsSearchPopoverOpen(false);
@@ -100,7 +100,7 @@ export const HeaderSearchBarIcon = ({ globalSearchHandlers }: Props) => {
   );
 };
 
-export const HeaderSearchBar = ({ globalSearchHandlers, panel, onSearchResultClick }: Props) => {
+export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultClick }: Props) => {
   const [results, setResults] = useState([] as React.JSX.Element[]);
   const [isLoading, setIsLoading] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -151,20 +151,20 @@ export const HeaderSearchBar = ({ globalSearchHandlers, panel, onSearchResultCli
 
   const onSearch = async (value: string) => {
     // do page search
-    const filteredHandlers = globalSearchHandlers.filter((handler) => {
-      return SearchHandlerFilters[handler.type](value).match;
+    const filteredCommands = globalSearchCommands.filter((command) => {
+      return SearchCommandFilters[command.type](value).match;
     });
 
-    if (value && filteredHandlers && filteredHandlers.length) {
+    if (value && filteredCommands && filteredCommands.length) {
       setIsPopoverOpen(true);
       setIsLoading(true);
 
       const settleResults = await Promise.allSettled(
-        filteredHandlers.map((handler) => {
+        filteredCommands.map((command) => {
           const callback = onSearchResultClick || closePopover;
-          const queryValue = SearchHandlerFilters[handler.type](value).searchValue;
-          return handler.invoke(queryValue, callback).then((items) => {
-            return { items, type: handler.type };
+          const queryValue = SearchCommandFilters[command.type](value).searchValue;
+          return command.run(queryValue, callback).then((items) => {
+            return { items, type: command.type };
           });
         })
       );

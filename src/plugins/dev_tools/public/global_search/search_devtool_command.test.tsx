@@ -4,12 +4,12 @@
  */
 
 import React from 'react';
-import { DevToolItem, searchForDevTools } from './search_devtool_handler';
+import { DevToolItem, searchForDevTools } from './search_devtool_command';
 import { fireEvent, render } from '@testing-library/react';
 import { uiActionsPluginMock } from 'src/plugins/ui_actions/public/mocks';
 import { DEVTOOL_TRIGGER_ID } from '../plugin';
 
-describe('DevtoolSearchStrategy', () => {
+describe('DevtoolSearchCommand', () => {
   const devToolsFn = jest.fn().mockReturnValue([
     {
       id: 'console',

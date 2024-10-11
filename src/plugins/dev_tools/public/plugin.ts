@@ -50,7 +50,7 @@ import { ManagementOverViewPluginSetup } from '../../management_overview/public'
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { DevToolsIcon } from './dev_tools_icon';
 import { WorkspaceAvailability, SearchObjectTypes } from '../../../core/public';
-import { searchForDevTools } from './global_search/search_devtool_handler';
+import { searchForDevTools } from './global_search/search_devtool_command';
 import { Trigger, UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 
 export const DEVTOOL_OPEN_ACTION = 'DEVTOOL_OPEN_ACTION';
@@ -159,10 +159,10 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
       /**
        * register search strategy for dev tools
        */
-      coreSetup.chrome.globalSearch.registerSearchHandler({
+      coreSetup.chrome.globalSearch.registerSearchCommand({
         id: 'devtools',
         type: SearchObjectTypes.PAGES,
-        invoke: async (query: string, callback?: () => void) =>
+        run: async (query: string, callback?: () => void) =>
           searchForDevTools(query, {
             devTools: this.getSortedDevTools.bind(this),
             title: this.title,

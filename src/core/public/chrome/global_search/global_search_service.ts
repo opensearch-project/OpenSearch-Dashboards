@@ -13,7 +13,7 @@ export enum SearchObjectTypes {
 /**
  * @experimental
  */
-export interface GlobalSearchHandler {
+export interface GlobalSearchCommand {
   /**
    * unique id of this strategy
    */
@@ -28,24 +28,24 @@ export interface GlobalSearchHandler {
    * @param value search query
    * @param callback callback function when search is done
    */
-  invoke(value: string, callback?: () => void): Promise<ReactNode[]>;
+  run(value: string, callback?: () => void): Promise<ReactNode[]>;
 }
 
 export interface GlobalSearchServiceSetupContract {
-  registerSearchHandler(searchStrategy: GlobalSearchHandler): void;
+  registerSearchCommand(searchCommand: GlobalSearchCommand): void;
 }
 
 export interface GlobalSearchServiceStartContract {
-  getAllSearchHandlers(): GlobalSearchHandler[];
+  getAllSearchCommands(): GlobalSearchCommand[];
 }
 
 /**
- * {@link GlobalSearchHandler | APIs} for registering new global search strategy when do search from header search bar .
+ * {@link GlobalSearchCommand | APIs} for registering new global search strategy when do search from header search bar .
  *
  * @example
- * Register a GlobalSearchHandler to search pages
+ * Register a GlobalSearchCommand to search pages
  * ```jsx
- * chrome.globalSearch.registerSearchHandler({
+ * chrome.globalSearch.registerSearchCommand({
  *   id: 'test',
  *   type: SearchObjectTypes.PAGES,
  *   run: async (query) => {
@@ -57,29 +57,29 @@ export interface GlobalSearchServiceStartContract {
  * @experimental
  */
 export class GlobalSearchService {
-  private searchHandlers = [] as GlobalSearchHandler[];
+  private searchCommands = [] as GlobalSearchCommand[];
 
-  private registerSearchHandler(searchHandler: GlobalSearchHandler) {
-    const exists = this.searchHandlers.find((item) => {
+  private registerSearchCommand(searchHandler: GlobalSearchCommand) {
+    const exists = this.searchCommands.find((item) => {
       return item.id === searchHandler.id;
     });
     if (exists) {
       // eslint-disable-next-line no-console
-      console.warn('Duplicate SearchHandlers id found');
+      console.warn(`Duplicate SearchCommands id ${searchHandler.id} found`);
       return;
     }
-    this.searchHandlers.push(searchHandler);
+    this.searchCommands.push(searchHandler);
   }
 
-  public setup() {
+  public setup(): GlobalSearchServiceSetupContract {
     return {
-      registerSearchHandler: this.registerSearchHandler.bind(this),
+      registerSearchCommand: this.registerSearchCommand.bind(this),
     };
   }
 
-  public start() {
+  public start(): GlobalSearchServiceStartContract {
     return {
-      getAllSearchHandlers: () => this.searchHandlers,
+      getAllSearchCommands: () => this.searchCommands,
     };
   }
 }

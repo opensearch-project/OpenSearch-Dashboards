@@ -24,7 +24,7 @@ import {
 } from '../../nav_group';
 import { fulfillRegistrationLinksToChromeNavLinks, getVisibleUseCases, sortBy } from '../../utils';
 import { ALL_USE_CASE_ID, DEFAULT_APP_CATEGORIES } from '../../../../../core/utils';
-import { GlobalSearchHandler } from '../../global_search';
+import { GlobalSearchCommand } from '../../global_search';
 import { CollapsibleNavTop } from './collapsible_nav_group_enabled_top';
 import { HeaderNavControls } from './header_nav_controls';
 import { NavGroups } from './collapsible_nav_groups';
@@ -49,7 +49,7 @@ export interface CollapsibleNavGroupEnabledProps {
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
   capabilities: InternalApplicationStart['capabilities'];
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
-  globalSearchHandlers?: GlobalSearchHandler[];
+  globalSearchCommands?: GlobalSearchCommand[];
 }
 
 const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
@@ -73,7 +73,7 @@ export function CollapsibleNavGroupEnabled({
   setCurrentNavGroup,
   capabilities,
   collapsibleNavHeaderRender,
-  globalSearchHandlers,
+  globalSearchCommands,
   ...observables
 }: CollapsibleNavGroupEnabledProps) {
   const allNavLinks = useObservable(observables.navLinks$, []);
@@ -220,8 +220,8 @@ export function CollapsibleNavGroupEnabled({
         )}
         {!isNavOpen ? (
           <div className="searchBarIcon euiHeaderSectionItemButton">
-            {globalSearchHandlers && (
-              <HeaderSearchBarIcon globalSearchHandlers={globalSearchHandlers} />
+            {globalSearchCommands && (
+              <HeaderSearchBarIcon globalSearchCommands={globalSearchCommands} />
             )}
           </div>
         ) : (
@@ -231,8 +231,8 @@ export function CollapsibleNavGroupEnabled({
             hasShadow={false}
             className="searchBar-wrapper"
           >
-            {globalSearchHandlers && (
-              <HeaderSearchBar globalSearchHandlers={globalSearchHandlers} />
+            {globalSearchCommands && (
+              <HeaderSearchBar globalSearchCommands={globalSearchCommands} />
             )}
           </EuiPanel>
         )}

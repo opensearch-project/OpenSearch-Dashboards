@@ -37,14 +37,14 @@ describe('DevToolsPlugin', () => {
 
     it('should register global search strategy for dev tools when new home is enabled', () => {
       plugin.setup(coreSetupMock, deps);
-      expect(coreSetupMock.chrome.globalSearch.registerSearchHandler).toHaveBeenCalled();
+      expect(coreSetupMock.chrome.globalSearch.registerSearchCommand).toHaveBeenCalled();
       expect(deps.uiActions.registerTrigger).toHaveBeenCalled();
     });
 
     it('should not register global search strategy for dev tools when new home is not enabled', () => {
       getNavGroupEnabledMock.mockReturnValue(false);
       plugin.setup(coreSetupMock, deps);
-      expect(coreSetupMock.chrome.globalSearch.registerSearchHandler).not.toHaveBeenCalled();
+      expect(coreSetupMock.chrome.globalSearch.registerSearchCommand).not.toHaveBeenCalled();
       expect(deps.uiActions.registerTrigger).not.toHaveBeenCalled();
     });
   });

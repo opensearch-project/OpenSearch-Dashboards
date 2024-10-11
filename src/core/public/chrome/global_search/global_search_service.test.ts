@@ -12,17 +12,17 @@ describe('GlobalSearchService', () => {
     const setup = globalSearchService.setup();
     const start = globalSearchService.start();
 
-    setup.registerSearchHandler({
+    setup.registerSearchCommand({
       id: 'test1',
       type: SearchObjectTypes.PAGES,
-      invoke: async (query) => {
+      run: async (query) => {
         return [];
       },
     });
 
-    expect(start.getAllSearchHandlers()).toHaveLength(1);
-    expect(start.getAllSearchHandlers()[0].id).toEqual('test1');
-    expect(start.getAllSearchHandlers()[0].type).toEqual(SearchObjectTypes.PAGES);
+    expect(start.getAllSearchCommands()).toHaveLength(1);
+    expect(start.getAllSearchCommands()[0].id).toEqual('test1');
+    expect(start.getAllSearchCommands()[0].type).toEqual(SearchObjectTypes.PAGES);
   });
 
   it('registerSearchStrategy with duplicate id', async () => {
@@ -30,25 +30,25 @@ describe('GlobalSearchService', () => {
     const setup = globalSearchService.setup();
     const start = globalSearchService.start();
 
-    setup.registerSearchHandler({
+    setup.registerSearchCommand({
       id: 'test2',
       type: SearchObjectTypes.PAGES,
-      invoke: async (query) => {
+      run: async (query) => {
         return [];
       },
     });
 
-    setup.registerSearchHandler({
+    setup.registerSearchCommand({
       id: 'test2',
       type: SearchObjectTypes.SAVED_OBJECTS,
-      invoke: async (query) => {
+      run: async (query) => {
         return [];
       },
     });
 
     // the second one will not overwrite the first one
-    expect(start.getAllSearchHandlers()).toHaveLength(1);
-    expect(start.getAllSearchHandlers()[0].id).toEqual('test2');
-    expect(start.getAllSearchHandlers()[0].type).toEqual(SearchObjectTypes.PAGES);
+    expect(start.getAllSearchCommands()).toHaveLength(1);
+    expect(start.getAllSearchCommands()[0].id).toEqual('test2');
+    expect(start.getAllSearchCommands()[0].type).toEqual(SearchObjectTypes.PAGES);
   });
 });
