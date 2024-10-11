@@ -6,17 +6,22 @@
 import { uiRenderMixin } from './ui_render_mixin';
 
 // Mock dependencies
-jest.mock('@osd/i18n', () => ({
-  i18n: {
-    getLocale: jest.fn(),
-    getTranslation: jest.fn(),
-    translate: jest.fn((key, { defaultMessage }) => defaultMessage),
-  },
-  i18nLoader: {
-    getRegisteredLocales: jest.fn(),
-    getTranslationsByLocale: jest.fn(),
-  },
-}));
+jest.mock('@osd/i18n', () => {
+  const getRegisteredLocales = jest.fn();
+  return {
+    i18n: {
+      getLocale: jest.fn(),
+      getTranslation: jest.fn(),
+      normalizeLocale: jest.fn((locale) => locale),
+      translate: jest.fn((key, { defaultMessage }) => defaultMessage),
+    },
+    i18nLoader: {
+      getRegisteredLocales: getRegisteredLocales,
+      getTranslationsByLocale: jest.fn(),
+      isRegisteredLocale: jest.fn((locale) => getRegisteredLocales()?.includes?.(locale)),
+    },
+  };
+});
 
 // Import mocked modules
 const { i18n, i18nLoader } = require('@osd/i18n');

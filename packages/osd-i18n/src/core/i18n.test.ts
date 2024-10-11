@@ -178,7 +178,7 @@ describe('I18n engine', () => {
         'en-us'
       );
 
-      expect(i18n.getLocale()).toBe('en-us');
+      expect(i18n.getLocale()).toBe('en-US');
       expect(i18n.getTranslation()).toEqual({
         messages: {
           ['a.b.c']: 'bar',
@@ -246,9 +246,19 @@ describe('I18n engine', () => {
       expect(i18n.getLocale()).toBe('foo');
     });
 
-    test('should normalize passed locale', () => {
-      i18n.setLocale('en-US');
-      expect(i18n.getLocale()).toBe('en-us');
+    test('should normalize basic locale', () => {
+      i18n.setLocale('It-iT');
+      expect(i18n.getLocale()).toBe('it-IT');
+    });
+
+    test('should normalize simple locale', () => {
+      i18n.setLocale('en-LATN-us_PRIVATE-variant');
+      expect(i18n.getLocale()).toBe('en-Latn-US');
+    });
+
+    test('should normalize complex locale', () => {
+      i18n.setLocale('FR-CA-X-FALLBACK-und-u@keyword=calendarKey');
+      expect(i18n.getLocale()).toBe('fr-CA');
     });
   });
 
@@ -280,8 +290,8 @@ describe('I18n engine', () => {
     });
 
     test('should normalize passed locale', () => {
-      i18n.setDefaultLocale('en-US');
-      expect(i18n.getDefaultLocale()).toBe('en-us');
+      i18n.setDefaultLocale('eN-uS');
+      expect(i18n.getDefaultLocale()).toBe('en-US');
     });
 
     test('should set "en" locale as default for IntlMessageFormat and IntlRelativeFormat', () => {
