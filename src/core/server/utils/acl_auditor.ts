@@ -54,6 +54,8 @@ class ACLAuditor {
 
     this.reset();
   };
+
+  getState = () => this.state;
 }
 
 interface AppState {
