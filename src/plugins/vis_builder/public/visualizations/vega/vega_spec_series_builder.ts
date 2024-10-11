@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { buildMarkForVega, VegaMarkType } from './components/mark';
+import { buildMarkForVega, VegaMarkType } from './components/mark/mark';
 import { buildLegend } from './components/legend';
 import { VegaSpec, AxisFormats } from './utils/types';
 import { StyleState } from '../../application/utils/state_management';
@@ -17,7 +17,11 @@ import { mapChartTypeToVegaType } from './utils/helpers';
  * @param {StyleState} style - The style configuration for the visualization.
  * @returns {VegaSpec} The complete Vega specification.
  */
-export const generateVegaSpec = (data: any, visConfig: any, style: StyleState): VegaSpec => {
+export const generateVegaSpecForSeries = (
+  data: any,
+  visConfig: any,
+  style: StyleState
+): VegaSpec => {
   const { dimensions, addLegend, legendPosition } = visConfig;
   const { type } = style;
   const vegaType = mapChartTypeToVegaType(type) as VegaMarkType;
