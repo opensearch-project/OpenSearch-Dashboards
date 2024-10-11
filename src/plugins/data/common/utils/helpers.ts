@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { i18n } from '@osd/i18n';
 import {
   PollQueryResultsHandler,
   FetchStatusResponse,
@@ -58,7 +59,12 @@ export const handleQueryResults = async <T>(
   if (queryStatus === 'FAILED') {
     throw (
       (queryResultsRes as QueryFailedStatusResponse).body.error ??
-      new Error(`Failed to fetch results ${queryId ?? ''}`)
+      new Error(
+        i18n.translate('data.search.request.failed', {
+          defaultMessage: 'Failed to fetch results for queryId: {queryId}',
+          values: { queryId: queryId ?? '' },
+        })
+      )
     );
   }
 
