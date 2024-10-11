@@ -148,7 +148,7 @@ export const useWorkspaceForm = ({
       },
       false
     );
-    if (result?.success) {
+    if (result) {
       setPermissionSettings(settings);
     }
   };
