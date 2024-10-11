@@ -25,6 +25,7 @@ import {
   WORKSPACE_INITIAL_APP_ID,
   WORKSPACE_NAVIGATION_APP_ID,
   DEFAULT_WORKSPACE,
+  PRIORITY_FOR_REPOSITORY_WRAPPER,
 } from '../common/constants';
 import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
 import { WorkspaceClient } from './workspace_client';
@@ -32,8 +33,11 @@ import { registerRoutes } from './routes';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import {
   cleanWorkspaceId,
+  destroyACLAuditor,
+  getACLAuditor,
   getWorkspaceIdFromUrl,
   getWorkspaceState,
+  initializeACLAuditor,
   updateWorkspaceState,
 } from '../../../core/server/utils';
 import { WorkspaceConflictSavedObjectsClientWrapper } from './saved_objects/saved_objects_wrapper_for_check_workspace_conflict';
@@ -45,6 +49,7 @@ import { getOSDAdminConfigFromYMLConfig, updateDashboardAdminStateForRequest } f
 import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consumer_wrapper';
 import { WorkspaceUiSettingsClientWrapper } from './saved_objects/workspace_ui_settings_client_wrapper';
 import { uiSettings } from './ui_settings';
+import { RepositoryWrapper } from './saved_objects/repository_wrapper';
 
 export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePluginStart> {
   private readonly logger: Logger;
@@ -93,6 +98,20 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
 
       const [configGroups, configUsers] = await getOSDAdminConfigFromYMLConfig(this.globalConfig$);
       updateDashboardAdminStateForRequest(request, groups, users, configGroups, configUsers);
+      return toolkit.next();
+    });
+
+    // Initialize ACL auditor in request.
+    core.http.registerOnPostAuth((request, response, toolkit) => {
+      initializeACLAuditor(request, this.logger);
+      return toolkit.next();
+    });
+
+    // Clean up auditor before response.
+    core.http.registerOnPreResponse((request, response, toolkit) => {
+      getACLAuditor(request)?.checkout();
+      destroyACLAuditor(request);
+      WorkspaceSavedObjectsClientWrapper.clientCallAuditor.clear(request);
       return toolkit.next();
     });
 
@@ -201,6 +220,13 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER,
       WORKSPACE_ID_CONSUMER_WRAPPER_ID,
       new WorkspaceIdConsumerWrapper(this.client).wrapperFactory
+    );
+
+    core.savedObjects.addClientWrapper(
+      PRIORITY_FOR_REPOSITORY_WRAPPER,
+      // Give a symbol here so this wrapper won't be bypassed
+      Symbol('repository_wrapper').toString(),
+      new RepositoryWrapper().wrapperFactory
     );
 
     const maxImportExportSize = core.savedObjects.getImportExportObjectLimit();
