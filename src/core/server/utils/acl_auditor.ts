@@ -61,7 +61,7 @@ interface AppState {
 }
 
 /**
- * This function will be to initialize a new app state to the request
+ * This function will be used to initialize a new app state to the request
  *
  * @param request OpenSearchDashboardsRequest
  * @returns void

@@ -109,7 +109,11 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
 
     // Clean up auditor before response.
     core.http.registerOnPreResponse((request, response, toolkit) => {
-      getACLAuditor(request)?.checkout();
+      const { isDashboardAdmin } = getWorkspaceState(request);
+      if (!isDashboardAdmin) {
+        // Only checkout auditor when current login user is not dashboard admin
+        getACLAuditor(request)?.checkout();
+      }
       destroyACLAuditor(request);
       WorkspaceSavedObjectsClientWrapper.clientCallAuditor.clear(request);
       return toolkit.next();
