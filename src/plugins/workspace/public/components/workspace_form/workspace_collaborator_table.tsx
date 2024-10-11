@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiSearchBarProps,
   EuiBasicTableColumn,
@@ -85,6 +85,9 @@ export const WorkspaceCollaboratorTable = ({
   const [selection, setSelection] = useState<PermissionSetting[]>([]);
   const { overlays } = useOpenSearchDashboards();
 
+  // eslint-disable-next-line
+  console.log('permissionSettings', permissionSettings);
+
   const items = useMemo(() => {
     return permissionSettings.map((setting) => {
       const collaborator = isWorkspacePermissionSetting(setting)
@@ -116,6 +119,17 @@ export const WorkspaceCollaboratorTable = ({
       return basicSettings;
     });
   }, [permissionSettings, displayedCollaboratorTypes]);
+
+  const findAdmin = useCallback((lists: typeof items) => {
+    return lists.filter((item) => item.accessLevel === 'Admin');
+  }, []);
+
+  const permissionNum = useMemo(() => {
+    return findAdmin(items).length;
+  }, [items, findAdmin]);
+
+  // eslint-disable-next-line
+  console.log('items', items);
 
   const emptyStateMessage = useMemo(() => {
     return (
@@ -151,25 +165,48 @@ export const WorkspaceCollaboratorTable = ({
   }, [displayedCollaboratorTypes, permissionSettings, handleSubmitPermissionSettings]);
 
   const openDeleteConfirmModal = ({ onConfirm }: { onConfirm: () => void }) => {
+    const adminOfSelection = selection.filter((item) => item.accessLevel === 'Admin').length;
+    // eslint-disable-next-line
+    console.log('adminOfSelection', adminOfSelection);
     const modal = overlays.openModal(
-      <EuiConfirmModal
-        title={i18n.translate('workspace.detail.collaborator.actions.delete', {
-          defaultMessage: 'Delete collaborator',
-        })}
-        onCancel={() => modal.close()}
-        onConfirm={onConfirm}
-        cancelButtonText="Cancel"
-        confirmButtonText="Confirm"
-      >
-        <EuiText>
-          <p>
-            {i18n.translate('workspace.detail.collaborator.delete.confirm', {
-              defaultMessage:
-                'Delete collaborator? The collaborators will not have access to the workspace.',
-            })}
-          </p>
-        </EuiText>
-      </EuiConfirmModal>
+      permissionNum === adminOfSelection ? (
+        <EuiConfirmModal
+          title={i18n.translate('workspace.detail.collaborator.actions.delete', {
+            defaultMessage: 'Delete collaborator',
+          })}
+          onCancel={() => modal.close()}
+          confirmButtonDisabled
+          cancelButtonText="Cancel"
+          confirmButtonText="Confirm"
+        >
+          <EuiText color="danger">
+            <p>
+              {i18n.translate('workspace.detail.collaborator.delete.confirm.disable', {
+                defaultMessage: 'You need to retain at least one admin in a workspace',
+              })}
+            </p>
+          </EuiText>
+        </EuiConfirmModal>
+      ) : (
+        <EuiConfirmModal
+          title={i18n.translate('workspace.detail.collaborator.actions.delete', {
+            defaultMessage: 'Delete collaborator',
+          })}
+          onCancel={() => modal.close()}
+          onConfirm={onConfirm}
+          cancelButtonText="Cancel"
+          confirmButtonText="Confirm"
+        >
+          <EuiText>
+            <p>
+              {i18n.translate('workspace.detail.collaborator.delete.confirm', {
+                defaultMessage:
+                  'Delete collaborator? The collaborators will not have access to the workspace.',
+              })}
+            </p>
+          </EuiText>
+        </EuiConfirmModal>
+      )
     );
     return modal;
   };
@@ -178,6 +215,12 @@ export const WorkspaceCollaboratorTable = ({
     if (selection.length === 0) {
       return;
     }
+
+    // eslint-disable-next-line
+    console.log('selection', selection);
+
+    // eslint-disable-next-line
+    console.log('permissionNUm', permissionNum);
 
     const onClick = () => {
       const modal = openDeleteConfirmModal({
@@ -196,7 +239,9 @@ export const WorkspaceCollaboratorTable = ({
     return (
       <EuiButton color="danger" iconType="trash" onClick={onClick}>
         {i18n.translate('workspace.detail.collaborator.delete', {
-          defaultMessage: 'Delete {num} collaborators',
+          defaultMessage: `Delete {num} ${
+            selection.length === 1 ? 'collaborator' : 'collaborators'
+          }`,
           values: {
             num: selection.length,
           },
@@ -383,6 +428,7 @@ const Actions = ({
           }),
           onClick: () => {
             setIsPopoverOpen(false);
+            setSelection([]);
             if (selection && openDeleteConfirmModal) {
               const modal = openDeleteConfirmModal({
                 onConfirm: () => {
