@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiCompressedFieldText } from '@elastic/eui';
+import { EuiCompressedFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { monaco } from '@osd/monaco';
-import React from 'react';
+import React, { Fragment, useCallback, useState } from 'react';
 import { CodeEditor } from '../../../../../opensearch_dashboards_react/public';
 
 interface SingleLineInputProps extends React.JSX.IntrinsicAttributes {
@@ -15,6 +15,7 @@ interface SingleLineInputProps extends React.JSX.IntrinsicAttributes {
   editorDidMount: (editor: any) => void;
   provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
   prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
+  footerItems?: any;
 }
 
 type CollapsedComponent<T> = React.ComponentType<T>;
@@ -61,59 +62,99 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
   editorDidMount,
   provideCompletionItems,
   prepend,
-}) => (
-  <div className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group osdQueryBar__wrap">
-    {prepend}
-    <div
-      className="osdQuerEditor__singleLine euiFormControlLayout__childrenWrapper"
-      data-test-subj="osdQueryEditor__singleLine"
-    >
-      <CodeEditor
-        height={20} // Adjusted to match lineHeight for a single line
-        languageId={languageId}
-        value={value}
-        onChange={onChange}
-        editorDidMount={editorDidMount}
-        options={{
-          lineNumbers: 'off', // Disabled line numbers
-          // lineHeight: 40,
-          fontSize: 14,
-          fontFamily: 'Roboto Mono',
-          minimap: {
-            enabled: false,
-          },
-          scrollBeyondLastLine: false,
-          wordWrap: 'off', // Disabled word wrapping
-          wrappingIndent: 'none', // No indent since wrapping is off
-          folding: false,
-          glyphMargin: false,
-          lineDecorationsWidth: 0,
-          scrollbar: {
-            vertical: 'hidden',
-          },
-          overviewRulerLanes: 0,
-          hideCursorInOverviewRuler: true,
-          cursorStyle: 'line',
-          wordBasedSuggestions: false,
-        }}
-        suggestionProvider={{
-          provideCompletionItems,
-          triggerCharacters: [' '],
-        }}
-        languageConfiguration={{
-          autoClosingPairs: [
-            {
-              open: '(',
-              close: ')',
+  footerItems,
+}) => {
+  const [editorIsFocused, setEditorIsFocused] = useState(false);
+
+  const handleEditorDidMount = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      editorDidMount(editor);
+
+      const focusDisposable = editor.onDidFocusEditorText(() => {
+        setEditorIsFocused(true);
+      });
+
+      // const blurDisposable = editor.onDidBlurEditorText(() => {
+      //   setEditorIsFocused(false);
+      // })
+
+      return () => {
+        focusDisposable.dispose();
+        // blurDisposable.dispose();
+      };
+    },
+    [editorDidMount]
+  );
+
+  return (
+    <div className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group osdQueryBar__wrap">
+      {prepend}
+      <div
+        className="osdQuerEditor__singleLine euiFormControlLayout__childrenWrapper"
+        data-test-subj="osdQueryEditor__singleLine"
+      >
+        <CodeEditor
+          height={20} // Adjusted to match lineHeight for a single line
+          languageId={languageId}
+          value={value}
+          onChange={onChange}
+          editorDidMount={handleEditorDidMount}
+          options={{
+            lineNumbers: 'off', // Disabled line numbers
+            // lineHeight: 40,
+            fontSize: 14,
+            fontFamily: 'Roboto Mono',
+            minimap: {
+              enabled: false,
             },
-            {
-              open: '"',
-              close: '"',
+            scrollBeyondLastLine: false,
+            wordWrap: 'off', // Disabled word wrapping
+            wrappingIndent: 'none', // No indent since wrapping is off
+            folding: false,
+            glyphMargin: false,
+            lineDecorationsWidth: 0,
+            scrollbar: {
+              vertical: 'hidden',
             },
-          ],
-        }}
-        triggerSuggestOnFocus={true}
-      />
+            overviewRulerLanes: 0,
+            hideCursorInOverviewRuler: true,
+            cursorStyle: 'line',
+            wordBasedSuggestions: false,
+          }}
+          suggestionProvider={{
+            provideCompletionItems,
+            triggerCharacters: [' '],
+          }}
+          languageConfiguration={{
+            autoClosingPairs: [
+              {
+                open: '(',
+                close: ')',
+              },
+              {
+                open: '"',
+                close: '"',
+              },
+            ],
+          }}
+          triggerSuggestOnFocus={true}
+        />
+        {editorIsFocused && (
+          <div className="queryEditor__footer">
+            {footerItems && (
+              <Fragment>
+                {footerItems.start?.map((item) => (
+                  <div className="queryEditor__footerItem">{item}</div>
+                ))}
+                <div className="queryEditor__footerSpacer" />
+                {footerItems.end?.map((item) => (
+                  <div className="queryEditor__footerItem">{item}</div>
+                ))}
+              </Fragment>
+            )}
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};

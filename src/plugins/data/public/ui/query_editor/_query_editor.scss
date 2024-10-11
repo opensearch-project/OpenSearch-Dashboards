@@ -218,3 +218,25 @@
     display: block;
   }
 }
+
+.queryEditor__footer {
+  display: flex;
+  gap: 4px;
+  background: $euiColorLightestShade;
+  padding: 2px 4px;
+  margin-top: 5px;
+  margin-left: -5px;
+  margin-right: -5px;
+  z-index: 1;
+  position: relative;
+  align-items: center;
+}
+
+.queryEditor__footerSpacer {
+  flex-grow: 1;
+}
+
+.queryEditor__footerItem {
+  // Needed so the footer items never have paddings
+  padding: 0 !important;
+}

@@ -77,6 +77,22 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
         </EuiButtonEmpty>
       );
     }
+    const time = Math.floor(elapsedTime / 1000);
+    return (
+      <EuiButtonEmpty
+        color="text"
+        size="xs"
+        onClick={() => {}}
+        isLoading
+        data-test-subj="queryResultLoading"
+        className="editor__footerItem"
+      >
+        {i18n.translate('data.query.languageService.queryResults.loadTime', {
+          defaultMessage: 'Loading {time} s',
+          values: { time },
+        })}
+      </EuiButtonEmpty>
+    );
   }
 
   if (props.queryStatus.status === ResultStatus.READY) {
@@ -122,8 +138,10 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
           size="xs"
           onClick={onButtonClick}
           data-test-subj="queryResultErrorBtn"
+          className="editor__footerItem"
+          flush="both"
         >
-          <EuiText size="xs" color="subdued">
+          <EuiText size="xs" color="subdued" className="editor__footerItem">
             {i18n.translate('data.query.languageService.queryResults.error', {
               defaultMessage: `Error`,
             })}
