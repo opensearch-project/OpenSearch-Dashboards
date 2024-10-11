@@ -431,20 +431,22 @@ export class WorkspaceSavedObjectsClientWrapper {
        * it has permission to any of the workspaces that the object associates with.
        *
        */
-      if (
-        options?.overwrite &&
-        options.id &&
-        !hasTargetWorkspaces &&
-        !(await this.validateWorkspacesAndSavedObjectsPermissions(
-          await wrapperOptions.client.get(type, options.id),
-          wrapperOptions.request,
-          [WorkspacePermissionMode.LibraryWrite],
-          [WorkspacePermissionMode.Write],
-          false
-        ))
-      ) {
-        ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
-        throw generateWorkspacePermissionError();
+      if (options?.overwrite && options.id && !hasTargetWorkspaces) {
+        const object = await wrapperOptions.client.get(type, options.id);
+        // System request, -1 for compensation.
+        ACLAuditor?.increment(ACLAuditorStateKey.DATABASE_OPERATION, -1);
+        if (
+          !(await this.validateWorkspacesAndSavedObjectsPermissions(
+            object,
+            wrapperOptions.request,
+            [WorkspacePermissionMode.LibraryWrite],
+            [WorkspacePermissionMode.Write],
+            false
+          ))
+        ) {
+          ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
+          throw generateWorkspacePermissionError();
+        }
       }
 
       ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_SUCCESS, 1);
