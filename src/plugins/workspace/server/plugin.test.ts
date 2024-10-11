@@ -44,7 +44,7 @@ describe('Workspace server plugin', () => {
         },
       }
     `);
-    expect(setupMock.savedObjects.addClientWrapper).toBeCalledTimes(4);
+    expect(setupMock.savedObjects.addClientWrapper).toBeCalledTimes(5);
 
     let registerSwitcher;
     let result;

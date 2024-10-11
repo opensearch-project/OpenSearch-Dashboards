@@ -101,6 +101,21 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       return toolkit.next();
     });
 
+    this.workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
+      this.permissionControl
+    );
+
+    core.savedObjects.addClientWrapper(
+      PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER,
+      WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+      this.workspaceSavedObjectsClientWrapper.wrapperFactory
+    );
+
+    core.http.registerOnPreResponse((request, _response, toolkit) => {
+      this.permissionControl?.clearSavedObjectsCache(request);
+      return toolkit.next();
+    });
+
     // Initialize ACL auditor in request.
     core.http.registerOnPostAuth((request, response, toolkit) => {
       initializeACLAuditor(request, this.logger);
@@ -116,21 +131,6 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       }
       destroyACLAuditor(request);
       WorkspaceSavedObjectsClientWrapper.clientCallAuditor.clear(request);
-      return toolkit.next();
-    });
-
-    this.workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
-      this.permissionControl
-    );
-
-    core.savedObjects.addClientWrapper(
-      PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER,
-      WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
-      this.workspaceSavedObjectsClientWrapper.wrapperFactory
-    );
-
-    core.http.registerOnPreResponse((request, _response, toolkit) => {
-      this.permissionControl?.clearSavedObjectsCache(request);
       return toolkit.next();
     });
   }
