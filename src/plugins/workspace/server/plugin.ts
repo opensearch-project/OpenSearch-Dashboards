@@ -34,10 +34,12 @@ import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import {
   cleanWorkspaceId,
   destroyACLAuditor,
+  destroyClientCallAuditor,
   getACLAuditor,
   getWorkspaceIdFromUrl,
   getWorkspaceState,
   initializeACLAuditor,
+  initializeClientCallAuditor,
   updateWorkspaceState,
 } from '../../../core/server/utils';
 import { WorkspaceConflictSavedObjectsClientWrapper } from './saved_objects/saved_objects_wrapper_for_check_workspace_conflict';
@@ -119,6 +121,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     // Initialize ACL auditor in request.
     core.http.registerOnPostAuth((request, response, toolkit) => {
       initializeACLAuditor(request, this.logger);
+      initializeClientCallAuditor(request);
       return toolkit.next();
     });
 
@@ -130,7 +133,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
         getACLAuditor(request)?.checkout();
       }
       destroyACLAuditor(request);
-      WorkspaceSavedObjectsClientWrapper.clientCallAuditor.clear(request);
+      destroyClientCallAuditor(request);
       return toolkit.next();
     });
   }

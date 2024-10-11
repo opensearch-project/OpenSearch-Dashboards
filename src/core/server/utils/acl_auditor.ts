@@ -46,9 +46,9 @@ class ACLAuditor {
       this.state[ACLAuditorStateKey.DATABASE_OPERATION]
     ) {
       this.logger.error(
-        `[ACLCounterCheckoutFailed] counter state: ${JSON.stringify(
-          this.state
-        )}, requestInfo: ${requestInfo}`
+        `[ACLCounterCheckoutFailed] counter state: ${JSON.stringify(this.state)}, ${
+          requestInfo ? `requestInfo: ${requestInfo}` : ''
+        }`
       );
     }
 

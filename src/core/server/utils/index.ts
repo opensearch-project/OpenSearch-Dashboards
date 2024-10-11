@@ -41,3 +41,9 @@ export {
   getACLAuditor,
   destroyACLAuditor,
 } from './acl_auditor';
+export {
+  CLIENT_CALL_AUDITOR_KEY,
+  getClientCallAuditor,
+  initializeClientCallAuditor,
+  destroyClientCallAuditor,
+} from './client_call_auditor';

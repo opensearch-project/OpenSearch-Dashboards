@@ -7,7 +7,9 @@ import { i18n } from '@osd/i18n';
 
 import {
   ACLAuditorStateKey,
+  CLIENT_CALL_AUDITOR_KEY,
   getACLAuditor,
+  getClientCallAuditor,
   getWorkspaceState,
 } from '../../../../core/server/utils';
 import {
@@ -38,7 +40,6 @@ import {
   WorkspacePermissionMode,
 } from '../../common/constants';
 import { validateIsWorkspaceDataSourceAndConnectionObjectType } from '../../common/utils';
-import { CLIENT_CALL_AUDITOR_KEY, ClientCallAuditor } from '../client_call_auditor';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -94,7 +95,6 @@ const getDefaultValuesForEmpty = <T>(values: T[] | undefined, defaultValues: T[]
 };
 
 export class WorkspaceSavedObjectsClientWrapper {
-  static clientCallAuditor: ClientCallAuditor = new ClientCallAuditor();
   private getScopedClient?: SavedObjectsServiceStart['getScopedClient'];
 
   private async validateObjectsPermissions(
@@ -243,6 +243,7 @@ export class WorkspaceSavedObjectsClientWrapper {
 
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
     const ACLAuditor = getACLAuditor(wrapperOptions.request);
+    const clientCallAuditor = getClientCallAuditor(wrapperOptions.request);
     const deleteWithWorkspacePermissionControl = async (
       type: string,
       id: string,
@@ -665,33 +666,19 @@ export class WorkspaceSavedObjectsClientWrapper {
       request: OpenSearchDashboardsRequest
     ): T {
       return function (...args: Parameters<T>): ReturnType<T> {
-        WorkspaceSavedObjectsClientWrapper.clientCallAuditor.increment(
-          request,
-          CLIENT_CALL_AUDITOR_KEY.incoming
-        );
+        clientCallAuditor?.increment(CLIENT_CALL_AUDITOR_KEY.incoming);
         const result = fn.apply(wrapperOptions.client, args);
         if (result instanceof Promise) {
           result.then(
             () => {
-              WorkspaceSavedObjectsClientWrapper.clientCallAuditor.increment(
-                request,
-                CLIENT_CALL_AUDITOR_KEY.outgoing
-              );
+              clientCallAuditor?.increment(CLIENT_CALL_AUDITOR_KEY.outgoing);
               try {
                 const checkoutInfo = JSON.stringify([fn.name, ...args]);
-                if (
-                  WorkspaceSavedObjectsClientWrapper.clientCallAuditor.ifAsyncClientCallsBalance(
-                    request
-                  )
-                ) {
+                if (clientCallAuditor?.ifAsyncClientCallsBalance()) {
                   ACLAuditor?.checkout(checkoutInfo);
                 }
               } catch (e) {
-                if (
-                  WorkspaceSavedObjectsClientWrapper.clientCallAuditor.ifAsyncClientCallsBalance(
-                    request
-                  )
-                ) {
+                if (clientCallAuditor?.ifAsyncClientCallsBalance()) {
                   ACLAuditor?.checkout();
                 }
               }
@@ -701,27 +688,15 @@ export class WorkspaceSavedObjectsClientWrapper {
              * and we will reset the auditor state when catch an error.
              */
             () => {
-              WorkspaceSavedObjectsClientWrapper.clientCallAuditor.increment(
-                request,
-                CLIENT_CALL_AUDITOR_KEY.outgoing
-              );
-              if (
-                WorkspaceSavedObjectsClientWrapper.clientCallAuditor.ifAsyncClientCallsBalance(
-                  request
-                )
-              ) {
+              clientCallAuditor?.increment(CLIENT_CALL_AUDITOR_KEY.outgoing);
+              if (clientCallAuditor?.ifAsyncClientCallsBalance()) {
                 ACLAuditor?.reset();
               }
             }
           );
         } else {
-          WorkspaceSavedObjectsClientWrapper.clientCallAuditor.increment(
-            request,
-            CLIENT_CALL_AUDITOR_KEY.outgoing
-          );
-          if (
-            WorkspaceSavedObjectsClientWrapper.clientCallAuditor.ifAsyncClientCallsBalance(request)
-          ) {
+          clientCallAuditor?.increment(CLIENT_CALL_AUDITOR_KEY.outgoing);
+          if (clientCallAuditor?.ifAsyncClientCallsBalance()) {
             ACLAuditor?.checkout();
           }
         }
