@@ -4,8 +4,13 @@
  */
 
 export class DuplicateCollaboratorError {
-  constructor(private _duplicateCollaboratorIds: string[]) {}
-  public get duplicateCollaboratorIds() {
-    return this._duplicateCollaboratorIds;
+  constructor(
+    private _details: {
+      pendingAdded: string[];
+      existing: string[];
+    }
+  ) {}
+  public get details() {
+    return this._details;
   }
 }

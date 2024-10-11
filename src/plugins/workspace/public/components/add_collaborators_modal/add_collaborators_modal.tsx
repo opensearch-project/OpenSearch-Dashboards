@@ -99,16 +99,7 @@ export const AddCollaboratorsModal = ({
       existingIds.push(collaborator.id);
       return previousValue;
     }, {});
-    const duplicateIds = Object.keys(collaboratorId2IdsMap).flatMap((key) => {
-      if (collaboratorId2IdsMap[key].length === 1) {
-        return [];
-      }
-      return collaboratorId2IdsMap[key].slice(1);
-    });
-    setErrors(generateDuplicateCollaboratorErrors(duplicateIds));
-    if (duplicateIds.length > 0) {
-      return;
-    }
+    setErrors({});
     try {
       await onAddCollaborators(
         validInnerCollaborators.map(({ id, ...collaborator }) => ({
@@ -116,15 +107,20 @@ export const AddCollaboratorsModal = ({
           permissionType,
         }))
       );
-    } catch (e) {
-      if (e instanceof DuplicateCollaboratorError) {
-        setErrors(
-          generateDuplicateCollaboratorErrors(
-            e.duplicateCollaboratorIds.flatMap(
-              (collaboratorId) => collaboratorId2IdsMap[collaboratorId] ?? []
-            )
-          )
-        );
+    } catch (error) {
+      if (error instanceof DuplicateCollaboratorError) {
+        const duplicateIds: number[] = [];
+        error.details.pendingAdded.forEach((collaboratorId) => {
+          collaboratorId2IdsMap[collaboratorId].slice(1).forEach((id) => {
+            duplicateIds.push(id);
+          });
+        });
+        error.details.existing.forEach((collaboratorId) => {
+          collaboratorId2IdsMap[collaboratorId].forEach((id) => {
+            duplicateIds.push(id);
+          });
+        });
+        setErrors(generateDuplicateCollaboratorErrors(duplicateIds));
         return;
       }
     }

@@ -108,7 +108,7 @@ describe('AddCollaboratorButton', () => {
     ]);
   });
 
-  it('should throw DuplicateCollaboratorError', async () => {
+  it('should throw DuplicateCollaboratorError with consistent details', async () => {
     let errorCached: DuplicateCollaboratorError | undefined;
     const mockOnAdd = jest.fn(async ({ onAddCollaborators }) => {
       try {
@@ -122,6 +122,16 @@ describe('AddCollaboratorButton', () => {
             accessLevel: 'readOnly',
             collaboratorId: 'group',
             permissionType: 'group',
+          },
+          {
+            accessLevel: 'readOnly',
+            collaboratorId: 'new-user',
+            permissionType: 'user',
+          },
+          {
+            accessLevel: 'readOnly',
+            collaboratorId: 'new-user',
+            permissionType: 'user',
           },
         ]);
       } catch (e) {
@@ -154,7 +164,8 @@ describe('AddCollaboratorButton', () => {
 
     expect(errorCached).toBeInstanceOf(DuplicateCollaboratorError);
     if (errorCached instanceof DuplicateCollaboratorError) {
-      expect(errorCached.duplicateCollaboratorIds).toEqual(['admin', 'group']);
+      expect(errorCached.details.pendingAdded).toEqual(['new-user']);
+      expect(errorCached.details.existing).toEqual(['admin', 'group']);
     }
   });
 });

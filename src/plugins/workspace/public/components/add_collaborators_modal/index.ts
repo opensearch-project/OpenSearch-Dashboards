@@ -4,4 +4,7 @@
  */
 
 export { AddCollaboratorsModal, AddCollaboratorsModalProps } from './add_collaborators_modal';
-export { DuplicateCollaboratorError } from './duplicate_collaborator_error';
+export {
+  DuplicateCollaboratorError,
+  CollaboratorDuplicateSource,
+} from './duplicate_collaborator_error';

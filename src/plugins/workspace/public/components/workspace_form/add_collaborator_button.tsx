@@ -37,6 +37,7 @@ export const AddCollaboratorButton = ({
   }, []);
 
   const onAddCollaborators = async (collaborators: WorkspaceCollaborator[]) => {
+    const uniqueCollaboratorIds = new Set();
     const addedSettings = collaborators.map(({ permissionType, accessLevel, collaboratorId }) => ({
       type: permissionType,
       modes: accessLevelNameToWorkspacePermissionModesMap[accessLevel],
@@ -48,24 +49,36 @@ export const AddCollaboratorButton = ({
         : {
             group: collaboratorId,
           }),
-    })) as WorkspacePermissionSetting[];
-    const duplicateSettings = addedSettings.filter((permissionSettingToAdd) =>
-      hasSameUserIdOrGroup(permissionSettings, permissionSettingToAdd)
+      collaboratorId,
+    })) as Array<WorkspacePermissionSetting & { collaboratorId: string }>;
+    const pendingAddedDuplicateCollaboratorIds = Array.from(
+      new Set(
+        collaborators.flatMap(({ collaboratorId }) => {
+          if (uniqueCollaboratorIds.has(collaboratorId)) {
+            return [collaboratorId];
+          }
+          uniqueCollaboratorIds.add(collaboratorId);
+          return [];
+        })
+      )
     );
-    if (duplicateSettings.length > 0) {
-      throw new DuplicateCollaboratorError(
-        Array.from(
-          new Set(
-            Array.from(
-              duplicateSettings.map((setting) =>
-                setting.type === WorkspacePermissionItemType.User ? setting.userId : setting.group
-              )
-            )
-          )
-        )
-      );
+    const existingDuplicateSettings = addedSettings.filter(
+      (permissionSettingToAdd) =>
+        !pendingAddedDuplicateCollaboratorIds.includes(permissionSettingToAdd.collaboratorId) &&
+        hasSameUserIdOrGroup(permissionSettings, permissionSettingToAdd)
+    );
+    if (pendingAddedDuplicateCollaboratorIds.length > 0 || existingDuplicateSettings.length > 0) {
+      throw new DuplicateCollaboratorError({
+        pendingAdded: pendingAddedDuplicateCollaboratorIds,
+        existing: Array.from(
+          new Set(existingDuplicateSettings.map((setting) => setting.collaboratorId))
+        ),
+      });
     }
-    const newPermissionSettings = [...permissionSettings, ...addedSettings];
+    const newPermissionSettings = [
+      ...permissionSettings,
+      ...addedSettings.map(({ collaboratorId, ...rest }) => rest),
+    ];
     handleSubmitPermissionSettings(newPermissionSettings as WorkspacePermissionSetting[]);
   };
 
