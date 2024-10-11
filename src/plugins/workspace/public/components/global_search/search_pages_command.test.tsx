@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { searchPageWithInWorkspace } from './search_pages_handler';
+import { searchPageWithInWorkspace } from './search_pages_command';
 import { WorkspaceUseCase } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
 import { NavGroupItemInMap, WorkspaceObject } from 'opensearch-dashboards/public';
 
-describe('<SearchPagesStrategy />', () => {
+describe('<SearchPagesCommand />', () => {
   const registeredUseCases = new BehaviorSubject([
     {
       id: 'foo',

@@ -76,7 +76,7 @@ import {
 import { AddCollaboratorsModal } from './components/add_collaborators_modal';
 import { registerDefaultCollaboratorTypes } from './register_default_collaborator_types';
 import { SearchObjectTypes } from '../../../core/public';
-import { searchPageWithInWorkspace } from './components/global_search/search_pages_handler';
+import { searchPageWithInWorkspace } from './components/global_search/search_pages_command';
 
 type WorkspaceAppType = (
   params: AppMountParameters,

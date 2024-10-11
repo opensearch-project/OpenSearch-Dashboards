@@ -6,9 +6,9 @@
 import { EuiHighlight, EuiSimplifiedBreadcrumbs } from '@elastic/eui';
 import {
   ApplicationStart,
-  ChromeNavGroup,
   ChromeNavLink,
   ChromeRegistrationNavLink,
+  NavGroupItemInMap,
   WorkspaceObject,
 } from 'opensearch-dashboards/public';
 import React from 'react';
@@ -20,7 +20,7 @@ import { NavGroupType } from '../../../../../core/public';
 
 interface Props {
   currentWorkspace: WorkspaceObject | null;
-  link: ChromeRegistrationNavLink & ChromeNavLink & { navGroup: ChromeNavGroup };
+  link: ChromeRegistrationNavLink & ChromeNavLink & { navGroup: NavGroupItemInMap };
   application: ApplicationStart;
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
   search: string;
@@ -60,6 +60,13 @@ export const GlobalSearchPageItem = ({
   const isOverviewPage = appId.endsWith('overview');
   if (isOverviewPage && link.category) {
     breadcrumbs.push({ text: link.category.label });
+  }
+
+  if (link.parentNavLinkId) {
+    const parentNavLinkTitle = link.navGroup.navLinks.find(
+      (navLink) => navLink.id === link.parentNavLinkId
+    )?.title;
+    breadcrumbs.push({ text: parentNavLinkTitle });
   }
 
   const onNavItemClick = (id: string) => {

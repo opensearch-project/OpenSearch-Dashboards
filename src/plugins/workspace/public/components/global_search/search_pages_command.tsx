@@ -40,10 +40,16 @@ export const searchPageWithInWorkspace = async (
       const navGroup = navGroupMap[useCaseId];
       if (navGroup) {
         const links = navGroup.navLinks as Array<ChromeRegistrationNavLink & ChromeNavLink>;
+        // parent nav links are not clickable
+        const parentNavLinkIds = links.map((link) => link.parentNavLinkId).filter((link) => !!link);
         return links
           .filter(
             (link) =>
-              !link.hidden && link.title && link.title.toLowerCase().includes(query.toLowerCase())
+              !link.hidden &&
+              !link.disabled &&
+              link.title &&
+              link.title.toLowerCase().includes(query.toLowerCase()) &&
+              !parentNavLinkIds.includes(link.id)
           )
           .map((link) => ({
             ...link,
