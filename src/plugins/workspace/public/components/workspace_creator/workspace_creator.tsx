@@ -10,8 +10,16 @@ import { BehaviorSubject } from 'rxjs';
 import { useLocation } from 'react-router-dom';
 
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
-import { WorkspaceFormSubmitData, WorkspaceOperationType, DetailTab } from '../workspace_form';
+import { PermissionModeId } from '../../../../../core/public';
+import { CURRENT_USER_PLACEHOLDER, WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
+import {
+  WorkspaceFormSubmitData,
+  WorkspaceOperationType,
+  DetailTab,
+  WorkspacePermissionItemType,
+  convertPermissionSettingsToPermissions,
+  WorkspacePermissionSetting,
+} from '../workspace_form';
 import { getUseCaseFeatureConfig } from '../../../common/utils';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
@@ -23,6 +31,7 @@ import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/p
 import { DataSourceConnectionType } from '../../../common/types';
 import { navigateToWorkspaceDetail } from '../utils/workspace';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
+import { optionIdToWorkspacePermissionModesMap } from '../workspace_form/constants';
 
 export interface WorkspaceCreatorProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -73,8 +82,20 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
             features: [getUseCaseFeatureConfig(defaultSelectedUseCase.id)],
           }
         : {}),
+      ...(isPermissionEnabled
+        ? {
+            permissionSettings: [
+              {
+                id: 1,
+                type: WorkspacePermissionItemType.User,
+                userId: CURRENT_USER_PLACEHOLDER,
+                modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Owner],
+              },
+            ] as WorkspacePermissionSetting[],
+          }
+        : {}),
     };
-  }, [location.search, availableUseCases]);
+  }, [location.search, availableUseCases, isPermissionEnabled]);
 
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
@@ -102,6 +123,11 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
         result = await workspaceClient.create(attributes, {
           dataSources: selectedDataSourceIds,
           dataConnections: selectedDataConnectionIds,
+          ...(isPermissionEnabled
+            ? {
+                permissions: convertPermissionSettingsToPermissions(permissionSettings),
+              }
+            : {}),
         });
         if (result?.success) {
           notifications?.toasts.addSuccess({

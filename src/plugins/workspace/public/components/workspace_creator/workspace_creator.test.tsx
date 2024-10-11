@@ -280,6 +280,14 @@ describe('WorkspaceCreator', () => {
       {
         dataSources: [],
         dataConnections: [],
+        permissions: {
+          library_write: {
+            users: ['%me%'],
+          },
+          write: {
+            users: ['%me%'],
+          },
+        },
       }
     );
     await waitFor(() => {
@@ -371,10 +379,10 @@ describe('WorkspaceCreator', () => {
       expect.objectContaining({
         name: 'test workspace name',
       }),
-      {
+      expect.objectContaining({
         dataConnections: [],
         dataSources: ['id1'],
-      }
+      })
     );
     await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
@@ -421,8 +429,39 @@ describe('WorkspaceCreator', () => {
       expect.objectContaining({
         name: 'test workspace name',
       }),
-      {
+      expect.objectContaining({
         dataConnections: ['id3'],
+        dataSources: [],
+      })
+    );
+    await waitFor(() => {
+      expect(notificationToastsAddSuccess).toHaveBeenCalled();
+    });
+    expect(notificationToastsAddDanger).not.toHaveBeenCalled();
+  });
+
+  it('should not include permissions parameter if permissions not enabled', async () => {
+    const { getByTestId } = render(
+      <WorkspaceCreator isDashboardAdmin={true} isPermissionEnabled={false} />
+    );
+
+    // Ensure workspace create form rendered
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('workspaceUseCase-observability'));
+
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    expect(workspaceClientCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'test workspace name',
+      }),
+      {
+        dataConnections: [],
         dataSources: [],
       }
     );
