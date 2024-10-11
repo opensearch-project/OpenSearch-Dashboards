@@ -7,10 +7,8 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { WorkspaceFormSummaryPanel, FieldSummaryItem } from './workspace_form_summary_panel';
 import { RightSidebarScrollField } from './utils';
-import { WorkspacePermissionItemType } from '../workspace_form';
 import { applicationServiceMock } from '../../../../../../src/core/public/mocks';
 import { DataSourceConnectionType } from '../../../common/types';
-import { WorkspacePermissionMode } from '../../../common/constants';
 
 describe('WorkspaceFormSummaryPanel', () => {
   const formData = {
@@ -38,25 +36,11 @@ describe('WorkspaceFormSummaryPanel', () => {
         type: '',
         connectionType: DataSourceConnectionType.OpenSearchConnection,
       },
-    ],
-    permissionSettings: [
       {
-        id: 1,
-        type: WorkspacePermissionItemType.User,
-        userId: 'user1',
-        modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
-      },
-      {
-        id: 2,
-        type: WorkspacePermissionItemType.Group,
-        group: 'group1',
-        modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
-      },
-      {
-        id: 3,
-        type: WorkspacePermissionItemType.User,
-        userId: 'user2',
-        modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Read],
+        id: 'data-source-4',
+        name: 'Data Source 4',
+        type: '',
+        connectionType: DataSourceConnectionType.OpenSearchConnection,
       },
     ],
   };
@@ -84,7 +68,6 @@ describe('WorkspaceFormSummaryPanel', () => {
       <WorkspaceFormSummaryPanel
         formData={formData}
         availableUseCases={availableUseCases}
-        permissionEnabled
         formId="id"
         application={applicationMock}
         isSubmitting={false}
@@ -100,12 +83,6 @@ describe('WorkspaceFormSummaryPanel', () => {
     expect(screen.getByText('Data Source 1')).toBeInTheDocument();
     expect(screen.getByText('Data Source 2')).toBeInTheDocument();
     expect(screen.getByText('Data Source 3')).toBeInTheDocument();
-    expect(screen.getByText('user1')).toBeInTheDocument();
-    expect(screen.getByText('Admin')).toBeInTheDocument();
-    expect(screen.getByText('group1')).toBeInTheDocument();
-    expect(screen.getByText('Read only')).toBeInTheDocument();
-    expect(screen.getByText('+1 more')).toBeInTheDocument();
-    expect(screen.queryByText('user2')).toBeNull();
     expect(screen.getByText('Cancel')).toBeInTheDocument();
     expect(screen.getByText('Create workspace')).toBeInTheDocument();
   });
@@ -116,12 +93,10 @@ describe('WorkspaceFormSummaryPanel', () => {
         formData={{
           name: '',
           selectedDataSourceConnections: [],
-          permissionSettings: [],
           features: [],
           useCase: undefined,
         }}
         availableUseCases={availableUseCases}
-        permissionEnabled
         formId="id"
         application={applicationMock}
         isSubmitting={false}
@@ -150,12 +125,6 @@ describe('WorkspaceFormSummaryPanel', () => {
       'workspaceFormRightSideBarSummary-dataSource-Value'
     );
     expect(dataSourcesPlaceholder).toHaveTextContent('—');
-
-    // Permissions placeholder
-    const permissionsPlaceholder = screen.getByTestId(
-      'workspaceFormRightSideBarSummary-collaborators-Value'
-    );
-    expect(permissionsPlaceholder).toHaveTextContent('—');
   });
 
   it('renders all items when expanded and hide some items when click show less', () => {
@@ -163,23 +132,23 @@ describe('WorkspaceFormSummaryPanel', () => {
       <WorkspaceFormSummaryPanel
         formData={formData}
         availableUseCases={availableUseCases}
-        permissionEnabled
         formId="id"
         application={applicationMock}
         isSubmitting={false}
         dataSourceEnabled
       />
     );
-    expect(screen.getByText('user1')).toBeInTheDocument();
-    expect(screen.getByText('group1')).toBeInTheDocument();
-    expect(screen.queryByText('user2')).toBeNull();
+    expect(screen.getByText('Data Source 1')).toBeInTheDocument();
+    expect(screen.getByText('Data Source 2')).toBeInTheDocument();
+    expect(screen.getByText('Data Source 3')).toBeInTheDocument();
+    expect(screen.queryByText('Data Source 4')).toBeNull();
     fireEvent.click(screen.getByText('+1 more'));
 
-    expect(screen.getByText('user2')).toBeInTheDocument();
+    expect(screen.getByText('Data Source 4')).toBeInTheDocument();
     expect(screen.getByText('Show less')).toBeInTheDocument();
 
     fireEvent.click(screen.getByText('Show less'));
-    expect(screen.queryByText('user2')).toBeNull();
+    expect(screen.queryByText('Data Source 4')).toBeNull();
   });
 
   it('should hide "Data sources" if data source not enabled', () => {
@@ -187,7 +156,6 @@ describe('WorkspaceFormSummaryPanel', () => {
       <WorkspaceFormSummaryPanel
         formData={formData}
         availableUseCases={availableUseCases}
-        permissionEnabled
         formId="id"
         application={applicationMock}
         isSubmitting={false}
