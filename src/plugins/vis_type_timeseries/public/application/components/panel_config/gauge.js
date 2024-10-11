@@ -52,6 +52,7 @@ import {
   EuiCompressedFieldNumber,
   EuiTitle,
   EuiHorizontalRule,
+  EuiFormControlLayout,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { QueryBarWrapper } from '../query_bar_wrapper';
@@ -215,17 +216,19 @@ class GaugePanelConfigUi extends Component {
                     />
                   }
                 >
-                  {/*
-                    EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-                    It accepts a null value, but is passed a empty string.
-                  */}
-                  <input
-                    id={htmlId('gaugeMax')}
-                    className="tvbAgg__input"
-                    type="number"
-                    onChange={handleTextChange('gauge_max')}
-                    value={model.gauge_max}
-                  />
+                  <EuiFormControlLayout compressed={true}>
+                    {/*
+                      EUITODO: The following input couldn't be converted to EUI because of type mis-match.
+                      It accepts a null value, but is passed a empty string.
+                    */}
+                    <input
+                      id={htmlId('gaugeMax')}
+                      className="euiFieldText euiFieldText--compressed"
+                      type="number"
+                      onChange={handleTextChange('gauge_max')}
+                      value={model.gauge_max}
+                    />
+                  </EuiFormControlLayout>
                 </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem>

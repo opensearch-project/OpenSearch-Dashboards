@@ -1,0 +1,6 @@
+feat:
+- Allow hiding the TSVB axis for time series visualizations ([#8504](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8504))
+- Allow setting scale of each axis for TSVB time series ([#8504](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8504))
+
+fix:
+- Compress non-OUI input fields in TSVB visualizations ([#8504](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8504))
