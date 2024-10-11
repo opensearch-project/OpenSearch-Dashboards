@@ -17,7 +17,3 @@
 .tvbAggRow__unavailable {
   margin-top: -$euiSizeXS;
 }
-
-.tvbAgg__input {
-  @include euiFormControlStyle($borderOnly: false, $includeStates: true, $includeSizes: false);
-}
