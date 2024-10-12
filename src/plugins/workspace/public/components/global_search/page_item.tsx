@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiHighlight, EuiSimplifiedBreadcrumbs } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHighlight,
+  EuiIcon,
+  EuiSimplifiedBreadcrumbs,
+} from '@elastic/eui';
 import {
   ApplicationStart,
   ChromeNavLink,
@@ -42,6 +48,18 @@ export const GlobalSearchPageItem = ({
   const availableUseCases = useObservable(registeredUseCases$);
   const breadcrumbs = [];
   const isPageOutOfWorkspace = link.navGroup.type === NavGroupType.SYSTEM;
+
+  const navGroupElement = (navGroup: NavGroupItemInMap) => (
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      {navGroup.icon && (
+        <EuiFlexItem>
+          <EuiIcon type={navGroup.icon} color="text" />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem>{navGroup.title}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   if (currentWorkspace && !isPageOutOfWorkspace) {
     breadcrumbs.push({
       text: (
@@ -52,7 +70,7 @@ export const GlobalSearchPageItem = ({
       ),
     });
   } else {
-    breadcrumbs.push({ text: link.navGroup.title });
+    breadcrumbs.push({ text: navGroupElement(link.navGroup) });
   }
   const appId = link.id.toLowerCase();
   const isLanding = appId.endsWith('landing');
