@@ -18,7 +18,7 @@ import { AssociationDataSourceModalMode } from 'src/plugins/workspace/common/con
 
 const setupAssociationDataSourceModal = ({
   mode,
-  assignedConnections,
+  excludedConnectionIds,
   handleAssignDataSourceConnections,
 }: Partial<AssociationDataSourceModalProps> = {}) => {
   const coreServices = coreMock.createStart();
@@ -69,7 +69,7 @@ const setupAssociationDataSourceModal = ({
         notifications={coreServices.notifications}
         savedObjects={coreServices.savedObjects}
         closeModal={jest.fn()}
-        assignedConnections={assignedConnections ?? []}
+        excludedConnectionIds={excludedConnectionIds ?? []}
         handleAssignDataSourceConnections={handleAssignDataSourceConnections ?? jest.fn()}
       />
     </IntlProvider>
@@ -135,14 +135,7 @@ describe('AssociationDataSourceModal', () => {
 
   it('should hide associated connections', async () => {
     setupAssociationDataSourceModal({
-      assignedConnections: [
-        {
-          id: 'ds2',
-          name: 'Data Source 2',
-          connectionType: DataSourceConnectionType.OpenSearchConnection,
-          type: 'OpenSearch',
-        },
-      ],
+      excludedConnectionIds: ['ds2'],
     });
     expect(
       screen.getByText(
