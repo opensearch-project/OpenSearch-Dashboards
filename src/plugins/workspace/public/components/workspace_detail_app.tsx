@@ -127,7 +127,6 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
               defaultMessage: 'Update workspace successfully',
             }),
           });
-          setIsFormSubmitting(false);
           if (application && http && refresh) {
             // Redirect page after one second, leave one second time to show update successful toast.
             window.setTimeout(() => {
@@ -139,6 +138,8 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
                 http.basePath
               );
             }, 1000);
+          } else {
+            setIsFormSubmitting(false);
           }
           return result;
         } else {

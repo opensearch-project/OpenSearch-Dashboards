@@ -150,7 +150,6 @@ export const useWorkspaceForm = ({
     setDescription(resetValues?.description ?? '');
     setColor(resetValues?.color);
     setFeatureConfigs(resetValues?.features ?? []);
-    setPermissionSettings(defaultValuesRef.current?.permissionSettings ?? []);
     setFormErrors({});
     setIsEditing(false);
   }, []);
