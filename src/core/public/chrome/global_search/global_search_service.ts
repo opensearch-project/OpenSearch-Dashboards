@@ -15,11 +15,11 @@ export const COMMANDS_SYMBOL = '>';
 
 export const SearchCommandTypes = {
   PAGES: {
-    description: i18n.translate('core.GlobalSearch.pages.description', { defaultMessage: 'Pages' }),
+    description: i18n.translate('core.globalSearch.pages.description', { defaultMessage: 'Pages' }),
     alias: null,
   },
   SAVED_OBJECTS: {
-    description: i18n.translate('core.GlobalSearch.assets.description', {
+    description: i18n.translate('core.globalSearch.assets.description', {
       defaultMessage: 'Assets',
     }),
     alias: SAVED_OBJECTS_SYMBOL,

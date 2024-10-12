@@ -7,7 +7,7 @@
 import { GlobalSearchService } from './global_search_service';
 
 describe('GlobalSearchService', () => {
-  it('registerSearchStrategy', async () => {
+  it('registerSearchCommand', async () => {
     const globalSearchService = new GlobalSearchService();
     const setup = globalSearchService.setup();
     const start = globalSearchService.start();
@@ -25,7 +25,7 @@ describe('GlobalSearchService', () => {
     expect(start.getAllSearchCommands()[0].type).toEqual('PAGES');
   });
 
-  it('registerSearchStrategy with duplicate id', async () => {
+  it('registerSearchCommand with duplicate id', async () => {
     const globalSearchService = new GlobalSearchService();
     const setup = globalSearchService.setup();
     const start = globalSearchService.start();
