@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Fragment, useEffect, useState, useCallback } from 'react';
+import { Fragment, useEffect, useState, useCallback, useRef } from 'react';
 import React from 'react';
 import {
   EuiText,
@@ -129,20 +129,19 @@ const convertConnectionsToOptions = ({
   connections,
   showDirectQueryConnections,
   selectedConnectionIds,
-  assignedConnections,
+  excludedConnectionIds,
   logos,
 }: {
   connections: DataSourceConnection[];
-  assignedConnections: DataSourceConnection[];
+  excludedConnectionIds: string[];
   showDirectQueryConnections: boolean;
   selectedConnectionIds: string[];
   logos: Logos;
 }) => {
-  const assignedConnectionIds = assignedConnections.map(({ id }) => id);
   return connections
     .flatMap((connection) => {
       if (
-        assignedConnectionIds.includes(connection.id) ||
+        excludedConnectionIds.includes(connection.id) ||
         connection.connectionType === DataSourceConnectionType.DirectQueryConnection
       ) {
         return [];
@@ -173,20 +172,28 @@ export interface AssociationDataSourceModalProps {
   http: HttpStart | undefined;
   notifications: NotificationsStart | undefined;
   savedObjects: SavedObjectsStart;
-  assignedConnections: DataSourceConnection[];
+  excludedConnectionIds: string[];
   mode: AssociationDataSourceModalMode;
   closeModal: () => void;
-  handleAssignDataSourceConnections: (connections: DataSourceConnection[]) => void;
+  handleAssignDataSourceConnections: (connections: DataSourceConnection[]) => Promise<void> | void;
   logos: Logos;
 }
 
-export const AssociationDataSourceModal = ({
+export const AssociationDataSourceModal = (props: AssociationDataSourceModalProps) => {
+  return (
+    <EuiModal onClose={props.closeModal} style={{ width: 630 }}>
+      <AssociationDataSourceModalContent {...props} />
+    </EuiModal>
+  );
+};
+
+export const AssociationDataSourceModalContent = ({
   mode,
   http,
   notifications,
   closeModal,
   savedObjects,
-  assignedConnections,
+  excludedConnectionIds,
   handleAssignDataSourceConnections,
   logos,
 }: AssociationDataSourceModalProps) => {
@@ -194,6 +201,15 @@ export const AssociationDataSourceModal = ({
   const [selectedConnectionIds, setSelectedConnectionIds] = useState<string[]>([]);
   const [options, setOptions] = useState<DataSourceModalOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const handleSelectionChange = useCallback((newOptions: DataSourceModalOption[]) => {
     setSelectedConnectionIds(
@@ -201,10 +217,15 @@ export const AssociationDataSourceModal = ({
     );
   }, []);
 
-  const handleSaveButtonClick = useCallback(() => {
-    handleAssignDataSourceConnections(
+  const handleSaveButtonClick = useCallback(async () => {
+    setIsSaving(true);
+    const res = handleAssignDataSourceConnections(
       allConnections.filter((connection) => selectedConnectionIds.includes(connection.id))
     );
+    await Promise.resolve(res);
+    if (mountedRef.current) {
+      setIsSaving(false);
+    }
   }, [selectedConnectionIds, allConnections, handleAssignDataSourceConnections]);
 
   useEffect(() => {
@@ -223,16 +244,16 @@ export const AssociationDataSourceModal = ({
     setOptions(
       convertConnectionsToOptions({
         connections: allConnections,
-        assignedConnections,
+        excludedConnectionIds,
         selectedConnectionIds,
         showDirectQueryConnections: mode === AssociationDataSourceModalMode.DirectQueryConnections,
         logos,
       })
     );
-  }, [allConnections, assignedConnections, selectedConnectionIds, mode, logos]);
+  }, [allConnections, excludedConnectionIds, selectedConnectionIds, mode, logos]);
 
   return (
-    <EuiModal onClose={closeModal} style={{ width: 630 }}>
+    <>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {mode === AssociationDataSourceModalMode.OpenSearchConnections ? (
@@ -292,6 +313,7 @@ export const AssociationDataSourceModal = ({
           data-test-subj="workspace-detail-dataSources-associateModal-save-button"
           onClick={handleSaveButtonClick}
           isDisabled={selectedConnectionIds.length === 0}
+          isLoading={isSaving}
           fill
         >
           <FormattedMessage
@@ -300,6 +322,6 @@ export const AssociationDataSourceModal = ({
           />
         </EuiSmallButton>
       </EuiModalFooter>
-    </EuiModal>
+    </>
   );
 };
