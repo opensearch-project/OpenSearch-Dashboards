@@ -29,6 +29,7 @@ import { CoreSetup } from '../../../../../core/public';
 import { QueryAssistContextType } from '../../../common/query_assist';
 import sparkleHollowSvg from '../../assets/sparkle_hollow.svg';
 import sparkleSolidSvg from '../../assets/sparkle_solid.svg';
+import { FeedbackStatus } from '../../../common/query_assist';
 
 export interface QueryContext {
   question: string;
@@ -65,9 +66,9 @@ export const convertResult = (body: IDataFrame) => {
 
 export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => {
   const { query, search } = props.data;
-  const [summary, setSummary] = useState(null); // store fetched data
+  const [summary, setSummary] = useState(''); // store fetched data
   const [loading, setLoading] = useState(false); // track loading state
-  const [feedback, setFeedback] = useState(false);
+  const [feedback, setFeedback] = useState(FeedbackStatus.NONE);
   const [isEnabledByCapability, setIsEnabledByCapability] = useState(false);
   const selectedDataset = useRef(query.queryString.getQuery()?.dataset);
   const { question$, isQueryAssistCollapsed } = useQueryAssist();
@@ -75,6 +76,9 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
   const afterFeedbackTip = i18n.translate('queryEnhancements.queryAssist.summary.afterFeedback', {
     defaultMessage:
       'Thank you for the feedback. Try again by adjusting your question so that I have the opportunity to better assist you.',
+  });
+  const errorPrompt = i18n.translate('queryEnhancements.queryAssist.summary.errorPrompt', {
+    defaultMessage: 'I am unable to respond to this query. Try another question.',
   });
 
   const sampleSize = 10;
@@ -117,8 +121,8 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
     async (queryContext: QueryContext) => {
       if (isEmpty(queryContext?.queryResults)) return;
       setLoading(true);
-      setSummary(null);
-      setFeedback(false);
+      setSummary('');
+      setFeedback(FeedbackStatus.NONE);
       const SUCCESS_METRIC = 'fetch_summary_success';
       try {
         const actualSampleSize = Math.min(sampleSize, queryContext?.queryResults?.length);
@@ -140,11 +144,12 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
         reportCountMetric(SUCCESS_METRIC, 1);
       } catch (error) {
         reportCountMetric(SUCCESS_METRIC, 0);
+        setSummary(errorPrompt);
       } finally {
         setLoading(false);
       }
     },
-    [props.http, reportCountMetric]
+    [props.http, reportCountMetric, errorPrompt]
   );
 
   useEffect(() => {
@@ -203,9 +208,10 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
 
   const onFeedback = useCallback(
     (satisfied: boolean) => {
-      if (feedback) return;
-      setFeedback(true);
-      reportMetric(satisfied ? 'thumbup' : 'thumbdown');
+      if (feedback !== FeedbackStatus.NONE) return;
+      const feedbackStatus = satisfied ? FeedbackStatus.THUMB_UP : FeedbackStatus.THUMB_DOWN;
+      setFeedback(feedbackStatus);
+      reportMetric(feedbackStatus);
     },
     [feedback, reportMetric]
   );
@@ -247,38 +253,42 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
                     })}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSmallButtonIcon
-                    aria-label="feedback thumbs up"
-                    color="text"
-                    iconType="thumbsUp"
-                    title={
-                      !feedback
-                        ? i18n.translate('queryEnhancements.queryAssist.summary.goodResponse', {
-                            defaultMessage: `Good response`,
-                          })
-                        : afterFeedbackTip
-                    }
-                    onClick={() => onFeedback(true)}
-                    data-test-subj="queryAssist_summary_buttons_thumbup"
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiSmallButtonIcon
-                    aria-label="feedback thumbs down"
-                    color="text"
-                    title={
-                      !feedback
-                        ? i18n.translate('queryEnhancements.queryAssist.summary.badResponse', {
-                            defaultMessage: `Bad response`,
-                          })
-                        : afterFeedbackTip
-                    }
-                    iconType="thumbsDown"
-                    onClick={() => onFeedback(false)}
-                    data-test-subj="queryAssist_summary_buttons_thumbdown"
-                  />
-                </EuiFlexItem>
+                {feedback !== FeedbackStatus.THUMB_DOWN && (
+                  <EuiFlexItem grow={false}>
+                    <EuiSmallButtonIcon
+                      aria-label="feedback thumbs up"
+                      color={feedback === FeedbackStatus.THUMB_UP ? 'subdued' : 'text'}
+                      iconType="thumbsUp"
+                      title={
+                        !feedback
+                          ? i18n.translate('queryEnhancements.queryAssist.summary.goodResponse', {
+                              defaultMessage: `Good response`,
+                            })
+                          : afterFeedbackTip
+                      }
+                      onClick={() => onFeedback(true)}
+                      data-test-subj="queryAssist_summary_buttons_thumbup"
+                    />
+                  </EuiFlexItem>
+                )}
+                {feedback !== FeedbackStatus.THUMB_UP && (
+                  <EuiFlexItem grow={false}>
+                    <EuiSmallButtonIcon
+                      aria-label="feedback thumbs down"
+                      color={feedback === FeedbackStatus.THUMB_DOWN ? 'subdued' : 'text'}
+                      title={
+                        !feedback
+                          ? i18n.translate('queryEnhancements.queryAssist.summary.badResponse', {
+                              defaultMessage: `Bad response`,
+                            })
+                          : afterFeedbackTip
+                      }
+                      iconType="thumbsDown"
+                      onClick={() => onFeedback(false)}
+                      data-test-subj="queryAssist_summary_buttons_thumbdown"
+                    />
+                  </EuiFlexItem>
+                )}
                 <EuiSpacer size="m" style={{ borderLeft: '1px solid #D3DAE6', height: '20px' }} />
                 <EuiFlexItem grow={false}>
                   <EuiCopy textToCopy={summary ?? ''}>
