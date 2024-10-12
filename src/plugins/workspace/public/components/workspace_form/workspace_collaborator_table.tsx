@@ -243,7 +243,7 @@ export const WorkspaceCollaboratorTable = ({
         onClick={onClick}
         data-test-subj="confirm-delete-button"
       >
-        {i18n.translate('workspace.detail.collaborator.delete', {
+        {i18n.translate('workspace.detail.collaborator.delete.button.info', {
           defaultMessage: `Delete {num} collaborator{pluralSuffix}`,
           values: {
             num: selection.length,
