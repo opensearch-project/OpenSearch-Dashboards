@@ -406,6 +406,7 @@ export {
   WorkspacesService,
   WorkspaceObject,
   IWorkspaceClient,
+  IWorkspaceResponse,
 } from './workspace';
 
 export { debounce } from './utils';

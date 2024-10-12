@@ -1,0 +1,2 @@
+fix:
+- Fix new home page small screen display issues ([#8554](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8554))
