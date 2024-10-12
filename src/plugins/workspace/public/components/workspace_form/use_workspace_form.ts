@@ -89,6 +89,22 @@ export const useWorkspaceForm = ({
     [setFeatureConfigs]
   );
 
+  const getSubmitFormData = (
+    submitFormData: WorkspaceFormDataState,
+    submitPermissionSettings?: WorkspacePermissionSetting[]
+  ) => {
+    return {
+      name: submitFormData.name!,
+      description: submitFormData.description,
+      color: submitFormData.color || '#FFFFFF',
+      features: submitFormData.features,
+      permissionSettings:
+        submitPermissionSettings ||
+        (submitFormData.permissionSettings as WorkspacePermissionSetting[]),
+      selectedDataSourceConnections: submitFormData.selectedDataSourceConnections,
+    };
+  };
+
   const handleFormSubmit = useCallback<FormEventHandler>(
     async (e) => {
       e.preventDefault();
@@ -107,15 +123,7 @@ export const useWorkspaceForm = ({
         return;
       }
 
-      const submitFormData = {
-        name: currentFormData.name!,
-        description: currentFormData.description,
-        color: currentFormData.color || '#FFFFFF',
-        features: currentFormData.features,
-        permissionSettings: currentFormData.permissionSettings as WorkspacePermissionSetting[],
-        selectedDataSourceConnections: currentFormData.selectedDataSourceConnections,
-      };
-
+      const submitFormData = getSubmitFormData(currentFormData);
       const result = await onSubmit?.(submitFormData);
       if (result?.success) {
         defaultValuesRef.current = submitFormData;
@@ -127,14 +135,7 @@ export const useWorkspaceForm = ({
 
   const handleSubmitPermissionSettings = async (settings: WorkspacePermissionSetting[]) => {
     const currentFormData = getFormDataRef.current();
-    const result = await onSubmit?.({
-      name: currentFormData.name!,
-      description: currentFormData.description,
-      color: currentFormData.color || '#FFFFFF',
-      features: currentFormData.features,
-      permissionSettings: settings,
-      selectedDataSourceConnections: currentFormData.selectedDataSourceConnections,
-    });
+    const result = await onSubmit?.(getSubmitFormData(currentFormData, settings));
     if (result) {
       setPermissionSettings(settings);
     }
