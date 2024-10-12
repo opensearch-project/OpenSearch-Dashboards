@@ -30,7 +30,7 @@ import {
   SkippingIndexRowType,
 } from '../framework/types';
 import { AvailableIntegrationsTableProps } from './components/direct_query_data_sources_components/integrations/available_integration_table';
-import { navigationPluginMock } from 'src/plugins/navigation/public/mocks';
+import { navigationPluginMock } from '../../navigation/public/mocks';
 
 /* Mock Types */
 

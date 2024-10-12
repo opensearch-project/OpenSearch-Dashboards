@@ -22,6 +22,12 @@ export interface AssociationResult {
   error?: string;
 }
 
+/**
+ * This interface representing a client for managing workspace-related operations.
+ * Workspace client should implement this interface.
+ *
+ * TODO: Refactor the current workspace client implementation in workspace plugin to add the missing operations to this interface
+ */
 export interface IWorkspaceClient {
   /**
    * copy saved objects to target workspace
