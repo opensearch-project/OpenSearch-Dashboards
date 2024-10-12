@@ -47,6 +47,31 @@ const permissionModeId2WorkspaceAccessLevelMap: {
   [PermissionModeId.ReadAndWrite]: 'readAndWrite',
 };
 
+const deletionModalConfirmButton = i18n.translate(
+  'workspace.detail.collaborator.delete.modal.confirm',
+  {
+    defaultMessage: 'Confirm',
+  }
+);
+
+const deletionModalCancelButton = i18n.translate(
+  'workspace.detail.collaborator.delete.modal.cancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+const deletionModalWarning = i18n.translate(
+  'workspace.workspaceDetail.collaborator.modal.delete.warning',
+  {
+    defaultMessage:
+      'Currently you’re the only user who has access to the workspace as an owner. Share this workspace by adding collaborators.',
+  }
+);
+const deletionModalConfirm = i18n.translate('workspace.detail.collaborator.modal.delete.confirm', {
+  defaultMessage: 'Delete collaborator? The collaborators will not have access to the workspace.',
+});
+
 const convertPermissionSettingToWorkspaceCollaborator = (
   permissionSetting: WorkspacePermissionSetting
 ) => ({
@@ -172,46 +197,22 @@ export const WorkspaceCollaboratorTable = ({
     const adminOfSelection = selections.filter(
       (item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin
     ).length;
+    const shouldShowWarning =
+      adminCollarboratorsNum === adminOfSelection && adminCollarboratorsNum !== 0;
     const modal = overlays.openModal(
-      adminCollarboratorsNum === adminOfSelection && adminCollarboratorsNum !== 0 ? (
-        <EuiConfirmModal
-          title={i18n.translate('workspace.detail.collaborator.actions.delete', {
-            defaultMessage: 'Delete collaborator',
-          })}
-          onCancel={() => modal.close()}
-          onConfirm={onConfirm}
-          cancelButtonText="Cancel"
-          confirmButtonText="Confirm"
-        >
-          <EuiText color="danger">
-            <p>
-              {i18n.translate('workspace.detail.collaborator.delete.confirm.warning', {
-                defaultMessage:
-                  'By removing the last administrator, only Application administrators will be able to manage this Workspace',
-              })}
-            </p>
-          </EuiText>
-        </EuiConfirmModal>
-      ) : (
-        <EuiConfirmModal
-          title={i18n.translate('workspace.detail.collaborator.actions.delete', {
-            defaultMessage: 'Delete collaborator',
-          })}
-          onCancel={() => modal.close()}
-          onConfirm={onConfirm}
-          cancelButtonText="Cancel"
-          confirmButtonText="Confirm"
-        >
-          <EuiText>
-            <p>
-              {i18n.translate('workspace.detail.collaborator.delete.confirm', {
-                defaultMessage:
-                  'Delete collaborator? The collaborators will not have access to the workspace.',
-              })}
-            </p>
-          </EuiText>
-        </EuiConfirmModal>
-      )
+      <EuiConfirmModal
+        title={i18n.translate('workspace.detail.collaborator.actions.delete', {
+          defaultMessage: 'Delete collaborator',
+        })}
+        onCancel={() => modal.close()}
+        onConfirm={onConfirm}
+        cancelButtonText={deletionModalCancelButton}
+        confirmButtonText={deletionModalConfirmButton}
+      >
+        <EuiText color={shouldShowWarning ? 'danger' : 'default'}>
+          <p>{shouldShowWarning ? deletionModalWarning : deletionModalConfirm}</p>
+        </EuiText>
+      </EuiConfirmModal>
     );
     return modal;
   };
@@ -244,10 +245,10 @@ export const WorkspaceCollaboratorTable = ({
         data-test-subj="confirm-delete-button"
       >
         {i18n.translate('workspace.detail.collaborator.delete.button.info', {
-          defaultMessage: `Delete {num} collaborator{pluralSuffix}`,
+          defaultMessage: 'Delete {num} collaborator{pluralSuffix, select, true {} other {s}}',
           values: {
             num: selection.length,
-            pluralSuffix: selection.length > 1 ? 's' : '',
+            pluralSuffix: selection.length === 1,
           },
         })}
       </EuiButton>
