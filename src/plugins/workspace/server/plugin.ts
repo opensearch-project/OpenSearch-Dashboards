@@ -113,6 +113,13 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       this.workspaceSavedObjectsClientWrapper.wrapperFactory
     );
 
+    core.savedObjects.addClientWrapper(
+      PRIORITY_FOR_REPOSITORY_WRAPPER,
+      // Give a symbol here so this wrapper won't be bypassed
+      Symbol('repository_wrapper').toString(),
+      new RepositoryWrapper().wrapperFactory
+    );
+
     core.http.registerOnPreResponse((request, _response, toolkit) => {
       this.permissionControl?.clearSavedObjectsCache(request);
       return toolkit.next();
@@ -227,13 +234,6 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER,
       WORKSPACE_ID_CONSUMER_WRAPPER_ID,
       new WorkspaceIdConsumerWrapper(this.client).wrapperFactory
-    );
-
-    core.savedObjects.addClientWrapper(
-      PRIORITY_FOR_REPOSITORY_WRAPPER,
-      // Give a symbol here so this wrapper won't be bypassed
-      Symbol('repository_wrapper').toString(),
-      new RepositoryWrapper().wrapperFactory
     );
 
     const maxImportExportSize = core.savedObjects.getImportExportObjectLimit();
