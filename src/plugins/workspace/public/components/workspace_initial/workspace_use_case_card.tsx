@@ -111,7 +111,7 @@ export const WorkspaceUseCaseCard = ({
   };
 
   return (
-    <EuiSplitPanel.Outer style={{ height: '416px', minWidth: '235px' }}>
+    <EuiSplitPanel.Outer style={{ height: '416px', minWidth: '240px' }}>
       <EuiSplitPanel.Inner
         paddingSize="m"
         grow={!hasWorkspaces}

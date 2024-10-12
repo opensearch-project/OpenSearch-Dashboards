@@ -157,7 +157,12 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
       </EuiFlexItem>
       <EuiSpacer size="l" />
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexGroup
+          direction="row"
+          justifyContent="spaceBetween"
+          alignItems="center"
+          gutterSize="m"
+        >
           <EuiFlexItem grow={false}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
               <EuiIcon type="wsSelector" size="m" />
@@ -181,8 +186,8 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
           <EuiFlexItem grow={false}>{isDashboardAdmin && createWorkspacePopover}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m" className="eui-xScroll">
           {useCaseCards}
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -241,15 +246,15 @@ export const WorkspaceInitial = ({ registeredUseCases$ }: WorkspaceInitialProps)
   return (
     <EuiPage style={{ minHeight: '100vh' }}>
       <EuiPageBody>
-        <EuiIcon type="logoOpenSearch" size="xl" />
+        <EuiIcon type="logoOpenSearch" size="xl" style={{ position: 'fixed' }} />
+        <EuiSpacer size="xl" />
         <EuiSpacer size="l" />
         <EuiFlexGroup
           direction="column"
           alignItems="center"
-          justifyContent="flexStart"
           className="workspace-initial__flex-group-responsive"
         >
-          <EuiFlexItem grow={false} style={{ width: '1264px' }}>
+          <EuiFlexItem grow={false} style={{ maxWidth: '1264px', width: '100%' }}>
             {content}
           </EuiFlexItem>
         </EuiFlexGroup>
