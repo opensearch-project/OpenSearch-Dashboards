@@ -62,7 +62,7 @@ const deletionModalCancelButton = i18n.translate(
 );
 
 const deletionModalWarning = i18n.translate(
-  'workspace.workspaceDetail.collaborator.modal.delete.warning',
+  'workspace.workspace.detail.collaborator.modal.delete.warning',
   {
     defaultMessage:
       'Currently you’re the only user who has access to the workspace as an owner. Share this workspace by adding collaborators.',
