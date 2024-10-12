@@ -69,11 +69,13 @@ describe('AddCollaboratorsModal', () => {
     const instruction = {
       title: 'Instructions',
       detail: 'Follow these instructions to add collaborators',
+      link: 'foo',
     };
     const props = { ...defaultProps, instruction };
     render(<AddCollaboratorsModal {...props} />);
     expect(screen.getByText(instruction.title)).toBeInTheDocument();
     expect(screen.getByText(instruction.detail)).toBeInTheDocument();
+    expect(screen.getByText('Learn more in Documentation')).toBeInTheDocument();
   });
 
   it('should display consistent duplicate collaborators errors', async () => {
