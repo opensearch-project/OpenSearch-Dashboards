@@ -46,7 +46,7 @@ class ACLAuditor {
      * DATABASE_OPERATION represents the count for operations call to the database.
      *
      * Normally the operations call to the database should always <= the AuthZ check(VALIDATE_FAILURE + VALIDATE_SUCCESS)
-     * If DATABASE_OPERATION > AuthZ check, it means we have somewhere bypassed the AuthZ check and we will audit this bypass behavior.
+     * If DATABASE_OPERATION > AuthZ check, it means we have somewhere bypasses the AuthZ check and we should audit this bypass behavior.
      */
     if (
       this.state[ACLAuditorStateKey.VALIDATE_FAILURE] +
