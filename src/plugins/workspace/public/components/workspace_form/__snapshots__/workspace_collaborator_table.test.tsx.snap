@@ -316,13 +316,9 @@ Object {
                       Type
                     </div>
                     <div
-                      class="euiTableCellContent"
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
-                      <span
-                        class="euiTableCellContent__text"
-                      >
-                        User
-                      </span>
+                      User
                     </div>
                   </td>
                   <td
@@ -334,13 +330,9 @@ Object {
                       Access level
                     </div>
                     <div
-                      class="euiTableCellContent"
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
-                      <span
-                        class="euiTableCellContent__text"
-                      >
-                        Admin
-                      </span>
+                      Admin
                     </div>
                   </td>
                   <td
@@ -431,13 +423,9 @@ Object {
                       Type
                     </div>
                     <div
-                      class="euiTableCellContent"
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
                     >
-                      <span
-                        class="euiTableCellContent__text"
-                      >
-                        Group
-                      </span>
+                      Group
                     </div>
                   </td>
                   <td
@@ -449,13 +437,114 @@ Object {
                       Access level
                     </div>
                     <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      Read only
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Actions
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      <div
+                        class="euiPopover euiPopover--anchorDownLeft"
+                        id="workspace-detail-add-collaborator-action"
+                      >
+                        <div
+                          class="euiPopover__anchor"
+                        >
+                          <button
+                            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                            data-test-subj="workspace-detail-collaborator-table-actions-box"
+                            type="button"
+                          >
+                            <span
+                              aria-hidden="true"
+                              class="euiButtonIcon__icon"
+                              color="inherit"
+                              data-euiicon-type="boxesHorizontal"
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+                <tr
+                  class="euiTableRow euiTableRow-isSelectable"
+                >
+                  <td
+                    class="euiTableRowCellCheckbox"
+                  >
+                    <div
+                      class="euiTableCellContent"
+                    >
+                      <div
+                        class="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                      >
+                        <input
+                          aria-label="Select this row"
+                          class="euiCheckbox__input"
+                          data-test-subj="checkboxSelectRow-2"
+                          id="_selection_column_2-checkbox"
+                          title="Select this row"
+                          type="checkbox"
+                        />
+                        <div
+                          class="euiCheckbox__square"
+                        />
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      ID
+                    </div>
+                    <div
                       class="euiTableCellContent"
                     >
                       <span
                         class="euiTableCellContent__text"
-                      >
-                        Read only
-                      </span>
+                      />
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Type
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      —
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Access level
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--overflowingContent"
+                    >
+                      —
                     </div>
                   </td>
                   <td
@@ -918,13 +1007,9 @@ Object {
                     Type
                   </div>
                   <div
-                    class="euiTableCellContent"
+                    class="euiTableCellContent euiTableCellContent--overflowingContent"
                   >
-                    <span
-                      class="euiTableCellContent__text"
-                    >
-                      User
-                    </span>
+                    User
                   </div>
                 </td>
                 <td
@@ -936,13 +1021,9 @@ Object {
                     Access level
                   </div>
                   <div
-                    class="euiTableCellContent"
+                    class="euiTableCellContent euiTableCellContent--overflowingContent"
                   >
-                    <span
-                      class="euiTableCellContent__text"
-                    >
-                      Admin
-                    </span>
+                    Admin
                   </div>
                 </td>
                 <td
@@ -1033,13 +1114,9 @@ Object {
                     Type
                   </div>
                   <div
-                    class="euiTableCellContent"
+                    class="euiTableCellContent euiTableCellContent--overflowingContent"
                   >
-                    <span
-                      class="euiTableCellContent__text"
-                    >
-                      Group
-                    </span>
+                    Group
                   </div>
                 </td>
                 <td
@@ -1051,13 +1128,114 @@ Object {
                     Access level
                   </div>
                   <div
+                    class="euiTableCellContent euiTableCellContent--overflowingContent"
+                  >
+                    Read only
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell"
+                >
+                  <div
+                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                  >
+                    Actions
+                  </div>
+                  <div
+                    class="euiTableCellContent euiTableCellContent--overflowingContent"
+                  >
+                    <div
+                      class="euiPopover euiPopover--anchorDownLeft"
+                      id="workspace-detail-add-collaborator-action"
+                    >
+                      <div
+                        class="euiPopover__anchor"
+                      >
+                        <button
+                          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                          data-test-subj="workspace-detail-collaborator-table-actions-box"
+                          type="button"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="boxesHorizontal"
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <tr
+                class="euiTableRow euiTableRow-isSelectable"
+              >
+                <td
+                  class="euiTableRowCellCheckbox"
+                >
+                  <div
+                    class="euiTableCellContent"
+                  >
+                    <div
+                      class="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                    >
+                      <input
+                        aria-label="Select this row"
+                        class="euiCheckbox__input"
+                        data-test-subj="checkboxSelectRow-2"
+                        id="_selection_column_2-checkbox"
+                        title="Select this row"
+                        type="checkbox"
+                      />
+                      <div
+                        class="euiCheckbox__square"
+                      />
+                    </div>
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell"
+                >
+                  <div
+                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                  >
+                    ID
+                  </div>
+                  <div
                     class="euiTableCellContent"
                   >
                     <span
                       class="euiTableCellContent__text"
-                    >
-                      Read only
-                    </span>
+                    />
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell"
+                >
+                  <div
+                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                  >
+                    Type
+                  </div>
+                  <div
+                    class="euiTableCellContent euiTableCellContent--overflowingContent"
+                  >
+                    —
+                  </div>
+                </td>
+                <td
+                  class="euiTableRowCell"
+                >
+                  <div
+                    class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                  >
+                    Access level
+                  </div>
+                  <div
+                    class="euiTableCellContent euiTableCellContent--overflowingContent"
+                  >
+                    —
                   </div>
                 </td>
                 <td

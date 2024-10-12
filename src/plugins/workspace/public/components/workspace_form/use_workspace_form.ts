@@ -16,12 +16,7 @@ import {
   WorkspacePermissionSetting,
   WorkspaceFormDataState,
 } from './types';
-import {
-  generatePermissionSettingsState,
-  getNumberOfChanges,
-  getNumberOfErrors,
-  validateWorkspaceForm,
-} from './utils';
+import { getNumberOfChanges, getNumberOfErrors, validateWorkspaceForm } from './utils';
 import { WorkspacePermissionItemType } from './constants';
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
@@ -29,7 +24,6 @@ const workspaceHtmlIdGenerator = htmlIdGenerator();
 export const useWorkspaceForm = ({
   application,
   defaultValues,
-  operationType,
   onSubmit,
   permissionEnabled,
   onAppLeave,
@@ -40,9 +34,6 @@ export const useWorkspaceForm = ({
   const [color, setColor] = useState(defaultValues?.color);
   const defaultValuesRef = useRef(defaultValues);
   const [isEditing, setIsEditing] = useState(false);
-  const initialPermissionSettingsRef = useRef(
-    generatePermissionSettingsState(operationType, defaultValues?.permissionSettings)
-  );
 
   const [featureConfigs, setFeatureConfigs] = useState<string[]>(defaultValues?.features ?? []);
   const selectedUseCase = useMemo(() => getFirstUseCaseOfFeatureConfigs(featureConfigs), [
@@ -50,7 +41,7 @@ export const useWorkspaceForm = ({
   ]);
   const [permissionSettings, setPermissionSettings] = useState<
     WorkspaceFormDataState['permissionSettings']
-  >(initialPermissionSettingsRef.current);
+  >(defaultValues?.permissionSettings ?? []);
 
   const [selectedDataSourceConnections, setSelectedDataSourceConnections] = useState<
     DataSourceConnection[]
@@ -77,11 +68,7 @@ export const useWorkspaceForm = ({
   getFormDataRef.current = getFormData;
   const formData = getFormData();
   const numberOfChanges = defaultValuesRef.current
-    ? getNumberOfChanges(formData, {
-        ...defaultValuesRef.current,
-        // The user form will insert some empty permission rows, should ignore these rows not treated as user new added.
-        permissionSettings: initialPermissionSettingsRef.current,
-      })
+    ? getNumberOfChanges(formData, defaultValuesRef.current)
     : 0;
 
   if (!formIdRef.current) {
@@ -163,7 +150,7 @@ export const useWorkspaceForm = ({
     setDescription(resetValues?.description ?? '');
     setColor(resetValues?.color);
     setFeatureConfigs(resetValues?.features ?? []);
-    setPermissionSettings(initialPermissionSettingsRef.current);
+    setPermissionSettings(defaultValuesRef.current?.permissionSettings ?? []);
     setFormErrors({});
     setIsEditing(false);
   }, []);
