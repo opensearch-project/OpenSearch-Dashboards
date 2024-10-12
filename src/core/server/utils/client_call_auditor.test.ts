@@ -37,6 +37,6 @@ describe('#ClientCallAuditor', () => {
     initializeClientCallAuditor(mockRequest);
     const ACLAuditorInstance = getClientCallAuditor(mockRequest);
     ACLAuditorInstance?.increment(CLIENT_CALL_AUDITOR_KEY.incoming);
-    expect(ACLAuditorInstance?.ifAsyncClientCallsBalance()).toEqual(false);
+    expect(ACLAuditorInstance?.isAsyncClientCallsBalanced()).toEqual(false);
   });
 });

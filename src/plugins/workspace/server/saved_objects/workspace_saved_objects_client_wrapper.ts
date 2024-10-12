@@ -674,11 +674,11 @@ export class WorkspaceSavedObjectsClientWrapper {
               clientCallAuditor?.increment(CLIENT_CALL_AUDITOR_KEY.outgoing);
               try {
                 const checkoutInfo = JSON.stringify([fn.name, ...args]);
-                if (clientCallAuditor?.ifAsyncClientCallsBalance()) {
+                if (clientCallAuditor?.isAsyncClientCallsBalanced()) {
                   ACLAuditor?.checkout(checkoutInfo);
                 }
               } catch (e) {
-                if (clientCallAuditor?.ifAsyncClientCallsBalance()) {
+                if (clientCallAuditor?.isAsyncClientCallsBalanced()) {
                   ACLAuditor?.checkout();
                 }
               }
@@ -689,14 +689,14 @@ export class WorkspaceSavedObjectsClientWrapper {
              */
             () => {
               clientCallAuditor?.increment(CLIENT_CALL_AUDITOR_KEY.outgoing);
-              if (clientCallAuditor?.ifAsyncClientCallsBalance()) {
+              if (clientCallAuditor?.isAsyncClientCallsBalanced()) {
                 ACLAuditor?.reset();
               }
             }
           );
         } else {
           clientCallAuditor?.increment(CLIENT_CALL_AUDITOR_KEY.outgoing);
-          if (clientCallAuditor?.ifAsyncClientCallsBalance()) {
+          if (clientCallAuditor?.isAsyncClientCallsBalanced()) {
             ACLAuditor?.checkout();
           }
         }

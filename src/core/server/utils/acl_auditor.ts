@@ -84,6 +84,6 @@ export const getACLAuditor = (request: OpenSearchDashboardsRequest): ACLAuditor 
   return (ensureRawRequest(request).app as AppState)[ACLAuditorKey];
 };
 
-export const destroyACLAuditor = (request: OpenSearchDashboardsRequest) => {
+export const cleanUpACLAuditor = (request: OpenSearchDashboardsRequest) => {
   (ensureRawRequest(request).app as AppState)[ACLAuditorKey] = undefined;
 };

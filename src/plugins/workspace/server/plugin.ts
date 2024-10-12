@@ -33,7 +33,7 @@ import { registerRoutes } from './routes';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import {
   cleanWorkspaceId,
-  destroyACLAuditor,
+  cleanUpACLAuditor,
   destroyClientCallAuditor,
   getACLAuditor,
   getWorkspaceIdFromUrl,
@@ -139,7 +139,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
         // Only checkout auditor when current login user is not dashboard admin
         getACLAuditor(request)?.checkout();
       }
-      destroyACLAuditor(request);
+      cleanUpACLAuditor(request);
       destroyClientCallAuditor(request);
       return toolkit.next();
     });

@@ -39,7 +39,7 @@ export {
   ACLAuditorStateKey,
   initializeACLAuditor,
   getACLAuditor,
-  destroyACLAuditor,
+  cleanUpACLAuditor,
 } from './acl_auditor';
 export {
   CLIENT_CALL_AUDITOR_KEY,

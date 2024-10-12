@@ -29,7 +29,7 @@ class ClientCallAuditor {
   increment(key: keyof typeof CLIENT_CALL_AUDITOR_KEY) {
     this.state[key] = (this.state[key] || 0) + 1;
   }
-  ifAsyncClientCallsBalance() {
+  isAsyncClientCallsBalanced() {
     return this.state.incoming === this.state.outgoing;
   }
 }

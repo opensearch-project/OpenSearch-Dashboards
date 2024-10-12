@@ -8,7 +8,7 @@ import { httpServerMock } from '../mocks';
 import {
   initializeACLAuditor,
   getACLAuditor,
-  destroyACLAuditor,
+  cleanUpACLAuditor,
   ACLAuditorStateKey,
 } from './acl_auditor';
 
@@ -23,13 +23,13 @@ describe('#getACLAuditor', () => {
   });
 });
 
-describe('#destroyACLAuditor', () => {
+describe('#cleanUpACLAuditor', () => {
   it('should be able to destroy the auditor', () => {
     const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
     const mockedLogger = loggerMock.create();
     initializeACLAuditor(mockRequest, mockedLogger);
     expect(getACLAuditor(mockRequest)).not.toBeFalsy();
-    destroyACLAuditor(mockRequest);
+    cleanUpACLAuditor(mockRequest);
     expect(getACLAuditor(mockRequest)).toBeFalsy();
   });
 });
