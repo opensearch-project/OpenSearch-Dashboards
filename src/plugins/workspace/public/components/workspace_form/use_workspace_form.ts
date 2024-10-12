@@ -90,7 +90,7 @@ export const useWorkspaceForm = ({
   );
 
   const handleFormSubmit = useCallback<FormEventHandler>(
-    (e) => {
+    async (e) => {
       e.preventDefault();
       const currentFormData = getFormDataRef.current();
       currentFormData.permissionSettings = currentFormData.permissionSettings.filter(
@@ -107,34 +107,34 @@ export const useWorkspaceForm = ({
         return;
       }
 
-      onSubmit?.(
-        {
-          name: currentFormData.name!,
-          description: currentFormData.description,
-          color: currentFormData.color || '#FFFFFF',
-          features: currentFormData.features,
-          permissionSettings: currentFormData.permissionSettings as WorkspacePermissionSetting[],
-          selectedDataSourceConnections: currentFormData.selectedDataSourceConnections,
-        },
-        true
-      );
+      const submitFormData = {
+        name: currentFormData.name!,
+        description: currentFormData.description,
+        color: currentFormData.color || '#FFFFFF',
+        features: currentFormData.features,
+        permissionSettings: currentFormData.permissionSettings as WorkspacePermissionSetting[],
+        selectedDataSourceConnections: currentFormData.selectedDataSourceConnections,
+      };
+
+      const result = await onSubmit?.(submitFormData);
+      if (result?.success) {
+        defaultValuesRef.current = submitFormData;
+        setIsEditing(false);
+      }
     },
     [onSubmit, permissionEnabled]
   );
 
   const handleSubmitPermissionSettings = async (settings: WorkspacePermissionSetting[]) => {
     const currentFormData = getFormDataRef.current();
-    const result = await onSubmit?.(
-      {
-        name: currentFormData.name!,
-        description: currentFormData.description,
-        color: currentFormData.color || '#FFFFFF',
-        features: currentFormData.features,
-        permissionSettings: settings,
-        selectedDataSourceConnections: currentFormData.selectedDataSourceConnections,
-      },
-      false
-    );
+    const result = await onSubmit?.({
+      name: currentFormData.name!,
+      description: currentFormData.description,
+      color: currentFormData.color || '#FFFFFF',
+      features: currentFormData.features,
+      permissionSettings: settings,
+      selectedDataSourceConnections: currentFormData.selectedDataSourceConnections,
+    });
     if (result) {
       setPermissionSettings(settings);
     }
