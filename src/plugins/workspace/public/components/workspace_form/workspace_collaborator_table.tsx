@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiSearchBarProps,
   EuiBasicTableColumn,
@@ -124,13 +124,10 @@ export const WorkspaceCollaboratorTable = ({
     });
   }, [permissionSettings, displayedCollaboratorTypes]);
 
-  const findAdmin = useCallback((lists: PermissionSettingWithAccessLevelAndDisplayedType[]) => {
-    return lists.filter((item) => item.accessLevel === 'Admin');
-  }, []);
-
-  const permissionNum = useMemo(() => {
-    return findAdmin(items).length;
-  }, [items, findAdmin]);
+  const adminCollarboratorsNum = useMemo(() => {
+    const admins = items.filter((item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin);
+    return admins.length;
+  }, [items]);
 
   const emptyStateMessage = useMemo(() => {
     return (
@@ -172,9 +169,11 @@ export const WorkspaceCollaboratorTable = ({
     onConfirm: () => void;
     selections: PermissionSettingWithAccessLevelAndDisplayedType[];
   }) => {
-    const adminOfSelection = selections.filter((item) => item.accessLevel === 'Admin').length;
+    const adminOfSelection = selections.filter(
+      (item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin
+    ).length;
     const modal = overlays.openModal(
-      permissionNum === adminOfSelection ? (
+      adminCollarboratorsNum === adminOfSelection && adminCollarboratorsNum !== 0 ? (
         <EuiConfirmModal
           title={i18n.translate('workspace.detail.collaborator.actions.delete', {
             defaultMessage: 'Delete collaborator',
@@ -245,11 +244,10 @@ export const WorkspaceCollaboratorTable = ({
         data-test-subj="confirm-delete-button"
       >
         {i18n.translate('workspace.detail.collaborator.delete', {
-          defaultMessage: `Delete {num} ${
-            selection.length === 1 ? 'collaborator' : 'collaborators'
-          }`,
+          defaultMessage: `Delete {num} collaborator{pluralSuffix}`,
           values: {
             num: selection.length,
+            pluralSuffix: selection.length > 1 ? 's' : '',
           },
         })}
       </EuiButton>
