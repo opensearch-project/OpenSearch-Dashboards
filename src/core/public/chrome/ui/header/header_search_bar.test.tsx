@@ -6,7 +6,7 @@
 import React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { HeaderSearchBarIcon, HeaderSearchBar } from './header_search_bar';
-import { GlobalSearchCommand, SearchObjectTypes } from '../../global_search';
+import { GlobalSearchCommand } from '../../global_search';
 import { EuiText } from '@elastic/eui';
 
 describe('<HeaderSearchBarIcon />', () => {
@@ -15,12 +15,12 @@ describe('<HeaderSearchBarIcon />', () => {
   const globalSearchCommands: GlobalSearchCommand[] = [
     {
       id: 'foo',
-      type: SearchObjectTypes.PAGES,
+      type: 'PAGES',
       run: searchFn,
     },
     {
       id: 'bar',
-      type: SearchObjectTypes.PAGES,
+      type: 'PAGES',
       run: searchFnBar,
     },
   ];
@@ -29,7 +29,7 @@ describe('<HeaderSearchBarIcon />', () => {
     const { getByTestId, queryByText } = render(
       <HeaderSearchBarIcon globalSearchCommands={globalSearchCommands} />
     );
-    const searchIcon = getByTestId('search-icon');
+    const searchIcon = getByTestId('globalSearch-leftNav-icon');
     expect(searchIcon).toBeVisible();
 
     fireEvent.click(searchIcon);
@@ -53,7 +53,7 @@ describe('<HeaderSearchBarIcon />', () => {
     const { getByTestId, queryByText } = render(
       <HeaderSearchBarIcon globalSearchCommands={globalSearchCommands} />
     );
-    const searchIcon = getByTestId('search-icon');
+    const searchIcon = getByTestId('globalSearch-leftNav-icon');
     expect(searchIcon).toBeVisible();
 
     fireEvent.click(searchIcon);
@@ -79,20 +79,20 @@ describe('<HeaderSearchBar />', () => {
   const searchFn = jest.fn().mockResolvedValue([]);
   const searchFnBar = jest.fn().mockResolvedValue([]);
   const searchFnBaz = jest.fn().mockResolvedValue([]);
-  const globalSearchHandlers: GlobalSearchCommand[] = [
+  const globalSearchCommands: GlobalSearchCommand[] = [
     {
       id: 'foo',
-      type: SearchObjectTypes.PAGES,
+      type: 'PAGES',
       run: searchFn,
     },
     {
       id: 'bar',
-      type: SearchObjectTypes.PAGES,
+      type: 'PAGES',
       run: searchFnBar,
     },
     {
       id: 'baz',
-      type: SearchObjectTypes.SAVED_OBJECTS,
+      type: 'SAVED_OBJECTS',
       run: searchFnBaz,
     },
   ];
@@ -103,7 +103,7 @@ describe('<HeaderSearchBar />', () => {
 
   it('render HeaderSearchBar with panel', () => {
     const { getByTestId } = render(
-      <HeaderSearchBar globalSearchCommands={globalSearchHandlers} panel />
+      <HeaderSearchBar globalSearchCommands={globalSearchCommands} panel />
     );
     const searchPanel = getByTestId('search-result-panel');
     expect(searchPanel).toBeVisible();
@@ -111,7 +111,7 @@ describe('<HeaderSearchBar />', () => {
 
   it('render HeaderSearchBar with search result', () => {
     const { getByTestId, queryByText } = render(
-      <HeaderSearchBar globalSearchCommands={globalSearchHandlers} panel />
+      <HeaderSearchBar globalSearchCommands={globalSearchCommands} panel />
     );
     const searchPanel = getByTestId('search-result-panel');
     expect(searchPanel).toBeVisible();
@@ -137,7 +137,7 @@ describe('<HeaderSearchBar />', () => {
 
   it('render HeaderSearchBar with reject search result', () => {
     const { getByTestId, queryByText } = render(
-      <HeaderSearchBar globalSearchCommands={globalSearchHandlers} panel />
+      <HeaderSearchBar globalSearchCommands={globalSearchCommands} panel />
     );
     const searchPanel = getByTestId('search-result-panel');
     expect(searchPanel).toBeVisible();
@@ -163,7 +163,7 @@ describe('<HeaderSearchBar />', () => {
 
   it('render HeaderSearchBar with all reject search result', () => {
     const { getByTestId, queryByText } = render(
-      <HeaderSearchBar globalSearchCommands={globalSearchHandlers} panel />
+      <HeaderSearchBar globalSearchCommands={globalSearchCommands} panel />
     );
     const searchPanel = getByTestId('search-result-panel');
     expect(searchPanel).toBeVisible();
@@ -189,7 +189,7 @@ describe('<HeaderSearchBar />', () => {
 
   it('render HeaderSearchBar with search saved objects', () => {
     const { getByTestId, queryByText } = render(
-      <HeaderSearchBar globalSearchCommands={globalSearchHandlers} panel />
+      <HeaderSearchBar globalSearchCommands={globalSearchCommands} panel />
     );
     const searchPanel = getByTestId('search-result-panel');
     expect(searchPanel).toBeVisible();
@@ -204,12 +204,12 @@ describe('<HeaderSearchBar />', () => {
       });
     });
 
-    // pages handler will not been invoked
-    globalSearchHandlers.forEach((handler) => {
-      if (handler.type === SearchObjectTypes.SAVED_OBJECTS) {
-        expect(handler.run).toHaveBeenCalled();
+    // pages search command will not been invoked
+    globalSearchCommands.forEach((command) => {
+      if (command.type === 'SAVED_OBJECTS') {
+        expect(command.run).toHaveBeenCalled();
       } else {
-        expect(handler.run).not.toHaveBeenCalled();
+        expect(command.run).not.toHaveBeenCalled();
       }
     });
 

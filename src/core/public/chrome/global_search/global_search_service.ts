@@ -4,25 +4,43 @@
  */
 
 import { ReactNode } from 'react';
+import { i18n } from '@osd/i18n';
 
-export enum SearchObjectTypes {
-  PAGES = 'pages',
-  SAVED_OBJECTS = 'saved_objects',
-}
+/**
+ * search input match with `@` will handled by saved objects search command
+ * search input match with `>` will handled by plugin customized commands
+ */
+export const SAVED_OBJECTS_SYMBOL = '@';
+export const COMMANDS_SYMBOL = '>';
+
+export const SearchCommandTypes = {
+  PAGES: {
+    description: i18n.translate('core.GlobalSearch.pages.description', { defaultMessage: 'Pages' }),
+    alias: null,
+  },
+  SAVED_OBJECTS: {
+    description: i18n.translate('core.GlobalSearch.assets.description', {
+      defaultMessage: 'Assets',
+    }),
+    alias: SAVED_OBJECTS_SYMBOL,
+  },
+} as const;
+
+export type SearchCommandKeyTypes = keyof typeof SearchCommandTypes;
 
 /**
  * @experimental
  */
 export interface GlobalSearchCommand {
   /**
-   * unique id of this strategy
+   * unique id of this command
    */
   id: string;
   /**
-   * search object type
-   * @type {SearchObjectTypes}
+   * search command type
+   * @type {SearchCommandTypes}
    */
-  type: SearchObjectTypes;
+  type: SearchCommandKeyTypes;
   /**
    * do the search and return search result with a React element
    * @param value search query
@@ -40,7 +58,7 @@ export interface GlobalSearchServiceStartContract {
 }
 
 /**
- * {@link GlobalSearchCommand | APIs} for registering new global search strategy when do search from header search bar .
+ * {@link GlobalSearchCommand | APIs} for registering new global search command when do search from header search bar .
  *
  * @example
  * Register a GlobalSearchCommand to search pages

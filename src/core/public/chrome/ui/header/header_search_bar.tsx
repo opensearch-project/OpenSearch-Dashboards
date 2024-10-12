@@ -18,35 +18,17 @@ import {
 } from '@elastic/eui';
 import React, { ReactNode, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { GlobalSearchCommand, SearchObjectTypes } from '../../global_search';
+import {
+  GlobalSearchCommand,
+  SearchCommandKeyTypes,
+  SearchCommandTypes,
+} from '../../global_search';
 
 interface Props {
   globalSearchCommands: GlobalSearchCommand[];
   panel?: boolean;
   onSearchResultClick?: () => void;
 }
-
-/**
- * search input match with `@` will handled by saved objects search command
- * search input match with `>` will handled by plugin customized commands
- */
-export const SAVED_OBJECTS_SYMBOL = '@';
-export const COMMANDS_SYMBOL = '>';
-
-export const SearchCommandFilters = {
-  [SearchObjectTypes.PAGES]: (value: string) => {
-    return {
-      match: !value.startsWith(SAVED_OBJECTS_SYMBOL) && !value.startsWith(COMMANDS_SYMBOL),
-      searchValue: value,
-    };
-  },
-  [SearchObjectTypes.SAVED_OBJECTS]: (value: string) => {
-    return {
-      match: value.startsWith(SAVED_OBJECTS_SYMBOL),
-      searchValue: value.replace(SAVED_OBJECTS_SYMBOL, '').trim(),
-    };
-  },
-};
 
 export const HeaderSearchBarIcon = ({ globalSearchCommands }: Props) => {
   const [isSearchPopoverOpen, setIsSearchPopoverOpen] = useState(false);
@@ -71,7 +53,7 @@ export const HeaderSearchBarIcon = ({ globalSearchCommands }: Props) => {
             iconType="search"
             color="text"
             buttonRef={buttonRef}
-            data-test-subj="search-icon"
+            data-test-subj="globalSearch-leftNav-icon"
             onClick={() => {
               setIsSearchPopoverOpen(!isSearchPopoverOpen);
               // remove focus from the button to dismiss the tooltip
@@ -112,13 +94,13 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
     setIsPopoverOpen(false);
   };
 
-  const pagesSection = (items: ReactNode[]) => {
+  const resultSection = (items: ReactNode[], sectionHeader: string) => {
     return (
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem>
           <EuiTitle size="s">
             <EuiText size="xs" color="subdued">
-              {i18n.translate('core.globalSearch.pageSection.title', { defaultMessage: 'Pages' })}
+              {sectionHeader}
             </EuiText>
           </EuiTitle>
         </EuiFlexItem>
@@ -150,10 +132,18 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
   );
 
   const onSearch = async (value: string) => {
-    // do page search
     const filteredCommands = globalSearchCommands.filter((command) => {
-      return SearchCommandFilters[command.type](value).match;
+      const alias = SearchCommandTypes[command.type].alias;
+      return alias && value.startsWith(alias);
     });
+
+    const defaultSearchCommands = globalSearchCommands.filter((command) => {
+      return !SearchCommandTypes[command.type].alias;
+    });
+
+    if (filteredCommands.length === 0) {
+      filteredCommands.push(...defaultSearchCommands);
+    }
 
     if (value && filteredCommands && filteredCommands.length) {
       setIsPopoverOpen(true);
@@ -162,7 +152,8 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
       const settleResults = await Promise.allSettled(
         filteredCommands.map((command) => {
           const callback = onSearchResultClick || closePopover;
-          const queryValue = SearchCommandFilters[command.type](value).searchValue;
+          const alias = SearchCommandTypes[command.type].alias;
+          const queryValue = alias ? value.replace(alias, '').trim() : value;
           return command.run(queryValue, callback).then((items) => {
             return { items, type: command.type };
           });
@@ -173,22 +164,21 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
         .filter((result) => result.status === 'fulfilled')
         .map(
           (result) =>
-            (result as PromiseFulfilledResult<{ items: ReactNode[]; type: SearchObjectTypes }>)
-              .value
+            (result as PromiseFulfilledResult<{
+              items: ReactNode[];
+              type: SearchCommandKeyTypes;
+            }>).value
         )
         .reduce((acc, { items, type }) => {
           return {
             ...acc,
             [type]: (acc[type] || []).concat(items),
           };
-        }, {} as Record<SearchObjectTypes, ReactNode[]>);
+        }, {} as Record<SearchCommandKeyTypes, ReactNode[]>);
 
       const sections = Object.entries(searchResults).map(([key, items]) => {
-        switch (key) {
-          case SearchObjectTypes.PAGES:
-            return pagesSection(items);
-        }
-        return <></>;
+        const sectionHeader = SearchCommandTypes[key as SearchCommandKeyTypes].description;
+        return resultSection(items, sectionHeader);
       });
 
       setIsLoading(false);

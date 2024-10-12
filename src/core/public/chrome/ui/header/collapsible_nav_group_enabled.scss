@@ -122,11 +122,11 @@
     flex-grow: 0;
 
     .searchInput {
-      background-color: transparentize(white, 0.5);
+      background-color: transparentize($euiFormBackgroundColor, 0.5);
     }
 
     .searchInput:focus {
-      background-color: white;
+      background-color: $euiFormBackgroundColor;
     }
   }
 

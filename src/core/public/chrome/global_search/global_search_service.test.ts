@@ -4,7 +4,7 @@
  */
 
 // test global_search_service.ts
-import { GlobalSearchService, SearchObjectTypes } from './global_search_service';
+import { GlobalSearchService } from './global_search_service';
 
 describe('GlobalSearchService', () => {
   it('registerSearchStrategy', async () => {
@@ -14,7 +14,7 @@ describe('GlobalSearchService', () => {
 
     setup.registerSearchCommand({
       id: 'test1',
-      type: SearchObjectTypes.PAGES,
+      type: 'PAGES',
       run: async (query) => {
         return [];
       },
@@ -22,7 +22,7 @@ describe('GlobalSearchService', () => {
 
     expect(start.getAllSearchCommands()).toHaveLength(1);
     expect(start.getAllSearchCommands()[0].id).toEqual('test1');
-    expect(start.getAllSearchCommands()[0].type).toEqual(SearchObjectTypes.PAGES);
+    expect(start.getAllSearchCommands()[0].type).toEqual('PAGES');
   });
 
   it('registerSearchStrategy with duplicate id', async () => {
@@ -32,7 +32,7 @@ describe('GlobalSearchService', () => {
 
     setup.registerSearchCommand({
       id: 'test2',
-      type: SearchObjectTypes.PAGES,
+      type: 'PAGES',
       run: async (query) => {
         return [];
       },
@@ -40,7 +40,7 @@ describe('GlobalSearchService', () => {
 
     setup.registerSearchCommand({
       id: 'test2',
-      type: SearchObjectTypes.SAVED_OBJECTS,
+      type: 'SAVED_OBJECTS',
       run: async (query) => {
         return [];
       },
@@ -49,6 +49,6 @@ describe('GlobalSearchService', () => {
     // the second one will not overwrite the first one
     expect(start.getAllSearchCommands()).toHaveLength(1);
     expect(start.getAllSearchCommands()[0].id).toEqual('test2');
-    expect(start.getAllSearchCommands()[0].type).toEqual(SearchObjectTypes.PAGES);
+    expect(start.getAllSearchCommands()[0].type).toEqual('PAGES');
   });
 });

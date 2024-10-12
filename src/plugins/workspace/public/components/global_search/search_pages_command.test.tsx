@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { searchPageWithInWorkspace } from './search_pages_command';
+import { searchPages } from './search_pages_command';
 import { WorkspaceUseCase } from '../../types';
 import { BehaviorSubject } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
@@ -98,38 +98,23 @@ describe('<SearchPagesCommand />', () => {
   const callbackFn = jest.fn();
 
   it('search return empty result', async () => {
-    const searchResult = await searchPageWithInWorkspace(
-      'bar',
-      registeredUseCases,
-      coreStartMock,
-      callbackFn
-    );
+    const searchResult = await searchPages('bar', registeredUseCases, coreStartMock, callbackFn);
 
     expect(searchResult).toHaveLength(0);
   });
 
   it('search return matched result', async () => {
-    const searchResult = await searchPageWithInWorkspace(
-      'foo',
-      registeredUseCases,
-      coreStartMock,
-      callbackFn
-    );
+    const searchResult = await searchPages('foo', registeredUseCases, coreStartMock, callbackFn);
 
     expect(searchResult).toHaveLength(2);
   });
 
   it('search return pages out of workspace', async () => {
-    let searchResult = await searchPageWithInWorkspace(
-      'Settings',
-      registeredUseCases,
-      coreStartMock,
-      callbackFn
-    );
+    let searchResult = await searchPages('Settings', registeredUseCases, coreStartMock, callbackFn);
 
     expect(searchResult).toHaveLength(2);
 
-    searchResult = await searchPageWithInWorkspace(
+    searchResult = await searchPages(
       'Administration',
       registeredUseCases,
       coreStartMock,

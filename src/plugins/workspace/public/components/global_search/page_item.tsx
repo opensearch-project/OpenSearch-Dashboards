@@ -8,6 +8,7 @@ import {
   ApplicationStart,
   ChromeNavLink,
   ChromeRegistrationNavLink,
+  HttpStart,
   NavGroupItemInMap,
   WorkspaceObject,
 } from 'opensearch-dashboards/public';
@@ -17,11 +18,13 @@ import { useObservable } from 'react-use';
 import { WorkspaceTitleDisplay } from '../workspace_name/workspace_name';
 import { WorkspaceUseCase } from '../../types';
 import { NavGroupType } from '../../../../../core/public';
+import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 
 interface Props {
   currentWorkspace: WorkspaceObject | null;
   link: ChromeRegistrationNavLink & ChromeNavLink & { navGroup: NavGroupItemInMap };
   application: ApplicationStart;
+  http: HttpStart;
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
   search: string;
   callback?: () => void;
@@ -31,13 +34,15 @@ export const GlobalSearchPageItem = ({
   link,
   currentWorkspace,
   application,
+  http,
   registeredUseCases$,
   search,
   callback,
 }: Props) => {
   const availableUseCases = useObservable(registeredUseCases$);
   const breadcrumbs = [];
-  if (currentWorkspace && link.navGroup.type !== NavGroupType.SYSTEM) {
+  const isPageOutOfWorkspace = link.navGroup.type === NavGroupType.SYSTEM;
+  if (currentWorkspace && !isPageOutOfWorkspace) {
     breadcrumbs.push({
       text: (
         <WorkspaceTitleDisplay
@@ -69,16 +74,20 @@ export const GlobalSearchPageItem = ({
     breadcrumbs.push({ text: parentNavLinkTitle });
   }
 
-  const onNavItemClick = (id: string) => {
+  const onNavItemClick = () => {
     callback?.();
-    application.navigateToApp(id);
+    if (isPageOutOfWorkspace && currentWorkspace) {
+      // remove workspace information in the URL, special handling for data source which could visible both in/out workspace
+      const urlWithoutWorkspace = formatUrlWithWorkspaceId(link.href, '', http.basePath);
+      window.location.assign(urlWithoutWorkspace);
+      return;
+    }
+    application.navigateToApp(link.id);
   };
 
   breadcrumbs.push({
     text,
-    onClick: () => {
-      onNavItemClick(link.id);
-    },
+    onClick: () => {},
   });
 
   return (
@@ -87,7 +96,7 @@ export const GlobalSearchPageItem = ({
       aria-hidden="true"
       data-test-subj={`global-search-item-${link.id}`}
       onClick={() => {
-        onNavItemClick(link.id);
+        onNavItemClick();
       }}
     >
       <EuiSimplifiedBreadcrumbs breadcrumbs={breadcrumbs} hideTrailingSeparator responsive />

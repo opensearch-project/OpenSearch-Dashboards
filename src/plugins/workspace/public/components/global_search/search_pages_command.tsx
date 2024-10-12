@@ -12,7 +12,7 @@ import { GlobalSearchPageItem } from './page_item';
 import { DEFAULT_NAV_GROUPS, NavGroupType } from '../../../../../core/public';
 import { WorkspaceUseCase } from '../../types';
 
-export const searchPageWithInWorkspace = async (
+export const searchPages = async (
   query: string,
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>,
   coreStart?: CoreStart,
@@ -66,6 +66,7 @@ export const searchPageWithInWorkspace = async (
           search={query}
           currentWorkspace={currentWorkspace}
           application={coreStart.application}
+          http={coreStart.http}
           registeredUseCases$={registeredUseCases$}
           callback={callback}
         />

@@ -49,7 +49,7 @@ import './index.scss';
 import { ManagementOverViewPluginSetup } from '../../management_overview/public';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { DevToolsIcon } from './dev_tools_icon';
-import { WorkspaceAvailability, SearchObjectTypes } from '../../../core/public';
+import { WorkspaceAvailability } from '../../../core/public';
 import { searchForDevTools } from './global_search/search_devtool_command';
 import { Trigger, UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 
@@ -161,7 +161,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
        */
       coreSetup.chrome.globalSearch.registerSearchCommand({
         id: 'devtools',
-        type: SearchObjectTypes.PAGES,
+        type: 'PAGES',
         run: async (query: string, callback?: () => void) =>
           searchForDevTools(query, {
             devTools: this.getSortedDevTools.bind(this),
