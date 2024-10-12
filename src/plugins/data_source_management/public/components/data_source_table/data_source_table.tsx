@@ -13,12 +13,16 @@ import {
   EuiSpacer,
   EuiText,
   EuiSearchBarProps,
+  EuiBasicTableColumn,
+  EuiButtonIcon,
 } from '@elastic/eui';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useRef } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import { useEffectOnce } from 'react-use';
+import { useEffectOnce, useObservable } from 'react-use';
+import { of } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { TopNavControlComponentData } from 'src/plugins/navigation/public';
 import {
   reactRouterNavigate,
   useOpenSearchDashboards,
@@ -33,10 +37,10 @@ import {
   deleteMultipleDataSources,
   getDataSources,
   setFirstDataSourceAsDefault,
-  getDefaultDataSourceId,
   fetchDataSourceConnections,
 } from '../utils';
 import { LoadingMask } from '../loading_mask';
+import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../constants';
 
 /* Table config */
 const pagination = {
@@ -59,7 +63,18 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     notifications,
     uiSettings,
     application,
+    navigation,
+    workspaces,
+    overlays,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
+  const { HeaderControl } = navigation.ui;
+  const workspaceClient = useObservable(workspaces.client$);
+  const DataSourceAssociation = workspaceClient?.ui().DataSourceAssociation;
+  const defaultDataSourceIdRef = useRef(
+    uiSettings.get$<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID)
+  );
+  const defaultDataSourceId = useObservable(defaultDataSourceIdRef.current);
+  const useUpdatedUX = uiSettings.get('home:useNewHomePage');
 
   /* Component state variables */
   const [dataSources, setDataSources] = useState<DataSourceTableItem[]>([]);
@@ -68,6 +83,9 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = React.useState(false);
   const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
+  const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
+  const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
+  const canAssociateDataSource = !!currentWorkspace && isDashboardAdmin;
 
   /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
@@ -82,9 +100,28 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     fetchDataSources();
   });
 
-  const fetchDataSources = () => {
+  const associateDataSourceButton = DataSourceAssociation && [
+    {
+      renderComponent: (
+        <DataSourceAssociation
+          excludedDataSourceIds={dataSources.map((ds) => ds.id)}
+          onComplete={() => fetchDataSources()}
+        />
+      ),
+    } as TopNavControlComponentData,
+  ];
+
+  /* Toast Handlers */
+  const handleDisplayToastMessage = useCallback(
+    ({ message }: DataSourceManagementToastMessageItem) => {
+      notifications.toasts.addDanger(message);
+    },
+    [notifications.toasts]
+  );
+
+  const fetchDataSources = useCallback(() => {
     setIsLoading(true);
-    getDataSources(savedObjects.client)
+    return getDataSources(savedObjects.client)
       .then((response: DataSourceTableItem[]) => {
         return fetchDataSourceConnections(response, http, notifications, false);
       })
@@ -105,31 +142,87 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       .finally(() => {
         setIsLoading(false);
       });
-  };
+  }, [handleDisplayToastMessage, http, notifications, savedObjects.client]);
+
+  const onDissociate = useCallback(
+    async (item: DataSourceTableItem | DataSourceTableItem[]) => {
+      const itemsToDissociate = Array<DataSourceTableItem>().concat(item);
+      const payload = itemsToDissociate.map((ds) => ({ id: ds.id, type: 'data-source' }));
+      const confirmed = await overlays.openConfirm('', {
+        title: i18n.translate('dataSourcesManagement.dataSourcesTable.removeAssociation', {
+          defaultMessage:
+            '{selectionSize, plural, one {Remove # association} other {Remove # associations}}',
+          values: { selectionSize: itemsToDissociate.length },
+        }),
+        buttonColor: 'danger',
+      });
+      if (confirmed) {
+        setIsLoading(true);
+        if (workspaceClient && currentWorkspace) {
+          await workspaceClient.dissociate(payload, currentWorkspace.id);
+          await fetchDataSources();
+          setSelectedDataSources([]);
+          if (payload.some((p) => p.id === defaultDataSourceId)) {
+            setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+          }
+        }
+      }
+    },
+    [
+      currentWorkspace,
+      defaultDataSourceId,
+      fetchDataSources,
+      overlays,
+      savedObjects.client,
+      uiSettings,
+      workspaceClient,
+    ]
+  );
 
   /* Table search config */
   const renderToolsLeft = useCallback(() => {
-    return selectedDataSources.length > 0
-      ? [
-          <EuiSmallButton
-            color="danger"
-            onClick={() => {
-              setConfirmDeleteVisible(true);
-            }}
-            data-test-subj="deleteDataSourceConnections"
-          >
-            <FormattedMessage
-              id="dataSourcesManagement.dataSourcesTable.deleteToolLabel"
-              defaultMessage="{selectionSize, plural, one {Delete # connection} other {Delete # connections}}"
-              values={{ selectionSize: selectedDataSources.length }}
-            />
-          </EuiSmallButton>,
-        ]
-      : [];
-  }, [selectedDataSources]);
+    if (selectedDataSources.length === 0) {
+      return [];
+    }
+    if (canManageDataSource) {
+      return [
+        <EuiSmallButton
+          color="danger"
+          onClick={() => {
+            setConfirmDeleteVisible(true);
+          }}
+          data-test-subj="deleteDataSourceConnections"
+        >
+          <FormattedMessage
+            id="dataSourcesManagement.dataSourcesTable.deleteToolLabel"
+            defaultMessage="{selectionSize, plural, one {Delete # connection} other {Delete # connections}}"
+            values={{ selectionSize: selectedDataSources.length }}
+          />
+        </EuiSmallButton>,
+      ];
+    }
+    if (canAssociateDataSource) {
+      return [
+        <EuiSmallButton
+          color="danger"
+          onClick={() => {
+            onDissociate(selectedDataSources);
+          }}
+          data-test-subj="dissociateSelectedDataSources"
+        >
+          <FormattedMessage
+            id="dataSourcesManagement.dataSourcesTable.dissociateSelectedDataSources"
+            defaultMessage="{selectionSize, plural, one {Remove # association} other {Remove # associations}}"
+            values={{ selectionSize: selectedDataSources.length }}
+          />
+        </EuiSmallButton>,
+      ];
+    }
+    return [];
+  }, [selectedDataSources, canManageDataSource, canAssociateDataSource, onDissociate]);
 
   const search: EuiSearchBarProps = {
-    toolsLeft: canManageDataSource ? renderToolsLeft() : undefined,
+    toolsLeft: renderToolsLeft(),
     compressed: true,
     box: {
       incremental: true,
@@ -157,7 +250,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   };
 
   /* Table columns */
-  const columns = [
+  const columns: Array<EuiBasicTableColumn<DataSourceTableItem>> = [
     {
       field: 'title',
       name: i18n.translate('dataSourcesManagement.dataSourcesTable.dataSourceField', {
@@ -177,7 +270,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `${index.id}`)} flush="left">
             {name}
           </EuiButtonEmpty>
-          {index.id === getDefaultDataSourceId(uiSettings) ? (
+          {index.id === defaultDataSourceId ? (
             <EuiBadge iconType="starFilled" iconSide="left">
               Default
             </EuiBadge>
@@ -295,7 +388,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const setDefaultDataSource = async () => {
     try {
       for (const dataSource of selectedDataSources) {
-        if (getDefaultDataSourceId(uiSettings) === dataSource.id) {
+        if (defaultDataSourceId === dataSource.id) {
           await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
           break;
         }
@@ -322,12 +415,6 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
 
   const selection = {
     onSelectionChange,
-  };
-
-  /* Toast Handlers */
-
-  const handleDisplayToastMessage = ({ message }: DataSourceManagementToastMessageItem) => {
-    notifications.toasts.addDanger(message);
   };
 
   /* Render Ui elements*/
@@ -384,8 +471,67 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     );
   };
 
+  const actionColumn: EuiBasicTableColumn<DataSourceTableItem> = {
+    name: 'Action',
+    actions: [],
+  };
+
+  // Add remove association action
+  if (canAssociateDataSource) {
+    actionColumn.actions.push({
+      name: i18n.translate('dataSourcesManagement.dataSourcesTable.removeAssociation.label', {
+        defaultMessage: 'Remove association',
+      }),
+      isPrimary: true,
+      description: i18n.translate(
+        'dataSourcesManagement.dataSourcesTable.removeAssociation.description',
+        {
+          defaultMessage: 'Remove association',
+        }
+      ),
+      icon: 'unlink',
+      type: 'icon',
+      onClick: async (item: DataSourceTableItem) => {
+        onDissociate(item);
+      },
+      'data-test-subj': 'dataSourcesManagement-dataSourceTable-dissociateButton',
+    });
+  }
+
+  // Add set as default action when data source list page opened within a workspace
+  if (currentWorkspace) {
+    actionColumn.actions.push({
+      render: (item) => {
+        return (
+          <EuiButtonIcon
+            data-test-subj="dataSourcesManagement-dataSourceTable-setAsDefaultButton"
+            isDisabled={defaultDataSourceId === item.id}
+            aria-label="Set as default data source"
+            title={i18n.translate('dataSourcesManagement.dataSourcesTable.setAsDefault.label', {
+              defaultMessage: 'Set as default',
+            })}
+            iconType="flag"
+            onClick={async () => {
+              await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, item.id);
+            }}
+          />
+        );
+      },
+    });
+  }
+
+  if (actionColumn.actions.length > 0) {
+    columns.push(actionColumn);
+  }
+
   return (
     <>
+      {useUpdatedUX && canAssociateDataSource && associateDataSourceButton && (
+        <HeaderControl
+          setMountPoint={application.setAppRightControls}
+          controls={associateDataSourceButton}
+        />
+      )}
       {tableRenderDeleteModal()}
       {!isLoading && (!dataSources || !dataSources.length)
         ? renderEmptyState()

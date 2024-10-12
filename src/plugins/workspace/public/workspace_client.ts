@@ -11,9 +11,11 @@ import {
   WorkspaceAttribute,
   WorkspacesSetup,
   IWorkspaceClient,
+  IWorkspaceResponse as IResponse,
 } from '../../../core/public';
 import { WorkspacePermissionMode } from '../common/constants';
 import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
+import { DataSourceAssociation } from './components/data_source_association/data_source_association';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -22,16 +24,6 @@ const join = (...uriComponents: Array<string | undefined>) =>
     .filter((comp): comp is string => Boolean(comp))
     .map(encodeURIComponent)
     .join('/');
-
-type IResponse<T> =
-  | {
-      result: T;
-      success: true;
-    }
-  | {
-      success: false;
-      error?: string;
-    };
 
 interface WorkspaceFindOptions {
   page?: number;
@@ -72,7 +64,7 @@ export class WorkspaceClient implements IWorkspaceClient {
    * Add a non-throw-error fetch method,
    * so that consumers only need to care about
    * if the success is false instead of wrapping the call with a try catch
-   * and judge the error both in catch clause and if(!success) cluase.
+   * and judge the error both in catch clause and if(!success) clause.
    */
   private safeFetch = async <T = any>(
     path: string,
@@ -346,6 +338,40 @@ export class WorkspaceClient implements IWorkspaceClient {
     });
 
     return result;
+  }
+
+  public async associate(savedObjects: Array<{ id: string; type: string }>, workspaceId: string) {
+    const path = this.getPath('_associate');
+    const body = {
+      savedObjects,
+      workspaceId,
+    };
+    const result = await this.safeFetch<Array<{ id: string; type: string }>>(path, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+
+    return result;
+  }
+
+  public async dissociate(savedObjects: Array<{ id: string; type: string }>, workspaceId: string) {
+    const path = this.getPath('_dissociate');
+    const body = {
+      savedObjects,
+      workspaceId,
+    };
+    const result = await this.safeFetch<Array<{ id: string; type: string }>>(path, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+
+    return result;
+  }
+
+  ui() {
+    return {
+      DataSourceAssociation,
+    };
   }
 
   public stop() {

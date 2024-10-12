@@ -14,6 +14,7 @@ import { scopedHistoryMock } from '../../../../../../core/public/mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../../opensearch_dashboards_react/public';
 import { getMappedDataSources, mockManagementPlugin } from '../../../mocks';
 import { ManageDirectQueryDataConnectionsTable } from './manage_direct_query_data_connections_table';
+import { BehaviorSubject } from 'rxjs';
 
 const deleteButtonIdentifier = '[data-test-subj="deleteDataSourceConnections"]';
 const tableIdentifier = 'EuiInMemoryTable';
@@ -62,7 +63,7 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
         Promise.resolve(getMappedDataSources)
       );
       spyOn(utils, 'getHideLocalCluster').and.returnValue(false);
-      spyOn(uiSettings, 'get').and.returnValue('test1');
+      spyOn(uiSettings, 'get$').and.returnValue(new BehaviorSubject('test1'));
       await act(async () => {
         component = await mount(
           wrapWithIntl(

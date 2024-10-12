@@ -30,6 +30,7 @@ import {
   SkippingIndexRowType,
 } from '../framework/types';
 import { AvailableIntegrationsTableProps } from './components/direct_query_data_sources_components/integrations/available_integration_table';
+import { navigationPluginMock } from '../../navigation/public/mocks';
 
 /* Mock Types */
 
@@ -54,6 +55,7 @@ const createDataSourceManagementContext = () => {
     uiSettings,
     notifications,
     overlays,
+    workspaces,
   } = coreMock.createStart();
   const { http } = coreMock.createSetup();
 
@@ -64,10 +66,12 @@ const createDataSourceManagementContext = () => {
     uiSettings,
     notifications,
     overlays,
+    workspaces,
     http,
     docLinks,
     setBreadcrumbs: () => {},
     authenticationMethodRegistry,
+    navigation: navigationPluginMock.createStartContract(),
   };
 };
 

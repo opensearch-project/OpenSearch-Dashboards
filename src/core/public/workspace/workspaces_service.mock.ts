@@ -6,7 +6,8 @@
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@osd/utility-types';
 
-import { WorkspacesService, WorkspaceObject, IWorkspaceClient } from './workspaces_service';
+import { IWorkspaceClient, WorkspaceObject } from './types';
+import { WorkspacesService } from './workspaces_service';
 
 const createWorkspacesSetupContractMock = () => {
   const currentWorkspaceId$ = new BehaviorSubject<string>('');

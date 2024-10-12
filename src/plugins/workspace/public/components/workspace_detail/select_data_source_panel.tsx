@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import {
   EuiText,
   EuiTitle,
@@ -281,6 +281,10 @@ export const SelectDataSourceDetailPanel = ({
     setIsLoading(loading);
   }, [loading]);
 
+  const excludedConnectionIds = useMemo(() => {
+    return formData.selectedDataSourceConnections.map((c) => c.id);
+  }, [formData.selectedDataSourceConnections]);
+
   return (
     <EuiPanel>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -312,7 +316,7 @@ export const SelectDataSourceDetailPanel = ({
           notifications={notifications}
           savedObjects={savedObjects}
           closeModal={() => setIsVisible(false)}
-          assignedConnections={formData.selectedDataSourceConnections}
+          excludedConnectionIds={excludedConnectionIds}
           handleAssignDataSourceConnections={handleAssignDataSourceConnections}
           mode={toggleIdSelected as AssociationDataSourceModalMode}
           logos={chrome.logos}
