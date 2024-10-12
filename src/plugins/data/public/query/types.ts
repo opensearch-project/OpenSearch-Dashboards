@@ -43,7 +43,7 @@ export interface QueryServiceSetupDependencies {
   storage: DataStorage;
   sessionStorage: DataStorage;
   defaultSearchInterceptor: ISearchInterceptor;
-  applicaton: ApplicationSetup;
+  application: ApplicationSetup;
 }
 
 /** @internal */
@@ -52,5 +52,5 @@ export interface QueryServiceStartDependencies {
   storage: DataStorage;
   uiSettings: IUiSettingsClient;
   indexPatterns: IndexPatternsService;
-  applicaton: ApplicationStart;
+  application: ApplicationStart;
 }
