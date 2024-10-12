@@ -150,7 +150,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       const path = request.url.pathname;
       if (path === '/') {
         const workspaceListResponse = await this.client?.list(
-          { request, logger: this.logger },
+          { request },
           { page: 1, perPage: 100 }
         );
         const basePath = core.http.basePath.serverBasePath;
