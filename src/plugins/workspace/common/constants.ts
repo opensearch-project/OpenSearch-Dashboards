@@ -48,7 +48,7 @@ export const PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER = 0;
  * The repository wrapper should be the wrapper closest to the repository client,
  * so we give a large number to the wrapper
  */
-export const PRIORITY_FOR_REPOSITORY_WRAPPER = 100 * 100;
+export const PRIORITY_FOR_REPOSITORY_WRAPPER = Number.MAX_VALUE;
 
 /**
  *
