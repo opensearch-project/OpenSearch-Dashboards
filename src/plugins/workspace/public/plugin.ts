@@ -575,7 +575,6 @@ export class WorkspacePlugin
         AddCollaboratorsModal,
       },
     };
-    return {};
   }
 
   public start(core: CoreStart, { contentManagement, navigation }: WorkspacePluginStartDeps) {
