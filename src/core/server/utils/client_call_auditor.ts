@@ -58,6 +58,6 @@ export const getClientCallAuditor = (
   return (ensureRawRequest(request).app as AppState)[clientCallAuditorKey];
 };
 
-export const destroyClientCallAuditor = (request: OpenSearchDashboardsRequest) => {
+export const cleanUpClientCallAuditor = (request: OpenSearchDashboardsRequest) => {
   (ensureRawRequest(request).app as AppState)[clientCallAuditorKey] = undefined;
 };

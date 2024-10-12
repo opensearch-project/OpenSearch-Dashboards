@@ -34,7 +34,7 @@ import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import {
   cleanWorkspaceId,
   cleanUpACLAuditor,
-  destroyClientCallAuditor,
+  cleanUpClientCallAuditor,
   getACLAuditor,
   getWorkspaceIdFromUrl,
   getWorkspaceState,
@@ -140,7 +140,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
         getACLAuditor(request)?.checkout();
       }
       cleanUpACLAuditor(request);
-      destroyClientCallAuditor(request);
+      cleanUpClientCallAuditor(request);
       return toolkit.next();
     });
   }

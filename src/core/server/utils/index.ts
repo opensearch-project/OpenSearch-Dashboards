@@ -45,5 +45,5 @@ export {
   CLIENT_CALL_AUDITOR_KEY,
   getClientCallAuditor,
   initializeClientCallAuditor,
-  destroyClientCallAuditor,
+  cleanUpClientCallAuditor,
 } from './client_call_auditor';

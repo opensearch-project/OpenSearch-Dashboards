@@ -8,7 +8,7 @@ import {
   initializeClientCallAuditor,
   getClientCallAuditor,
   CLIENT_CALL_AUDITOR_KEY,
-  destroyClientCallAuditor,
+  cleanUpClientCallAuditor,
 } from './client_call_auditor';
 
 describe('#getClientCallAuditor', () => {
@@ -21,12 +21,12 @@ describe('#getClientCallAuditor', () => {
   });
 });
 
-describe('#destroyClientCallAuditor', () => {
+describe('#cleanUpClientCallAuditor', () => {
   it('should be able to destroy the auditor', () => {
     const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
     initializeClientCallAuditor(mockRequest);
     expect(getClientCallAuditor(mockRequest)).not.toBeFalsy();
-    destroyClientCallAuditor(mockRequest);
+    cleanUpClientCallAuditor(mockRequest);
     expect(getClientCallAuditor(mockRequest)).toBeFalsy();
   });
 });
