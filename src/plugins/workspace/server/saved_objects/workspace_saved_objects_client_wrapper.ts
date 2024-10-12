@@ -33,6 +33,8 @@ import {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
   SavedObjectsDeleteByWorkspaceOptions,
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
 } from '../../../../core/server';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import {
@@ -579,7 +581,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         return {
           ...findResult,
           total: finalSavedObjects.length,
-          saved_objects: finalSavedObjects,
+          saved_objects: finalSavedObjects as Array<SavedObjectsFindResult<T>>,
         };
       } else if (!options.workspaces && !options.ACLSearchParams) {
         options.workspaces = permittedWorkspaceIds;
@@ -661,10 +663,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       return wrapperOptions.client;
     }
 
-    const ACLAuditDecorator = function <T extends (...args: any[]) => any>(
-      fn: T,
-      request: OpenSearchDashboardsRequest
-    ): T {
+    const ACLAuditDecorator = function <T extends (...args: any[]) => any>(fn: T): T {
       return function (...args: Parameters<T>): ReturnType<T> {
         clientCallAuditor?.increment(CLIENT_CALL_AUDITOR_KEY.incoming);
         const result = fn.apply(wrapperOptions.client, args);
@@ -706,36 +705,21 @@ export class WorkspaceSavedObjectsClientWrapper {
 
     return {
       ...wrapperOptions.client,
-      get: ACLAuditDecorator(getWithWorkspacePermissionControl, wrapperOptions.request),
+      get: ACLAuditDecorator(getWithWorkspacePermissionControl),
       checkConflicts: wrapperOptions.client.checkConflicts,
       find: findWithWorkspacePermissionControl,
-      bulkGet: ACLAuditDecorator(bulkGetWithWorkspacePermissionControl, wrapperOptions.request),
+      bulkGet: ACLAuditDecorator(bulkGetWithWorkspacePermissionControl),
       errors: wrapperOptions.client.errors,
       addToNamespaces: wrapperOptions.client.addToNamespaces,
       deleteFromNamespaces: wrapperOptions.client.deleteFromNamespaces,
-      create: ACLAuditDecorator(createWithWorkspacePermissionControl, wrapperOptions.request),
-      bulkCreate: ACLAuditDecorator(
-        bulkCreateWithWorkspacePermissionControl,
-        wrapperOptions.request
-      ),
-      delete: ACLAuditDecorator(deleteWithWorkspacePermissionControl, wrapperOptions.request),
-      update: ACLAuditDecorator(updateWithWorkspacePermissionControl, wrapperOptions.request),
-      bulkUpdate: ACLAuditDecorator(
-        bulkUpdateWithWorkspacePermissionControl,
-        wrapperOptions.request
-      ),
-      deleteByWorkspace: ACLAuditDecorator(
-        deleteByWorkspaceWithPermissionControl,
-        wrapperOptions.request
-      ),
-      addToWorkspaces: ACLAuditDecorator(
-        addToWorkspacesWithPermissionControl,
-        wrapperOptions.request
-      ),
-      deleteFromWorkspaces: ACLAuditDecorator(
-        deleteFromWorkspacesWithPermissionControl,
-        wrapperOptions.request
-      ),
+      create: ACLAuditDecorator(createWithWorkspacePermissionControl),
+      bulkCreate: ACLAuditDecorator(bulkCreateWithWorkspacePermissionControl),
+      delete: ACLAuditDecorator(deleteWithWorkspacePermissionControl),
+      update: ACLAuditDecorator(updateWithWorkspacePermissionControl),
+      bulkUpdate: ACLAuditDecorator(bulkUpdateWithWorkspacePermissionControl),
+      deleteByWorkspace: ACLAuditDecorator(deleteByWorkspaceWithPermissionControl),
+      addToWorkspaces: ACLAuditDecorator(addToWorkspacesWithPermissionControl),
+      deleteFromWorkspaces: ACLAuditDecorator(deleteFromWorkspacesWithPermissionControl),
     };
   };
 
