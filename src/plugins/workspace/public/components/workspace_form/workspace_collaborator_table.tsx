@@ -77,18 +77,22 @@ interface Props {
   handleSubmitPermissionSettings: (permissionSettings: WorkspacePermissionSetting[]) => void;
 }
 
+type PermissionSettingWithAccessLevelAndDisplayedType = PermissionSetting & {
+  accessLevel?: string;
+  displayedType?: string;
+};
+
 export const WorkspaceCollaboratorTable = ({
   permissionSettings,
   displayedCollaboratorTypes,
   handleSubmitPermissionSettings,
 }: Props) => {
-  const [selection, setSelection] = useState<PermissionSetting[]>([]);
+  const [selection, setSelection] = useState<PermissionSettingWithAccessLevelAndDisplayedType[]>(
+    []
+  );
   const { overlays } = useOpenSearchDashboards();
 
-  // eslint-disable-next-line
-  console.log('permissionSettings', permissionSettings);
-
-  const items = useMemo(() => {
+  const items: PermissionSettingWithAccessLevelAndDisplayedType[] = useMemo(() => {
     return permissionSettings.map((setting) => {
       const collaborator = isWorkspacePermissionSetting(setting)
         ? convertPermissionSettingToWorkspaceCollaborator(setting)
@@ -120,16 +124,13 @@ export const WorkspaceCollaboratorTable = ({
     });
   }, [permissionSettings, displayedCollaboratorTypes]);
 
-  const findAdmin = useCallback((lists: typeof items) => {
+  const findAdmin = useCallback((lists: PermissionSettingWithAccessLevelAndDisplayedType[]) => {
     return lists.filter((item) => item.accessLevel === 'Admin');
   }, []);
 
   const permissionNum = useMemo(() => {
     return findAdmin(items).length;
   }, [items, findAdmin]);
-
-  // eslint-disable-next-line
-  console.log('items', items);
 
   const emptyStateMessage = useMemo(() => {
     return (
@@ -164,10 +165,14 @@ export const WorkspaceCollaboratorTable = ({
     );
   }, [displayedCollaboratorTypes, permissionSettings, handleSubmitPermissionSettings]);
 
-  const openDeleteConfirmModal = ({ onConfirm }: { onConfirm: () => void }) => {
-    const adminOfSelection = selection.filter((item) => item.accessLevel === 'Admin').length;
-    // eslint-disable-next-line
-    console.log('adminOfSelection', adminOfSelection);
+  const openDeleteConfirmModal = ({
+    onConfirm,
+    selections,
+  }: {
+    onConfirm: () => void;
+    selections: PermissionSettingWithAccessLevelAndDisplayedType[];
+  }) => {
+    const adminOfSelection = selections.filter((item) => item.accessLevel === 'Admin').length;
     const modal = overlays.openModal(
       permissionNum === adminOfSelection ? (
         <EuiConfirmModal
@@ -175,14 +180,15 @@ export const WorkspaceCollaboratorTable = ({
             defaultMessage: 'Delete collaborator',
           })}
           onCancel={() => modal.close()}
-          confirmButtonDisabled
+          onConfirm={onConfirm}
           cancelButtonText="Cancel"
           confirmButtonText="Confirm"
         >
           <EuiText color="danger">
             <p>
-              {i18n.translate('workspace.detail.collaborator.delete.confirm.disable', {
-                defaultMessage: 'You need to retain at least one admin in a workspace',
+              {i18n.translate('workspace.detail.collaborator.delete.confirm.warning', {
+                defaultMessage:
+                  'By removing the last administrator, only Application administrators will be able to manage this Workspace',
               })}
             </p>
           </EuiText>
@@ -216,12 +222,6 @@ export const WorkspaceCollaboratorTable = ({
       return;
     }
 
-    // eslint-disable-next-line
-    console.log('selection', selection);
-
-    // eslint-disable-next-line
-    console.log('permissionNUm', permissionNum);
-
     const onClick = () => {
       const modal = openDeleteConfirmModal({
         onConfirm: () => {
@@ -233,11 +233,17 @@ export const WorkspaceCollaboratorTable = ({
           setSelection([]);
           modal.close();
         },
+        selections: selection,
       });
     };
 
     return (
-      <EuiButton color="danger" iconType="trash" onClick={onClick}>
+      <EuiButton
+        color="danger"
+        iconType="trash"
+        onClick={onClick}
+        data-test-subj="confirm-delete-button"
+      >
         {i18n.translate('workspace.detail.collaborator.delete', {
           defaultMessage: `Delete {num} ${
             selection.length === 1 ? 'collaborator' : 'collaborators'
@@ -298,7 +304,7 @@ export const WorkspaceCollaboratorTable = ({
     toolsRight: renderToolsRight(),
   };
 
-  const columns: Array<EuiBasicTableColumn<PermissionSetting>> = [
+  const columns: Array<EuiBasicTableColumn<PermissionSettingWithAccessLevelAndDisplayedType>> = [
     {
       field: 'primaryId',
       name: 'ID',
@@ -316,7 +322,7 @@ export const WorkspaceCollaboratorTable = ({
     {
       name: 'Actions',
       field: '',
-      render: (item: PermissionSetting) => (
+      render: (item: PermissionSettingWithAccessLevelAndDisplayedType) => (
         <Actions
           isTableAction={true}
           selection={[item]}
@@ -327,7 +333,7 @@ export const WorkspaceCollaboratorTable = ({
       ),
     },
   ];
-  const selectionValue: EuiTableSelectionType<PermissionSetting> = {
+  const selectionValue: EuiTableSelectionType<PermissionSettingWithAccessLevelAndDisplayedType> = {
     onSelectionChange: (newSelection) => setSelection(newSelection),
   };
 
@@ -353,10 +359,16 @@ const Actions = ({
   openDeleteConfirmModal,
 }: {
   isTableAction: boolean;
-  selection?: PermissionSetting[];
+  selection?: PermissionSettingWithAccessLevelAndDisplayedType[];
   permissionSettings: PermissionSetting[];
   handleSubmitPermissionSettings: (permissionSettings: WorkspacePermissionSetting[]) => void;
-  openDeleteConfirmModal?: ({ onConfirm }: { onConfirm: () => void }) => { close: () => void };
+  openDeleteConfirmModal?: ({
+    onConfirm,
+    selections,
+  }: {
+    onConfirm: () => void;
+    selections: PermissionSettingWithAccessLevelAndDisplayedType[];
+  }) => { close: () => void };
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { overlays } = useOpenSearchDashboards();
@@ -428,7 +440,6 @@ const Actions = ({
           }),
           onClick: () => {
             setIsPopoverOpen(false);
-            setSelection([]);
             if (selection && openDeleteConfirmModal) {
               const modal = openDeleteConfirmModal({
                 onConfirm: () => {
@@ -439,6 +450,7 @@ const Actions = ({
                   handleSubmitPermissionSettings(newSettings as WorkspacePermissionSetting[]);
                   modal.close();
                 },
+                selections: selection,
               });
             }
           },
