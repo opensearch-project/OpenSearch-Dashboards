@@ -185,5 +185,6 @@ export const useWorkspaceForm = ({
     setSelectedDataSourceConnections,
     onAppLeave,
     handleSubmitPermissionSettings,
+    color,
   };
 };

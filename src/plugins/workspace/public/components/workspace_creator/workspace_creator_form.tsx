@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   EuiSpacer,
   EuiForm,
@@ -32,6 +32,7 @@ import './workspace_creator_form.scss';
 
 interface WorkspaceCreatorFormProps extends WorkspaceFormProps {
   isSubmitting: boolean;
+  onColorChange: (color: string) => void;
 }
 
 export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
@@ -42,6 +43,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
     permissionEnabled,
     dataSourceManagement: isDataSourceEnabled,
     availableUseCases,
+    onColorChange,
   } = props;
   const {
     formId,
@@ -55,12 +57,19 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
     handleUseCaseChange,
     setPermissionSettings,
     setSelectedDataSourceConnections,
+    color,
   } = useWorkspaceForm(props);
 
   const disabledUserOrGroupInputIdsRef = useRef(
     defaultValues?.permissionSettings?.map((item) => item.id) ?? []
   );
   const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin ?? false;
+
+  useEffect(() => {
+    if (color) {
+      onColorChange(color);
+    }
+  }, [color, onColorChange, props]);
 
   return (
     <EuiFlexGroup className="workspaceCreateFormContainer">
