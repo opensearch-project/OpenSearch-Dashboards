@@ -693,6 +693,8 @@ export class WorkspaceSavedObjectsClientWrapper {
             }
           );
         } else {
+          // The decorator is used to decorate async functions so the branch here won't be picked.
+          // But we still need to keep it in case there are sync calls in the future.
           clientCallAuditor?.increment(CLIENT_CALL_AUDITOR_KEY.outgoing);
           if (clientCallAuditor?.isAsyncClientCallsBalanced()) {
             ACLAuditor?.checkout();

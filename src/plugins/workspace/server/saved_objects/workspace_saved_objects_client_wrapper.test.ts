@@ -3,7 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getWorkspaceState, updateWorkspaceState } from '../../../../core/server/utils';
+import { loggerMock } from '@osd/logging/target/mocks';
+import {
+  getACLAuditor,
+  getWorkspaceState,
+  initializeACLAuditor,
+  initializeClientCallAuditor,
+  updateWorkspaceState,
+} from '../../../../core/server/utils';
 import {
   SavedObject,
   SavedObjectsBulkGetObject,
@@ -172,6 +179,8 @@ const generateWorkspaceSavedObjectsClientWrapper = (role = NO_DASHBOARD_ADMIN) =
     };
   });
   const requestMock = httpServerMock.createOpenSearchDashboardsRequest();
+  initializeACLAuditor(requestMock, loggerMock.create());
+  initializeClientCallAuditor(requestMock);
   updateWorkspaceState(requestMock, { requestWorkspaceId: 'mock-request-workspace-id' });
   if (role === DASHBOARD_ADMIN) {
     updateWorkspaceState(requestMock, { isDashboardAdmin: true });
@@ -1339,6 +1348,24 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         }
         expect(errorCatch.message).toEqual('Invalid permission, please contact OSD admin');
       });
+    });
+  });
+
+  describe('ACLAuditor', () => {
+    it('should check out once after multiple parallel client calls all finished', async () => {
+      const { wrapper, requestMock } = generateWorkspaceSavedObjectsClientWrapper();
+      const auditor = getACLAuditor(requestMock);
+      let checkSpy;
+      if (auditor) {
+        checkSpy = jest.spyOn(auditor, 'checkout');
+      }
+
+      await Promise.all([
+        wrapper.get('workspace', 'foo'),
+        wrapper.get('workspace', 'foo'),
+        wrapper.get('workspace', 'foo'),
+      ]);
+      expect(checkSpy).toBeCalledTimes(1);
     });
   });
 });
