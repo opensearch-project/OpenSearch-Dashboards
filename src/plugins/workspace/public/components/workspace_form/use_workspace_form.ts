@@ -89,18 +89,13 @@ export const useWorkspaceForm = ({
     [setFeatureConfigs]
   );
 
-  const getSubmitFormData = (
-    submitFormData: WorkspaceFormDataState,
-    submitPermissionSettings?: WorkspacePermissionSetting[]
-  ) => {
+  const getSubmitFormData = (submitFormData: WorkspaceFormDataState) => {
     return {
       name: submitFormData.name!,
       description: submitFormData.description,
       color: submitFormData.color || '#FFFFFF',
       features: submitFormData.features,
-      permissionSettings:
-        submitPermissionSettings ||
-        (submitFormData.permissionSettings as WorkspacePermissionSetting[]),
+      permissionSettings: submitFormData.permissionSettings as WorkspacePermissionSetting[],
       selectedDataSourceConnections: submitFormData.selectedDataSourceConnections,
     };
   };
@@ -135,7 +130,10 @@ export const useWorkspaceForm = ({
 
   const handleSubmitPermissionSettings = async (settings: WorkspacePermissionSetting[]) => {
     const currentFormData = getFormDataRef.current();
-    const result = await onSubmit?.(getSubmitFormData(currentFormData, settings));
+    const result = await onSubmit?.({
+      ...getSubmitFormData(currentFormData),
+      permissionSettings: settings,
+    });
     if (result) {
       setPermissionSettings(settings);
     }
