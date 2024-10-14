@@ -11,8 +11,8 @@ import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import classNames from 'classnames';
 import { WorkspacesStart } from 'src/core/public/workspace';
-import { ChromeNavControl, ChromeNavLink } from '../..';
 import { NavGroupType } from '../../../../types';
+import { ChromeNavControl, ChromeNavLink } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { createEuiListItem } from './nav_link';
@@ -24,9 +24,11 @@ import {
 } from '../../nav_group';
 import { fulfillRegistrationLinksToChromeNavLinks, getVisibleUseCases, sortBy } from '../../utils';
 import { ALL_USE_CASE_ID, DEFAULT_APP_CATEGORIES } from '../../../../../core/utils';
+import { GlobalSearchCommand } from '../../global_search';
 import { CollapsibleNavTop } from './collapsible_nav_group_enabled_top';
 import { HeaderNavControls } from './header_nav_controls';
 import { NavGroups } from './collapsible_nav_groups';
+import { HeaderSearchBar, HeaderSearchBarIcon } from './header_search_bar';
 
 export interface CollapsibleNavGroupEnabledProps {
   appId$: InternalApplicationStart['currentAppId$'];
@@ -47,6 +49,7 @@ export interface CollapsibleNavGroupEnabledProps {
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
   capabilities: InternalApplicationStart['capabilities'];
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
+  globalSearchCommands?: GlobalSearchCommand[];
 }
 
 const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
@@ -55,7 +58,7 @@ const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
 
 enum NavWidth {
   Expanded = 270,
-  Collapsed = 48, // The Collasped width is supposed to be aligned with the hamburger icon on the top left navigation.
+  Collapsed = 48, // The Collapsed width is supposed to be aligned with the hamburger icon on the top left navigation.
 }
 
 export function CollapsibleNavGroupEnabled({
@@ -70,6 +73,7 @@ export function CollapsibleNavGroupEnabled({
   setCurrentNavGroup,
   capabilities,
   collapsibleNavHeaderRender,
+  globalSearchCommands,
   ...observables
 }: CollapsibleNavGroupEnabledProps) {
   const allNavLinks = useObservable(observables.navLinks$, []);
@@ -212,6 +216,24 @@ export function CollapsibleNavGroupEnabled({
               shouldShrinkNavigation={!isNavOpen}
               onClickShrink={closeNav}
             />
+          </EuiPanel>
+        )}
+        {!isNavOpen ? (
+          <div className="searchBarIcon euiHeaderSectionItemButton">
+            {globalSearchCommands && (
+              <HeaderSearchBarIcon globalSearchCommands={globalSearchCommands} />
+            )}
+          </div>
+        ) : (
+          <EuiPanel
+            hasBorder={false}
+            paddingSize="s"
+            hasShadow={false}
+            className="searchBar-wrapper"
+          >
+            {globalSearchCommands && (
+              <HeaderSearchBar globalSearchCommands={globalSearchCommands} />
+            )}
           </EuiPanel>
         )}
         {!isNavOpen ? null : (

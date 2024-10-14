@@ -114,4 +114,25 @@
     padding: 0 $euiSizeS;
     padding-left: $euiSize;
   }
+
+  .searchBar-wrapper {
+    padding: $euiSize;
+    padding-top: $euiSizeS;
+    background-color: transparent;
+    flex-grow: 0;
+
+    .searchInput {
+      background-color: transparentize($euiFormBackgroundColor, 0.5);
+    }
+
+    .searchInput:focus {
+      background-color: $euiFormBackgroundColor;
+    }
+  }
+
+  .searchBarIcon {
+    position: fixed;
+    top: $ouiHeaderChildSize;
+    left: 0;
+  }
 }

@@ -23,6 +23,7 @@ const defaultNavGroups = {
     }),
     order: 1000,
     type: NavGroupType.SYSTEM,
+    icon: 'database',
   },
   settingsAndSetup: {
     id: 'settingsAndSetup',
@@ -34,6 +35,7 @@ const defaultNavGroups = {
     }),
     order: 2000,
     type: NavGroupType.SYSTEM,
+    icon: 'gear',
   },
   all: {
     id: ALL_USE_CASE_ID,
