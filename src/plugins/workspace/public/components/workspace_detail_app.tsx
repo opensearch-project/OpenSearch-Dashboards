@@ -92,7 +92,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
   }, [currentWorkspace, savedObjects, http, notifications]);
 
   const handleWorkspaceFormSubmit = useCallback(
-    async (data: WorkspaceFormSubmitData, refresh?: boolean) => {
+    async (data: WorkspaceFormSubmitData) => {
       let result;
       if (isFormSubmitting) {
         return;
@@ -121,28 +121,15 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
           dataSources: selectedDataSourceIds,
           permissions: convertPermissionSettingsToPermissions(permissionSettings),
         });
+        setIsFormSubmitting(false);
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.update.success', {
               defaultMessage: 'Update workspace successfully',
             }),
           });
-          setIsFormSubmitting(false);
-          if (application && http && refresh) {
-            // Redirect page after one second, leave one second time to show update successful toast.
-            window.setTimeout(() => {
-              window.location.href = formatUrlWithWorkspaceId(
-                application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
-                  absolute: true,
-                }),
-                currentWorkspace.id,
-                http.basePath
-              );
-            }, 1000);
-          }
           return result;
         } else {
-          setIsFormSubmitting(false);
           throw new Error(result?.error ? result?.error : 'update workspace failed');
         }
       } catch (error) {
@@ -156,7 +143,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
         return;
       }
     },
-    [isFormSubmitting, currentWorkspace, notifications?.toasts, workspaceClient, application, http]
+    [isFormSubmitting, currentWorkspace, notifications?.toasts, workspaceClient]
   );
 
   if (!workspaces || !application || !http || !savedObjects || !currentWorkspaceFormData) {

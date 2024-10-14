@@ -1,0 +1,2 @@
+fix:
+- Fix workspace update issue ([#8570](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8570))
