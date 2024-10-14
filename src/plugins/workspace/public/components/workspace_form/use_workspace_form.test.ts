@@ -138,8 +138,7 @@ describe('useWorkspaceForm', () => {
       expect.objectContaining({
         name: 'test-workspace-name',
         features: ['use-case-observability'],
-      }),
-      true
+      })
     );
   });
   it('should update selected use case', () => {
