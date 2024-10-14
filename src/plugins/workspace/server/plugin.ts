@@ -25,6 +25,7 @@ import {
   WORKSPACE_INITIAL_APP_ID,
   WORKSPACE_NAVIGATION_APP_ID,
   DEFAULT_WORKSPACE,
+  PRIORITY_FOR_REPOSITORY_WRAPPER,
 } from '../common/constants';
 import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
 import { WorkspaceClient } from './workspace_client';
@@ -32,8 +33,13 @@ import { registerRoutes } from './routes';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import {
   cleanWorkspaceId,
+  cleanUpACLAuditor,
+  cleanUpClientCallAuditor,
+  getACLAuditor,
   getWorkspaceIdFromUrl,
   getWorkspaceState,
+  initializeACLAuditor,
+  initializeClientCallAuditor,
   updateWorkspaceState,
 } from '../../../core/server/utils';
 import { WorkspaceConflictSavedObjectsClientWrapper } from './saved_objects/saved_objects_wrapper_for_check_workspace_conflict';
@@ -45,6 +51,7 @@ import { getOSDAdminConfigFromYMLConfig, updateDashboardAdminStateForRequest } f
 import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consumer_wrapper';
 import { WorkspaceUiSettingsClientWrapper } from './saved_objects/workspace_ui_settings_client_wrapper';
 import { uiSettings } from './ui_settings';
+import { RepositoryWrapper } from './saved_objects/repository_wrapper';
 
 export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePluginStart> {
   private readonly logger: Logger;
@@ -106,8 +113,34 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       this.workspaceSavedObjectsClientWrapper.wrapperFactory
     );
 
+    core.savedObjects.addClientWrapper(
+      PRIORITY_FOR_REPOSITORY_WRAPPER,
+      // Give a symbol here so this wrapper won't be bypassed
+      Symbol('repository_wrapper').toString(),
+      new RepositoryWrapper().wrapperFactory
+    );
+
     core.http.registerOnPreResponse((request, _response, toolkit) => {
       this.permissionControl?.clearSavedObjectsCache(request);
+      return toolkit.next();
+    });
+
+    // Initialize ACL auditor in request.
+    core.http.registerOnPostAuth((request, response, toolkit) => {
+      initializeACLAuditor(request, this.logger);
+      initializeClientCallAuditor(request);
+      return toolkit.next();
+    });
+
+    // Clean up auditor before response.
+    core.http.registerOnPreResponse((request, response, toolkit) => {
+      const { isDashboardAdmin } = getWorkspaceState(request);
+      if (!isDashboardAdmin) {
+        // Only checkout auditor when current login user is not dashboard admin
+        getACLAuditor(request)?.checkout();
+      }
+      cleanUpACLAuditor(request);
+      cleanUpClientCallAuditor(request);
       return toolkit.next();
     });
   }
@@ -117,7 +150,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       const path = request.url.pathname;
       if (path === '/') {
         const workspaceListResponse = await this.client?.list(
-          { request, logger: this.logger },
+          { request },
           { page: 1, perPage: 100 }
         );
         const basePath = core.http.basePath.serverBasePath;
