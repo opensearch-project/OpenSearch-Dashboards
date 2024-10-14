@@ -782,17 +782,22 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         includeReferencesDeep
       );
 
-      this.setState({
-        isShowingDuplicateResultFlyout: true,
-        failedCopies: result.success ? [] : result.errors,
-        successfulCopies: result.successCount > 0 ? result.successResults : [],
-        targetWorkspaceName,
-      });
+      if (!result?.success && !result?.errors) {
+        showErrorNotification();
+      } else {
+        this.setState({
+          isShowingDuplicateResultFlyout: true,
+          failedCopies: result?.errors,
+          successfulCopies: result.successCount > 0 ? result.successResults : [],
+          targetWorkspaceName,
+        });
+      }
     } catch (e) {
       showErrorNotification();
+    } finally {
+      this.hideDuplicateModal();
+      await this.refreshObjects();
     }
-    this.hideDuplicateModal();
-    await this.refreshObjects();
   };
 
   renderDuplicateModal() {

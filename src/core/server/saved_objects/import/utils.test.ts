@@ -10,11 +10,13 @@ import {
   getUpdatedTSVBVisState,
   updateDataSourceNameInVegaSpec,
   updateDataSourceNameInTimeline,
+  findDataSourceForObject,
 } from './utils';
 import { parse } from 'hjson';
 import { isEqual } from 'lodash';
 import { join } from 'path';
 import { SavedObject, SavedObjectsClientContract } from '../types';
+import { savedObjectsClientMock } from '../../mocks';
 
 describe('updateDataSourceNameInVegaSpec()', () => {
   const loadHJSONStringFromFile = (filepath: string) => {
@@ -341,4 +343,108 @@ describe('getUpdatedTSVBVisState', () => {
       });
     }
   );
+});
+
+describe('findDataSourceForObject', () => {
+  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+  const indexPatternObject: SavedObject = {
+    id: 'indexPattern',
+    type: 'index-pattern',
+    references: [{ type: 'data-source', id: 'dataSource', name: 'dataSource' }],
+    attributes: {},
+  };
+
+  beforeEach(() => {
+    savedObjectsClient = savedObjectsClientMock.create();
+  });
+
+  it('should return the data source id for an index-pattern object', async () => {
+    const dataSourceId = await findDataSourceForObject(indexPatternObject, savedObjectsClient);
+    expect(dataSourceId).toBe('dataSource');
+  });
+
+  it('should use bulkGet to resolve multiple references and return data source', async () => {
+    const savedObject: SavedObject = {
+      type: 'dashboard',
+      id: 'dashboard',
+      references: [{ type: 'visualization', id: 'visualization', name: 'visualization' }],
+      attributes: {},
+    };
+
+    const visualizationObject: SavedObject = {
+      type: 'visualization',
+      id: 'visualization',
+      references: [{ type: 'index-pattern', id: 'indexPattern', name: 'indexPattern' }],
+      attributes: {},
+    };
+
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [visualizationObject],
+    });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [indexPatternObject],
+    });
+
+    const dataSourceId = await findDataSourceForObject(savedObject, savedObjectsClient);
+    expect(dataSourceId).toBe('dataSource');
+  });
+
+  it('should use bulkGet to resolve multiple references and return the first found data source', async () => {
+    const savedObject: SavedObject = {
+      id: 'visualization',
+      type: 'visualization',
+      references: [
+        // { type: 'index-pattern', id: 'indexPattern', name: 'index-pattern' },
+        { type: 'dashboard', id: 'dashboard', name: 'dashboard' },
+      ],
+      attributes: {},
+    };
+
+    savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [indexPatternObject],
+    });
+
+    const dataSourceId = await findDataSourceForObject(savedObject, savedObjectsClient);
+    expect(dataSourceId).toBe('dataSource');
+    expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
+      { type: 'dashboard', id: 'dashboard' },
+    ]);
+  });
+
+  it('should return null if no data source is found', async () => {
+    const savedObject: SavedObject = {
+      id: 'visualization',
+      type: 'visualization',
+      references: [],
+      attributes: {},
+    };
+
+    const dataSourceId = await findDataSourceForObject(savedObject, savedObjectsClient);
+    expect(dataSourceId).toBeNull();
+  });
+
+  it('should return null if there is an error in bulkGet', async () => {
+    const savedObject: SavedObject = {
+      id: 'visualization',
+      type: 'visualization',
+      references: [{ type: 'index-pattern', id: 'indexPattern', name: 'indexPattern' }],
+      attributes: {},
+    };
+
+    savedObjectsClient.bulkGet.mockResolvedValue({
+      saved_objects: [
+        {
+          id: 'indexPattern',
+          type: 'index-pattern',
+          error: { error: '', statusCode: 400, message: '' },
+          attributes: undefined,
+          references: [],
+        },
+      ],
+    });
+
+    await expect(findDataSourceForObject(savedObject, savedObjectsClient)).rejects.toThrow(
+      'Bad Request'
+    );
+  });
 });

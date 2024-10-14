@@ -4,6 +4,7 @@
  */
 
 import { parse, stringify } from 'hjson';
+import Boom from '@hapi/boom';
 import { SavedObject, SavedObjectReference, SavedObjectsClientContract } from '../types';
 import { VisualizationObject } from './types';
 
@@ -183,3 +184,53 @@ const parseJSONSpec = (spec: string) => {
 
   return undefined;
 };
+
+export async function findDataSourceForObject(
+  savedObject: SavedObject,
+  savedObjectsClient: SavedObjectsClientContract,
+  visitedObjects: Set<string> = new Set()
+): Promise<string | null> {
+  const references = savedObject.references;
+  if (!references || references.length === 0) {
+    return null;
+  }
+
+  const objectKey = `${savedObject.type}:${savedObject.id}`;
+  if (visitedObjects.has(objectKey)) {
+    return null;
+  }
+  visitedObjects.add(objectKey);
+
+  const dataSourceReference = references.find((ref) => ref.type === 'data-source');
+  if (dataSourceReference) {
+    return dataSourceReference.id;
+  }
+
+  const bulkGetResponse = await savedObjectsClient.bulkGet(
+    references.map((reference) => ({
+      type: reference.type,
+      id: reference.id,
+    }))
+  );
+
+  const referencedObjects = bulkGetResponse.saved_objects;
+  const erroredObjects = referencedObjects.filter(
+    (obj) => obj.error && obj.error.statusCode !== 404
+  );
+
+  if (erroredObjects.length > 0) {
+    const err = Boom.badRequest();
+    err.output.payload.attributes = {
+      objects: erroredObjects,
+    };
+    throw err;
+  }
+
+  for (const referencedObject of referencedObjects) {
+    const dataSource = await findDataSourceForObject(referencedObject, savedObjectsClient);
+    if (dataSource) {
+      return dataSource;
+    }
+  }
+  return null;
+}

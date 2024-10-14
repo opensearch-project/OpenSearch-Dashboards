@@ -7,6 +7,7 @@ import { SavedObjectsImportError, SavedObjectsImportSuccess } from 'opensearch-d
 import { DuplicateResultFlyout, DuplicateResultFlyoutProps } from './duplicate_result_flyout';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { IntlProvider } from 'react-intl';
 
 describe('DuplicateResultFlyout', () => {
   const failedCopies: SavedObjectsImportError[] = [
@@ -21,6 +22,15 @@ describe('DuplicateResultFlyout', () => {
       id: '2',
       meta: {},
       error: { type: 'unsupported_type' },
+    },
+    {
+      type: 'data-source',
+      id: '3',
+      meta: {},
+      error: {
+        type: 'missing_target_workspace_assigned_data_source',
+        message: 'The object hasn’t be copied to the selected workspace.',
+      },
     },
   ];
   const successfulCopies: SavedObjectsImportSuccess[] = [
@@ -44,21 +54,29 @@ describe('DuplicateResultFlyout', () => {
     onClose: onCloseMock,
   };
 
+  const DuplicateResultFlyoutComponent = (props: DuplicateResultFlyoutProps) => {
+    return (
+      <IntlProvider locale="en">
+        <DuplicateResultFlyout {...props} />
+      </IntlProvider>
+    );
+  };
+
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders the flyout with correct title and result', () => {
-    render(<DuplicateResultFlyout {...duplicateResultFlyoutProps} />);
+    render(<DuplicateResultFlyoutComponent {...duplicateResultFlyoutProps} />);
     expect(document.children).toMatchSnapshot();
 
     // Check title
     expect(screen.getByText('Copy saved objects to targetWorkspace')).toBeInTheDocument();
 
     // Check result counts
-    expect(screen.getByText('4 saved objects copied')).toBeInTheDocument();
+    expect(screen.getByText('5 saved objects copied')).toBeInTheDocument();
     expect(screen.getByText('2 Successful')).toBeInTheDocument();
-    expect(screen.getByText('2 Error copying file')).toBeInTheDocument();
+    expect(screen.getByText('3 Error copying file')).toBeInTheDocument();
 
     // Check successful copy icon and message
     expect(screen.getByLabelText('visualization')).toBeInTheDocument();
@@ -73,10 +91,13 @@ describe('DuplicateResultFlyout', () => {
 
     expect(screen.getByLabelText('config')).toBeInTheDocument();
     expect(screen.getByText('Failed Config Title')).toBeInTheDocument();
+
+    expect(screen.getByLabelText('data-source')).toBeInTheDocument();
+    expect(screen.getByText('data-source [id=3]')).toBeInTheDocument();
   });
 
   it('calls onClose when the close button is clicked', () => {
-    render(<DuplicateResultFlyout {...duplicateResultFlyoutProps} />);
+    render(<DuplicateResultFlyoutComponent {...duplicateResultFlyoutProps} />);
 
     const closeButton = screen.getByTestId('euiFlyoutCloseButton');
     fireEvent.click(closeButton);
@@ -86,7 +107,7 @@ describe('DuplicateResultFlyout', () => {
 
   it('copy count is null', () => {
     render(
-      <DuplicateResultFlyout
+      <DuplicateResultFlyoutComponent
         workspaceName={workspaceName}
         failedCopies={[]}
         successfulCopies={[]}
