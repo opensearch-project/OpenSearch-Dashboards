@@ -66,6 +66,6 @@ describe('WorkspaceForm', () => {
   it('should not display data source panel when data source is disabled', () => {
     const { queryByText } = setup(true, undefined);
 
-    expect(queryByText('Associate data source')).not.toBeInTheDocument();
+    expect(queryByText('Associate data sources')).not.toBeInTheDocument();
   });
 });

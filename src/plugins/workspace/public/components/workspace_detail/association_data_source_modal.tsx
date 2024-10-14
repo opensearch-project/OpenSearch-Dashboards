@@ -258,13 +258,13 @@ export const AssociationDataSourceModalContent = ({
         <EuiModalHeaderTitle>
           {mode === AssociationDataSourceModalMode.OpenSearchConnections ? (
             <FormattedMessage
-              id="workspace.detail.dataSources.associateModal.title.openSearchConnections"
-              defaultMessage="Associate OpenSearch connections"
+              id="workspace.detail.dataSources.associateModal.title.openSearchDataSources"
+              defaultMessage="Associate OpenSearch data sources"
             />
           ) : (
             <FormattedMessage
-              id="workspace.detail.dataSources.associateModal.title.directQueryConnections"
-              defaultMessage="Associate direct query connections"
+              id="workspace.detail.dataSources.associateModal.title.directQueryDataSources"
+              defaultMessage="Associate direct query data sources"
             />
           )}
         </EuiModalHeaderTitle>
@@ -273,7 +273,7 @@ export const AssociationDataSourceModalContent = ({
         <EuiText size="xs" color="subdued">
           <FormattedMessage
             id="workspace.detail.dataSources.associateModal.message"
-            defaultMessage="Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace."
+            defaultMessage="Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace."
           />
         </EuiText>
         <EuiSpacer size="s" />
