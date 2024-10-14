@@ -64,9 +64,15 @@ export const AddCollaboratorsModal = ({
     }
     return { collaboratorId, accessLevel, permissionType };
   });
+  const [isAdding, setIsAdding] = useState(false);
 
-  const handleAddCollaborators = () => {
-    onAddCollaborators(validCollaborators);
+  const handleAddCollaborators = async () => {
+    setIsAdding(true);
+    try {
+      await onAddCollaborators(validCollaborators);
+    } finally {
+      setIsAdding(false);
+    }
   };
 
   return (
@@ -131,6 +137,8 @@ export const AddCollaboratorsModal = ({
           type="submit"
           onClick={handleAddCollaborators}
           fill
+          isDisabled={isAdding}
+          isLoading={isAdding}
         >
           {i18n.translate('workspace.addCollaboratorsModal.addCollaboratorsButton', {
             defaultMessage: 'Add collaborators',

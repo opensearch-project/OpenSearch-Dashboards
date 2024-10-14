@@ -76,4 +76,28 @@ describe('AddCollaboratorsModal', () => {
     expect(screen.getByText(instruction.detail)).toBeInTheDocument();
     expect(screen.getByText('Learn more in Documentation')).toBeInTheDocument();
   });
+
+  it('should disable "Add collaborators" button during onAddCollaborators execution', async () => {
+    const onAddCollaboratorsMock = jest.fn().mockReturnValue(
+      new Promise((resolve) => {
+        window.setTimeout(resolve, 1000);
+      })
+    );
+    render(<AddCollaboratorsModal {...defaultProps} onAddCollaborators={onAddCollaboratorsMock} />);
+    const collaboratorInput = screen.getByLabelText(defaultProps.inputLabel);
+    fireEvent.change(collaboratorInput, { target: { value: 'user1' } });
+    const addCollaboratorsButton = screen.getByRole('button', { name: 'Add collaborators' });
+
+    jest.useFakeTimers();
+    fireEvent.click(addCollaboratorsButton);
+    await waitFor(() => {
+      expect(addCollaboratorsButton).toBeDisabled();
+    });
+    jest.runAllTimers();
+    jest.useRealTimers();
+
+    await waitFor(() => {
+      expect(addCollaboratorsButton).not.toBeDisabled();
+    });
+  });
 });
