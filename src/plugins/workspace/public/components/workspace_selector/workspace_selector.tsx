@@ -66,6 +66,7 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
   };
   const button = currentWorkspace ? (
     <EuiPanel
+      className="workspaceSelectorPopoverButton"
       paddingSize="none"
       color="transparent"
       hasBorder={false}

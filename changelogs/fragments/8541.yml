@@ -1,0 +1,2 @@
+fix:
+- The workspace selector jump that occurs when hovering and clicking. ([#8541](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8541))
