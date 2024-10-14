@@ -3,26 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { StartServicesAccessor } from 'src/core/public';
+import { MountPoint, StartServicesAccessor } from 'src/core/public';
 
+import { EuiPageContent } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { EuiPageContent } from '@elastic/eui';
 import { ManagementAppMountParams } from '../../../management/public';
 
 import { NavigationPublicPluginStart } from '../../../navigation/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
-import { CreateDataSourceWizardWithRouter } from '../components/create_data_source_wizard';
-import { EditDataSourceWithRouter } from '../components/edit_data_source';
-import { DataSourceHomePanel } from '../components/data_source_home_panel/data_source_home_panel';
-import { CreateDataSourcePanel } from '../components/data_source_creation_panel/create_data_source_panel';
-import { DataSourceManagementContext } from '../types';
 import { AuthenticationMethodRegistry } from '../auth_registry';
-import { ConfigureDirectQueryDataSourceWithRouter } from '../components/direct_query_data_sources_components/direct_query_data_source_configuration/configure_direct_query_data_sources';
+import { CreateDataSourceWizardWithRouter } from '../components/create_data_source_wizard';
+import { CreateDataSourcePanel } from '../components/data_source_creation_panel/create_data_source_panel';
+import { DataSourceHomePanel } from '../components/data_source_home_panel/data_source_home_panel';
 import { DirectQueryDataConnectionDetail } from '../components/direct_query_data_sources_components/connection_detail/direct_query_connection_detail';
+import { ConfigureDirectQueryDataSourceWithRouter } from '../components/direct_query_data_sources_components/direct_query_data_source_configuration/configure_direct_query_data_sources';
+import { EditDataSourceWithRouter } from '../components/edit_data_source';
+import { DataSourceManagementContext } from '../types';
 
 export interface DataSourceManagementStartDependencies {
   data: DataPublicPluginStart;
@@ -31,7 +31,10 @@ export interface DataSourceManagementStartDependencies {
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<DataSourceManagementStartDependencies>,
-  params: ManagementAppMountParams & { wrapInPage?: boolean },
+  params: ManagementAppMountParams & {
+    wrapInPage?: boolean;
+    setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+  },
   authMethodsRegistry: AuthenticationMethodRegistry,
   featureFlagStatus: boolean
 ) {
@@ -80,6 +83,7 @@ export async function mountManagementSection(
             application={application}
             useNewUX={useNewUX}
             savedObjects={savedObjects}
+            setHeaderActionMenu={params.setHeaderActionMenu}
           />
         </Route>
         {canManageDataSource && (
