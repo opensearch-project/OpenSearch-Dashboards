@@ -80,6 +80,7 @@ import {
   HeaderVariant,
   LinkItemType,
   getSortedNavLinks,
+  SearchCommandKeyTypes,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -394,6 +395,7 @@ export {
   HeaderVariant,
   LinkItemType,
   getSortedNavLinks,
+  SearchCommandKeyTypes,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';
