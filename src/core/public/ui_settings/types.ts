@@ -55,6 +55,24 @@ export interface IUiSettingsClient {
   get: <T = any>(key: string, defaultOverride?: T) => T;
 
   /**
+   * Gets the value for a specific uiSetting, considering browser-stored settings and advanced settings.
+   * This method returns an object containing the resolved value and individual setting values.
+   *
+   * @param key - The key of the uiSetting to retrieve
+   * @param defaultOverride - An optional default value to use if the setting is not declared
+   * @returns An object containing the resolved value and additional setting information
+   * @throws Error if the setting is not declared and no defaultOverride is provided
+   */
+  getWithBrowserSettings<T = any>(
+    key: string,
+    defaultOverride?: T
+  ): {
+    advancedSettingValue: T | undefined;
+    browserValue: T | undefined;
+    defaultValue: T;
+  };
+
+  /**
    * Gets an observable of the current value for a config key, and all updates to that config
    * key in the future. Providing a `defaultOverride` argument behaves the same as it does in #get()
    */
