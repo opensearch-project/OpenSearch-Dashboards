@@ -1,2 +1,2 @@
-feat:
+fix:
 - Fix data source info is missing in default query when click Disocver from other pages ([#8583](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8583))
