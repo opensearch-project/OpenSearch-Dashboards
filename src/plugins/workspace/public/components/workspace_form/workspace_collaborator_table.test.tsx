@@ -133,6 +133,33 @@ describe('WorkspaceCollaboratorTable', () => {
     expect(mockOverlays.openModal).toHaveBeenCalled();
   });
 
+  it('should openModal when clicking one selection delete', () => {
+    const permissionSettings = [
+      {
+        id: 0,
+        modes: ['library_write', 'write'],
+        type: 'user',
+        userId: 'admin',
+      },
+      {
+        id: 1,
+        modes: ['library_read', 'read'],
+        type: 'group',
+        group: 'group',
+      },
+    ];
+
+    const { getByText, getByTestId } = render(
+      <Provider>
+        <WorkspaceCollaboratorTable {...mockProps} permissionSettings={permissionSettings} />
+      </Provider>
+    );
+    fireEvent.click(getByTestId('checkboxSelectRow-0'));
+    const deleteCollaborator = getByText('Delete 1 collaborator');
+    fireEvent.click(deleteCollaborator);
+    expect(mockOverlays.openModal).toHaveBeenCalled();
+  });
+
   it('should openModal when clicking multi selection delete', () => {
     const permissionSettings = [
       {
