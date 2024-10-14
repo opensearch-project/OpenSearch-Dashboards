@@ -74,7 +74,9 @@ export const getDisplayedType = (
 interface Props {
   permissionSettings: PermissionSetting[];
   displayedCollaboratorTypes: WorkspaceCollaboratorType[];
-  handleSubmitPermissionSettings: (permissionSettings: WorkspacePermissionSetting[]) => void;
+  handleSubmitPermissionSettings: (
+    permissionSettings: WorkspacePermissionSetting[]
+  ) => Promise<void>;
 }
 
 export const WorkspaceCollaboratorTable = ({
