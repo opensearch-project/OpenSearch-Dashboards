@@ -4,7 +4,13 @@
  */
 
 import React, { useState, useRef, useCallback } from 'react';
-import { EuiPopover, EuiContextMenu, EuiButton, EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiContextMenu,
+  EuiSmallButton,
+  EuiContextMenuPanelDescriptor,
+  EuiIcon,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { WorkspaceCollaboratorType } from '../../services/workspace_collaborator_types_service';
 import { WorkspaceCollaborator } from '../../types';
@@ -17,7 +23,9 @@ import { WorkspacePermissionSetting } from './types';
 interface Props {
   displayedTypes: WorkspaceCollaboratorType[];
   permissionSettings: PermissionSetting[];
-  handleSubmitPermissionSettings: (permissionSettings: WorkspacePermissionSetting[]) => void;
+  handleSubmitPermissionSettings: (
+    permissionSettings: WorkspacePermissionSetting[]
+  ) => Promise<void>;
 }
 
 export const AddCollaboratorButton = ({
@@ -49,7 +57,7 @@ export const AddCollaboratorButton = ({
           }),
     }));
     const newPermissionSettings = [...permissionSettings, ...addedSettings];
-    handleSubmitPermissionSettings(newPermissionSettings as WorkspacePermissionSetting[]);
+    await handleSubmitPermissionSettings(newPermissionSettings as WorkspacePermissionSetting[]);
   };
 
   const panelItems = displayedTypes.map(({ id, buttonLabel, onAdd }) => ({
@@ -66,18 +74,19 @@ export const AddCollaboratorButton = ({
       id="add-collaborator-popover"
       data-test-subj="add-collaborator-popover"
       button={
-        <EuiButton
-          iconSide="right"
-          iconType="arrowDown"
+        <EuiSmallButton
+          iconSide="left"
+          iconType="plusInCircle"
           fill
           onClick={() => setIsPopoverOpen((prev) => !prev)}
-          size="s"
           data-test-subj="add-collaborator-button"
         >
           {i18n.translate('workspace.workspaceDetail.collaborator.add', {
             defaultMessage: 'Add collaborators',
           })}
-        </EuiButton>
+          &nbsp;&nbsp;
+          <EuiIcon type="arrowDown" />
+        </EuiSmallButton>
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}

@@ -17,48 +17,122 @@ import {
   EuiEmptyPrompt,
   EuiContextMenuPanelDescriptor,
   EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { WorkspacePermissionSetting } from './types';
-import { WorkspacePermissionItemType, permissionModeOptions, typeOptions } from './constants';
-import { getPermissionModeId } from './utils';
+import { WorkspacePermissionItemType } from './constants';
+import { getPermissionModeId, isWorkspacePermissionSetting } from './utils';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { PermissionModeId } from '../../../../../core/public';
 import { AddCollaboratorButton } from './add_collaborator_button';
 import { WorkspaceCollaboratorType } from '../../services/workspace_collaborator_types_service';
 import {
   WORKSPACE_ACCESS_LEVEL_NAMES,
   accessLevelNameToWorkspacePermissionModesMap,
 } from '../../constants';
-import { WorkspaceCollaboratorAccessLevel } from '../../types';
+import { WorkspaceCollaborator, WorkspaceCollaboratorAccessLevel } from '../../types';
+import { BackgroundPic } from '../../assets/background_pic';
 
 export type PermissionSetting = Pick<WorkspacePermissionSetting, 'id'> &
   Partial<WorkspacePermissionSetting>;
 
+// TODO: Update PermissionModeId to align with WorkspaceCollaboratorAccessLevel
+const permissionModeId2WorkspaceAccessLevelMap: {
+  [key in PermissionModeId]: WorkspaceCollaboratorAccessLevel;
+} = {
+  [PermissionModeId.Owner]: 'admin',
+  [PermissionModeId.Read]: 'readOnly',
+  [PermissionModeId.ReadAndWrite]: 'readAndWrite',
+};
+
+const deletionModalConfirmButton = i18n.translate(
+  'workspace.detail.collaborator.delete.modal.confirm',
+  {
+    defaultMessage: 'Confirm',
+  }
+);
+
+const deletionModalCancelButton = i18n.translate(
+  'workspace.detail.collaborator.delete.modal.cancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+const deletionModalWarning = i18n.translate(
+  'workspace.workspace.detail.collaborator.modal.delete.warning',
+  {
+    defaultMessage:
+      'Currently you’re the only user who has access to the workspace as an owner. Share this workspace by adding collaborators.',
+  }
+);
+const deletionModalConfirm = i18n.translate('workspace.detail.collaborator.modal.delete.confirm', {
+  defaultMessage: 'Delete collaborator? The collaborators will not have access to the workspace.',
+});
+
+const convertPermissionSettingToWorkspaceCollaborator = (
+  permissionSetting: WorkspacePermissionSetting
+) => ({
+  collaboratorId:
+    permissionSetting.type === WorkspacePermissionItemType.User
+      ? permissionSetting.userId
+      : permissionSetting.group,
+  permissionType: permissionSetting.type,
+  accessLevel:
+    permissionModeId2WorkspaceAccessLevelMap[getPermissionModeId(permissionSetting.modes)],
+});
+
+export const getDisplayedType = (
+  supportCollaboratorTypes: WorkspaceCollaboratorType[],
+  collaborator: WorkspaceCollaborator
+) => {
+  for (const collaboratorType of supportCollaboratorTypes) {
+    const displayedType = collaboratorType.getDisplayedType?.(collaborator);
+    if (displayedType) {
+      return displayedType;
+    }
+  }
+};
+
 interface Props {
   permissionSettings: PermissionSetting[];
   displayedCollaboratorTypes: WorkspaceCollaboratorType[];
-  handleSubmitPermissionSettings: (permissionSettings: WorkspacePermissionSetting[]) => void;
+  handleSubmitPermissionSettings: (
+    permissionSettings: WorkspacePermissionSetting[]
+  ) => Promise<void>;
 }
+
+type PermissionSettingWithAccessLevelAndDisplayedType = PermissionSetting & {
+  accessLevel?: string;
+  displayedType?: string;
+};
 
 export const WorkspaceCollaboratorTable = ({
   permissionSettings,
   displayedCollaboratorTypes,
   handleSubmitPermissionSettings,
 }: Props) => {
-  const [selection, setSelection] = useState<PermissionSetting[]>([]);
+  const [selection, setSelection] = useState<PermissionSettingWithAccessLevelAndDisplayedType[]>(
+    []
+  );
   const { overlays } = useOpenSearchDashboards();
 
-  const items = useMemo(() => {
+  const items: PermissionSettingWithAccessLevelAndDisplayedType[] = useMemo(() => {
     return permissionSettings.map((setting) => {
+      const collaborator = isWorkspacePermissionSetting(setting)
+        ? convertPermissionSettingToWorkspaceCollaborator(setting)
+        : undefined;
       const basicSettings = {
         ...setting,
         // This is used for table display and search match.
-        displayedType:
-          typeOptions.find((option) => option.value === setting.type)?.inputDisplay ?? '',
-        accessLevel:
-          permissionModeOptions.find(
-            (option) => option.value === getPermissionModeId(setting.modes ?? [])
-          )?.inputDisplay ?? '',
+        displayedType: collaborator
+          ? getDisplayedType(displayedCollaboratorTypes, collaborator)
+          : undefined,
+        accessLevel: collaborator
+          ? WORKSPACE_ACCESS_LEVEL_NAMES[collaborator.accessLevel]
+          : undefined,
       };
       // Unique primary key and filter null value
       if (setting.type === WorkspacePermissionItemType.User) {
@@ -75,35 +149,58 @@ export const WorkspaceCollaboratorTable = ({
       }
       return basicSettings;
     });
-  }, [permissionSettings]);
+  }, [permissionSettings, displayedCollaboratorTypes]);
+
+  const adminCollarboratorsNum = useMemo(() => {
+    const admins = items.filter((item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin);
+    return admins.length;
+  }, [items]);
 
   const emptyStateMessage = useMemo(() => {
     return (
-      <EuiEmptyPrompt
-        title={
-          <h3>
-            {i18n.translate('workspace.workspaceDetail.collaborator.emptyState.title', {
-              defaultMessage: 'Your workspace doesn’t have any collaborators.',
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiEmptyPrompt
+            title={
+              <h3>
+                {i18n.translate('workspace.workspaceDetail.collaborator.emptyState.title', {
+                  defaultMessage: 'Your workspace doesn’t have any collaborators.',
+                })}
+              </h3>
+            }
+            titleSize="s"
+            body={i18n.translate('workspace.workspaceDetail.collaborator.emptyState.body', {
+              defaultMessage:
+                'Currently you’re the only user who has access to the workspace as an owner. Share this workspace by adding collaborators.',
             })}
-          </h3>
-        }
-        titleSize="s"
-        body={i18n.translate('workspace.workspaceDetail.collaborator.emptyState.body', {
-          defaultMessage:
-            'Currently you’re the only user who has access to the workspace as an owner. Share this workspace by adding collaborators.',
-        })}
-        actions={
-          <AddCollaboratorButton
-            displayedTypes={displayedCollaboratorTypes}
-            permissionSettings={permissionSettings}
-            handleSubmitPermissionSettings={handleSubmitPermissionSettings}
+            actions={
+              <AddCollaboratorButton
+                displayedTypes={displayedCollaboratorTypes}
+                permissionSettings={permissionSettings}
+                handleSubmitPermissionSettings={handleSubmitPermissionSettings}
+              />
+            }
           />
-        }
-      />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <BackgroundPic />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }, [displayedCollaboratorTypes, permissionSettings, handleSubmitPermissionSettings]);
 
-  const openDeleteConfirmModal = ({ onConfirm }: { onConfirm: () => void }) => {
+  const openDeleteConfirmModal = ({
+    onConfirm,
+    selections,
+  }: {
+    onConfirm: () => void;
+    selections: PermissionSettingWithAccessLevelAndDisplayedType[];
+  }) => {
+    const adminOfSelection = selections.filter(
+      (item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin
+    ).length;
+    const shouldShowWarning =
+      adminCollarboratorsNum === adminOfSelection && adminCollarboratorsNum !== 0;
     const modal = overlays.openModal(
       <EuiConfirmModal
         title={i18n.translate('workspace.detail.collaborator.actions.delete', {
@@ -111,16 +208,11 @@ export const WorkspaceCollaboratorTable = ({
         })}
         onCancel={() => modal.close()}
         onConfirm={onConfirm}
-        cancelButtonText="Cancel"
-        confirmButtonText="Confirm"
+        cancelButtonText={deletionModalCancelButton}
+        confirmButtonText={deletionModalConfirmButton}
       >
-        <EuiText>
-          <p>
-            {i18n.translate('workspace.detail.collaborator.delete.confirm', {
-              defaultMessage:
-                'Delete collaborator? The collaborators will not have access to the workspace.',
-            })}
-          </p>
+        <EuiText color={shouldShowWarning ? 'danger' : 'default'}>
+          <p>{shouldShowWarning ? deletionModalWarning : deletionModalConfirm}</p>
         </EuiText>
       </EuiConfirmModal>
     );
@@ -143,15 +235,22 @@ export const WorkspaceCollaboratorTable = ({
           setSelection([]);
           modal.close();
         },
+        selections: selection,
       });
     };
 
     return (
-      <EuiButton color="danger" iconType="trash" onClick={onClick}>
-        {i18n.translate('workspace.detail.collaborator.delete', {
-          defaultMessage: 'Delete {num} collaborators',
+      <EuiButton
+        color="danger"
+        iconType="trash"
+        onClick={onClick}
+        data-test-subj="confirm-delete-button"
+      >
+        {i18n.translate('workspace.detail.collaborator.delete.button.info', {
+          defaultMessage: 'Delete {num} collaborator{pluralSuffix, select, true {} other {s}}',
           values: {
             num: selection.length,
+            pluralSuffix: selection.length === 1,
           },
         })}
       </EuiButton>
@@ -182,31 +281,31 @@ export const WorkspaceCollaboratorTable = ({
         field: 'displayedType',
         name: 'Type',
         multiSelect: false,
-        options: Array.from(new Set(items.map(({ displayedType }) => displayedType ?? ''))).map(
-          (item) => ({
-            value: item,
-            name: item,
-          })
-        ),
+        options: Array.from(
+          new Set(items.flatMap(({ displayedType }) => (!!displayedType ? [displayedType] : [])))
+        ).map((item) => ({
+          value: item,
+          name: item,
+        })),
       },
       {
         type: 'field_value_selection',
         field: 'accessLevel',
         name: 'Access level',
         multiSelect: false,
-        options: Array.from(new Set(items.map(({ accessLevel }) => accessLevel ?? ''))).map(
-          (item) => ({
-            value: item,
-            name: item,
-          })
-        ),
+        options: Array.from(
+          new Set(items.flatMap(({ accessLevel }) => (!!accessLevel ? [accessLevel] : [])))
+        ).map((item) => ({
+          value: item,
+          name: item,
+        })),
       },
     ],
     toolsLeft: renderToolsLeft(),
     toolsRight: renderToolsRight(),
   };
 
-  const columns: Array<EuiBasicTableColumn<PermissionSetting>> = [
+  const columns: Array<EuiBasicTableColumn<PermissionSettingWithAccessLevelAndDisplayedType>> = [
     {
       field: 'primaryId',
       name: 'ID',
@@ -214,15 +313,17 @@ export const WorkspaceCollaboratorTable = ({
     {
       field: 'displayedType',
       name: 'Type',
+      render: (displayedType: string) => displayedType || <>&mdash;</>,
     },
     {
       field: 'accessLevel',
       name: 'Access level',
+      render: (accessLevel: string) => accessLevel || <>&mdash;</>,
     },
     {
       name: 'Actions',
       field: '',
-      render: (item: PermissionSetting) => (
+      render: (item: PermissionSettingWithAccessLevelAndDisplayedType) => (
         <Actions
           isTableAction={true}
           selection={[item]}
@@ -233,7 +334,7 @@ export const WorkspaceCollaboratorTable = ({
       ),
     },
   ];
-  const selectionValue: EuiTableSelectionType<PermissionSetting> = {
+  const selectionValue: EuiTableSelectionType<PermissionSettingWithAccessLevelAndDisplayedType> = {
     onSelectionChange: (newSelection) => setSelection(newSelection),
   };
 
@@ -259,10 +360,16 @@ const Actions = ({
   openDeleteConfirmModal,
 }: {
   isTableAction: boolean;
-  selection?: PermissionSetting[];
+  selection?: PermissionSettingWithAccessLevelAndDisplayedType[];
   permissionSettings: PermissionSetting[];
   handleSubmitPermissionSettings: (permissionSettings: WorkspacePermissionSetting[]) => void;
-  openDeleteConfirmModal?: ({ onConfirm }: { onConfirm: () => void }) => { close: () => void };
+  openDeleteConfirmModal?: ({
+    onConfirm,
+    selections,
+  }: {
+    onConfirm: () => void;
+    selections: PermissionSettingWithAccessLevelAndDisplayedType[];
+  }) => { close: () => void };
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { overlays } = useOpenSearchDashboards();
@@ -344,6 +451,7 @@ const Actions = ({
                   handleSubmitPermissionSettings(newSettings as WorkspacePermissionSetting[]);
                   modal.close();
                 },
+                selections: selection,
               });
             }
           },

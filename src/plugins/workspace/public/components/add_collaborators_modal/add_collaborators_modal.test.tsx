@@ -12,7 +12,7 @@ describe('AddCollaboratorsModal', () => {
     title: 'Add Collaborators',
     inputLabel: 'Collaborator ID',
     addAnotherButtonLabel: 'Add Another',
-    permissionType: 'readOnly',
+    permissionType: 'user' as const,
     onClose: jest.fn(),
     onAddCollaborators: jest.fn(),
   };
@@ -46,7 +46,7 @@ describe('AddCollaboratorsModal', () => {
     fireEvent.click(addCollaboratorsButton);
     await waitFor(() => {
       expect(defaultProps.onAddCollaborators).toHaveBeenCalledWith([
-        { collaboratorId: 'user1', accessLevel: 'readOnly', permissionType: 'readOnly' },
+        { collaboratorId: 'user1', accessLevel: 'readOnly', permissionType: 'user' },
       ]);
     });
   });
@@ -68,10 +68,36 @@ describe('AddCollaboratorsModal', () => {
     const instruction = {
       title: 'Instructions',
       detail: 'Follow these instructions to add collaborators',
+      link: 'foo',
     };
     const props = { ...defaultProps, instruction };
     render(<AddCollaboratorsModal {...props} />);
     expect(screen.getByText(instruction.title)).toBeInTheDocument();
     expect(screen.getByText(instruction.detail)).toBeInTheDocument();
+    expect(screen.getByText('Learn more in Documentation')).toBeInTheDocument();
+  });
+
+  it('should disable "Add collaborators" button during onAddCollaborators execution', async () => {
+    const onAddCollaboratorsMock = jest.fn().mockReturnValue(
+      new Promise((resolve) => {
+        window.setTimeout(resolve, 1000);
+      })
+    );
+    render(<AddCollaboratorsModal {...defaultProps} onAddCollaborators={onAddCollaboratorsMock} />);
+    const collaboratorInput = screen.getByLabelText(defaultProps.inputLabel);
+    fireEvent.change(collaboratorInput, { target: { value: 'user1' } });
+    const addCollaboratorsButton = screen.getByRole('button', { name: 'Add collaborators' });
+
+    jest.useFakeTimers();
+    fireEvent.click(addCollaboratorsButton);
+    await waitFor(() => {
+      expect(addCollaboratorsButton).toBeDisabled();
+    });
+    jest.runAllTimers();
+    jest.useRealTimers();
+
+    await waitFor(() => {
+      expect(addCollaboratorsButton).not.toBeDisabled();
+    });
   });
 });

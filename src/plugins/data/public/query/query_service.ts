@@ -97,7 +97,7 @@ export class QueryService {
     storage,
     uiSettings,
     indexPatterns,
-    applicaton,
+    application,
   }: QueryServiceStartDependencies): IQueryStart {
     this.queryStringManager.getDatasetService().init(indexPatterns);
     return {
@@ -110,7 +110,7 @@ export class QueryService {
       savedQueries: createSavedQueryService(
         savedObjectsClient,
         this.queryStringManager,
-        applicaton
+        application
       ),
       state$: this.state$,
       timefilter: this.timefilter,
