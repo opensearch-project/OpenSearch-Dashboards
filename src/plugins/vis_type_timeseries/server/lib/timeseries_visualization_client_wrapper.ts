@@ -32,7 +32,12 @@ export const timeSeriesVisualizationClientWrapper: SavedObjectsClientWrapperFact
     }
 
     const tsvbAttributes = attributes as T & { visState: string };
-    const visState = JSON.parse(tsvbAttributes.visState);
+    let visState;
+    try {
+      visState = JSON.parse(tsvbAttributes.visState);
+    } catch (ex) {
+      throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
+    }
 
     if (visState.type !== 'metrics' || !visState.params) {
       return await wrapperOptions.client.create(type, attributes, options);
