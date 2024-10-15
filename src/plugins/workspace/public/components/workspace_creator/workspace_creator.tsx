@@ -4,7 +4,14 @@
  */
 
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
-import { EuiPage, EuiPageBody, EuiPageContent, euiPaletteColorBlind } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageContent,
+  euiPaletteColorBlind,
+  EUI_THEME,
+  EUI_THEMES,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { useLocation } from 'react-router-dom';
@@ -22,7 +29,6 @@ import { useFormAvailableUseCases } from '../workspace_form/use_form_available_u
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
 import { DataSourceConnectionType } from '../../../common/types';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
-// import './workspace_creator.scss';
 
 export interface WorkspaceCreatorProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -46,8 +52,6 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     navigationUI: NavigationPublicPluginStart['ui'];
   }>();
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
-
-  const [workspaceColor, setWorkspaceColor] = useState('#ffffff');
 
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
   const { isOnlyAllowEssential, availableUseCases } = useFormAvailableUseCases({
@@ -154,6 +158,8 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     isOnlyAllowEssential !== undefined &&
     availableUseCases !== undefined;
 
+  const [workspaceColor, setWorkspaceColor] = useState('#ffffff');
+
   const onColorChange = (color: string) => {
     setWorkspaceColor(color);
   };
@@ -162,11 +168,9 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     <EuiPage
       className="WorkspaceCreator"
       style={{
-        backgroundColor: 'transparent',
         backgroundAttachment: 'fixed',
-        backgroundImage: `radial-gradient(ellipse at 40% 800px, ${workspaceColor}59 0%, transparent 60%)`,
+        backgroundImage: `radial-gradient(ellipse at 40% 800px, ${workspaceColor}57 0%, transparent 60%)`,
         backgroundBlendMode: 'normal',
-        // transition: ,
       }}
     >
       <HeaderControl
