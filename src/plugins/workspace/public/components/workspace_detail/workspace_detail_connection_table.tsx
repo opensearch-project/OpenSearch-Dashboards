@@ -61,6 +61,7 @@ export const WorkspaceDetailConnectionTable = ({
 
   const search: EuiSearchBarProps = {
     toolsLeft: renderToolsLeft(),
+    compressed: true,
     box: {
       incremental: true,
     },
