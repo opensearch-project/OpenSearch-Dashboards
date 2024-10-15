@@ -1,0 +1,2 @@
+fix:
+- Disable cope all button when there is no saved objects in assets page ([#8581](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8581))

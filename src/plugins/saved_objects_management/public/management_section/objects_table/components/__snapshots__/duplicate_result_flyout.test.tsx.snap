@@ -374,7 +374,7 @@ HTMLCollection [
                     class="euiFlexItem euiFlexItem--flexGrowZero"
                   >
                     <h4
-                      class="euiTitle euiTitle--xsmall savedObjectsManagementImportSummary__copiedCountCount"
+                      class="euiTitle euiTitle--xsmall savedObjectsManagementImportSummary__createdCount"
                     >
                       <span>
                         2 Successful
