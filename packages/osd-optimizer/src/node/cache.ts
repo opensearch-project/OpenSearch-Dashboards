@@ -47,7 +47,7 @@ const dbName = (db: LMDB.Database) =>
 export class Cache {
   private readonly codes: LMDB.RootDatabase<string, string>;
   private readonly atimes: LMDB.Database<string, string>;
-  private readonly mtimes: LMDB.Database<string, string>;
+  private readonly hashes: LMDB.Database<string, string>;
   private readonly sourceMaps: LMDB.Database<string, string>;
   private readonly pathRoots: string[];
   private readonly prefix: string;
@@ -82,8 +82,8 @@ export class Cache {
       encoding: 'string',
     });
 
-    this.mtimes = this.codes.openDB('mtimes', {
-      name: 'mtimes',
+    this.hashes = this.codes.openDB('hashes', {
+      name: 'hashes',
       encoding: 'string',
     });
 
@@ -106,8 +106,8 @@ export class Cache {
     }
   }
 
-  getMtime(path: string) {
-    return this.safeGet(this.mtimes, this.getKey(path));
+  getFileHash(path: string) {
+    return this.safeGet(this.hashes, this.getKey(path));
   }
 
   getCode(path: string) {
@@ -131,12 +131,12 @@ export class Cache {
     }
   }
 
-  async update(path: string, file: { mtime: string; code: string; map: any }) {
+  async update(path: string, file: { filehash: string; code: string; map: any }) {
     const key = this.getKey(path);
 
     await Promise.all([
       this.safePut(this.atimes, key, GLOBAL_ATIME),
-      this.safePut(this.mtimes, key, file.mtime),
+      this.safePut(this.hashes, key, file.filehash),
       this.safePut(this.codes, key, file.code),
       this.safePut(this.sourceMaps, key, JSON.stringify(file.map)),
     ]);
@@ -223,7 +223,7 @@ export class Cache {
               // if a future version starts returning independent promises so
               // this is just for some future-proofing
               promises.add(this.atimes.remove(k));
-              promises.add(this.mtimes.remove(k));
+              promises.add(this.hashes.remove(k));
               promises.add(this.codes.remove(k));
               promises.add(this.sourceMaps.remove(k));
             }

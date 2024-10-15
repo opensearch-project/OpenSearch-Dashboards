@@ -34,7 +34,7 @@ import { mergeAll } from 'rxjs/operators';
 import { Bundle, BundleRefs } from '../common';
 
 import { OptimizerConfig } from './optimizer_config';
-import { getMtimes } from './get_mtimes';
+import { getHashes } from './get_hashes';
 import { diffCacheKey } from './cache_keys';
 
 export type BundleCacheEvent = BundleNotCachedEvent | BundleCachedEvent;
@@ -136,7 +136,7 @@ export function getBundleCacheEvent$(
       eligibleBundles.push(bundle);
     }
 
-    const mtimes = await getMtimes(
+    const hashes = await getHashes(
       new Set<string>(
         eligibleBundles.reduce(
           (acc: string[], bundle) => [...acc, ...(bundle.cache.getReferencedFiles() || [])],
@@ -148,7 +148,7 @@ export function getBundleCacheEvent$(
     for (const bundle of eligibleBundles) {
       const diff = diffCacheKey(
         bundle.cache.getCacheKey(),
-        bundle.createCacheKey(bundle.cache.getReferencedFiles() || [], mtimes)
+        bundle.createCacheKey(bundle.cache.getReferencedFiles() || [], hashes)
       );
 
       if (diff) {
