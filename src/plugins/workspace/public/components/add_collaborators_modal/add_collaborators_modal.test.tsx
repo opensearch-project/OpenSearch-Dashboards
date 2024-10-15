@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { AddCollaboratorsModal } from './add_collaborators_modal';
+import { DuplicateCollaboratorError } from './duplicate_collaborator_error';
 
 describe('AddCollaboratorsModal', () => {
   const defaultProps = {
@@ -75,6 +76,30 @@ describe('AddCollaboratorsModal', () => {
     expect(screen.getByText(instruction.title)).toBeInTheDocument();
     expect(screen.getByText(instruction.detail)).toBeInTheDocument();
     expect(screen.getByText('Learn more in Documentation')).toBeInTheDocument();
+  });
+
+  it('should display consistent duplicate collaborators errors', async () => {
+    const mockOnAddCollaborators = () => {
+      throw new DuplicateCollaboratorError({ pendingAdded: ['user1'], existing: ['user2'] });
+    };
+    render(<AddCollaboratorsModal {...defaultProps} onAddCollaborators={mockOnAddCollaborators} />);
+    const collaboratorIdInput0 = screen.getByTestId('workspaceCollaboratorIdInput-0');
+    fireEvent.change(collaboratorIdInput0, { target: { value: 'user1' } });
+
+    fireEvent.click(screen.getByText('Add Another'));
+    const collaboratorIdInput1 = screen.getByTestId('workspaceCollaboratorIdInput-1');
+    fireEvent.change(collaboratorIdInput1, { target: { value: 'user1' } });
+
+    fireEvent.click(screen.getByText('Add Another'));
+    const collaboratorIdInput2 = screen.getByTestId('workspaceCollaboratorIdInput-2');
+    fireEvent.change(collaboratorIdInput2, { target: { value: 'user2' } });
+
+    const addCollaboratorsButton = screen.getByRole('button', { name: 'Add collaborators' });
+    fireEvent.click(addCollaboratorsButton);
+    await waitFor(() => {
+      expect(screen.getByText('This ID is already added to the list.')).toBeInTheDocument();
+      expect(screen.getByText('A collaborator with this ID already exists.')).toBeInTheDocument();
+    });
   });
 
   it('should disable "Add collaborators" button during onAddCollaborators execution', async () => {
