@@ -28,12 +28,11 @@
  * under the License.
  */
 
-import { delay } from 'bluebird';
-
 import { createPromiseFromStreams } from './promise_from_streams';
 import { createListStream } from './list_stream';
 import { createMapStream } from './map_stream';
 import { createConcatStream } from './concat_stream';
+import { setTimeout } from 'timers/promises';
 
 describe('createMapStream()', () => {
   test('calls the function with each item in the source stream', async () => {
@@ -61,7 +60,7 @@ describe('createMapStream()', () => {
     const result = await createPromiseFromStreams([
       createListStream([1, 2, 3]),
       createMapStream(async (n, i) => {
-        await delay(n);
+        await setTimeout(n);
         return n * i;
       }),
       createConcatStream([]),

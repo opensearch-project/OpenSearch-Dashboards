@@ -34,7 +34,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
 // @ts-ignore
-import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { IndexPatternField } from '../../../../../data/public';
 
