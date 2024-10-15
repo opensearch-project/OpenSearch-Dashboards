@@ -45,6 +45,12 @@ export const PRIORITY_FOR_WORKSPACE_CONFLICT_CONTROL_WRAPPER = -1;
 export const PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER = 0;
 
 /**
+ * The repository wrapper should be the wrapper closest to the repository client,
+ * so we give a large number to the wrapper
+ */
+export const PRIORITY_FOR_REPOSITORY_WRAPPER = Number.MAX_VALUE;
+
+/**
  *
  * This is a temp solution to store relationships between use cases  and features.
  * The relationship should be provided by plugin itself. The workspace plugin should
