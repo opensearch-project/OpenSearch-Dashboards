@@ -206,11 +206,11 @@ export const AccelerationTable = ({
   const tableActions = [
     {
       name: 'Query Data',
-      description: 'Query in Observability Logs',
+      description: 'Query in Discover',
       icon: 'discoverApp',
       type: 'icon',
       onClick: (acc: CachedAcceleration) => {
-        onDiscoverIconClick(acc, dataSourceName, application);
+        onDiscoverIconClick(acc, dataSourceName, dataSourceMDSId, application);
       },
     },
     {

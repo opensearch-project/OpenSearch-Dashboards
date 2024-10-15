@@ -177,7 +177,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
           description: i18n.translate(
             'dataSourcesManagement.associatedObjectsTab.action.discover.description',
             {
-              defaultMessage: 'Query in Observability Logs',
+              defaultMessage: 'Query in Discover',
             }
           ),
           type: 'icon',
@@ -188,11 +188,11 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
               const acceleration = cachedAccelerations.find(
                 (acc) => getAccelerationName(acc) === asscObj.name
               );
-              redirectToExplorerOSIdx(acceleration!.flintIndexName, application);
+              redirectToExplorerOSIdx(acceleration!.flintIndexName, dataSourceMDSId, application);
             } else if (asscObj.type === 'table' || asscObj.type === 'skipping') {
               redirectToExplorerWithDataSrc(
                 asscObj.datasource,
-                DATA_SOURCE_TYPES.S3Glue,
+                dataSourceMDSId,
                 asscObj.database,
                 asscObj.tableName,
                 application

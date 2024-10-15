@@ -168,6 +168,7 @@ export const AccelerationHealth = ({ health }: { health: string }) => {
 export const onDiscoverIconClick = (
   acceleration: CachedAcceleration,
   dataSourceName: string,
+  dataSourceMDSId: string | undefined,
   application: ApplicationStart
 ) => {
   // boolean determining whether its a skipping index table or mv/ci
@@ -175,12 +176,12 @@ export const onDiscoverIconClick = (
   if (acceleration.type === 'skipping') {
     redirectToExplorerWithDataSrc(
       dataSourceName,
-      DATA_SOURCE_TYPES.S3Glue,
+      dataSourceMDSId,
       acceleration.database,
       acceleration.table,
       application
     );
   } else {
-    redirectToExplorerOSIdx(acceleration.flintIndexName, application);
+    redirectToExplorerOSIdx(acceleration.flintIndexName, dataSourceMDSId, application);
   }
 };

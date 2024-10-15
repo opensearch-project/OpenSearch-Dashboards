@@ -80,7 +80,7 @@ export const AssociatedObjectsDetailsFlyout = ({
           if (tableDetail.type !== 'table') return;
           redirectToExplorerWithDataSrc(
             tableDetail.datasource,
-            DATA_SOURCE_TYPES.S3Glue,
+            dataSourceMDSId,
             tableDetail.database,
             tableDetail.name,
             application
