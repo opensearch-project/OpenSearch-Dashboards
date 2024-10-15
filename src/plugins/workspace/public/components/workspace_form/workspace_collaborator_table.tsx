@@ -239,9 +239,10 @@ export const WorkspaceCollaboratorTable = ({
           if (result?.success) {
             notifications?.toasts?.addSuccess({
               title: i18n.translate('workspace.detail.collaborator.delete.success', {
-                defaultMessage: 'Delete collaborator{pluralSuffix} successfully.',
+                defaultMessage:
+                  'Delete collaborator{pluralSuffix, select, true {} other {s}} successfully.',
                 values: {
-                  pluralSuffix: selection.length > 1 ? 's' : '',
+                  pluralSuffix: selection.length === 1,
                 },
               }),
             });
@@ -440,11 +441,11 @@ const Actions = ({
                   ),
                   text: i18n.translate('workspace.detail.collaborator.change.access.success.body', {
                     defaultMessage:
-                      'The access level is changed to {level} for {num} collaborator{pluralSuffix}.',
+                      'The access level is changed to {level} for {num} collaborator{pluralSuffix, select, true {} other {s}}.',
                     values: {
                       level: WORKSPACE_ACCESS_LEVEL_NAMES[level],
                       num: selection.length,
-                      pluralSuffix: selection.length > 1 ? 's' : '',
+                      pluralSuffix: selection.length === 1,
                     },
                   }),
                 });
@@ -458,10 +459,10 @@ const Actions = ({
               <p>
                 {i18n.translate('workspace.detail.collaborator.changeAccessLevel.confirmation', {
                   defaultMessage:
-                    'Do you want to change access level to {numCollaborators} collaborator{pluralSuffix} to "{accessLevel}"?',
+                    'Do you want to change access level to {numCollaborators} collaborator{pluralSuffix, select, true {} other {s}} to "{accessLevel}"?',
                   values: {
                     numCollaborators: selection.length,
-                    pluralSuffix: selection.length > 1 ? 's' : '',
+                    pluralSuffix: selection.length === 1,
                     accessLevel: WORKSPACE_ACCESS_LEVEL_NAMES[level],
                   },
                 })}
@@ -503,9 +504,10 @@ const Actions = ({
                   if (result?.success) {
                     notifications?.toasts?.addSuccess({
                       title: i18n.translate('workspace.detail.collaborator.delete.success', {
-                        defaultMessage: 'Delete collaborator{pluralSuffix} successfully.',
+                        defaultMessage:
+                          'Delete collaborator{pluralSuffix, select, true {} other {s}} successfully.',
                         values: {
-                          pluralSuffix: selection.length > 1 ? 's' : '',
+                          pluralSuffix: selection.length === 1,
                         },
                       }),
                     });
