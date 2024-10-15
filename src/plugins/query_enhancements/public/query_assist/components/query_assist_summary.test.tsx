@@ -9,6 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import { QueryAssistSummary, convertResult } from './query_assist_summary';
 import { useQueryAssist } from '../hooks';
 import { IDataFrame, Query } from '../../../../data/common';
+import { FeedbackStatus as FEEDBACK } from '../../../common/query_assist';
 
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
@@ -89,10 +90,6 @@ describe('query assist summary', () => {
     YES: true,
     NO: false,
   };
-  const FEEDBACK = {
-    YES: true,
-    NO: false,
-  };
 
   const renderQueryAssistSummary = (isCollapsed: boolean) => {
     const component = render(
@@ -136,7 +133,7 @@ describe('query assist summary', () => {
   };
 
   const defaultUseStateMock = () => {
-    mockUseState(null, LOADING.NO, FEEDBACK.NO);
+    mockUseState(null, LOADING.NO, FEEDBACK.NONE);
   };
 
   it('should not show if collapsed is true', () => {
@@ -147,14 +144,14 @@ describe('query assist summary', () => {
   });
 
   it('should not show if assistant is disabled by capability', () => {
-    mockUseState(null, LOADING.NO, FEEDBACK.NO, false);
+    mockUseState(null, LOADING.NO, FEEDBACK.NONE, false);
     renderQueryAssistSummary(COLLAPSED.NO);
     const summaryPanels = screen.queryAllByTestId('queryAssist__summary');
     expect(summaryPanels).toHaveLength(0);
   });
 
   it('should not show if query assistant is collapsed', () => {
-    mockUseState(null, LOADING.NO, FEEDBACK.NO, true, COLLAPSED.YES);
+    mockUseState(null, LOADING.NO, FEEDBACK.NONE, true, COLLAPSED.YES);
     renderQueryAssistSummary(COLLAPSED.NO);
     const summaryPanels = screen.queryAllByTestId('queryAssist__summary');
     expect(summaryPanels).toHaveLength(0);
@@ -168,7 +165,7 @@ describe('query assist summary', () => {
   });
 
   it('should display loading view if loading state is true', () => {
-    mockUseState(null, LOADING.YES, FEEDBACK.NO);
+    mockUseState(null, LOADING.YES, FEEDBACK.NONE);
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_loading')).toBeInTheDocument();
     expect(screen.queryAllByTestId('queryAssist_summary_result')).toHaveLength(0);
@@ -176,7 +173,7 @@ describe('query assist summary', () => {
   });
 
   it('should display loading view if loading state is true even with summary', () => {
-    mockUseState('summary', LOADING.YES, FEEDBACK.NO);
+    mockUseState('summary', LOADING.YES, FEEDBACK.NONE);
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_loading')).toBeInTheDocument();
     expect(screen.queryAllByTestId('queryAssist_summary_result')).toHaveLength(0);
@@ -192,7 +189,7 @@ describe('query assist summary', () => {
   });
 
   it('should display summary result', () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NO);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
     expect(screen.getByTestId('queryAssist_summary_result')).toHaveTextContent('summary');
@@ -201,12 +198,12 @@ describe('query assist summary', () => {
   });
 
   it('should report metric for thumbup click', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NO);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
     await screen.getByTestId('queryAssist_summary_buttons_thumbup');
     fireEvent.click(screen.getByTestId('queryAssist_summary_buttons_thumbup'));
-    expect(setFeedback).toHaveBeenCalledWith(true);
+    expect(setFeedback).toHaveBeenCalledWith(FEEDBACK.THUMB_UP);
     expect(reportUiStatsMock).toHaveBeenCalledWith(
       'query-assist',
       'click',
@@ -215,12 +212,12 @@ describe('query assist summary', () => {
   });
 
   it('should report metric for thumbdown click', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NO);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
     await screen.getByTestId('queryAssist_summary_buttons_thumbdown');
     fireEvent.click(screen.getByTestId('queryAssist_summary_buttons_thumbdown'));
-    expect(setFeedback).toHaveBeenCalledWith(true);
+    expect(setFeedback).toHaveBeenCalledWith(FEEDBACK.THUMB_DOWN);
     expect(reportUiStatsMock).toHaveBeenCalledWith(
       'query-assist',
       'click',
@@ -228,8 +225,24 @@ describe('query assist summary', () => {
     );
   });
 
+  it('should hide thumbdown button if thumbup button is clicked', async () => {
+    mockUseState('summary', LOADING.NO, FEEDBACK.THUMB_UP);
+    renderQueryAssistSummary(COLLAPSED.NO);
+    expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
+    await screen.getByTestId('queryAssist_summary_buttons_thumbup');
+    expect(screen.queryByTestId('queryAssist_summary_buttons_thumbdown')).not.toBeInTheDocument();
+  });
+
+  it('should hide thumbup button if thumbdown button is clicked', async () => {
+    mockUseState('summary', LOADING.NO, FEEDBACK.THUMB_DOWN);
+    renderQueryAssistSummary(COLLAPSED.NO);
+    expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
+    await screen.getByTestId('queryAssist_summary_buttons_thumbdown');
+    expect(screen.queryByTestId('queryAssist_summary_buttons_thumbup')).not.toBeInTheDocument();
+  });
+
   it('should not fetch summary if data is empty', async () => {
-    mockUseState(null, LOADING.NO, FEEDBACK.NO);
+    mockUseState(null, LOADING.NO, FEEDBACK.NONE);
     renderQueryAssistSummary(COLLAPSED.NO);
     question$.next(question);
     query$.next({ query: PPL, language: 'PPL' });
@@ -238,7 +251,7 @@ describe('query assist summary', () => {
   });
 
   it('should fetch summary with expected payload and response', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NO);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
     const RESPONSE_TEXT = 'response';
     httpMock.post.mockResolvedValue(RESPONSE_TEXT);
     renderQueryAssistSummary(COLLAPSED.NO);
@@ -258,27 +271,27 @@ describe('query assist summary', () => {
         dataSourceId: undefined,
       },
     });
-    expect(setSummary).toHaveBeenNthCalledWith(1, null);
+    expect(setSummary).toHaveBeenNthCalledWith(1, '');
     expect(setSummary).toHaveBeenNthCalledWith(2, RESPONSE_TEXT);
     expect(setLoading).toHaveBeenNthCalledWith(1, true);
     expect(setLoading).toHaveBeenNthCalledWith(2, false);
   });
 
   it('should handle fetch summary error', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NO);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
     httpMock.post.mockRejectedValueOnce({});
     renderQueryAssistSummary(COLLAPSED.NO);
     question$.next(question);
     query$.next({ query: PPL, language: 'PPL' });
     data$.next(dataFrame as IDataFrame);
     await sleep(WAIT_TIME);
-    expect(setSummary).toBeCalledTimes(1);
+    expect(setSummary).toBeCalledTimes(2);
     expect(setLoading).toHaveBeenNthCalledWith(1, true);
     expect(setLoading).toHaveBeenNthCalledWith(2, false);
   });
 
   it('should not update queryResults if subscription changed not in order', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NO);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
     const RESPONSE_TEXT = 'response';
     httpMock.post.mockResolvedValue(RESPONSE_TEXT);
     renderQueryAssistSummary(COLLAPSED.NO);
@@ -290,7 +303,7 @@ describe('query assist summary', () => {
   });
 
   it('should update queryResults if subscriptions changed in order', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NO);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
     const RESPONSE_TEXT = 'response';
     httpMock.post.mockResolvedValue(RESPONSE_TEXT);
     renderQueryAssistSummary(COLLAPSED.NO);
@@ -308,7 +321,7 @@ describe('query assist summary', () => {
   });
 
   it('should reset feedback state if re-fetch summary', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.YES);
+    mockUseState('summary', LOADING.NO, FEEDBACK.THUMB_UP);
     const RESPONSE_TEXT = 'response';
     httpMock.post.mockResolvedValue(RESPONSE_TEXT);
     renderQueryAssistSummary(COLLAPSED.NO);
@@ -316,6 +329,6 @@ describe('query assist summary', () => {
     query$.next({ query: PPL, language: 'PPL' });
     data$.next(dataFrame as IDataFrame);
     await sleep(WAIT_TIME);
-    expect(setFeedback).toHaveBeenCalledWith(FEEDBACK.NO);
+    expect(setFeedback).toHaveBeenCalledWith(FEEDBACK.NONE);
   });
 });

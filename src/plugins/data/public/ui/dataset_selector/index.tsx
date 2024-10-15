@@ -28,6 +28,7 @@ const ConnectedDatasetSelector = ({ onSubmit }: ConnectedDatasetSelectorProps) =
         const query = queryString.getInitialQueryByDataset(dataset);
         queryString.setQuery(query);
         onSubmit!(queryString.getQuery());
+        queryString.getDatasetService().addRecentDataset(dataset);
       }
     },
     [onSubmit, queryString]
