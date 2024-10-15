@@ -240,3 +240,18 @@
   // Needed so the footer items never have paddings
   padding: 0 !important;
 }
+
+// TODO: Temporary workaround to disable padding for single line editor footer
+.euiFormControlLayout--group.euiFormControlLayout--compressed .osdQuerEditor__singleLine .euiText {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.euiFormControlLayout--group .osdQuerEditor__singleLine .euiText {
+  background-color: unset !important;
+  line-height: 21px !important;
+}
+
+.euiFormControlLayout--group .osdQuerEditor__singleLine .euiButtonEmpty {
+  border-right: 0;
+}

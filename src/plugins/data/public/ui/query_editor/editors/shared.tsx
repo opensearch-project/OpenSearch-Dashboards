@@ -5,7 +5,7 @@
 
 import { EuiCompressedFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { monaco } from '@osd/monaco';
-import React, { Fragment, useCallback, useState } from 'react';
+import React, { Fragment, useCallback, useRef, useState } from 'react';
 import { CodeEditor } from '../../../../../opensearch_dashboards_react/public';
 
 interface SingleLineInputProps extends React.JSX.IntrinsicAttributes {
@@ -65,22 +65,31 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
   footerItems,
 }) => {
   const [editorIsFocused, setEditorIsFocused] = useState(false);
+  const blurTimeoutRef = useRef<NodeJS.Timeout | undefined>();
 
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       editorDidMount(editor);
 
       const focusDisposable = editor.onDidFocusEditorText(() => {
+        if (blurTimeoutRef.current) {
+          clearTimeout(blurTimeoutRef.current);
+        }
         setEditorIsFocused(true);
       });
 
-      // const blurDisposable = editor.onDidBlurEditorText(() => {
-      //   setEditorIsFocused(false);
-      // })
+      const blurDisposable = editor.onDidBlurEditorText(() => {
+        blurTimeoutRef.current = setTimeout(() => {
+          setEditorIsFocused(false);
+        }, 3000);
+      });
 
       return () => {
         focusDisposable.dispose();
-        // blurDisposable.dispose();
+        blurDisposable.dispose();
+        if (blurTimeoutRef.current) {
+          clearTimeout(blurTimeoutRef.current);
+        }
       };
     },
     [editorDidMount]

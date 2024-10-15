@@ -117,7 +117,13 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     }
 
     return (
-      <EuiButtonEmpty iconSide="left" iconType={'checkInCircleEmpty'} size="xs" onClick={() => {}}>
+      <EuiButtonEmpty
+        iconSide="left"
+        iconType={'checkInCircleEmpty'}
+        iconGap="s"
+        size="xs"
+        onClick={() => {}}
+      >
         <EuiText size="xs" color="subdued" data-test-subj="queryResultCompleteMsg">
           {message}
         </EuiText>
