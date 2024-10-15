@@ -26,6 +26,8 @@ describe('DatasetService', () => {
     uiSettings.get = jest.fn().mockImplementation((setting: string) => {
       if (setting === UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS) {
         return 4;
+      } else if (setting === 'defaultIndex') {
+        return 'id';
       }
     });
     sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
@@ -33,7 +35,13 @@ describe('DatasetService', () => {
     service = new DatasetService(uiSettings, sessionStorage);
     indexPatterns = dataPluginMock.createStartContract().indexPatterns;
     savedObjectsClient = ({
-      get: jest.fn(),
+      get: jest.fn().mockReturnValue(
+        Promise.resolve({
+          id: 'id',
+          title: 'data source',
+          type: 'OpenSearch',
+        })
+      ),
     } as unknown) as jest.Mocked<SavedObjectsClientContract>;
     service.init(indexPatterns, savedObjectsClient);
   });
