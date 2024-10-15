@@ -44,6 +44,7 @@ export interface Props {
   renderBreadcrumbs: React.JSX.Element;
   buttonSize?: EuiHeaderSectionItemButtonProps['size'];
   http: HttpStart;
+  workspaceEnabled: boolean | undefined;
   loadingCount$: Rx.Observable<number>;
 }
 
@@ -111,6 +112,7 @@ export const RecentItems = ({
   renderBreadcrumbs,
   buttonSize = 's',
   http,
+  workspaceEnabled,
   loadingCount$,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -231,8 +233,13 @@ export const RecentItems = ({
             ...recentAccessItem.meta,
             updatedAt: moment(obj?.updated_at).valueOf(),
             workspaceName: findWorkspace?.name,
-            link: createRecentNavLink(recentAccessItem, filteredNavLinks, basePath, navigateToUrl)
-              .href,
+            link: createRecentNavLink(
+              recentAccessItem,
+              filteredNavLinks,
+              basePath,
+              navigateToUrl,
+              !!workspaceEnabled
+            ).href,
           };
         });
         // here I write this argument to avoid Unnecessary re-rendering
@@ -249,6 +256,7 @@ export const RecentItems = ({
     http,
     workspaceList,
     detailedSavedObjects,
+    workspaceEnabled,
   ]);
 
   const selectedRecentsItems = useMemo(() => {
