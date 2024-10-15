@@ -8,9 +8,13 @@
   transform: none !important;
 }
 
+/* Trying to show the border label:
+     * The following style is referenced from data souce selector
+     * see file src/plugins/data_source_management/public/components/popover_button/popover_button.scss
+*/
 .workspaceSelectorPopoverButtonContainer {
   position: relative;
-  background-color: $euiHeaderBackgroundColor;
+  background-color: $euiSideNavBackgroundColor;
   border: 1px solid $euiColorMediumShade;
   border-radius: 4px;
 
@@ -19,24 +23,14 @@
     position: absolute;
     top: -0.2rem;
     left: $euiSizeS;
-    font-size: 0.5rem;
+    font-size: 0.4rem;
     line-height: 0.4rem;
     padding: 0 $euiSizeXS;
 
-    /* Trying to hide the button's border:
-     * The background should start 1px (for the border) higher than at the edge of the button.
-     * When the top is 0.2rem, the gradient should start at 0.2rem - 1.
-     * The value is rounded down to the nearest pixel to avoid partial coverage of the border
-     * we are trying to hide.
+    /* update
+     * Delete the line-gradient and set the background color to euiSideNavBackgroundColor directly
      */
-    --dsm-popover-label-start: round(down, calc(0.2rem - 1px), 1px);
-
-    background:
-      linear-gradient(
-        to bottom,
-        transparent var(--dsm-popover-label-start),
-        $euiHeaderBackgroundColor var(--dsm-popover-label-start)
-      );
+    background-color: $euiSideNavBackgroundColor;
     color: $euiTextColor;
     z-index: 0;
     text-transform: uppercase;
