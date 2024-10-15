@@ -70,7 +70,7 @@
 }
 
 .newTopNavHeaderTitle {
-  line-height: 1;
+  line-height: $euiButtonHeightSmall; // match button size so title is centered
   font-size: 2rem;
 }
 
@@ -116,5 +116,36 @@
   .secondaryPageHeaderFlexGroup {
     display: flex;
     flex-direction: column;
+
+    // Override eui responsive spacing for header elements
+    // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+    .euiHeaderSection--left,
+    .euiHeaderSection--right {
+      // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+      .euiFlexGroup--responsive > .euiFlexItem {
+        margin: $euiSizeXS 0 !important; // set as !important in eui
+      }
+    }
+  }
+
+  // Add bottom margin to left group to counter-act negative margins from gutters
+  .leftSecondaryPageHeaderFlexGroup {
+    margin-bottom: $euiSizeXS;
+  }
+}
+
+// Make sure there's space betweeen left and right header content on non-mobile screens
+@include euiBreakpoint("m", "l", "xl", "xxl", "xxxl") {
+  .leftSecondaryPageHeaderFlexGroup {
+    margin-right: $euiSizeM;
+  }
+}
+
+// Make badges/health statuses line-height match buttons so its vertically centered
+.leftSecondaryPageHeaderFlexGroup {
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiBadge,
+  .euiHealth {
+    line-height: $euiButtonHeightSmall !important;
   }
 }
