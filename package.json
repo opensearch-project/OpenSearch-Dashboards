@@ -99,6 +99,7 @@
     "**/@types/node": "~18.7.0",
     "**/ansi-regex": "^5.0.1",
     "**/async": "^3.2.3",
+    "**/cookie": "^0.7.0",
     "**/cpy/globby": "^10.0.1",
     "**/d3-color": "^3.1.0",
     "**/elasticsearch/agentkeepalive": "^4.5.0",
