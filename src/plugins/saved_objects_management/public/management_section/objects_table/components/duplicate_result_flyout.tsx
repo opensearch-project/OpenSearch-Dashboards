@@ -91,7 +91,7 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
         {copiedCount && (
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
-              <h4 className="savedObjectsManagementImportSummary__copiedCountCount">
+              <h4 className="savedObjectsManagementImportSummary__createdCount">
                 <FormattedMessage
                   id="savedObjectsManagement.copyResult.copiedCountHeader"
                   defaultMessage="{copiedCount} Successful"
