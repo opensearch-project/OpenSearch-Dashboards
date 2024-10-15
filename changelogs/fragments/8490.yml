@@ -1,0 +1,7 @@
+security:
+- [CVE-2024-39338] Bump axios from 1.7.2 to 1.7.7 ([#8490](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8490))
+- [SNYK-JS-MOCHA-2863123] Bump mocha from 10.1.0 to 10.7.3 ([#8490](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8490))
+- [CVE-2024-42459][CVE-2024-42460][CVE-2024-42461] Bump elliptic from 6.5.4 to 6.5.7 ([#8490](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8490))
+
+chore:
+- Bump chokidar from 3.5.3 to 3.6.0 ([#8490](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8490))
