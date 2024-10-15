@@ -81,5 +81,20 @@
     "plugins/vis_type_timeline/server/series_functions/graphite.js",
     "plugins/vis_type_timeseries/public/application/components/aggs/serial_diff.js"
   ],
-  "translations": []
+  "translations": [
+    "translations/zh-TW.json",
+    "translations/zh-CN.json",
+    "translations/tr-TR.json",
+    "translations/pt-PT.json",
+    "translations/pt-BR.json",
+    "translations/ko-KR.json",
+    "translations/ja-JP.json",
+    "translations/it-IT.json",
+    "translations/id-ID.json",
+    "translations/fr-FR.json",
+    "translations/fr-CA.json",
+    "translations/es-ES.json",
+    "translations/es-419.json",
+    "translations/de-DE.json"
+  ]
 }
