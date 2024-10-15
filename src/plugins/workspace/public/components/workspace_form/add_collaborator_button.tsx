@@ -59,6 +59,9 @@ export const AddCollaboratorButton = ({
           }),
       collaboratorId,
     })) as Array<WorkspacePermissionSetting & { collaboratorId: string }>;
+    const existingDuplicateSettings = addedSettings.filter((permissionSettingToAdd) =>
+      hasSameUserIdOrGroup(permissionSettings, permissionSettingToAdd)
+    );
     const pendingAddedDuplicateCollaboratorIds = Array.from(
       new Set(
         collaborators.flatMap(({ collaboratorId }) => {
@@ -69,11 +72,6 @@ export const AddCollaboratorButton = ({
           return [];
         })
       )
-    );
-    const existingDuplicateSettings = addedSettings.filter(
-      (permissionSettingToAdd) =>
-        !pendingAddedDuplicateCollaboratorIds.includes(permissionSettingToAdd.collaboratorId) &&
-        hasSameUserIdOrGroup(permissionSettings, permissionSettingToAdd)
     );
     if (pendingAddedDuplicateCollaboratorIds.length > 0 || existingDuplicateSettings.length > 0) {
       throw new DuplicateCollaboratorError({

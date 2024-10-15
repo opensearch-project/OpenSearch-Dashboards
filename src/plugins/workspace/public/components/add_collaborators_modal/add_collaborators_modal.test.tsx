@@ -97,7 +97,8 @@ describe('AddCollaboratorsModal', () => {
     const addCollaboratorsButton = screen.getByRole('button', { name: 'Add collaborators' });
     fireEvent.click(addCollaboratorsButton);
     await waitFor(() => {
-      expect(screen.getAllByText('A collaborator with this ID already exists.')).toHaveLength(2);
+      expect(screen.getByText('This ID is already added to the list.')).toBeInTheDocument();
+      expect(screen.getByText('A collaborator with this ID already exists.')).toBeInTheDocument();
     });
   });
 

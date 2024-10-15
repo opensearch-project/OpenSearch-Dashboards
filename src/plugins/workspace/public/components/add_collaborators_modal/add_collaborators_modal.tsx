@@ -34,14 +34,12 @@ const DUPLICATE_COLLABORATOR_ERROR_MESSAGE = i18n.translate(
   }
 );
 
-const generateDuplicateCollaboratorErrors = (duplicateIds: number[]) =>
-  duplicateIds.reduce<{ [key: number]: string }>(
-    (previousValue, id) => ({
-      ...previousValue,
-      [id]: DUPLICATE_COLLABORATOR_ERROR_MESSAGE,
-    }),
-    {}
-  );
+const DUPLICATE_COLLABORATOR_WITH_LIST_ERROR_MESSAGE = i18n.translate(
+  'workspace.addCollaboratorsModal.errors.duplicateCollaboratorWithList',
+  {
+    defaultMessage: 'This ID is already added to the list.',
+  }
+);
 
 export interface AddCollaboratorsModalProps {
   title: string;
@@ -112,18 +110,18 @@ export const AddCollaboratorsModal = ({
       );
     } catch (error) {
       if (error instanceof DuplicateCollaboratorError) {
-        const duplicateIds: number[] = [];
+        const newErrors: { [key: number]: string } = {};
         error.details.pendingAdded.forEach((collaboratorId) => {
           collaboratorId2IdsMap[collaboratorId].slice(1).forEach((id) => {
-            duplicateIds.push(id);
+            newErrors[id] = DUPLICATE_COLLABORATOR_ERROR_MESSAGE;
           });
         });
         error.details.existing.forEach((collaboratorId) => {
           collaboratorId2IdsMap[collaboratorId].forEach((id) => {
-            duplicateIds.push(id);
+            newErrors[id] = DUPLICATE_COLLABORATOR_WITH_LIST_ERROR_MESSAGE;
           });
         });
-        setErrors(generateDuplicateCollaboratorErrors(duplicateIds));
+        setErrors(newErrors);
         return;
       }
     } finally {
