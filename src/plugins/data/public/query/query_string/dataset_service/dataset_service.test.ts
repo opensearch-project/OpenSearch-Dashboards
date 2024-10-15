@@ -12,6 +12,7 @@ import { indexPatternTypeConfig } from './lib';
 import { dataPluginMock } from '../../../mocks';
 import { IndexPatternsContract } from '../../..';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { waitFor } from '@testing-library/dom';
 
 describe('DatasetService', () => {
   let service: DatasetService;
@@ -26,23 +27,13 @@ describe('DatasetService', () => {
     uiSettings.get = jest.fn().mockImplementation((setting: string) => {
       if (setting === UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS) {
         return 4;
-      } else if (setting === 'defaultIndex') {
-        return 'id';
       }
     });
     sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
     mockDataPluginServices = {} as jest.Mocked<IDataPluginServices>;
     service = new DatasetService(uiSettings, sessionStorage);
     indexPatterns = dataPluginMock.createStartContract().indexPatterns;
-    savedObjectsClient = ({
-      get: jest.fn().mockReturnValue(
-        Promise.resolve({
-          id: 'id',
-          title: 'data source',
-          type: 'OpenSearch',
-        })
-      ),
-    } as unknown) as jest.Mocked<SavedObjectsClientContract>;
+    savedObjectsClient = (undefined as unknown) as jest.Mocked<SavedObjectsClientContract>;
     service.init(indexPatterns, savedObjectsClient);
   });
 
@@ -194,5 +185,62 @@ describe('DatasetService', () => {
       });
     }
     expect(service.getRecentDatasets().length).toEqual(4);
+  });
+
+  test('test empty savedObjectsClient', () => {
+    jest.clearAllMocks();
+    uiSettings = coreMock.createSetup().uiSettings;
+    uiSettings.get = jest.fn().mockImplementation((setting: string) => {
+      if (setting === UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS) {
+        return 4;
+      } else if (setting === 'defaultIndex') {
+        return 'id';
+      }
+    });
+    sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
+    mockDataPluginServices = {} as jest.Mocked<IDataPluginServices>;
+    service = new DatasetService(uiSettings, sessionStorage);
+    indexPatterns = dataPluginMock.createStartContract().indexPatterns;
+    savedObjectsClient = (undefined as unknown) as jest.Mocked<SavedObjectsClientContract>;
+    service.init(indexPatterns, savedObjectsClient);
+
+    expect(service.getDefault()?.dataSource).toEqual(undefined);
+  });
+
+  test('test get default dataset ', async () => {
+    jest.clearAllMocks();
+    uiSettings = coreMock.createSetup().uiSettings;
+    uiSettings.get = jest.fn().mockImplementation((setting: string) => {
+      if (setting === UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS) {
+        return 4;
+      } else if (setting === 'defaultIndex') {
+        return 'id';
+      } else if (setting === UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) {
+        return true;
+      }
+    });
+    sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
+    mockDataPluginServices = {} as jest.Mocked<IDataPluginServices>;
+    service = new DatasetService(uiSettings, sessionStorage);
+    indexPatterns = dataPluginMock.createStartContract().indexPatterns;
+    const mockedDataSource = {
+      id: 'id',
+      attributes: {
+        title: 'datasource',
+        dataSourceEngineType: 'OpenSearch',
+      },
+    };
+    savedObjectsClient = ({
+      get: jest.fn().mockReturnValue(Promise.resolve(mockedDataSource)),
+    } as unknown) as jest.Mocked<SavedObjectsClientContract>;
+    service.init(indexPatterns, savedObjectsClient);
+
+    await waitFor(() => {
+      expect(service.getDefault()?.dataSource).toMatchObject({
+        id: 'id',
+        title: 'datasource',
+        type: 'OpenSearch',
+      });
+    });
   });
 });
