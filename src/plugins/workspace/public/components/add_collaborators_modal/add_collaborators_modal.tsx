@@ -83,6 +83,7 @@ export const AddCollaboratorsModal = ({
     }
     return collaborator;
   });
+  const [isAdding, setIsAdding] = useState(false);
 
   const handleAddCollaborators = async () => {
     const collaboratorId2IdsMap = validInnerCollaborators.reduce<{
@@ -101,6 +102,7 @@ export const AddCollaboratorsModal = ({
       return previousValue;
     }, {});
     setErrors({});
+    setIsAdding(true);
     try {
       await onAddCollaborators(
         validInnerCollaborators.map(({ id, ...collaborator }) => ({
@@ -124,6 +126,8 @@ export const AddCollaboratorsModal = ({
         setErrors(generateDuplicateCollaboratorErrors(duplicateIds));
         return;
       }
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -190,6 +194,8 @@ export const AddCollaboratorsModal = ({
           type="submit"
           onClick={handleAddCollaborators}
           fill
+          isDisabled={isAdding}
+          isLoading={isAdding}
         >
           {i18n.translate('workspace.addCollaboratorsModal.addCollaboratorsButton', {
             defaultMessage: 'Add collaborators',

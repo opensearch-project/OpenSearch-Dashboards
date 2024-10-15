@@ -24,7 +24,9 @@ import { DuplicateCollaboratorError } from '../add_collaborators_modal';
 interface Props {
   displayedTypes: WorkspaceCollaboratorType[];
   permissionSettings: PermissionSetting[];
-  handleSubmitPermissionSettings: (permissionSettings: WorkspacePermissionSetting[]) => void;
+  handleSubmitPermissionSettings: (
+    permissionSettings: WorkspacePermissionSetting[]
+  ) => Promise<void>;
 }
 
 export const AddCollaboratorButton = ({
@@ -85,7 +87,7 @@ export const AddCollaboratorButton = ({
       ...permissionSettings,
       ...addedSettings.map(({ collaboratorId, ...rest }) => rest),
     ];
-    handleSubmitPermissionSettings(newPermissionSettings as WorkspacePermissionSetting[]);
+    await handleSubmitPermissionSettings(newPermissionSettings as WorkspacePermissionSetting[]);
   };
 
   const panelItems = displayedTypes.map(({ id, buttonLabel, onAdd }) => ({

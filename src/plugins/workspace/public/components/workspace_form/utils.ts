@@ -446,25 +446,5 @@ export const getNumberOfChanges = (
   ) {
     count++;
   }
-  // Count all new added permission settings
-  count +=
-    newFormData.permissionSettings?.reduce((prevNewAddedCount, setting) => {
-      if (!initialFormData.permissionSettings?.find((item) => item.id === setting.id)) {
-        prevNewAddedCount += 1;
-      }
-      return prevNewAddedCount;
-    }, 0) ?? 0;
-  count +=
-    initialFormData.permissionSettings?.reduce((prevDeletedAndModifiedCount, setting) => {
-      const newSetting = newFormData.permissionSettings?.find((item) => item.id === setting.id);
-      if (!newSetting) {
-        // Count all delete permission settings
-        prevDeletedAndModifiedCount += 1;
-      } else if (!isSamePermissionSetting(newSetting, setting)) {
-        // Count all modified permission settings
-        prevDeletedAndModifiedCount += 1;
-      }
-      return prevDeletedAndModifiedCount;
-    }, 0) ?? 0;
   return count;
 };

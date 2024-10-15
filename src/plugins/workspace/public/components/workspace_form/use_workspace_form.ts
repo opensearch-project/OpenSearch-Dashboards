@@ -89,8 +89,19 @@ export const useWorkspaceForm = ({
     [setFeatureConfigs]
   );
 
+  const getSubmitFormData = (submitFormData: WorkspaceFormDataState) => {
+    return {
+      name: submitFormData.name!,
+      description: submitFormData.description,
+      color: submitFormData.color || '#FFFFFF',
+      features: submitFormData.features,
+      permissionSettings: submitFormData.permissionSettings as WorkspacePermissionSetting[],
+      selectedDataSourceConnections: submitFormData.selectedDataSourceConnections,
+    };
+  };
+
   const handleFormSubmit = useCallback<FormEventHandler>(
-    (e) => {
+    async (e) => {
       e.preventDefault();
       const currentFormData = getFormDataRef.current();
       currentFormData.permissionSettings = currentFormData.permissionSettings.filter(
@@ -107,34 +118,22 @@ export const useWorkspaceForm = ({
         return;
       }
 
-      onSubmit?.(
-        {
-          name: currentFormData.name!,
-          description: currentFormData.description,
-          color: currentFormData.color || '#FFFFFF',
-          features: currentFormData.features,
-          permissionSettings: currentFormData.permissionSettings as WorkspacePermissionSetting[],
-          selectedDataSourceConnections: currentFormData.selectedDataSourceConnections,
-        },
-        true
-      );
+      const submitFormData = getSubmitFormData(currentFormData);
+      const result = await onSubmit?.(submitFormData);
+      if (result?.success) {
+        defaultValuesRef.current = submitFormData;
+        setIsEditing(false);
+      }
     },
     [onSubmit, permissionEnabled]
   );
 
   const handleSubmitPermissionSettings = async (settings: WorkspacePermissionSetting[]) => {
     const currentFormData = getFormDataRef.current();
-    const result = await onSubmit?.(
-      {
-        name: currentFormData.name!,
-        description: currentFormData.description,
-        color: currentFormData.color || '#FFFFFF',
-        features: currentFormData.features,
-        permissionSettings: settings,
-        selectedDataSourceConnections: currentFormData.selectedDataSourceConnections,
-      },
-      false
-    );
+    const result = await onSubmit?.({
+      ...getSubmitFormData(currentFormData),
+      permissionSettings: settings,
+    });
     if (result) {
       setPermissionSettings(settings);
     }
@@ -150,7 +149,6 @@ export const useWorkspaceForm = ({
     setDescription(resetValues?.description ?? '');
     setColor(resetValues?.color);
     setFeatureConfigs(resetValues?.features ?? []);
-    setPermissionSettings(defaultValuesRef.current?.permissionSettings ?? []);
     setFormErrors({});
     setIsEditing(false);
   }, []);
