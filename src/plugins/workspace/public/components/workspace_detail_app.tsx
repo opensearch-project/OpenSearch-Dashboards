@@ -121,27 +121,15 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
           dataSources: selectedDataSourceIds,
           permissions: convertPermissionSettingsToPermissions(permissionSettings),
         });
+        setIsFormSubmitting(false);
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.update.success', {
               defaultMessage: 'Update workspace successfully',
             }),
           });
-          if (application && http) {
-            // Redirect page after one second, leave one second time to show update successful toast.
-            window.setTimeout(() => {
-              window.location.href = formatUrlWithWorkspaceId(
-                application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
-                  absolute: true,
-                }),
-                currentWorkspace.id,
-                http.basePath
-              );
-            }, 1000);
-          }
-          return;
+          return result;
         } else {
-          setIsFormSubmitting(false);
           throw new Error(result?.error ? result?.error : 'update workspace failed');
         }
       } catch (error) {
@@ -155,7 +143,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
         return;
       }
     },
-    [isFormSubmitting, currentWorkspace, notifications?.toasts, workspaceClient, application, http]
+    [isFormSubmitting, currentWorkspace, notifications?.toasts, workspaceClient]
   );
 
   if (!workspaces || !application || !http || !savedObjects || !currentWorkspaceFormData) {

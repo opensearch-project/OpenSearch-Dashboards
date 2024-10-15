@@ -261,8 +261,8 @@ exports[`Header should render normally when useUpdatedUX is true 1`] = `
         Array [
           Object {
             "controlType": "button",
-            "disabled": false,
             "iconType": "copy",
+            "isDisabled": false,
             "label": "Copy all assets to...",
             "run": [Function],
             "testId": "duplicateObjects",

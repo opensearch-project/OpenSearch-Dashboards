@@ -18,7 +18,7 @@ import { AssociationDataSourceModalMode } from 'src/plugins/workspace/common/con
 
 const setupAssociationDataSourceModal = ({
   mode,
-  assignedConnections,
+  excludedConnectionIds,
   handleAssignDataSourceConnections,
 }: Partial<AssociationDataSourceModalProps> = {}) => {
   const coreServices = coreMock.createStart();
@@ -69,7 +69,7 @@ const setupAssociationDataSourceModal = ({
         notifications={coreServices.notifications}
         savedObjects={coreServices.savedObjects}
         closeModal={jest.fn()}
-        assignedConnections={assignedConnections ?? []}
+        excludedConnectionIds={excludedConnectionIds ?? []}
         handleAssignDataSourceConnections={handleAssignDataSourceConnections ?? jest.fn()}
       />
     </IntlProvider>
@@ -109,10 +109,10 @@ describe('AssociationDataSourceModal', () => {
 
   it('should display opensearch connections', async () => {
     setupAssociationDataSourceModal();
-    expect(screen.getByText('Associate OpenSearch connections')).toBeInTheDocument();
+    expect(screen.getByText('Associate OpenSearch data sources')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
+        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
       )
     ).toBeInTheDocument();
     await waitFor(() => {
@@ -125,7 +125,7 @@ describe('AssociationDataSourceModal', () => {
     setupAssociationDataSourceModal({
       mode: AssociationDataSourceModalMode.DirectQueryConnections,
     });
-    expect(screen.getByText('Associate direct query connections')).toBeInTheDocument();
+    expect(screen.getByText('Associate direct query data sources')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.queryByRole('option', { name: 'dqc1' })).not.toBeInTheDocument();
       fireEvent.click(screen.getByRole('option', { name: 'Data Source 1' }));
@@ -135,18 +135,11 @@ describe('AssociationDataSourceModal', () => {
 
   it('should hide associated connections', async () => {
     setupAssociationDataSourceModal({
-      assignedConnections: [
-        {
-          id: 'ds2',
-          name: 'Data Source 2',
-          connectionType: DataSourceConnectionType.OpenSearchConnection,
-          type: 'OpenSearch',
-        },
-      ],
+      excludedConnectionIds: ['ds2'],
     });
     expect(
       screen.getByText(
-        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query connection, they will also be available in the workspace.'
+        'Add data sources that will be available in the workspace. If a selected data source has related Direct Query data sources, they will also be available in the workspace.'
       )
     ).toBeInTheDocument();
     await waitFor(() => {
