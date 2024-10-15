@@ -4,14 +4,7 @@
  */
 
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  euiPaletteColorBlind,
-  EUI_THEME,
-  EUI_THEMES,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent, euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { useLocation } from 'react-router-dom';
@@ -168,8 +161,12 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     <EuiPage
       className="WorkspaceCreator"
       style={{
+        position: 'absolute',
+        backgroundImage: `radial-gradient(ellipse at 50% 50%, ${workspaceColor}48 0%, transparent 70%)`,
+        top: '-200px',
+        width: '100%',
+        paddingTop: '200px',
         backgroundAttachment: 'fixed',
-        backgroundImage: `radial-gradient(ellipse at 40% 800px, ${workspaceColor}57 0%, transparent 60%)`,
         backgroundBlendMode: 'normal',
       }}
     >
