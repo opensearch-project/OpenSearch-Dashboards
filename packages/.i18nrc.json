@@ -2,5 +2,7 @@
   "paths": {
     "flot": "osd-ui-shared-deps/flot_charts"
   },
-  "translations": []
+  "translations": [
+    "translations/tr-TR.json"
+  ]
 }
