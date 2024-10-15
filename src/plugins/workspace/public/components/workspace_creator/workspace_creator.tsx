@@ -163,9 +163,10 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
       style={{
         position: 'absolute',
         backgroundImage: `radial-gradient(ellipse at 50% 50%, ${workspaceColor}48 0%, transparent 70%)`,
+        backgroundPosition: 'top, 0',
         top: '-200px',
         width: '100%',
-        paddingTop: '200px',
+        paddingTop: '216px',
         backgroundAttachment: 'fixed',
         backgroundBlendMode: 'normal',
       }}
