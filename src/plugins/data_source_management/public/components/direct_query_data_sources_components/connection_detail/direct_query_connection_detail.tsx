@@ -16,8 +16,8 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
-  EuiText,
   EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { escapeRegExp } from 'lodash';
 import {
@@ -29,15 +29,6 @@ import {
 } from 'opensearch-dashboards/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { escapeRegExp } from 'lodash';
-import s3Svg from '../../direct_query_data_sources_components/icons/s3_logo.svg';
-import prometheusSvg from '../../direct_query_data_sources_components/icons/prometheus_logo.svg';
-import { DATACONNECTIONS_BASE } from '../../../constants';
-import { DirectQueryDatasourceDetails, PrometheusProperties } from '../../../types';
-import { NoAccess } from './utils/no_access_page';
-import { InactiveDataConnectionCallout } from './utils/inactive_data_connection_callout';
-import { AccessControlTab } from './access_control_tab';
-import { getManageDirectQueryDataSourceBreadcrumbs } from '../../breadcrumbs';
 import {
   useLoadAccelerationsToCache,
   useLoadDatabasesToCache,
