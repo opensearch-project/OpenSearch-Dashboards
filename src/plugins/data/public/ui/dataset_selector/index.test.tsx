@@ -24,6 +24,9 @@ describe('ConnectedDatasetSelector', () => {
     getDefaultQuery: jest.fn().mockReturnValue({}),
     getInitialQueryByDataset: jest.fn().mockReturnValue({}),
     setQuery: jest.fn(),
+    getDatasetService: jest.fn().mockReturnValue({
+      addRecentDataset: jest.fn(),
+    }),
   };
   const mockOnSubmit = jest.fn();
   const mockServices = {

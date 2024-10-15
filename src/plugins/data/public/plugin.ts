@@ -150,7 +150,7 @@ export class DataPublicPlugin
       storage: this.storage,
       sessionStorage: this.sessionStorage,
       defaultSearchInterceptor: searchService.getDefaultSearchInterceptor(),
-      applicaton: core.application,
+      application: core.application,
     });
 
     uiActions.registerAction(
@@ -225,7 +225,7 @@ export class DataPublicPlugin
       savedObjectsClient: savedObjects.client,
       uiSettings,
       indexPatterns,
-      applicaton: core.application,
+      application: core.application,
     });
     setQueryService(query);
 

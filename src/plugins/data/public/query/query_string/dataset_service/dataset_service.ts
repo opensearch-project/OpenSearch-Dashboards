@@ -4,6 +4,7 @@
  */
 
 import { CoreStart } from 'opensearch-dashboards/public';
+import LRUCache from 'lru-cache';
 import {
   Dataset,
   DataStructure,
@@ -22,6 +23,7 @@ export class DatasetService {
   private indexPatterns?: IndexPatternsContract;
   private defaultDataset?: Dataset;
   private typesRegistry: Map<string, DatasetTypeConfig> = new Map();
+  private recentDatasets: LRUCache<string, Dataset>;
 
   constructor(
     private readonly uiSettings: CoreStart['uiSettings'],
@@ -30,6 +32,10 @@ export class DatasetService {
     if (this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) {
       this.registerDefaultTypes();
     }
+    this.recentDatasets = new LRUCache({
+      max: this.uiSettings.get(UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS),
+    });
+    this.deserializeRecentDatasets();
   }
 
   /**
@@ -59,6 +65,30 @@ export class DatasetService {
 
   public getDefault(): Dataset | undefined {
     return this.defaultDataset;
+  }
+
+  private serializeRecentDatasets(): void {
+    this.sessionStorage.set('recentDatasets', this.getRecentDatasets());
+  }
+
+  private deserializeRecentDatasets(): void {
+    const cacheData = this.sessionStorage.get('recentDatasets');
+    if (cacheData) {
+      cacheData.forEach((dataset: Dataset) => this.addRecentDataset(dataset, false));
+    }
+  }
+
+  public getRecentDatasets(): Dataset[] {
+    return this.recentDatasets.values();
+  }
+
+  public addRecentDataset(dataset: Dataset | undefined, serialize: boolean = true): void {
+    if (dataset) {
+      this.recentDatasets.set(dataset.id, dataset);
+    }
+    if (serialize) {
+      this.serializeRecentDatasets();
+    }
   }
 
   public async cacheDataset(dataset: Dataset): Promise<void> {

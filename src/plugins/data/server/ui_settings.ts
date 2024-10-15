@@ -782,5 +782,14 @@ export function getUiSettings(
       schema: schema.boolean(),
       category: ['search'],
     },
+    [UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS]: {
+      name: i18n.translate('data.advancedSettings.searchMaxRecentDatasets', {
+        defaultMessage: 'Maximum datasets in recents list',
+      }),
+      value: 4,
+      type: 'number',
+      schema: schema.number(),
+      category: ['search'],
+    },
   };
 }
