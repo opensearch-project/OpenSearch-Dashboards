@@ -14,10 +14,8 @@ import { WorkspaceClient } from '../workspace_client';
 
 export const WorkspaceCollaboratorsApp = () => {
   const {
-    services: { chrome, application },
+    services: { chrome },
   } = useOpenSearchDashboards<{ CoreStart: CoreStart; workspaceClient: WorkspaceClient }>();
-
-  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   /**
    * set breadcrumbs to chrome

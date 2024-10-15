@@ -289,12 +289,14 @@ export const WorkspaceCollaboratorTable = ({
     box: {
       incremental: true,
     },
+    compressed: true,
     filters: [
       {
         type: 'field_value_selection',
         field: 'displayedType',
+        compressed: true,
         name: 'Type',
-        multiSelect: false,
+        multiSelect: 'or',
         options: Array.from(
           new Set(items.flatMap(({ displayedType }) => (!!displayedType ? [displayedType] : [])))
         ).map((item) => ({
@@ -305,8 +307,9 @@ export const WorkspaceCollaboratorTable = ({
       {
         type: 'field_value_selection',
         field: 'accessLevel',
+        compressed: true,
         name: 'Access level',
-        multiSelect: false,
+        multiSelect: 'or',
         options: Array.from(
           new Set(items.flatMap(({ accessLevel }) => (!!accessLevel ? [accessLevel] : [])))
         ).map((item) => ({
@@ -323,20 +326,25 @@ export const WorkspaceCollaboratorTable = ({
     {
       field: 'primaryId',
       name: 'ID',
+      width: '30%',
     },
     {
       field: 'displayedType',
       name: 'Type',
       render: (displayedType: string) => displayedType || <>&mdash;</>,
+      width: '30%',
     },
     {
       field: 'accessLevel',
       name: 'Access level',
       render: (accessLevel: string) => accessLevel || <>&mdash;</>,
+      width: '30%',
     },
     {
       name: 'Actions',
       field: '',
+      width: '10%',
+      align: 'right',
       render: (item: PermissionSettingWithAccessLevelAndDisplayedType) => (
         <Actions
           isTableAction={true}
@@ -356,6 +364,7 @@ export const WorkspaceCollaboratorTable = ({
     <EuiInMemoryTable
       items={items}
       columns={columns}
+      compressed={true}
       search={search}
       itemId="id"
       pagination={true}

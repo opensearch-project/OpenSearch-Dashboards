@@ -31,11 +31,7 @@ export const WorkspaceCollaborators = () => {
     services: {
       workspaces,
       application,
-      http,
-      savedObjects,
-      uiSettings,
       navigationUI: { HeaderControl },
-      chrome,
       workspaceClient,
       collaboratorTypes,
       notifications,
@@ -56,6 +52,8 @@ export const WorkspaceCollaborators = () => {
   const permissionSettings = convertPermissionsToPermissionSettings(
     currentWorkspace?.permissions ?? {}
   );
+
+  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const handleSubmitPermissionSettings = async (settings: WorkspacePermissionSetting[]) => {
     const showErrorNotification = (errorText?: string) => {
@@ -89,7 +87,7 @@ export const WorkspaceCollaborators = () => {
     }
   };
 
-  if (!currentWorkspace || !application || !http || !savedObjects || !uiSettings || !chrome) {
+  if (!currentWorkspace || !isPermissionEnabled) {
     return null;
   }
   return (

@@ -108,6 +108,7 @@ export class WorkspacePlugin
   private useCase = new UseCaseService();
   private workspaceClient?: WorkspaceClient;
   private collaboratorTypes = new WorkspaceCollaboratorTypesService();
+  private collaboratorsAppUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
 
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
@@ -400,6 +401,7 @@ export class WorkspacePlugin
         const { renderCollaboratorsApp } = await import('./application');
         return mountWorkspaceApp(params, renderCollaboratorsApp);
       },
+      updater$: this.collaboratorsAppUpdater$,
     });
 
     // workspace initial page
@@ -592,6 +594,10 @@ export class WorkspacePlugin
 
   public start(core: CoreStart, { contentManagement, navigation }: WorkspacePluginStartDeps) {
     this.coreStart = core;
+    const isPermissionEnabled = core?.application?.capabilities.workspaces.permissionEnabled;
+    this.collaboratorsAppUpdater$.next(() => {
+      return { status: isPermissionEnabled ? AppStatus.accessible : AppStatus.inaccessible };
+    });
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
 

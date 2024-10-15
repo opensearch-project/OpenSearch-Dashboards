@@ -45,6 +45,8 @@ export class UseCaseService {
    */
   private async registerManageWorkspaceCategory(setupDeps: UseCaseServiceSetupDeps) {
     const [coreStart] = await setupDeps.getStartServices();
+    const isPermissionEnabled = coreStart?.application?.capabilities.workspaces.permissionEnabled;
+
     this.workspaceAndManageWorkspaceCategorySubscription?.unsubscribe();
     this.workspaceAndManageWorkspaceCategorySubscription = combineLatest([
       setupDeps.workspaces.currentWorkspace$,
@@ -76,14 +78,18 @@ export class UseCaseService {
                 defaultMessage: 'Workspace settings',
               }),
             },
-            {
-              id: WORKSPACE_COLLABORATORS_APP_ID,
-              category: DEFAULT_APP_CATEGORIES.manageWorkspace,
-              order: 200,
-              title: i18n.translate('workspace.settings.workspaceCollaborators', {
-                defaultMessage: 'Collaborators',
-              }),
-            },
+            ...(isPermissionEnabled
+              ? [
+                  {
+                    id: WORKSPACE_COLLABORATORS_APP_ID,
+                    category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+                    order: 200,
+                    title: i18n.translate('workspace.settings.workspaceCollaborators', {
+                      defaultMessage: 'Collaborators',
+                    }),
+                  },
+                ]
+              : []),
             {
               id: 'objects',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
