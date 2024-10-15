@@ -55,6 +55,8 @@ import {
 import { AccessControlTab } from './access_control_tab';
 import { InactiveDataConnectionCallout } from './utils/inactive_data_connection_callout';
 import { NoAccess } from './utils/no_access_page';
+import prometheusSvg from '../../direct_query_data_sources_components/icons/prometheus_logo.svg';
+import s3Svg from '../../direct_query_data_sources_components/icons/s3_logo.svg';
 
 interface DirectQueryDataConnectionDetailProps {
   featureFlagStatus: boolean;
