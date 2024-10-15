@@ -5,13 +5,16 @@ exports[`Query Result show error status with error message 2`] = `
   anchorPosition="downRight"
   button={
     <EuiButtonEmpty
+      className="editor__footerItem"
       data-test-subj="queryResultErrorBtn"
+      flush="both"
       iconSide="left"
       iconType="alert"
       onClick={[Function]}
       size="xs"
     >
       <EuiText
+        className="editor__footerItem"
         color="subdued"
         size="xs"
       >

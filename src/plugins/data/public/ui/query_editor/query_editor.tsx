@@ -447,6 +447,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           <EuiButtonEmpty
             iconSide="left"
             iconType="clock"
+            iconGap="s"
             size="xs"
             onClick={this.toggleRecentQueries}
             className="queryEditor__footerItem"
@@ -508,13 +509,13 @@ export default class QueryEditorUI extends Component<Props, State> {
         {!this.state.isCollapsed && (
           <>
             <div className="osdQueryEditor__body">{languageEditor.Body()}</div>
-            <RecentQueriesTable
-              isVisible={this.state.isRecentQueryVisible && useQueryEditor}
-              queryString={this.queryString}
-              onClickRecentQuery={this.onClickRecentQuery}
-            />
           </>
         )}
+        <RecentQueriesTable
+          isVisible={this.state.isRecentQueryVisible && useQueryEditor}
+          queryString={this.queryString}
+          onClickRecentQuery={this.onClickRecentQuery}
+        />
 
         {this.renderQueryEditorExtensions()}
       </div>
