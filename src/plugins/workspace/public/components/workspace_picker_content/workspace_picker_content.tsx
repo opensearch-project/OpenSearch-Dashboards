@@ -36,7 +36,7 @@ const getValidWorkspaceColor = (color?: string) =>
 
 interface UpdatedWorkspaceObject extends WorkspaceObject {
   accessTimeStamp?: number;
-  accessTime?: string;
+  accessTimeDescription?: string;
 }
 interface Props {
   coreStart: CoreStart;
@@ -78,7 +78,7 @@ export const WorkspacePickerContent = ({
       return {
         ...workspace,
         accessTimeStamp: recentWorkspace?.timestamp,
-        accessTime: recentWorkspace
+        accessTimeDescription: recentWorkspace
           ? `Viewed ${moment(recentWorkspace.timestamp).fromNow()}`
           : `Not visited recently`,
       };
@@ -187,7 +187,7 @@ export const WorkspacePickerContent = ({
                       </EuiFlexItem>
                       <EuiFlexItem grow={1} style={{ position: 'absolute', right: '0px' }}>
                         <EuiText size="s" color="subdued">
-                          <small> {workspace.accessTime}</small>
+                          <small> {workspace.accessTimeDescription}</small>
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -212,7 +212,7 @@ export const WorkspacePickerContent = ({
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText size="s" color="subdued">
-                      <small> {workspace.accessTime}</small>
+                      <small> {workspace.accessTimeDescription}</small>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
