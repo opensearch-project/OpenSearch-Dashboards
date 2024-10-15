@@ -65,12 +65,8 @@ export const redirectToExplorerOSIdx = (
   });
 };
 
-export const redirectToExplorerS3 = (datasourceName: string, application: ApplicationStart) => {
-  application.navigateToApp(observabilityLogsID, {
-    path: `#/explorer`,
-    state: {
-      datasourceName,
-      datasourceType: DATA_SOURCE_TYPES.S3Glue,
-    },
+export const redirectToDiscover = (application: ApplicationStart) => {
+  application.navigateToApp('data-explorer', {
+    path: `discover#`,
   });
 };

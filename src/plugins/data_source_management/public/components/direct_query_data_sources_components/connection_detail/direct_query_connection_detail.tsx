@@ -47,7 +47,7 @@ import { createDataSourceMenu, DataSourceViewConfig } from '../../data_source_me
 import { getDataSourcesWithFields, isPluginInstalled } from '../../utils';
 import { AccelerationTable } from '../acceleration_management/acceleration_table';
 import { AssociatedObjectsTab } from '../associated_object_management/associated_objects_tab';
-import { redirectToExplorerS3 } from '../associated_object_management/utils/associated_objects_tab_utils';
+import { redirectToDiscover } from '../associated_object_management/utils/associated_objects_tab_utils';
 import {
   InstalledIntegrationsTable,
   InstallIntegrationFlyout,
@@ -95,7 +95,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   const [hasAccess, setHasAccess] = useState(true);
 
   const onclickDiscoverCard = () => {
-    redirectToExplorerS3(dataSourceName, application);
+    redirectToDiscover(application);
   };
 
   const dataSourceMenuView = useMemo(() => {
@@ -307,7 +307,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
               selectable={{
                 onClick: onclickDiscoverCard,
                 isDisabled: false,
-                children: 'Query in Observability Logs',
+                children: 'Query in Discover',
               }}
             />
           </EuiFlexItem>
