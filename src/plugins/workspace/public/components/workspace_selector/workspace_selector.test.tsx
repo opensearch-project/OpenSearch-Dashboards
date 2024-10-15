@@ -68,6 +68,7 @@ describe('<WorkspaceSelector />', () => {
     expect(screen.getByTestId('workspace-selector-current-title')).toBeInTheDocument();
     expect(screen.getByTestId('workspace-selector-current-name')).toBeInTheDocument();
   });
+
   it('should display a list of workspaces in the dropdown', () => {
     jest
       .spyOn(recentWorkspaceManager, 'getRecentWorkspaces')
@@ -82,11 +83,11 @@ describe('<WorkspaceSelector />', () => {
     const selectButton = screen.getByTestId('workspace-selector-button');
     fireEvent.click(selectButton);
 
-    expect(screen.getByTestId('workspace-menu-item-workspace-1')).toBeInTheDocument();
-    expect(screen.getByTestId('workspace-menu-item-workspace-2')).toBeInTheDocument();
+    expect(screen.getByText('workspace 1')).toBeInTheDocument();
+    expect(screen.getByText('workspace 2')).toBeInTheDocument();
   });
 
-  it('should display viewed xx ago for recent workspaces', () => {
+  it('should display viewed xx ago for recent workspaces, and Not visited recently for never-visited workspace', () => {
     jest
       .spyOn(recentWorkspaceManager, 'getRecentWorkspaces')
       .mockReturnValue([{ id: 'workspace-1', timestamp: 1234567890 }]);
@@ -95,13 +96,12 @@ describe('<WorkspaceSelector />', () => {
       { id: 'workspace-1', name: 'workspace 1', features: [] },
       { id: 'workspace-2', name: 'workspace 2', features: [] },
     ]);
-
     render(<WorkspaceSelectorCreatorComponent />);
-
     const selectButton = screen.getByTestId('workspace-selector-button');
     fireEvent.click(selectButton);
 
-    expect(screen.getByText(`viewed ${moment(1234567890).fromNow()}`)).toBeInTheDocument();
+    expect(screen.getByText(`Viewed ${moment(1234567890).fromNow()}`)).toBeInTheDocument();
+    expect(screen.getByText('Not visited recently')).toBeInTheDocument();
   });
 
   it('should be able to display empty state when the workspace list is empty', () => {
@@ -127,8 +127,8 @@ describe('<WorkspaceSelector />', () => {
 
     const searchInput = screen.getByRole('searchbox');
     fireEvent.change(searchInput, { target: { value: 'works' } });
-    expect(screen.getByTestId('workspace-menu-item-workspace-1')).toBeInTheDocument();
-    expect(screen.queryByText('workspace-menu-item-workspace-1')).not.toBeInTheDocument();
+    expect(screen.getByText('workspace 1')).toBeInTheDocument();
+    expect(screen.queryByText('test 2')).not.toBeInTheDocument();
   });
 
   it('should be able to display empty state when seach is not found', () => {
