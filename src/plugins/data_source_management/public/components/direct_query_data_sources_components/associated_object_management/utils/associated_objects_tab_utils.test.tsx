@@ -69,7 +69,7 @@ describe('AssociatedObjectsTab utils', () => {
 
       expect(mockNavigateToApp).toHaveBeenCalledWith('data-explorer', {
         path:
-          "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:testMDSId,title:'',type:DATA_SOURCE),id:'testMDSId::testIndex',title:testIndex,type:INDEXES),language:SQL,query:'SELECT%20*%20FROM%20testIndex%20LIMIT%2010'))",
+          "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'testMDSId',title:'',type:DATA_SOURCE),id:'testMDSId::testIndex',title:testIndex,type:INDEXES),language:SQL,query:'SELECT%20*%20FROM%20testIndex%20LIMIT%2010'))",
       });
     });
   });
