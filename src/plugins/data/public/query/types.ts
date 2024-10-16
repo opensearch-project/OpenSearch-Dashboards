@@ -7,6 +7,8 @@ import {
   ApplicationSetup,
   ApplicationStart,
   IUiSettingsClient,
+  NotificationsSetup,
+  NotificationsStart,
   SavedObjectsClientContract,
 } from 'opensearch-dashboards/public';
 import { Observable } from 'rxjs';
@@ -44,6 +46,7 @@ export interface QueryServiceSetupDependencies {
   sessionStorage: DataStorage;
   defaultSearchInterceptor: ISearchInterceptor;
   application: ApplicationSetup;
+  notifications: NotificationsSetup;
 }
 
 /** @internal */
@@ -53,4 +56,5 @@ export interface QueryServiceStartDependencies {
   uiSettings: IUiSettingsClient;
   indexPatterns: IndexPatternsService;
   application: ApplicationStart;
+  notifications: NotificationsStart;
 }
