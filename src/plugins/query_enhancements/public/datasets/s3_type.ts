@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { trimEnd } from 'lodash';
+import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import {
   DATA_STRUCTURE_META_TYPES,
   DEFAULT_DATA,
@@ -13,9 +13,17 @@ import {
   DataStructureCustomMeta,
   Dataset,
   DatasetField,
+  OPENSEARCH_SQL_FIELD_TYPES,
+  castSQLTypeToOSDFieldType,
 } from '../../../data/common';
 import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
-import { API, DATASET, handleQueryStatus } from '../../common';
+import {
+  API,
+  DATASET,
+  S3_PARTITION_INFO_COLUMN,
+  SQLQueryResponse,
+  handleQueryStatus,
+} from '../../common';
 import S3_ICON from '../assets/s3_mark.svg';
 
 export const s3TypeConfig: DatasetTypeConfig = {
@@ -25,6 +33,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
     icon: { type: S3_ICON },
     tooltip: 'Amazon S3 Connections',
     searchOnLoad: true,
+    supportsTimeFilter: false,
   },
 
   toDataset: (path: DataStructure[]): Dataset => {
@@ -42,7 +51,10 @@ export const s3TypeConfig: DatasetTypeConfig = {
             id: dataSource.id,
             title: dataSource.title,
             type: dataSource.type,
-            meta: table.meta as DataSourceMeta,
+            meta: {
+              ...table.meta,
+              supportsTimeFilter: s3TypeConfig.meta.supportsTimeFilter,
+            } as DataSourceMeta,
           }
         : DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE,
     };
@@ -95,8 +107,9 @@ export const s3TypeConfig: DatasetTypeConfig = {
     }
   },
 
-  fetchFields: async (dataset: Dataset): Promise<DatasetField[]> => {
-    return [];
+  fetchFields: async (dataset: Dataset, http?: HttpSetup): Promise<DatasetField[]> => {
+    if (!http) return [];
+    return await fetchFields(http, dataset);
   },
 
   supportedLanguages: (dataset: Dataset): string[] => {
@@ -246,4 +259,64 @@ const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<Data
   database.meta = setMeta(database, response);
 
   return fetch(http, path, 'TABLE');
+};
+
+// Function to process the input and map types using the new SQL to OSD mapping
+export function mapResponseToFields(sqlOutput: SQLQueryResponse): DatasetField[] {
+  const datasetFields: DatasetField[] = [];
+
+  for (const row of sqlOutput.datarows) {
+    const [colName, dataType] = row;
+
+    // Stop processing once we hit the partition info row
+    if (colName === S3_PARTITION_INFO_COLUMN) {
+      break;
+    }
+
+    // Only include rows with valid types
+    if (dataType && dataType !== '') {
+      const sqlType = dataType as OPENSEARCH_SQL_FIELD_TYPES;
+      datasetFields.push({
+        name: colName as string,
+        type: castSQLTypeToOSDFieldType(sqlType),
+      });
+    }
+  }
+  return datasetFields;
+}
+
+const fetchFields = async (http: HttpSetup, dataset: Dataset): Promise<DatasetField[]> => {
+  const abortController = new AbortController();
+  try {
+    const connection = (dataset.dataSource?.meta as DataStructureCustomMeta).name;
+    const sessionId = (dataset.dataSource?.meta as DataStructureCustomMeta).sessionId;
+    const response = await http.fetch({
+      method: 'POST',
+      path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
+      body: JSON.stringify({
+        lang: 'sql',
+        query: `DESCRIBE TABLE ${dataset.title}`,
+        datasource: connection,
+        ...(sessionId && { sessionId }),
+      }),
+      query: {
+        id: dataset.dataSource?.id,
+      },
+      signal: abortController.signal,
+    });
+    const fetchResponse = await handleQueryStatus({
+      fetchStatus: () =>
+        http.fetch({
+          method: 'GET',
+          path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
+          query: {
+            id: dataset.dataSource?.id,
+            queryId: response.queryId,
+          },
+        }),
+    });
+    return mapResponseToFields(fetchResponse);
+  } catch (error) {
+    throw new Error(`Failed to load table fields from ${dataset.title}: ${error}`);
+  }
 };

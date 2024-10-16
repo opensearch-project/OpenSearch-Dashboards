@@ -36,3 +36,11 @@ export interface QueryStatusOptions<T> {
 }
 
 export type FetchFunction<T, P = void> = (params?: P) => Promise<T>;
+
+export interface SQLQueryResponse {
+  status: string;
+  schema: Array<{ name: string; type: string }>;
+  datarows: Array<Array<string | null>>;
+  total: number;
+  size: number;
+}

@@ -3,13 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { IndexPattern, useQueryStringManager } from '../../../../../data/public';
-import { useSelector, updateIndexPattern } from '../../utils/state_management';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  IndexPattern,
+  QueryStringContract,
+  useQueryStringManager,
+} from '../../../../../data/public';
+import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
-import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
+import { updateIndexPattern, useSelector } from '../../utils/state_management';
 
 /**
  * Custom hook to fetch and manage the index pattern based on the provided services.
@@ -41,6 +45,20 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     data.indexPatterns,
   ]);
 
+  const fetchDatasetFields = useCallback(
+    async (selectedIndexPattern: IndexPattern, queryString: QueryStringContract) => {
+      if (query.dataset) {
+        const type = queryString.getDatasetService().getType(query.dataset?.type);
+        const fetchedFields = await type?.fetchFields(query.dataset, services.http);
+        selectedIndexPattern?.fields.replaceAll([...fetchedFields]);
+        selectedIndexPattern?.setFieldLoadingStatus(false);
+        services.indexPatterns?.saveToCache(query.dataset.id, selectedIndexPattern);
+        setIndexPattern(selectedIndexPattern);
+      }
+    },
+    [services, query.dataset]
+  );
+
   useEffect(() => {
     let isMounted = true;
 
@@ -60,6 +78,9 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
 
         if (isMounted && pattern) {
           setIndexPattern(pattern);
+          if (query.dataset.type !== 'INDEX_PATTERN') {
+            await fetchDatasetFields(pattern, data.query.queryString);
+          }
         }
       } else if (!isQueryEnhancementEnabled) {
         if (!indexPatternIdFromState) {
@@ -99,6 +120,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     };
   }, [
     isQueryEnhancementEnabled,
+    fetchDatasetFields,
     indexPatternIdFromState,
     fetchIndexPatternDetails,
     data.indexPatterns,

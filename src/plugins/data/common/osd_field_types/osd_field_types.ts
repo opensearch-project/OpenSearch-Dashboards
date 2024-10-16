@@ -28,9 +28,9 @@
  * under the License.
  */
 
-import { createOsdFieldTypes, OsdFieldTypeUnknown } from './osd_field_types_factory';
 import { OsdFieldType } from './osd_field_type';
-import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from './types';
+import { createOsdFieldTypes, OsdFieldTypeUnknown } from './osd_field_types_factory';
+import { OPENSEARCH_FIELD_TYPES, OPENSEARCH_SQL_FIELD_TYPES, OSD_FIELD_TYPES } from './types';
 
 /** @private */
 const registeredOsdTypes = createOsdFieldTypes();
@@ -84,3 +84,19 @@ export const setOsdFieldOverrides = (newOverrides: { [key: string]: any } | unde
 export const getOsdFieldOverrides = (): { [key: string]: any } => {
   return osdFieldOverrides;
 };
+
+/**
+ *  Mapping function from SQL_TYPES to OSD_FIELD_TYPES
+ *
+ *  @param {string} sqlType
+ *  @return {OSD_FIELD_TYPES}
+ */
+export function castSQLTypeToOSDFieldType(
+  sqlType: OPENSEARCH_SQL_FIELD_TYPES | string
+): OSD_FIELD_TYPES {
+  const type = registeredOsdTypes.find((t) =>
+    t.osSQLTypes?.includes(sqlType as OPENSEARCH_SQL_FIELD_TYPES)
+  );
+
+  return type && type.name ? (type.name as OSD_FIELD_TYPES) : OSD_FIELD_TYPES.UNKNOWN;
+}

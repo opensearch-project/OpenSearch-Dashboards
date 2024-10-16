@@ -28,6 +28,8 @@ export interface DataSourceMeta {
   name?: string;
   /** Optional session ID for faster responses when utilizing async query sources */
   sessionId?: string;
+  /** Optional requiresTimeFilter determines if a time filter is needed */
+  supportsTimeFilter?: boolean;
 }
 
 /**
