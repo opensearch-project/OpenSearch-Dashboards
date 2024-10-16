@@ -5,8 +5,8 @@
 
 // s3_type.test.ts
 
-import { s3TypeConfig } from './s3_type';
 import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { IDataPluginServices } from 'src/plugins/data/public';
 import {
   DATA_STRUCTURE_META_TYPES,
   DataStructure,
@@ -14,7 +14,7 @@ import {
   Dataset,
 } from '../../../data/common';
 import { DATASET } from '../../common';
-import { IDataPluginServices } from 'src/plugins/data/public';
+import { s3TypeConfig } from './s3_type';
 
 describe('s3TypeConfig', () => {
   const mockHttp = ({
@@ -69,7 +69,12 @@ describe('s3TypeConfig', () => {
           id: 'ds1',
           title: 'DataSource 1',
           type: 'DATA_SOURCE',
-          meta: { name: 'conn1', sessionId: 'session123', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+          meta: {
+            name: 'conn1',
+            sessionId: 'session123',
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            supportsTimeFilter: false,
+          },
         },
       });
     });
@@ -84,6 +89,7 @@ describe('s3TypeConfig', () => {
           meta: {
             sessionId: 'session123',
             type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            supportsTimeFilter: false,
           } as DataStructureCustomMeta,
         },
       ];
@@ -98,7 +104,11 @@ describe('s3TypeConfig', () => {
           id: 'ds1',
           title: 'DataSource 1',
           type: 'DATA_SOURCE',
-          meta: { sessionId: 'session123', type: DATA_STRUCTURE_META_TYPES.CUSTOM },
+          meta: {
+            sessionId: 'session123',
+            type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+            supportsTimeFilter: false,
+          },
         },
       });
     });
@@ -144,11 +154,69 @@ describe('s3TypeConfig', () => {
     });
   });
 
-  test('fetchFields returns empty array', async () => {
-    const mockDataset: Dataset = { id: 'table1', title: 'Table 1', type: 'S3' };
-    const result = await s3TypeConfig.fetchFields(mockDataset);
+  test('fetchFields returns table fields', async () => {
+    const postResponse = {
+      queryId: 'd09ZbTgxRHlnWW15czM=',
+      sessionId: 'VHg1d0Z1NXlCS215czM=',
+    };
 
-    expect(result).toEqual([]);
+    const defaultResponse = {
+      status: 'SUCCESS',
+      schema: [
+        { name: 'col_name', type: 'string' },
+        { name: 'data_type', type: 'string' },
+        { name: 'comment', type: 'string' },
+      ],
+      datarows: [
+        ['@timestamp', 'timestamp', null],
+        ['clientip', 'string', null],
+        ['request', 'string', null],
+        ['status', 'int', null],
+        ['size', 'int', null],
+        ['# Partition Information', '', ''],
+        ['# col_name', 'data_type', 'comment'],
+        ['year', 'int', null],
+        ['month', 'int', null],
+        ['day', 'int', null],
+      ],
+      total: 10,
+      size: 10,
+    };
+
+    const mockDataset: Dataset = {
+      id: '9aa4dc80-7151-11ef-8fea-1fe2265e9c7d::mys3.default.http_logs',
+      title: 'mys3.default.http_logs',
+      type: 'S3',
+      dataSource: {
+        id: '9aa4dc80-7151-11ef-8fea-1fe2265e9c7d',
+        title: 'flint-213',
+        type: 'DATA_SOURCE',
+        meta: {
+          sessionId: 'VHg1d0Z1NXlCS215czM=',
+          name: 'mys3',
+          supportsTimeFilter: false,
+        },
+      },
+    };
+
+    mockHttp.fetch = jest.fn(({ method }: { method: string }) => {
+      switch (method) {
+        case 'POST':
+          return postResponse;
+        default:
+          return [defaultResponse];
+      }
+    });
+
+    const result = await s3TypeConfig.fetchFields(mockDataset, mockHttp);
+
+    expect(result).toHaveLength(5);
+    expect(result[0].name).toBe('@timestamp');
+    expect(result[0].type).toBe('date');
+    expect(result[1].name).toBe('clientip');
+    expect(result[1].type).toBe('string');
+    expect(result[3].name).toBe('status');
+    expect(result[3].type).toBe('number');
   });
 
   test('supportedLanguages returns SQL', () => {

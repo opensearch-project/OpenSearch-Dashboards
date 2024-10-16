@@ -54,3 +54,5 @@ export const UI_SETTINGS = {
 };
 
 export const ERROR_DETAILS = { GUARDRAILS_TRIGGERED: 'guardrails triggered' };
+
+export const S3_PARTITION_INFO_COLUMN = '# Partition Information';
