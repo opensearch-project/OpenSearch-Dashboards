@@ -65,9 +65,9 @@ export const redirectToDiscoverOSIdx = (
   application: ApplicationStart
 ) => {
   application.navigateToApp('data-explorer', {
-    path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:${
+    path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
       datasourceMDSId ?? ''
-    },title:'',type:DATA_SOURCE),id:'${
+    }',title:'',type:DATA_SOURCE),id:'${
       datasourceMDSId ?? ''
     }::${indexName}',title:${indexName},type:INDEXES),language:SQL,query:'SELECT%20*%20FROM%20${indexName}%20LIMIT%2010'))`,
   });
