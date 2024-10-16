@@ -47,19 +47,15 @@ describe('AssociatedObjectsTab utils', () => {
 
       redirectToDiscoverWithDataSrc(
         'testDataSource',
-        'testType',
+        'testMDSID',
         'testDatabase',
         'testTable',
         application
       );
 
-      expect(mockNavigateToApp).toHaveBeenCalledWith(observabilityLogsID, {
-        path: '#/explorer',
-        state: {
-          datasourceName: 'testDataSource',
-          datasourceType: 'testType',
-          queryToRun: 'source = testDataSource.testDatabase.testTable | head 10',
-        },
+      expect(mockNavigateToApp).toHaveBeenCalledWith('data-explorer', {
+        path:
+          "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'testMDSID',meta:(name:testDataSource,type:CUSTOM),title:'',type:DATA_SOURCE),id:'testMDSID::testDataSource.testDatabase.testTable',title:testDataSource.testDatabase.testTable,type:S3),language:SQL,query:'SELECT%20*%20FROM%20testDataSource.testDatabase.testTable%20LIMIT%2010'))",
       });
     });
   });
@@ -69,15 +65,11 @@ describe('AssociatedObjectsTab utils', () => {
       const mockNavigateToApp = jest.fn();
       const application = ({ navigateToApp: mockNavigateToApp } as unknown) as ApplicationStart;
 
-      redirectToDiscoverOSIdx('testIndex', application);
+      redirectToDiscoverOSIdx('testIndex', 'testMDSId', application);
 
-      expect(mockNavigateToApp).toHaveBeenCalledWith(observabilityLogsID, {
-        path: '#/explorer',
-        state: {
-          datasourceName: DEFAULT_DATA_SOURCE_NAME,
-          datasourceType: DEFAULT_DATA_SOURCE_TYPE,
-          queryToRun: 'source = testIndex | head 10',
-        },
+      expect(mockNavigateToApp).toHaveBeenCalledWith('data-explorer', {
+        path:
+          "discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:testMDSId,title:'',type:DATA_SOURCE),id:'testMDSId::testIndex',title:testIndex,type:INDEXES),language:SQL,query:'SELECT%20*%20FROM%20testIndex%20LIMIT%2010'))",
       });
     });
   });
