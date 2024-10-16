@@ -30,6 +30,7 @@ import {
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { OpenSearchDashboardsResponse } from '../../../../../../core/server/http/router';
 import { DSL_BASE } from '../../../../framework/utils/shared';
+import { getUiSettings } from '../../utils';
 
 export interface AccelerationDetailsFlyoutProps {
   acceleration: CachedAcceleration;
@@ -231,6 +232,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   const DiscoverIcon = () => {
     return (
       <EuiButtonEmpty
+        isDisabled={!getUiSettings().get('query:enhancements:enabled')}
         onClick={() => {
           onDiscoverIconClick(acceleration, dataSourceName, dataSourceMDSId, application);
           resetFlyout();

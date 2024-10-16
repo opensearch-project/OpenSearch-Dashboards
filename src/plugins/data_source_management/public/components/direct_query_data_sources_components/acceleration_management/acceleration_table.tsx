@@ -42,6 +42,7 @@ import {
   getRenderAccelerationDetailsFlyout,
   getRenderCreateAccelerationFlyout,
 } from '../../../plugin';
+import { getUiSettings } from '../../utils';
 
 interface AccelerationTableProps {
   dataSourceName: string;
@@ -211,6 +212,9 @@ export const AccelerationTable = ({
       type: 'icon',
       onClick: (acc: CachedAcceleration) => {
         onDiscoverIconClick(acc, dataSourceName, dataSourceMDSId, application);
+      },
+      enabled: () => {
+        return getUiSettings().get('query:enhancements:enabled');
       },
     },
     {

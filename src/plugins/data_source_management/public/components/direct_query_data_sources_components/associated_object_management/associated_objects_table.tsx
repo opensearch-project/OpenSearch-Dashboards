@@ -12,7 +12,7 @@ import {
 import { i18n } from '@osd/i18n';
 import React, { useEffect, useState } from 'react';
 import { ApplicationStart } from 'opensearch-dashboards/public';
-import { ACCELERATION_INDEX_TYPES, DATA_SOURCE_TYPES } from '../../../../framework/constants';
+import { ACCELERATION_INDEX_TYPES } from '../../../../framework/constants';
 import { AssociatedObject, CachedAcceleration } from '../../../../framework/types';
 import {
   getRenderAccelerationDetailsFlyout,
@@ -27,6 +27,7 @@ import {
   redirectToDiscoverOSIdx,
   redirectToDiscoverWithDataSrc,
 } from './utils/associated_objects_tab_utils';
+import { getUiSettings } from '../../utils';
 
 interface AssociatedObjectsTableProps {
   datasourceName: string;
@@ -180,6 +181,9 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
               defaultMessage: 'Query in Discover',
             }
           ),
+          enabled: () => {
+            return getUiSettings().get('query:enhancements:enabled');
+          },
           type: 'icon',
           icon: 'discoverApp',
           onClick: (asscObj: AssociatedObject) => {

@@ -47,6 +47,7 @@ import {
   isCatalogCacheFetching,
   redirectToDiscoverWithDataSrc,
 } from './utils/associated_objects_tab_utils';
+import { getUiSettings } from '../../utils';
 
 export interface AssociatedObjectsFlyoutProps {
   tableDetail: AssociatedObject;
@@ -76,6 +77,7 @@ export const AssociatedObjectsDetailsFlyout = ({
   const DiscoverButton = () => {
     return (
       <EuiButtonEmpty
+        isDisabled={!getUiSettings().get('query:enhancements:enabled')}
         onClick={() => {
           if (tableDetail.type !== 'table') return;
           redirectToDiscoverWithDataSrc(
