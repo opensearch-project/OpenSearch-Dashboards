@@ -362,6 +362,7 @@ Object {
                           class="euiPopover__anchor"
                         >
                           <button
+                            aria-label="workspace-collaborator-table-actions"
                             class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                             data-test-subj="workspace-detail-collaborator-table-actions-box"
                             type="button"
@@ -473,6 +474,7 @@ Object {
                           class="euiPopover__anchor"
                         >
                           <button
+                            aria-label="workspace-collaborator-table-actions"
                             class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                             data-test-subj="workspace-detail-collaborator-table-actions-box"
                             type="button"
@@ -582,6 +584,7 @@ Object {
                           class="euiPopover__anchor"
                         >
                           <button
+                            aria-label="workspace-collaborator-table-actions"
                             class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                             data-test-subj="workspace-detail-collaborator-table-actions-box"
                             type="button"
@@ -1069,6 +1072,7 @@ Object {
                         class="euiPopover__anchor"
                       >
                         <button
+                          aria-label="workspace-collaborator-table-actions"
                           class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                           data-test-subj="workspace-detail-collaborator-table-actions-box"
                           type="button"
@@ -1180,6 +1184,7 @@ Object {
                         class="euiPopover__anchor"
                       >
                         <button
+                          aria-label="workspace-collaborator-table-actions"
                           class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                           data-test-subj="workspace-detail-collaborator-table-actions-box"
                           type="button"
@@ -1289,6 +1294,7 @@ Object {
                         class="euiPopover__anchor"
                       >
                         <button
+                          aria-label="workspace-collaborator-table-actions"
                           class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
                           data-test-subj="workspace-detail-collaborator-table-actions-box"
                           type="button"

@@ -101,7 +101,7 @@ describe('UseCaseService', () => {
             title: 'Workspace settings',
           },
           {
-            id: 'collaborators',
+            id: 'workspace_collaborators',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 200,
             title: 'Collaborators',

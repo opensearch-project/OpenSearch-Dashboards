@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-process.env.DEBUG_PRINT_LIMIT = 100000;
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
@@ -12,12 +11,22 @@ import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/open
 import { of } from 'rxjs';
 import ReactDOM from 'react-dom';
 import { fireEvent } from '@testing-library/react';
+import { WorkspaceCollaboratorPermissionType } from '../../types';
+
 const workspaceClientUpdateMock = jest.fn();
+const addDangerMock = jest.fn();
 const coreStartMock = coreMock.createStart();
 
 const mockOverlays = coreStartMock.overlays;
 
-const setup = ({ permissionEnabled = true }: { permissionEnabled?: boolean }) => {
+const setup = ({
+  permissionEnabled = true,
+  workspaceClientUpdate = workspaceClientUpdateMock,
+}: {
+  permissionEnabled?: boolean;
+  workspaceClientUpdate?: jest.Mock;
+}) => {
+  const collaboratorTypes: WorkspaceCollaboratorPermissionType[] = [];
   const services = {
     ...coreStartMock,
     application: {
@@ -54,13 +63,20 @@ const setup = ({ permissionEnabled = true }: { permissionEnabled?: boolean }) =>
       }),
     },
     workspaceClient: {
-      update: workspaceClientUpdateMock,
+      update: workspaceClientUpdate,
     },
     navigationUI: {
       HeaderControl: () => null,
     },
     collaboratorTypes: {
-      getTypes$: () => of([]),
+      getTypes$: () => of(collaboratorTypes),
+    },
+    notifications: {
+      ...coreStartMock.notifications,
+      toasts: {
+        ...coreStartMock.notifications.toasts,
+        addDanger: addDangerMock,
+      },
     },
   };
   const renderResult = render(
@@ -105,5 +121,50 @@ describe('WorkspaceCollaborators', () => {
     const deleteCollaborator = renderResult.getByText('Delete 1 collaborator');
     fireEvent.click(deleteCollaborator);
     expect(mockOverlays.openModal).toHaveBeenCalled();
+    mockOverlays.openModal.mock.calls[0][0](renderResult.getByTestId('confirm-modal-container'));
+    await waitFor(() => {
+      expect(renderResult.getByText('Confirm')).toBeInTheDocument();
+    });
+    jest.useFakeTimers();
+    fireEvent.click(renderResult.getByText('Confirm'));
+    expect(workspaceClientUpdateMock).toHaveBeenCalledWith(
+      'test',
+      {},
+      {
+        permissions: {
+          library_read: { users: ['bar'] },
+          library_write: { groups: ['foo'] },
+          read: { groups: ['foo'], users: ['bar'] },
+        },
+      }
+    );
+    mockOverlays.openModal.mock.calls[0][0](renderResult.getByTestId('confirm-modal-container'));
+    const modal = renderResult.queryByTestId('confirm-modal-container');
+    if (modal) {
+      ReactDOM.unmountComponentAtNode(modal);
+    }
+  });
+
+  it('should call notification add danger if update is failed', async () => {
+    const workspaceClientUpdate = jest.fn().mockRejectedValue('error');
+    const { renderResult } = setup({ permissionEnabled: true, workspaceClientUpdate });
+    mockOverlays.openModal.mockReturnValue({
+      onClose: Promise.resolve(),
+      close: async () => {
+        ReactDOM.unmountComponentAtNode(renderResult.getByTestId('confirm-modal-container'));
+      },
+    });
+
+    fireEvent.click(renderResult.getByTestId('checkboxSelectRow-0'));
+    const deleteCollaborator = renderResult.getByText('Delete 1 collaborator');
+    fireEvent.click(deleteCollaborator);
+    expect(mockOverlays.openModal).toHaveBeenCalled();
+    mockOverlays.openModal.mock.calls[0][0](renderResult.getByTestId('confirm-modal-container'));
+    await waitFor(() => {
+      expect(renderResult.getByText('Confirm')).toBeInTheDocument();
+    });
+    jest.useFakeTimers();
+    fireEvent.click(renderResult.getByText('Confirm'));
+    expect(addDangerMock).toHaveBeenCalled();
   });
 });
