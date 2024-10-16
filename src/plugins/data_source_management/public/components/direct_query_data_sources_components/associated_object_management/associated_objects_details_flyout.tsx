@@ -77,7 +77,13 @@ export const AssociatedObjectsDetailsFlyout = ({
   const DiscoverButton = () => {
     return (
       <EuiButtonEmpty
-        isDisabled={!getUiSettings().get('query:enhancements:enabled')}
+        isDisabled={(() => {
+          try {
+            return !getUiSettings().get('query:enhancements:enabled');
+          } catch (e) {
+            return false;
+          }
+        })()}
         onClick={() => {
           if (tableDetail.type !== 'table') return;
           redirectToDiscoverWithDataSrc(

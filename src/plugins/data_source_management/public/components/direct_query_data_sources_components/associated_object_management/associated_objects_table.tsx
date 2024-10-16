@@ -182,7 +182,11 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
             }
           ),
           enabled: () => {
-            return getUiSettings().get('query:enhancements:enabled');
+            try {
+              return getUiSettings().get('query:enhancements:enabled');
+            } catch (e) {
+              return false;
+            }
           },
           type: 'icon',
           icon: 'discoverApp',

@@ -232,7 +232,13 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   const DiscoverIcon = () => {
     return (
       <EuiButtonEmpty
-        isDisabled={!getUiSettings().get('query:enhancements:enabled')}
+        isDisabled={(() => {
+          try {
+            return !getUiSettings().get('query:enhancements:enabled');
+          } catch (e) {
+            return false;
+          }
+        })()}
         onClick={() => {
           onDiscoverIconClick(acceleration, dataSourceName, dataSourceMDSId, application);
           resetFlyout();
