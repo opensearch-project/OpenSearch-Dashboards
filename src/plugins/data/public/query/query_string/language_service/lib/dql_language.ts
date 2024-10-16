@@ -24,6 +24,6 @@ export const getDQLLanguageConfig = (
     },
     showDocLinks: true,
     editorSupportedAppNames: ['discover'],
-    supportedAppNames: ['discover', 'dashboards', 'visualize', 'data-explorer'],
+    supportedAppNames: ['discover', 'dashboards', 'visualize', 'data-explorer', 'vis-builder', '*'],
   };
 };

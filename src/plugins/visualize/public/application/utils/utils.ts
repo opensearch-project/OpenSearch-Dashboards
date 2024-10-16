@@ -60,7 +60,7 @@ export const addBadgeToAppChrome = (chrome: ChromeStart) => {
   });
 };
 
-export const getDefaultQuery = ({ data }: VisualizeServices) => {
+export const getDefaultQuery = ({ data, toastNotifications, uiSettings }: VisualizeServices) => {
   return data.query.queryString.getDefaultQuery();
 };
 
