@@ -16,7 +16,7 @@ import {
   EDIT,
 } from '../../framework/utils/shared';
 
-export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled: boolean) {
+export function registerNonMdsDataConnectionsRoute(router: IRouter) {
   router.get(
     {
       path: `${DATACONNECTIONS_BASE}/{name}`,
@@ -204,7 +204,9 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
       }
     }
   );
+}
 
+export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled: boolean) {
   router.get(
     {
       path: `${DATACONNECTIONS_BASE}/dataSourceMDSId={dataSourceMDSId?}`,
