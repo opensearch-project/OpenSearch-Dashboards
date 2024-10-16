@@ -1,0 +1,15 @@
+#data.enhancements.enabled: true
+#workspace.enabled: true
+data_source.enabled: true
+opensearch.hosts: ["https://search-osd-211-3sx6v2a2vnvnnx77kltautyll4.us-west-2.es.amazonaws.com"]
+opensearch.username: 'admin'
+opensearch.password: 'myStrongPassword123!'
+opensearch.ignoreVersionMismatch: true
+opensearchDashboards.branding.useExpandedHeader: false
+opensearch.ssl.verificationMode: none
+opensearch.requestHeadersWhitelist: [authorization]
+opensearch_security.multitenancy.enabled: false
+opensearch_security.readonly_mode.roles: [kibana_read_only]
+opensearch_security.cookie.secure: false
+#usageCollection.uiMetric.enabled: true
+#export OSD_PATH_CONF=/home/ubuntu/work/OpenSearch-Dashboards/OSDConfig

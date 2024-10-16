@@ -15,7 +15,12 @@ import {
 import { DataSourceOption, DatasetSelector } from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
-import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
+import {
+  setIndexPattern,
+  useTypedDispatch,
+  useTypedSelector,
+  setSelectedDataset,
+} from '../../utils/state_management';
 import './index.scss';
 
 export const Sidebar: FC = ({ children }) => {
@@ -24,6 +29,7 @@ export const Sidebar: FC = ({ children }) => {
   const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
   const [activeDataSources, setActiveDataSources] = useState<DataSource[]>([]);
+  const selectedDataSet = useTypedSelector((state) => state.metadata.selectedDataset);
 
   const {
     services: {
@@ -139,7 +145,12 @@ export const Sidebar: FC = ({ children }) => {
           className="deSidebar_dataSource"
         >
           {isEnhancementEnabled ? (
-            <DatasetSelector onSubmit={handleDatasetSubmit} />
+            <DatasetSelector
+              onSubmit={handleDatasetSubmit}
+              selectedDataset={selectedDataSet}
+              setSelectedDataset={setSelectedDataset}
+              dispatch={dispatch}
+            />
           ) : (
             <DataSourceSelectable
               dataSources={activeDataSources}

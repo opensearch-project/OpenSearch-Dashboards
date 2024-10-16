@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { memo, useRef } from 'react';
+import React, { memo, useRef, useCallback } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,16 +21,23 @@ import { View } from '../services/view_service/view';
 import { shallowEqual } from '../utils/use/shallow_equal';
 import './app_container.scss';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
-import { IDataPluginServices } from '../../../data/public';
+import { IDataPluginServices, AdvancedSelector } from '../../../data/public';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from './constants';
 import { DISCOVER_LOAD_EVENT, NEW_DISCOVER_LOAD_EVENT, trackUiMetric } from '../ui_metric';
+import { NoIndexPatternPanel } from './no_index_pattern_panel';
+import { useTypedSelector, useTypedDispatch, setSelectedDataset } from '../utils/state_management';
+import { Dataset } from '../../../data/common';
+import { toMountPoint } from '../../../opensearch_dashboards_react/public';
+import { NoDatasetPanel } from './no_dataset_panel';
 
 export const AppContainer = React.memo(
   ({ view, params }: { view?: View; params: AppMountParameters }) => {
     const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
+    const { indexPattern } = useTypedSelector((state) => state.metadata);
+    const dispatch = useTypedDispatch();
 
     const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
-    const { uiSettings } = opensearchDashboards.services;
+    const { uiSettings, overlays, data } = opensearchDashboards.services;
     const isEnhancementsEnabled = uiSettings?.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
     const showActionsInGroup = uiSettings?.get('home:useNewHomePage');
 
@@ -55,6 +62,39 @@ export const AppContainer = React.memo(
       topLinkRef,
       datePickerRef,
     };
+
+    const handleDatasetChange = (dataset: Dataset) => {
+      setSelectedDataset(dataset);
+      dispatch(setSelectedDataset(dataset));
+
+      // Update query and other necessary state
+      const queryString = data.query.queryString;
+      const query = queryString.getInitialQueryByDataset(dataset);
+      queryString.setQuery(query);
+      queryString.getDatasetService().addRecentDataset(dataset);
+    };
+
+    const handleOpenDataSelector = () => {
+      const overlay = overlays?.openModal(
+        toMountPoint(
+          <AdvancedSelector
+            services={opensearchDashboards.services}
+            onSelect={(dataset?: Dataset) => {
+              overlay?.close();
+              if (dataset) {
+                handleDatasetChange(dataset);
+              }
+            }}
+            onCancel={() => overlay?.close()}
+          />
+        ),
+        {
+          maxWidth: false,
+          className: 'datasetSelector__advancedModal',
+        }
+      );
+    };
+
     // Render the application DOM.
     return (
       <div className="mainPage">
@@ -88,34 +128,44 @@ export const AppContainer = React.memo(
           {/* TODO: improve fallback state */}
           <Suspense fallback={<div>Loading...</div>}>
             <Context {...params}>
-              <EuiResizableContainer direction={isMobile ? 'vertical' : 'horizontal'}>
-                {(EuiResizablePanel, EuiResizableButton) => (
-                  <>
-                    <EuiResizablePanel
-                      initialSize={20}
-                      minSize="260px"
-                      mode={['collapsible', { position: 'top' }]}
-                      paddingSize="none"
-                    >
-                      <Sidebar>
-                        <MemoizedPanel {...params} />
-                      </Sidebar>
-                    </EuiResizablePanel>
-                    <EuiResizableButton />
+              {hasNoDataset ? (
+                <EuiPageBody>
+                  <NoDatasetPanel onOpenDataSelector={handleOpenDataSelector} />
+                </EuiPageBody>
+              ) : (
+                <EuiResizableContainer direction={isMobile ? 'vertical' : 'horizontal'}>
+                  {(EuiResizablePanel, EuiResizableButton) => (
+                    <>
+                      <EuiResizablePanel
+                        initialSize={20}
+                        minSize="260px"
+                        mode={['collapsible', { position: 'top' }]}
+                        paddingSize="none"
+                      >
+                        <Sidebar>
+                          <MemoizedPanel {...params} />
+                        </Sidebar>
+                      </EuiResizablePanel>
+                      <EuiResizableButton />
 
-                    <EuiResizablePanel
-                      initialSize={80}
-                      minSize="65%"
-                      mode="main"
-                      paddingSize="none"
-                    >
-                      <EuiPageBody className="deLayout__canvas">
-                        <MemoizedCanvas {...params} />
-                      </EuiPageBody>
-                    </EuiResizablePanel>
-                  </>
-                )}
-              </EuiResizableContainer>
+                      <EuiResizablePanel
+                        initialSize={80}
+                        minSize="65%"
+                        mode="main"
+                        paddingSize="none"
+                      >
+                        <EuiPageBody className="deLayout__canvas">
+                          {indexPattern ? (
+                            <MemoizedCanvas {...params} />
+                          ) : (
+                            <NoIndexPatternPanel onOpenDataSelector={handleOpenDataSelector} />
+                          )}
+                        </EuiPageBody>
+                      </EuiResizablePanel>
+                    </>
+                  )}
+                </EuiResizableContainer>
+              )}
             </Context>
           </Suspense>
         </EuiPage>

@@ -37,6 +37,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
       uiSettings,
       capabilities,
       chrome: { setHeaderVariant },
+      data,
     },
   } = useOpenSearchDashboards<DiscoverViewServices>();
   const { columns } = useSelector((state) => {
