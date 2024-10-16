@@ -51,7 +51,11 @@ export const redirectToExplorerWithDataSrc = (
   application: ApplicationStart
 ) => {
   application.navigateToApp('data-explorer', {
-    path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:${datasourceMDSId},meta:(name:${datasourceName},type:CUSTOM),title:'',type:DATA_SOURCE),id:'${datasourceMDSId}::${datasourceName}.${databaseName}.${tableName}',title:${datasourceName}.${databaseName}.${tableName},type:S3),language:SQL,query:'SELECT%20*%20FROM%20${datasourceName}.${databaseName}.${tableName}%20LIMIT%2010'))`,
+    path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:'${
+      datasourceMDSId ?? ''
+    }',meta:(name:${datasourceName},type:CUSTOM),title:'',type:DATA_SOURCE),id:'${
+      datasourceMDSId ?? ''
+    }::${datasourceName}.${databaseName}.${tableName}',title:${datasourceName}.${databaseName}.${tableName},type:S3),language:SQL,query:'SELECT%20*%20FROM%20${datasourceName}.${databaseName}.${tableName}%20LIMIT%2010'))`,
   });
 };
 
@@ -61,7 +65,11 @@ export const redirectToExplorerOSIdx = (
   application: ApplicationStart
 ) => {
   application.navigateToApp('data-explorer', {
-    path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:${datasourceMDSId},title:'',type:DATA_SOURCE),id:'${datasourceMDSId}::${indexName}',title:${indexName},type:INDEXES),language:SQL,query:'SELECT%20*%20FROM%20${indexName}%20LIMIT%2010'))`,
+    path: `discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-15m,to:now))&_q=(filters:!(),query:(dataset:(dataSource:(id:${
+      datasourceMDSId ?? ''
+    },title:'',type:DATA_SOURCE),id:'${
+      datasourceMDSId ?? ''
+    }::${indexName}',title:${indexName},type:INDEXES),language:SQL,query:'SELECT%20*%20FROM%20${indexName}%20LIMIT%2010'))`,
   });
 };
 
