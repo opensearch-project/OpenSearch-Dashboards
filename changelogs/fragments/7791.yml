@@ -1,0 +1,2 @@
+feat:
+- Support overriding theme through URL search parameter ([#7791](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7791))
