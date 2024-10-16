@@ -9,8 +9,8 @@ import { ApplicationStart } from 'opensearch-dashboards/public';
 import { DATA_SOURCE_TYPES } from '../../../../framework/constants';
 import { CachedAcceleration, RenderAccelerationFlyoutParams } from '../../../../framework/types';
 import {
-  redirectToExplorerOSIdx,
-  redirectToExplorerWithDataSrc,
+  redirectToDiscoverOSIdx,
+  redirectToDiscoverWithDataSrc,
 } from '../associated_object_management/utils/associated_objects_tab_utils';
 export const ACC_PANEL_TITLE = 'Accelerations';
 export const ACC_PANEL_DESC =
@@ -174,7 +174,7 @@ export const onDiscoverIconClick = (
   // boolean determining whether its a skipping index table or mv/ci
   if (acceleration.type === undefined) return;
   if (acceleration.type === 'skipping') {
-    redirectToExplorerWithDataSrc(
+    redirectToDiscoverWithDataSrc(
       dataSourceName,
       dataSourceMDSId,
       acceleration.database,
@@ -182,6 +182,6 @@ export const onDiscoverIconClick = (
       application
     );
   } else {
-    redirectToExplorerOSIdx(acceleration.flintIndexName, dataSourceMDSId, application);
+    redirectToDiscoverOSIdx(acceleration.flintIndexName, dataSourceMDSId, application);
   }
 };

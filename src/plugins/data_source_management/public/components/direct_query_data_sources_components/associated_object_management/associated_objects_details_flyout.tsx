@@ -45,7 +45,7 @@ import {
 } from '../acceleration_management/acceleration_utils';
 import {
   isCatalogCacheFetching,
-  redirectToExplorerWithDataSrc,
+  redirectToDiscoverWithDataSrc,
 } from './utils/associated_objects_tab_utils';
 
 export interface AssociatedObjectsFlyoutProps {
@@ -78,7 +78,7 @@ export const AssociatedObjectsDetailsFlyout = ({
       <EuiButtonEmpty
         onClick={() => {
           if (tableDetail.type !== 'table') return;
-          redirectToExplorerWithDataSrc(
+          redirectToDiscoverWithDataSrc(
             tableDetail.datasource,
             dataSourceMDSId,
             tableDetail.database,

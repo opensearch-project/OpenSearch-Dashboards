@@ -24,8 +24,8 @@ import {
   ASSC_OBJ_TABLE_ACC_COLUMN_NAME,
   ASSC_OBJ_TABLE_SEARCH_HINT,
   ASSC_OBJ_TABLE_SUBJ,
-  redirectToExplorerOSIdx,
-  redirectToExplorerWithDataSrc,
+  redirectToDiscoverOSIdx,
+  redirectToDiscoverWithDataSrc,
 } from './utils/associated_objects_tab_utils';
 
 interface AssociatedObjectsTableProps {
@@ -188,9 +188,9 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
               const acceleration = cachedAccelerations.find(
                 (acc) => getAccelerationName(acc) === asscObj.name
               );
-              redirectToExplorerOSIdx(acceleration!.flintIndexName, dataSourceMDSId, application);
+              redirectToDiscoverOSIdx(acceleration!.flintIndexName, dataSourceMDSId, application);
             } else if (asscObj.type === 'table' || asscObj.type === 'skipping') {
-              redirectToExplorerWithDataSrc(
+              redirectToDiscoverWithDataSrc(
                 asscObj.datasource,
                 dataSourceMDSId,
                 asscObj.database,

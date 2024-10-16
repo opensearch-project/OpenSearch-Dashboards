@@ -7,8 +7,8 @@ import { ApplicationStart } from 'opensearch-dashboards/public';
 import { DirectQueryLoadingStatus } from '../../../../../framework/types';
 import {
   isCatalogCacheFetching,
-  redirectToExplorerWithDataSrc,
-  redirectToExplorerOSIdx,
+  redirectToDiscoverWithDataSrc,
+  redirectToDiscoverOSIdx,
 } from './associated_objects_tab_utils';
 import {
   DEFAULT_DATA_SOURCE_NAME,
@@ -40,12 +40,12 @@ describe('AssociatedObjectsTab utils', () => {
     });
   });
 
-  describe('redirectToExplorerWithDataSrc', () => {
+  describe('redirectToDiscoverWithDataSrc', () => {
     it('navigates to the explorer with the correct state', () => {
       const mockNavigateToApp = jest.fn();
       const application = ({ navigateToApp: mockNavigateToApp } as unknown) as ApplicationStart;
 
-      redirectToExplorerWithDataSrc(
+      redirectToDiscoverWithDataSrc(
         'testDataSource',
         'testType',
         'testDatabase',
@@ -64,12 +64,12 @@ describe('AssociatedObjectsTab utils', () => {
     });
   });
 
-  describe('redirectToExplorerOSIdx', () => {
+  describe('redirectToDiscoverOSIdx', () => {
     it('navigates to the explorer with the correct state', () => {
       const mockNavigateToApp = jest.fn();
       const application = ({ navigateToApp: mockNavigateToApp } as unknown) as ApplicationStart;
 
-      redirectToExplorerOSIdx('testIndex', application);
+      redirectToDiscoverOSIdx('testIndex', application);
 
       expect(mockNavigateToApp).toHaveBeenCalledWith(observabilityLogsID, {
         path: '#/explorer',

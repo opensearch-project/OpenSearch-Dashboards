@@ -43,7 +43,7 @@ export const isCatalogCacheFetching = (...statuses: DirectQueryLoadingStatus[]) 
   );
 };
 
-export const redirectToExplorerWithDataSrc = (
+export const redirectToDiscoverWithDataSrc = (
   datasourceName: string,
   datasourceMDSId: string | undefined,
   databaseName: string,
@@ -59,7 +59,7 @@ export const redirectToExplorerWithDataSrc = (
   });
 };
 
-export const redirectToExplorerOSIdx = (
+export const redirectToDiscoverOSIdx = (
   indexName: string,
   datasourceMDSId: string | undefined,
   application: ApplicationStart
