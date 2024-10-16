@@ -33,6 +33,8 @@ export interface DatasetTypeConfig {
     tooltip?: string;
     /** Optional requiresTimeFilter determines if a time filter is needed */
     supportsTimeFilter?: boolean;
+    /** Optional preference for search on page load else defaulted to true */
+    searchOnLoad?: boolean;
   };
   /**
    * Converts a DataStructure to a Dataset.

@@ -33,6 +33,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
     icon: { type: S3_ICON },
     tooltip: 'Amazon S3 Connections',
     supportsTimeFilter: false,
+    searchOnLoad: true,
   },
 
   toDataset: (path: DataStructure[]): Dataset => {
