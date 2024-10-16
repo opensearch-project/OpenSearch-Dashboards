@@ -91,17 +91,17 @@ export class UseCaseService {
                 ]
               : []),
             {
-              id: 'objects',
+              id: 'dataSources',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 300,
             },
             {
-              id: 'dataSources',
+              id: 'indexPatterns',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 400,
             },
             {
-              id: 'indexPatterns',
+              id: 'objects',
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 500,
             },

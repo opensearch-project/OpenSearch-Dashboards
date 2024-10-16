@@ -91,7 +91,7 @@ export const WorkspaceCollaborators = () => {
     return null;
   }
   return (
-    <EuiPage>
+    <EuiPage data-test-subj="workspace-collaborators-panel">
       <HeaderControl
         controls={[
           {

@@ -532,6 +532,7 @@ const Actions = ({
 
   const button = isTableAction ? (
     <EuiButtonIcon
+      aria-label="workspace-collaborator-table-actions"
       iconType="boxesHorizontal"
       onClick={() => setIsPopoverOpen(true)}
       data-test-subj="workspace-detail-collaborator-table-actions-box"
