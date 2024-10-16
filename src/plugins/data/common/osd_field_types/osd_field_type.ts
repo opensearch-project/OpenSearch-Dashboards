@@ -28,18 +28,25 @@
  * under the License.
  */
 
-import { OsdFieldTypeOptions, OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from './types';
+import {
+  OPENSEARCH_FIELD_TYPES,
+  OPENSEARCH_SQL_FIELD_TYPES,
+  OSD_FIELD_TYPES,
+  OsdFieldTypeOptions,
+} from './types';
 
 export class OsdFieldType {
   public readonly name: string;
   public readonly sortable: boolean;
   public readonly filterable: boolean;
   public readonly esTypes: readonly OPENSEARCH_FIELD_TYPES[];
+  public readonly osSQLTypes?: readonly OPENSEARCH_SQL_FIELD_TYPES[];
 
   constructor(options: Partial<OsdFieldTypeOptions> = {}) {
     this.name = options.name || OSD_FIELD_TYPES.UNKNOWN;
     this.sortable = options.sortable || false;
     this.filterable = options.filterable || false;
     this.esTypes = Object.freeze((options.esTypes || []).slice());
+    this.osSQLTypes = Object.freeze((options.osSQLTypes || []).slice());
   }
 }
