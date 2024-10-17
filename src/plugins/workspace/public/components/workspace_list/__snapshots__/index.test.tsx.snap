@@ -12,20 +12,20 @@ exports[`WorkspaceList should render title and table normally 1`] = `
     >
       <div>
         <div
-          class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
         >
           <div
             class="euiFlexItem euiSearchBar__searchHolder"
           >
             <div
-              class="euiFormControlLayout euiFormControlLayout--fullWidth"
+              class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
             >
               <div
                 class="euiFormControlLayout__childrenWrapper"
               >
                 <input
                   aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-                  class="euiFieldSearch euiFieldSearch--fullWidth"
+                  class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
                   placeholder="Search..."
                   type="search"
                   value=""
@@ -60,7 +60,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--hasIcon"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiFilterButton euiFilterButton--hasIcon"
                     type="button"
                   >
                     <span
@@ -90,7 +90,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
           </div>
         </div>
         <div
-          class="euiSpacer euiSpacer--l"
+          class="euiSpacer euiSpacer--m"
         />
         <div
           class="euiBasicTable"
@@ -357,9 +357,10 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                       <span
                         class=""
                       >
-                        <button
+                        <a
                           class="euiLink euiLink--primary"
-                          type="button"
+                          href="http://localhost/w/id1/workspace_detail"
+                          rel="noreferrer"
                         >
                           <div
                             class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -374,7 +375,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                               </div>
                             </div>
                           </div>
-                        </button>
+                        </a>
                       </span>
                     </div>
                   </td>
@@ -529,9 +530,10 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                       <span
                         class=""
                       >
-                        <button
+                        <a
                           class="euiLink euiLink--primary"
-                          type="button"
+                          href="http://localhost/w/id2/discover"
+                          rel="noreferrer"
                         >
                           <div
                             class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -546,7 +548,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                               </div>
                             </div>
                           </div>
-                        </button>
+                        </a>
                       </span>
                     </div>
                   </td>
@@ -701,9 +703,10 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                       <span
                         class=""
                       >
-                        <button
+                        <a
                           class="euiLink euiLink--primary"
-                          type="button"
+                          href="http://localhost/w/id3/discover"
+                          rel="noreferrer"
                         >
                           <div
                             class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -718,7 +721,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                               </div>
                             </div>
                           </div>
-                        </button>
+                        </a>
                       </span>
                     </div>
                   </td>

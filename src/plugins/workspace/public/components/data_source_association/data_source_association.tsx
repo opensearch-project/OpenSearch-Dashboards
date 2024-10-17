@@ -19,7 +19,7 @@ import {
   toMountPoint,
   useOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
-import { AssociationDataSourceModalContent } from '../workspace_detail/association_data_source_modal';
+import { AssociationDataSourceModalContent } from './association_data_source_modal';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 

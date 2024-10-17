@@ -12,7 +12,7 @@ import {
   toMountPoint,
 } from '../../../../opensearch_dashboards_react/public';
 import { DataSourceAssociation } from './data_source_association';
-import { AssociationDataSourceModalContent } from '../workspace_detail/association_data_source_modal';
+import { AssociationDataSourceModalContent } from './association_data_source_modal';
 import { DataSourceConnectionType } from 'src/plugins/workspace/common/types';
 import { BehaviorSubject } from 'rxjs';
 import { IWorkspaceClient } from 'opensearch-dashboards/public';
@@ -23,7 +23,7 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => ({
   toMountPoint: jest.fn(),
 }));
 
-jest.mock('../workspace_detail/association_data_source_modal', () => ({
+jest.mock('./association_data_source_modal', () => ({
   AssociationDataSourceModalContent: jest.fn(),
 }));
 

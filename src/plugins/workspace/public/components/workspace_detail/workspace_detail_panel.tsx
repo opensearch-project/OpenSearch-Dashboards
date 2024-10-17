@@ -4,27 +4,14 @@
  */
 
 import React from 'react';
-import {
-  EuiText,
-  EuiCopy,
-  EuiBadge,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButtonIcon,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiText, EuiCopy, EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiIcon } from '@elastic/eui';
 import moment from 'moment';
 import { i18n } from '@osd/i18n';
 import { WorkspaceUseCase } from '../../types';
 import { WorkspaceObject } from '../../../../../core/public';
-import { WorkspaceAttributeWithPermission } from '../../../../../core/types';
 
 const detailUseCase = i18n.translate('workspace.detail.useCase', {
   defaultMessage: 'Use case',
-});
-
-const detailOwners = i18n.translate('workspace.detail.owners', {
-  defaultMessage: 'Owners',
 });
 
 const detailLastUpdated = i18n.translate('workspace.detail.lastUpdated', {
@@ -35,24 +22,16 @@ const detailID = i18n.translate('workspace.detail.id', {
   defaultMessage: 'ID',
 });
 
-function getOwners(currentWorkspace: WorkspaceAttributeWithPermission) {
-  const { groups = [], users = [] } = currentWorkspace?.permissions?.write || {};
-  return [...groups, ...users];
-}
-
 interface WorkspaceDetailPanelProps {
-  handleBadgeClick: () => void;
   currentUseCase: WorkspaceUseCase | undefined;
   currentWorkspace: WorkspaceObject;
   dateFormat: string;
 }
 export const WorkspaceDetailPanel = ({
   currentUseCase,
-  handleBadgeClick,
   currentWorkspace,
   dateFormat,
 }: WorkspaceDetailPanelProps) => {
-  const owners = getOwners(currentWorkspace);
   const formatDate = (lastUpdatedTime: string) => {
     return moment(lastUpdatedTime).format(dateFormat);
   };
@@ -72,23 +51,6 @@ export const WorkspaceDetailPanel = ({
               <EuiFlexItem>{currentUseCase.title}</EuiFlexItem>
             </EuiFlexGroup>
           )}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiText>
-          <h4>{detailOwners}</h4>
-          <p style={{ display: 'inline-flex' }}>
-            {owners?.at(0)}&nbsp;&nbsp;
-            {owners && owners.length > 1 && (
-              <EuiBadge
-                onClick={handleBadgeClick}
-                onClickAriaLabel="MoveToTeamMember"
-                color="hollow"
-              >
-                +{owners?.length - 1} more
-              </EuiBadge>
-            )}
-          </p>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>
