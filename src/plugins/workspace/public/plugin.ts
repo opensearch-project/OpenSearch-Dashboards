@@ -435,7 +435,7 @@ export class WorkspacePlugin
           const currentUseCase = availableUseCases.find(
             (useCase) => useCase.id === getFirstUseCaseOfFeatureConfigs(workspace?.features ?? [])
           );
-          const useCaseUrl = getUseCaseUrl(currentUseCase, workspace, application, http);
+          const useCaseUrl = getUseCaseUrl(currentUseCase, workspace.id, application, http);
           application.navigateToUrl(useCaseUrl);
         } else {
           application.navigateToApp('home');
