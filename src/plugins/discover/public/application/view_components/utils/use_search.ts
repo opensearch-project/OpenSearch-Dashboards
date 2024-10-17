@@ -259,9 +259,9 @@ export const useSearch = (services: DiscoverViewServices) => {
       }
       let errorBody;
       try {
-        errorBody = JSON.parse(error.message);
+        errorBody = JSON.parse(error.body.message);
       } catch (e) {
-        errorBody = error.message;
+        errorBody = error.body.message;
       }
 
       data$.next({
