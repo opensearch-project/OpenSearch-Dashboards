@@ -6,7 +6,7 @@
 import React from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
 
-import { ContentManagementService, ContentProvider, Section } from './services';
+import { ContentManagementService, ContentProvider, Page, Section } from './services';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 
 export interface ContentManagementPluginSetup {
@@ -36,6 +36,10 @@ export interface ContentManagementPluginStart {
     targetArea: string,
     callback: (section: Section | null, err?: Error) => Section | null
   ) => void;
+  /**
+   * @experimental this API is experimental and might change in future releases
+   */
+  getPage: (id: string) => Page | undefined;
   renderPage: (id: string, options?: RenderOptions) => React.ReactNode;
 }
 
