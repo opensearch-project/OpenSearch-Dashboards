@@ -101,7 +101,7 @@ export const AddCollaboratorButton = ({
     if (result?.success) {
       if (notifications) {
         notifications.toasts.addSuccess({
-          title: i18n.translate('workspace.workspaceDetail.collaborator.add.success', {
+          title: i18n.translate('workspace.collaborator.add.success.message', {
             defaultMessage: 'Collaborators added successfully',
           }),
         });

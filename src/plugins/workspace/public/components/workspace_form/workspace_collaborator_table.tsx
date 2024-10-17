@@ -238,7 +238,7 @@ export const WorkspaceCollaboratorTable = ({
           );
           if (result?.success) {
             notifications?.toasts?.addSuccess({
-              title: i18n.translate('workspace.detail.collaborator.delete.success', {
+              title: i18n.translate('workspace.collaborator.delete.success.message', {
                 defaultMessage:
                   'Delete collaborator{pluralSuffix, select, true {} other {s}} successfully.',
                 values: {
@@ -326,23 +326,31 @@ export const WorkspaceCollaboratorTable = ({
   const columns: Array<EuiBasicTableColumn<PermissionSettingWithAccessLevelAndDisplayedType>> = [
     {
       field: 'primaryId',
-      name: 'ID',
+      name: i18n.translate('workspace.collaborator.id.name', {
+        defaultMessage: 'ID',
+      }),
       width: '30%',
     },
     {
       field: 'displayedType',
-      name: 'Type',
+      name: i18n.translate('workspace.collaborator.type.name', {
+        defaultMessage: 'Type',
+      }),
       render: (displayedType: string) => displayedType || <>&mdash;</>,
       width: '30%',
     },
     {
       field: 'accessLevel',
-      name: 'Access level',
+      name: i18n.translate('workspace.collaborator.access.level.name', {
+        defaultMessage: 'Access level',
+      }),
       render: (accessLevel: string) => accessLevel || <>&mdash;</>,
       width: '30%',
     },
     {
-      name: 'Actions',
+      name: i18n.translate('workspace.collaborator.actions.name', {
+        defaultMessage: 'Actions',
+      }),
       field: '',
       width: '10%',
       align: 'right',

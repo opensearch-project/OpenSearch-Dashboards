@@ -58,8 +58,8 @@ export const WorkspaceCollaborators = () => {
   const handleSubmitPermissionSettings = async (settings: WorkspacePermissionSetting[]) => {
     const showErrorNotification = (errorText?: string) => {
       notifications?.toasts.addDanger({
-        title: i18n.translate('workspace.update.failed', {
-          defaultMessage: 'Failed to update workspace',
+        title: i18n.translate('workspace.collaborators.update.failed.message', {
+          defaultMessage: 'Failed to update workspace collaborators',
         }),
         ...(errorText ? { text: errorText } : {}),
       });
@@ -95,7 +95,9 @@ export const WorkspaceCollaborators = () => {
       <HeaderControl
         controls={[
           {
-            description: 'Manage workspace access and permissions.',
+            description: i18n.translate('workspace.collaborators.description', {
+              defaultMessage: 'Manage workspace access and permissions.',
+            }),
           } as TopNavControlDescriptionData,
         ]}
         setMountPoint={application.setAppDescriptionControls}
