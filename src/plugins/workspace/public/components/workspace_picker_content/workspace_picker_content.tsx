@@ -80,10 +80,13 @@ export const WorkspacePickerContent = ({
         accessTimeStamp: recentWorkspace?.timestamp,
         accessTimeDescription: recentWorkspace
           ? i18n.translate('workspace.picker.accessTime.description', {
-              defaultMessage: `Viewed ${moment(recentWorkspace.timestamp).fromNow()}`,
+              defaultMessage: 'Viewed {timeLabel}',
+              values: {
+                timeLabel: moment(recentWorkspace.timestamp).fromNow(),
+              },
             })
           : i18n.translate('workspace.picker.accessTime.not.visited', {
-              defaultMessage: `Not visited recently`,
+              defaultMessage: 'Not visited recently',
             }),
       };
     });
