@@ -1,0 +1,2 @@
+feat:
+- Add admin validation when changing the last administrator to a lesser access ([#8621](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8621))
