@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { generateVegaLiteSpec } from './vega_lite_spec_builder';
+import { generateVegaLiteSpecForSeries } from './vega_lite_spec_series_builder';
 
-describe('generateVegaLiteSpec', () => {
+describe('generateVegaLiteSpecForSeries', () => {
   it('should generate a basic Vega-Lite specification', () => {
     const data = {
       xAxisFormat: { id: 'date' },
@@ -22,7 +22,7 @@ describe('generateVegaLiteSpec', () => {
     };
     const style = { type: 'line' };
 
-    const result = generateVegaLiteSpec(data, visConfig, style);
+    const result = generateVegaLiteSpecForSeries(data, visConfig, style);
 
     expect(result.$schema).toBe('https://vega.github.io/schema/vega-lite/v5.json');
     expect(result.data).toBeDefined();
@@ -45,10 +45,10 @@ describe('generateVegaLiteSpec', () => {
       addTooltip: true,
     };
 
-    const lineResult = generateVegaLiteSpec(data, visConfig, { type: 'line' });
+    const lineResult = generateVegaLiteSpecForSeries(data, visConfig, { type: 'line' });
     expect(lineResult.mark).toEqual({ type: 'line', point: true, tooltip: true });
 
-    const areaResult = generateVegaLiteSpec(data, visConfig, { type: 'area' });
+    const areaResult = generateVegaLiteSpecForSeries(data, visConfig, { type: 'area' });
     expect(areaResult.mark).toEqual({
       type: 'area',
       line: true,
@@ -58,7 +58,7 @@ describe('generateVegaLiteSpec', () => {
       baseline: 0,
     });
 
-    const barResult = generateVegaLiteSpec(data, visConfig, { type: 'bar' });
+    const barResult = generateVegaLiteSpecForSeries(data, visConfig, { type: 'bar' });
     expect(barResult.mark).toEqual({ type: 'bar', tooltip: true });
   });
 
@@ -78,7 +78,7 @@ describe('generateVegaLiteSpec', () => {
     };
     const style = { type: 'line' };
 
-    const result = generateVegaLiteSpec(data, visConfig, style);
+    const result = generateVegaLiteSpecForSeries(data, visConfig, style);
 
     expect(result.config).toBeDefined();
     expect(result.config!.legend).toBeDefined();
@@ -101,7 +101,7 @@ describe('generateVegaLiteSpec', () => {
     };
     const style = { type: 'line' };
 
-    const result = generateVegaLiteSpec(data, visConfig, style);
+    const result = generateVegaLiteSpecForSeries(data, visConfig, style);
 
     expect(result.encoding!.tooltip).toBeDefined();
     expect(result.mark).toHaveProperty('tooltip', true);

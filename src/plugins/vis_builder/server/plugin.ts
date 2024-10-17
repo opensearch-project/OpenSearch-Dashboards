@@ -44,6 +44,7 @@ export class VisBuilderPlugin implements Plugin<VisBuilderPluginSetup, VisBuilde
         description: i18n.translate('visBuilder.advancedSettings.visbuilderEnableVegaText', {
           defaultMessage: `Allow visbuilder to render visualizations via vega.`,
         }),
+        requiresPageReload: true,
         category: ['visbuilder'],
         schema: schema.boolean(),
       },

@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { generateVegaSpec } from './vega_spec_builder';
+import { generateVegaSpecForSeries } from './vega_spec_series_builder';
 
-describe('generateVegaSpec', () => {
+describe('generateVegaSpecForSeries', () => {
   const baseData = {
     xAxisFormat: { id: 'date' },
     xAxisLabel: 'Date',
@@ -26,7 +26,7 @@ describe('generateVegaSpec', () => {
   it('should generate a basic Vega specification', () => {
     const style = { type: 'line' };
 
-    const result = generateVegaSpec(baseData, baseVisConfig, style);
+    const result = generateVegaSpecForSeries(baseData, baseVisConfig, style);
 
     expect(result.$schema).toBe('https://vega.github.io/schema/vega/v5.json');
     expect(result.data).toBeDefined();
@@ -38,7 +38,7 @@ describe('generateVegaSpec', () => {
   it('should handle area charts', () => {
     const style = { type: 'area' };
 
-    const result = generateVegaSpec(baseData, baseVisConfig, style);
+    const result = generateVegaSpecForSeries(baseData, baseVisConfig, style);
 
     expect(result.data).toBeDefined();
     expect(result.data?.some((d) => d.name === 'stacked')).toBe(true);
@@ -48,7 +48,7 @@ describe('generateVegaSpec', () => {
   it('should add legend when specified', () => {
     const style = { type: 'line' };
 
-    const result = generateVegaSpec(baseData, baseVisConfig, style);
+    const result = generateVegaSpecForSeries(baseData, baseVisConfig, style);
 
     expect(result.legends).toBeDefined();
     expect(result.legends?.[0]?.orient).toBe('right');
@@ -61,7 +61,7 @@ describe('generateVegaSpec', () => {
     };
     const style = { type: 'line' };
 
-    const result = generateVegaSpec(baseData, visConfigNoLegend, style);
+    const result = generateVegaSpecForSeries(baseData, visConfigNoLegend, style);
 
     expect(result.legends).toBeUndefined();
   });
