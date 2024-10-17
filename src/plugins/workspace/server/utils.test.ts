@@ -77,7 +77,7 @@ describe('workspace utils', () => {
     expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
   });
 
-  it('should be not dashboard admin when configGroups and configUsers are []', () => {
+  it('should not be dashboard admin when configGroups and configUsers are []', () => {
     const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
     const groups: string[] = [];
     const users: string[] = ['user1'];

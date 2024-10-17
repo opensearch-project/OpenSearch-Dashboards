@@ -42,10 +42,6 @@ export const updateDashboardAdminStateForRequest = (
   if (!groups.length && !users.length) {
     return updateWorkspaceState(request, { isDashboardAdmin: true });
   }
-  // If groups/users are not configured or [], login is not OSD Admin
-  if (!configGroups.length && !configUsers.length) {
-    return updateWorkspaceState(request, { isDashboardAdmin: false });
-  }
   // If user config contains wildcard characters '*', login defaults to OSD Admin
   if (configUsers.includes(OSD_ADMIN_WILDCARD_MATH_ALL)) {
     return updateWorkspaceState(request, { isDashboardAdmin: true });
