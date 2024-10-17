@@ -11,7 +11,11 @@ import { useLocation } from 'react-router-dom';
 
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { PermissionModeId } from '../../../../../core/public';
-import { CURRENT_USER_PLACEHOLDER, WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
+import {
+  CURRENT_USER_PLACEHOLDER,
+  WORKSPACE_COLLABORATORS_APP_ID,
+  WORKSPACE_DETAIL_APP_ID,
+} from '../../../common/constants';
 import {
   WorkspaceFormSubmitData,
   WorkspaceOperationType,
@@ -145,7 +149,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
                 navigateToAppWithinWorkspace(
                   { application, http },
                   newWorkspaceId,
-                  WORKSPACE_DETAIL_APP_ID
+                  WORKSPACE_COLLABORATORS_APP_ID
                 );
                 return;
               }
