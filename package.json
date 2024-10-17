@@ -102,6 +102,7 @@
     "**/flat": "^5.0.2",
     "**/elasticsearch/agentkeepalive": "^4.5.0",
     "**/es5-ext": "^0.10.63",
+    "**/fetch-mock/path-to-regexp": "^3.3.0",
     "**/follow-redirects": "^1.15.4",
     "**/glob-parent": "^6.0.0",
     "**/hoist-non-react-statics": "^3.3.2",
@@ -126,10 +127,7 @@
     "**/watchpack-chokidar2/chokidar": "^3.5.3",
     "**/eslint-plugin-mocha-next/mocha": "npm:mocha@^10.1.0",
     "**/xml2js": "^0.5.0",
-    "**/yaml": "^2.2.2",
-    "path-to-regexp": "1.9.0",
-    "**/path-to-regexp@^2.2.1": "6.3.0",
-    "**/path-to-regexp@^6.2.0": "6.3.0"
+    "**/yaml": "^2.2.2"
   },
   "workspaces": {
     "packages": [
