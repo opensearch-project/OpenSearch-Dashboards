@@ -1,6 +1,6 @@
 # OpenSearch Dashboards Metric Recorder Plugin
 
-Metric Recorder allows publishing metrics.
+Metric Recorder is a plugin to record metrics.
 
 ## How to use
 
@@ -14,16 +14,33 @@ Metric Recorder allows publishing metrics.
     }
     ```
 
-2. Register Usage collector in the `setup` function:
+2. Register Metrics recorder in the `setup` function:
 
+    ```ts
+    // public/plugin.ts
+    import { MetricsRecorderSetup } from 'src/plugins/metrics_recorder/server';
+    import { CoreSetup, CoreStart } from 'opensearch-dashboards/server';
+
+    class Plugin {
+      public setup(core: CoreSetup, plugins: { metricsRecorder?: MetricsRecorderSetup }) {
+        metricsRecorder?.recordCount('app', 'metric', 1);
+      }
+
+      public start(core: CoreStart) {}
+    }
+    ```
+
+3. Register a MetricsReporterFactory to handle reported metrics.
     ```ts
     // server/plugin.ts
     import { MetricsRecorderSetup } from 'src/plugins/metrics_recorder/server';
     import { CoreSetup, CoreStart } from 'opensearch-dashboards/server';
 
     class Plugin {
+      private metricsRecorder: CustomizedMetricsRecorder;
+
       public setup(core: CoreSetup, plugins: { metricsRecorder?: MetricsRecorderSetup }) {
-        metricsRecorder.recordCount('app', 'metric', 1);
+        metricsRecorder?.setMetricsRecorderFactory(() => metricsRecorder);
       }
 
       public start(core: CoreStart) {}
