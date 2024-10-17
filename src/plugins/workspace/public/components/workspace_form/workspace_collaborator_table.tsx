@@ -260,6 +260,7 @@ export const WorkspaceCollaboratorTable = ({
         iconType="trash"
         onClick={onClick}
         data-test-subj="confirm-delete-button"
+        size="s"
       >
         {i18n.translate('workspace.detail.collaborator.delete.button.info', {
           defaultMessage: 'Delete {num} collaborator{pluralSuffix, select, true {} other {s}}',
@@ -548,6 +549,7 @@ const Actions = ({
   ) : (
     <EuiButton
       iconType="arrowDown"
+      size="s"
       iconSide="right"
       onClick={() => setIsPopoverOpen(true)}
       data-test-subj="workspace-detail-collaborator-table-actions"
