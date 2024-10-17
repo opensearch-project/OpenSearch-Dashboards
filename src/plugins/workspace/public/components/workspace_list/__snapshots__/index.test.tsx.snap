@@ -7,25 +7,25 @@ exports[`WorkspaceList should render title and table normally 1`] = `
   >
     Organize collaborative projects with use-case-specific workspaces.
     <div
-      class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
+      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--verticalCenter euiPageContent--horizontalCenter"
       role="main"
     >
       <div>
         <div
-          class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
         >
           <div
             class="euiFlexItem euiSearchBar__searchHolder"
           >
             <div
-              class="euiFormControlLayout euiFormControlLayout--fullWidth"
+              class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
             >
               <div
                 class="euiFormControlLayout__childrenWrapper"
               >
                 <input
                   aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
-                  class="euiFieldSearch euiFieldSearch--fullWidth"
+                  class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
                   placeholder="Search..."
                   type="search"
                   value=""
@@ -60,7 +60,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                   class="euiPopover__anchor"
                 >
                   <button
-                    class="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--hasIcon"
+                    class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiFilterButton euiFilterButton--hasIcon"
                     type="button"
                   >
                     <span
@@ -90,7 +90,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
           </div>
         </div>
         <div
-          class="euiSpacer euiSpacer--l"
+          class="euiSpacer euiSpacer--m"
         />
         <div
           class="euiBasicTable"
@@ -163,7 +163,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
               </div>
             </div>
             <table
-              class="euiTable euiTable--compressed euiTable--responsive"
+              class="euiTable euiTable--responsive"
               id="__table_generated-id"
               tabindex="-1"
             >
@@ -413,7 +413,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--extraSmall eui-textTruncate"
+                          class="euiText euiText--small eui-textTruncate"
                           style="max-width: 150px;"
                         >
                           should be able to see the description tooltip when hovering over the description
@@ -585,7 +585,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--extraSmall eui-textTruncate"
+                          class="euiText euiText--small eui-textTruncate"
                           style="max-width: 150px;"
                         >
                           should be able to see the description tooltip when hovering over the description
@@ -757,9 +757,11 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         class="euiToolTipAnchor"
                       >
                         <div
-                          class="euiText euiText--extraSmall eui-textTruncate"
+                          class="euiText euiText--small eui-textTruncate"
                           style="max-width: 150px;"
-                        />
+                        >
+                          —
+                        </div>
                       </span>
                     </div>
                   </td>
@@ -867,7 +869,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                         >
                           Rows per page
                           : 
-                          10
+                          20
                         </span>
                       </span>
                     </button>

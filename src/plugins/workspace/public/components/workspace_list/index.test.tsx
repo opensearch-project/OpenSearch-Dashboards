@@ -214,8 +214,30 @@ describe('WorkspaceList', () => {
     const operationIcons = getAllByTestId('euiCollapsedItemActionsButton')[0];
     fireEvent.click(operationIcons);
     expect(getByText('Copy ID')).toBeInTheDocument();
+    expect(getByText('Set as my default')).toBeInTheDocument();
     expect(getByText('Edit')).toBeInTheDocument();
     expect(getByText('Delete')).toBeInTheDocument();
+  });
+
+  it('should not be able to see the  operation: delete after click in the meatballs button for non-dashboard-admin', async () => {
+    const { getAllByTestId, queryByText } = render(
+      getWrapWorkspaceListInContext(
+        [
+          {
+            id: 'id2',
+            name: 'name2',
+            features: ['use-case-observability'],
+            description:
+              'should be able to see the description tooltip when hovering over the description',
+            lastUpdatedTime: '1999-08-06T00:00:00.00Z',
+          },
+        ],
+        false
+      )
+    );
+    const operationIcons = getAllByTestId('euiCollapsedItemActionsButton')[0];
+    fireEvent.click(operationIcons);
+    expect(queryByText('Delete')).not.toBeInTheDocument();
   });
 
   it('should be able to copy workspace ID after clicking copy button', async () => {
@@ -250,8 +272,8 @@ describe('WorkspaceList', () => {
 
   it('should be able to pagination when clicking pagination button', async () => {
     const list = [];
-    // add 15 items into list
-    for (let i = 100; i < 115; i++) {
+    // add 25 items into list
+    for (let i = 100; i < 125; i++) {
       list.push({
         id: `id${i}`,
         name: `name${i}`,
@@ -262,11 +284,11 @@ describe('WorkspaceList', () => {
     }
     const { getByTestId, getByText, queryByText } = render(getWrapWorkspaceListInContext(list));
     expect(getByText('name100')).toBeInTheDocument();
-    expect(queryByText('name110')).not.toBeInTheDocument();
+    expect(queryByText('name124')).not.toBeInTheDocument();
     const paginationButton = getByTestId('pagination-button-next');
     fireEvent.click(paginationButton);
     expect(queryByText('name100')).not.toBeInTheDocument();
-    expect(queryByText('name110')).toBeInTheDocument();
+    expect(queryByText('name124')).toBeInTheDocument();
   });
 
   it('should display create workspace button for dashboard admin', async () => {

@@ -82,7 +82,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
               </div>
             </div>
             <table
-              class="euiTable euiTable--compressed euiTable--responsive"
+              class="euiTable euiTable--responsive"
               id="__table_generated-id"
               tabindex="-1"
             >
@@ -606,7 +606,9 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                         <div
                           class="euiText euiText--extraSmall eui-textTruncate"
                           style="max-width: 150px;"
-                        />
+                        >
+                          —
+                        </div>
                       </span>
                     </div>
                   </td>
@@ -733,7 +735,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                         >
                           Rows per page
                           : 
-                          10
+                          20
                         </span>
                       </span>
                     </button>
