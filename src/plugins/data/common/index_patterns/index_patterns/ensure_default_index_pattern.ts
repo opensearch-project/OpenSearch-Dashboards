@@ -42,7 +42,10 @@ export const createEnsureDefaultIndexPattern = (
    * Checks whether a default index pattern is set and exists and defines
    * one otherwise.
    */
-  return async function ensureDefaultIndexPattern(this: IndexPatternsContract) {
+  return async function ensureDefaultIndexPattern(
+    this: IndexPatternsContract,
+    shouldRedirect: boolean = true
+  ) {
     const patterns = await this.getIds();
     let defaultId = await uiSettings.get('defaultIndex');
     let defined = !!defaultId;
@@ -61,8 +64,10 @@ export const createEnsureDefaultIndexPattern = (
     if (patterns.length >= 1) {
       defaultId = patterns[0];
       await uiSettings.set('defaultIndex', defaultId);
-    } else {
+    } else if (shouldRedirect) {
       return onRedirectNoIndexPattern();
+    } else {
+      return;
     }
   };
 };

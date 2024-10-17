@@ -24,8 +24,10 @@ import { AdvancedSelector } from './advanced_selector';
 
 interface DatasetSelectorProps {
   selectedDataset?: Dataset;
-  setSelectedDataset: (dataset: Dataset) => void;
+  setSelectedDataset?: any;
+  handleDatasetChange: (dataset: Dataset) => void;
   services: IDataPluginServices;
+  dispatch?: any;
 }
 
 /**
@@ -41,7 +43,9 @@ interface DatasetSelectorProps {
 export const DatasetSelector = ({
   selectedDataset,
   setSelectedDataset,
+  handleDatasetChange,
   services,
+  dispatch,
 }: DatasetSelectorProps) => {
   const isMounted = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -69,7 +73,7 @@ export const DatasetSelector = ({
 
       // If no dataset is selected, select the first one
       if (!selectedDataset && fetchedDatasets.length > 0) {
-        setSelectedDataset(fetchedDatasets[0]);
+        handleDatasetChange(fetchedDatasets[0]);
       }
     };
 
@@ -146,11 +150,11 @@ export const DatasetSelector = ({
           indexPatterns.find((dataset) => dataset.id === selectedOption.key);
         if (foundDataset) {
           closePopover();
-          setSelectedDataset(foundDataset);
+          handleDatasetChange(foundDataset);
         }
       }
     },
-    [recentDatasets, indexPatterns, setSelectedDataset, closePopover]
+    [recentDatasets, indexPatterns, handleDatasetChange, closePopover]
   );
 
   const datasetTitle = useMemo(() => {
@@ -168,7 +172,15 @@ export const DatasetSelector = ({
   return (
     <EuiPopover
       button={
-        <EuiToolTip content={`${selectedDataset?.title ?? 'Select data'}`}>
+        <EuiToolTip
+          display="block"
+          content={`${
+            selectedDataset?.title ??
+            i18n.translate('data.dataSelector.defaultTitle', {
+              defaultMessage: 'Select data',
+            })
+          }`}
+        >
           <EuiSmallButtonEmpty
             className="datasetSelector__button"
             iconType="arrowDown"
@@ -223,10 +235,13 @@ export const DatasetSelector = ({
                   onSelect={(dataset?: Dataset) => {
                     overlay?.close();
                     if (dataset) {
-                      setSelectedDataset(dataset);
+                      handleDatasetChange(dataset);
                     }
                   }}
                   onCancel={() => overlay?.close()}
+                  selectedDataset={undefined}
+                  setSelectedDataset={setSelectedDataset}
+                  dispatch={dispatch}
                 />
               ),
               {

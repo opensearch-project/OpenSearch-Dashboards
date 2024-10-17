@@ -88,7 +88,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   useEffect(() => {
     let isMounted = true;
     const initializeDataset = async () => {
-      await data.indexPatterns.ensureDefaultIndexPattern();
+      await data.indexPatterns.ensureDefaultIndexPattern(false);
       const defaultIndexPattern = await data.indexPatterns.getDefault();
       // TODO: ROCKY do we need this?
       // const queryString = data.query.queryString;
