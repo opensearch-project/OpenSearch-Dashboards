@@ -21,6 +21,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
   meta: {
     icon: { type: 'logoOpenSearch' },
     tooltip: 'OpenSearch Indexes',
+    searchOnLoad: true,
   },
 
   toDataset: (path) => {
