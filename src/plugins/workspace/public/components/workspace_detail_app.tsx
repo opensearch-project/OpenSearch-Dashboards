@@ -20,8 +20,6 @@ import {
 } from './workspace_form';
 import { DataSourceConnectionType } from '../../common/types';
 import { WorkspaceClient } from '../workspace_client';
-import { formatUrlWithWorkspaceId } from '../../../../core/public/utils';
-import { WORKSPACE_DETAIL_APP_ID } from '../../common/constants';
 import { getDataSourcesList, mergeDataSourcesWithConnections } from '../utils';
 import { WorkspaceAttributeWithPermission } from '../../../../core/types';
 
@@ -71,7 +69,7 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailPropsWithOnAppLeave) =>
     chrome?.setBreadcrumbs([
       {
         text: i18n.translate('workspace.detail.title', {
-          defaultMessage: 'Workspace settings',
+          defaultMessage: 'Workspace details',
         }),
       },
     ]);

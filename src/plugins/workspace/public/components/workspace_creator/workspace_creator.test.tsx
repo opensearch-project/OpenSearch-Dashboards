@@ -520,12 +520,12 @@ describe('WorkspaceCreator', () => {
     jest.useRealTimers();
   });
 
-  it('should redirect to workspace setting collaborators tab if permission enabled', async () => {
+  it('should redirect to workspace setting collaborators page if permission enabled', async () => {
     const { getByTestId } = render(<WorkspaceCreator />);
-    const navigateToWorkspaceDetailMock = jest.fn();
+    const navigateToCollaboratorsMock = jest.fn();
     jest
-      .spyOn(workspaceUtilsExports, 'navigateToWorkspaceDetail')
-      .mockImplementation(navigateToWorkspaceDetailMock);
+      .spyOn(workspaceUtilsExports, 'navigateToAppWithinWorkspace')
+      .mockImplementation(navigateToCollaboratorsMock);
 
     // Ensure workspace create form rendered
     await waitFor(() => {
@@ -539,10 +539,10 @@ describe('WorkspaceCreator', () => {
     jest.useFakeTimers();
     jest.runAllTimers();
     await waitFor(() => {
-      expect(navigateToWorkspaceDetailMock).toHaveBeenCalledWith(
+      expect(navigateToCollaboratorsMock).toHaveBeenCalledWith(
         expect.anything(),
         'successResult',
-        'collaborators'
+        'workspace_collaborators'
       );
     });
     jest.useRealTimers();

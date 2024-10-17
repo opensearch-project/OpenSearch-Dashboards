@@ -17,7 +17,7 @@ import { i18n } from '@osd/i18n';
 import { SavedObjectsStart, CoreStart } from '../../../../../core/public';
 import { DataSourceConnection } from '../../../common/types';
 import { WorkspaceFormError } from './types';
-import { AssociationDataSourceModal } from '../workspace_detail/association_data_source_modal';
+import { AssociationDataSourceModal } from '../data_source_association/association_data_source_modal';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceClient } from '../../workspace_client';
 import { AssociationDataSourceModalMode } from '../../../common/constants';

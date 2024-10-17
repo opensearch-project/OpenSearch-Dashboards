@@ -212,9 +212,10 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                       <span
                         class=""
                       >
-                        <button
+                        <a
                           class="euiLink euiLink--primary"
-                          type="button"
+                          href="http://localhost/w/id1/undefined"
+                          rel="noreferrer"
                         >
                           <div
                             class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -229,7 +230,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                               </div>
                             </div>
                           </div>
-                        </button>
+                        </a>
                       </span>
                     </div>
                   </td>
@@ -380,9 +381,10 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                       <span
                         class=""
                       >
-                        <button
+                        <a
                           class="euiLink euiLink--primary"
-                          type="button"
+                          href="http://localhost/w/id2/undefined"
+                          rel="noreferrer"
                         >
                           <div
                             class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -397,7 +399,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                               </div>
                             </div>
                           </div>
-                        </button>
+                        </a>
                       </span>
                     </div>
                   </td>
@@ -548,9 +550,10 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                       <span
                         class=""
                       >
-                        <button
+                        <a
                           class="euiLink euiLink--primary"
-                          type="button"
+                          href="http://localhost/w/id3/undefined"
+                          rel="noreferrer"
                         >
                           <div
                             class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -565,7 +568,7 @@ exports[`UserDefaultWorkspace should render title and table normally 1`] = `
                               </div>
                             </div>
                           </div>
-                        </button>
+                        </a>
                       </span>
                     </div>
                   </td>

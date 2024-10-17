@@ -18,25 +18,25 @@ import {
   detailsColorHelpText,
   detailsDescriptionIntroduction,
   detailsUseCaseHelpText,
-} from './constants';
+} from '../workspace_form/constants';
 import { CoreStart } from '../../../../../core/public';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
-import { useWorkspaceFormContext } from './workspace_form_context';
+import { useWorkspaceFormContext } from '../workspace_form/workspace_form_context';
 import { WorkspaceUseCase as WorkspaceUseCaseObject } from '../../types';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { WorkspaceNameField } from './fields/workspace_name_field';
-import { WorkspaceDescriptionField } from './fields/workspace_description_field';
+import { WorkspaceNameField } from '../workspace_form/fields/workspace_name_field';
+import { WorkspaceDescriptionField } from '../workspace_form/fields/workspace_description_field';
 
-interface WorkspaceDetailFormDetailsProps {
+interface WorkspaceDetailFormContentProps {
   availableUseCases: Array<
     Pick<WorkspaceUseCaseObject, 'id' | 'title' | 'description' | 'systematic'>
   >;
 }
 
-export const WorkspaceDetailFormDetails = ({
+export const WorkspaceDetailFormContent = ({
   availableUseCases,
-}: WorkspaceDetailFormDetailsProps) => {
+}: WorkspaceDetailFormContentProps) => {
   const {
     setName,
     formData,
@@ -108,6 +108,7 @@ export const WorkspaceDetailFormDetails = ({
           helpText={detailsUseCaseHelpText}
         >
           <EuiCompressedSuperSelect
+            hasDividers={true}
             options={options}
             valueOfSelected={value}
             onChange={(id) => {

@@ -146,7 +146,12 @@ export const WorkspacePickerContent = ({
   const getWorkspaceLists = (filterWorkspaceList: UpdatedWorkspaceObject[]) => {
     const listItems = filterWorkspaceList.map((workspace: UpdatedWorkspaceObject) => {
       const useCase = getUseCase(workspace);
-      const useCaseURL = getUseCaseUrl(useCase, workspace, coreStart.application, coreStart.http);
+      const useCaseURL = getUseCaseUrl(
+        useCase,
+        workspace.id,
+        coreStart.application,
+        coreStart.http
+      );
 
       return (
         <>

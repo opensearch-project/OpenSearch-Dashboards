@@ -82,6 +82,7 @@ export const WorkspaceBottomBar = ({
                 color="ghost"
                 onClick={handleResetForm}
                 data-test-subj="workspaceForm-bottomBar-cancelButton"
+                iconGap="s"
               >
                 {i18n.translate('workspace.form.bottomBar.disCardChanges', {
                   defaultMessage: 'Discard changes',
@@ -98,9 +99,12 @@ export const WorkspaceBottomBar = ({
                 data-test-subj="workspaceForm-bottomBar-updateButton"
                 isLoading={isFormSubmitting}
                 isDisabled={saveChangesButtonDisabled}
+                iconType="check"
+                iconGap="s"
+                minWidth="60px"
               >
                 {i18n.translate('workspace.form.bottomBar.saveChanges', {
-                  defaultMessage: 'Save changes',
+                  defaultMessage: 'Save',
                 })}
               </EuiSmallButton>
             </EuiFlexItem>

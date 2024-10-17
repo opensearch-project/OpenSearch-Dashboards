@@ -74,8 +74,8 @@ export class UseCaseService {
               id: WORKSPACE_DETAIL_APP_ID,
               category: DEFAULT_APP_CATEGORIES.manageWorkspace,
               order: 100,
-              title: i18n.translate('workspace.settings.workspaceSettings', {
-                defaultMessage: 'Workspace settings',
+              title: i18n.translate('workspace.settings.workspaceDetails', {
+                defaultMessage: 'Workspace details',
               }),
             },
             ...(isPermissionEnabled

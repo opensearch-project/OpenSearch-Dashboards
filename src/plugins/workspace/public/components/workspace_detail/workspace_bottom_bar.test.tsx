@@ -29,22 +29,22 @@ describe('WorkspaceBottomBar', () => {
     expect(screen.getByText('2 Unsaved change(s)')).toBeInTheDocument();
     expect(screen.getByText('2 error(s)')).toBeInTheDocument();
     expect(screen.getByText('Discard changes')).toBeInTheDocument();
-    expect(screen.getByText('Save changes')).toBeInTheDocument();
+    expect(screen.getByText('Save')).toBeInTheDocument();
   });
 
   test('disables the save button when there are no changes', () => {
     render(<WorkspaceBottomBar {...defaultProps} numberOfChanges={0} />);
-    const saveButton = screen.getByRole('button', { name: 'Save changes' });
+    const saveButton = screen.getByRole('button', { name: 'Save' });
     expect(saveButton).toBeDisabled();
   });
 
-  test('calls handleResetForm when discard changes button is clicked', () => {
+  test('calls handleResetForm when discard button is clicked', () => {
     render(<WorkspaceBottomBar {...defaultProps} />);
     fireEvent.click(screen.getByText('Discard changes'));
     expect(mockHandleResetForm).toHaveBeenCalled();
   });
 
-  test('calls handleSubmit when save changes button is clicked', () => {
+  test('calls handleSubmit when save button is clicked', () => {
     const handleSubmit = jest.fn();
     render(
       <form id="testForm" onSubmit={handleSubmit}>
@@ -52,24 +52,24 @@ describe('WorkspaceBottomBar', () => {
       </form>
     );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
     // Assuming handleSubmit is called during form submission
     expect(handleSubmit).toHaveBeenCalled();
   });
 
-  it('should disable the "Save changes" button when name exceeds the maximum length', () => {
+  it('should disable the "Save" button when name exceeds the maximum length', () => {
     const longName = 'a'.repeat(MAX_WORKSPACE_NAME_LENGTH + 1);
     render(
       <form id="testForm">
         <WorkspaceBottomBar {...defaultProps} formData={{ name: longName }} />
       </form>
     );
-    const saveChangesButton = screen.getByText('Save changes');
+    const saveChangesButton = screen.getByText('Save');
     expect(saveChangesButton.closest('button')).toBeDisabled();
   });
 
-  it('should disable the "Save changes" button when description exceeds the maximum length', () => {
+  it('should disable the "Save" button when description exceeds the maximum length', () => {
     const longDescription = 'a'.repeat(MAX_WORKSPACE_DESCRIPTION_LENGTH + 1);
     render(
       <form id="testForm">
@@ -79,19 +79,19 @@ describe('WorkspaceBottomBar', () => {
         />
       </form>
     );
-    const saveChangesButton = screen.getByText('Save changes');
+    const saveChangesButton = screen.getByText('Save');
     expect(saveChangesButton.closest('button')).toBeDisabled();
   });
 
-  it('should enable the "Save changes" button when name and description are within the maximum length', () => {
+  it('should enable the "Save" button when name and description are within the maximum length', () => {
     render(<WorkspaceBottomBar {...defaultProps} />);
-    const saveChangesButton = screen.getByText('Save changes');
+    const saveChangesButton = screen.getByText('Save');
     expect(saveChangesButton.closest('button')).not.toBeDisabled();
   });
 
-  it('should enable the "Save changes" button when name and description are empty', () => {
+  it('should enable the "Save" button when name and description are empty', () => {
     render(<WorkspaceBottomBar {...defaultProps} formData={{}} />);
-    const saveChangesButton = screen.getByText('Save changes');
+    const saveChangesButton = screen.getByText('Save');
     expect(saveChangesButton.closest('button')).not.toBeDisabled();
   });
 });
