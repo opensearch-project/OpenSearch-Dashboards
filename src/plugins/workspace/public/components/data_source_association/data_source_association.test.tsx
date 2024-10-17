@@ -23,7 +23,7 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => ({
   toMountPoint: jest.fn(),
 }));
 
-jest.mock('../workspace_detail/association_data_source_modal', () => ({
+jest.mock('./association_data_source_modal', () => ({
   AssociationDataSourceModalContent: jest.fn(),
 }));
 
