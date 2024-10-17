@@ -21,6 +21,7 @@ import {
 import { getWorkspaceState } from '../../../core/server/utils';
 import { Observable, of } from 'rxjs';
 import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../data_source_management/common';
+import { OSD_ADMIN_WILDCARD_MATCH_ALL } from '../common/constants';
 
 describe('workspace utils', () => {
   it('should generate id with the specified size', () => {
@@ -76,12 +77,22 @@ describe('workspace utils', () => {
     expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
   });
 
-  it('should be dashboard admin when configGroups and configUsers are []', () => {
+  it('should not be dashboard admin when configGroups and configUsers are []', () => {
     const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
-    const groups: string[] = ['user1'];
-    const users: string[] = [];
+    const groups: string[] = [];
+    const users: string[] = ['user1'];
     const configGroups: string[] = [];
     const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(false);
+  });
+
+  it('should be dashboard admin when configGroups or configUsers include wildcard *', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['user1'];
+    const configGroups: string[] = [];
+    const configUsers: string[] = [OSD_ADMIN_WILDCARD_MATCH_ALL];
     updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
     expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
   });

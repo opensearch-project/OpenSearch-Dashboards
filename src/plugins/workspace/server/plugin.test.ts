@@ -116,7 +116,7 @@ describe('Workspace server plugin', () => {
       },
     });
     let registerOnPostAuthFn: OnPostAuthHandler = () => httpServerMock.createResponseFactory().ok();
-    setupMock.http.registerOnPostAuth.mockImplementation((fn) => {
+    setupMock.http.registerOnPostAuth.mockImplementationOnce((fn) => {
       registerOnPostAuthFn = fn;
       return fn;
     });
@@ -137,7 +137,7 @@ describe('Workspace server plugin', () => {
       expect(toolKitMock.next).toBeCalledTimes(1);
     });
 
-    it('with yml config', async () => {
+    it('with configuring user as OSD admin', async () => {
       jest
         .spyOn(serverUtils, 'getPrincipalsFromRequest')
         .mockImplementation(() => ({ users: [`user1`] }));
@@ -153,10 +153,56 @@ describe('Workspace server plugin', () => {
         httpServerMock.createResponseFactory(),
         toolKitMock
       );
+
+      expect(getWorkspaceState(requestWithWorkspaceInUrl)).toEqual({
+        isDashboardAdmin: true,
+      });
       expect(toolKitMock.next).toBeCalledTimes(1);
     });
 
-    it('uninstall security plugin', async () => {
+    it('with configuring wildcard * and anyone will be OSD admin', async () => {
+      jest
+        .spyOn(serverUtils, 'getPrincipalsFromRequest')
+        .mockImplementation(() => ({ users: [`user1`] }));
+      jest.spyOn(utilsExports, 'getOSDAdminConfigFromYMLConfig').mockResolvedValue([[], ['*']]);
+
+      await workspacePlugin.setup(setupMock);
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(
+        requestWithWorkspaceInUrl,
+        httpServerMock.createResponseFactory(),
+        toolKitMock
+      );
+
+      expect(getWorkspaceState(requestWithWorkspaceInUrl)).toEqual({
+        isDashboardAdmin: true,
+      });
+      expect(toolKitMock.next).toBeCalledTimes(1);
+    });
+
+    it('without configuring yml config and anyone will be not OSD admin', async () => {
+      jest
+        .spyOn(serverUtils, 'getPrincipalsFromRequest')
+        .mockImplementation(() => ({ users: [`user1`] }));
+      jest.spyOn(utilsExports, 'getOSDAdminConfigFromYMLConfig').mockResolvedValue([[], []]);
+
+      await workspacePlugin.setup(setupMock);
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(
+        requestWithWorkspaceInUrl,
+        httpServerMock.createResponseFactory(),
+        toolKitMock
+      );
+
+      expect(getWorkspaceState(requestWithWorkspaceInUrl)).toEqual({
+        isDashboardAdmin: false,
+      });
+      expect(toolKitMock.next).toBeCalledTimes(1);
+    });
+
+    it('uninstall security plugin and anyone will be OSD admin', async () => {
       jest.spyOn(serverUtils, 'getPrincipalsFromRequest').mockImplementation(() => ({}));
 
       await workspacePlugin.setup(setupMock);
@@ -167,6 +213,10 @@ describe('Workspace server plugin', () => {
         httpServerMock.createResponseFactory(),
         toolKitMock
       );
+
+      expect(getWorkspaceState(requestWithWorkspaceInUrl)).toEqual({
+        isDashboardAdmin: true,
+      });
       expect(toolKitMock.next).toBeCalledTimes(1);
     });
 
