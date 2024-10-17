@@ -176,4 +176,4 @@ export const WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES = [
 
 export const USE_CASE_CARD_GRADIENT_PREFIX = 'workspace-initial-use-case-card';
 
-export const OSD_ADMIN_WILDCARD_MATH_ALL = '*';
+export const OSD_ADMIN_WILDCARD_MATCH_ALL = '*';

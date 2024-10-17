@@ -20,7 +20,7 @@ import {
   CURRENT_USER_PLACEHOLDER,
   WorkspacePermissionMode,
   WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES,
-  OSD_ADMIN_WILDCARD_MATH_ALL,
+  OSD_ADMIN_WILDCARD_MATCH_ALL,
 } from '../common/constants';
 import { PermissionModeId } from '../../../core/server';
 
@@ -43,7 +43,7 @@ export const updateDashboardAdminStateForRequest = (
     return updateWorkspaceState(request, { isDashboardAdmin: true });
   }
   // If user config contains wildcard characters '*', login defaults to OSD Admin
-  if (configUsers.includes(OSD_ADMIN_WILDCARD_MATH_ALL)) {
+  if (configUsers.includes(OSD_ADMIN_WILDCARD_MATCH_ALL)) {
     return updateWorkspaceState(request, { isDashboardAdmin: true });
   }
   const groupMatchAny = groups.some((group) => configGroups.includes(group));
