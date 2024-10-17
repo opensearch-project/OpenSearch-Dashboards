@@ -91,7 +91,7 @@ export const WorkspaceUseCaseCard = ({
     return (
       <Fragment key={workspace.id}>
         <EuiContextMenuItem
-          href={getUseCaseUrl(useCase, workspace, application, http)}
+          href={getUseCaseUrl(useCase, workspace.id, application, http)}
           icon={<EuiIcon type={useCaseIcon} color={workspace.color} size="m" />}
           toolTipContent={workspace.name}
           size="s"

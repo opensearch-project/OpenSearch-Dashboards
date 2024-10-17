@@ -112,7 +112,7 @@ describe('UseCaseService', () => {
             id: WORKSPACE_DETAIL_APP_ID,
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 500,
-            title: 'Workspace settings',
+            title: 'Workspace details',
           },
         ]);
       });

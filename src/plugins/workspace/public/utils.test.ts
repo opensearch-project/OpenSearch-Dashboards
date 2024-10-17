@@ -16,6 +16,7 @@ import {
   prependWorkspaceToBreadcrumbs,
   getIsOnlyAllowEssentialUseCase,
   mergeDataSourcesWithConnections,
+  getUseCaseUrl,
 } from './utils';
 import { WorkspaceAvailability } from '../../../core/public';
 import { coreMock } from '../../../core/public/mocks';
@@ -839,5 +840,19 @@ describe('workspace utils: mergeDataSourcesWithConnections', () => {
         type: 'AWS CloudWatch',
       },
     ]);
+  });
+});
+
+describe('workspace utils: getUseCaseUrl', () => {
+  it('should get use case url', () => {
+    startMock.application.getUrlForApp.mockImplementation((id) => `http://localhost/${id}`);
+    const url = getUseCaseUrl(useCaseMock, 'foo', startMock.application, startMock.http);
+    expect(url).toEqual('http://localhost/w/foo/bar');
+  });
+
+  it('should return workspace detail url when there is no use case', () => {
+    startMock.application.getUrlForApp.mockImplementation((id) => `http://localhost/${id}`);
+    const url = getUseCaseUrl(undefined, 'foo', startMock.application, startMock.http);
+    expect(url).toEqual('http://localhost/w/foo/workspace_detail');
   });
 });

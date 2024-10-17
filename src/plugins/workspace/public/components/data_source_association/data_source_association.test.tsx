@@ -12,7 +12,7 @@ import {
   toMountPoint,
 } from '../../../../opensearch_dashboards_react/public';
 import { DataSourceAssociation } from './data_source_association';
-import { AssociationDataSourceModalContent } from '../workspace_detail/association_data_source_modal';
+import { AssociationDataSourceModalContent } from './association_data_source_modal';
 import { DataSourceConnectionType } from 'src/plugins/workspace/common/types';
 import { BehaviorSubject } from 'rxjs';
 import { IWorkspaceClient } from 'opensearch-dashboards/public';
