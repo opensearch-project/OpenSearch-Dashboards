@@ -480,7 +480,6 @@ const Actions = ({
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const {
-    overlays,
     services: { notifications },
   } = useOpenSearchDashboards();
 
