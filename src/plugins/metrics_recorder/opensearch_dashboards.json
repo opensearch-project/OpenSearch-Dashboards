@@ -1,0 +1,10 @@
+{
+  "id": "metricsRecorder",
+  "configPath": ["metricsRecorder"],
+  "version": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredBundles": [
+    "opensearchDashboardsUtils"
+  ]
+}
