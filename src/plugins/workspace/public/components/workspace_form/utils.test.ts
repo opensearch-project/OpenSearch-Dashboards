@@ -186,7 +186,7 @@ describe('validateWorkspaceForm', () => {
   it('should return error if color is invalid', () => {
     expect(validateWorkspaceForm({ color: 'QWERTY' }, false).color).toEqual({
       code: WorkspaceFormErrorCode.InvalidColor,
-      message: 'Color is invalid. Enter a valid color.',
+      message: 'Color is invalid. Choose a valid color.',
     });
   });
   it('should return error if use case is empty', () => {

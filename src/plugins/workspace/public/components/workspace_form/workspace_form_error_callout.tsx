@@ -44,7 +44,7 @@ const getSuggestionFromErrorCode = (error: WorkspaceFormError) => {
       });
     case WorkspaceFormErrorCode.InvalidColor:
       return i18n.translate('workspace.form.errorCallout.invalidColor', {
-        defaultMessage: 'Enter a valid color.',
+        defaultMessage: 'Choose a valid color.',
       });
     default:
       return error.message;
