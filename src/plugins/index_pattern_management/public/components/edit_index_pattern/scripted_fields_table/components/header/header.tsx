@@ -66,6 +66,7 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => (
 
     <EuiFlexItem grow={false}>
       <EuiSmallButton
+        iconType="plusInCircle"
         data-test-subj="addScriptedFieldLink"
         {...reactRouterNavigate(history, `patterns/${indexPatternId}/create-field/`)}
       >
