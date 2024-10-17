@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import React from 'react';
 import { Dataset, Query, TimeRange } from '../../../common';
 import { DatasetSelector } from './dataset_selector';
@@ -20,6 +20,16 @@ const ConnectedDatasetSelector = ({ onSubmit }: ConnectedDatasetSelectorProps) =
   const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(
     () => queryString.getQuery().dataset || queryString.getDefaultQuery().dataset
   );
+
+  useEffect(() => {
+    const subscription = queryString.getUpdates$().subscribe((query) => {
+      setSelectedDataset(query.dataset);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [queryString]);
 
   const handleDatasetChange = useCallback(
     (dataset?: Dataset) => {
