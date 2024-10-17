@@ -18,6 +18,7 @@ import { WorkspaceDetailProps } from './components/workspace_detail/workspace_de
 import { WorkspaceInitialApp } from './components/workspace_initial_app';
 import { WorkspaceUseCaseOverviewApp } from './components/workspace_use_case_overview_app';
 import { WorkspaceInitialProps } from './components/workspace_initial/workspace_initial';
+import { WorkspaceCollaboratorsApp } from './components/workspace_collaborators_app';
 
 export const renderCreatorApp = (
   { element }: AppMountParameters,
@@ -127,6 +128,23 @@ export const renderUseCaseOverviewApp = async (
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
       <WorkspaceUseCaseOverviewApp pageId={pageId} />
+    </OpenSearchDashboardsContextProvider>,
+    element
+  );
+
+  return () => {
+    ReactDOM.unmountComponentAtNode(element);
+  };
+};
+
+export const renderCollaboratorsApp = (
+  { element }: AppMountParameters,
+  services: Services,
+  props: {}
+) => {
+  ReactDOM.render(
+    <OpenSearchDashboardsContextProvider services={services}>
+      <WorkspaceCollaboratorsApp {...props} />
     </OpenSearchDashboardsContextProvider>,
     element
   );

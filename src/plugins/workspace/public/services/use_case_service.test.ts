@@ -65,11 +65,18 @@ const setupUseCaseStart = (options?: { navGroupEnabled?: boolean }) => {
 
 describe('UseCaseService', () => {
   describe('#setup', () => {
-    it('should add manage workspace category to current use case', async () => {
+    it('should add manage workspace category to current use case and register collaborators when permission is enabled', async () => {
       const useCaseService = new UseCaseService();
       const coreSetup = coreMock.createSetup();
       const navGroupMap$ = new BehaviorSubject<Record<string, NavGroupItemInMap>>({});
       const coreStartMock = coreMock.createStart();
+      coreStartMock.application.capabilities = {
+        ...coreStartMock.application.capabilities,
+        workspaces: {
+          ...coreStartMock.application.capabilities.workspaces,
+          permissionEnabled: true,
+        },
+      };
       coreSetup.getStartServices.mockResolvedValue([coreStartMock, {}, {}]);
       coreStartMock.chrome.navGroup.getNavGroupsMap$.mockReturnValue(navGroupMap$);
       useCaseService.setup(coreSetup);
@@ -88,31 +95,37 @@ describe('UseCaseService', () => {
       await waitFor(() => {
         expect(coreSetup.chrome.navGroup.addNavLinksToGroup).toBeCalledWith(navGroupInfo, [
           {
-            id: 'objects',
+            id: WORKSPACE_DETAIL_APP_ID,
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
             order: 100,
+            title: 'Workspace settings',
+          },
+          {
+            id: 'workspace_collaborators',
+            category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+            order: 200,
+            title: 'Collaborators',
           },
           {
             id: 'dataSources',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
-            order: 200,
+            order: 300,
           },
           {
             id: 'indexPatterns',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
-            order: 300,
+            order: 400,
+          },
+          {
+            id: 'objects',
+            category: DEFAULT_APP_CATEGORIES.manageWorkspace,
+            order: 500,
           },
           {
             id: 'import_sample_data',
             category: DEFAULT_APP_CATEGORIES.manageWorkspace,
-            order: 400,
+            order: 600,
             title: 'Sample data',
-          },
-          {
-            id: WORKSPACE_DETAIL_APP_ID,
-            category: DEFAULT_APP_CATEGORIES.manageWorkspace,
-            order: 500,
-            title: 'Workspace settings',
           },
         ]);
       });

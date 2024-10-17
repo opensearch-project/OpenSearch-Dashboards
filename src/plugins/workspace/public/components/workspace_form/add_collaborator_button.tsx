@@ -20,20 +20,30 @@ import { accessLevelNameToWorkspacePermissionModesMap } from '../../constants';
 import { WorkspacePermissionItemType } from './constants';
 import { WorkspacePermissionSetting } from './types';
 import { DuplicateCollaboratorError } from '../add_collaborators_modal';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { CoreStart, IWorkspaceResponse } from '../../../../../core/public';
 
 interface Props {
   displayedTypes: WorkspaceCollaboratorType[];
   permissionSettings: PermissionSetting[];
   handleSubmitPermissionSettings: (
     permissionSettings: WorkspacePermissionSetting[]
-  ) => Promise<void>;
+  ) => Promise<IWorkspaceResponse<boolean>>;
+  fill?: boolean;
 }
 
 export const AddCollaboratorButton = ({
   displayedTypes,
   permissionSettings,
   handleSubmitPermissionSettings,
+  fill = true,
 }: Props) => {
+  const {
+    services: { notifications },
+  } = useOpenSearchDashboards<{
+    CoreStart: CoreStart;
+  }>();
+
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const nextIdRef = useRef(generateNextPermissionSettingsId(permissionSettings));
@@ -85,7 +95,18 @@ export const AddCollaboratorButton = ({
       ...permissionSettings,
       ...addedSettings.map(({ collaboratorId, ...rest }) => rest),
     ];
-    await handleSubmitPermissionSettings(newPermissionSettings as WorkspacePermissionSetting[]);
+    const result = await handleSubmitPermissionSettings(
+      newPermissionSettings as WorkspacePermissionSetting[]
+    );
+    if (result?.success) {
+      if (notifications) {
+        notifications.toasts.addSuccess({
+          title: i18n.translate('workspace.collaborator.add.success.message', {
+            defaultMessage: 'Collaborators added successfully',
+          }),
+        });
+      }
+    }
   };
 
   const panelItems = displayedTypes.map(({ id, buttonLabel, onAdd }) => ({
@@ -105,9 +126,9 @@ export const AddCollaboratorButton = ({
         <EuiSmallButton
           iconSide="left"
           iconType="plusInCircle"
-          fill
           onClick={() => setIsPopoverOpen((prev) => !prev)}
           data-test-subj="add-collaborator-button"
+          fill={fill}
         >
           {i18n.translate('workspace.workspaceDetail.collaborator.add', {
             defaultMessage: 'Add collaborators',
