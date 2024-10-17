@@ -1,0 +1,2 @@
+refactor:
+- Fine-tune workspace list page compressed style to align with compressed table ([#8619](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8619))
