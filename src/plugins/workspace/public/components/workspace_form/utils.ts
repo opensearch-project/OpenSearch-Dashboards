@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-
+import { euiPaletteColorBlind } from '@elastic/eui';
 import type { SavedObjectPermissions } from '../../../../../core/types';
 import { WorkspacePermissionMode } from '../../../common/constants';
 import { isUseCaseFeatureConfig } from '../../utils';
@@ -335,11 +335,11 @@ export const validateWorkspaceForm = (
       }),
     };
   }
-  if (color && !validateWorkspaceColor(color)) {
+  if (color && (!validateWorkspaceColor(color) || !euiPaletteColorBlind().includes(color))) {
     formErrors.color = {
       code: WorkspaceFormErrorCode.InvalidColor,
       message: i18n.translate('workspace.form.features.invalidColor', {
-        defaultMessage: 'Color is invalid. Enter a valid color.',
+        defaultMessage: 'Color is invalid. Choose a valid color.',
       }),
     };
   }
