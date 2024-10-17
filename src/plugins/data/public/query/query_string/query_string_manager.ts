@@ -29,9 +29,9 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { skip } from 'rxjs/operators';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { isEqual } from 'lodash';
+import { skip } from 'rxjs/operators';
 import { Dataset, DataStorage, Query, TimeRange, UI_SETTINGS } from '../../../common';
 import { createHistory, QueryHistory } from './query_history';
 import { DatasetService, DatasetServiceContract } from './dataset_service';
@@ -103,8 +103,8 @@ export class QueryStringManager {
     }
   }
 
-  public getUpdates$ = () => {
-    return this.query$.asObservable().pipe(skip(1));
+  public getUpdates$ = (defaultSkip = 1) => {
+    return this.query$.asObservable().pipe(skip(defaultSkip));
   };
 
   public getQuery = (): Query => {

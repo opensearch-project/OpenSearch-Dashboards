@@ -207,6 +207,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         loadingCount$,
       },
       df: dfService,
+      queryStringService: uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)
+        ? getQueryService().queryString
+        : undefined,
     };
 
     return {
