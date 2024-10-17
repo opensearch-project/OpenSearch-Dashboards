@@ -323,7 +323,7 @@ export const WorkspaceListInner = ({
     return (
       isDashboardAdmin && (
         <>
-          <EuiButton color="danger" iconType="trash" onClick={onClick}>
+          <EuiButton color="danger" iconType="trash" onClick={onClick} size="s">
             Delete {selection.length} Workspace
           </EuiButton>
           {deletedWorkspaces && deletedWorkspaces.length > 0 && (
@@ -346,6 +346,7 @@ export const WorkspaceListInner = ({
       incremental: true,
     },
     query,
+    compressed: true,
     onChange: (args) => setQuery((args.query as unknown) as EuiSearchBarProps['query']),
     filters: [
       {
@@ -354,6 +355,7 @@ export const WorkspaceListInner = ({
         name: 'Use Case',
         multiSelect: false,
         options: useCaseFilterOptions,
+        compressed: true,
       },
     ],
     toolsLeft: renderToolsLeft(),
