@@ -46,11 +46,8 @@ export const updateDashboardAdminStateForRequest = (
   if (!configGroups.length && !configUsers.length) {
     return updateWorkspaceState(request, { isDashboardAdmin: false });
   }
-  // If config contains wildcard characters '*', login defaults to OSD Admin
-  if (
-    configGroups.includes(OSD_ADMIN_WILDCARD_MATH_ALL) ||
-    configUsers.includes(OSD_ADMIN_WILDCARD_MATH_ALL)
-  ) {
+  // If user config contains wildcard characters '*', login defaults to OSD Admin
+  if (configUsers.includes(OSD_ADMIN_WILDCARD_MATH_ALL)) {
     return updateWorkspaceState(request, { isDashboardAdmin: true });
   }
   const groupMatchAny = groups.some((group) => configGroups.includes(group));

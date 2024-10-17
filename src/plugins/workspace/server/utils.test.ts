@@ -79,8 +79,8 @@ describe('workspace utils', () => {
 
   it('should be not dashboard admin when configGroups and configUsers are []', () => {
     const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
-    const groups: string[] = ['user1'];
-    const users: string[] = [];
+    const groups: string[] = [];
+    const users: string[] = ['user1'];
     const configGroups: string[] = [];
     const configUsers: string[] = [];
     updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
@@ -89,10 +89,10 @@ describe('workspace utils', () => {
 
   it('should be dashboard admin when configGroups or configUsers include wildcard *', () => {
     const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
-    const groups: string[] = ['user1'];
-    const users: string[] = [];
-    const configGroups: string[] = [OSD_ADMIN_WILDCARD_MATH_ALL];
-    const configUsers: string[] = [];
+    const groups: string[] = [];
+    const users: string[] = ['user1'];
+    const configGroups: string[] = [];
+    const configUsers: string[] = [OSD_ADMIN_WILDCARD_MATH_ALL];
     updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
     expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
   });
