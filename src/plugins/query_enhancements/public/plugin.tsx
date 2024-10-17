@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../common/config';
 import { setData, setStorage } from './services';
@@ -100,6 +101,60 @@ export class QueryEnhancementsPlugin
       editorSupportedAppNames: ['discover'],
       supportedAppNames: ['discover', 'data-explorer'],
       hideDatePicker: true,
+      sampleQueries: [
+        {
+          title: i18n.translate('queryEnhancements.sqlLanguage.sampleQuery.titleContainsWind', {
+            defaultMessage: 'The title field contains the word wind.',
+          }),
+          query: `SELECT * FROM your_table WHERE title LIKE '%wind%'`,
+        },
+        {
+          title: i18n.translate(
+            'queryEnhancements.sqlLanguage.sampleQuery.titleContainsWindOrWindy',
+            {
+              defaultMessage: 'The title field contains the word wind or the word windy.',
+            }
+          ),
+          query: `SELECT * FROM your_table WHERE title LIKE '%wind%' OR title LIKE '%windy%';`,
+        },
+        {
+          title: i18n.translate(
+            'queryEnhancements.sqlLanguage.sampleQuery.titleContainsPhraseWindRises',
+            {
+              defaultMessage: 'The title field contains the phrase wind rises.',
+            }
+          ),
+          query: `SELECT * FROM your_table WHERE title LIKE '%wind rises%'`,
+        },
+        {
+          title: i18n.translate(
+            'queryEnhancements.sqlLanguage.sampleQuery.titleExactMatchWindRises',
+            {
+              defaultMessage: 'The title.keyword field exactly matches The wind rises.',
+            }
+          ),
+          query: `SELECT * FROM your_table WHERE title = 'The wind rises'`,
+        },
+        {
+          title: i18n.translate(
+            'queryEnhancements.sqlLanguage.sampleQuery.titleFieldsContainWind',
+            {
+              defaultMessage:
+                'Any field that starts with title (for example, title and title.keyword) contains the word wind',
+            }
+          ),
+          query: `SELECT * FROM your_table WHERE title LIKE '%wind%' OR title = 'wind'`,
+        },
+        {
+          title: i18n.translate(
+            'queryEnhancements.sqlLanguage.sampleQuery.descriptionFieldExists',
+            {
+              defaultMessage: 'Documents in which the field description exists.',
+            }
+          ),
+          query: `SELECT * FROM your_table WHERE description IS NOT NULL AND description != '';`,
+        },
+      ],
     };
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
 
