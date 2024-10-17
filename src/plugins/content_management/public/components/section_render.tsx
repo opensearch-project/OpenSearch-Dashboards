@@ -66,25 +66,24 @@ const CardSection = ({ section, embeddable, contents$ }: Props) => {
     return (
       <>
         {section.title ? (
-          <EuiTitle size="s">
-            <h2>
-              {isCardCollapsible ? (
-                <EuiButtonIcon
-                  iconType={isCardVisible ? 'arrowDown' : 'arrowRight'}
-                  onClick={() => setIsCardVisible(!isCardVisible)}
-                  color="text"
-                  aria-label={isCardVisible ? 'Show panel' : 'Hide panel'}
-                />
-              ) : null}
-              {section.title}
-            </h2>
-          </EuiTitle>
-        ) : null}
-        {isCardVisible && (
           <>
-            <EuiSpacer size="m" /> <EmbeddableRenderer factory={factory} input={input} />
+            <EuiTitle size="s">
+              <h2>
+                {isCardCollapsible ? (
+                  <EuiButtonIcon
+                    iconType={isCardVisible ? 'arrowDown' : 'arrowRight'}
+                    onClick={() => setIsCardVisible(!isCardVisible)}
+                    color="text"
+                    aria-label={isCardVisible ? 'Show panel' : 'Hide panel'}
+                  />
+                ) : null}
+                {section.title}
+              </h2>
+            </EuiTitle>
+            <EuiSpacer size="m" />
           </>
-        )}
+        ) : null}
+        {isCardVisible && <EmbeddableRenderer factory={factory} input={input} />}
       </>
     );
   }

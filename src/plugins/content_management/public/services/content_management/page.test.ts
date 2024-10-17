@@ -264,3 +264,16 @@ test('it should callback with error if section not exist', () => {
   expect(callbackMock.mock.calls[0][0]).toBe(null);
   expect(callbackMock.mock.calls[0][1]).toBeInstanceOf(Error);
 });
+
+test('it should remove the specified section', () => {
+  const page = new Page({ id: 'page1' });
+  page.createSection({
+    id: 'section_id',
+    kind: 'dashboard',
+    order: 1000,
+    input: { timeRange: { from: 'now-7d', to: 'now' } },
+  });
+  expect(page.getSections()).toHaveLength(1);
+  page.removeSection('section_id');
+  expect(page.getSections()).toHaveLength(0);
+});
