@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import React from 'react';
 import { Dataset, Query, TimeRange } from '../../../common';
 import {
@@ -12,37 +12,42 @@ import {
   DatasetSelectorUsingButtonProps,
   DatasetSelectorAppearance,
 } from './dataset_selector';
-import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { IDataPluginServices } from '../../types';
+import { AdvancedSelector } from './advanced_selector';
 
 interface ConnectedDatasetSelectorProps {
   onSubmit: ((query: Query, dateRange?: TimeRange | undefined) => void) | undefined;
+  selectedDataset?: Dataset;
+  setSelectedDataset: (data: Dataset | undefined) => void;
+  setIndexPattern: (id: string | undefined) => void;
+  services?: any;
 }
 
 const ConnectedDatasetSelector = ({
   onSubmit,
+  selectedDataset,
+  setSelectedDataset,
+  setIndexPattern,
+  services,
   ...datasetSelectorProps
 }: ConnectedDatasetSelectorProps &
   (DatasetSelectorUsingButtonProps | DatasetSelectorUsingButtonEmptyProps)) => {
-  const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const queryString = services.data.query.queryString;
-  const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(
-    () => queryString.getQuery().dataset || queryString.getDefaultQuery().dataset
-  );
 
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query) => {
       setSelectedDataset(query.dataset);
+      setIndexPattern(query.dataset?.id);
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [queryString]);
+  }, [queryString, setSelectedDataset, setIndexPattern]);
 
   const handleDatasetChange = useCallback(
     (dataset?: Dataset) => {
       setSelectedDataset(dataset);
+      setIndexPattern(dataset?.id);
       if (dataset) {
         const query = queryString.getInitialQueryByDataset(dataset);
         queryString.setQuery(query);
@@ -50,17 +55,19 @@ const ConnectedDatasetSelector = ({
         queryString.getDatasetService().addRecentDataset(dataset);
       }
     },
-    [onSubmit, queryString]
+    [onSubmit, queryString, setSelectedDataset, setIndexPattern]
   );
 
   return (
     <DatasetSelector
       {...datasetSelectorProps}
       selectedDataset={selectedDataset}
-      setSelectedDataset={handleDatasetChange}
+      setSelectedDataset={setSelectedDataset}
+      setIndexPattern={setIndexPattern}
+      handleDatasetChange={handleDatasetChange}
       services={services}
     />
   );
 };
 
-export { ConnectedDatasetSelector as DatasetSelector, DatasetSelectorAppearance };
+export { ConnectedDatasetSelector as DatasetSelector, AdvancedSelector, DatasetSelectorAppearance };

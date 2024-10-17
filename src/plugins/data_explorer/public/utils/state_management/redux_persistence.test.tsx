@@ -26,6 +26,7 @@ describe('test redux state persistence', () => {
         "metadata": Object {
           "indexPattern": "id",
           "originatingApp": undefined,
+          "selectedDataset": undefined,
         },
       }
     `);

@@ -27,18 +27,27 @@ import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_ty
 import { buildColumns } from '../../utils/columns';
 import './discover_canvas.scss';
 import { HeaderVariant } from '../../../../../../core/public';
+import { setIndexPattern, setSelectedDataset } from '../../../../../data_explorer/public';
+import { NoIndexPatternsPanel, AdvancedSelector } from '../../../../../data/public';
+import { Dataset } from '../../../../../data/common';
+import { toMountPoint } from '../../../../../opensearch_dashboards_react/public';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalRef }: ViewProps) {
+  const { indexPattern: currentIndexPattern, selectedDataset } = useSelector(
+    (state) => state.metadata
+  );
+  const [loadedIndexPattern, setLoadedIndexPattern] = useState<any>(selectedDataset?.id);
   const panelRef = useRef<HTMLDivElement>(null);
   const { data$, refetch$, indexPattern } = useDiscoverContext();
+  const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const {
-    services: {
-      uiSettings,
-      capabilities,
-      chrome: { setHeaderVariant },
-    },
-  } = useOpenSearchDashboards<DiscoverViewServices>();
+    uiSettings,
+    capabilities,
+    chrome: { setHeaderVariant },
+    data,
+    overlays,
+  } = services;
   const { columns } = useSelector((state) => {
     const stateColumns = state.discover.columns;
 
@@ -122,7 +131,45 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
   };
   const showSaveQuery = !!capabilities.discover?.saveQuery;
 
-  return (
+  const handleDatasetChange = (dataset: Dataset) => {
+    dispatch(setSelectedDataset(dataset));
+
+    // Update query and other necessary state
+    const queryString = data.query.queryString;
+    const query = queryString.getInitialQueryByDataset(dataset);
+    queryString.setQuery(query);
+    queryString.getDatasetService().addRecentDataset(dataset);
+  };
+
+  const handleOpenDataSelector = () => {
+    const overlay = overlays?.openModal(
+      toMountPoint(
+        <AdvancedSelector
+          services={services}
+          onSelect={(dataset?: Dataset) => {
+            overlay?.close();
+            if (dataset) {
+              handleDatasetChange(dataset);
+            }
+          }}
+          onCancel={() => overlay?.close()}
+          selectedDataset={undefined}
+          setSelectedDataset={setSelectedDataset}
+          setIndexPattern={setIndexPattern}
+          dispatch={dispatch}
+        />
+      ),
+      {
+        maxWidth: false,
+        className: 'datasetSelector__advancedModal',
+      }
+    );
+  };
+
+  const useNoIndexPatternsPanel =
+    !currentIndexPattern && !loadedIndexPattern && isEnhancementsEnabled;
+
+  return !useNoIndexPatternsPanel ? (
     <EuiPanel
       panelRef={panelRef}
       hasBorder={true}
@@ -164,6 +211,8 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
         </EuiPanel>
       )}
     </EuiPanel>
+  ) : (
+    <NoIndexPatternsPanel onOpenDataSelector={handleOpenDataSelector} />
   );
 }
 
