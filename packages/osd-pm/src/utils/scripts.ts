@@ -48,7 +48,7 @@ interface WorkspacesInfo {
  * Install all dependencies in the given directory
  */
 export async function installInDir(directory: string, extraArgs: string[] = [], useAdd = false) {
-  const options = [useAdd ? 'add' : 'install', '--non-interactive', ...extraArgs];
+  const options = [useAdd ? 'add' : 'install', ...extraArgs];
 
   // We pass the mutex flag to ensure only one instance of yarn runs at any
   // given time (e.g. to avoid conflicts).
