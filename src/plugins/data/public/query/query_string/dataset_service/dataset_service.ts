@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CoreStart } from 'opensearch-dashboards/public';
+import { CoreStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import LRUCache from 'lru-cache';
 import {
   Dataset,
@@ -24,6 +24,7 @@ export class DatasetService {
   private defaultDataset?: Dataset;
   private typesRegistry: Map<string, DatasetTypeConfig> = new Map();
   private recentDatasets: LRUCache<string, Dataset>;
+  private savedObjectsClient?: SavedObjectsClientContract;
 
   constructor(
     private readonly uiSettings: CoreStart['uiSettings'],
@@ -46,8 +47,12 @@ export class DatasetService {
     this.registerType(indexTypeConfig);
   }
 
-  public async init(indexPatterns: IndexPatternsContract): Promise<void> {
+  public async init(
+    indexPatterns: IndexPatternsContract,
+    savedObjectsClient: SavedObjectsClientContract
+  ): Promise<void> {
     this.indexPatterns = indexPatterns;
+    this.savedObjectsClient = savedObjectsClient;
     this.defaultDataset = await this.fetchDefaultDataset();
   }
 
@@ -222,6 +227,14 @@ export class DatasetService {
       return undefined;
     }
 
+    let dataSource;
+    if (indexPattern.dataSourceRef) {
+      dataSource = await this.savedObjectsClient?.get(
+        indexPattern.dataSourceRef?.type,
+        indexPattern.dataSourceRef?.id
+      );
+    }
+
     const dataType = this.typesRegistry.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
     if (dataType) {
       const dataset = dataType.toDataset([
@@ -229,8 +242,16 @@ export class DatasetService {
           id: indexPattern.id,
           title: indexPattern.title,
           type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+          parent: dataSource
+            ? {
+                id: dataSource.id,
+                title: dataSource.attributes?.title,
+                type: dataSource.attributes?.dataSourceEngineType,
+              }
+            : undefined,
         },
       ]);
+
       return { ...dataset, timeFieldName: indexPattern.timeFieldName };
     }
 
