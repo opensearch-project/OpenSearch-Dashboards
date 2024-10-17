@@ -66,7 +66,7 @@ jest.mock('../associated_object_management/associated_objects_tab', () => ({
 }));
 
 jest.mock('../associated_object_management/utils/associated_objects_tab_utils', () => ({
-  redirectToExplorerS3: jest.fn(),
+  redirectToDiscover: jest.fn(),
 }));
 
 const mockApplication = coreMock.createSetup().application;
