@@ -88,6 +88,7 @@ export const useSearch = (services: DiscoverViewServices) => {
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
   const { savedSearch: savedSearchId, sort, interval } = useSelector((state) => state.discover);
   const indexPattern = useIndexPattern(services);
+  const skipInitialFetch = useRef(false);
   const {
     data,
     filterManager,
@@ -111,6 +112,15 @@ export const useSearch = (services: DiscoverViewServices) => {
     requests: new RequestAdapter(),
   };
 
+  const getDatasetAutoSearchOnPageLoadPreference = () => {
+    // Checks the searchOnpageLoadPreference for the current dataset if not specifed defaults to true
+    const datasetType = data.query.queryString.getQuery().dataset?.type;
+
+    const datasetService = data.query.queryString.getDatasetService();
+
+    return !datasetType || (datasetService?.getType(datasetType)?.meta?.searchOnLoad ?? true);
+  };
+
   const shouldSearchOnPageLoad = useCallback(() => {
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
@@ -125,10 +135,13 @@ export const useSearch = (services: DiscoverViewServices) => {
   const data$ = useMemo(
     () =>
       new BehaviorSubject<SearchData>({
-        status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
+        status:
+          shouldSearchOnPageLoad() && !skipInitialFetch.current
+            ? ResultStatus.LOADING
+            : ResultStatus.UNINITIALIZED,
         queryStatus: { startTime },
       }),
-    [shouldSearchOnPageLoad, startTime]
+    [shouldSearchOnPageLoad, startTime, skipInitialFetch]
   );
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
@@ -289,6 +302,9 @@ export const useSearch = (services: DiscoverViewServices) => {
   ]);
 
   useEffect(() => {
+    if (!getDatasetAutoSearchOnPageLoadPreference()) {
+      skipInitialFetch.current = true;
+    }
     const fetch$ = merge(
       refetch$,
       filterManager.getFetches$(),
@@ -297,8 +313,11 @@ export const useSearch = (services: DiscoverViewServices) => {
       timefilter.getAutoRefreshFetch$(),
       data.query.queryString.getUpdates$()
     ).pipe(debounceTime(100));
-
     const subscription = fetch$.subscribe(() => {
+      if (skipInitialFetch.current) {
+        skipInitialFetch.current = false; // Reset so future fetches will proceed normally
+        return; // Skip the first fetch
+      }
       (async () => {
         try {
           await fetch();
@@ -316,6 +335,8 @@ export const useSearch = (services: DiscoverViewServices) => {
     return () => {
       subscription.unsubscribe();
     };
+    // disabling the eslint since we are not adding getDatasetAutoSearchOnPageLoadPreference since this changes when dataset changes and these chnages are already part of data.query.queryString
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     data$,
     data.query.queryString,

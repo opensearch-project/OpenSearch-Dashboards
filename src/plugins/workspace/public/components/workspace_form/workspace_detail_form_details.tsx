@@ -129,6 +129,7 @@ export const WorkspaceDetailFormDetails = ({
           error={formErrors.color?.message}
         >
           <EuiCompressedColorPicker
+            mode="swatch"
             color={formData.color}
             onChange={handleColorChange}
             readOnly={!isEditing}
