@@ -81,7 +81,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
       const blurDisposable = editor.onDidBlurEditorText(() => {
         blurTimeoutRef.current = setTimeout(() => {
           setEditorIsFocused(false);
-        }, 3000);
+        }, 500);
       });
 
       return () => {

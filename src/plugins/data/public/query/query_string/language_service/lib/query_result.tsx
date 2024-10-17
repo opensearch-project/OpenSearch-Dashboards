@@ -145,9 +145,9 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
           onClick={onButtonClick}
           data-test-subj="queryResultErrorBtn"
           className="editor__footerItem"
-          flush="both"
+          color="danger"
         >
-          <EuiText size="xs" color="subdued" className="editor__footerItem">
+          <EuiText size="xs" color="danger" className="editor__footerItem">
             {i18n.translate('data.query.languageService.queryResults.error', {
               defaultMessage: `Error`,
             })}
@@ -167,7 +167,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
             {i18n.translate('data.query.languageService.queryResults.reasons', {
               defaultMessage: `Reasons:`,
             })}
-          </strong>
+          </strong>{' '}
           {props.queryStatus.body.error.reason}
         </EuiText>
         <EuiText size="s">
@@ -176,7 +176,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
               {i18n.translate('data.query.languageService.queryResults.details', {
                 defaultMessage: `Details:`,
               })}
-            </strong>
+            </strong>{' '}
             {props.queryStatus.body.error.details}
           </p>
         </EuiText>
