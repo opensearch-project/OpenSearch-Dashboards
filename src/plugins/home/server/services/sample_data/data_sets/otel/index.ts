@@ -11,7 +11,6 @@ import {
   getSavedObjectsWithDataSource,
   overwriteSavedObjectsWithWorkspaceId,
 } from '../util';
-// import { getSavedObjects } from './saved_objects';
 import { servicesFieldMappings } from './services_field_mappings';
 import { tracesFieldMappings } from './traces_field_mappings';
 import { metricsFieldMappings } from './metrics_field_mappings';
@@ -53,7 +52,7 @@ export const otelSpecProvider = function (): SampleDatasetSchema {
         dataPath: path.join(__dirname, './sample_traces.json.gz'),
         fields: tracesFieldMappings,
         timeFields: ['startTime', 'endTime', 'traceGroupFields.endTime'], // TODO: add support for 'events.time'
-        currentTimeMarker: '2024-10-16T03:30:00',
+        currentTimeMarker: '2024-10-16T19:00:01',
         preserveDayOfWeekTimeOfDay: false,
         customPrefix: 'otel-v1-apm-span',
       },
@@ -62,7 +61,7 @@ export const otelSpecProvider = function (): SampleDatasetSchema {
         dataPath: path.join(__dirname, './sample_service_map.json.gz'),
         fields: servicesFieldMappings,
         timeFields: [],
-        currentTimeMarker: '2024-10-16T03:30:00',
+        currentTimeMarker: '2024-10-16T19:00:01',
         preserveDayOfWeekTimeOfDay: false,
         customPrefix: 'otel-v1-apm-service',
       },
@@ -71,7 +70,7 @@ export const otelSpecProvider = function (): SampleDatasetSchema {
         dataPath: path.join(__dirname, './sample_metrics.json.gz'),
         fields: metricsFieldMappings,
         timeFields: ['@timestamp', 'exemplar.time', 'startTime', 'time', 'observedTimestamp'],
-        currentTimeMarker: '2024-10-16T03:30:00',
+        currentTimeMarker: '2024-10-16T19:00:01',
         preserveDayOfWeekTimeOfDay: false,
         customPrefix: 'ss4o_metrics-otel',
       },
@@ -80,7 +79,7 @@ export const otelSpecProvider = function (): SampleDatasetSchema {
         dataPath: path.join(__dirname, './sample_logs.json.gz'),
         fields: logsFieldMappings,
         timeFields: ['time', 'observedTime'],
-        currentTimeMarker: '2024-10-16T03:30:00',
+        currentTimeMarker: '2024-10-16T19:00:01',
         preserveDayOfWeekTimeOfDay: false,
         customPrefix: 'otel-events',
       },
