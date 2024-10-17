@@ -30,6 +30,7 @@ import {
   WORKSPACE_LIST_APP_ID,
   WORKSPACE_INITIAL_APP_ID,
   WORKSPACE_NAVIGATION_APP_ID,
+  WORKSPACE_COLLABORATORS_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services, WorkspaceUseCase, WorkspacePluginSetup } from './types';
@@ -107,6 +108,7 @@ export class WorkspacePlugin
   private useCase = new UseCaseService();
   private workspaceClient?: WorkspaceClient;
   private collaboratorTypes = new WorkspaceCollaboratorTypesService();
+  private collaboratorsAppUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
 
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
@@ -384,6 +386,24 @@ export class WorkspacePlugin
       },
     });
 
+    /**
+     * register workspace collaborators page
+     */
+    core.application.register({
+      id: WORKSPACE_COLLABORATORS_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceCollaborators', {
+        defaultMessage: 'Collaborators',
+      }),
+      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderCollaboratorsApp } = await import('./application');
+        return mountWorkspaceApp(params, renderCollaboratorsApp);
+      },
+      updater$: this.collaboratorsAppUpdater$,
+    });
+
     // workspace initial page
     core.application.register({
       id: WORKSPACE_INITIAL_APP_ID,
@@ -574,6 +594,10 @@ export class WorkspacePlugin
 
   public start(core: CoreStart, { contentManagement, navigation }: WorkspacePluginStartDeps) {
     this.coreStart = core;
+    const isPermissionEnabled = core?.application?.capabilities.workspaces.permissionEnabled;
+    this.collaboratorsAppUpdater$.next(() => {
+      return { status: isPermissionEnabled ? AppStatus.accessible : AppStatus.inaccessible };
+    });
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
 
