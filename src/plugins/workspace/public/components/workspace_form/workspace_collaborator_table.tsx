@@ -65,9 +65,18 @@ const deletionModalWarning = i18n.translate(
   'workspace.workspace.detail.collaborator.modal.delete.warning',
   {
     defaultMessage:
-      'Currently you’re the only user who has access to the workspace as an owner. Share this workspace by adding collaborators.',
+      'By removing the last administrator, only application administrators will be able to manage this workspace',
   }
 );
+
+const changeAccessModalWarning = i18n.translate(
+  'workspace.workspace.detail.collaborator.modal.changeAccessLevel.warning',
+  {
+    defaultMessage:
+      'By changing the last administrator to a lesser access, only application administrators will be able to manage this workspace',
+  }
+);
+
 const deletionModalConfirm = i18n.translate('workspace.detail.collaborator.modal.delete.confirm', {
   defaultMessage: 'Delete collaborator? The collaborators will not have access to the workspace.',
 });
@@ -152,7 +161,7 @@ export const WorkspaceCollaboratorTable = ({
     });
   }, [permissionSettings, displayedCollaboratorTypes]);
 
-  const adminCollarboratorsNum = useMemo(() => {
+  const adminCollaboratorsNum = useMemo(() => {
     const admins = items.filter((item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin);
     return admins.length;
   }, [items]);
@@ -202,9 +211,10 @@ export const WorkspaceCollaboratorTable = ({
       (item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin
     ).length;
     const shouldShowWarning =
-      adminCollarboratorsNum === adminOfSelection && adminCollarboratorsNum !== 0;
+      adminCollaboratorsNum === adminOfSelection && adminCollaboratorsNum !== 0;
     const modal = overlays.openModal(
       <EuiConfirmModal
+        data-test-subj="delete-confirm-modal"
         title={i18n.translate('workspace.detail.collaborator.actions.delete', {
           defaultMessage: 'Delete collaborator',
         })}
@@ -218,6 +228,57 @@ export const WorkspaceCollaboratorTable = ({
         </EuiText>
       </EuiConfirmModal>
     );
+    return modal;
+  };
+
+  const openChangeAccessLevelModal = ({
+    onConfirm,
+    selections,
+    type,
+  }: {
+    onConfirm: () => void;
+    selections: PermissionSettingWithAccessLevelAndDisplayedType[];
+    type: WorkspaceCollaboratorAccessLevel;
+  }) => {
+    let shouldShowWarning = false;
+    if (type !== 'admin') {
+      const adminOfSelection = selections.filter(
+        (item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin
+      ).length;
+      shouldShowWarning = adminCollaboratorsNum - adminOfSelection < 1 && adminCollaboratorsNum > 0;
+    }
+
+    const modal = overlays.openModal(
+      <EuiConfirmModal
+        data-test-subj="change-access-confirm-modal"
+        title={i18n.translate('workspace.detail.collaborator.table.change.access.level', {
+          defaultMessage: 'Change access level',
+        })}
+        onCancel={() => {
+          modal.close();
+        }}
+        onConfirm={onConfirm}
+        cancelButtonText={deletionModalCancelButton}
+        confirmButtonText={deletionModalConfirmButton}
+      >
+        <EuiText color={shouldShowWarning ? 'danger' : 'default'}>
+          <p>
+            {shouldShowWarning
+              ? changeAccessModalWarning
+              : i18n.translate('workspace.detail.collaborator.changeAccessLevel.confirmation', {
+                  defaultMessage:
+                    'Do you want to change access level of {numCollaborators} collaborator{pluralSuffix} to "{accessLevel}"?',
+                  values: {
+                    numCollaborators: selections.length,
+                    pluralSuffix: selections.length > 1 ? 's' : '',
+                    accessLevel: type,
+                  },
+                })}
+          </p>
+        </EuiText>
+      </EuiConfirmModal>
+    );
+
     return modal;
   };
 
@@ -283,6 +344,7 @@ export const WorkspaceCollaboratorTable = ({
         isTableAction={false}
         selection={selection}
         handleSubmitPermissionSettings={handleSubmitPermissionSettings}
+        openChangeAccessLevelModal={openChangeAccessLevelModal}
       />
     );
   };
@@ -362,6 +424,7 @@ export const WorkspaceCollaboratorTable = ({
           permissionSettings={permissionSettings}
           handleSubmitPermissionSettings={handleSubmitPermissionSettings}
           openDeleteConfirmModal={openDeleteConfirmModal}
+          openChangeAccessLevelModal={openChangeAccessLevelModal}
         />
       ),
     },
@@ -391,6 +454,7 @@ const Actions = ({
   permissionSettings,
   handleSubmitPermissionSettings,
   openDeleteConfirmModal,
+  openChangeAccessLevelModal,
 }: {
   isTableAction: boolean;
   selection?: PermissionSettingWithAccessLevelAndDisplayedType[];
@@ -405,10 +469,18 @@ const Actions = ({
     onConfirm: () => void;
     selections: PermissionSettingWithAccessLevelAndDisplayedType[];
   }) => { close: () => void };
+  openChangeAccessLevelModal?: ({
+    onConfirm,
+    selections,
+    type,
+  }: {
+    onConfirm: () => void;
+    selections: PermissionSettingWithAccessLevelAndDisplayedType[];
+    type: WorkspaceCollaboratorAccessLevel;
+  }) => { close: () => void };
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const {
-    overlays,
     services: { notifications },
   } = useOpenSearchDashboards();
 
@@ -416,69 +488,48 @@ const Actions = ({
     WORKSPACE_ACCESS_LEVEL_NAMES
   ) as WorkspaceCollaboratorAccessLevel[]).map((level) => ({
     name: WORKSPACE_ACCESS_LEVEL_NAMES[level],
-    onClick: async () => {
+    onClick: () => {
       setIsPopoverOpen(false);
-      if (selection) {
-        const modal = overlays.openModal(
-          <EuiConfirmModal
-            title={i18n.translate('workspace.detail.collaborator.table.change.access.level', {
-              defaultMessage: 'Change access level',
-            })}
-            onCancel={() => modal.close()}
-            onConfirm={async () => {
-              let newSettings = permissionSettings;
-              selection.forEach(({ id }) => {
-                newSettings = newSettings.map((item) =>
-                  id === item.id
-                    ? {
-                        ...item,
-                        modes: accessLevelNameToWorkspacePermissionModesMap[level],
-                      }
-                    : item
-                );
-              });
-              const result = await handleSubmitPermissionSettings(
-                newSettings as WorkspacePermissionSetting[]
-              );
-              if (result?.success) {
-                notifications?.toasts?.addSuccess({
-                  title: i18n.translate(
-                    'workspace.detail.collaborator.change.access.success.title',
-                    {
-                      defaultMessage: 'The access level changed',
+      if (selection && openChangeAccessLevelModal) {
+        const modal = openChangeAccessLevelModal({
+          onConfirm: async () => {
+            let newSettings = permissionSettings;
+            selection.forEach(({ id }) => {
+              newSettings = newSettings.map((item) =>
+                id === item.id
+                  ? {
+                      ...item,
+                      modes: accessLevelNameToWorkspacePermissionModesMap[level],
                     }
-                  ),
-                  text: i18n.translate('workspace.detail.collaborator.change.access.success.body', {
-                    defaultMessage:
-                      'The access level is changed to {level} for {num} collaborator{pluralSuffix, select, true {} other {s}}.',
-                    values: {
-                      level: WORKSPACE_ACCESS_LEVEL_NAMES[level],
-                      num: selection.length,
-                      pluralSuffix: selection.length === 1,
-                    },
-                  }),
-                });
-              }
-              modal.close();
-            }}
-            cancelButtonText="Cancel"
-            confirmButtonText="Confirm"
-          >
-            <EuiText>
-              <p>
-                {i18n.translate('workspace.detail.collaborator.changeAccessLevel.confirmation', {
+                  : item
+              );
+            });
+
+            const result = await handleSubmitPermissionSettings(
+              newSettings as WorkspacePermissionSetting[]
+            );
+
+            if (result?.success) {
+              notifications?.toasts?.addSuccess({
+                title: i18n.translate('workspace.detail.collaborator.change.access.success.title', {
+                  defaultMessage: 'The access level changed',
+                }),
+                text: i18n.translate('workspace.detail.collaborator.change.access.success.body', {
                   defaultMessage:
-                    'Do you want to change access level to {numCollaborators} collaborator{pluralSuffix, select, true {} other {s}} to "{accessLevel}"?',
+                    'The access level is changed to {level} for {num} collaborator{pluralSuffix, select, true {} other {s}}.',
                   values: {
-                    numCollaborators: selection.length,
-                    pluralSuffix: selection.length === 1,
-                    accessLevel: WORKSPACE_ACCESS_LEVEL_NAMES[level],
+                    level: WORKSPACE_ACCESS_LEVEL_NAMES[level],
+                    num: selection.length,
+                    pluralSuffix: selection.length === 1 ? '' : 's',
                   },
-                })}
-              </p>
-            </EuiText>
-          </EuiConfirmModal>
-        );
+                }),
+              });
+            }
+            modal.close();
+          },
+          selections: selection,
+          type: level,
+        });
       }
     },
     icon: '',
