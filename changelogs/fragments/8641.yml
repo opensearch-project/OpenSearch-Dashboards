@@ -1,0 +1,2 @@
+feat:
+- [Workspace] Response forbidden error for not permitted workspace ([#8641](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8641))
