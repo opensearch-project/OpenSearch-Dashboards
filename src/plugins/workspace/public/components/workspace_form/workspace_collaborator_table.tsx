@@ -493,7 +493,7 @@ const Actions = ({
       setIsPopoverOpen(false);
       if (selection && openChangeAccessLevelModal) {
         const modal = openChangeAccessLevelModal({
-          onConfirm: () => {
+          onConfirm: async () => {
             let newSettings = permissionSettings;
             selection.forEach(({ id }) => {
               newSettings = newSettings.map((item) =>
@@ -505,7 +505,27 @@ const Actions = ({
                   : item
               );
             });
-            handleSubmitPermissionSettings(newSettings as WorkspacePermissionSetting[]);
+
+            const result = await handleSubmitPermissionSettings(
+              newSettings as WorkspacePermissionSetting[]
+            );
+
+            if (result?.success) {
+              notifications?.toasts?.addSuccess({
+                title: i18n.translate('workspace.detail.collaborator.change.access.success.title', {
+                  defaultMessage: 'The access level changed',
+                }),
+                text: i18n.translate('workspace.detail.collaborator.change.access.success.body', {
+                  defaultMessage:
+                    'The access level is changed to {level} for {num} collaborator{pluralSuffix, select, true {} other {s}}.',
+                  values: {
+                    level: WORKSPACE_ACCESS_LEVEL_NAMES[level],
+                    num: selection.length,
+                    pluralSuffix: selection.length === 1 ? '' : 's',
+                  },
+                }),
+              });
+            }
             modal.close();
           },
           selections: selection,

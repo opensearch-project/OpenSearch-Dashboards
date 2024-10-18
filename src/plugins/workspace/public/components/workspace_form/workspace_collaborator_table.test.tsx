@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import ReactDOM from 'react-dom';
 import { WorkspaceCollaboratorTable, getDisplayedType } from './workspace_collaborator_table';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
@@ -28,19 +28,16 @@ const displayedCollaboratorTypes = [
   },
 ];
 
-const mockOverlays = {
-  openModal: jest.fn(),
-};
+const mockOverlays = mockCoreStart.overlays;
 
-const { Provider } = createOpenSearchDashboardsReactContext({
-  ...mockCoreStart,
-  overlays: mockOverlays,
-});
+const { Provider } = createOpenSearchDashboardsReactContext(mockCoreStart);
 
 describe('getDisplayedTypes', () => {
   it('should return undefined if not match any collaborator type', () => {
     expect(
-      getDisplayedType(displayedCollaboratorTypes, { permissionType: 'unknown' })
+      getDisplayedType(displayedCollaboratorTypes, {
+        permissionType: 'unknown',
+      })
     ).toBeUndefined();
   });
   it('should return "User"', () => {
@@ -134,7 +131,7 @@ describe('WorkspaceCollaboratorTable', () => {
     expect(mockOverlays.openModal).toHaveBeenCalled();
   });
 
-  it('should open change access modal when trying to change access level', () => {
+  it('should open change access modal when trying to change access level', async () => {
     const permissionSettings = [
       {
         id: 0,
@@ -152,9 +149,20 @@ describe('WorkspaceCollaboratorTable', () => {
 
     const { getByText, getByTestId } = render(
       <Provider>
-        <WorkspaceCollaboratorTable {...mockProps} permissionSettings={permissionSettings} />
+        <>
+          <WorkspaceCollaboratorTable {...mockProps} permissionSettings={permissionSettings} />
+          <div data-test-subj="change-access-confirm-modal" />
+        </>
       </Provider>
     );
+
+    mockOverlays.openModal.mockReturnValue({
+      onClose: Promise.resolve(),
+      close: async () => {
+        ReactDOM.unmountComponentAtNode(getByTestId('change-access-confirm-modal'));
+      },
+    });
+
     fireEvent.click(getByTestId('checkboxSelectRow-0'));
     fireEvent.click(getByTestId('checkboxSelectRow-1'));
 
@@ -162,19 +170,21 @@ describe('WorkspaceCollaboratorTable', () => {
     fireEvent.click(action);
     const changeAccessLevel = getByText('Change access level');
     fireEvent.click(changeAccessLevel);
-    expect(getByText('Read only')).toBeInTheDocument();
     const changes = getByText('Read only');
     fireEvent.click(changes);
     expect(mockOverlays.openModal).toHaveBeenCalled();
-    const ModalComponent = mockOverlays.openModal.mock.calls[0][0];
-    const { queryByTestId } = render(ModalComponent);
-    const modal = queryByTestId('change-access-confirm-modal');
+    mockOverlays.openModal.mock.calls[0][0](getByTestId('change-access-confirm-modal'));
+    await waitFor(() => {
+      expect(getByText('Confirm')).toBeInTheDocument();
+      expect(getByText('Change access level')).toBeInTheDocument();
+    });
+    const modal = getByTestId('change-access-confirm-modal');
     if (modal) {
       ReactDOM.unmountComponentAtNode(modal);
     }
   });
 
-  it('should openModal when clicking one selection delete', () => {
+  it('should openModal when clicking one selection delete', async () => {
     const permissionSettings = [
       {
         id: 0,
@@ -190,24 +200,31 @@ describe('WorkspaceCollaboratorTable', () => {
       },
     ];
 
-    const { getByText, getByTestId } = render(
+    const { getByText, getByTestId, queryByTestId } = render(
       <Provider>
-        <WorkspaceCollaboratorTable {...mockProps} permissionSettings={permissionSettings} />
+        <>
+          <WorkspaceCollaboratorTable {...mockProps} permissionSettings={permissionSettings} />
+          <div data-test-subj="delete-confirm-modal" />
+        </>
       </Provider>
     );
     fireEvent.click(getByTestId('checkboxSelectRow-0'));
     const deleteCollaborator = getByText('Delete 1 collaborator');
     fireEvent.click(deleteCollaborator);
     expect(mockOverlays.openModal).toHaveBeenCalled();
-    const ModalComponent = mockOverlays.openModal.mock.calls[0][0];
-    const { queryByTestId } = render(ModalComponent);
+    mockOverlays.openModal.mock.calls[0][0](getByTestId('delete-confirm-modal'));
+    await waitFor(() => {
+      expect(getByText('Confirm')).toBeInTheDocument();
+      expect(getByText('Delete collaborator')).toBeInTheDocument();
+      expect(getByTestId('delete-confirm-modal-des')).toBeInTheDocument();
+    });
     const modal = queryByTestId('delete-confirm-modal');
     if (modal) {
       ReactDOM.unmountComponentAtNode(modal);
     }
   });
 
-  it('should openModal when clicking multi selection delete', () => {
+  it('should openModal when clicking multi selection delete', async () => {
     const permissionSettings = [
       {
         id: 0,
@@ -223,16 +240,37 @@ describe('WorkspaceCollaboratorTable', () => {
       },
     ];
 
-    const { getByText, getByTestId } = render(
+    const { getByText, getByTestId, queryByTestId } = render(
       <Provider>
-        <WorkspaceCollaboratorTable {...mockProps} permissionSettings={permissionSettings} />
+        <>
+          <WorkspaceCollaboratorTable {...mockProps} permissionSettings={permissionSettings} />
+          <div data-test-subj="delete-confirm-modal" />
+        </>
       </Provider>
     );
+
+    mockOverlays.openModal.mockReturnValue({
+      onClose: Promise.resolve(),
+      close: async () => {
+        ReactDOM.unmountComponentAtNode(getByTestId('delete-confirm-modal'));
+      },
+    });
+
     fireEvent.click(getByTestId('checkboxSelectRow-0'));
     fireEvent.click(getByTestId('checkboxSelectRow-1'));
     const deleteCollaborator = getByText('Delete 2 collaborators');
     fireEvent.click(deleteCollaborator);
     expect(mockOverlays.openModal).toHaveBeenCalled();
+    mockOverlays.openModal.mock.calls[0][0](getByTestId('delete-confirm-modal'));
+    await waitFor(() => {
+      expect(getByText('Confirm')).toBeInTheDocument();
+      expect(getByText('Delete collaborator')).toBeInTheDocument();
+      expect(getByTestId('delete-confirm-modal-des')).toBeInTheDocument();
+    });
+    const modal = queryByTestId('delete-confirm-modal');
+    if (modal) {
+      ReactDOM.unmountComponentAtNode(modal);
+    }
   });
 
   it('should openModal when clicking action tools when multi selection', () => {
