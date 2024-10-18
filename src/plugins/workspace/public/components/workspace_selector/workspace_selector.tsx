@@ -64,36 +64,21 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
   const closePopover = () => {
     setPopover(false);
   };
+
   const button = currentWorkspace ? (
-    <EuiPanel
-      className="workspaceSelectorPopoverButton"
-      paddingSize="none"
-      color="transparent"
-      hasBorder={false}
-      hasShadow={false}
-      data-test-subj="workspace-selector-button"
-      onClick={onButtonClick}
-    >
-      <EuiText
-        size="xs"
-        // TODO: Use standard OuiComponent to achieve the label looks
-        style={{
-          position: 'relative',
-          bottom: '-10px',
-          zIndex: 1,
-          padding: '0 5px',
-        }}
+    <div className="workspaceSelectorPopoverButtonContainer" data-label="Workspace">
+      <EuiPanel
+        className="workspaceSelectorPopoverButton"
+        data-test-subj="workspace-selector-button"
+        paddingSize="s"
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+        onClick={onButtonClick}
       >
-        <small className="workspaceNameLabel">
-          {i18n.translate('workspace.left.nav.selector.label', {
-            defaultMessage: 'WORKSPACE',
-          })}
-        </small>
-      </EuiText>
-      <EuiPanel paddingSize="s" borderRadius="m" color="transparent" hasBorder>
-        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" responsive={false}>
           <EuiFlexItem>
-            <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
+            <EuiFlexGroup gutterSize="s" justifyContent="flexStart" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiIcon
                   size="l"
@@ -101,14 +86,14 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
                   color={getValidWorkspaceColor(currentWorkspace.color)}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup direction="column" gutterSize="none">
-                  <EuiFlexItem grow={false} style={{ maxWidth: '130px' }}>
+              <EuiFlexItem>
+                <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
+                  <EuiFlexItem style={{ maxWidth: '130px' }}>
                     <EuiText size="s" data-test-subj="workspace-selector-current-name">
                       <h4 className="eui-textTruncate">{currentWorkspace.name}</h4>
                     </EuiText>
                   </EuiFlexItem>
-                  <EuiFlexItem>
+                  <EuiFlexItem grow={false}>
                     <EuiText
                       size="xs"
                       color="subdued"
@@ -126,7 +111,7 @@ export const WorkspaceSelector = ({ coreStart, registeredUseCases$ }: Props) => 
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
-    </EuiPanel>
+    </div>
   ) : (
     <EuiButton onClick={onButtonClick}>Select a Workspace</EuiButton>
   );

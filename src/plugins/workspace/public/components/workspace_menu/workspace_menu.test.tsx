@@ -83,7 +83,7 @@ describe('<WorkspaceMenu />', () => {
     const selectButton = screen.getByTestId('workspace-select-button');
     fireEvent.click(selectButton);
 
-    expect(screen.getByText(`viewed ${moment(1234567890).fromNow()}`)).toBeInTheDocument();
+    expect(screen.getByText(`Viewed ${moment(1234567890).fromNow()}`)).toBeInTheDocument();
   });
 
   it('should be able to display empty state when the workspace list is empty', () => {
