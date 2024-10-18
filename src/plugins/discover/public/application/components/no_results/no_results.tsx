@@ -28,18 +28,17 @@
  * under the License.
  */
 
+import './no_results.scss';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 
 import {
   EuiEmptyPrompt,
-  EuiPanel,
   EuiText,
   EuiTabbedContent,
   EuiCodeBlock,
   EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { Query } from '../../../../../data/common';
@@ -210,16 +209,19 @@ export const DiscoverNoResults = ({
     };
 
     const sampleQueries = [];
-    if (query?.dataset?.type && datasetService.getType(query.dataset.type)?.getSampleQueries) {
-      sampleQueries.push(
-        ...datasetService.getType(query.dataset.type)!.getSampleQueries!(
-          query.dataset,
-          query.language
-        )
-      );
+
+    // Samples for the dataset type
+    if (query?.dataset?.type) {
+      const datasetSampleQueries = datasetService
+        .getType(query.dataset.type)
+        ?.getSampleQueries?.(query.dataset, query.language);
+      if (Array.isArray(datasetSampleQueries)) sampleQueries.push(...datasetSampleQueries);
     }
-    if (query && languageService.getLanguage(query?.language)?.sampleQueries) {
-      sampleQueries.push(...(languageService.getLanguage(query.language)!.sampleQueries ?? []));
+
+    // Samples for the language
+    if (query?.language) {
+      const languageSampleQueries = languageService.getLanguage(query.language)?.sampleQueries;
+      if (Array.isArray(languageSampleQueries)) sampleQueries.push(...languageSampleQueries);
     }
 
     return [
@@ -231,14 +233,14 @@ export const DiscoverNoResults = ({
                 defaultMessage: 'Sample Queries',
               }),
               content: (
-                <Fragment>
+                <EuiPanel hasBorder={false} hasShadow={false}>
                   <EuiSpacer size="s" />
                   {sampleQueries
                     .slice(0, 5)
                     .map((sampleQuery) =>
                       buildSampleQueryBlock(sampleQuery.title, sampleQuery.query)
                     )}
-                </Fragment>
+                </EuiPanel>
               ),
             },
           ]
@@ -266,39 +268,33 @@ export const DiscoverNoResults = ({
 
   return (
     <I18nProvider>
-      <EuiPanel hasBorder={false} hasShadow={false} color="transparent">
-        <EuiFlexGroup alignItems="center" justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiPanel hasBorder={true}>
-              <EuiEmptyPrompt
-                iconType="alert"
-                iconColor="default"
-                data-test-subj="discoverNoResults"
-                title={
-                  <EuiText size="s">
-                    <h2>
-                      {i18n.translate('discover.emptyPrompt.title', {
-                        defaultMessage: 'No Results',
-                      })}
-                    </h2>
-                  </EuiText>
-                }
-                body={
-                  <EuiText size="s" data-test-subj="discoverNoResultsTimefilter">
-                    <p>
-                      {i18n.translate('discover.emptyPrompt.body', {
-                        defaultMessage:
-                          'Try selecting a different data source, expanding your time range or modifying the query & filters.',
-                      })}
-                    </p>
-                  </EuiText>
-                }
-              />
-              <EuiTabbedContent tabs={tabs} />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+      <EuiEmptyPrompt
+        iconType="editorCodeBlock"
+        iconColor="default"
+        data-test-subj="discoverNoResults"
+        title={
+          <EuiText size="s">
+            <h2>
+              {i18n.translate('discover.emptyPrompt.title', {
+                defaultMessage: 'No Results',
+              })}
+            </h2>
+          </EuiText>
+        }
+        body={
+          <EuiText size="s" data-test-subj="discoverNoResultsTimefilter">
+            <p>
+              {i18n.translate('discover.emptyPrompt.body', {
+                defaultMessage:
+                  'Try selecting a different data source, expanding your time range or modifying the query & filters.',
+              })}
+            </p>
+          </EuiText>
+        }
+      />
+      <div className="discoverNoResults-sampleContainer">
+        <EuiTabbedContent tabs={tabs} />
+      </div>
     </I18nProvider>
   );
 };
