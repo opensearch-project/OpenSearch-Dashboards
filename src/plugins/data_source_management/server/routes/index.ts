@@ -5,7 +5,10 @@
 
 import { IRouter, ILegacyClusterClient } from '../../../../core/server';
 import { registerDslRoute } from './dsl';
-import { registerDataConnectionsRoute } from './data_connections_router';
+import {
+  registerDataConnectionsRoute,
+  registerNonMdsDataConnectionsRoute,
+} from './data_connections_router';
 import { registerDatasourcesRoute } from './datasources_router';
 import { registerPplRoute } from './ppl';
 import { DSLFacet } from '../services/facets/dsl_facet';
@@ -43,6 +46,9 @@ export function setupRoutes({
   // const queryService = new QueryService(client);
   // registerSqlRoute(router, queryService);
 
+  if (!dataSourceEnabled) {
+    registerNonMdsDataConnectionsRoute(router);
+  }
   registerDataConnectionsRoute(router, dataSourceEnabled);
   registerDatasourcesRoute(router, dataSourceEnabled);
 }
