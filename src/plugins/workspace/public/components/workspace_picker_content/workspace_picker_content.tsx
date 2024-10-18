@@ -27,18 +27,6 @@ import { WorkspaceUseCase } from '../../types';
 import { validateWorkspaceColor } from '../../../common/utils';
 import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
 
-function sortBy<T>(getkey: (item: T) => number | undefined) {
-  return (a: T, b: T): number => {
-    const aValue = getkey(a);
-    const bValue = getkey(b);
-
-    if (aValue === undefined) return 1;
-    if (bValue === undefined) return -1;
-
-    return bValue - aValue;
-  };
-}
-
 const searchFieldPlaceholder = i18n.translate('workspace.menu.search.placeholder', {
   defaultMessage: 'Search workspace name',
 });
@@ -48,7 +36,7 @@ const getValidWorkspaceColor = (color?: string) =>
 
 interface UpdatedWorkspaceObject extends WorkspaceObject {
   accessTimeStamp?: number;
-  accessTime?: string;
+  accessTimeDescription?: string;
 }
 interface Props {
   coreStart: CoreStart;
@@ -56,6 +44,21 @@ interface Props {
   onClickWorkspace?: () => void;
   isInTwoLines?: boolean;
 }
+
+const sortByRecentVisitedAndAlphabetical = (
+  ws1: UpdatedWorkspaceObject,
+  ws2: UpdatedWorkspaceObject
+) => {
+  // First, sort by accessTimeStamp in descending order (if both have timestamps)
+  if (ws1?.accessTimeStamp && ws2?.accessTimeStamp) {
+    return ws2.accessTimeStamp - ws1.accessTimeStamp;
+  }
+  // If one has a timestamp and the other does not, prioritize the one with the timestamp
+  if (ws1.accessTimeStamp) return -1;
+  if (ws2.accessTimeStamp) return 1;
+  // If neither has a timestamp, sort alphabetically by name
+  return ws1.name.localeCompare(ws2.name);
+};
 
 export const WorkspacePickerContent = ({
   coreStart,
@@ -72,18 +75,23 @@ export const WorkspacePickerContent = ({
     const recentWorkspaces = recentWorkspaceManager.getRecentWorkspaces();
     const updatedList = workspaceList.map((workspace) => {
       const recentWorkspace = recentWorkspaces.find((recent) => recent.id === workspace.id);
-
-      if (recentWorkspace) {
-        return {
-          ...workspace,
-          accessTimeStamp: recentWorkspace.timestamp,
-          accessTime: `viewed ${moment(recentWorkspace.timestamp).fromNow()}`,
-        };
-      }
-      return workspace as UpdatedWorkspaceObject;
+      return {
+        ...workspace,
+        accessTimeStamp: recentWorkspace?.timestamp,
+        accessTimeDescription: recentWorkspace
+          ? i18n.translate('workspace.picker.accessTime.description', {
+              defaultMessage: 'Viewed {timeLabel}',
+              values: {
+                timeLabel: moment(recentWorkspace.timestamp).fromNow(),
+              },
+            })
+          : i18n.translate('workspace.picker.accessTime.not.visited', {
+              defaultMessage: 'Not visited recently',
+            }),
+      };
     });
 
-    return updatedList.sort(sortBy((workspace) => workspace.accessTimeStamp));
+    return updatedList.sort(sortByRecentVisitedAndAlphabetical);
   }, [workspaceList]);
 
   const queryFromList = ({ list, query }: { list: UpdatedWorkspaceObject[]; query: string }) => {
@@ -186,7 +194,7 @@ export const WorkspacePickerContent = ({
                       </EuiFlexItem>
                       <EuiFlexItem grow={1} style={{ position: 'absolute', right: '0px' }}>
                         <EuiText size="s" color="subdued">
-                          <small> {workspace.accessTime}</small>
+                          <small> {workspace.accessTimeDescription}</small>
                         </EuiText>
                       </EuiFlexItem>
                     </EuiFlexGroup>
@@ -211,7 +219,7 @@ export const WorkspacePickerContent = ({
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText size="s" color="subdued">
-                      <small> {workspace.accessTime}</small>
+                      <small> {workspace.accessTimeDescription}</small>
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
