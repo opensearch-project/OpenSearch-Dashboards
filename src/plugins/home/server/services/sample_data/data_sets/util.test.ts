@@ -3,9 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getSavedObjectsWithDataSource, getFinalSavedObjects } from './util';
 import { SavedObject, updateDataSourceNameInVegaSpec } from '../../../../../../core/server';
 import visualizationObjects from './test_utils/visualization_objects.json';
+import {
+  getFinalSavedObjects,
+  getNestedField,
+  getSavedObjectsWithDataSource,
+  setNestedField,
+} from './util';
 
 describe('getSavedObjectsWithDataSource()', () => {
   const getVisualizationSavedObjects = (): Array<SavedObject<any>> => {
@@ -265,5 +270,69 @@ describe('getFinalSavedObjects()', () => {
         dataset,
       })
     ).toBe(dataset.savedObjects);
+  });
+});
+
+describe('getNestedField', () => {
+  it('should return the value of a top-level field', () => {
+    const doc = { field1: 'value1', field2: 'value2' };
+    const result = getNestedField(doc, 'field1');
+    expect(result).toBe('value1');
+  });
+
+  it('should return the value of a nested field', () => {
+    const doc = { field1: { nestedField: 'nestedValue' } };
+    const result = getNestedField(doc, 'field1.nestedField');
+    expect(result).toBe('nestedValue');
+  });
+
+  it('should return undefined for a non-existent field', () => {
+    const doc = { field1: 'value1' };
+    const result = getNestedField(doc, 'nonExistentField');
+    expect(result).toBeUndefined();
+  });
+
+  it('should handle fields with dots in their names', () => {
+    const doc = { 'field.with.dot': 'valueWithDot' };
+    const result = getNestedField(doc, 'field.with.dot');
+    expect(result).toBe('valueWithDot');
+  });
+
+  it('should return undefined for a non-existent nested field', () => {
+    const doc = { field1: { nestedField: 'nestedValue' } };
+    const result = getNestedField(doc, 'field1.nonExistentField');
+    expect(result).toBeUndefined();
+  });
+});
+
+describe('setNestedField', () => {
+  it('should set the value of a top-level field', () => {
+    const doc = { field1: 'value1', field2: 'value2' };
+    setNestedField(doc, 'field1', 'newValue1');
+    expect(doc.field1).toBe('newValue1');
+  });
+
+  it('should set the value of a nested field', () => {
+    const doc = { field1: { nestedField: 'nestedValue' } };
+    setNestedField(doc, 'field1.nestedField', 'newNestedValue');
+    expect(doc.field1.nestedField).toBe('newNestedValue');
+  });
+
+  it('should create nested fields if they do not exist', () => {
+    const doc: any = {}; // Allow dynamic properties
+    setNestedField(doc, 'field1.nestedField', 'newNestedValue');
+    expect(doc.field1).toEqual({ nestedField: 'newNestedValue' });
+  });
+
+  it('should handle fields with dots in their names', () => {
+    const doc = { 'field.with.dot': 'valueWithDot' };
+    setNestedField(doc, 'field.with.dot', 'newValueWithDot');
+    expect(doc['field.with.dot']).toBe('newValueWithDot');
+  });
+
+  it('should set a value in deeply nested structures', () => {
+    const doc = { level1: { level2: { level3: { level4: 'oldValue' } } } };
+    setNestedField(doc, 'level1.level2.level3.level4', 'newValue');
+    expect(doc.level1.level2.level3.level4).toBe('newValue');
   });
 });

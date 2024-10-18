@@ -117,6 +117,7 @@ export class SampleDataSetCard extends React.Component {
             <EuiFlexItem grow={false}>
               <SampleDataViewDataButton
                 id={this.props.id}
+                dataSourceId={this.props.dataSourceId}
                 name={this.props.name}
                 overviewDashboard={this.props.overviewDashboard}
                 appLinks={this.props.appLinks}
