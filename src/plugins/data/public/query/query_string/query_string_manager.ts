@@ -126,6 +126,7 @@ export class QueryStringManager {
       }
 
       const defaultLanguage = this.uiSettings.get('search:queryLanguage');
+      const defaultLanguageTitle = this.languageService.getLanguage(defaultLanguage)?.title;
 
       showWarning(this.notifications, {
         title: i18n.translate('data.unSupportedLanguageTitle', {
@@ -133,10 +134,10 @@ export class QueryStringManager {
         }),
         text: i18n.translate('data.unSupportedLanguageBody', {
           defaultMessage:
-            'Selected language {currentLanguage} not supported. Defaulting to {defaultLanguage}.',
+            'Selected language {currentLanguage} is not supported. Defaulting to {defaultLanguage}.',
           values: {
             currentLanguage,
-            defaultLanguage,
+            defaultLanguage: defaultLanguageTitle,
           },
         }),
       });
@@ -247,9 +248,9 @@ export class QueryStringManager {
   };
 }
 
-const showWarning = debounce((notifications, { title, text }) => {
-  notifications.toasts.addWarning({ title, text });
-}, 500);
+const showWarning = (notifications: NotificationsSetup, { title, text }) => {
+  notifications.toasts.addWarning({ title, text, id: 'unsupported_language_selected' });
+};
 
 const containsWildcardOrValue = (arr: string[] | undefined, value: string) => {
   return arr ? arr.includes('*') || arr.includes(value) : true;
