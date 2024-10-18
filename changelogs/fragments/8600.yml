@@ -1,0 +1,2 @@
+fix:
+- Fix padding and responsive behavior of page header ([#8600](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8600))

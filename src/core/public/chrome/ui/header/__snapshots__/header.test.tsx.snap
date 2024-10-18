@@ -20461,27 +20461,41 @@ exports[`Header renders page header with application title 1`] = `
           >
             <EuiFlexGroup
               className="secondaryPageHeaderFlexGroup"
-              gutterSize="s"
+              gutterSize="none"
               justifyContent="spaceBetween"
             >
               <div
-                className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive secondaryPageHeaderFlexGroup"
+                className="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive secondaryPageHeaderFlexGroup"
               >
                 <EuiHeaderSection
+                  grow={true}
                   side="left"
+                  style={
+                    Object {
+                      "flexShrink": 1,
+                    }
+                  }
                 >
                   <div
-                    className="euiHeaderSection euiHeaderSection--dontGrow euiHeaderSection--left"
+                    className="euiHeaderSection euiHeaderSection--grow euiHeaderSection--left"
+                    style={
+                      Object {
+                        "flexShrink": 1,
+                      }
+                    }
                   >
                     <EuiFlexGroup
+                      className="leftSecondaryPageHeaderFlexGroup"
                       gutterSize="s"
                     >
                       <div
-                        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+                        className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive leftSecondaryPageHeaderFlexGroup"
                       >
-                        <EuiFlexItem>
+                        <EuiFlexItem
+                          grow={false}
+                        >
                           <div
-                            className="euiFlexItem"
+                            className="euiFlexItem euiFlexItem--flexGrowZero"
                           >
                             <EuiHeaderSectionItem
                               border="none"
@@ -20496,7 +20510,7 @@ exports[`Header renders page header with application title 1`] = `
                                   size="l"
                                 >
                                   <h1
-                                    className="euiTitle euiTitle--large newTopNavHeaderTitle"
+                                    className="euiTitle euiTitle--large newTopNavHeaderTitle eui-textBreakWord"
                                   >
                                     testTitle
                                   </h1>
