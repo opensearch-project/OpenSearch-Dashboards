@@ -132,6 +132,60 @@ describe('WorkspaceCollaboratorTable', () => {
     expect(mockOverlays.openModal).toHaveBeenCalled();
   });
 
+  it('should disable delete confirm button when submitting', async () => {
+    const permissionSettings = [
+      {
+        id: 0,
+        modes: ['library_write', 'write'],
+        type: 'user',
+        userId: 'admin',
+      },
+    ];
+    const handleSubmitPermissionSettingsMock = () =>
+      new Promise<void>((resolve) => {
+        setTimeout(resolve, 1000);
+      });
+
+    const { getByText, getByTestId, queryByText } = render(
+      <Provider>
+        <>
+          <WorkspaceCollaboratorTable
+            {...mockProps}
+            handleSubmitPermissionSettings={handleSubmitPermissionSettingsMock}
+            permissionSettings={permissionSettings}
+          />
+          <div data-test-subj="confirm-modal-container" />
+        </>
+      </Provider>
+    );
+
+    mockOverlays.openModal.mockReturnValue({
+      onClose: Promise.resolve(),
+      close: async () => {
+        ReactDOM.unmountComponentAtNode(getByTestId('confirm-modal-container'));
+      },
+    });
+    const action = getByTestId('workspace-detail-collaborator-table-actions-box');
+    fireEvent.click(action);
+    const deleteCollaborator = getByText('Delete collaborator');
+    fireEvent.click(deleteCollaborator);
+
+    mockOverlays.openModal.mock.calls[0][0](getByTestId('confirm-modal-container'));
+    await waitFor(() => {
+      expect(getByText('Confirm')).toBeInTheDocument();
+    });
+    jest.useFakeTimers();
+    fireEvent.click(getByText('Confirm'));
+    await waitFor(() => {
+      expect(getByText('Confirm').closest('button')).toBeDisabled();
+    });
+    jest.runAllTimers();
+    jest.useRealTimers();
+    await waitFor(() => {
+      expect(queryByText('Confirm')).toBe(null);
+    });
+  });
+
   it('should openModal when clicking one selection delete', () => {
     const permissionSettings = [
       {
@@ -248,6 +302,58 @@ describe('WorkspaceCollaboratorTable', () => {
         { id: 0, modes: ['library_read', 'read'], type: 'user', userId: 'admin' },
         { group: 'group', id: 1, modes: ['library_read', 'read'], type: 'group' },
       ]);
+    });
+    jest.runAllTimers();
+    jest.useRealTimers();
+  });
+
+  it('should disable change access level confirm button when submitting', async () => {
+    const permissionSettings = [
+      {
+        id: 0,
+        modes: ['library_write', 'write'],
+        type: 'user',
+        userId: 'admin',
+      },
+    ];
+    const handleSubmitPermissionSettingsMock = () =>
+      new Promise<void>((resolve) => {
+        setTimeout(resolve, 1000);
+      });
+
+    const { getByText, getByTestId, getByRole } = render(
+      <Provider>
+        <>
+          <WorkspaceCollaboratorTable
+            {...mockProps}
+            handleSubmitPermissionSettings={handleSubmitPermissionSettingsMock}
+            permissionSettings={permissionSettings}
+          />
+          <div data-test-subj="confirm-modal-container" />
+        </>
+      </Provider>
+    );
+    mockOverlays.openModal.mockReturnValue({
+      onClose: Promise.resolve(),
+      close: async () => {
+        ReactDOM.unmountComponentAtNode(getByTestId('confirm-modal-container'));
+      },
+    });
+    const action = getByTestId('workspace-detail-collaborator-table-actions-box');
+    fireEvent.click(action);
+    fireEvent.click(getByText('Change access level'));
+    await waitFor(() => {
+      fireEvent.click(within(getByRole('dialog')).getByText('Read only'));
+    });
+
+    mockOverlays.openModal.mock.calls[0][0](getByTestId('confirm-modal-container'));
+    await waitFor(() => {
+      expect(getByText('Confirm')).toBeInTheDocument();
+    });
+    jest.useFakeTimers();
+    fireEvent.click(getByText('Confirm'));
+    await waitFor(() => {
+      expect(getByText('Confirm').closest('button')).toBeDisabled();
     });
     jest.runAllTimers();
     jest.useRealTimers();
