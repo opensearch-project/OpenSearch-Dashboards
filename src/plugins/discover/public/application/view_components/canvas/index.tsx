@@ -166,13 +166,13 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
     );
   };
 
-  const hasNoDataset =
-    !currentIndexPattern && !loadedIndexPattern && isEnhancementsEnabled;
+  const hasNoDataset = !currentIndexPattern && !loadedIndexPattern && isEnhancementsEnabled;
 
   return (
     <EuiPanel
       panelRef={panelRef}
-      hasBorder={true}
+      hasBorder={hasNoDataset ? false : true}
+      color={hasNoDataset ? 'transparent' : 'plain'}
       hasShadow={false}
       paddingSize="s"
       className="dscCanvas"
@@ -192,30 +192,30 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
         <NoIndexPatternsPanel onOpenDataSelector={handleOpenDataSelector} />
       ) : (
         <>
-      {fetchState.status === ResultStatus.NO_RESULTS && (
-        <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
-      )}
-      {fetchState.status === ResultStatus.ERROR && (
-        <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
-      )}
-      {fetchState.status === ResultStatus.UNINITIALIZED && (
-        <DiscoverUninitialized onRefresh={() => refetch$.next()} />
-      )}
-      {fetchState.status === ResultStatus.LOADING && <LoadingSpinner />}
-      {fetchState.status === ResultStatus.READY && isEnhancementsEnabled && (
-        <>
-          <MemoizedDiscoverChartContainer {...fetchState} />
-          <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+          {fetchState.status === ResultStatus.NO_RESULTS && (
+            <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
+          )}
+          {fetchState.status === ResultStatus.ERROR && (
+            <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
+          )}
+          {fetchState.status === ResultStatus.UNINITIALIZED && (
+            <DiscoverUninitialized onRefresh={() => refetch$.next()} />
+          )}
+          {fetchState.status === ResultStatus.LOADING && <LoadingSpinner />}
+          {fetchState.status === ResultStatus.READY && isEnhancementsEnabled && (
+            <>
+              <MemoizedDiscoverChartContainer {...fetchState} />
+              <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+            </>
+          )}
+          {fetchState.status === ResultStatus.READY && !isEnhancementsEnabled && (
+            <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
+              <MemoizedDiscoverChartContainer {...fetchState} />
+              <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+            </EuiPanel>
+          )}
         </>
       )}
-      {fetchState.status === ResultStatus.READY && !isEnhancementsEnabled && (
-        <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
-          <MemoizedDiscoverChartContainer {...fetchState} />
-          <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
-        </EuiPanel>
-      )}
-            </>
-            )}
     </EuiPanel>
   );
 }

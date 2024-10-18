@@ -24,12 +24,17 @@ interface NoIndexPatternsPanelProps {
 export const NoIndexPatternsPanel: React.FC<NoIndexPatternsPanelProps> = ({
   onOpenDataSelector,
 }) => (
-  <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="none">
-    <EuiFlexItem grow={false} className="dataUI-centerPanel">
+  <EuiFlexGroup
+    justifyContent="center"
+    alignItems="center"
+    gutterSize="none"
+    className="dataUI-centerPanel"
+  >
+    <EuiFlexItem grow={false}>
       <EuiPanel paddingSize="l">
         <EuiFlexGroup direction="column" alignItems="center" gutterSize="m">
           <EuiFlexItem>
-            <EuiIcon type="dataVisualizer" size="xl" color="subdued" />
+            <EuiIcon type="visBarVertical" size="xl" color="subdued" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="m">
