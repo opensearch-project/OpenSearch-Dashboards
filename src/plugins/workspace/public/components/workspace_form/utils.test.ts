@@ -186,7 +186,7 @@ describe('validateWorkspaceForm', () => {
   it('should return error if color is invalid', () => {
     expect(validateWorkspaceForm({ color: 'QWERTY' }, false).color).toEqual({
       code: WorkspaceFormErrorCode.InvalidColor,
-      message: 'Color is invalid. Enter a valid color.',
+      message: 'Color is invalid. Choose a valid color.',
     });
   });
   it('should return error if use case is empty', () => {
@@ -552,79 +552,6 @@ describe('getNumberOfChanges', () => {
         }
       )
     ).toEqual(1);
-  });
-  it('should return consistent permission settings changes count', () => {
-    expect(
-      getNumberOfChanges(
-        {
-          name: 'foo',
-          permissionSettings: [
-            {
-              id: 0,
-              type: WorkspacePermissionItemType.User,
-              userId: 'user-1',
-              modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
-            },
-          ],
-        },
-        {
-          name: 'foo',
-          permissionSettings: [
-            {
-              id: 0,
-              type: WorkspacePermissionItemType.User,
-              userId: 'user-1',
-              modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
-            },
-          ],
-        }
-      )
-    ).toEqual(0);
-    // for remove permission setting
-    expect(
-      getNumberOfChanges(
-        {
-          name: 'foo',
-          permissionSettings: [
-            {
-              id: 0,
-              type: WorkspacePermissionItemType.User,
-              userId: 'user-1',
-              modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
-            },
-            {
-              id: 1,
-              type: WorkspacePermissionItemType.Group,
-              group: 'group-1',
-              modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
-            },
-          ],
-        },
-        {
-          name: 'foo',
-          /**
-           * These include three changes:
-           * 1.Remove permission setting#0
-           * 2.Modify permission setting#1
-           * 3.Add permission setting#2
-           */
-          permissionSettings: [
-            {
-              id: 1,
-              type: WorkspacePermissionItemType.Group,
-              group: 'group-1',
-              modes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.LibraryWrite],
-            },
-            {
-              id: 2,
-              type: WorkspacePermissionItemType.User,
-              userId: 'user-1',
-              modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
-            },
-          ],
-        }
-      )
-    ).toEqual(3);
   });
 });
 

@@ -61,3 +61,4 @@ export { ChromeDocTitle } from './doc_title';
 export { RightNavigationOrder, HeaderVariant } from './constants';
 export { ChromeRegistrationNavLink, ChromeNavGroupUpdater, NavGroupItemInMap } from './nav_group';
 export { fulfillRegistrationLinksToChromeNavLinks, LinkItemType, getSortedNavLinks } from './utils';
+export { SearchCommandKeyTypes, GlobalSearchCommand } from './global_search';
