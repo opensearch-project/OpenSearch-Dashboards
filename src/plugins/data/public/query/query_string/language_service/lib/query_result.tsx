@@ -32,7 +32,7 @@ export interface QueryStatus {
 }
 
 // This is the time in milliseconds that the query will wait before showing the loading spinner
-const BUFFER_TIME = 1000;
+const BUFFER_TIME = 3000;
 
 export function QueryResult(props: { queryStatus: QueryStatus }) {
   const [isPopoverOpen, setPopover] = useState(false);
