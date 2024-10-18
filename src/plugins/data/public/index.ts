@@ -70,6 +70,7 @@ export {
   DatasetSelector,
   AdvancedSelector,
   NoIndexPatternsPanel,
+  NoDataSourcesPanel,
   DatasetSelectorAppearance,
 } from './ui';
 

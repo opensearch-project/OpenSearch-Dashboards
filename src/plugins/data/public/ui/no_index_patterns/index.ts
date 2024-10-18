@@ -4,3 +4,4 @@
  */
 
 export * from './no_index_patterns_panel';
+export * from './no_data_sources_panel';
