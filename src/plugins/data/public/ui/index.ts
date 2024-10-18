@@ -51,3 +51,4 @@ export {
   useQueryStringManager,
 } from './search_bar';
 export { SuggestionsComponent } from './typeahead';
+export { DatasetSelector, DatasetSelectorAppearance } from './dataset_selector';

@@ -125,11 +125,11 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
   return (
     <EuiPanel
       panelRef={panelRef}
-      hasBorder={false}
+      hasBorder={true}
       hasShadow={false}
-      color="transparent"
-      paddingSize="none"
+      paddingSize="s"
       className="dscCanvas"
+      borderRadius="l"
     >
       <TopNav
         isEnhancementsEnabled={isEnhancementsEnabled}

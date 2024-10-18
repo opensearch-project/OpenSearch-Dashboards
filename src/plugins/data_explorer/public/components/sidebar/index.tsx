@@ -12,7 +12,11 @@ import {
   DataSourceSelectable,
   UI_SETTINGS,
 } from '../../../../data/public';
-import { DataSourceOption } from '../../../../data/public/';
+import {
+  DataSourceOption,
+  DatasetSelector,
+  DatasetSelectorAppearance,
+} from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
 import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
@@ -33,6 +37,16 @@ export const Sidebar: FC = ({ children }) => {
       uiSettings,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
+
+  const handleDatasetSubmit = useCallback(
+    (query: any) => {
+      // Update the index pattern
+      if (query.dataset) {
+        dispatch(setIndexPattern(query.dataset.id));
+      }
+    },
+    [dispatch]
+  );
 
   const [isEnhancementEnabled, setIsEnhancementEnabled] = useState<boolean>(false);
 
@@ -119,16 +133,24 @@ export const Sidebar: FC = ({ children }) => {
       <EuiSplitPanel.Outer
         className="eui-yScroll deSidebar_panel"
         hasBorder={true}
-        borderRadius="none"
-        color="transparent"
+        borderRadius="l"
       >
-        {!isEnhancementEnabled && (
-          <EuiSplitPanel.Inner
-            paddingSize="s"
-            grow={false}
-            color="transparent"
-            className="deSidebar_dataSource"
-          >
+        <EuiSplitPanel.Inner
+          paddingSize="s"
+          grow={false}
+          color="transparent"
+          className="deSidebar_dataSource"
+        >
+          {isEnhancementEnabled ? (
+            <DatasetSelector
+              onSubmit={handleDatasetSubmit}
+              appearance={DatasetSelectorAppearance.Button}
+              buttonProps={{
+                color: 'text',
+                fullWidth: true,
+              }}
+            />
+          ) : (
             <DataSourceSelectable
               dataSources={activeDataSources}
               dataSourceOptionList={dataSourceOptionList}
@@ -139,8 +161,8 @@ export const Sidebar: FC = ({ children }) => {
               onRefresh={memorizedReload}
               fullWidth
             />
-          </EuiSplitPanel.Inner>
-        )}
+          )}
+        </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
           {children}
         </EuiSplitPanel.Inner>
