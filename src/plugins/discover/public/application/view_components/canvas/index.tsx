@@ -27,6 +27,7 @@ import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_ty
 import { buildColumns } from '../../utils/columns';
 import './discover_canvas.scss';
 import { HeaderVariant } from '../../../../../../core/public';
+import { Query } from '../../../../../../../src/plugins/data/common/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalRef }: ViewProps) {
@@ -37,8 +38,12 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
       uiSettings,
       capabilities,
       chrome: { setHeaderVariant },
+      data: {
+        query: { queryString, savedQueries },
+      },
     },
   } = useOpenSearchDashboards<DiscoverViewServices>();
+  const datasetService = queryString.getDatasetService();
   const { columns } = useSelector((state) => {
     const stateColumns = state.discover.columns;
 
@@ -56,6 +61,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
   );
   const dispatch = useDispatch();
   const prevIndexPattern = useRef(indexPattern);
+  const [query, setQuery] = useState<Query>();
 
   const [fetchState, setFetchState] = useState<SearchData>({
     status: data$.getValue().status,
@@ -65,6 +71,9 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
 
   const onQuerySubmit = useCallback(
     (payload, isUpdate) => {
+      if (payload?.query) {
+        setQuery(payload?.query);
+      }
       if (isUpdate === false) {
         refetch$.next();
       }
@@ -142,10 +151,22 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
       />
 
       {fetchState.status === ResultStatus.NO_RESULTS && (
-        <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
+        <DiscoverNoResults
+          datasetService={datasetService}
+          query={query}
+          savedQueryService={savedQueries}
+          timeFieldName={timeField}
+          queryLanguage={''}
+        />
       )}
       {fetchState.status === ResultStatus.ERROR && (
-        <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
+        <DiscoverNoResults
+          datasetService={datasetService}
+          query={query}
+          savedQueryService={savedQueries}
+          timeFieldName={timeField}
+          queryLanguage={''}
+        />
       )}
       {fetchState.status === ResultStatus.UNINITIALIZED && (
         <DiscoverUninitialized onRefresh={() => refetch$.next()} />

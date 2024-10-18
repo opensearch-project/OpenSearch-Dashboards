@@ -70,6 +70,39 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
     }
     return ['kuery', 'lucene', 'PPL', 'SQL'];
   },
+
+  getSampleQueries: (dataset: Dataset, language: string) => {
+    switch (language) {
+      case 'kuery':
+        return [
+          {
+            title: 'sample query for DQL',
+            query: 'sample',
+          },
+        ];
+      case 'lucene':
+        return [
+          {
+            title: 'sample query for Lucene',
+            query: 'sample',
+          },
+        ];
+      case 'PPL':
+        return [
+          {
+            title: 'sample query for PPL',
+            query: `source = ${dataset.title}`,
+          },
+        ];
+      case 'SQL':
+        return [
+          {
+            title: 'sample query for SQL',
+            query: 'sample',
+          },
+        ];
+    }
+  },
 };
 
 const fetchIndexPatterns = async (client: SavedObjectsClientContract): Promise<DataStructure[]> => {

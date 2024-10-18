@@ -28,18 +28,36 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 
-import { EuiEmptyPrompt, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiPanel,
+  EuiText,
+  EuiTabbedContent,
+  EuiCodeBlock,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { Query } from '../../../../../data/common';
+import { DatasetServiceContract, SavedQuery, SavedQueryService } from '../../../../../data/public';
 
 interface Props {
+  datasetService: DatasetServiceContract;
+  savedQueryService: SavedQueryService;
+  query: Query | undefined;
   timeFieldName?: string;
   queryLanguage?: string;
 }
 
-export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
+export const DiscoverNoResults = ({
+  datasetService,
+  savedQueryService,
+  query,
+  timeFieldName,
+  queryLanguage,
+}: Props) => {
   // Commented out due to no usage in code
   // See: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8149
   //
@@ -157,6 +175,71 @@ export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
   //   );
   // }
 
+  const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
+
+  useEffect(() => {
+    const fetchSavedQueries = async () => {
+      const { queries: savedQueryItems } = await savedQueryService.findSavedQueries('', 1000);
+      setSavedQueries(savedQueryItems);
+    };
+
+    fetchSavedQueries();
+  }, [setSavedQueries, savedQueryService]);
+
+  const tabs = useMemo(() => {
+    const buildSampleQueryBlock = (sampleTitle: string, sampleQuery: string) => {
+      return (
+        <>
+          <EuiText size="s">{sampleTitle}</EuiText>
+          <EuiSpacer size="s" />
+          <EuiCodeBlock isCopyable>{sampleQuery}</EuiCodeBlock>
+          <EuiSpacer size="s" />
+        </>
+      );
+    };
+
+    const sampleQueries = [];
+    if (query?.dataset?.type && datasetService.getType(query.dataset.type)?.getSampleQueries) {
+      sampleQueries.push(
+        ...datasetService.getType(query.dataset.type)!.getSampleQueries!(
+          query.dataset,
+          query.language
+        )
+      );
+    }
+
+    return [
+      {
+        id: 'sample_queries',
+        name: i18n.translate('discover.emptyPrompt.sampleQueries.title', {
+          defaultMessage: 'Sample Queries',
+        }),
+        content: (
+          <Fragment>
+            <EuiSpacer />
+            {sampleQueries.map((sampleQuery) =>
+              buildSampleQueryBlock(sampleQuery.title, sampleQuery.query)
+            )}
+          </Fragment>
+        ),
+      },
+      {
+        id: 'saved_queries',
+        name: i18n.translate('discover.emptyPrompt.savedQueries.title', {
+          defaultMessage: 'Saved Queries',
+        }),
+        content: (
+          <Fragment>
+            <EuiSpacer />
+            {savedQueries.map((savedQuery) =>
+              buildSampleQueryBlock(savedQuery.id, savedQuery.attributes.query.query as string)
+            )}
+          </Fragment>
+        ),
+      },
+    ];
+  }, [datasetService, query, savedQueries]);
+
   return (
     <I18nProvider>
       <EuiPanel hasBorder={false} hasShadow={false} color="transparent">
@@ -184,6 +267,7 @@ export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
             </EuiText>
           }
         />
+        <EuiTabbedContent tabs={tabs} />
       </EuiPanel>
     </I18nProvider>
   );

@@ -25,5 +25,14 @@ export const getDQLLanguageConfig = (
     showDocLinks: true,
     editorSupportedAppNames: ['discover'],
     supportedAppNames: ['discover', 'dashboards', 'visualize', 'data-explorer'],
+    sampleQueries: [
+      {
+        title: 'sample 1',
+        query: {
+          query: '',
+          language: 'kuery',
+        },
+      },
+    ],
   };
 };
