@@ -50,9 +50,12 @@ interface Props {
   savedQueryService: SavedQueryService;
   onSave: (savedQueryMeta: SavedQueryMeta) => void;
   onClose: () => void;
-  onSaveAsNew?: () => void;
-  showFilterOption: boolean | undefined;
-  showTimeFilterOption: boolean | undefined;
+  setSaveAsNew?: (shouldSaveAsNew: boolean) => void;
+  showFilterOption?: boolean;
+  showTimeFilterOption?: boolean;
+  showDataSourceOption?: boolean;
+  saveAsNew?: boolean;
+  cannotBeOverwritten?: boolean;
 }
 
 export interface SavedQueryMeta {
@@ -60,6 +63,7 @@ export interface SavedQueryMeta {
   description: string;
   shouldIncludeFilters: boolean;
   shouldIncludeTimefilter: boolean;
+  shouldIncludeDataSource: boolean;
 }
 
 export function SaveQueryForm({
@@ -70,7 +74,10 @@ export function SaveQueryForm({
   onClose,
   showFilterOption = true,
   showTimeFilterOption = true,
-  onSaveAsNew,
+  showDataSourceOption = false,
+  saveAsNew,
+  setSaveAsNew,
+  cannotBeOverwritten,
 }: Props) {
   const { header, body, footer } = useSaveQueryFormContent({
     formUiType,
@@ -80,7 +87,10 @@ export function SaveQueryForm({
     onClose,
     showFilterOption,
     showTimeFilterOption,
-    onSaveAsNew,
+    showDataSourceOption,
+    saveAsNew,
+    setSaveAsNew,
+    cannotBeOverwritten,
   });
 
   return formUiType === 'Modal' ? (

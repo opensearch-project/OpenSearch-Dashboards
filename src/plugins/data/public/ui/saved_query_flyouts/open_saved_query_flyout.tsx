@@ -16,18 +16,20 @@ import {
   EuiSearchBar,
   EuiSearchBarProps,
   EuiSpacer,
+  EuiTabbedContent,
   EuiTablePagination,
   EuiTitle,
   Pager,
 } from '@elastic/eui';
-import React, { useRef, useState } from 'react';
-import { SavedQuery } from '../../query';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { SavedQuery, SavedQueryService } from '../../query';
 import { SavedQueryCard } from './saved_query_card';
 
 export interface OpenSavedQueryFlyoutProps {
-  savedQueries: SavedQuery[];
+  savedQueryService: SavedQueryService;
   onClose: () => void;
   onQueryOpen: (query: SavedQuery) => void;
+  handleQueryDelete: (query: SavedQuery) => Promise<void>;
 }
 
 interface SavedQuerySearchableItem {
@@ -35,27 +37,89 @@ interface SavedQuerySearchableItem {
   title: string;
   description: string;
   language: string;
+  datasetType?: string;
+  savedQuery: SavedQuery;
 }
 
 export function OpenSavedQueryFlyout({
-  savedQueries,
+  savedQueryService,
   onClose,
   onQueryOpen,
+  handleQueryDelete,
 }: OpenSavedQueryFlyoutProps) {
   // const [shouldRunOnOpen, setShouldRunOnOpen] = useState(false);
-  const [selectedQuery, setSelectedQuery] = useState<SavedQuery | undefined>(undefined);
-  const [searchQuery, setSearchQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
+  const [selectedTabId, setSelectedTabId] = useState<string>('mutable-saved-queries');
+  const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const pager = useRef(new Pager(savedQueries.length, itemsPerPage));
-  const [firstItemIndex, setFirstItemIndex] = useState(pager.current.getFirstItemIndex());
-  const [lastItemIndex, setLastItemIndex] = useState(pager.current.getLastItemIndex());
+  const [activePage, setActivePage] = useState(pager.current.getCurrentPageIndex());
+  const [queriesOnCurrentPage, setQueriesOnCurrentPage] = useState<SavedQuerySearchableItem[]>([]);
+  const [datasetTypeFilterOptions, setDatasetTypeFilterOptions] = useState<string[]>([]);
+  const [languageFilterOptions, setLanguageFilterOptions] = useState<string[]>([]);
+  const [selectedQuery, setSelectedQuery] = useState<SavedQuery | undefined>(undefined);
+  const [searchQuery, setSearchQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
+
+  const fetchAllSavedQueriesForSelectedTab = useCallback(async () => {
+    const allQueries = await savedQueryService.getAllSavedQueries();
+    const queriesForSelectedTab = allQueries.filter(
+      (q) =>
+        (selectedTabId === 'mutable-saved-queries' && !q.attributes.isTemplate) ||
+        (selectedTabId === 'template-saved-queries' && q.attributes.isTemplate)
+    );
+    setSavedQueries(queriesForSelectedTab);
+  }, [savedQueryService, selectedTabId, setSavedQueries]);
+
+  const updatePageIndex = useCallback((index: number) => {
+    pager.current.goToPageIndex(index);
+    setActivePage(index);
+  }, []);
+
+  useEffect(() => {
+    fetchAllSavedQueriesForSelectedTab();
+    setSearchQuery(EuiSearchBar.Query.MATCH_ALL);
+    updatePageIndex(0);
+  }, [selectedTabId, fetchAllSavedQueriesForSelectedTab, updatePageIndex]);
+
+  useEffect(() => {
+    const queryLanguages = new Set<string>();
+    const queryDatasetTypes = new Set<string>();
+
+    savedQueries.forEach((q) => {
+      queryLanguages.add(q.attributes.query.language);
+      if (q.attributes.query.dataset?.type) {
+        queryDatasetTypes.add(q.attributes.query.dataset.type);
+      }
+    });
+    setLanguageFilterOptions(Array.from(queryLanguages));
+    setDatasetTypeFilterOptions(Array.from(queryDatasetTypes));
+  }, [savedQueries]);
+
+  useEffect(() => {
+    const searchableItems = savedQueries.map((q) => ({
+      id: q.id,
+      title: q.attributes.title,
+      description: q.attributes.description,
+      language: q.attributes.query.language,
+      datasetType: q.attributes.query.dataset?.type,
+      savedQuery: q,
+    }));
+
+    const filteredSavedQueries = EuiSearchBar.Query.execute(searchQuery, searchableItems, {
+      defaultFields: ['language', 'title', 'description', 'datasetType'],
+    });
+    pager.current.setTotalItems(filteredSavedQueries.length);
+    setQueriesOnCurrentPage(
+      filteredSavedQueries.slice(
+        pager.current.getFirstItemIndex(),
+        pager.current.getLastItemIndex() + 1
+      )
+    );
+  }, [savedQueries, searchQuery, activePage, itemsPerPage]);
 
   const onChange: EuiSearchBarProps['onChange'] = ({ query, error }) => {
     if (!error) {
       setSearchQuery(query);
-      pager.current.goToPageIndex(0);
-      setFirstItemIndex(pager.current.getFirstItemIndex());
-      setLastItemIndex(pager.current.getLastItemIndex());
+      updatePageIndex(0);
     }
   };
 
@@ -74,78 +138,62 @@ export function OpenSavedQueryFlyout({
     },
   };
 
-  const queryMap: {
-    [id: string]: { savedQuery: SavedQuery; savedQuerySearchableItem: SavedQuerySearchableItem };
-  } = {};
-  const queryLanguageSet = new Set<string>();
-  savedQueries.forEach((q) => {
-    queryLanguageSet.add(q.attributes.query.language);
-    queryMap[q.id] = {
-      savedQuery: q,
-      savedQuerySearchableItem: {
-        id: q.id,
-        title: q.attributes.title,
-        description: q.attributes.description,
-        language: q.attributes.query.language,
-      },
-    };
-  });
-
-  const filteredSavedQueries = EuiSearchBar.Query.execute(
-    searchQuery,
-    Object.values(queryMap).map((obj) => obj.savedQuerySearchableItem),
-    {
-      defaultFields: ['language', 'title', 'description'],
-    }
-  );
-
-  pager.current.setTotalItems(filteredSavedQueries.length);
-  const queriesOnCurrentPage = filteredSavedQueries.slice(firstItemIndex, lastItemIndex + 1);
-
-  return (
-    <EuiFlyout onClose={onClose} hideCloseButton>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle>
-          <h3>Saved queries</h3>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <EuiSearchBar
-          box={{
-            placeholder: 'Search saved query',
-            incremental: true,
-            schema,
-          }}
-          filters={[
-            {
-              type: 'field_value_selection',
-              field: 'language',
-              name: 'Query language',
-              multiSelect: 'or',
-              options: Array.from(queryLanguageSet).map((language) => ({
-                value: language,
-                view: language.toUpperCase(),
-              })),
-            },
-          ]}
-          onChange={onChange}
-        />
-        <EuiSpacer />
-        {queriesOnCurrentPage.length > 0 ? (
-          queriesOnCurrentPage.map((query) => (
-            <SavedQueryCard
-              key={query.id}
-              savedQuery={queryMap[query.id].savedQuery}
-              selectedQuery={selectedQuery}
-              onSelect={setSelectedQuery}
-              onRunPreview={onQueryOpen}
-              onClose={onClose}
-            />
-          ))
-        ) : (
-          <EuiEmptyPrompt content={'No saved query present'} />
-        )}
-        <EuiSpacer />
+  const flyoutBodyContent = (
+    <>
+      <EuiSpacer />
+      <EuiSearchBar
+        query={searchQuery}
+        box={{
+          placeholder: 'Search saved query',
+          incremental: true,
+          schema,
+        }}
+        filters={[
+          {
+            type: 'field_value_selection',
+            field: 'datasetType',
+            name: 'Data type',
+            multiSelect: 'or',
+            options: datasetTypeFilterOptions.map((datasetType) => ({
+              value: datasetType,
+              view: datasetType.toUpperCase(),
+            })),
+          },
+          {
+            type: 'field_value_selection',
+            field: 'language',
+            name: 'Query language',
+            multiSelect: 'or',
+            options: languageFilterOptions.map((language) => ({
+              value: language,
+              view: language.toUpperCase(),
+            })),
+          },
+        ]}
+        onChange={onChange}
+      />
+      <EuiSpacer />
+      {queriesOnCurrentPage.length > 0 ? (
+        queriesOnCurrentPage.map((query) => (
+          <SavedQueryCard
+            key={query.id}
+            savedQuery={query.savedQuery}
+            selectedQuery={selectedQuery}
+            onSelect={setSelectedQuery}
+            onRunPreview={onQueryOpen}
+            onClose={onClose}
+            handleQueryDelete={(queryToDelete) => {
+              handleQueryDelete(queryToDelete).then(() => {
+                fetchAllSavedQueriesForSelectedTab();
+              });
+            }}
+          />
+        ))
+      ) : (
+        <EuiEmptyPrompt title={<p>No saved query found.</p>} />
+      )}
+      <EuiSpacer />
+      {queriesOnCurrentPage.length > 0 && (
         <EuiTablePagination
           itemsPerPageOptions={[5, 10, 20]}
           itemsPerPage={itemsPerPage}
@@ -154,13 +202,41 @@ export function OpenSavedQueryFlyout({
           onChangeItemsPerPage={(pageSize) => {
             pager.current.setItemsPerPage(pageSize);
             setItemsPerPage(pageSize);
-            setFirstItemIndex(pager.current.getFirstItemIndex());
-            setLastItemIndex(pager.current.getLastItemIndex());
           }}
           onChangePage={(pageIndex) => {
-            pager.current.goToPageIndex(pageIndex);
-            setFirstItemIndex(pager.current.getFirstItemIndex());
-            setLastItemIndex(pager.current.getLastItemIndex());
+            updatePageIndex(pageIndex);
+          }}
+        />
+      )}
+    </>
+  );
+
+  const tabs = [
+    {
+      id: 'mutable-saved-queries',
+      name: 'Saved queries',
+      content: flyoutBodyContent,
+    },
+    {
+      id: 'template-saved-queries',
+      name: 'Templates',
+      content: flyoutBodyContent,
+    },
+  ];
+
+  return (
+    <EuiFlyout onClose={onClose}>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle>
+          <h3>Saved queries</h3>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiTabbedContent
+          tabs={tabs}
+          initialSelectedTab={tabs[0]}
+          onTabClick={(tab) => {
+            setSelectedTabId(tab.id);
           }}
         />
       </EuiFlyoutBody>

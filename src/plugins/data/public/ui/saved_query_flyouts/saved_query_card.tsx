@@ -5,7 +5,6 @@
 
 import {
   EuiBadge,
-  EuiButton,
   EuiButtonIcon,
   EuiCheckableCard,
   EuiCopy,
@@ -20,6 +19,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import { monaco } from '@osd/monaco';
 import { SavedQuery } from '../../query';
+import { DeleteSavedQueryConfirmationModal } from '../saved_query_management/delete_saved_query_confirmation_modal';
 
 export interface SavedQueryCardProps {
   savedQuery: SavedQuery;
@@ -27,12 +27,14 @@ export interface SavedQueryCardProps {
   onSelect: (query: SavedQuery) => void;
   onRunPreview: (query: SavedQuery) => void;
   onClose: () => void;
+  handleQueryDelete: (query: SavedQuery) => void;
 }
 
 export function SavedQueryCard({
   savedQuery,
   selectedQuery,
   onSelect,
+  handleQueryDelete,
   onRunPreview,
   onClose,
 }: SavedQueryCardProps) {
@@ -40,6 +42,7 @@ export function SavedQueryCard({
   const [isTruncated, setIsTruncated] = useState(true);
   const [editorHeight, setEditorHeight] = useState(60);
   const customHTMLRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const [showDeletionConfirmationModal, setShowDeletionConfirmationModal] = useState(false);
 
   const [lineCount, setLineCount] = useState(0);
 
@@ -109,26 +112,26 @@ export function SavedQueryCard({
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  onClick={() => {
-                    onRunPreview(savedQuery);
-                    onClose();
-                  }}
-                >
-                  Run preview
-                </EuiButton>
-              </EuiFlexItem>
+              {!savedQuery.attributes.isTemplate && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="trash"
+                    color="danger"
+                    onClick={() => {
+                      setShowDeletionConfirmationModal(true);
+                    }}
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
             {savedQuery.attributes.description && (
               <EuiText>
                 <p>{savedQuery.attributes.description}</p>
               </EuiText>
             )}
-            {savedQuery.attributes.query.dataset?.dataSource?.title && (
+            {savedQuery.attributes.query.dataset?.title && (
               <EuiText color="subdued">
-                <p>{savedQuery.attributes.query.dataset.dataSource.title}</p>
+                <p>{savedQuery.attributes.query.dataset.title}</p>
               </EuiText>
             )}
           </>
@@ -173,6 +176,18 @@ export function SavedQueryCard({
         </EuiFlexGroup>
       </EuiCheckableCard>
       <EuiSpacer size="s" />
+      {showDeletionConfirmationModal && (
+        <DeleteSavedQueryConfirmationModal
+          savedQuery={savedQuery}
+          onConfirm={() => {
+            handleQueryDelete(savedQuery);
+            setShowDeletionConfirmationModal(false);
+          }}
+          onCancel={() => {
+            setShowDeletionConfirmationModal(false);
+          }}
+        />
+      )}
     </>
   );
 }

@@ -33,33 +33,42 @@ import { SavedObjectsClientContract, SavedObjectAttributes, CoreStart } from 'sr
 import { first } from 'rxjs/operators';
 import { SavedQueryAttributes, SavedQuery, SavedQueryService } from './types';
 import { QueryStringContract } from '../query_string';
+import { Dataset, UI_SETTINGS } from '../../../common';
 
 type SerializedSavedQueryAttributes = SavedObjectAttributes &
   SavedQueryAttributes & {
     query: {
       query: string;
       language: string;
+      dataset?: Dataset;
     };
   };
 
 export const createSavedQueryService = (
   savedObjectsClient: SavedObjectsClientContract,
-  queryStringManager?: QueryStringContract,
-  application?: CoreStart['application']
+  coreStartServices: { application: CoreStart['application']; uiSettings: CoreStart['uiSettings'] },
+  queryStringManager?: QueryStringContract
 ): SavedQueryService => {
+  const { application, uiSettings } = coreStartServices;
+  const queryEnhancementEnabled = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
+
   const saveQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
     if (!attributes.title.length) {
       // title is required extra check against circumventing the front end
       throw new Error('Cannot create saved query without a title');
     }
 
-    const query = {
+    const query: any = {
       query:
         typeof attributes.query.query === 'string'
           ? attributes.query.query
           : JSON.stringify(attributes.query.query),
       language: attributes.query.language,
     };
+
+    if (queryEnhancementEnabled && attributes.query.dataset) {
+      query.dataset = attributes.query.dataset;
+    }
 
     const queryObject: SerializedSavedQueryAttributes = {
       title: attributes.title.trim(), // trim whitespace before save as an extra precaution against circumventing the front end
@@ -73,6 +82,10 @@ export const createSavedQueryService = (
 
     if (attributes.timefilter) {
       queryObject.timefilter = attributes.timefilter;
+    }
+
+    if (queryEnhancementEnabled && attributes.isTemplate) {
+      queryObject.isTemplate = attributes.isTemplate;
     }
 
     let rawQueryResponse;
@@ -172,7 +185,7 @@ export const createSavedQueryService = (
       parsedQuery = queryString;
     }
 
-    const savedQueryItems: SavedQueryAttributes = {
+    const savedQueryItem: SavedQueryAttributes = {
       title: savedQuery.attributes.title || '',
       description: savedQuery.attributes.description || '',
       query: {
@@ -181,15 +194,20 @@ export const createSavedQueryService = (
       },
     };
 
+    if (queryEnhancementEnabled) {
+      savedQueryItem.query.dataset = savedQuery.attributes.query.dataset;
+      savedQueryItem.isTemplate = !!savedQuery.attributes.isTemplate;
+    }
+
     if (savedQuery.attributes.filters) {
-      savedQueryItems.filters = savedQuery.attributes.filters;
+      savedQueryItem.filters = savedQuery.attributes.filters;
     }
     if (savedQuery.attributes.timefilter) {
-      savedQueryItems.timefilter = savedQuery.attributes.timefilter;
+      savedQueryItem.timefilter = savedQuery.attributes.timefilter;
     }
     return {
       id: savedQuery.id,
-      attributes: savedQueryItems,
+      attributes: savedQueryItem,
     };
   };
 

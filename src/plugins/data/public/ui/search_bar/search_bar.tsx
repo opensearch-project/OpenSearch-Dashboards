@@ -30,7 +30,7 @@
 
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
-import { compact, get, isEqual } from 'lodash';
+import { cloneDeep, compact, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import {
@@ -283,10 +283,18 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   public onSave = async (savedQueryMeta: SavedQueryMeta, saveAsNew = false) => {
     if (!this.state.query) return;
 
+    const query = cloneDeep(this.state.query);
+    if (
+      this.services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) &&
+      !savedQueryMeta.shouldIncludeDataSource
+    ) {
+      delete query.dataset;
+    }
+
     const savedQueryAttributes: SavedQueryAttributes = {
       title: savedQueryMeta.title,
       description: savedQueryMeta.description,
-      query: this.state.query,
+      query,
     };
 
     if (savedQueryMeta.shouldIncludeFilters) {

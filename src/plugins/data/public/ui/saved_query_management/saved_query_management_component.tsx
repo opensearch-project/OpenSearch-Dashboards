@@ -152,10 +152,21 @@ export function SavedQueryManagementComponent({
         setActivePage(0);
       };
 
-      onDeleteSavedQuery(savedQueryToDelete);
-      handleClosePopover();
+      const deletePromise = onDeleteSavedQuery(savedQueryToDelete);
+      if (!useNewSavedQueryUI) {
+        handleClosePopover();
+      }
+
+      return deletePromise;
     },
-    [handleClosePopover, loadedSavedQuery, onClearSavedQuery, savedQueries, savedQueryService]
+    [
+      handleClosePopover,
+      loadedSavedQuery,
+      onClearSavedQuery,
+      savedQueries,
+      savedQueryService,
+      useNewSavedQueryUI,
+    ]
   );
 
   const savedQueryDescriptionText = i18n.translate(
@@ -237,9 +248,10 @@ export function SavedQueryManagementComponent({
             const openSavedQueryFlyout = overlays?.openFlyout(
               toMountPoint(
                 <OpenSavedQueryFlyout
-                  savedQueries={savedQueries}
+                  savedQueryService={savedQueryService}
                   onClose={() => openSavedQueryFlyout?.close().then()}
                   onQueryOpen={onLoad}
+                  handleQueryDelete={handleDelete}
                 />
               )
             );

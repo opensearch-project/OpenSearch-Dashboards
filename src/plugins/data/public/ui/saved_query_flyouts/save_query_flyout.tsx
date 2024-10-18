@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import { SavedQueryAttributes, SavedQueryService } from '../../query';
-import { SaveQueryForm } from '../saved_query_form';
+import { SaveQueryForm, SavedQueryMeta } from '../saved_query_form';
 
 interface SaveQueryFlyoutProps {
   savedQuery?: SavedQueryAttributes;
@@ -16,13 +16,6 @@ interface SaveQueryFlyoutProps {
   showTimeFilterOption: boolean | undefined;
 }
 
-export interface SavedQueryMeta {
-  title: string;
-  description: string;
-  shouldIncludeFilters: boolean;
-  shouldIncludeTimefilter: boolean;
-}
-
 export function SaveQueryFlyout({
   savedQuery,
   savedQueryService,
@@ -31,7 +24,7 @@ export function SaveQueryFlyout({
   showFilterOption,
   showTimeFilterOption,
 }: SaveQueryFlyoutProps) {
-  const [saveAsNew, setSaveAsNew] = useState(!savedQuery);
+  const [saveAsNew, setSaveAsNew] = useState(!savedQuery || savedQuery.isTemplate);
 
   return (
     <SaveQueryForm
@@ -50,8 +43,11 @@ export function SaveQueryFlyout({
       savedQueryService={savedQueryService}
       showFilterOption={showFilterOption}
       showTimeFilterOption={showTimeFilterOption}
-      onSaveAsNew={() => setSaveAsNew(true)}
+      showDataSourceOption={true}
+      setSaveAsNew={(shouldSaveAsNew) => setSaveAsNew(shouldSaveAsNew)}
       savedQuery={saveAsNew ? undefined : savedQuery}
+      saveAsNew={saveAsNew}
+      cannotBeOverwritten={!!savedQuery?.isTemplate}
     />
   );
 }

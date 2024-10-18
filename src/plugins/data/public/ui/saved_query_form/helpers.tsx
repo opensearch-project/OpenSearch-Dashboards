@@ -41,11 +41,13 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiButton,
+  EuiCompressedCheckbox,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { sortBy, isEqual } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
 import { SavedQueryAttributes } from '../../query';
+import { SavedQueryMeta } from './save_query_form';
 
 interface Props {
   savedQuery?: SavedQueryAttributes;
@@ -53,16 +55,12 @@ interface Props {
   onSave: (savedQueryMeta: SavedQueryMeta) => void;
   onClose: () => void;
   formUiType: 'Modal' | 'Flyout';
-  showFilterOption: boolean | undefined;
-  showTimeFilterOption: boolean | undefined;
-  onSaveAsNew?: () => void;
-}
-
-export interface SavedQueryMeta {
-  title: string;
-  description: string;
-  shouldIncludeFilters: boolean;
-  shouldIncludeTimefilter: boolean;
+  showFilterOption?: boolean;
+  showTimeFilterOption?: boolean;
+  showDataSourceOption?: boolean;
+  saveAsNew?: boolean;
+  setSaveAsNew?: (shouldSaveAsNew: boolean) => void;
+  cannotBeOverwritten?: boolean;
 }
 
 export function useSaveQueryFormContent({
@@ -72,14 +70,18 @@ export function useSaveQueryFormContent({
   onClose,
   showFilterOption = true,
   showTimeFilterOption = true,
+  showDataSourceOption = false,
   formUiType,
-  onSaveAsNew,
+  saveAsNew,
+  setSaveAsNew,
+  cannotBeOverwritten,
 }: Props) {
   const [title, setTitle] = useState('');
   const [enabledSaveButton, setEnabledSaveButton] = useState(false);
   const [description, setDescription] = useState('');
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [shouldIncludeFilters, setShouldIncludeFilters] = useState(true);
+  const [shouldIncludeDataSource, setShouldIncludeDataSource] = useState(true);
   // Defaults to false because saved queries are meant to be as portable as possible and loading
   // a saved query with a time filter will override whatever the current value of the global timepicker
   // is. We expect this option to be used rarely and only when the user knows they want this behavior.
@@ -146,9 +148,18 @@ export function useSaveQueryFormContent({
         description,
         shouldIncludeFilters,
         shouldIncludeTimefilter,
+        shouldIncludeDataSource,
       });
     }
-  }, [validate, onSave, title, description, shouldIncludeFilters, shouldIncludeTimefilter]);
+  }, [
+    validate,
+    onSave,
+    title,
+    description,
+    shouldIncludeFilters,
+    shouldIncludeTimefilter,
+    shouldIncludeDataSource,
+  ]);
 
   const onInputChange = useCallback((event) => {
     setEnabledSaveButton(Boolean(event.target.value));
@@ -172,6 +183,19 @@ export function useSaveQueryFormContent({
           {savedQueryDescriptionText}
         </EuiText>
       </EuiCompressedFormRow>
+      {formUiType === 'Flyout' && (
+        <EuiCompressedFormRow>
+          <EuiCompressedCheckbox
+            id="save-as-new-query"
+            onChange={(event) => setSaveAsNew?.(event.target.checked)}
+            checked={saveAsNew}
+            label={i18n.translate('data.search.searchBar.SaveAsNewLabelText', {
+              defaultMessage: 'Save as new query',
+            })}
+            disabled={cannotBeOverwritten}
+          />
+        </EuiCompressedFormRow>
+      )}
       <EuiCompressedFormRow
         label={i18n.translate('data.search.searchBar.savedQueryNameLabelText', {
           defaultMessage: 'Name',
@@ -207,6 +231,21 @@ export function useSaveQueryFormContent({
           data-test-subj="saveQueryFormDescription"
         />
       </EuiCompressedFormRow>
+      {showDataSourceOption && (
+        <EuiCompressedFormRow>
+          <EuiCompressedSwitch
+            name="shouldIncludeDataSource"
+            label={i18n.translate('data.search.searchBar.savedQueryIncludeDatasourceLabelText', {
+              defaultMessage: 'Include data source',
+            })}
+            checked={shouldIncludeDataSource}
+            onChange={() => {
+              setShouldIncludeDataSource(!shouldIncludeDataSource);
+            }}
+            data-test-subj="saveQueryFormIncludeDataSourceOption"
+          />
+        </EuiCompressedFormRow>
+      )}
       {showFilterOption && (
         <EuiCompressedFormRow>
           <EuiCompressedSwitch
@@ -271,27 +310,12 @@ export function useSaveQueryFormContent({
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center">
-            {savedQuery && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={() => {
-                    onSaveAsNew?.();
-                    setTitle('');
-                  }}
-                >
-                  Save as new
-                </EuiButton>
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>
-              <EuiButton fill disabled={hasErrors || !enabledSaveButton} onClick={onClickSave}>
-                {i18n.translate('data.search.searchBar.savedQueryFormSaveButtonText', {
-                  defaultMessage: savedQuery ? 'Save changes' : 'Save',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiButton fill disabled={hasErrors || !enabledSaveButton} onClick={onClickSave}>
+            {i18n.translate('data.search.searchBar.savedQueryFlyoutFormSaveButtonText', {
+              defaultMessage: '{saveText}',
+              values: { saveText: savedQuery ? 'Save changes' : 'Save' },
+            })}
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

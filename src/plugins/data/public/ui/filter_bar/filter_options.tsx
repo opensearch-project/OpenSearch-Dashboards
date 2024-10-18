@@ -369,6 +369,8 @@ const FilterOptionsUI = (props: Props) => {
     defaultMessage: 'See saved queries',
   });
 
+  const iconForQueryEditorControlPopoverBtn = useNewSavedQueryUI ? 'boxesVertical' : 'folderOpen';
+
   const savedQueryPopoverButton = (
     <EuiSmallButtonEmpty
       onClick={togglePopover}
@@ -378,7 +380,7 @@ const FilterOptionsUI = (props: Props) => {
       title={label}
     >
       <EuiIcon
-        type={props.isQueryEditorControl ? 'folderOpen' : 'save'}
+        type={props.isQueryEditorControl ? iconForQueryEditorControlPopoverBtn : 'save'}
         className="euiQuickSelectPopover__buttonText"
       />
     </EuiSmallButtonEmpty>
