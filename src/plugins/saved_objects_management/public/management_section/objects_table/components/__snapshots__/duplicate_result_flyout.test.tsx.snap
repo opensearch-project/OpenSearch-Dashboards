@@ -142,9 +142,13 @@ HTMLCollection [
           <div
             class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
           >
-            <span>
-              Copy saved objects to targetWorkspace
-            </span>
+            <h2
+              class="euiTitle euiTitle--small"
+            >
+              <span>
+                Copy saved objects to targetWorkspace
+              </span>
+            </h2>
           </div>
           <div
             class="euiFlyoutBody"
@@ -342,9 +346,13 @@ HTMLCollection [
           <div
             class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
           >
-            <span>
-              Copy saved objects to targetWorkspace
-            </span>
+            <h2
+              class="euiTitle euiTitle--small"
+            >
+              <span>
+                Copy saved objects to targetWorkspace
+              </span>
+            </h2>
           </div>
           <div
             class="euiFlyoutBody"
