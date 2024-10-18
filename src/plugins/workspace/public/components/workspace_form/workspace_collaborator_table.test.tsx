@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-
+import ReactDOM from 'react-dom';
 import { WorkspaceCollaboratorTable, getDisplayedType } from './workspace_collaborator_table';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
@@ -122,6 +122,7 @@ describe('WorkspaceCollaboratorTable', () => {
         <WorkspaceCollaboratorTable {...mockProps} permissionSettings={permissionSettings} />
       </Provider>
     );
+
     const action = getByTestId('workspace-detail-collaborator-table-actions-box');
     fireEvent.click(action);
     const deleteCollaborator = getByText('Delete collaborator');
@@ -131,6 +132,46 @@ describe('WorkspaceCollaboratorTable', () => {
     const changeAccessLevel = getByText('Change access level');
     fireEvent.click(changeAccessLevel);
     expect(mockOverlays.openModal).toHaveBeenCalled();
+  });
+
+  it('should open change access modal when trying to change access level', () => {
+    const permissionSettings = [
+      {
+        id: 0,
+        modes: ['library_write', 'write'],
+        type: 'user',
+        userId: 'admin',
+      },
+      {
+        id: 1,
+        modes: ['library_read', 'read'],
+        type: 'group',
+        group: 'group',
+      },
+    ];
+
+    const { getByText, getByTestId } = render(
+      <Provider>
+        <WorkspaceCollaboratorTable {...mockProps} permissionSettings={permissionSettings} />
+      </Provider>
+    );
+    fireEvent.click(getByTestId('checkboxSelectRow-0'));
+    fireEvent.click(getByTestId('checkboxSelectRow-1'));
+
+    const action = getByTestId('workspace-detail-collaborator-table-actions');
+    fireEvent.click(action);
+    const changeAccessLevel = getByText('Change access level');
+    fireEvent.click(changeAccessLevel);
+    expect(getByText('Read only')).toBeInTheDocument();
+    const changes = getByText('Read only');
+    fireEvent.click(changes);
+    expect(mockOverlays.openModal).toHaveBeenCalled();
+    const ModalComponent = mockOverlays.openModal.mock.calls[0][0];
+    const { queryByTestId } = render(ModalComponent);
+    const modal = queryByTestId('change-access-confirm-modal');
+    if (modal) {
+      ReactDOM.unmountComponentAtNode(modal);
+    }
   });
 
   it('should openModal when clicking one selection delete', () => {
@@ -158,6 +199,12 @@ describe('WorkspaceCollaboratorTable', () => {
     const deleteCollaborator = getByText('Delete 1 collaborator');
     fireEvent.click(deleteCollaborator);
     expect(mockOverlays.openModal).toHaveBeenCalled();
+    const ModalComponent = mockOverlays.openModal.mock.calls[0][0];
+    const { queryByTestId } = render(ModalComponent);
+    const modal = queryByTestId('delete-confirm-modal');
+    if (modal) {
+      ReactDOM.unmountComponentAtNode(modal);
+    }
   });
 
   it('should openModal when clicking multi selection delete', () => {

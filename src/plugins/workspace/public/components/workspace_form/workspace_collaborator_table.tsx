@@ -214,6 +214,7 @@ export const WorkspaceCollaboratorTable = ({
       adminCollarboratorsNum === adminOfSelection && adminCollarboratorsNum !== 0;
     const modal = overlays.openModal(
       <EuiConfirmModal
+        data-test-subj="delete-confirm-modal"
         title={i18n.translate('workspace.detail.collaborator.actions.delete', {
           defaultMessage: 'Delete collaborator',
         })}
@@ -250,6 +251,7 @@ export const WorkspaceCollaboratorTable = ({
 
     const modal = overlays.openModal(
       <EuiConfirmModal
+        data-test-subj="change-access-confirm-modal"
         title={i18n.translate('workspace.detail.collaborator.table.change.access.level', {
           defaultMessage: 'Change access level',
         })}
@@ -257,8 +259,8 @@ export const WorkspaceCollaboratorTable = ({
           modal.close();
         }}
         onConfirm={onConfirm}
-        cancelButtonText="Cancel"
-        confirmButtonText="Confirm"
+        cancelButtonText={deletionModalCancelButton}
+        confirmButtonText={deletionModalConfirmButton}
       >
         <EuiText color={shouldShowWarning ? 'danger' : 'default'}>
           <p>
