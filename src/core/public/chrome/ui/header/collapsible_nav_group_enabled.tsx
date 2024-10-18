@@ -247,6 +247,7 @@ export function CollapsibleNavGroupEnabled({
             style={{ paddingTop: 0 }}
           >
             <NavGroups
+              className="navGroup-container"
               navLinks={navLinksForRender}
               navigateToApp={navigateToApp}
               onNavItemClick={(event, navItem) => {

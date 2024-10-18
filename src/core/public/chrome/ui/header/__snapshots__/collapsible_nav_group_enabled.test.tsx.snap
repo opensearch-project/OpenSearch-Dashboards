@@ -28,7 +28,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
         style="padding-top: 0px;"
       >
         <div
-          class="euiFlexItem"
+          class="euiFlexItem navGroup-container"
         >
           <nav
             class="euiSideNav euiSideNav-isOpenMobile"
@@ -126,7 +126,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show use case nav when current na
         style="padding-top: 0px;"
       >
         <div
-          class="euiFlexItem"
+          class="euiFlexItem navGroup-container"
         >
           <nav
             class="euiSideNav euiSideNav-isOpenMobile"

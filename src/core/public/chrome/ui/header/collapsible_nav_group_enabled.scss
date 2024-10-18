@@ -78,6 +78,10 @@
   .left-navigation-wrapper {
     display: flex;
     flex-direction: column;
+
+    .navGroup-container {
+      margin-right: -$euiSizeS;
+    }
   }
 
   .flex-1-container {
@@ -112,7 +116,11 @@
 
   .navGroupEnabledNavTopWrapper {
     padding: 0 $euiSizeS;
-    padding-left: $euiSize;
+    padding-left: $euiSizeS;
+
+    .homeICon {
+      margin-left: $euiSizeS;
+    }
   }
 
   .searchBar-wrapper {

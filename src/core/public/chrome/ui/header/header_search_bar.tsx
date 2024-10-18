@@ -86,12 +86,10 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
   const [results, setResults] = useState([] as React.JSX.Element[]);
   const [isLoading, setIsLoading] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [panelWidth, setPanelWidth] = useState(0);
-  const inputElRef = useRef<HTMLElement | null>();
-  const inputRef = (node: HTMLElement | null) => (inputElRef.current = node);
 
   const closePopover = () => {
     setIsPopoverOpen(false);
+    setResults([]);
   };
 
   const resultSection = (items: ReactNode[], sectionHeader: string) => {
@@ -108,7 +106,7 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
           {items.length ? (
             <EuiListGroup flush={true} gutterSize="none" maxWidth={false}>
               {items.map((item, index) => (
-                <EuiListGroupItem key={index} label={item} size="s" />
+                <EuiListGroupItem key={index} label={item} color="text" />
               ))}
             </EuiListGroup>
           ) : (
@@ -184,7 +182,6 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
       setIsLoading(false);
       setResults(sections);
     } else {
-      setIsPopoverOpen(false);
       setResults([]);
     }
   };
@@ -203,47 +200,49 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
       data-test-subj="search-input"
       className="searchInput"
       onFocus={() => {
-        const inputEl = inputElRef.current;
-        if (inputEl) {
-          const width = inputEl.getBoundingClientRect().width;
-          setPanelWidth(width);
-        }
+        setIsPopoverOpen(true);
       }}
     />
   );
 
+  const searchBarPanel = (
+    <EuiPanel
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize="s"
+      data-test-subj="search-result-panel"
+    >
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem>{searchBar}</EuiFlexItem>
+        <EuiFlexItem>{searchResultSections}</EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+
   if (panel) {
-    return (
-      <EuiPanel
-        hasBorder={false}
-        hasShadow={false}
-        paddingSize="s"
-        data-test-subj="search-result-panel"
-      >
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem>{searchBar}</EuiFlexItem>
-          <EuiFlexItem>{searchResultSections}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    );
+    return searchBarPanel;
   } else {
     return (
-      <EuiPopover
-        button={searchBar}
-        buttonRef={inputRef}
-        panelStyle={{ minWidth: panelWidth }}
-        zIndex={2000}
-        panelPaddingSize="s"
-        attachToAnchor={true}
-        ownFocus={false}
-        display="block"
-        isOpen={isPopoverOpen}
-        closePopover={() => {
-          setIsPopoverOpen(false);
-        }}
-      >
-        {searchResultSections}
-      </EuiPopover>
+      <>
+        {!isPopoverOpen && searchBar}
+        {isPopoverOpen && (
+          <EuiPopover
+            panelStyle={{ minWidth: '400px', minHeight: '300px' }}
+            button={<></>}
+            zIndex={2000}
+            panelPaddingSize="s"
+            attachToAnchor={true}
+            ownFocus={true}
+            display="block"
+            isOpen={isPopoverOpen}
+            closePopover={() => {
+              closePopover();
+            }}
+          >
+            {searchBarPanel}
+          </EuiPopover>
+        )}
+      </>
     );
   }
 };
