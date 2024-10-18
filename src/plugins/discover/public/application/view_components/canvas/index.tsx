@@ -28,7 +28,11 @@ import { buildColumns } from '../../utils/columns';
 import './discover_canvas.scss';
 import { HeaderVariant } from '../../../../../../core/public';
 import { setIndexPattern, setSelectedDataset } from '../../../../../data_explorer/public';
-import { NoIndexPatternsPanel, AdvancedSelector } from '../../../../../data/public';
+import {
+  NoIndexPatternsPanel,
+  NoDataSourcesPanel,
+  AdvancedSelector,
+} from '../../../../../data/public';
 import { Dataset } from '../../../../../data/common';
 import { toMountPoint } from '../../../../../opensearch_dashboards_react/public';
 
@@ -38,16 +42,19 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
     (state) => state.metadata
   );
   const [loadedIndexPattern, setLoadedIndexPattern] = useState<any>(selectedDataset?.id);
+  const [dataSourcesExist, setDataSourcesExist] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const { data$, refetch$, indexPattern } = useDiscoverContext();
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const {
+    application,
     uiSettings,
     capabilities,
     chrome: { setHeaderVariant },
-    data,
+    data: { query, dataSources },
     overlays,
   } = services;
+  //
   const { columns } = useSelector((state) => {
     const stateColumns = state.discover.columns;
 
@@ -81,6 +88,18 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
     [refetch$]
   );
   const [rows, setRows] = useState<OpenSearchSearchHit[] | undefined>(undefined);
+
+  useEffect(() => {
+    const subscription = dataSources.dataSourceService
+      .getDataSources$()
+      .subscribe((currentDataSources) => {
+        setDataSourcesExist(Object.keys(currentDataSources).length > 0);
+      });
+  
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [dataSources]);
 
   useEffect(() => {
     const subscription = data$.subscribe((next) => {
@@ -135,9 +154,9 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
     dispatch(setSelectedDataset(dataset));
 
     // Update query and other necessary state
-    const queryString = data.query.queryString;
-    const query = queryString.getInitialQueryByDataset(dataset);
-    queryString.setQuery(query);
+    const queryString = query.queryString;
+    const queryToSend = queryString.getInitialQueryByDataset(dataset);
+    queryString.setQuery(queryToSend);
     queryString.getDatasetService().addRecentDataset(dataset);
   };
 
@@ -189,7 +208,14 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
         useNoIndexPatternsTopNav={hasNoDataset}
       />
       {hasNoDataset ? (
-        <NoIndexPatternsPanel onOpenDataSelector={handleOpenDataSelector} />
+        dataSourcesExist ? (
+          <NoIndexPatternsPanel onOpenDataSelector={handleOpenDataSelector} />
+        ) : (
+          <NoDataSourcesPanel
+            onOpenDataSelector={handleOpenDataSelector}
+            navigateToApp={application.navigateToApp}
+          />
+        )
       ) : (
         <>
           {fetchState.status === ResultStatus.NO_RESULTS && (
