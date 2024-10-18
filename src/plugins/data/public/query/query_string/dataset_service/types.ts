@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { EuiIconProps } from '@elastic/eui';
+import { HttpSetup } from '../../../../../../core/public';
 import { Dataset, DatasetField, DatasetSearchOptions, DataStructure } from '../../../../common';
 import { IDataPluginServices } from '../../../types';
 
@@ -30,6 +31,8 @@ export interface DatasetTypeConfig {
     icon: EuiIconProps;
     /** Optional tooltip text */
     tooltip?: string;
+    /** Optional requiresTimeFilter determines if a time filter is needed */
+    supportsTimeFilter?: boolean;
     /** Optional preference for search on page load else defaulted to true */
     searchOnLoad?: boolean;
   };
@@ -55,7 +58,7 @@ export interface DatasetTypeConfig {
    * Fetches fields for the dataset.
    * @returns {Promise<DatasetField[]>} A promise that resolves to an array of DatasetFields.
    */
-  fetchFields: (dataset: Dataset) => Promise<DatasetField[]>;
+  fetchFields: (dataset: Dataset, http?: HttpSetup) => Promise<DatasetField[]>;
   /**
    * Retrieves the supported query languages for this dataset type.
    * @returns {Promise<string[]>} A promise that resolves to an array of supported language ids.
