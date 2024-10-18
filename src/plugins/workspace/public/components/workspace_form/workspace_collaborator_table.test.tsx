@@ -6,7 +6,6 @@
 import React from 'react';
 import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import ReactDOM from 'react-dom';
-
 import { WorkspaceCollaboratorTable, getDisplayedType } from './workspace_collaborator_table';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
@@ -242,7 +241,7 @@ describe('WorkspaceCollaboratorTable', () => {
     expect(mockOverlays.openModal).toHaveBeenCalled();
   });
 
-  it('should openModal when clicking action tools when multi selection', async () => {
+  it('should openModal and show warning text when changing last admin to a less permission level', async () => {
     const permissionSettings = [
       {
         id: 0,
@@ -258,21 +257,54 @@ describe('WorkspaceCollaboratorTable', () => {
       },
     ];
 
+    const handleSubmitPermissionSettingsMock = jest.fn();
+
     const { getByText, getByTestId, getByRole } = render(
       <Provider>
-        <WorkspaceCollaboratorTable {...mockProps} permissionSettings={permissionSettings} />
+        <WorkspaceCollaboratorTable
+          {...mockProps}
+          permissionSettings={permissionSettings}
+          handleSubmitPermissionSettings={handleSubmitPermissionSettingsMock}
+        />
+        <div data-test-subj="modal-container" />
       </Provider>
     );
+
+    mockOverlays.openModal.mockReturnValue({
+      onClose: Promise.resolve(),
+      close: async () => {
+        ReactDOM.unmountComponentAtNode(getByTestId('modal-container'));
+      },
+    });
+
     fireEvent.click(getByTestId('checkboxSelectRow-0'));
     fireEvent.click(getByTestId('checkboxSelectRow-1'));
     const actions = getByTestId('workspace-detail-collaborator-table-actions');
     fireEvent.click(actions);
-    const changeAccessLevel = getByText('Change access level');
-    fireEvent.click(changeAccessLevel);
+    fireEvent.click(getByText('Change access level'));
     await waitFor(() => {
-      fireEvent.click(within(getByRole('dialog')).getByText('Admin'));
+      fireEvent.click(within(getByRole('dialog')).getByText('Read only'));
     });
-    expect(mockOverlays.openModal).toHaveBeenCalled();
+    mockOverlays.openModal.mock.calls[0][0](getByTestId('modal-container'));
+    await waitFor(() => {
+      expect(getByText('Confirm')).toBeInTheDocument();
+    });
+    expect(
+      getByText(
+        'By changing the last administrator to a lesser access, only application administrators will be able to manage this workspace'
+      )
+    ).toBeInTheDocument();
+    jest.useFakeTimers();
+    fireEvent.click(getByText('Confirm'));
+
+    await waitFor(() => {
+      expect(handleSubmitPermissionSettingsMock).toHaveBeenCalledWith([
+        { id: 0, modes: ['library_read', 'read'], type: 'user', userId: 'admin' },
+        { group: 'group', id: 1, modes: ['library_read', 'read'], type: 'group' },
+      ]);
+    });
+    jest.runAllTimers();
+    jest.useRealTimers();
   });
 
   it('should disable change access level confirm button when submitting', async () => {
