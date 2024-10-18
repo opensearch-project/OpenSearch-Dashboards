@@ -166,10 +166,10 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
     );
   };
 
-  const useNoIndexPatternsPanel =
+  const hasNoDataset =
     !currentIndexPattern && !loadedIndexPattern && isEnhancementsEnabled;
 
-  return !useNoIndexPatternsPanel ? (
+  return (
     <EuiPanel
       panelRef={panelRef}
       hasBorder={true}
@@ -186,8 +186,12 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
           optionalRef,
         }}
         showSaveQuery={showSaveQuery}
+        useNoIndexPatternsTopNav={hasNoDataset}
       />
-
+      {hasNoDataset ? (
+        <NoIndexPatternsPanel onOpenDataSelector={handleOpenDataSelector} />
+      ) : (
+        <>
       {fetchState.status === ResultStatus.NO_RESULTS && (
         <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
       )}
@@ -210,9 +214,9 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
           <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
         </EuiPanel>
       )}
+            </>
+            )}
     </EuiPanel>
-  ) : (
-    <NoIndexPatternsPanel onOpenDataSelector={handleOpenDataSelector} />
   );
 }
 
