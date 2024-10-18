@@ -28,13 +28,8 @@
  * under the License.
  */
 
-import { timer } from 'rxjs';
-import { filter, mergeMap, take, takeWhile } from 'rxjs/operators';
-import {
-  PollQueryResultsHandler,
-  FetchStatusResponse,
-  QueryFailedStatusResponse,
-} from '../data_frames';
+import { i18n } from '@osd/i18n';
+import { PollQueryResultsHandler, FetchStatusResponse } from '../data_frames';
 
 export interface QueryStatusOptions {
   pollQueryResults: PollQueryResultsHandler;
@@ -42,29 +37,28 @@ export interface QueryStatusOptions {
   interval?: number;
 }
 
-export const handleQueryResults = <T>(
+export const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+export const handleQueryResults = async <T>(
   options: QueryStatusOptions
 ): Promise<FetchStatusResponse> => {
-  const { pollQueryResults, interval = 5000, queryId } = options;
+  const { pollQueryResults, interval = 5000 } = options;
+  let queryResultsRes: FetchStatusResponse;
+  let queryStatus;
+  do {
+    // Wait for the given interval in ms before polling for the query status/results
+    await delay(interval);
+    queryResultsRes = await pollQueryResults();
+    queryStatus = queryResultsRes?.status?.toUpperCase();
+  } while (queryStatus !== 'SUCCESS' && queryStatus !== 'FAILED');
 
-  return timer(0, interval)
-    .pipe(
-      mergeMap(() => pollQueryResults()),
-      takeWhile((response: FetchStatusResponse) => {
-        const status = response?.status?.toUpperCase();
-        return status !== 'SUCCESS' && status !== 'FAILED';
-      }, true),
-      filter((response: FetchStatusResponse) => {
-        const status = response?.status?.toUpperCase();
-        if (status === 'FAILED') {
-          throw (
-            (response as QueryFailedStatusResponse).body.error ??
-            new Error(`Failed to fetch results ${queryId ?? ''}`)
-          );
-        }
-        return status === 'SUCCESS';
-      }),
-      take(1)
-    )
-    .toPromise();
+  if (queryStatus === 'FAILED') {
+    throw new Error(
+      i18n.translate('data.search.request.failed', {
+        defaultMessage: 'An error occurred while executing the search query',
+      })
+    );
+  }
+
+  return queryResultsRes;
 };

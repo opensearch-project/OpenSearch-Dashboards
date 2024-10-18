@@ -1,0 +1,2 @@
+fix:
+- Refactored polling logic to poll for results once current request completes ([#8555](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8555))
