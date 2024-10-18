@@ -1,0 +1,2 @@
+feat:
+- [Workspace]Keep confirm modal and disable confirm button during collaborators operation ([#8604](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8604))
