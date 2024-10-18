@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { memo, useEffect, useRef } from 'react';
+import React, { memo, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,13 +23,7 @@ import './app_container.scss';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
 import { IDataPluginServices } from '../../../data/public';
 import { QUERY_ENHANCEMENT_ENABLED_SETTING } from './constants';
-import {
-  DISCOVER_LOAD_EVENT,
-  NEW_DISCOVER_LOAD_EVENT,
-  NEW_DISCOVER_OPT_IN,
-  NEW_DISCOVER_OPT_OUT,
-  trackUiMetric,
-} from '../ui_metric';
+import { DISCOVER_LOAD_EVENT, NEW_DISCOVER_LOAD_EVENT, trackUiMetric } from '../ui_metric';
 
 export const AppContainer = React.memo(
   ({ view, params }: { view?: View; params: AppMountParameters }) => {
@@ -41,6 +35,7 @@ export const AppContainer = React.memo(
     const showActionsInGroup = uiSettings?.get('home:useNewHomePage');
 
     const topLinkRef = useRef<HTMLDivElement>(null);
+    const datasetSelectorRef = useRef<HTMLDivElement>(null);
     const datePickerRef = useRef<HTMLDivElement>(null);
 
     if (!view) {
@@ -59,6 +54,7 @@ export const AppContainer = React.memo(
 
     params.optionalRef = {
       topLinkRef,
+      datasetSelectorRef,
       datePickerRef,
     };
     // Render the application DOM.
@@ -103,7 +99,7 @@ export const AppContainer = React.memo(
                       mode={['collapsible', { position: 'top' }]}
                       paddingSize="none"
                     >
-                      <Sidebar>
+                      <Sidebar datasetSelectorRef={datasetSelectorRef}>
                         <MemoizedPanel {...params} />
                       </Sidebar>
                     </EuiResizablePanel>

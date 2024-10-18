@@ -77,14 +77,22 @@ export const DefaultInput: React.FC<DefaultInputProps> = ({
             gutterSize="none"
             className="defaultEditor__footerRow"
           >
-            {footerItems.start?.map((item) => (
-              <EuiFlexItem grow={false} className="defaultEditor__footerItem">
+            {footerItems.start?.map((item, idx) => (
+              <EuiFlexItem
+                key={`defaultEditor__footerItem-start-${idx}`}
+                grow={false}
+                className="defaultEditor__footerItem"
+              >
                 {item}
               </EuiFlexItem>
             ))}
             <EuiFlexItem grow />
-            {footerItems.end?.map((item) => (
-              <EuiFlexItem grow={false} className="defaultEditor__footerItem">
+            {footerItems.end?.map((item, idx) => (
+              <EuiFlexItem
+                key={`defaultEditor__footerItem-end-${idx}`}
+                grow={false}
+                className="defaultEditor__footerItem"
+              >
                 {item}
               </EuiFlexItem>
             ))}
