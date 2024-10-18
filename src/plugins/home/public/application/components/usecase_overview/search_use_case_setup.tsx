@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { EuiI18n, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiI18n, EuiIcon, EuiLink, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
   ContentManagementPluginSetup,
@@ -14,6 +14,8 @@ import {
   SECTIONS,
   SEARCH_OVERVIEW_CONTENT_AREAS,
 } from '../../../../../content_management/public';
+
+const DISCOVER_APP_ID = 'discover';
 
 export const setupSearchUseCase = (contentManagement: ContentManagementPluginSetup) => {
   contentManagement.registerPage({
@@ -56,39 +58,64 @@ export const registerContentToSearchUseCasePage = (
   contentManagement: ContentManagementPluginStart,
   core: CoreStart
 ) => {
+  // Replicate external EuiLink icon as doc links can't use EuiLink for visual consistency
+  const externalLinkIcon = (
+    <>
+      {' '}
+      <EuiIcon size="s" type="popout" />
+    </>
+  );
   const getStartedCards = [
     {
       id: 'access_search_functionality',
       order: 10,
-      title: i18n.translate('home.searchOverview.setup.accessSearch.title', {
-        defaultMessage: 'Access search functionality',
-      }),
+      icon: <EuiIcon type="bookOpen" size="l" color="primary" />,
+      title: '',
       description: i18n.translate('home.searchOverview.setup.accessSearch.description', {
-        defaultMessage:
-          'You can run a search using REST API or language client. For experimentation, you can also run queries interactively.',
+        defaultMessage: 'Explore search capabilities and functionality of OpenSearch.',
       }),
       footer: (
-        <EuiI18n token="home.searchOverview.setup.accessSearch.footer" default="Documentation" />
+        <EuiTextColor color="subdued">
+          <EuiI18n token="home.searchOverview.setup.accessSearch.footer" default="Documentation" />
+          {externalLinkIcon}
+        </EuiTextColor>
       ),
       documentURL: 'https://opensearch.org/docs/latest/search-plugins/',
     },
     {
       id: 'create_document_index',
       order: 20,
-      title: i18n.translate('home.searchOverview.setup.createDocumentIndex.title', {
-        defaultMessage: 'Create a document index',
-      }),
+      icon: <EuiIcon type="bookOpen" size="l" color="primary" />,
+      title: '',
       description: i18n.translate('home.searchOverview.setup.createDocumentIndex.description', {
-        defaultMessage:
-          'You can create a document collection (an index) by adding documents to a new index.',
+        defaultMessage: 'Create a document collection (an index) to query your data.',
       }),
       footer: (
-        <EuiI18n
-          token="home.search_overview.createDocumentIndex.card.footer"
-          default="Documentation"
-        />
+        <EuiTextColor color="subdued">
+          <EuiI18n
+            token="home.search_overview.createDocumentIndex.card.footer"
+            default="Documentation"
+          />
+          {externalLinkIcon}
+        </EuiTextColor>
       ),
       documentURL: 'https://opensearch.org/docs/latest/getting-started/intro/',
+    },
+    {
+      id: 'get_start_discover',
+      order: 30,
+      icon: <EuiIcon type="compass" size="l" color="primary" />,
+      title: '',
+      description: i18n.translate('home.searchOverview.setup.discover.description', {
+        defaultMessage: 'Explore data to uncover and discover insights.',
+      }),
+      footer: (
+        <EuiTextColor color="subdued">
+          <EuiI18n token="workspace.essential_overview.discover.card.footer" default="Discover" />
+        </EuiTextColor>
+      ),
+      documentURL: 'https://opensearch.org/docs/latest/getting-started/intro/',
+      navigateAppId: DISCOVER_APP_ID,
     },
   ];
 
@@ -101,16 +128,17 @@ export const registerContentToSearchUseCasePage = (
         order: card.order,
         title: card.title,
         description: card.description,
+        onClick: () => {
+          if (card.navigateAppId) {
+            core.application.navigateToApp(card.navigateAppId);
+          } else {
+            window.open(card.documentURL, '_blank');
+          }
+        },
+        getFooter: () => card.footer,
+        getIcon: () => card.icon,
         cardProps: {
-          titleElement: 'h4',
-          titleSize: 's',
-          selectable: {
-            onClick: () => {
-              window.open(card.documentURL, '_blank');
-            },
-            children: card.footer,
-            isSelected: false,
-          },
+          className: 'usecaseOverviewGettingStartedCard',
         },
       }),
       getTargetArea: () => SEARCH_OVERVIEW_CONTENT_AREAS.GET_STARTED,

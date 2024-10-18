@@ -75,22 +75,16 @@ describe('Setup use case overview', () => {
     expect(firstCall[0].getContent()).toMatchInlineSnapshot(`
       Object {
         "cardProps": Object {
-          "selectable": Object {
-            "children": <EuiI18n
-              default="Discover"
-              token="workspace.essential_overview.discover.card.footer"
-            />,
-            "isSelected": false,
-            "onClick": [Function],
-          },
-          "titleElement": "h4",
-          "titleSize": "s",
+          "className": "usecaseOverviewGettingStartedCard",
         },
-        "description": "Explore data to uncover insights.",
+        "description": "Explore data to uncover and discover insights.",
+        "getFooter": [Function],
+        "getIcon": [Function],
         "id": "get_start_discover",
         "kind": "card",
+        "onClick": [Function],
         "order": 20,
-        "title": "Explore data",
+        "title": "",
       }
     `);
   });
@@ -137,17 +131,16 @@ describe('Setup use case overview', () => {
     expect(firstCall[0].getContent()).toMatchInlineSnapshot(`
       Object {
         "cardProps": Object {
-          "layout": "horizontal",
-          "titleElement": "h4",
-          "titleSize": "s",
+          "className": "usecaseOverviewGettingStartedCard",
         },
         "description": "Gain visibility into system health, performance, and reliability through monitoring of logs, metrics and traces.",
+        "getFooter": [Function],
         "getIcon": [Function],
         "id": "observability",
         "kind": "card",
         "onClick": [Function],
         "order": 4000,
-        "title": "Observability",
+        "title": "",
       }
     `);
   });
