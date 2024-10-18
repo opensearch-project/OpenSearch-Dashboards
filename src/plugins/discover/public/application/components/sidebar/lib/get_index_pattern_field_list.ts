@@ -28,8 +28,7 @@
  * under the License.
  */
 
-import { difference } from 'lodash';
-import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 
 export function getIndexPatternFieldList(
   indexPattern?: IndexPattern,
