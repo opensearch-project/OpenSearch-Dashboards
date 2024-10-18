@@ -215,11 +215,7 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
           color="transparent"
           hasBorder={false}
         >
-          <EuiSplitPanel.Inner
-            grow={false}
-            paddingSize="none"
-            className="dscSideBar_searchContainer"
-          >
+          <EuiSplitPanel.Inner grow={false} paddingSize="s" className="dscSideBar_searchContainer">
             <DiscoverFieldSearch
               onChange={onChangeFieldSearch}
               value={fieldFilterState.name}
@@ -235,7 +231,10 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
               />
             </EuiSplitPanel.Inner>
           ) : null}
-          <EuiSplitPanel.Inner className="eui-yScroll" paddingSize="none">
+          <EuiSplitPanel.Inner
+            className="eui-yScroll dscSideBar_fieldListContainer"
+            paddingSize="none"
+          >
             {fields.length > 0 && (
               <>
                 <FieldList
@@ -306,7 +305,7 @@ const FieldList = ({
   return (
     <>
       <EuiButtonEmpty
-        iconSide="right"
+        iconSide="left"
         color="text"
         iconType={expanded ? 'arrowDown' : 'arrowRight'}
         onClick={() => setExpanded(!expanded)}
@@ -319,7 +318,7 @@ const FieldList = ({
       {expanded && (
         <EuiDroppable
           droppableId={`${category.toUpperCase()}_FIELDS`}
-          spacing="m"
+          spacing="l"
           data-test-subj={`fieldList-${category}`}
           cloneDraggables={category !== 'selected'}
         >
