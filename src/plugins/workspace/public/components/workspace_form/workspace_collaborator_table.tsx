@@ -161,7 +161,7 @@ export const WorkspaceCollaboratorTable = ({
     });
   }, [permissionSettings, displayedCollaboratorTypes]);
 
-  const adminCollarboratorsNum = useMemo(() => {
+  const adminCollaboratorsNum = useMemo(() => {
     const admins = items.filter((item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin);
     return admins.length;
   }, [items]);
@@ -211,7 +211,7 @@ export const WorkspaceCollaboratorTable = ({
       (item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin
     ).length;
     const shouldShowWarning =
-      adminCollarboratorsNum === adminOfSelection && adminCollarboratorsNum !== 0;
+      adminCollaboratorsNum === adminOfSelection && adminCollaboratorsNum !== 0;
     const modal = overlays.openModal(
       <EuiConfirmModal
         data-test-subj="delete-confirm-modal"
@@ -245,8 +245,7 @@ export const WorkspaceCollaboratorTable = ({
       const adminOfSelection = selections.filter(
         (item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin
       ).length;
-      shouldShowWarning =
-        adminCollarboratorsNum - adminOfSelection < 1 && adminCollarboratorsNum > 0;
+      shouldShowWarning = adminCollaboratorsNum - adminOfSelection < 1 && adminCollaboratorsNum > 0;
     }
 
     const modal = overlays.openModal(
@@ -489,7 +488,7 @@ const Actions = ({
     WORKSPACE_ACCESS_LEVEL_NAMES
   ) as WorkspaceCollaboratorAccessLevel[]).map((level) => ({
     name: WORKSPACE_ACCESS_LEVEL_NAMES[level],
-    onClick: async () => {
+    onClick: () => {
       setIsPopoverOpen(false);
       if (selection && openChangeAccessLevelModal) {
         const modal = openChangeAccessLevelModal({
