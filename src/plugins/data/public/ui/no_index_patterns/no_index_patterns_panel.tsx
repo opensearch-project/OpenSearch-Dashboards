@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@osd/i18n';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -32,75 +33,102 @@ export const NoIndexPatternsPanel: React.FC<NoIndexPatternsPanelProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="m">
-              <h2>Select data</h2>
+              <h2>
+                {i18n.translate('data.noIndexPatterns.selectDataTitle', {
+                  defaultMessage: 'Select data',
+                })}
+              </h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText textAlign="center" color="subdued" size="xs">
-              Select an available data source and choose a query language to use for running
-              queries. You can use the data dropdown or use the enhanced data selector to select
-              data.
+              {i18n.translate('data.noIndexPatterns.selectDataDescription', {
+                defaultMessage:
+                  'Select an available data source and choose a query language to use for running queries. You can use the data dropdown or use the enhanced data selector to select data.',
+              })}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiSmallButton fill onClick={onOpenDataSelector}>
-              Open data selector
+              {i18n.translate('data.noIndexPatterns.openDataSelectorButton', {
+                defaultMessage: 'Open data selector',
+              })}
             </EuiSmallButton>
           </EuiFlexItem>
           <EuiSpacer size="s" />
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h4>Learn more about query languages</h4>
+              <h4>
+                {i18n.translate('data.noIndexPatterns.learnMoreAboutQueryLanguages', {
+                  defaultMessage: 'Learn more about query languages',
+                })}
+              </h4>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="center" gutterSize="s" wrap>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  href="#"
+                  href="https://opensearch.org/docs/latest/search-plugins/sql/ppl/syntax/"
                   target="_blank"
                   size="xs"
                   iconType="popout"
                   iconSide="right"
                   iconGap="s"
                 >
-                  <EuiText size="xs">PPL documentation</EuiText>
+                  <EuiText size="xs">
+                    {i18n.translate('data.noIndexPatterns.pplDocumentation', {
+                      defaultMessage: 'PPL documentation',
+                    })}
+                  </EuiText>
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  href="#"
+                  href="https://opensearch.org/docs/latest/search-plugins/sql/sql/basic/"
                   target="_blank"
                   size="xs"
                   iconType="popout"
                   iconSide="right"
                   iconGap="s"
                 >
-                  <EuiText size="xs">SQL documentation</EuiText>
+                  <EuiText size="xs">
+                    {i18n.translate('data.noIndexPatterns.sqlDocumentation', {
+                      defaultMessage: 'SQL documentation',
+                    })}
+                  </EuiText>
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  href="#"
+                  href="https://opensearch.org/docs/latest/query-dsl/full-text/query-string/"
                   target="_blank"
                   size="xs"
                   iconType="popout"
                   iconSide="right"
                   iconGap="s"
                 >
-                  <EuiText size="xs">Lucene documentation</EuiText>
+                  <EuiText size="xs">
+                    {i18n.translate('data.noIndexPatterns.luceneDocumentation', {
+                      defaultMessage: 'Lucene documentation',
+                    })}
+                  </EuiText>
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  href="#"
+                  href="https://opensearch.org/docs/latest/query-dsl/full-text/query-string/"
                   target="_blank"
                   size="xs"
                   iconType="popout"
                   iconSide="right"
                   iconGap="s"
                 >
-                  <EuiText size="xs">DQL documentation</EuiText>
+                  <EuiText size="xs">
+                    {i18n.translate('data.noIndexPatterns.dqlDocumentation', {
+                      defaultMessage: 'DQL documentation',
+                    })}
+                  </EuiText>
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
