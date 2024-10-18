@@ -64,7 +64,7 @@ export const logsFieldMappings = {
             },
           },
           envName: {
-            type: 'text',
+            type: 'keyword',
             fields: {
               keyword: {
                 type: 'keyword',
@@ -73,7 +73,7 @@ export const logsFieldMappings = {
             },
           },
           otelServiceName: {
-            type: 'text',
+            type: 'keyword',
             fields: {
               keyword: {
                 type: 'keyword',
@@ -82,7 +82,7 @@ export const logsFieldMappings = {
             },
           },
           otelSpanID: {
-            type: 'text',
+            type: 'keyword',
             fields: {
               keyword: {
                 type: 'keyword',
@@ -91,7 +91,7 @@ export const logsFieldMappings = {
             },
           },
           otelTraceID: {
-            type: 'text',
+            type: 'keyword',
             fields: {
               keyword: {
                 type: 'keyword',
@@ -349,7 +349,7 @@ export const logsFieldMappings = {
     },
   },
   serviceName: {
-    type: 'text',
+    type: 'keyword',
     fields: {
       keyword: {
         type: 'keyword',
@@ -370,7 +370,7 @@ export const logsFieldMappings = {
     },
   },
   spanId: {
-    type: 'text',
+    type: 'keyword',
     fields: {
       keyword: {
         type: 'keyword',
@@ -382,7 +382,7 @@ export const logsFieldMappings = {
     type: 'date',
   },
   traceId: {
-    type: 'text',
+    type: 'keyword',
     fields: {
       keyword: {
         type: 'keyword',

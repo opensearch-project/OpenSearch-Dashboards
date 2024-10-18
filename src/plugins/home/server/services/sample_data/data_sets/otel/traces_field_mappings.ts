@@ -121,7 +121,7 @@ export const tracesFieldMappings = {
         type: 'long',
       },
       spanId: {
-        type: 'text',
+        type: 'keyword',
         fields: {
           keyword: {
             type: 'keyword',
@@ -130,7 +130,7 @@ export const tracesFieldMappings = {
         },
       },
       traceId: {
-        type: 'text',
+        type: 'keyword',
         fields: {
           keyword: {
             type: 'keyword',
