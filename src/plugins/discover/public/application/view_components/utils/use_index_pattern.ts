@@ -74,25 +74,25 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
             handleIndexPattern();
           }
         } else {
-          try {
-            const ip = await fetchIndexPatternDetails(indexPatternIdFromState);
-            if (isMounted) {
-              setIndexPattern(ip);
-            }
-          } catch (error) {
-            if (isMounted) {
-              const warningMessage = i18n.translate('discover.indexPatternFetchErrorWarning', {
-                defaultMessage: 'Error fetching index pattern: {error}',
-                values: { error: (error as Error).message },
-              });
-              toastNotifications.addWarning(warningMessage);
-            }
+          const ip = await fetchIndexPatternDetails(indexPatternIdFromState);
+          if (isMounted) {
+            setIndexPattern(ip);
           }
         }
       }
     };
 
-    handleIndexPattern();
+    try {
+      handleIndexPattern();
+    } catch (error) {
+      if (isMounted) {
+        const warningMessage = i18n.translate('discover.indexPatternFetchErrorWarning', {
+          defaultMessage: 'Error fetching index pattern: {error}',
+          values: { error: (error as Error).message },
+        });
+        toastNotifications.addWarning(warningMessage);
+      }
+    }
 
     return () => {
       isMounted = false;
