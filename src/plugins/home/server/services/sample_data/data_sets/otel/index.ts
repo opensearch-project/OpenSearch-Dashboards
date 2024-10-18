@@ -23,10 +23,22 @@ const otelDataDescription = i18n.translate('home.sampleData.otelSpecDescription'
   defaultMessage:
     'Sample data including correlated observability signals for an e-commerce application in Open-Telemetry standard.',
 });
-const initialAppLinks = [] as AppLinkSchema[];
-
-const DEFAULT_INDEX = 'i254a9691-8a1b-11ef-adb4-9f1097200c20';
-const DASHBOARD_ID = '';
+const initialAppLinks: AppLinkSchema[] = [
+  {
+    path: 'observability-traces#/traces',
+    icon: 'apmTrace',
+    label: 'View traces',
+    newPath: 'observability-traces-nav#/traces',
+    appendDatasourceToPath: true,
+  },
+  {
+    path: 'observability-traces#/services',
+    icon: 'graphApp',
+    label: 'View services',
+    newPath: 'observability-services-nav#/services',
+    appendDatasourceToPath: true,
+  },
+];
 
 export const otelSpecProvider = function (): SampleDatasetSchema {
   return {
@@ -36,11 +48,11 @@ export const otelSpecProvider = function (): SampleDatasetSchema {
     previewImagePath: '/plugins/home/assets/sample_data_resources/otel/otel_traces.png',
     darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/otel/otel_traces_dark.png',
     hasNewThemeImages: true,
-    overviewDashboard: DASHBOARD_ID,
-    getDataSourceIntegratedDashboard: appendDataSourceId(DASHBOARD_ID),
+    overviewDashboard: '',
+    getDataSourceIntegratedDashboard: appendDataSourceId(''),
     appLinks: initialAppLinks,
-    defaultIndex: DEFAULT_INDEX,
-    getDataSourceIntegratedDefaultIndex: appendDataSourceId(DEFAULT_INDEX),
+    defaultIndex: '',
+    getDataSourceIntegratedDefaultIndex: appendDataSourceId(''),
     savedObjects: [],
     getDataSourceIntegratedSavedObjects: (dataSourceId?: string, dataSourceTitle?: string) =>
       getSavedObjectsWithDataSource([], dataSourceId, dataSourceTitle),

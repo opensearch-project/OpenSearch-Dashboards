@@ -61,15 +61,13 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
           previewImagePath: sampleDataset.previewImagePath,
           darkPreviewImagePath: sampleDataset.darkPreviewImagePath,
           hasNewThemeImages: sampleDataset.hasNewThemeImages,
-          overviewDashboard: sampleDataset.getDataSourceIntegratedDashboard(
-            dataSourceId,
-            workspaceId
-          ),
+          overviewDashboard: sampleDataset.overviewDashboard
+            ? sampleDataset.getDataSourceIntegratedDashboard(dataSourceId, workspaceId)
+            : '',
           appLinks: sampleDataset.appLinks,
-          defaultIndex: sampleDataset.getDataSourceIntegratedDefaultIndex(
-            dataSourceId,
-            workspaceId
-          ),
+          defaultIndex: sampleDataset.defaultIndex
+            ? sampleDataset.getDataSourceIntegratedDefaultIndex(dataSourceId, workspaceId)
+            : '',
           dataIndices: sampleDataset.dataIndices.map(({ id, indexName }) => ({
             id,
             indexName,

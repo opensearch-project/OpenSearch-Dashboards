@@ -55,12 +55,19 @@ const dataIndexSchema = Joi.object({
   // Set to true to move timestamp to current week, preserving day of week and time of day
   // Relative distance from timestamp to currentTimeMarker will not remain the same
   preserveDayOfWeekTimeOfDay: Joi.boolean().default(false),
+
+  // Optional indexName field, if added wouldn't all flow would use this name
+  // `createIndexName` wouldn't be used
+  indexName: Joi.string(),
 });
 
 const appLinkSchema = Joi.object({
   path: Joi.string().required(),
   label: Joi.string().required(),
   icon: Joi.string().required(),
+  // Alternative app path when new nav flag is enabled
+  newPath: Joi.string(),
+  appendDatasourceToPath: Joi.string(),
 });
 
 export const sampleDataSchema = {

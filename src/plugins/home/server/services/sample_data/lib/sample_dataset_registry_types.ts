@@ -81,6 +81,9 @@ export interface AppLinkSchema {
   path: string;
   icon: string;
   label: string;
+  // Alternative app path when new nav flag is enabled
+  newPath?: string;
+  appendDatasourceToPath?: boolean;
 }
 
 export interface SampleDatasetSchema<T = unknown> {
