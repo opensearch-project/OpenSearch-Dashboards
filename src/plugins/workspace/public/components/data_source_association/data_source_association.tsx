@@ -22,6 +22,10 @@ import {
 import { AssociationDataSourceModalContent } from './association_data_source_modal';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
+import {
+  DATA_CONNECTION_SAVED_OBJECT_TYPE,
+  DATA_SOURCE_SAVED_OBJECT_TYPE,
+} from '../../../../data_source/common';
 
 interface Props {
   excludedDataSourceIds: string[];
@@ -54,10 +58,13 @@ export const DataSourceAssociation = ({ excludedDataSourceIds, onComplete, onErr
 
   const onAssociateDataSource = useCallback(
     async (ds: DataSourceConnection[]) => {
-      const objects = ds
+      const dataSourceObjects = ds
         .filter((d) => d.connectionType === DataSourceConnectionType.OpenSearchConnection)
-        .map((d) => ({ id: d.id, type: 'data-source' }));
-
+        .map((d) => ({ id: d.id, type: DATA_SOURCE_SAVED_OBJECT_TYPE }));
+      const dataConnectionObjects = ds
+        .filter((d) => d.connectionType === DataSourceConnectionType.DataConnection)
+        .map((d) => ({ id: d.id, type: DATA_CONNECTION_SAVED_OBJECT_TYPE }));
+      const objects = [...dataSourceObjects, ...dataConnectionObjects];
       if (workspaceClient && currentWorkspaceId) {
         let failedCount = 0;
         try {

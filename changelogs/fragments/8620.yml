@@ -1,0 +1,2 @@
+feat:
+- Add data-connection type support for association modal ([#8620](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8620))
