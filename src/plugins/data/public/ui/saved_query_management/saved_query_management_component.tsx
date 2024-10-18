@@ -39,6 +39,7 @@ import {
   EuiPagination,
   EuiText,
   EuiSpacer,
+  EuiListGroupItem,
 } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
@@ -46,33 +47,50 @@ import React, { useCallback, useEffect, useState, Fragment, useRef } from 'react
 import { sortBy } from 'lodash';
 import { SavedQuery, SavedQueryService } from '../..';
 import { SavedQueryListItem } from './saved_query_list_item';
+import {
+  toMountPoint,
+  useOpenSearchDashboards,
+} from '../../../../opensearch_dashboards_react/public';
+import { SaveQueryFlyout } from '../saved_query_flyouts/save_query_flyout';
+import {
+  OpenSavedQueryFlyout,
+  OpenSavedQueryFlyoutProps,
+} from '../saved_query_flyouts/open_saved_query_flyout';
+import { SavedQueryMeta } from '../saved_query_form';
 
 const perPage = 50;
 interface Props {
   showSaveQuery?: boolean;
   loadedSavedQuery?: SavedQuery;
   savedQueryService: SavedQueryService;
-  onSave: () => void;
-  onSaveAsNew: () => void;
-  onLoad: (savedQuery: SavedQuery) => void;
+  useNewSavedQueryUI?: boolean;
+  onInitiateSave: () => void;
+  onInitiateSaveAsNew: () => void;
+  onLoad: OpenSavedQueryFlyoutProps['onQueryOpen'];
   onClearSavedQuery: () => void;
   closeMenuPopover: () => void;
+  saveQuery: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
 }
 
 export function SavedQueryManagementComponent({
   showSaveQuery,
   loadedSavedQuery,
-  onSave,
-  onSaveAsNew,
+  onInitiateSave,
+  onInitiateSaveAsNew,
   onLoad,
   onClearSavedQuery,
   savedQueryService,
   closeMenuPopover,
+  useNewSavedQueryUI,
+  saveQuery,
 }: Props) {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
   const [activePage, setActivePage] = useState(0);
   const cancelPendingListingRequest = useRef<() => void>(() => {});
+  const {
+    services: { overlays },
+  } = useOpenSearchDashboards();
 
   useEffect(() => {
     const fetchCountAndSavedQueries = async () => {
@@ -102,13 +120,13 @@ export function SavedQueryManagementComponent({
 
   const handleSave = useCallback(() => {
     handleClosePopover();
-    onSave();
-  }, [handleClosePopover, onSave]);
+    onInitiateSave();
+  }, [handleClosePopover, onInitiateSave]);
 
   const handleSaveAsNew = useCallback(() => {
     handleClosePopover();
-    onSaveAsNew();
-  }, [handleClosePopover, onSaveAsNew]);
+    onInitiateSaveAsNew();
+  }, [handleClosePopover, onInitiateSaveAsNew]);
 
   const handleSelect = useCallback(
     (savedQueryToSelect) => {
@@ -186,7 +204,50 @@ export function SavedQueryManagementComponent({
     ));
   };
 
-  return (
+  return useNewSavedQueryUI ? (
+    <div
+      className="osdSavedQueryManagement__popover"
+      data-test-subj="saved-query-management-popover"
+    >
+      <EuiListGroup>
+        <EuiListGroupItem
+          label={'Save query'}
+          iconType={'save'}
+          onClick={() => {
+            closeMenuPopover();
+            const saveQueryFlyout = overlays?.openFlyout(
+              toMountPoint(
+                <SaveQueryFlyout
+                  savedQueryService={savedQueryService}
+                  onClose={() => saveQueryFlyout?.close().then()}
+                  onSave={saveQuery}
+                  showFilterOption={true}
+                  showTimeFilterOption={true}
+                  savedQuery={loadedSavedQuery?.attributes}
+                />
+              )
+            );
+          }}
+        />
+        <EuiListGroupItem
+          label={'Open query'}
+          iconType={'folderOpen'}
+          onClick={() => {
+            closeMenuPopover();
+            const openSavedQueryFlyout = overlays?.openFlyout(
+              toMountPoint(
+                <OpenSavedQueryFlyout
+                  savedQueries={savedQueries}
+                  onClose={() => openSavedQueryFlyout?.close().then()}
+                  onQueryOpen={onLoad}
+                />
+              )
+            );
+          }}
+        />
+      </EuiListGroup>
+    </div>
+  ) : (
     <div
       className="osdSavedQueryManagement__popover"
       data-test-subj="saved-query-management-popover"
