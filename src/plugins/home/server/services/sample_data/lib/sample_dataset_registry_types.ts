@@ -71,6 +71,10 @@ export interface DataIndexSchema {
   // Set to true to move timestamp to current week, preserving day of week and time of day
   // Relative distance from timestamp to currentTimeMarker will not remain the same
   preserveDayOfWeekTimeOfDay: boolean;
+
+  // Optional custom prefix added to the index name
+  // Replaces the default custom_prefix of `opensearch_dashboards_sample_data_`
+  customPrefix?: string;
 }
 
 export interface AppLinkSchema {

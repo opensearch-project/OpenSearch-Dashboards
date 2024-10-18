@@ -29,25 +29,27 @@
  */
 
 import Joi from 'joi';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { SavedObject } from 'src/core/public';
+import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import {
-  SampleDatasetProvider,
-  SampleDatasetSchema,
   AppLinkSchema,
   SampleDatasetDashboardPanel,
+  SampleDatasetProvider,
+  SampleDatasetSchema,
 } from './lib/sample_dataset_registry_types';
 import { sampleDataSchema } from './lib/sample_dataset_schema';
 
-import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
-import { createListRoute, createInstallRoute } from './routes';
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
-import { makeSampleDataUsageCollector, usage } from './usage';
+import { ecommerceSpecProvider, flightsSpecProvider, logsSpecProvider } from './data_sets';
+import { otelSpecProvider } from './data_sets/otel';
+import { createInstallRoute, createListRoute } from './routes';
 import { createUninstallRoute } from './routes/uninstall';
+import { makeSampleDataUsageCollector, usage } from './usage';
 
 const flightsSampleDataset = flightsSpecProvider();
 const logsSampleDataset = logsSpecProvider();
 const ecommerceSampleDataset = ecommerceSpecProvider();
+const otelSampleDataset = otelSpecProvider();
 
 export class SampleDataRegistry {
   constructor(private readonly initContext: PluginInitializerContext) {}
@@ -55,6 +57,7 @@ export class SampleDataRegistry {
     flightsSampleDataset,
     logsSampleDataset,
     ecommerceSampleDataset,
+    otelSampleDataset,
   ];
 
   public setup(core: CoreSetup, usageCollections: UsageCollectionSetup | undefined) {

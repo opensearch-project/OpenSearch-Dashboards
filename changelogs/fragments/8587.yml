@@ -1,0 +1,2 @@
+feat:
+- Add support for otel sample data - logs, traces and metrics ([#8587](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8587))
