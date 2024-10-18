@@ -32,7 +32,7 @@ export interface QueryStatus {
 }
 
 // This is the time in milliseconds that the query will wait before showing the loading spinner
-const BUFFER_TIME = 3000;
+const BUFFER_TIME = 1000;
 
 export function QueryResult(props: { queryStatus: QueryStatus }) {
   const [isPopoverOpen, setPopover] = useState(false);
@@ -53,8 +53,11 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
 
     const interval = setInterval(updateElapsedTime, 1000);
 
-    return () => clearInterval(interval);
-  });
+    return () => {
+      clearInterval(interval);
+      setElapsedTime(0);
+    };
+  }, [props.queryStatus.startTime]);
 
   if (elapsedTime > BUFFER_TIME) {
     if (props.queryStatus.status === ResultStatus.LOADING) {
