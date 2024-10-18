@@ -30,12 +30,12 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter, LegacyCallAPIOptions, Logger } from 'src/core/server';
-import { getWorkspaceState } from '../../../../../../core/server/utils';
-import { getFinalSavedObjects } from '../data_sets/util';
 import { SavedObjectsErrorHelpers } from '../../../../../../core/server';
-import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
+import { getWorkspaceState } from '../../../../../../core/server/utils';
+import { getFinalSavedObjects, getNestedField, setNestedField } from '../data_sets/util';
 import { createIndexName } from '../lib/create_index_name';
 import { loadData } from '../lib/load_data';
+import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import {
   dateToIso8601IgnoringTime,
   translateTimeRelativeToDifference,
@@ -54,37 +54,6 @@ const insertDataIntoIndex = (
   ) => Promise<any>,
   logger: Logger
 ) => {
-  // Helper function to get a nested field by path
-  function getNestedField(doc: any, path: string) {
-    // First check if the exact path exists as a field
-    if (path in doc) {
-      return doc[path];
-    }
-    // If not, treat it as a nested path
-    return path
-      .split('.')
-      .reduce((obj, key) => (obj && obj[key] !== 'undefined' ? obj[key] : undefined), doc);
-  }
-
-  // Helper function to set a nested field by path
-  function setNestedField(doc: any, path: string, value: any) {
-    // First check if the exact path exists as a field
-    if (path in doc) {
-      doc[path] = value;
-      return;
-    }
-    // If not, treat it as a nested path
-    const keys = path.split('.');
-    keys.reduce((obj, key, indexName) => {
-      if (indexName === keys.length - 1) {
-        obj[key] = value;
-      } else {
-        if (!obj[key]) obj[key] = {}; // Create the object if it doesn't exist
-        return obj[key];
-      }
-    }, doc);
-  }
-
   // Function to update timestamps
   function updateTimestamps(doc: any) {
     dataIndexConfig.timeFields
@@ -188,11 +157,8 @@ export function createInstallRoute(
 
       for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
         const dataIndexConfig = sampleDataset.dataIndices[i];
-        const index = createIndexName(
-          sampleDataset.id,
-          dataIndexConfig.id,
-          dataIndexConfig?.customPrefix
-        );
+        const index =
+          dataIndexConfig.indexName ?? createIndexName(sampleDataset.id, dataIndexConfig.id);
 
         // clean up any old installation of dataset
         try {

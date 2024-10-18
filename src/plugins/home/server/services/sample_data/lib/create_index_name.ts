@@ -28,14 +28,7 @@
  * under the License.
  */
 
-export const createIndexName = function (
-  sampleDataSetId: string,
-  dataIndexId: string,
-  customPrefix?: string
-): string {
-  if (customPrefix) {
-    return `${customPrefix}-${dataIndexId}`;
-  }
+export const createIndexName = function (sampleDataSetId: string, dataIndexId: string): string {
   if (sampleDataSetId === dataIndexId) {
     // Sample data schema was updated to support multiple indices in 6.5.
     // This if statement ensures that sample data sets that used a single index prior to the schema change

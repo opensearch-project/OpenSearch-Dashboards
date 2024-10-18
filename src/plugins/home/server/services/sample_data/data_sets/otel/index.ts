@@ -11,10 +11,10 @@ import {
   getSavedObjectsWithDataSource,
   overwriteSavedObjectsWithWorkspaceId,
 } from '../util';
+import { logsFieldMappings } from './logs_field_mappings';
+import { metricsFieldMappings } from './metrics_field_mappings';
 import { servicesFieldMappings } from './services_field_mappings';
 import { tracesFieldMappings } from './traces_field_mappings';
-import { metricsFieldMappings } from './metrics_field_mappings';
-import { logsFieldMappings } from './logs_field_mappings';
 
 const otelDataName = i18n.translate('home.sampleData.otelSpecTitle', {
   defaultMessage: 'Sample Open-Telemetry logs, Traces and Metrics',
@@ -48,40 +48,40 @@ export const otelSpecProvider = function (): SampleDatasetSchema {
       overwriteSavedObjectsWithWorkspaceId([], workspaceId),
     dataIndices: [
       {
-        id: '000001',
+        id: 'otel-v1-apm-span-sample',
         dataPath: path.join(__dirname, './sample_traces.json.gz'),
         fields: tracesFieldMappings,
         timeFields: ['startTime', 'endTime', 'traceGroupFields.endTime'], // TODO: add support for 'events.time'
         currentTimeMarker: '2024-10-16T19:00:01',
         preserveDayOfWeekTimeOfDay: false,
-        customPrefix: 'otel-v1-apm-span',
+        indexName: 'otel-v1-apm-span-sample',
       },
       {
-        id: 'map',
+        id: 'otel-v1-apm-service-sample',
         dataPath: path.join(__dirname, './sample_service_map.json.gz'),
         fields: servicesFieldMappings,
         timeFields: [],
         currentTimeMarker: '2024-10-16T19:00:01',
         preserveDayOfWeekTimeOfDay: false,
-        customPrefix: 'otel-v1-apm-service',
+        indexName: 'otel-v1-apm-service-sample',
       },
       {
-        id: '2024.10.16',
+        id: 'ss4o_metrics-otel-sample',
         dataPath: path.join(__dirname, './sample_metrics.json.gz'),
         fields: metricsFieldMappings,
         timeFields: ['@timestamp', 'exemplar.time', 'startTime', 'time', 'observedTimestamp'],
         currentTimeMarker: '2024-10-16T19:00:01',
         preserveDayOfWeekTimeOfDay: false,
-        customPrefix: 'ss4o_metrics-otel',
+        indexName: 'ss4o_metrics-otel-sample',
       },
       {
-        id: '2024.10.16',
+        id: 'ss4o_logs-otel-sample',
         dataPath: path.join(__dirname, './sample_logs.json.gz'),
         fields: logsFieldMappings,
         timeFields: ['time', 'observedTime'],
         currentTimeMarker: '2024-10-16T19:00:01',
         preserveDayOfWeekTimeOfDay: false,
-        customPrefix: 'otel-events',
+        indexName: 'ss4o_logs-otel-sample',
       },
     ],
     status: 'not_installed',

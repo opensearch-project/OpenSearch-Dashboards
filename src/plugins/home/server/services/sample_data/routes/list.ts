@@ -70,9 +70,9 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
             dataSourceId,
             workspaceId
           ),
-          dataIndices: sampleDataset.dataIndices.map(({ id, customPrefix }) => ({
+          dataIndices: sampleDataset.dataIndices.map(({ id, indexName }) => ({
             id,
-            customPrefix,
+            indexName,
           })),
           status: sampleDataset.status,
           statusMsg: sampleDataset.statusMsg,
@@ -85,11 +85,8 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
 
         for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
           const dataIndexConfig = sampleDataset.dataIndices[i];
-          const index = createIndexName(
-            sampleDataset.id,
-            dataIndexConfig.id,
-            dataIndexConfig?.customPrefix
-          );
+          const index =
+            dataIndexConfig.indexName ?? createIndexName(sampleDataset.id, dataIndexConfig.id);
           try {
             const indexExists = await caller('indices.exists', { index });
 

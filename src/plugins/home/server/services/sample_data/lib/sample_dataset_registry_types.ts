@@ -72,9 +72,9 @@ export interface DataIndexSchema {
   // Relative distance from timestamp to currentTimeMarker will not remain the same
   preserveDayOfWeekTimeOfDay: boolean;
 
-  // Optional custom prefix added to the index name
-  // Replaces the default custom_prefix of `opensearch_dashboards_sample_data_`
-  customPrefix?: string;
+  // Optional indexName field, if added wouldn't all flow would use this name
+  // `createIndexName` wouldn't be used
+  indexName?: string;
 }
 
 export interface AppLinkSchema {

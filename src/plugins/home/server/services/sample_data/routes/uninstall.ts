@@ -68,11 +68,8 @@ export function createUninstallRoute(
 
       for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
         const dataIndexConfig = sampleDataset.dataIndices[i];
-        const index = createIndexName(
-          sampleDataset.id,
-          dataIndexConfig.id,
-          dataIndexConfig?.customPrefix
-        );
+        const index =
+          dataIndexConfig.indexName ?? createIndexName(sampleDataset.id, dataIndexConfig.id);
 
         try {
           await caller('indices.delete', { index });
