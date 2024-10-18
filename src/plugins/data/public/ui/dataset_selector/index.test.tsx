@@ -49,40 +49,77 @@ describe('ConnectedDatasetSelector', () => {
   });
 
   it('should render DatasetSelector with correct props', () => {
-    const wrapper = mount(<ConnectedDatasetSelector onSubmit={mockOnSubmit} />);
+    const wrapper = mount(
+      <ConnectedDatasetSelector
+        onSubmit={mockOnSubmit}
+        selectedDataset={undefined}
+        setSelectedDataset={jest.fn()}
+        setIndexPattern={jest.fn()}
+        services={mockServices}
+      />
+    );
     expect(wrapper.find(DatasetSelector).props()).toEqual({
       selectedDataset: undefined,
       setSelectedDataset: expect.any(Function),
+      setIndexPattern: expect.any(Function),
+      handleDatasetChange: expect.any(Function),
       services: mockServices,
     });
   });
 
   it('should initialize selectedDataset correctly', () => {
     const mockDataset: Dataset = { id: 'initial', title: 'Initial Dataset', type: 'test' };
-    mockQueryString.getQuery.mockReturnValueOnce({ dataset: mockDataset });
 
-    const wrapper = mount(<ConnectedDatasetSelector onSubmit={mockOnSubmit} />);
+    const wrapper = mount(
+      <ConnectedDatasetSelector
+        onSubmit={mockOnSubmit}
+        selectedDataset={mockDataset}
+        setSelectedDataset={jest.fn()}
+        setIndexPattern={jest.fn()}
+        services={mockServices}
+      />
+    );
     expect(wrapper.find(DatasetSelector).prop('selectedDataset')).toEqual(mockDataset);
   });
 
   it('should call handleDatasetChange only once when dataset changes', () => {
-    const wrapper = mount(<ConnectedDatasetSelector onSubmit={mockOnSubmit} />);
-    const setSelectedDataset = wrapper.find(DatasetSelector).prop('setSelectedDataset') as (
+    const setSelectedDataset = jest.fn();
+    const setIndexPattern = jest.fn();
+    const wrapper = mount(
+      <ConnectedDatasetSelector
+        onSubmit={mockOnSubmit}
+        selectedDataset={undefined}
+        setSelectedDataset={setSelectedDataset}
+        setIndexPattern={setIndexPattern}
+        services={mockServices}
+      />
+    );
+    const handleDatasetChange = wrapper.find(DatasetSelector).prop('handleDatasetChange') as (
       dataset?: Dataset
     ) => void;
 
     const newDataset: Dataset = { id: 'test', title: 'Test Dataset', type: 'test' };
     act(() => {
-      setSelectedDataset(newDataset);
+      handleDatasetChange(newDataset);
     });
 
     expect(mockQueryString.getInitialQueryByDataset).toHaveBeenCalledTimes(1);
     expect(mockQueryString.setQuery).toHaveBeenCalledTimes(1);
     expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+    expect(setSelectedDataset).toHaveBeenCalledWith(newDataset);
+    expect(setIndexPattern).toHaveBeenCalledWith(newDataset.id);
   });
 
   it('should subscribe to queryString.getUpdates$ and unsubscribe on unmount', () => {
-    const wrapper = mount(<ConnectedDatasetSelector onSubmit={mockOnSubmit} />);
+    const wrapper = mount(
+      <ConnectedDatasetSelector
+        onSubmit={mockOnSubmit}
+        selectedDataset={undefined}
+        setSelectedDataset={jest.fn()}
+        setIndexPattern={jest.fn()}
+        services={mockServices}
+      />
+    );
 
     expect(mockQueryString.getUpdates$).toHaveBeenCalledTimes(1);
     expect(mockSubscribe).toHaveBeenCalledTimes(1);
