@@ -103,6 +103,43 @@ describe('<DataSourceAssociation />', () => {
     });
   });
 
+  it('should associate data connections successfully', async () => {
+    const associateMock = jest
+      .fn()
+      .mockResolvedValue({ success: true, result: [{ id: 'id1' }, { id: 'id2' }] });
+    servicesMock.workspaces.client$ = new BehaviorSubject<IWorkspaceClient | null>({
+      associate: associateMock,
+      copy: jest.fn(),
+      dissociate: jest.fn(),
+      ui: jest.fn(),
+    });
+    servicesMock.workspaces.currentWorkspaceId$ = new BehaviorSubject<string>('workspace_test');
+
+    (AssociationDataSourceModalContent as jest.Mock).mockImplementation((props: any) => (
+      <button
+        onClick={() =>
+          props.handleAssignDataSourceConnections([
+            { id: 'id1', connectionType: DataSourceConnectionType.DataConnection },
+            { id: 'id2', connectionType: DataSourceConnectionType.DataConnection },
+          ])
+        }
+      >
+        Mocked association button
+      </button>
+    ));
+
+    render(<DataSourceAssociation excludedDataSourceIds={[]} />);
+    fireEvent.click(screen.getByTestId('workspaceAssociateDataSourceButton'));
+    fireEvent.click(screen.getByText('Direct query data sources'));
+    fireEvent.click(screen.getByText('Mocked association button'));
+    await waitFor(() => {
+      expect(associateMock).toHaveBeenCalled();
+      expect(servicesMock.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({ title: '2 data sources been associated to the workspace' })
+      );
+    });
+  });
+
   it('should display error toast when associate data source failed', async () => {
     const associateMock = jest.fn().mockRejectedValue(new Error());
     servicesMock.workspaces.client$ = new BehaviorSubject<IWorkspaceClient | null>({
