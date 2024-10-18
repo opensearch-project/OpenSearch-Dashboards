@@ -10,13 +10,8 @@ import { WorkspaceSelector } from './workspace_selector';
 import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart, DEFAULT_NAV_GROUPS, WorkspaceObject } from '../../../../../core/public';
 import { BehaviorSubject } from 'rxjs';
-import { IntlProvider } from 'react-intl';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
-jest.mock('@osd/i18n', () => ({
-  i18n: {
-    translate: (id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
-  },
-}));
+import { I18nProvider } from '@osd/i18n/react';
 describe('<WorkspaceSelector />', () => {
   let coreStartMock: CoreStart;
   const navigateToApp = jest.fn();
@@ -52,9 +47,9 @@ describe('<WorkspaceSelector />', () => {
 
   const WorkspaceSelectorCreatorComponent = () => {
     return (
-      <IntlProvider locale="en">
+      <I18nProvider>
         <WorkspaceSelector coreStart={coreStartMock} registeredUseCases$={registeredUseCases$} />
-      </IntlProvider>
+      </I18nProvider>
     );
   };
 
