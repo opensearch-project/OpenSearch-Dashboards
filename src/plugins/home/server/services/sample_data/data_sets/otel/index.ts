@@ -17,11 +17,11 @@ import { servicesFieldMappings } from './services_field_mappings';
 import { tracesFieldMappings } from './traces_field_mappings';
 
 const otelDataName = i18n.translate('home.sampleData.otelSpecTitle', {
-  defaultMessage: 'Sample Open-Telemetry logs, Traces and Metrics',
+  defaultMessage: 'Sample Observability Logs, Traces, and Metrics',
 });
 const otelDataDescription = i18n.translate('home.sampleData.otelSpecDescription', {
   defaultMessage:
-    'Sample data including correlated observability signals for an e-commerce application in Open-Telemetry standard.',
+    'Correlated observability signals for an e-commerce application in OpenTelemetry standard.',
 });
 const initialAppLinks: AppLinkSchema[] = [
   {
@@ -87,13 +87,13 @@ export const otelSpecProvider = function (): SampleDatasetSchema {
         indexName: 'ss4o_metrics-otel-sample',
       },
       {
-        id: 'otel-events-sample',
+        id: 'ss4o_logs-otel-sample',
         dataPath: path.join(__dirname, './sample_logs.json.gz'),
         fields: logsFieldMappings,
         timeFields: ['time', 'observedTime'],
         currentTimeMarker: '2024-10-16T19:00:01',
         preserveDayOfWeekTimeOfDay: false,
-        indexName: 'otel-events-sample',
+        indexName: 'ss4o_logs-otel-sample',
       },
     ],
     status: 'not_installed',
