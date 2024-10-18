@@ -168,7 +168,15 @@ export const DatasetSelector = ({
   return (
     <EuiPopover
       button={
-        <EuiToolTip content={`${selectedDataset?.title ?? 'Select data'}`}>
+        <EuiToolTip
+          display="block"
+          content={`${
+            selectedDataset?.title ??
+            i18n.translate('data.dataSelector.defaultTitle', {
+              defaultMessage: 'Select data',
+            })
+          }`}
+        >
           <EuiSmallButtonEmpty
             className="datasetSelector__button"
             iconType="arrowDown"
