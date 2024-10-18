@@ -38,6 +38,7 @@ import { trackQueryMetric } from '../../../ui_metric';
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
   LOADING = 'loading', // initial data load
+  LOADING_MORE = 'loading_more', // loading additional data while existing results are present
   READY = 'ready', // results came back
   NO_RESULTS = 'none', // no results came back
   ERROR = 'error', // error occurred
@@ -150,6 +151,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     if (!dataset) {
       data$.next({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
+        queryStatus: { startTime },
       });
       return;
     }
@@ -181,7 +183,9 @@ export const useSearch = (services: DiscoverViewServices) => {
     try {
       // Only show loading indicator if we are fetching when the rows are empty
       if (fetchStateRef.current.rows?.length === 0) {
-        data$.next({ status: ResultStatus.LOADING });
+        data$.next({ status: ResultStatus.LOADING, queryStatus: { startTime } });
+      } else {
+        data$.next({ status: ResultStatus.LOADING_MORE, queryStatus: { startTime } });
       }
 
       // Initialize inspect adapter for search source
@@ -272,9 +276,9 @@ export const useSearch = (services: DiscoverViewServices) => {
       }
       let errorBody;
       try {
-        errorBody = JSON.parse(error.message);
+        errorBody = JSON.parse(error.body.message);
       } catch (e) {
-        errorBody = error.message;
+        errorBody = error.body.message;
       }
 
       data$.next({
@@ -293,6 +297,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     toastNotifications,
     interval,
     data,
+    startTime,
     services,
     sort,
     savedSearch?.searchSource,

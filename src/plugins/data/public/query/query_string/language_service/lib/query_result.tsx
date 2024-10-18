@@ -13,6 +13,7 @@ import React, { useEffect, useState } from 'react';
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
   LOADING = 'loading', // initial data load
+  LOADING_MORE = 'loading_more', // loading additional data while existing results are presents
   READY = 'ready', // results came back
   NO_RESULTS = 'none', // no results came back
   ERROR = 'error', // error occurred
@@ -56,7 +57,10 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     return () => clearInterval(interval);
   });
 
-  if (props.queryStatus.status === ResultStatus.LOADING) {
+  if (
+    props.queryStatus.status === ResultStatus.LOADING ||
+    props.queryStatus.status === ResultStatus.LOADING_MORE
+  ) {
     if (elapsedTime < BUFFER_TIME) {
       return null;
     }
@@ -68,6 +72,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
         onClick={() => {}}
         isLoading
         data-test-subj="queryResultLoading"
+        className="editor__footerItem"
       >
         {i18n.translate('data.query.languageService.queryResults.loadTime', {
           defaultMessage: 'Loading {time} s',
@@ -99,7 +104,13 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     }
 
     return (
-      <EuiButtonEmpty iconSide="left" iconType={'checkInCircleEmpty'} size="xs" onClick={() => {}}>
+      <EuiButtonEmpty
+        iconSide="left"
+        iconType={'checkInCircleEmpty'}
+        iconGap="s"
+        size="xs"
+        onClick={() => {}}
+      >
         <EuiText size="xs" color="subdued" data-test-subj="queryResultCompleteMsg">
           {message}
         </EuiText>
@@ -120,8 +131,10 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
           size="xs"
           onClick={onButtonClick}
           data-test-subj="queryResultErrorBtn"
+          className="editor__footerItem"
+          color="danger"
         >
-          <EuiText size="xs" color="subdued">
+          <EuiText size="xs" color="danger" className="editor__footerItem">
             {i18n.translate('data.query.languageService.queryResults.error', {
               defaultMessage: `Error`,
             })}
@@ -141,7 +154,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
             {i18n.translate('data.query.languageService.queryResults.reasons', {
               defaultMessage: `Reasons:`,
             })}
-          </strong>
+          </strong>{' '}
           {props.queryStatus.body.error.reason}
         </EuiText>
         <EuiText size="s">
@@ -150,7 +163,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
               {i18n.translate('data.query.languageService.queryResults.details', {
                 defaultMessage: `Details:`,
               })}
-            </strong>
+            </strong>{' '}
             {props.queryStatus.body.error.details}
           </p>
         </EuiText>
