@@ -34,6 +34,7 @@ export interface OsdFieldTypeOptions {
   filterable: boolean;
   name: string;
   esTypes: OPENSEARCH_FIELD_TYPES[];
+  osSQLTypes?: OPENSEARCH_SQL_FIELD_TYPES[];
 }
 
 /** @public **/
@@ -92,4 +93,30 @@ export enum OSD_FIELD_TYPES {
   OBJECT = 'object',
   NESTED = 'nested',
   HISTOGRAM = 'histogram',
+}
+
+/** @public **/
+export enum OPENSEARCH_SQL_FIELD_TYPES {
+  BOOLEAN = 'boolean',
+  BYTE = 'byte',
+  SHORT = 'short',
+  INTEGER = 'integer',
+  INT = 'int',
+  LONG = 'long',
+  FLOAT = 'float',
+  DOUBLE = 'double',
+  KEYWORD = 'keyword',
+  TEXT = 'text',
+  STRING = 'string',
+  TIMESTAMP = 'timestamp',
+  DATE = 'date',
+  DATE_NANOS = 'date_nanos',
+  TIME = 'time',
+  INTERVAL = 'interval',
+  IP = 'ip',
+  GEO_POINT = 'geo_point',
+  BINARY = 'binary',
+  STRUCT = 'struct',
+  ARRAY = 'array',
+  UNKNOWN = 'unknown', // For unmapped or unsupported types
 }
