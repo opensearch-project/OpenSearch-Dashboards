@@ -55,73 +55,38 @@ export const logsFieldMappings = {
             },
           },
           context: {
-            type: 'text',
-            fields: {
-              keyword: {
-                type: 'keyword',
-                ignore_above: 256,
-              },
-            },
+            type: 'keyword',
+            ignore_above: 256,
           },
           envName: {
             type: 'keyword',
-            fields: {
-              keyword: {
-                type: 'keyword',
-                ignore_above: 256,
-              },
-            },
+            ignore_above: 256,
           },
           otelServiceName: {
             type: 'keyword',
-            fields: {
-              keyword: {
-                type: 'keyword',
-                ignore_above: 256,
-              },
-            },
+            ignore_above: 256,
           },
           otelSpanID: {
             type: 'keyword',
-            fields: {
-              keyword: {
-                type: 'keyword',
-                ignore_above: 256,
-              },
-            },
+            ignore_above: 256,
           },
           otelTraceID: {
             type: 'keyword',
-            fields: {
-              keyword: {
-                type: 'keyword',
-                ignore_above: 256,
-              },
-            },
+            ignore_above: 256,
           },
           otelTraceSampled: {
             type: 'boolean',
           },
           productId: {
-            type: 'text',
-            fields: {
-              keyword: {
-                type: 'keyword',
-                ignore_above: 256,
-              },
-            },
+            type: 'keyword',
+            ignore_above: 256,
           },
           quantity: {
             type: 'long',
           },
           userId: {
-            type: 'text',
-            fields: {
-              keyword: {
-                type: 'keyword',
-                ignore_above: 256,
-              },
-            },
+            type: 'keyword',
+            ignore_above: 256,
           },
         },
       },
@@ -135,13 +100,8 @@ export const logsFieldMappings = {
       attributes: {
         properties: {
           'container@id': {
-            type: 'text',
-            fields: {
-              keyword: {
-                type: 'keyword',
-                ignore_above: 256,
-              },
-            },
+            type: 'keyword',
+            ignore_above: 256,
           },
           'docker@cli@cobra@command_path': {
             type: 'text',
@@ -371,23 +331,13 @@ export const logsFieldMappings = {
   },
   spanId: {
     type: 'keyword',
-    fields: {
-      keyword: {
-        type: 'keyword',
-        ignore_above: 256,
-      },
-    },
+    ignore_above: 256,
   },
   time: {
     type: 'date',
   },
   traceId: {
     type: 'keyword',
-    fields: {
-      keyword: {
-        type: 'keyword',
-        ignore_above: 256,
-      },
-    },
+    ignore_above: 256,
   },
 };
