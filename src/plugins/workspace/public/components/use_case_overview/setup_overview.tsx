@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiTextColor } from '@elastic/eui';
 import { first } from 'rxjs/operators';
 import {
   ContentManagementPluginSetup,
@@ -76,16 +76,13 @@ export const registerEssentialOverviewContent = (
         order: card.order,
         description: card.description,
         title: card.title,
+        onClick: () => {
+          core.application.navigateToApp(card.navigateAppId);
+        },
+        getFooter: () => card.footer,
+        getIcon: () => card.icon,
         cardProps: {
-          titleElement: 'h4',
-          titleSize: 's',
-          selectable: {
-            onClick: () => {
-              core.application.navigateToApp(card.navigateAppId);
-            },
-            children: card.footer,
-            isSelected: false,
-          },
+          className: 'usecaseOverviewGettingStartedCard',
         },
       }),
     });
@@ -135,19 +132,13 @@ export const registerAnalyticsAllOverviewContent = (
       getContent: () => ({
         id: card.id,
         kind: 'card',
-        getIcon: () =>
-          React.createElement(EuiIcon, {
-            size: 'xl',
-            type: card.icon || 'wsSelector',
-            className: 'analyticsGettingStartedWorkspaceCardsIcon',
-          }),
+        getIcon: () => <EuiIcon type={card.icon || 'wsSelector'} size="l" color="primary" />,
         order: card.order || index,
         description: card.description,
-        title: card.title,
+        title: '',
+        getFooter: () => <EuiTextColor color="subdued">{card.title}</EuiTextColor>,
         cardProps: {
-          titleElement: 'h4',
-          titleSize: 's',
-          layout: 'horizontal',
+          className: 'usecaseOverviewGettingStartedCard',
         },
         onClick: async () => {
           const navGroups = await core.chrome.navGroup.getNavGroupsMap$().pipe(first()).toPromise();

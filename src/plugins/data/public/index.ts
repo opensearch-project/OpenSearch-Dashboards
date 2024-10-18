@@ -62,7 +62,7 @@ import {
 } from '../common';
 
 import { FilterLabel } from './ui';
-export { createEditor, DefaultInput, DQLBody, SingleLineInput } from './ui';
+export { createEditor, DefaultInput, DQLBody, SingleLineInput, DatasetSelector } from './ui';
 
 import {
   generateFilters,
