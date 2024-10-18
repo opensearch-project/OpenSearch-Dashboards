@@ -5,13 +5,12 @@
 
 import { CoreStart } from 'opensearch-dashboards/public';
 import React from 'react';
-import { EuiI18n } from '@elastic/eui';
+import { EuiI18n, EuiIcon, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
   ContentManagementPluginStart,
   ContentProvider,
   ESSENTIAL_OVERVIEW_CONTENT_AREAS,
-  SEARCH_OVERVIEW_CONTENT_AREAS,
 } from '../../../../../content_management/public';
 import { IMPORT_SAMPLE_DATA_APP_ID } from '../../../../common/constants';
 
@@ -27,30 +26,26 @@ export const registerSampleDataCard = (
       kind: 'card',
       order,
       description: i18n.translate('home.sampleData.card.description', {
-        defaultMessage: 'Explore sample data before adding your own.',
+        defaultMessage: 'Install sample data to experiment with OpenSearch.',
       }),
-      title: i18n.translate('home.sampleData.card.title', {
-        defaultMessage: 'Try OpenSearch',
-      }),
+      title: '',
+      onClick: () => {
+        // TODO change to a modal
+        core.application.navigateToApp(IMPORT_SAMPLE_DATA_APP_ID);
+      },
+      getIcon: () => <EuiIcon type="functionAdd" size="l" color="primary" />,
+      getFooter: () => (
+        <EuiTextColor color="subdued">
+          <EuiI18n token="home.sampleData.card.footer" default="Sample datasets" />
+        </EuiTextColor>
+      ),
       cardProps: {
-        titleElement: 'h4',
-        titleSize: 's',
-        selectable: {
-          children: <EuiI18n token="home.sampleData.card.footer" default="Sample Datasets" />,
-          isSelected: false,
-          onClick: () => {
-            // TODO change to a modal
-            core.application.navigateToApp(IMPORT_SAMPLE_DATA_APP_ID);
-          },
-        },
+        className: 'usecaseOverviewGettingStartedCard',
       },
     }),
   });
 
   contentManagement.registerContentProvider(
     sampleDataCard(0, ESSENTIAL_OVERVIEW_CONTENT_AREAS.GET_STARTED)
-  );
-  contentManagement.registerContentProvider(
-    sampleDataCard(30, SEARCH_OVERVIEW_CONTENT_AREAS.GET_STARTED)
   );
 };
