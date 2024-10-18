@@ -53,6 +53,7 @@ import {
   UiSettingsPublicToCommon,
 } from './index_patterns';
 import {
+  setApplication,
   setFieldFormats,
   setIndexPatterns,
   setNotifications,
@@ -151,6 +152,7 @@ export class DataPublicPlugin
       sessionStorage: this.sessionStorage,
       defaultSearchInterceptor: searchService.getDefaultSearchInterceptor(),
       application: core.application,
+      notifications: core.notifications,
     });
 
     uiActions.registerAction(
@@ -195,6 +197,7 @@ export class DataPublicPlugin
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
+    setApplication(application);
 
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
@@ -226,6 +229,7 @@ export class DataPublicPlugin
       uiSettings,
       indexPatterns,
       application: core.application,
+      notifications,
     });
     setQueryService(query);
 
