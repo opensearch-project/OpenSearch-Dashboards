@@ -17,8 +17,8 @@ import {
 import { LanguageConfig, Query } from '../../data/public';
 import { s3TypeConfig } from './datasets';
 import { createEditor, DefaultInput, SingleLineInput } from '../../data/public';
-import { QueryLanguageReference } from './query_editor/query_language_reference';
 import { DataStorage } from '../../data/common';
+import { pplLanguageReference, sqlLanguageReference } from './query_editor_extensions';
 
 export class QueryEnhancementsPlugin
   implements
@@ -57,9 +57,8 @@ export class QueryEnhancementsPlugin
       usageCollector: data.search.usageCollector,
     });
 
-    const queryLanguageReference = new QueryLanguageReference(core.getStartServices());
-    const pplControls = [queryLanguageReference.createPPLLanguageReference()];
-    const sqlControls = [queryLanguageReference.createPPLLanguageReference()];
+    const pplControls = [pplLanguageReference()];
+    const sqlControls = [sqlLanguageReference()];
 
     const enhancedPPLQueryEditor = createEditor(SingleLineInput, null, pplControls, DefaultInput);
 

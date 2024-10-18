@@ -14,7 +14,8 @@ import {
   UiEnhancements,
 } from '../../../ui';
 import { DataStorage, setOverrides as setFieldOverrides } from '../../../../common';
-import { createDefaultLanguageReference } from './lib/default_language_reference';
+import { dqlLanguageReference } from './lib/dql_language_reference';
+import { luceneLanguageReference } from './lib/lucene_language_reference';
 
 export class LanguageService {
   private languages: Map<string, LanguageConfig> = new Map();
@@ -35,22 +36,22 @@ export class LanguageService {
     }
   };
 
-  public createDefaultLanguageReference = () => {
-    return createDefaultLanguageReference();
-  };
-
   /**
    * Registers default handlers for index patterns and indices.
    */
   private registerDefaultLanguages() {
-    const defaultEditor = createEditor(
-      SingleLineInput,
-      SingleLineInput,
-      [this.createDefaultLanguageReference()],
-      DQLBody
+    this.registerLanguage(
+      getDQLLanguageConfig(
+        this.defaultSearchInterceptor,
+        createEditor(SingleLineInput, SingleLineInput, [dqlLanguageReference()], DQLBody)
+      )
     );
-    this.registerLanguage(getDQLLanguageConfig(this.defaultSearchInterceptor, defaultEditor));
-    this.registerLanguage(getLuceneLanguageConfig(this.defaultSearchInterceptor, defaultEditor));
+    this.registerLanguage(
+      getLuceneLanguageConfig(
+        this.defaultSearchInterceptor,
+        createEditor(SingleLineInput, SingleLineInput, [luceneLanguageReference()], DQLBody)
+      )
+    );
   }
 
   public registerLanguage(config: LanguageConfig): void {
