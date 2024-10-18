@@ -227,7 +227,7 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
         {!isPopoverOpen && searchBar}
         {isPopoverOpen && (
           <EuiPopover
-            panelStyle={{ minWidth: '400px', minHeight: '300px' }}
+            panelStyle={{ minWidth: '400px', minHeight: '100px' }}
             button={<></>}
             zIndex={2000}
             panelPaddingSize="s"
