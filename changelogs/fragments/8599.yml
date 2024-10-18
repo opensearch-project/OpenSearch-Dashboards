@@ -1,0 +1,2 @@
+fix:
+- Bump cookie to 0.7.2 ([#8599](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8599))
