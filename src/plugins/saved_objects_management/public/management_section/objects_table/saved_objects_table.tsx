@@ -761,13 +761,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const { notifications, workspaces, useUpdatedUX } = this.props;
     const workspaceClient = workspaces.client$.getValue();
 
-    const showErrorNotification = () => {
+    const showErrorNotification = (text?: string) => {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
           defaultMessage:
             'Unable to copy {useUpdatedUX, select, true {{errorCount, plural, one {# asset} other {# assets}}} other {{errorCount, plural, one {# saved object} other {# saved objects}}}}.',
           values: { errorCount: savedObjects.length, useUpdatedUX },
         }),
+        ...(text && { text }),
       });
     };
     if (!workspaceClient) {
@@ -781,18 +782,22 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         targetWorkspace,
         includeReferencesDeep
       );
-
-      this.setState({
-        isShowingDuplicateResultFlyout: true,
-        failedCopies: result.success ? [] : result.errors,
-        successfulCopies: result.successCount > 0 ? result.successResults : [],
-        targetWorkspaceName,
-      });
+      if (result?.error) {
+        showErrorNotification(result.error);
+      } else {
+        this.setState({
+          isShowingDuplicateResultFlyout: true,
+          failedCopies: result?.errors || [],
+          successfulCopies: result?.successCount > 0 ? result.successResults : [],
+          targetWorkspaceName,
+        });
+      }
     } catch (e) {
       showErrorNotification();
+    } finally {
+      this.hideDuplicateModal();
+      await this.refreshObjects();
     }
-    this.hideDuplicateModal();
-    await this.refreshObjects();
   };
 
   renderDuplicateModal() {
