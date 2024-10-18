@@ -22,7 +22,7 @@ const LuceneReference = () => {
         <p>
           <FormattedMessage
             id="data.query.queryBar.luceneSyntaxOptionsDescription"
-            defaultMessage="{docsLink} is a query syntax that allows precise searching and filtering on indexed text."
+            defaultMessage="{docsLink} Query Language is a powerful search syntax that enables precise and efficient data retrieval. It utilizes boolean operators, wildcards, and field-specific searches to construct complex queries for finding relevant information. Lucene is particularly well-suited for full-text search and indexing of structured and unstructured data, making it ideal for applications ranging from document retrieval to log analysis and content management systems."
             values={{
               docsLink: (
                 <EuiLink href={luceneDocs} target="_blank">
