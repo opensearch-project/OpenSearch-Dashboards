@@ -13,6 +13,7 @@ import React, { useEffect, useState } from 'react';
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
   LOADING = 'loading', // initial data load
+  LOADING_MORE = 'loading_more', // loading additional data while existing results are presents
   READY = 'ready', // results came back
   NO_RESULTS = 'none', // no results came back
   ERROR = 'error', // error occurred
@@ -56,7 +57,10 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     return () => clearInterval(interval);
   });
 
-  if (props.queryStatus.status === ResultStatus.LOADING) {
+  if (
+    props.queryStatus.status === ResultStatus.LOADING ||
+    props.queryStatus.status === ResultStatus.LOADING_MORE
+  ) {
     if (elapsedTime < BUFFER_TIME) {
       return null;
     }
