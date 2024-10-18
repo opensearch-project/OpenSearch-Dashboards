@@ -31,6 +31,7 @@
 import { schema } from '@osd/config-schema';
 import { IRouter, LegacyCallAPIOptions, Logger } from 'src/core/server';
 import { getWorkspaceState } from '../../../../../../core/server/utils';
+import { SavedObjectsErrorHelpers } from '../../../../../../core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import {
@@ -217,6 +218,9 @@ export function createInstallRoute(
       } catch (err) {
         const errMsg = `bulkCreate failed, error: ${err.message}`;
         logger.warn(errMsg);
+        if (workspaceId && SavedObjectsErrorHelpers.isForbiddenError(err)) {
+          return res.forbidden({ body: errMsg });
+        }
         return res.internalError({ body: errMsg });
       }
       const errors = createResults.saved_objects.filter((savedObjectCreateResult) => {
