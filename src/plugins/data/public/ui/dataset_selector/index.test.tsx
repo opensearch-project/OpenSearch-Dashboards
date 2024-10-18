@@ -10,6 +10,7 @@ import { DatasetSelector as ConnectedDatasetSelector } from './index';
 import { DatasetSelector } from './dataset_selector';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { Dataset } from '../../../common';
+import { of } from 'rxjs';
 
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
@@ -60,6 +61,7 @@ describe('ConnectedDatasetSelector', () => {
   it('should initialize selectedDataset correctly', () => {
     const mockDataset: Dataset = { id: 'initial', title: 'Initial Dataset', type: 'test' };
     mockQueryString.getQuery.mockReturnValueOnce({ dataset: mockDataset });
+    mockQueryString.getUpdates$.mockReturnValueOnce(of({ dataset: mockDataset }));
 
     const wrapper = mount(<ConnectedDatasetSelector onSubmit={mockOnSubmit} />);
     expect(wrapper.find(DatasetSelector).prop('selectedDataset')).toEqual(mockDataset);
