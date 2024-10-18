@@ -560,23 +560,27 @@ export function Header({
       <EuiHeader className="newTopNavHeader">
         <EuiFlexGroup
           justifyContent="spaceBetween"
-          gutterSize="s"
+          gutterSize="none"
           className="secondaryPageHeaderFlexGroup"
         >
           {/* Left Section */}
-          <EuiHeaderSection side="left">
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
+          <EuiHeaderSection side="left" grow={true} style={{ flexShrink: 1 }}>
+            <EuiFlexGroup gutterSize="s" className="leftSecondaryPageHeaderFlexGroup">
+              <EuiFlexItem grow={false}>
                 <EuiHeaderSectionItem border="none" data-test-subj="headerApplicationTitle">
                   <EuiTitle size="l" className="newTopNavHeaderTitle">
-                    {breadcrumbs && <h1>{breadcrumbs[breadcrumbs.length - 1]?.text}</h1>}
+                    {breadcrumbs && (
+                      <h1 className="eui-textBreakWord">
+                        {breadcrumbs[breadcrumbs.length - 1]?.text}
+                      </h1>
+                    )}
                   </EuiTitle>
                 </EuiHeaderSectionItem>
               </EuiFlexItem>
 
-              {badge && <EuiFlexItem>{badge}</EuiFlexItem>}
+              {badge && <EuiFlexItem grow={false}>{badge}</EuiFlexItem>}
 
-              {leftControls && <EuiFlexItem>{leftControls}</EuiFlexItem>}
+              {leftControls && <EuiFlexItem grow={false}>{leftControls}</EuiFlexItem>}
             </EuiFlexGroup>
           </EuiHeaderSection>
 
