@@ -12,7 +12,11 @@ import {
   DataSourceSelectable,
   UI_SETTINGS,
 } from '../../../../data/public';
-import { DataSourceOption, DatasetSelector } from '../../../../data/public/';
+import {
+  DataSourceOption,
+  DatasetSelector,
+  DatasetSelectorAppearance,
+} from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
 import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
@@ -129,8 +133,7 @@ export const Sidebar: FC = ({ children }) => {
       <EuiSplitPanel.Outer
         className="eui-yScroll deSidebar_panel"
         hasBorder={true}
-        borderRadius="none"
-        color="transparent"
+        borderRadius="l"
       >
         <EuiSplitPanel.Inner
           paddingSize="s"
@@ -139,7 +142,14 @@ export const Sidebar: FC = ({ children }) => {
           className="deSidebar_dataSource"
         >
           {isEnhancementEnabled ? (
-            <DatasetSelector onSubmit={handleDatasetSubmit} />
+            <DatasetSelector
+              onSubmit={handleDatasetSubmit}
+              appearance={DatasetSelectorAppearance.Button}
+              buttonProps={{
+                color: 'text',
+                fullWidth: true,
+              }}
+            />
           ) : (
             <DataSourceSelectable
               dataSources={activeDataSources}

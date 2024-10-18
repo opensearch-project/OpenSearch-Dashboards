@@ -137,14 +137,12 @@
 .osdQueryEditor__header {
   display: flex;
   align-items: center;
-  padding: 0 $euiSizeXS $euiSizeXS;
+  padding: 0 $euiSizeXS $euiSizeS;
 }
 
 .osdQueryEditor__topBar {
   display: flex;
   align-items: center;
-  padding: $euiSizeS;
-  gap: $euiSizeXS;
 
   > * {
     flex: 0 1 auto;
@@ -186,12 +184,18 @@
 
 .osdQuerEditor__singleLine {
   padding: calc($euiSizeXS + 1px);
-  background-color: $euiColorEmptyShade;
   overflow: initial !important; // needed for suggestion window, otherwise will be hidden in child
   min-width: 0;
 
   .monaco-editor .view-overlays .current-line {
     border: none;
+  }
+
+  &,
+  & .monaco-editor,
+  & .monaco-editor .inputarea.ime-input,
+  & .monaco-editor-background {
+    background-color: $euiFormBackgroundColor;
   }
 }
 

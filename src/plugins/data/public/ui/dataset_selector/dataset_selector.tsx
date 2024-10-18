@@ -11,6 +11,7 @@ import {
   EuiSelectable,
   EuiSelectableOption,
   EuiSmallButtonEmpty,
+  EuiSmallButton,
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -22,11 +23,40 @@ import { getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
 import { AdvancedSelector } from './advanced_selector';
 
+export enum DatasetSelectorAppearance {
+  Button = 'button',
+  None = 'none',
+}
+
+type EuiSmallButtonProps = React.ComponentProps<typeof EuiSmallButton>;
+type EuiSmallButtonEmptyProps = React.ComponentProps<typeof EuiSmallButtonEmpty>;
+
 interface DatasetSelectorProps {
   selectedDataset?: Dataset;
   setSelectedDataset: (dataset: Dataset) => void;
   services: IDataPluginServices;
 }
+
+export interface DatasetSelectorUsingButtonProps {
+  appearance: DatasetSelectorAppearance.Button;
+  buttonProps?: EuiSmallButtonProps;
+}
+
+export interface DatasetSelectorUsingButtonEmptyProps {
+  appearance?: DatasetSelectorAppearance.None;
+  buttonProps?: EuiSmallButtonEmptyProps;
+}
+
+const RootComponent: React.FC<
+  (EuiSmallButtonEmptyProps | EuiSmallButtonProps) & { appearance?: DatasetSelectorAppearance }
+> = (props) => {
+  const { appearance, ...rest } = props;
+  if (appearance === DatasetSelectorAppearance.Button) {
+    return <EuiSmallButton {...(rest as EuiSmallButtonProps)} />;
+  } else {
+    return <EuiSmallButtonEmpty {...(rest as EuiSmallButtonEmptyProps)} />;
+  }
+};
 
 /**
  * This component provides a dropdown selector for datasets and an advanced selector modal.
@@ -42,7 +72,10 @@ export const DatasetSelector = ({
   selectedDataset,
   setSelectedDataset,
   services,
-}: DatasetSelectorProps) => {
+  appearance,
+  buttonProps,
+}: DatasetSelectorProps &
+  (DatasetSelectorUsingButtonProps | DatasetSelectorUsingButtonEmptyProps)) => {
   const isMounted = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState<Dataset[]>([]);
@@ -177,7 +210,9 @@ export const DatasetSelector = ({
             })
           }`}
         >
-          <EuiSmallButtonEmpty
+          <RootComponent
+            appearance={appearance}
+            {...buttonProps}
             className="datasetSelector__button"
             iconType="arrowDown"
             iconSide="right"
@@ -185,7 +220,7 @@ export const DatasetSelector = ({
           >
             <EuiIcon type={datasetIcon} className="datasetSelector__icon" />
             {datasetTitle}
-          </EuiSmallButtonEmpty>
+          </RootComponent>
         </EuiToolTip>
       }
       isOpen={isOpen}
