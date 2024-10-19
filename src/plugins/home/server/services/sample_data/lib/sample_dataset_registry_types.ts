@@ -71,12 +71,19 @@ export interface DataIndexSchema {
   // Set to true to move timestamp to current week, preserving day of week and time of day
   // Relative distance from timestamp to currentTimeMarker will not remain the same
   preserveDayOfWeekTimeOfDay: boolean;
+
+  // Optional indexName field, if added wouldn't all flow would use this name
+  // `createIndexName` wouldn't be used
+  indexName?: string;
 }
 
 export interface AppLinkSchema {
   path: string;
   icon: string;
   label: string;
+  // Alternative app path when new nav flag is enabled
+  newPath?: string;
+  appendDatasourceToPath?: boolean;
 }
 
 export interface SampleDatasetSchema<T = unknown> {

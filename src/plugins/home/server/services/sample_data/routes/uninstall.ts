@@ -32,10 +32,10 @@ import { schema } from '@osd/config-schema';
 import _ from 'lodash';
 import { IRouter } from 'src/core/server';
 import { getWorkspaceState } from '../../../../../../core/server/utils';
-import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
-import { createIndexName } from '../lib/create_index_name';
-import { SampleDataUsageTracker } from '../usage/usage';
 import { getFinalSavedObjects } from '../data_sets/util';
+import { createIndexName } from '../lib/create_index_name';
+import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
+import { SampleDataUsageTracker } from '../usage/usage';
 
 export function createUninstallRoute(
   router: IRouter,
@@ -68,7 +68,8 @@ export function createUninstallRoute(
 
       for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
         const dataIndexConfig = sampleDataset.dataIndices[i];
-        const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
+        const index =
+          dataIndexConfig.indexName ?? createIndexName(sampleDataset.id, dataIndexConfig.id);
 
         try {
           await caller('indices.delete', { index });
