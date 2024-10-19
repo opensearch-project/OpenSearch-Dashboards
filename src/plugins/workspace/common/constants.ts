@@ -14,6 +14,7 @@ export const WORKSPACE_LIST_APP_ID = 'workspace_list';
 export const WORKSPACE_DETAIL_APP_ID = 'workspace_detail';
 export const WORKSPACE_INITIAL_APP_ID = 'workspace_initial';
 export const WORKSPACE_NAVIGATION_APP_ID = 'workspace_navigation';
+export const WORKSPACE_COLLABORATORS_APP_ID = 'workspace_collaborators';
 
 export const WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID = 'workspace';
 export const WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID =
@@ -175,3 +176,5 @@ export const WORKSPACE_DATA_SOURCE_AND_CONNECTION_OBJECT_TYPES = [
 ];
 
 export const USE_CASE_CARD_GRADIENT_PREFIX = 'workspace-initial-use-case-card';
+
+export const OSD_ADMIN_WILDCARD_MATCH_ALL = '*';

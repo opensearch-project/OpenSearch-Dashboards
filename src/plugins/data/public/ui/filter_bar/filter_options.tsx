@@ -413,7 +413,6 @@ const FilterOptionsUI = (props: Props) => {
     return (
       <EuiPopover
         id="popoverForAllFilters"
-        className="globalFilterGroup__allFiltersPopover"
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         button={savedQueryPopoverButton}
@@ -431,7 +430,7 @@ const FilterOptionsUI = (props: Props) => {
   return (
     <EuiPopover
       id="popoverForAllFilters"
-      className="globalFilterGroup__allFiltersPopover"
+      className={useNewHeader ? 'globalFilterGroup__allFiltersPopover' : undefined}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       button={props.useSaveQueryMenu ? savedQueryPopoverButton : filterPopoverButton}

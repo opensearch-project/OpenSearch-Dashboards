@@ -11,11 +11,14 @@ import { useLocation } from 'react-router-dom';
 
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { PermissionModeId } from '../../../../../core/public';
-import { CURRENT_USER_PLACEHOLDER, WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
+import {
+  CURRENT_USER_PLACEHOLDER,
+  WORKSPACE_COLLABORATORS_APP_ID,
+  WORKSPACE_DETAIL_APP_ID,
+} from '../../../common/constants';
 import {
   WorkspaceFormSubmitData,
   WorkspaceOperationType,
-  DetailTab,
   WorkspacePermissionItemType,
   convertPermissionSettingsToPermissions,
   WorkspacePermissionSetting,
@@ -29,7 +32,7 @@ import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
 import { DataSourceConnectionType } from '../../../common/types';
-import { navigateToWorkspaceDetail } from '../utils/workspace';
+import { navigateToAppWithinWorkspace } from '../utils/workspace';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
 import { optionIdToWorkspacePermissionModesMap } from '../workspace_form/constants';
 
@@ -143,10 +146,10 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
             // Redirect page after one second, leave one second time to show create successful toast.
             window.setTimeout(() => {
               if (isPermissionEnabled) {
-                navigateToWorkspaceDetail(
+                navigateToAppWithinWorkspace(
                   { application, http },
                   newWorkspaceId,
-                  DetailTab.Collaborators
+                  WORKSPACE_COLLABORATORS_APP_ID
                 );
                 return;
               }
