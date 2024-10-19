@@ -11,13 +11,11 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiText,
-  EuiSmallButton,
-  EuiSpacer,
   EuiTitle,
   EuiButtonEmpty,
 } from '@elastic/eui';
 
-export const onNoIndexPattern = (toggleDatasetExplorer: () => void) => (
+export const onNoIndexPattern = () => (
   <EuiFlexGroup
     justifyContent="center"
     alignItems="center"
@@ -34,7 +32,7 @@ export const onNoIndexPattern = (toggleDatasetExplorer: () => void) => (
             <EuiTitle size="m">
               <h2>
                 {i18n.translate('data.noIndexPatterns.selectDataTitle', {
-                  defaultMessage: 'Select datastream',
+                  defaultMessage: 'Select data',
                 })}
               </h2>
             </EuiTitle>
@@ -47,14 +45,14 @@ export const onNoIndexPattern = (toggleDatasetExplorer: () => void) => (
               })}
             </EuiText>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiSmallButton fill onClick={toggleDatasetExplorer}>
+          {/* <EuiFlexItem>
+            <EuiSmallButton fill onClick={() => setIsDatasetSelectorOpen(true)}>
               {i18n.translate('data.noIndexPatterns.openDataSelectorButton', {
                 defaultMessage: 'Open data selector',
               })}
             </EuiSmallButton>
           </EuiFlexItem>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="s" /> */}
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h4>

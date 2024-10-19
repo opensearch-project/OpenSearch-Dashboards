@@ -32,7 +32,6 @@ type EuiSmallButtonProps = React.ComponentProps<typeof EuiSmallButton>;
 type EuiSmallButtonEmptyProps = React.ComponentProps<typeof EuiSmallButtonEmpty>;
 
 interface DatasetSelectorProps {
-  setIsOpen: (isOpen: boolean) => void;
   selectedDataset?: Dataset;
   setSelectedDataset: (dataset: Dataset) => void;
   services: IDataPluginServices;
