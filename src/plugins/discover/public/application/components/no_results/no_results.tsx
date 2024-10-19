@@ -50,19 +50,19 @@ import {
 } from '../../../../../data/public/';
 
 interface Props {
-  datasetService: DatasetServiceContract;
-  savedQuery: SavedQueryService;
-  languageService: LanguageServiceContract;
-  query: Query | undefined;
+  // datasetService: DatasetServiceContract;
+  // savedQuery: SavedQueryService;
+  // languageService: LanguageServiceContract;
+  // query: Query | undefined;
   timeFieldName?: string;
   queryLanguage?: string;
 }
 
 export const DiscoverNoResults = ({
-  datasetService,
-  savedQuery,
-  languageService,
-  query,
+  // datasetService,
+  // savedQuery,
+  // languageService,
+  // query,
   timeFieldName,
   queryLanguage,
 }: Props) => {
@@ -182,90 +182,81 @@ export const DiscoverNoResults = ({
   //     </Fragment>
   //   );
   // }
-
-  const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
-
-  useEffect(() => {
-    const fetchSavedQueries = async () => {
-      const { queries: savedQueryItems } = await savedQuery.findSavedQueries('', 1000);
-      setSavedQueries(
-        savedQueryItems.filter((sq) => query?.language === sq.attributes.query.language)
-      );
-    };
-
-    fetchSavedQueries();
-  }, [setSavedQueries, query, savedQuery]);
-
-  const tabs = useMemo(() => {
-    const buildSampleQueryBlock = (sampleTitle: string, sampleQuery: string) => {
-      return (
-        <>
-          <EuiText size="s">{sampleTitle}</EuiText>
-          <EuiSpacer size="s" />
-          <EuiCodeBlock isCopyable>{sampleQuery}</EuiCodeBlock>
-          <EuiSpacer size="s" />
-        </>
-      );
-    };
-
-    const sampleQueries = [];
-
-    // Samples for the dataset type
-    if (query?.dataset?.type) {
-      const datasetSampleQueries = datasetService
-        .getType(query.dataset.type)
-        ?.getSampleQueries?.(query.dataset, query.language);
-      if (Array.isArray(datasetSampleQueries)) sampleQueries.push(...datasetSampleQueries);
-    }
-
-    // Samples for the language
-    if (query?.language) {
-      const languageSampleQueries = languageService.getLanguage(query.language)?.sampleQueries;
-      if (Array.isArray(languageSampleQueries)) sampleQueries.push(...languageSampleQueries);
-    }
-
-    return [
-      ...(sampleQueries.length > 0
-        ? [
-            {
-              id: 'sample_queries',
-              name: i18n.translate('discover.emptyPrompt.sampleQueries.title', {
-                defaultMessage: 'Sample Queries',
-              }),
-              content: (
-                <EuiPanel hasBorder={false} hasShadow={false}>
-                  <EuiSpacer size="s" />
-                  {sampleQueries
-                    .slice(0, 5)
-                    .map((sampleQuery) =>
-                      buildSampleQueryBlock(sampleQuery.title, sampleQuery.query)
-                    )}
-                </EuiPanel>
-              ),
-            },
-          ]
-        : []),
-      ...(savedQueries.length > 0
-        ? [
-            {
-              id: 'saved_queries',
-              name: i18n.translate('discover.emptyPrompt.savedQueries.title', {
-                defaultMessage: 'Saved Queries',
-              }),
-              content: (
-                <Fragment>
-                  <EuiSpacer />
-                  {savedQueries.map((sq) =>
-                    buildSampleQueryBlock(sq.id, sq.attributes.query.query as string)
-                  )}
-                </Fragment>
-              ),
-            },
-          ]
-        : []),
-    ];
-  }, [datasetService, languageService, query, savedQueries]);
-
+  // const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
+  // useEffect(() => {
+  //   const fetchSavedQueries = async () => {
+  //     const { queries: savedQueryItems } = await savedQuery.findSavedQueries('', 1000);
+  //     setSavedQueries(
+  //       savedQueryItems.filter((sq) => query?.language === sq.attributes.query.language)
+  //     );
+  //   };
+  //   fetchSavedQueries();
+  // }, [setSavedQueries, query, savedQuery]);
+  // const tabs = useMemo(() => {
+  //   const buildSampleQueryBlock = (sampleTitle: string, sampleQuery: string) => {
+  //     return (
+  //       <>
+  //         <EuiText size="s">{sampleTitle}</EuiText>
+  //         <EuiSpacer size="s" />
+  //         <EuiCodeBlock isCopyable>{sampleQuery}</EuiCodeBlock>
+  //         <EuiSpacer size="s" />
+  //       </>
+  //     );
+  //   };
+  //   const sampleQueries = [];
+  //   // Samples for the dataset type
+  //   if (query?.dataset?.type) {
+  //     const datasetSampleQueries = datasetService
+  //       .getType(query.dataset.type)
+  //       ?.getSampleQueries?.(query.dataset, query.language);
+  //     if (Array.isArray(datasetSampleQueries)) sampleQueries.push(...datasetSampleQueries);
+  //   }
+  //   // Samples for the language
+  //   if (query?.language) {
+  //     const languageSampleQueries = languageService.getLanguage(query.language)?.sampleQueries;
+  //     if (Array.isArray(languageSampleQueries)) sampleQueries.push(...languageSampleQueries);
+  //   }
+  //   return [
+  //     ...(sampleQueries.length > 0
+  //       ? [
+  //           {
+  //             id: 'sample_queries',
+  //             name: i18n.translate('discover.emptyPrompt.sampleQueries.title', {
+  //               defaultMessage: 'Sample Queries',
+  //             }),
+  //             content: (
+  //               <EuiPanel hasBorder={false} hasShadow={false}>
+  //                 <EuiSpacer size="s" />
+  //                 {sampleQueries
+  //                   .slice(0, 5)
+  //                   .map((sampleQuery) =>
+  //                     buildSampleQueryBlock(sampleQuery.title, sampleQuery.query)
+  //                   )}
+  //               </EuiPanel>
+  //             ),
+  //           },
+  //         ]
+  //       : []),
+  //     ...(savedQueries.length > 0
+  //       ? [
+  //           {
+  //             id: 'saved_queries',
+  //             name: i18n.translate('discover.emptyPrompt.savedQueries.title', {
+  //               defaultMessage: 'Saved Queries',
+  //             }),
+  //             content: (
+  //               <Fragment>
+  //                 <EuiSpacer />
+  //                 {savedQueries.map((sq) =>
+  //                   buildSampleQueryBlock(sq.id, sq.attributes.query.query as string)
+  //                 )}
+  //               </Fragment>
+  //             ),
+  //           },
+  //         ]
+  //       : []),
+  //   ];
+  // }, [datasetService, languageService, query, savedQueries]);
   return (
     <I18nProvider>
       <EuiEmptyPrompt
@@ -292,9 +283,9 @@ export const DiscoverNoResults = ({
           </EuiText>
         }
       />
-      <div className="discoverNoResults-sampleContainer">
+      {/* <div className="discoverNoResults-sampleContainer">
         <EuiTabbedContent tabs={tabs} />
-      </div>
+      </div> */}
     </I18nProvider>
   );
 };

@@ -191,6 +191,9 @@ export const TopNav = ({
         onQuerySubmit={useNoIndexPatternsTopNav ? () => {} : opts.onQuerySubmit}
         savedQueryId={useNoIndexPatternsTopNav ? undefined : state.savedQuery}
         onSavedQueryIdChange={useNoIndexPatternsTopNav ? () => {} : updateSavedQueryId}
+        datasetSelectorRef={
+          useNoIndexPatternsTopNav ? undefined : opts?.optionalRef?.datasetSelectorRef
+        }
         datePickerRef={useNoIndexPatternsTopNav ? undefined : opts?.optionalRef?.datePickerRef}
         groupActions={showActionsInGroup}
         screenTitle={

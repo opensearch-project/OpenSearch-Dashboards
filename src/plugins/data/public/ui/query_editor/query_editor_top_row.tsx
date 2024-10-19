@@ -15,7 +15,14 @@ import {
 import classNames from 'classnames';
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
-import { IDataPluginServices, IIndexPattern, Query, TimeHistoryContract, TimeRange } from '../..';
+import {
+  DatasetSelector,
+  IDataPluginServices,
+  IIndexPattern,
+  Query,
+  TimeHistoryContract,
+  TimeRange,
+} from '../..';
 import {
   useOpenSearchDashboards,
   withOpenSearchDashboards,
@@ -52,6 +59,7 @@ export interface QueryEditorTopRowProps {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
+  datasetSelectorRef?: React.RefObject<HTMLDivElement>;
   datePickerRef?: React.RefObject<HTMLDivElement>;
   savedQueryManagement?: any;
   queryStatus?: QueryStatus;
@@ -63,14 +71,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
-  const {
-    uiSettings,
-    storage,
-    appName,
-    data: {
-      query: { queryString },
-    },
-  } = opensearchDashboards.services;
+  const { uiSettings, storage, appName } = opensearchDashboards.services;
 
   const queryLanguage = props.query && props.query.language;
   const persistedLog: PersistedLog | undefined = React.useMemo(
@@ -168,6 +169,10 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       return value;
     }
     return valueAsMoment.toISOString();
+  }
+
+  function renderDatasetSelector() {
+    return <DatasetSelector onSubmit={onInputSubmit} />;
   }
 
   function renderQueryEditor() {
@@ -315,6 +320,8 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     </EuiFlexGroup>
   );
 
+  const datasetSelector = <>{renderDatasetSelector()}</>;
+
   return (
     <EuiFlexGroup
       className={classes}
@@ -323,6 +330,8 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       direction="column"
       justifyContent="flexEnd"
     >
+      {props?.datasetSelectorRef?.current &&
+        createPortal(datasetSelector, props.datasetSelectorRef.current)}
       {props?.datePickerRef?.current && uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)
         ? createPortal(datePicker, props.datePickerRef.current)
         : datePicker}
