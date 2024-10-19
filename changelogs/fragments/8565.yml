@@ -1,0 +1,2 @@
+feat:
+- Adds editor footer to single line editor on focus ([#8565](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8565))
