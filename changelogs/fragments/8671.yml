@@ -1,0 +1,2 @@
+fix:
+- Select the correct language when a different one is chosen by the dataset selector ([#8671](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8671))
