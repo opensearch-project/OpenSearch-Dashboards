@@ -16,7 +16,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { ReactNode, useRef, useState } from 'react';
+import React, { ReactNode, useCallback, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   GlobalSearchCommand,
@@ -121,70 +121,80 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
     );
   };
 
-  const searchResultSections = results && (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      {results.map((result) => (
-        <EuiFlexItem key={result.key}>{result}</EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
-  );
+  const searchResultSections =
+    results && results.length ? (
+      <EuiFlexGroup direction="column" gutterSize="none">
+        {results.map((result) => (
+          <EuiFlexItem key={result.key}>{result}</EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    ) : (
+      <EuiText color="subdued" size="xs">
+        {i18n.translate('core.globalSearch.emptyResult.description', {
+          defaultMessage: 'No results found.',
+        })}
+      </EuiText>
+    );
 
-  const onSearch = async (value: string) => {
-    const filteredCommands = globalSearchCommands.filter((command) => {
-      const alias = SearchCommandTypes[command.type].alias;
-      return alias && value.startsWith(alias);
-    });
-
-    const defaultSearchCommands = globalSearchCommands.filter((command) => {
-      return !SearchCommandTypes[command.type].alias;
-    });
-
-    if (filteredCommands.length === 0) {
-      filteredCommands.push(...defaultSearchCommands);
-    }
-
-    if (value && filteredCommands && filteredCommands.length) {
-      setIsPopoverOpen(true);
-      setIsLoading(true);
-
-      const settleResults = await Promise.allSettled(
-        filteredCommands.map((command) => {
-          const callback = onSearchResultClick || closePopover;
-          const alias = SearchCommandTypes[command.type].alias;
-          const queryValue = alias ? value.replace(alias, '').trim() : value;
-          return command.run(queryValue, callback).then((items) => {
-            return { items, type: command.type };
-          });
-        })
-      );
-
-      const searchResults = settleResults
-        .filter((result) => result.status === 'fulfilled')
-        .map(
-          (result) =>
-            (result as PromiseFulfilledResult<{
-              items: ReactNode[];
-              type: SearchCommandKeyTypes;
-            }>).value
-        )
-        .reduce((acc, { items, type }) => {
-          return {
-            ...acc,
-            [type]: (acc[type] || []).concat(items),
-          };
-        }, {} as Record<SearchCommandKeyTypes, ReactNode[]>);
-
-      const sections = Object.entries(searchResults).map(([key, items]) => {
-        const sectionHeader = SearchCommandTypes[key as SearchCommandKeyTypes].description;
-        return resultSection(items, sectionHeader);
+  const onSearch = useCallback(
+    async (value: string) => {
+      const filteredCommands = globalSearchCommands.filter((command) => {
+        const alias = SearchCommandTypes[command.type].alias;
+        return alias && value.startsWith(alias);
       });
 
-      setIsLoading(false);
-      setResults(sections);
-    } else {
-      setResults([]);
-    }
-  };
+      const defaultSearchCommands = globalSearchCommands.filter((command) => {
+        return !SearchCommandTypes[command.type].alias;
+      });
+
+      if (filteredCommands.length === 0) {
+        filteredCommands.push(...defaultSearchCommands);
+      }
+
+      if (value && filteredCommands && filteredCommands.length) {
+        setIsPopoverOpen(true);
+        setIsLoading(true);
+
+        const settleResults = await Promise.allSettled(
+          filteredCommands.map((command) => {
+            const callback = onSearchResultClick || closePopover;
+            const alias = SearchCommandTypes[command.type].alias;
+            const queryValue = alias ? value.replace(alias, '').trim() : value;
+            return command.run(queryValue, callback).then((items) => {
+              return { items, type: command.type };
+            });
+          })
+        );
+
+        const searchResults = settleResults
+          .filter((result) => result.status === 'fulfilled')
+          .map(
+            (result) =>
+              (result as PromiseFulfilledResult<{
+                items: ReactNode[];
+                type: SearchCommandKeyTypes;
+              }>).value
+          )
+          .reduce((acc, { items, type }) => {
+            return {
+              ...acc,
+              [type]: (acc[type] || []).concat(items),
+            };
+          }, {} as Record<SearchCommandKeyTypes, ReactNode[]>);
+
+        const sections = Object.entries(searchResults).map(([key, items]) => {
+          const sectionHeader = SearchCommandTypes[key as SearchCommandKeyTypes].description;
+          return resultSection(items, sectionHeader);
+        });
+
+        setIsLoading(false);
+        setResults(sections);
+      } else {
+        setResults([]);
+      }
+    },
+    [globalSearchCommands, onSearchResultClick]
+  );
 
   const searchBar = (
     <EuiFieldSearch
@@ -197,7 +207,7 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
       })}
       isLoading={isLoading}
       aria-label="Search the menus"
-      data-test-subj="search-input"
+      data-test-subj="global-search-input"
       className="searchInput"
       onFocus={() => {
         setIsPopoverOpen(true);
@@ -209,7 +219,7 @@ export const HeaderSearchBar = ({ globalSearchCommands, panel, onSearchResultCli
     <EuiPanel
       hasBorder={false}
       hasShadow={false}
-      paddingSize="s"
+      paddingSize="none"
       data-test-subj="search-result-panel"
     >
       <EuiFlexGroup direction="column" gutterSize="s">
