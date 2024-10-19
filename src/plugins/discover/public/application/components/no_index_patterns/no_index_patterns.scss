@@ -4,11 +4,7 @@
  */
 
 .discoverNoIndexPatterns-centerPanel {
-  height: 100%;
   width: 100%;
-
-  // Push the centralized child up, just like ouiOverlayMask
-  padding-bottom: 10vh;
 
   & > * {
     @include euiLegibilityMaxWidth(100%);

@@ -171,6 +171,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
         groupActions={showActionsInGroup}
         screenTitle={screenTitle}
         queryStatus={queryStatus}
+        showQueryBar={!!opts?.optionalRef?.datasetSelectorRef}
       />
     </>
   );

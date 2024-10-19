@@ -224,7 +224,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     const showDatePicker = this.props.showDatePicker || this.props.showAutoRefreshOnly;
     // TODO: MQL showQueryEditor should be a prop of it's own but using showQueryInput for now
     const showQueryEditor =
-      this.props.showQueryInput && this.props.indexPatterns && this.state.query;
+      (this.props.showQueryInput && this.props.indexPatterns && this.state.query) ||
+      this.props.datasetSelectorRef?.current;
     return this.props.showQueryBar && (showDatePicker || showQueryEditor);
   }
 
