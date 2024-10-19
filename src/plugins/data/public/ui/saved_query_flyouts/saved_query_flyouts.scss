@@ -8,7 +8,7 @@
   background: linear-gradient(rgba($euiColorEmptyShade, 5%) 10%, $euiColorEmptyShade 60%, $euiColorEmptyShade 100%);
   height: 90px;
   position: absolute;
-  z-index: 100;
+  z-index: 1;
   left: 0;
   bottom: 0;
   text-align: center;
@@ -18,13 +18,6 @@
 .read-more-btn {
   position: absolute;
   left: 50%;
-  bottom: 13px;
+  bottom: 0;
   transform: translateX(-50%);
-}
-
-.copy-saved-query-btn {
-  position: absolute;
-  right: 5px;
-  top: -5px;
-  font-size: 20px;
 }
