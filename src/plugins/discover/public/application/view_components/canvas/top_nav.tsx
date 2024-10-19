@@ -35,15 +35,9 @@ export interface TopNavProps {
   };
   showSaveQuery: boolean;
   isEnhancementsEnabled?: boolean;
-  useNoIndexPatternsTopNav?: boolean;
 }
 
-export const TopNav = ({
-  opts,
-  showSaveQuery,
-  isEnhancementsEnabled,
-  useNoIndexPatternsTopNav = false,
-}: TopNavProps) => {
+export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const { data$, inspectorAdapters, savedSearch, indexPattern } = useDiscoverContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
@@ -68,13 +62,7 @@ export const TopNav = ({
   const showActionsInGroup = uiSettings.get('home:useNewHomePage');
 
   const topNavLinks = savedSearch
-    ? getTopNavLinks(
-        services,
-        inspectorAdapters,
-        savedSearch,
-        isEnhancementsEnabled,
-        useNoIndexPatternsTopNav
-      )
+    ? getTopNavLinks(services, inspectorAdapters, savedSearch, isEnhancementsEnabled)
     : [];
 
   connectStorageToQueryState(
@@ -100,18 +88,11 @@ export const TopNav = ({
   useEffect(() => {
     let isMounted = true;
     const initializeDataset = async () => {
-      await data.indexPatterns.ensureDefaultIndexPattern(isEnhancementsEnabled ? false : true);
+      await data.indexPatterns.ensureDefaultIndexPattern();
       const defaultIndexPattern = await data.indexPatterns.getDefault();
-      // TODO: ROCKY do we need this?
-      // const queryString = data.query.queryString;
-      // const defaultDataset = queryString.getDatasetService().getDefault();
-
       if (!isMounted) return;
 
       setIndexPatterns(defaultIndexPattern ? [defaultIndexPattern] : undefined);
-      // if (defaultDataset) {
-      //   datasetManager.setDataset(defaultDataset);
-      // }
     };
 
     initializeDataset();
@@ -119,7 +100,7 @@ export const TopNav = ({
     return () => {
       isMounted = false;
     };
-  }, [data.indexPatterns, data.query, isEnhancementsEnabled]);
+  }, [data.indexPatterns, data.query]);
 
   useEffect(() => {
     const pageTitleSuffix = savedSearch?.id && savedSearch.title ? `: ${savedSearch.title}` : '';
@@ -176,30 +157,19 @@ export const TopNav = ({
       <TopNavMenu
         appName={PLUGIN_ID}
         config={displayToNavLinkInPortal ? [] : topNavLinks}
-        showSearchBar={
-          useNoIndexPatternsTopNav
-            ? TopNavMenuItemRenderType.OMITTED
-            : TopNavMenuItemRenderType.IN_PLACE
-        }
+        showSearchBar={TopNavMenuItemRenderType.IN_PLACE}
         showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
-        showSaveQuery={useNoIndexPatternsTopNav ? false : showSaveQuery}
+        showSaveQuery={showSaveQuery}
         useDefaultBehaviors
         setMenuMountPoint={opts.setHeaderActionMenu}
-        indexPatterns={
-          useNoIndexPatternsTopNav ? [] : indexPattern ? [indexPattern] : indexPatterns
-        }
-        onQuerySubmit={useNoIndexPatternsTopNav ? () => {} : opts.onQuerySubmit}
-        savedQueryId={useNoIndexPatternsTopNav ? undefined : state.savedQuery}
-        onSavedQueryIdChange={useNoIndexPatternsTopNav ? () => {} : updateSavedQueryId}
-        datePickerRef={useNoIndexPatternsTopNav ? undefined : opts?.optionalRef?.datePickerRef}
+        indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
+        onQuerySubmit={opts.onQuerySubmit}
+        savedQueryId={state.savedQuery}
+        onSavedQueryIdChange={updateSavedQueryId}
+        datasetSelectorRef={opts?.optionalRef?.datasetSelectorRef}
+        datePickerRef={opts?.optionalRef?.datePickerRef}
         groupActions={showActionsInGroup}
-        screenTitle={
-          useNoIndexPatternsTopNav
-            ? i18n.translate('discover.noIndexPatterns.screenTitle', {
-                defaultMessage: 'Select data',
-              })
-            : screenTitle
-        }
+        screenTitle={screenTitle}
         queryStatus={queryStatus}
       />
     </>
