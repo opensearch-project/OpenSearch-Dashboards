@@ -240,11 +240,10 @@ export default class QueryEditorUI extends Component<Props, State> {
 
     if (!isEqual(this.props.query.dataset, prevQuery.dataset)) {
       if (this.inputRef) {
-        const newQuery = this.queryString.getInitialQuery();
-        const newQueryString = newQuery.query;
-        if (this.inputRef.getValue() !== newQueryString) {
+        const newQueryString = this.props.query.query;
+        if (this.inputRef.getValue() !== newQueryString && typeof newQueryString === 'string') {
           this.inputRef.setValue(newQueryString);
-          this.onSubmit(newQuery);
+          this.onSubmit(this.props.query);
         }
       }
     }
