@@ -35,6 +35,11 @@ export interface EditorEnhancements {
   queryEditorExtension?: QueryEditorExtensionConfig;
 }
 
+export interface SampleQuery {
+  title: string;
+  query: string;
+}
+
 export interface LanguageConfig {
   id: string;
   title: string;
@@ -53,4 +58,5 @@ export interface LanguageConfig {
   editorSupportedAppNames?: string[];
   supportedAppNames?: string[];
   hideDatePicker?: boolean;
+  sampleQueries?: SampleQuery[];
 }

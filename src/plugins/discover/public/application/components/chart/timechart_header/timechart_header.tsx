@@ -118,7 +118,7 @@ export function TimechartHeader({
 
   return (
     <I18nProvider>
-      <EuiFlexGroup gutterSize="s" responsive justifyContent="center" alignItems="center">
+      <EuiFlexGroup gutterSize="s" responsive alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('discover.howToChangeTheTimeTooltip', {

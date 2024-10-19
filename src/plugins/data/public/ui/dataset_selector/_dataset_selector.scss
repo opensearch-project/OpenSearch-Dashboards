@@ -19,7 +19,9 @@
   &__advancedModal {
     width: 1200px;
     height: 800px;
-    max-height: calc(100vh - $euiSizeS);
+
+    // euiOverlayMask pushes the modal up due to having padding-bottom: 10vh
+    max-height: calc(90vh - $euiSizeL);
 
     .euiModal__flex {
       max-height: none;

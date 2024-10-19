@@ -20,20 +20,21 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField } from '../../../common';
-import { getIndexPatterns, getQueryService } from '../../services';
+import { getIndexPatterns } from '../../services';
 
 export const Configurator = ({
   baseDataset,
   onConfirm,
   onCancel,
   onPrevious,
+  queryService,
 }: {
   baseDataset: BaseDataset;
   onConfirm: (dataset: Dataset) => void;
   onCancel: () => void;
   onPrevious: () => void;
+  queryService: any;
 }) => {
-  const queryService = getQueryService();
   const queryString = queryService.queryString;
   const languageService = queryService.queryString.getLanguageService();
   const indexPatternsService = getIndexPatterns();

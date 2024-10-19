@@ -27,18 +27,31 @@ import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_ty
 import { buildColumns } from '../../utils/columns';
 import './discover_canvas.scss';
 import { HeaderVariant } from '../../../../../../core/public';
+import { Query } from '../../../../../../../src/plugins/data/common/types';
+import { setIndexPattern, setSelectedDataset } from '../../../../../data_explorer/public';
+import { NoIndexPatternsPanel, AdvancedSelector } from '../../../../../data/public';
+import { Dataset } from '../../../../../data/common';
+import { toMountPoint } from '../../../../../opensearch_dashboards_react/public';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalRef }: ViewProps) {
+  const { indexPattern: currentIndexPattern, selectedDataset } = useSelector(
+    (state) => state.metadata
+  );
+  const [loadedIndexPattern, setLoadedIndexPattern] = useState<any>(selectedDataset?.id);
   const panelRef = useRef<HTMLDivElement>(null);
   const { data$, refetch$, indexPattern } = useDiscoverContext();
+  const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const {
-    services: {
-      uiSettings,
-      capabilities,
-      chrome: { setHeaderVariant },
-    },
-  } = useOpenSearchDashboards<DiscoverViewServices>();
+    uiSettings,
+    capabilities,
+    chrome: { setHeaderVariant },
+    data,
+    overlays,
+  } = services;
+  const datasetService = data.query.queryString.getDatasetService();
+  const savedQuery = data.query.savedQueries;
+  const languageService = data.query.queryString.getLanguageService();
   const { columns } = useSelector((state) => {
     const stateColumns = state.discover.columns;
 
@@ -56,6 +69,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
   );
   const dispatch = useDispatch();
   const prevIndexPattern = useRef(indexPattern);
+  const [query, setQuery] = useState<Query>();
 
   const [fetchState, setFetchState] = useState<SearchData>({
     status: data$.getValue().status,
@@ -65,6 +79,9 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
 
   const onQuerySubmit = useCallback(
     (payload, isUpdate) => {
+      if (payload?.query) {
+        setQuery(payload?.query);
+      }
       if (isUpdate === false) {
         refetch$.next();
       }
@@ -122,14 +139,52 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
   };
   const showSaveQuery = !!capabilities.discover?.saveQuery;
 
+  const handleDatasetChange = (dataset: Dataset) => {
+    dispatch(setSelectedDataset(dataset));
+
+    // Update query and other necessary state
+    const queryString = data.query.queryString;
+    const initialQuery = queryString.getInitialQueryByDataset(dataset);
+    queryString.setQuery(initialQuery);
+    queryString.getDatasetService().addRecentDataset(dataset);
+  };
+
+  const handleOpenDataSelector = () => {
+    const overlay = overlays?.openModal(
+      toMountPoint(
+        <AdvancedSelector
+          services={services}
+          onSelect={(dataset?: Dataset) => {
+            overlay?.close();
+            if (dataset) {
+              handleDatasetChange(dataset);
+            }
+          }}
+          onCancel={() => overlay?.close()}
+          selectedDataset={undefined}
+          setSelectedDataset={setSelectedDataset}
+          setIndexPattern={setIndexPattern}
+          dispatch={dispatch}
+        />
+      ),
+      {
+        maxWidth: false,
+        className: 'datasetSelector__advancedModal',
+      }
+    );
+  };
+
+  const hasNoDataset = !currentIndexPattern && !loadedIndexPattern && isEnhancementsEnabled;
+
   return (
     <EuiPanel
       panelRef={panelRef}
-      hasBorder={false}
+      hasBorder={hasNoDataset ? false : true}
+      color={hasNoDataset ? 'transparent' : 'plain'}
       hasShadow={false}
-      color="transparent"
-      paddingSize="none"
+      paddingSize="s"
       className="dscCanvas"
+      borderRadius="l"
     >
       <TopNav
         isEnhancementsEnabled={isEnhancementsEnabled}
@@ -139,29 +194,49 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
           optionalRef,
         }}
         showSaveQuery={showSaveQuery}
+        useNoIndexPatternsTopNav={hasNoDataset}
       />
-
-      {fetchState.status === ResultStatus.NO_RESULTS && (
-        <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
-      )}
-      {fetchState.status === ResultStatus.ERROR && (
-        <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
-      )}
-      {fetchState.status === ResultStatus.UNINITIALIZED && (
-        <DiscoverUninitialized onRefresh={() => refetch$.next()} />
-      )}
-      {fetchState.status === ResultStatus.LOADING && <LoadingSpinner />}
-      {fetchState.status === ResultStatus.READY && isEnhancementsEnabled && (
+      {hasNoDataset ? (
+        <NoIndexPatternsPanel onOpenDataSelector={handleOpenDataSelector} />
+      ) : (
         <>
-          <MemoizedDiscoverChartContainer {...fetchState} />
-          <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+          {fetchState.status === ResultStatus.NO_RESULTS && (
+            <DiscoverNoResults
+              datasetService={datasetService}
+              savedQuery={savedQuery}
+              languageService={languageService}
+              query={query}
+              timeFieldName={timeField}
+              queryLanguage={''}
+            />
+          )}
+          {fetchState.status === ResultStatus.ERROR && (
+            <DiscoverNoResults
+              datasetService={datasetService}
+              savedQuery={savedQuery}
+              languageService={languageService}
+              query={query}
+              timeFieldName={timeField}
+              queryLanguage={''}
+            />
+          )}
+          {fetchState.status === ResultStatus.UNINITIALIZED && (
+            <DiscoverUninitialized onRefresh={() => refetch$.next()} />
+          )}
+          {fetchState.status === ResultStatus.LOADING && <LoadingSpinner />}
+          {fetchState.status === ResultStatus.READY && isEnhancementsEnabled && (
+            <>
+              <MemoizedDiscoverChartContainer {...fetchState} />
+              <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+            </>
+          )}
+          {fetchState.status === ResultStatus.READY && !isEnhancementsEnabled && (
+            <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
+              <MemoizedDiscoverChartContainer {...fetchState} />
+              <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+            </EuiPanel>
+          )}
         </>
-      )}
-      {fetchState.status === ResultStatus.READY && !isEnhancementsEnabled && (
-        <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
-          <MemoizedDiscoverChartContainer {...fetchState} />
-          <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
-        </EuiPanel>
       )}
     </EuiPanel>
   );

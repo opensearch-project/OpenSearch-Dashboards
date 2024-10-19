@@ -1,5 +1,5 @@
 .dscCanvas {
-  @include euiYScrollWithShadows;
+  @include euiYScroll;
 
   /* stylelint-disable-next-line */
   container-type: inline-size; // containment context
