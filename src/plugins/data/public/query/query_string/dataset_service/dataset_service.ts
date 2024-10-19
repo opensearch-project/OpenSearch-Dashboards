@@ -207,6 +207,11 @@ export class DatasetService {
     return Number(this.sessionStorage.get('lastCacheTime')) || undefined;
   }
 
+  public removeFromRecentDatasets(datasetId: string): void {
+    this.recentDatasets.del(datasetId);
+    this.serializeRecentDatasets();
+  }
+
   private setLastCacheTime(time: number): void {
     this.sessionStorage.set('lastCacheTime', time);
   }

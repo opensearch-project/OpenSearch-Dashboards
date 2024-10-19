@@ -30,13 +30,15 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
-import { CoreStart } from 'opensearch-dashboards/public';
-import { isEqual } from 'lodash';
+import { CoreStart, NotificationsSetup } from 'opensearch-dashboards/public';
+import { debounce, isEqual } from 'lodash';
+import { i18n } from '@osd/i18n';
 import { Dataset, DataStorage, Query, TimeRange, UI_SETTINGS } from '../../../common';
 import { createHistory, QueryHistory } from './query_history';
 import { DatasetService, DatasetServiceContract } from './dataset_service';
 import { LanguageService, LanguageServiceContract } from './language_service';
 import { ISearchInterceptor } from '../../search';
+import { getApplication } from '../../services';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;
@@ -48,7 +50,8 @@ export class QueryStringManager {
     private readonly storage: DataStorage,
     private readonly sessionStorage: DataStorage,
     private readonly uiSettings: CoreStart['uiSettings'],
-    private readonly defaultSearchInterceptor: ISearchInterceptor
+    private readonly defaultSearchInterceptor: ISearchInterceptor,
+    private readonly notifications: NotificationsSetup
   ) {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
     this.queryHistory = createHistory({ storage });
@@ -108,6 +111,40 @@ export class QueryStringManager {
   };
 
   public getQuery = (): Query => {
+    const currentAppId = this.getCurrentAppId();
+    const query = this.query$.getValue();
+
+    if (currentAppId) {
+      const currentLanguage = query.language;
+      if (
+        containsWildcardOrValue(
+          this.languageService.getLanguage(currentLanguage)?.supportedAppNames,
+          currentAppId
+        )
+      ) {
+        return this.query$.getValue();
+      }
+
+      const defaultLanguage = this.uiSettings.get('search:queryLanguage');
+      const defaultLanguageTitle = this.languageService.getLanguage(defaultLanguage)?.title;
+
+      showWarning(this.notifications, {
+        title: i18n.translate('data.unSupportedLanguageTitle', {
+          defaultMessage: 'Unsupported Language Selected',
+        }),
+        text: i18n.translate('data.unSupportedLanguageBody', {
+          defaultMessage:
+            'Selected language {currentLanguage} is not supported. Defaulting to {defaultLanguage}.',
+          values: {
+            currentLanguage,
+            defaultLanguage: defaultLanguageTitle,
+          },
+        }),
+      });
+
+      const updatedQuery = this.getInitialQueryByLanguage(defaultLanguage);
+      this.setQuery(updatedQuery);
+    }
     return this.query$.getValue();
   };
 
@@ -194,6 +231,29 @@ export class QueryStringManager {
       this.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE)
     );
   }
+
+  private getCurrentAppId = () => {
+    let appId;
+    try {
+      const application = getApplication();
+      if (application) {
+        application.currentAppId$.subscribe((val) => (appId = val)).unsubscribe();
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log('Application Not available.');
+    }
+
+    return appId;
+  };
 }
+
+const showWarning = (notifications: NotificationsSetup, { title, text }) => {
+  notifications.toasts.addWarning({ title, text, id: 'unsupported_language_selected' });
+};
+
+const containsWildcardOrValue = (arr: string[] | undefined, value: string) => {
+  return arr ? arr.includes('*') || arr.includes(value) : true;
+};
 
 export type QueryStringContract = PublicMethodsOf<QueryStringManager>;

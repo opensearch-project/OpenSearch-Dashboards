@@ -1,9 +1,9 @@
 .context-nav-wrapper {
   border: none !important;
   border-top-right-radius: $euiSizeL;
-  border-bottom-right-radius: $euiSizeL;
   background-color: $euiSideNavBackgroundColor;
   overflow: hidden;
+  box-shadow: 1px 0 0 $euiBorderColor !important;
 
   .nav-link-item {
     padding: $euiSizeS;

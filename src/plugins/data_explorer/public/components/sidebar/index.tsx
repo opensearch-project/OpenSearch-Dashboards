@@ -12,27 +12,40 @@ import {
   DataSourceSelectable,
   UI_SETTINGS,
 } from '../../../../data/public';
-import { DataSourceOption, DatasetSelector } from '../../../../data/public/';
+import {
+  DataSourceOption,
+  DatasetSelector,
+  DatasetSelectorAppearance,
+} from '../../../../data/public/';
+import { Dataset } from '../../../../data/common';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
-import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
+import {
+  setIndexPattern,
+  useTypedDispatch,
+  useTypedSelector,
+  setSelectedDataset,
+} from '../../utils/state_management';
 import './index.scss';
 
+type HandleSetIndexPattern = (id: string | undefined) => void;
+type HandleSelectedDataset = (data: Dataset | undefined) => void;
+
 export const Sidebar: FC = ({ children }) => {
-  const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
+  const { indexPattern: indexPatternId, selectedDataset } = useTypedSelector(
+    (state) => state.metadata
+  );
   const dispatch = useTypedDispatch();
   const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
   const [activeDataSources, setActiveDataSources] = useState<DataSource[]>([]);
-
+  const { services } = useOpenSearchDashboards<DataExplorerServices>();
   const {
-    services: {
-      data: { indexPatterns, dataSources },
-      notifications: { toasts },
-      application,
-      uiSettings,
-    },
-  } = useOpenSearchDashboards<DataExplorerServices>();
+    data: { indexPatterns, dataSources },
+    notifications: { toasts },
+    application,
+    uiSettings,
+  } = services;
 
   const handleDatasetSubmit = useCallback(
     (query: any) => {
@@ -124,13 +137,20 @@ export const Sidebar: FC = ({ children }) => {
     dataSources.dataSourceService.reload();
   }, [dataSources.dataSourceService]);
 
+  const handleSetIndexPattern: HandleSetIndexPattern = (id: string | undefined) => {
+    dispatch(setIndexPattern(id));
+  };
+
+  const handleSelectedDataset: HandleSelectedDataset = (data: Dataset | undefined) => {
+    dispatch(setSelectedDataset(data));
+  };
+
   return (
     <EuiPageSideBar className="deSidebar" sticky>
       <EuiSplitPanel.Outer
         className="eui-yScroll deSidebar_panel"
         hasBorder={true}
-        borderRadius="none"
-        color="transparent"
+        borderRadius="l"
       >
         <EuiSplitPanel.Inner
           paddingSize="s"
@@ -139,7 +159,18 @@ export const Sidebar: FC = ({ children }) => {
           className="deSidebar_dataSource"
         >
           {isEnhancementEnabled ? (
-            <DatasetSelector onSubmit={handleDatasetSubmit} />
+            <DatasetSelector
+              onSubmit={handleDatasetSubmit}
+              selectedDataset={selectedDataset}
+              setSelectedDataset={handleSelectedDataset}
+              setIndexPattern={handleSetIndexPattern}
+              services={services}
+              appearance={DatasetSelectorAppearance.Button}
+              buttonProps={{
+                color: 'text',
+                fullWidth: true,
+              }}
+            />
           ) : (
             <DataSourceSelectable
               dataSources={activeDataSources}

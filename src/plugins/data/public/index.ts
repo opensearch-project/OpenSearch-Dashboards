@@ -62,7 +62,16 @@ import {
 } from '../common';
 
 import { FilterLabel } from './ui';
-export { createEditor, DefaultInput, DQLBody, SingleLineInput, DatasetSelector } from './ui';
+export {
+  createEditor,
+  DefaultInput,
+  DQLBody,
+  SingleLineInput,
+  DatasetSelector,
+  AdvancedSelector,
+  NoIndexPatternsPanel,
+  DatasetSelectorAppearance,
+} from './ui';
 
 import {
   generateFilters,
@@ -485,6 +494,7 @@ export {
   QueryStateChange,
   QueryStart,
   PersistedLog,
+  LanguageReference,
 } from './query';
 
 export { AggsStart } from './search/aggs';

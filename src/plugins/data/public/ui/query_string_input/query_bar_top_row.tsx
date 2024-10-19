@@ -402,7 +402,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
       >
         {renderQueryInput()}
         {renderSharingMetaFields()}
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} className="osdQueryBar--hideEmpty">
           {shouldUseDatePickerRef
             ? createPortal(renderUpdateButton(), props.datePickerRef!.current!)
             : renderUpdateButton()}
