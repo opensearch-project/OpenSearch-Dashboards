@@ -12,9 +12,10 @@ import { ValidationResult } from './types';
 /**
  * Validate if the aggregations to perform are possible
  * @param aggs Aggregations to be performed
+ * @param schemas Optional. All available schemas
  * @returns ValidationResult
  */
-export const validateAggregations = (aggs: AggConfig[]): ValidationResult => {
+export const validateAggregations = (aggs: AggConfig[], schemas?: any[]): ValidationResult => {
   // Pipeline aggs should have a valid bucket agg
   const metricAggs = aggs.filter((agg) => agg.schema === 'metric');
   const lastParentPipelineAgg = findLast(
@@ -48,6 +49,19 @@ export const validateAggregations = (aggs: AggConfig[]): ValidationResult => {
         description: 'Date Histogram and Histogram should not be translated',
       }),
     };
+  }
+
+  const splitSchema = schemas?.find((s) => s.name === 'split');
+  if (splitSchema?.mustBeFirst) {
+    const firstGroupSchemaIndex = aggs.findIndex((item) => item.schema === 'group');
+    if (firstGroupSchemaIndex !== -1) {
+      return {
+        valid: false,
+        errorMsg: i18n.translate('visBuilder.aggregation.splitChartOrderErrorMessage', {
+          defaultMessage: 'Split chart must be first in the configuration.',
+        }),
+      };
+    }
   }
 
   return { valid: true };

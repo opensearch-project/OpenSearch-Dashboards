@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { createHistogramConfig } from './histogram_vis_type';
+export { createHistogramConfig, HistogramOptionsDefaults } from './histogram_vis_type';
