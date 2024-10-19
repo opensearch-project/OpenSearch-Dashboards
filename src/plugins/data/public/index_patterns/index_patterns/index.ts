@@ -30,6 +30,5 @@
 
 export * from '../../../common/index_patterns/index_patterns';
 export * from './redirect_no_index_pattern';
-export * from './on_no_index_pattern';
 export * from './on_unsupported_time_pattern';
 export * from './index_patterns_api_client';

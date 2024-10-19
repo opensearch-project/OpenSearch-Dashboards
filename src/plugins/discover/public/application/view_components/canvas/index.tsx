@@ -12,6 +12,7 @@ import { DiscoverChartContainer } from './discover_chart_container';
 import { useDiscoverContext } from '../context';
 import { ResultStatus, SearchData } from '../utils/use_search';
 import { DiscoverNoResults } from '../../components/no_results/no_results';
+import { DiscoverNoIndexPatterns } from '../../components/no_index_patterns/no_index_patterns';
 import { DiscoverUninitialized } from '../../components/uninitialized/uninitialized';
 import { LoadingSpinner } from '../../components/loading_spinner/loading_spinner';
 import { setColumns, useDispatch, useSelector } from '../../utils/state_management';
@@ -142,38 +143,41 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
         showSaveQuery={showSaveQuery}
       />
 
-      {fetchState.status === ResultStatus.NO_RESULTS && (
-        <DiscoverNoResults
-          queryString={data.query.queryString}
-          query={data.query.queryString.getQuery()}
-          savedQuery={data.query.savedQueries}
-          timeFieldName={timeField}
-        />
-      )}
-      {fetchState.status === ResultStatus.ERROR && (
-        <DiscoverNoResults
-          queryString={data.query.queryString}
-          query={data.query.queryString.getQuery()}
-          savedQuery={data.query.savedQueries}
-          timeFieldName={timeField}
-        />
-      )}
-      {fetchState.status === ResultStatus.UNINITIALIZED && (
-        <DiscoverUninitialized onRefresh={() => refetch$.next()} />
-      )}
-      {fetchState.status === ResultStatus.LOADING && <LoadingSpinner />}
-      {fetchState.status === ResultStatus.READY && isEnhancementsEnabled && (
-        <>
-          <MemoizedDiscoverChartContainer {...fetchState} />
-          <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
-        </>
-      )}
-      {fetchState.status === ResultStatus.READY && !isEnhancementsEnabled && (
-        <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
-          <MemoizedDiscoverChartContainer {...fetchState} />
-          <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
-        </EuiPanel>
-      )}
+      {!indexPattern && <DiscoverNoIndexPatterns />}
+      <>
+        {fetchState.status === ResultStatus.NO_RESULTS && (
+          <DiscoverNoResults
+            queryString={data.query.queryString}
+            query={data.query.queryString.getQuery()}
+            savedQuery={data.query.savedQueries}
+            timeFieldName={timeField}
+          />
+        )}
+        {fetchState.status === ResultStatus.ERROR && (
+          <DiscoverNoResults
+            queryString={data.query.queryString}
+            query={data.query.queryString.getQuery()}
+            savedQuery={data.query.savedQueries}
+            timeFieldName={timeField}
+          />
+        )}
+        {fetchState.status === ResultStatus.UNINITIALIZED && (
+          <DiscoverUninitialized onRefresh={() => refetch$.next()} />
+        )}
+        {fetchState.status === ResultStatus.LOADING && <LoadingSpinner />}
+        {fetchState.status === ResultStatus.READY && isEnhancementsEnabled && (
+          <>
+            <MemoizedDiscoverChartContainer {...fetchState} />
+            <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+          </>
+        )}
+        {fetchState.status === ResultStatus.READY && !isEnhancementsEnabled && (
+          <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
+            <MemoizedDiscoverChartContainer {...fetchState} />
+            <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+          </EuiPanel>
+        )}
+      </>
     </EuiPanel>
   );
 }

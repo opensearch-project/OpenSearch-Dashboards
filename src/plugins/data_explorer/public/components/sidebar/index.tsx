@@ -126,14 +126,14 @@ export const Sidebar: FC<SidebarProps> = ({ children, datasetSelectorRef }) => {
         hasBorder={true}
         borderRadius="l"
       >
-        {isEnhancementEnabled && <div ref={datasetSelectorRef} />}
-        {!isEnhancementEnabled && (
-          <EuiSplitPanel.Inner
-            paddingSize="s"
-            grow={false}
-            color="transparent"
-            className="deSidebar_dataSource"
-          >
+        <EuiSplitPanel.Inner
+          paddingSize="s"
+          grow={false}
+          color="transparent"
+          className="deSidebar_dataSource"
+        >
+          {isEnhancementEnabled && <div ref={datasetSelectorRef} />}
+          {!isEnhancementEnabled && (
             <DataSourceSelectable
               dataSources={activeDataSources}
               dataSourceOptionList={dataSourceOptionList}
@@ -144,8 +144,9 @@ export const Sidebar: FC<SidebarProps> = ({ children, datasetSelectorRef }) => {
               onRefresh={memorizedReload}
               fullWidth
             />
-          </EuiSplitPanel.Inner>
-        )}
+          )}
+        </EuiSplitPanel.Inner>
+
         <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
           {children}
         </EuiSplitPanel.Inner>
