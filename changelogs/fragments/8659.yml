@@ -1,0 +1,2 @@
+fix:
+- Discover UI stuck on searching after failing to find deleted index pattern ([#8659](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8659))
