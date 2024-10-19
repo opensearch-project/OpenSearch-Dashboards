@@ -142,6 +142,7 @@ export function OpenSavedQueryFlyout({
     <>
       <EuiSpacer />
       <EuiSearchBar
+        compressed
         query={searchQuery}
         box={{
           placeholder: 'Search saved query',
@@ -180,8 +181,6 @@ export function OpenSavedQueryFlyout({
             savedQuery={query.savedQuery}
             selectedQuery={selectedQuery}
             onSelect={setSelectedQuery}
-            onRunPreview={onQueryOpen}
-            onClose={onClose}
             handleQueryDelete={(queryToDelete) => {
               handleQueryDelete(queryToDelete).then(() => {
                 fetchAllSavedQueriesForSelectedTab();

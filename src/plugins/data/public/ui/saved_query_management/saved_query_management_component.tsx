@@ -222,8 +222,10 @@ export function SavedQueryManagementComponent({
     >
       <EuiListGroup>
         <EuiListGroupItem
-          label={'Save query'}
-          iconType={'save'}
+          label={i18n.translate('data.saved_query_management.save_query_item_label', {
+            defaultMessage: 'Save query',
+          })}
+          iconType="save"
           onClick={() => {
             closeMenuPopover();
             const saveQueryFlyout = overlays?.openFlyout(
@@ -241,8 +243,10 @@ export function SavedQueryManagementComponent({
           }}
         />
         <EuiListGroupItem
-          label={'Open query'}
-          iconType={'folderOpen'}
+          label={i18n.translate('data.saved_query_management.open_query_item_label', {
+            defaultMessage: 'Open query',
+          })}
+          iconType="folderOpen"
           onClick={() => {
             closeMenuPopover();
             const openSavedQueryFlyout = overlays?.openFlyout(

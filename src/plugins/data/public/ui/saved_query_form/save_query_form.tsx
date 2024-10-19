@@ -62,7 +62,7 @@ export interface SavedQueryMeta {
   title: string;
   description: string;
   shouldIncludeFilters: boolean;
-  shouldIncludeTimefilter: boolean;
+  shouldIncludeTimeFilter: boolean;
   shouldIncludeDataSource: boolean;
 }
 

@@ -18,6 +18,7 @@ import {
 import React, { useRef, useState, useEffect } from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import { monaco } from '@osd/monaco';
+import { i18n } from '@osd/i18n';
 import { SavedQuery } from '../../query';
 import { DeleteSavedQueryConfirmationModal } from '../saved_query_management/delete_saved_query_confirmation_modal';
 
@@ -25,8 +26,6 @@ export interface SavedQueryCardProps {
   savedQuery: SavedQuery;
   selectedQuery?: SavedQuery;
   onSelect: (query: SavedQuery) => void;
-  onRunPreview: (query: SavedQuery) => void;
-  onClose: () => void;
   handleQueryDelete: (query: SavedQuery) => void;
 }
 
@@ -35,8 +34,6 @@ export function SavedQueryCard({
   selectedQuery,
   onSelect,
   handleQueryDelete,
-  onRunPreview,
-  onClose,
 }: SavedQueryCardProps) {
   const [shouldTruncate, setShouldTruncate] = useState(false);
   const [isTruncated, setIsTruncated] = useState(true);
@@ -155,7 +152,14 @@ export function SavedQueryCard({
               {shouldTruncate && (
                 <div className={isTruncated ? 'read-more-wrap' : ''}>
                   <EuiLink className="read-more-btn" onClick={toggleView}>
-                    {isTruncated ? `View full query (${lineCount}) lines` : 'View Less'}
+                    {i18n.translate('data.saved_query.view_more_label', {
+                      defaultMessage: '{viewMoreLabel}',
+                      values: {
+                        viewMoreLabel: `${
+                          isTruncated ? `View full query (${lineCount}) lines` : 'View Less'
+                        }`,
+                      },
+                    })}
                   </EuiLink>
                 </div>
               )}
@@ -168,7 +172,9 @@ export function SavedQueryCard({
                   onClick={copy}
                   iconType="copy"
                   iconSize="m"
-                  aria-label="Copy recent query"
+                  aria-label={i18n.translate('data.saved_query.copy_query_aria_label', {
+                    defaultMessage: 'Copy recent query',
+                  })}
                 />
               )}
             </EuiCopy>

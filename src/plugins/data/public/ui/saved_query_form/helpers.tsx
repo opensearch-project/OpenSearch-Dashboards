@@ -85,18 +85,18 @@ export function useSaveQueryFormContent({
   // Defaults to false because saved queries are meant to be as portable as possible and loading
   // a saved query with a time filter will override whatever the current value of the global timepicker
   // is. We expect this option to be used rarely and only when the user knows they want this behavior.
-  const [shouldIncludeTimefilter, setIncludeTimefilter] = useState(false);
+  const [shouldIncludeTimeFilter, setIncludeTimefilter] = useState(false);
   const [formErrors, setFormErrors] = useState<string[]>([]);
 
-  // Instead of setting the default values based on the saved query above,
-  // we use this effect so that in case when user select "Save as new" in the flyout,
-  // the initial state resets with change to 'savedQuery'
+  // Need this effect so that in case when user select "Save as new" in the flyout,
+  // the initial state resets since savedQuery will be undefined
   useEffect(() => {
-    setTitle(savedQuery ? savedQuery.title : '');
+    setTitle(savedQuery?.title || '');
     setEnabledSaveButton(Boolean(savedQuery));
-    setDescription(savedQuery ? savedQuery.description : '');
+    setDescription(savedQuery?.description || '');
     setShouldIncludeFilters(savedQuery ? !!savedQuery.filters : true);
-    setIncludeTimefilter(savedQuery ? !!savedQuery.timefilter : false);
+    setIncludeTimefilter(!!savedQuery?.timefilter);
+    setShouldIncludeDataSource(savedQuery ? !!savedQuery.query.dataset : true);
     setFormErrors([]);
   }, [savedQuery]);
 
@@ -126,9 +126,8 @@ export function useSaveQueryFormContent({
   const validate = useCallback(() => {
     const errors = [];
     if (
-      !!savedQueries.find(
-        (existingSavedQuery) => !savedQuery && existingSavedQuery.attributes.title === title
-      )
+      !savedQuery &&
+      savedQueries.some((existingSavedQuery) => existingSavedQuery.attributes.title === title)
     ) {
       errors.push(titleConflictErrorText);
     }
@@ -147,7 +146,7 @@ export function useSaveQueryFormContent({
         title,
         description,
         shouldIncludeFilters,
-        shouldIncludeTimefilter,
+        shouldIncludeTimeFilter,
         shouldIncludeDataSource,
       });
     }
@@ -157,7 +156,7 @@ export function useSaveQueryFormContent({
     title,
     description,
     shouldIncludeFilters,
-    shouldIncludeTimefilter,
+    shouldIncludeTimeFilter,
     shouldIncludeDataSource,
   ]);
 
@@ -201,8 +200,7 @@ export function useSaveQueryFormContent({
           defaultMessage: 'Name',
         })}
         helpText={i18n.translate('data.search.searchBar.savedQueryNameHelpText', {
-          defaultMessage:
-            'Name is required. Name cannot contain leading or trailing whitespace. Name must be unique.',
+          defaultMessage: 'Name is required and must be unique without leading or trailing spaces.',
         })}
         isInvalid={hasErrors}
       >
@@ -265,13 +263,13 @@ export function useSaveQueryFormContent({
       {showTimeFilterOption && (
         <EuiCompressedFormRow>
           <EuiCompressedSwitch
-            name="shouldIncludeTimefilter"
+            name="shouldIncludeTimeFilter"
             label={i18n.translate('data.search.searchBar.savedQueryIncludeTimeFilterLabelText', {
               defaultMessage: 'Include time filter',
             })}
-            checked={shouldIncludeTimefilter}
+            checked={shouldIncludeTimeFilter}
             onChange={() => {
-              setIncludeTimefilter(!shouldIncludeTimefilter);
+              setIncludeTimefilter(!shouldIncludeTimeFilter);
             }}
             data-test-subj="saveQueryFormIncludeTimeFilterOption"
           />

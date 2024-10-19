@@ -302,7 +302,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
 
     if (
-      savedQueryMeta.shouldIncludeTimefilter &&
+      savedQueryMeta.shouldIncludeTimeFilter &&
       this.state.dateRangeTo !== undefined &&
       this.state.dateRangeFrom !== undefined &&
       this.props.refreshInterval !== undefined &&
@@ -342,7 +342,13 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       }
     } catch (error: any) {
       this.services.notifications.toasts.addDanger(
-        `An error occured while saving your query: ${error.message}`
+        this.props.intl.formatMessage(
+          {
+            id: 'data.filter.filterEditor.createCustomLabelSwitchLabel',
+            defaultMessage: 'An error occured while saving your query: {errorMessage}',
+          },
+          { errorMessage: error.message }
+        )
       );
       throw error;
     }

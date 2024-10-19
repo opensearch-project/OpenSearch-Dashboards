@@ -10,7 +10,7 @@ import { SaveQueryForm, SavedQueryMeta } from '../saved_query_form';
 interface SaveQueryFlyoutProps {
   savedQuery?: SavedQueryAttributes;
   savedQueryService: SavedQueryService;
-  onSave: (savedQueryMeta: SavedQueryMeta, saveAsnew?: boolean) => Promise<void>;
+  onSave: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
   onClose: () => void;
   showFilterOption: boolean | undefined;
   showTimeFilterOption: boolean | undefined;
