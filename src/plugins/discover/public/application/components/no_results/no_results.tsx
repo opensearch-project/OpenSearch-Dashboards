@@ -41,31 +41,21 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { Query } from '../../../../../data/common';
 import {
-  DatasetServiceContract,
-  LanguageServiceContract,
+  Query,
+  QueryStringContract,
   SavedQuery,
   SavedQueryService,
 } from '../../../../../data/public/';
 
 interface Props {
-  datasetService: DatasetServiceContract;
+  queryString: QueryStringContract;
   savedQuery: SavedQueryService;
-  languageService: LanguageServiceContract;
   query: Query | undefined;
   timeFieldName?: string;
-  queryLanguage?: string;
 }
 
-export const DiscoverNoResults = ({
-  datasetService,
-  savedQuery,
-  languageService,
-  query,
-  timeFieldName,
-  queryLanguage,
-}: Props) => {
+export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldName }: Props) => {
   // Commented out due to no usage in code
   // See: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8149
   //
@@ -212,15 +202,17 @@ export const DiscoverNoResults = ({
 
     // Samples for the dataset type
     if (query?.dataset?.type) {
-      const datasetSampleQueries = datasetService
-        .getType(query.dataset.type)
+      const datasetSampleQueries = queryString
+        .getDatasetService()
+        ?.getType(query.dataset.type)
         ?.getSampleQueries?.(query.dataset, query.language);
       if (Array.isArray(datasetSampleQueries)) sampleQueries.push(...datasetSampleQueries);
     }
 
     // Samples for the language
     if (query?.language) {
-      const languageSampleQueries = languageService.getLanguage(query.language)?.sampleQueries;
+      const languageSampleQueries = queryString.getLanguageService()?.getLanguage(query.language)
+        ?.sampleQueries;
       if (Array.isArray(languageSampleQueries)) sampleQueries.push(...languageSampleQueries);
     }
 
@@ -264,7 +256,7 @@ export const DiscoverNoResults = ({
           ]
         : []),
     ];
-  }, [datasetService, languageService, query, savedQueries]);
+  }, [queryString, query, savedQueries]);
 
   return (
     <I18nProvider>

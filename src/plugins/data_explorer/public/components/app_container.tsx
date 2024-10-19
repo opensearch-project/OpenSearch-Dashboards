@@ -41,6 +41,7 @@ export const AppContainer = React.memo(
     const showActionsInGroup = uiSettings?.get('home:useNewHomePage');
 
     const topLinkRef = useRef<HTMLDivElement>(null);
+    const datasetSelectorRef = useRef<HTMLDivElement>(null);
     const datePickerRef = useRef<HTMLDivElement>(null);
 
     if (!view) {
@@ -59,6 +60,7 @@ export const AppContainer = React.memo(
 
     params.optionalRef = {
       topLinkRef,
+      datasetSelectorRef,
       datePickerRef,
     };
     // Render the application DOM.
@@ -103,7 +105,7 @@ export const AppContainer = React.memo(
                       mode={['collapsible', { position: 'top' }]}
                       paddingSize="none"
                     >
-                      <Sidebar>
+                      <Sidebar datasetSelectorRef={datasetSelectorRef}>
                         <MemoizedPanel {...params} />
                       </Sidebar>
                     </EuiResizablePanel>

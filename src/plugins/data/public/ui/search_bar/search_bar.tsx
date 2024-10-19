@@ -75,6 +75,7 @@ export interface SearchBarOwnProps {
   refreshInterval?: number;
   dateRangeFrom?: string;
   dateRangeTo?: string;
+  datasetSelectorRef?: React.RefObject<HTMLDivElement>;
   datePickerRef?: React.RefObject<HTMLDivElement>;
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
@@ -549,6 +550,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           filterBar={filterBar}
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
+          datasetSelectorRef={this.props.datasetSelectorRef}
           datePickerRef={this.props.datePickerRef}
           savedQueryManagement={searchBarMenu(false, true)}
           queryStatus={this.props.queryStatus}
