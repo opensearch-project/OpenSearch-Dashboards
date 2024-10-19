@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { mount } from 'enzyme';
-import { act } from 'react-dom/test-utils';
 import { DatasetSelector as ConnectedDatasetSelector } from './index';
 import { DatasetSelector } from './dataset_selector';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';

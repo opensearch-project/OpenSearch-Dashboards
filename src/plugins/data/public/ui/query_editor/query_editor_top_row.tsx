@@ -17,6 +17,7 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   DatasetSelector,
+  DatasetSelectorAppearance,
   IDataPluginServices,
   IIndexPattern,
   Query,
@@ -172,7 +173,16 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function renderDatasetSelector() {
-    return <DatasetSelector onSubmit={onInputSubmit} />;
+    return (
+      <DatasetSelector
+        onSubmit={onInputSubmit}
+        appearance={DatasetSelectorAppearance.Button}
+        buttonProps={{
+          color: 'text',
+          fullWidth: true,
+        }}
+      />
+    );
   }
 
   function renderQueryEditor() {

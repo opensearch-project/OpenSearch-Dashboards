@@ -126,12 +126,7 @@ export const Sidebar: FC<SidebarProps> = ({ children, datasetSelectorRef }) => {
         hasBorder={true}
         borderRadius="l"
       >
-        <EuiSplitPanel.Inner
-          paddingSize="s"
-          grow={false}
-          color="transparent"
-          className="deSidebar_dataSource"
-        >
+        <EuiSplitPanel.Inner paddingSize="s" grow={false} className="deSidebar_dataSource">
           {isEnhancementEnabled && <div ref={datasetSelectorRef} />}
           {!isEnhancementEnabled && (
             <DataSourceSelectable
