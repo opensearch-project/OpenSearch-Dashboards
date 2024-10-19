@@ -13,27 +13,19 @@ import {
 } from '../../../common';
 import { DatasetExplorer } from './dataset_explorer';
 import { Configurator } from './configurator';
+import { getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
 
 export const AdvancedSelector = ({
   services,
   onSelect,
   onCancel,
-  selectedDataset,
-  setSelectedDataset,
-  setIndexPattern,
-  direct = false,
 }: {
   services: IDataPluginServices;
   onSelect: (dataset: Dataset) => void;
   onCancel: () => void;
-  selectedDataset?: Dataset;
-  setSelectedDataset: (data: Dataset | undefined) => void;
-  setIndexPattern: (id: string | undefined) => void;
-  direct?: boolean;
 }) => {
-  const queryService = services.data.query;
-  const queryString = queryService.queryString;
+  const queryString = getQueryService().queryString;
 
   const [path, setPath] = useState<DataStructure[]>([
     {
@@ -56,21 +48,14 @@ export const AdvancedSelector = ({
         }),
     },
   ]);
+  const [selectedDataset, setSelectedDataset] = useState<BaseDataset | undefined>();
 
-  const [currentSelectedDataset, setCurrentSelectedDataset] = useState<BaseDataset | undefined>(
-    selectedDataset
-  );
-
-  return currentSelectedDataset ? (
+  return selectedDataset ? (
     <Configurator
-      baseDataset={currentSelectedDataset}
+      baseDataset={selectedDataset}
       onConfirm={onSelect}
       onCancel={onCancel}
-      onPrevious={() => {
-        setSelectedDataset(undefined);
-        setCurrentSelectedDataset(undefined);
-      }}
-      queryService={queryService}
+      onPrevious={() => setSelectedDataset(undefined)}
     />
   ) : (
     <DatasetExplorer
@@ -78,16 +63,7 @@ export const AdvancedSelector = ({
       queryString={queryString}
       path={path}
       setPath={setPath}
-      onNext={(dataset) => {
-        setSelectedDataset(dataset);
-        setIndexPattern(dataset.id);
-        setCurrentSelectedDataset(dataset);
-        if (direct) {
-          const query = queryString.getInitialQueryByDataset(dataset);
-          queryString.setQuery(query);
-          queryString.getDatasetService().addRecentDataset(dataset);
-        }
-      }}
+      onNext={(dataset) => setSelectedDataset(dataset)}
       onCancel={onCancel}
     />
   );

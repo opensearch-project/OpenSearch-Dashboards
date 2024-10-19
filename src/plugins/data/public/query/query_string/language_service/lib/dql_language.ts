@@ -24,6 +24,12 @@ export const getDQLLanguageConfig = (
       visualizable: true,
     },
     showDocLinks: true,
+    docLink: {
+      title: i18n.translate('data.dqlLanguage.docLink', {
+        defaultMessage: 'DQL documentation',
+      }),
+      url: 'https://opensearch.org/docs/latest/query-dsl/full-text/query-string/',
+    },
     editorSupportedAppNames: ['discover'],
     supportedAppNames: ['discover', 'dashboards', 'visualize', 'data-explorer', 'vis-builder', '*'],
     sampleQueries: [

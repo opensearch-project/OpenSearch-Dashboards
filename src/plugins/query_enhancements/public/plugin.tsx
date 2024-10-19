@@ -77,6 +77,12 @@ export class QueryEnhancementsPlugin
         filterable: false,
         visualizable: false,
       },
+      docLink: {
+        title: i18n.translate('queryEnhancements.pplLanguage.docLink', {
+          defaultMessage: 'PPL documentation',
+        }),
+        url: 'https://opensearch.org/docs/latest/search-plugins/sql/ppl/syntax/',
+      },
       showDocLinks: false,
       editor: enhancedPPLQueryEditor,
       editorSupportedAppNames: ['discover'],
@@ -95,6 +101,12 @@ export class QueryEnhancementsPlugin
       fields: {
         filterable: false,
         visualizable: false,
+      },
+      docLink: {
+        title: i18n.translate('queryEnhancements.sqlLanguage.docLink', {
+          defaultMessage: 'SQL documentation',
+        }),
+        url: 'https://opensearch.org/docs/latest/search-plugins/sql/sql/basic/',
       },
       showDocLinks: false,
       editor: enhancedSQLQueryEditor,

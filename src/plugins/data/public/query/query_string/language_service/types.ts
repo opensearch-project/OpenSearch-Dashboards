@@ -55,6 +55,10 @@ export interface LanguageConfig {
     visualizable?: boolean;
   };
   showDocLinks?: boolean;
+  docLink?: {
+    title: string;
+    url: string;
+  };
   editorSupportedAppNames?: string[];
   supportedAppNames?: string[];
   hideDatePicker?: boolean;
