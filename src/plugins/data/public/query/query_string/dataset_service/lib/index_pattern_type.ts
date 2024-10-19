@@ -4,6 +4,7 @@
  */
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { i18n } from '@osd/i18n';
 import { DataSourceAttributes } from '../../../../../../data_source/common/data_sources';
 import {
   DEFAULT_DATA,
@@ -69,6 +70,29 @@ export const indexPatternTypeConfig: DatasetTypeConfig = {
       return ['kuery', 'lucene'];
     }
     return ['kuery', 'lucene', 'PPL', 'SQL'];
+  },
+
+  getSampleQueries: (dataset: Dataset, language: string) => {
+    switch (language) {
+      case 'PPL':
+        return [
+          {
+            title: i18n.translate('data.indexPatternType.sampleQuery.basicPPLQuery', {
+              defaultMessage: 'Sample query for PPL',
+            }),
+            query: `source = ${dataset.title}`,
+          },
+        ];
+      case 'SQL':
+        return [
+          {
+            title: i18n.translate('data.indexPatternType.sampleQuery.basicSQLQuery', {
+              defaultMessage: 'Sample query for SQL',
+            }),
+            query: `SELECT * FROM ${dataset.title} LIMIT 10`,
+          },
+        ];
+    }
   },
 };
 
