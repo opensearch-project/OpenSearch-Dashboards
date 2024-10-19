@@ -380,7 +380,7 @@ export const useSearch = (services: DiscoverViewServices) => {
 
       // Filters in URL are higher priority than the filters in saved search
       const urlFilters = (osdUrlStateStorage.get('_q') as QueryState)?.filters ?? [];
-      if (!urlFilters || urlFilters.length === 0) {
+      if (!Array.isArray(urlFilters) || urlFilters.length === 0) {
         filterManager.setAppFilters(actualFilters);
       }
 
