@@ -41,6 +41,7 @@ export {
   flattenHitWrapper,
   formatHitProvider,
   onRedirectNoIndexPattern,
+  onNoIndexPattern,
   onUnsupportedTimePattern,
 } from './index_patterns';
 
