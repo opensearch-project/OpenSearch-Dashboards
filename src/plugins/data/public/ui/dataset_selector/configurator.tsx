@@ -80,6 +80,11 @@ export const Configurator = ({
       setTimeFields(dateFields || []);
     };
 
+    if (baseDataset?.dataSource?.meta?.supportsTimeFilter === false) {
+      setTimeFields([]);
+      return;
+    }
+
     fetchFields();
   }, [baseDataset, indexPatternsService, queryString]);
 
