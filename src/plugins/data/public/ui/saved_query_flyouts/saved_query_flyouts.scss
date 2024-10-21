@@ -1,0 +1,23 @@
+.editor-container {
+  position: relative;
+  overflow-y: clip;
+}
+
+.read-more-wrap {
+  /* stylelint-disable  @osd/stylelint/no_restricted_values */
+  background: linear-gradient(rgba($euiColorEmptyShade, 5%) 10%, $euiColorEmptyShade 60%, $euiColorEmptyShade 100%);
+  height: 90px;
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  bottom: 0;
+  text-align: center;
+  width: 100%;
+}
+
+.read-more-btn {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+}

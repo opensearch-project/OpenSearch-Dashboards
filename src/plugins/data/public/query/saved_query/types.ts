@@ -42,6 +42,9 @@ export interface SavedQuery {
 export interface SavedQueryAttributes {
   title: string;
   description: string;
+  // If isTemplate is true, then saved query cannot be updated/deleted from the UI and
+  // will show up under Templates tab for saved queries
+  isTemplate?: boolean;
   query: Query;
   filters?: Filter[];
   timefilter?: SavedQueryTimeFilter;
