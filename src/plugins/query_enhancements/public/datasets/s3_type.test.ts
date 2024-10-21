@@ -14,7 +14,7 @@ import {
   Dataset,
 } from '../../../data/common';
 import { DATASET, S3_FIELD_TYPES } from '../../common';
-import { castSQLTypeToOSDFieldType, s3TypeConfig } from './s3_type';
+import { castS3FieldTypeToOSDFieldType, s3TypeConfig } from './s3_type';
 
 describe('s3TypeConfig', () => {
   const mockHttp = ({
@@ -208,7 +208,7 @@ describe('s3TypeConfig', () => {
       }
     });
 
-    const result = await s3TypeConfig.fetchFields(mockDataset, mockHttp);
+    const result = await s3TypeConfig.fetchFields(mockDataset, mockServices);
 
     expect(result).toHaveLength(5);
     expect(result[0].name).toBe('@timestamp');
@@ -224,9 +224,9 @@ describe('s3TypeConfig', () => {
     expect(s3TypeConfig.supportedLanguages(mockDataset)).toEqual(['SQL']);
   });
 
-  describe('castSQLTypeToOSDFieldType()', () => {
+  describe('castS3FieldTypeToOSDFieldType()', () => {
     it('should map BOOLEAN to OSD_FIELD_TYPES.BOOLEAN', () => {
-      expect(castSQLTypeToOSDFieldType(S3_FIELD_TYPES.BOOLEAN)).toBe(OSD_FIELD_TYPES.BOOLEAN);
+      expect(castS3FieldTypeToOSDFieldType(S3_FIELD_TYPES.BOOLEAN)).toBe(OSD_FIELD_TYPES.BOOLEAN);
     });
 
     it('should map BYTE, SHORT, INTEGER, INT, LONG, FLOAT, DOUBLE to OSD_FIELD_TYPES.NUMBER', () => {
@@ -240,14 +240,14 @@ describe('s3TypeConfig', () => {
         S3_FIELD_TYPES.DOUBLE,
       ];
       numberTypes.forEach((type) => {
-        expect(castSQLTypeToOSDFieldType(type)).toBe(OSD_FIELD_TYPES.NUMBER);
+        expect(castS3FieldTypeToOSDFieldType(type)).toBe(OSD_FIELD_TYPES.NUMBER);
       });
     });
 
     it('should map KEYWORD, TEXT, STRING to OSD_FIELD_TYPES.STRING', () => {
       const stringTypes = [S3_FIELD_TYPES.KEYWORD, S3_FIELD_TYPES.TEXT, S3_FIELD_TYPES.STRING];
       stringTypes.forEach((type) => {
-        expect(castSQLTypeToOSDFieldType(type)).toBe(OSD_FIELD_TYPES.STRING);
+        expect(castS3FieldTypeToOSDFieldType(type)).toBe(OSD_FIELD_TYPES.STRING);
       });
     });
 
@@ -260,31 +260,33 @@ describe('s3TypeConfig', () => {
         S3_FIELD_TYPES.INTERVAL,
       ];
       dateTypes.forEach((type) => {
-        expect(castSQLTypeToOSDFieldType(type)).toBe(OSD_FIELD_TYPES.DATE);
+        expect(castS3FieldTypeToOSDFieldType(type)).toBe(OSD_FIELD_TYPES.DATE);
       });
     });
 
     it('should map IP to OSD_FIELD_TYPES.IP', () => {
-      expect(castSQLTypeToOSDFieldType(S3_FIELD_TYPES.IP)).toBe(OSD_FIELD_TYPES.IP);
+      expect(castS3FieldTypeToOSDFieldType(S3_FIELD_TYPES.IP)).toBe(OSD_FIELD_TYPES.IP);
     });
 
     it('should map GEO_POINT to OSD_FIELD_TYPES.GEO_POINT', () => {
-      expect(castSQLTypeToOSDFieldType(S3_FIELD_TYPES.GEO_POINT)).toBe(OSD_FIELD_TYPES.GEO_POINT);
+      expect(castS3FieldTypeToOSDFieldType(S3_FIELD_TYPES.GEO_POINT)).toBe(
+        OSD_FIELD_TYPES.GEO_POINT
+      );
     });
 
     it('should map BINARY to OSD_FIELD_TYPES.ATTACHMENT', () => {
-      expect(castSQLTypeToOSDFieldType(S3_FIELD_TYPES.BINARY)).toBe(OSD_FIELD_TYPES.ATTACHMENT);
+      expect(castS3FieldTypeToOSDFieldType(S3_FIELD_TYPES.BINARY)).toBe(OSD_FIELD_TYPES.ATTACHMENT);
     });
 
     it('should map STRUCT and ARRAY to OSD_FIELD_TYPES.OBJECT', () => {
       const objectTypes = [S3_FIELD_TYPES.STRUCT, S3_FIELD_TYPES.ARRAY];
       objectTypes.forEach((type) => {
-        expect(castSQLTypeToOSDFieldType(type)).toBe(OSD_FIELD_TYPES.OBJECT);
+        expect(castS3FieldTypeToOSDFieldType(type)).toBe(OSD_FIELD_TYPES.OBJECT);
       });
     });
 
     it('should return OSD_FIELD_TYPES.UNKNOWN for unmapped types', () => {
-      expect(castSQLTypeToOSDFieldType(S3_FIELD_TYPES.UNKNOWN)).toBe(OSD_FIELD_TYPES.UNKNOWN);
+      expect(castS3FieldTypeToOSDFieldType(S3_FIELD_TYPES.UNKNOWN)).toBe(OSD_FIELD_TYPES.UNKNOWN);
     });
   });
 });
