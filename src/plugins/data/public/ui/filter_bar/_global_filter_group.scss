@@ -12,8 +12,21 @@
   }
 }
 
-.globalDatePicker {
-  text-align: right;
+@include euiBreakpoint("m", "l", "xl", "xxl") {
+  .globalDatePicker {
+    text-align: right;
+  }
+}
+
+@include euiBreakpoint("s", "xs") {
+  .headerAppActionMenu {
+    .osdTopNavMenuScreenTitle,
+    .osdTopNavMenu,
+    .osdTopNavSearchBar,
+    .globalDatePicker {
+      margin-bottom: 0 !important;
+    }
+  }
 }
 
 .headerAppActionMenu .globalQueryBar,

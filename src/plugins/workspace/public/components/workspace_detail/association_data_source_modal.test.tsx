@@ -52,6 +52,12 @@ const setupAssociationDataSourceModal = ({
       connectionType: DataSourceConnectionType.OpenSearchConnection,
       type: 'OpenSearch',
     },
+    {
+      id: 'dqs1',
+      name: 'Data Connection 1',
+      connectionType: DataSourceConnectionType.DataConnection,
+      type: 'AWS Security Lake',
+    },
   ]);
   const { logos } = chromeServiceMock.createStartContract();
   render(
@@ -175,6 +181,28 @@ describe('AssociationDataSourceModal', () => {
             type: 'Amazon S3',
           },
         ],
+      },
+    ]);
+  });
+
+  it('should call handleAssignDataSourceConnections with data connections after assigned', async () => {
+    const handleAssignDataSourceConnectionsMock = jest.fn();
+    setupAssociationDataSourceModal({
+      handleAssignDataSourceConnections: handleAssignDataSourceConnectionsMock,
+      mode: AssociationDataSourceModalMode.DirectQueryConnections,
+    });
+
+    await waitFor(() => {
+      fireEvent.click(screen.getByRole('option', { name: 'Data Connection 1' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Associate data sources' }));
+    });
+
+    expect(handleAssignDataSourceConnectionsMock).toHaveBeenCalledWith([
+      {
+        id: 'dqs1',
+        name: 'Data Connection 1',
+        connectionType: DataSourceConnectionType.DataConnection,
+        type: 'AWS Security Lake',
       },
     ]);
   });

@@ -55,6 +55,7 @@ export const registerFindRoute = (
             defaultValue: 'OR',
           }),
           sortField: schema.maybe(schema.string()),
+          sortOrder: schema.maybe(schema.string()),
           hasReference: schema.maybe(
             schema.object({
               type: schema.string(),

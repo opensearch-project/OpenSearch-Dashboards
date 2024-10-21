@@ -1,0 +1,2 @@
+fix:
+- Prevent too many queries sent from dataset selector ([#8347](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8347))

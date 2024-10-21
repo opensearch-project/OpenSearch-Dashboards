@@ -11,10 +11,10 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
   EuiIcon,
   EuiPanel,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { InternalApplicationStart } from 'src/core/public/application';
 import { createEuiListItem } from './nav_link';
@@ -25,6 +25,7 @@ import { fulfillRegistrationLinksToChromeNavLinks } from '../../utils';
 import './collapsible_nav_group_enabled_top.scss';
 
 export interface CollapsibleNavTopProps {
+  collapsibleNavHeaderRender?: () => JSX.Element | null;
   homeLink?: ChromeNavLink;
   navGroupsMap: Record<string, NavGroupItemInMap>;
   currentNavGroup?: NavGroupItemInMap;
@@ -39,6 +40,7 @@ export interface CollapsibleNavTopProps {
 }
 
 export const CollapsibleNavTop = ({
+  collapsibleNavHeaderRender,
   currentNavGroup,
   navigateToApp,
   logos,
@@ -52,7 +54,6 @@ export const CollapsibleNavTop = ({
   navLinks,
 }: CollapsibleNavTopProps) => {
   const currentWorkspace = useObservable(currentWorkspace$);
-
   const firstVisibleNavLinkInFirstVisibleUseCase = useMemo(
     () =>
       fulfillRegistrationLinksToChromeNavLinks(
@@ -148,12 +149,19 @@ export const CollapsibleNavTop = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {currentNavGroup?.title && (
-        <>
-          <EuiSpacer />
-          <EuiText>{currentNavGroup?.title}</EuiText>
-        </>
-      )}
+      {
+        // Nav groups with type are system(global) nav group and we should show title for those nav groups
+        (currentNavGroup?.type || collapsibleNavHeaderRender) && (
+          <>
+            <EuiSpacer />
+            {currentNavGroup?.type ? (
+              <EuiText>{currentNavGroup?.title}</EuiText>
+            ) : (
+              collapsibleNavHeaderRender?.()
+            )}
+          </>
+        )
+      }
     </EuiPanel>
   );
 };

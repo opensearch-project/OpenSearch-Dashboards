@@ -323,7 +323,7 @@ describe('SelectDataSourceDetailPanel', () => {
     ).toBeNull();
   });
 
-  it('should success to remove data sources', async () => {
+  it('should success to remove data associations', async () => {
     const { getByText, getByTestId, getByRole } = render(
       selectDataSourceDetailPanel({
         ...defaultProps,
@@ -336,15 +336,15 @@ describe('SelectDataSourceDetailPanel', () => {
     });
     const removeButton = getByTestId('workspace-detail-dataSources-table-actions-remove');
     fireEvent.click(removeButton);
-    const confirButton = getByRole('button', { name: 'Remove data source(s)' });
-    expect(confirButton).toBeInTheDocument();
-    fireEvent.click(confirButton);
+    const confirmButton = getByRole('button', { name: 'Remove 1 association' });
+    expect(confirmButton).toBeInTheDocument();
+    fireEvent.click(confirmButton);
     await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
     });
   });
 
-  it('should fail to remove data sources', async () => {
+  it('should fail to remove data associations', async () => {
     const { getByText, getByTestId, getByRole } = render(
       selectDataSourceDetailPanel({
         ...defaultProps,
@@ -357,9 +357,9 @@ describe('SelectDataSourceDetailPanel', () => {
     });
     const removeButton = getByTestId('workspace-detail-dataSources-table-actions-remove');
     fireEvent.click(removeButton);
-    const confirButton = getByRole('button', { name: 'Remove data source(s)' });
-    expect(confirButton).toBeInTheDocument();
-    fireEvent.click(confirButton);
+    const confirmButton = getByRole('button', { name: 'Remove 1 association' });
+    expect(confirmButton).toBeInTheDocument();
+    fireEvent.click(confirmButton);
     await waitFor(() => {
       expect(notificationToastsAddDanger).toHaveBeenCalled();
     });
@@ -381,9 +381,9 @@ describe('SelectDataSourceDetailPanel', () => {
 
     // Simulate clicking the checkbox
     fireEvent.click(checkbox);
-    expect(getByText('Remove 1 association(s)')).toBeInTheDocument();
-    fireEvent.click(getByText('Remove 1 association(s)'));
-    fireEvent.click(getByRole('button', { name: 'Remove data source(s)' }));
+    expect(getByText('Remove 1 association')).toBeInTheDocument();
+    fireEvent.click(getByText('Remove 1 association'));
+    fireEvent.click(getByRole('button', { name: 'Remove 1 association' }));
     await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
     });

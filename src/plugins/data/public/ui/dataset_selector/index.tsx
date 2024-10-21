@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import React from 'react';
 import { Dataset, Query, TimeRange } from '../../../common';
 import { DatasetSelector } from './dataset_selector';
@@ -17,25 +17,21 @@ interface ConnectedDatasetSelectorProps {
 const ConnectedDatasetSelector = ({ onSubmit }: ConnectedDatasetSelectorProps) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const queryString = services.data.query.queryString;
-  const initialDataset = queryString.getQuery().dataset || queryString.getDefaultQuery().dataset;
-  const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(initialDataset);
+  const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(
+    () => queryString.getQuery().dataset || queryString.getDefaultQuery().dataset
+  );
 
-  useEffect(() => {
-    const subscription = queryString.getUpdates$().subscribe((query) => {
-      setSelectedDataset(query.dataset);
-    });
-
-    return () => subscription.unsubscribe();
-  }, [queryString]);
-
-  const handleDatasetChange = (dataset?: Dataset) => {
-    setSelectedDataset(dataset);
-    if (dataset) {
-      const query = queryString.getInitialQueryByDataset(dataset);
-      queryString.setQuery(query);
-      onSubmit!(queryString.getQuery());
-    }
-  };
+  const handleDatasetChange = useCallback(
+    (dataset?: Dataset) => {
+      setSelectedDataset(dataset);
+      if (dataset) {
+        const query = queryString.getInitialQueryByDataset(dataset);
+        queryString.setQuery(query);
+        onSubmit!(queryString.getQuery());
+      }
+    },
+    [onSubmit, queryString]
+  );
 
   return (
     <DatasetSelector

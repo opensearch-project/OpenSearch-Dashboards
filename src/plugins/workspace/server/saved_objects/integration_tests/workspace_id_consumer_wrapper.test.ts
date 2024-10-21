@@ -277,6 +277,14 @@ describe('workspace_id_consumer integration test', () => {
       );
     });
 
+    it('should return error when find with a not existing workspace', async () => {
+      const findResult = await osdTestServer.request
+        .get(root, `/w/not_exist_workspace_id/api/saved_objects/_find?type=${dashboard.type}`)
+        .expect(400);
+
+      expect(findResult.body.message).toEqual('Invalid workspaces');
+    });
+
     it('import within workspace', async () => {
       await clearFooAndBar();
 

@@ -1,0 +1,2 @@
+feat:
+- Update workspace server to support data connection type ([#8200](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8200))

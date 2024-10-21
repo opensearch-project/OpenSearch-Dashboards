@@ -17,3 +17,9 @@ export interface QueryAssistParameters {
   // for MDS
   dataSourceId?: string;
 }
+
+export enum QueryAssistContextType {
+  QUESTION,
+  QUERY,
+  DATA,
+}

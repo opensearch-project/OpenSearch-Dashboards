@@ -421,6 +421,10 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
           },
           "opensearchDashboards": Object {
             "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+            "dashboards": Object {
+              "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+              "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+            },
             "dataSource": Object {
               "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
               "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -456,7 +460,7 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
             },
             "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
             "visualize": Object {
-              "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+              "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
             },
           },
         },
@@ -492,7 +496,7 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
     <EuiPopover
       anchorPosition="downLeft"
       button={
-        <EuiButtonEmpty
+        <EuiSmallButtonEmpty
           className="languageSelector__button"
           iconSide="right"
           iconSize="s"
@@ -500,7 +504,7 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
           onClick={[Function]}
         >
           DQL
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
       }
       className="languageSelector"
       closePopover={[Function]}
@@ -516,57 +520,66 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
         <div
           className="euiPopover__anchor"
         >
-          <EuiButtonEmpty
+          <EuiSmallButtonEmpty
             className="languageSelector__button"
             iconSide="right"
             iconSize="s"
             iconType="arrowDown"
             onClick={[Function]}
           >
-            <button
-              className="euiButtonEmpty euiButtonEmpty--primary languageSelector__button"
-              disabled={false}
+            <EuiButtonEmpty
+              className="languageSelector__button"
+              iconSide="right"
               iconSize="s"
+              iconType="arrowDown"
               onClick={[Function]}
-              type="button"
+              size="s"
             >
-              <EuiButtonContent
-                className="euiButtonEmpty__content"
-                iconGap="m"
-                iconSide="right"
-                iconSize="m"
-                iconType="arrowDown"
-                textProps={
-                  Object {
-                    "className": "euiButtonEmpty__text",
-                  }
-                }
+              <button
+                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small languageSelector__button"
+                disabled={false}
+                iconSize="s"
+                onClick={[Function]}
+                type="button"
               >
-                <span
-                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                <EuiButtonContent
+                  className="euiButtonEmpty__content"
+                  iconGap="m"
+                  iconSide="right"
+                  iconSize="m"
+                  iconType="arrowDown"
+                  textProps={
+                    Object {
+                      "className": "euiButtonEmpty__text",
+                    }
+                  }
                 >
-                  <EuiIcon
-                    className="euiButtonContent__icon"
-                    color="inherit"
-                    size="m"
-                    type="arrowDown"
+                  <span
+                    className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
-                    <span
+                    <EuiIcon
                       className="euiButtonContent__icon"
                       color="inherit"
-                      data-euiicon-type="arrowDown"
                       size="m"
-                    />
-                  </EuiIcon>
-                  <span
-                    className="euiButtonEmpty__text"
-                  >
-                    DQL
+                      type="arrowDown"
+                    >
+                      <span
+                        className="euiButtonContent__icon"
+                        color="inherit"
+                        data-euiicon-type="arrowDown"
+                        size="m"
+                      />
+                    </EuiIcon>
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      DQL
+                    </span>
                   </span>
-                </span>
-              </EuiButtonContent>
-            </button>
-          </EuiButtonEmpty>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
         </div>
       </div>
     </EuiPopover>
@@ -995,6 +1008,10 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
           },
           "opensearchDashboards": Object {
             "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+            "dashboards": Object {
+              "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+              "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+            },
             "dataSource": Object {
               "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
               "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -1030,7 +1047,7 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
             },
             "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
             "visualize": Object {
-              "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+              "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
             },
           },
         },
@@ -1066,7 +1083,7 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
     <EuiPopover
       anchorPosition="downLeft"
       button={
-        <EuiButtonEmpty
+        <EuiSmallButtonEmpty
           className="languageSelector__button"
           iconSide="right"
           iconSize="s"
@@ -1074,7 +1091,7 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
           onClick={[Function]}
         >
           Lucene
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
       }
       className="languageSelector"
       closePopover={[Function]}
@@ -1090,57 +1107,66 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
         <div
           className="euiPopover__anchor"
         >
-          <EuiButtonEmpty
+          <EuiSmallButtonEmpty
             className="languageSelector__button"
             iconSide="right"
             iconSize="s"
             iconType="arrowDown"
             onClick={[Function]}
           >
-            <button
-              className="euiButtonEmpty euiButtonEmpty--primary languageSelector__button"
-              disabled={false}
+            <EuiButtonEmpty
+              className="languageSelector__button"
+              iconSide="right"
               iconSize="s"
+              iconType="arrowDown"
               onClick={[Function]}
-              type="button"
+              size="s"
             >
-              <EuiButtonContent
-                className="euiButtonEmpty__content"
-                iconGap="m"
-                iconSide="right"
-                iconSize="m"
-                iconType="arrowDown"
-                textProps={
-                  Object {
-                    "className": "euiButtonEmpty__text",
-                  }
-                }
+              <button
+                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small languageSelector__button"
+                disabled={false}
+                iconSize="s"
+                onClick={[Function]}
+                type="button"
               >
-                <span
-                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                <EuiButtonContent
+                  className="euiButtonEmpty__content"
+                  iconGap="m"
+                  iconSide="right"
+                  iconSize="m"
+                  iconType="arrowDown"
+                  textProps={
+                    Object {
+                      "className": "euiButtonEmpty__text",
+                    }
+                  }
                 >
-                  <EuiIcon
-                    className="euiButtonContent__icon"
-                    color="inherit"
-                    size="m"
-                    type="arrowDown"
+                  <span
+                    className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                   >
-                    <span
+                    <EuiIcon
                       className="euiButtonContent__icon"
                       color="inherit"
-                      data-euiicon-type="arrowDown"
                       size="m"
-                    />
-                  </EuiIcon>
-                  <span
-                    className="euiButtonEmpty__text"
-                  >
-                    Lucene
+                      type="arrowDown"
+                    >
+                      <span
+                        className="euiButtonContent__icon"
+                        color="inherit"
+                        data-euiicon-type="arrowDown"
+                        size="m"
+                      />
+                    </EuiIcon>
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      Lucene
+                    </span>
                   </span>
-                </span>
-              </EuiButtonContent>
-            </button>
-          </EuiButtonEmpty>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
         </div>
       </div>
     </EuiPopover>

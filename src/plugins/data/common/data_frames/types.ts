@@ -4,6 +4,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { BehaviorSubject } from 'rxjs';
 import { IFieldType } from './fields';
 
 export * from './_df_cache';
@@ -19,6 +20,7 @@ export interface DataFrameService {
   get: () => IDataFrame | undefined;
   set: (dataFrame: IDataFrame) => void;
   clear: () => void;
+  df$: BehaviorSubject<IDataFrame | undefined>;
 }
 
 /**

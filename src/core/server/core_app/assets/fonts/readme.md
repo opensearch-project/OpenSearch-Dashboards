@@ -3,7 +3,7 @@
 OpenSearch Dashboards packages these fonts:
 
 * [Rubik](https://fonts.google.com/specimen/Rubik) was pulled from the Google Fonts website on August 8th, 2024.
-* [Fira Code](https://fonts.google.com/specimen/Fira+Code) was pulled from the Google Fonts website on August 8th, 2024.
+* [Source Code Pro](https://github.com/adobe-fonts/source-code-pro) upright v2.042 and italic v1.062.
 
 * [Source Sans 3](https://github.com/adobe-fonts/source-sans) v3.052
 * [Source Code Pro](https://github.com/adobe-fonts/source-code-pro) upright v2.042 and italic v1.062.

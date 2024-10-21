@@ -1,0 +1,76 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TopNavMenu Component should render correctly when not use updatedUX 1`] = `
+<div>
+  <div
+    class="euiTabs euiTabs--small"
+    role="tablist"
+  >
+    <button
+      aria-selected="false"
+      class="euiTab"
+      data-test-subj="foo"
+      role="tab"
+      title="foo"
+      type="button"
+    >
+      <span
+        class="euiTab__content"
+      >
+        foo
+      </span>
+    </button>
+    <button
+      aria-selected="false"
+      class="euiTab"
+      data-test-subj="bar"
+      role="tab"
+      title="bar"
+      type="button"
+    >
+      <span
+        class="euiTab__content"
+      >
+        bar
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`TopNavMenu Component should render correctly when use updatedUX 1`] = `
+<div>
+  <div
+    class="euiSpacer euiSpacer--s"
+  />
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        />
+      </div>
+    </div>
+    <div
+      class="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--l"
+  />
+</div>
+`;

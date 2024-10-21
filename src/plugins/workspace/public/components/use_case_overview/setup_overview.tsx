@@ -77,6 +77,8 @@ export const registerEssentialOverviewContent = (
         description: card.description,
         title: card.title,
         cardProps: {
+          titleElement: 'h4',
+          titleSize: 's',
           selectable: {
             onClick: () => {
               core.application.navigateToApp(card.navigateAppId);
@@ -143,6 +145,8 @@ export const registerAnalyticsAllOverviewContent = (
         description: card.description,
         title: card.title,
         cardProps: {
+          titleElement: 'h4',
+          titleSize: 's',
           layout: 'horizontal',
         },
         onClick: async () => {

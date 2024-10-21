@@ -4,13 +4,13 @@
  */
 
 import { render } from '@testing-library/react';
-import React, { ComponentProps } from 'react';
+import React, { ComponentProps, PropsWithChildren } from 'react';
 import { IntlProvider } from 'react-intl';
 import { QueryAssistCallOut } from './call_outs';
 
 type Props = ComponentProps<typeof QueryAssistCallOut>;
 
-const IntlWrapper = ({ children }: { children: unknown }) => (
+const IntlWrapper = ({ children }: PropsWithChildren<unknown>) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
 

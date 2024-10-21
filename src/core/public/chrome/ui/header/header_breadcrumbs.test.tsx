@@ -107,44 +107,28 @@ describe('HeaderBreadcrumbs', () => {
     wrapper.update();
     expect(wrapper.find('.euiBreadcrumbWrapper')).toHaveLength(2);
   });
+});
 
-  it('remove heading home when workspace is enabled', () => {
+describe('EuiSimplifiedBreadcrumbs', () => {
+  it('renders updates to the breadcrumbs$ observable', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
-    const breadcrumbsEnricher$ = new BehaviorSubject((crumbs: ChromeBreadcrumb[]) => [
-      { text: 'Home', home: true },
-      { text: 'Analytics' },
-      ...crumbs,
-    ]);
     const wrapper = mount(
       <HeaderBreadcrumbs
         appTitle$={new BehaviorSubject('')}
         breadcrumbs$={breadcrumbs$}
-        breadcrumbsEnricher$={breadcrumbsEnricher$}
-        dropHomeFromBreadcrumb={true}
+        breadcrumbsEnricher$={new BehaviorSubject(undefined)}
+        renderFullLength={true}
+        hideTrailingSeparator={true}
       />
     );
-    let breadcrumbs = wrapper.find('.euiBreadcrumbWrapper');
-    expect(breadcrumbs).toHaveLength(2);
-    expect(breadcrumbs.at(0).text()).toBe('Analytics');
-    expect(breadcrumbs.at(1).text()).toBe('First');
+    expect(wrapper.find('.euiBreadcrumbSeparator .euiBreadcrumbSeparator')).toHaveLength(0);
 
-    // if no home property, we don't drop by text
-    act(() => {
-      breadcrumbsEnricher$.next((items) => items);
-      breadcrumbs$.next([{ text: 'Home' }, { text: 'Second' }]);
-    });
+    act(() => breadcrumbs$.next([{ text: 'First' }, { text: 'Second' }]));
     wrapper.update();
-    breadcrumbs = wrapper.find('.euiBreadcrumbWrapper');
-    expect(breadcrumbs).toHaveLength(2);
-    expect(breadcrumbs.at(0).text()).toBe('Home');
-    expect(breadcrumbs.at(1).text()).toBe('Second');
+    expect(wrapper.find('.euiSimplifiedBreadcrumbs .euiBreadcrumbSeparator')).toHaveLength(1);
 
-    act(() => {
-      breadcrumbsEnricher$.next((items) => []);
-      breadcrumbs$.next([{ text: 'Home' }, { text: 'Second' }]);
-    });
+    act(() => breadcrumbs$.next([]));
     wrapper.update();
-    breadcrumbs = wrapper.find('.euiBreadcrumbWrapper');
-    expect(breadcrumbs).toHaveLength(0);
+    expect(wrapper.find('.euiSimplifiedBreadcrumbs')).toMatchSnapshot();
   });
 });

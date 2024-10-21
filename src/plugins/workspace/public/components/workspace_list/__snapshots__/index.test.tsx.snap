@@ -411,7 +411,7 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                       <span
                         class="euiTableCellContent__text"
                       >
-                        Analytics (All)
+                        Analytics
                       </span>
                     </div>
                   </td>

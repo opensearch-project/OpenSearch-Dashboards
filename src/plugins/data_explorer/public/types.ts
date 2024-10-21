@@ -10,6 +10,7 @@ import { ViewServiceStart, ViewServiceSetup } from './services/view_service';
 import { IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { Store } from './utils/state_management';
+import { UsageCollectionSetup } from '../../usage_collection/public';
 
 export type DataExplorerPluginSetup = ViewServiceSetup;
 
@@ -18,6 +19,7 @@ export interface DataExplorerPluginStart {}
 
 export interface DataExplorerPluginSetupDependencies {
   data: DataPublicPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export interface DataExplorerPluginStartDependencies {

@@ -59,13 +59,7 @@ export const getNoItemsMessage = (
                 defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
                 values={{
                   sampleDataInstallLink: (
-                    <EuiLink
-                      onClick={() =>
-                        application.navigateToApp('home', {
-                          path: '#/tutorial_directory/sampleData',
-                        })
-                      }
-                    >
+                    <EuiLink onClick={() => application.navigateToApp('import_sample_data')}>
                       <FormattedMessage
                         id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
                         defaultMessage="Install some sample data"

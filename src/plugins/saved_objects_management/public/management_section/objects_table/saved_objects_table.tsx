@@ -392,7 +392,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   debouncedFetchObjects = debounce(async () => {
     const { activeQuery: query } = this.state;
-    const { notifications, http } = this.props;
+    const { notifications, http, useUpdatedUX } = this.props;
 
     try {
       const resp = await findObjects(http, this.findOptions);
@@ -421,7 +421,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       notifications.toasts.addDanger({
         title: i18n.translate(
           'savedObjectsManagement.objectsTable.unableFindSavedObjectsNotificationMessage',
-          { defaultMessage: 'Unable find saved objects' }
+          {
+            defaultMessage:
+              'Unable find {useUpdatedUX, select, true {assets} other {saved objects}}',
+            values: { useUpdatedUX },
+          }
         ),
         text: `${error}`,
       });
@@ -429,7 +433,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }, 300);
 
   debouncedFetchObject = debounce(async (type: string, id: string) => {
-    const { notifications, http } = this.props;
+    const { notifications, http, useUpdatedUX } = this.props;
     try {
       const resp = await findObject(http, type, id);
       if (!this._isMounted) {
@@ -455,7 +459,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       notifications.toasts.addDanger({
         title: i18n.translate(
           'savedObjectsManagement.objectsTable.unableFindSavedObjectNotificationMessage',
-          { defaultMessage: 'Unable to find saved object' }
+          {
+            defaultMessage:
+              'Unable to find {useUpdatedUX, select, true {asset} other {saved object}}',
+            values: { useUpdatedUX },
+          }
         ),
         text: `${error}`,
       });
@@ -581,7 +589,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   showExportSuccessMessage = (exportDetails: SavedObjectsExportResultDetails | undefined) => {
-    const { notifications } = this.props;
+    const { notifications, useUpdatedUX } = this.props;
     if (exportDetails && exportDetails.missingReferences.length > 0) {
       notifications.toasts.addWarning({
         title: i18n.translate(
@@ -589,8 +597,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           {
             defaultMessage:
               'Your file is downloading in the background. ' +
-              'Some related objects could not be found. ' +
+              'Some related {useUpdatedUX, select, true {assets} other {objects}} could not be found. ' +
               'Please see the last line in the exported file for a list of missing objects.',
+            values: {
+              useUpdatedUX,
+            },
           }
         ),
       });
@@ -622,7 +633,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   delete = async () => {
-    const { savedObjectsClient, notifications } = this.props;
+    const { savedObjectsClient, notifications, useUpdatedUX } = this.props;
     const { selectedSavedObjects, isDeleting } = this.state;
 
     if (isDeleting) {
@@ -657,7 +668,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       notifications.toasts.addDanger({
         title: i18n.translate(
           'savedObjectsManagement.objectsTable.unableDeleteSavedObjectsNotificationMessage',
-          { defaultMessage: 'Unable to delete saved objects' }
+          {
+            defaultMessage:
+              'Unable to delete {useUpdatedUX, select, true {assets} other {saved objects}}',
+            values: { useUpdatedUX },
+          }
         ),
         text: `${error}`,
       });
@@ -695,6 +710,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         savedObjects={this.props.savedObjectsClient}
         notifications={this.props.notifications}
         dataSourceManagement={this.props.dataSourceManagement}
+        useUpdatedUX={this.props.useUpdatedUX}
       />
     );
   }
@@ -704,7 +720,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   onDuplicateAll = async () => {
-    const { notifications, http } = this.props;
+    const { notifications, http, useUpdatedUX } = this.props;
     const findOptions = this.findOptions;
     findOptions.perPage = 9999;
     findOptions.page = 1;
@@ -725,7 +741,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       notifications.toasts.addDanger({
         title: i18n.translate(
           'savedObjectsManagement.objectsTable.unableFindSavedObjectsNotificationMessage',
-          { defaultMessage: 'Unable find saved objects' }
+          {
+            defaultMessage:
+              'Unable find {useUpdatedUX, select, true {assets} other {saved objects}}',
+            values: { useUpdatedUX },
+          }
         ),
         text: `${error}`,
       });
@@ -738,15 +758,15 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     targetWorkspace: string,
     targetWorkspaceName: string
   ) => {
-    const { notifications, workspaces } = this.props;
+    const { notifications, workspaces, useUpdatedUX } = this.props;
     const workspaceClient = workspaces.client$.getValue();
 
     const showErrorNotification = () => {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
           defaultMessage:
-            'Unable to copy {errorCount, plural, one {# saved object} other {# saved objects}}.',
-          values: { errorCount: savedObjects.length },
+            'Unable to copy {useUpdatedUX, select, true {{errorCount, plural, one {# asset} other {# assets}}} other {{errorCount, plural, one {# saved object} other {# saved objects}}}}.',
+          values: { errorCount: savedObjects.length, useUpdatedUX },
         }),
       });
     };
@@ -790,6 +810,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         notifications={this.props.notifications}
         onClose={this.hideDuplicateModal}
         selectedSavedObjects={duplicateSelectedSavedObjects}
+        useUpdatedUX={this.props.useUpdatedUX}
       />
     );
   }
@@ -975,8 +996,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
               <h2>
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalTitle"
-                  defaultMessage="Export {filteredItemCount, plural, one{# object} other {# objects}}"
+                  defaultMessage="Export {useUpdatedUX, select, true {{filteredItemCount, plural, one{# asset} other {# assets}}} other {{filteredItemCount, plural, one{# object} other {# objects}}}}"
                   values={{
+                    useUpdatedUX: this.props.useUpdatedUX,
                     filteredItemCount,
                   }}
                 />
@@ -1017,7 +1039,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             label={
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                defaultMessage="Include related objects"
+                defaultMessage="Include related {useUpdatedUX, select, true {assets} other {objects}}"
+                values={{
+                  useUpdatedUX: this.props.useUpdatedUX,
+                }}
               />
             }
             checked={isIncludeReferencesDeepChecked}
@@ -1122,18 +1147,16 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       });
     }
 
-    // Add workspace filter
-    if (workspaceEnabled && availableWorkspaces?.length) {
+    // Add workspace filter when out of workspace
+    if (workspaceEnabled && availableWorkspaces?.length && !currentWorkspace) {
       const wsCounts = savedObjectCounts.workspaces || {};
-      const wsFilterOptions = availableWorkspaces
-        .filter((ws) => (currentWorkspace ? currentWorkspace.id === ws.id : true))
-        .map((ws) => {
-          return {
-            name: ws.name,
-            value: ws.name,
-            view: `${ws.name} (${wsCounts[ws.id] || 0})`,
-          };
-        });
+      const wsFilterOptions = availableWorkspaces.map((ws) => {
+        return {
+          name: ws.name,
+          value: ws.name,
+          view: `${ws.name} (${wsCounts[ws.id] || 0})`,
+        };
+      });
 
       filters.push({
         type: 'field_value_selection',
@@ -1148,7 +1171,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }
 
     return (
-      <EuiPageContent horizontalPosition="center">
+      <EuiPageContent horizontalPosition="center" paddingSize={useUpdatedUX ? 'm' : undefined}>
         {this.renderFlyout()}
         {this.renderRelationships()}
         {this.renderDeleteConfirmModal()}
