@@ -29,6 +29,21 @@
  */
 
 import { load } from 'cheerio';
+import { i18nLoader } from '@osd/i18n';
+
+jest.mock('@osd/i18n', () => {
+  const originalModule = jest.requireActual('@osd/i18n');
+  return {
+    ...originalModule,
+    i18nLoader: {
+      getRegisteredLocales: jest.fn(),
+      getTranslationsByLocale: jest.fn(),
+      isRegisteredLocale: jest.fn(),
+    },
+  };
+});
+
+const i18nLoaderMock = jest.mocked(i18nLoader, true);
 
 import { httpServerMock } from '../http/http_server.mocks';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
@@ -160,6 +175,34 @@ describe('RenderingService', () => {
         const data = JSON.parse(dom('osd-injected-metadata').attr('data') || '');
 
         expect(data).toMatchSnapshot(INJECTED_METADATA);
+      });
+
+      it('renders "core" page driven by overridden locale', async () => {
+        i18nLoaderMock.isRegisteredLocale.mockReturnValue(true);
+        const content = await render(
+          createOpenSearchDashboardsRequest({ query: { locale: 'TR-tr' } }),
+          uiSettings,
+          {}
+        );
+        const dom = load(content);
+        const $elStyle = dom('html');
+
+        expect(i18nLoader.isRegisteredLocale).toHaveBeenCalledWith('tr-TR');
+        expect($elStyle.attr('lang')).toBe('tr-TR');
+      });
+
+      it('renders "core" page driven by invalid overridden locale', async () => {
+        i18nLoaderMock.isRegisteredLocale.mockReturnValue(false);
+        const content = await render(
+          createOpenSearchDashboardsRequest({ query: { locale: 'xx-XX' } }),
+          uiSettings,
+          {}
+        );
+        const dom = load(content);
+        const $elStyle = dom('html');
+
+        expect(i18nLoader.isRegisteredLocale).toHaveBeenCalledWith('xx-XX');
+        expect($elStyle.attr('lang')).toBe('en');
       });
     });
   });

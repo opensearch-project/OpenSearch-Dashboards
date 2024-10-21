@@ -91,7 +91,7 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
         {copiedCount && (
           <EuiFlexItem grow={false}>
             <EuiTitle size="xs">
-              <h4 className="savedObjectsManagementImportSummary__copiedCountCount">
+              <h4 className="savedObjectsManagementImportSummary__createdCount">
                 <FormattedMessage
                   id="savedObjectsManagement.copyResult.copiedCountHeader"
                   defaultMessage="{copiedCount} Successful"
@@ -220,11 +220,13 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
       <EuiFlyout ownFocus onClose={onClose} size="s">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
-            <FormattedMessage
-              id="savedObjectsManagement.copyResult.title"
-              defaultMessage="Copy saved objects to {workspaceName}"
-              values={{ workspaceName }}
-            />
+            <h2>
+              <FormattedMessage
+                id="savedObjectsManagement.copyResult.title"
+                defaultMessage="Copy saved objects to {workspaceName}"
+                values={{ workspaceName }}
+              />
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{this.copyResult({ failedCopies, successfulCopies })}</EuiFlyoutBody>

@@ -19,17 +19,21 @@ Object {
             type="button"
           >
             <span
-              class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+              class="euiButtonContent euiButton__content"
             >
               <span
                 class="euiButtonContent__icon"
                 color="inherit"
-                data-euiicon-type="arrowDown"
+                data-euiicon-type="plusInCircle"
               />
               <span
                 class="euiButton__text"
               >
                 Add collaborators
+                  
+                <span
+                  data-euiicon-type="arrowDown"
+                />
               </span>
             </span>
           </button>
@@ -52,17 +56,21 @@ Object {
           type="button"
         >
           <span
-            class="euiButtonContent euiButtonContent--iconRight euiButton__content"
+            class="euiButtonContent euiButton__content"
           >
             <span
               class="euiButtonContent__icon"
               color="inherit"
-              data-euiicon-type="arrowDown"
+              data-euiicon-type="plusInCircle"
             />
             <span
               class="euiButton__text"
             >
               Add collaborators
+                
+              <span
+                data-euiicon-type="arrowDown"
+              />
             </span>
           </span>
         </button>

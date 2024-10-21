@@ -1,0 +1,2 @@
+fix:
+- [Workspace] Workspace assets page crashed after library_write permission revoked ([#8648](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8648))

@@ -3,10 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import React from 'react';
 import { Dataset, Query, TimeRange } from '../../../common';
-import { DatasetSelector } from './dataset_selector';
+import {
+  DatasetSelector,
+  DatasetSelectorUsingButtonEmptyProps,
+  DatasetSelectorUsingButtonProps,
+  DatasetSelectorAppearance,
+} from './dataset_selector';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IDataPluginServices } from '../../types';
 
@@ -14,12 +19,26 @@ interface ConnectedDatasetSelectorProps {
   onSubmit: ((query: Query, dateRange?: TimeRange | undefined) => void) | undefined;
 }
 
-const ConnectedDatasetSelector = ({ onSubmit }: ConnectedDatasetSelectorProps) => {
+const ConnectedDatasetSelector = ({
+  onSubmit,
+  ...datasetSelectorProps
+}: ConnectedDatasetSelectorProps &
+  (DatasetSelectorUsingButtonProps | DatasetSelectorUsingButtonEmptyProps)) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const queryString = services.data.query.queryString;
   const [selectedDataset, setSelectedDataset] = useState<Dataset | undefined>(
     () => queryString.getQuery().dataset || queryString.getDefaultQuery().dataset
   );
+
+  useEffect(() => {
+    const subscription = queryString.getUpdates$().subscribe((query) => {
+      setSelectedDataset(query.dataset);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [queryString]);
 
   const handleDatasetChange = useCallback(
     (dataset?: Dataset) => {
@@ -28,6 +47,7 @@ const ConnectedDatasetSelector = ({ onSubmit }: ConnectedDatasetSelectorProps) =
         const query = queryString.getInitialQueryByDataset(dataset);
         queryString.setQuery(query);
         onSubmit!(queryString.getQuery());
+        queryString.getDatasetService().addRecentDataset(dataset);
       }
     },
     [onSubmit, queryString]
@@ -35,6 +55,7 @@ const ConnectedDatasetSelector = ({ onSubmit }: ConnectedDatasetSelectorProps) =
 
   return (
     <DatasetSelector
+      {...datasetSelectorProps}
       selectedDataset={selectedDataset}
       setSelectedDataset={handleDatasetChange}
       services={services}
@@ -42,4 +63,8 @@ const ConnectedDatasetSelector = ({ onSubmit }: ConnectedDatasetSelectorProps) =
   );
 };
 
-export { ConnectedDatasetSelector as DatasetSelector };
+export {
+  ConnectedDatasetSelector as DatasetSelector,
+  ConnectedDatasetSelectorProps as DatasetSelectorProps,
+  DatasetSelectorAppearance,
+};

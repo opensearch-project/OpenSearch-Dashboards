@@ -51,3 +51,9 @@ export const STACKED_OPTIONS = {
   STACKED: 'stacked',
   STACKED_WITHIN_SERIES: 'stacked_within_series',
 };
+
+export const AXIS_POSITION = {
+  LEFT: 'left',
+  RIGHT: 'right',
+  HIDDEN: 'hidden',
+};

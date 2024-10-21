@@ -36,7 +36,6 @@ import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { getQueryService, getIndexPatterns } from '../../services';
-import { DatasetSelector } from '../dataset_selector';
 import { DefaultInputProps } from './editors';
 import { MonacoCompatibleQuerySuggestion } from '../../autocomplete/providers/query_suggestion_provider';
 
@@ -454,7 +453,6 @@ export default class QueryEditorUI extends Component<Props, State> {
           className={classNames('osdQueryEditor__banner', this.props.bannerClassName)}
         />
         <div className="osdQueryEditor__topBar">
-          <DatasetSelector onSubmit={this.props.onSubmit} />
           <div className="osdQueryEditor__input">
             {this.state.isCollapsed
               ? languageEditor.TopBar.Collapsed()

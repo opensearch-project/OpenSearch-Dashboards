@@ -127,7 +127,7 @@ export const Header = ({
                 testId: 'duplicateObjects',
                 run: onDuplicate,
                 controlType: 'button',
-                disabled: objectCount === 0,
+                isDisabled: objectCount === 0,
                 iconType: 'copy',
                 label: i18n.translate(
                   'savedObjectsManagement.objectsTable.header.duplicateAllAssetsButtonLabel',

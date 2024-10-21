@@ -62,6 +62,7 @@ export class QueryService {
     storage,
     sessionStorage,
     defaultSearchInterceptor,
+    notifications,
   }: QueryServiceSetupDependencies): IQuerySetup {
     this.filterManager = new FilterManager(uiSettings);
 
@@ -75,7 +76,8 @@ export class QueryService {
       storage,
       sessionStorage,
       uiSettings,
-      defaultSearchInterceptor
+      defaultSearchInterceptor,
+      notifications
     );
 
     this.state$ = createQueryStateObservable({
@@ -97,7 +99,7 @@ export class QueryService {
     storage,
     uiSettings,
     indexPatterns,
-    applicaton,
+    application,
   }: QueryServiceStartDependencies): IQueryStart {
     this.queryStringManager.getDatasetService().init(indexPatterns);
     return {
@@ -110,7 +112,7 @@ export class QueryService {
       savedQueries: createSavedQueryService(
         savedObjectsClient,
         this.queryStringManager,
-        applicaton
+        application
       ),
       state$: this.state$,
       timefilter: this.timefilter,

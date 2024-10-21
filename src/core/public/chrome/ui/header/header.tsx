@@ -81,6 +81,7 @@ import { HeaderLogo } from './header_logo';
 import { HeaderNavControls } from './header_nav_controls';
 import { HomeLoader } from './home_loader';
 import { RecentItems } from './recent_items';
+import { GlobalSearchCommand } from '../../global_search';
 
 export interface HeaderProps {
   http: HttpStart;
@@ -122,6 +123,7 @@ export interface HeaderProps {
   workspaceList$: Observable<WorkspaceObject[]>;
   currentWorkspace$: WorkspacesStart['currentWorkspace$'];
   useUpdatedHeader?: boolean;
+  globalSearchCommands?: GlobalSearchCommand[];
 }
 
 const hasValue = (value: any) => {
@@ -147,6 +149,7 @@ export function Header({
   navGroupEnabled,
   setCurrentNavGroup,
   useUpdatedHeader,
+  globalSearchCommands,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -557,23 +560,27 @@ export function Header({
       <EuiHeader className="newTopNavHeader">
         <EuiFlexGroup
           justifyContent="spaceBetween"
-          gutterSize="s"
+          gutterSize="none"
           className="secondaryPageHeaderFlexGroup"
         >
           {/* Left Section */}
-          <EuiHeaderSection side="left">
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem>
+          <EuiHeaderSection side="left" grow={true} style={{ flexShrink: 1 }}>
+            <EuiFlexGroup gutterSize="s" className="leftSecondaryPageHeaderFlexGroup">
+              <EuiFlexItem grow={false}>
                 <EuiHeaderSectionItem border="none" data-test-subj="headerApplicationTitle">
                   <EuiTitle size="l" className="newTopNavHeaderTitle">
-                    {breadcrumbs && <h1>{breadcrumbs[breadcrumbs.length - 1]?.text}</h1>}
+                    {breadcrumbs && (
+                      <h1 className="eui-textBreakWord">
+                        {breadcrumbs[breadcrumbs.length - 1]?.text}
+                      </h1>
+                    )}
                   </EuiTitle>
                 </EuiHeaderSectionItem>
               </EuiFlexItem>
 
-              {badge && <EuiFlexItem>{badge}</EuiFlexItem>}
+              {badge && <EuiFlexItem grow={false}>{badge}</EuiFlexItem>}
 
-              {leftControls && <EuiFlexItem>{leftControls}</EuiFlexItem>}
+              {leftControls && <EuiFlexItem grow={false}>{leftControls}</EuiFlexItem>}
             </EuiFlexGroup>
           </EuiHeaderSection>
 
@@ -658,6 +665,7 @@ export function Header({
             setCurrentNavGroup={setCurrentNavGroup}
             capabilities={application.capabilities}
             currentWorkspace$={observables.currentWorkspace$}
+            globalSearchCommands={globalSearchCommands}
           />
         ) : (
           <CollapsibleNav

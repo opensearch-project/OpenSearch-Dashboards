@@ -1407,10 +1407,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@npm:@opensearch-project/oui@1.15.0":
-  version "1.15.0"
-  resolved "https://registry.yarnpkg.com/@opensearch-project/oui/-/oui-1.15.0.tgz#bec1bcb15cee9bcc31c71920b1b491d0cb60a8d9"
-  integrity sha512-xa/ygOlmNnQy+LcSgsbr9WCL8jt6HzWoJcV4tI0uPo1j7GNTyi6IccE30CXjmUEqh3Fce82ghKzBuWGreJXGeQ==
+"@elastic/eui@npm:@opensearch-project/oui@1.17.0":
+  version "1.17.0"
+  resolved "https://registry.yarnpkg.com/@opensearch-project/oui/-/oui-1.17.0.tgz#8a09f9f03f82eaf9404e59ac961b663748baba68"
+  integrity sha512-lr8S88sOUrMElO4w38laRsASLcCvXuASLVFZG7giFL31O6AkwGbII/Dux5jH26OdQ9T7CshPDZ5y/h3pyuSbUQ==
   dependencies:
     "@types/chroma-js" "^2.4.0"
     "@types/react-beautiful-dnd" "^13.1.3"
@@ -11404,10 +11404,10 @@ json-stringify-safe@5.0.1, json-stringify-safe@^5.0.1, json-stringify-safe@~5.0.
   resolved "https://registry.yarnpkg.com/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz#1296a2d58fd45f19a0f6ce01d65701e2c735b6eb"
   integrity sha1-Epai1Y/UXxmg9s4B1lcB4sc1tus=
 
-json11@^1.0.4, json11@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/json11/-/json11-1.1.2.tgz#35ffd3ee5073b0cc09ef826b0a0dc005ebef2b5b"
-  integrity sha512-5r1RHT1/Gr/jsI/XZZj/P6F11BKM8xvTaftRuiLkQI9Z2PFDukM82Ysxw8yDszb3NJP/NKnRlSGmhUdG99rlBw==
+json11@^1.0.4, json11@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/json11/-/json11-2.0.0.tgz#06c4ad0a40b50c5de99a87f6d3028593137e5641"
+  integrity sha512-VuKJKUSPEJape+daTm70Nx7vdcdorf4S6LCyN2z0jUVH4UrQ4ftXo2kC0bnHpCREmxHuHqCNVPA75BjI3CB6Ag==
 
 json5@^1.0.1:
   version "1.0.2"

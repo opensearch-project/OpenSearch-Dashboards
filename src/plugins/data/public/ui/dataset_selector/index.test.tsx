@@ -19,11 +19,19 @@ jest.mock('./dataset_selector', () => ({
 }));
 
 describe('ConnectedDatasetSelector', () => {
+  const mockSubscribe = jest.fn();
+  const mockUnsubscribe = jest.fn();
   const mockQueryString = {
     getQuery: jest.fn().mockReturnValue({}),
     getDefaultQuery: jest.fn().mockReturnValue({}),
     getInitialQueryByDataset: jest.fn().mockReturnValue({}),
     setQuery: jest.fn(),
+    getDatasetService: jest.fn().mockReturnValue({
+      addRecentDataset: jest.fn(),
+    }),
+    getUpdates$: jest.fn().mockReturnValue({
+      subscribe: mockSubscribe.mockReturnValue({ unsubscribe: mockUnsubscribe }),
+    }),
   };
   const mockOnSubmit = jest.fn();
   const mockServices = {

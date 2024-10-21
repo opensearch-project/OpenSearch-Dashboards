@@ -17,28 +17,140 @@ import {
   EuiEmptyPrompt,
   EuiContextMenuPanelDescriptor,
   EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiConfirmModalProps,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { useMountedState } from 'react-use';
 import { WorkspacePermissionSetting } from './types';
-import { WorkspacePermissionItemType, permissionModeOptions, typeOptions } from './constants';
-import { getPermissionModeId } from './utils';
+import { WorkspacePermissionItemType } from './constants';
+import { getPermissionModeId, isWorkspacePermissionSetting } from './utils';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { PermissionModeId, IWorkspaceResponse } from '../../../../../core/public';
 import { AddCollaboratorButton } from './add_collaborator_button';
 import { WorkspaceCollaboratorType } from '../../services/workspace_collaborator_types_service';
 import {
   WORKSPACE_ACCESS_LEVEL_NAMES,
   accessLevelNameToWorkspacePermissionModesMap,
 } from '../../constants';
-import { WorkspaceCollaboratorAccessLevel } from '../../types';
+import { WorkspaceCollaborator, WorkspaceCollaboratorAccessLevel } from '../../types';
+import { BackgroundPic } from '../../assets/background_pic';
 
 export type PermissionSetting = Pick<WorkspacePermissionSetting, 'id'> &
   Partial<WorkspacePermissionSetting>;
 
+// TODO: Update PermissionModeId to align with WorkspaceCollaboratorAccessLevel
+const permissionModeId2WorkspaceAccessLevelMap: {
+  [key in PermissionModeId]: WorkspaceCollaboratorAccessLevel;
+} = {
+  [PermissionModeId.Owner]: 'admin',
+  [PermissionModeId.Read]: 'readOnly',
+  [PermissionModeId.ReadAndWrite]: 'readAndWrite',
+};
+
+const deletionModalConfirmButton = i18n.translate(
+  'workspace.detail.collaborator.delete.modal.confirm',
+  {
+    defaultMessage: 'Confirm',
+  }
+);
+
+const deletionModalCancelButton = i18n.translate(
+  'workspace.detail.collaborator.delete.modal.cancel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+const deletionModalWarning = i18n.translate(
+  'workspace.workspace.detail.collaborator.modal.delete.warning',
+  {
+    defaultMessage:
+      'By removing the last administrator, only application administrators will be able to manage this workspace',
+  }
+);
+
+const changeAccessModalWarning = i18n.translate(
+  'workspace.workspace.detail.collaborator.modal.changeAccessLevel.warning',
+  {
+    defaultMessage:
+      'By changing the last administrator to a lesser access, only application administrators will be able to manage this workspace',
+  }
+);
+
+const deletionModalConfirm = i18n.translate('workspace.detail.collaborator.modal.delete.confirm', {
+  defaultMessage: 'Delete collaborator? The collaborators will not have access to the workspace.',
+});
+
+const BaseConfirmModal = ({
+  onCancel,
+  onConfirm,
+  ...restProps
+}: React.PropsWithChildren<
+  EuiConfirmModalProps & {
+    onConfirm: () => Promise<void>;
+    onCancel: () => void;
+  }
+>) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const isMounted = useMountedState();
+  return (
+    <EuiConfirmModal
+      {...restProps}
+      onCancel={onCancel}
+      onConfirm={async () => {
+        setIsProcessing(true);
+        try {
+          await onConfirm();
+        } finally {
+          if (isMounted()) {
+            setIsProcessing(false);
+          }
+        }
+      }}
+      confirmButtonDisabled={isProcessing}
+      isLoading={isProcessing}
+    />
+  );
+};
+
+const convertPermissionSettingToWorkspaceCollaborator = (
+  permissionSetting: WorkspacePermissionSetting
+) => ({
+  collaboratorId:
+    permissionSetting.type === WorkspacePermissionItemType.User
+      ? permissionSetting.userId
+      : permissionSetting.group,
+  permissionType: permissionSetting.type,
+  accessLevel:
+    permissionModeId2WorkspaceAccessLevelMap[getPermissionModeId(permissionSetting.modes)],
+});
+
+export const getDisplayedType = (
+  supportCollaboratorTypes: WorkspaceCollaboratorType[],
+  collaborator: WorkspaceCollaborator
+) => {
+  for (const collaboratorType of supportCollaboratorTypes) {
+    const displayedType = collaboratorType.getDisplayedType?.(collaborator);
+    if (displayedType) {
+      return displayedType;
+    }
+  }
+};
+
 interface Props {
   permissionSettings: PermissionSetting[];
   displayedCollaboratorTypes: WorkspaceCollaboratorType[];
-  handleSubmitPermissionSettings: (permissionSettings: WorkspacePermissionSetting[]) => void;
+  handleSubmitPermissionSettings: (
+    permissionSettings: WorkspacePermissionSetting[]
+  ) => Promise<IWorkspaceResponse<boolean>>;
 }
+
+type PermissionSettingWithAccessLevelAndDisplayedType = PermissionSetting & {
+  accessLevel?: string;
+  displayedType?: string;
+};
 
 export const WorkspaceCollaboratorTable = ({
   permissionSettings,
@@ -46,19 +158,25 @@ export const WorkspaceCollaboratorTable = ({
   handleSubmitPermissionSettings,
 }: Props) => {
   const [selection, setSelection] = useState<PermissionSetting[]>([]);
-  const { overlays } = useOpenSearchDashboards();
+  const {
+    overlays,
+    services: { notifications },
+  } = useOpenSearchDashboards();
 
-  const items = useMemo(() => {
+  const items: PermissionSettingWithAccessLevelAndDisplayedType[] = useMemo(() => {
     return permissionSettings.map((setting) => {
+      const collaborator = isWorkspacePermissionSetting(setting)
+        ? convertPermissionSettingToWorkspaceCollaborator(setting)
+        : undefined;
       const basicSettings = {
         ...setting,
         // This is used for table display and search match.
-        displayedType:
-          typeOptions.find((option) => option.value === setting.type)?.inputDisplay ?? '',
-        accessLevel:
-          permissionModeOptions.find(
-            (option) => option.value === getPermissionModeId(setting.modes ?? [])
-          )?.inputDisplay ?? '',
+        displayedType: collaborator
+          ? getDisplayedType(displayedCollaboratorTypes, collaborator)
+          : undefined,
+        accessLevel: collaborator
+          ? WORKSPACE_ACCESS_LEVEL_NAMES[collaborator.accessLevel]
+          : undefined,
       };
       // Unique primary key and filter null value
       if (setting.type === WorkspacePermissionItemType.User) {
@@ -75,55 +193,126 @@ export const WorkspaceCollaboratorTable = ({
       }
       return basicSettings;
     });
-  }, [permissionSettings]);
+  }, [permissionSettings, displayedCollaboratorTypes]);
+
+  const adminCollaboratorsNum = useMemo(() => {
+    const admins = items.filter((item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin);
+    return admins.length;
+  }, [items]);
 
   const emptyStateMessage = useMemo(() => {
     return (
-      <EuiEmptyPrompt
-        title={
-          <h3>
-            {i18n.translate('workspace.workspaceDetail.collaborator.emptyState.title', {
-              defaultMessage: 'Your workspace doesn’t have any collaborators.',
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiEmptyPrompt
+            title={
+              <h3>
+                {i18n.translate('workspace.workspaceDetail.collaborator.emptyState.title', {
+                  defaultMessage: 'Your workspace doesn’t have any collaborators.',
+                })}
+              </h3>
+            }
+            titleSize="s"
+            body={i18n.translate('workspace.workspaceDetail.collaborator.emptyState.body', {
+              defaultMessage:
+                'Currently you’re the only user who has access to the workspace as an owner. Share this workspace by adding collaborators.',
             })}
-          </h3>
-        }
-        titleSize="s"
-        body={i18n.translate('workspace.workspaceDetail.collaborator.emptyState.body', {
-          defaultMessage:
-            'Currently you’re the only user who has access to the workspace as an owner. Share this workspace by adding collaborators.',
-        })}
-        actions={
-          <AddCollaboratorButton
-            displayedTypes={displayedCollaboratorTypes}
-            permissionSettings={permissionSettings}
-            handleSubmitPermissionSettings={handleSubmitPermissionSettings}
+            actions={
+              <AddCollaboratorButton
+                displayedTypes={displayedCollaboratorTypes}
+                permissionSettings={permissionSettings}
+                handleSubmitPermissionSettings={handleSubmitPermissionSettings}
+                fill={false}
+              />
+            }
           />
-        }
-      />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <BackgroundPic />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }, [displayedCollaboratorTypes, permissionSettings, handleSubmitPermissionSettings]);
 
-  const openDeleteConfirmModal = ({ onConfirm }: { onConfirm: () => void }) => {
+  const openDeleteConfirmModal = ({
+    onConfirm,
+    selections,
+  }: {
+    onConfirm: () => Promise<void>;
+    selections: PermissionSettingWithAccessLevelAndDisplayedType[];
+  }) => {
+    const adminOfSelection = selections.filter(
+      (item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin
+    ).length;
+    const shouldShowWarning =
+      adminCollaboratorsNum === adminOfSelection && adminCollaboratorsNum !== 0;
     const modal = overlays.openModal(
-      <EuiConfirmModal
+      <BaseConfirmModal
+        data-test-subj="delete-confirm-modal"
         title={i18n.translate('workspace.detail.collaborator.actions.delete', {
           defaultMessage: 'Delete collaborator',
         })}
         onCancel={() => modal.close()}
         onConfirm={onConfirm}
-        cancelButtonText="Cancel"
-        confirmButtonText="Confirm"
+        cancelButtonText={deletionModalCancelButton}
+        confirmButtonText={deletionModalConfirmButton}
       >
-        <EuiText>
+        <EuiText color={shouldShowWarning ? 'danger' : 'default'}>
+          <p>{shouldShowWarning ? deletionModalWarning : deletionModalConfirm}</p>
+        </EuiText>
+      </BaseConfirmModal>
+    );
+    return modal;
+  };
+
+  const openChangeAccessLevelModal = ({
+    onConfirm,
+    selections,
+    type,
+  }: {
+    onConfirm: () => Promise<void>;
+    selections: PermissionSettingWithAccessLevelAndDisplayedType[];
+    type: WorkspaceCollaboratorAccessLevel;
+  }) => {
+    let shouldShowWarning = false;
+    if (type !== 'admin') {
+      const adminOfSelection = selections.filter(
+        (item) => item.accessLevel === WORKSPACE_ACCESS_LEVEL_NAMES.admin
+      ).length;
+      shouldShowWarning = adminCollaboratorsNum - adminOfSelection < 1 && adminCollaboratorsNum > 0;
+    }
+
+    const modal = overlays.openModal(
+      <BaseConfirmModal
+        data-test-subj="change-access-confirm-modal"
+        title={i18n.translate('workspace.detail.collaborator.table.change.access.level', {
+          defaultMessage: 'Change access level',
+        })}
+        onCancel={() => {
+          modal.close();
+        }}
+        onConfirm={onConfirm}
+        cancelButtonText={deletionModalCancelButton}
+        confirmButtonText={deletionModalConfirmButton}
+      >
+        <EuiText color={shouldShowWarning ? 'danger' : 'default'}>
           <p>
-            {i18n.translate('workspace.detail.collaborator.delete.confirm', {
-              defaultMessage:
-                'Delete collaborator? The collaborators will not have access to the workspace.',
-            })}
+            {shouldShowWarning
+              ? changeAccessModalWarning
+              : i18n.translate('workspace.detail.collaborator.changeAccessLevel.confirmation', {
+                  defaultMessage:
+                    'Do you want to change access level of {numCollaborators} collaborator{pluralSuffix} to "{accessLevel}"?',
+                  values: {
+                    numCollaborators: selections.length,
+                    pluralSuffix: selections.length > 1 ? 's' : '',
+                    accessLevel: type,
+                  },
+                })}
           </p>
         </EuiText>
-      </EuiConfirmModal>
+      </BaseConfirmModal>
     );
+
     return modal;
   };
 
@@ -134,24 +323,45 @@ export const WorkspaceCollaboratorTable = ({
 
     const onClick = () => {
       const modal = openDeleteConfirmModal({
-        onConfirm: () => {
+        onConfirm: async () => {
           let newSettings = permissionSettings;
           selection.forEach(({ id }) => {
             newSettings = newSettings.filter((_item) => _item.id !== id);
           });
-          handleSubmitPermissionSettings(newSettings as WorkspacePermissionSetting[]);
-          setSelection([]);
-          modal.close();
+          const result = await handleSubmitPermissionSettings(
+            newSettings as WorkspacePermissionSetting[]
+          );
+          if (result?.success) {
+            notifications?.toasts?.addSuccess({
+              title: i18n.translate('workspace.collaborator.delete.success.message', {
+                defaultMessage:
+                  'Delete collaborator{pluralSuffix, select, true {} other {s}} successfully.',
+                values: {
+                  pluralSuffix: selection.length === 1,
+                },
+              }),
+            });
+            setSelection([]);
+            modal.close();
+          }
         },
+        selections: selection,
       });
     };
 
     return (
-      <EuiButton color="danger" iconType="trash" onClick={onClick}>
-        {i18n.translate('workspace.detail.collaborator.delete', {
-          defaultMessage: 'Delete {num} collaborators',
+      <EuiButton
+        color="danger"
+        iconType="trash"
+        onClick={onClick}
+        data-test-subj="confirm-delete-button"
+        size="s"
+      >
+        {i18n.translate('workspace.detail.collaborator.delete.button.info', {
+          defaultMessage: 'Delete {num} collaborator{pluralSuffix, select, true {} other {s}}',
           values: {
             num: selection.length,
+            pluralSuffix: selection.length === 1,
           },
         })}
       </EuiButton>
@@ -168,6 +378,7 @@ export const WorkspaceCollaboratorTable = ({
         isTableAction={false}
         selection={selection}
         handleSubmitPermissionSettings={handleSubmitPermissionSettings}
+        openChangeAccessLevelModal={openChangeAccessLevelModal}
       />
     );
   };
@@ -176,64 +387,83 @@ export const WorkspaceCollaboratorTable = ({
     box: {
       incremental: true,
     },
+    compressed: true,
     filters: [
       {
         type: 'field_value_selection',
         field: 'displayedType',
+        compressed: true,
         name: 'Type',
-        multiSelect: false,
-        options: Array.from(new Set(items.map(({ displayedType }) => displayedType ?? ''))).map(
-          (item) => ({
-            value: item,
-            name: item,
-          })
-        ),
+        multiSelect: 'or',
+        options: Array.from(
+          new Set(items.flatMap(({ displayedType }) => (!!displayedType ? [displayedType] : [])))
+        ).map((item) => ({
+          value: item,
+          name: item,
+        })),
       },
       {
         type: 'field_value_selection',
         field: 'accessLevel',
+        compressed: true,
         name: 'Access level',
-        multiSelect: false,
-        options: Array.from(new Set(items.map(({ accessLevel }) => accessLevel ?? ''))).map(
-          (item) => ({
-            value: item,
-            name: item,
-          })
-        ),
+        multiSelect: 'or',
+        options: Array.from(
+          new Set(items.flatMap(({ accessLevel }) => (!!accessLevel ? [accessLevel] : [])))
+        ).map((item) => ({
+          value: item,
+          name: item,
+        })),
       },
     ],
     toolsLeft: renderToolsLeft(),
     toolsRight: renderToolsRight(),
   };
 
-  const columns: Array<EuiBasicTableColumn<PermissionSetting>> = [
+  const columns: Array<EuiBasicTableColumn<PermissionSettingWithAccessLevelAndDisplayedType>> = [
     {
       field: 'primaryId',
-      name: 'ID',
+      name: i18n.translate('workspace.collaborator.id.name', {
+        defaultMessage: 'ID',
+      }),
+      width: '30%',
     },
     {
       field: 'displayedType',
-      name: 'Type',
+      name: i18n.translate('workspace.collaborator.type.name', {
+        defaultMessage: 'Type',
+      }),
+      render: (displayedType: string) => displayedType || <>&mdash;</>,
+      width: '30%',
     },
     {
       field: 'accessLevel',
-      name: 'Access level',
+      name: i18n.translate('workspace.collaborator.access.level.name', {
+        defaultMessage: 'Access level',
+      }),
+      render: (accessLevel: string) => accessLevel || <>&mdash;</>,
+      width: '30%',
     },
     {
-      name: 'Actions',
+      name: i18n.translate('workspace.collaborator.actions.name', {
+        defaultMessage: 'Actions',
+      }),
       field: '',
-      render: (item: PermissionSetting) => (
+      width: '10%',
+      align: 'right',
+      render: (item: PermissionSettingWithAccessLevelAndDisplayedType) => (
         <Actions
           isTableAction={true}
           selection={[item]}
           permissionSettings={permissionSettings}
           handleSubmitPermissionSettings={handleSubmitPermissionSettings}
           openDeleteConfirmModal={openDeleteConfirmModal}
+          openChangeAccessLevelModal={openChangeAccessLevelModal}
         />
       ),
     },
   ];
-  const selectionValue: EuiTableSelectionType<PermissionSetting> = {
+  const selectionValue: EuiTableSelectionType<PermissionSettingWithAccessLevelAndDisplayedType> = {
     onSelectionChange: (newSelection) => setSelection(newSelection),
   };
 
@@ -241,6 +471,7 @@ export const WorkspaceCollaboratorTable = ({
     <EuiInMemoryTable
       items={items}
       columns={columns}
+      compressed={true}
       search={search}
       itemId="id"
       pagination={true}
@@ -257,62 +488,82 @@ const Actions = ({
   permissionSettings,
   handleSubmitPermissionSettings,
   openDeleteConfirmModal,
+  openChangeAccessLevelModal,
 }: {
   isTableAction: boolean;
-  selection?: PermissionSetting[];
+  selection?: PermissionSettingWithAccessLevelAndDisplayedType[];
   permissionSettings: PermissionSetting[];
-  handleSubmitPermissionSettings: (permissionSettings: WorkspacePermissionSetting[]) => void;
-  openDeleteConfirmModal?: ({ onConfirm }: { onConfirm: () => void }) => { close: () => void };
+  handleSubmitPermissionSettings: (
+    permissionSettings: WorkspacePermissionSetting[]
+  ) => Promise<IWorkspaceResponse<boolean>>;
+  openDeleteConfirmModal?: ({
+    onConfirm,
+    selections,
+  }: {
+    onConfirm: () => Promise<void>;
+    selections: PermissionSettingWithAccessLevelAndDisplayedType[];
+  }) => { close: () => void };
+  openChangeAccessLevelModal?: ({
+    onConfirm,
+    selections,
+    type,
+  }: {
+    onConfirm: () => Promise<void>;
+    selections: PermissionSettingWithAccessLevelAndDisplayedType[];
+    type: WorkspaceCollaboratorAccessLevel;
+  }) => { close: () => void };
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { overlays } = useOpenSearchDashboards();
+  const {
+    services: { notifications },
+  } = useOpenSearchDashboards();
 
   const accessLevelOptions = (Object.keys(
     WORKSPACE_ACCESS_LEVEL_NAMES
   ) as WorkspaceCollaboratorAccessLevel[]).map((level) => ({
     name: WORKSPACE_ACCESS_LEVEL_NAMES[level],
-    onClick: async () => {
+    onClick: () => {
       setIsPopoverOpen(false);
-      if (selection) {
-        const modal = overlays.openModal(
-          <EuiConfirmModal
-            title={i18n.translate('workspace.detail.collaborator.table.change.access.level', {
-              defaultMessage: 'Change access level',
-            })}
-            onCancel={() => modal.close()}
-            onConfirm={() => {
-              let newSettings = permissionSettings;
-              selection.forEach(({ id }) => {
-                newSettings = newSettings.map((item) =>
-                  id === item.id
-                    ? {
-                        ...item,
-                        modes: accessLevelNameToWorkspacePermissionModesMap[level],
-                      }
-                    : item
-                );
-              });
-              handleSubmitPermissionSettings(newSettings as WorkspacePermissionSetting[]);
-              modal.close();
-            }}
-            cancelButtonText="Cancel"
-            confirmButtonText="Confirm"
-          >
-            <EuiText>
-              <p>
-                {i18n.translate('workspace.detail.collaborator.changeAccessLevel.confirmation', {
+      if (selection && openChangeAccessLevelModal) {
+        const modal = openChangeAccessLevelModal({
+          onConfirm: async () => {
+            let newSettings = permissionSettings;
+            selection.forEach(({ id }) => {
+              newSettings = newSettings.map((item) =>
+                id === item.id
+                  ? {
+                      ...item,
+                      modes: accessLevelNameToWorkspacePermissionModesMap[level],
+                    }
+                  : item
+              );
+            });
+
+            const result = await handleSubmitPermissionSettings(
+              newSettings as WorkspacePermissionSetting[]
+            );
+
+            if (result?.success) {
+              notifications?.toasts?.addSuccess({
+                title: i18n.translate('workspace.detail.collaborator.change.access.success.title', {
+                  defaultMessage: 'The access level changed',
+                }),
+                text: i18n.translate('workspace.detail.collaborator.change.access.success.body', {
                   defaultMessage:
-                    'Do you want to change access level to {numCollaborators} collaborator{pluralSuffix} to "{accessLevel}"?',
+                    'The access level is changed to {level} for {num} collaborator{pluralSuffix, select, true {} other {s}}.',
                   values: {
-                    numCollaborators: selection.length,
-                    pluralSuffix: selection.length > 1 ? 's' : '',
-                    accessLevel: WORKSPACE_ACCESS_LEVEL_NAMES[level],
+                    level: WORKSPACE_ACCESS_LEVEL_NAMES[level],
+                    num: selection.length,
+                    pluralSuffix: selection.length === 1 ? '' : 's',
                   },
-                })}
-              </p>
-            </EuiText>
-          </EuiConfirmModal>
-        );
+                }),
+              });
+            }
+            modal.close();
+          },
+          selections: selection,
+          type: level,
+        });
       }
     },
     icon: '',
@@ -336,14 +587,28 @@ const Actions = ({
             setIsPopoverOpen(false);
             if (selection && openDeleteConfirmModal) {
               const modal = openDeleteConfirmModal({
-                onConfirm: () => {
+                onConfirm: async () => {
                   let newSettings = permissionSettings;
                   selection.forEach(({ id }) => {
                     newSettings = newSettings.filter((_item) => _item.id !== id);
                   });
-                  handleSubmitPermissionSettings(newSettings as WorkspacePermissionSetting[]);
+                  const result = await handleSubmitPermissionSettings(
+                    newSettings as WorkspacePermissionSetting[]
+                  );
+                  if (result?.success) {
+                    notifications?.toasts?.addSuccess({
+                      title: i18n.translate('workspace.detail.collaborator.delete.success', {
+                        defaultMessage:
+                          'Delete collaborator{pluralSuffix, select, true {} other {s}} successfully.',
+                        values: {
+                          pluralSuffix: selection.length === 1,
+                        },
+                      }),
+                    });
+                  }
                   modal.close();
                 },
+                selections: selection,
               });
             }
           },
@@ -361,6 +626,7 @@ const Actions = ({
 
   const button = isTableAction ? (
     <EuiButtonIcon
+      aria-label="workspace-collaborator-table-actions"
       iconType="boxesHorizontal"
       onClick={() => setIsPopoverOpen(true)}
       data-test-subj="workspace-detail-collaborator-table-actions-box"
@@ -368,6 +634,7 @@ const Actions = ({
   ) : (
     <EuiButton
       iconType="arrowDown"
+      size="s"
       iconSide="right"
       onClick={() => setIsPopoverOpen(true)}
       data-test-subj="workspace-detail-collaborator-table-actions"
