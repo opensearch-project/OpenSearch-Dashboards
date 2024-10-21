@@ -112,7 +112,11 @@
 
   .navGroupEnabledNavTopWrapper {
     padding: 0 $euiSizeS;
-    padding-left: $euiSize;
+    padding-left: $euiSizeS;
+
+    .navGroupEnabledHomeIcon {
+      margin-left: $euiSizeS;
+    }
   }
 
   .searchBar-wrapper {
