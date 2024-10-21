@@ -179,8 +179,7 @@ export class DataPublicPlugin
     autoComplete.addQuerySuggestionProvider('PPL', getPPLSuggestions);
 
     return {
-      // TODO: MQL
-      autocomplete: this.autocomplete.setup(core),
+      autocomplete: autoComplete,
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,

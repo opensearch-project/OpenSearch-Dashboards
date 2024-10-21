@@ -36,16 +36,18 @@ export function getIgnoredTokens(): number[] {
     OpenSearchPPLParser.COMMA,
     OpenSearchPPLParser.PLUS,
     OpenSearchPPLParser.MINUS,
-    // OpenSearchPPLParser.EQUAL,
-    // OpenSearchPPLParser.NOT_EQUAL,
-    // OpenSearchPPLParser.LESS,
-    // OpenSearchPPLParser.NOT_LESS,
-    // OpenSearchPPLParser.GREATER,
-    // OpenSearchPPLParser.NOT_GREATER,
-    // OpenSearchPPLParser.OR,
-    // OpenSearchPPLParser.AND,
-    // OpenSearchPPLParser.XOR,
-    // OpenSearchPPLParser.NOT,
+    OpenSearchPPLParser.EQUAL,
+    OpenSearchPPLParser.NOT_EQUAL,
+    OpenSearchPPLParser.LESS,
+    OpenSearchPPLParser.NOT_LESS,
+    OpenSearchPPLParser.GREATER,
+    OpenSearchPPLParser.NOT_GREATER,
+    OpenSearchPPLParser.OR,
+    OpenSearchPPLParser.AND,
+    OpenSearchPPLParser.XOR,
+    OpenSearchPPLParser.NOT,
+    OpenSearchPPLParser.LT_PRTHS,
+    OpenSearchPPLParser.RT_PRTHS,
   ];
   for (let i = firstFunctionIndex; i <= lastFunctionIndex; i++) {
     if (!operatorsToInclude.includes(i)) {
@@ -64,6 +66,8 @@ const tokenDictionary: any = {
   CLOSING_BRACKET: OpenSearchPPLParser.RT_PRTHS,
   SEARCH: OpenSearchPPLParser.SEARCH,
   SOURCE: OpenSearchPPLParser.SOURCE,
+  PIPE: OpenSearchPPLParser.PIPE,
+  ID: OpenSearchPPLParser.ID,
 };
 
 const rulesToVisit = new Set([
@@ -78,6 +82,7 @@ const rulesToVisit = new Set([
   OpenSearchPPLParser.RULE_multiFieldRelevanceFunctionName,
   OpenSearchPPLParser.RULE_positionFunctionName,
   OpenSearchPPLParser.RULE_evalFunctionName,
+  OpenSearchPPLParser.RULE_literalValue,
 ]);
 
 export function processVisitedRules(
@@ -88,6 +93,7 @@ export function processVisitedRules(
   let suggestSourcesOrTables: OpenSearchPplAutocompleteResult['suggestSourcesOrTables'];
   let suggestAggregateFunctions = false;
   let shouldSuggestColumns = false;
+  let suggestValuesForColumn: string | undefined;
 
   for (const [ruleId, rule] of rules) {
     switch (ruleId) {
@@ -101,6 +107,22 @@ export function processVisitedRules(
       }
       case OpenSearchPPLParser.RULE_tableQualifiedName: {
         suggestSourcesOrTables = SourceOrTableSuggestion.TABLES;
+        break;
+      }
+      case OpenSearchPPLParser.RULE_literalValue: {
+        let currentIndex = cursorTokenIndex - 1;
+        while (currentIndex > -1) {
+          const token = tokenStream.get(currentIndex);
+          if (token.type === tokenDictionary.PIPE) {
+            break;
+          }
+          if (token.type === tokenDictionary.ID) {
+            suggestValuesForColumn = token.text;
+            break;
+          }
+          currentIndex--;
+        }
+        break;
       }
     }
   }
@@ -109,6 +131,7 @@ export function processVisitedRules(
     suggestSourcesOrTables,
     suggestAggregateFunctions,
     shouldSuggestColumns,
+    suggestValuesForColumn,
   };
 }
 
@@ -145,7 +168,7 @@ export function enrichAutocompleteResult(
   const result: OpenSearchPplAutocompleteResult = {
     ...baseResult,
     ...suggestionsFromRules,
-    suggestColumns: shouldSuggestColumns ? ({ name: '' } as TableContextSuggestion) : undefined,
+    suggestColumns: shouldSuggestColumns ? ({} as TableContextSuggestion) : undefined,
   };
   return result;
 }

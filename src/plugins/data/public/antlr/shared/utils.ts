@@ -8,6 +8,7 @@ import { distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
 import { CodeCompletionCore } from 'antlr4-c3';
 import { Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
 import { monaco } from '@osd/monaco';
+import { HttpSetup } from 'opensearch-dashboards/public';
 import { QueryStringContract } from '../../query';
 import { findCursorTokenIndex } from './cursor';
 import { GeneralErrorListener } from './general_error_listerner';
@@ -17,6 +18,8 @@ import { ParsingSubject } from './types';
 import { quotesRegex } from './constants';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestion } from '../../autocomplete';
+import { IDataPluginServices } from '../../types';
+import { Dataset, UI_SETTINGS } from '../../../common';
 
 export interface IDataSourceRequestHandlerParams {
   dataSourceId: string;
@@ -46,9 +49,9 @@ export const getRawSuggestionData$ = (
     })
   );
 
-const fetchFromAPI = async (api: any, body: string) => {
+const fetchFromAPI = async (http: HttpSetup, body: string) => {
   try {
-    return await api.http.fetch({
+    return await http.fetch({
       method: 'POST',
       path: '/api/enhancements/search/sql',
       body,
@@ -63,7 +66,7 @@ const fetchFromAPI = async (api: any, body: string) => {
 export const fetchData = (
   tables: string[],
   queryFormatter: (table: string, dataSourceId?: string, title?: string) => any,
-  api: any,
+  http: HttpSetup,
   queryString: QueryStringContract
 ) => {
   return new Promise((resolve, reject) => {
@@ -72,14 +75,14 @@ export const fetchData = (
       ({ dataSourceId, title }) => {
         const requests = tables.map(async (table) => {
           const body = JSON.stringify(queryFormatter(table, dataSourceId, title));
-          return fetchFromAPI(api, body);
+          return fetchFromAPI(http, body);
         });
         return Promise.all(requests);
       },
       () => {
         const requests = tables.map(async (table) => {
           const body = JSON.stringify(queryFormatter(table));
-          return fetchFromAPI(api, body);
+          return fetchFromAPI(http, body);
         });
         return Promise.all(requests);
       }
@@ -93,24 +96,27 @@ export const fetchData = (
   });
 };
 
-// Specific fetch function for table schemas
-// TODO: remove this after using data set table schema fetcher
-export const fetchTableSchemas = (tables: string[], api: any, queryString: QueryStringContract) => {
-  return fetchData(
-    tables,
-    (table, dataSourceId, title) => ({
-      query: { query: `DESCRIBE TABLES LIKE ${table}`, format: 'jdbc' },
-      df: {
-        meta: {
-          queryConfig: {
-            dataSourceId: dataSourceId || undefined,
-            title: title || undefined,
-          },
-        },
+export const fetchColumnValues = (
+  tables: string[],
+  column: string,
+  services: IDataPluginServices,
+  dataset?: Dataset
+) => {
+  if (!services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES)) {
+    return new Promise(() => []);
+  }
+  const limit = services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT);
+
+  return fetchFromAPI(
+    services.http,
+    JSON.stringify({
+      query: {
+        query: `SELECT ${column} FROM ${tables[0]} GROUP BY ${column} ORDER BY COUNT(${column}) DESC LIMIT ${limit}`,
+        language: 'SQL',
+        dataset,
+        format: 'jdbc',
       },
-    }),
-    api,
-    queryString
+    })
   );
 };
 
