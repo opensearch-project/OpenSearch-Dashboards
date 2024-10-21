@@ -41,40 +41,42 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     setPopover(!isPopoverOpen);
   };
 
-  const updateElapsedTime = () => {
-    const time = Date.now() - (props.queryStatus.startTime || 0);
-    if (time > BUFFER_TIME) {
-      setElapsedTime(time);
-    } else {
-      setElapsedTime(0);
-    }
-  };
-
   useEffect(() => {
+    const updateElapsedTime = () => {
+      const currentTime = Date.now();
+      if (!props.queryStatus.startTime) {
+        return;
+      }
+      const elapsed = currentTime - props.queryStatus.startTime;
+      setElapsedTime(elapsed);
+    };
+
     const interval = setInterval(updateElapsedTime, 1000);
 
-    return () => clearInterval(interval);
-  });
+    return () => {
+      clearInterval(interval);
+      setElapsedTime(0);
+    };
+  }, [props.queryStatus.startTime]);
 
-  if (props.queryStatus.status === ResultStatus.LOADING) {
-    if (elapsedTime < BUFFER_TIME) {
-      return null;
+  if (elapsedTime > BUFFER_TIME) {
+    if (props.queryStatus.status === ResultStatus.LOADING) {
+      const time = Math.floor(elapsedTime / 1000);
+      return (
+        <EuiButtonEmpty
+          color="text"
+          size="xs"
+          onClick={() => {}}
+          isLoading
+          data-test-subj="queryResultLoading"
+        >
+          {i18n.translate('data.query.languageService.queryResults.loadTime', {
+            defaultMessage: 'Loading {time} s',
+            values: { time },
+          })}
+        </EuiButtonEmpty>
+      );
     }
-    const time = Math.floor(elapsedTime / 1000);
-    return (
-      <EuiButtonEmpty
-        color="text"
-        size="xs"
-        onClick={() => {}}
-        isLoading
-        data-test-subj="queryResultLoading"
-      >
-        {i18n.translate('data.query.languageService.queryResults.loadTime', {
-          defaultMessage: 'Loading {time} s',
-          values: { time },
-        })}
-      </EuiButtonEmpty>
-    );
   }
 
   if (props.queryStatus.status === ResultStatus.READY) {
@@ -85,7 +87,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
       });
     } else if (props.queryStatus.elapsedMs < 1000) {
       message = i18n.translate(
-        'data.query.languageService.queryResults.completeTimeInMiliseconds',
+        'data.query.languageService.queryResults.completeTimeInMilliseconds',
         {
           defaultMessage: 'Completed in {timeMS} ms',
           values: { timeMS: props.queryStatus.elapsedMs },

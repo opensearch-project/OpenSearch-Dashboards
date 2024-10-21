@@ -111,7 +111,6 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
       button={
         <EuiSmallButtonEmpty
           iconSide="right"
-          iconSize="s"
           onClick={onButtonClick}
           className="languageSelector__button"
           iconType="arrowDown"

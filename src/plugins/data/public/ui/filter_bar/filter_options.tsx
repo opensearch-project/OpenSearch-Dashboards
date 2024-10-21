@@ -90,8 +90,7 @@ const FilterOptionsUI = (props: Props) => {
   const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
   const useNewHeader = Boolean(uiSettings!.get(UI_SETTINGS.NEW_HOME_PAGE));
   const useNewSavedQueryUI = Boolean(uiSettings!.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED));
-  const [indexPattern] = props.indexPatterns;
-  const index = indexPattern && indexPattern.id;
+  const index = Array.isArray(props.indexPatterns) ? props.indexPatterns[0]?.id : undefined;
   const newFilter = buildEmptyFilter(isPinned, index);
 
   const togglePopover = () => {
