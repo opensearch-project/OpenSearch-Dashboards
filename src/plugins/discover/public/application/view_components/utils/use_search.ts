@@ -276,15 +276,15 @@ export const useSearch = (services: DiscoverViewServices) => {
       }
       let errorBody;
       try {
-        errorBody = JSON.parse(error.body.message);
+        errorBody = JSON.parse(error.body);
       } catch (e) {
-        errorBody = error.body.message;
+        errorBody = error.body;
       }
 
       data$.next({
         status: ResultStatus.ERROR,
         queryStatus: {
-          body: errorBody,
+          body: { error: errorBody },
           elapsedMs,
         },
       });

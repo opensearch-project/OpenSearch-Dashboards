@@ -23,10 +23,9 @@ export interface QueryStatus {
   status: ResultStatus;
   body?: {
     error?: {
-      reason?: string;
-      details: string;
+      statusCode?: number;
+      message?: string;
     };
-    statusCode?: number;
   };
   elapsedMs?: number;
   startTime?: number;
@@ -154,20 +153,20 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
       <div style={{ width: '250px' }}>
         <EuiText size="s">
           <strong>
-            {i18n.translate('data.query.languageService.queryResults.reasons', {
-              defaultMessage: `Reasons:`,
+            {i18n.translate('data.query.languageService.queryResults.status', {
+              defaultMessage: `Status:`,
             })}
           </strong>{' '}
-          {props.queryStatus.body.error.reason}
+          {props.queryStatus.body.error?.statusCode}
         </EuiText>
         <EuiText size="s">
           <p>
             <strong>
-              {i18n.translate('data.query.languageService.queryResults.details', {
-                defaultMessage: `Details:`,
+              {i18n.translate('data.query.languageService.queryResults.message', {
+                defaultMessage: `Message:`,
               })}
             </strong>{' '}
-            {props.queryStatus.body.error.details}
+            {props.queryStatus.body.error.message}
           </p>
         </EuiText>
       </div>
