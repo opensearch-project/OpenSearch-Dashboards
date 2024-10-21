@@ -80,7 +80,7 @@ export const CollapsibleNavTop = ({
               flush="both"
               {...homeLinkProps}
               onClick={onIconClick}
-              className="homeIcon"
+              className="navGroupEnabledHomeIcon"
             >
               <EuiIcon
                 type={homeIcon}
