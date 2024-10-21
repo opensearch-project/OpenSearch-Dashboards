@@ -369,7 +369,7 @@ const FilterOptionsUI = (props: Props) => {
     defaultMessage: 'See saved queries',
   });
 
-  const iconForQueryEditorControlPopoverBtn = useNewSavedQueryUI ? 'boxesVertical' : 'folderOpen';
+  const iconForQueryEditorControlPopoverBtn = useNewSavedQueryUI ? 'boxesHorizontal' : 'folderOpen';
 
   const savedQueryPopoverButton = (
     <EuiSmallButtonEmpty

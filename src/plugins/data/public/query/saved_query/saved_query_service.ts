@@ -33,16 +33,9 @@ import { SavedObjectsClientContract, SavedObjectAttributes, CoreStart } from 'sr
 import { first } from 'rxjs/operators';
 import { SavedQueryAttributes, SavedQuery, SavedQueryService } from './types';
 import { QueryStringContract } from '../query_string';
-import { Dataset, UI_SETTINGS } from '../../../common';
+import { UI_SETTINGS } from '../../../common';
 
-type SerializedSavedQueryAttributes = SavedObjectAttributes &
-  SavedQueryAttributes & {
-    query: {
-      query: string;
-      language: string;
-      dataset?: Dataset;
-    };
-  };
+type SerializedSavedQueryAttributes = SavedObjectAttributes & SavedQueryAttributes;
 
 export const createSavedQueryService = (
   savedObjectsClient: SavedObjectsClientContract,
@@ -58,7 +51,7 @@ export const createSavedQueryService = (
       throw new Error('Cannot create saved query without a title');
     }
 
-    const query: any = {
+    const query: SerializedSavedQueryAttributes['query'] = {
       query:
         typeof attributes.query.query === 'string'
           ? attributes.query.query
@@ -70,7 +63,7 @@ export const createSavedQueryService = (
       query.dataset = attributes.query.dataset;
     }
 
-    const queryObject: SerializedSavedQueryAttributes = {
+    const queryObject: SavedQueryAttributes = {
       title: attributes.title.trim(), // trim whitespace before save as an extra precaution against circumventing the front end
       description: attributes.description,
       query,
@@ -139,8 +132,7 @@ export const createSavedQueryService = (
         parseSavedQueryObject(savedObject)
     );
 
-    const currentAppId =
-      (await application?.currentAppId$?.pipe(first()).toPromise()) ?? Promise.resolve(undefined);
+    const currentAppId = (await application?.currentAppId$?.pipe(first()).toPromise()) ?? undefined;
     const languageService = queryStringManager?.getLanguageService();
 
     // Filtering saved queries based on language supported by cirrent application
@@ -172,11 +164,8 @@ export const createSavedQueryService = (
     return await savedObjectsClient.delete('query', id);
   };
 
-  const parseSavedQueryObject = (savedQuery: {
-    id: string;
-    attributes: SerializedSavedQueryAttributes;
-  }) => {
-    const queryString = savedQuery.attributes.query.query;
+  const parseSavedQueryObject = (savedQuery: SavedQuery) => {
+    const queryString = savedQuery.attributes.query.query as string;
     let parsedQuery;
     try {
       parsedQuery = JSON.parse(queryString);
