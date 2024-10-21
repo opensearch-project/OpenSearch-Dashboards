@@ -346,7 +346,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       this.services.notifications.toasts.addDanger(
         this.props.intl.formatMessage(
           {
-            id: 'data.filter.filterEditor.createCustomLabelSwitchLabel',
+            id: 'data.search_bar.save_query.failedToSaveQuery',
             defaultMessage: 'An error occured while saving your query: {errorMessage}',
           },
           { errorMessage: error.message }
