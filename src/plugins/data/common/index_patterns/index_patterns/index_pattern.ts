@@ -94,7 +94,7 @@ export class IndexPattern implements IIndexPattern {
   public version: string | undefined;
   public sourceFilters?: SourceFilter[];
   public dataSourceRef?: SavedObjectReference;
-  public areFieldsLoading?: boolean;
+  public fieldsLoading?: boolean;
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
@@ -138,7 +138,7 @@ export class IndexPattern implements IIndexPattern {
       return this.deserializeFieldFormatMap(mapping);
     });
     this.dataSourceRef = spec.dataSourceRef;
-    this.areFieldsLoading = spec.areFieldsLoading;
+    this.fieldsLoading = spec.fieldsLoading;
   }
 
   /**
@@ -380,8 +380,8 @@ export class IndexPattern implements IIndexPattern {
       : [];
   };
 
-  setFieldLoadingStatus = (status: boolean) => {
-    return (this.areFieldsLoading = status);
+  setFieldsLoading = (status: boolean) => {
+    return (this.fieldsLoading = status);
   };
 
   /**

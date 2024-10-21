@@ -201,7 +201,7 @@ export interface IndexPatternSpec {
   typeMeta?: TypeMeta;
   type?: string;
   dataSourceRef?: SavedObjectReference;
-  areFieldsLoading?: boolean;
+  fieldsLoading?: boolean;
 }
 
 export interface SourceFilter {

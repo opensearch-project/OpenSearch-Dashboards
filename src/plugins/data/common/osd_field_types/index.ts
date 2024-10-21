@@ -32,10 +32,9 @@ export { OsdFieldType } from './osd_field_type';
 
 export {
   castOpenSearchToOsdFieldTypeName,
-  castSQLTypeToOSDFieldType,
-  getFilterableOsdTypeNames,
-  getOsdFieldOverrides,
   getOsdFieldType,
   getOsdTypeNames,
+  getFilterableOsdTypeNames,
+  getOsdFieldOverrides,
   setOsdFieldOverrides,
 } from './osd_field_types';

@@ -44,3 +44,28 @@ export interface SQLQueryResponse {
   total: number;
   size: number;
 }
+
+export enum S3_FIELD_TYPES {
+  BOOLEAN = 'boolean',
+  BYTE = 'byte',
+  SHORT = 'short',
+  INTEGER = 'integer',
+  INT = 'int',
+  LONG = 'long',
+  FLOAT = 'float',
+  DOUBLE = 'double',
+  KEYWORD = 'keyword',
+  TEXT = 'text',
+  STRING = 'string',
+  TIMESTAMP = 'timestamp',
+  DATE = 'date',
+  DATE_NANOS = 'date_nanos',
+  TIME = 'time',
+  INTERVAL = 'interval',
+  IP = 'ip',
+  GEO_POINT = 'geo_point',
+  BINARY = 'binary',
+  STRUCT = 'struct',
+  ARRAY = 'array',
+  UNKNOWN = 'unknown', // For unmapped or unsupported types
+}

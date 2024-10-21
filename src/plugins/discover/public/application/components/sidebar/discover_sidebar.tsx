@@ -232,8 +232,11 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
             </EuiSplitPanel.Inner>
           ) : null}
 
-          <EuiSplitPanel.Inner className="eui-yScroll dscSideBar_fieldListContainer" paddingSize="none">
-            {(fields.length > 0 || selectedIndexPattern.areFieldsLoading) && (
+          <EuiSplitPanel.Inner
+            className="eui-yScroll dscSideBar_fieldListContainer"
+            paddingSize="none"
+          >
+            {(fields.length > 0 || selectedIndexPattern.fieldsLoading) && (
               <>
                 <FieldList
                   category="selected"
@@ -310,7 +313,7 @@ const FieldList = ({
         size="xs"
         className="dscSideBar_fieldGroup"
         aria-label={title}
-        isLoading={selectedIndexPattern.areFieldsLoading ?? false}
+        isLoading={selectedIndexPattern.fieldsLoading ?? false}
       >
         {title}
       </EuiButtonEmpty>

@@ -14,13 +14,12 @@ import {
   DataStructureCustomMeta,
   Dataset,
   DatasetField,
-  OPENSEARCH_SQL_FIELD_TYPES,
-  castSQLTypeToOSDFieldType,
 } from '../../../data/common';
-import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
+import { DatasetTypeConfig, IDataPluginServices, OSD_FIELD_TYPES } from '../../../data/public';
 import {
   API,
   DATASET,
+  S3_FIELD_TYPES,
   S3_PARTITION_INFO_COLUMN,
   SQLQueryResponse,
   handleQueryStatus,
@@ -35,6 +34,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
     tooltip: 'Amazon S3 Connections',
     searchOnLoad: true,
     supportsTimeFilter: false,
+    isFieldLoadAsync: true,
   },
 
   toDataset: (path: DataStructure[]): Dataset => {
@@ -108,7 +108,11 @@ export const s3TypeConfig: DatasetTypeConfig = {
     }
   },
 
-  fetchFields: async (dataset: Dataset, http?: HttpSetup): Promise<DatasetField[]> => {
+  fetchFields: async (
+    dataset: Dataset,
+    services?: IDataPluginServices
+  ): Promise<DatasetField[]> => {
+    const http = services?.http;
     if (!http) return [];
     return await fetchFields(http, dataset);
   },
@@ -285,6 +289,48 @@ const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<Data
   return fetch(http, path, 'TABLE');
 };
 
+/**
+ *  Mapping function from S3_FIELD_TYPES to OSD_FIELD_TYPES
+ *
+ *  @param {S3_FIELD_TYPES} sqlType
+ *  @return {OSD_FIELD_TYPES}
+ */
+export function castS3FieldTypeToOSDFieldType(sqlType: S3_FIELD_TYPES): OSD_FIELD_TYPES {
+  switch (sqlType) {
+    case S3_FIELD_TYPES.BOOLEAN:
+      return OSD_FIELD_TYPES.BOOLEAN;
+    case S3_FIELD_TYPES.BYTE:
+    case S3_FIELD_TYPES.SHORT:
+    case S3_FIELD_TYPES.INT:
+    case S3_FIELD_TYPES.INTEGER:
+    case S3_FIELD_TYPES.LONG:
+    case S3_FIELD_TYPES.FLOAT:
+    case S3_FIELD_TYPES.DOUBLE:
+      return OSD_FIELD_TYPES.NUMBER;
+    case S3_FIELD_TYPES.KEYWORD:
+    case S3_FIELD_TYPES.STRING:
+    case S3_FIELD_TYPES.TEXT:
+      return OSD_FIELD_TYPES.STRING;
+    case S3_FIELD_TYPES.TIMESTAMP:
+    case S3_FIELD_TYPES.DATE:
+    case S3_FIELD_TYPES.DATE_NANOS:
+    case S3_FIELD_TYPES.TIME:
+    case S3_FIELD_TYPES.INTERVAL:
+      return OSD_FIELD_TYPES.DATE;
+    case S3_FIELD_TYPES.IP:
+      return OSD_FIELD_TYPES.IP;
+    case S3_FIELD_TYPES.GEO_POINT:
+      return OSD_FIELD_TYPES.GEO_POINT;
+    case S3_FIELD_TYPES.BINARY:
+      return OSD_FIELD_TYPES.ATTACHMENT;
+    case S3_FIELD_TYPES.STRUCT:
+    case S3_FIELD_TYPES.ARRAY:
+      return OSD_FIELD_TYPES.OBJECT;
+    default:
+      return OSD_FIELD_TYPES.UNKNOWN;
+  }
+}
+
 // Function to process the input and map types using the new SQL to OSD mapping
 export function mapResponseToFields(sqlOutput: SQLQueryResponse): DatasetField[] {
   const datasetFields: DatasetField[] = [];
@@ -299,10 +345,10 @@ export function mapResponseToFields(sqlOutput: SQLQueryResponse): DatasetField[]
 
     // Only include rows with valid types
     if (dataType && dataType !== '') {
-      const sqlType = dataType as OPENSEARCH_SQL_FIELD_TYPES;
+      const sqlType = dataType as S3_FIELD_TYPES;
       datasetFields.push({
         name: colName as string,
-        type: castSQLTypeToOSDFieldType(sqlType),
+        type: castS3FieldTypeToOSDFieldType(sqlType),
       });
     }
   }

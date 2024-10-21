@@ -92,17 +92,20 @@ export class DatasetService {
     }
   }
 
-  public async cacheDataset(dataset: Dataset): Promise<void> {
+  public async cacheDataset(dataset: Dataset, services: IDataPluginServices): Promise<void> {
     const type = this.getType(dataset?.type);
     try {
+      const asyncType = type && type.meta.isFieldLoadAsync;
       if (dataset && dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
-        const fetchedFields = await type?.fetchFields(dataset);
+        const fetchedFields = asyncType
+          ? await type?.fetchFields(dataset)
+          : ({} as IndexPatternFieldMap);
         const spec = {
           id: dataset.id,
           title: dataset.title,
           timeFieldName: dataset.timeFieldName,
-          fields: fetchedFields ?? ({} as IndexPatternFieldMap),
-          areFieldsLoading: true,
+          fields: fetchedFields,
+          fieldsLoading: asyncType ? true : false,
           dataSourceRef: dataset.dataSource
             ? {
                 id: dataset.dataSource.id!,
@@ -113,6 +116,19 @@ export class DatasetService {
         } as IndexPatternSpec;
         const temporaryIndexPattern = await this.indexPatterns?.create(spec, true);
 
+        // Load schema asynchronously if it's an async index pattern
+        if (asyncType && temporaryIndexPattern) {
+          type
+            .fetchFields(dataset, services)
+            .then((fields) => {
+              temporaryIndexPattern?.fields.replaceAll([...fields]);
+              this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
+            })
+            .finally(() => {
+              temporaryIndexPattern.setFieldsLoading(false);
+            });
+        }
+
         if (temporaryIndexPattern) {
           this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
         }
@@ -121,7 +137,6 @@ export class DatasetService {
       throw new Error(`Failed to load dataset: ${dataset?.id}`);
     }
   }
-
   public async fetchOptions(
     services: IDataPluginServices,
     path: DataStructure[],
