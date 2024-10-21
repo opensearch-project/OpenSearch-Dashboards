@@ -62,11 +62,16 @@ export class DocLinksService {
     const OPENSEARCH_WEBSITE_DOCS = `${OPENSEARCH_WEBSITE_URL}docs/${DOC_LINK_VERSION}`;
     const OPENSEARCH_VERSIONED_DOCS = `${OPENSEARCH_WEBSITE_DOCS}/opensearch/`;
     const OPENSEARCH_DASHBOARDS_VERSIONED_DOCS = `${OPENSEARCH_WEBSITE_DOCS}/dashboards/`;
+    const OPENSEARCH_START_DOCS = `${OPENSEARCH_WEBSITE_URL}docs/getting-started/`;
 
     return deepFreeze({
       DOC_LINK_VERSION,
       OPENSEARCH_WEBSITE_URL,
       links: {
+        gettingStarted: {
+          // https://opensearch.org/docs/latest/getting-started/ingest-data/
+          ingestData: `${OPENSEARCH_START_DOCS}ingest-data/`,
+        },
         opensearch: {
           // https://opensearch.org/docs/latest/opensearch/index/
           introduction: `${OPENSEARCH_VERSIONED_DOCS}index/`,
@@ -643,6 +648,9 @@ export interface DocLinksStart {
   readonly DOC_LINK_VERSION: string;
   readonly OPENSEARCH_WEBSITE_URL: string;
   readonly links: {
+    readonly gettingStarted: {
+      readonly ingestData: string;
+    };
     readonly opensearch: {
       readonly introduction: string;
       readonly installation: {
