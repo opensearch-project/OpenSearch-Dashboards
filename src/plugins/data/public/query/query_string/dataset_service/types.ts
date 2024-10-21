@@ -59,7 +59,10 @@ export interface DatasetTypeConfig {
    * Fetches fields for the dataset.
    * @returns {Promise<DatasetField[]>} A promise that resolves to an array of DatasetFields.
    */
-  fetchFields: (dataset: Dataset, services?: IDataPluginServices) => Promise<DatasetField[]>;
+  fetchFields: (
+    dataset: Dataset,
+    services?: Partial<IDataPluginServices>
+  ) => Promise<DatasetField[]>;
   /**
    * Retrieves the supported query languages for this dataset type.
    * @returns {Promise<string[]>} A promise that resolves to an array of supported language ids.

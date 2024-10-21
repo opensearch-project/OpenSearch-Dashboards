@@ -52,12 +52,10 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
         );
         if (!pattern) {
           await data.query.queryString.getDatasetService().cacheDataset(query.dataset, {
-            appName: services.appName,
             uiSettings: services.uiSettings,
             savedObjects: services.savedObjects,
             notifications: services.notifications,
             http: services.http,
-            storage: services.storage,
             data: services.data,
           });
           pattern = await data.indexPatterns.get(

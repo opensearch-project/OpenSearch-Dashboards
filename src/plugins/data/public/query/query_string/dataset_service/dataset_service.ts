@@ -92,13 +92,16 @@ export class DatasetService {
     }
   }
 
-  public async cacheDataset(dataset: Dataset, services: IDataPluginServices): Promise<void> {
+  public async cacheDataset(
+    dataset: Dataset,
+    services: Partial<IDataPluginServices>
+  ): Promise<void> {
     const type = this.getType(dataset?.type);
     try {
       const asyncType = type && type.meta.isFieldLoadAsync;
       if (dataset && dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
         const fetchedFields = asyncType
-          ? await type?.fetchFields(dataset)
+          ? await type?.fetchFields(dataset, services)
           : ({} as IndexPatternFieldMap);
         const spec = {
           id: dataset.id,

@@ -110,7 +110,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
 
   fetchFields: async (
     dataset: Dataset,
-    services?: IDataPluginServices
+    services?: Partial<IDataPluginServices>
   ): Promise<DatasetField[]> => {
     const http = services?.http;
     if (!http) return [];
