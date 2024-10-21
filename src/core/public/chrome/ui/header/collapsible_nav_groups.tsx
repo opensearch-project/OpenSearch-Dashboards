@@ -18,7 +18,6 @@ export interface NavGroupsProps {
   navLinks: ChromeNavLink[];
   suffix?: React.ReactElement;
   style?: React.CSSProperties;
-  className?: string;
   appId?: string;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   onNavItemClick: (
@@ -39,7 +38,6 @@ export function NavGroups({
   navLinks,
   suffix,
   style,
-  className: containerClassName,
   appId,
   navigateToApp,
   onNavItemClick,
@@ -191,7 +189,7 @@ export function NavGroups({
     .filter((navItem) => !!navItem.id);
 
   return (
-    <EuiFlexItem style={style} className={containerClassName}>
+    <EuiFlexItem style={style}>
       <EuiSideNav items={sideNavItems} isOpenOnMobile mobileBreakpoints={[]} />
       {suffix}
     </EuiFlexItem>
