@@ -225,11 +225,25 @@ export class QueryStringManager {
     };
   };
 
-  private getDefaultLanguage() {
-    return (
-      this.storage.get('userQueryLanguage') ||
-      this.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE)
+  private isLanguageSupported(languageId: string) {
+    const currentAppId = this.getCurrentAppId();
+    if (!currentAppId) {
+      return false;
+    }
+
+    return containsWildcardOrValue(
+      this.languageService.getLanguage(languageId)?.supportedAppNames,
+      currentAppId
     );
+  }
+
+  private getDefaultLanguage() {
+    const lastUsedLanguage = this.storage.get('userQueryLanguage');
+    if (lastUsedLanguage && this.isLanguageSupported(lastUsedLanguage)) {
+      return lastUsedLanguage;
+    }
+
+    return this.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE);
   }
 
   private getCurrentAppId = () => {
