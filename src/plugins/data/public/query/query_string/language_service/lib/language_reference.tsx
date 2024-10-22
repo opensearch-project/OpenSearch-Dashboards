@@ -21,6 +21,7 @@ export const LanguageReference = (props: { body: ReactFragment }) => {
           defaultMessage: `Language Reference`,
         })}
         onClick={() => setIsLanguageReferenceOpen(!isLanguageReferenceOpen)}
+        data-test-subj="languageReferenceButton"
       />
     </div>
   );
