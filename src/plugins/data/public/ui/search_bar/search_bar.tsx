@@ -75,6 +75,7 @@ export interface SearchBarOwnProps {
   refreshInterval?: number;
   dateRangeFrom?: string;
   dateRangeTo?: string;
+  datasetSelectorRef?: React.RefObject<HTMLDivElement>;
   datePickerRef?: React.RefObject<HTMLDivElement>;
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
@@ -223,7 +224,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     const showDatePicker = this.props.showDatePicker || this.props.showAutoRefreshOnly;
     // TODO: MQL showQueryEditor should be a prop of it's own but using showQueryInput for now
     const showQueryEditor =
-      this.props.showQueryInput && this.props.indexPatterns && this.state.query;
+      (this.props.showQueryInput && this.props.indexPatterns && this.state.query) ||
+      this.props.datasetSelectorRef?.current;
     return this.props.showQueryBar && (showDatePicker || showQueryEditor);
   }
 
@@ -549,6 +551,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           filterBar={filterBar}
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
+          datasetSelectorRef={this.props.datasetSelectorRef}
           datePickerRef={this.props.datePickerRef}
           savedQueryManagement={searchBarMenu(false, true)}
           queryStatus={this.props.queryStatus}

@@ -491,7 +491,7 @@ export function prependWorkspaceToBreadcrumbs(
 
 export const getUseCaseUrl = (
   useCase: WorkspaceUseCase | undefined,
-  workspace: WorkspaceObject,
+  workspaceId: string,
   application: ApplicationStart,
   http: HttpSetup
 ): string => {
@@ -500,7 +500,7 @@ export const getUseCaseUrl = (
     application.getUrlForApp(appId, {
       absolute: false,
     }),
-    workspace.id,
+    workspaceId,
     http.basePath
   );
   return useCaseURL;

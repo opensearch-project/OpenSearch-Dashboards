@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiI18n } from '@elastic/eui';
+import { EuiI18n, EuiIcon, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
 
@@ -11,6 +11,7 @@ interface GetStartCard {
   id: string;
   title: string;
   description: string;
+  icon: React.JSX.Element;
   footer: React.JSX.Element;
   navigateAppId: string;
   order: number;
@@ -23,43 +24,48 @@ const DASHBOARDS_APP_ID = 'dashboards';
 export const getStartedCards: GetStartCard[] = [
   {
     id: 'get_start_discover',
-    title: i18n.translate('workspace.essential_overview.discover.card.title', {
-      defaultMessage: 'Explore data',
-    }),
+    icon: <EuiIcon type="compass" size="l" color="primary" />,
+    title: '',
     description: i18n.translate('workspace.essential_overview.discover.card.description', {
-      defaultMessage: 'Explore data to uncover insights.',
+      defaultMessage: 'Explore data to uncover and discover insights.',
     }),
     footer: (
-      <EuiI18n token="workspace.essential_overview.discover.card.footer" default="Discover" />
+      <EuiTextColor color="subdued">
+        <EuiI18n token="workspace.essential_overview.discover.card.footer" default="Discover" />
+      </EuiTextColor>
     ),
     navigateAppId: DISCOVER_APP_ID,
     order: 20,
   },
   {
     id: 'get_start_visualization',
-    title: i18n.translate('workspace.essential_overview.visualize.card.title', {
-      defaultMessage: 'Visualize data',
-    }),
+    icon: <EuiIcon type="lineChart" size="l" color="primary" />,
+    title: '',
     description: i18n.translate('workspace.essential_overview.visualize.card.description', {
       defaultMessage: 'Gain deeper insights by visualizing and aggregating your data.',
     }),
     footer: (
-      <EuiI18n token="workspace.essential_overview.visualize.card.footer" default="Visualize" />
+      <EuiTextColor color="subdued">
+        <EuiI18n
+          token="workspace.essential_overview.visualize.card.footer"
+          default="Visualizations"
+        />
+      </EuiTextColor>
     ),
     navigateAppId: VISUALIZE_APP_ID,
     order: 30,
   },
   {
     id: 'get_start_dashboards',
-    title: i18n.translate('workspace.essential_overview.dashboards.card.title', {
-      defaultMessage: 'Explore your data at a glance',
-    }),
+    icon: <EuiIcon type="dashboard" size="l" color="primary" />,
+    title: '',
     description: i18n.translate('workspace.essential_overview.dashboards.card.description', {
-      defaultMessage:
-        'Monitor and understand your data connections using dynamic data visualization tools.',
+      defaultMessage: 'Monitor and explore your data using dynamic data visualization tools.',
     }),
     footer: (
-      <EuiI18n token="workspace.essential_overview.dashboards.card.footer" default="Dashboards" />
+      <EuiTextColor color="subdued">
+        <EuiI18n token="workspace.essential_overview.dashboards.card.footer" default="Dashboards" />
+      </EuiTextColor>
     ),
     navigateAppId: DASHBOARDS_APP_ID,
     order: 40,

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-export { UiEnhancements, IUiStart, IUiSetup } from './types';
+export { IUiStart, IUiSetup } from './types';
 export { IndexPatternSelectProps } from './index_pattern_select';
 export { FilterLabel } from './filter_bar';
 export { QueryStringInput, QueryStringInputProps } from './query_string_input';
@@ -51,3 +51,4 @@ export {
   useQueryStringManager,
 } from './search_bar';
 export { SuggestionsComponent } from './typeahead';
+export { DatasetSelector, DatasetSelectorAppearance } from './dataset_selector';

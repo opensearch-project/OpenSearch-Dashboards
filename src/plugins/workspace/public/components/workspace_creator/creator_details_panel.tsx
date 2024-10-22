@@ -73,6 +73,7 @@ export const CreatorDetailsPanel = ({
                 color={color}
                 onChange={onColorChange}
                 compressed
+                mode="swatch"
                 button={
                   <EuiFormControlLayout
                     icon={{

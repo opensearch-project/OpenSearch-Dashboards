@@ -30,6 +30,8 @@ export interface DatasetTypeConfig {
     icon: EuiIconProps;
     /** Optional tooltip text */
     tooltip?: string;
+    /** Optional preference for search on page load else defaulted to true */
+    searchOnLoad?: boolean;
   };
   /**
    * Converts a DataStructure to a Dataset.
@@ -69,4 +71,8 @@ export interface DatasetTypeConfig {
    * @see https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8362.
    */
   combineDataStructures?: (dataStructures: DataStructure[]) => DataStructure | undefined;
+  /**
+   * Returns a list of sample queries for this dataset type
+   */
+  getSampleQueries?: (dataset: Dataset, language: string) => any;
 }
