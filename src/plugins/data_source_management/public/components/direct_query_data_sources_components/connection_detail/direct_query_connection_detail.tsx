@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
+  EuiTitle,
   EuiText,
 } from '@elastic/eui';
 import { escapeRegExp } from 'lodash';
@@ -46,7 +47,7 @@ import { createDataSourceMenu, DataSourceViewConfig } from '../../data_source_me
 import { getDataSourcesWithFields, isPluginInstalled } from '../../utils';
 import { AccelerationTable } from '../acceleration_management/acceleration_table';
 import { AssociatedObjectsTab } from '../associated_object_management/associated_objects_tab';
-import { redirectToExplorerS3 } from '../associated_object_management/utils/associated_objects_tab_utils';
+import { redirectToDiscover } from '../associated_object_management/utils/associated_objects_tab_utils';
 import {
   InstalledIntegrationsTable,
   InstallIntegrationFlyout,
@@ -54,6 +55,8 @@ import {
 import { AccessControlTab } from './access_control_tab';
 import { InactiveDataConnectionCallout } from './utils/inactive_data_connection_callout';
 import { NoAccess } from './utils/no_access_page';
+import prometheusSvg from '../../direct_query_data_sources_components/icons/prometheus_logo.svg';
+import s3Svg from '../../direct_query_data_sources_components/icons/s3_logo.svg';
 
 interface DirectQueryDataConnectionDetailProps {
   featureFlagStatus: boolean;
@@ -92,7 +95,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   const [hasAccess, setHasAccess] = useState(true);
 
   const onclickDiscoverCard = () => {
-    redirectToExplorerS3(dataSourceName, application);
+    redirectToDiscover(application);
   };
 
   const dataSourceMenuView = useMemo(() => {
@@ -304,7 +307,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
               selectable={{
                 onClick: onclickDiscoverCard,
                 isDisabled: false,
-                children: 'Query in Observability Logs',
+                children: 'Query in Discover',
               }}
             />
           </EuiFlexItem>
@@ -339,6 +342,25 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   const S3DatasourceOverview = () => (
     <EuiPanel>
       <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="column" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText className="overview-title">Data Source Type</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={s3Svg} size="xl" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h3>Amazon S3</h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
@@ -369,6 +391,25 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   const PrometheusDatasourceOverview = () => (
     <EuiPanel>
       <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="column" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText className="overview-title">Data Source Type</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={prometheusSvg} size="xl" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiTitle size="s">
+                    <h3>Prometheus</h3>
+                  </EuiTitle>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
