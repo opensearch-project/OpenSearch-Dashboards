@@ -172,6 +172,7 @@ export const Configurator = ({
                     setDataset({ ...dataset, timeFieldName: value });
                   }}
                   hasNoInitialSelection
+                  data-test-subj="advancedSelectorTimeFieldSelect"
                 />
               </EuiFormRow>
             ))}
@@ -197,6 +198,7 @@ export const Configurator = ({
           }}
           fill
           disabled={submitDisabled}
+          data-test-subj="advancedSelectorConfirmButton"
         >
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"
