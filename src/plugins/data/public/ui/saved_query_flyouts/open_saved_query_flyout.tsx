@@ -50,6 +50,7 @@ export function OpenSavedQueryFlyout({
   // const [shouldRunOnOpen, setShouldRunOnOpen] = useState(false);
   const [selectedTabId, setSelectedTabId] = useState<string>('mutable-saved-queries');
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
+  const [hasTemplateQueries, setHasTemplateQueries] = useState(false);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const pager = useRef(new Pager(savedQueries.length, itemsPerPage));
   const [activePage, setActivePage] = useState(pager.current.getCurrentPageIndex());
@@ -61,12 +62,14 @@ export function OpenSavedQueryFlyout({
 
   const fetchAllSavedQueriesForSelectedTab = useCallback(async () => {
     const allQueries = await savedQueryService.getAllSavedQueries();
+    const templateQueriesPresent = allQueries.some((q) => q.attributes.isTemplate);
     const queriesForSelectedTab = allQueries.filter(
       (q) =>
         (selectedTabId === 'mutable-saved-queries' && !q.attributes.isTemplate) ||
         (selectedTabId === 'template-saved-queries' && q.attributes.isTemplate)
     );
     setSavedQueries(queriesForSelectedTab);
+    setHasTemplateQueries(templateQueriesPresent);
   }, [savedQueryService, selectedTabId, setSavedQueries]);
 
   const updatePageIndex = useCallback((index: number) => {
@@ -216,12 +219,15 @@ export function OpenSavedQueryFlyout({
       name: 'Saved queries',
       content: flyoutBodyContent,
     },
-    {
+  ];
+
+  if (hasTemplateQueries) {
+    tabs.push({
       id: 'template-saved-queries',
       name: 'Templates',
       content: flyoutBodyContent,
-    },
-  ];
+    });
+  }
 
   return (
     <EuiFlyout onClose={onClose}>
