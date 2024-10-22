@@ -83,13 +83,13 @@ export const Configurator = ({
       setTimeFields(dateFields || []);
     };
 
-    if (baseDataset?.dataSource?.meta?.supportsTimeFilter === false) {
+    if (baseDataset?.dataSource?.meta?.supportsTimeFilter === false && timeFields.length > 0) {
       setTimeFields([]);
       return;
     }
 
     fetchFields();
-  }, [baseDataset, indexPatternsService, queryString]);
+  }, [baseDataset, indexPatternsService, queryString, timeFields.length]);
 
   return (
     <>

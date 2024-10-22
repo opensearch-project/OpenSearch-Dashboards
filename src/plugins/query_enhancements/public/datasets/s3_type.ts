@@ -160,7 +160,7 @@ const fetch = async (
       fetchStatus: () =>
         http.fetch({
           method: 'GET',
-          path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
+          path: trimEnd(API.DATA_SOURCE.ASYNC_JOBS),
           query: {
             id: dataSource?.id,
             queryId: meta.queryId,
@@ -245,7 +245,7 @@ const fetchDatabases = async (http: HttpSetup, path: DataStructure[]): Promise<D
   const meta = connection.meta as DataStructureCustomMeta;
   const response = await http.fetch({
     method: 'POST',
-    path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
+    path: trimEnd(API.DATA_SOURCE.ASYNC_JOBS),
     body: JSON.stringify({
       lang: 'sql',
       query: `SHOW DATABASES in ${connection.title}`,
@@ -271,7 +271,7 @@ const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<Data
   const database = path[path.length - 1];
   const response = await http.fetch({
     method: 'POST',
-    path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
+    path: trimEnd(API.DATA_SOURCE.ASYNC_JOBS),
     body: JSON.stringify({
       lang: 'sql',
       query: `SHOW TABLES in ${database.title}`,
@@ -362,7 +362,7 @@ const fetchFields = async (http: HttpSetup, dataset: Dataset): Promise<DatasetFi
     const sessionId = (dataset.dataSource?.meta as DataStructureCustomMeta).sessionId;
     const response = await http.fetch({
       method: 'POST',
-      path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
+      path: trimEnd(API.DATA_SOURCE.ASYNC_JOBS),
       body: JSON.stringify({
         lang: 'sql',
         query: `DESCRIBE TABLE ${dataset.title}`,
@@ -378,7 +378,7 @@ const fetchFields = async (http: HttpSetup, dataset: Dataset): Promise<DatasetFi
       fetchStatus: () =>
         http.fetch({
           method: 'GET',
-          path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
+          path: trimEnd(API.DATA_SOURCE.ASYNC_JOBS),
           query: {
             id: dataset.dataSource?.id,
             queryId: response.queryId,

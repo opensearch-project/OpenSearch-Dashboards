@@ -313,7 +313,7 @@ const FieldList = ({
         size="xs"
         className="dscSideBar_fieldGroup"
         aria-label={title}
-        isLoading={selectedIndexPattern.fieldsLoading ?? false}
+        isLoading={!!selectedIndexPattern.fieldsLoading}
       >
         {title}
       </EuiButtonEmpty>
