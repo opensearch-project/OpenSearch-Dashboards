@@ -4,7 +4,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { BehaviorSubject } from 'rxjs';
 import { ConfigSchema } from '../../config';
 import { DataPublicPluginStart } from '../types';
 import { createIndexPatternSelect } from './index_pattern_select';
@@ -12,8 +11,6 @@ import { createSearchBar } from './search_bar/create_search_bar';
 import { SuggestionsComponent } from './typeahead';
 import { IUiSetup, IUiStart } from './types';
 import { DataStorage } from '../../common';
-import { QueryStatus } from '../query';
-import { ResultStatus } from '../query/query_string/language_service/lib';
 
 /** @internal */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -1,0 +1,2 @@
+fix:
+- Fix random big number when loading in query result ([#8650](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8650))

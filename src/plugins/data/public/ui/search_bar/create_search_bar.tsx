@@ -209,6 +209,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
           onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
+          datasetSelectorRef={props.datasetSelectorRef}
           datePickerRef={props.datePickerRef}
           isFilterBarPortable={props.isFilterBarPortable}
           {...overrideDefaultBehaviors(props)}

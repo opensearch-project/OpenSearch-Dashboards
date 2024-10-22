@@ -24,6 +24,12 @@ export const getLuceneLanguageConfig = (
       visualizable: true,
     },
     showDocLinks: true,
+    docLink: {
+      title: i18n.translate('data.luceneLanguage.docLink', {
+        defaultMessage: 'Lucene documentation',
+      }),
+      url: 'https://opensearch.org/docs/latest/query-dsl/full-text/query-string/',
+    },
     editorSupportedAppNames: ['discover'],
     supportedAppNames: ['discover', 'dashboards', 'visualize', 'data-explorer', 'vis-builder', '*'],
     sampleQueries: [

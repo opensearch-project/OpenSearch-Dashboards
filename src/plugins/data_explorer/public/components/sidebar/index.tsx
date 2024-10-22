@@ -12,50 +12,32 @@ import {
   DataSourceSelectable,
   UI_SETTINGS,
 } from '../../../../data/public';
-import {
-  DataSourceOption,
-  DatasetSelector,
-  DatasetSelectorAppearance,
-} from '../../../../data/public/';
-import { Dataset } from '../../../../data/common';
+import { DataSourceOption } from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
-import {
-  setIndexPattern,
-  useTypedDispatch,
-  useTypedSelector,
-  setSelectedDataset,
-} from '../../utils/state_management';
+import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import './index.scss';
 
-type HandleSetIndexPattern = (id: string | undefined) => void;
-type HandleSelectedDataset = (data: Dataset | undefined) => void;
+interface SidebarProps {
+  children: React.ReactNode;
+  datasetSelectorRef: React.RefObject<HTMLDivElement>;
+}
 
-export const Sidebar: FC = ({ children }) => {
-  const { indexPattern: indexPatternId, selectedDataset } = useTypedSelector(
-    (state) => state.metadata
-  );
+export const Sidebar: FC<SidebarProps> = ({ children, datasetSelectorRef }) => {
+  const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
   const dispatch = useTypedDispatch();
   const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
   const [activeDataSources, setActiveDataSources] = useState<DataSource[]>([]);
-  const { services } = useOpenSearchDashboards<DataExplorerServices>();
-  const {
-    data: { indexPatterns, dataSources },
-    notifications: { toasts },
-    application,
-    uiSettings,
-  } = services;
 
-  const handleDatasetSubmit = useCallback(
-    (query: any) => {
-      // Update the index pattern
-      if (query.dataset) {
-        dispatch(setIndexPattern(query.dataset.id));
-      }
+  const {
+    services: {
+      data: { indexPatterns, dataSources },
+      notifications: { toasts },
+      application,
+      uiSettings,
     },
-    [dispatch]
-  );
+  } = useOpenSearchDashboards<DataExplorerServices>();
 
   const [isEnhancementEnabled, setIsEnhancementEnabled] = useState<boolean>(false);
 
@@ -137,14 +119,6 @@ export const Sidebar: FC = ({ children }) => {
     dataSources.dataSourceService.reload();
   }, [dataSources.dataSourceService]);
 
-  const handleSetIndexPattern: HandleSetIndexPattern = (id: string | undefined) => {
-    dispatch(setIndexPattern(id));
-  };
-
-  const handleSelectedDataset: HandleSelectedDataset = (data: Dataset | undefined) => {
-    dispatch(setSelectedDataset(data));
-  };
-
   return (
     <EuiPageSideBar className="deSidebar" sticky>
       <EuiSplitPanel.Outer
@@ -152,26 +126,9 @@ export const Sidebar: FC = ({ children }) => {
         hasBorder={true}
         borderRadius="l"
       >
-        <EuiSplitPanel.Inner
-          paddingSize="s"
-          grow={false}
-          color="transparent"
-          className="deSidebar_dataSource"
-        >
-          {isEnhancementEnabled ? (
-            <DatasetSelector
-              onSubmit={handleDatasetSubmit}
-              selectedDataset={selectedDataset}
-              setSelectedDataset={handleSelectedDataset}
-              setIndexPattern={handleSetIndexPattern}
-              services={services}
-              appearance={DatasetSelectorAppearance.Button}
-              buttonProps={{
-                color: 'text',
-                fullWidth: true,
-              }}
-            />
-          ) : (
+        <EuiSplitPanel.Inner paddingSize="s" grow={false} className="deSidebar_dataSource">
+          {isEnhancementEnabled && <div ref={datasetSelectorRef} />}
+          {!isEnhancementEnabled && (
             <DataSourceSelectable
               dataSources={activeDataSources}
               dataSourceOptionList={dataSourceOptionList}
@@ -184,6 +141,7 @@ export const Sidebar: FC = ({ children }) => {
             />
           )}
         </EuiSplitPanel.Inner>
+
         <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
           {children}
         </EuiSplitPanel.Inner>
