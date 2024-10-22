@@ -98,17 +98,17 @@ export class DatasetService {
   ): Promise<void> {
     const type = this.getType(dataset?.type);
     try {
-      const asyncType = type && type.meta.isFieldLoadAsync;
+      const asyncType = type?.meta.isFieldLoadAsync ?? false;
       if (dataset && dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
         const fetchedFields = asyncType
-          ? await type?.fetchFields(dataset, services)
-          : ({} as IndexPatternFieldMap);
+          ? ({} as IndexPatternFieldMap)
+          : await type?.fetchFields(dataset, services);
         const spec = {
           id: dataset.id,
           title: dataset.title,
           timeFieldName: dataset.timeFieldName,
           fields: fetchedFields,
-          fieldsLoading: asyncType ? true : false,
+          fieldsLoading: asyncType,
           dataSourceRef: dataset.dataSource
             ? {
                 id: dataset.dataSource.id!,
@@ -121,11 +121,14 @@ export class DatasetService {
 
         // Load schema asynchronously if it's an async index pattern
         if (asyncType && temporaryIndexPattern) {
-          type
+          type!
             .fetchFields(dataset, services)
             .then((fields) => {
-              temporaryIndexPattern?.fields.replaceAll([...fields]);
+              temporaryIndexPattern.fields.replaceAll([...fields]);
               this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
+            })
+            .catch((error) => {
+              throw new Error(`Error while fetching fields for dataset ${dataset.id}:`);
             })
             .finally(() => {
               temporaryIndexPattern.setFieldsLoading(false);
