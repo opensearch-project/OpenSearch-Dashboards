@@ -113,14 +113,20 @@ export class WorkspaceClient implements IWorkspaceClient {
     });
 
     if (result?.success) {
-      const resultWithWritePermission = await this.list({
-        perPage: 999,
-        permissionModes: [WorkspacePermissionMode.LibraryWrite],
-      });
-      const resultWithOwnerPermission = await this.list({
-        perPage: 999,
-        permissionModes: [WorkspacePermissionMode.Write],
-      });
+      const promises = [];
+      promises.push(
+        this.list({
+          perPage: 999,
+          permissionModes: [WorkspacePermissionMode.LibraryWrite],
+        })
+      );
+      promises.push(
+        this.list({
+          perPage: 999,
+          permissionModes: [WorkspacePermissionMode.Write],
+        })
+      );
+      const [resultWithWritePermission, resultWithOwnerPermission] = await Promise.all(promises);
       if (resultWithWritePermission?.success && resultWithOwnerPermission?.success) {
         const workspaceIdsWithWritePermission = resultWithWritePermission.result.workspaces.map(
           (workspace: WorkspaceAttribute) => workspace.id
