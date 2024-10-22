@@ -38,7 +38,7 @@ import * as sinon from 'sinon';
 
 import { serviceContextMock } from '../../../../contexts/services_context.mock';
 
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { setTimeout } from 'timers/promises';
 import {
   ServicesContextProvider,
   EditorContextProvider,
@@ -87,7 +87,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test with dataSourceId', (
     act(() => {
       editor.find('[data-test-subj~="sendRequestButton"]').simulate('click');
     });
-    await nextTick();
+    await setTimeout();
     expect(sendRequestToOpenSearch).toBeCalledTimes(1);
   });
 
@@ -150,7 +150,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test with empty dataSource
     act(() => {
       editor.find('[data-test-subj~="sendRequestButton"]').simulate('click');
     });
-    await nextTick();
+    await setTimeout();
     expect(sendRequestToOpenSearch).toBeCalledTimes(1);
   });
 
@@ -220,7 +220,7 @@ describe('Legacy (Ace) Console Editor Component Smoke Test with dataSouceId unde
     act(() => {
       editor.find('[data-test-subj~="sendRequestButton"]').simulate('click');
     });
-    await nextTick();
+    await setTimeout();
     expect(sendRequestToOpenSearch).toBeCalledTimes(0);
   });
 

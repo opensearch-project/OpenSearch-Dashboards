@@ -34,7 +34,7 @@ import { skip } from 'rxjs/operators';
 import { mount } from 'enzyme';
 import { I18nProvider } from '@osd/i18n/react';
 import sizeMe from 'react-sizeme';
-import { nextTick } from 'test_utils/enzyme_helpers';
+import { setTimeout } from 'timers/promises';
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
 import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
@@ -178,7 +178,7 @@ test('renders exit full screen button when in full screen mode', async () => {
 
   props.container.updateInput({ isFullScreenMode: false });
   component.update();
-  await nextTick();
+  await setTimeout();
 
   expect((component.find('.dshDashboardViewport').childAt(0).type() as any).name).not.toBe(
     'ExitFullScreenButton'
@@ -205,7 +205,7 @@ test('renders exit full screen button when in full screen mode and empty screen'
 
   props.container.updateInput({ isFullScreenMode: false });
   component.update();
-  await nextTick();
+  await setTimeout();
 
   expect((component.find('.dshDashboardEmptyScreen').childAt(0).type() as any).name).not.toBe(
     'ExitFullScreenButton'
