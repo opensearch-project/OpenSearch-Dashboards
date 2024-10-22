@@ -228,9 +228,12 @@ export class DataPublicPlugin
         notifications.toasts,
         application.navigateToApp
       ),
-      isCurrentWorkspaceOwner:
-        workspaces?.currentWorkspace$.getValue()?.owner ||
-        application.capabilities?.dashboards?.isDashboardAdmin !== false,
+      // If workspace is enabled, only workspace owner/OSD admin can update ui setting.
+      ...(application.capabilities.workspaces.enabled && {
+        canUpdateUiSetting:
+          workspaces?.currentWorkspace$.getValue()?.owner ||
+          application.capabilities?.dashboards?.isDashboardAdmin !== false,
+      }),
     });
     setIndexPatterns(indexPatterns);
 

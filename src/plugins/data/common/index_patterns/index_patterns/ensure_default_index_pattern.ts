@@ -37,15 +37,14 @@ export type EnsureDefaultIndexPattern = () => Promise<unknown | void> | undefine
 export const createEnsureDefaultIndexPattern = (
   uiSettings: UiSettingsCommon,
   onRedirectNoIndexPattern: () => Promise<unknown> | void,
-  isCurrentWorkspaceOwner?: boolean
+  canUpdateUiSetting?: boolean
 ) => {
   /**
    * Checks whether a default index pattern is set and exists and defines
    * one otherwise.
    */
   return async function ensureDefaultIndexPattern(this: IndexPatternsContract) {
-    // If workspace is enabled, only workspace owner can update ui setting.
-    if (isCurrentWorkspaceOwner === false) {
+    if (canUpdateUiSetting === false) {
       return;
     }
     const patterns = await this.getIds();
