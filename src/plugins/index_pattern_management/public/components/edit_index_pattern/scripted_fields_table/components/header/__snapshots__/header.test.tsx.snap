@@ -32,6 +32,11 @@ exports[`Header should render normally 1`] = `
         class="euiButtonContent euiButton__content"
       >
         <span
+          class="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="plusInCircle"
+        />
+        <span
           class="euiButton__text"
         >
           Add scripted field
