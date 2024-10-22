@@ -34,6 +34,8 @@ env:
   FTR_PATH: 'ftr'
   START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true  --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false'
   OPENSEARCH_SNAPSHOT_CMD: 'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false'
+  START_CMD_QUERY_ENHANCED: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true  --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=true --uiSettings.overrides['home:useNewHomePage']=true --workspace.enabled=true --data_source.enabled=true'
+  OPENSEARCH_SNAPSHOT_CMD_QUERY_ENHANCED: 'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false --sql'
   CYPRESS_BROWSER: 'chromium'
   CYPRESS_VISBUILDER_ENABLED: true
   CYPRESS_DATASOURCE_MANAGEMENT_ENABLED: false
@@ -49,7 +51,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-          group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+          group: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11]
     container:
       image: docker://opensearchstaging/ci-runner:ci-runner-rockylinux8-opensearch-dashboards-integtest-v2
       options: --user 1001
@@ -117,7 +119,7 @@ jobs:
 
       # Setup spec files for existing Functional Test repo cypress tests
       - name: Setup spec files
-        if: ${{ inputs.specs == '' && matrix.group < 10 }}
+        if: ${{ inputs.specs == '' && matrix.group < 11 }}
         working-directory: ${{ env.FTR_PATH }}
         shell: bash
         run: |
@@ -129,7 +131,7 @@ jobs:
           echo "SPEC=${FORMATTED_SPEC}" >> $GITHUB_ENV
 
       - name: Get Cypress version
-        if: ${{ matrix.group < 10 }}
+        if: ${{ matrix.group < 11 }}
         id: cypress_version
         run: |
           echo "name=cypress_version::$(cat ./${{ env.FTR_PATH }}/package.json | jq '.devDependencies.cypress' | tr -d '"')" >> $GITHUB_OUTPUT
@@ -148,7 +150,7 @@ jobs:
 
       # Setup spec files for Dashboards in-house cypress tests
       - name: Setup spec files for Dashboards tests
-        if: ${{ inputs.specs == '' && matrix.group > 9 }}
+        if: ${{ inputs.specs == '' && matrix.group > 10 }}
         shell: bash
         run: |
           IFS="," read -a SPEC_ARRAY <<< $(yarn --silent osd:ciGroup${{ matrix.group }})
@@ -167,15 +169,25 @@ jobs:
           start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
+
+      # Run FT repo tests with query enhancements enabled
+      - name: Run FT repo tests with query enhancements enabled
+        if: ${{ matrix.group = 10 }}
+        uses: cypress-io/github-action@v2
+        with:
+          working-directory: ${{ env.FTR_PATH }}
+          start: ${{ env.OPENSEARCH_SNAPSHOT_CMD_QUERY_ENHANCED }}, ${{ env.START_CMD_QUERY_ENHANCED }}
+          wait-on: 'http://localhost:9200, http://localhost:5601'
+          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
       
       # Clear Cypress Cache before running Dashboards tests
       - name: Clear Cypress Cache
-        if: ${{ matrix.group > 9 }}
+        if: ${{ matrix.group > 10 }}
         run: npx cypress cache clear
 
       # Run Dashboards Cypress tests within the source repo
       - name: Run Dashboards Cypress tests
-        if: ${{ matrix.group > 9 }}
+        if: ${{ matrix.group > 10 }}
         uses: cypress-io/github-action@v6
         with:
           install-command: npx cypress install --force
@@ -186,7 +198,7 @@ jobs:
       # Screenshots are only captured on failure, will change this once we do visual regression tests
       - name: Upload FT repo screenshots
         uses: actions/upload-artifact@v3
-        if: failure() && (matrix.group < 10)
+        if: failure() && (matrix.group < 11)
         with:
           name: ftr-cypress-screenshots
           path: ${{ env.FTR_PATH }}/cypress/screenshots
@@ -194,7 +206,7 @@ jobs:
 
       - name: Upload FT repo videos
         uses: actions/upload-artifact@v3
-        if: always() && (matrix.group < 10)
+        if: always() && (matrix.group < 11)
         with:
           name: ftr-cypress-videos
           path: ${{ env.FTR_PATH }}/cypress/videos
@@ -202,14 +214,14 @@ jobs:
 
       - name: Upload FT repo results
         uses: actions/upload-artifact@v3
-        if: always() && (matrix.group < 10)
+        if: always() && (matrix.group < 11)
         with:
           name: ftr-cypress-results
           path: ${{ env.FTR_PATH }}/cypress/results
           retention-days: 1
 
       - name: Upload Dashboards screenshots
-        if: failure() && (matrix.group > 9)
+        if: failure() && (matrix.group > 10)
         uses: actions/upload-artifact@v3
         with:
           name: dashboards-cypress-screenshots
@@ -218,7 +230,7 @@ jobs:
 
       - name: Upload Dashboards repo videos
         uses: actions/upload-artifact@v3
-        if: always() && (matrix.group > 9)
+        if: always() && (matrix.group > 10)
         with:
           name: dashboards-cypress-videos
           path: cypress/videos
@@ -226,7 +238,7 @@ jobs:
 
       - name: Upload Dashboards repo results
         uses: actions/upload-artifact@v3
-        if: always() && (matrix.group > 9)
+        if: always() && (matrix.group > 10)
         with:
           name: dashboards-cypress-results
           path: cypress/results
