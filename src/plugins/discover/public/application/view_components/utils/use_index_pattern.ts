@@ -3,13 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { IndexPattern, useQueryStringManager } from '../../../../../data/public';
-import { useSelector, updateIndexPattern } from '../../utils/state_management';
+import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
-import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
+import { updateIndexPattern, useSelector } from '../../utils/state_management';
 
 /**
  * Custom hook to fetch and manage the index pattern based on the provided services.
@@ -51,7 +51,13 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
           query.dataset.type !== 'INDEX_PATTERN'
         );
         if (!pattern) {
-          await data.query.queryString.getDatasetService().cacheDataset(query.dataset);
+          await data.query.queryString.getDatasetService().cacheDataset(query.dataset, {
+            uiSettings: services.uiSettings,
+            savedObjects: services.savedObjects,
+            notifications: services.notifications,
+            http: services.http,
+            data: services.data,
+          });
           pattern = await data.indexPatterns.get(
             query.dataset.id,
             query.dataset.type !== 'INDEX_PATTERN'
@@ -98,6 +104,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
       isMounted = false;
     };
   }, [
+    services,
     isQueryEnhancementEnabled,
     indexPatternIdFromState,
     fetchIndexPatternDetails,
