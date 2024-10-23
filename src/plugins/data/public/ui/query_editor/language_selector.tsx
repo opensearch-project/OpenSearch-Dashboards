@@ -114,6 +114,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
           onClick={onButtonClick}
           className="languageSelector__button"
           iconType="arrowDown"
+          data-test-subj="queryEditorLanguageSelector"
         >
           {selectedLanguage.label}
         </EuiSmallButtonEmpty>
