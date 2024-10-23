@@ -43,14 +43,25 @@ export const searchPages = async (
         // parent nav links are not clickable
         const parentNavLinkIds = links.map((link) => link.parentNavLinkId).filter((link) => !!link);
         return links
-          .filter(
-            (link) =>
+          .filter((link) => {
+            const title = link.title;
+            let parentNavLinkTitle;
+            // parent title also taken into consideration for search its sub items
+            if (link.parentNavLinkId) {
+              parentNavLinkTitle = navGroup.navLinks.find(
+                (navLink) => navLink.id === link.parentNavLinkId
+              )?.title;
+            }
+            const titleMatch = title && title.toLowerCase().includes(query.toLowerCase());
+            const parentTitleMatch =
+              parentNavLinkTitle && parentNavLinkTitle.toLowerCase().includes(query.toLowerCase());
+            return (
               !link.hidden &&
               !link.disabled &&
-              link.title &&
-              link.title.toLowerCase().includes(query.toLowerCase()) &&
+              (titleMatch || parentTitleMatch) &&
               !parentNavLinkIds.includes(link.id)
-          )
+            );
+          })
           .map((link) => ({
             ...link,
             navGroup,
