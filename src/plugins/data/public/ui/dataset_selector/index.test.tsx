@@ -9,6 +9,7 @@ import { DatasetSelector as ConnectedDatasetSelector } from './index';
 import { DatasetSelector } from './dataset_selector';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { Dataset } from '../../../common';
+import { of } from 'rxjs';
 
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
