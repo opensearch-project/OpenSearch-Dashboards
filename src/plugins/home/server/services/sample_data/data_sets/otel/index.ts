@@ -21,7 +21,7 @@ const otelDataName = i18n.translate('home.sampleData.otelSpecTitle', {
 });
 const otelDataDescription = i18n.translate('home.sampleData.otelSpecDescription', {
   defaultMessage:
-    'Correlated observability signals for an e-commerce application in OpenTelemetry standard.',
+    'Correlated observability signals for an e-commerce application in OpenTelemetry standard (Compatible with 2.13+ OpenSearch domains)',
 });
 const initialAppLinks: AppLinkSchema[] = [
   {
