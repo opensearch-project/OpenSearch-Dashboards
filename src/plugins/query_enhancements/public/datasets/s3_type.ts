@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { trimEnd } from 'lodash';
 import { i18n } from '@osd/i18n';
+import { trimEnd } from 'lodash';
+import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import {
   DATA_STRUCTURE_META_TYPES,
   DEFAULT_DATA,
@@ -15,8 +15,15 @@ import {
   Dataset,
   DatasetField,
 } from '../../../data/common';
-import { DatasetTypeConfig, IDataPluginServices } from '../../../data/public';
-import { API, DATASET, handleQueryStatus } from '../../common';
+import { DatasetTypeConfig, IDataPluginServices, OSD_FIELD_TYPES } from '../../../data/public';
+import {
+  API,
+  DATASET,
+  S3_FIELD_TYPES,
+  S3_PARTITION_INFO_COLUMN,
+  SQLQueryResponse,
+  handleQueryStatus,
+} from '../../common';
 import S3_ICON from '../assets/s3_mark.svg';
 
 export const s3TypeConfig: DatasetTypeConfig = {
@@ -26,6 +33,8 @@ export const s3TypeConfig: DatasetTypeConfig = {
     icon: { type: S3_ICON },
     tooltip: 'Amazon S3 Connections',
     searchOnLoad: true,
+    supportsTimeFilter: false,
+    isFieldLoadAsync: true,
   },
 
   toDataset: (path: DataStructure[]): Dataset => {
@@ -43,7 +52,10 @@ export const s3TypeConfig: DatasetTypeConfig = {
             id: dataSource.id,
             title: dataSource.title,
             type: dataSource.type,
-            meta: table.meta as DataSourceMeta,
+            meta: {
+              ...table.meta,
+              supportsTimeFilter: s3TypeConfig.meta.supportsTimeFilter,
+            } as DataSourceMeta,
           }
         : DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE,
     };
@@ -96,8 +108,13 @@ export const s3TypeConfig: DatasetTypeConfig = {
     }
   },
 
-  fetchFields: async (dataset: Dataset): Promise<DatasetField[]> => {
-    return [];
+  fetchFields: async (
+    dataset: Dataset,
+    services?: Partial<IDataPluginServices>
+  ): Promise<DatasetField[]> => {
+    const http = services?.http;
+    if (!http) return [];
+    return await fetchFields(http, dataset);
   },
 
   supportedLanguages: (dataset: Dataset): string[] => {
@@ -143,7 +160,7 @@ const fetch = async (
       fetchStatus: () =>
         http.fetch({
           method: 'GET',
-          path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
+          path: trimEnd(API.DATA_SOURCE.ASYNC_JOBS),
           query: {
             id: dataSource?.id,
             queryId: meta.queryId,
@@ -228,7 +245,7 @@ const fetchDatabases = async (http: HttpSetup, path: DataStructure[]): Promise<D
   const meta = connection.meta as DataStructureCustomMeta;
   const response = await http.fetch({
     method: 'POST',
-    path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
+    path: trimEnd(API.DATA_SOURCE.ASYNC_JOBS),
     body: JSON.stringify({
       lang: 'sql',
       query: `SHOW DATABASES in ${connection.title}`,
@@ -254,7 +271,7 @@ const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<Data
   const database = path[path.length - 1];
   const response = await http.fetch({
     method: 'POST',
-    path: trimEnd(`${API.DATA_SOURCE.ASYNC_JOBS}`),
+    path: trimEnd(API.DATA_SOURCE.ASYNC_JOBS),
     body: JSON.stringify({
       lang: 'sql',
       query: `SHOW TABLES in ${database.title}`,
@@ -270,4 +287,106 @@ const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<Data
   database.meta = setMeta(database, response);
 
   return fetch(http, path, 'TABLE');
+};
+
+/**
+ *  Mapping function from S3_FIELD_TYPES to OSD_FIELD_TYPES
+ *
+ *  @param {S3_FIELD_TYPES} sqlType
+ *  @return {OSD_FIELD_TYPES}
+ */
+export function castS3FieldTypeToOSDFieldType(sqlType: S3_FIELD_TYPES): OSD_FIELD_TYPES {
+  switch (sqlType) {
+    case S3_FIELD_TYPES.BOOLEAN:
+      return OSD_FIELD_TYPES.BOOLEAN;
+    case S3_FIELD_TYPES.BYTE:
+    case S3_FIELD_TYPES.SHORT:
+    case S3_FIELD_TYPES.INT:
+    case S3_FIELD_TYPES.INTEGER:
+    case S3_FIELD_TYPES.LONG:
+    case S3_FIELD_TYPES.FLOAT:
+    case S3_FIELD_TYPES.DOUBLE:
+      return OSD_FIELD_TYPES.NUMBER;
+    case S3_FIELD_TYPES.KEYWORD:
+    case S3_FIELD_TYPES.STRING:
+    case S3_FIELD_TYPES.TEXT:
+      return OSD_FIELD_TYPES.STRING;
+    case S3_FIELD_TYPES.TIMESTAMP:
+    case S3_FIELD_TYPES.DATE:
+    case S3_FIELD_TYPES.DATE_NANOS:
+    case S3_FIELD_TYPES.TIME:
+    case S3_FIELD_TYPES.INTERVAL:
+      return OSD_FIELD_TYPES.DATE;
+    case S3_FIELD_TYPES.IP:
+      return OSD_FIELD_TYPES.IP;
+    case S3_FIELD_TYPES.GEO_POINT:
+      return OSD_FIELD_TYPES.GEO_POINT;
+    case S3_FIELD_TYPES.BINARY:
+      return OSD_FIELD_TYPES.ATTACHMENT;
+    case S3_FIELD_TYPES.STRUCT:
+    case S3_FIELD_TYPES.ARRAY:
+      return OSD_FIELD_TYPES.OBJECT;
+    default:
+      return OSD_FIELD_TYPES.UNKNOWN;
+  }
+}
+
+// Function to process the input and map types using the new SQL to OSD mapping
+export function mapResponseToFields(sqlOutput: SQLQueryResponse): DatasetField[] {
+  const datasetFields: DatasetField[] = [];
+
+  for (const row of sqlOutput.datarows) {
+    const [colName, dataType] = row;
+
+    // Stop processing once we hit the partition info row
+    if (colName === S3_PARTITION_INFO_COLUMN) {
+      break;
+    }
+
+    // Only include rows with valid types
+    if (dataType && dataType !== '') {
+      const sqlType = dataType as S3_FIELD_TYPES;
+      datasetFields.push({
+        name: colName as string,
+        type: castS3FieldTypeToOSDFieldType(sqlType),
+      });
+    }
+  }
+  return datasetFields;
+}
+
+const fetchFields = async (http: HttpSetup, dataset: Dataset): Promise<DatasetField[]> => {
+  const abortController = new AbortController();
+  try {
+    const connection = (dataset.dataSource?.meta as DataStructureCustomMeta).name;
+    const sessionId = (dataset.dataSource?.meta as DataStructureCustomMeta).sessionId;
+    const response = await http.fetch({
+      method: 'POST',
+      path: trimEnd(API.DATA_SOURCE.ASYNC_JOBS),
+      body: JSON.stringify({
+        lang: 'sql',
+        query: `DESCRIBE TABLE ${dataset.title}`,
+        datasource: connection,
+        ...(sessionId && { sessionId }),
+      }),
+      query: {
+        id: dataset.dataSource?.id,
+      },
+      signal: abortController.signal,
+    });
+    const fetchResponse = await handleQueryStatus({
+      fetchStatus: () =>
+        http.fetch({
+          method: 'GET',
+          path: trimEnd(API.DATA_SOURCE.ASYNC_JOBS),
+          query: {
+            id: dataset.dataSource?.id,
+            queryId: response.queryId,
+          },
+        }),
+    });
+    return mapResponseToFields(fetchResponse);
+  } catch (error) {
+    throw new Error(`Failed to load table fields from ${dataset.title}: ${error}`);
+  }
 };

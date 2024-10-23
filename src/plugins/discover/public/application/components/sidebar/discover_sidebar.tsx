@@ -28,31 +28,31 @@
  * under the License.
  */
 
-import './discover_sidebar.scss';
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { i18n } from '@osd/i18n';
 import {
-  EuiDragDropContext,
   DropResult,
-  EuiDroppable,
+  EuiButtonEmpty,
+  EuiDragDropContext,
   EuiDraggable,
+  EuiDroppable,
   EuiPanel,
   EuiSplitPanel,
-  EuiButtonEmpty,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
-import { DiscoverField } from './discover_field';
-import { DiscoverFieldSearch } from './discover_field_search';
-import { DiscoverFieldDataFrame } from './discover_field_data_frame';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { IndexPattern, IndexPatternField, UI_SETTINGS } from '../../../../../data/public';
 import { FIELDS_LIMIT_SETTING } from '../../../../common';
-import { groupFields } from './lib/group_fields';
-import { IndexPatternField, IndexPattern, UI_SETTINGS } from '../../../../../data/public';
-import { getDetails } from './lib/get_details';
-import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
-import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { getServices } from '../../../opensearch_dashboards_services';
-import { FieldDetails } from './types';
+import { DiscoverField } from './discover_field';
+import { DiscoverFieldDataFrame } from './discover_field_data_frame';
+import { DiscoverFieldSearch } from './discover_field_search';
+import './discover_sidebar.scss';
 import { displayIndexPatternCreation } from './lib/display_index_pattern_creation';
+import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
+import { getDetails } from './lib/get_details';
+import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
+import { groupFields } from './lib/group_fields';
+import { FieldDetails } from './types';
 
 export interface DiscoverSidebarProps {
   /**
@@ -231,11 +231,12 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
               />
             </EuiSplitPanel.Inner>
           ) : null}
+
           <EuiSplitPanel.Inner
             className="eui-yScroll dscSideBar_fieldListContainer"
             paddingSize="none"
           >
-            {fields.length > 0 && (
+            {(fields.length > 0 || selectedIndexPattern.fieldsLoading) && (
               <>
                 <FieldList
                   category="selected"
@@ -312,6 +313,7 @@ const FieldList = ({
         size="xs"
         className="dscSideBar_fieldGroup"
         aria-label={title}
+        isLoading={!!selectedIndexPattern.fieldsLoading}
       >
         {title}
       </EuiButtonEmpty>

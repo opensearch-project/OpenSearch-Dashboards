@@ -64,7 +64,10 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
 }) => (
   <div className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group osdQueryBar__wrap">
     {prepend}
-    <div className="osdQuerEditor__singleLine euiFormControlLayout__childrenWrapper">
+    <div
+      className="osdQuerEditor__singleLine euiFormControlLayout__childrenWrapper"
+      data-test-subj="osdQueryEditor__singleLine"
+    >
       <CodeEditor
         height={20} // Adjusted to match lineHeight for a single line
         languageId={languageId}

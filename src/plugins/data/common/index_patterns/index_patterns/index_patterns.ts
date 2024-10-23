@@ -74,6 +74,7 @@ interface IndexPatternsServiceDeps {
   onError: OnError;
   onRedirectNoIndexPattern?: () => void;
   onUnsupportedTimePattern: OnUnsupportedTimePattern;
+  canUpdateUiSetting?: boolean;
 }
 
 export class IndexPatternsService {
@@ -96,6 +97,7 @@ export class IndexPatternsService {
     onError,
     onUnsupportedTimePattern,
     onRedirectNoIndexPattern = () => {},
+    canUpdateUiSetting,
   }: IndexPatternsServiceDeps) {
     this.apiClient = apiClient;
     this.config = uiSettings;
@@ -106,7 +108,8 @@ export class IndexPatternsService {
     this.onUnsupportedTimePattern = onUnsupportedTimePattern;
     this.ensureDefaultIndexPattern = createEnsureDefaultIndexPattern(
       uiSettings,
-      onRedirectNoIndexPattern
+      onRedirectNoIndexPattern,
+      canUpdateUiSetting
     );
   }
 
