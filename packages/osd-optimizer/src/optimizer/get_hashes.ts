@@ -32,23 +32,28 @@ import Fs from 'fs';
 
 import * as Rx from 'rxjs';
 import { mergeMap, map, catchError } from 'rxjs/operators';
+import Crypto from 'crypto';
 import { allValuesFrom } from '../common';
 
-const stat$ = Rx.bindNodeCallback<Fs.PathLike, Fs.Stats>(Fs.stat);
+// const stat$ = Rx.bindNodeCallback<Fs.PathLike, Fs.Stats>(Fs.stat);
+const readFile$ = Rx.bindNodeCallback<Fs.PathLike, Buffer>(Fs.readFile);
 
 /**
- * get mtimes of referenced paths concurrently, limit concurrency to 100
+ * Get content hashes of referenced paths concurrently, with at most 100 concurrent files
  */
-export async function getMtimes(paths: Iterable<string>) {
+export async function getHashes(paths: Iterable<string>): Promise<Map<string, string>> {
   return new Map(
     await allValuesFrom(
       Rx.from(paths).pipe(
-        // map paths to [path, mtimeMs] entries with concurrency of
+        // map paths to [path, sha1Hash] entries with concurrency of
         // 100 at a time, ignoring missing paths
         mergeMap(
           (path) =>
-            stat$(path).pipe(
-              map((stat) => [path, stat.mtimeMs] as const),
+            readFile$(path).pipe(
+              map(
+                (buffer) =>
+                  [path, Crypto.createHash('sha1').update(buffer).digest('base64')] as const
+              ),
               catchError((error: any) =>
                 error?.code === 'ENOENT' ? Rx.EMPTY : Rx.throwError(error)
               )

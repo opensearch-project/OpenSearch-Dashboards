@@ -1,0 +1,2 @@
+infra:
+- Switch OSD build cache to rely on file hashes instead of `mtime`s ([#8472](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8472))

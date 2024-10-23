@@ -105,8 +105,8 @@ function determineCachePrefix() {
 
 function compile(cache: Cache, source: string, path: string) {
   try {
-    const mtime = `${Fs.statSync(path).mtimeMs}`;
-    if (cache.getMtime(path) === mtime) {
+    const filehash = Crypto.createHash('sha1').update(Fs.readFileSync(path)).digest('base64');
+    if (cache.getFileHash(path) === filehash) {
       const code = cache.getCode(path);
       if (code) {
         // code *should* always be defined, but if it isn't for some reason rebuild it
@@ -122,7 +122,7 @@ function compile(cache: Cache, source: string, path: string) {
     }
 
     cache.update(path, {
-      mtime,
+      filehash,
       map: result.map,
       code: result.code,
     });
