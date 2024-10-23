@@ -121,7 +121,7 @@ export type IDataFrameResponse = SearchResponse<any> &
   (IDataFrameDefaultResponse | IDataFramePollingResponse | IDataFrameErrorResponse);
 
 export interface IDataFrameError extends SearchResponse<any> {
-  error: Error;
+  error: Error | string;
 }
 
 export interface PollQueryResultsParams {

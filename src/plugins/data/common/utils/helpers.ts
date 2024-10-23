@@ -28,13 +28,7 @@
  * under the License.
  */
 
-import { i18n } from '@osd/i18n';
-import {
-  PollQueryResultsHandler,
-  FetchStatusResponse,
-  IDataFrameResponse,
-  DATA_FRAME_TYPES,
-} from '../data_frames';
+import { PollQueryResultsHandler, FetchStatusResponse } from '../data_frames';
 
 export interface QueryStatusOptions {
   pollQueryResults: PollQueryResultsHandler;
@@ -58,15 +52,7 @@ export const handleQueryResults = async <T>(
   } while (queryStatus !== 'SUCCESS' && queryStatus !== 'FAILED');
 
   if (queryStatus === 'FAILED') {
-    const error = Error(
-      i18n.translate('data.search.request.failed', {
-        defaultMessage: 'An error occurred while executing the search query',
-      })
-    );
-    return {
-      status: 'failed',
-      body: { error },
-    } as FetchStatusResponse;
+    throw new Error(queryResultsRes?.body.error);
   }
 
   return queryResultsRes;

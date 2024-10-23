@@ -160,15 +160,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
       data-test-subj="queryResultError"
     >
       <EuiPopoverTitle>ERRORS</EuiPopoverTitle>
-      <div style={{ width: '250px' }}>
-        <EuiText size="s">
-          <strong>
-            {i18n.translate('data.query.languageService.queryResults.status', {
-              defaultMessage: `Status:`,
-            })}
-          </strong>{' '}
-          {props.queryStatus.body.error?.statusCode}
-        </EuiText>
+      <div style={{ width: '250px' }} className="eui-textBreakWord">
         <EuiText size="s">
           <p>
             <strong>

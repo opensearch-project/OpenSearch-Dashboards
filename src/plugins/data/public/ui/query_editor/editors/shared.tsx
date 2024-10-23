@@ -124,6 +124,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
             lineDecorationsWidth: 0,
             scrollbar: {
               vertical: 'hidden',
+              horizontalScrollbarSize: 1,
             },
             overviewRulerLanes: 0,
             hideCursorInOverviewRuler: true,

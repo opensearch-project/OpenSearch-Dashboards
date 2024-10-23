@@ -14,13 +14,7 @@ import {
   createDataFrame,
 } from '../../../data/common';
 import { Facet } from '../utils';
-import {
-  buildQueryStatusConfig,
-  getFields,
-  handleFacetError,
-  SEARCH_STRATEGY,
-  PollingResponseError,
-} from '../../common';
+import { buildQueryStatusConfig, getFields, handleFacetError, SEARCH_STRATEGY } from '../../common';
 
 export const sqlAsyncSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -84,8 +78,13 @@ export const sqlAsyncSearchStrategyProvider = (
               body: dataFrame,
             } as IDataFrameResponse;
           } else if (queryStatus?.toUpperCase() === 'FAILED') {
-            const error = new PollingResponseError(queryStatusResponse.data.error, 500);
-            throw error;
+            return {
+              type: DATA_FRAME_TYPES.POLLING,
+              status: 'failed',
+              body: {
+                error: `JOB: ${inProgressQueryId} failed: ${queryStatusResponse.data.error}`,
+              },
+            } as IDataFrameResponse;
           }
 
           return {
