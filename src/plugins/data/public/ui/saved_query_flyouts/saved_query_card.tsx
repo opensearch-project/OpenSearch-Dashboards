@@ -40,10 +40,7 @@ export function SavedQueryCard({
   const [editorHeight, setEditorHeight] = useState(60);
   const customHTMLRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [showDeletionConfirmationModal, setShowDeletionConfirmationModal] = useState(false);
-
   const [lineCount, setLineCount] = useState(0);
-
-  // Function to toggle the view state
   const toggleView = () => {
     setIsTruncated(!isTruncated);
   };
@@ -122,12 +119,12 @@ export function SavedQueryCard({
               )}
             </EuiFlexGroup>
             {savedQuery.attributes.description && (
-              <EuiText>
+              <EuiText size="s">
                 <p>{savedQuery.attributes.description}</p>
               </EuiText>
             )}
             {savedQuery.attributes.query.dataset?.title && (
-              <EuiText color="subdued">
+              <EuiText color="subdued" size="s">
                 <p>{savedQuery.attributes.query.dataset.title}</p>
               </EuiText>
             )}
@@ -156,7 +153,7 @@ export function SavedQueryCard({
                       defaultMessage: '{viewMoreLabel}',
                       values: {
                         viewMoreLabel: `${
-                          isTruncated ? `View full query (${lineCount}) lines` : 'View Less'
+                          isTruncated ? `View full query (${lineCount} lines)` : 'View Less'
                         }`,
                       },
                     })}

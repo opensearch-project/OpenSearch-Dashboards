@@ -22,6 +22,7 @@ import {
   Pager,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { i18n } from '@osd/i18n';
 import { SavedQuery, SavedQueryService } from '../../query';
 import { SavedQueryCard } from './saved_query_card';
 
@@ -47,7 +48,6 @@ export function OpenSavedQueryFlyout({
   onQueryOpen,
   handleQueryDelete,
 }: OpenSavedQueryFlyoutProps) {
-  // const [shouldRunOnOpen, setShouldRunOnOpen] = useState(false);
   const [selectedTabId, setSelectedTabId] = useState<string>('mutable-saved-queries');
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
   const [hasTemplateQueries, setHasTemplateQueries] = useState(false);
@@ -148,7 +148,9 @@ export function OpenSavedQueryFlyout({
         compressed
         query={searchQuery}
         box={{
-          placeholder: 'Search saved query',
+          placeholder: i18n.translate('data.openSavedQueryFlyout.searchBarPlaceholder', {
+            defaultMessage: 'Search',
+          }),
           incremental: true,
           schema,
         }}
@@ -192,7 +194,15 @@ export function OpenSavedQueryFlyout({
           />
         ))
       ) : (
-        <EuiEmptyPrompt title={<p>No saved query found.</p>} />
+        <EuiEmptyPrompt
+          title={
+            <p>
+              {i18n.translate('data.openSavedQueryFlyout.queryTable.noQueryFoundText', {
+                defaultMessage: 'No saved query found.',
+              })}
+            </p>
+          }
+        />
       )}
       <EuiSpacer />
       {queriesOnCurrentPage.length > 0 && (
@@ -253,32 +263,18 @@ export function OpenSavedQueryFlyout({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center">
-              {/* <EuiFlexItem grow={false}>
-                <EuiCheckbox
-                  id="run-saved-query-automatically"
-                  checked={shouldRunOnOpen}
-                  onChange={(event) => {
-                    setShouldRunOnOpen(event.target.checked);
-                  }}
-                  label={'Run automatically'}
-                />
-              </EuiFlexItem> */}
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  disabled={!selectedQuery}
-                  fill
-                  onClick={() => {
-                    if (selectedQuery) {
-                      onQueryOpen(selectedQuery);
-                      onClose();
-                    }
-                  }}
-                >
-                  Open query
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiButton
+              disabled={!selectedQuery}
+              fill
+              onClick={() => {
+                if (selectedQuery) {
+                  onQueryOpen(selectedQuery);
+                  onClose();
+                }
+              }}
+            >
+              Open query
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

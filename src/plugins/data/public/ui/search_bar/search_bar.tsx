@@ -347,9 +347,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         this.props.intl.formatMessage(
           {
             id: 'data.search_bar.save_query.failedToSaveQuery',
-            defaultMessage: 'An error occured while saving your query: {errorMessage}',
+            defaultMessage: 'An error occured while saving your query{errorMessage}',
           },
-          { errorMessage: error.message }
+          { errorMessage: error.message ? `: ${error.message}` : '' }
         )
       );
       throw error;

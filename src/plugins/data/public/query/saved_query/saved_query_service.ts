@@ -78,7 +78,7 @@ export const createSavedQueryService = (
     }
 
     if (queryEnhancementEnabled && attributes.isTemplate) {
-      queryObject.isTemplate = attributes.isTemplate;
+      queryObject.isTemplate = true;
     }
 
     let rawQueryResponse;
