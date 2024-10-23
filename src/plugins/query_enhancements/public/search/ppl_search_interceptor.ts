@@ -16,6 +16,7 @@ import {
 } from '../../../data/public';
 import {
   API,
+  DATASET,
   EnhancedFetchContext,
   fetch,
   formatDate,
@@ -47,6 +48,9 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       http: this.deps.http,
       path: trimEnd(`${API.SEARCH}/${strategy}`),
       signal,
+      body: {
+        pollQueryResultsParams: request.params?.pollQueryResultsParams,
+      },
     };
 
     const query = this.buildQuery();
@@ -57,7 +61,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
     const dataset = this.queryService.queryString.getQuery().dataset;
     const datasetType = dataset?.type;
-    let strategy = SEARCH_STRATEGY.PPL;
+    let strategy = datasetType === DATASET.S3 ? SEARCH_STRATEGY.PPL_ASYNC : SEARCH_STRATEGY.PPL;
 
     if (datasetType) {
       const datasetTypeConfig = this.queryService.queryString

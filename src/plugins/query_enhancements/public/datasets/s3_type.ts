@@ -118,7 +118,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
   },
 
   supportedLanguages: (dataset: Dataset): string[] => {
-    return ['SQL'];
+    return ['SQL', 'PPL'];
   },
 
   getSampleQueries: (dataset: Dataset, language: string) => {
