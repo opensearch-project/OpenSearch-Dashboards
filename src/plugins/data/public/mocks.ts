@@ -107,6 +107,15 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
         type: 'INDEX_PATTERN',
       }),
       saveToCache: jest.fn(),
+      getDataSource: jest.fn().mockReturnValue(
+        Promise.resolve({
+          id: 'id',
+          attributes: {
+            title: 'datasource',
+            dataSourceEngineType: 'OpenSearch',
+          },
+        })
+      ),
     } as unknown) as IndexPatternsContract,
     dataSources: dataSourceServiceMock.createStartContract(),
   };

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CoreStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { CoreStart } from 'opensearch-dashboards/public';
 import LRUCache from 'lru-cache';
 import {
   Dataset,
@@ -24,7 +24,6 @@ export class DatasetService {
   private defaultDataset?: Dataset;
   private typesRegistry: Map<string, DatasetTypeConfig> = new Map();
   private recentDatasets: LRUCache<string, Dataset>;
-  private savedObjectsClient?: SavedObjectsClientContract;
 
   constructor(
     private readonly uiSettings: CoreStart['uiSettings'],
@@ -47,12 +46,8 @@ export class DatasetService {
     this.registerType(indexTypeConfig);
   }
 
-  public async init(
-    indexPatterns: IndexPatternsContract,
-    savedObjectsClient: SavedObjectsClientContract
-  ): Promise<void> {
+  public async init(indexPatterns: IndexPatternsContract): Promise<void> {
     this.indexPatterns = indexPatterns;
-    this.savedObjectsClient = savedObjectsClient;
     this.defaultDataset = await this.fetchDefaultDataset();
   }
 
@@ -234,10 +229,7 @@ export class DatasetService {
 
     let dataSource;
     if (indexPattern.dataSourceRef) {
-      dataSource = await this.savedObjectsClient?.get(
-        indexPattern.dataSourceRef?.type,
-        indexPattern.dataSourceRef?.id
-      );
+      dataSource = await this.indexPatterns?.getDataSource(indexPattern.dataSourceRef?.id);
     }
 
     const dataType = this.typesRegistry.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
