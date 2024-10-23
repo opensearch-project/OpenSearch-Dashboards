@@ -193,7 +193,15 @@ export class DataPublicPlugin
   }
 
   public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
-    const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
+    const {
+      uiSettings,
+      http,
+      notifications,
+      savedObjects,
+      overlays,
+      application,
+      workspaces,
+    } = core;
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
@@ -220,6 +228,12 @@ export class DataPublicPlugin
         notifications.toasts,
         application.navigateToApp
       ),
+      // If workspace is enabled, only workspace owner/OSD admin can update ui setting.
+      ...(application.capabilities.workspaces.enabled && {
+        canUpdateUiSetting:
+          workspaces?.currentWorkspace$.getValue()?.owner ||
+          application.capabilities?.dashboards?.isDashboardAdmin !== false,
+      }),
     });
     setIndexPatterns(indexPatterns);
 

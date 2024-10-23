@@ -178,6 +178,7 @@ describe('#WorkspaceClient', () => {
     expect(workspaceMock.workspaceList$.getValue()).toEqual([
       {
         id: 'foo',
+        owner: true,
         readonly: false,
       },
     ]);

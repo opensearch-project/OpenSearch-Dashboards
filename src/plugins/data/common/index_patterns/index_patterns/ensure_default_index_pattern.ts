@@ -36,13 +36,17 @@ export type EnsureDefaultIndexPattern = () => Promise<unknown | void> | undefine
 
 export const createEnsureDefaultIndexPattern = (
   uiSettings: UiSettingsCommon,
-  onRedirectNoIndexPattern: () => Promise<unknown> | void
+  onRedirectNoIndexPattern: () => Promise<unknown> | void,
+  canUpdateUiSetting?: boolean
 ) => {
   /**
    * Checks whether a default index pattern is set and exists and defines
    * one otherwise.
    */
   return async function ensureDefaultIndexPattern(this: IndexPatternsContract) {
+    if (canUpdateUiSetting === false) {
+      return;
+    }
     const patterns = await this.getIds();
     let defaultId = await uiSettings.get('defaultIndex');
     let defined = !!defaultId;

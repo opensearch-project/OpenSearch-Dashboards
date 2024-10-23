@@ -5,7 +5,7 @@
 
 import { WorkspaceAttribute } from '../../types';
 
-export type WorkspaceObject = WorkspaceAttribute & { readonly?: boolean };
+export type WorkspaceObject = WorkspaceAttribute & { readonly?: boolean; owner?: boolean };
 
 export type IWorkspaceResponse<T> =
   | {
