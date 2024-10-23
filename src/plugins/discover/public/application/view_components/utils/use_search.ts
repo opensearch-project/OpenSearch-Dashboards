@@ -352,7 +352,6 @@ export const useSearch = (services: DiscoverViewServices) => {
   useEffect(() => {
     (async () => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
-      setSavedSearch(savedSearchInstance);
 
       const query =
         savedSearchInstance.searchSource.getField('query') ||
@@ -393,6 +392,7 @@ export const useSearch = (services: DiscoverViewServices) => {
 
       filterManager.setAppFilters(actualFilters);
       data.query.queryString.setQuery(query);
+      setSavedSearch(savedSearchInstance);
 
       if (savedSearchInstance?.id) {
         chrome.recentlyAccessed.add(
