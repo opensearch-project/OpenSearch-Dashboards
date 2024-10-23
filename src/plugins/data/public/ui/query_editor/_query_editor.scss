@@ -218,3 +218,40 @@
     display: block;
   }
 }
+
+.queryEditor__footer {
+  display: flex;
+  gap: 4px;
+  background: $euiColorLightestShade;
+  padding: 2px 4px;
+  margin-top: 5px;
+  margin-left: -5px;
+  margin-right: -5px;
+  z-index: 1;
+  position: relative;
+  align-items: center;
+}
+
+.queryEditor__footerSpacer {
+  flex-grow: 1;
+}
+
+.queryEditor__footerItem {
+  // Needed so the footer items never have paddings
+  padding: 0 !important;
+}
+
+// TODO: Temporary workaround to disable padding for single line editor footer
+.euiFormControlLayout--group.euiFormControlLayout--compressed .osdQuerEditor__singleLine .euiText {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.euiFormControlLayout--group .osdQuerEditor__singleLine .euiText {
+  background-color: unset !important;
+  line-height: 21px !important;
+}
+
+.euiFormControlLayout--group .osdQuerEditor__singleLine .euiButtonEmpty {
+  border-right: 0;
+}

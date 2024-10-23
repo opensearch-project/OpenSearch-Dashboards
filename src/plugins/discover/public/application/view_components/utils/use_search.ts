@@ -150,6 +150,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     if (!dataset) {
       data$.next({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
+        queryStatus: { startTime },
       });
       return;
     }
@@ -181,7 +182,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     try {
       // Only show loading indicator if we are fetching when the rows are empty
       if (fetchStateRef.current.rows?.length === 0) {
-        data$.next({ status: ResultStatus.LOADING });
+        data$.next({ status: ResultStatus.LOADING, queryStatus: { startTime } });
       }
 
       // Initialize inspect adapter for search source
@@ -272,15 +273,19 @@ export const useSearch = (services: DiscoverViewServices) => {
       }
       let errorBody;
       try {
-        errorBody = JSON.parse(error.message);
+        errorBody = JSON.parse(error.body);
       } catch (e) {
-        errorBody = error.message;
+        if (error.body) {
+          errorBody = error.body;
+        } else {
+          errorBody = error;
+        }
       }
 
       data$.next({
         status: ResultStatus.ERROR,
         queryStatus: {
-          body: errorBody,
+          body: { error: errorBody },
           elapsedMs,
         },
       });
@@ -296,6 +301,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     services,
     sort,
     savedSearch?.searchSource,
+    startTime,
     data$,
     shouldSearchOnPageLoad,
     inspectorAdapters.requests,
