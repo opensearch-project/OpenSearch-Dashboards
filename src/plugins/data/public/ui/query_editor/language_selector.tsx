@@ -10,7 +10,7 @@ import {
   EuiSmallButtonEmpty,
   PopoverAnchorPosition,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Query } from '../..';
 import { LanguageConfig } from '../../query';
 import { getQueryService } from '../../services';
@@ -36,12 +36,14 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
   const queryString = getQueryService().queryString;
   const languageService = queryString.getLanguageService();
 
-  const datasetSupportedLanguages = props.query.dataset
-    ? queryString
-        .getDatasetService()
-        .getType(props.query.dataset.type)
-        ?.supportedLanguages(props.query.dataset)
-    : undefined;
+  const datasetSupportedLanguages = useMemo(() => {
+    const dataset = props.query.dataset;
+    if (!dataset) {
+      return undefined;
+    }
+    const datasetType = queryString.getDatasetService().getType(dataset.type);
+    return datasetType?.supportedLanguages(dataset);
+  }, [props.query.dataset, queryString]);
 
   useEffect(() => {
     const subscription = queryString.getUpdates$().subscribe((query: Query) => {
@@ -59,51 +61,58 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
     setPopover(!isPopoverOpen);
   };
 
-  const languageOptions: Array<{ label: string; value: string }> = [];
+  const languageOptions = useMemo(() => {
+    const options: Array<{ label: string; value: string }> = [];
 
-  languageService.getLanguages().forEach((language) => {
-    if (
-      (language && props.appName && !language.editorSupportedAppNames?.includes(props.appName)) ||
-      languageService.getUserQueryLanguageBlocklist().includes(language?.id) ||
-      (datasetSupportedLanguages && !datasetSupportedLanguages.includes(language.id))
-    )
-      return;
-    languageOptions.unshift(mapExternalLanguageToOptions(language));
-  });
+    languageService.getLanguages().forEach((language) => {
+      const isSupported =
+        !datasetSupportedLanguages || datasetSupportedLanguages.includes(language.id);
+      const isBlocklisted = languageService.getUserQueryLanguageBlocklist().includes(language?.id);
+      const isAppSupported =
+        !props.appName || language?.editorSupportedAppNames?.includes(props.appName);
 
-  const selectedLanguage = {
-    label:
-      (languageOptions.find(
-        (option) => (option.value as string).toLowerCase() === currentLanguage.toLowerCase()
-      )?.label as string) ?? languageOptions[0].label,
-  };
+      if (!isSupported || isBlocklisted || !isAppSupported) return;
 
-  const handleLanguageChange = (newLanguage: string) => {
-    setCurrentLanguage(newLanguage);
-    props.onSelectLanguage(newLanguage);
-  };
+      options.unshift(mapExternalLanguageToOptions(language));
+    });
 
-  languageService.setUserQueryLanguage(currentLanguage);
+    return options.sort((a, b) => a.label.localeCompare(b.label));
+  }, [languageService, props.appName, datasetSupportedLanguages]);
 
-  const languageOptionsMenu = languageOptions
-    .sort((a, b) => {
-      return a.label.localeCompare(b.label);
-    })
-    .map((language) => {
-      return (
+  const selectedLanguage = useMemo(
+    () => ({
+      label:
+        languageOptions.find(
+          (option) => option.value.toLowerCase() === currentLanguage.toLowerCase()
+        )?.label ?? languageOptions[0]?.label,
+    }),
+    [languageOptions, currentLanguage]
+  );
+
+  const handleLanguageChange = useCallback(
+    (newLanguage: string) => {
+      setCurrentLanguage(newLanguage);
+      props.onSelectLanguage(newLanguage);
+      languageService.setUserQueryLanguage(newLanguage);
+      setPopover(false);
+    },
+    [props, languageService]
+  );
+
+  const languageOptionsMenu = useMemo(
+    () =>
+      languageOptions.map((language) => (
         <EuiContextMenuItem
           key={language.label}
           className="languageSelector__menuItem"
           icon={language.label === selectedLanguage.label ? 'check' : 'empty'}
-          onClick={() => {
-            setPopover(false);
-            handleLanguageChange(language.value);
-          }}
+          onClick={() => handleLanguageChange(language.value)}
         >
           {language.label}
         </EuiContextMenuItem>
-      );
-    });
+      )),
+    [languageOptions, selectedLanguage.label, handleLanguageChange]
+  );
 
   return (
     <EuiPopover
