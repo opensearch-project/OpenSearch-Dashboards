@@ -13,7 +13,6 @@ import React, { useEffect, useState } from 'react';
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
   LOADING = 'loading', // initial data load
-  LOADING_MORE = 'loading_more', // loading additional data while existing results are presents
   READY = 'ready', // results came back
   NO_RESULTS = 'none', // no results came back
   ERROR = 'error', // error occurred
@@ -59,12 +58,23 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     };
   }, [props.queryStatus.startTime]);
 
-  if (
-    props.queryStatus.status === ResultStatus.LOADING ||
-    props.queryStatus.status === ResultStatus.LOADING_MORE
-  ) {
-    if (elapsedTime < BUFFER_TIME) {
-      return null;
+  if (elapsedTime > BUFFER_TIME) {
+    if (props.queryStatus.status === ResultStatus.LOADING) {
+      const time = Math.floor(elapsedTime / 1000);
+      return (
+        <EuiButtonEmpty
+          color="text"
+          size="xs"
+          onClick={() => {}}
+          isLoading
+          data-test-subj="queryResultLoading"
+        >
+          {i18n.translate('data.query.languageService.queryResults.loadTime', {
+            defaultMessage: 'Loading {time} s',
+            values: { time },
+          })}
+        </EuiButtonEmpty>
+      );
     }
     const time = Math.floor(elapsedTime / 1000);
     return (
