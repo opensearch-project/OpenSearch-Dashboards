@@ -99,8 +99,6 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
     [props, languageService]
   );
 
-  // languageService.setUserQueryLanguage(currentLanguage);
-
   const languageOptionsMenu = useMemo(
     () =>
       languageOptions.map((language) => (
