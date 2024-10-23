@@ -379,7 +379,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           <EuiText size="xs" color="subdued">
             {`${this.state.lineCount} ${this.state.lineCount === 1 ? 'line' : 'lines'}`}
           </EuiText>,
-          <EuiText size="xs" color="subdued">
+          <EuiText size="xs" color="subdued" data-test-subj="queryEditorFooterTimestamp">
             {this.props.query.dataset?.timeFieldName || ''}
           </EuiText>,
           <QueryResult queryStatus={this.props.queryStatus!} />,
