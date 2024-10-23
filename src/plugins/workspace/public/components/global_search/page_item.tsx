@@ -89,7 +89,15 @@ export const GlobalSearchPageItem = ({
     const parentNavLinkTitle = link.navGroup.navLinks.find(
       (navLink) => navLink.id === link.parentNavLinkId
     )?.title;
-    breadcrumbs.push({ text: parentNavLinkTitle });
+    if (parentNavLinkTitle) {
+      breadcrumbs.push({
+        text: (
+          <EuiHighlight search={search} highlightAll={true}>
+            {parentNavLinkTitle}
+          </EuiHighlight>
+        ),
+      });
+    }
   }
 
   const onNavItemClick = () => {
