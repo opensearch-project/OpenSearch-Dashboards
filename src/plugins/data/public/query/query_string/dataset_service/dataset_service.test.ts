@@ -11,7 +11,6 @@ import { IDataPluginServices } from '../../../types';
 import { indexPatternTypeConfig } from './lib';
 import { dataPluginMock } from '../../../mocks';
 import { IndexPatternsContract } from '../../..';
-import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { waitFor } from '@testing-library/dom';
 
 describe('DatasetService', () => {
@@ -20,7 +19,6 @@ describe('DatasetService', () => {
   let sessionStorage: DataStorage;
   let mockDataPluginServices: jest.Mocked<IDataPluginServices>;
   let indexPatterns: IndexPatternsContract;
-  let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
 
   beforeEach(() => {
     uiSettings = coreMock.createSetup().uiSettings;
@@ -33,8 +31,7 @@ describe('DatasetService', () => {
     mockDataPluginServices = {} as jest.Mocked<IDataPluginServices>;
     service = new DatasetService(uiSettings, sessionStorage);
     indexPatterns = dataPluginMock.createStartContract().indexPatterns;
-    savedObjectsClient = (undefined as unknown) as jest.Mocked<SavedObjectsClientContract>;
-    service.init(indexPatterns, savedObjectsClient);
+    service.init(indexPatterns);
   });
 
   const mockResult = {
@@ -202,7 +199,18 @@ describe('DatasetService', () => {
     sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
     mockDataPluginServices = {} as jest.Mocked<IDataPluginServices>;
     service = new DatasetService(uiSettings, sessionStorage);
-    indexPatterns = dataPluginMock.createStartContract().indexPatterns;
+    indexPatterns = {
+      ...dataPluginMock.createStartContract().indexPatterns,
+      getDataSource: jest.fn().mockReturnValue(
+        Promise.resolve({
+          id: 'id',
+          attributes: {
+            title: 'datasource',
+            dataSourceEngineType: 'OpenSearch',
+          },
+        })
+      ),
+    };
     service.init(indexPatterns);
 
     await waitFor(() => {
@@ -211,6 +219,16 @@ describe('DatasetService', () => {
         title: 'datasource',
         type: 'OpenSearch',
       });
+    });
+
+    indexPatterns = {
+      ...dataPluginMock.createStartContract().indexPatterns,
+      getDataSource: jest.fn().mockReturnValue(Promise.resolve()),
+    };
+    service.init(indexPatterns);
+
+    await waitFor(() => {
+      expect(service.getDefault()?.dataSource).toBe(undefined);
     });
   });
 });
