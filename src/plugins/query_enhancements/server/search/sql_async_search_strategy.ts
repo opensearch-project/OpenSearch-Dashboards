@@ -82,7 +82,7 @@ export const sqlAsyncSearchStrategyProvider = (
               type: DATA_FRAME_TYPES.POLLING,
               status: 'failed',
               body: {
-                error: new Error(`JOB: ${pollQueryResultsParams.queryId} failed`),
+                error: `JOB: ${inProgressQueryId} failed: ${queryStatusResponse.data.error}`,
               },
             } as IDataFrameResponse;
           }

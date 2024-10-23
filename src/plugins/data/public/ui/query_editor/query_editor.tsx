@@ -376,10 +376,15 @@ export default class QueryEditorUI extends Component<Props, State> {
       },
       footerItems: {
         start: [
-          <EuiText size="xs" color="subdued">
+          <EuiText size="xs" color="subdued" className="queryEditor__footerItem">
             {`${this.state.lineCount} ${this.state.lineCount === 1 ? 'line' : 'lines'}`}
           </EuiText>,
-          <EuiText size="xs" color="subdued">
+          <EuiText
+            size="xs"
+            color="subdued"
+            data-test-subj="queryEditorFooterTimestamp"
+            className="queryEditor__footerItem"
+          >
             {this.props.query.dataset?.timeFieldName || ''}
           </EuiText>,
           <QueryResult queryStatus={this.props.queryStatus!} />,
@@ -390,6 +395,7 @@ export default class QueryEditorUI extends Component<Props, State> {
             iconType="clock"
             size="xs"
             onClick={this.toggleRecentQueries}
+            className="queryEditor__footerItem"
           >
             <EuiText size="xs" color="subdued">
               {'Recent queries'}
@@ -429,6 +435,34 @@ export default class QueryEditorUI extends Component<Props, State> {
       },
       provideCompletionItems: this.provideCompletionItems,
       prepend: this.props.prepend,
+      footerItems: {
+        start: [
+          <EuiText size="xs" color="subdued" className="queryEditor__footerItem">
+            {`${this.state.lineCount ?? 1} ${
+              this.state.lineCount === 1 || !this.state.lineCount ? 'line' : 'lines'
+            }`}
+          </EuiText>,
+          <EuiText size="xs" color="subdued" className="queryEditor__footerItem">
+            {this.props.query.dataset?.timeFieldName || ''}
+          </EuiText>,
+          <QueryResult queryStatus={this.props.queryStatus!} />,
+        ],
+        end: [
+          <EuiButtonEmpty
+            iconSide="left"
+            iconType="clock"
+            iconGap="s"
+            size="xs"
+            onClick={this.toggleRecentQueries}
+            className="queryEditor__footerItem"
+            flush="both"
+          >
+            <EuiText size="xs" color="subdued">
+              {'Recent queries'}
+            </EuiText>
+          </EuiButtonEmpty>,
+        ],
+      },
     };
 
     const languageEditorFunc = this.languageManager.getLanguage(this.props.query.language)!.editor;
@@ -478,13 +512,13 @@ export default class QueryEditorUI extends Component<Props, State> {
         {!this.state.isCollapsed && (
           <>
             <div className="osdQueryEditor__body">{languageEditor.Body()}</div>
-            <RecentQueriesTable
-              isVisible={this.state.isRecentQueryVisible && useQueryEditor}
-              queryString={this.queryString}
-              onClickRecentQuery={this.onClickRecentQuery}
-            />
           </>
         )}
+        <RecentQueriesTable
+          isVisible={this.state.isRecentQueryVisible && useQueryEditor}
+          queryString={this.queryString}
+          onClickRecentQuery={this.onClickRecentQuery}
+        />
 
         {this.renderQueryEditorExtensions()}
       </div>

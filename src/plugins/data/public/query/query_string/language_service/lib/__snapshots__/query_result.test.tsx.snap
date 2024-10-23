@@ -5,6 +5,8 @@ exports[`Query Result show error status with error message 2`] = `
   anchorPosition="downRight"
   button={
     <EuiButtonEmpty
+      className="editor__footerItem"
+      color="danger"
       data-test-subj="queryResultErrorBtn"
       iconSide="left"
       iconType="alert"
@@ -12,7 +14,8 @@ exports[`Query Result show error status with error message 2`] = `
       size="xs"
     >
       <EuiText
-        color="subdued"
+        className="editor__footerItem"
+        color="danger"
         size="xs"
       >
         Error
@@ -31,6 +34,7 @@ exports[`Query Result show error status with error message 2`] = `
     ERRORS
   </EuiPopoverTitle>
   <div
+    className="eui-textBreakWord"
     style={
       Object {
         "width": "250px",
@@ -40,19 +44,11 @@ exports[`Query Result show error status with error message 2`] = `
     <EuiText
       size="s"
     >
-      <strong>
-        Reasons:
-      </strong>
-      error reason
-    </EuiText>
-    <EuiText
-      size="s"
-    >
       <p>
         <strong>
-          Details:
+          Message:
         </strong>
-        error details
+         
       </p>
     </EuiText>
   </div>

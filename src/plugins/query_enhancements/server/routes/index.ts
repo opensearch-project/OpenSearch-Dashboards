@@ -85,8 +85,14 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
           const queryRes: IDataFrameResponse = await searchStrategy.search(context, req as any, {});
           return res.ok({ body: { ...queryRes } });
         } catch (err) {
+          let error;
+          try {
+            error = JSON.parse(err.message);
+          } catch (e) {
+            error = err;
+          }
           return res.custom({
-            statusCode: err.name,
+            statusCode: error.status,
             body: err.message,
           });
         }
