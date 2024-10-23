@@ -3,14 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+
+export interface QueryAssistState {
+  question: string;
+  answer: string;
+}
 
 export interface QueryAssistContextValue {
-  question: string;
-  question$: BehaviorSubject<string>;
-  updateQuestion: (question: string) => void;
   isQueryAssistCollapsed: boolean;
   updateIsQueryAssistCollapsed: (isCollapsed: boolean) => void;
+  queryState: QueryAssistState;
+  updateQueryState: (state: QueryAssistState) => void;
 }
 export const QueryAssistContext = React.createContext<QueryAssistContextValue>(
   {} as QueryAssistContextValue
