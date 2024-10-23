@@ -21,7 +21,7 @@ import {
 } from '../utils';
 import { ChromeNavLinks } from '../nav_links';
 import { InternalApplicationStart } from '../../application';
-import { NavGroupStatus } from '../../../../core/types';
+import { NavGroupStatus, NavGroupType } from '../../../../core/types';
 import { ChromeBreadcrumb, ChromeBreadcrumbEnricher } from '../chrome_service';
 import { ALL_USE_CASE_ID } from '../../../utils';
 
@@ -270,10 +270,15 @@ export class ChromeNavGroupService {
             appIdNavGroupMap.set(navLinkId, navGroupSet);
           });
         };
-        if (visibleUseCases.length === 1 && visibleUseCases[0].id === ALL_USE_CASE_ID) {
-          // If the only visible use case is all use case
-          // All the other nav groups will be visible because all use case can visit all of the nav groups.
-          Object.values(navGroupMap).forEach((navGroup) => mapAppIdToNavGroup(navGroup));
+        if (visibleUseCases.length === 1) {
+          if (visibleUseCases[0].id === ALL_USE_CASE_ID) {
+            // If the only visible use case is all use case
+            // All the other nav groups will be visible because all use case can visit all of the nav groups.
+            Object.values(navGroupMap).forEach((navGroup) => mapAppIdToNavGroup(navGroup));
+          } else {
+            // It means we are in a workspace, we should only use the visible use cases
+            visibleUseCases.forEach((navGroup) => mapAppIdToNavGroup(navGroup));
+          }
         } else {
           // Nav group of Hidden status should be filtered out when counting navGroups the currentApp belongs to
           Object.values(navGroupMap).forEach((navGroup) => {
@@ -287,7 +292,26 @@ export class ChromeNavGroupService {
 
         const navGroups = appIdNavGroupMap.get(appId);
         if (navGroups && navGroups.size === 1) {
-          setCurrentNavGroup(navGroups.values().next().value);
+          const navGroupId = navGroups.values().next().value as string;
+          /**
+           * If
+           * 1. workspace enabled
+           * 2. outside of workspace: visibleUseCases.length > 1
+           * 3. the matched nav group is a use case nav group
+           *
+           * It means a workspace application is incorrectly opened in global place.
+           * We need to set current nav group to undefined to not show the use case nav.
+           */
+          const navGroupInfo = navGroupMap[navGroupId];
+          if (
+            application.capabilities.workspaces.enabled &&
+            visibleUseCases.length > 1 &&
+            navGroupInfo.type !== NavGroupType.SYSTEM
+          ) {
+            setCurrentNavGroup(undefined);
+          } else {
+            setCurrentNavGroup(navGroupId);
+          }
         } else if (!navGroups) {
           setCurrentNavGroup(undefined);
         }

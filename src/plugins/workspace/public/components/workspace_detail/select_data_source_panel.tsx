@@ -159,7 +159,7 @@ export const SelectDataSourceDetailPanel = ({
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.detail.dataSources.unassign.success', {
-              defaultMessage: 'Remove associated OpenSearch connections successfully',
+              defaultMessage: 'The association has been removed',
             }),
           });
           setSelectedDataSourceConnections(savedDataSourceConnections);
@@ -282,7 +282,7 @@ export const SelectDataSourceDetailPanel = ({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem>
               <EuiButtonGroup
                 legend="dataSourceGroup"
@@ -296,7 +296,7 @@ export const SelectDataSourceDetailPanel = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiHorizontalRule />
+      <EuiHorizontalRule margin="m" />
       {renderTableContent()}
       {isVisible && (
         <AssociationDataSourceModal
