@@ -5,6 +5,7 @@
 
 import { createRawDataVisFn, executeExpression } from './expression_helper';
 import { getExpressionsService } from '../../../../../expressions/public';
+import { ExecutionContext, OpenSearchDashboardsDatatable } from '../../../../../expressions/public';
 
 jest.mock('../../../../../expressions/public', () => ({
   getExpressionsService: jest.fn(),
@@ -22,7 +23,15 @@ describe('expression_helper.ts', () => {
     it('should return the input context unchanged', () => {
       const result = createRawDataVisFn();
       const context = { some: 'data' };
-      expect(result.fn(context as any)).toBe(context);
+      const mockArgs = {};
+      const mockHandlers: ExecutionContext<OpenSearchDashboardsDatatable, {}> = {
+        getInitialInput: jest.fn(),
+        variables: {},
+        types: {},
+        abortSignal: new AbortController().signal,
+        inspectorAdapters: {},
+      };
+      expect(result.fn(context as any, mockArgs, mockHandlers)).toBe(context);
     });
   });
 

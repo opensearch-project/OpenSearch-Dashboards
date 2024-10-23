@@ -4,7 +4,7 @@
  */
 
 import { buildVegaLiteEncoding } from './components/encoding';
-import { buildMarkForVegaLite, VegaMarkType } from './components/mark';
+import { buildMarkForVegaLite, VegaMarkType } from './components/mark/mark';
 import { buildTooltip } from './components/tooltip';
 import { buildLegend } from './components/legend';
 import { StyleState } from '../../application/utils/state_management';
@@ -19,7 +19,7 @@ import { mapChartTypeToVegaType } from './utils/helpers';
  * @param {StyleState} style - The StyleState defined in style slice.
  * @returns {VegaLiteSpec} The complete Vega-Lite specification.
  */
-export const generateVegaLiteSpec = (
+export const generateVegaLiteSpecForSeries = (
   data: any,
   visConfig: any,
   style: StyleState

@@ -4,7 +4,7 @@
  */
 
 import { AxisFormats } from '../utils/types';
-import { buildAxes } from './axes';
+import { buildAxes } from '../axes';
 
 export type VegaMarkType =
   | 'line'
@@ -87,7 +87,7 @@ export const buildMarkForVegaLite = (vegaType: string): VegaLiteMark => {
 };
 
 /**
- * Builds a mark configuration for Vega based on the chart type.
+ * Builds a mark configuration for Vega useing series data based on the chart type.
  *
  * @param {VegaMarkType} chartType - The type of chart to build the mark for.
  * @param {any} dimensions - The dimensions of the data.
