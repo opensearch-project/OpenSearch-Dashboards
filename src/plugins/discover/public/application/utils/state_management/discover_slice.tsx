@@ -11,7 +11,11 @@ import { RootState, DefaultViewState } from '../../../../../data_explorer/public
 import { buildColumns } from '../columns';
 import * as utils from './common';
 import { SortOrder } from '../../../saved_searches/types';
-import { DEFAULT_COLUMNS_SETTING, PLUGIN_ID } from '../../../../common';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  PLUGIN_ID,
+  QUERY_ENHANCEMENT_ENABLED_SETTING,
+} from '../../../../common';
 
 export interface DiscoverState {
   /**
@@ -90,7 +94,8 @@ export const getPreloadedState = async ({
       const indexPatternId = savedSearchInstance.searchSource.getField('index')?.id;
       preloadedState.root = {
         metadata: {
-          indexPattern: indexPatternId,
+          ...(indexPatternId &&
+            !config.get(QUERY_ENHANCEMENT_ENABLED_SETTING) && { indexPattern: indexPatternId }),
           view: PLUGIN_ID,
         },
       };
