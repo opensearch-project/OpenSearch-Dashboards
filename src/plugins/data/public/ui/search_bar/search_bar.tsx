@@ -45,6 +45,7 @@ import { QueryEditorTopRow } from '../query_editor';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { FilterOptions } from '../filter_bar/filter_options';
+import { getUseNewSavedQueriesUI } from '../../services';
 
 interface SearchBarInjectedDeps {
   opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
@@ -286,10 +287,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     if (!this.state.query) return;
 
     const query = cloneDeep(this.state.query);
-    if (
-      this.services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) &&
-      !savedQueryMeta.shouldIncludeDataSource
-    ) {
+    if (getUseNewSavedQueriesUI() && !savedQueryMeta.shouldIncludeDataSource) {
       delete query.dataset;
     }
 

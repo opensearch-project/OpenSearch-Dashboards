@@ -61,6 +61,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { SavedQueryManagementComponent } from '../saved_query_management';
 import { SavedQuery, SavedQueryService } from '../../query';
 import { SavedQueryMeta } from '../saved_query_form';
+import { getUseNewSavedQueriesUI } from '../../services';
 
 interface Props {
   intl: InjectedIntl;
@@ -89,7 +90,6 @@ const FilterOptionsUI = (props: Props) => {
   const uiSettings = opensearchDashboards.services.uiSettings;
   const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
   const useNewHeader = Boolean(uiSettings!.get(UI_SETTINGS.NEW_HOME_PAGE));
-  const useNewSavedQueryUI = Boolean(uiSettings!.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED));
   const index = Array.isArray(props.indexPatterns) ? props.indexPatterns[0]?.id : undefined;
   const newFilter = buildEmptyFilter(isPinned, index);
 
@@ -308,7 +308,7 @@ const FilterOptionsUI = (props: Props) => {
             setIsPopoverOpen(false);
           }}
           key={'savedQueryManagement'}
-          useNewSavedQueryUI={useNewSavedQueryUI}
+          useNewSavedQueryUI={getUseNewSavedQueriesUI()}
           saveQuery={props.saveQuery}
         />,
       ]}
@@ -368,7 +368,9 @@ const FilterOptionsUI = (props: Props) => {
     defaultMessage: 'See saved queries',
   });
 
-  const iconForQueryEditorControlPopoverBtn = useNewSavedQueryUI ? 'boxesHorizontal' : 'folderOpen';
+  const iconForQueryEditorControlPopoverBtn = getUseNewSavedQueriesUI()
+    ? 'boxesHorizontal'
+    : 'folderOpen';
 
   const savedQueryPopoverButton = (
     <EuiSmallButtonEmpty
