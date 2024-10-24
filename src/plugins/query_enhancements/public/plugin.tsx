@@ -101,7 +101,7 @@ export class QueryEnhancementsPlugin
     // Register SQL language
     const sqlLanguageConfig: LanguageConfig = {
       id: 'SQL',
-      title: 'SQL',
+      title: 'OpenSearch SQL',
       search: sqlSearchInterceptor,
       getQueryString: (query: Query) => {
         return `SELECT * FROM ${query.dataset?.title} LIMIT 10`;
