@@ -228,6 +228,10 @@ jobs:
           target: plugin-artifacts/
           filename: sql.zip
 
+      - name: Install wget
+        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        run: sudo apt-get update && sudo apt-get install -y wget
+
       - name: Download OpenSearch
         if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
         uses: peternied/download-file@v2
