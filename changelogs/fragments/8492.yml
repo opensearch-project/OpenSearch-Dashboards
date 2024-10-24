@@ -1,0 +1,2 @@
+fix:
+- Updated DataSource Management to redirect to Discover as well as display the type of the DataSource ([#8492](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8492))

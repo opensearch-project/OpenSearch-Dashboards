@@ -116,6 +116,7 @@ export class DataSourceManagementPlugin
   ) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
     const uiSettings = core.uiSettings;
+    setUiSettings(uiSettings);
 
     if (!opensearchDashboardsSection) {
       throw new Error('`opensearchDashboards` management section not found.');
@@ -207,7 +208,6 @@ export class DataSourceManagementPlugin
     }
 
     setHideLocalCluster({ enabled: dataSource!.hideLocalCluster });
-    setUiSettings(uiSettings);
     // This instance will be got in each data source selector component.
     setDataSourceSelection(this.dataSourceSelection);
 
