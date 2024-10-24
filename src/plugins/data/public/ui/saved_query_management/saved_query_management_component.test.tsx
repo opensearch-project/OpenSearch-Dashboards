@@ -18,8 +18,8 @@ const mockProps = () => ({
     deleteSavedQuery: jest.fn(),
     getSavedQueryCount: jest.fn(),
   },
-  onSave: jest.fn(),
-  onSaveAsNew: jest.fn(),
+  onInitiateSave: jest.fn(),
+  onInitiateSaveAsNew: jest.fn(),
   onLoad: jest.fn(),
   onClearSavedQuery: jest.fn(),
   closeMenuPopover: jest.fn(),
@@ -33,6 +33,7 @@ const mockProps = () => ({
       query: { query: '', language: 'kuery' } as Query,
     } as SavedQueryAttributes,
   },
+  saveQuery: jest.fn(),
 });
 
 describe('Saved query management component', () => {
@@ -42,25 +43,25 @@ describe('Saved query management component', () => {
     expect(wrapper.exists()).toBe(true);
   });
 
-  it('should call onSave when save button is clicked', () => {
+  it('should call onInitiateSave when save button is clicked', () => {
     const props = mockProps();
     const wrapper = shallowWithIntl(<SavedQueryManagementComponent {...props} />);
     const saveButton = wrapper
       .find('[data-test-subj="saved-query-management-save-changes-button"]')
       .at(0);
     saveButton.simulate('click');
-    expect(props.onSave).toHaveBeenCalled();
+    expect(props.onInitiateSave).toHaveBeenCalled();
     expect(props.closeMenuPopover).toHaveBeenCalled();
   });
 
-  it('should call onSaveAsNew when save as new button is clicked', () => {
+  it('should call onInitiateSaveAsNew when save as new button is clicked', () => {
     const props = mockProps();
     const wrapper = shallowWithIntl(<SavedQueryManagementComponent {...props} />);
     const saveAsNewButton = wrapper
       .find('[data-test-subj="saved-query-management-save-as-new-button"]')
       .at(0);
     saveAsNewButton.simulate('click');
-    expect(props.onSaveAsNew).toHaveBeenCalled();
+    expect(props.onInitiateSaveAsNew).toHaveBeenCalled();
   });
 
   it('should call onClearSavedQuery when clear saved query button is clicked', () => {

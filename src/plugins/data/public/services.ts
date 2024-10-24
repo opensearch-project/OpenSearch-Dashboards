@@ -63,3 +63,13 @@ export const [getSearchService, setSearchService] = createGetterSetter<
 export const [getUiService, setUiService] = createGetterSetter<DataPublicPluginStart['ui']>('Ui');
 
 export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
+
+let useNewSavedQueriesUI = false;
+
+export function getUseNewSavedQueriesUI() {
+  return useNewSavedQueriesUI;
+}
+
+export const setUseNewSavedQueriesUI = (value: boolean) => {
+  useNewSavedQueriesUI = value;
+};

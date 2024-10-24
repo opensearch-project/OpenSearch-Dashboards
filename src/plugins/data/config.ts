@@ -57,6 +57,9 @@ export const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: false }),
     }),
   }),
+  savedQueriesNewUI: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
 });
 
 export type ConfigSchema = TypeOf<typeof configSchema>;

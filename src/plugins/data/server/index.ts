@@ -306,6 +306,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     enhancements: true,
     autocomplete: true,
     search: true,
+    savedQueriesNewUI: true,
   },
   schema: configSchema,
 };
