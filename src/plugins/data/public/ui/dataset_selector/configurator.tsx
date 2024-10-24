@@ -148,7 +148,7 @@ export const Configurator = ({
           >
             <EuiFieldText disabled value={dataset.title} />
           </EuiFormRow>
-          {indexedViews.length > 0 && (
+          {indexedViewsService && (
             <EuiFormRow
               label={i18n.translate(
                 'data.explorer.datasetSelector.advancedSelector.configurator.indexedViewLabel',
@@ -165,12 +165,6 @@ export const Configurator = ({
             >
               <EuiSelect
                 isLoading={loadingIndexedViews}
-                placeholder={i18n.translate(
-                  'data.explorer.datasetSelector.advancedSelector.configurator.indexedViewSelector.placeholder',
-                  {
-                    defaultMessage: 'Select indexed view',
-                  }
-                )}
                 options={indexedViews.map(({ name }) => ({
                   text: name,
                   value: name,
