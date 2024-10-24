@@ -95,7 +95,7 @@ jobs:
         'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false' }}
 
       SNAPSHOT_CMD: ${{ matrix.config == 'query_enhanced' &&
-        'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false --sql' ||
+        'node ../scripts/opensearch snapshot -E --sql cluster.routing.allocation.disk.threshold_enabled=false' ||
         matrix.config == 'dashboard' &&
         'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false' ||
         'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false' }}
@@ -200,7 +200,6 @@ jobs:
           key: cypress-cache-v2-${{ runner.os }}-${{ hashFiles('**/package.json') }}
         env:
           CYPRESS_INSTALL_BINARY: ${{ steps.cypress_version.outputs.cypress_version }}
-
       - run: npx cypress cache list
       - run: npx cypress cache path
 
@@ -210,7 +209,7 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           working-directory: ${{ env.FTR_PATH }}
-          start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
+          start: ${{ env.SNAPSHOT_CMD }}, ${{ env.START_CMD }}
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
 
