@@ -96,7 +96,7 @@ export class QueryEnhancementsPlugin
       title: 'SQL',
       search: sqlSearchInterceptor,
       getQueryString: (query: Query) => {
-        return `SELECT * FROM ${queryString.getQuery().dataset?.title} LIMIT 10`;
+        return `SELECT * FROM ${query.dataset?.title} LIMIT 10`;
       },
       fields: {
         filterable: false,
