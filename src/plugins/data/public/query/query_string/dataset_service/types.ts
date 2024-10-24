@@ -16,6 +16,14 @@ export interface DataStructureFetchOptions {
   paginationToken?: string;
 }
 
+export interface IndexedView {
+  name: string;
+}
+
+export interface IndexedViewsService {
+  getIndexedViews: (dataset: Dataset) => Promise<IndexedView[]>;
+}
+
 /**
  * Configuration for handling dataset operations.
  */
@@ -72,7 +80,7 @@ export interface DatasetTypeConfig {
    * Retrieves the search options to be used for running the query on the data connection associated
    * with this Dataset
    */
-  getSearchOptions?: () => DatasetSearchOptions;
+  getSearchOptions?: (dataset: Dataset) => DatasetSearchOptions;
   /**
    * Combines a list of user selected data structures into a single one to use in discover.
    * @see https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8362.
@@ -82,4 +90,8 @@ export interface DatasetTypeConfig {
    * Returns a list of sample queries for this dataset type
    */
   getSampleQueries?: (dataset: Dataset, language: string) => any;
+  /**
+   * Service used for indexedViews related operations
+   */
+  indexedViewsService?: IndexedViewsService;
 }

@@ -247,6 +247,8 @@ export interface Dataset extends BaseDataset {
   timeFieldName?: string;
   /** Optional language to default to from the language selector */
   language?: string;
+  /** Optional name of the indexed view to search data from */
+  indexedView?: string;
 }
 
 export interface DatasetField {
@@ -256,6 +258,30 @@ export interface DatasetField {
   // TODO:  osdFieldType?
 }
 
+export type CanvasBannerProps =
+  | {
+      componentType: 'callout';
+      title: string;
+      iconType?: string;
+      content?: React.ReactNode;
+    }
+  | {
+      componentType: 'callout';
+      title?: string;
+      iconType?: string;
+      content: React.ReactNode;
+    }
+  | {
+      componentType: 'custom';
+      content: React.ReactNode;
+    };
+
 export interface DatasetSearchOptions {
   strategy?: string;
+  /**
+   * Returns props used to render a banner on the Discover canvas/results section
+   */
+  getBannerProps?: (
+    searchStatus: string
+  ) => CanvasBannerProps | Promise<CanvasBannerProps> | undefined;
 }

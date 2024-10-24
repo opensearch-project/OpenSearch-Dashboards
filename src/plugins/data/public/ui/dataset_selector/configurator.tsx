@@ -22,6 +22,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../../common';
 import { getIndexPatterns, getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
+import { IndexedView } from '../../query/query_string/dataset_service';
 
 export const Configurator = ({
   services,
@@ -41,7 +42,7 @@ export const Configurator = ({
   const languageService = queryService.queryString.getLanguageService();
   const indexPatternsService = getIndexPatterns();
   const type = queryString.getDatasetService().getType(baseDataset.type);
-  const languages = type?.supportedLanguages(baseDataset) || [];
+  const [languages, setLanguages] = useState(type?.supportedLanguages(baseDataset) || []);
 
   const [dataset, setDataset] = useState<Dataset>(baseDataset);
   const [timeFields, setTimeFields] = useState<DatasetField[]>([]);
@@ -52,25 +53,49 @@ export const Configurator = ({
       defaultMessage: "I don't want to use the time filter",
     }
   );
-  const [language, setLanguage] = useState<string>(() => {
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('');
+  const indexedViewsService = type?.indexedViewsService;
+  const [selectedIndexedView, setSelectedIndexedView] = useState<string | undefined>();
+  const [indexedViews, setIndexedViews] = useState<IndexedView[]>([]);
+  const [loadingIndexedViews, setLoadingIndexedViews] = useState(false);
+
+  useEffect(() => {
+    setLanguages(type?.supportedLanguages(dataset) || []);
+  }, [dataset, type]);
+
+  useEffect(() => {
     const currentLanguage = queryString.getQuery().language;
     if (languages.includes(currentLanguage)) {
-      return currentLanguage;
+      setSelectedLanguage(currentLanguage);
     }
-    return languages[0];
-  });
+    setSelectedLanguage(languages[0]);
+  }, [languages, queryString]);
+
+  useEffect(() => {
+    const getIndexedViews = async () => {
+      if (indexedViewsService) {
+        setLoadingIndexedViews(true);
+        const fetchedIndexedViews = await indexedViewsService.getIndexedViews(baseDataset);
+        setLoadingIndexedViews(false);
+        setIndexedViews(fetchedIndexedViews || []);
+      }
+    };
+
+    getIndexedViews();
+  }, [indexedViewsService, baseDataset]);
 
   const submitDisabled = useMemo(() => {
     return (
-      timeFieldName === undefined &&
-      !(
-        languageService.getLanguage(language)?.hideDatePicker ||
-        dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-      ) &&
-      timeFields &&
-      timeFields.length > 0
+      loadingIndexedViews ||
+      (timeFieldName === undefined &&
+        !(
+          languageService.getLanguage(selectedLanguage)?.hideDatePicker ||
+          dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+        ) &&
+        timeFields &&
+        timeFields.length > 0)
     );
-  }, [dataset, language, timeFieldName, timeFields, languageService]);
+  }, [dataset, selectedLanguage, timeFieldName, timeFields, languageService, loadingIndexedViews]);
 
   useEffect(() => {
     const fetchFields = async () => {
@@ -123,6 +148,46 @@ export const Configurator = ({
           >
             <EuiFieldText disabled value={dataset.title} />
           </EuiFormRow>
+          {indexedViews.length > 0 && (
+            <EuiFormRow
+              label={i18n.translate(
+                'data.explorer.datasetSelector.advancedSelector.configurator.indexedViewLabel',
+                {
+                  defaultMessage: 'Available indexed views',
+                }
+              )}
+              helpText={i18n.translate(
+                'data.explorer.datasetSelector.advancedSelector.configurator.indexedViewHelpText',
+                {
+                  defaultMessage: 'Select an indexed view to speed up your query.',
+                }
+              )}
+            >
+              <EuiSelect
+                isLoading={loadingIndexedViews}
+                placeholder={i18n.translate(
+                  'data.explorer.datasetSelector.advancedSelector.configurator.indexedViewSelector.placeholder',
+                  {
+                    defaultMessage: 'Select indexed view',
+                  }
+                )}
+                options={indexedViews.map(({ name }) => ({
+                  text: name,
+                  value: name,
+                }))}
+                value={selectedIndexedView}
+                onChange={(e) => {
+                  setSelectedIndexedView(e.target.value);
+                  setDataset({
+                    ...dataset,
+                    indexedView: e.target.value,
+                    title: `${dataset.title}.${e.target.value}`,
+                  });
+                }}
+                hasNoInitialSelection
+              />
+            </EuiFormRow>
+          )}
           <EuiFormRow
             label={i18n.translate(
               'data.explorer.datasetSelector.advancedSelector.configurator.languageLabel',
@@ -136,14 +201,14 @@ export const Configurator = ({
                 text: languageService.getLanguage(languageId)?.title || languageId,
                 value: languageId,
               }))}
-              value={language}
+              value={selectedLanguage}
               onChange={(e) => {
-                setLanguage(e.target.value);
+                setSelectedLanguage(e.target.value);
                 setDataset({ ...dataset, language: e.target.value });
               }}
             />
           </EuiFormRow>
-          {!languageService.getLanguage(language)?.hideDatePicker &&
+          {!languageService.getLanguage(selectedLanguage)?.hideDatePicker &&
             (dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN ? (
               <EuiFormRow
                 label={i18n.translate(

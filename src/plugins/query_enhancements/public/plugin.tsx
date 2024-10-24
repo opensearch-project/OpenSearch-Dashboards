@@ -62,7 +62,11 @@ export class QueryEnhancementsPlugin
         startServices: core.getStartServices(),
         usageCollector: data.search.usageCollector,
       }),
-      getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title} | head 10`,
+      getQueryString: (currentQuery: Query) => {
+        const dataset = currentQuery.dataset;
+        const source = dataset?.indexedView ?? dataset?.title;
+        return `source = ${source} | head 10`;
+      },
       fields: { filterable: false, visualizable: false },
       docLink: {
         title: i18n.translate('queryEnhancements.pplLanguage.docLink', {
@@ -127,8 +131,10 @@ export class QueryEnhancementsPlugin
         startServices: core.getStartServices(),
         usageCollector: data.search.usageCollector,
       }),
-      getQueryString: (currentQuery: Query) =>
-        `SELECT * FROM ${currentQuery.dataset?.title} LIMIT 10`,
+      getQueryString: (currentQuery: Query) => {
+        const source = currentQuery.dataset?.indexedView ?? currentQuery.dataset?.title;
+        return `SELECT * FROM ${source} LIMIT 10`;
+      },
       fields: { filterable: false, visualizable: false },
       docLink: {
         title: i18n.translate('queryEnhancements.sqlLanguage.docLink', {
