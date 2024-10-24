@@ -586,7 +586,10 @@ describe('SavedObjectsTable', () => {
       await component.instance().onDelete();
       component.update();
 
-      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.find('EuiModal')).toMatchSnapshot();
+      expect(component.find('EuiModalHeader')).toMatchSnapshot();
+      expect(component.find('EuiModalFooter')).toMatchSnapshot();
+      expect(component.find('Delete assets')).toMatchSnapshot();
     });
 
     it('should delete selected objects', async () => {
@@ -675,14 +678,14 @@ describe('SavedObjectsTable', () => {
       await component.instance().onDelete();
       component.update();
       expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
-      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.find('EuiModal')).toMatchSnapshot();
 
       await component.instance().delete();
       component.update();
       expect(notifications.toasts.addDanger).toHaveBeenCalled();
       // If user fail to delete the saved objects, the delete modal will continue to display
       expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
-      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.find('EuiModal')).toMatchSnapshot();
       expect(component.state('isDeleting')).toBe(false);
     });
   });
