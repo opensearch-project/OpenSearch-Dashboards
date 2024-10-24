@@ -1236,6 +1236,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
         }
       }
       totalItemCount={4}
+      workspaceIdNameMap={Map {}}
     />
   </RedirectAppLinks>
 </EuiPageContent>
