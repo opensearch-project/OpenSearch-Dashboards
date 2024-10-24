@@ -1,0 +1,2 @@
+feat:
+- Show banner at the top in discover canvas; show indexed views in dataset selector ([#8701](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8701))

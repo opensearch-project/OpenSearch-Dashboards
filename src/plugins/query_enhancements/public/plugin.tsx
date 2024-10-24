@@ -71,7 +71,9 @@ export class QueryEnhancementsPlugin
       title: 'PPL',
       search: pplSearchInterceptor,
       getQueryString: (query: Query) => {
-        return `source = ${query.dataset?.title}`;
+        const dataset = query.dataset;
+        const source = dataset?.indexedView ?? dataset?.title;
+        return `source = ${source}`;
       },
       fields: {
         filterable: false,
@@ -96,7 +98,8 @@ export class QueryEnhancementsPlugin
       title: 'SQL',
       search: sqlSearchInterceptor,
       getQueryString: (query: Query) => {
-        return `SELECT * FROM ${query.dataset?.title} LIMIT 10`;
+        const source = query.dataset?.indexedView ?? query.dataset?.title;
+        return `SELECT * FROM ${source} LIMIT 10`;
       },
       fields: {
         filterable: false,

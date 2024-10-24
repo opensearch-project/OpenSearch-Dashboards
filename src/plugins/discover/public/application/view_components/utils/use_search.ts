@@ -181,7 +181,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     let elapsedMs;
     try {
       // Only show loading indicator if we are fetching when the rows are empty
-      if (fetchStateRef.current.rows?.length === 0) {
+      if (!fetchStateRef.current.rows || fetchStateRef.current.rows.length === 0) {
         data$.next({ status: ResultStatus.LOADING, queryStatus: { startTime } });
       }
 
