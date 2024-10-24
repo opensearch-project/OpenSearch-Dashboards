@@ -1,0 +1,15 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.queryEnhancements {
+  .sqlArrayInfoPopoverText {
+    width: 280px;
+
+    p {
+      // align with text after icon + gutter
+      margin-left: calc($euiSizeM + $euiSizeM);
+    }
+  }
+}

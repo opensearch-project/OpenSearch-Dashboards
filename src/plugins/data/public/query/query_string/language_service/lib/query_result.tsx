@@ -82,6 +82,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
         color="text"
         size="xs"
         onClick={() => {}}
+        iconGap="m"
         isLoading
         data-test-subj="queryResultLoading"
         className="editor__footerItem"
@@ -118,8 +119,9 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     return (
       <EuiButtonEmpty
         iconSide="left"
-        iconType={'checkInCircleEmpty'}
-        iconGap="s"
+        iconType="checkInCircleEmpty"
+        color="text"
+        iconGap="m"
         size="xs"
         onClick={() => {}}
       >

@@ -15,8 +15,8 @@ export interface DefaultInputProps extends React.JSX.IntrinsicAttributes {
   onChange: (value: string) => void;
   editorDidMount: (editor: any) => void;
   footerItems?: {
-    start?: any[];
-    end?: any[];
+    start?: React.ReactNode[];
+    end?: React.ReactNode[];
   };
   headerRef?: React.RefObject<HTMLDivElement>;
   provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];

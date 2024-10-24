@@ -631,6 +631,7 @@ export class DocLinksService {
           sql: {
             // https://opensearch.org/docs/latest/search-plugins/sql/sql/basic/
             base: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/sql/sql/basic/`,
+            limitation: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/sql/limitation/`,
           },
         },
       },
@@ -979,6 +980,7 @@ export interface DocLinksStart {
       };
       readonly sql: {
         readonly base: string;
+        readonly limitation: string;
       };
       readonly ppl: {
         readonly base: string;

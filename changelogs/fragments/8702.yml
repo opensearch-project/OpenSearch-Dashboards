@@ -1,0 +1,2 @@
+feat:
+- Notify user about field_type_tolerance for SQL/PPL in discover query footer ([#8702](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8702))
