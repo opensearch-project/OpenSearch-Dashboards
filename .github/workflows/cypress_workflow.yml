@@ -224,9 +224,17 @@ jobs:
         if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
         uses: suisei-cn/actions-download-file@v1.4.0
         with:
-          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-sql-plugin&v=${{ env.OPENSEARCH_PLUGIN_VERSION }}-SNAPSHOT&p=zip
+          url: https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/${{ env.OPENSEARCH_VERSION }}/latest/linux/x64/tar/builds/opensearch/plugins/opensearch-sql-${{ env.OPENSEARCH_VERSION }}.0.zip
           target: plugin-artifacts/
           filename: sql.zip
+
+      - name: Download Job Scheduler artifact
+        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        uses: suisei-cn/actions-download-file@v1.4.0
+        with:
+          url: https://ci.opensearch.org/ci/dbc/distribution-build-opensearch/${{ env.OPENSEARCH_VERSION }}/latest/linux/x64/tar/builds/opensearch/plugins/opensearch-job-scheduler-${{ env.OPENSEARCH_VERSION }}.0.zip
+          target: plugin-artifacts/
+          filename: job-scheduler.zip
 
       - name: Download OpenSearch
         if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
