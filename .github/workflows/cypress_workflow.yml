@@ -228,13 +228,9 @@ jobs:
           target: plugin-artifacts/
           filename: sql.zip
 
-      - name: Install wget
-        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
-        run: sudo apt-get update && sudo apt-get install -y wget
-
       - name: Download OpenSearch
         if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
-        uses: peternied/download-file@v2
+        uses: suisei-cn/actions-download-file@v1.4.0
         with:
           url: https://artifacts.opensearch.org/snapshots/core/opensearch/${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/opensearch-min-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT-linux-x64-latest.tar.gz
 
