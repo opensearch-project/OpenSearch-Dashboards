@@ -93,8 +93,7 @@ jobs:
         matrix.config == 'dashboard' &&
         'node scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true' ||
         'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false' }}
-
-      SNAPSHOT_CMD: ${{ matrix.config == 'query_enhanced' &&
+      OPENSEARCH_SNAPSHOT_CMD: ${{ matrix.config == 'query_enhanced' &&
         'node ../scripts/opensearch snapshot -E --sql cluster.routing.allocation.disk.threshold_enabled=false' ||
         matrix.config == 'dashboard' &&
         'node scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false' ||
@@ -203,13 +202,18 @@ jobs:
       - run: npx cypress cache list
       - run: npx cypress cache path
 
+      - name: Verify start commands
+        run: |
+          echo "OPENSEARCH_SNAPSHOT_CMD=${{ env.OPENSEARCH_SNAPSHOT_CMD }}"
+          echo "START_CMD=${{ env.START_CMD }}"
+
       # Run tests based on configuration
       - name: Run FT repo tests
         if: matrix.test_location == 'ftr'
         uses: cypress-io/github-action@v2
         with:
           working-directory: ${{ env.FTR_PATH }}
-          start: ${{ env.SNAPSHOT_CMD }}, ${{ env.START_CMD }}
+          start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
 
@@ -224,7 +228,7 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           install-command: npx cypress install --force
-          start: ${{ env.SNAPSHOT_CMD }}, ${{ env.START_CMD }}
+          start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.DASHBOARDS_SPEC }}
 

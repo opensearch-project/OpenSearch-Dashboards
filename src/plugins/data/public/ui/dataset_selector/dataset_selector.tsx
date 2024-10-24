@@ -215,6 +215,7 @@ export const DatasetSelector = ({
             appearance={appearance}
             {...buttonProps}
             className="datasetSelector__button"
+            data-test-subj="datasetSelectorButton"
             iconType="arrowDown"
             iconSide="right"
             onClick={togglePopover}
@@ -253,6 +254,7 @@ export const DatasetSelector = ({
       <EuiPopoverFooter paddingSize="none" className="datasetSelector__footer">
         <EuiButton
           className="datasetSelector__advancedButton"
+          data-test-subj="datasetSelectorAdvancedButton"
           iconType="gear"
           iconSide="right"
           iconSize="s"
