@@ -4,3 +4,4 @@
  */
 export { pplLanguageReference } from './ppl_language_reference';
 export { sqlLanguageReference } from './sql_language_reference';
+export { FieldTypeToleranceInfoIcon } from './field_type_tolerance_info_icon';

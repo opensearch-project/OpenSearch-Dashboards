@@ -4,6 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import React from 'react';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../common/config';
 import { setData, setStorage } from './services';
@@ -19,7 +20,11 @@ import { LanguageConfig, Query } from '../../data/public';
 import { s3TypeConfig } from './datasets';
 import { createEditor, DefaultInput, SingleLineInput } from '../../data/public';
 import { DataStorage } from '../../data/common';
-import { pplLanguageReference, sqlLanguageReference } from './query_editor_extensions';
+import {
+  FieldTypeToleranceInfoIcon,
+  pplLanguageReference,
+  sqlLanguageReference,
+} from './query_editor_extensions';
 
 export class QueryEnhancementsPlugin
   implements
@@ -87,6 +92,9 @@ export class QueryEnhancementsPlugin
       editor: enhancedPPLQueryEditor,
       editorSupportedAppNames: ['discover'],
       supportedAppNames: ['discover', 'data-explorer'],
+      inputFooterItems: {
+        start: [<FieldTypeToleranceInfoIcon core={core} data={data} />],
+      },
     };
     queryString.getLanguageService().registerLanguage(pplLanguageConfig);
 
@@ -167,6 +175,9 @@ export class QueryEnhancementsPlugin
           query: `SELECT * FROM your_table WHERE description IS NOT NULL AND description != '';`,
         },
       ],
+      inputFooterItems: {
+        start: [<FieldTypeToleranceInfoIcon core={core} data={data} />],
+      },
     };
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
 

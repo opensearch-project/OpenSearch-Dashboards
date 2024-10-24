@@ -10,7 +10,7 @@ import {
   QueryStringContract,
   TimeRange,
 } from '../../../../public';
-import { EditorInstance } from '../../../ui/query_editor/editors';
+import { DefaultInputProps, EditorInstance } from '../../../ui/query_editor/editors';
 
 export interface RecentQueryItem {
   id: number;
@@ -63,4 +63,5 @@ export interface LanguageConfig {
   supportedAppNames?: string[];
   hideDatePicker?: boolean;
   sampleQueries?: SampleQuery[];
+  inputFooterItems?: DefaultInputProps['footerItems'];
 }

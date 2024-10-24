@@ -358,6 +358,9 @@ export default class QueryEditorUI extends Component<Props, State> {
       value: this.getQueryString(),
     };
 
+    const languageFooterItems = this.languageManager.getLanguage(this.props.query.language)
+      ?.inputFooterItems;
+
     const defaultInputProps: DefaultInputProps = {
       ...baseInputProps,
       onChange: this.onInputChange,
@@ -387,12 +390,16 @@ export default class QueryEditorUI extends Component<Props, State> {
           >
             {this.props.query.dataset?.timeFieldName || ''}
           </EuiText>,
+          ...(languageFooterItems?.start || []),
           <QueryResult queryStatus={this.props.queryStatus!} />,
         ],
         end: [
+          ...(languageFooterItems?.end || []),
           <EuiButtonEmpty
             iconSide="left"
             iconType="clock"
+            iconGap="s"
+            color="text"
             size="xs"
             onClick={this.toggleRecentQueries}
             className="queryEditor__footerItem"
@@ -445,13 +452,16 @@ export default class QueryEditorUI extends Component<Props, State> {
           <EuiText size="xs" color="subdued" className="queryEditor__footerItem">
             {this.props.query.dataset?.timeFieldName || ''}
           </EuiText>,
+          ...(languageFooterItems?.start || []),
           <QueryResult queryStatus={this.props.queryStatus!} />,
         ],
         end: [
+          ...(languageFooterItems?.end || []),
           <EuiButtonEmpty
             iconSide="left"
             iconType="clock"
-            iconGap="s"
+            iconGap="m"
+            color="text"
             size="xs"
             onClick={this.toggleRecentQueries}
             className="queryEditor__footerItem"
