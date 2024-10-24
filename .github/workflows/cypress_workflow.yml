@@ -40,6 +40,8 @@ env:
   COMMENT_TAG: '[MANUAL CYPRESS TEST RUN RESULTS]'
   COMMENT_SUCCESS_MSG: ':white_check_mark: Cypress test run succeeded!'
   COMMENT_FAILURE_MSG: ':x: Cypress test run failed!'
+  OPENSEARCH_VERSION: '3.0.0'
+  OPENSEARCH_PLUGIN_VERSION: '3.0.0.0'
 
 jobs:
   cypress-tests:
@@ -208,12 +210,66 @@ jobs:
           echo "START_CMD=${{ env.START_CMD }}"
 
       # Run tests based on configuration
-      - name: Run FT repo tests
-        if: matrix.test_location == 'ftr'
+      - name: Run FT repo tests with no query enhancements
+        if: matrix.test_location == 'ftr' && matrix.config == 'standard'
         uses: cypress-io/github-action@v2
         with:
           working-directory: ${{ env.FTR_PATH }}
           start: ${{ env.OPENSEARCH_SNAPSHOT_CMD }}, ${{ env.START_CMD }}
+          wait-on: 'http://localhost:9200, http://localhost:5601'
+          command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
+
+      # Run query enhanced tests
+      - name: Download SQL artifact
+        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        uses: suisei-cn/actions-download-file@v1.4.0
+        with:
+          url: https://aws.oss.sonatype.org/service/local/artifact/maven/redirect?r=snapshots&g=org.opensearch.plugin&a=opensearch-sql-plugin&v=${{ env.OPENSEARCH_PLUGIN_VERSION }}-SNAPSHOT&p=zip
+          target: plugin-artifacts/
+          filename: sql.zip
+
+      - name: Download OpenSearch
+        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        uses: peternied/download-file@v2
+        with:
+          url: https://artifacts.opensearch.org/snapshots/core/opensearch/${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/opensearch-min-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT-linux-x64-latest.tar.gz
+
+      - name: Extract OpenSearch
+        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        run: |
+          tar -xzf opensearch-*.tar.gz
+          rm -f opensearch-*.tar.gz
+        shell: bash
+
+      - name: Install SQL plugin
+        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        run: |
+          /bin/bash -c "yes | ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch-plugin install file:$(pwd)/plugin-artifacts/sql.zip"
+        shell: bash
+
+      - name: Run OpenSearch
+        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        run: |
+          /bin/bash -c "./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/bin/opensearch &"
+          sleep 30
+        shell: bash
+
+      - name: Check OpenSearch Running on Linux
+        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        run: curl http://localhost:9200/
+        shell: bash
+
+      - name: Show OpenSearch Logs
+        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        run: cat ./opensearch-${{ env.OPENSEARCH_VERSION }}-SNAPSHOT/logs/opensearch.log
+        shell: bash
+
+      - name: Run FT repo tests with query enhancements
+        if: matrix.test_location == 'ftr' && matrix.config == 'query_enhanced'
+        uses: cypress-io/github-action@v2
+        with:
+          working-directory: ${{ env.FTR_PATH }}
+          start: ${{ env.START_CMD }}
           wait-on: 'http://localhost:9200, http://localhost:5601'
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
 
