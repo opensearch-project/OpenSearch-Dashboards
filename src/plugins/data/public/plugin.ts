@@ -54,6 +54,7 @@ import {
 } from './index_patterns';
 import {
   setApplication,
+  setUseNewSavedQueriesUI,
   setFieldFormats,
   setIndexPatterns,
   setNotifications,
@@ -93,7 +94,7 @@ import { DEFAULT_DATA_SOURCE_TYPE } from './data_sources/constants';
 import { getSuggestions as getSQLSuggestions } from './antlr/opensearch_sql/code_completion';
 import { getSuggestions as getDQLSuggestions } from './antlr/dql/code_completion';
 import { getSuggestions as getPPLSuggestions } from './antlr/opensearch_ppl/code_completion';
-import { createStorage, DataStorage } from '../common';
+import { createStorage, DataStorage, UI_SETTINGS } from '../common';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -118,6 +119,7 @@ export class DataPublicPlugin
   private readonly queryService: QueryService;
   private readonly storage: DataStorage;
   private readonly sessionStorage: DataStorage;
+  private readonly config: ConfigSchema;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
@@ -130,6 +132,7 @@ export class DataPublicPlugin
       engine: window.sessionStorage,
       prefix: 'opensearchDashboards.',
     });
+    this.config = initializerContext.config.get();
   }
 
   public setup(
@@ -177,6 +180,11 @@ export class DataPublicPlugin
     autoComplete.addQuerySuggestionProvider('SQL', getSQLSuggestions);
     autoComplete.addQuerySuggestionProvider('kuery', getDQLSuggestions);
     autoComplete.addQuerySuggestionProvider('PPL', getPPLSuggestions);
+
+    const useNewSavedQueriesUI =
+      core.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) &&
+      this.config.savedQueriesNewUI.enabled;
+    setUseNewSavedQueriesUI(useNewSavedQueriesUI);
 
     return {
       // TODO: MQL
