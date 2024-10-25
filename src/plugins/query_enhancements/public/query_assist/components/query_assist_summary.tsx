@@ -237,7 +237,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
     if (queryChanged) {
       return (
         <EuiText size="s" data-test-subj="queryAssist_summary_unavailable">
-          {i18n.translate('queryEnhancements.queryAssist.summary.generating', {
+          {i18n.translate('queryEnhancements.queryAssist.summary.unavailable', {
             defaultMessage: 'Summary unavailable for custom queries',
           })}
         </EuiText>
