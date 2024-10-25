@@ -137,6 +137,7 @@ export const Sidebar: FC<SidebarProps> = ({ children, datasetSelectorRef }) => {
               selectedSources={selectedSources}
               onGetDataSetError={handleGetDataSetError}
               onRefresh={memorizedReload}
+              uiSettings={uiSettings}
               fullWidth
             />
           )}
