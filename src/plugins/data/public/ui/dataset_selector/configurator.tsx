@@ -67,6 +67,7 @@ export const Configurator = ({
     const currentLanguage = queryString.getQuery().language;
     if (languages.includes(currentLanguage)) {
       setSelectedLanguage(currentLanguage);
+      return;
     }
     setSelectedLanguage(languages[0]);
   }, [languages, queryString]);
