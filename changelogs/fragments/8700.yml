@@ -1,0 +1,2 @@
+feat:
+- Trigger summary generation on initial query add manual trigger for subsequent queries ([#8700](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8700))

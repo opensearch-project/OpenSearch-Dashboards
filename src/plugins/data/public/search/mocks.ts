@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import { BehaviorSubject } from 'rxjs';
+import { IDataFrame } from '../../common';
 import { searchAggsSetupMock, searchAggsStartMock } from './aggs/mocks';
 import { searchSourceMock } from './search_source/mocks';
 import { ISearchSetup, ISearchStart } from './types';
@@ -37,6 +39,12 @@ function createSetupContract(): jest.Mocked<ISearchSetup> {
     aggs: searchAggsSetupMock(),
     __enhance: jest.fn(),
     getDefaultSearchInterceptor: jest.fn(),
+    df: {
+      get: jest.fn().mockReturnValue({}),
+      set: jest.fn().mockReturnValue({}),
+      clear: jest.fn(),
+      df$: new BehaviorSubject<IDataFrame | undefined>(undefined),
+    },
   };
 }
 
@@ -52,6 +60,7 @@ function createStartContract(): jest.Mocked<ISearchStart> {
       get: jest.fn().mockReturnValue({}),
       set: jest.fn().mockReturnValue({}),
       clear: jest.fn(),
+      df$: new BehaviorSubject<IDataFrame | undefined>(undefined),
     },
   };
 }
