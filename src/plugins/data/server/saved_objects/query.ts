@@ -52,8 +52,37 @@ export const querySavedObjectType: SavedObjectsType = {
     properties: {
       title: { type: 'text' },
       description: { type: 'text' },
+      isTemplate: { type: 'boolean' },
       query: {
-        properties: { language: { type: 'keyword' }, query: { type: 'keyword', index: false } },
+        properties: {
+          language: { type: 'keyword' },
+          query: { type: 'keyword', index: false },
+          dataset: {
+            type: 'object',
+            properties: {
+              id: { type: 'text' },
+              title: { type: 'text' },
+              type: { type: 'text' },
+              timeFieldName: { type: 'text' },
+              language: { type: 'text' },
+              dataSource: {
+                type: 'object',
+                properties: {
+                  id: { type: 'text' },
+                  title: { type: 'text' },
+                  type: { type: 'text' },
+                  meta: {
+                    type: 'object',
+                    properties: {
+                      name: { type: 'text' },
+                      sessionId: { type: 'text' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
       filters: { type: 'object', enabled: false },
       timefilter: { type: 'object', enabled: false },
