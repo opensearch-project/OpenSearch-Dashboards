@@ -40,8 +40,6 @@ env:
   COMMENT_TAG: '[MANUAL CYPRESS TEST RUN RESULTS]'
   COMMENT_SUCCESS_MSG: ':white_check_mark: Cypress test run succeeded!'
   COMMENT_FAILURE_MSG: ':x: Cypress test run failed!'
-  OPENSEARCH_VERSION: '3.0.0'
-  OPENSEARCH_PLUGIN_VERSION: '3.0.0.0'
   LATEST_VERSION: '2.17.0'
 
 jobs:
@@ -268,7 +266,7 @@ jobs:
       # Screenshots are only captured on failure, will change this once we do visual regression tests
       - name: Upload FT repo screenshots
         uses: actions/upload-artifact@v3
-        if: failure() && (matrix.group < 11)
+        if: failure() && matrix.test_location == 'ftr'
         with:
           name: ftr-cypress-screenshots
           path: ${{ env.FTR_PATH }}/cypress/screenshots
@@ -276,7 +274,7 @@ jobs:
 
       - name: Upload FT repo videos
         uses: actions/upload-artifact@v3
-        if: always() && (matrix.group < 11)
+        if: always() && matrix.test_location == 'ftr'
         with:
           name: ftr-cypress-videos
           path: ${{ env.FTR_PATH }}/cypress/videos
@@ -284,14 +282,14 @@ jobs:
 
       - name: Upload FT repo results
         uses: actions/upload-artifact@v3
-        if: always() && (matrix.group < 11)
+        if: always() && matrix.test_location == 'ftr'
         with:
           name: ftr-cypress-results
           path: ${{ env.FTR_PATH }}/cypress/results
           retention-days: 1
 
       - name: Upload Dashboards screenshots
-        if: failure() && (matrix.group > 10)
+        if: failure() && matrix.test_location == 'source'
         uses: actions/upload-artifact@v3
         with:
           name: dashboards-cypress-screenshots
@@ -300,7 +298,7 @@ jobs:
 
       - name: Upload Dashboards repo videos
         uses: actions/upload-artifact@v3
-        if: always() && (matrix.group > 10)
+        if: always() && matrix.test_location == 'source'
         with:
           name: dashboards-cypress-videos
           path: cypress/videos
@@ -308,7 +306,7 @@ jobs:
 
       - name: Upload Dashboards repo results
         uses: actions/upload-artifact@v3
-        if: always() && (matrix.group > 10)
+        if: always() && matrix.test_location == 'source'
         with:
           name: dashboards-cypress-results
           path: cypress/results
