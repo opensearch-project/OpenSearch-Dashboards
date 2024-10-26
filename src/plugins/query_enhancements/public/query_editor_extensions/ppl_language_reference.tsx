@@ -11,8 +11,13 @@ import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/pu
 const PPLReference = () => {
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const pplDocs = opensearchDashboards.services.docLinks?.links.noDocumentation.ppl.base;
+  const limitationDocs =
+    opensearchDashboards.services.docLinks?.links.noDocumentation.sqlPplLimitation.base;
   const pplFullName = (
     <FormattedMessage id="queryEnhancements.queryBar.pplFullLanguageName" defaultMessage="PPL" />
+  );
+  const limitationsLink = (
+    <FormattedMessage id="queryEnhancements.queryBar.pplLimitationDoc" defaultMessage="here" />
   );
 
   return (
@@ -21,11 +26,16 @@ const PPLReference = () => {
         <p>
           <FormattedMessage
             id="queryEnhancements.queryBar.pplSyntaxOptionsDescription"
-            defaultMessage="Piped Processing Language ({docsLink}) is a query language that focuses on processing data in a sequential, step-by-step manner. PPL uses the pipe (|) operator to combine commands to find and retrieve data. It is particularly well suited for analyzing observability data, such as logs, metrics, and traces, due to its ability to handle semi-structured data efficiently."
+            defaultMessage="Piped Processing Language ({pplDocsLink}) is a query language that focuses on processing data in a sequential, step-by-step manner. OpenSearch SQL/PPL language limitations can be found {limitationDocsLink}."
             values={{
-              docsLink: (
+              pplDocsLink: (
                 <EuiLink href={pplDocs} target="_blank">
                   {pplFullName}
+                </EuiLink>
+              ),
+              limitationDocsLink: (
+                <EuiLink href={limitationDocs} target="_blank">
+                  {limitationsLink}
                 </EuiLink>
               ),
             }}
@@ -39,3 +49,10 @@ const PPLReference = () => {
 export const pplLanguageReference = () => {
   return <LanguageReference body={<PPLReference />} />;
 };
+
+// (i) for PPL: Piped Processing Language (PPL) is a query language that focuses on processing data in a sequential, step-by-step manner. OpenSearch SQL/PPL language limitations can be found here.
+// PPL: https://opensearch.org/docs/latest/search-plugins/sql/ppl/index/
+// / HERE: https://opensearch.org/docs/latest/search-plugins/sql/limitation/
+
+// SQL: (i) for SQL: OpenSearch (SQL). OpenSearch SQL/PPL language limitations can be found here.
+// HERE: https://opensearch.org/docs/latest/search-plugins/sql/limitation/
