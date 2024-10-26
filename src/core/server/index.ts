@@ -553,3 +553,5 @@ export const config = {
     appenders: appendersSchema as Type<AppenderConfigType>,
   },
 };
+
+export { getRedirectUrl } from './http';
