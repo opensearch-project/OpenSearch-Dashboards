@@ -1,0 +1,2 @@
+fix:
+- Make goto router support workspace ([#8709](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8709))
