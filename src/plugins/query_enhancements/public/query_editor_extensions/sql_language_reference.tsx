@@ -46,6 +46,14 @@ const SQLReference = () => {
   );
 };
 
-export const sqlLanguageReference = () => {
-  return <LanguageReference body={<SQLReference />} />;
+export const sqlLanguageReference = (selectedLanguage) => {
+  const isFirstTimeSQL = window.localStorage.getItem('hasSeenSQLInfoBox') === 'false';
+
+  return (
+    <LanguageReference
+      body={<SQLReference />}
+      autoShow={isFirstTimeSQL && selectedLanguage === 'SQL'}
+      selectedLanguage={selectedLanguage}
+    />
+  );
 };

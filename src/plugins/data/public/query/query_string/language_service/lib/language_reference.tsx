@@ -7,11 +7,32 @@ import { i18n } from '@osd/i18n';
 
 import { EuiButtonIcon, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 
-import React, { ReactFragment } from 'react';
+import React, { ReactFragment, useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 
-export const LanguageReference = (props: { body: ReactFragment }) => {
-  const [isLanguageReferenceOpen, setIsLanguageReferenceOpen] = React.useState(false);
+export const LanguageReference = (props: {
+  body: ReactFragment;
+  autoShow?: boolean;
+  selectedLanguage?: string;
+}) => {
+  const [isLanguageReferenceOpen, setIsLanguageReferenceOpen] = useState(props.autoShow || false);
+
+  // useEffect hook to auto-open the info box on the first selection of SQL or PPL
+  useEffect(() => {
+    if (
+      props.selectedLanguage === 'SQL' &&
+      window.localStorage.getItem('hasSeenSQLInfoBox') === 'false'
+    ) {
+      setIsLanguageReferenceOpen(true);
+      window.localStorage.setItem('hasSeenSQLInfoBox', 'true');
+    } else if (
+      props.selectedLanguage === 'PPL' &&
+      window.localStorage.getItem('hasSeenPPLInfoBox') === 'false'
+    ) {
+      setIsLanguageReferenceOpen(true);
+      window.localStorage.setItem('hasSeenPPLInfoBox', 'true');
+    }
+  }, [props.selectedLanguage]);
 
   const button = (
     <div>

@@ -35,6 +35,14 @@ export class QueryEnhancementsPlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
     this.storage = new DataStorage(window.localStorage, 'discover.queryAssist.');
+
+    // Initialize local storage flags if not already set
+    if (!window.localStorage.getItem('hasSeenSQLInfoBox')) {
+      window.localStorage.setItem('hasSeenSQLInfoBox', 'false');
+    }
+    if (!window.localStorage.getItem('hasSeenPPLInfoBox')) {
+      window.localStorage.setItem('hasSeenPPLInfoBox', 'false');
+    }
   }
 
   public setup(
@@ -42,134 +50,131 @@ export class QueryEnhancementsPlugin
     { data, usageCollection }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
     const { queryString } = data.query;
-    const pplSearchInterceptor = new PPLSearchInterceptor({
-      toasts: core.notifications.toasts,
-      http: core.http,
-      uiSettings: core.uiSettings,
-      startServices: core.getStartServices(),
-      usageCollector: data.search.usageCollector,
-    });
 
-    const sqlSearchInterceptor = new SQLSearchInterceptor({
-      toasts: core.notifications.toasts,
-      http: core.http,
-      uiSettings: core.uiSettings,
-      startServices: core.getStartServices(),
-      usageCollector: data.search.usageCollector,
-    });
+    // Initialize `selectedLanguage` as undefined to wait for the correct language update
+    let selectedLanguage;
 
-    const pplControls = [pplLanguageReference()];
-    const sqlControls = [sqlLanguageReference()];
+    // Subscribe to updates to track language changes
+    queryString.getUpdates$().subscribe((query) => {
+      selectedLanguage = query.language;
 
-    const enhancedPPLQueryEditor = createEditor(SingleLineInput, null, pplControls, DefaultInput);
+      // Re-render the controls when `selectedLanguage` is defined
+      const pplControls = [pplLanguageReference(selectedLanguage)];
+      const sqlControls = [sqlLanguageReference(selectedLanguage)];
 
-    const enhancedSQLQueryEditor = createEditor(SingleLineInput, null, sqlControls, DefaultInput);
+      const enhancedPPLQueryEditor = createEditor(SingleLineInput, null, pplControls, DefaultInput);
+      const enhancedSQLQueryEditor = createEditor(SingleLineInput, null, sqlControls, DefaultInput);
 
-    // Register PPL language
-    const pplLanguageConfig: LanguageConfig = {
-      id: 'PPL',
-      title: 'PPL',
-      search: pplSearchInterceptor,
-      getQueryString: (query: Query) => {
-        return `source = ${query.dataset?.title}`;
-      },
-      fields: {
-        filterable: false,
-        visualizable: false,
-      },
-      docLink: {
-        title: i18n.translate('queryEnhancements.pplLanguage.docLink', {
-          defaultMessage: 'PPL documentation',
+      // Define and register PPL language configuration
+      const pplLanguageConfig: LanguageConfig = {
+        id: 'PPL',
+        title: 'PPL',
+        search: new PPLSearchInterceptor({
+          toasts: core.notifications.toasts,
+          http: core.http,
+          uiSettings: core.uiSettings,
+          startServices: core.getStartServices(),
+          usageCollector: data.search.usageCollector,
         }),
-        url: 'https://opensearch.org/docs/latest/search-plugins/sql/ppl/syntax/',
-      },
-      showDocLinks: false,
-      editor: enhancedPPLQueryEditor,
-      editorSupportedAppNames: ['discover'],
-      supportedAppNames: ['discover', 'data-explorer'],
-    };
-    queryString.getLanguageService().registerLanguage(pplLanguageConfig);
-
-    // Register SQL language
-    const sqlLanguageConfig: LanguageConfig = {
-      id: 'SQL',
-      title: 'SQL',
-      search: sqlSearchInterceptor,
-      getQueryString: (query: Query) => {
-        return `SELECT * FROM ${query.dataset?.title} LIMIT 10`;
-      },
-      fields: {
-        filterable: false,
-        visualizable: false,
-      },
-      docLink: {
-        title: i18n.translate('queryEnhancements.sqlLanguage.docLink', {
-          defaultMessage: 'SQL documentation',
-        }),
-        url: 'https://opensearch.org/docs/latest/search-plugins/sql/sql/basic/',
-      },
-      showDocLinks: false,
-      editor: enhancedSQLQueryEditor,
-      editorSupportedAppNames: ['discover'],
-      supportedAppNames: ['discover', 'data-explorer'],
-      hideDatePicker: true,
-      sampleQueries: [
-        {
-          title: i18n.translate('queryEnhancements.sqlLanguage.sampleQuery.titleContainsWind', {
-            defaultMessage: 'The title field contains the word wind.',
+        getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
+        fields: { filterable: false, visualizable: false },
+        docLink: {
+          title: i18n.translate('queryEnhancements.pplLanguage.docLink', {
+            defaultMessage: 'PPL documentation',
           }),
-          query: `SELECT * FROM your_table WHERE title LIKE '%wind%'`,
+          url: 'https://opensearch.org/docs/latest/search-plugins/sql/ppl/syntax/',
         },
-        {
-          title: i18n.translate(
-            'queryEnhancements.sqlLanguage.sampleQuery.titleContainsWindOrWindy',
-            {
-              defaultMessage: 'The title field contains the word wind or the word windy.',
-            }
-          ),
-          query: `SELECT * FROM your_table WHERE title LIKE '%wind%' OR title LIKE '%windy%';`,
-        },
-        {
-          title: i18n.translate(
-            'queryEnhancements.sqlLanguage.sampleQuery.titleContainsPhraseWindRises',
-            {
-              defaultMessage: 'The title field contains the phrase wind rises.',
-            }
-          ),
-          query: `SELECT * FROM your_table WHERE title LIKE '%wind rises%'`,
-        },
-        {
-          title: i18n.translate(
-            'queryEnhancements.sqlLanguage.sampleQuery.titleExactMatchWindRises',
-            {
-              defaultMessage: 'The title.keyword field exactly matches The wind rises.',
-            }
-          ),
-          query: `SELECT * FROM your_table WHERE title = 'The wind rises'`,
-        },
-        {
-          title: i18n.translate(
-            'queryEnhancements.sqlLanguage.sampleQuery.titleFieldsContainWind',
-            {
-              defaultMessage:
-                'Any field that starts with title (for example, title and title.keyword) contains the word wind',
-            }
-          ),
-          query: `SELECT * FROM your_table WHERE title LIKE '%wind%' OR title = 'wind'`,
-        },
-        {
-          title: i18n.translate(
-            'queryEnhancements.sqlLanguage.sampleQuery.descriptionFieldExists',
-            {
-              defaultMessage: 'Documents in which the field description exists.',
-            }
-          ),
-          query: `SELECT * FROM your_table WHERE description IS NOT NULL AND description != '';`,
-        },
-      ],
-    };
-    queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
+        showDocLinks: false,
+        editor: enhancedPPLQueryEditor,
+        editorSupportedAppNames: ['discover'],
+        supportedAppNames: ['discover', 'data-explorer'],
+      };
+      queryString.getLanguageService().registerLanguage(pplLanguageConfig);
 
+      // Define and register SQL language configuration
+      const sqlLanguageConfig: LanguageConfig = {
+        id: 'SQL',
+        title: 'SQL',
+        search: new SQLSearchInterceptor({
+          toasts: core.notifications.toasts,
+          http: core.http,
+          uiSettings: core.uiSettings,
+          startServices: core.getStartServices(),
+          usageCollector: data.search.usageCollector,
+        }),
+        getQueryString: (currentQuery: Query) =>
+          `SELECT * FROM ${currentQuery.dataset?.title} LIMIT 10`,
+        fields: { filterable: false, visualizable: false },
+        docLink: {
+          title: i18n.translate('queryEnhancements.sqlLanguage.docLink', {
+            defaultMessage: 'SQL documentation',
+          }),
+          url: 'https://opensearch.org/docs/latest/search-plugins/sql/sql/basic/',
+        },
+        showDocLinks: false,
+        editor: enhancedSQLQueryEditor,
+        editorSupportedAppNames: ['discover'],
+        supportedAppNames: ['discover', 'data-explorer'],
+        hideDatePicker: true,
+        sampleQueries: [
+          {
+            title: i18n.translate('queryEnhancements.sqlLanguage.sampleQuery.titleContainsWind', {
+              defaultMessage: 'The title field contains the word wind.',
+            }),
+            query: `SELECT * FROM your_table WHERE title LIKE '%wind%'`,
+          },
+          {
+            title: i18n.translate(
+              'queryEnhancements.sqlLanguage.sampleQuery.titleContainsWindOrWindy',
+              {
+                defaultMessage: 'The title field contains the word wind or the word windy.',
+              }
+            ),
+            query: `SELECT * FROM your_table WHERE title LIKE '%wind%' OR title LIKE '%windy%';`,
+          },
+          {
+            title: i18n.translate(
+              'queryEnhancements.sqlLanguage.sampleQuery.titleContainsPhraseWindRises',
+              {
+                defaultMessage: 'The title field contains the phrase wind rises.',
+              }
+            ),
+            query: `SELECT * FROM your_table WHERE title LIKE '%wind rises%'`,
+          },
+          {
+            title: i18n.translate(
+              'queryEnhancements.sqlLanguage.sampleQuery.titleExactMatchWindRises',
+              {
+                defaultMessage: 'The title.keyword field exactly matches The wind rises.',
+              }
+            ),
+            query: `SELECT * FROM your_table WHERE title = 'The wind rises'`,
+          },
+          {
+            title: i18n.translate(
+              'queryEnhancements.sqlLanguage.sampleQuery.titleFieldsContainWind',
+              {
+                defaultMessage:
+                  'Any field that starts with title (for example, title and title.keyword) contains the word wind',
+              }
+            ),
+            query: `SELECT * FROM your_table WHERE title LIKE '%wind%' OR title = 'wind'`,
+          },
+          {
+            title: i18n.translate(
+              'queryEnhancements.sqlLanguage.sampleQuery.descriptionFieldExists',
+              {
+                defaultMessage: 'Documents in which the field description exists.',
+              }
+            ),
+            query: `SELECT * FROM your_table WHERE description IS NOT NULL AND description != '';`,
+          },
+        ],
+      };
+      queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
+    });
+
+    // Enhance data with the query editor extension
     data.__enhance({
       editor: {
         queryEditorExtension: createQueryAssistExtension(
@@ -181,6 +186,7 @@ export class QueryEnhancementsPlugin
       },
     });
 
+    // Register custom dataset type
     queryString.getDatasetService().registerType(s3TypeConfig);
 
     return {};

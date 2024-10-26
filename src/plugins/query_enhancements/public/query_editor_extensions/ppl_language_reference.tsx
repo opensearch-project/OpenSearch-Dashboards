@@ -46,6 +46,14 @@ const PPLReference = () => {
   );
 };
 
-export const pplLanguageReference = () => {
-  return <LanguageReference body={<PPLReference />} />;
+export const pplLanguageReference = (selectedLanguage) => {
+  const isFirstTimePPL = window.localStorage.getItem('hasSeenPPLInfoBox') === 'false';
+
+  return (
+    <LanguageReference
+      body={<PPLReference />}
+      autoShow={isFirstTimePPL && selectedLanguage === 'PPL'}
+      selectedLanguage={selectedLanguage}
+    />
+  );
 };
