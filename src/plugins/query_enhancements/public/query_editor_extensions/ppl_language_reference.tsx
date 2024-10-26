@@ -49,10 +49,3 @@ const PPLReference = () => {
 export const pplLanguageReference = () => {
   return <LanguageReference body={<PPLReference />} />;
 };
-
-// (i) for PPL: Piped Processing Language (PPL) is a query language that focuses on processing data in a sequential, step-by-step manner. OpenSearch SQL/PPL language limitations can be found here.
-// PPL: https://opensearch.org/docs/latest/search-plugins/sql/ppl/index/
-// / HERE: https://opensearch.org/docs/latest/search-plugins/sql/limitation/
-
-// SQL: (i) for SQL: OpenSearch (SQL). OpenSearch SQL/PPL language limitations can be found here.
-// HERE: https://opensearch.org/docs/latest/search-plugins/sql/limitation/
