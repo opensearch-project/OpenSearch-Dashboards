@@ -43,14 +43,6 @@ export class QueryEnhancementsPlugin
   ): QueryEnhancementsPluginSetup {
     const { queryString } = data.query;
 
-    // Initialize local storage keys when the plugin loads, if they don't exist
-    if (!window.localStorage.getItem('hasSeenSQLInfoBox')) {
-      window.localStorage.setItem('hasSeenSQLInfoBox', 'false');
-    }
-    if (!window.localStorage.getItem('hasSeenPPLInfoBox')) {
-      window.localStorage.setItem('hasSeenPPLInfoBox', 'false');
-    }
-
     // Initialize `selectedLanguage` as undefined to wait for correct language updates
     let selectedLanguage;
 

@@ -21,13 +21,13 @@ export const LanguageReference = (props: {
   useEffect(() => {
     if (
       props.selectedLanguage === 'SQL' &&
-      window.localStorage.getItem('hasSeenSQLInfoBox') === 'false'
+      window.localStorage.getItem('hasSeenSQLInfoBox') === null
     ) {
       setIsLanguageReferenceOpen(true);
       window.localStorage.setItem('hasSeenSQLInfoBox', 'true');
     } else if (
       props.selectedLanguage === 'PPL' &&
-      window.localStorage.getItem('hasSeenPPLInfoBox') === 'false'
+      window.localStorage.getItem('hasSeenPPLInfoBox') === null
     ) {
       setIsLanguageReferenceOpen(true);
       window.localStorage.setItem('hasSeenPPLInfoBox', 'true');
