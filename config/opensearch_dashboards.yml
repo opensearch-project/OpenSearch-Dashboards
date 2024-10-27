@@ -1,5 +1,5 @@
 # OpenSearch Dashboards is served by a back end server. This setting specifies the port to use.
-#server.port: 5601
+# server.port: 5602
 
 # Specifies the address to which the OpenSearch Dashboards server will bind. IP addresses and host names are both valid values.
 # The default is 'localhost', which usually means remote machines will not be able to connect.
@@ -268,9 +268,10 @@
 # vis_builder.enabled: false
 
 # Set the value of this setting to true to enable multiple data source feature.
-#data_source.enabled: false
+data_source.enabled: true
 # Set the value of this setting to true to hide local cluster in data source feature.
-#data_source.hideLocalCluster: false
+data_source.hideLocalCluster: false
+data_source.ssl.verificationMode: none
 # Set the value of these settings to customize crypto materials to encryption saved credentials
 # in data sources.
 #data_source.encryption.wrappingKeyName: 'changeme'
@@ -348,10 +349,10 @@
 # Set the value to true to enable workspace feature
 # Please note, workspace will not work with multi-tenancy. To enable workspace feature, you need to disable multi-tenancy first with `opensearch_security.multitenancy.enabled: false`
 # Please uncomment below uiSettings to enable new home/navigation experience when workspace is enabled
-# workspace.enabled: false
-# uiSettings:
-#   overrides:
-#     "home:useNewHomePage": true
+workspace.enabled: false
+uiSettings:
+  overrides:
+    "home:useNewHomePage": true
 
 # Optional settings to specify saved object types to be deleted during migration.
 # This feature can help address compatibility issues that may arise during the migration of saved objects, such as types defined by legacy applications.
@@ -375,6 +376,6 @@
 # If the user config is set to wildcard ["*"], anyone will be dashboard admin.
 # opensearchDashboards.dashboardAdmin.groups: ["dashboard_admin"]
 # opensearchDashboards.dashboardAdmin.users: ["dashboard_admin"]
-
-# Set the value to true to enable the new UI for savedQueries in Discover
-# data.savedQueriesNewUI.enabled: true
+opensearch.username: "admin"
+opensearch.password: "Welcome@123"
+opensearch.ssl.verificationMode: none
