@@ -48,7 +48,6 @@ const SQLReference = () => {
 };
 
 export const sqlLanguageReference = (selectedLanguage) => {
-  // Only set `autoShow` to true if the selected language is SQL and it hasn't been shown before
   const hasSeenInfoBox = localStorage.getItem('hasSeenInfoBox_SQL') === 'true';
   const shouldAutoShow = selectedLanguage === 'SQL' && !hasSeenInfoBox;
 
