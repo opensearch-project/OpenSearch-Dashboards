@@ -174,7 +174,6 @@ export class QueryEnhancementsPlugin
       queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
     });
 
-    // Enhance data with the query editor extension
     data.__enhance({
       editor: {
         queryEditorExtension: createQueryAssistExtension(
@@ -186,7 +185,6 @@ export class QueryEnhancementsPlugin
       },
     });
 
-    // Register custom dataset type
     queryString.getDatasetService().registerType(s3TypeConfig);
 
     return {};
