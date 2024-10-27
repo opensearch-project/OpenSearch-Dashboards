@@ -48,10 +48,13 @@ const PPLReference = () => {
 };
 
 export const pplLanguageReference = (selectedLanguage) => {
+  const hasSeenInfoBox = localStorage.getItem('hasSeenInfoBox_PPL') === 'true';
+  const shouldAutoShow = selectedLanguage === 'PPL' && !hasSeenInfoBox;
+
   return (
     <LanguageReference
       body={<PPLReference />}
-      autoShow={selectedLanguage === 'PPL'}
+      autoShow={shouldAutoShow}
       selectedLanguage={selectedLanguage}
     />
   );

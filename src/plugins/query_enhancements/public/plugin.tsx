@@ -43,21 +43,18 @@ export class QueryEnhancementsPlugin
   ): QueryEnhancementsPluginSetup {
     const { queryString } = data.query;
 
-    // Initialize `selectedLanguage` as undefined to wait for correct language updates
-    let selectedLanguage;
-
     // Subscribe to updates to track language changes
     queryString.getUpdates$().subscribe((query) => {
-      selectedLanguage = query.language;
+      const selectedLanguage = query.language;
 
-      // Re-render the controls when `selectedLanguage` is defined
+      // Re-render the controls with updated `autoShow` flags
       const pplControls = [pplLanguageReference(selectedLanguage)];
       const sqlControls = [sqlLanguageReference(selectedLanguage)];
 
       const enhancedPPLQueryEditor = createEditor(SingleLineInput, null, pplControls, DefaultInput);
       const enhancedSQLQueryEditor = createEditor(SingleLineInput, null, sqlControls, DefaultInput);
 
-      // Define and register PPL language configuration
+      // Register PPL language configuration
       const pplLanguageConfig: LanguageConfig = {
         id: 'PPL',
         title: 'PPL',
@@ -83,7 +80,7 @@ export class QueryEnhancementsPlugin
       };
       queryString.getLanguageService().registerLanguage(pplLanguageConfig);
 
-      // Define and register SQL language configuration
+      // Register SQL language configuration
       const sqlLanguageConfig: LanguageConfig = {
         id: 'SQL',
         title: 'OpenSearch SQL',
