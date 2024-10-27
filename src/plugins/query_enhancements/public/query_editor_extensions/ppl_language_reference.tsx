@@ -8,6 +8,7 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import { IDataPluginServices } from 'src/plugins/data/public';
 import { LanguageReference } from '../../../data/public';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+
 const PPLReference = () => {
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const pplDocs = opensearchDashboards.services.docLinks?.links.noDocumentation.ppl.base;
@@ -47,12 +48,10 @@ const PPLReference = () => {
 };
 
 export const pplLanguageReference = (selectedLanguage) => {
-  const isFirstTimePPL = window.localStorage.getItem('hasSeenPPLInfoBox') === 'false';
-
   return (
     <LanguageReference
       body={<PPLReference />}
-      autoShow={isFirstTimePPL && selectedLanguage === 'PPL'}
+      autoShow={selectedLanguage === 'PPL'}
       selectedLanguage={selectedLanguage}
     />
   );

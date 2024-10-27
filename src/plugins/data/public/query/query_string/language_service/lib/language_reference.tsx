@@ -17,22 +17,17 @@ export const LanguageReference = (props: {
 }) => {
   const [isLanguageReferenceOpen, setIsLanguageReferenceOpen] = useState(props.autoShow || false);
 
-  // useEffect hook to auto-open the info box on the first selection of SQL or PPL
   useEffect(() => {
-    if (
-      props.selectedLanguage === 'SQL' &&
-      window.localStorage.getItem('hasSeenSQLInfoBox') === null
-    ) {
-      setIsLanguageReferenceOpen(true);
-      window.localStorage.setItem('hasSeenSQLInfoBox', 'true');
-    } else if (
-      props.selectedLanguage === 'PPL' &&
-      window.localStorage.getItem('hasSeenPPLInfoBox') === null
-    ) {
-      setIsLanguageReferenceOpen(true);
-      window.localStorage.setItem('hasSeenPPLInfoBox', 'true');
+    if (props.autoShow) {
+      const storageKey = `hasSeenInfoBox_${props.selectedLanguage}`;
+      const hasSeenInfoBox = window.localStorage.getItem(storageKey);
+
+      if (hasSeenInfoBox === null && props.autoShow) {
+        setIsLanguageReferenceOpen(true);
+        window.localStorage.setItem(storageKey, 'true');
+      }
     }
-  }, [props.selectedLanguage]);
+  }, [props.selectedLanguage, props.autoShow]);
 
   const button = (
     <div>

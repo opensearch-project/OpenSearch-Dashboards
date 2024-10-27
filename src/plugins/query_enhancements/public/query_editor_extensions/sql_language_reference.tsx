@@ -8,6 +8,7 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import { IDataPluginServices } from 'src/plugins/data/public';
 import { LanguageReference } from '../../../data/public';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+
 const SQLReference = () => {
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const sqlDocs = opensearchDashboards.services.docLinks?.links.noDocumentation.sql.base;
@@ -47,12 +48,10 @@ const SQLReference = () => {
 };
 
 export const sqlLanguageReference = (selectedLanguage) => {
-  const isFirstTimeSQL = window.localStorage.getItem('hasSeenSQLInfoBox') === 'false';
-
   return (
     <LanguageReference
       body={<SQLReference />}
-      autoShow={isFirstTimeSQL && selectedLanguage === 'SQL'}
+      autoShow={selectedLanguage === 'SQL'}
       selectedLanguage={selectedLanguage}
     />
   );
