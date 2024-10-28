@@ -4,7 +4,7 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["data", "opensearchDashboardsReact", "opensearchDashboardsUtils", "savedObjects", "uiActions"],
-  "optionalPlugins": ["dataSource", "usageCollection"],
+  "optionalPlugins": ["dataSource", "usageCollection","assistantDashboards"],
   "configPath": ["queryEnhancements"]
 }
 

@@ -5,7 +5,7 @@
 import { i18n } from '@osd/i18n';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../common/config';
-import { setData, setStorage } from './services';
+import { setData, setStorage, setAssistantClient } from './services';
 import { createQueryAssistExtension } from './query_assist';
 import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
 import {
@@ -37,7 +37,7 @@ export class QueryEnhancementsPlugin
   }
 
   public setup(
-    core: CoreSetup<QueryEnhancementsPluginStartDependencies>,
+    core: CoreSetup,
     { data, usageCollection }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
     const { queryString } = data.query;
@@ -153,7 +153,6 @@ export class QueryEnhancementsPlugin
       ],
     };
     queryString.getLanguageService().registerLanguage(sqlLanguageConfig);
-
     data.__enhance({
       editor: {
         queryEditorExtension: createQueryAssistExtension(
@@ -172,10 +171,16 @@ export class QueryEnhancementsPlugin
 
   public start(
     core: CoreStart,
-    deps: QueryEnhancementsPluginStartDependencies
+    { data, assistantDashboards }: QueryEnhancementsPluginStartDependencies
   ): QueryEnhancementsPluginStart {
+    // eslint-disable-next-line
+    console.log('111assistantDashboards', assistantDashboards);
+
+    if (assistantDashboards) {
+      setAssistantClient(assistantDashboards.assistantClient);
+    }
     setStorage(this.storage);
-    setData(deps.data);
+    setData(data);
     return {};
   }
 

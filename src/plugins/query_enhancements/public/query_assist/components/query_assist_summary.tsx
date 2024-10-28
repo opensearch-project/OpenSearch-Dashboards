@@ -30,7 +30,7 @@ import { QueryAssistContextType } from '../../../common/query_assist';
 import sparkleHollowSvg from '../../assets/sparkle_hollow.svg';
 import sparkleSolidSvg from '../../assets/sparkle_solid.svg';
 import { FeedbackStatus } from '../../../common/query_assist';
-
+import { getIsSummaryAgent } from '../utils/get_is_summary_agent';
 export interface QueryContext {
   question: string;
   query: string;
@@ -70,6 +70,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
   const [loading, setLoading] = useState(false); // track loading state
   const [feedback, setFeedback] = useState(FeedbackStatus.NONE);
   const [isEnabledByCapability, setIsEnabledByCapability] = useState(false);
+  const [isSummaryAgent, setIsSummaryAgent] = useState(false);
   const selectedDataset = useRef(query.queryString.getQuery()?.dataset);
   const { question$, isQueryAssistCollapsed } = useQueryAssist();
   const METRIC_APP = `query-assist`;
@@ -95,6 +96,17 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
     },
     [props.usageCollection, METRIC_APP]
   );
+
+  const checkSummaryAgent = useCallback(async () => {
+    if (selectedDataset.current?.dataSource?.id) {
+      const res = await getIsSummaryAgent(selectedDataset.current.dataSource.id);
+      setIsSummaryAgent(res);
+    }
+  }, [selectedDataset]);
+
+  useEffect(() => {
+    checkSummaryAgent();
+  }, [checkSummaryAgent]);
 
   const reportCountMetric = useCallback(
     (metric: string, count: number) => {
@@ -216,7 +228,12 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
     [feedback, reportMetric]
   );
 
-  if (props.dependencies.isCollapsed || isQueryAssistCollapsed || !isEnabledByCapability)
+  if (
+    props.dependencies.isCollapsed ||
+    isQueryAssistCollapsed ||
+    !isEnabledByCapability ||
+    !isSummaryAgent
+  )
     return null;
   const isDarkMode = props.core.uiSettings.get('theme:darkMode');
   return (

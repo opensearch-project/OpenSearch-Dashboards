@@ -7,7 +7,7 @@ import { CoreSetup, CoreStart } from 'opensearch-dashboards/public';
 import { DataSourcePluginStart } from 'src/plugins/data_source/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
-
+import { AssistantPublicPluginStart } from '../../../../plugins/dashboards-assistant/public';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueryEnhancementsPluginSetup {}
 
@@ -22,6 +22,7 @@ export interface QueryEnhancementsPluginSetupDependencies {
 export interface QueryEnhancementsPluginStartDependencies {
   data: DataPublicPluginStart;
   dataSource?: DataSourcePluginStart;
+  assistantDashboards: AssistantPublicPluginStart;
 }
 
 export interface Connection {
@@ -33,3 +34,9 @@ export interface Connection {
     auth?: any;
   };
 }
+
+export type {
+  AssistantSetup,
+  AssistantPublicPluginStart,
+  AssistantPublicPluginSetup,
+} from '../../../../plugins/dashboards-assistant/public';
