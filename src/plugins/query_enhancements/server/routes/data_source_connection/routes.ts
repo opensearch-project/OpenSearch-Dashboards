@@ -31,7 +31,12 @@ export function registerDataSourceConnectionsRoutes(
         if (error.statusCode === 404 || error.statusCode === 400) {
           return response.ok({ body: [] });
         }
-        return response.custom({ statusCode: error.statusCode || 500, body: error.message });
+        // Transform 500 errors to 503 to indicate service availability issues
+        const statusCode = error.statusCode === 500 ? 503 : error.statusCode || 503;
+        return response.custom({
+          statusCode,
+          body: error.message,
+        });
       }
     }
   );
