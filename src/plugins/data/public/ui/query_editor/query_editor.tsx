@@ -15,7 +15,7 @@ import {
   PopoverAnchorPosition,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { monaco } from '@osd/monaco';
 import {
   IDataPluginServices,
@@ -80,8 +80,20 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const extensionMap = languageManager.getQueryEditorExtensionMap();
   const services = props.opensearchDashboards.services;
 
-  const persistedLogRef = useRef<PersistedLog>();
+  const persistedLogRef = useRef<PersistedLog>(
+    props.persistedLog ||
+      getQueryLog(services.uiSettings, services.storage, services.appName, props.query.language)
+  );
   const abortControllerRef = useRef<AbortController>();
+
+  useEffect(() => {
+    const abortController = abortControllerRef.current;
+    return () => {
+      if (abortController) {
+        abortController.abort();
+      }
+    };
+  }, []);
 
   const getQueryString = useCallback(() => {
     return toUser(props.query.query);
@@ -174,13 +186,6 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
 
     onChange(newQuery);
     onSubmit(newQuery);
-  };
-
-  const initPersistedLog = () => {
-    const { uiSettings, storage, appName } = services;
-    persistedLogRef.current = props.persistedLog
-      ? props.persistedLog
-      : getQueryLog(uiSettings, storage, appName, props.query.language);
   };
 
   const toggleRecentQueries = () => {
@@ -407,10 +412,6 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
           !languageEditor.TopBar.Expanded && 'emptyExpanded'
         )}
       >
-        <div
-          ref={bannerRef}
-          className={classNames('osdQueryEditor__banner', props.bannerClassName)}
-        />
         <div className="osdQueryEditor__topBar">
           <div className="osdQueryEditor__input">
             {isCollapsed
