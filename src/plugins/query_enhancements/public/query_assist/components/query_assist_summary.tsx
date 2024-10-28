@@ -97,17 +97,6 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
     [props.usageCollection, METRIC_APP]
   );
 
-  const checkSummaryAgent = useCallback(async () => {
-    if (selectedDataset.current?.dataSource?.id) {
-      const res = await getIsSummaryAgent(selectedDataset.current.dataSource.id);
-      setIsSummaryAgent(res);
-    }
-  }, [selectedDataset]);
-
-  useEffect(() => {
-    checkSummaryAgent();
-  }, [checkSummaryAgent]);
-
   const reportCountMetric = useCallback(
     (metric: string, count: number) => {
       if (props.usageCollection) {
@@ -218,6 +207,19 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
     });
   }, [props.core]);
 
+  useEffect(() => {
+    const checkSummaryAgent = async () => {
+      setIsSummaryAgent(false);
+      if (selectedDataset.current?.dataSource?.id) {
+        const res = await getIsSummaryAgent(selectedDataset.current.dataSource.id);
+
+        setIsSummaryAgent(res);
+      }
+    };
+
+    checkSummaryAgent();
+  }, [selectedDataset.current?.dataSource?.id]);
+
   const onFeedback = useCallback(
     (satisfied: boolean) => {
       if (feedback !== FeedbackStatus.NONE) return;
@@ -233,8 +235,10 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
     isQueryAssistCollapsed ||
     !isEnabledByCapability ||
     !isSummaryAgent
-  )
+  ) {
     return null;
+  }
+
   const isDarkMode = props.core.uiSettings.get('theme:darkMode');
   return (
     <EuiSplitPanel.Outer

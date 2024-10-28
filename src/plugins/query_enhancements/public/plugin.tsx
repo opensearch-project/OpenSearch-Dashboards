@@ -37,7 +37,7 @@ export class QueryEnhancementsPlugin
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<QueryEnhancementsPluginStartDependencies>,
     { data, usageCollection }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
     const { queryString } = data.query;
@@ -173,9 +173,6 @@ export class QueryEnhancementsPlugin
     core: CoreStart,
     { data, assistantDashboards }: QueryEnhancementsPluginStartDependencies
   ): QueryEnhancementsPluginStart {
-    // eslint-disable-next-line
-    console.log('111assistantDashboards', assistantDashboards);
-
     if (assistantDashboards) {
       setAssistantClient(assistantDashboards.assistantClient);
     }
