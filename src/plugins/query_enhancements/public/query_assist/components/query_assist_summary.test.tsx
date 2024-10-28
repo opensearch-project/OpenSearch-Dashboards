@@ -10,6 +10,8 @@ import { QueryAssistSummary, convertResult } from './query_assist_summary';
 import { useQueryAssist } from '../hooks';
 import { IDataFrame, Query } from '../../../../data/common';
 import { FeedbackStatus as FEEDBACK } from '../../../common/query_assist';
+import { setAssistantClient } from '../../services/index';
+import { getIsSummaryAgent } from '../utils/get_is_summary_agent';
 
 jest.mock('react', () => ({
   ...jest.requireActual('react'),
@@ -19,6 +21,12 @@ jest.mock('react', () => ({
 
 jest.mock('../hooks', () => ({
   useQueryAssist: jest.fn(),
+}));
+
+jest.mock('../utils/get_is_summary_agent', () => ({ getIsSummaryAgent: jest.fn() }));
+jest.mock('../../services/index', () => ({
+  getAssistantClient: jest.fn(),
+  setAssistantClient: jest.fn(),
 }));
 
 describe('query assist summary', () => {
@@ -42,6 +50,7 @@ describe('query assist summary', () => {
   const setSummary = jest.fn();
   const setLoading = jest.fn();
   const setFeedback = jest.fn();
+  const setIsSummaryAgent = jest.fn();
   const setIsAssistantEnabledByCapability = jest.fn();
   const getQuery = jest.fn();
   const dataMock = {
@@ -58,6 +67,10 @@ describe('query assist summary', () => {
     },
   };
 
+  beforeEach(() => {
+    (getIsSummaryAgent as jest.Mock).mockResolvedValue(false);
+  });
+
   afterEach(() => {
     data$.next(undefined);
     question$.next('');
@@ -71,13 +84,13 @@ describe('query assist summary', () => {
       CLICK: 'click',
     },
   };
+
   const props: ComponentProps<typeof QueryAssistSummary> = {
     data: dataMock,
     http: httpMock,
     usageCollection: usageCollectionMock,
     dependencies: {
       isCollapsed: false,
-      isSummaryCollapsed: false,
     },
     core: coreSetupMock,
   };
@@ -115,6 +128,7 @@ describe('query assist summary', () => {
     summary,
     loading,
     feedback,
+    isSummaryAgent = false,
     isAssistantEnabledByCapability = true,
     isQueryAssistCollapsed = COLLAPSED.NO
   ) => {
@@ -125,6 +139,7 @@ describe('query assist summary', () => {
       isAssistantEnabledByCapability,
       setIsAssistantEnabledByCapability,
     ]);
+    React.useState.mockImplementationOnce(() => [isSummaryAgent, setIsSummaryAgent]);
     useQueryAssist.mockImplementationOnce(() => ({
       question: 'question',
       question$,
@@ -133,7 +148,7 @@ describe('query assist summary', () => {
   };
 
   const defaultUseStateMock = () => {
-    mockUseState(null, LOADING.NO, FEEDBACK.NONE);
+    mockUseState(null, LOADING.NO, FEEDBACK.NONE, true);
   };
 
   it('should not show if collapsed is true', () => {
@@ -150,30 +165,48 @@ describe('query assist summary', () => {
     expect(summaryPanels).toHaveLength(0);
   });
 
-  it('should not show if query assistant is collapsed', () => {
-    mockUseState(null, LOADING.NO, FEEDBACK.NONE, true, COLLAPSED.YES);
+  it('should not show if is not summary agent', () => {
+    (getIsSummaryAgent as jest.Mock).mockResolvedValue(false);
+    mockUseState(null, LOADING.NO, FEEDBACK.NONE, false);
     renderQueryAssistSummary(COLLAPSED.NO);
     const summaryPanels = screen.queryAllByTestId('queryAssist__summary');
     expect(summaryPanels).toHaveLength(0);
   });
 
+  it('should not show if query assistant is collapsed', () => {
+    mockUseState(null, LOADING.NO, FEEDBACK.NONE, true);
+    renderQueryAssistSummary(COLLAPSED.YES);
+    const summaryPanels = screen.queryAllByTestId('queryAssist__summary');
+    expect(summaryPanels).toHaveLength(0);
+  });
+
   it('should show if collapsed is false', () => {
-    defaultUseStateMock();
+    (getIsSummaryAgent as jest.Mock).mockResolvedValue(true);
+    mockUseState(null, LOADING.NO, FEEDBACK.NONE, true);
+    renderQueryAssistSummary(COLLAPSED.NO);
+    const summaryPanels = screen.queryAllByTestId('queryAssist__summary');
+    expect(summaryPanels).toHaveLength(1);
+  });
+
+  it('should show if summary agent', () => {
+    (getIsSummaryAgent as jest.Mock).mockResolvedValue(true);
+    mockUseState(null, LOADING.NO, FEEDBACK.NONE, true);
     renderQueryAssistSummary(COLLAPSED.NO);
     const summaryPanels = screen.queryAllByTestId('queryAssist__summary');
     expect(summaryPanels).toHaveLength(1);
   });
 
   it('should display loading view if loading state is true', () => {
-    mockUseState(null, LOADING.YES, FEEDBACK.NONE);
+    (getIsSummaryAgent as jest.Mock).mockResolvedValue(true);
+    mockUseState(null, LOADING.YES, FEEDBACK.NONE, true);
     renderQueryAssistSummary(COLLAPSED.NO);
-    expect(screen.getByTestId('queryAssist_summary_loading')).toBeInTheDocument();
     expect(screen.queryAllByTestId('queryAssist_summary_result')).toHaveLength(0);
     expect(screen.queryAllByTestId('queryAssist_summary_empty_text')).toHaveLength(0);
   });
 
   it('should display loading view if loading state is true even with summary', () => {
-    mockUseState('summary', LOADING.YES, FEEDBACK.NONE);
+    (getIsSummaryAgent as jest.Mock).mockResolvedValue(true);
+    mockUseState('summary', LOADING.YES, FEEDBACK.NONE, true);
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_loading')).toBeInTheDocument();
     expect(screen.queryAllByTestId('queryAssist_summary_result')).toHaveLength(0);
@@ -181,6 +214,7 @@ describe('query assist summary', () => {
   });
 
   it('should display initial view if loading state is false and no summary', () => {
+    (getIsSummaryAgent as jest.Mock).mockResolvedValue(true);
     defaultUseStateMock();
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_empty_text')).toBeInTheDocument();
@@ -189,7 +223,8 @@ describe('query assist summary', () => {
   });
 
   it('should display summary result', () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
+    (getIsSummaryAgent as jest.Mock).mockResolvedValue(true);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NONE, true);
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
     expect(screen.getByTestId('queryAssist_summary_result')).toHaveTextContent('summary');
@@ -198,7 +233,8 @@ describe('query assist summary', () => {
   });
 
   it('should report metric for thumbup click', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
+    (getIsSummaryAgent as jest.Mock).mockResolvedValue(true);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NONE, true);
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
     await screen.getByTestId('queryAssist_summary_buttons_thumbup');
@@ -212,7 +248,8 @@ describe('query assist summary', () => {
   });
 
   it('should report metric for thumbdown click', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
+    (getIsSummaryAgent as jest.Mock).mockResolvedValue(true);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NONE, true);
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
     await screen.getByTestId('queryAssist_summary_buttons_thumbdown');
@@ -226,7 +263,8 @@ describe('query assist summary', () => {
   });
 
   it('should hide thumbdown button if thumbup button is clicked', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.THUMB_UP);
+    (getIsSummaryAgent as jest.Mock).mockResolvedValue(true);
+    mockUseState('summary', LOADING.NO, FEEDBACK.THUMB_UP, true);
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
     await screen.getByTestId('queryAssist_summary_buttons_thumbup');
@@ -234,7 +272,8 @@ describe('query assist summary', () => {
   });
 
   it('should hide thumbup button if thumbdown button is clicked', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.THUMB_DOWN);
+    (getIsSummaryAgent as jest.Mock).mockResolvedValue(true);
+    mockUseState('summary', LOADING.NO, FEEDBACK.THUMB_DOWN, true);
     renderQueryAssistSummary(COLLAPSED.NO);
     expect(screen.getByTestId('queryAssist_summary_result')).toBeInTheDocument();
     await screen.getByTestId('queryAssist_summary_buttons_thumbdown');
@@ -242,7 +281,8 @@ describe('query assist summary', () => {
   });
 
   it('should not fetch summary if data is empty', async () => {
-    mockUseState(null, LOADING.NO, FEEDBACK.NONE);
+    (getIsSummaryAgent as jest.Mock).mockResolvedValue(true);
+    mockUseState(null, LOADING.NO, FEEDBACK.NONE, true);
     renderQueryAssistSummary(COLLAPSED.NO);
     question$.next(question);
     query$.next({ query: PPL, language: 'PPL' });
@@ -251,7 +291,7 @@ describe('query assist summary', () => {
   });
 
   it('should fetch summary with expected payload and response', async () => {
-    mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
+    mockUseState('summary', LOADING.NO, FEEDBACK.NONE, true);
     const RESPONSE_TEXT = 'response';
     httpMock.post.mockResolvedValue(RESPONSE_TEXT);
     renderQueryAssistSummary(COLLAPSED.NO);
@@ -291,6 +331,7 @@ describe('query assist summary', () => {
   });
 
   it('should not update queryResults if subscription changed not in order', async () => {
+    (getIsSummaryAgent as jest.Mock).mockResolvedValue(true);
     mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
     const RESPONSE_TEXT = 'response';
     httpMock.post.mockResolvedValue(RESPONSE_TEXT);
@@ -303,6 +344,7 @@ describe('query assist summary', () => {
   });
 
   it('should update queryResults if subscriptions changed in order', async () => {
+    (getIsSummaryAgent as jest.Mock).mockResolvedValue(true);
     mockUseState('summary', LOADING.NO, FEEDBACK.NONE);
     const RESPONSE_TEXT = 'response';
     httpMock.post.mockResolvedValue(RESPONSE_TEXT);
@@ -321,6 +363,7 @@ describe('query assist summary', () => {
   });
 
   it('should reset feedback state if re-fetch summary', async () => {
+    (getIsSummaryAgent as jest.Mock).mockResolvedValue(true);
     mockUseState('summary', LOADING.NO, FEEDBACK.THUMB_UP);
     const RESPONSE_TEXT = 'response';
     httpMock.post.mockResolvedValue(RESPONSE_TEXT);
