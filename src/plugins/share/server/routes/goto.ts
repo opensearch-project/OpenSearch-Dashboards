@@ -35,6 +35,8 @@ import { modifyUrl } from '@osd/std';
 import { shortUrlAssertValid } from './lib/short_url_assert_valid';
 import { ShortUrlLookupService } from './lib/short_url_lookup';
 import { getGotoPath } from '../../common/short_url_routes';
+import { getWorkspaceState } from '../../../../core/server/utils';
+import { getRedirectUrl } from '../../../../core/server';
 
 export const createGotoRoute = ({
   router,
@@ -65,7 +67,15 @@ export const createGotoRoute = ({
 
         const prependedUrl = modifyUrl(url, (parts) => {
           if (!parts.hostname && parts.pathname && parts.pathname.startsWith('/')) {
-            parts.pathname = `${basePath}${parts.pathname}`;
+            if (getWorkspaceState(request).requestWorkspaceId) {
+              parts.pathname = getRedirectUrl({
+                request,
+                nextUrl: parts.pathname,
+                basePath,
+              });
+            } else {
+              parts.pathname = `${basePath}${parts.pathname}`;
+            }
           }
         });
         return response.redirected({
