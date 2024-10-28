@@ -156,6 +156,10 @@ export class QueryStringManager {
     const curQuery = this.query$.getValue();
     const newQuery = { ...curQuery, ...query };
     if (!isEqual(curQuery, newQuery)) {
+      // Add to recent datasets if dataset has changed
+      if (newQuery.dataset && !isEqual(curQuery.dataset, newQuery.dataset)) {
+        this.datasetService.addRecentDataset(newQuery.dataset);
+      }
       this.query$.next(newQuery);
     }
   };

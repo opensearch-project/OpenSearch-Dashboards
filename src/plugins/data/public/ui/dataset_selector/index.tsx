@@ -46,9 +46,6 @@ const ConnectedDatasetSelector = ({
       setSelectedDataset(query.dataset);
       queryString.setQuery(query);
       onSubmit!(query);
-      if (query.dataset) {
-        queryString.getDatasetService().addRecentDataset(query.dataset);
-      }
     },
     [onSubmit, queryString]
   );
