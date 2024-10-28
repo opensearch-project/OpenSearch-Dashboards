@@ -54,7 +54,7 @@ export class QueryStringManager {
     private readonly notifications: NotificationsSetup
   ) {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
-    this.queryHistory = createHistory({ storage });
+    this.queryHistory = new QueryHistory(this.sessionStorage);
     this.datasetService = new DatasetService(uiSettings, this.sessionStorage);
     this.languageService = new LanguageService(this.defaultSearchInterceptor, this.storage);
   }
