@@ -1,0 +1,2 @@
+fix:
+- [Discover] Modify the search bar info box content for sql/ppl #8708 ([#8708](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8708))
