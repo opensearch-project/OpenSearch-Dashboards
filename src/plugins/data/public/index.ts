@@ -68,8 +68,6 @@ export {
   DQLBody,
   SingleLineInput,
   DatasetSelector,
-  AdvancedSelector,
-  NoIndexPatternsPanel,
   DatasetSelectorAppearance,
 } from './ui';
 

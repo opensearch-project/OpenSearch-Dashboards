@@ -111,8 +111,8 @@ export class QueryService {
       queryString: this.queryStringManager,
       savedQueries: createSavedQueryService(
         savedObjectsClient,
-        this.queryStringManager,
-        application
+        { application, uiSettings },
+        this.queryStringManager
       ),
       state$: this.state$,
       timefilter: this.timefilter,
