@@ -6,7 +6,7 @@ import React from 'react';
 
 export interface QueryAssistState {
   question: string;
-  answer: string;
+  generatedQuery: string;
 }
 
 export interface QueryAssistContextValue {

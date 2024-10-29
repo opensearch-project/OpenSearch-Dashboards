@@ -87,7 +87,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
         language: params.language,
         dataset: selectedDataset,
       });
-      updateQueryState({ question: previousQuestionRef.current, answer: response.query });
+      updateQueryState({ question: previousQuestionRef.current, generatedQuery: response.query });
       if (response.timeRange) services.data.query.timefilter.timefilter.setTime(response.timeRange);
       setCallOutType('query_generated');
     }

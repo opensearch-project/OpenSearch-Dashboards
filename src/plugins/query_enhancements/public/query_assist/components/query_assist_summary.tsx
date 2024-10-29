@@ -7,7 +7,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiIcon,
   EuiIconTip,
   EuiSmallButtonIcon,
   EuiSpacer,
@@ -26,8 +25,6 @@ import { QueryAssistState, useQueryAssist } from '../hooks';
 import { DataPublicPluginSetup, QueryEditorExtensionDependencies } from '../../../../data/public';
 import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { CoreSetup } from '../../../../../core/public';
-import sparkleHollowSvg from '../../assets/sparkle_mark.svg';
-import sparkleSolidSvg from '../../assets/sparkle_solid.svg';
 import { FeedbackStatus } from '../../../common/query_assist';
 
 export interface QueryContext {
@@ -277,7 +274,6 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
     return null;
   }
 
-  const isDarkMode = props.core.uiSettings.get('theme:darkMode');
   return (
     <EuiSplitPanel.Outer
       className="queryAssist queryAssist__summary"
@@ -369,9 +365,6 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
                 </>
               )}
               <EuiSpacer className="verticalRuler" size="m" />
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={isDarkMode ? sparkleSolidSvg : sparkleHollowSvg} size="m" />
-              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSmallButtonEmpty
                   isDisabled={!canGenerateSummary}
