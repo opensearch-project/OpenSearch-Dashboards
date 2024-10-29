@@ -1,0 +1,2 @@
+fix:
+- Fix UI issues in workspace detail and create page ([#8737](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8737))
