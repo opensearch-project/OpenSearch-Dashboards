@@ -16,7 +16,7 @@ import {
 } from '../../../../data/public';
 import { API } from '../../../common';
 import { ConfigSchema } from '../../../common/config';
-import assistantMark from '../../assets/query_assist_mark.svg';
+import assistantMark from '../../assets/sparkle_mark.svg';
 import {
   QueryAssistBanner,
   QueryAssistBar,

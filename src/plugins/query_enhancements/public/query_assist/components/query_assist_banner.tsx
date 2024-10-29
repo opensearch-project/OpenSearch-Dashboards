@@ -15,7 +15,7 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useState } from 'react';
 import { QueryEditorExtensionDependencies } from '../../../../data/public';
-import assistantMark from '../../assets/query_assist_mark.svg';
+import assistantMark from '../../assets/sparkle_mark.svg';
 import { getStorage } from '../../services';
 
 const BANNER_STORAGE_KEY = 'queryAssist:banner:show';
