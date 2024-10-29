@@ -71,8 +71,8 @@ describe('workspace ui settings saved object client wrapper', () => {
 
     expect(await globalUiSettingsClient.get('defaultIndex')).toBe('global-index');
 
-    // workspace defaultIndex is not set, it will use the global value
-    expect(await workspaceScopedUiSettingsClient.get('defaultIndex')).toBe('global-index');
+    // workspace defaultIndex is not set, it will not use the global value
+    expect(await workspaceScopedUiSettingsClient.get('defaultIndex')).toBeUndefined();
 
     // update ui settings in a workspace
     await workspaceScopedUiSettingsClient.set('defaultIndex', 'workspace-index');

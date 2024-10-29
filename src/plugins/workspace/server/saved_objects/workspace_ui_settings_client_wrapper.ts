@@ -19,7 +19,10 @@ import {
 } from '../../../../core/server';
 import { WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID } from '../../common/constants';
 import { Logger } from '../../../../core/server';
-import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../../data_source_management/common';
+import {
+  DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+  DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID,
+} from '../../../data_source_management/common';
 
 /**
  * This saved object client wrapper offers methods to get and update UI settings considering
@@ -78,11 +81,16 @@ export class WorkspaceUiSettingsClientWrapper {
         const workspaceLevelDefaultDS =
           workspaceObject?.attributes?.uiSettings?.[DEFAULT_DATA_SOURCE_UI_SETTINGS_ID];
 
+        const workspaceLevelDefaultIndex =
+          workspaceObject?.attributes?.uiSettings?.[DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID];
+
         configObject.attributes = {
           ...configObject.attributes,
           ...(workspaceObject ? workspaceObject.attributes.uiSettings : {}),
           // Workspace level default data source value should not extend global UIsettings value.
           [DEFAULT_DATA_SOURCE_UI_SETTINGS_ID]: workspaceLevelDefaultDS,
+          // Workspace level default index pattern value should not extend global UIsettings value.
+          [DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID]: workspaceLevelDefaultIndex,
         };
 
         return configObject as SavedObject<T>;

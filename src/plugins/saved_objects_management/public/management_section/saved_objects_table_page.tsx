@@ -43,6 +43,7 @@ import {
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
 import { NavigationPublicPluginStart } from '../../../navigation/public';
+import { formatUrlWithWorkspaceId } from '../../../../core/public/utils';
 
 const SavedObjectsTablePage = ({
   coreStart,
@@ -75,6 +76,8 @@ const SavedObjectsTablePage = ({
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
   const dateFormat = coreStart.uiSettings.get<string>('dateFormat');
   const currentWorkspace = useObservable(coreStart.workspaces.currentWorkspace$);
+  const basePath = coreStart.http.basePath;
+  const visibleWsIds = useObservable(coreStart.workspaces.workspaceList$)?.map((ws) => ws.id) || [];
 
   useEffect(() => {
     setBreadcrumbs([
@@ -119,12 +122,24 @@ const SavedObjectsTablePage = ({
         const { editUrl } = savedObject.meta;
         let finalEditUrl = editUrl;
         if (useUpdatedUX && finalEditUrl) {
-          finalEditUrl = finalEditUrl.replace(/^\/management\/opensearch-dashboards/, '');
+          finalEditUrl = finalEditUrl.replace(/^\/management\/opensearch-dashboards/, '/app');
         }
         if (finalEditUrl) {
-          return coreStart.application.navigateToUrl(
-            coreStart.http.basePath.prepend(`/app${finalEditUrl}`)
-          );
+          let inAppUrl = basePath.prepend(finalEditUrl);
+          if (savedObject.workspaces?.length) {
+            if (currentWorkspace) {
+              inAppUrl = formatUrlWithWorkspaceId(finalEditUrl, currentWorkspace.id, basePath);
+            } else {
+              // find first workspace user have permission
+              const workspaceId = savedObject.workspaces.find((wsId) =>
+                visibleWsIds.includes(wsId)
+              );
+              if (workspaceId) {
+                inAppUrl = formatUrlWithWorkspaceId(finalEditUrl, workspaceId, basePath);
+              }
+            }
+          }
+          return coreStart.application.navigateToUrl(inAppUrl);
         }
       }}
       dateFormat={dateFormat}
