@@ -298,6 +298,8 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       },
       dataType: 'string' as const,
       sortable: ({ description }: { description: string }) => description,
+      render: (description: string) =>
+        description.length > 0 ? description : <EuiText>&mdash;</EuiText>,
     },
     {
       field: 'relatedConnections',
