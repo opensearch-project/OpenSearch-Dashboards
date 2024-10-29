@@ -30,7 +30,9 @@ import { QueryAssistContextType } from '../../../common/query_assist';
 import sparkleHollowSvg from '../../assets/sparkle_hollow.svg';
 import sparkleSolidSvg from '../../assets/sparkle_solid.svg';
 import { FeedbackStatus } from '../../../common/query_assist';
-import { getIsSummaryAgent } from '../utils/get_is_summary_agent';
+import { checkAgentsExist } from '../utils/get_is_summary_agent';
+import { DATA2SUMMARY_AGENT_CONFIG_ID } from '../utils/constant';
+
 export interface QueryContext {
   question: string;
   query: string;
@@ -208,17 +210,19 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
   }, [props.core]);
 
   useEffect(() => {
-    const checkSummaryAgent = async () => {
-      setIsSummaryAgent(false);
+    setIsSummaryAgent(false);
+    const fetchSummaryAgent = async () => {
       if (selectedDataset.current?.dataSource?.id) {
-        const res = await getIsSummaryAgent(selectedDataset.current.dataSource.id);
-
-        setIsSummaryAgent(res);
+        const summaryAgentStatus = await checkAgentsExist(
+          props.http,
+          DATA2SUMMARY_AGENT_CONFIG_ID,
+          selectedDataset.current?.dataSource?.id
+        );
+        setIsSummaryAgent(summaryAgentStatus.exists);
       }
     };
-
-    checkSummaryAgent();
-  }, [selectedDataset.current?.dataSource?.id]);
+    fetchSummaryAgent();
+  }, [selectedDataset.current?.dataSource?.id, props.http]);
 
   const onFeedback = useCallback(
     (satisfied: boolean) => {

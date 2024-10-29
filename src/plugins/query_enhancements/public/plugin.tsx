@@ -5,7 +5,7 @@
 import { i18n } from '@osd/i18n';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { ConfigSchema } from '../common/config';
-import { setData, setStorage, setAssistantClient } from './services';
+import { setData, setStorage } from './services';
 import { createQueryAssistExtension } from './query_assist';
 import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
 import {
@@ -171,11 +171,8 @@ export class QueryEnhancementsPlugin
 
   public start(
     core: CoreStart,
-    { data, assistantDashboards }: QueryEnhancementsPluginStartDependencies
+    { data }: QueryEnhancementsPluginStartDependencies
   ): QueryEnhancementsPluginStart {
-    if (assistantDashboards) {
-      setAssistantClient(assistantDashboards.assistantClient);
-    }
     setStorage(this.storage);
     setData(data);
     return {};

@@ -34,7 +34,6 @@ exports[`Query Result show error status with error message 2`] = `
     ERRORS
   </EuiPopoverTitle>
   <div
-    className="eui-textBreakWord"
     style={
       Object {
         "width": "250px",
@@ -44,11 +43,21 @@ exports[`Query Result show error status with error message 2`] = `
     <EuiText
       size="s"
     >
+      <strong>
+        Reasons:
+      </strong>
+       
+      error reason
+    </EuiText>
+    <EuiText
+      size="s"
+    >
       <p>
         <strong>
-          Message:
+          Details:
         </strong>
          
+        error details
       </p>
     </EuiText>
   </div>
