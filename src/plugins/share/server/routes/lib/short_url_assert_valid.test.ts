@@ -49,6 +49,7 @@ describe('shortUrlAssertValid()', () => {
     ['path with an extra leading slash', '///app/opensearch-dashboards', HOSTNAME_ERROR], // parser detects '' as the hostname
     ['path without app', '/foo/opensearch-dashboards', PATH_ERROR], // fails because first path part is not 'app'
     ['path without appId', '/app/', PATH_ERROR], // fails because there is only one path part (leading and trailing slashes are trimmed)
+    '/w/app/dashboards', // fails because it is not a standard workspace path
   ];
 
   invalid.forEach(([desc, url, error]) => {
@@ -67,6 +68,7 @@ describe('shortUrlAssertValid()', () => {
     '/app/some?with=query',
     '/app/some?with=query#and-a-hash',
     '/app/some/deeper?with=query#and-a-hash',
+    '/w/workspaceid/app/foo',
   ];
 
   valid.forEach((url) => {
