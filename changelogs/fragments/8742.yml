@@ -1,0 +1,2 @@
+security:
+- [CVE-2024-48948] Bump `elliptic` from 6.5.7 to 6.6.0 ([#8742](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8742))
