@@ -177,7 +177,7 @@ tableSourceClause
    ;
 
 renameClasue
-   : orignalField = fieldExpression AS renamedField = ID
+   : orignalField = wcFieldExpression AS renamedField = wcFieldExpression
    ;
 
 byClause
@@ -258,14 +258,14 @@ logicalExpression
    ;
 
 comparisonExpression
-   : left = valueExpression comparisonOperator right = literalValue  # compareExpr
+   : left = valueExpression comparisonOperator right = valueExpression  # compareExpr
    | valueExpression IN valueList                                       # inExpr
    ;
 
 valueExpression
-   // : left = valueExpression binaryOperator = (STAR | DIVIDE | MODULE) right = valueExpression   # binaryArithmetic
-   // | left = valueExpression binaryOperator = (PLUS | MINUS) right = valueExpression             # binaryArithmetic
-   : primaryExpression                                                                          # valueExpressionDefault
+   : left = valueExpression binaryOperator = (STAR | DIVIDE | MODULE) right = valueExpression   # binaryArithmetic
+   | left = valueExpression binaryOperator = (PLUS | MINUS) right = valueExpression             # binaryArithmetic
+   | primaryExpression                                                                          # valueExpressionDefault
    | positionFunction                                                                           # positionFunctionCall
    | extractFunction                                                                            # extractFunctionCall
    | getFormatFunction                                                                          # getFormatFunctionCall
