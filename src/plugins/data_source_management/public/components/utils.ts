@@ -62,7 +62,7 @@ export const getDirectQueryConnections = async (dataSourceId: string, http: Http
 };
 
 export const getLocalClusterConnections = async (http: HttpSetup) => {
-  const res = await http.get(`${DATACONNECTIONS_BASE}`);
+  const res = await http.get(`${DATACONNECTIONS_BASE}/dataSourceMDSId=`);
   const localClusterConnections: DataSourceTableItem[] = res.map(
     (dataConnection: DirectQueryDatasourceDetails) => ({
       id: `${dataConnection.name}`,

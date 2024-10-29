@@ -31,6 +31,7 @@
 import { parse } from 'url';
 import { trim } from 'lodash';
 import Boom from '@hapi/boom';
+import { WORKSPACE_PATH_PREFIX } from '../../../../../core/server';
 
 export function shortUrlAssertValid(url: string) {
   const { protocol, hostname, pathname } = parse(
@@ -47,7 +48,13 @@ export function shortUrlAssertValid(url: string) {
     throw Boom.notAcceptable(`Short url targets cannot have a hostname, found "${hostname}"`);
   }
 
-  const pathnameParts = trim(pathname === null ? undefined : pathname, '/').split('/');
+  let pathnameParts = trim(pathname === null ? undefined : pathname, '/').split('/');
+
+  // Workspace introduced paths like `/w/${workspaceId}/app`
+  // ignore the first 2 elements if it starts with /w
+  if (`/${pathnameParts[0]}` === WORKSPACE_PATH_PREFIX) {
+    pathnameParts = pathnameParts.slice(2);
+  }
   if (pathnameParts[0] !== 'app' || !pathnameParts[1]) {
     throw Boom.notAcceptable(
       `Short url target path must be in the format "/app/{{appId}}", found "${pathname}"`

@@ -19,17 +19,20 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField } from '../../../common';
+import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../../common';
 import { getIndexPatterns, getQueryService } from '../../services';
+import { IDataPluginServices } from '../../types';
 
 export const Configurator = ({
+  services,
   baseDataset,
   onConfirm,
   onCancel,
   onPrevious,
 }: {
+  services: IDataPluginServices;
   baseDataset: BaseDataset;
-  onConfirm: (dataset: Dataset) => void;
+  onConfirm: (query: Partial<Query>) => void;
   onCancel: () => void;
   onPrevious: () => void;
 }) => {
@@ -80,8 +83,13 @@ export const Configurator = ({
       setTimeFields(dateFields || []);
     };
 
+    if (baseDataset?.dataSource?.meta?.supportsTimeFilter === false && timeFields.length > 0) {
+      setTimeFields([]);
+      return;
+    }
+
     fetchFields();
-  }, [baseDataset, indexPatternsService, queryString]);
+  }, [baseDataset, indexPatternsService, queryString, timeFields.length]);
 
   return (
     <>
@@ -172,6 +180,7 @@ export const Configurator = ({
                     setDataset({ ...dataset, timeFieldName: value });
                   }}
                   hasNoInitialSelection
+                  data-test-subj="advancedSelectorTimeFieldSelect"
                 />
               </EuiFormRow>
             ))}
@@ -192,11 +201,12 @@ export const Configurator = ({
         </EuiButton>
         <EuiButton
           onClick={async () => {
-            await queryString.getDatasetService().cacheDataset(dataset);
-            onConfirm(dataset);
+            await queryString.getDatasetService().cacheDataset(dataset, services);
+            onConfirm({ dataset, language });
           }}
           fill
           disabled={submitDisabled}
+          data-test-subj="advancedSelectorConfirmButton"
         >
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"

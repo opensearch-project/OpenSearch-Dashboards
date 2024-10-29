@@ -45,8 +45,9 @@ import {
 } from '../acceleration_management/acceleration_utils';
 import {
   isCatalogCacheFetching,
-  redirectToExplorerWithDataSrc,
+  redirectToDiscoverWithDataSrc,
 } from './utils/associated_objects_tab_utils';
+import { getUiSettings } from '../../utils';
 
 export interface AssociatedObjectsFlyoutProps {
   tableDetail: AssociatedObject;
@@ -76,11 +77,18 @@ export const AssociatedObjectsDetailsFlyout = ({
   const DiscoverButton = () => {
     return (
       <EuiButtonEmpty
+        isDisabled={(() => {
+          try {
+            return !getUiSettings().get('query:enhancements:enabled');
+          } catch (e) {
+            return false;
+          }
+        })()}
         onClick={() => {
           if (tableDetail.type !== 'table') return;
-          redirectToExplorerWithDataSrc(
+          redirectToDiscoverWithDataSrc(
             tableDetail.datasource,
-            DATA_SOURCE_TYPES.S3Glue,
+            dataSourceMDSId,
             tableDetail.database,
             tableDetail.name,
             application

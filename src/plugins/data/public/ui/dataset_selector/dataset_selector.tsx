@@ -11,21 +11,52 @@ import {
   EuiSelectable,
   EuiSelectableOption,
   EuiSmallButtonEmpty,
+  EuiSmallButton,
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { i18n } from '@osd/i18n';
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
-import { Dataset, DEFAULT_DATA } from '../../../common';
+import { Dataset, DEFAULT_DATA, Query } from '../../../common';
 import { getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
 import { AdvancedSelector } from './advanced_selector';
 
+export enum DatasetSelectorAppearance {
+  Button = 'button',
+  None = 'none',
+}
+
+type EuiSmallButtonProps = React.ComponentProps<typeof EuiSmallButton>;
+type EuiSmallButtonEmptyProps = React.ComponentProps<typeof EuiSmallButtonEmpty>;
+
 interface DatasetSelectorProps {
   selectedDataset?: Dataset;
-  setSelectedDataset: (dataset: Dataset) => void;
+  onSelect: (partialQuery: Partial<Query>) => void;
   services: IDataPluginServices;
 }
+
+export interface DatasetSelectorUsingButtonProps {
+  appearance: DatasetSelectorAppearance.Button;
+  buttonProps?: EuiSmallButtonProps;
+}
+
+export interface DatasetSelectorUsingButtonEmptyProps {
+  appearance?: DatasetSelectorAppearance.None;
+  buttonProps?: EuiSmallButtonEmptyProps;
+}
+
+const RootComponent: React.FC<
+  (EuiSmallButtonEmptyProps | EuiSmallButtonProps) & { appearance?: DatasetSelectorAppearance }
+> = (props) => {
+  const { appearance, ...rest } = props;
+  if (appearance === DatasetSelectorAppearance.Button) {
+    return <EuiSmallButton {...(rest as EuiSmallButtonProps)} />;
+  } else {
+    return <EuiSmallButtonEmpty {...(rest as EuiSmallButtonEmptyProps)} />;
+  }
+};
 
 /**
  * This component provides a dropdown selector for datasets and an advanced selector modal.
@@ -39,12 +70,15 @@ interface DatasetSelectorProps {
  */
 export const DatasetSelector = ({
   selectedDataset,
-  setSelectedDataset,
+  onSelect,
   services,
-}: DatasetSelectorProps) => {
+  appearance,
+  buttonProps,
+}: DatasetSelectorProps &
+  (DatasetSelectorUsingButtonProps | DatasetSelectorUsingButtonEmptyProps)) => {
   const isMounted = useRef(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [indexPatterns, setIndexPatterns] = useState<Dataset[]>([]);
   const { overlays } = services;
   const datasetService = getQueryService().queryString.getDatasetService();
   const datasetIcon =
@@ -64,11 +98,11 @@ export const DatasetSelector = ({
         fetchedIndexPatternDataStructures.children?.map((pattern) =>
           typeConfig.toDataset([pattern])
         ) ?? [];
-      setDatasets(fetchedDatasets);
+      setIndexPatterns(fetchedDatasets);
 
       // If no dataset is selected, select the first one
       if (!selectedDataset && fetchedDatasets.length > 0) {
-        setSelectedDataset(fetchedDatasets[0]);
+        onSelect({ dataset: fetchedDatasets[0] });
       }
     };
 
@@ -81,6 +115,12 @@ export const DatasetSelector = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datasetService]);
 
+  const recentDatasets = useMemo(() => {
+    return datasetService.getRecentDatasets();
+    // NOTE: Intentionally adding dependencies to ensure that we have the latest recentDatasets
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, datasetService]);
+
   const togglePopover = useCallback(async () => {
     setIsOpen(!isOpen);
   }, [isOpen]);
@@ -88,38 +128,63 @@ export const DatasetSelector = ({
   const closePopover = useCallback(() => setIsOpen(false), []);
 
   const options = useMemo(() => {
-    const newOptions: EuiSelectableOption[] = [
-      {
-        label: 'Index patterns',
-        isGroupLabel: true,
-      },
-    ];
-
-    datasets.forEach(({ id, title, type, dataSource }) => {
-      const label = dataSource ? `${dataSource.title}::${title}` : title;
-      newOptions.push({
-        label,
-        checked: id === selectedDataset?.id ? 'on' : undefined,
-        key: id,
-        prepend: <EuiIcon type={datasetService.getType(type)!.meta.icon.type} />,
+    const buildDatasetOptions = (
+      groupLabel: string,
+      ds: Dataset[],
+      selectedDatasetId: string | undefined
+    ): EuiSelectableOption[] => {
+      const datasetOptions: EuiSelectableOption[] = [
+        {
+          label: groupLabel,
+          isGroupLabel: true,
+        },
+      ];
+      ds.forEach(({ id, title, type, dataSource }) => {
+        const label = dataSource ? `${dataSource.title}::${title}` : title;
+        datasetOptions.push({
+          label,
+          checked: id === selectedDatasetId ? 'on' : undefined,
+          key: id,
+          prepend: <EuiIcon type={datasetService.getType(type)!.meta.icon.type} />,
+          'data-test-subj': `datasetOption-${id}`,
+        });
       });
-    });
+      return datasetOptions.length > 1 ? datasetOptions : [];
+    };
+    const recentDatasetOptions = buildDatasetOptions(
+      i18n.translate('data.dataSelector.recentDatasetsGroupLabel', {
+        defaultMessage: 'Recently selected data',
+      }),
+      recentDatasets,
+      selectedDataset?.id
+    );
+    const indexPatternOptions = buildDatasetOptions(
+      i18n.translate('data.dataSelector.indexPatternsGroupLabel', {
+        defaultMessage: 'Index patterns',
+      }),
+      indexPatterns.filter(
+        (dataset) => !recentDatasets.some((recentDataset) => recentDataset.id === dataset.id)
+      ),
+      selectedDataset?.id
+    );
 
-    return newOptions;
-  }, [datasets, selectedDataset?.id, datasetService]);
+    return [...recentDatasetOptions, ...indexPatternOptions];
+  }, [indexPatterns, selectedDataset?.id, datasetService, recentDatasets]);
 
   const handleOptionChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
       const selectedOption = newOptions.find((option) => option.checked === 'on');
       if (selectedOption) {
-        const foundDataset = datasets.find((dataset) => dataset.id === selectedOption.key);
+        const foundDataset =
+          recentDatasets.find((dataset) => dataset.id === selectedOption.key) ||
+          indexPatterns.find((dataset) => dataset.id === selectedOption.key);
         if (foundDataset) {
           closePopover();
-          setSelectedDataset(foundDataset);
+          onSelect({ dataset: foundDataset });
         }
       }
     },
-    [datasets, setSelectedDataset, closePopover]
+    [recentDatasets, indexPatterns, onSelect, closePopover]
   );
 
   const datasetTitle = useMemo(() => {
@@ -137,8 +202,18 @@ export const DatasetSelector = ({
   return (
     <EuiPopover
       button={
-        <EuiToolTip content={`${selectedDataset?.title ?? 'Select data'}`}>
-          <EuiSmallButtonEmpty
+        <EuiToolTip
+          display="block"
+          content={`${
+            selectedDataset?.title ??
+            i18n.translate('data.dataSelector.defaultTitle', {
+              defaultMessage: 'Select data',
+            })
+          }`}
+        >
+          <RootComponent
+            appearance={appearance}
+            {...buttonProps}
             className="datasetSelector__button"
             iconType="arrowDown"
             iconSide="right"
@@ -146,7 +221,7 @@ export const DatasetSelector = ({
           >
             <EuiIcon type={datasetIcon} className="datasetSelector__icon" />
             {datasetTitle}
-          </EuiSmallButtonEmpty>
+          </RootComponent>
         </EuiToolTip>
       }
       isOpen={isOpen}
@@ -189,10 +264,10 @@ export const DatasetSelector = ({
               toMountPoint(
                 <AdvancedSelector
                   services={services}
-                  onSelect={(dataset?: Dataset) => {
+                  onSelect={(query: Partial<Query>) => {
                     overlay?.close();
-                    if (dataset) {
-                      setSelectedDataset(dataset);
+                    if (query) {
+                      onSelect(query);
                     }
                   }}
                   onCancel={() => overlay?.close()}

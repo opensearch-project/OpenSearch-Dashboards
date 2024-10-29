@@ -4,14 +4,13 @@
  */
 
 import { i18n } from '@osd/i18n';
-
+import { euiPaletteColorBlind } from '@elastic/eui';
 import type { SavedObjectPermissions } from '../../../../../core/types';
-import { CURRENT_USER_PLACEHOLDER, WorkspacePermissionMode } from '../../../common/constants';
+import { WorkspacePermissionMode } from '../../../common/constants';
 import { isUseCaseFeatureConfig } from '../../utils';
 import {
   optionIdToWorkspacePermissionModesMap,
   permissionModeOptions,
-  WorkspaceOperationType,
   WorkspacePermissionItemType,
 } from './constants';
 
@@ -85,7 +84,7 @@ export const hasSameUserIdOrGroup = (
 export const getPermissionModeId = (modes: WorkspacePermissionMode[]) => {
   for (const key in optionIdToWorkspacePermissionModesMap) {
     if (optionIdToWorkspacePermissionModesMap[key].every((mode) => modes?.includes(mode))) {
-      return key;
+      return key as PermissionModeId;
     }
   }
   return PermissionModeId.Read;
@@ -336,11 +335,11 @@ export const validateWorkspaceForm = (
       }),
     };
   }
-  if (color && !validateWorkspaceColor(color)) {
+  if (color && (!validateWorkspaceColor(color) || !euiPaletteColorBlind().includes(color))) {
     formErrors.color = {
       code: WorkspaceFormErrorCode.InvalidColor,
       message: i18n.translate('workspace.form.features.invalidColor', {
-        defaultMessage: 'Color is invalid. Enter a valid color.',
+        defaultMessage: 'Color is invalid. Choose a valid color.',
       }),
     };
   }
@@ -380,49 +379,6 @@ export const generateNextPermissionSettingsId = (permissionSettings: Array<{ id:
   return permissionSettings.length === 0
     ? 0
     : Math.max(...permissionSettings.map(({ id }) => id)) + 1;
-};
-
-/**
- *
- * Generate permission settings state with provided operation type and  permission settings,
- * It will always return current user as an Owner and an empty user group permission settings
- * when operation type is create or no users and groups in provided permission settings.
- * It will append current user to result permission settings if no user in provided permission settings.
- * It will append an empty permission group to result permission settings if no user group in provided permission settings.
- * It will always return original permission settings if both user or user group in provided permission settings.
- *
- * @param operationType
- * @param permissionSettings
- * @returns
- */
-export const generatePermissionSettingsState = (
-  operationType: WorkspaceOperationType,
-  permissionSettings?: WorkspacePermissionSetting[]
-): WorkspacePermissionSetting[] => {
-  const emptyUserPermission: WorkspaceUserPermissionSetting = {
-    id: 1,
-    type: WorkspacePermissionItemType.User,
-    userId: '',
-    modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Owner],
-  };
-  const emptyUserGroupPermission: WorkspaceUserGroupPermissionSetting = {
-    id: 2,
-    type: WorkspacePermissionItemType.Group,
-    group: '',
-    modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read],
-  };
-
-  if (operationType === WorkspaceOperationType.Create) {
-    return [
-      {
-        ...emptyUserPermission,
-        userId: CURRENT_USER_PLACEHOLDER,
-      },
-      emptyUserGroupPermission,
-    ];
-  }
-
-  return [...(permissionSettings ?? [])];
 };
 
 interface PermissionSettingLike
@@ -490,25 +446,5 @@ export const getNumberOfChanges = (
   ) {
     count++;
   }
-  // Count all new added permission settings
-  count +=
-    newFormData.permissionSettings?.reduce((prevNewAddedCount, setting) => {
-      if (!initialFormData.permissionSettings?.find((item) => item.id === setting.id)) {
-        prevNewAddedCount += 1;
-      }
-      return prevNewAddedCount;
-    }, 0) ?? 0;
-  count +=
-    initialFormData.permissionSettings?.reduce((prevDeletedAndModifiedCount, setting) => {
-      const newSetting = newFormData.permissionSettings?.find((item) => item.id === setting.id);
-      if (!newSetting) {
-        // Count all delete permission settings
-        prevDeletedAndModifiedCount += 1;
-      } else if (!isSamePermissionSetting(newSetting, setting)) {
-        // Count all modified permission settings
-        prevDeletedAndModifiedCount += 1;
-      }
-      return prevDeletedAndModifiedCount;
-    }, 0) ?? 0;
   return count;
 };

@@ -58,7 +58,7 @@ describe('WorkspaceFormErrorCallout', () => {
       },
     });
 
-    expect(renderResult.getByText('Color: Enter a valid color.')).toBeInTheDocument();
+    expect(renderResult.getByText('Color: Choose a valid color.')).toBeInTheDocument();
   });
 
   it('should render use case suggestion', () => {

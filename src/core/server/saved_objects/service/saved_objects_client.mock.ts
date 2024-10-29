@@ -31,22 +31,22 @@
 import { SavedObjectsClientContract } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
 
-const create = () =>
-  (({
-    errors: SavedObjectsErrorHelpers,
-    create: jest.fn(),
-    bulkCreate: jest.fn(),
-    checkConflicts: jest.fn(),
-    bulkUpdate: jest.fn(),
-    delete: jest.fn(),
-    bulkGet: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-    addToNamespaces: jest.fn(),
-    deleteFromNamespaces: jest.fn(),
-    addToWorkspaces: jest.fn(),
-    deleteFromWorkspaces: jest.fn(),
-  } as unknown) as jest.Mocked<SavedObjectsClientContract>);
+const create = (): jest.Mocked<SavedObjectsClientContract> => ({
+  errors: SavedObjectsErrorHelpers as jest.Mocked<SavedObjectsClientContract>['errors'],
+  create: jest.fn(),
+  bulkCreate: jest.fn(),
+  checkConflicts: jest.fn(),
+  bulkUpdate: jest.fn(),
+  delete: jest.fn(),
+  bulkGet: jest.fn(),
+  find: jest.fn(),
+  get: jest.fn(),
+  update: jest.fn(),
+  addToNamespaces: jest.fn(),
+  deleteFromNamespaces: jest.fn(),
+  addToWorkspaces: jest.fn(),
+  deleteFromWorkspaces: jest.fn(),
+  deleteByWorkspace: jest.fn(),
+});
 
 export const savedObjectsClientMock = { create };

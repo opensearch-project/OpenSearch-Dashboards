@@ -1,0 +1,2 @@
+refactor:
+- [Workspace] Update default OSD admin config permission and support wildcard. ([#8617](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8617))

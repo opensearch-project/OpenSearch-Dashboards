@@ -7,14 +7,14 @@ import React, { useState } from 'react';
 import {
   BaseDataset,
   DATA_STRUCTURE_META_TYPES,
-  Dataset,
   DataStructure,
   DEFAULT_DATA,
+  Query,
 } from '../../../common';
-import { DatasetExplorer } from './dataset_explorer';
-import { Configurator } from './configurator';
 import { getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
+import { Configurator } from './configurator';
+import { DatasetExplorer } from './dataset_explorer';
 
 export const AdvancedSelector = ({
   services,
@@ -22,7 +22,7 @@ export const AdvancedSelector = ({
   onCancel,
 }: {
   services: IDataPluginServices;
-  onSelect: (dataset: Dataset) => void;
+  onSelect: (query: Partial<Query>) => void;
   onCancel: () => void;
 }) => {
   const queryString = getQueryService().queryString;
@@ -52,6 +52,7 @@ export const AdvancedSelector = ({
 
   return selectedDataset ? (
     <Configurator
+      services={services}
       baseDataset={selectedDataset}
       onConfirm={onSelect}
       onCancel={onCancel}

@@ -1,0 +1,2 @@
+fix:
+- Generate short url with workspace info ([#8719](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8719))
