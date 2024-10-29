@@ -42,6 +42,7 @@ import {
   getRenderAccelerationDetailsFlyout,
   getRenderCreateAccelerationFlyout,
 } from '../../../plugin';
+import { getUiSettings } from '../../utils';
 
 interface AccelerationTableProps {
   dataSourceName: string;
@@ -206,11 +207,18 @@ export const AccelerationTable = ({
   const tableActions = [
     {
       name: 'Query Data',
-      description: 'Query in Observability Logs',
+      description: 'Query in Discover',
       icon: 'discoverApp',
       type: 'icon',
       onClick: (acc: CachedAcceleration) => {
-        onDiscoverIconClick(acc, dataSourceName, application);
+        onDiscoverIconClick(acc, dataSourceName, dataSourceMDSId, application);
+      },
+      enabled: () => {
+        try {
+          return getUiSettings().get('query:enhancements:enabled');
+        } catch (e) {
+          return false;
+        }
       },
     },
     {

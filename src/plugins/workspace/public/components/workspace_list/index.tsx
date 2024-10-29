@@ -22,29 +22,35 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  Query,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, of } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { isString } from 'lodash';
 import { startCase } from 'lodash';
-import {
-  DEFAULT_NAV_GROUPS,
-  WorkspaceAttribute,
-  WorkspaceAttributeWithPermission,
-} from '../../../../../core/public';
+import { useLocation } from 'react-router-dom';
+import { WorkspaceAttribute, WorkspaceAttributeWithPermission } from '../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
-import { navigateToWorkspaceDetail } from '../utils/workspace';
-import { DetailTab } from '../workspace_form/constants';
+import { navigateToAppWithinWorkspace } from '../utils/workspace';
 
-import { DEFAULT_WORKSPACE, WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
+import {
+  DEFAULT_WORKSPACE,
+  WORKSPACE_CREATE_APP_ID,
+  WORKSPACE_DETAIL_APP_ID,
+} from '../../../common/constants';
 
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
-import { getFirstUseCaseOfFeatureConfigs, getDataSourcesList } from '../../utils';
+import {
+  getDataSourcesList,
+  extractUseCaseTitleFromFeatures,
+  getFirstUseCaseOfFeatureConfigs,
+  getUseCaseUrl,
+} from '../../utils';
 import { WorkspaceUseCase } from '../../types';
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
-import { WorkspacePermissionMode } from '../../../common/constants';
 import { DataSourceAttributesWithWorkspaces } from '../../types';
+import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 
 export interface WorkspaceListProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -112,25 +118,11 @@ export const WorkspaceListInner = ({
   const [allDataSources, setAllDataSources] = useState<DataSourceAttributesWithWorkspaces[]>([]);
   //  default workspace state
   const [defaultWorkspaceId, setDefaultWorkspaceId] = useState<string | undefined>(undefined);
+  const [query, setQuery] = useState<EuiSearchBarProps['query'] | undefined>(undefined);
+
+  const location = useLocation();
 
   const dateFormat = uiSettings?.get('dateFormat');
-
-  const extractUseCaseFromFeatures = useCallback(
-    (features: string[]) => {
-      if (!features || features.length === 0) {
-        return '';
-      }
-      const useCaseId = getFirstUseCaseOfFeatureConfigs(features);
-      const usecase =
-        useCaseId === DEFAULT_NAV_GROUPS.all.id
-          ? DEFAULT_NAV_GROUPS.all
-          : registeredUseCases?.find(({ id }) => id === useCaseId);
-      if (usecase) {
-        return usecase.title;
-      }
-    },
-    [registeredUseCases]
-  );
 
   useEffect(() => {
     setDefaultWorkspaceId(uiSettings?.get(DEFAULT_WORKSPACE));
@@ -149,12 +141,33 @@ export const WorkspaceListInner = ({
           .map((ds) => ds.title as string);
         return {
           ...workspace,
-          useCase: extractUseCaseFromFeatures(workspace.features ?? []),
+          useCase: extractUseCaseTitleFromFeatures(
+            registeredUseCases ?? [],
+            workspace.features ?? []
+          ),
           dataSources: associatedDataSourcesTitles,
         };
       }
     );
-  }, [workspaceList, extractUseCaseFromFeatures, allDataSources]);
+  }, [workspaceList, allDataSources, registeredUseCases]);
+
+  const useCaseFilterOptions = useMemo(() => {
+    return Array.from(new Set(newWorkspaceList.map(({ useCase }) => useCase).filter(Boolean))).map(
+      (useCase) => ({
+        value: useCase!,
+        name: useCase!,
+      })
+    );
+  }, [newWorkspaceList]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const useCase = params.get('useCase');
+    if (useCase && useCaseFilterOptions.find((item) => item.value === useCase)) {
+      setQuery((Query.parse(`useCase:"${useCase}"`) as unknown) as EuiSearchBarProps['query']);
+    }
+  }, [location.search, useCaseFilterOptions]);
+
   const workspaceCreateUrl = useMemo(() => {
     if (!application) {
       return '';
@@ -228,12 +241,23 @@ export const WorkspaceListInner = ({
   };
 
   const handleSwitchWorkspace = useCallback(
-    (id: string, tab?: DetailTab) => {
+    (workspaceId: string, appId: string) => {
       if (application && http) {
-        navigateToWorkspaceDetail({ application, http }, id, tab);
+        navigateToAppWithinWorkspace({ application, http }, workspaceId, appId);
       }
     },
     [application, http]
+  );
+
+  const getItemUseCaseUrl = useCallback(
+    (item: WorkspaceAttributeWithPermission) => {
+      if (application && http) {
+        const useCaseId = getFirstUseCaseOfFeatureConfigs(item?.features || []);
+        const itemUseCase = registeredUseCases?.find((useCase) => useCase.id === useCaseId);
+        return getUseCaseUrl(itemUseCase, item.id, application, http);
+      }
+    },
+    [application, http, registeredUseCases]
   );
 
   const handleSetDefaultWorkspace = useCallback(
@@ -263,9 +287,11 @@ export const WorkspaceListInner = ({
   const renderDataWithMoreBadge = (
     data: string[],
     maxDisplayedAmount: number,
-    workspaceId: string,
-    tab: DetailTab
+    workspaceId: string
   ) => {
+    if (!application || !http) {
+      return null;
+    }
     const amount = data.length;
     const mostDisplayedTitles = data.slice(0, maxDisplayedAmount).join(',');
     return amount <= maxDisplayedAmount ? (
@@ -277,11 +303,13 @@ export const WorkspaceListInner = ({
           color="hollow"
           iconType="popout"
           iconSide="right"
-          onClick={() => handleSwitchWorkspace(workspaceId, tab)}
-          iconOnClick={() => handleSwitchWorkspace(workspaceId, tab)}
-          iconOnClickAriaLabel="Open workspace detail"
-          onClickAriaLabel="Open workspace detail"
-          data-test-subj={`workspaceList-more-${tab}-badge`}
+          data-test-subj={`workspaceList-more-${workspaceId}-badge`}
+          href={formatUrlWithWorkspaceId(
+            application.getUrlForApp('dataSources', { absolute: false }),
+            workspaceId,
+            http.basePath
+          )}
+          target="_blank"
         >
           + {amount - maxDisplayedAmount} more
         </EuiBadge>
@@ -317,17 +345,19 @@ export const WorkspaceListInner = ({
     };
 
     return (
-      <>
-        <EuiButton color="danger" iconType="trash" onClick={onClick}>
-          Delete {selection.length} Workspace
-        </EuiButton>
-        {deletedWorkspaces && deletedWorkspaces.length > 0 && (
-          <DeleteWorkspaceModal
-            selectedWorkspaces={deletedWorkspaces}
-            onClose={() => setDeletedWorkspaces([])}
-          />
-        )}
-      </>
+      isDashboardAdmin && (
+        <>
+          <EuiButton color="danger" iconType="trash" onClick={onClick} size="s">
+            Delete {selection.length} Workspace
+          </EuiButton>
+          {deletedWorkspaces && deletedWorkspaces.length > 0 && (
+            <DeleteWorkspaceModal
+              selectedWorkspaces={deletedWorkspaces}
+              onClose={() => setDeletedWorkspaces([])}
+            />
+          )}
+        </>
+      )
     );
   };
 
@@ -339,18 +369,17 @@ export const WorkspaceListInner = ({
     box: {
       incremental: true,
     },
+    query,
+    compressed: true,
+    onChange: (args) => setQuery((args.query as unknown) as EuiSearchBarProps['query']),
     filters: [
       {
         type: 'field_value_selection',
         field: 'useCase',
         name: 'Use Case',
         multiSelect: false,
-        options: Array.from(
-          new Set(newWorkspaceList.map(({ useCase }) => useCase).filter(Boolean))
-        ).map((useCase) => ({
-          value: useCase!,
-          name: useCase!,
-        })),
+        options: useCaseFilterOptions,
+        compressed: true,
       },
     ],
     toolsLeft: renderToolsLeft(),
@@ -364,7 +393,7 @@ export const WorkspaceListInner = ({
       sortable: true,
       render: (name: string, item: WorkspaceAttributeWithPermission) => (
         <span>
-          <EuiLink onClick={() => handleSwitchWorkspace(item.id)}>
+          <EuiLink href={getItemUseCaseUrl(item)}>
             <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiFlexItem>
                 <EuiText size="s">{name}</EuiText>
@@ -395,7 +424,7 @@ export const WorkspaceListInner = ({
       name: i18n.translate('workspace.list.columns.description.title', {
         defaultMessage: 'Description',
       }),
-      width: '15%',
+      width: '18%',
       render: (description: string) => (
         <EuiToolTip
           position="bottom"
@@ -408,18 +437,6 @@ export const WorkspaceListInner = ({
           </EuiText>
         </EuiToolTip>
       ),
-    },
-    {
-      field: 'permissions',
-      name: i18n.translate('workspace.list.columns.owners.title', { defaultMessage: 'Owners' }),
-      width: '15%',
-      render: (
-        permissions: WorkspaceAttributeWithPermission['permissions'],
-        item: WorkspaceAttributeWithPermission
-      ) => {
-        const owners = permissions?.[WorkspacePermissionMode.Write]?.users ?? [];
-        return renderDataWithMoreBadge(owners, 1, item.id, DetailTab.Collaborators);
-      },
     },
     {
       field: 'permissionMode',
@@ -449,7 +466,7 @@ export const WorkspaceListInner = ({
       name: i18n.translate('workspace.list.columns.lastUpdated.title', {
         defaultMessage: 'Last updated',
       }),
-      width: '15%',
+      width: '18%',
       truncateText: false,
       render: (lastUpdatedTime: string) => {
         return moment(lastUpdatedTime).format(dateFormat);
@@ -457,12 +474,12 @@ export const WorkspaceListInner = ({
     },
     {
       field: 'dataSources',
-      width: '15%',
+      width: '18%',
       name: i18n.translate('workspace.list.columns.dataSources.title', {
         defaultMessage: 'Data sources',
       }),
       render: (dataSources: string[], item: WorkspaceAttributeWithPermission) => {
-        return renderDataWithMoreBadge(dataSources, 2, item.id, DetailTab.DataSources);
+        return renderDataWithMoreBadge(dataSources, 2, item.id);
       },
     },
   ];
@@ -493,7 +510,7 @@ export const WorkspaceListInner = ({
         defaultMessage: 'Edit workspace',
       }),
       'data-test-subj': 'workspace-list-edit-icon',
-      onClick: ({ id }: WorkspaceAttribute) => handleSwitchWorkspace(id),
+      onClick: ({ id }: WorkspaceAttribute) => handleSwitchWorkspace(id, WORKSPACE_DETAIL_APP_ID),
     },
     {
       name: (
@@ -601,9 +618,9 @@ export const WorkspaceListInner = ({
           direction: initialSortDirection,
         },
       }}
-      isSelectable={selectable}
+      isSelectable={selectable && !!isDashboardAdmin}
       search={searchable ? search : undefined}
-      selection={selectable ? selectionValue : undefined}
+      selection={selectable && !!isDashboardAdmin ? selectionValue : undefined}
     />
   );
 

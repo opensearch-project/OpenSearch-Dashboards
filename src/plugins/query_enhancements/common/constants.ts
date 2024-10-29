@@ -29,9 +29,8 @@ export const API = {
     GENERATE: `${BASE_API}/assist/generate`,
   },
   DATA_SOURCE: {
-    EXTERNAL: `${BASE_API}/datasource/external`,
-    ASYNC_JOBS: `${BASE_API}/datasource/jobs`,
-    CONNECTIONS: `${BASE_API}/datasource/connections`,
+    ASYNC_JOBS: `${BASE_API}/jobs`,
+    CONNECTIONS: `${BASE_API}/connections`,
   },
 };
 
@@ -55,3 +54,5 @@ export const UI_SETTINGS = {
 };
 
 export const ERROR_DETAILS = { GUARDRAILS_TRIGGERED: 'guardrails triggered' };
+
+export const S3_PARTITION_INFO_COLUMN = '# Partition Information';

@@ -38,6 +38,16 @@ jest.mock('../../utils', () => {
   };
 });
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({
+    search: '',
+    pathname: '',
+    hash: '',
+    state: undefined,
+  }),
+}));
+
 function getWrapUserDefaultWorkspaceList(
   workspaceList = [
     {
@@ -137,7 +147,7 @@ describe('UserDefaultWorkspace', () => {
     expect(getByText('name2')).toBeInTheDocument();
 
     // should display use case
-    expect(getByText('Analytics (All)')).toBeInTheDocument();
+    expect(getByText('Analytics')).toBeInTheDocument();
     expect(getByText('Observability')).toBeInTheDocument();
 
     // owner column not display

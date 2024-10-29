@@ -6,6 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { HttpSetup } from 'opensearch-dashboards/public';
 import React, { useEffect, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 import { DATA_STRUCTURE_META_TYPES, DEFAULT_DATA } from '../../../../data/common';
 import {
@@ -15,8 +16,16 @@ import {
 } from '../../../../data/public';
 import { API } from '../../../common';
 import { ConfigSchema } from '../../../common/config';
-import assistantMark from '../../assets/query_assist_mark.svg';
-import { QueryAssistBanner, QueryAssistBar } from '../components';
+import assistantMark from '../../assets/sparkle_mark.svg';
+import {
+  QueryAssistBanner,
+  QueryAssistBar,
+  QueryAssistSummary,
+  QueryAssistButton,
+} from '../components';
+import { UsageCollectionSetup } from '../../../../usage_collection/public';
+import { QueryAssistContext } from '../hooks/use_query_assist';
+import { CoreSetup } from '../../../../../core/public';
 
 const [getAvailableLanguagesForDataSource, clearCache] = (() => {
   const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
@@ -77,10 +86,14 @@ const getAvailableLanguages$ = (http: HttpSetup, data: DataPublicPluginSetup) =>
   );
 
 export const createQueryAssistExtension = (
-  http: HttpSetup,
+  core: CoreSetup,
   data: DataPublicPluginSetup,
-  config: ConfigSchema['queryAssist']
+  config: ConfigSchema['queryAssist'],
+  usageCollection?: UsageCollectionSetup
 ): QueryEditorExtensionConfig => {
+  const http: HttpSetup = core.http;
+  const isQueryAssistCollapsed$ = new BehaviorSubject<boolean>(false);
+  const question$ = new BehaviorSubject('');
   return {
     id: 'query-assist',
     order: 1000,
@@ -92,7 +105,7 @@ export const createQueryAssistExtension = (
         return {
           type: DATA_STRUCTURE_META_TYPES.FEATURE,
           icon: { type: assistantMark },
-          tooltip: i18n.translate('queryAssist.meta.icon.tooltip', {
+          tooltip: i18n.translate('queryEnhancements.meta.icon.tooltip', {
             defaultMessage: 'Query assist is available',
           }),
         };
@@ -103,8 +116,23 @@ export const createQueryAssistExtension = (
     getComponent: (dependencies) => {
       // only show the component if user is on a supported language.
       return (
-        <QueryAssistWrapper dependencies={dependencies} http={http} data={data}>
+        <QueryAssistWrapper
+          dependencies={dependencies}
+          http={http}
+          data={data}
+          isQueryAssistCollapsed$={isQueryAssistCollapsed$}
+          question$={question$}
+        >
           <QueryAssistBar dependencies={dependencies} />
+          {config.summary.enabled && (
+            <QueryAssistSummary
+              data={data}
+              http={http}
+              usageCollection={usageCollection}
+              dependencies={dependencies}
+              core={core}
+            />
+          )}
         </QueryAssistWrapper>
       );
     },
@@ -119,6 +147,18 @@ export const createQueryAssistExtension = (
         </QueryAssistWrapper>
       );
     },
+    getSearchBarButton: (dependencies) => {
+      return (
+        <QueryAssistWrapper
+          dependencies={dependencies}
+          http={http}
+          data={data}
+          isQueryAssistCollapsed$={isQueryAssistCollapsed$}
+        >
+          <QueryAssistButton dependencies={dependencies} />
+        </QueryAssistWrapper>
+      );
+    },
   };
 };
 
@@ -127,10 +167,37 @@ interface QueryAssistWrapperProps {
   http: HttpSetup;
   data: DataPublicPluginSetup;
   invert?: boolean;
+  isQueryAssistCollapsed$?: BehaviorSubject<boolean>;
+  question$?: BehaviorSubject<string>;
 }
 
 const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
   const [visible, setVisible] = useState(false);
+  const [question, setQuestion] = useState('');
+  const [isQueryAssistCollapsed, setIsQueryAssistCollapsed] = useState(true);
+  const updateQuestion = (newQuestion: string) => {
+    props.question$?.next(newQuestion);
+  };
+  const question$ = props.question$;
+
+  const updateIsQueryAssistCollapsed = (isCollapsed: boolean) => {
+    props.isQueryAssistCollapsed$?.next(isCollapsed);
+  };
+
+  useEffect(() => {
+    const subscription = props.isQueryAssistCollapsed$?.subscribe((isCollapsed) => {
+      setIsQueryAssistCollapsed(isCollapsed);
+    });
+    const questionSubscription = props.question$?.subscribe((newQuestion) => {
+      setQuestion(newQuestion);
+    });
+
+    return () => {
+      questionSubscription?.unsubscribe();
+      subscription?.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -147,5 +214,19 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
   }, [props]);
 
   if (!visible) return null;
-  return <>{props.children}</>;
+  return (
+    <>
+      <QueryAssistContext.Provider
+        value={{
+          question,
+          question$,
+          updateQuestion,
+          isQueryAssistCollapsed,
+          updateIsQueryAssistCollapsed,
+        }}
+      >
+        {props.children}
+      </QueryAssistContext.Provider>
+    </>
+  );
 };

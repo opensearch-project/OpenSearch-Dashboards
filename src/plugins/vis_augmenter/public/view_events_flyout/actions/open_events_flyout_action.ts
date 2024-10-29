@@ -32,7 +32,7 @@ export class OpenEventsFlyoutAction implements Action<AugmentVisContext> {
   }
 
   public getDisplayName() {
-    return i18n.translate('dashboard.actions.viewEvents.displayName', {
+    return i18n.translate('visAugmenter.actions.viewEvents.displayName', {
       defaultMessage: 'View Events',
     });
   }

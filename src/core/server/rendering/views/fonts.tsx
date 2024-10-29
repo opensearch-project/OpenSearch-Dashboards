@@ -126,36 +126,6 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
       },
     ],
   };
-  const firaCode: FontFace = {
-    family: 'Fira Code',
-    variants: [
-      {
-        weight: 300,
-        style: 'normal',
-        sources: [`${url}/fonts/fira_code/static/FiraCode-Light.woff2`],
-      },
-      {
-        weight: 400,
-        style: 'normal',
-        sources: [`${url}/fonts/fira_code/static/FiraCode-Regular.woff2`],
-      },
-      {
-        weight: 500,
-        style: 'normal',
-        sources: [`${url}/fonts/fira_code/static/FiraCode-Medium.woff2`],
-      },
-      {
-        weight: 600,
-        style: 'normal',
-        sources: [`${url}/fonts/fira_code/static/FiraCode-SemiBold.woff2`],
-      },
-      {
-        weight: 700,
-        style: 'normal',
-        sources: [`${url}/fonts/fira_code/static/FiraCode-Bold.woff2`],
-      },
-    ],
-  };
 
   // For next theme
   const sourceSans3: FontFace = {
@@ -638,7 +608,7 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
       url('${url}/fonts/inter_ui/Inter-UI-italic.var.woff2') format('woff2');
   }
   */
-  const fontsDefinitionRules = [interUi, sourceSans3, roboto, sourceCodePro, rubik, firaCode]
+  const fontsDefinitionRules = [interUi, sourceSans3, roboto, sourceCodePro, rubik]
     .flatMap(({ family, variants }) =>
       variants.map(({ style, weight, format, sources, unicodeRange }) => {
         const src = sources

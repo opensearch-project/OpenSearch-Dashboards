@@ -17,7 +17,6 @@ import {
   EuiComboBox,
   EuiFormRow,
   EuiCheckbox,
-  EuiText,
 } from '@elastic/eui';
 import { HttpSetup, NotificationsStart, WorkspacesStart } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
@@ -36,6 +35,7 @@ export interface ShowDuplicateModalProps {
   notifications: NotificationsStart;
   selectedSavedObjects: DuplicateObject[];
   onClose: () => void;
+  useUpdatedUX?: boolean;
 }
 
 interface State {
@@ -128,10 +128,11 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.duplicateModal.title"
-              defaultMessage="Copy {objectCount, plural, =1 {{objectName}} other {# objects}} to another workspace?"
+              defaultMessage="Copy {objectCount, plural, =1 {{objectName}} other {# {useUpdatedUX, select, true {assets} other {objects}}}} to another workspace?"
               values={{
-                objectName: allSelectedObjects[0].meta.title,
+                objectName: allSelectedObjects[0]?.meta.title,
                 objectCount: allSelectedObjects.length,
+                useUpdatedUX: this.props.useUpdatedUX,
               }}
             />
           </EuiModalHeaderTitle>
@@ -142,21 +143,10 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
             fullWidth
             label={i18n.translate(
               'savedObjectsManagement.objectsTable.duplicateModal.targetWorkspaceLabel',
-              { defaultMessage: 'Workspace' }
+              { defaultMessage: 'Target workspace' }
             )}
           >
             <>
-              <EuiText size="s" color="subdued">
-                {i18n.translate(
-                  'savedObjectsManagement.objectsTable.duplicateModal.targetWorkspaceNotice',
-                  {
-                    defaultMessage: `Move copied saved  object${
-                      allSelectedObjects.length > 1 ? `s` : ``
-                    } to the selected workspace.`,
-                  }
-                )}
-              </EuiText>
-              <EuiSpacer size="s" />
               <EuiComboBox
                 options={workspaceOptions}
                 onChange={this.onTargetWorkspaceChange}
@@ -175,7 +165,13 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
             fullWidth
             label={i18n.translate(
               'savedObjectsManagement.objectsTable.duplicateModal.relatedObjects',
-              { defaultMessage: 'Copy related objects' }
+              {
+                defaultMessage:
+                  'Copy related {useUpdatedUX, select, true {assets} other {objects}}',
+                values: {
+                  useUpdatedUX: this.props.useUpdatedUX,
+                },
+              }
             )}
           >
             <>
@@ -186,7 +182,10 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
                   'savedObjectsManagement.objectsTable.duplicateModal.includeReferencesDeepLabel',
                   {
                     defaultMessage:
-                      'Copy the selected object and any related objects (recommended).',
+                      'Copy the selected {useUpdatedUX, select, true {asset} other {object}} and any related {useUpdatedUX, select, true {assets} other {objects}} (recommended).',
+                    values: {
+                      useUpdatedUX: this.props.useUpdatedUX,
+                    },
                   }
                 )}
                 checked={isIncludeReferencesDeepChecked}

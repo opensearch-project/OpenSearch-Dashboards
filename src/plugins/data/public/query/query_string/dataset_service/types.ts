@@ -7,6 +7,16 @@ import { Dataset, DatasetField, DatasetSearchOptions, DataStructure } from '../.
 import { IDataPluginServices } from '../../../types';
 
 /**
+ * Options for fetching the data structure.
+ */
+export interface DataStructureFetchOptions {
+  /** Search string to filter results */
+  search?: string;
+  /** Token for paginated results */
+  paginationToken?: string;
+}
+
+/**
  * Configuration for handling dataset operations.
  */
 export interface DatasetTypeConfig {
@@ -20,6 +30,12 @@ export interface DatasetTypeConfig {
     icon: EuiIconProps;
     /** Optional tooltip text */
     tooltip?: string;
+    /** Optional preference for search on page load else defaulted to true */
+    searchOnLoad?: boolean;
+    /** Optional supportsTimeFilter determines if a time filter is needed */
+    supportsTimeFilter?: boolean;
+    /** Optional isFieldLoadAsync determines if field loads are async */
+    isFieldLoadAsync?: boolean;
   };
   /**
    * Converts a DataStructure to a Dataset.
@@ -28,17 +44,25 @@ export interface DatasetTypeConfig {
    */
   toDataset: (path: DataStructure[]) => Dataset;
   /**
-   * Fetches child options for a given DataStructure.
+   * Fetches child data structures and populates corresponding properties for a given DataStructure.
    * @param {IDataPluginServices} services - The data plugin services.
    * @param {DataStructure} dataStructure - The parent DataStructure.
-   * @returns {Promise<DatasetHandlerFetchResponse>} A promise that resolves to a DatasetHandlerFetchResponse.
+   * @param {DataStructureFetchOptions} options - The fetch options for pagination and search.
+   * @returns {Promise<DataStructure>} A promise that resolves to the updated DataStructure.
    */
-  fetch: (services: IDataPluginServices, path: DataStructure[]) => Promise<DataStructure>;
+  fetch: (
+    services: IDataPluginServices,
+    path: DataStructure[],
+    options?: DataStructureFetchOptions
+  ) => Promise<DataStructure>;
   /**
    * Fetches fields for the dataset.
    * @returns {Promise<DatasetField[]>} A promise that resolves to an array of DatasetFields.
    */
-  fetchFields: (dataset: Dataset) => Promise<DatasetField[]>;
+  fetchFields: (
+    dataset: Dataset,
+    services?: Partial<IDataPluginServices>
+  ) => Promise<DatasetField[]>;
   /**
    * Retrieves the supported query languages for this dataset type.
    * @returns {Promise<string[]>} A promise that resolves to an array of supported language ids.
@@ -49,4 +73,13 @@ export interface DatasetTypeConfig {
    * with this Dataset
    */
   getSearchOptions?: () => DatasetSearchOptions;
+  /**
+   * Combines a list of user selected data structures into a single one to use in discover.
+   * @see https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8362.
+   */
+  combineDataStructures?: (dataStructures: DataStructure[]) => DataStructure | undefined;
+  /**
+   * Returns a list of sample queries for this dataset type
+   */
+  getSampleQueries?: (dataset: Dataset, language: string) => any;
 }

@@ -50,14 +50,40 @@ import { ManagementOverViewPluginSetup } from '../../management_overview/public'
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { DevToolsIcon } from './dev_tools_icon';
 import { WorkspaceAvailability } from '../../../core/public';
+import { searchForDevTools } from './global_search/search_devtool_command';
+import { Trigger, UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
+
+export const DEVTOOL_OPEN_ACTION = 'DEVTOOL_OPEN_ACTION';
+export const DEVTOOL_TRIGGER_ID = 'DEVTOOL_TRIGGER_ID';
+export const devToolsTrigger: Trigger = {
+  id: DEVTOOL_TRIGGER_ID,
+};
+
+export interface DevToolsContext {
+  defaultRoute: string;
+}
+
+declare module '../../ui_actions/public' {
+  export interface TriggerContextMapping {
+    [DEVTOOL_TRIGGER_ID]: {};
+  }
+
+  export interface ActionContextMapping {
+    [DEVTOOL_OPEN_ACTION]: DevToolsContext;
+  }
+}
 
 export interface DevToolsSetupDependencies {
   urlForwarding: UrlForwardingSetup;
+  uiActions: UiActionsSetup;
   dataSource?: DataSourcePluginSetup;
   dataSourceManagement?: DataSourceManagementPluginSetup;
   managementOverview?: ManagementOverViewPluginSetup;
 }
 
+export interface DevToolsStartDependencies {
+  uiActions: UiActionsStart;
+}
 export interface DevToolsSetup {
   /**
    * Register a developer tool. It will be available
@@ -75,9 +101,15 @@ export interface DevToolsSetup {
 export class DevToolsPlugin implements Plugin<DevToolsSetup> {
   private readonly devTools = new Map<string, DevToolApp>();
   private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private setupDeps: DevToolsSetupDependencies | undefined;
+  private uiActionsStart: UiActionsStart | undefined;
 
   private getSortedDevTools(): readonly DevToolApp[] {
     return sortBy([...this.devTools.values()], 'order');
+  }
+
+  private getUiActionsStart(): UiActionsStart {
+    return this.uiActionsStart!;
   }
 
   private title = i18n.translate('devTools.devToolsTitle', {
@@ -88,7 +120,8 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
 
   public setup(coreSetup: CoreSetup, deps: DevToolsSetupDependencies) {
     const { application: applicationSetup, getStartServices } = coreSetup;
-    const { urlForwarding, managementOverview } = deps;
+    const { urlForwarding, managementOverview, uiActions } = deps;
+    this.setupDeps = deps;
 
     applicationSetup.register({
       id: this.id,
@@ -122,6 +155,25 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
 
     urlForwarding.forwardApp('dev_tools', 'dev_tools');
 
+    if (coreSetup.chrome.navGroup.getNavGroupEnabled()) {
+      /**
+       * register search strategy for dev tools
+       */
+      coreSetup.chrome.globalSearch.registerSearchCommand({
+        id: 'devtools',
+        type: 'PAGES',
+        run: async (query: string, callback?: () => void) =>
+          searchForDevTools(query, {
+            devTools: this.getSortedDevTools.bind(this),
+            title: this.title,
+            uiActionsApi: this.getUiActionsStart.bind(this),
+            callback,
+          }),
+      });
+
+      uiActions.registerTrigger(devToolsTrigger);
+    }
+
     return {
       register: (devToolArgs: CreateDevToolArgs) => {
         if (this.devTools.has(devToolArgs.id)) {
@@ -137,7 +189,8 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { uiActions }: DevToolsStartDependencies) {
+    this.uiActionsStart = uiActions;
     if (core.chrome.navGroup.getNavGroupEnabled()) {
       core.chrome.navControls.registerLeftBottom({
         order: 4,
@@ -145,6 +198,9 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
           React.createElement(DevToolsIcon, {
             core,
             appId: this.id,
+            devTools: this.getSortedDevTools(),
+            deps: this.setupDeps as DevToolsSetupDependencies,
+            title: this.title,
           })
         ),
       });

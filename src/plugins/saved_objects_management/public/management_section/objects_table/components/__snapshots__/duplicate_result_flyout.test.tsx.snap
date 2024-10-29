@@ -142,9 +142,13 @@ HTMLCollection [
           <div
             class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
           >
-            <span>
-              Copy saved objects to targetWorkspace
-            </span>
+            <h2
+              class="euiTitle euiTitle--small"
+            >
+              <span>
+                Copy saved objects to targetWorkspace
+              </span>
+            </h2>
           </div>
           <div
             class="euiFlyoutBody"
@@ -172,6 +176,26 @@ HTMLCollection [
                 />
               </div>
             </div>
+          </div>
+          <div
+            class="euiFlyoutFooter"
+          >
+            <button
+              class="euiButton euiButton--primary euiButton--small"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text"
+                >
+                  <span>
+                    Close
+                  </span>
+                </span>
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -322,9 +346,13 @@ HTMLCollection [
           <div
             class="euiFlyoutHeader euiFlyoutHeader--hasBorder"
           >
-            <span>
-              Copy saved objects to targetWorkspace
-            </span>
+            <h2
+              class="euiTitle euiTitle--small"
+            >
+              <span>
+                Copy saved objects to targetWorkspace
+              </span>
+            </h2>
           </div>
           <div
             class="euiFlyoutBody"
@@ -354,7 +382,7 @@ HTMLCollection [
                     class="euiFlexItem euiFlexItem--flexGrowZero"
                   >
                     <h4
-                      class="euiTitle euiTitle--xsmall savedObjectsManagementImportSummary__copiedCountCount"
+                      class="euiTitle euiTitle--xsmall savedObjectsManagementImportSummary__createdCount"
                     >
                       <span>
                         2 Successful
@@ -570,6 +598,26 @@ HTMLCollection [
                 </div>
               </div>
             </div>
+          </div>
+          <div
+            class="euiFlyoutFooter"
+          >
+            <button
+              class="euiButton euiButton--primary euiButton--small"
+              type="button"
+            >
+              <span
+                class="euiButtonContent euiButton__content"
+              >
+                <span
+                  class="euiButton__text"
+                >
+                  <span>
+                    Close
+                  </span>
+                </span>
+              </span>
+            </button>
           </div>
         </div>
       </div>

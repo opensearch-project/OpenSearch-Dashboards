@@ -51,7 +51,11 @@ import {
 import { getTutorials } from '../load_tutorials';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import { DataSourceSelector } from '../../../../data_source_management/public';
+import { DataSourceSelector, DataSourceMenu } from '../../../../data_source_management/public';
+import {
+  MountPointPortal,
+  withOpenSearchDashboards,
+} from '../../../../opensearch_dashboards_react/public';
 
 const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
@@ -59,6 +63,9 @@ const SAMPLE_DATA_TAB_ID = 'sampleData';
 const homeTitle = i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
 const addDataTitle = i18n.translate('home.breadcrumbs.addDataTitle', {
   defaultMessage: 'Add data',
+});
+const sampleDataTitle = i18n.translate('home.breadcrumbs.sampleDataTitle', {
+  defaultMessage: 'Sample data',
 });
 
 class TutorialDirectoryUi extends React.Component {
@@ -84,6 +91,7 @@ class TutorialDirectoryUi extends React.Component {
       notices: getServices().tutorialService.getDirectoryNotices(),
       isDataSourceEnabled: !!getServices().dataSource,
       isLocalClusterHidden: getServices().dataSource?.hideLocalCluster ?? false,
+      useUpdatedUX: getServices().uiSettings.get('home:useNewHomePage'),
     };
   }
 
@@ -95,7 +103,7 @@ class TutorialDirectoryUi extends React.Component {
     this._isMounted = true;
     const { chrome } = getServices();
     const { withoutHomeBreadCrumb } = this.props;
-    const breadcrumbs = [{ text: addDataTitle }];
+    const breadcrumbs = [{ text: this.state.useUpdatedUX ? sampleDataTitle : addDataTitle }];
     if (!withoutHomeBreadCrumb) {
       breadcrumbs.splice(0, 0, {
         text: homeTitle,
@@ -190,6 +198,7 @@ class TutorialDirectoryUi extends React.Component {
           dataSourceId={this.state.selectedDataSourceId}
           isDataSourceEnabled={this.state.isDataSourceEnabled}
           isLocalClusterHidden={this.state.isLocalClusterHidden}
+          useUpdatedUX={this.state.useUpdatedUX}
         />
       );
     }
@@ -229,21 +238,45 @@ class TutorialDirectoryUi extends React.Component {
   };
 
   renderDataSourceSelector = () => {
-    const { isDataSourceEnabled, isLocalClusterHidden } = this.state;
+    const { isDataSourceEnabled, isLocalClusterHidden, useUpdatedUX } = this.state;
+    const { toastNotifications, savedObjectsClient, application, uiSettings } = getServices();
 
-    return isDataSourceEnabled ? (
+    if (!isDataSourceEnabled) {
+      return null;
+    }
+
+    if (useUpdatedUX) {
+      return (
+        <MountPointPortal
+          setMountPoint={this.props.opensearchDashboards.services.setHeaderActionMenu}
+        >
+          <DataSourceMenu
+            componentType="DataSourceSelectable"
+            componentConfig={{
+              notifications: toastNotifications,
+              savedObjects: savedObjectsClient,
+              onSelectedDataSources: this.onSelectedDataSourceChange,
+            }}
+            application={application}
+            hideLocalCluster={isLocalClusterHidden}
+            uiSettings={uiSettings}
+          />
+        </MountPointPortal>
+      );
+    }
+    return (
       <div className="sampleDataSourceSelector">
         <DataSourceSelector
-          savedObjectsClient={getServices().savedObjectsClient}
-          notifications={getServices().toastNotifications}
+          savedObjectsClient={savedObjectsClient}
+          notifications={toastNotifications}
           onSelectedDataSource={this.onSelectedDataSourceChange}
           disabled={!isDataSourceEnabled}
           hideLocalCluster={isLocalClusterHidden}
-          uiSettings={getServices().uiSettings}
+          uiSettings={uiSettings}
           compressed={true}
         />
       </div>
-    ) : null;
+    );
   };
 
   renderNotices = () => {
@@ -275,6 +308,28 @@ class TutorialDirectoryUi extends React.Component {
   renderHeader = () => {
     const notices = this.renderNotices();
     const headerLinks = this.renderHeaderLinks();
+    const { application } = getServices();
+    const {
+      navigation: {
+        ui: { HeaderControl },
+      },
+    } = this.props.opensearchDashboards.services;
+
+    if (this.state.useUpdatedUX) {
+      return (
+        <HeaderControl
+          controls={[
+            {
+              description: this.props.intl.formatMessage({
+                id: 'home.tutorial.card.sampleDataDescription',
+                defaultMessage: 'Explore sample data, visualizations, and dashboards.',
+              }),
+            },
+          ]}
+          setMountPoint={application.setAppDescriptionControls}
+        />
+      );
+    }
 
     return (
       <>
@@ -297,21 +352,29 @@ class TutorialDirectoryUi extends React.Component {
   };
 
   renderPageBody = () => {
+    const { useUpdatedUX } = this.state;
     return (
       <EuiPageBody component="main">
         {this.renderHeader()}
-        <EuiSpacer size="m" />
+        {!useUpdatedUX && <EuiSpacer size="m" />}
         {this.renderDataSourceSelector()}
         <EuiTabs size="s">{this.renderTabs()}</EuiTabs>
-        <EuiSpacer />
+        <EuiSpacer size={useUpdatedUX ? 's' : undefined} />
         {this.renderTabContent()}
       </EuiPageBody>
     );
   };
 
   render() {
-    const { isDataSourceEnabled } = this.state;
+    const { isDataSourceEnabled, useUpdatedUX } = this.state;
 
+    if (useUpdatedUX) {
+      return (
+        <EuiPage>
+          <EuiPanel paddingSize="m">{this.renderPageBody()}</EuiPanel>
+        </EuiPage>
+      );
+    }
     return isDataSourceEnabled ? (
       <EuiPanel paddingSize={'l'} style={{ width: '70%', margin: '50px auto' }}>
         {this.renderPageBody()}
@@ -327,6 +390,7 @@ TutorialDirectoryUi.propTypes = {
   openTab: PropTypes.string,
   isCloudEnabled: PropTypes.bool.isRequired,
   withoutHomeBreadCrumb: PropTypes.bool,
+  openSearchDashboards: PropTypes.object,
 };
 
-export const TutorialDirectory = injectI18n(TutorialDirectoryUi);
+export const TutorialDirectory = injectI18n(withOpenSearchDashboards(TutorialDirectoryUi));

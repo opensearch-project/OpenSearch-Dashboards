@@ -6,6 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { WorkspacePermissionMode } from '../../../common/constants';
 import { PermissionModeId } from '../../../../../core/public';
+import { WORKSPACE_ACCESS_LEVEL_NAMES } from '../../constants';
 
 export enum WorkspaceOperationType {
   Create = 'create',
@@ -101,24 +102,36 @@ export const detailsColorHelpText = i18n.translate(
   }
 );
 
-export enum DetailTab {
-  Details = 'details',
-  DataSources = 'dataSources',
-  Collaborators = 'collaborators',
-}
-
-export const DetailTabTitles: { [key in DetailTab]: string } = {
-  [DetailTab.Details]: i18n.translate('workspace.detail.tabTitle.details', {
-    defaultMessage: 'Details',
-  }),
-  [DetailTab.DataSources]: i18n.translate('workspace.detail.tabTitle.dataSources', {
-    defaultMessage: 'Data sources',
-  }),
-  [DetailTab.Collaborators]: i18n.translate('workspace.detail.tabTitle.collaborators', {
-    defaultMessage: 'Collaborators',
-  }),
-};
-
 export const PERMISSION_TYPE_LABEL_ID = 'workspace-form-permission-type-label';
 export const PERMISSION_COLLABORATOR_LABEL_ID = 'workspace-form-permission-collaborator-label';
 export const PERMISSION_ACCESS_LEVEL_LABEL_ID = 'workspace-form-permission-access-level-label';
+
+export const permissionModeOptions = [
+  {
+    value: PermissionModeId.Read,
+    inputDisplay: WORKSPACE_ACCESS_LEVEL_NAMES.readOnly,
+  },
+  {
+    value: PermissionModeId.ReadAndWrite,
+    inputDisplay: WORKSPACE_ACCESS_LEVEL_NAMES.readAndWrite,
+  },
+  {
+    value: PermissionModeId.Owner,
+    inputDisplay: WORKSPACE_ACCESS_LEVEL_NAMES.admin,
+  },
+];
+
+export const typeOptions = [
+  {
+    value: WorkspacePermissionItemType.User,
+    inputDisplay: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.user', {
+      defaultMessage: 'User',
+    }),
+  },
+  {
+    value: WorkspacePermissionItemType.Group,
+    inputDisplay: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.group', {
+      defaultMessage: 'Group',
+    }),
+  },
+];

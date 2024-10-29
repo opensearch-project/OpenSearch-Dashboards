@@ -23,6 +23,7 @@ const defaultNavGroups = {
     }),
     order: 1000,
     type: NavGroupType.SYSTEM,
+    icon: 'database',
   },
   settingsAndSetup: {
     id: 'settingsAndSetup',
@@ -34,14 +35,16 @@ const defaultNavGroups = {
     }),
     order: 2000,
     type: NavGroupType.SYSTEM,
+    icon: 'gear',
   },
   all: {
     id: ALL_USE_CASE_ID,
     title: i18n.translate('core.ui.group.all.title', {
-      defaultMessage: 'Analytics (All)',
+      defaultMessage: 'Analytics',
     }),
     description: i18n.translate('core.ui.group.all.description', {
-      defaultMessage: 'This is a use case contains all the features.',
+      defaultMessage:
+        'If you aren’t sure where to start with OpenSearch, or if you have needs that cut across multiple use cases.',
     }),
     order: 3000,
     icon: 'wsAnalytics',
@@ -52,7 +55,8 @@ const defaultNavGroups = {
       defaultMessage: 'Observability',
     }),
     description: i18n.translate('core.ui.group.observability.description', {
-      defaultMessage: 'Gain visibility into your application and infrastructure',
+      defaultMessage:
+        'Gain visibility into system health, performance, and reliability through monitoring of logs, metrics and traces.',
     }),
     order: 4000,
     icon: 'wsObservability',
@@ -63,7 +67,8 @@ const defaultNavGroups = {
       defaultMessage: 'Security Analytics',
     }),
     description: i18n.translate('core.ui.group.security.analytics.description', {
-      defaultMessage: 'Enhance your security posture with advanced analytics',
+      defaultMessage:
+        'Detect and investigate potential security threats and vulnerabilities across your systems and data.',
     }),
     order: 5000,
     icon: 'wsSecurityAnalytics',
@@ -86,7 +91,8 @@ const defaultNavGroups = {
       defaultMessage: 'Search',
     }),
     description: i18n.translate('core.ui.group.search.description', {
-      defaultMessage: 'Discover and query your data with ease',
+      defaultMessage:
+        "Quickly find and explore relevant information across your organization's data sources.",
     }),
     order: 6000,
     icon: 'wsSearch',

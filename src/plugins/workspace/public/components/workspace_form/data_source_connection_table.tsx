@@ -22,7 +22,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { DataSourceConnection, DataSourceConnectionType } from '../../../common/types';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
-import { DirectQueryConnectionIcon } from './direct_query_connection_icon';
+import { ConnectionTypeIcon } from './connection_type_icon';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { CoreStart } from '../../../../../core/public';
 
@@ -34,7 +34,10 @@ interface DataSourceConnectionTableProps {
   onUnlinkDataSource: (dataSources: DataSourceConnection) => void;
   onSelectionChange: (selections: DataSourceConnection[]) => void;
   dataSourceConnections: DataSourceConnection[];
-  tableProps?: Pick<EuiInMemoryTableProps<DataSourceConnection>, 'pagination' | 'search'>;
+  tableProps?: Pick<
+    EuiInMemoryTableProps<DataSourceConnection>,
+    'pagination' | 'search' | 'message'
+  >;
 }
 
 export const DataSourceConnectionTable = forwardRef<
@@ -115,6 +118,10 @@ export const DataSourceConnectionTable = forwardRef<
         }),
         truncateText: true,
         render: (name: string, record) => {
+          // There is not a detail page for data connection, so we won't display a link here.
+          if (record.connectionType === DataSourceConnectionType.DataConnection) {
+            return name;
+          }
           let url: string;
           if (record.connectionType === DataSourceConnectionType.OpenSearchConnection) {
             url = http.basePath.prepend(`/app/dataSources/${record.id}`);
@@ -154,6 +161,7 @@ export const DataSourceConnectionTable = forwardRef<
         name: i18n.translate('workspace.detail.dataSources.table.relatedConnections', {
           defaultMessage: 'Related connections',
         }),
+        align: 'right',
         truncateText: true,
         render: (relatedConnections: DataSourceConnection[], record) =>
           relatedConnections?.length > 0 ? (
@@ -191,7 +199,7 @@ export const DataSourceConnectionTable = forwardRef<
                     key={item.id}
                     size="xs"
                     label={item.name}
-                    icon={<DirectQueryConnectionIcon type={item.type} />}
+                    icon={<ConnectionTypeIcon type={item.type} />}
                     style={{ maxHeight: '30px' }}
                   />
                 ))}

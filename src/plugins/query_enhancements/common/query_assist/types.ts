@@ -17,3 +17,15 @@ export interface QueryAssistParameters {
   // for MDS
   dataSourceId?: string;
 }
+
+export enum QueryAssistContextType {
+  QUESTION,
+  QUERY,
+  DATA,
+}
+
+export enum FeedbackStatus {
+  NONE = 'none',
+  THUMB_UP = 'thumbup',
+  THUMB_DOWN = 'thumbdown',
+}

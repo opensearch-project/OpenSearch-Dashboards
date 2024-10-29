@@ -27,7 +27,7 @@ function AreaVisOptions() {
   return (
     <>
       <Option
-        title={i18n.translate('visTypeVislib.area.params.settingsTitle', {
+        title={i18n.translate('visBuilder.area.params.settingsTitle', {
           defaultMessage: 'Settings',
         })}
         initialIsOpen

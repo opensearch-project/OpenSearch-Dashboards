@@ -6,12 +6,13 @@
 import './collapsible_nav_group_enabled.scss';
 import { EuiFlexItem, EuiSideNavItemType, EuiSideNav, EuiText } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import classNames from 'classnames';
 import { ChromeNavLink } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { createEuiListItem } from './nav_link';
 import { getOrderedLinksOrCategories, LinkItem, LinkItemType } from '../../utils';
+import { CollapsibleNavGroupsLabel, getIsCategoryOpen } from './collapsible_nav_groups_label';
 
 export interface NavGroupsProps {
   navLinks: ChromeNavLink[];
@@ -23,6 +24,8 @@ export interface NavGroupsProps {
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     navItem: ChromeNavLink
   ) => void;
+  categoryCollapsible?: boolean;
+  currentWorkspaceId?: string;
 }
 
 const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
@@ -38,7 +41,10 @@ export function NavGroups({
   appId,
   navigateToApp,
   onNavItemClick,
+  categoryCollapsible,
+  currentWorkspaceId,
 }: NavGroupsProps) {
+  const [, setRenderKey] = useState(Date.now());
   const createNavItem = ({
     link,
     className,
@@ -58,7 +64,7 @@ export function NavGroups({
 
     return {
       id: `${link.id}-${link.title}`,
-      name: <EuiText size="xs">{link.title}</EuiText>,
+      name: <EuiText>{link.title}</EuiText>,
       onClick: euiListItem.onClick,
       href: euiListItem.href,
       emphasize: euiListItem.isActive,
@@ -94,17 +100,37 @@ export function NavGroups({
 
     if (navLink.itemType === LinkItemType.PARENT_LINK && navLink.link) {
       const props = createNavItem({ link: navLink.link });
+      const parentOpenKey = `${currentWorkspaceId ? `${currentWorkspaceId}-` : ''}${
+        navLink.link.id
+      }`;
       const parentItem = {
         ...props,
         forceOpen: true,
+        /**
+         * The Tree component inside SideNav is not a controllable component,
+         * so we need to change the id(will pass as key into the Tree component) to remount the component.
+         */
+        id: `${props.id}-${!!getIsCategoryOpen(parentOpenKey)}`,
         /**
          * The href and onClick should both be undefined to make parent item rendered as accordion.
          */
         href: undefined,
         onClick: undefined,
+        /**
+         * The data-test-subj has to be undefined because we render the element with the attribute in CollapsibleNavGroupsLabel
+         */
+        'data-test-subj': undefined,
         className: classNames(props.className, 'nav-link-parent-item'),
-        buttonClassName: classNames(props.buttonClassName, 'nav-link-parent-item-button'),
-        items: navLink.links.map((subNavLink) =>
+        name: (
+          <CollapsibleNavGroupsLabel
+            label={props.name}
+            storageKey={parentOpenKey}
+            collapsible={!categoryCollapsible}
+            onToggle={() => setRenderKey(Date.now())}
+            data-test-subj={props['data-test-subj']}
+          />
+        ),
+        items: (getIsCategoryOpen(parentOpenKey) ? navLink.links : []).map((subNavLink) =>
           createSideNavItem(subNavLink, level + 1, 'nav-nested-item')
         ),
       };
@@ -126,11 +152,32 @@ export function NavGroups({
     }
 
     if (navLink.itemType === LinkItemType.CATEGORY) {
+      const categoryOpenKey = `${currentWorkspaceId ? `${currentWorkspaceId}-` : ''}${
+        navLink.category?.id
+      }`;
       return {
         id: navLink.category?.id ?? '',
-        name: <div className="nav-link-item">{navLink.category?.label ?? ''}</div>,
-        items: navLink.links?.map((link) => createSideNavItem(link, level + 1)),
+        name: (
+          <CollapsibleNavGroupsLabel
+            label={
+              <EuiText size="s">
+                <span className="euiCollapsibleNavGroup__heading nav-link-item">
+                  {navLink.category?.label ?? ''}
+                </span>
+              </EuiText>
+            }
+            collapsible={!!categoryCollapsible}
+            storageKey={categoryOpenKey}
+            onToggle={() => setRenderKey(Date.now())}
+          />
+        ),
+        items: (!categoryCollapsible || getIsCategoryOpen(categoryOpenKey)
+          ? navLink.links
+          : []
+        )?.map((link) => createSideNavItem(link, level + 1)),
         'aria-label': navLink.category?.label,
+        className: 'nav-link-item-category-item',
+        buttonClassName: 'nav-link-item-category-button',
       };
     }
 
@@ -143,7 +190,7 @@ export function NavGroups({
 
   return (
     <EuiFlexItem style={style}>
-      <EuiSideNav items={sideNavItems} isOpenOnMobile />
+      <EuiSideNav items={sideNavItems} isOpenOnMobile mobileBreakpoints={[]} />
       {suffix}
     </EuiFlexItem>
   );

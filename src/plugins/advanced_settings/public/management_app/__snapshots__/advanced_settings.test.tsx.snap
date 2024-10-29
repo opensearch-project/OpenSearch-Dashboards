@@ -142,6 +142,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
           "userAgentProcessor": "https://opensearch.org/docs/mocked-test-branch",
         },
         "logstash": "https://opensearch.org/docs/mocked-test-branch",
+        "lucene": Object {
+          "base": "https://opensearch.org/docs/mocked-test-branch/query-dsl/full-text/query-string/",
+        },
         "management": Object {
           "dashboardSettings": "https://opensearch.org/docs/mocked-test-branch",
           "opensearchDashboardsGeneralSettings": "https://opensearch.org/docs/mocked-test-branch",
@@ -158,6 +161,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
           "usage": "https://opensearch.org/docs/mocked-test-branch/api-reference/nodes-apis/nodes-usage/",
         },
         "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
+        "ppl": Object {
+          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+        },
         "reIndex": Object {
           "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
         },
@@ -187,6 +193,12 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
           "deleteRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot-repository/",
           "deleteSnapshot": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot/",
           "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
+        },
+        "sql": Object {
+          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+        },
+        "sqlPplLimitation": Object {
+          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
         },
         "tutorial": Object {
           "loadDataTutorial": "https://opensearch.org/docs/mocked-test-branch",
@@ -365,6 +377,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
       },
       "opensearchDashboards": Object {
         "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+        "dashboards": Object {
+          "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+          "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+        },
         "dataSource": Object {
           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
           "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -400,7 +416,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
         },
         "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
         "visualize": Object {
-          "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+          "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
         },
       },
     }
@@ -519,10 +535,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
       search
     </Search>
     <EuiSpacer
-      size="m"
+      size="s"
     >
       <div
-        className="euiSpacer euiSpacer--m"
+        className="euiSpacer euiSpacer--s"
       />
     </EuiSpacer>
     <AdvancedSettingsVoiceAnnouncement
@@ -781,6 +797,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "userAgentProcessor": "https://opensearch.org/docs/mocked-test-branch",
             },
             "logstash": "https://opensearch.org/docs/mocked-test-branch",
+            "lucene": Object {
+              "base": "https://opensearch.org/docs/mocked-test-branch/query-dsl/full-text/query-string/",
+            },
             "management": Object {
               "dashboardSettings": "https://opensearch.org/docs/mocked-test-branch",
               "opensearchDashboardsGeneralSettings": "https://opensearch.org/docs/mocked-test-branch",
@@ -797,6 +816,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "usage": "https://opensearch.org/docs/mocked-test-branch/api-reference/nodes-apis/nodes-usage/",
             },
             "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
+            "ppl": Object {
+              "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+            },
             "reIndex": Object {
               "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
             },
@@ -826,6 +848,12 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
               "deleteRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot-repository/",
               "deleteSnapshot": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot/",
               "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
+            },
+            "sql": Object {
+              "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+            },
+            "sqlPplLimitation": Object {
+              "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
             },
             "tutorial": Object {
               "loadDataTutorial": "https://opensearch.org/docs/mocked-test-branch",
@@ -1004,6 +1032,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
           },
           "opensearchDashboards": Object {
             "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+            "dashboards": Object {
+              "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+              "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+            },
             "dataSource": Object {
               "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
               "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -1039,7 +1071,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
             },
             "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
             "visualize": Object {
-              "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+              "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
             },
           },
         }
@@ -1699,6 +1731,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "userAgentProcessor": "https://opensearch.org/docs/mocked-test-branch",
                         },
                         "logstash": "https://opensearch.org/docs/mocked-test-branch",
+                        "lucene": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/query-dsl/full-text/query-string/",
+                        },
                         "management": Object {
                           "dashboardSettings": "https://opensearch.org/docs/mocked-test-branch",
                           "opensearchDashboardsGeneralSettings": "https://opensearch.org/docs/mocked-test-branch",
@@ -1715,6 +1750,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "usage": "https://opensearch.org/docs/mocked-test-branch/api-reference/nodes-apis/nodes-usage/",
                         },
                         "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
+                        "ppl": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                        },
                         "reIndex": Object {
                           "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
                         },
@@ -1744,6 +1782,12 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "deleteRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot-repository/",
                           "deleteSnapshot": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot/",
                           "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
+                        },
+                        "sql": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                        },
+                        "sqlPplLimitation": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                         },
                         "tutorial": Object {
                           "loadDataTutorial": "https://opensearch.org/docs/mocked-test-branch",
@@ -1922,6 +1966,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                       },
                       "opensearchDashboards": Object {
                         "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                        "dashboards": Object {
+                          "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                          "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                        },
                         "dataSource": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                           "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -1957,7 +2005,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         },
                         "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                         "visualize": Object {
-                          "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                          "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                         },
                       },
                     }
@@ -2095,6 +2143,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "userAgentProcessor": "https://opensearch.org/docs/mocked-test-branch",
                         },
                         "logstash": "https://opensearch.org/docs/mocked-test-branch",
+                        "lucene": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/query-dsl/full-text/query-string/",
+                        },
                         "management": Object {
                           "dashboardSettings": "https://opensearch.org/docs/mocked-test-branch",
                           "opensearchDashboardsGeneralSettings": "https://opensearch.org/docs/mocked-test-branch",
@@ -2111,6 +2162,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "usage": "https://opensearch.org/docs/mocked-test-branch/api-reference/nodes-apis/nodes-usage/",
                         },
                         "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
+                        "ppl": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                        },
                         "reIndex": Object {
                           "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
                         },
@@ -2140,6 +2194,12 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "deleteRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot-repository/",
                           "deleteSnapshot": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot/",
                           "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
+                        },
+                        "sql": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                        },
+                        "sqlPplLimitation": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                         },
                         "tutorial": Object {
                           "loadDataTutorial": "https://opensearch.org/docs/mocked-test-branch",
@@ -2318,6 +2378,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                       },
                       "opensearchDashboards": Object {
                         "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                        "dashboards": Object {
+                          "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                          "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                        },
                         "dataSource": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                           "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -2353,7 +2417,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         },
                         "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                         "visualize": Object {
-                          "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                          "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                         },
                       },
                     }
@@ -2491,6 +2555,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "userAgentProcessor": "https://opensearch.org/docs/mocked-test-branch",
                         },
                         "logstash": "https://opensearch.org/docs/mocked-test-branch",
+                        "lucene": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/query-dsl/full-text/query-string/",
+                        },
                         "management": Object {
                           "dashboardSettings": "https://opensearch.org/docs/mocked-test-branch",
                           "opensearchDashboardsGeneralSettings": "https://opensearch.org/docs/mocked-test-branch",
@@ -2507,6 +2574,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "usage": "https://opensearch.org/docs/mocked-test-branch/api-reference/nodes-apis/nodes-usage/",
                         },
                         "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
+                        "ppl": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                        },
                         "reIndex": Object {
                           "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
                         },
@@ -2536,6 +2606,12 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "deleteRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot-repository/",
                           "deleteSnapshot": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot/",
                           "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
+                        },
+                        "sql": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                        },
+                        "sqlPplLimitation": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                         },
                         "tutorial": Object {
                           "loadDataTutorial": "https://opensearch.org/docs/mocked-test-branch",
@@ -2714,6 +2790,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                       },
                       "opensearchDashboards": Object {
                         "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                        "dashboards": Object {
+                          "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                          "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                        },
                         "dataSource": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                           "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -2749,7 +2829,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         },
                         "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                         "visualize": Object {
-                          "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                          "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                         },
                       },
                     }
@@ -2887,6 +2967,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "userAgentProcessor": "https://opensearch.org/docs/mocked-test-branch",
                         },
                         "logstash": "https://opensearch.org/docs/mocked-test-branch",
+                        "lucene": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/query-dsl/full-text/query-string/",
+                        },
                         "management": Object {
                           "dashboardSettings": "https://opensearch.org/docs/mocked-test-branch",
                           "opensearchDashboardsGeneralSettings": "https://opensearch.org/docs/mocked-test-branch",
@@ -2903,6 +2986,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "usage": "https://opensearch.org/docs/mocked-test-branch/api-reference/nodes-apis/nodes-usage/",
                         },
                         "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
+                        "ppl": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                        },
                         "reIndex": Object {
                           "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
                         },
@@ -2932,6 +3018,12 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "deleteRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot-repository/",
                           "deleteSnapshot": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot/",
                           "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
+                        },
+                        "sql": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                        },
+                        "sqlPplLimitation": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                         },
                         "tutorial": Object {
                           "loadDataTutorial": "https://opensearch.org/docs/mocked-test-branch",
@@ -3110,6 +3202,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                       },
                       "opensearchDashboards": Object {
                         "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                        "dashboards": Object {
+                          "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                          "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                        },
                         "dataSource": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                           "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -3145,7 +3241,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         },
                         "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                         "visualize": Object {
-                          "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                          "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                         },
                       },
                     }
@@ -3338,6 +3434,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "userAgentProcessor": "https://opensearch.org/docs/mocked-test-branch",
                         },
                         "logstash": "https://opensearch.org/docs/mocked-test-branch",
+                        "lucene": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/query-dsl/full-text/query-string/",
+                        },
                         "management": Object {
                           "dashboardSettings": "https://opensearch.org/docs/mocked-test-branch",
                           "opensearchDashboardsGeneralSettings": "https://opensearch.org/docs/mocked-test-branch",
@@ -3354,6 +3453,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "usage": "https://opensearch.org/docs/mocked-test-branch/api-reference/nodes-apis/nodes-usage/",
                         },
                         "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
+                        "ppl": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                        },
                         "reIndex": Object {
                           "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
                         },
@@ -3383,6 +3485,12 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "deleteRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot-repository/",
                           "deleteSnapshot": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot/",
                           "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
+                        },
+                        "sql": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                        },
+                        "sqlPplLimitation": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                         },
                         "tutorial": Object {
                           "loadDataTutorial": "https://opensearch.org/docs/mocked-test-branch",
@@ -3561,6 +3669,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                       },
                       "opensearchDashboards": Object {
                         "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                        "dashboards": Object {
+                          "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                          "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                        },
                         "dataSource": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                           "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -3596,7 +3708,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         },
                         "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                         "visualize": Object {
-                          "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                          "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                         },
                       },
                     }
@@ -3736,6 +3848,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "userAgentProcessor": "https://opensearch.org/docs/mocked-test-branch",
                         },
                         "logstash": "https://opensearch.org/docs/mocked-test-branch",
+                        "lucene": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/query-dsl/full-text/query-string/",
+                        },
                         "management": Object {
                           "dashboardSettings": "https://opensearch.org/docs/mocked-test-branch",
                           "opensearchDashboardsGeneralSettings": "https://opensearch.org/docs/mocked-test-branch",
@@ -3752,6 +3867,9 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "usage": "https://opensearch.org/docs/mocked-test-branch/api-reference/nodes-apis/nodes-usage/",
                         },
                         "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
+                        "ppl": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+                        },
                         "reIndex": Object {
                           "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
                         },
@@ -3781,6 +3899,12 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                           "deleteRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot-repository/",
                           "deleteSnapshot": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot/",
                           "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
+                        },
+                        "sql": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+                        },
+                        "sqlPplLimitation": Object {
+                          "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
                         },
                         "tutorial": Object {
                           "loadDataTutorial": "https://opensearch.org/docs/mocked-test-branch",
@@ -3959,6 +4083,10 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                       },
                       "opensearchDashboards": Object {
                         "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
+                        "dashboards": Object {
+                          "createDashboards": "https://opensearch.org/docs/mocked-test-branch/dashboards/dashboard/index/",
+                          "quickStart": "https://opensearch.org/docs/mocked-test-branch/dashboards/quickstart/",
+                        },
                         "dataSource": Object {
                           "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
                           "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
@@ -3994,7 +4122,7 @@ exports[`AdvancedSettings should render normally when use updated UX 1`] = `
                         },
                         "reporting": "https://opensearch.org/docs/mocked-test-branch/dashboards/reporting",
                         "visualize": Object {
-                          "guide": "https://opensearch.org/docs/mocked-test-branchvisualize/viz-index/",
+                          "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/visualize/viz-index/",
                         },
                       },
                     }

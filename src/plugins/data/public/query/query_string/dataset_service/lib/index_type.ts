@@ -5,6 +5,7 @@
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { map } from 'rxjs/operators';
+import { i18n } from '@osd/i18n';
 import {
   DEFAULT_DATA,
   DataStructure,
@@ -21,6 +22,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
   meta: {
     icon: { type: 'logoOpenSearch' },
     tooltip: 'OpenSearch Indexes',
+    searchOnLoad: true,
   },
 
   toDataset: (path) => {
@@ -64,7 +66,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
         const dataSources = await fetchDataSources(services.savedObjects.client);
         return {
           ...dataStructure,
-          columnHeader: 'Cluster',
+          columnHeader: 'Clusters',
           hasNext: true,
           children: dataSources,
         };
@@ -80,11 +82,35 @@ export const indexTypeConfig: DatasetTypeConfig = {
     return fields.map((field: any) => ({
       name: field.name,
       type: field.type,
+      aggregatable: field?.aggregatable,
     }));
   },
 
   supportedLanguages: (dataset: Dataset): string[] => {
     return ['SQL', 'PPL'];
+  },
+
+  getSampleQueries: (dataset: Dataset, language: string) => {
+    switch (language) {
+      case 'PPL':
+        return [
+          {
+            title: i18n.translate('data.indexType.sampleQuery.basicPPLQuery', {
+              defaultMessage: 'Sample query for PPL',
+            }),
+            query: `source = ${dataset.title}`,
+          },
+        ];
+      case 'SQL':
+        return [
+          {
+            title: i18n.translate('data.indexType.sampleQuery.basicSQLQuery', {
+              defaultMessage: 'Sample query for SQL',
+            }),
+            query: `SELECT * FROM ${dataset.title} LIMIT 10`,
+          },
+        ];
+    }
   },
 };
 

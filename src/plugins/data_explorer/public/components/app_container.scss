@@ -11,6 +11,7 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 
 .deLayout {
   height: calc(100vh - #{$osdHeaderOffset * 1});
+  padding: $euiSizeS;
 
   &.dsc--next {
     height: calc(100vh - #{$osdHeaderOffset * 2});
@@ -18,6 +19,15 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 
   &__canvas {
     height: 100%;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  & > .euiResizableContainer {
+    gap: $euiSizeXS;
+  }
+
+  .globalQueryBar {
+    padding: 0;
   }
 }
 

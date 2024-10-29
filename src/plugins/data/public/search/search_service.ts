@@ -85,6 +85,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private searchInterceptor!: ISearchInterceptor;
   private defaultSearchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
+  private dataFrame$ = new BehaviorSubject<IDataFrame | undefined>(undefined);
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -120,6 +121,23 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       expressions.registerFunction(aggShardDelay);
     }
 
+    const dfService: DataFrameService = {
+      get: () => {
+        const df = this.dfCache.get();
+        this.dataFrame$.next(df);
+        return df;
+      },
+      set: (dataFrame: IDataFrame) => {
+        this.dfCache.set(dataFrame);
+      },
+      clear: () => {
+        if (this.dfCache.get() === undefined) return;
+        this.dfCache.clear();
+        this.dataFrame$.next(undefined);
+      },
+      df$: this.dataFrame$,
+    };
+
     return {
       aggs,
       usageCollector: this.usageCollector!,
@@ -127,6 +145,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         this.searchInterceptor = enhancements.searchInterceptor;
       },
       getDefaultSearchInterceptor: () => this.defaultSearchInterceptor,
+      df: dfService,
     };
   }
 
@@ -136,7 +155,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ): ISearchStart {
     const search = ((request, options) => {
       const isEnhancedEnabled = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
-      if (isEnhancedEnabled) {
+      if (isEnhancedEnabled && !options?.strategy) {
         const queryStringManager = getQueryService().queryString;
         const language = queryStringManager.getQuery().language;
         const languageConfig = queryStringManager.getLanguageService().getLanguage(language);
@@ -152,16 +171,21 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
-
     const dfService: DataFrameService = {
-      get: () => this.dfCache.get(),
-      set: async (dataFrame: IDataFrame) => {
+      get: () => {
+        const df = this.dfCache.get();
+        this.dataFrame$.next(df);
+        return df;
+      },
+      set: (dataFrame: IDataFrame) => {
         this.dfCache.set(dataFrame);
       },
       clear: () => {
         if (this.dfCache.get() === undefined) return;
         this.dfCache.clear();
+        this.dataFrame$.next(undefined);
       },
+      df$: this.dataFrame$,
     };
 
     const searchSourceDependencies: SearchSourceDependencies = {

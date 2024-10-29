@@ -3,54 +3,133 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { shallow } from 'enzyme';
-import { SavedObjectsClientContract } from '../../../../../core/public';
 import React from 'react';
 import IndexPatternSelect from './index_pattern_select';
+import { savedObjectsServiceMock } from '../../../../../core/public/mocks';
 
 describe('IndexPatternSelect', () => {
-  let client: SavedObjectsClientContract;
-  const bulkGetMock = jest.fn();
+  const savedObjectsClient = savedObjectsServiceMock.createStartContract().client;
+  const onChangeMock = jest.fn();
 
-  const nextTick = () => new Promise((res) => process.nextTick(res));
+  jest.useFakeTimers();
 
   beforeEach(() => {
-    client = {
-      find: jest.fn().mockResolvedValue({
+    onChangeMock.mockReset();
+
+    jest.spyOn(savedObjectsClient, 'get').mockReturnValue(
+      // @ts-ignore
+      Promise.resolve({
+        id: '3',
+        type: 'data-source',
+        references: [{ id: 'testDataSourceId3', type: 'data-source' }],
+        attributes: { title: 'testTitle3' },
+      })
+    );
+
+    jest.spyOn(savedObjectsClient, 'bulkGet').mockReturnValue(
+      // @ts-ignore
+      Promise.resolve({
         savedObjects: [
           {
-            references: [{ id: 'testDataSourceId', type: 'data-source' }],
+            id: '4',
+            type: 'data-source',
+            attributes: { title: 'testTitle4' },
+          },
+        ],
+      })
+    );
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should use the data-source IDs to make a bulkGet call', async () => {
+    jest.spyOn(savedObjectsClient, 'find').mockReturnValue(
+      // @ts-ignore
+      Promise.resolve({
+        total: 2,
+        perPage: 10,
+        page: 1,
+        savedObjects: [
+          {
+            id: '1',
+            type: 'data-source',
+            references: [{ id: 'testDataSourceId1', type: 'data-source' }],
             attributes: { title: 'testTitle1' },
           },
           {
-            references: [{ id: 'testDataSourceId', type: 'data-source' }],
+            id: '2',
+            type: 'data-source',
+            references: [{ id: 'testDataSourceId2', type: 'data-source' }],
             attributes: { title: 'testTitle2' },
           },
         ],
-      }),
-      bulkGet: bulkGetMock,
-      get: jest.fn().mockResolvedValue({
-        references: [{ id: 'someId', type: 'data-source' }],
-        attributes: { title: 'testTitle' },
-      }),
-    } as any;
-  });
+      })
+    );
 
-  it('should render index pattern select', async () => {
-    const onChangeMock = jest.fn();
-    const compInstance = shallow(
+    const compInstance = shallow<IndexPatternSelect>(
       <IndexPatternSelect
         placeholder={'test index pattern'}
         indexPatternId={'testId'}
         onChange={onChangeMock}
         data-test-subj={'testId'}
-        savedObjectsClient={client}
+        savedObjectsClient={savedObjectsClient}
       />
     ).instance();
 
-    bulkGetMock.mockResolvedValue({ savedObjects: [{ attributes: { title: 'test1' } }] });
-    compInstance.debouncedFetch('');
-    await new Promise((resolve) => setTimeout(resolve, 300));
-    await nextTick();
-    expect(bulkGetMock).toBeCalledWith([{ id: 'testDataSourceId', type: 'data-source' }]);
+    const call = compInstance.debouncedFetch('');
+    jest.advanceTimersByTime(10000);
+    await call;
+    await compInstance.debouncedFetch.flush();
+
+    expect(savedObjectsClient.bulkGet).toBeCalledWith([
+      { id: 'testDataSourceId1', type: 'data-source' },
+      { id: 'testDataSourceId2', type: 'data-source' },
+    ]);
+  });
+
+  it('should combine saved-objects with common data-source IDs when making a bulkGet call', async () => {
+    jest.spyOn(savedObjectsClient, 'find').mockReturnValue(
+      // @ts-ignore
+      Promise.resolve({
+        total: 2,
+        perPage: 10,
+        page: 1,
+        savedObjects: [
+          {
+            id: '1',
+            type: 'data-source',
+            references: [{ id: 'testDataSourceId0', type: 'data-source' }],
+            attributes: { title: 'testTitle1' },
+          },
+          {
+            id: '2',
+            type: 'data-source',
+            references: [{ id: 'testDataSourceId0', type: 'data-source' }],
+            attributes: { title: 'testTitle2' },
+          },
+        ],
+      })
+    );
+
+    const compInstance = shallow<IndexPatternSelect>(
+      <IndexPatternSelect
+        placeholder={'test index pattern'}
+        indexPatternId={'testId'}
+        onChange={onChangeMock}
+        data-test-subj={'testId'}
+        savedObjectsClient={savedObjectsClient}
+      />
+    ).instance();
+
+    const call = compInstance.debouncedFetch('');
+    jest.advanceTimersByTime(10000);
+    await call;
+    await compInstance.debouncedFetch.flush();
+
+    expect(savedObjectsClient.bulkGet).toBeCalledWith([
+      { id: 'testDataSourceId0', type: 'data-source' },
+    ]);
   });
 });

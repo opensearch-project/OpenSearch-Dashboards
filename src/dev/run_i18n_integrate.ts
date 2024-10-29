@@ -34,6 +34,7 @@ import Listr from 'listr';
 import { createFailError, run } from '@osd/dev-utils';
 import { ErrorReporter, integrateLocaleFiles } from './i18n';
 import { extractDefaultMessages, mergeConfigs, ListrContext } from './i18n/tasks';
+import { DEFAULT_DIRS_WITH_RC_FILES } from './i18n/constants';
 
 run(
   async ({
@@ -88,7 +89,7 @@ run(
       );
     }
 
-    const srcPaths = Array().concat(path || ['./src', './packages']);
+    const srcPaths = Array().concat(path || DEFAULT_DIRS_WITH_RC_FILES);
 
     const list = new Listr<ListrContext>([
       {

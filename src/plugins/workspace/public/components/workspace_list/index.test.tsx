@@ -9,12 +9,22 @@ import { of } from 'rxjs';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import { coreMock } from '../../../../../core/public/mocks';
-import { navigateToWorkspaceDetail } from '../utils/workspace';
+import { navigateToAppWithinWorkspace } from '../utils/workspace';
 import { createMockedRegisteredUseCases$ } from '../../mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { WorkspaceList } from './index';
 
 jest.mock('../utils/workspace');
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: () => ({
+    search: '',
+    pathname: '',
+    hash: '',
+    state: undefined,
+  }),
+}));
 
 const mockNavigatorWrite = jest.fn();
 
@@ -100,6 +110,7 @@ function getWrapWorkspaceListInContext(
       isDashboardAdmin,
     },
   };
+  coreStartMock.application.getUrlForApp.mockImplementation((id) => `http://localhost/${id}`);
 
   const mockHeaderControl = ({ controls }) => {
     return controls?.[0].description ?? controls?.[0].renderComponent ?? null;
@@ -153,7 +164,7 @@ describe('WorkspaceList', () => {
     expect(getByText('name2')).toBeInTheDocument();
 
     // should display use case
-    expect(getByText('Analytics (All)')).toBeInTheDocument();
+    expect(getByText('Analytics')).toBeInTheDocument();
     expect(getByText('Observability')).toBeInTheDocument();
   });
 
@@ -181,9 +192,9 @@ describe('WorkspaceList', () => {
 
   it('should be able to switch workspace after clicking name', async () => {
     const { getByText } = render(getWrapWorkspaceListInContext());
-    const nameLink = getByText('name1');
+    const nameLink = getByText('name2');
     fireEvent.click(nameLink);
-    expect(navigateToWorkspaceDetail).toBeCalled();
+    expect(nameLink.closest('a')).toHaveAttribute('href', 'http://localhost/w/id2/discover');
   });
 
   it('should be able to perform the time format transformation', async () => {
@@ -223,7 +234,7 @@ describe('WorkspaceList', () => {
     fireEvent.click(operationIcons);
     const editIcon = getByText('Edit');
     fireEvent.click(editIcon);
-    expect(navigateToWorkspaceDetail).toBeCalled();
+    expect(navigateToAppWithinWorkspace).toBeCalled();
   });
 
   it('should be able to call delete modal after clicking delete button', async () => {
@@ -271,23 +282,10 @@ describe('WorkspaceList', () => {
 
   it('should render data source badge when more than two data sources', async () => {
     const { getByTestId } = render(getWrapWorkspaceListInContext());
-    expect(navigateToWorkspaceDetail).not.toHaveBeenCalled();
     await waitFor(() => {
-      const badge = getByTestId('workspaceList-more-dataSources-badge');
+      const badge = getByTestId('workspaceList-more-id1-badge');
       expect(badge).toBeInTheDocument();
-      fireEvent.click(badge);
+      expect(badge.closest('a')).toHaveAttribute('href', 'http://localhost/w/id1/dataSources');
     });
-    expect(navigateToWorkspaceDetail).toHaveBeenCalledTimes(1);
-  });
-
-  it('should render owners badge when more than one owners', async () => {
-    const { getByTestId } = render(getWrapWorkspaceListInContext());
-    expect(navigateToWorkspaceDetail).not.toHaveBeenCalled();
-    await waitFor(() => {
-      const badge = getByTestId('workspaceList-more-collaborators-badge');
-      expect(badge).toBeInTheDocument();
-      fireEvent.click(badge);
-    });
-    expect(navigateToWorkspaceDetail).toHaveBeenCalledTimes(1);
   });
 });

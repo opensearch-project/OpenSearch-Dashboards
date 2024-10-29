@@ -16,7 +16,11 @@ import {
   HttpAuth,
 } from '../../../../core/server';
 import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../../common/constants';
-import { getPrincipalsFromRequest } from '../../../../core/server/utils';
+import {
+  ACLAuditorStateKey,
+  getACLAuditor,
+  getPrincipalsFromRequest,
+} from '../../../../core/server/utils';
 
 export type SavedObjectsPermissionControlContract = Pick<
   SavedObjectsPermissionControl,
@@ -57,6 +61,7 @@ export class SavedObjectsPermissionControl {
     request: OpenSearchDashboardsRequest,
     savedObjects: SavedObjectsBulkGetObject[]
   ) {
+    const ACLAuditor = getACLAuditor(request);
     const requestKey = request.uuid;
     const savedObjectsToGet = savedObjects.filter(
       (savedObject) =>
@@ -66,6 +71,8 @@ export class SavedObjectsPermissionControl {
       savedObjectsToGet.length > 0
         ? (await this.getScopedClient?.(request)?.bulkGet(savedObjectsToGet))?.saved_objects || []
         : [];
+    // System request, -1 * savedObjectsToGet.length for compensation.
+    ACLAuditor?.increment(ACLAuditorStateKey.DATABASE_OPERATION, -1 * savedObjectsToGet.length);
 
     const retrievedSavedObjectsMap: { [key: string]: SavedObject } = {};
     retrievedSavedObjects.forEach((savedObject) => {
@@ -184,7 +191,7 @@ export class SavedObjectsPermissionControl {
     if (!savedObjectsGet.length) {
       return {
         success: false,
-        error: i18n.translate('savedObjects.permission.notFound', {
+        error: i18n.translate('workspace.savedObjects.permission.notFound', {
           defaultMessage: 'Can not find target saved objects.',
         }),
       };

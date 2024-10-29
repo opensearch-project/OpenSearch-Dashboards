@@ -23,26 +23,17 @@ describe('Sample data card', () => {
     expect(call[0].getContent()).toMatchInlineSnapshot(`
       Object {
         "cardProps": Object {
-          "selectable": Object {
-            "children": <EuiI18n
-              default="with Sample Datasets"
-              token="home.sampleData.card.footer"
-            />,
-            "isSelected": false,
-            "onClick": [Function],
-          },
+          "className": "usecaseOverviewGettingStartedCard",
         },
-        "description": "You can install sample data to experiment with OpenSearch Dashboards.",
+        "description": "Install sample data to experiment with OpenSearch.",
+        "getFooter": [Function],
+        "getIcon": [Function],
         "id": "sample_data",
         "kind": "card",
+        "onClick": [Function],
         "order": 0,
-        "title": "Try openSearch",
+        "title": "",
       }
     `);
-
-    // search use case overview
-    expect(registerContentProviderMock.mock.calls[1][0].getTargetArea()).toEqual(
-      'search_overview/get_started'
-    );
   });
 });
