@@ -7,9 +7,9 @@ import React, { useState } from 'react';
 import {
   BaseDataset,
   DATA_STRUCTURE_META_TYPES,
-  Dataset,
   DataStructure,
   DEFAULT_DATA,
+  Query,
 } from '../../../common';
 import { getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
@@ -22,7 +22,7 @@ export const AdvancedSelector = ({
   onCancel,
 }: {
   services: IDataPluginServices;
-  onSelect: (dataset: Dataset) => void;
+  onSelect: (query: Partial<Query>) => void;
   onCancel: () => void;
 }) => {
   const queryString = getQueryService().queryString;

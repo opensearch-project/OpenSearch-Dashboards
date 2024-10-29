@@ -19,7 +19,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField } from '../../../common';
+import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../../common';
 import { getIndexPatterns, getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
 
@@ -32,7 +32,7 @@ export const Configurator = ({
 }: {
   services: IDataPluginServices;
   baseDataset: BaseDataset;
-  onConfirm: (dataset: Dataset) => void;
+  onConfirm: (query: Partial<Query>) => void;
   onCancel: () => void;
   onPrevious: () => void;
 }) => {
@@ -201,7 +201,7 @@ export const Configurator = ({
         <EuiButton
           onClick={async () => {
             await queryString.getDatasetService().cacheDataset(dataset, services);
-            onConfirm(dataset);
+            onConfirm({ dataset, language });
           }}
           fill
           disabled={submitDisabled}
