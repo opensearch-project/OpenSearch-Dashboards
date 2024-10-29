@@ -56,7 +56,7 @@ export class ShareMenuManager {
           ...options,
           menuItems,
           post: core.http.post,
-          basePath: core.http.basePath.get(),
+          basePath: core.http.basePath.getBasePath(),
         });
       },
     };
