@@ -66,7 +66,7 @@ export class LanguageService {
     return Array.from(this.languages.values());
   }
 
-  public getDefaultLanguage(): LanguageConfig {
+  public getDefaultLanguage(): LanguageConfig | undefined {
     return this.languages.get('kuery') || this.languages.values().next().value;
   }
 
