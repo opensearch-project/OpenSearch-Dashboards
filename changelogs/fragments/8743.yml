@@ -1,0 +1,2 @@
+fix:
+- Fix error handling in query enhancement facet ([#8743](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8743))
