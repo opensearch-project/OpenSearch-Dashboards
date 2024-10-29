@@ -308,7 +308,8 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       }),
       align: 'right',
       truncateText: true,
-      render: (relatedConnections: DataSourceTableItem[]) => relatedConnections?.length,
+      render: (relatedConnections: DataSourceTableItem[]) =>
+        relatedConnections.length > 0 ? relatedConnections.length : <EuiText>&mdash;</EuiText>,
     },
   ];
 
