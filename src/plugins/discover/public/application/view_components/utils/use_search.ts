@@ -86,7 +86,9 @@ export const useSearch = (services: DiscoverViewServices) => {
   const { pathname } = useLocation();
   const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
-  const { savedSearch: savedSearchId, sort, interval } = useSelector((state) => state.discover);
+  const { savedSearch: savedSearchId, sort, interval, savedQuery } = useSelector(
+    (state) => state.discover
+  );
   const indexPattern = useIndexPattern(services);
   const skipInitialFetch = useRef(false);
   const {
@@ -387,9 +389,12 @@ export const useSearch = (services: DiscoverViewServices) => {
 
       // sync initial app filters from savedObject to filterManager
       const filters = cloneDeep(savedSearchInstance.searchSource.getOwnField('filter'));
-      const actualFilters = [];
 
-      if (filters !== undefined) {
+      let actualFilters: any[] = [];
+
+      if (savedQuery) {
+        actualFilters = data.query.filterManager.getFilters();
+      } else if (filters !== undefined) {
         const result = typeof filters === 'function' ? filters() : filters;
         if (result !== undefined) {
           actualFilters.push(...(Array.isArray(result) ? result : [result]));
@@ -397,7 +402,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       }
 
       filterManager.setAppFilters(actualFilters);
-      data.query.queryString.setQuery(query);
+      data.query.queryString.setQuery(savedQuery ? data.query.queryString.getQuery() : query);
       setSavedSearch(savedSearchInstance);
 
       if (savedSearchInstance?.id) {
