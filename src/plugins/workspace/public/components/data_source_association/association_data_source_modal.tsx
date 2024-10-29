@@ -115,10 +115,9 @@ const convertConnectionToOption = ({
       : undefined,
   prepend:
     connection.connectionType === DataSourceConnectionType.DirectQueryConnection ? (
-      <>
-        <div style={{ width: 16 }} />
+      <div style={{ marginLeft: 16 }}>
         <ConnectionIcon connection={connection} logos={logos} />
-      </>
+      </div>
     ) : (
       <ConnectionIcon connection={connection} logos={logos} />
     ),
