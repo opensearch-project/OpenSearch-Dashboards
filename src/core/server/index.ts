@@ -373,7 +373,12 @@ export {
 } from './metrics';
 
 export { AppCategory, WorkspaceAttribute, PermissionModeId } from '../types';
-export { DEFAULT_APP_CATEGORIES, WORKSPACE_TYPE, DEFAULT_NAV_GROUPS } from '../utils';
+export {
+  DEFAULT_APP_CATEGORIES,
+  WORKSPACE_TYPE,
+  DEFAULT_NAV_GROUPS,
+  WORKSPACE_PATH_PREFIX,
+} from '../utils';
 
 export {
   SavedObject,
