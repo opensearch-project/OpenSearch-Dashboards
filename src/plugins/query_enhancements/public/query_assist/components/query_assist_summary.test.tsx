@@ -58,7 +58,7 @@ describe('query assist summary', () => {
       // query assist is not collapsed
       isQueryAssistCollapsed: false,
       updateIsQueryAssistCollapsed: jest.fn(),
-      queryState: { question: '', answer: '' },
+      queryState: { question: '', generatedQuery: '' },
       updateQueryState: jest.fn(),
     };
     const component = render(
@@ -128,7 +128,7 @@ describe('query assist summary', () => {
       rerender = renderQueryAssistSummary(
         {
           // ppl is generated
-          queryState: { question, answer: ppl },
+          queryState: { question, generatedQuery: ppl },
         },
         { dataSetup, coreSetup, usageCollection }
       );
@@ -223,7 +223,7 @@ describe('query assist summary', () => {
       .mockReturnValue({ query: anotherPPL, language: 'PPL' });
 
     await act(async () => {
-      rerender({ queryState: { question: 'another question', answer: anotherPPL } });
+      rerender({ queryState: { question: 'another question', generatedQuery: anotherPPL } });
       // ppl query returned results
       dataSetup.search.df.df$.next({
         type: DATA_FRAME_TYPES.DEFAULT,
@@ -330,7 +330,7 @@ describe('query assist summary', () => {
     await act(async () => {
       renderQueryAssistSummary(
         {
-          queryState: { question: 'test question', answer: firstPPL },
+          queryState: { question: 'test question', generatedQuery: firstPPL },
         },
         { dataSetup }
       );

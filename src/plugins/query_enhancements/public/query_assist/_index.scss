@@ -6,6 +6,10 @@
 .queryAssist {
   &.queryAssist__summary {
     margin-top: $euiSizeXS;
+
+    .verticalRuler {
+      border-left: 1px solid $euiColorDarkestShade;
+    }
   }
 
   &.queryAssist__summary_banner {

@@ -26,7 +26,7 @@ import { QueryAssistState, useQueryAssist } from '../hooks';
 import { DataPublicPluginSetup, QueryEditorExtensionDependencies } from '../../../../data/public';
 import { UsageCollectionSetup } from '../../../../usage_collection/public';
 import { CoreSetup } from '../../../../../core/public';
-import sparkleHollowSvg from '../../assets/sparkle_hollow.svg';
+import sparkleHollowSvg from '../../assets/sparkle_mark.svg';
 import sparkleSolidSvg from '../../assets/sparkle_solid.svg';
 import { FeedbackStatus } from '../../../common/query_assist';
 
@@ -90,12 +90,14 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
   const sampleSize = 10;
 
   const queryChanged =
-    queryState.answer && queryState.answer !== props.data.query.queryString.getQuery().query;
+    queryState.generatedQuery &&
+    queryState.generatedQuery !== props.data.query.queryString.getQuery().query;
   // It can generate summary when
   // 1. it has the current generated query(answer)
-  // 2. the generated query didn't been changed by user
+  // 2. user didn't run a different query other than the generated one
   // 3. there are search results
-  const canGenerateSummary = Boolean(results.length) && Boolean(queryState.answer) && !queryChanged;
+  const canGenerateSummary =
+    Boolean(results.length) && Boolean(queryState.generatedQuery) && !queryChanged;
   // Generate summary can be auto triggered only when first time generating the query
   const shouldAutoTrigger = !lastUsedQueryStateRef.current;
   // Display a message in the panel to indicate that clicking
@@ -103,7 +105,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
   const manualTriggerVisible =
     !shouldAutoTrigger &&
     canGenerateSummary &&
-    lastUsedQueryStateRef.current?.answer !== queryState.answer;
+    lastUsedQueryStateRef.current?.generatedQuery !== queryState.generatedQuery;
   // The visibility of panel action buttons: thumbs up/down and copy to clipboard buttons
   const actionButtonVisible = summary && !loading && !queryChanged && !manualTriggerVisible;
 
@@ -147,7 +149,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
         setSummary(response);
         lastUsedQueryStateRef.current = {
           question: queryContext.question,
-          answer: queryContext.query,
+          generatedQuery: queryContext.query,
         };
         reportCountMetric(SUCCESS_METRIC, 1);
       } catch (error) {
@@ -165,9 +167,9 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
   }, [queryState]);
 
   useEffect(() => {
-    const { question, answer } = currentQueryStateRef.current;
+    const { question, generatedQuery } = currentQueryStateRef.current;
     if (shouldAutoTrigger && canGenerateSummary) {
-      fetchSummary({ question, query: answer, queryResults: results });
+      fetchSummary({ question, query: generatedQuery, queryResults: results });
     }
   }, [results, canGenerateSummary, fetchSummary, shouldAutoTrigger]);
 
@@ -286,13 +288,10 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
       <EuiSplitPanel.Inner className={'queryAssist queryAssist__summary_banner'}>
         <EuiFlexGroup alignItems={'center'} gutterSize={'xs'}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type={isDarkMode ? sparkleSolidSvg : sparkleHollowSvg} size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
             <EuiText size="s">
               <strong>
                 {i18n.translate('queryEnhancements.queryAssist.summary.panelTitle', {
-                  defaultMessage: 'Response',
+                  defaultMessage: 'Summary',
                 })}
               </strong>
             </EuiText>
@@ -350,7 +349,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
                       />
                     </EuiFlexItem>
                   )}
-                  <EuiSpacer size="m" style={{ borderLeft: '1px solid #D3DAE6', height: '20px' }} />
+                  <EuiSpacer className="verticalRuler" size="m" />
                   <EuiFlexItem grow={false}>
                     <EuiCopy textToCopy={summary ?? ''}>
                       {(copy) => (
@@ -369,7 +368,10 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
                   </EuiFlexItem>
                 </>
               )}
-              <EuiSpacer size="m" style={{ borderLeft: '1px solid #D3DAE6', height: '20px' }} />
+              <EuiSpacer className="verticalRuler" size="m" />
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={isDarkMode ? sparkleSolidSvg : sparkleHollowSvg} size="m" />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSmallButtonEmpty
                   isDisabled={!canGenerateSummary}
@@ -377,7 +379,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
                   onClick={() =>
                     fetchSummary({
                       question: queryState.question,
-                      query: queryState.answer,
+                      query: queryState.generatedQuery,
                       queryResults: results,
                     })
                   }
