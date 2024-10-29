@@ -488,7 +488,7 @@
     "tree-kill": "^1.2.2",
     "typescript": "4.0.2",
     "vega": "^5.23.0",
-    "vega-interpreter": "npm:@amoo-miki/vega-forced-csp-compliant-interpreter@1.0.6",
+    "vega-interpreter": "^1.0.5",
     "vega-lite": "^5.6.0",
     "vega-schema-url-parser": "^2.1.0",
     "vega-tooltip": "^0.30.0",
