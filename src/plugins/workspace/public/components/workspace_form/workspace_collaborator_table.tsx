@@ -305,7 +305,7 @@ export const WorkspaceCollaboratorTable = ({
                   values: {
                     numCollaborators: selections.length,
                     pluralSuffix: selections.length > 1 ? 's' : '',
-                    accessLevel: type,
+                    accessLevel: WORKSPACE_ACCESS_LEVEL_NAMES[type],
                   },
                 })}
           </p>
