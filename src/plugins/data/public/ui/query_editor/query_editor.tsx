@@ -404,50 +404,38 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         ref={bannerRef}
         className={classNames('osdQueryEditor__banner', props.bannerClassName)}
       />
-      <div
-        className={classNames(
-          props.className,
-          'osdQueryEditor',
-          isCollapsed ? 'collapsed' : 'expanded',
-          !languageEditor.TopBar.Expanded && 'emptyExpanded'
-        )}
-      >
-        <div className="osdQueryEditor__topBar">
-          <div className="osdQueryEditor__input">
-            {isCollapsed
-              ? languageEditor.TopBar.Collapsed()
-              : languageEditor.TopBar.Expanded && languageEditor.TopBar.Expanded()}
-          </div>
-          {languageSelector}
-          <div className="osdQueryEditor__querycontrols">
-            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-              <div
-                ref={queryControlsContainer}
-                className="osdQueryEditor__extensionQueryControls"
-              />
-              {renderQueryControls(languageEditor.TopBar.Controls)}
-              {!languageEditor.TopBar.Expanded && renderToggleIcon()}
-              {props.savedQueryManagement}
-            </EuiFlexGroup>
-          </div>
+      <div className="osdQueryEditor__topBar">
+        <div className="osdQueryEditor__input">
+          {isCollapsed
+            ? languageEditor.TopBar.Collapsed()
+            : languageEditor.TopBar.Expanded && languageEditor.TopBar.Expanded()}
         </div>
-        <div
-          ref={headerRef}
-          className={classNames('osdQueryEditor__header', props.headerClassName)}
-        />
-        {!isCollapsed && (
-          <>
-            <div className="osdQueryEditor__body">{languageEditor.Body()}</div>
-          </>
-        )}
-        <RecentQueriesTable
-          isVisible={isRecentQueryVisible && useQueryEditor}
-          queryString={queryString}
-          onClickRecentQuery={onClickRecentQuery}
-        />
-
-        {renderQueryEditorExtensions()}
+        {languageSelector}
+        <div className="osdQueryEditor__querycontrols">
+          <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+            <div ref={queryControlsContainer} className="osdQueryEditor__extensionQueryControls" />
+            {renderQueryControls(languageEditor.TopBar.Controls)}
+            {!languageEditor.TopBar.Expanded && renderToggleIcon()}
+            {props.savedQueryManagement}
+          </EuiFlexGroup>
+        </div>
       </div>
+      <div
+        ref={headerRef}
+        className={classNames('osdQueryEditor__header', props.headerClassName)}
+      />
+      {!isCollapsed && (
+        <>
+          <div className="osdQueryEditor__body">{languageEditor.Body()}</div>
+        </>
+      )}
+      <RecentQueriesTable
+        isVisible={isRecentQueryVisible && useQueryEditor}
+        queryString={queryString}
+        onClickRecentQuery={onClickRecentQuery}
+      />
+
+      {renderQueryEditorExtensions()}
     </div>
   );
 };

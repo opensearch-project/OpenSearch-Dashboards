@@ -204,6 +204,7 @@ export class QueryStringManager {
    * If only language is provided, uses current dataset
    * If only dataset is provided, uses current or dataset's preferred language
    */
+  // TODO: claude write jest test for this
   public getInitialQuery = (partialQuery?: Partial<Query>) => {
     if (!partialQuery) {
       return this.getInitialQueryByLanguage(this.query$.getValue().language);
@@ -242,6 +243,7 @@ export class QueryStringManager {
    * Gets initial query for a language, preserving current dataset
    * Called by getInitialQuery when only language changes
    */
+  // TODO: claude write jest test for this
   public getInitialQueryByLanguage = (languageId: string) => {
     const curQuery = this.query$.getValue();
     const language = this.languageService.getLanguage(languageId);
@@ -262,6 +264,7 @@ export class QueryStringManager {
    * Gets initial query for a dataset, using dataset's preferred language or current language
    * Called by getInitialQuery when only dataset changes
    */
+  // TODO: claude write jest test for this
   public getInitialQueryByDataset = (newDataset: Dataset) => {
     const curQuery = this.query$.getValue();
     // Use dataset's preferred language or fallback to current language
