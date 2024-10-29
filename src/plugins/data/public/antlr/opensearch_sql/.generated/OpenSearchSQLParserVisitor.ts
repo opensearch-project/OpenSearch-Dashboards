@@ -1,4 +1,4 @@
-// Generated from grammar/OpenSearchSQLParser.g4 by ANTLR 4.13.1
+// Generated from ./src/plugins/data/public/antlr/opensearch_sql/grammar/OpenSearchSQLParser.g4 by ANTLR 4.13.1
 
 import { AbstractParseTreeVisitor } from "antlr4ng";
 
@@ -68,6 +68,7 @@ import { IsNullPredicateContext } from "./OpenSearchSQLParser.js";
 import { LikePredicateContext } from "./OpenSearchSQLParser.js";
 import { RegexpPredicateContext } from "./OpenSearchSQLParser.js";
 import { ExpressionsContext } from "./OpenSearchSQLParser.js";
+import { ConstantExpressionAtomContext } from "./OpenSearchSQLParser.js";
 import { FunctionCallExpressionAtomContext } from "./OpenSearchSQLParser.js";
 import { FullColumnNameExpressionAtomContext } from "./OpenSearchSQLParser.js";
 import { NestedExpressionAtomContext } from "./OpenSearchSQLParser.js";
@@ -576,6 +577,13 @@ export class OpenSearchSQLParserVisitor<Result> extends AbstractParseTreeVisitor
      * @return the visitor result
      */
     visitExpressions?: (ctx: ExpressionsContext) => Result;
+    /**
+     * Visit a parse tree produced by the `constantExpressionAtom`
+     * labeled alternative in `OpenSearchSQLParser.expressionAtom`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitConstantExpressionAtom?: (ctx: ConstantExpressionAtomContext) => Result;
     /**
      * Visit a parse tree produced by the `functionCallExpressionAtom`
      * labeled alternative in `OpenSearchSQLParser.expressionAtom`.

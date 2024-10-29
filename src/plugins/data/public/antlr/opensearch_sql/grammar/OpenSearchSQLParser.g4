@@ -291,7 +291,7 @@ expression
 
 predicate
    : expressionAtom                                         # expressionAtomPredicate
-   | left = predicate comparisonOperator right = constant   # binaryComparisonPredicate
+   | left = predicate comparisonOperator right = predicate  # binaryComparisonPredicate
    | predicate IS nullNotnull                               # isNullPredicate
    | predicate NOT? BETWEEN predicate AND predicate         # betweenPredicate
    | left = predicate NOT? LIKE right = predicate           # likePredicate
@@ -304,7 +304,8 @@ expressions
    ;
 
 expressionAtom
-   : columnName                                                                             # fullColumnNameExpressionAtom
+   : constant                                                                               # constantExpressionAtom
+   | columnName                                                                             # fullColumnNameExpressionAtom
    | functionCall                                                                           # functionCallExpressionAtom
    | LR_BRACKET expression RR_BRACKET                                                       # nestedExpressionAtom
    | left = expressionAtom mathOperator = (STAR | SLASH | MODULE) right = expressionAtom    # mathExpressionAtom
@@ -805,7 +806,7 @@ alternateMultiMatchField
 
 // Identifiers
 tableName
-   : ID
+   : qualifiedName
    ;
 
 columnName
