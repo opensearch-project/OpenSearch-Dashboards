@@ -14,6 +14,7 @@ import {
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
   SavedObjectsErrorHelpers,
+  SavedObjectsClientWrapperOptions,
 } from '../../../../core/server';
 import { IWorkspaceClientImpl } from '../types';
 
@@ -48,25 +49,70 @@ export class WorkspaceIdConsumerWrapper {
     return type === UI_SETTINGS_SAVED_OBJECTS_TYPE;
   }
 
+  private async checkWorkspacesExist(
+    finalOptions: SavedObjectsCreateOptions,
+    wrapperOptions: SavedObjectsClientWrapperOptions
+  ) {
+    if (finalOptions.workspaces?.length) {
+      let isAllTargetWorkspaceExisting = false;
+      // If only has one workspace, we should use get to optimize performance
+      if (finalOptions.workspaces.length === 1) {
+        const workspaceGet = await this.workspaceClient.get(
+          { request: wrapperOptions.request },
+          finalOptions.workspaces[0]
+        );
+        if (workspaceGet.success) {
+          isAllTargetWorkspaceExisting = true;
+        }
+      } else {
+        const workspaceList = await this.workspaceClient.list(
+          {
+            request: wrapperOptions.request,
+          },
+          {
+            perPage: 9999,
+          }
+        );
+        if (workspaceList.success) {
+          const workspaceIdsSet = new Set(
+            workspaceList.result.workspaces.map((workspace) => workspace.id)
+          );
+          isAllTargetWorkspaceExisting = finalOptions.workspaces.every((targetWorkspace) =>
+            workspaceIdsSet.has(targetWorkspace)
+          );
+        }
+      }
+
+      if (!isAllTargetWorkspaceExisting) {
+        throw SavedObjectsErrorHelpers.decorateBadRequestError(
+          new Error(
+            i18n.translate('workspace.id_consumer.invalid', {
+              defaultMessage: 'Invalid workspaces',
+            })
+          )
+        );
+      }
+    }
+  }
+
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
     return {
       ...wrapperOptions.client,
-      create: <T>(type: string, attributes: T, options: SavedObjectsCreateOptions = {}) =>
-        wrapperOptions.client.create(
-          type,
-          attributes,
-          this.isConfigType(type)
-            ? options
-            : this.formatWorkspaceIdParams(wrapperOptions.request, options)
-        ),
-      bulkCreate: <T = unknown>(
+      create: async <T>(type: string, attributes: T, options: SavedObjectsCreateOptions = {}) => {
+        const finalOptions = this.isConfigType(type)
+          ? options
+          : this.formatWorkspaceIdParams(wrapperOptions.request, options);
+        await this.checkWorkspacesExist(finalOptions, wrapperOptions);
+        return wrapperOptions.client.create(type, attributes, finalOptions);
+      },
+      bulkCreate: async <T = unknown>(
         objects: Array<SavedObjectsBulkCreateObject<T>>,
         options: SavedObjectsCreateOptions = {}
-      ) =>
-        wrapperOptions.client.bulkCreate(
-          objects,
-          this.formatWorkspaceIdParams(wrapperOptions.request, options)
-        ),
+      ) => {
+        const finalOptions = this.formatWorkspaceIdParams(wrapperOptions.request, options);
+        await this.checkWorkspacesExist(finalOptions, wrapperOptions);
+        return wrapperOptions.client.bulkCreate(objects, finalOptions);
+      },
       checkConflicts: (
         objects: SavedObjectsCheckConflictsObject[] = [],
         options: SavedObjectsBaseOptions = {}
@@ -84,46 +130,7 @@ export class WorkspaceIdConsumerWrapper {
           this.isConfigType(options.type as string) && options.sortField === 'buildNum'
             ? options
             : this.formatWorkspaceIdParams(wrapperOptions.request, options);
-        if (finalOptions.workspaces?.length) {
-          let isAllTargetWorkspaceExisting = false;
-          // If only has one workspace, we should use get to optimize performance
-          if (finalOptions.workspaces.length === 1) {
-            const workspaceGet = await this.workspaceClient.get(
-              { request: wrapperOptions.request },
-              finalOptions.workspaces[0]
-            );
-            if (workspaceGet.success) {
-              isAllTargetWorkspaceExisting = true;
-            }
-          } else {
-            const workspaceList = await this.workspaceClient.list(
-              {
-                request: wrapperOptions.request,
-              },
-              {
-                perPage: 9999,
-              }
-            );
-            if (workspaceList.success) {
-              const workspaceIdsSet = new Set(
-                workspaceList.result.workspaces.map((workspace) => workspace.id)
-              );
-              isAllTargetWorkspaceExisting = finalOptions.workspaces.every((targetWorkspace) =>
-                workspaceIdsSet.has(targetWorkspace)
-              );
-            }
-          }
-
-          if (!isAllTargetWorkspaceExisting) {
-            throw SavedObjectsErrorHelpers.decorateBadRequestError(
-              new Error(
-                i18n.translate('workspace.id_consumer.invalid', {
-                  defaultMessage: 'Invalid workspaces',
-                })
-              )
-            );
-          }
-        }
+        await this.checkWorkspacesExist(finalOptions, wrapperOptions);
         return wrapperOptions.client.find(finalOptions);
       },
       bulkGet: wrapperOptions.client.bulkGet,
