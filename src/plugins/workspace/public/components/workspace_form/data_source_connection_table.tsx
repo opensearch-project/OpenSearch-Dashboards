@@ -200,7 +200,7 @@ export const DataSourceConnectionTable = forwardRef<
                     size="xs"
                     label={item.name}
                     icon={<ConnectionTypeIcon type={item.type} />}
-                    style={{ maxHeight: '30px' }}
+                    style={{ maxHeight: '30px', gap: '4px' }}
                   />
                 ))}
               </EuiListGroup>
