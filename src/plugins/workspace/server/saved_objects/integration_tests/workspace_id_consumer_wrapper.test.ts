@@ -282,7 +282,7 @@ describe('workspace_id_consumer integration test', () => {
         .get(root, `/w/not_exist_workspace_id/api/saved_objects/_find?type=${dashboard.type}`)
         .expect(400);
 
-      expect(findResult.body.message).toEqual('Invalid workspaces');
+      expect(findResult.body.message).toEqual('Invalid workspaces: not_exist_workspace_id');
     });
 
     it('import within workspace', async () => {
