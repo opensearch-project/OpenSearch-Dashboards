@@ -696,11 +696,11 @@ stringLiteral
    ;
 
 integerLiteral
-   : INTEGER_LITERAL
+   : (PLUS | MINUS)? INTEGER_LITERAL
    ;
 
 decimalLiteral
-   : DECIMAL_LITERAL
+   : (PLUS | MINUS)? DECIMAL_LITERAL
    ;
 
 booleanLiteral
