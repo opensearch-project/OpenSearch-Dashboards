@@ -173,12 +173,11 @@ export class QueryStringManager {
 
           // Show warning about language change
           showWarning(this.notifications, {
-            title: i18n.translate('data.datasetLanguageChangeTitle', {
-              defaultMessage: 'Query Language Changed',
+            title: i18n.translate('data.languageChangeTitle', {
+              defaultMessage: 'Language Changed',
             }),
-            text: i18n.translate('data.datasetLanguageChangeBody', {
-              defaultMessage:
-                'Selected dataset only supports {supportedLanguage} queries. Language has been changed.',
+            text: i18n.translate('data.languageChangeBody', {
+              defaultMessage: 'Query language changed to {supportedLanguage}.',
               values: {
                 supportedLanguage:
                   this.languageService.getLanguage(supportedLanguages[0])?.title ||
@@ -348,7 +347,10 @@ export class QueryStringManager {
   };
 }
 
-const showWarning = (notifications: NotificationsSetup, { title, text }) => {
+const showWarning = (
+  notifications: NotificationsSetup,
+  { title, text }: { title: string; text: string }
+) => {
   notifications.toasts.addWarning({ title, text, id: 'unsupported_language_selected' });
 };
 
