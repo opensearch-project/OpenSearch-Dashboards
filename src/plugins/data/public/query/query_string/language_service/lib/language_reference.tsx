@@ -37,6 +37,7 @@ export const LanguageReference = (props: {
           defaultMessage: `Language Reference`,
         })}
         onClick={() => setIsLanguageReferenceOpen(!isLanguageReferenceOpen)}
+        data-test-subj="languageReferenceButton"
       />
     </div>
   );
