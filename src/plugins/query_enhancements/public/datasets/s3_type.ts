@@ -200,7 +200,8 @@ const fetchDataSources = async (client: SavedObjectsClientContract): Promise<Dat
   return dataSources.concat(
     resp.savedObjects
       .filter(
-        (savedObject) => savedObject.attributes.dataSourceEngineType !== 'OpenSearch Serverless'
+        (savedObject) =>
+          !savedObject.attributes?.dataSourceEngineType?.includes('OpenSearch Serverless')
       )
       .map((savedObject) => ({
         id: savedObject.id,

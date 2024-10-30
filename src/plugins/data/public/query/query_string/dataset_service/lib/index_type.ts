@@ -122,7 +122,8 @@ const fetchDataSources = async (client: SavedObjectsClientContract) => {
   const dataSources: DataStructure[] = [DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE].concat(
     response.savedObjects
       .filter(
-        (savedObject) => savedObject.attributes.dataSourceEngineType !== 'OpenSearch Serverless'
+        (savedObject) =>
+          !savedObject.attributes?.dataSourceEngineType?.includes('OpenSearch Serverless')
       )
       .map((savedObject) => ({
         id: savedObject.id,
