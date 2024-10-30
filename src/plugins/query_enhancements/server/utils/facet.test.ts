@@ -8,6 +8,7 @@ import { Facet, FacetProps } from './facet';
 
 describe('Facet', () => {
   let facet: Facet;
+  let facetWithShimEnabled: Facet;
   let mockClient: jest.Mock;
   let mockLogger: jest.Mocked<Logger>;
   let mockContext: any;
@@ -26,6 +27,7 @@ describe('Facet', () => {
     };
 
     facet = new Facet(props);
+    facetWithShimEnabled = new Facet({ ...props, shimResponse: true });
 
     mockContext = {
       dataSource: {
@@ -109,6 +111,18 @@ describe('Facet', () => {
       mockClient.mockRejectedValue(error);
 
       const result = await facet.describeQuery(mockContext, mockRequest);
+
+      expect(result).toEqual({ success: false, data: error });
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Facet fetch: test-endpoint: Error: Test error'
+      );
+    });
+
+    it('should handle errors with shim enabled', async () => {
+      const error = new Error('Test error');
+      mockClient.mockRejectedValue(error);
+
+      const result = await facetWithShimEnabled.describeQuery(mockContext, mockRequest);
 
       expect(result).toEqual({ success: false, data: error });
       expect(mockLogger.error).toHaveBeenCalledWith(

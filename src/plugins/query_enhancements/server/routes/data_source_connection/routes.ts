@@ -52,14 +52,20 @@ export function registerDataSourceConnectionsRoutes(
       },
     },
     async (context, request, response) => {
-      const client = request.query.id
-        ? context.dataSource.opensearch.legacy.getClient(request.query.id).callAPI
-        : defaultClient.asScoped(request).callAsCurrentUser;
+      try {
+        const client = request.query.id
+          ? context.dataSource.opensearch.legacy.getClient(request.query.id).callAPI
+          : defaultClient.asScoped(request).callAsCurrentUser;
 
-      const resp = await client('enhancements.getJobStatus', {
-        queryId: request.query.queryId,
-      });
-      return response.ok({ body: resp });
+        const resp = await client('enhancements.getJobStatus', {
+          queryId: request.query.queryId,
+        });
+        return response.ok({ body: resp });
+      } catch (error) {
+        // Transform 500 errors to 503 to indicate service availability issues
+        const statusCode = error.statusCode === 500 ? 503 : error.statusCode || 503;
+        return response.custom({ statusCode, body: error.message });
+      }
     }
   );
 
@@ -79,12 +85,18 @@ export function registerDataSourceConnectionsRoutes(
       },
     },
     async (context, request, response) => {
-      const client = request.query.id
-        ? context.dataSource.opensearch.legacy.getClient(request.query.id).callAPI
-        : defaultClient.asScoped(request).callAsCurrentUser;
+      try {
+        const client = request.query.id
+          ? context.dataSource.opensearch.legacy.getClient(request.query.id).callAPI
+          : defaultClient.asScoped(request).callAsCurrentUser;
 
-      const resp = await client('enhancements.runDirectQuery', { body: request.body });
-      return response.ok({ body: resp });
+        const resp = await client('enhancements.runDirectQuery', { body: request.body });
+        return response.ok({ body: resp });
+      } catch (error) {
+        // Transform 500 errors to 503 to indicate service availability issues
+        const statusCode = error.statusCode === 500 ? 503 : error.statusCode || 503;
+        return response.custom({ statusCode, body: error.message });
+      }
     }
   );
 }

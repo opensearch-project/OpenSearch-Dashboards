@@ -59,6 +59,9 @@ export const sqlAsyncSearchStrategyProvider = (
         } else {
           request.params = { queryId: inProgressQueryId };
           const queryStatusResponse: any = await sqlAsyncJobsFacet.describeQuery(context, request);
+
+          if (!queryStatusResponse.success) handleFacetError(queryStatusResponse);
+
           const queryStatus = queryStatusResponse?.data?.status;
           logger.info(`sqlAsyncSearchStrategy: JOB: ${inProgressQueryId} - STATUS: ${queryStatus}`);
 
