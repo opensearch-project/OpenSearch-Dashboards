@@ -161,7 +161,7 @@ describe('s3TypeConfig', () => {
           { id: 'ds1', attributes: { title: 'DataSource 1', dataSourceEngineType: 'OpenSearch' } },
           {
             id: 'ds2',
-            attributes: { title: 'DataSource 2', dataSourceEngineType: 3 },
+            attributes: { title: 'DataSource 2', dataSourceEngineType: 'OpenSearch Serverless' },
           },
           { id: 'ds3', attributes: { title: 'DataSource 3', dataSourceEngineType: 'OpenSearch' } },
         ],
