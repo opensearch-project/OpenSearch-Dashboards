@@ -69,6 +69,45 @@ export class QueryEnhancementsPlugin
       editor: createEditor(SingleLineInput, null, pplControls, DefaultInput),
       editorSupportedAppNames: ['discover'],
       supportedAppNames: ['discover', 'data-explorer'],
+      sampleQueries: [
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWind', {
+            defaultMessage: 'The title field contains the word wind.',
+          }),
+          query: `SOURCE = your_table | WHERE LIKE(title, '%wind%')`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWindOrWindy', {
+            defaultMessage: 'The title field contains the word wind or the word windy.',
+          }),
+          query: `SOURCE = your_table | WHERE LIKE(title, '%wind%') OR LIKE(title, '%windy%')`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleContainsPhraseWindRises', {
+            defaultMessage: 'The title field contains the phrase wind rises.',
+          }),
+          query: `SOURCE = your_table | WHERE LIKE(title, '%wind rises%')`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleExactMatchWindRises', {
+            defaultMessage: 'The title.keyword field exactly matches The wind rises.',
+          }),
+          query: `SOURCE = your_table | WHERE title = 'The wind rises'`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleFieldsContainWind', {
+            defaultMessage:
+              'Any field that starts with title (for example, title and title.keyword) contains the word wind',
+          }),
+          query: `SOURCE = your_table | WHERE LIKE(title, '%wind%') OR title = 'wind'`,
+        },
+        {
+          title: i18n.translate('queryEnhancements.sampleQuery.descriptionFieldExists', {
+            defaultMessage: 'Documents in which the field description exists.',
+          }),
+          query: `SOURCE = your_table | WHERE ISNOTNULL(description) AND description != '';`,
+        },
+      ],
     };
     queryString.getLanguageService().registerLanguage(pplLanguageConfig);
 
@@ -99,55 +138,40 @@ export class QueryEnhancementsPlugin
       hideDatePicker: true,
       sampleQueries: [
         {
-          title: i18n.translate('queryEnhancements.sqlLanguage.sampleQuery.titleContainsWind', {
+          title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWind', {
             defaultMessage: 'The title field contains the word wind.',
           }),
           query: `SELECT * FROM your_table WHERE title LIKE '%wind%'`,
         },
         {
-          title: i18n.translate(
-            'queryEnhancements.sqlLanguage.sampleQuery.titleContainsWindOrWindy',
-            {
-              defaultMessage: 'The title field contains the word wind or the word windy.',
-            }
-          ),
+          title: i18n.translate('queryEnhancements.sampleQuery.titleContainsWindOrWindy', {
+            defaultMessage: 'The title field contains the word wind or the word windy.',
+          }),
           query: `SELECT * FROM your_table WHERE title LIKE '%wind%' OR title LIKE '%windy%';`,
         },
         {
-          title: i18n.translate(
-            'queryEnhancements.sqlLanguage.sampleQuery.titleContainsPhraseWindRises',
-            {
-              defaultMessage: 'The title field contains the phrase wind rises.',
-            }
-          ),
+          title: i18n.translate('queryEnhancements.sampleQuery.titleContainsPhraseWindRises', {
+            defaultMessage: 'The title field contains the phrase wind rises.',
+          }),
           query: `SELECT * FROM your_table WHERE title LIKE '%wind rises%'`,
         },
         {
-          title: i18n.translate(
-            'queryEnhancements.sqlLanguage.sampleQuery.titleExactMatchWindRises',
-            {
-              defaultMessage: 'The title.keyword field exactly matches The wind rises.',
-            }
-          ),
+          title: i18n.translate('queryEnhancements.sampleQuery.titleExactMatchWindRises', {
+            defaultMessage: 'The title.keyword field exactly matches The wind rises.',
+          }),
           query: `SELECT * FROM your_table WHERE title = 'The wind rises'`,
         },
         {
-          title: i18n.translate(
-            'queryEnhancements.sqlLanguage.sampleQuery.titleFieldsContainWind',
-            {
-              defaultMessage:
-                'Any field that starts with title (for example, title and title.keyword) contains the word wind',
-            }
-          ),
+          title: i18n.translate('queryEnhancements.sampleQuery.titleFieldsContainWind', {
+            defaultMessage:
+              'Any field that starts with title (for example, title and title.keyword) contains the word wind',
+          }),
           query: `SELECT * FROM your_table WHERE title LIKE '%wind%' OR title = 'wind'`,
         },
         {
-          title: i18n.translate(
-            'queryEnhancements.sqlLanguage.sampleQuery.descriptionFieldExists',
-            {
-              defaultMessage: 'Documents in which the field description exists.',
-            }
-          ),
+          title: i18n.translate('queryEnhancements.sampleQuery.descriptionFieldExists', {
+            defaultMessage: 'Documents in which the field description exists.',
+          }),
           query: `SELECT * FROM your_table WHERE description IS NOT NULL AND description != '';`,
         },
       ],

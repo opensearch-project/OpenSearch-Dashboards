@@ -260,33 +260,37 @@ export const DiscoverNoResults = ({ queryString, query, savedQuery, timeFieldNam
 
   return (
     <I18nProvider>
-      <EuiEmptyPrompt
-        iconType="editorCodeBlock"
-        iconColor="default"
-        data-test-subj="discoverNoResults"
-        title={
-          <EuiText size="s">
-            <h2>
-              {i18n.translate('discover.emptyPrompt.title', {
-                defaultMessage: 'No Results',
-              })}
-            </h2>
-          </EuiText>
-        }
-        body={
-          <EuiText size="s" data-test-subj="discoverNoResultsTimefilter">
-            <p>
-              {i18n.translate('discover.emptyPrompt.body', {
-                defaultMessage:
-                  'Try selecting a different data source, expanding your time range or modifying the query & filters.',
-              })}
-            </p>
-          </EuiText>
-        }
-      />
-      <div className="discoverNoResults-sampleContainer">
-        <EuiTabbedContent tabs={tabs} />
-      </div>
+      <>
+        <EuiEmptyPrompt
+          iconType="editorCodeBlock"
+          iconColor="default"
+          data-test-subj="discoverNoResults"
+          title={
+            <EuiText size="s">
+              <h2>
+                {i18n.translate('discover.emptyPrompt.title', {
+                  defaultMessage: 'No Results',
+                })}
+              </h2>
+            </EuiText>
+          }
+          body={
+            <EuiText size="s" data-test-subj="discoverNoResultsTimefilter">
+              <p>
+                {i18n.translate('discover.emptyPrompt.body', {
+                  defaultMessage:
+                    'Try selecting a different data source, expanding your time range or modifying the query & filters.',
+                })}
+              </p>
+            </EuiText>
+          }
+        />
+        {tabs.length && (
+          <div className="discoverNoResults-sampleContainer">
+            <EuiTabbedContent tabs={tabs} />
+          </div>
+        )}
+      </>
     </I18nProvider>
   );
 };
