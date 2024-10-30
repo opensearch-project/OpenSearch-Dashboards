@@ -4,7 +4,7 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter, ILegacyClusterClient } from 'opensearch-dashboards/server';
+import { ILegacyClusterClient, IRouter } from 'opensearch-dashboards/server';
 import { API } from '../../../common';
 
 export function registerDataSourceConnectionsRoutes(
