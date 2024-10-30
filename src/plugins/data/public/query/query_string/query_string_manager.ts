@@ -31,7 +31,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { CoreStart, NotificationsSetup } from 'opensearch-dashboards/public';
-import { debounce, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { Dataset, DataStorage, Query, TimeRange, UI_SETTINGS } from '../../../common';
 import { createHistory, QueryHistory } from './query_history';
@@ -154,10 +154,40 @@ export class QueryStringManager {
    */
   public setQuery = (query: Partial<Query>) => {
     const curQuery = this.query$.getValue();
-    const newQuery = { ...curQuery, ...query };
+    let newQuery = { ...curQuery, ...query };
     if (!isEqual(curQuery, newQuery)) {
-      // Add to recent datasets if dataset has changed
+      // Check if dataset changed and if new dataset has language restrictions
       if (newQuery.dataset && !isEqual(curQuery.dataset, newQuery.dataset)) {
+        // Get supported languages for the dataset
+        const supportedLanguages = this.datasetService
+          .getType(newQuery.dataset.type)
+          ?.supportedLanguages(newQuery.dataset);
+
+        // If we have supported languages and current language isn't supported
+        if (supportedLanguages && !supportedLanguages.includes(newQuery.language)) {
+          // Get initial query with first supported language and new dataset
+          newQuery = this.getInitialQuery({
+            language: supportedLanguages[0],
+            dataset: newQuery.dataset,
+          });
+
+          // Show warning about language change
+          showWarning(this.notifications, {
+            title: i18n.translate('data.languageChangeTitle', {
+              defaultMessage: 'Language Changed',
+            }),
+            text: i18n.translate('data.languageChangeBody', {
+              defaultMessage: 'Query language changed to {supportedLanguage}.',
+              values: {
+                supportedLanguage:
+                  this.languageService.getLanguage(supportedLanguages[0])?.title ||
+                  supportedLanguages[0],
+              },
+            }),
+          });
+        }
+
+        // Add to recent datasets
         this.datasetService.addRecentDataset(newQuery.dataset);
       }
       this.query$.next(newQuery);
@@ -204,7 +234,6 @@ export class QueryStringManager {
    * If only language is provided, uses current dataset
    * If only dataset is provided, uses current or dataset's preferred language
    */
-  // TODO: claude write jest test for this
   public getInitialQuery = (partialQuery?: Partial<Query>) => {
     if (!partialQuery) {
       return this.getInitialQueryByLanguage(this.query$.getValue().language);
@@ -243,7 +272,6 @@ export class QueryStringManager {
    * Gets initial query for a language, preserving current dataset
    * Called by getInitialQuery when only language changes
    */
-  // TODO: claude write jest test for this
   public getInitialQueryByLanguage = (languageId: string) => {
     const curQuery = this.query$.getValue();
     const language = this.languageService.getLanguage(languageId);
@@ -264,7 +292,6 @@ export class QueryStringManager {
    * Gets initial query for a dataset, using dataset's preferred language or current language
    * Called by getInitialQuery when only dataset changes
    */
-  // TODO: claude write jest test for this
   public getInitialQueryByDataset = (newDataset: Dataset) => {
     const curQuery = this.query$.getValue();
     // Use dataset's preferred language or fallback to current language
@@ -320,7 +347,10 @@ export class QueryStringManager {
   };
 }
 
-const showWarning = (notifications: NotificationsSetup, { title, text }) => {
+const showWarning = (
+  notifications: NotificationsSetup,
+  { title, text }: { title: string; text: string }
+) => {
   notifications.toasts.addWarning({ title, text, id: 'unsupported_language_selected' });
 };
 
