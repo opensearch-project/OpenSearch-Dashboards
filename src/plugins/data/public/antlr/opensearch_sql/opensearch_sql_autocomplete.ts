@@ -14,6 +14,7 @@ import {
   ProcessVisitedRulesResult,
   TableOrViewSuggestion,
   OpenSearchSqlAutocompleteResult,
+  ColumnValuePredicate,
 } from '../shared/types';
 import { OpenSearchSQLLexer } from './.generated/OpenSearchSQLLexer';
 import {
@@ -81,6 +82,7 @@ const rulesToVisit = new Set([
   OpenSearchSQLParser.RULE_specificFunction,
   OpenSearchSQLParser.RULE_windowFunctionClause,
   OpenSearchSQLParser.RULE_comparisonOperator,
+  OpenSearchSQLParser.RULE_predicate,
 ]);
 
 class OpenSearchSqlSymbolTableVisitor
@@ -131,6 +133,7 @@ export function processVisitedRules(
   let shouldSuggestColumns = false;
   let shouldSuggestColumnAliases = false;
   let suggestValuesForColumn: string | undefined;
+  let suggestColumnValuePredicate: ColumnValuePredicate | undefined;
 
   for (const [ruleId, rule] of rules) {
     switch (ruleId) {
@@ -182,6 +185,39 @@ export function processVisitedRules(
         }
         break;
       }
+      case OpenSearchSQLParser.RULE_predicate: {
+        // need to check if we have a binary comparison predicate
+        // if we do, need to find out if we are in the field, value, or operator
+        // depending on which, just return an object that will flag any one of those three
+
+        const expressionStart = rule.startTokenIndex;
+
+        // basically walk through the tokens between the expressionStart and cursorTokenIndex,
+        // if we're only on the first token, we're in the column. if theres a first token, WS,
+        // then another token like EOF, we need to suggest operators. if we're past an operator,
+        // and we need to check if that middle token is an EQUAL because we only care about that,
+        // and we have a WS, we can go to value
+
+        if (expressionStart === cursorTokenIndex) {
+          suggestColumnValuePredicate = ColumnValuePredicate.COLUMN;
+          break;
+        }
+
+        if (expressionStart + 2 === cursorTokenIndex) {
+          suggestColumnValuePredicate = ColumnValuePredicate.OPERATOR;
+          break;
+        }
+
+        if (
+          tokenStream.get(expressionStart + 2).type === OpenSearchSQLParser.EQUAL_SYMBOL &&
+          expressionStart + 4 === cursorTokenIndex
+        ) {
+          suggestColumnValuePredicate = ColumnValuePredicate.VALUE;
+          break;
+        }
+
+        break;
+      }
     }
   }
 
@@ -192,6 +228,7 @@ export function processVisitedRules(
     shouldSuggestColumns,
     shouldSuggestColumnAliases,
     suggestValuesForColumn,
+    suggestColumnValuePredicate,
   };
 }
 

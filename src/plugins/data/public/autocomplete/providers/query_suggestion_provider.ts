@@ -31,7 +31,6 @@
 import { monaco } from '@osd/monaco';
 import { IFieldType, IndexPattern } from '../../../common/index_patterns';
 import { IDataPluginServices } from '../../types';
-import { Dataset } from '../../../common';
 
 export enum QuerySuggestionTypes {
   Field = 'field',

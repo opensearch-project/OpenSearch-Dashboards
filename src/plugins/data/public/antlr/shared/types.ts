@@ -26,6 +26,7 @@ export interface AutocompleteResultBase {
   suggestColumnAliases?: ColumnAliasSuggestion[];
   suggestDatabases?: boolean;
   suggestValuesForColumn?: string;
+  suggestColumnValuePredicate?: ColumnValuePredicate;
 }
 
 export interface ParserSyntaxError extends TokenPosition {
@@ -57,6 +58,12 @@ export interface Table {
 
 export interface ColumnAliasSuggestion {
   name: string;
+}
+
+export enum ColumnValuePredicate {
+  COLUMN = 'COLUMN',
+  VALUE = 'VALUE',
+  OPERATOR = 'OPERATOR',
 }
 
 export type LexerConstructor<T> = new (input: CharStream) => T;

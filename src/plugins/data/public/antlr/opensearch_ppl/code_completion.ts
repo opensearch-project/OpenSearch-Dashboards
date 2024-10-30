@@ -61,7 +61,7 @@ export const getSuggestions = async ({
             insertText: typeof val === 'string' ? `"${val}" ` : `${val} `,
             type: monaco.languages.CompletionItemKind.Value,
             detail: SuggestionItemDetailsTags.Value,
-            sortText: i.toString().padStart(3, '0'),
+            sortText: i.toString().padStart(3, '0'), // todo: change based on how many values can be returned
           };
         })
       );
