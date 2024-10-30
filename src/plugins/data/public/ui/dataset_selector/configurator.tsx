@@ -57,7 +57,7 @@ export const Configurator = ({
   const indexedViewsService = type?.indexedViewsService;
   const [selectedIndexedView, setSelectedIndexedView] = useState<string | undefined>();
   const [indexedViews, setIndexedViews] = useState<IndexedView[]>([]);
-  const [loadingIndexedViews, setLoadingIndexedViews] = useState(false);
+  const [isLoadingIndexedViews, setIsLoadingIndexedViews] = useState(false);
 
   useEffect(() => {
     setLanguages(type?.supportedLanguages(dataset) || []);
@@ -75,9 +75,9 @@ export const Configurator = ({
   useEffect(() => {
     const getIndexedViews = async () => {
       if (indexedViewsService) {
-        setLoadingIndexedViews(true);
+        setIsLoadingIndexedViews(true);
         const fetchedIndexedViews = await indexedViewsService.getIndexedViews(baseDataset);
-        setLoadingIndexedViews(false);
+        setIsLoadingIndexedViews(false);
         setIndexedViews(fetchedIndexedViews || []);
       }
     };
@@ -87,7 +87,7 @@ export const Configurator = ({
 
   const submitDisabled = useMemo(() => {
     return (
-      loadingIndexedViews ||
+      isLoadingIndexedViews ||
       (timeFieldName === undefined &&
         !(
           languageService.getLanguage(selectedLanguage)?.hideDatePicker ||
@@ -96,7 +96,14 @@ export const Configurator = ({
         timeFields &&
         timeFields.length > 0)
     );
-  }, [dataset, selectedLanguage, timeFieldName, timeFields, languageService, loadingIndexedViews]);
+  }, [
+    dataset,
+    selectedLanguage,
+    timeFieldName,
+    timeFields,
+    languageService,
+    isLoadingIndexedViews,
+  ]);
 
   useEffect(() => {
     const fetchFields = async () => {
@@ -165,7 +172,7 @@ export const Configurator = ({
               )}
             >
               <EuiSelect
-                isLoading={loadingIndexedViews}
+                isLoading={isLoadingIndexedViews}
                 options={indexedViews.map(({ name }) => ({
                   text: name,
                   value: name,

@@ -258,21 +258,26 @@ export interface DatasetField {
   // TODO:  osdFieldType?
 }
 
-export type CanvasBannerProps =
+export enum DatasetCanvasBannerComponentType {
+  Callout = 'callout',
+  Custom = 'custom',
+}
+
+export type DatasetCanvasBannerProps =
   | {
-      componentType: 'callout';
+      componentType: DatasetCanvasBannerComponentType.Callout;
       title: string;
       iconType?: string;
       content?: React.ReactNode;
     }
   | {
-      componentType: 'callout';
+      componentType: DatasetCanvasBannerComponentType.Callout;
       title?: string;
       iconType?: string;
       content: React.ReactNode;
     }
   | {
-      componentType: 'custom';
+      componentType: DatasetCanvasBannerComponentType.Custom;
       content: React.ReactNode;
     };
 
