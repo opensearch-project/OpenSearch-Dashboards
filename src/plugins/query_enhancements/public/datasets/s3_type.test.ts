@@ -141,7 +141,9 @@ describe('s3TypeConfig', () => {
 
     it('should fetch data sources for unknown type', async () => {
       mockSavedObjectsClient.find = jest.fn().mockResolvedValue({
-        savedObjects: [{ id: 'ds1', attributes: { title: 'DataSource 1' } }],
+        savedObjects: [
+          { id: 'ds1', attributes: { title: 'DataSource 1', dataSourceEngineType: 'OpenSearch' } },
+        ],
       });
 
       const result = await s3TypeConfig.fetch(mockServices as IDataPluginServices, [
@@ -159,7 +161,7 @@ describe('s3TypeConfig', () => {
           { id: 'ds1', attributes: { title: 'DataSource 1', dataSourceEngineType: 'OpenSearch' } },
           {
             id: 'ds2',
-            attributes: { title: 'DataSource 2', dataSourceEngineType: 'OpenSearch Serverless' },
+            attributes: { title: 'DataSource 2', dataSourceEngineType: 3 },
           },
           { id: 'ds3', attributes: { title: 'DataSource 3', dataSourceEngineType: 'OpenSearch' } },
         ],

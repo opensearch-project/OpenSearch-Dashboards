@@ -201,6 +201,7 @@ const fetchDataSources = async (client: SavedObjectsClientContract): Promise<Dat
     resp.savedObjects
       .filter(
         (savedObject) =>
+          typeof savedObject.attributes?.dataSourceEngineType === 'string' &&
           !savedObject.attributes?.dataSourceEngineType?.includes('OpenSearch Serverless')
       )
       .map((savedObject) => ({
