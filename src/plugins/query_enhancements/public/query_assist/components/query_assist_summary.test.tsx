@@ -45,7 +45,7 @@ describe('query assist summary', () => {
   const setSummary = jest.fn();
   const setLoading = jest.fn();
   const setFeedback = jest.fn();
-  const setIsSummaryAgent = jest.fn();
+  const setIsSummaryAgentAvailable = jest.fn();
   const setIsAssistantEnabledByCapability = jest.fn();
   const getQuery = jest.fn();
   const dataMock = {
@@ -123,7 +123,7 @@ describe('query assist summary', () => {
     summary,
     loading,
     feedback,
-    isSummaryAgent = false,
+    isSummaryAgentAvailable = false,
     isAssistantEnabledByCapability = true,
     isQueryAssistCollapsed = COLLAPSED.NO
   ) => {
@@ -134,7 +134,10 @@ describe('query assist summary', () => {
       isAssistantEnabledByCapability,
       setIsAssistantEnabledByCapability,
     ]);
-    React.useState.mockImplementationOnce(() => [isSummaryAgent, setIsSummaryAgent]);
+    React.useState.mockImplementationOnce(() => [
+      isSummaryAgentAvailable,
+      setIsSummaryAgentAvailable,
+    ]);
     useQueryAssist.mockImplementationOnce(() => ({
       question: 'question',
       question$,
@@ -161,7 +164,7 @@ describe('query assist summary', () => {
   });
 
   it('should not show if is not summary agent', () => {
-    (checkAgentsExist as jest.Mock).mockResolvedValue(false);
+    (checkAgentsExist as jest.Mock).mockResolvedValue({ exist: false });
     mockUseState(null, LOADING.NO, FEEDBACK.NONE, false);
     renderQueryAssistSummary(COLLAPSED.NO);
     const summaryPanels = screen.queryAllByTestId('queryAssist__summary');
