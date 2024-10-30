@@ -7,7 +7,7 @@ export const PLUGIN_ID = 'queryEnhancements';
 export const PLUGIN_NAME = 'queryEnhancements';
 
 export const BASE_API = '/api/enhancements';
-export const BASE_API_AGENT = '/api/assistant';
+export const BASE_API_ASSISTANT = '/api/assistant';
 
 export const DATASET = {
   S3: 'S3',
@@ -34,7 +34,7 @@ export const API = {
     CONNECTIONS: `${BASE_API}/connections`,
   },
   AGENT_API: {
-    CONFIG_EXISTS: `${BASE_API_AGENT}/agent_config/_exists`,
+    CONFIG_EXISTS: `${BASE_API_ASSISTANT}/agent_config/_exists`,
   },
 };
 
