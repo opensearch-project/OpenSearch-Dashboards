@@ -49,14 +49,14 @@ export const s3TypeConfig: DatasetTypeConfig = {
       type: DATASET.S3,
       dataSource: dataSource
         ? {
-            id: dataSource.id,
-            title: dataSource.title,
-            type: dataSource.type,
-            meta: {
-              ...table.meta,
-              supportsTimeFilter: s3TypeConfig.meta.supportsTimeFilter,
-            } as DataSourceMeta,
-          }
+          id: dataSource.id,
+          title: dataSource.title,
+          type: dataSource.type,
+          meta: {
+            ...table.meta,
+            supportsTimeFilter: s3TypeConfig.meta.supportsTimeFilter,
+          } as DataSourceMeta,
+        }
         : DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE,
     };
   },
@@ -198,7 +198,7 @@ const fetchDataSources = async (client: SavedObjectsClientContract): Promise<Dat
   });
   const dataSources: DataStructure[] = [DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE];
   return dataSources.concat(
-    resp.savedObjects.map((savedObject) => ({
+    resp.savedObjects.filter((savedObject) => savedObject.attributes.dataSourceEngineType !== 'OpenSearch Serverless').map((savedObject) => ({
       id: savedObject.id,
       title: savedObject.attributes.title,
       type: 'DATA_SOURCE',
