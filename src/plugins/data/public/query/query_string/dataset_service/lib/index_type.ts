@@ -37,10 +37,10 @@ export const indexTypeConfig: DatasetTypeConfig = {
       timeFieldName: indexMeta?.timeFieldName,
       dataSource: dataSource
         ? {
-          id: dataSource.id,
-          title: dataSource.title,
-          type: dataSource.type,
-        }
+            id: dataSource.id,
+            title: dataSource.title,
+            type: dataSource.type,
+          }
         : DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE,
     };
   },
@@ -120,11 +120,15 @@ const fetchDataSources = async (client: SavedObjectsClientContract) => {
     perPage: 10000,
   });
   const dataSources: DataStructure[] = [DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE].concat(
-    response.savedObjects.filter((savedObject) => savedObject.attributes.dataSourceEngineType !== 'OpenSearch Serverless').map((savedObject) => ({
-      id: savedObject.id,
-      title: savedObject.attributes.title,
-      type: 'DATA_SOURCE',
-    }))
+    response.savedObjects
+      .filter(
+        (savedObject) => savedObject.attributes.dataSourceEngineType !== 'OpenSearch Serverless'
+      )
+      .map((savedObject) => ({
+        id: savedObject.id,
+        title: savedObject.attributes.title,
+        type: 'DATA_SOURCE',
+      }))
   );
 
   return injectMetaToDataStructures(dataSources);
