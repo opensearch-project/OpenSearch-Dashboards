@@ -34,7 +34,6 @@ export const API = {
     CONNECTIONS: `${BASE_API}/connections`,
   },
   AGENT_API: {
-    EXECUTE: `${BASE_API_AGENT}/agent/_execute`,
     CONFIG_EXISTS: `${BASE_API_AGENT}/agent_config/_exists`,
   },
 };

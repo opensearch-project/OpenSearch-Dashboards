@@ -72,7 +72,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
   const [loading, setLoading] = useState(false); // track loading state
   const [feedback, setFeedback] = useState(FeedbackStatus.NONE);
   const [isEnabledByCapability, setIsEnabledByCapability] = useState(false);
-  const [isSummaryAgent, setIsSummaryAgent] = useState(false);
+  const [isSummaryAgentAvailable, setIsSummaryAgentAvailable] = useState(false);
   const selectedDataset = useRef(query.queryString.getQuery()?.dataset);
   const { question$, isQueryAssistCollapsed } = useQueryAssist();
   const METRIC_APP = `query-assist`;
@@ -210,15 +210,20 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
   }, [props.core]);
 
   useEffect(() => {
-    setIsSummaryAgent(false);
+    setIsSummaryAgentAvailable(false);
     const fetchSummaryAgent = async () => {
       if (selectedDataset.current?.dataSource?.id) {
-        const summaryAgentStatus = await checkAgentsExist(
-          props.http,
-          DATA2SUMMARY_AGENT_CONFIG_ID,
-          selectedDataset.current?.dataSource?.id
-        );
-        setIsSummaryAgent(summaryAgentStatus.exists);
+        try {
+          const summaryAgentStatus = await checkAgentsExist(
+            props.http,
+            DATA2SUMMARY_AGENT_CONFIG_ID,
+            selectedDataset.current?.dataSource?.id
+          );
+          setIsSummaryAgentAvailable(summaryAgentStatus.exists);
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(error);
+        }
       }
     };
     fetchSummaryAgent();
@@ -238,7 +243,7 @@ export const QueryAssistSummary: React.FC<QueryAssistSummaryProps> = (props) => 
     props.dependencies.isCollapsed ||
     isQueryAssistCollapsed ||
     !isEnabledByCapability ||
-    !isSummaryAgent
+    !isSummaryAgentAvailable
   ) {
     return null;
   }
