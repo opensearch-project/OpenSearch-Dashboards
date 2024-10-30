@@ -14,12 +14,12 @@ export const HISTORY_KEY_PREFIX = 'query_';
 export class QueryHistory {
   private changeEmitter: BehaviorSubject<any[]>;
 
-  constructor(private readonly sessionStorage: DataStorage) {
+  constructor(private readonly storage: DataStorage) {
     this.changeEmitter = new BehaviorSubject<any[]>(this.getHistory());
   }
 
   public getHistoryKeys(): string[] {
-    return this.sessionStorage
+    return this.storage
       .keys()
       .filter((key: string) => key.startsWith(HISTORY_KEY_PREFIX))
       .sort((a, b) => {
@@ -31,7 +31,7 @@ export class QueryHistory {
 
   public getHistory(): any[] {
     return this.getHistoryKeys()
-      .map((key) => this.sessionStorage.get(key))
+      .map((key) => this.storage.get(key))
       .sort((a, b) => b.time - a.time);
   }
 
@@ -45,13 +45,13 @@ export class QueryHistory {
 
     // Check if the query already exists
     const existingKey = existingKeys.find((key) => {
-      const item = this.sessionStorage.get(key);
+      const item = this.storage.get(key);
       return item && item.query.query === query.query && item.query.language === query.language;
     });
 
     if (existingKey) {
       // If the query exists, remove it from its current position
-      this.sessionStorage.remove(existingKey);
+      this.storage.remove(existingKey);
       existingKeys.splice(existingKeys.indexOf(existingKey), 1);
     }
 
@@ -64,12 +64,12 @@ export class QueryHistory {
       dateRange,
       id: uuid.v4(),
     };
-    this.sessionStorage.set(newKey, newItem);
+    this.storage.set(newKey, newItem);
 
     // Trim the history if it exceeds the maximum size
     if (existingKeys.length >= MAX_HISTORY_SIZE) {
       const keysToRemove = existingKeys.slice(MAX_HISTORY_SIZE - 1);
-      keysToRemove.forEach((key) => this.sessionStorage.remove(key));
+      keysToRemove.forEach((key) => this.storage.remove(key));
     }
 
     // Emit the updated history
@@ -77,11 +77,11 @@ export class QueryHistory {
   }
 
   public clearHistory(): void {
-    this.getHistoryKeys().forEach((key) => this.sessionStorage.remove(key));
+    this.getHistoryKeys().forEach((key) => this.storage.remove(key));
     this.changeEmitter.next([]);
   }
 }
 
-export function createHistory(deps: { sessionStorage: DataStorage }): QueryHistory {
-  return new QueryHistory(deps.sessionStorage);
+export function createHistory(deps: { storage: DataStorage }): QueryHistory {
+  return new QueryHistory(deps.storage);
 }
