@@ -100,7 +100,7 @@ export class Facet {
     const response = this.useJobs
       ? await this.fetchJobs(context, request, this.endpoint)
       : await this.fetch(context, request, this.endpoint);
-    if (!this.shimResponse) return response;
+    if (response.success === false || !this.shimResponse) return response;
 
     const { format: dataType } = request.body;
     const shimFunctions: { [key: string]: (data: any) => any } = {
