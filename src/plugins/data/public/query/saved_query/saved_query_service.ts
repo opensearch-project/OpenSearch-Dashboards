@@ -34,6 +34,7 @@ import { first } from 'rxjs/operators';
 import { SavedQueryAttributes, SavedQuery, SavedQueryService } from './types';
 import { QueryStringContract } from '../query_string';
 import { getUseNewSavedQueriesUI } from '../../services';
+import { UI_SETTINGS } from '../../../common';
 
 type SerializedSavedQueryAttributes = SavedObjectAttributes & SavedQueryAttributes;
 
@@ -42,7 +43,8 @@ export const createSavedQueryService = (
   coreStartServices: { application: CoreStart['application']; uiSettings: CoreStart['uiSettings'] },
   queryStringManager?: QueryStringContract
 ): SavedQueryService => {
-  const { application } = coreStartServices;
+  const { application, uiSettings } = coreStartServices;
+  const queryEnhancementEnabled = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
 
   const saveQuery = async (attributes: SavedQueryAttributes, { overwrite = false } = {}) => {
     if (!attributes.title.length) {
@@ -58,7 +60,7 @@ export const createSavedQueryService = (
       language: attributes.query.language,
     };
 
-    if (getUseNewSavedQueriesUI() && attributes.query.dataset) {
+    if (queryEnhancementEnabled && attributes.query.dataset) {
       query.dataset = attributes.query.dataset;
     }
 
@@ -182,8 +184,11 @@ export const createSavedQueryService = (
       },
     };
 
-    if (getUseNewSavedQueriesUI()) {
+    if (queryEnhancementEnabled) {
       savedQueryItem.query.dataset = savedQuery.attributes.query.dataset;
+    }
+
+    if (getUseNewSavedQueriesUI()) {
       savedQueryItem.isTemplate = !!savedQuery.attributes.isTemplate;
     }
 

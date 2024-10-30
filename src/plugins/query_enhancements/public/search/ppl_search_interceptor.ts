@@ -47,6 +47,9 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       http: this.deps.http,
       path: trimEnd(`${API.SEARCH}/${strategy}`),
       signal,
+      body: {
+        pollQueryResultsParams: request.params?.pollQueryResultsParams,
+      },
     };
 
     const query = this.buildQuery();
