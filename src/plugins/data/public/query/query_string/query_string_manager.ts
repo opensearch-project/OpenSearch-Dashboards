@@ -156,6 +156,10 @@ export class QueryStringManager {
     const curQuery = this.query$.getValue();
     const newQuery = { ...curQuery, ...query };
     if (!isEqual(curQuery, newQuery)) {
+      // Add to recent datasets if dataset has changed
+      if (newQuery.dataset && !isEqual(curQuery.dataset, newQuery.dataset)) {
+        this.datasetService.addRecentDataset(newQuery.dataset);
+      }
       this.query$.next(newQuery);
     }
   };
@@ -194,34 +198,88 @@ export class QueryStringManager {
     return this.languageService;
   };
 
-  public getInitialQuery = () => {
-    return this.getInitialQueryByLanguage(this.query$.getValue().language);
+  /**
+   * Gets the initial query based on the provided partial query object.
+   * If both language and dataset are provided, generates a new query without using current state
+   * If only language is provided, uses current dataset
+   * If only dataset is provided, uses current or dataset's preferred language
+   */
+  // TODO: claude write jest test for this
+  public getInitialQuery = (partialQuery?: Partial<Query>) => {
+    if (!partialQuery) {
+      return this.getInitialQueryByLanguage(this.query$.getValue().language);
+    }
+
+    const { language, dataset } = partialQuery;
+    const currentQuery = this.query$.getValue();
+
+    // Both language and dataset provided - generate fresh query
+    if (language && dataset) {
+      const languageService = this.languageService.getLanguage(language);
+      const newQuery = {
+        language,
+        dataset,
+        query: '',
+      };
+      newQuery.query = languageService?.getQueryString(newQuery) || '';
+      return newQuery;
+    }
+
+    // Only dataset provided - use dataset's preferred language or current language
+    if (dataset) {
+      return this.getInitialQueryByDataset(dataset);
+    }
+
+    // Only language provided - use current dataset
+    if (language) {
+      return this.getInitialQueryByLanguage(language);
+    }
+
+    // Fallback to current query
+    return currentQuery;
   };
 
+  /**
+   * Gets initial query for a language, preserving current dataset
+   * Called by getInitialQuery when only language changes
+   */
+  // TODO: claude write jest test for this
   public getInitialQueryByLanguage = (languageId: string) => {
     const curQuery = this.query$.getValue();
     const language = this.languageService.getLanguage(languageId);
-    const dataset = curQuery.dataset;
-    const input = language?.getQueryString(curQuery) || '';
-    this.languageService.setUserQueryString(input);
-
-    return {
-      query: input,
+    const newQuery = {
+      ...curQuery,
       language: languageId,
-      dataset,
     };
-  };
-
-  public getInitialQueryByDataset = (newDataset: Dataset) => {
-    const curQuery = this.query$.getValue();
-    const languageId = newDataset.language || curQuery.language;
-    const language = this.languageService.getLanguage(languageId);
-    const newQuery = { ...curQuery, language: languageId, dataset: newDataset };
-    const newQueryString = language?.getQueryString(newQuery) || '';
+    const queryString = language?.getQueryString(newQuery) || '';
+    this.languageService.setUserQueryString(queryString);
 
     return {
       ...newQuery,
-      query: newQueryString,
+      query: queryString,
+    };
+  };
+
+  /**
+   * Gets initial query for a dataset, using dataset's preferred language or current language
+   * Called by getInitialQuery when only dataset changes
+   */
+  // TODO: claude write jest test for this
+  public getInitialQueryByDataset = (newDataset: Dataset) => {
+    const curQuery = this.query$.getValue();
+    // Use dataset's preferred language or fallback to current language
+    const languageId = newDataset.language || curQuery.language;
+    const language = this.languageService.getLanguage(languageId);
+    const newQuery = {
+      ...curQuery,
+      language: languageId,
+      dataset: newDataset,
+    };
+    const queryString = language?.getQueryString(newQuery) || '';
+
+    return {
+      ...newQuery,
+      query: queryString,
     };
   };
 

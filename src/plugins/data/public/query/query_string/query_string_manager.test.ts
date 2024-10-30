@@ -49,7 +49,8 @@ describe('QueryStringManager', () => {
       storage,
       sessionStorage,
       coreMock.createSetup().uiSettings,
-      mockSearchInterceptor
+      mockSearchInterceptor,
+      coreMock.createStart().notifications
     );
   });
 
@@ -138,5 +139,60 @@ describe('QueryStringManager', () => {
     };
     const query = service.getInitialQueryByDataset(dataset);
     expect(query).toHaveProperty('dataset', dataset);
+  });
+
+  describe('getInitialQuery', () => {
+    const mockDataset = {
+      id: 'test-dataset',
+      title: 'Test Dataset',
+      type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+      language: 'sql',
+    };
+
+    beforeEach(() => {
+      service.setQuery({
+        query: 'initial query',
+        language: 'kuery',
+        dataset: {
+          id: 'current-dataset',
+          title: 'Current Dataset',
+          type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+        },
+      });
+    });
+
+    test('returns current language query when no params provided', () => {
+      const result = service.getInitialQuery();
+      expect(result.language).toBe('kuery');
+      expect(result.dataset).toBeDefined();
+    });
+
+    test('generates new query when both language and dataset provided', () => {
+      const result = service.getInitialQuery({
+        language: 'sql',
+        dataset: mockDataset,
+      });
+
+      expect(result.language).toBe('sql');
+      expect(result.dataset).toBe(mockDataset);
+      expect(result.query).toBeDefined();
+    });
+
+    test('uses dataset preferred language when only dataset provided', () => {
+      const result = service.getInitialQuery({ dataset: mockDataset });
+
+      expect(result.language).toBe(mockDataset.language);
+      expect(result.dataset).toBe(mockDataset);
+      expect(result.query).toBeDefined();
+    });
+
+    test('uses current dataset when only language provided', () => {
+      const currentDataset = service.getQuery().dataset;
+      const result = service.getInitialQuery({ language: 'ppl' });
+
+      expect(result.language).toBe('ppl');
+      expect(result.dataset).toEqual(currentDataset);
+      expect(result.query).toBeDefined();
+    });
   });
 });

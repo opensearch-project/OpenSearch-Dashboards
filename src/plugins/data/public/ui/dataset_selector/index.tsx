@@ -40,15 +40,12 @@ const ConnectedDatasetSelector = ({
     };
   }, [queryString]);
 
-  const handleDatasetChange = useCallback(
-    (dataset?: Dataset) => {
-      setSelectedDataset(dataset);
-      if (dataset) {
-        const query = queryString.getInitialQueryByDataset(dataset);
-        queryString.setQuery(query);
-        onSubmit!(queryString.getQuery());
-        queryString.getDatasetService().addRecentDataset(dataset);
-      }
+  const onSelect = useCallback(
+    (partialQuery: Partial<Query>) => {
+      const query = queryString.getInitialQuery(partialQuery);
+      setSelectedDataset(query.dataset);
+      queryString.setQuery(query);
+      onSubmit!(query);
     },
     [onSubmit, queryString]
   );
@@ -57,7 +54,7 @@ const ConnectedDatasetSelector = ({
     <DatasetSelector
       {...datasetSelectorProps}
       selectedDataset={selectedDataset}
-      setSelectedDataset={handleDatasetChange}
+      onSelect={onSelect}
       services={services}
     />
   );

@@ -106,6 +106,93 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
   }
   services={
     Object {
+      "data": Object {
+        "query": Object {
+          "queryString": Object {
+            "getDatasetService": [Function],
+            "getLanguageService": [Function],
+            "getQuery": [MockFunction] {
+              "calls": Array [
+                Array [],
+                Array [],
+                Array [],
+                Array [],
+                Array [],
+                Array [],
+                Array [],
+                Array [],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "lucene",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "lucene",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "lucene",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "lucene",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "kuery",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "kuery",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "kuery",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "kuery",
+                    "query": "",
+                  },
+                },
+              ],
+            },
+            "getUpdates$": [MockFunction],
+          },
+        },
+      },
       "docLinks": Object {
         "DOC_LINK_VERSION": "mocked-test-branch",
         "OPENSEARCH_WEBSITE_URL": "https://opensearch.org/",
@@ -474,6 +561,32 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
           },
         },
       },
+      "http": Object {
+        "addLoadingCountSource": [MockFunction],
+        "anonymousPaths": Object {
+          "isAnonymous": [MockFunction],
+          "register": [MockFunction],
+        },
+        "basePath": BasePath {
+          "basePath": "",
+          "clientBasePath": "",
+          "get": [Function],
+          "getBasePath": [Function],
+          "prepend": [Function],
+          "remove": [Function],
+          "serverBasePath": "",
+        },
+        "delete": [MockFunction],
+        "fetch": [MockFunction],
+        "get": [MockFunction],
+        "getLoadingCount$": [MockFunction],
+        "head": [MockFunction],
+        "intercept": [MockFunction],
+        "options": [MockFunction],
+        "patch": [MockFunction],
+        "post": [MockFunction],
+        "put": [MockFunction],
+      },
       "uiSettings": Object {
         "get": [MockFunction],
         "get$": [MockFunction],
@@ -495,12 +608,6 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
 >
   <QueryLanguageSelector
     onSelectLanguage={[MockFunction]}
-    query={
-      Object {
-        "language": "kuery",
-        "query": "",
-      }
-    }
   >
     <EuiPopover
       anchorPosition="downLeft"
@@ -698,6 +805,57 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
   }
   services={
     Object {
+      "data": Object {
+        "query": Object {
+          "queryString": Object {
+            "getDatasetService": [Function],
+            "getLanguageService": [Function],
+            "getQuery": [MockFunction] {
+              "calls": Array [
+                Array [],
+                Array [],
+                Array [],
+                Array [],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "lucene",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "lucene",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "lucene",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "lucene",
+                    "query": "",
+                  },
+                },
+              ],
+            },
+            "getUpdates$": [MockFunction],
+          },
+        },
+      },
       "docLinks": Object {
         "DOC_LINK_VERSION": "mocked-test-branch",
         "OPENSEARCH_WEBSITE_URL": "https://opensearch.org/",
@@ -1066,6 +1224,32 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
           },
         },
       },
+      "http": Object {
+        "addLoadingCountSource": [MockFunction],
+        "anonymousPaths": Object {
+          "isAnonymous": [MockFunction],
+          "register": [MockFunction],
+        },
+        "basePath": BasePath {
+          "basePath": "",
+          "clientBasePath": "",
+          "get": [Function],
+          "getBasePath": [Function],
+          "prepend": [Function],
+          "remove": [Function],
+          "serverBasePath": "",
+        },
+        "delete": [MockFunction],
+        "fetch": [MockFunction],
+        "get": [MockFunction],
+        "getLoadingCount$": [MockFunction],
+        "head": [MockFunction],
+        "intercept": [MockFunction],
+        "options": [MockFunction],
+        "patch": [MockFunction],
+        "post": [MockFunction],
+        "put": [MockFunction],
+      },
       "uiSettings": Object {
         "get": [MockFunction],
         "get$": [MockFunction],
@@ -1087,12 +1271,6 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
 >
   <QueryLanguageSelector
     onSelectLanguage={[MockFunction]}
-    query={
-      Object {
-        "language": "lucene",
-        "query": "",
-      }
-    }
   >
     <EuiPopover
       anchorPosition="downLeft"

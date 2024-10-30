@@ -70,7 +70,7 @@ describe('DatasetSelector', () => {
   it('should fetch datasets once on mount', async () => {
     const props = {
       selectedDataset: undefined as Dataset | undefined,
-      setSelectedDataset: jest.fn(),
+      onSelect: jest.fn(),
       services: mockServices,
     };
 
@@ -83,7 +83,7 @@ describe('DatasetSelector', () => {
   it('should not fetch datasets on re-render', async () => {
     const props = {
       selectedDataset: undefined as Dataset | undefined,
-      setSelectedDataset: jest.fn(),
+      onSelect: jest.fn(),
       services: mockServices,
     };
 
@@ -100,7 +100,7 @@ describe('DatasetSelector', () => {
   it('should not update datasets state on re-render', async () => {
     const props = {
       selectedDataset: undefined as Dataset | undefined,
-      setSelectedDataset: jest.fn(),
+      onSelect: jest.fn(),
       services: mockServices,
     };
 
