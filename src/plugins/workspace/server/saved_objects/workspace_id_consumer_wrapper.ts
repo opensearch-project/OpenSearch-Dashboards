@@ -54,15 +54,15 @@ export class WorkspaceIdConsumerWrapper {
     wrapperOptions: SavedObjectsClientWrapperOptions
   ) {
     if (finalOptions.workspaces?.length) {
-      let isAllTargetWorkspaceExisting = false;
+      let invalidWorkspaces: string[] = [];
       // If only has one workspace, we should use get to optimize performance
       if (finalOptions.workspaces.length === 1) {
         const workspaceGet = await this.workspaceClient.get(
           { request: wrapperOptions.request },
           finalOptions.workspaces[0]
         );
-        if (workspaceGet.success) {
-          isAllTargetWorkspaceExisting = true;
+        if (!workspaceGet.success) {
+          invalidWorkspaces = [finalOptions.workspaces[0]];
         }
       } else {
         const workspaceList = await this.workspaceClient.list(
@@ -77,17 +77,18 @@ export class WorkspaceIdConsumerWrapper {
           const workspaceIdsSet = new Set(
             workspaceList.result.workspaces.map((workspace) => workspace.id)
           );
-          isAllTargetWorkspaceExisting = finalOptions.workspaces.every((targetWorkspace) =>
-            workspaceIdsSet.has(targetWorkspace)
+          invalidWorkspaces = finalOptions.workspaces.filter(
+            (targetWorkspace) => !workspaceIdsSet.has(targetWorkspace)
           );
         }
       }
 
-      if (!isAllTargetWorkspaceExisting) {
+      if (invalidWorkspaces.length > 0) {
         throw SavedObjectsErrorHelpers.decorateBadRequestError(
           new Error(
             i18n.translate('workspace.id_consumer.invalid', {
-              defaultMessage: 'Invalid workspaces',
+              defaultMessage: 'Invalid workspaces: {invalidWorkspaces}',
+              values: { invalidWorkspaces: invalidWorkspaces.join(', ') },
             })
           )
         );

@@ -104,7 +104,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
           },
           { workspaces: ['zoo', 'noo'] }
         )
-      ).rejects.toMatchInlineSnapshot(`[Error: Invalid workspaces]`);
+      ).rejects.toMatchInlineSnapshot(`[Error: Invalid workspaces: zoo, noo]`);
       expect(mockedWorkspaceClient.get).toBeCalledTimes(0);
       expect(mockedWorkspaceClient.list).toBeCalledTimes(1);
     });
@@ -148,7 +148,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
             id: 'foo',
           }),
         ])
-      ).rejects.toMatchInlineSnapshot(`[Error: Invalid workspaces]`);
+      ).rejects.toMatchInlineSnapshot(`[Error: Invalid workspaces: foo]`);
       expect(mockedWorkspaceClient.get).toBeCalledTimes(1);
       expect(mockedWorkspaceClient.list).toBeCalledTimes(0);
     });
@@ -238,7 +238,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
           type: ['dashboard', 'visualization'],
           workspaces: ['foo', 'not-exist'],
         })
-      ).rejects.toMatchInlineSnapshot(`[Error: Invalid workspaces]`);
+      ).rejects.toMatchInlineSnapshot(`[Error: Invalid workspaces: not-exist]`);
       expect(mockedWorkspaceClient.get).toBeCalledTimes(0);
       expect(mockedWorkspaceClient.list).toBeCalledTimes(1);
     });
