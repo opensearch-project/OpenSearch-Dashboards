@@ -214,6 +214,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           paddingSize="none"
           color="subdued"
           hasShadow={false}
+          style={{ backgroundColor: 'transparent' }}
         >
           {isFormReadyToRender && (
             <WorkspaceCreatorForm
