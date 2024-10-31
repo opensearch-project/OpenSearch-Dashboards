@@ -124,9 +124,6 @@ export const RecentItems = ({
   const navLinks = useObservable(navLinks$, []);
   const loadingCount = useObservable(loadingCount$, 0);
 
-  // eslint-disable-next-line
-  console.log('loadingCount', loadingCount);
-
   const handleItemClick = (link: string) => {
     navigateToUrl(link);
     setIsPopoverOpen(false);
