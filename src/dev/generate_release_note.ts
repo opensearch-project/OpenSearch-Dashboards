@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ToolingLog } from '@osd/dev-utils';
 import { join, resolve } from 'path';
 import { readFileSync, writeFileSync, Dirent, rm, rename, promises as fsPromises } from 'fs';
 import { load as loadYaml } from 'js-yaml';
@@ -19,11 +18,6 @@ import {
   releaseNotesDirPath,
   filePath,
 } from './generate_release_note_helper';
-
-const log = new ToolingLog({
-  level: 'info',
-  writeTo: process.stdout,
-});
 
 // Function to add content after the 'Unreleased' section in the changelog
 function addContentAfterUnreleased(path: string, newContent: string): void {
@@ -66,63 +60,35 @@ async function readFragments() {
   ) as unknown) as Changelog;
 
   const fragmentPaths = await readdir(fragmentDirPath, { withFileTypes: true });
-  const failedFragments: string[] = [];
-
   for (const fragmentFilename of fragmentPaths) {
     // skip non yml or yaml files
     if (!/\.ya?ml$/i.test(fragmentFilename.name)) {
-      log.info(`Skipping non yml or yaml file ${fragmentFilename.name}`);
+      // eslint-disable-next-line no-console
+      console.warn(`Skipping non yml or yaml file ${fragmentFilename.name}`);
       continue;
     }
 
-    try {
-      const fragmentPath = join(fragmentDirPath, fragmentFilename.name);
-      const fragmentContents = readFileSync(fragmentPath, { encoding: 'utf-8' });
+    const fragmentPath = join(fragmentDirPath, fragmentFilename.name);
+    const fragmentContents = readFileSync(fragmentPath, { encoding: 'utf-8' });
 
-      try {
-        validateFragment(fragmentContents);
-      } catch (validationError) {
-        log.info(`Validation failed for ${fragmentFilename.name}: ${validationError.message}`);
-        failedFragments.push(
-          `${fragmentFilename.name} (Validation Error: ${validationError.message})`
-        );
-        continue;
-      }
+    validateFragment(fragmentContents);
 
-      const fragmentContentLines = fragmentContents.split('\n');
-      // Adding a quotes to the second line and escaping existing " within the line
-      fragmentContentLines[1] = fragmentContentLines[1].replace(/-\s*(.*)/, (match, p1) => {
-        // Escape any existing quotes in the content
-        const escapedContent = p1.replace(/"/g, '\\"');
-        return `- "${escapedContent}"`;
-      });
+    const fragmentContentLines = fragmentContents.split('\n');
+    // Adding a quotes to the second line and escaping exisiting " within the line
+    fragmentContentLines[1] = fragmentContentLines[1].replace(/-\s*(.*)/, (match, p1) => {
+      // Escape any existing quotes in the content
+      const escapedContent = p1.replace(/"/g, '\\"');
+      return `- "${escapedContent}"`;
+    });
 
-      const processedFragmentContent = fragmentContentLines.join('\n');
+    const processedFragmentContent = fragmentContentLines.join('\n');
 
-      try {
-        const fragmentYaml = loadYaml(processedFragmentContent) as Changelog;
-        for (const [sectionKey, entries] of Object.entries(fragmentYaml)) {
-          sections[sectionKey as SectionKey].push(...entries);
-        }
-      } catch (yamlError) {
-        log.info(`Failed to parse YAML in ${fragmentFilename.name}: ${yamlError.message}`);
-        failedFragments.push(`${fragmentFilename.name} (YAML Parse Error: ${yamlError.message})`);
-        continue;
-      }
-    } catch (error) {
-      log.info(`Failed to process ${fragmentFilename.name}: ${error.message}`);
-      failedFragments.push(`${fragmentFilename.name} (Processing Error: ${error.message})`);
-      continue;
+    const fragmentYaml = loadYaml(processedFragmentContent) as Changelog;
+    for (const [sectionKey, entries] of Object.entries(fragmentYaml)) {
+      sections[sectionKey as SectionKey].push(...entries);
     }
   }
-
-  if (failedFragments.length > 0) {
-    log.info('\nThe following changelog fragments were skipped due to errors:');
-    failedFragments.forEach((fragment) => log.info(`- ${fragment}`));
-    log.info('\nPlease review and fix these fragments for inclusion in the next release.\n');
-  }
-
-  return { sections, fragmentPaths, failedFragments };
+  return { sections, fragmentPaths };
 }
 
 async function moveFragments(fragmentPaths: Dirent[], fragmentTempDirPath: string): Promise<void> {
@@ -162,22 +128,16 @@ function generateReleaseNote(changelogSections: string[]) {
 }
 
 (async () => {
-  const { sections, fragmentPaths, failedFragments } = await readFragments();
+  const { sections, fragmentPaths } = await readFragments();
+  // create folder for temp fragments
+  const fragmentTempDirPath = await fsPromises.mkdtemp(join(fragmentDirPath, 'tmp_fragments-'));
+  // move fragments to temp fragments folder
+  await moveFragments(fragmentPaths, fragmentTempDirPath);
 
-  // Only proceed if we have some valid fragments
-  if (Object.values(sections).some((section) => section.length > 0)) {
-    // create folder for temp fragments
-    const fragmentTempDirPath = await fsPromises.mkdtemp(join(fragmentDirPath, 'tmp_fragments-'));
-    // move fragments to temp fragments folder
-    await moveFragments(fragmentPaths, fragmentTempDirPath);
+  const changelogSections = generateChangelog(sections);
 
-    const changelogSections = generateChangelog(sections);
-    generateReleaseNote(changelogSections);
+  generateReleaseNote(changelogSections);
 
-    // remove temp fragments folder
-    await deleteFragments(fragmentTempDirPath);
-  } else {
-    log.error('No valid changelog entries were found. Release notes generation aborted.');
-    process.exit(1);
-  }
+  // remove temp fragments folder
+  await deleteFragments(fragmentTempDirPath);
 })();

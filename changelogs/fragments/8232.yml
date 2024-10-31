@@ -1,2 +1,0 @@
-fix:
-- Use @osd/std to prettify objects for display ([#8232](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8232))
