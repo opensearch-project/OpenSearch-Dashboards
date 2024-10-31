@@ -953,7 +953,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
               />
             </EuiButtonEmpty>
 
-            <EuiButton type="submit" onClick={onConfirm} fill color="danger">
+            <EuiButton
+              type="submit"
+              onClick={onConfirm}
+              fill
+              color="danger"
+              disabled={isDeleting ? true : false}
+            >
               {isDeleting ? (
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteProcessButtonLabel"

@@ -75,6 +75,7 @@ exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
     </EuiButtonEmpty>
     <EuiButton
       color="danger"
+      disabled={false}
       fill={true}
       onClick={[Function]}
       type="submit"
@@ -114,6 +115,7 @@ exports[`SavedObjectsTable delete should show a confirm modal 3`] = `
   </EuiButtonEmpty>
   <EuiButton
     color="danger"
+    disabled={false}
     fill={true}
     onClick={[Function]}
     type="submit"
@@ -200,6 +202,7 @@ exports[`SavedObjectsTable delete should show error toast when failing to delete
     </EuiButtonEmpty>
     <EuiButton
       color="danger"
+      disabled={false}
       fill={true}
       onClick={[Function]}
       type="submit"
@@ -285,6 +288,7 @@ exports[`SavedObjectsTable delete should show error toast when failing to delete
     </EuiButtonEmpty>
     <EuiButton
       color="danger"
+      disabled={false}
       fill={true}
       onClick={[Function]}
       type="submit"
