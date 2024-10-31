@@ -141,7 +141,9 @@ describe('s3TypeConfig', () => {
 
     it('should fetch data sources for unknown type', async () => {
       mockSavedObjectsClient.find = jest.fn().mockResolvedValue({
-        savedObjects: [{ id: 'ds1', attributes: { title: 'DataSource 1' } }],
+        savedObjects: [
+          { id: 'ds1', attributes: { title: 'DataSource 1', dataSourceEngineType: 'OpenSearch' } },
+        ],
       });
 
       const result = await s3TypeConfig.fetch(mockServices as IDataPluginServices, [
@@ -150,6 +152,29 @@ describe('s3TypeConfig', () => {
 
       expect(result.children).toHaveLength(2); // Including DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE
       expect(result.children?.[1].title).toBe('DataSource 1');
+      expect(result.hasNext).toBe(true);
+    });
+
+    it('should filter out OpenSearch Serverless data sources', async () => {
+      mockSavedObjectsClient.find = jest.fn().mockResolvedValue({
+        savedObjects: [
+          { id: 'ds1', attributes: { title: 'DataSource 1', dataSourceEngineType: 'OpenSearch' } },
+          {
+            id: 'ds2',
+            attributes: { title: 'DataSource 2', dataSourceEngineType: 'OpenSearch Serverless' },
+          },
+          { id: 'ds3', attributes: { title: 'DataSource 3', dataSourceEngineType: 'OpenSearch' } },
+        ],
+      });
+
+      const result = await s3TypeConfig.fetch(mockServices as IDataPluginServices, [
+        { id: 'unknown', title: 'Unknown', type: 'UNKNOWN' },
+      ]);
+
+      expect(result.children).toHaveLength(3); // Including DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE
+      expect(result.children?.[1].title).toBe('DataSource 1');
+      expect(result.children?.[2].title).toBe('DataSource 3');
+      expect(result.children?.some((child) => child.title === 'DataSource 2')).toBe(false);
       expect(result.hasNext).toBe(true);
     });
   });

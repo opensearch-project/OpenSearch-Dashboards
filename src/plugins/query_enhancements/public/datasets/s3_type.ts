@@ -198,17 +198,23 @@ const fetchDataSources = async (client: SavedObjectsClientContract): Promise<Dat
   });
   const dataSources: DataStructure[] = [DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE];
   return dataSources.concat(
-    resp.savedObjects.map((savedObject) => ({
-      id: savedObject.id,
-      title: savedObject.attributes.title,
-      type: 'DATA_SOURCE',
-      meta: {
-        query: {
-          id: savedObject.id,
-        },
-        type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-      } as DataStructureCustomMeta,
-    }))
+    resp.savedObjects
+      .filter(
+        (savedObject) =>
+          typeof savedObject.attributes?.dataSourceEngineType === 'string' &&
+          !savedObject.attributes?.dataSourceEngineType?.includes('OpenSearch Serverless')
+      )
+      .map((savedObject) => ({
+        id: savedObject.id,
+        title: savedObject.attributes.title,
+        type: 'DATA_SOURCE',
+        meta: {
+          query: {
+            id: savedObject.id,
+          },
+          type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+        } as DataStructureCustomMeta,
+      }))
   );
 };
 
