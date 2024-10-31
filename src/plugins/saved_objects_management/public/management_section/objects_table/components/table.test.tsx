@@ -84,7 +84,7 @@ const defaultProps: TableProps = {
   canGoInApp: () => true,
   pageIndex: 1,
   pageSize: 2,
-  workspaceIdNameMap: new Map([
+  workspaceNameIdLookup: new Map([
     ['test1', 'jVyiM7'],
     ['test2', '8rZ0OL'],
     ['test3', 'evIuNZ'],

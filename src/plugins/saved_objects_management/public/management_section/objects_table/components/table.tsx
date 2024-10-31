@@ -188,7 +188,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       pageSize,
       itemId,
       items,
-      workspaceIdNameMap,
+      workspaceNameIdLookup,
       totalItemCount,
       isSearching,
       filters,
@@ -313,7 +313,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           const displayedWorkspaces = workspaces.slice(0, 1);
           const remainingWorkspaces = workspaces.length - 1;
           const getWorkspaceNameById = (workspaceId: string) => {
-            for (const [name, id] of workspaceIdNameMap) {
+            for (const [name, id] of workspaceNameIdLookup) {
               if (id === workspaceId) {
                 return name;
               }
