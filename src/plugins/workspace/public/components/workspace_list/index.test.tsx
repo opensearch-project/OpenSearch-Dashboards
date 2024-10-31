@@ -302,6 +302,29 @@ describe('WorkspaceList', () => {
     expect(queryByText('Create workspace')).toBeNull();
   });
 
+  it('displays "Delete 1 workspace" when one workspace is selected for deletion', async () => {
+    const { getByText, container, getByTestId } = render(getWrapWorkspaceListInContext());
+    const checkboxes = container.querySelectorAll('[data-test-subj^="checkboxSelectRow-"]');
+    expect(checkboxes.length).toBeGreaterThanOrEqual(2);
+    fireEvent.click(checkboxes[0]);
+    expect(getByText('Delete 1 workspace')).toBeInTheDocument();
+    const deleteButton = getByTestId('workspace-list-page-delete-button');
+    fireEvent.click(deleteButton);
+    expect(screen.queryByLabelText('mock delete workspace modal')).toBeInTheDocument();
+  });
+
+  it('should display "Delete 2 workspaces" and show modal when two workspaces are selected for deletion', async () => {
+    const { getByText, container, getByTestId } = render(getWrapWorkspaceListInContext());
+    const checkboxes = container.querySelectorAll('[data-test-subj^="checkboxSelectRow-"]');
+    expect(checkboxes.length).toBeGreaterThanOrEqual(2);
+    fireEvent.click(checkboxes[0]);
+    fireEvent.click(checkboxes[1]);
+    expect(getByText('Delete 2 workspaces')).toBeInTheDocument();
+    const deleteButton = getByTestId('workspace-list-page-delete-button');
+    fireEvent.click(deleteButton);
+    expect(screen.queryByLabelText('mock delete workspace modal')).toBeInTheDocument();
+  });
+
   it('should render data source badge when more than two data sources', async () => {
     const { getByTestId } = render(getWrapWorkspaceListInContext());
     await waitFor(() => {

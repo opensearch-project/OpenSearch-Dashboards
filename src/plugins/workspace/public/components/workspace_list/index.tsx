@@ -354,7 +354,13 @@ export const WorkspaceListInner = ({
             size="s"
             data-test-subj="multi-deletion-button"
           >
-            Delete {selection.length} Workspace
+            {i18n.translate('workspace.list.page.delete.button.info', {
+              defaultMessage: 'Delete {num} workspace{pluralSuffix, select, true {} other {s}}',
+              values: {
+                num: selection.length,
+                pluralSuffix: selection.length === 1,
+              },
+            })}
           </EuiButton>
           {deletedWorkspaces && deletedWorkspaces.length > 0 && (
             <DeleteWorkspaceModal
