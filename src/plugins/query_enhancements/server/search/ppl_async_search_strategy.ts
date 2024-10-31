@@ -59,6 +59,9 @@ export const pplAsyncSearchStrategyProvider = (
         } else {
           request.params = { queryId: inProgressQueryId };
           const queryStatusResponse: any = await pplAsyncJobsFacet.describeQuery(context, request);
+
+          if (!queryStatusResponse.success) handleFacetError(queryStatusResponse);
+
           const queryStatus = queryStatusResponse?.data?.status;
           logger.info(`pplAsyncSearchStrategy: JOB: ${inProgressQueryId} - STATUS: ${queryStatus}`);
 
