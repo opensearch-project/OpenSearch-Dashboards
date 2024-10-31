@@ -4,21 +4,26 @@
  */
 import { i18n } from '@osd/i18n';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
+import { DataStorage } from '../../data/common';
+import {
+  createEditor,
+  DefaultInput,
+  LanguageConfig,
+  Query,
+  SingleLineInput,
+} from '../../data/public';
 import { ConfigSchema } from '../common/config';
-import { setData, setStorage } from './services';
+import { s3TypeConfig } from './datasets';
 import { createQueryAssistExtension } from './query_assist';
+import { pplLanguageReference, sqlLanguageReference } from './query_editor_extensions';
 import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
+import { setData, setStorage } from './services';
 import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
-import { LanguageConfig, Query } from '../../data/public';
-import { s3TypeConfig } from './datasets';
-import { createEditor, DefaultInput, SingleLineInput } from '../../data/public';
-import { DataStorage } from '../../data/common';
-import { pplLanguageReference, sqlLanguageReference } from './query_editor_extensions';
 
 export class QueryEnhancementsPlugin
   implements
@@ -57,7 +62,7 @@ export class QueryEnhancementsPlugin
         startServices: core.getStartServices(),
         usageCollector: data.search.usageCollector,
       }),
-      getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
+      getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title} | head 10`,
       fields: { filterable: false, visualizable: false },
       docLink: {
         title: i18n.translate('queryEnhancements.pplLanguage.docLink', {
