@@ -118,7 +118,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
   },
 
   supportedLanguages: (dataset: Dataset): string[] => {
-    return ['SQL'];
+    return ['SQL', 'PPL'];
   },
 
   getSampleQueries: (dataset: Dataset, language: string) => {
@@ -129,7 +129,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
             title: i18n.translate('queryEnhancements.s3Type.sampleQuery.basicPPLQuery', {
               defaultMessage: 'Sample query for PPL',
             }),
-            query: `source = ${dataset.title}`,
+            query: `source = ${dataset.title} | head 10`,
           },
         ];
       case 'SQL':

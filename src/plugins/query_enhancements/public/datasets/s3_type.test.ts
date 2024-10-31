@@ -244,9 +244,9 @@ describe('s3TypeConfig', () => {
     expect(result[3].type).toBe('number');
   });
 
-  test('supportedLanguages returns SQL', () => {
+  test('supportedLanguages returns SQL, PPL', () => {
     const mockDataset: Dataset = { id: 'table1', title: 'Table 1', type: 'S3' };
-    expect(s3TypeConfig.supportedLanguages(mockDataset)).toEqual(['SQL']);
+    expect(s3TypeConfig.supportedLanguages(mockDataset)).toEqual(['SQL', 'PPL']);
   });
 
   describe('castS3FieldTypeToOSDFieldType()', () => {
