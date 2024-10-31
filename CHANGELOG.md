@@ -1,15 +1,13 @@
 # CHANGELOG
 Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
-## [Unreleased](https://github.com/opensearch-project/OpenSearch-Dashboards/compare/1.3.18...1.3)
+## [Unreleased](https://github.com/opensearch-project/OpenSearch-Dashboards/compare/1.3.19...1.3)
 
 ### 💥 Breaking Changes
 
 ### Deprecations
 
-### 🛡 Security
-
-- [CVE-2017-16100] Use a patched version for the `dns-sync` dependency ([#7811](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7811))
+### 🛡   Security
 
 ### 📈 Features/Enhancements
 
@@ -19,9 +17,9 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 📝 Documentation
 
-### 🛠 Maintenance
+### 🛠   Maintenance
 
-### 🪛 Refactoring
+### 🪛  Refactoring
 
 ### 🔩 Tests
 
@@ -38,6 +36,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CVE-2024-29041] Bump express from 4.18.2 to 4.19.2 ([#7738](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7738))
 - [CVE-2024-33883] Bump ejs from 3.1.7 to 3.1.10 ([#7740](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7740))
 - [CVE-2024-37890] Bump ws from 6.2.2 to 6.2.3 and from 7.5.3 to 7.5.10 ([#7732](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7732))
+- [CVE-2017-16100] Use a patched version for the `dns-sync` dependency ([#7811](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7811))
 
 ### 📈 Features/Enhancements
 
