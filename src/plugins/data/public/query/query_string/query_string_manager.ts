@@ -33,7 +33,7 @@ import { skip } from 'rxjs/operators';
 import { CoreStart, NotificationsSetup } from 'opensearch-dashboards/public';
 import { isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { Dataset, DataStorage, Query, TimeRange, UI_SETTINGS } from '../../../common';
+import { Dataset, DataStorage, DEFAULT_DATA, Query, TimeRange, UI_SETTINGS } from '../../../common';
 import { createHistory, QueryHistory } from './query_history';
 import { DatasetService, DatasetServiceContract } from './dataset_service';
 import { LanguageService, LanguageServiceContract } from './language_service';
@@ -57,6 +57,28 @@ export class QueryStringManager {
     this.queryHistory = createHistory({ storage: this.sessionStorage });
     this.datasetService = new DatasetService(uiSettings, this.sessionStorage);
     this.languageService = new LanguageService(this.defaultSearchInterceptor, this.storage);
+
+    this.uiSettings.get$(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED).subscribe((isEnabled) => {
+      if (!isEnabled) {
+        const query = this.query$.getValue();
+
+        // Update query to use default language and index patterns if:
+        // 1. Current language is not a basic query language (kuery/lucene)
+        // 2. Current dataset is not an index pattern
+        if (
+          !(query.language === `kuery` || query.language === `lucene`) &&
+          query.dataset?.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+        ) {
+          const defaultDataset = this.datasetService.getDefault();
+          const newQuery = this.getInitialQuery({
+            language: `kuery`,
+            dataset: defaultDataset,
+          });
+
+          this.setQuery(newQuery);
+        }
+      }
+    });
   }
 
   private getDefaultQueryString() {
