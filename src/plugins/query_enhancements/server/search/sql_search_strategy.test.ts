@@ -3,24 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { sqlSearchStrategyProvider } from './sql_search_strategy';
-import { Observable, of } from 'rxjs';
 import {
-  SharedGlobalConfig,
-  Logger,
   ILegacyClusterClient,
+  Logger,
   RequestHandlerContext,
+  SharedGlobalConfig,
 } from 'opensearch-dashboards/server';
+import { Observable, of } from 'rxjs';
+import { DATA_FRAME_TYPES, IOpenSearchDashboardsSearchRequest } from '../../../data/common';
 import { SearchUsage } from '../../../data/server';
-import {
-  DATA_FRAME_TYPES,
-  IDataFrameError,
-  IOpenSearchDashboardsSearchRequest,
-} from '../../../data/common';
-import * as facet from '../utils/facet';
 import * as utils from '../../common/utils';
+import * as facet from '../utils/facet';
+import { sqlSearchStrategyProvider } from './sql_search_strategy';
 
 jest.mock('../../common/utils', () => ({
+  ...jest.requireActual('../../common/utils'),
   getFields: jest.fn(),
 }));
 
@@ -142,6 +139,27 @@ describe('sqlSearchStrategyProvider', () => {
       )
     ).rejects.toThrow(mockError);
     expect(logger.error).toHaveBeenCalledWith(`sqlSearchStrategy: ${mockError.message}`);
+    expect(usage.trackError).toHaveBeenCalled();
+  });
+
+  it('should throw error when describeQuery success is false', async () => {
+    const mockError = new Error('Something went wrong');
+    const mockFacet = ({
+      describeQuery: jest.fn().mockResolvedValue({ success: false, data: mockError }),
+    } as unknown) as facet.Facet;
+    jest.spyOn(facet, 'Facet').mockImplementation(() => mockFacet);
+
+    const strategy = sqlSearchStrategyProvider(config$, logger, client, usage);
+    await expect(
+      strategy.search(
+        emptyRequestHandlerContext,
+        ({
+          body: { query: { query: 'SELECT * FROM table' } },
+        } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
+        {}
+      )
+    ).rejects.toThrowError();
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(mockError.message));
     expect(usage.trackError).toHaveBeenCalled();
   });
 
