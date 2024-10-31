@@ -81,7 +81,7 @@ export interface TableProps {
   pageIndex: number;
   pageSize: number;
   items: SavedObjectWithMetadata[];
-  workspaceIdNameMap: Map<string, string>;
+  workspaceNameIdLookup: Map<string, string>;
   itemId: string | (() => string);
   totalItemCount: number;
   onQueryChange: (query: any, filterFields: string[]) => void;
