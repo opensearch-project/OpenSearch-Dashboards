@@ -1,2 +1,0 @@
-fix:
-- Pass hide local cluster flag to data source menu in sample data page ([#8503](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8503))
