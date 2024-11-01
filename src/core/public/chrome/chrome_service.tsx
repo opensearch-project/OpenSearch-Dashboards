@@ -173,10 +173,9 @@ export class ChromeService {
          */
         switchMap((appId) =>
           application.applications$.pipe(
-            map(
-              (applications) =>
-                !!appId && applications.has(appId) && !!applications.get(appId)!.chromeless
-            )
+            map((applications) => {
+              return !!appId && applications.has(appId) && !!applications.get(appId)!.chromeless;
+            })
           )
         )
       )
