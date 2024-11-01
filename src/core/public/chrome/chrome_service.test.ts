@@ -314,7 +314,6 @@ describe('start', () => {
           false,
           true,
           true,
-          true,
         ]
       `);
     });
