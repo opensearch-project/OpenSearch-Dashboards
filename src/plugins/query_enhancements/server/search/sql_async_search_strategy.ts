@@ -3,18 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SharedGlobalConfig, Logger, ILegacyClusterClient } from 'opensearch-dashboards/server';
+import { ILegacyClusterClient, Logger, SharedGlobalConfig } from 'opensearch-dashboards/server';
 import { Observable } from 'rxjs';
-import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import {
+  createDataFrame,
   DATA_FRAME_TYPES,
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
   Query,
-  createDataFrame,
 } from '../../../data/common';
-import { Facet } from '../utils';
+import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import { buildQueryStatusConfig, getFields, handleFacetError, SEARCH_STRATEGY } from '../../common';
+import { FacetResponse } from '../types';
+import { Facet } from '../utils';
 
 export const sqlAsyncSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -58,7 +59,10 @@ export const sqlAsyncSearchStrategyProvider = (
           } as IDataFrameResponse;
         } else {
           request.params = { queryId: inProgressQueryId };
-          const queryStatusResponse: any = await sqlAsyncJobsFacet.describeQuery(context, request);
+          const queryStatusResponse: FacetResponse = await sqlAsyncJobsFacet.describeQuery(
+            context,
+            request
+          );
 
           if (!queryStatusResponse.success) handleFacetError(queryStatusResponse);
 

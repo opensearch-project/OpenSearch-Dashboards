@@ -14,6 +14,7 @@ import {
 } from '../../../data/common';
 import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import { buildQueryStatusConfig, getFields, handleFacetError, SEARCH_STRATEGY } from '../../common';
+import { FacetResponse } from '../types';
 import { Facet } from '../utils';
 
 export const pplAsyncSearchStrategyProvider = (
@@ -58,7 +59,10 @@ export const pplAsyncSearchStrategyProvider = (
           } as IDataFrameResponse;
         } else {
           request.params = { queryId: inProgressQueryId };
-          const queryStatusResponse: any = await pplAsyncJobsFacet.describeQuery(context, request);
+          const queryStatusResponse: FacetResponse = await pplAsyncJobsFacet.describeQuery(
+            context,
+            request
+          );
 
           if (!queryStatusResponse.success) handleFacetError(queryStatusResponse);
 
