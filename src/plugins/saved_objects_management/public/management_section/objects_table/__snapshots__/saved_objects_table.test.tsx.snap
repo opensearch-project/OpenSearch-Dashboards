@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 1`] = `
 <EuiModal
   maxWidth="50vw"
   onClose={[Function]}
@@ -49,10 +49,16 @@ exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
         Array [
           Object {
             "id": "1",
-            "type": "index-pattern",
+            "meta": Object {
+              "icon": "configApp",
+            },
+            "type": "config",
           },
           Object {
             "id": "3",
+            "meta": Object {
+              "icon": "dashboardApp",
+            },
             "type": "dashboard",
           },
         ]
@@ -90,7 +96,7 @@ exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
 </EuiModal>
 `;
 
-exports[`SavedObjectsTable delete should show a confirm modal 2`] = `
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 2`] = `
 <EuiModalHeader>
   <EuiModalHeaderTitle>
     <FormattedMessage
@@ -102,7 +108,7 @@ exports[`SavedObjectsTable delete should show a confirm modal 2`] = `
 </EuiModalHeader>
 `;
 
-exports[`SavedObjectsTable delete should show a confirm modal 3`] = `
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 3`] = `
 <EuiModalFooter>
   <EuiButtonEmpty
     onClick={[Function]}
@@ -129,7 +135,7 @@ exports[`SavedObjectsTable delete should show a confirm modal 3`] = `
 </EuiModalFooter>
 `;
 
-exports[`SavedObjectsTable delete should show a confirm modal 4`] = `null`;
+exports[`SavedObjectsTable delete should show a confirm modal with correct icons and tooltips 4`] = `null`;
 
 exports[`SavedObjectsTable delete should show error toast when failing to delete saved objects 1`] = `
 <EuiModal
