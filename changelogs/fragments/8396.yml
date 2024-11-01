@@ -1,2 +1,0 @@
-fix:
-- Fix dynamic uses of i18n in discover plugin ([#8396](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8396))

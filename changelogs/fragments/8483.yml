@@ -1,2 +1,0 @@
-fix:
-- Fix inconsistent i18n key names in workspace and examples ([#8483](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8483))

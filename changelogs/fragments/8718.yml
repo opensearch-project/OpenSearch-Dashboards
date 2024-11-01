@@ -1,2 +1,0 @@
-fix:
-- [Workspace] [Bug] Fix index pattern issue. ([#8718](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8718))
