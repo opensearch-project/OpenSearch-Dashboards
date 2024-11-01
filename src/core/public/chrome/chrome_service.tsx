@@ -160,18 +160,32 @@ export class ChromeService {
     const isEmbedded = new URL(location.hash.slice(1), location.origin).searchParams.has('embed');
     this.isForceHidden$ = new BehaviorSubject(isEmbedded);
 
+    /**
+     * There is a staled closure issue here.
+     * For example, when currentAppId$ is going through A -> B -> C and
+     * the application.applications$ just get changed in B, then it will always use B as the currentAppId
+     * even though the latest appId now is C.
+     */
+    let currentAppId: string | undefined;
+
     const appHidden$ = merge(
       // For the isVisible$ logic, having no mounted app is equivalent to having a hidden app
       // in the sense that the chrome UI should not be displayed until a non-chromeless app is mounting or mounted
       of(true),
       application.currentAppId$.pipe(
-        flatMap((appId) =>
-          application.applications$.pipe(
+        flatMap((appId) => {
+          // Update the currentAppId to latest
+          currentAppId = appId;
+          return application.applications$.pipe(
             map((applications) => {
-              return !!appId && applications.has(appId) && !!applications.get(appId)!.chromeless;
+              return (
+                !!currentAppId &&
+                applications.has(currentAppId) &&
+                !!applications.get(currentAppId)!.chromeless
+              );
             })
-          )
-        )
+          );
+        })
       )
     );
     this.isVisible$ = combineLatest([appHidden$, this.isForceHidden$]).pipe(
