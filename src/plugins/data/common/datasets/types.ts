@@ -259,25 +259,25 @@ export interface DatasetField {
 }
 
 export enum DatasetCanvasBannerComponentType {
-  Callout = 'callout',
-  Custom = 'custom',
+  CALLOUT = 'callout',
+  CUSTOM = 'custom',
 }
 
 export type DatasetCanvasBannerProps =
   | {
-      componentType: DatasetCanvasBannerComponentType.Callout;
+      componentType: DatasetCanvasBannerComponentType.CALLOUT;
       title: string;
       iconType?: string;
       content?: React.ReactNode;
     }
   | {
-      componentType: DatasetCanvasBannerComponentType.Callout;
+      componentType: DatasetCanvasBannerComponentType.CALLOUT;
       title?: string;
       iconType?: string;
       content: React.ReactNode;
     }
   | {
-      componentType: DatasetCanvasBannerComponentType.Custom;
+      componentType: DatasetCanvasBannerComponentType.CUSTOM;
       content: React.ReactNode;
     };
 
@@ -288,5 +288,5 @@ export interface DatasetSearchOptions {
    */
   getBannerProps?: (
     searchStatus: string
-  ) => CanvasBannerProps | Promise<CanvasBannerProps> | undefined;
+  ) => DatasetCanvasBannerProps | Promise<DatasetCanvasBannerProps> | undefined;
 }

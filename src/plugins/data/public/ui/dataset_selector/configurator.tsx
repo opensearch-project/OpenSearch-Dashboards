@@ -65,7 +65,7 @@ export const Configurator = ({
 
   useEffect(() => {
     const currentLanguage = queryString.getQuery().language;
-    if (languages.includes(currentLanguage)) {
+    if (Array.isArray(languages) && languages.includes(currentLanguage)) {
       setSelectedLanguage(currentLanguage);
       return;
     }
@@ -116,7 +116,7 @@ export const Configurator = ({
       setTimeFields(dateFields || []);
     };
 
-    if (baseDataset?.dataSource?.meta?.supportsTimeFilter === false && timeFields.length > 0) {
+    if (!baseDataset?.dataSource?.meta?.supportsTimeFilter && timeFields.length > 0) {
       setTimeFields([]);
       return;
     }
@@ -269,7 +269,7 @@ export const Configurator = ({
         <EuiButton
           onClick={async () => {
             await queryString.getDatasetService().cacheDataset(dataset, services);
-            onConfirm({ dataset, language });
+            onConfirm({ dataset, language: selectedLanguage });
           }}
           fill
           disabled={submitDisabled}
