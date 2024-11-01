@@ -41,7 +41,7 @@ import {
   ReplaySubject,
   Subscription,
 } from 'rxjs';
-import { flatMap, map, takeUntil } from 'rxjs/operators';
+import { map, switchMap, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
 import { mountReactNode } from '../utils/mount';
@@ -166,7 +166,13 @@ export class ChromeService {
       // in the sense that the chrome UI should not be displayed until a non-chromeless app is mounting or mounted
       of(true),
       application.currentAppId$.pipe(
-        flatMap((appId) =>
+        /**
+         * Using flatMap here will introduce staled closure issue.
+         * For example, when currentAppId$ is going through A -> B -> C and
+         * the application.applications$ just get changed in B, then it will always use B as the currentAppId
+         * even though the latest appId now is C.
+         */
+        switchMap((appId) =>
           application.applications$.pipe(
             map((applications) => {
               return !!appId && applications.has(appId) && !!applications.get(appId)!.chromeless;
@@ -185,7 +191,7 @@ export class ChromeService {
     this.headerVariantOverride$ = new BehaviorSubject<HeaderVariant | undefined>(undefined);
 
     const appHeaderVariant$ = application.currentAppId$.pipe(
-      flatMap((appId) =>
+      switchMap((appId) =>
         application.applications$.pipe(
           map(
             (applications) =>
