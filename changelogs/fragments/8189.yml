@@ -1,3 +1,0 @@
-fix:
-- Current nav group will be mapped to global system nav group even if user is in a workspace. ([#8189](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8189))
-- Current nav group will be mapped to a nav group even when user is out of a workspace. ([#8189](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8189))
