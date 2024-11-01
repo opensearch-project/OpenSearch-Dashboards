@@ -65,6 +65,8 @@ const getErrorMessage = ({ error }: SavedObjectsImportError) => {
     return error.message;
   } else if (error.type === 'unsupported_type') {
     return unsupportedTypeErrorMessage;
+  } else if (error.type === 'missing_target_workspace_assigned_data_source') {
+    return error.message;
   }
 };
 

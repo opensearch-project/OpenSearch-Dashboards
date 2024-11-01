@@ -42,6 +42,7 @@ import { checkConflicts } from './check_conflicts';
 import { regenerateIds } from './regenerate_ids';
 import { checkConflictsForDataSource } from './check_conflict_for_data_source';
 import { isSavedObjectWithDataSource } from './validate_object_id';
+import { findDataSourceForObject } from './utils';
 
 /**
  * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
@@ -92,6 +93,44 @@ export async function importSavedObjectsFromStream({
         success: false,
         errors: notSupportedErrors,
       };
+    }
+  }
+
+  // If target workspace is exists, it will check whether the assigned data sources in the target workspace
+  // include the data sources of the imported saved objects.
+  if (workspaces && workspaces.length > 0) {
+    const assignedDataSourcesInTargetWorkspace = await savedObjectsClient
+      .find({
+        type: 'data-source',
+        fields: ['id'],
+        perPage: 10000,
+        workspaces,
+      })
+      .then((response) => {
+        return response?.saved_objects?.map((source) => source.id) ?? [];
+      });
+    for (const object of collectSavedObjectsResult.collectedObjects) {
+      try {
+        const referenceDSId = await findDataSourceForObject(object, savedObjectsClient);
+        if (referenceDSId && !assignedDataSourcesInTargetWorkspace.includes(referenceDSId)) {
+          collectSavedObjectsResult.errors.push({
+            type: object.type,
+            id: object.id,
+            error: {
+              type: 'missing_target_workspace_assigned_data_source',
+              message: `The object hasn’t be copied to the selected workspace. The data source (${referenceDSId}) is not available in the selected workspace.`,
+            },
+            meta: { title: object.attributes?.title },
+          });
+        }
+      } catch (err) {
+        collectSavedObjectsResult.errors.push({
+          type: object.type,
+          id: object.id,
+          error: { type: 'unknown', message: err, statusCode: 500 },
+          meta: { title: object.attributes?.title },
+        });
+      }
     }
   }
 

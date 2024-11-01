@@ -369,7 +369,7 @@ HTMLCollection [
                   data-test-subj="copySavedObjectsSuccess"
                 >
                   <span>
-                    4 saved objects copied
+                    5 saved objects copied
                   </span>
                 </h3>
                 <div
@@ -396,7 +396,7 @@ HTMLCollection [
                       class="euiTitle euiTitle--xsmall savedObjectsManagementImportSummary__errorCount"
                     >
                       <span>
-                        2 Error copying file
+                        3 Error copying file
                       </span>
                     </h4>
                   </div>
@@ -478,6 +478,54 @@ HTMLCollection [
                         title="dashboard [id=2]"
                       >
                         dashboard [id=2]
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <div
+                      class="eui-textRight"
+                    >
+                      <span
+                        class="euiToolTipAnchor"
+                      >
+                        <span
+                          aria-label="Info"
+                          color="danger"
+                          data-euiicon-type="alert"
+                          tabindex="0"
+                        />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow savedObjectsManagementImportSummary__row"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <span
+                      class="euiToolTipAnchor"
+                    >
+                      <span
+                        aria-label="data-source"
+                        data-euiicon-type="apps"
+                      />
+                    </span>
+                  </div>
+                  <div
+                    class="euiFlexItem savedObjectsManagementImportSummary__title"
+                  >
+                    <div
+                      class="euiText euiText--small"
+                    >
+                      <p
+                        class="eui-textTruncate"
+                        title="data-source [id=3]"
+                      >
+                        data-source [id=3]
                       </p>
                     </div>
                   </div>
