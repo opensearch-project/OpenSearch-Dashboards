@@ -166,7 +166,7 @@ export class ChromeService {
       of(true),
       application.currentAppId$.pipe(
         /**
-         * There is a staled closure issue here.
+         * Using flatMap here will introduce staled closure issue.
          * For example, when currentAppId$ is going through A -> B -> C and
          * the application.applications$ just get changed in B, then it will always use B as the currentAppId
          * even though the latest appId now is C.
