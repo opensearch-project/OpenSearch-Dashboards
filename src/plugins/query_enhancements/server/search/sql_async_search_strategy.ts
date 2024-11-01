@@ -3,18 +3,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SharedGlobalConfig, Logger, ILegacyClusterClient } from 'opensearch-dashboards/server';
+import { ILegacyClusterClient, Logger, SharedGlobalConfig } from 'opensearch-dashboards/server';
 import { Observable } from 'rxjs';
-import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import {
+  createDataFrame,
   DATA_FRAME_TYPES,
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
   Query,
-  createDataFrame,
 } from '../../../data/common';
-import { Facet } from '../utils';
+import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import { buildQueryStatusConfig, getFields, handleFacetError, SEARCH_STRATEGY } from '../../common';
+import { Facet } from '../utils';
 
 export const sqlAsyncSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -58,22 +58,22 @@ export const sqlAsyncSearchStrategyProvider = (
           } as IDataFrameResponse;
         } else {
           request.params = { queryId: inProgressQueryId };
-          const queryStatusResponse: any = await sqlAsyncJobsFacet.describeQuery(context, request);
+          const queryStatusResponse = await sqlAsyncJobsFacet.describeQuery(context, request);
 
           if (!queryStatusResponse.success) handleFacetError(queryStatusResponse);
 
-          const queryStatus = queryStatusResponse?.data?.status;
+          const queryStatus = queryStatusResponse.data?.status;
           logger.info(`sqlAsyncSearchStrategy: JOB: ${inProgressQueryId} - STATUS: ${queryStatus}`);
 
           if (queryStatus?.toUpperCase() === 'SUCCESS') {
             const dataFrame = createDataFrame({
               name: query.dataset?.id,
-              schema: queryStatusResponse.data.schema,
+              schema: queryStatusResponse.data?.schema,
               meta: { ...pollQueryResultsParams },
               fields: getFields(queryStatusResponse),
             });
 
-            dataFrame.size = queryStatusResponse.data.datarows.length;
+            dataFrame.size = queryStatusResponse.data?.datarows.length;
 
             return {
               type: DATA_FRAME_TYPES.POLLING,
@@ -85,7 +85,7 @@ export const sqlAsyncSearchStrategyProvider = (
               type: DATA_FRAME_TYPES.POLLING,
               status: 'failed',
               body: {
-                error: `JOB: ${inProgressQueryId} failed: ${queryStatusResponse.data.error}`,
+                error: `JOB: ${inProgressQueryId} failed: ${queryStatusResponse.data?.error}`,
               },
             } as IDataFrameResponse;
           }
