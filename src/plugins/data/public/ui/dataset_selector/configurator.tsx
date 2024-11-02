@@ -42,9 +42,20 @@ export const Configurator = ({
   const languageService = queryService.queryString.getLanguageService();
   const indexPatternsService = getIndexPatterns();
   const type = queryString.getDatasetService().getType(baseDataset.type);
-  const [languages, setLanguages] = useState(type?.supportedLanguages(baseDataset) || []);
+  const languages = type?.supportedLanguages(baseDataset) || [];
 
-  const [dataset, setDataset] = useState<Dataset>(baseDataset);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>(() => {
+    const currentLanguage = queryString.getQuery().language;
+    if (languages.includes(currentLanguage)) {
+      return currentLanguage;
+    }
+    return languages[0];
+  });
+
+  const [dataset, setDataset] = useState<Dataset>({
+    ...baseDataset,
+    language: selectedLanguage,
+  });
   const [timeFields, setTimeFields] = useState<DatasetField[]>([]);
   const [timeFieldName, setTimeFieldName] = useState<string | undefined>(dataset.timeFieldName);
   const noTimeFilter = i18n.translate(
@@ -53,24 +64,10 @@ export const Configurator = ({
       defaultMessage: "I don't want to use the time filter",
     }
   );
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('');
   const indexedViewsService = type?.indexedViewsService;
   const [selectedIndexedView, setSelectedIndexedView] = useState<string | undefined>();
   const [indexedViews, setIndexedViews] = useState<IndexedView[]>([]);
   const [isLoadingIndexedViews, setIsLoadingIndexedViews] = useState(false);
-
-  useEffect(() => {
-    setLanguages(type?.supportedLanguages(dataset) || []);
-  }, [dataset, type]);
-
-  useEffect(() => {
-    const currentLanguage = queryString.getQuery().language;
-    if (Array.isArray(languages) && languages.includes(currentLanguage)) {
-      setSelectedLanguage(currentLanguage);
-      return;
-    }
-    setSelectedLanguage(languages[0]);
-  }, [languages, queryString]);
 
   useEffect(() => {
     const getIndexedViews = async () => {
@@ -116,7 +113,7 @@ export const Configurator = ({
       setTimeFields(dateFields || []);
     };
 
-    if (!baseDataset?.dataSource?.meta?.supportsTimeFilter && timeFields.length > 0) {
+    if (baseDataset?.dataSource?.meta?.supportsTimeFilter === false && timeFields.length > 0) {
       setTimeFields([]);
       return;
     }
