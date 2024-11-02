@@ -61,7 +61,9 @@ export function OpenSavedQueryFlyout({
   const [searchQuery, setSearchQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
 
   const fetchAllSavedQueriesForSelectedTab = useCallback(async () => {
-    const allQueries = await savedQueryService.getAllSavedQueries();
+    // const allQueries = await savedQueryService.getAllSavedQueries();
+    // TODO: Mitigation until getAllSavedQueries gets fixed
+    const { queries: allQueries } = await savedQueryService.findSavedQueries('', 10000);
     const templateQueriesPresent = allQueries.some((q) => q.attributes.isTemplate);
     const queriesForSelectedTab = allQueries.filter(
       (q) =>
