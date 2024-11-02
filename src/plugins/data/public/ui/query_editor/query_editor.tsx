@@ -287,7 +287,12 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       inputRef.current = editor;
       // eslint-disable-next-line no-bitwise
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
-        onSubmit(props.query);
+        const newQuery = {
+          ...props.query,
+          query: editor.getValue(),
+        };
+
+        onSubmit(newQuery);
       });
 
       return () => {
