@@ -275,7 +275,7 @@ export class DatasetService {
             ? {
                 id: dataSource.id,
                 title: dataSource.attributes?.title,
-                type: dataSource.attributes?.dataSourceEngineType,
+                type: dataSource.attributes?.dataSourceEngineType || '',
               }
             : undefined,
         },
