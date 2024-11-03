@@ -9,11 +9,21 @@ import { indexTypeConfig } from './index_type';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { DATA_STRUCTURE_META_TYPES, DataStructure, Dataset } from '../../../../../common';
 import * as services from '../../../../services';
+import { IDataPluginServices } from 'src/plugins/data/public';
 
-jest.mock('../../../../services', () => ({
-  getSearchService: jest.fn(),
-  getIndexPatterns: jest.fn(),
-}));
+jest.mock('../../../../services', () => {
+  return {
+    getSearchService: jest.fn(),
+    getIndexPatterns: jest.fn(),
+    getQueryService: () => ({
+      queryString: {
+        getLanguageService: () => ({
+          getQueryEditorExtensionMap: jest.fn().mockReturnValue({}),
+        }),
+      },
+    }),
+  };
+});
 
 describe('indexTypeConfig', () => {
   const mockSavedObjectsClient = {} as SavedObjectsClientContract;
@@ -76,5 +86,48 @@ describe('indexTypeConfig', () => {
   test('supportedLanguages returns correct languages', () => {
     const mockDataset: Dataset = { id: 'index1', title: 'Index 1', type: 'INDEX' };
     expect(indexTypeConfig.supportedLanguages(mockDataset)).toEqual(['SQL', 'PPL']);
+  });
+
+  test('should fetch data sources for unknown type', async () => {
+    mockSavedObjectsClient.find = jest.fn().mockResolvedValue({
+      savedObjects: [
+        { id: 'ds1', attributes: { title: 'DataSource 1', dataSourceVersion: '3.0' } },
+      ],
+    });
+
+    const result = await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
+      { id: 'unknown', title: 'Unknown', type: 'Unknown' },
+    ]);
+
+    expect(result.children).toHaveLength(1);
+    expect(result.children?.[0].title).toBe('DataSource 1');
+    expect(result.hasNext).toBe(true);
+  });
+
+  test('should filter out data sources with versions lower than 1.0.0', async () => {
+    mockSavedObjectsClient.find = jest.fn().mockResolvedValue({
+      savedObjects: [
+        { id: 'ds1', attributes: { title: 'DataSource 1', dataSourceVersion: '1.0' } },
+        {
+          id: 'ds2',
+          attributes: { title: 'DataSource 2', dataSourceVersion: '' },
+        },
+        { id: 'ds3', attributes: { title: 'DataSource 3', dataSourceVersion: '2.17.0' } },
+        {
+          id: 'ds4',
+          attributes: { title: 'DataSource 4', dataSourceVersion: '.0' },
+        },
+      ],
+    });
+
+    const result = await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
+      { id: 'unknown', title: 'Unknown', type: 'UNKNOWN' },
+    ]);
+
+    expect(result.children).toHaveLength(2);
+    expect(result.children?.[0].title).toBe('DataSource 1');
+    expect(result.children?.[1].title).toBe('DataSource 3');
+    expect(result.children?.some((child) => child.title === 'DataSource 2')).toBe(false);
+    expect(result.hasNext).toBe(true);
   });
 });

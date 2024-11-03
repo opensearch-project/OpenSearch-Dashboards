@@ -1,0 +1,2 @@
+fix:
+- Polling for PPL results; Saved dataset to saved queries ([#8724](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8724))
