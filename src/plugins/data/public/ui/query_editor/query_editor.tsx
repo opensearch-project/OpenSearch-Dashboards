@@ -127,6 +127,8 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   };
 
   const onSubmit = (query: Query, dateRange?: TimeRange) => {
+    const currentQuery = inputRef.current?.getModel()?.getValue();
+    if (!currentQuery || currentQuery.trim() === '') return;
     if (props.onSubmit) {
       if (persistedLogRef.current) {
         persistedLogRef.current.add(query.query);
@@ -134,7 +136,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
 
       props.onSubmit(
         {
-          query: fromUser(query.query),
+          query: currentQuery,
           language: query.language,
           dataset: query.dataset,
         },
