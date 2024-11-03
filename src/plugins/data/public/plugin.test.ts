@@ -28,7 +28,6 @@ describe('#DataPublicPlugin setup', () => {
   };
 
   beforeEach(() => {
-    // Define the initializer context with all necessary config
     const initializerContext = {
       config: {
         get: jest.fn().mockReturnValue({
@@ -49,10 +48,8 @@ describe('#DataPublicPlugin setup', () => {
       },
     };
 
-    // Create a new instance of DataPublicPlugin with the initializer context
     plugin = new DataPublicPlugin(initializerContext);
 
-    // Mock the core setup
     coreSetup = {
       ...coreMock.createSetup({ pluginStartContract: mockDataPublicPluginStart }),
       uiSettings: {
@@ -77,7 +74,6 @@ describe('#DataPublicPlugin setup', () => {
     coreStart = coreMock.createStart();
   });
 
-  // Add the actual test case
   it('should setup the plugin and set useNewSavedQueriesUI', () => {
     const setupContract = plugin.setup(coreSetup, {
       expressions: expressionsMock,

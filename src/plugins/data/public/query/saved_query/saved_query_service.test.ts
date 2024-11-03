@@ -135,7 +135,6 @@ describe('saved query service', () => {
 
   describe('saveQuery', function () {
     it('should create a saved object for the given attributes', async () => {
-      // Mock the response for the saved objects client
       mockSavedObjectsClient.create.mockReturnValue({
         id: 'foo',
         attributes: savedAttributesWithTemplate,
@@ -143,7 +142,6 @@ describe('saved query service', () => {
 
       const response = await saveQuery(savedAttributesWithTemplate);
 
-      // Assert the creation with the correct structure
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         'query',
         {
@@ -223,7 +221,6 @@ describe('saved query service', () => {
       expect(error).not.toBe(null);
     });
     it('should include dataset in the query when query enhancement is enabled and dataset exists', async () => {
-      // Mock the behavior
       uiSettingsServiceMock.createStartContract().get.mockReturnValue(true); // query enhancements enabled
       getUseNewSavedQueriesUI.mockReturnValue(true); // using new saved queries UI
 
@@ -233,26 +230,23 @@ describe('saved query service', () => {
         query: {
           language: 'kuery',
           query: 'response:200',
-          dataset: 'my_dataset', // Include the dataset
+          dataset: 'my_dataset',
         },
-        isTemplate: false, // Ensure isTemplate is set correctly if needed
+        isTemplate: false,
       };
 
-      // Adjust the return value to match what the saveQuery function is expected to create
       mockSavedObjectsClient.create.mockReturnValue({
         id: 'foo',
         attributes: {
-          ...savedQueryAttributesWithTemplate, // Spread the savedQueryAttributes to include all properties
+          ...savedQueryAttributesWithTemplate,
           query: {
-            ...savedQueryAttributesWithTemplate.query, // Spread to ensure we keep all query properties
+            ...savedQueryAttributesWithTemplate.query,
           },
         },
       });
 
-      // Act
       const response = await saveQuery(savedQueryAttributesWithTemplate);
 
-      // Assert
       expect(response).toEqual({
         id: 'foo',
         attributes: {
@@ -261,13 +255,12 @@ describe('saved query service', () => {
           query: {
             language: 'kuery',
             query: 'response:200',
-            dataset: 'my_dataset', // Ensure the dataset is included
+            dataset: 'my_dataset',
           },
-          isTemplate: false, // Include isTemplate in the expected response
+          isTemplate: false,
         },
       });
 
-      // Ensure dataset is included
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         'query',
         expect.objectContaining({
@@ -311,7 +304,6 @@ describe('saved query service', () => {
         },
       });
 
-      // Ensure isTemplate is included
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         'query',
         expect.objectContaining({
