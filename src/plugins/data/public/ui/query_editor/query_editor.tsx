@@ -128,7 +128,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
 
   const onSubmit = (query: Query, dateRange?: TimeRange) => {
     // TODO: this is a hack to get the current query string as query.query in some use cases are empty
-    const currentQuery = query.query || inputRef.current?.getModel()?.getValue();
+    const currentQuery = inputRef.current?.getModel()?.getValue() ?? query.query;
     if (!currentQuery || currentQuery.trim() === '') return;
     if (props.onSubmit) {
       if (persistedLogRef.current) {
