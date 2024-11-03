@@ -225,7 +225,8 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   ): Promise<monaco.languages.CompletionList> => {
     const indexPattern = await fetchIndexPattern();
     const suggestions = await services.data.autocomplete.getQuerySuggestions({
-      query: getQueryString(),
+      // TODO: this is a hack to get the current query string as getQueryString() is not fetching the updated query string
+      query: inputRef.current?.getModel()?.getValue() ?? getQueryString(),
       selectionStart: model.getOffsetAt(position),
       selectionEnd: model.getOffsetAt(position),
       language: props.query.language,
