@@ -19,7 +19,7 @@ jest.mock('../../services', () => ({
 describe('DatasetSelector', () => {
   const nextTick = () => new Promise((res) => process.nextTick(res));
 
-  const fetchMock = jest.fn().mockResolvedValue({ children: [] });
+  const fetchMock = jest.fn().mockResolvedValue([]);
   const setDatasetsMock = jest.fn();
   const mockDatasetTypeConfig: DatasetTypeConfig = {
     id: 'mockType',
@@ -56,6 +56,8 @@ describe('DatasetSelector', () => {
       queryString: {
         getDatasetService: jest.fn().mockReturnValue({
           getType: getTypeMock,
+          getRecentDatasets: jest.fn().mockReturnValue([]),
+          addRecentDataset: jest.fn(),
         }),
       },
     });
@@ -68,7 +70,7 @@ describe('DatasetSelector', () => {
   it('should fetch datasets once on mount', async () => {
     const props = {
       selectedDataset: undefined as Dataset | undefined,
-      setSelectedDataset: jest.fn(),
+      onSelect: jest.fn(),
       services: mockServices,
     };
 
@@ -81,7 +83,7 @@ describe('DatasetSelector', () => {
   it('should not fetch datasets on re-render', async () => {
     const props = {
       selectedDataset: undefined as Dataset | undefined,
-      setSelectedDataset: jest.fn(),
+      onSelect: jest.fn(),
       services: mockServices,
     };
 
@@ -98,7 +100,7 @@ describe('DatasetSelector', () => {
   it('should not update datasets state on re-render', async () => {
     const props = {
       selectedDataset: undefined as Dataset | undefined,
-      setSelectedDataset: jest.fn(),
+      onSelect: jest.fn(),
       services: mockServices,
     };
 

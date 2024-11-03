@@ -91,3 +91,7 @@
     }
   }
 }
+
+.osdQueryBar--hideEmpty:empty {
+  display: none;
+}

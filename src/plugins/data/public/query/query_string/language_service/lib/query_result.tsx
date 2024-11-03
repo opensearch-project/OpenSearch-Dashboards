@@ -22,10 +22,9 @@ export interface QueryStatus {
   status: ResultStatus;
   body?: {
     error?: {
-      reason?: string;
-      details: string;
+      statusCode?: number;
+      message?: string;
     };
-    statusCode?: number;
   };
   elapsedMs?: number;
   startTime?: number;
@@ -41,24 +40,41 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     setPopover(!isPopoverOpen);
   };
 
-  const updateElapsedTime = () => {
-    const time = Date.now() - (props.queryStatus.startTime || 0);
-    if (time > BUFFER_TIME) {
-      setElapsedTime(time);
-    } else {
-      setElapsedTime(0);
-    }
-  };
-
   useEffect(() => {
+    const updateElapsedTime = () => {
+      const currentTime = Date.now();
+      if (!props.queryStatus.startTime) {
+        return;
+      }
+      const elapsed = currentTime - props.queryStatus.startTime;
+      setElapsedTime(elapsed);
+    };
+
     const interval = setInterval(updateElapsedTime, 1000);
 
-    return () => clearInterval(interval);
-  });
+    return () => {
+      clearInterval(interval);
+      setElapsedTime(0);
+    };
+  }, [props.queryStatus.startTime]);
 
-  if (props.queryStatus.status === ResultStatus.LOADING) {
-    if (elapsedTime < BUFFER_TIME) {
-      return null;
+  if (elapsedTime > BUFFER_TIME) {
+    if (props.queryStatus.status === ResultStatus.LOADING) {
+      const time = Math.floor(elapsedTime / 1000);
+      return (
+        <EuiButtonEmpty
+          color="text"
+          size="xs"
+          onClick={() => {}}
+          isLoading
+          data-test-subj="queryResultLoading"
+        >
+          {i18n.translate('data.query.languageService.queryResults.loadTime', {
+            defaultMessage: 'Loading {time} s',
+            values: { time },
+          })}
+        </EuiButtonEmpty>
+      );
     }
     const time = Math.floor(elapsedTime / 1000);
     return (
@@ -68,6 +84,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
         onClick={() => {}}
         isLoading
         data-test-subj="queryResultLoading"
+        className="editor__footerItem"
       >
         {i18n.translate('data.query.languageService.queryResults.loadTime', {
           defaultMessage: 'Loading {time} s',
@@ -85,7 +102,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
       });
     } else if (props.queryStatus.elapsedMs < 1000) {
       message = i18n.translate(
-        'data.query.languageService.queryResults.completeTimeInMiliseconds',
+        'data.query.languageService.queryResults.completeTimeInMilliseconds',
         {
           defaultMessage: 'Completed in {timeMS} ms',
           values: { timeMS: props.queryStatus.elapsedMs },
@@ -99,7 +116,13 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     }
 
     return (
-      <EuiButtonEmpty iconSide="left" iconType={'checkInCircleEmpty'} size="xs" onClick={() => {}}>
+      <EuiButtonEmpty
+        iconSide="left"
+        iconType={'checkInCircleEmpty'}
+        iconGap="s"
+        size="xs"
+        onClick={() => {}}
+      >
         <EuiText size="xs" color="subdued" data-test-subj="queryResultCompleteMsg">
           {message}
         </EuiText>
@@ -120,8 +143,10 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
           size="xs"
           onClick={onButtonClick}
           data-test-subj="queryResultErrorBtn"
+          className="editor__footerItem"
+          color="danger"
         >
-          <EuiText size="xs" color="subdued">
+          <EuiText size="xs" color="danger" className="editor__footerItem">
             {i18n.translate('data.query.languageService.queryResults.error', {
               defaultMessage: `Error`,
             })}
@@ -135,23 +160,15 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
       data-test-subj="queryResultError"
     >
       <EuiPopoverTitle>ERRORS</EuiPopoverTitle>
-      <div style={{ width: '250px' }}>
-        <EuiText size="s">
-          <strong>
-            {i18n.translate('data.query.languageService.queryResults.reasons', {
-              defaultMessage: `Reasons:`,
-            })}
-          </strong>
-          {props.queryStatus.body.error.reason}
-        </EuiText>
+      <div style={{ width: '250px' }} className="eui-textBreakWord">
         <EuiText size="s">
           <p>
             <strong>
-              {i18n.translate('data.query.languageService.queryResults.details', {
-                defaultMessage: `Details:`,
+              {i18n.translate('data.query.languageService.queryResults.message', {
+                defaultMessage: `Message:`,
               })}
-            </strong>
-            {props.queryStatus.body.error.details}
+            </strong>{' '}
+            {props.queryStatus.body.error.message}
           </p>
         </EuiText>
       </div>

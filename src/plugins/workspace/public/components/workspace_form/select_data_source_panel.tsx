@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiSpacer,
   EuiFlexItem,
@@ -17,7 +17,7 @@ import { i18n } from '@osd/i18n';
 import { SavedObjectsStart, CoreStart } from '../../../../../core/public';
 import { DataSourceConnection } from '../../../common/types';
 import { WorkspaceFormError } from './types';
-import { AssociationDataSourceModal } from '../workspace_detail/association_data_source_modal';
+import { AssociationDataSourceModal } from '../data_source_association/association_data_source_modal';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceClient } from '../../workspace_client';
 import { AssociationDataSourceModalMode } from '../../../common/constants';
@@ -45,6 +45,10 @@ export const SelectDataSourcePanel = ({
   const {
     services: { notifications, http, chrome },
   } = useOpenSearchDashboards<{ CoreStart: CoreStart; workspaceClient: WorkspaceClient }>();
+
+  const excludedConnectionIds = useMemo(() => assignedDataSourceConnections.map((c) => c.id), [
+    assignedDataSourceConnections,
+  ]);
 
   const handleAssignDataSourceConnections = (newDataSourceConnections: DataSourceConnection[]) => {
     setModalVisible(false);
@@ -75,7 +79,7 @@ export const SelectDataSourcePanel = ({
       data-test-subj={testingId}
     >
       {i18n.translate('workspace.form.selectDataSourcePanel.addNew', {
-        defaultMessage: 'Associate OpenSearch connections',
+        defaultMessage: 'Associate OpenSearch data sources',
       })}
     </EuiSmallButton>
   );
@@ -92,7 +96,7 @@ export const SelectDataSourcePanel = ({
       data-test-subj={testingId}
     >
       {i18n.translate('workspace.form.selectDataSourcePanel.addNewDQCs', {
-        defaultMessage: 'Associate direct query connections',
+        defaultMessage: 'Associate direct query data sources',
       })}
     </EuiSmallButton>
   );
@@ -187,7 +191,7 @@ export const SelectDataSourcePanel = ({
       {modalVisible && chrome && (
         <AssociationDataSourceModal
           savedObjects={savedObjects}
-          assignedConnections={assignedDataSourceConnections}
+          excludedConnectionIds={excludedConnectionIds}
           closeModal={() => setModalVisible(false)}
           handleAssignDataSourceConnections={handleAssignDataSourceConnections}
           http={http}
