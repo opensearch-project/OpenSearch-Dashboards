@@ -1,2 +1,2 @@
 fix:
-- Fix DQL & PPL Autocomplete Regression Issues ([#8800](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8800))
+- [Discover] Fix DQL & PPL Autocomplete Regression Issues ([#8800](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8800))
