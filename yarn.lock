@@ -17378,10 +17378,10 @@ vega-hierarchy@~4.1.1:
     vega-dataflow "^5.7.5"
     vega-util "^1.17.1"
 
-"vega-interpreter@npm:@amoo-miki/vega-forced-csp-compliant-interpreter@1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@amoo-miki/vega-forced-csp-compliant-interpreter/-/vega-forced-csp-compliant-interpreter-1.0.6.tgz#5cffdf12b7fe12dc936194edd9e8519506c38716"
-  integrity sha512-9S5nTTVd8JVKobcWp5iwirIeePiamwH1J9uSZPuG5kcF0TUBvGu++ERKjNdst5Qck7e4R6/7vjx2wVf58XUarg==
+vega-interpreter@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/vega-interpreter/-/vega-interpreter-1.0.5.tgz#19e1d1b5f84a4ea9cb25c4e90a05ce16cd058484"
+  integrity sha512-po6oTOmeQqr1tzTCdD15tYxAQLeUnOVirAysgVEemzl+vfmvcEP7jQmlc51jz0jMA+WsbmE6oJywisQPu/H0Bg==
 
 vega-label@~1.2.1:
   version "1.2.1"
