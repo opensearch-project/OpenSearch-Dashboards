@@ -103,6 +103,6 @@ describe('createRecentNavLink', () => {
       mockedNavigateToUrl
     );
 
-    expect(recentLink.href).toEqual('http://localhost/test/w/foo/app/foo');
+    expect(recentLink.href).toEqual('http://localhost/test/app/foo');
   });
 });
