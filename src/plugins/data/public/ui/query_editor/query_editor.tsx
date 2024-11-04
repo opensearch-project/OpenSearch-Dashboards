@@ -75,7 +75,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const headerRef = useRef<HTMLDivElement>(null);
   const bannerRef = useRef<HTMLDivElement>(null);
   const queryControlsContainer = useRef<HTMLDivElement>(null);
-  // TODO: There should only be one source of truth for query state and it should match the app query state. Firing the query should be restricted to when the user is ready, but should not prevent the app query from changing.
+  // TODO: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8801
   const editorQuery = props.query; // local query state managed by the editor. Not to be confused by the app query state.
 
   const queryString = getQueryService().queryString;
@@ -87,7 +87,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   });
   const queryRef = useRef(query);
 
-  // Monaco editor commands dont reference the query state directly since the commands are registered at startup, so we need to keep a ref to the query state that it can use when needed
+  // Monaco commands are registered once at startup, we need a ref to access the latest query state inside command callbacks
   useEffect(() => {
     queryRef.current = query;
   }, [query]);
@@ -165,7 +165,6 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const onQueryStringChange = (value: string) => {
     onChange({
       query: value,
-      // Its fiune to reference the query state her since it is not updated yet
       language: query.language,
       dataset: query.dataset,
     });
