@@ -189,6 +189,7 @@ const setMeta = (dataStructure: DataStructure, response: any) => {
     ...dataStructure.meta,
     queryId: response.queryId,
     sessionId: response.sessionId,
+    updatedAt: Date.now(),
   } as DataStructureCustomMeta;
 };
 
