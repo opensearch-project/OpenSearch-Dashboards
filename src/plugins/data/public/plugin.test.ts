@@ -53,18 +53,8 @@ describe('#DataPublicPlugin setup', () => {
     coreSetup = {
       ...coreMock.createSetup({ pluginStartContract: mockDataPublicPluginStart }),
       uiSettings: {
-        get: jest.fn((setting) => {
-          if (setting === UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) {
-            return true;
-          }
-          return false;
-        }),
-        get$: jest.fn((setting) => {
-          if (setting === UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) {
-            return of(true);
-          }
-          return of(false);
-        }),
+        get: jest.fn((setting) => setting === UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED),
+        get$: jest.fn((setting) => of(setting === UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)),
         getUpdate$: jest.fn(() => of({ key: UI_SETTINGS.FORMAT_DEFAULT_TYPE_MAP, newValue: {} })),
       },
       expressions: expressionsMock,
