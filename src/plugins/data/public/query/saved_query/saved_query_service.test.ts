@@ -29,10 +29,11 @@
  */
 
 import { createSavedQueryService } from './saved_query_service';
-import { FilterStateStore } from '../../../common';
+import { FilterStateStore, UI_SETTINGS } from '../../../common';
 import { SavedQueryAttributes } from './types';
 import { applicationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { getUseNewSavedQueriesUI } from '../../services';
+import { setUISettings } from '../../../../vis_augmenter/public';
 
 jest.mock('../../services', () => ({
   getUseNewSavedQueriesUI: jest.fn(),
@@ -47,58 +48,36 @@ const savedQueryAttributes: SavedQueryAttributes = {
     query: 'response:200',
   },
 };
-
-const savedAttributesWithTemplate: SavedQueryAttributes = {
-  ...savedQueryAttributes,
-  isTemplate: false,
-  query: {
-    ...savedQueryAttributes.query,
-    dataset: undefined,
-  },
-};
-
 const savedQueryAttributesBar: SavedQueryAttributes = {
   title: 'bar',
   description: 'baz',
   query: {
     language: 'kuery',
     query: 'response:200',
-    dataset: undefined,
   },
-  isTemplate: false,
 };
-
-const createDefaultFilters = () => [
-  {
-    query: { match_all: {} },
-    $state: { store: FilterStateStore.APP_STATE },
-    meta: {
-      disabled: false,
-      negate: false,
-      alias: null,
-    },
-  },
-];
-
-const createDefaultTimeFilter = () => ({
-  to: 'now',
-  from: 'now-15m',
-  refreshInterval: {
-    pause: false,
-    value: 0,
-  },
-});
 
 const savedQueryAttributesWithFilters: SavedQueryAttributes = {
   ...savedQueryAttributes,
-  filters: createDefaultFilters(),
-  timefilter: createDefaultTimeFilter(),
-};
-
-const savedQueryAttributesWithTemplateAndFilters: SavedQueryAttributes = {
-  ...savedAttributesWithTemplate,
-  filters: createDefaultFilters(),
-  timefilter: createDefaultTimeFilter(),
+  filters: [
+    {
+      query: { match_all: {} },
+      $state: { store: FilterStateStore.APP_STATE },
+      meta: {
+        disabled: false,
+        negate: false,
+        alias: null,
+      },
+    },
+  ],
+  timefilter: {
+    to: 'now',
+    from: 'now-15m',
+    refreshInterval: {
+      pause: false,
+      value: 0,
+    },
+  },
 };
 
 const mockSavedObjectsClient = {
@@ -108,6 +87,12 @@ const mockSavedObjectsClient = {
   get: jest.fn(),
   delete: jest.fn(),
 };
+
+const uiSettings = uiSettingsServiceMock.createStartContract();
+setUISettings(uiSettings);
+uiSettings.get.mockImplementation((key: string) => {
+  return key === UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED;
+});
 
 const {
   deleteSavedQuery,
@@ -121,11 +106,16 @@ const {
   mockSavedObjectsClient,
   {
     application: applicationServiceMock.create(),
-    uiSettings: uiSettingsServiceMock.createStartContract(),
+    uiSettings,
   }
 );
 
 describe('saved query service', () => {
+  beforeEach(() => {
+    // Reset mocks before each test
+    jest.clearAllMocks();
+    getUseNewSavedQueriesUI.mockReturnValue(false);
+  });
   afterEach(() => {
     mockSavedObjectsClient.create.mockReset();
     mockSavedObjectsClient.find.mockReset();
@@ -137,25 +127,14 @@ describe('saved query service', () => {
     it('should create a saved object for the given attributes', async () => {
       mockSavedObjectsClient.create.mockReturnValue({
         id: 'foo',
-        attributes: savedAttributesWithTemplate,
-      });
-
-      const response = await saveQuery(savedAttributesWithTemplate);
-
-      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
-        'query',
-        {
-          ...savedQueryAttributes,
-        },
-        {
-          id: 'foo',
-        }
-      );
-
-      expect(response).toEqual({
-        id: 'foo',
         attributes: savedQueryAttributes,
       });
+
+      const response = await saveQuery(savedQueryAttributes);
+      expect(mockSavedObjectsClient.create).toHaveBeenCalledWith('query', savedQueryAttributes, {
+        id: 'foo',
+      });
+      expect(response).toEqual({ id: 'foo', attributes: savedQueryAttributes });
     });
 
     it('should allow overwriting an existing saved query', async () => {
@@ -221,9 +200,6 @@ describe('saved query service', () => {
       expect(error).not.toBe(null);
     });
     it('should include dataset in the query when query enhancement is enabled and dataset exists', async () => {
-      uiSettingsServiceMock.createStartContract().get.mockReturnValue(true); // query enhancements enabled
-      getUseNewSavedQueriesUI.mockReturnValue(true); // using new saved queries UI
-
       const savedQueryAttributesWithTemplate: SavedQueryAttributes = {
         title: 'foo',
         description: 'bar',
@@ -232,7 +208,6 @@ describe('saved query service', () => {
           query: 'response:200',
           dataset: 'my_dataset',
         },
-        isTemplate: false,
       };
 
       mockSavedObjectsClient.create.mockReturnValue({
@@ -257,7 +232,6 @@ describe('saved query service', () => {
             query: 'response:200',
             dataset: 'my_dataset',
           },
-          isTemplate: false,
         },
       });
 
@@ -273,9 +247,7 @@ describe('saved query service', () => {
     });
 
     it('should include isTemplate in the query object when new saved queries UI is enabled and isTemplate is true', async () => {
-      uiSettingsServiceMock.createStartContract().get.mockReturnValue(false); // query enhancements not enabled
       getUseNewSavedQueriesUI.mockReturnValue(true); // using new saved queries UI
-
       const savedQueryAttributesWithTemplate: SavedQueryAttributes = {
         title: 'foo',
         description: 'bar',
@@ -317,12 +289,12 @@ describe('saved query service', () => {
   describe('findSavedQueries', function () {
     it('should find and return saved queries without search text or pagination parameters', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
-        savedObjects: [{ id: 'foo', attributes: savedAttributesWithTemplate }],
+        savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
         total: 5,
       });
 
       const response = await findSavedQueries();
-      expect(response.queries).toEqual([{ id: 'foo', attributes: savedAttributesWithTemplate }]);
+      expect(response.queries).toEqual([{ id: 'foo', attributes: savedQueryAttributes }]);
     });
 
     it('should return the total count along with the requested queries', async () => {
@@ -337,7 +309,7 @@ describe('saved query service', () => {
 
     it('should find and return saved queries with search text matching the title field', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
-        savedObjects: [{ id: 'foo', attributes: savedAttributesWithTemplate }],
+        savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
         total: 5,
       });
       const response = await findSavedQueries('foo');
@@ -349,12 +321,12 @@ describe('saved query service', () => {
         sortField: '_score',
         type: 'query',
       });
-      expect(response.queries).toEqual([{ id: 'foo', attributes: savedAttributesWithTemplate }]);
+      expect(response.queries).toEqual([{ id: 'foo', attributes: savedQueryAttributes }]);
     });
 
     it('should find and return parsed filters and timefilters items', async () => {
       const serializedSavedQueryAttributesWithFilters = {
-        ...savedQueryAttributesWithTemplateAndFilters,
+        ...savedQueryAttributesWithFilters,
         filters: savedQueryAttributesWithFilters.filters,
         timefilter: savedQueryAttributesWithFilters.timefilter,
       };
@@ -364,13 +336,13 @@ describe('saved query service', () => {
       });
       const response = await findSavedQueries('bar');
       expect(response.queries).toEqual([
-        { id: 'foo', attributes: savedQueryAttributesWithTemplateAndFilters },
+        { id: 'foo', attributes: savedQueryAttributesWithFilters },
       ]);
     });
 
     it('should return an array of saved queries', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
-        savedObjects: [{ id: 'foo', attributes: savedAttributesWithTemplate }],
+        savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
         total: 5,
       });
       const response = await findSavedQueries();
@@ -379,8 +351,7 @@ describe('saved query service', () => {
           {
             attributes: {
               description: 'bar',
-              query: { language: 'kuery', query: 'response:200', dataset: undefined },
-              isTemplate: false,
+              query: { language: 'kuery', query: 'response:200' },
               title: 'foo',
             },
             id: 'foo',
@@ -392,7 +363,7 @@ describe('saved query service', () => {
     it('should accept perPage and page properties', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
         savedObjects: [
-          { id: 'foo', attributes: savedAttributesWithTemplate },
+          { id: 'foo', attributes: savedQueryAttributes },
           { id: 'bar', attributes: savedQueryAttributesBar },
         ],
         total: 5,
@@ -411,8 +382,7 @@ describe('saved query service', () => {
           {
             attributes: {
               description: 'bar',
-              query: { language: 'kuery', query: 'response:200', dataset: undefined },
-              isTemplate: false,
+              query: { language: 'kuery', query: 'response:200' },
               title: 'foo',
             },
             id: 'foo',
@@ -420,8 +390,7 @@ describe('saved query service', () => {
           {
             attributes: {
               description: 'baz',
-              query: { language: 'kuery', query: 'response:200', dataset: undefined },
-              isTemplate: false,
+              query: { language: 'kuery', query: 'response:200' },
               title: 'bar',
             },
             id: 'bar',
@@ -551,13 +520,10 @@ describe('saved query service', () => {
 
   describe('getSavedQuery', function () {
     it('should retrieve a saved query by id', async () => {
-      mockSavedObjectsClient.get.mockReturnValue({
-        id: 'foo',
-        attributes: savedAttributesWithTemplate,
-      });
+      mockSavedObjectsClient.get.mockReturnValue({ id: 'foo', attributes: savedQueryAttributes });
 
       const response = await getSavedQuery('foo');
-      expect(response).toEqual({ id: 'foo', attributes: savedAttributesWithTemplate });
+      expect(response).toEqual({ id: 'foo', attributes: savedQueryAttributes });
     });
     it('should only return saved queries', async () => {
       mockSavedObjectsClient.get.mockReturnValue({ id: 'foo', attributes: savedQueryAttributes });
@@ -577,7 +543,7 @@ describe('saved query service', () => {
   describe('getAllSavedQueries', function () {
     it('should return all the saved queries', async () => {
       mockSavedObjectsClient.find.mockReturnValue({
-        savedObjects: [{ id: 'foo', attributes: savedAttributesWithTemplate }],
+        savedObjects: [{ id: 'foo', attributes: savedQueryAttributes }],
       });
       const response = await getAllSavedQueries();
       expect(response).toEqual(
@@ -585,8 +551,7 @@ describe('saved query service', () => {
           {
             attributes: {
               description: 'bar',
-              query: { language: 'kuery', query: 'response:200', dataset: undefined },
-              isTemplate: false,
+              query: { language: 'kuery', query: 'response:200' },
               title: 'foo',
             },
             id: 'foo',
