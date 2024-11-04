@@ -1,0 +1,2 @@
+fix:
+- [Discover] Makes cachign dataset options optional and configurable by the dataset type ([#8799](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8799))
