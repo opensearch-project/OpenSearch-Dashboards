@@ -1,0 +1,2 @@
+fix:
+- Staled closure inside chrome_service ([#8783](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8783))

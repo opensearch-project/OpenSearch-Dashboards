@@ -46,6 +46,7 @@ import { HeaderVariant } from './constants';
 
 class FakeApp implements App {
   public title: string;
+  public appRoute: string;
   public mount = () => () => {};
 
   constructor(
@@ -54,6 +55,7 @@ class FakeApp implements App {
     public headerVariant?: HeaderVariant
   ) {
     this.title = `${this.id} App`;
+    this.appRoute = this.id;
   }
 }
 const store = new Map();
@@ -78,12 +80,18 @@ function defaultStartDeps(availableApps?: App[]) {
     uiSettings: uiSettingsServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
     workspaces: workspacesServiceMock.createStartContract(),
+    updateApplications: (() => {}) as (applications?: App[]) => void,
   };
 
   if (availableApps) {
-    deps.application.applications$ = new Rx.BehaviorSubject<Map<string, PublicAppInfo>>(
+    const applications$ = new Rx.BehaviorSubject<Map<string, PublicAppInfo>>(
       new Map(availableApps.map((app) => [app.id, getAppInfo(app) as PublicAppInfo]))
     );
+    deps.application.applications$ = applications$;
+    deps.updateApplications = (applications?: App[]) =>
+      applications$.next(
+        new Map(applications?.map((app) => [app.id, getAppInfo(app) as PublicAppInfo]))
+      );
   }
 
   return deps;
@@ -284,6 +292,30 @@ describe('start', () => {
                         false,
                       ]
                   `);
+    });
+
+    it('should use correct current app id to tell if hidden', async () => {
+      const apps = [new FakeApp('alpha', true), new FakeApp('beta', false)];
+      const startDeps = defaultStartDeps(apps);
+      const { navigateToApp } = startDeps.application;
+      const { chrome } = await start({ startDeps });
+      const visibleChangedArray: boolean[] = [];
+      const visible$ = chrome.getIsVisible$();
+      visible$.subscribe((visible) => visibleChangedArray.push(visible));
+
+      await navigateToApp('alpha');
+
+      await navigateToApp('beta');
+      startDeps.updateApplications(apps);
+
+      expect(visibleChangedArray).toMatchInlineSnapshot(`
+        Array [
+          false,
+          false,
+          true,
+          true,
+        ]
+      `);
     });
   });
 
