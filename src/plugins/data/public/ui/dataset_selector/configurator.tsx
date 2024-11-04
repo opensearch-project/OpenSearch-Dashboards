@@ -141,6 +141,7 @@ export const Configurator = ({
                 setLanguage(e.target.value);
                 setDataset({ ...dataset, language: e.target.value });
               }}
+              data-test-subj="advancedSelectorLanguageSelect"
             />
           </EuiFormRow>
           {!languageService.getLanguage(language)?.hideDatePicker &&

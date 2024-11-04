@@ -58,22 +58,22 @@ export const pplAsyncSearchStrategyProvider = (
           } as IDataFrameResponse;
         } else {
           request.params = { queryId: inProgressQueryId };
-          const queryStatusResponse: any = await pplAsyncJobsFacet.describeQuery(context, request);
+          const queryStatusResponse = await pplAsyncJobsFacet.describeQuery(context, request);
 
           if (!queryStatusResponse.success) handleFacetError(queryStatusResponse);
 
-          const queryStatus = queryStatusResponse?.data?.status;
+          const queryStatus = queryStatusResponse.data?.status;
           logger.info(`pplAsyncSearchStrategy: JOB: ${inProgressQueryId} - STATUS: ${queryStatus}`);
 
           if (queryStatus?.toUpperCase() === 'SUCCESS') {
             const dataFrame = createDataFrame({
               name: query.dataset?.id,
-              schema: queryStatusResponse.data.schema,
+              schema: queryStatusResponse.data?.schema,
               meta: { ...pollQueryResultsParams },
               fields: getFields(queryStatusResponse),
             });
 
-            dataFrame.size = queryStatusResponse.data.datarows.length;
+            dataFrame.size = queryStatusResponse.data?.datarows.length;
 
             return {
               type: DATA_FRAME_TYPES.POLLING,
@@ -85,7 +85,7 @@ export const pplAsyncSearchStrategyProvider = (
               type: DATA_FRAME_TYPES.POLLING,
               status: 'failed',
               body: {
-                error: `JOB: ${inProgressQueryId} failed: ${queryStatusResponse.data.error}`,
+                error: `JOB: ${inProgressQueryId} failed: ${queryStatusResponse.data?.error}`,
               },
             } as IDataFrameResponse;
           }
