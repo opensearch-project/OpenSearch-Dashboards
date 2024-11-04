@@ -6,6 +6,7 @@
 import { i18n } from '@osd/i18n';
 import { trimEnd } from 'lodash';
 import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import semver from 'semver';
 import {
   DATA_STRUCTURE_META_TYPES,
   DEFAULT_DATA,
@@ -118,7 +119,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
   },
 
   supportedLanguages: (dataset: Dataset): string[] => {
-    return ['SQL'];
+    return ['SQL', 'PPL'];
   },
 
   getSampleQueries: (dataset: Dataset, language: string) => {
@@ -129,7 +130,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
             title: i18n.translate('queryEnhancements.s3Type.sampleQuery.basicPPLQuery', {
               defaultMessage: 'Sample query for PPL',
             }),
-            query: `source = ${dataset.title}`,
+            query: `source = ${dataset.title} | head 10`,
           },
         ];
       case 'SQL':
@@ -196,9 +197,12 @@ const fetchDataSources = async (client: SavedObjectsClientContract): Promise<Dat
     type: 'data-source',
     perPage: 10000,
   });
-  const dataSources: DataStructure[] = [DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE];
-  return dataSources.concat(
-    resp.savedObjects.map((savedObject) => ({
+  const dataSources: DataStructure[] = resp.savedObjects
+    .filter((savedObject) => {
+      const coercedVersion = semver.coerce(savedObject.attributes.dataSourceVersion);
+      return coercedVersion ? semver.satisfies(coercedVersion, '>=1.0.0') : false;
+    })
+    .map((savedObject) => ({
       id: savedObject.id,
       title: savedObject.attributes.title,
       type: 'DATA_SOURCE',
@@ -208,8 +212,8 @@ const fetchDataSources = async (client: SavedObjectsClientContract): Promise<Dat
         },
         type: DATA_STRUCTURE_META_TYPES.CUSTOM,
       } as DataStructureCustomMeta,
-    }))
-  );
+    }));
+  return dataSources;
 };
 
 const fetchConnections = async (

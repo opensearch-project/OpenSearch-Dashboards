@@ -16,18 +16,18 @@ import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import { buildQueryStatusConfig, getFields, handleFacetError, SEARCH_STRATEGY } from '../../common';
 import { Facet } from '../utils';
 
-export const sqlAsyncSearchStrategyProvider = (
+export const pplAsyncSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
   client: ILegacyClusterClient,
   usage?: SearchUsage
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
-  const sqlAsyncFacet = new Facet({
+  const pplAsyncFacet = new Facet({
     client,
     logger,
     endpoint: 'enhancements.runDirectQuery',
   });
-  const sqlAsyncJobsFacet = new Facet({
+  const pplAsyncJobsFacet = new Facet({
     client,
     logger,
     endpoint: 'enhancements.getJobStatus',
@@ -42,8 +42,8 @@ export const sqlAsyncSearchStrategyProvider = (
         const inProgressQueryId = pollQueryResultsParams?.queryId;
 
         if (!inProgressQueryId) {
-          request.body = { ...request.body, lang: SEARCH_STRATEGY.SQL };
-          const rawResponse: any = await sqlAsyncFacet.describeQuery(context, request);
+          request.body = { ...request.body, lang: SEARCH_STRATEGY.PPL };
+          const rawResponse: any = await pplAsyncFacet.describeQuery(context, request);
 
           if (!rawResponse.success) handleFacetError(rawResponse);
 
@@ -58,12 +58,12 @@ export const sqlAsyncSearchStrategyProvider = (
           } as IDataFrameResponse;
         } else {
           request.params = { queryId: inProgressQueryId };
-          const queryStatusResponse = await sqlAsyncJobsFacet.describeQuery(context, request);
+          const queryStatusResponse = await pplAsyncJobsFacet.describeQuery(context, request);
 
           if (!queryStatusResponse.success) handleFacetError(queryStatusResponse);
 
           const queryStatus = queryStatusResponse.data?.status;
-          logger.info(`sqlAsyncSearchStrategy: JOB: ${inProgressQueryId} - STATUS: ${queryStatus}`);
+          logger.info(`pplAsyncSearchStrategy: JOB: ${inProgressQueryId} - STATUS: ${queryStatus}`);
 
           if (queryStatus?.toUpperCase() === 'SUCCESS') {
             const dataFrame = createDataFrame({
@@ -96,7 +96,7 @@ export const sqlAsyncSearchStrategyProvider = (
           } as IDataFrameResponse;
         }
       } catch (e: any) {
-        logger.error(`sqlAsyncSearchStrategy: ${e.message}`);
+        logger.error(`pplAsyncSearchStrategy: ${e.message}`);
         if (usage) usage.trackError();
         throw e;
       }

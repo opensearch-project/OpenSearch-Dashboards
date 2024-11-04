@@ -9,13 +9,10 @@ import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dash
 import { coreMock } from '../../../../../core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { Query } from '../..';
-import { of } from 'rxjs';
 
 const startMock = coreMock.createStart();
 
 // Mock the query updates subject
-// TODO: Codeium jest is complaining about reference area and this being out of scope can you fix this?
-
 // Create a more complete mock that matches the service structure
 jest.mock('../../services', () => {
   const getQueryMock = jest.fn().mockReturnValue({

@@ -44,7 +44,8 @@ export const removeKeyword = (queryString: string | undefined) => {
 
 export const handleFacetError = (response: any) => {
   const error = new Error(response.data.body ?? response.data);
-  error.name = response.data.status ?? response.status;
+  error.name = response.data.status ?? response.status ?? response.data.statusCode;
+  (error as any).status = error.name;
   throw error;
 };
 
