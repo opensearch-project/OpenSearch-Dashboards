@@ -85,8 +85,12 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const { query } = useQueryStringManager({
     queryString,
   });
+  const queryRef = useRef(query);
 
-  // console.log('QueryEditorUI', query);
+  // Monaco editor commands dont reference the query state directly since the commands are registered at startup, so we need to keep a ref to the query state that it can use when needed
+  useEffect(() => {
+    queryRef.current = query;
+  }, [query]);
 
   const persistedLogRef = useRef<PersistedLog>(
     props.persistedLog ||
@@ -226,7 +230,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       query: inputRef.current?.getValue() ?? '',
       selectionStart: model.getOffsetAt(position),
       selectionEnd: model.getOffsetAt(position),
-      language: query.language,
+      language: queryRef.current.language,
       indexPattern,
       position,
       services,
@@ -287,9 +291,8 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       inputRef.current = editor;
       // eslint-disable-next-line no-bitwise
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
-        // debugger
         const newQuery = {
-          ...query,
+          ...queryRef.current,
           query: editor.getValue(),
         };
 
@@ -350,30 +353,6 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
 
         onSubmit(newQuery);
       });
-
-      // const handleEnterPress = () => {
-      //   const newQuery = {
-      //     ...props.query,
-      //     query: editor.getValue(),
-      //   };
-
-      //   debugger
-
-      //   onSubmit(newQuery);
-      // };
-
-      // const disposable = editor.onKeyDown((e) => {
-      //   if (e.keyCode === monaco.KeyCode.Enter) {
-      //     // Prevent default Enter key behavior
-      //     e.preventDefault();
-      //     handleEnterPress();
-      //   }
-      // });
-
-      // Optional: Cleanup on component unmount
-      return () => {
-        // disposable.dispose();
-      };
     },
     provideCompletionItems,
     prepend: props.prepend,
