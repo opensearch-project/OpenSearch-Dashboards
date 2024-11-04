@@ -143,8 +143,25 @@ export const useSearch = (services: DiscoverViewServices) => {
             : ResultStatus.UNINITIALIZED,
         queryStatus: { startTime },
       }),
-    [shouldSearchOnPageLoad, startTime, skipInitialFetch]
+    // we only want data$ observable to be created once, updates will be done through useEffect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
+
+  useEffect(() => {
+    data$.next({ ...data$.value, queryStatus: { startTime } });
+  }, [data$, startTime]);
+
+  useEffect(() => {
+    data$.next({
+      ...data$.value,
+      status:
+        shouldSearchOnPageLoad() && !skipInitialFetch.current
+          ? ResultStatus.LOADING
+          : ResultStatus.UNINITIALIZED,
+    });
+  }, [data$, shouldSearchOnPageLoad, skipInitialFetch]);
+
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
   const fetch = useCallback(async () => {
