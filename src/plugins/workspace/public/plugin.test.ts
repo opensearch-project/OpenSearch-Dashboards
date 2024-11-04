@@ -25,8 +25,8 @@ import { navigationPluginMock } from '../../navigation/public/mocks';
 import * as registerDefaultCollaboratorTypesExports from './register_default_collaborator_types';
 import { AddCollaboratorsModal } from './components/add_collaborators_modal';
 
-// Expect 6 app registrations: create, fatal error, detail, initial, navigation, and list apps.
-const registrationAppNumber = 6;
+// Expect 6 app registrations: create, fatal error, detail, initial, navigation, collaborator and list apps.
+const registrationAppNumber = 7;
 
 describe('Workspace plugin', () => {
   const getMockDependencies = () => ({

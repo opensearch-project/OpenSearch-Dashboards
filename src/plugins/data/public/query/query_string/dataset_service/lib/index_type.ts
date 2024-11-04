@@ -5,6 +5,8 @@
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { map } from 'rxjs/operators';
+import { i18n } from '@osd/i18n';
+import semver from 'semver';
 import {
   DEFAULT_DATA,
   DataStructure,
@@ -21,6 +23,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
   meta: {
     icon: { type: 'logoOpenSearch' },
     tooltip: 'OpenSearch Indexes',
+    searchOnLoad: true,
   },
 
   toDataset: (path) => {
@@ -80,11 +83,35 @@ export const indexTypeConfig: DatasetTypeConfig = {
     return fields.map((field: any) => ({
       name: field.name,
       type: field.type,
+      aggregatable: field?.aggregatable,
     }));
   },
 
   supportedLanguages: (dataset: Dataset): string[] => {
     return ['SQL', 'PPL'];
+  },
+
+  getSampleQueries: (dataset: Dataset, language: string) => {
+    switch (language) {
+      case 'PPL':
+        return [
+          {
+            title: i18n.translate('data.indexType.sampleQuery.basicPPLQuery', {
+              defaultMessage: 'Sample query for PPL',
+            }),
+            query: `source = ${dataset.title}`,
+          },
+        ];
+      case 'SQL':
+        return [
+          {
+            title: i18n.translate('data.indexType.sampleQuery.basicSQLQuery', {
+              defaultMessage: 'Sample query for SQL',
+            }),
+            query: `SELECT * FROM ${dataset.title} LIMIT 10`,
+          },
+        ];
+    }
   },
 };
 
@@ -93,13 +120,16 @@ const fetchDataSources = async (client: SavedObjectsClientContract) => {
     type: 'data-source',
     perPage: 10000,
   });
-  const dataSources: DataStructure[] = [DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE].concat(
-    response.savedObjects.map((savedObject) => ({
+  const dataSources: DataStructure[] = response.savedObjects
+    .filter((savedObject) => {
+      const coercedVersion = semver.coerce(savedObject.attributes.dataSourceVersion);
+      return coercedVersion ? semver.satisfies(coercedVersion, '>=1.0.0') : false;
+    })
+    .map((savedObject) => ({
       id: savedObject.id,
       title: savedObject.attributes.title,
       type: 'DATA_SOURCE',
-    }))
-  );
+    }));
 
   return injectMetaToDataStructures(dataSources);
 };

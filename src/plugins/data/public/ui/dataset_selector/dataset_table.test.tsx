@@ -6,7 +6,9 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
 import { IntlProvider } from 'react-intl';
-import { DataStructure } from '../../../common';
+import { CoreStart } from 'src/core/public';
+import { DataPublicPluginStart, IDataPluginServices } from '../..';
+import { DataStorage, DataStructure } from '../../../common';
 import { queryServiceMock } from '../../query/mocks';
 import { getQueryService } from '../../services';
 import { DatasetTable } from './dataset_table';
@@ -35,7 +37,26 @@ describe('DataSetTable', () => {
     },
   ];
 
+  const mockServices: IDataPluginServices = {
+    appName: 'testApp',
+    uiSettings: {} as CoreStart['uiSettings'],
+    savedObjects: {} as CoreStart['savedObjects'],
+    notifications: ({
+      toasts: {
+        addSuccess: jest.fn(),
+        addError: jest.fn(),
+      },
+    } as unknown) as CoreStart['notifications'],
+    http: {} as CoreStart['http'],
+    storage: {} as DataStorage,
+    data: {} as DataPublicPluginStart,
+    overlays: ({
+      openModal: jest.fn(),
+    } as unknown) as CoreStart['overlays'],
+  };
+
   const mockProps: ComponentProps<typeof DatasetTable> = {
+    services: mockServices,
     path: mockPath,
     setPath: jest.fn(),
     index: 2,
@@ -79,17 +100,12 @@ describe('DataSetTable', () => {
   });
 
   it('calls selectDataStructure with undefined when all items are deselected', async () => {
-    const propsWithSelection = {
-      ...mockProps,
-      explorerDataset: { id: 'child1,child2', title: 'Child 1,Child 2', type: 'index' },
-    };
-    renderWithIntl(<DatasetTable {...propsWithSelection} />);
+    renderWithIntl(<DatasetTable {...mockProps} />);
 
     const checkbox1 = screen.getByTestId('checkboxSelectRow-child1');
-    const checkbox2 = screen.getByTestId('checkboxSelectRow-child2');
 
     fireEvent.click(checkbox1);
-    fireEvent.click(checkbox2);
+    fireEvent.click(checkbox1);
 
     await waitFor(() => {
       expect(mockProps.selectDataStructure).toHaveBeenCalledWith(undefined, mockPath.slice(0, 3));

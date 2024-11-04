@@ -30,6 +30,12 @@ export interface DatasetTypeConfig {
     icon: EuiIconProps;
     /** Optional tooltip text */
     tooltip?: string;
+    /** Optional preference for search on page load else defaulted to true */
+    searchOnLoad?: boolean;
+    /** Optional supportsTimeFilter determines if a time filter is needed */
+    supportsTimeFilter?: boolean;
+    /** Optional isFieldLoadAsync determines if field loads are async */
+    isFieldLoadAsync?: boolean;
   };
   /**
    * Converts a DataStructure to a Dataset.
@@ -53,7 +59,10 @@ export interface DatasetTypeConfig {
    * Fetches fields for the dataset.
    * @returns {Promise<DatasetField[]>} A promise that resolves to an array of DatasetFields.
    */
-  fetchFields: (dataset: Dataset) => Promise<DatasetField[]>;
+  fetchFields: (
+    dataset: Dataset,
+    services?: Partial<IDataPluginServices>
+  ) => Promise<DatasetField[]>;
   /**
    * Retrieves the supported query languages for this dataset type.
    * @returns {Promise<string[]>} A promise that resolves to an array of supported language ids.
@@ -64,4 +73,13 @@ export interface DatasetTypeConfig {
    * with this Dataset
    */
   getSearchOptions?: () => DatasetSearchOptions;
+  /**
+   * Combines a list of user selected data structures into a single one to use in discover.
+   * @see https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8362.
+   */
+  combineDataStructures?: (dataStructures: DataStructure[]) => DataStructure | undefined;
+  /**
+   * Returns a list of sample queries for this dataset type
+   */
+  getSampleQueries?: (dataset: Dataset, language: string) => any;
 }

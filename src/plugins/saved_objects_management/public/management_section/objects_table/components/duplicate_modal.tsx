@@ -130,7 +130,7 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
               id="savedObjectsManagement.objectsTable.duplicateModal.title"
               defaultMessage="Copy {objectCount, plural, =1 {{objectName}} other {# {useUpdatedUX, select, true {assets} other {objects}}}} to another workspace?"
               values={{
-                objectName: allSelectedObjects[0].meta.title,
+                objectName: allSelectedObjects[0]?.meta.title,
                 objectCount: allSelectedObjects.length,
                 useUpdatedUX: this.props.useUpdatedUX,
               }}

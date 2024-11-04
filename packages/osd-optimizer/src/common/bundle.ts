@@ -103,13 +103,13 @@ export class Bundle {
 
   /**
    * Calculate the cache key for this bundle based from current
-   * mtime values.
+   * hash values.
    */
-  createCacheKey(files: string[], mtimes: Map<string, number | undefined>): unknown {
+  createCacheKey(files: string[], hashes: Map<string, string | undefined>): unknown {
     return {
       spec: this.toSpec(),
-      mtimes: entriesToObject(
-        files.map((p) => [p, mtimes.get(p)] as const).sort(ascending((e) => e[0]))
+      hashes: entriesToObject(
+        files.map((p) => [p, hashes.get(p)] as const).sort(ascending((e) => e[0]))
       ),
     };
   }

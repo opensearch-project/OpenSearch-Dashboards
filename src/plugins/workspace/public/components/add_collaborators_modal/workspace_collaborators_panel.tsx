@@ -24,6 +24,7 @@ export interface WorkspaceCollaboratorInner
 
 export interface WorkspaceCollaboratorsPanelProps {
   label: string;
+  errors?: { [key: number]: string };
   description?: string;
   collaborators: WorkspaceCollaboratorInner[];
   onChange: (value: WorkspaceCollaboratorInner[]) => void;
@@ -33,6 +34,7 @@ export interface WorkspaceCollaboratorsPanelProps {
 
 export const WorkspaceCollaboratorsPanel = ({
   label,
+  errors,
   description,
   collaborators,
   addAnotherButtonLabel,
@@ -91,7 +93,12 @@ export const WorkspaceCollaboratorsPanel = ({
         </>
       )}
       {collaborators.map((item, index) => (
-        <EuiCompressedFormRow key={item.id} fullWidth>
+        <EuiCompressedFormRow
+          key={item.id}
+          fullWidth
+          error={errors?.[item.id]}
+          isInvalid={!!errors?.[item.id]}
+        >
           <WorkspaceCollaboratorInput
             index={index}
             accessLevel={item.accessLevel}
@@ -100,6 +107,7 @@ export const WorkspaceCollaboratorsPanel = ({
             onAccessLevelChange={handleAccessLevelChange}
             onDelete={handleDelete}
             collaboratorIdInputPlaceholder={collaboratorIdInputPlaceholder}
+            error={errors?.[item.id]}
           />
         </EuiCompressedFormRow>
       ))}

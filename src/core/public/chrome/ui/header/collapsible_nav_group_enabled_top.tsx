@@ -19,7 +19,6 @@ import { InternalApplicationStart } from 'src/core/public/application';
 import { createEuiListItem } from './nav_link';
 import { NavGroupItemInMap } from '../../nav_group';
 import { ChromeNavLink } from '../../nav_links';
-
 export interface CollapsibleNavTopProps {
   collapsibleNavHeaderRender?: () => JSX.Element | null;
   homeLink?: ChromeNavLink;
@@ -77,7 +76,12 @@ export const CollapsibleNavTop = ({
       <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
         {!shouldShrinkNavigation ? (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="both" {...homeLinkProps} onClick={onIconClick}>
+            <EuiButtonEmpty
+              flush="both"
+              {...homeLinkProps}
+              onClick={onIconClick}
+              className="navGroupEnabledHomeIcon"
+            >
               <EuiIcon
                 type={homeIcon}
                 size="xl"

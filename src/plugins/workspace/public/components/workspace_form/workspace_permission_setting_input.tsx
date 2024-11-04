@@ -20,23 +20,9 @@ import {
   PERMISSION_COLLABORATOR_LABEL_ID,
   PERMISSION_ACCESS_LEVEL_LABEL_ID,
   permissionModeOptions,
+  typeOptions,
 } from './constants';
 import { getPermissionModeId } from './utils';
-
-const typeOptions = [
-  {
-    value: WorkspacePermissionItemType.User,
-    inputDisplay: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.user', {
-      defaultMessage: 'User',
-    }),
-  },
-  {
-    value: WorkspacePermissionItemType.Group,
-    inputDisplay: i18n.translate('workspace.form.permissionSettingPanel.typeOptions.group', {
-      defaultMessage: 'User Group',
-    }),
-  },
-];
 
 export interface WorkspacePermissionSettingInputProps {
   index: number;

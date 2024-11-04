@@ -620,6 +620,22 @@ export class DocLinksService {
             // https://opensearch.org/docs/latest/api-reference/snapshots/verify-snapshot-repository/
             veirfyRepository: `${OPENSEARCH_WEBSITE_DOCS}/api-reference/snapshots/verify-snapshot-repository/`,
           },
+          lucene: {
+            // https://opensearch.org/docs/latest/query-dsl/full-text/query-string/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/query-dsl/full-text/query-string/`,
+          },
+          ppl: {
+            // https://opensearch.org/docs/latest/search-plugins/sql/ppl/syntax/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/sql/ppl/syntax/`,
+          },
+          sql: {
+            // https://opensearch.org/docs/latest/search-plugins/sql/sql/basic/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/sql/sql/basic/`,
+          },
+          sqlPplLimitation: {
+            // https://opensearch.org/docs/latest/search-plugins/sql/limitation/
+            base: `${OPENSEARCH_WEBSITE_DOCS}/search-plugins/sql/limitation/`,
+          },
         },
       },
     });
@@ -961,6 +977,18 @@ export interface DocLinksStart {
         readonly deleteRepository: string;
         readonly cleanup: string;
         readonly veirfyRepository: string;
+      };
+      readonly lucene: {
+        readonly base: string;
+      };
+      readonly sql: {
+        readonly base: string;
+      };
+      readonly ppl: {
+        readonly base: string;
+      };
+      readonly sqlPplLimitation: {
+        readonly base: string;
       };
     };
   };

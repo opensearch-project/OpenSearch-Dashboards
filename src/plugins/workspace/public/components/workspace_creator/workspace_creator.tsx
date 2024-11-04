@@ -7,22 +7,34 @@ import React, { useCallback, useState, useMemo } from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
-
 import { useLocation } from 'react-router-dom';
+
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
-import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
+import { PermissionModeId } from '../../../../../core/public';
+import {
+  CURRENT_USER_PLACEHOLDER,
+  WORKSPACE_COLLABORATORS_APP_ID,
+  WORKSPACE_DETAIL_APP_ID,
+} from '../../../common/constants';
+import {
+  WorkspaceFormSubmitData,
+  WorkspaceOperationType,
+  WorkspacePermissionItemType,
+  convertPermissionSettingsToPermissions,
+  WorkspacePermissionSetting,
+} from '../workspace_form';
 import { getUseCaseFeatureConfig } from '../../../common/utils';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
-import { convertPermissionSettingsToPermissions } from '../workspace_form';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { WorkspaceUseCase } from '../../types';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { useFormAvailableUseCases } from '../workspace_form/use_form_available_use_cases';
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
 import { DataSourceConnectionType } from '../../../common/types';
+import { navigateToAppWithinWorkspace } from '../utils/workspace';
 import { WorkspaceCreatorForm } from './workspace_creator_form';
+import { optionIdToWorkspacePermissionModesMap } from '../workspace_form/constants';
 
 export interface WorkspaceCreatorProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -46,8 +58,8 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     navigationUI: NavigationPublicPluginStart['ui'];
   }>();
   const [isFormSubmitting, setIsFormSubmitting] = useState(false);
-
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
+
   const { isOnlyAllowEssential, availableUseCases } = useFormAvailableUseCases({
     savedObjects,
     registeredUseCases$,
@@ -73,8 +85,20 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
             features: [getUseCaseFeatureConfig(defaultSelectedUseCase.id)],
           }
         : {}),
+      ...(isPermissionEnabled
+        ? {
+            permissionSettings: [
+              {
+                id: 1,
+                type: WorkspacePermissionItemType.User,
+                userId: CURRENT_USER_PLACEHOLDER,
+                modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Owner],
+              },
+            ] as WorkspacePermissionSetting[],
+          }
+        : {}),
     };
-  }, [location.search, availableUseCases]);
+  }, [location.search, availableUseCases, isPermissionEnabled]);
 
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
@@ -102,7 +126,11 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
         result = await workspaceClient.create(attributes, {
           dataSources: selectedDataSourceIds,
           dataConnections: selectedDataConnectionIds,
-          permissions: convertPermissionSettingsToPermissions(permissionSettings),
+          ...(isPermissionEnabled
+            ? {
+                permissions: convertPermissionSettingsToPermissions(permissionSettings),
+              }
+            : {}),
         });
         if (result?.success) {
           notifications?.toasts.addSuccess({
@@ -117,6 +145,14 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               ?.features[0].id;
             // Redirect page after one second, leave one second time to show create successful toast.
             window.setTimeout(() => {
+              if (isPermissionEnabled) {
+                navigateToAppWithinWorkspace(
+                  { application, http },
+                  newWorkspaceId,
+                  WORKSPACE_COLLABORATORS_APP_ID
+                );
+                return;
+              }
               window.location.href = formatUrlWithWorkspaceId(
                 application.getUrlForApp(useCaseLandingAppId || WORKSPACE_DETAIL_APP_ID, {
                   absolute: true,
@@ -142,7 +178,15 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
         setIsFormSubmitting(false);
       }
     },
-    [notifications?.toasts, http, application, workspaceClient, isFormSubmitting, availableUseCases]
+    [
+      notifications?.toasts,
+      http,
+      application,
+      workspaceClient,
+      isFormSubmitting,
+      availableUseCases,
+      isPermissionEnabled,
+    ]
   );
 
   const isFormReadyToRender =
@@ -177,7 +221,6 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               savedObjects={savedObjects}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Create}
-              permissionEnabled={isPermissionEnabled}
               dataSourceManagement={dataSourceManagement}
               availableUseCases={availableUseCases}
               defaultValues={defaultWorkspaceFormValues}

@@ -90,16 +90,9 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     const initializeDataset = async () => {
       await data.indexPatterns.ensureDefaultIndexPattern();
       const defaultIndexPattern = await data.indexPatterns.getDefault();
-      // TODO: ROCKY do we need this?
-      // const queryString = data.query.queryString;
-      // const defaultDataset = queryString.getDatasetService().getDefault();
-
       if (!isMounted) return;
 
       setIndexPatterns(defaultIndexPattern ? [defaultIndexPattern] : undefined);
-      // if (defaultDataset) {
-      //   datasetManager.setDataset(defaultDataset);
-      // }
     };
 
     initializeDataset();
@@ -173,10 +166,12 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
         onQuerySubmit={opts.onQuerySubmit}
         savedQueryId={state.savedQuery}
         onSavedQueryIdChange={updateSavedQueryId}
+        datasetSelectorRef={opts?.optionalRef?.datasetSelectorRef}
         datePickerRef={opts?.optionalRef?.datePickerRef}
         groupActions={showActionsInGroup}
         screenTitle={screenTitle}
         queryStatus={queryStatus}
+        showQueryBar={!!opts?.optionalRef?.datasetSelectorRef}
       />
     </>
   );

@@ -106,6 +106,93 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
   }
   services={
     Object {
+      "data": Object {
+        "query": Object {
+          "queryString": Object {
+            "getDatasetService": [Function],
+            "getLanguageService": [Function],
+            "getQuery": [MockFunction] {
+              "calls": Array [
+                Array [],
+                Array [],
+                Array [],
+                Array [],
+                Array [],
+                Array [],
+                Array [],
+                Array [],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "lucene",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "lucene",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "lucene",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "lucene",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "kuery",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "kuery",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "kuery",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "kuery",
+                    "query": "",
+                  },
+                },
+              ],
+            },
+            "getUpdates$": [MockFunction],
+          },
+        },
+      },
       "docLinks": Object {
         "DOC_LINK_VERSION": "mocked-test-branch",
         "OPENSEARCH_WEBSITE_URL": "https://opensearch.org/",
@@ -198,6 +285,9 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
               "userAgentProcessor": "https://opensearch.org/docs/mocked-test-branch",
             },
             "logstash": "https://opensearch.org/docs/mocked-test-branch",
+            "lucene": Object {
+              "base": "https://opensearch.org/docs/mocked-test-branch/query-dsl/full-text/query-string/",
+            },
             "management": Object {
               "dashboardSettings": "https://opensearch.org/docs/mocked-test-branch",
               "opensearchDashboardsGeneralSettings": "https://opensearch.org/docs/mocked-test-branch",
@@ -214,6 +304,9 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
               "usage": "https://opensearch.org/docs/mocked-test-branch/api-reference/nodes-apis/nodes-usage/",
             },
             "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
+            "ppl": Object {
+              "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+            },
             "reIndex": Object {
               "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
             },
@@ -243,6 +336,12 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
               "deleteRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot-repository/",
               "deleteSnapshot": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot/",
               "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
+            },
+            "sql": Object {
+              "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+            },
+            "sqlPplLimitation": Object {
+              "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
             },
             "tutorial": Object {
               "loadDataTutorial": "https://opensearch.org/docs/mocked-test-branch",
@@ -465,6 +564,32 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
           },
         },
       },
+      "http": Object {
+        "addLoadingCountSource": [MockFunction],
+        "anonymousPaths": Object {
+          "isAnonymous": [MockFunction],
+          "register": [MockFunction],
+        },
+        "basePath": BasePath {
+          "basePath": "",
+          "clientBasePath": "",
+          "get": [Function],
+          "getBasePath": [Function],
+          "prepend": [Function],
+          "remove": [Function],
+          "serverBasePath": "",
+        },
+        "delete": [MockFunction],
+        "fetch": [MockFunction],
+        "get": [MockFunction],
+        "getLoadingCount$": [MockFunction],
+        "head": [MockFunction],
+        "intercept": [MockFunction],
+        "options": [MockFunction],
+        "patch": [MockFunction],
+        "post": [MockFunction],
+        "put": [MockFunction],
+      },
       "uiSettings": Object {
         "get": [MockFunction],
         "get$": [MockFunction],
@@ -486,20 +611,14 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
 >
   <QueryLanguageSelector
     onSelectLanguage={[MockFunction]}
-    query={
-      Object {
-        "language": "kuery",
-        "query": "",
-      }
-    }
   >
     <EuiPopover
       anchorPosition="downLeft"
       button={
         <EuiSmallButtonEmpty
           className="languageSelector__button"
+          data-test-subj="queryEditorLanguageSelector"
           iconSide="right"
-          iconSize="s"
           iconType="arrowDown"
           onClick={[Function]}
         >
@@ -522,23 +641,23 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
         >
           <EuiSmallButtonEmpty
             className="languageSelector__button"
+            data-test-subj="queryEditorLanguageSelector"
             iconSide="right"
-            iconSize="s"
             iconType="arrowDown"
             onClick={[Function]}
           >
             <EuiButtonEmpty
               className="languageSelector__button"
+              data-test-subj="queryEditorLanguageSelector"
               iconSide="right"
-              iconSize="s"
               iconType="arrowDown"
               onClick={[Function]}
               size="s"
             >
               <button
                 className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small languageSelector__button"
+                data-test-subj="queryEditorLanguageSelector"
                 disabled={false}
-                iconSize="s"
                 onClick={[Function]}
                 type="button"
               >
@@ -693,6 +812,57 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
   }
   services={
     Object {
+      "data": Object {
+        "query": Object {
+          "queryString": Object {
+            "getDatasetService": [Function],
+            "getLanguageService": [Function],
+            "getQuery": [MockFunction] {
+              "calls": Array [
+                Array [],
+                Array [],
+                Array [],
+                Array [],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "lucene",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "lucene",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "lucene",
+                    "query": "",
+                  },
+                },
+                Object {
+                  "type": "return",
+                  "value": Object {
+                    "dataset": undefined,
+                    "language": "lucene",
+                    "query": "",
+                  },
+                },
+              ],
+            },
+            "getUpdates$": [MockFunction],
+          },
+        },
+      },
       "docLinks": Object {
         "DOC_LINK_VERSION": "mocked-test-branch",
         "OPENSEARCH_WEBSITE_URL": "https://opensearch.org/",
@@ -785,6 +955,9 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
               "userAgentProcessor": "https://opensearch.org/docs/mocked-test-branch",
             },
             "logstash": "https://opensearch.org/docs/mocked-test-branch",
+            "lucene": Object {
+              "base": "https://opensearch.org/docs/mocked-test-branch/query-dsl/full-text/query-string/",
+            },
             "management": Object {
               "dashboardSettings": "https://opensearch.org/docs/mocked-test-branch",
               "opensearchDashboardsGeneralSettings": "https://opensearch.org/docs/mocked-test-branch",
@@ -801,6 +974,9 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
               "usage": "https://opensearch.org/docs/mocked-test-branch/api-reference/nodes-apis/nodes-usage/",
             },
             "painless_execute": "https://opensearch.org/docs/mocked-test-branch/api-reference/script-apis/exec-script/",
+            "ppl": Object {
+              "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/ppl/syntax/",
+            },
             "reIndex": Object {
               "rethrottle": "https://opensearch.org/docs/mocked-test-branch",
             },
@@ -830,6 +1006,12 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
               "deleteRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot-repository/",
               "deleteSnapshot": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/delete-snapshot/",
               "veirfyRepository": "https://opensearch.org/docs/mocked-test-branch/api-reference/snapshots/verify-snapshot-repository/",
+            },
+            "sql": Object {
+              "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/sql/basic/",
+            },
+            "sqlPplLimitation": Object {
+              "base": "https://opensearch.org/docs/mocked-test-branch/search-plugins/sql/limitation/",
             },
             "tutorial": Object {
               "loadDataTutorial": "https://opensearch.org/docs/mocked-test-branch",
@@ -1052,6 +1234,32 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
           },
         },
       },
+      "http": Object {
+        "addLoadingCountSource": [MockFunction],
+        "anonymousPaths": Object {
+          "isAnonymous": [MockFunction],
+          "register": [MockFunction],
+        },
+        "basePath": BasePath {
+          "basePath": "",
+          "clientBasePath": "",
+          "get": [Function],
+          "getBasePath": [Function],
+          "prepend": [Function],
+          "remove": [Function],
+          "serverBasePath": "",
+        },
+        "delete": [MockFunction],
+        "fetch": [MockFunction],
+        "get": [MockFunction],
+        "getLoadingCount$": [MockFunction],
+        "head": [MockFunction],
+        "intercept": [MockFunction],
+        "options": [MockFunction],
+        "patch": [MockFunction],
+        "post": [MockFunction],
+        "put": [MockFunction],
+      },
       "uiSettings": Object {
         "get": [MockFunction],
         "get$": [MockFunction],
@@ -1073,20 +1281,14 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
 >
   <QueryLanguageSelector
     onSelectLanguage={[MockFunction]}
-    query={
-      Object {
-        "language": "lucene",
-        "query": "",
-      }
-    }
   >
     <EuiPopover
       anchorPosition="downLeft"
       button={
         <EuiSmallButtonEmpty
           className="languageSelector__button"
+          data-test-subj="queryEditorLanguageSelector"
           iconSide="right"
-          iconSize="s"
           iconType="arrowDown"
           onClick={[Function]}
         >
@@ -1109,23 +1311,23 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
         >
           <EuiSmallButtonEmpty
             className="languageSelector__button"
+            data-test-subj="queryEditorLanguageSelector"
             iconSide="right"
-            iconSize="s"
             iconType="arrowDown"
             onClick={[Function]}
           >
             <EuiButtonEmpty
               className="languageSelector__button"
+              data-test-subj="queryEditorLanguageSelector"
               iconSide="right"
-              iconSize="s"
               iconType="arrowDown"
               onClick={[Function]}
               size="s"
             >
               <button
                 className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small languageSelector__button"
+                data-test-subj="queryEditorLanguageSelector"
                 disabled={false}
-                iconSize="s"
                 onClick={[Function]}
                 type="button"
               >

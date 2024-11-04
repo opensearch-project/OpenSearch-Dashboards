@@ -18,18 +18,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { useEffect, useState } from 'react';
-import { BaseDataset, Dataset, DatasetField } from '../../../common';
+import React, { useEffect, useMemo, useState } from 'react';
+import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../../common';
 import { getIndexPatterns, getQueryService } from '../../services';
+import { IDataPluginServices } from '../../types';
 
 export const Configurator = ({
+  services,
   baseDataset,
   onConfirm,
   onCancel,
   onPrevious,
 }: {
+  services: IDataPluginServices;
   baseDataset: BaseDataset;
-  onConfirm: (dataset: Dataset) => void;
+  onConfirm: (query: Partial<Query>) => void;
   onCancel: () => void;
   onPrevious: () => void;
 }) => {
@@ -41,8 +44,14 @@ export const Configurator = ({
   const languages = type?.supportedLanguages(baseDataset) || [];
 
   const [dataset, setDataset] = useState<Dataset>(baseDataset);
-  const [timeFields, setTimeFields] = useState<DatasetField[]>();
+  const [timeFields, setTimeFields] = useState<DatasetField[]>([]);
   const [timeFieldName, setTimeFieldName] = useState<string | undefined>(dataset.timeFieldName);
+  const noTimeFilter = i18n.translate(
+    'data.explorer.datasetSelector.advancedSelector.configurator.timeField.noTimeFieldOptionLabel',
+    {
+      defaultMessage: "I don't want to use the time filter",
+    }
+  );
   const [language, setLanguage] = useState<string>(() => {
     const currentLanguage = queryString.getQuery().language;
     if (languages.includes(currentLanguage)) {
@@ -50,6 +59,18 @@ export const Configurator = ({
     }
     return languages[0];
   });
+
+  const submitDisabled = useMemo(() => {
+    return (
+      timeFieldName === undefined &&
+      !(
+        languageService.getLanguage(language)?.hideDatePicker ||
+        dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+      ) &&
+      timeFields &&
+      timeFields.length > 0
+    );
+  }, [dataset, language, timeFieldName, timeFields, languageService]);
 
   useEffect(() => {
     const fetchFields = async () => {
@@ -62,8 +83,13 @@ export const Configurator = ({
       setTimeFields(dateFields || []);
     };
 
+    if (baseDataset?.dataSource?.meta?.supportsTimeFilter === false && timeFields.length > 0) {
+      setTimeFields([]);
+      return;
+    }
+
     fetchFields();
-  }, [baseDataset, indexPatternsService, queryString]);
+  }, [baseDataset, indexPatternsService, queryString, timeFields.length]);
 
   return (
     <>
@@ -97,33 +123,6 @@ export const Configurator = ({
           >
             <EuiFieldText disabled value={dataset.title} />
           </EuiFormRow>
-          {timeFields && timeFields.length > 0 && (
-            <EuiFormRow
-              label={i18n.translate(
-                'data.explorer.datasetSelector.advancedSelector.configurator.timeFieldLabel',
-                {
-                  defaultMessage: 'Time field',
-                }
-              )}
-            >
-              <EuiSelect
-                options={[
-                  ...timeFields.map((field) => ({
-                    text: field.displayName || field.name,
-                    value: field.name,
-                  })),
-                  { text: '-----', value: '', disabled: true },
-                  { text: 'No time field', value: undefined },
-                ]}
-                value={timeFieldName}
-                onChange={(e) => {
-                  const value = e.target.value === 'undefined' ? undefined : e.target.value;
-                  setTimeFieldName(value);
-                  setDataset({ ...dataset, timeFieldName: value });
-                }}
-              />
-            </EuiFormRow>
-          )}
           <EuiFormRow
             label={i18n.translate(
               'data.explorer.datasetSelector.advancedSelector.configurator.languageLabel',
@@ -142,8 +141,50 @@ export const Configurator = ({
                 setLanguage(e.target.value);
                 setDataset({ ...dataset, language: e.target.value });
               }}
+              data-test-subj="advancedSelectorLanguageSelect"
             />
           </EuiFormRow>
+          {!languageService.getLanguage(language)?.hideDatePicker &&
+            (dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN ? (
+              <EuiFormRow
+                label={i18n.translate(
+                  'data.explorer.datasetSelector.advancedSelector.configurator.indexPatternTimeFieldLabel',
+                  {
+                    defaultMessage: 'Time field',
+                  }
+                )}
+              >
+                <EuiFieldText disabled value={dataset.timeFieldName ?? 'No time field'} />
+              </EuiFormRow>
+            ) : (
+              <EuiFormRow
+                label={i18n.translate(
+                  'data.explorer.datasetSelector.advancedSelector.configurator.timeFieldLabel',
+                  {
+                    defaultMessage: 'Time field',
+                  }
+                )}
+              >
+                <EuiSelect
+                  options={[
+                    ...timeFields.map((field) => ({
+                      text: field.displayName || field.name,
+                      value: field.name,
+                    })),
+                    { text: '-----', value: '-----', disabled: true },
+                    { text: noTimeFilter, value: noTimeFilter },
+                  ]}
+                  value={timeFieldName}
+                  onChange={(e) => {
+                    const value = e.target.value === noTimeFilter ? undefined : e.target.value;
+                    setTimeFieldName(e.target.value);
+                    setDataset({ ...dataset, timeFieldName: value });
+                  }}
+                  hasNoInitialSelection
+                  data-test-subj="advancedSelectorTimeFieldSelect"
+                />
+              </EuiFormRow>
+            ))}
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
@@ -161,10 +202,12 @@ export const Configurator = ({
         </EuiButton>
         <EuiButton
           onClick={async () => {
-            await queryString.getDatasetService().cacheDataset(dataset);
-            onConfirm(dataset);
+            await queryString.getDatasetService().cacheDataset(dataset, services);
+            onConfirm({ dataset, language });
           }}
           fill
+          disabled={submitDisabled}
+          data-test-subj="advancedSelectorConfirmButton"
         >
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"

@@ -173,6 +173,7 @@ export const DatasetExplorer = ({
                 </EuiTitle>
                 {current.multiSelect ? (
                   <DatasetTable
+                    services={services}
                     path={path}
                     setPath={setPath}
                     index={index}
@@ -228,6 +229,7 @@ export const DatasetExplorer = ({
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.cancel"
             defaultMessage="Cancel"
+            data-test-subj="datasetSelectorCancel"
           />
         </EuiButtonEmpty>
         <EuiButton
@@ -236,6 +238,7 @@ export const DatasetExplorer = ({
           iconType="arrowRight"
           iconSide="right"
           fill
+          data-test-subj="datasetSelectorNext"
         >
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.next"
