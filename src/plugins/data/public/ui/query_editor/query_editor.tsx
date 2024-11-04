@@ -25,6 +25,7 @@ import {
   RecentQueriesTable,
   QueryResult,
   QueryStatus,
+  useQueryStringManager,
 } from '../..';
 import { OpenSearchDashboardsReactContextValue } from '../../../../opensearch_dashboards_react/public';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
@@ -74,15 +75,22 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const headerRef = useRef<HTMLDivElement>(null);
   const bannerRef = useRef<HTMLDivElement>(null);
   const queryControlsContainer = useRef<HTMLDivElement>(null);
+  // TODO: There should only be one source of truth for query state and it should match the app query state. Firing the query should be restricted to when the user is ready, but should not prevent the app query from changing.
+  const editorQuery = props.query; // local query state managed by the editor. Not to be confused by the app query state.
 
   const queryString = getQueryService().queryString;
   const languageManager = queryString.getLanguageService();
   const extensionMap = languageManager.getQueryEditorExtensionMap();
   const services = props.opensearchDashboards.services;
+  const { query } = useQueryStringManager({
+    queryString,
+  });
+
+  // console.log('QueryEditorUI', query);
 
   const persistedLogRef = useRef<PersistedLog>(
     props.persistedLog ||
-      getQueryLog(services.uiSettings, services.storage, services.appName, props.query.language)
+      getQueryLog(services.uiSettings, services.storage, services.appName, query.language)
   );
   const abortControllerRef = useRef<AbortController>();
 
@@ -95,17 +103,13 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     };
   }, []);
 
-  const getQueryString = useCallback(() => {
-    return toUser(props.query.query);
-  }, [props.query]);
-
   const renderQueryEditorExtensions = () => {
     if (
       !(
         headerRef.current &&
         bannerRef.current &&
         queryControlsContainer.current &&
-        props.query.language &&
+        query.language &&
         extensionMap &&
         Object.keys(extensionMap).length > 0
       )
@@ -114,7 +118,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     }
     return (
       <QueryEditorExtensions
-        language={props.query.language}
+        language={query.language}
         onSelectLanguage={onSelectLanguage}
         isCollapsed={isCollapsed}
         setIsCollapsed={setIsCollapsed}
@@ -126,27 +130,29 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     );
   };
 
-  const onSubmit = (query: Query, dateRange?: TimeRange) => {
+  const onSubmit = (currentQuery: Query, dateRange?: TimeRange) => {
     if (props.onSubmit) {
       if (persistedLogRef.current) {
-        persistedLogRef.current.add(query.query);
+        persistedLogRef.current.add(currentQuery.query);
       }
 
       props.onSubmit(
         {
-          query: fromUser(query.query),
-          language: query.language,
-          dataset: query.dataset,
+          ...currentQuery,
+          query: fromUser(currentQuery.query),
         },
         dateRange
       );
     }
   };
 
-  const onChange = (query: Query, dateRange?: TimeRange) => {
+  const onChange = (currentQuery: Query, dateRange?: TimeRange) => {
     if (props.onChange) {
       props.onChange(
-        { query: fromUser(query.query), language: query.language, dataset: query.dataset },
+        {
+          ...currentQuery,
+          query: fromUser(currentQuery.query),
+        },
         dateRange
       );
     }
@@ -155,13 +161,14 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   const onQueryStringChange = (value: string) => {
     onChange({
       query: value,
-      language: props.query.language,
-      dataset: props.query.dataset,
+      // Its fiune to reference the query state her since it is not updated yet
+      language: query.language,
+      dataset: query.dataset,
     });
   };
 
-  const onClickRecentQuery = (query: Query, timeRange?: TimeRange) => {
-    onSubmit(query, timeRange);
+  const onClickRecentQuery = (currentQuery: Query, timeRange?: TimeRange) => {
+    onSubmit(currentQuery, timeRange);
   };
 
   const onInputChange = (value: string) => {
@@ -175,13 +182,6 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   };
 
   const onSelectLanguage = (languageId: string) => {
-    // Send telemetry info every time the user opts in or out of kuery
-    // As a result it is important this function only ever gets called in the
-    // UI component's change handler.
-    services.http.post('/api/opensearch-dashboards/dql_opt_in_stats', {
-      body: JSON.stringify({ opt_in: languageId === 'kuery' }),
-    });
-
     const newQuery = queryString.getInitialQueryByLanguage(languageId);
 
     onChange(newQuery);
@@ -223,10 +223,10 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   ): Promise<monaco.languages.CompletionList> => {
     const indexPattern = await fetchIndexPattern();
     const suggestions = await services.data.autocomplete.getQuerySuggestions({
-      query: getQueryString(),
+      query: inputRef.current?.getValue() ?? '',
       selectionStart: model.getOffsetAt(position),
       selectionEnd: model.getOffsetAt(position),
-      language: props.query.language,
+      language: query.language,
       indexPattern,
       position,
       services,
@@ -263,7 +263,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     };
   };
 
-  const useQueryEditor = props.query.language !== 'kuery' && props.query.language !== 'lucene';
+  const useQueryEditor = query.language !== 'kuery' && query.language !== 'lucene';
 
   const languageSelector = (
     <QueryLanguageSelector
@@ -274,8 +274,8 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
   );
 
   const baseInputProps = {
-    languageId: props.query.language,
-    value: getQueryString(),
+    languageId: query.language,
+    value: toUser(editorQuery.query),
   };
 
   const defaultInputProps: DefaultInputProps = {
@@ -287,7 +287,13 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
       inputRef.current = editor;
       // eslint-disable-next-line no-bitwise
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
-        onSubmit(props.query);
+        // debugger
+        const newQuery = {
+          ...query,
+          query: editor.getValue(),
+        };
+
+        onSubmit(newQuery);
       });
 
       return () => {
@@ -305,7 +311,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
           data-test-subj="queryEditorFooterTimestamp"
           className="queryEditor__footerItem"
         >
-          {props.query.dataset?.timeFieldName || ''}
+          {query.dataset?.timeFieldName || ''}
         </EuiText>,
         <QueryResult queryStatus={props.queryStatus!} />,
       ],
@@ -336,21 +342,37 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     editorDidMount: (editor: monaco.editor.IStandaloneCodeEditor) => {
       inputRef.current = editor;
 
-      const handleEnterPress = () => {
-        onSubmit(props.query);
-      };
+      editor.addCommand(monaco.KeyCode.Enter, () => {
+        const newQuery = {
+          ...query,
+          query: editor.getValue(),
+        };
 
-      const disposable = editor.onKeyDown((e) => {
-        if (e.keyCode === monaco.KeyCode.Enter) {
-          // Prevent default Enter key behavior
-          e.preventDefault();
-          handleEnterPress();
-        }
+        onSubmit(newQuery);
       });
+
+      // const handleEnterPress = () => {
+      //   const newQuery = {
+      //     ...props.query,
+      //     query: editor.getValue(),
+      //   };
+
+      //   debugger
+
+      //   onSubmit(newQuery);
+      // };
+
+      // const disposable = editor.onKeyDown((e) => {
+      //   if (e.keyCode === monaco.KeyCode.Enter) {
+      //     // Prevent default Enter key behavior
+      //     e.preventDefault();
+      //     handleEnterPress();
+      //   }
+      // });
 
       // Optional: Cleanup on component unmount
       return () => {
-        disposable.dispose();
+        // disposable.dispose();
       };
     },
     provideCompletionItems,
@@ -361,7 +383,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
           {`${lineCount ?? 1} ${lineCount === 1 || !lineCount ? 'line' : 'lines'}`}
         </EuiText>,
         <EuiText size="xs" color="subdued" className="queryEditor__footerItem">
-          {props.query.dataset?.timeFieldName || ''}
+          {query.dataset?.timeFieldName || ''}
         </EuiText>,
         <QueryResult queryStatus={props.queryStatus!} />,
       ],
@@ -383,7 +405,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
     },
   };
 
-  const languageEditorFunc = languageManager.getLanguage(props.query.language)!.editor;
+  const languageEditorFunc = languageManager.getLanguage(query.language)!.editor;
 
   const languageEditor = useQueryEditor
     ? languageEditorFunc(singleLineInputProps, {}, defaultInputProps)
