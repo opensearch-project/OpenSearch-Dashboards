@@ -1,2 +1,0 @@
-fix:
-- Fix dynamic uses of i18n in indexPatternManagement plugin ([#8398](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8398))

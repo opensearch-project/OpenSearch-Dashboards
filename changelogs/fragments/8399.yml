@@ -1,2 +1,0 @@
-fix:
-- Fix dynamic uses of i18n and correct unprefixed and duplicate i18n identifiers in visBuilder plugin ([#8399](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8399))

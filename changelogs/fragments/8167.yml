@@ -1,2 +1,0 @@
-fix:
-- Discover Embeddable not showing _source when all other column are removed ([#8167](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8167))

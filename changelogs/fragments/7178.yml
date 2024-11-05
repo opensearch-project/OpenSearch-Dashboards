@@ -1,2 +1,0 @@
-fix:
-- Truncate height of table cell in legacy discover ([#7178](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7178))

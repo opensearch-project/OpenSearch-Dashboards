@@ -1,2 +1,0 @@
-fix:
-- [Workspace] prepend workspace name and icon to breadcrumbs ([#8303](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8303))

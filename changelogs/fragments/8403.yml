@@ -1,2 +1,0 @@
-fix:
-- Fix dynamic uses of i18n in home plugin ([#8403](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8403))
