@@ -202,7 +202,7 @@ export const createSavedQueryService = (
   const getSavedQueryCount = async (): Promise<number> => {
     const response = await savedObjectsClient.find<SerializedSavedQueryAttributes>({
       type: 'query',
-      perPage: 0,
+      perPage: 1,
       page: 1,
     });
     return response.total;
