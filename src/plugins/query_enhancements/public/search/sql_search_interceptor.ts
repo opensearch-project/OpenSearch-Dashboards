@@ -4,9 +4,9 @@
  */
 
 import { trimEnd } from 'lodash';
+import { CoreStart } from 'opensearch-dashboards/public';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { CoreStart } from 'opensearch-dashboards/public';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,

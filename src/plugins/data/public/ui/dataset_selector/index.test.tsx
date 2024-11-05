@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import { DatasetSelector as ConnectedDatasetSelector } from './index';
 import { DatasetSelector } from './dataset_selector';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { Dataset } from '../../../common';
+import { Dataset, Query } from '../../../common';
 
 jest.mock('../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
@@ -24,7 +24,7 @@ describe('ConnectedDatasetSelector', () => {
   const mockQueryString = {
     getQuery: jest.fn().mockReturnValue({}),
     getDefaultQuery: jest.fn().mockReturnValue({}),
-    getInitialQueryByDataset: jest.fn().mockReturnValue({}),
+    getInitialQuery: jest.fn().mockReturnValue({}),
     setQuery: jest.fn(),
     getDatasetService: jest.fn().mockReturnValue({
       addRecentDataset: jest.fn(),
@@ -51,7 +51,7 @@ describe('ConnectedDatasetSelector', () => {
     const wrapper = mount(<ConnectedDatasetSelector onSubmit={mockOnSubmit} />);
     expect(wrapper.find(DatasetSelector).props()).toEqual({
       selectedDataset: undefined,
-      setSelectedDataset: expect.any(Function),
+      onSelect: expect.any(Function),
       services: mockServices,
     });
   });
@@ -66,14 +66,14 @@ describe('ConnectedDatasetSelector', () => {
 
   it('should call handleDatasetChange only once when dataset changes', () => {
     const wrapper = mount(<ConnectedDatasetSelector onSubmit={mockOnSubmit} />);
-    const setSelectedDataset = wrapper.find(DatasetSelector).prop('setSelectedDataset') as (
-      dataset?: Dataset
+    const onSelect = wrapper.find(DatasetSelector).prop('onSelect') as (
+      query: Partial<Query>
     ) => void;
 
     const newDataset: Dataset = { id: 'test', title: 'Test Dataset', type: 'test' };
-    setSelectedDataset(newDataset);
+    onSelect(newDataset);
 
-    expect(mockQueryString.getInitialQueryByDataset).toHaveBeenCalledTimes(1);
+    expect(mockQueryString.getInitialQuery).toHaveBeenCalledTimes(1);
     expect(mockQueryString.setQuery).toHaveBeenCalledTimes(1);
     expect(mockOnSubmit).toHaveBeenCalledTimes(1);
   });
