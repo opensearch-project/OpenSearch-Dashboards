@@ -8,12 +8,13 @@ import { coreMock } from '../../../core/public/mocks';
 import { UI_SETTINGS } from '../common';
 import { of } from 'rxjs';
 import { setUseNewSavedQueriesUI } from './services';
+import { CoreSetup, CoreStart } from 'opensearch-dashboards/public';
 
 jest.mock('./services');
 
 describe('#DataPublicPlugin setup', () => {
-  let coreSetup: any;
-  let coreStart: any;
+  let coreSetup: CoreSetup;
+  let coreStart: CoreStart;
   let plugin;
   let mockDataPublicPluginStart: MockedKeys<DataPublicPluginStart>;
 
