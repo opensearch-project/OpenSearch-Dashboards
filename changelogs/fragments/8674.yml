@@ -1,2 +1,0 @@
-fix:
-- Fixed unsupported language is used from localStorage ([#8674](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8674))

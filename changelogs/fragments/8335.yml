@@ -1,2 +1,0 @@
-fix:
-- Fix HeaderControl not rendered if not mount in initial rendering ([#8335](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8335))
