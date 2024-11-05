@@ -1,2 +1,0 @@
-fix:
-- Fix dynamic uses of i18n and correct unprefixed i18n identifiers in queryEnhancements plugin ([#8397](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8397))
