@@ -1,2 +1,0 @@
-fix:
-- Fix incorrect use of TopNavControlDescriptionData in dataSourceManagement plugin ([#8402](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8402))

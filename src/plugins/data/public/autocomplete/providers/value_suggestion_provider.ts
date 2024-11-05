@@ -64,10 +64,17 @@ export const setupValueSuggestionProvider = (
   core: CoreSetup
 ): ((any: ValueSuggestionsGetFnArgs) => Promise<any[]>) => {
   const requestSuggestions = memoize(
-    (index: string, field: IFieldType, query: string, boolFilter: any = [], signal?: AbortSignal) =>
+    (
+      index: string,
+      field: IFieldType,
+      query: string,
+      boolFilter: any = [],
+      signal?: AbortSignal,
+      dataSourceId?: string
+    ) =>
       core.http.fetch(`/api/opensearch-dashboards/suggestions/values/${index}`, {
         method: 'POST',
-        body: JSON.stringify({ query, field: field.name, boolFilter }),
+        body: JSON.stringify({ query, field: field.name, boolFilter, dataSourceId }),
         signal,
       }),
     resolver
@@ -90,7 +97,13 @@ export const setupValueSuggestionProvider = (
     } else if (!shouldSuggestValues || !field.aggregatable || field.type !== 'string') {
       return [];
     }
-
-    return await requestSuggestions(title, field, query, boolFilter, signal);
+    return await requestSuggestions(
+      title,
+      field,
+      query,
+      boolFilter,
+      signal,
+      indexPattern.dataSourceRef?.id
+    );
   };
 };

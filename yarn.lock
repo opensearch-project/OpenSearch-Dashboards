@@ -7428,9 +7428,9 @@ element-resize-detector@^1.2.1:
     batch-processor "1.0.0"
 
 elliptic@^6.5.3, elliptic@^6.5.4:
-  version "6.5.7"
-  resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.5.7.tgz#8ec4da2cb2939926a1b9a73619d768207e647c8b"
-  integrity sha512-ESVCtTwiA+XhY3wyh24QqRGBoP3rEdDUl3EDUUo9tft074fi19IrdpH7hLCMMP3CIj7jb3W96rn8lt/BqIlt5Q==
+  version "6.6.0"
+  resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.6.0.tgz#5919ec723286c1edf28685aa89261d4761afa210"
+  integrity sha512-dpwoQcLc/2WLQvJvLRHKZ+f9FgOdjnq11rurqwekGQygGPsYSK29OMMD2WalatiqQ+XGFDglTNixpPfI+lpaAA==
   dependencies:
     bn.js "^4.11.9"
     brorand "^1.1.0"
@@ -17654,10 +17654,10 @@ vega-hierarchy@~4.1.1:
     vega-dataflow "^5.7.5"
     vega-util "^1.17.1"
 
-"vega-interpreter@npm:@amoo-miki/vega-forced-csp-compliant-interpreter@1.0.6":
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/@amoo-miki/vega-forced-csp-compliant-interpreter/-/vega-forced-csp-compliant-interpreter-1.0.6.tgz#5cffdf12b7fe12dc936194edd9e8519506c38716"
-  integrity sha512-9S5nTTVd8JVKobcWp5iwirIeePiamwH1J9uSZPuG5kcF0TUBvGu++ERKjNdst5Qck7e4R6/7vjx2wVf58XUarg==
+vega-interpreter@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/vega-interpreter/-/vega-interpreter-1.0.5.tgz#19e1d1b5f84a4ea9cb25c4e90a05ce16cd058484"
+  integrity sha512-po6oTOmeQqr1tzTCdD15tYxAQLeUnOVirAysgVEemzl+vfmvcEP7jQmlc51jz0jMA+WsbmE6oJywisQPu/H0Bg==
 
 vega-label@~1.2.1:
   version "1.2.1"

@@ -3,21 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CoreStart } from 'opensearch-dashboards/public';
 import LRUCache from 'lru-cache';
+import { CoreStart } from 'opensearch-dashboards/public';
 import {
-  Dataset,
-  DataStructure,
-  IndexPatternSpec,
-  DEFAULT_DATA,
-  UI_SETTINGS,
-  DataStorage,
   CachedDataStructure,
+  Dataset,
+  DataStorage,
+  DataStructure,
+  DEFAULT_DATA,
+  IndexPatternFieldMap,
+  IndexPatternSpec,
+  UI_SETTINGS,
 } from '../../../../common';
-import { DatasetTypeConfig, DataStructureFetchOptions } from './types';
-import { indexPatternTypeConfig, indexTypeConfig } from './lib';
 import { IndexPatternsContract } from '../../../index_patterns';
 import { IDataPluginServices } from '../../../types';
+import { indexPatternTypeConfig, indexTypeConfig } from './lib';
+import { DatasetTypeConfig, DataStructureFetchOptions } from './types';
 
 export class DatasetService {
   private indexPatterns?: IndexPatternsContract;
@@ -91,29 +92,57 @@ export class DatasetService {
     }
   }
 
-  public async cacheDataset(dataset: Dataset): Promise<void> {
-    const type = this.getType(dataset.type);
-    if (dataset && dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
-      const spec = {
-        id: dataset.id,
-        title: dataset.title,
-        timeFieldName: dataset.timeFieldName,
-        fields: await type?.fetchFields(dataset),
-        dataSourceRef: dataset.dataSource
-          ? {
-              id: dataset.dataSource.id!,
-              name: dataset.dataSource.title,
-              type: dataset.dataSource.type,
-            }
-          : undefined,
-      } as IndexPatternSpec;
-      const temporaryIndexPattern = await this.indexPatterns?.create(spec, true);
-      if (temporaryIndexPattern) {
-        this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
+  public async cacheDataset(
+    dataset: Dataset,
+    services: Partial<IDataPluginServices>
+  ): Promise<void> {
+    const type = this.getType(dataset?.type);
+    try {
+      const asyncType = type?.meta.isFieldLoadAsync ?? false;
+      if (dataset && dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
+        const fetchedFields = asyncType
+          ? ({} as IndexPatternFieldMap)
+          : await type?.fetchFields(dataset, services);
+        const spec = {
+          id: dataset.id,
+          title: dataset.title,
+          timeFieldName: dataset.timeFieldName,
+          fields: fetchedFields,
+          fieldsLoading: asyncType,
+          dataSourceRef: dataset.dataSource
+            ? {
+                id: dataset.dataSource.id!,
+                name: dataset.dataSource.title,
+                type: dataset.dataSource.type,
+              }
+            : undefined,
+        } as IndexPatternSpec;
+        const temporaryIndexPattern = await this.indexPatterns?.create(spec, true);
+
+        // Load schema asynchronously if it's an async index pattern
+        if (asyncType && temporaryIndexPattern) {
+          type!
+            .fetchFields(dataset, services)
+            .then((fields) => {
+              temporaryIndexPattern.fields.replaceAll([...fields]);
+              this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
+            })
+            .catch((error) => {
+              throw new Error(`Error while fetching fields for dataset ${dataset.id}:`);
+            })
+            .finally(() => {
+              temporaryIndexPattern.setFieldsLoading(false);
+            });
+        }
+
+        if (temporaryIndexPattern) {
+          this.indexPatterns?.saveToCache(dataset.id, temporaryIndexPattern);
+        }
       }
+    } catch (error) {
+      throw new Error(`Failed to load dataset: ${dataset?.id}`);
     }
   }
-
   public async fetchOptions(
     services: IDataPluginServices,
     path: DataStructure[],
@@ -132,14 +161,17 @@ export class DatasetService {
       .join('&');
     const cacheKey =
       `${dataType}.${lastPathItem.id}` + (fetchOptionsKey.length ? `?${fetchOptionsKey}` : '');
-
-    const cachedDataStructure = this.sessionStorage.get<CachedDataStructure>(cacheKey);
-    if (cachedDataStructure?.children?.length > 0) {
-      return this.cacheToDataStructure(dataType, cachedDataStructure);
+    if (type.meta.cacheOptions) {
+      const cachedDataStructure = this.sessionStorage.get<CachedDataStructure>(cacheKey);
+      if (cachedDataStructure?.children?.length > 0) {
+        return this.cacheToDataStructure(dataType, cachedDataStructure);
+      }
     }
 
     const fetchedDataStructure = await type.fetch(services, path, options);
-    this.cacheDataStructure(dataType, fetchedDataStructure);
+    if (type.meta.cacheOptions) {
+      this.cacheDataStructure(dataType, fetchedDataStructure);
+    }
     return fetchedDataStructure;
   }
 
@@ -227,6 +259,11 @@ export class DatasetService {
       return undefined;
     }
 
+    let dataSource;
+    if (indexPattern.dataSourceRef) {
+      dataSource = await this.indexPatterns?.getDataSource(indexPattern.dataSourceRef?.id);
+    }
+
     const dataType = this.typesRegistry.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
     if (dataType) {
       const dataset = dataType.toDataset([
@@ -234,8 +271,16 @@ export class DatasetService {
           id: indexPattern.id,
           title: indexPattern.title,
           type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+          parent: dataSource
+            ? {
+                id: dataSource.id,
+                title: dataSource.attributes?.title,
+                type: dataSource.attributes?.dataSourceEngineType || '',
+              }
+            : undefined,
         },
       ]);
+
       return { ...dataset, timeFieldName: indexPattern.timeFieldName };
     }
 

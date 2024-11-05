@@ -8,11 +8,17 @@ import { EuiLink, EuiText } from '@elastic/eui';
 import { IDataPluginServices } from 'src/plugins/data/public';
 import { LanguageReference } from '../../../data/public';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+
 const PPLReference = () => {
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const pplDocs = opensearchDashboards.services.docLinks?.links.noDocumentation.ppl.base;
+  const limitationDocs =
+    opensearchDashboards.services.docLinks?.links.noDocumentation.sqlPplLimitation.base;
   const pplFullName = (
     <FormattedMessage id="queryEnhancements.queryBar.pplFullLanguageName" defaultMessage="PPL" />
+  );
+  const limitationsLink = (
+    <FormattedMessage id="queryEnhancements.queryBar.pplLimitationDoc" defaultMessage="here" />
   );
 
   return (
@@ -21,11 +27,16 @@ const PPLReference = () => {
         <p>
           <FormattedMessage
             id="queryEnhancements.queryBar.pplSyntaxOptionsDescription"
-            defaultMessage="Piped Processing Language ({docsLink}) is a query language that focuses on processing data in a sequential, step-by-step manner. PPL uses the pipe (|) operator to combine commands to find and retrieve data. It is particularly well suited for analyzing observability data, such as logs, metrics, and traces, due to its ability to handle semi-structured data efficiently."
+            defaultMessage="Piped Processing Language ({pplDocsLink}) is a query language that focuses on processing data in a sequential, step-by-step manner. OpenSearch SQL/PPL language limitations can be found {limitationDocsLink}."
             values={{
-              docsLink: (
+              pplDocsLink: (
                 <EuiLink href={pplDocs} target="_blank">
                   {pplFullName}
+                </EuiLink>
+              ),
+              limitationDocsLink: (
+                <EuiLink href={limitationDocs} target="_blank">
+                  {limitationsLink}
                 </EuiLink>
               ),
             }}
@@ -36,6 +47,15 @@ const PPLReference = () => {
   );
 };
 
-export const pplLanguageReference = () => {
-  return <LanguageReference body={<PPLReference />} />;
+export const pplLanguageReference = (selectedLanguage) => {
+  const hasSeenInfoBox = localStorage.getItem('hasSeenInfoBox_PPL') === 'true';
+  const shouldAutoShow = selectedLanguage === 'PPL' && !hasSeenInfoBox;
+
+  return (
+    <LanguageReference
+      body={<PPLReference />}
+      autoShow={shouldAutoShow}
+      selectedLanguage={selectedLanguage}
+    />
+  );
 };

@@ -86,7 +86,9 @@ export const useSearch = (services: DiscoverViewServices) => {
   const { pathname } = useLocation();
   const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
-  const { savedSearch: savedSearchId, sort, interval } = useSelector((state) => state.discover);
+  const { savedSearch: savedSearchId, sort, interval, savedQuery } = useSelector(
+    (state) => state.discover
+  );
   const indexPattern = useIndexPattern(services);
   const skipInitialFetch = useRef(false);
   const {
@@ -150,6 +152,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     if (!dataset) {
       data$.next({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
+        queryStatus: { startTime },
       });
       return;
     }
@@ -181,7 +184,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     try {
       // Only show loading indicator if we are fetching when the rows are empty
       if (fetchStateRef.current.rows?.length === 0) {
-        data$.next({ status: ResultStatus.LOADING });
+        data$.next({ status: ResultStatus.LOADING, queryStatus: { startTime } });
       }
 
       // Initialize inspect adapter for search source
@@ -272,15 +275,19 @@ export const useSearch = (services: DiscoverViewServices) => {
       }
       let errorBody;
       try {
-        errorBody = JSON.parse(error.message);
+        errorBody = JSON.parse(error.body);
       } catch (e) {
-        errorBody = error.message;
+        if (error.body) {
+          errorBody = error.body;
+        } else {
+          errorBody = error;
+        }
       }
 
       data$.next({
         status: ResultStatus.ERROR,
         queryStatus: {
-          body: errorBody,
+          body: { error: errorBody },
           elapsedMs,
         },
       });
@@ -296,6 +303,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     services,
     sort,
     savedSearch?.searchSource,
+    startTime,
     data$,
     shouldSearchOnPageLoad,
     inspectorAdapters.requests,
@@ -352,21 +360,41 @@ export const useSearch = (services: DiscoverViewServices) => {
   useEffect(() => {
     (async () => {
       const savedSearchInstance = await getSavedSearchById(savedSearchId);
-      setSavedSearch(savedSearchInstance);
 
-      // if saved search does not exist, do not atempt to sync filters and query from savedObject
-      if (!savedSearch) {
-        return;
+      const query =
+        savedSearchInstance.searchSource.getField('query') ||
+        data.query.queryString.getDefaultQuery();
+
+      const isEnhancementsEnabled = await uiSettings.get('query:enhancements:enabled');
+      if (isEnhancementsEnabled && query.dataset) {
+        let pattern = await data.indexPatterns.get(
+          query.dataset.id,
+          query.dataset.type !== 'INDEX_PATTERN'
+        );
+        if (!pattern) {
+          await data.query.queryString.getDatasetService().cacheDataset(query.dataset, {
+            uiSettings: services.uiSettings,
+            savedObjects: services.savedObjects,
+            notifications: services.notifications,
+            http: services.http,
+            data: services.data,
+          });
+          pattern = await data.indexPatterns.get(
+            query.dataset.id,
+            query.dataset.type !== 'INDEX_PATTERN'
+          );
+          savedSearchInstance.searchSource.setField('index', pattern);
+        }
       }
 
       // sync initial app filters from savedObject to filterManager
       const filters = cloneDeep(savedSearchInstance.searchSource.getOwnField('filter'));
-      const query =
-        savedSearchInstance.searchSource.getField('query') ||
-        data.query.queryString.getDefaultQuery();
-      const actualFilters = [];
 
-      if (filters !== undefined) {
+      let actualFilters: any[] = [];
+
+      if (savedQuery) {
+        actualFilters = data.query.filterManager.getFilters();
+      } else if (filters !== undefined) {
         const result = typeof filters === 'function' ? filters() : filters;
         if (result !== undefined) {
           actualFilters.push(...(Array.isArray(result) ? result : [result]));
@@ -374,7 +402,8 @@ export const useSearch = (services: DiscoverViewServices) => {
       }
 
       filterManager.setAppFilters(actualFilters);
-      data.query.queryString.setQuery(query);
+      data.query.queryString.setQuery(savedQuery ? data.query.queryString.getQuery() : query);
+      setSavedSearch(savedSearchInstance);
 
       if (savedSearchInstance?.id) {
         chrome.recentlyAccessed.add(
@@ -387,8 +416,6 @@ export const useSearch = (services: DiscoverViewServices) => {
         );
       }
     })();
-
-    return () => {};
     // This effect will only run when getSavedSearchById is called, which is
     // only called when the component is first mounted.
     // eslint-disable-next-line react-hooks/exhaustive-deps
