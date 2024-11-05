@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ParseTree, TokenStream } from 'antlr4ng';
+import { ParserRuleContext, ParseTree, TokenStream } from 'antlr4ng';
 import * as c3 from 'antlr4-c3';
 import { ColumnAliasSymbol, TableSymbol } from './symbol_table';
 import {
@@ -85,6 +85,7 @@ const rulesToVisit = new Set([
   OpenSearchSQLParser.RULE_predicate,
 ]);
 
+// TODO: double check symbol table
 class OpenSearchSqlSymbolTableVisitor
   extends OpenSearchSQLParserVisitor<{}>
   implements ISymbolTableVisitor {
@@ -111,7 +112,7 @@ class OpenSearchSqlSymbolTableVisitor
 
   visitSelectElementAlias = (context: SelectElementsContext): {} => {
     try {
-      this.symbolTable.addNewSymbolOfType(ColumnAliasSymbol, this.scope, context.uid().getText());
+      this.symbolTable.addNewSymbolOfType(ColumnAliasSymbol, this.scope, context.getText());
     } catch (error) {
       if (!(error instanceof c3.DuplicateSymbolError)) {
         throw error;
@@ -134,6 +135,7 @@ export function processVisitedRules(
   let shouldSuggestColumnAliases = false;
   let suggestValuesForColumn: string | undefined;
   let suggestColumnValuePredicate: ColumnValuePredicate | undefined;
+  let rerunAndConstrain: ParserRuleContext | undefined;
 
   for (const [ruleId, rule] of rules) {
     switch (ruleId) {
@@ -173,16 +175,79 @@ export function processVisitedRules(
         }
         break;
       }
-      case OpenSearchSQLParser.RULE_constant: {
-        const previousToken = getPreviousToken(
-          tokenStream,
-          tokenDictionary,
-          cursorTokenIndex,
-          OpenSearchSQLLexer.ID
-        );
-        if (previousToken) {
-          suggestValuesForColumn = previousToken.text;
+      case OpenSearchSQLParser.RULE_predicate: {
+        // console.clear();
+        // console.log('Formatted Token Stream:');
+        // let index = 0;
+        // try {
+        //   while (true) {
+        //     const token = tokenStream.get(index);
+        //     if (!token) break;
+
+        //     const isCurrentToken = index === cursorTokenIndex;
+        //     const tokenInfo = `Token ${index}: ${token.text} (Type: ${token.type})`;
+
+        //     if (isCurrentToken) {
+        //       console.log(`%c${tokenInfo}`, 'background-color: red; font-weight: bold;');
+        //     } else {
+        //       console.log(tokenInfo);
+        //     }
+
+        //     index++;
+        //   }
+        // } catch (error) {
+        //   console.error('Error while iterating through token stream:', error);
+        // }
+
+        // console.log(rule.startTokenIndex);
+
+        // TODO: set rerunAndConstrain to the predicate parser rule context
+
+        // TODO: make sure that the IN operator can also have values
+
+        // need to check if we have a binary comparison predicate
+        // if we do, need to find out if we are in the field, value, or operator
+        // depending on which, just return an object that will flag any one of those three
+
+        const expressionStart = rule.startTokenIndex;
+
+        // basically walk through the tokens between the expressionStart and cursorTokenIndex,
+        // if we're only on the first token, we're in the column. if theres a first token, WS,
+        // then another token like EOF, we need to suggest operators. if we're past an operator,
+        // and we need to check if that middle token is an EQUAL because we only care about that,
+        // and we have a WS, we can go to value
+
+        if (expressionStart === cursorTokenIndex) {
+          suggestColumnValuePredicate = ColumnValuePredicate.COLUMN;
+          break;
         }
+
+        if (expressionStart + 2 === cursorTokenIndex) {
+          suggestColumnValuePredicate = ColumnValuePredicate.OPERATOR;
+          break;
+        }
+
+        if (
+          tokenStream.get(expressionStart + 2).type === OpenSearchSQLParser.EQUAL_SYMBOL &&
+          expressionStart + 4 === cursorTokenIndex
+        ) {
+          suggestColumnValuePredicate = ColumnValuePredicate.VALUE;
+          // console.log('prev field', tokenStream.get(expressionStart).text);
+          suggestValuesForColumn = tokenStream.get(expressionStart).text; // todo: seems like this breaks if we have some extra stuff in front for our pred
+          break;
+        }
+
+        if (
+          tokenStream.get(expressionStart + 2).type === OpenSearchSQLParser.IN &&
+          tokenStream.get(expressionStart + 4).type === OpenSearchSQLParser.LR_BRACKET &&
+          expressionStart + 4 < cursorTokenIndex
+        ) {
+          suggestColumnValuePredicate = ColumnValuePredicate.VALUE;
+          // console.log('prev field', tokenStream.get(expressionStart).text);
+          suggestValuesForColumn = tokenStream.get(expressionStart).text;
+          break;
+        }
+
         break;
       }
       case OpenSearchSQLParser.RULE_predicate: {
@@ -222,6 +287,7 @@ export function processVisitedRules(
   }
 
   return {
+    rerunAndConstrain,
     suggestViewsOrTables,
     suggestAggregateFunctions,
     suggestScalarFunctions,

@@ -93,6 +93,7 @@ export interface CursorPosition {
 
 export interface OpenSearchSqlAutocompleteResult extends AutocompleteResultBase {
   suggestViewsOrTables?: TableOrViewSuggestion;
+  rerunAndConstrain?: ParserRuleContext;
 }
 
 export interface OpenSearchPplAutocompleteResult extends AutocompleteResultBase {

@@ -66,12 +66,32 @@ export const getSuggestions = async ({
           });
         }
         case ColumnValuePredicate.VALUE: {
-          finalSuggestions.push({
-            text: 'value',
-            insertText: 'value ',
-            type: monaco.languages.CompletionItemKind.Value,
-            detail: SuggestionItemDetailsTags.Value,
-          });
+          if (suggestions.suggestValuesForColumn) {
+            // get dataset for connecting to the cluster currently engaged
+            const dataset = services.data.query.queryString.getQuery().dataset;
+
+            // take the column and push in values for that column
+            const res = await fetchColumnValues(
+              [indexPattern.title],
+              suggestions.suggestValuesForColumn,
+              services,
+              dataset
+            );
+
+            let i = 0;
+            finalSuggestions.push(
+              ...res.body.fields[0].values.map((val: any) => {
+                i++;
+                return {
+                  text: val.toString(),
+                  insertText: typeof val === 'string' ? `"${val}" ` : `${val} `,
+                  type: monaco.languages.CompletionItemKind.Value,
+                  detail: SuggestionItemDetailsTags.Value,
+                  sortText: i.toString().padStart(3, '0'), // todo: change based on how many values can be returned
+                };
+              })
+            );
+          }
         }
       }
     }
@@ -119,7 +139,7 @@ export const getOpenSearchSqlAutoCompleteSuggestions = (
   query: string,
   cursor: CursorPosition
 ): OpenSearchSqlAutocompleteResult => {
-  return parseQuery({
+  const initialResult = parseQuery({
     Lexer: openSearchSqlAutocompleteData.Lexer,
     Parser: openSearchSqlAutocompleteData.Parser,
     tokenDictionary: openSearchSqlAutocompleteData.tokenDictionary,
@@ -130,4 +150,40 @@ export const getOpenSearchSqlAutoCompleteSuggestions = (
     query,
     cursor,
   });
+
+  if (!initialResult?.suggestColumnValuePredicate) {
+    return initialResult;
+  }
+
+  // rerun with no preferred rules and specified context to grab missing lexer tokens
+  const contextResult = parseQuery({
+    Lexer: openSearchSqlAutocompleteData.Lexer,
+    Parser: openSearchSqlAutocompleteData.Parser,
+    tokenDictionary: openSearchSqlAutocompleteData.tokenDictionary,
+    ignoredTokens: openSearchSqlAutocompleteData.ignoredTokens,
+    rulesToVisit: new Set(),
+    getParseTree: openSearchSqlAutocompleteData.getParseTree,
+    enrichAutocompleteResult: openSearchSqlAutocompleteData.enrichAutocompleteResult,
+    query,
+    cursor,
+    // context: initialResult.rerunAndConstrain,
+  });
+
+  // only need to modify initial results if there are context keywords
+  if (contextResult?.suggestKeywords) {
+    if (!initialResult?.suggestKeywords) {
+      // set initial keywords to be context keywords
+      initialResult.suggestKeywords = contextResult.suggestKeywords;
+    } else {
+      // merge initial and context keywords, removing duplicates
+      const combined = [...initialResult.suggestKeywords, ...contextResult.suggestKeywords];
+
+      // ES6 magic to filter out duplicate objects based on id field
+      initialResult.suggestKeywords = combined.filter(
+        (item, index, self) => index === self.findIndex((other) => other.id === item.id)
+      );
+    }
+  }
+
+  return initialResult;
 };
