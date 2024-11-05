@@ -29,6 +29,17 @@
  */
 
 import { DiscoverSetup, DiscoverStart } from '.';
+import { coreMock } from '../../../core/public/mocks';
+import { chartPluginMock } from '../../charts/public/mocks';
+import { dataPluginMock } from '../../data/public/mocks';
+import { embeddablePluginMock } from '../../embeddable/public/mocks';
+import { inspectorPluginMock } from '../../inspector/public/mocks';
+import { navigationPluginMock } from '../../navigation/public/mocks';
+import { opensearchDashboardsLegacyPluginMock } from '../../opensearch_dashboards_legacy/public/mocks';
+import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
+import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
+import { visualizationsPluginMock } from '../../visualizations/public/mocks';
+import { buildServices, DiscoverServices } from './build_services';
 
 export type Setup = jest.Mocked<DiscoverSetup>;
 export type Start = jest.Mocked<DiscoverStart>;
@@ -55,7 +66,25 @@ const createStartContract = (): Start => {
   return startContract;
 };
 
+const createDiscoverServicesMock = (): DiscoverServices =>
+  buildServices(
+    coreMock.createStart(),
+    {
+      data: dataPluginMock.createStartContract(),
+      charts: chartPluginMock.createStartContract(),
+      embeddable: embeddablePluginMock.createStartContract(),
+      inspector: inspectorPluginMock.createStartContract(),
+      navigation: navigationPluginMock.createStartContract(),
+      uiActions: uiActionsPluginMock.createStartContract(),
+      urlForwarding: urlForwardingPluginMock.createStartContract(),
+      visualizations: visualizationsPluginMock.createStartContract(),
+      opensearchDashboardsLegacy: opensearchDashboardsLegacyPluginMock.createStartContract(),
+    },
+    coreMock.createPluginInitializerContext()
+  );
+
 export const discoverPluginMock = {
+  createDiscoverServicesMock,
   createSetupContract,
   createStartContract,
 };
