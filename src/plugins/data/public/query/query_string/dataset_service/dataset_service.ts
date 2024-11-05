@@ -80,7 +80,9 @@ export class DatasetService {
   }
 
   public getRecentDatasets(): Dataset[] {
-    return this.recentDatasets.values();
+    // TODO: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8814
+    return [];
+    // return this.recentDatasets.values();
   }
 
   public addRecentDataset(dataset: Dataset | undefined, serialize: boolean = true): void {
