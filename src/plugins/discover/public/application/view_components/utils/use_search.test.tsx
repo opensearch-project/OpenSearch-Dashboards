@@ -137,6 +137,12 @@ describe('useSearch', () => {
       mockDatasetUpdates$.next({
         dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
       });
+      mockDatasetUpdates$.next({
+        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
+      });
+      mockDatasetUpdates$.next({
+        dataset: { id: 'new-dataset-id2', title: 'New Dataset', type: 'INDEX_PATTERN' },
+      });
     });
 
     await act(async () => {
