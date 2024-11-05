@@ -119,19 +119,17 @@ const fetchDataSources = async (client: SavedObjectsClientContract) => {
     type: 'data-source',
     perPage: 10000,
   });
-  const dataSources: DataStructure[] = [DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE].concat(
-    response.savedObjects
-      .filter(
-        (savedObject) =>
-          typeof savedObject.attributes?.dataSourceEngineType === 'string' &&
-          !savedObject.attributes?.dataSourceEngineType?.includes('OpenSearch Serverless')
-      )
-      .map((savedObject) => ({
-        id: savedObject.id,
-        title: savedObject.attributes.title,
-        type: 'DATA_SOURCE',
-      }))
-  );
+  const dataSources: DataStructure[] = response.savedObjects
+    .filter(
+      (savedObject) =>
+        typeof savedObject.attributes?.dataSourceEngineType === 'string' &&
+        !savedObject.attributes?.dataSourceEngineType?.includes('OpenSearch Serverless')
+    )
+    .map((savedObject) => ({
+      id: savedObject.id,
+      title: savedObject.attributes.title,
+      type: 'DATA_SOURCE',
+    }));
 
   return injectMetaToDataStructures(dataSources);
 };

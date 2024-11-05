@@ -150,8 +150,8 @@ describe('s3TypeConfig', () => {
         { id: 'unknown', title: 'Unknown', type: 'UNKNOWN' },
       ]);
 
-      expect(result.children).toHaveLength(2); // Including DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE
-      expect(result.children?.[1].title).toBe('DataSource 1');
+      expect(result.children).toHaveLength(1); // Including DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE
+      expect(result.children?.[0].title).toBe('DataSource 1');
       expect(result.hasNext).toBe(true);
     });
 
@@ -171,9 +171,9 @@ describe('s3TypeConfig', () => {
         { id: 'unknown', title: 'Unknown', type: 'UNKNOWN' },
       ]);
 
-      expect(result.children).toHaveLength(3); // Including DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE
-      expect(result.children?.[1].title).toBe('DataSource 1');
-      expect(result.children?.[2].title).toBe('DataSource 3');
+      expect(result.children).toHaveLength(2); // Including DEFAULT_DATA.STRUCTURES.LOCAL_DATASOURCE
+      expect(result.children?.[0].title).toBe('DataSource 1');
+      expect(result.children?.[1].title).toBe('DataSource 3');
       expect(result.children?.some((child) => child.title === 'DataSource 2')).toBe(false);
       expect(result.hasNext).toBe(true);
     });
