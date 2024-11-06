@@ -906,6 +906,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Update caniuse to `1.0.30001587` to fix failed integration tests ([#5886](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5886))
 - [Home] Add more unit tests for other complications of overview ([#5418](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5418))
+- Add example demo plugins for cross compatibility service and functional tests ([#5896](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5896))
 
 ## [2.11.1 - 2023-11-21](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.11.1)
 

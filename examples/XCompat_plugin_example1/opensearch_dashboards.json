@@ -1,0 +1,9 @@
+{
+  "id": "XCompat-plugin-example1",
+  "version": "1.0.0",
+  "opensearchDashboardsVersion": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["navigation", "developerExamples", "data"],
+  "optionalPlugins": []
+}
