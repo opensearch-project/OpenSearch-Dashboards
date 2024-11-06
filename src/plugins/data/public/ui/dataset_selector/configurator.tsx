@@ -39,13 +39,13 @@ export const Configurator = ({
 }) => {
   const queryService = getQueryService();
   const queryString = queryService.queryString;
-  const languageService = queryService.queryString.getLanguageService();
+  const languageService = queryService.queryString?.getLanguageService();
   const indexPatternsService = getIndexPatterns();
-  const type = queryString.getDatasetService().getType(baseDataset.type);
+  const type = queryString?.getDatasetService().getType(baseDataset.type);
   const languages = type?.supportedLanguages(baseDataset) || [];
 
   const [selectedLanguage, setSelectedLanguage] = useState<string>(() => {
-    const currentLanguage = queryString.getQuery().language;
+    const currentLanguage = queryString?.getQuery().language;
     if (languages.includes(currentLanguage)) {
       return currentLanguage;
     }
@@ -65,7 +65,7 @@ export const Configurator = ({
     }
   );
   const indexedViewsService = type?.indexedViewsService;
-  const [selectedIndexedView, setSelectedIndexedView] = useState<string | undefined>();
+  const [selectedIndexedView, setSelectedIndexedView] = useState<string>();
   const [indexedViews, setIndexedViews] = useState<IndexedView[]>([]);
   const [isLoadingIndexedViews, setIsLoadingIndexedViews] = useState(false);
 
@@ -87,7 +87,7 @@ export const Configurator = ({
       isLoadingIndexedViews ||
       (timeFieldName === undefined &&
         !(
-          languageService.getLanguage(selectedLanguage)?.hideDatePicker ||
+          languageService?.getLanguage(selectedLanguage)?.hideDatePicker ||
           dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
         ) &&
         timeFields &&
@@ -105,7 +105,7 @@ export const Configurator = ({
   useEffect(() => {
     const fetchFields = async () => {
       const datasetFields = await queryString
-        .getDatasetService()
+        ?.getDatasetService()
         .getType(baseDataset.type)
         ?.fetchFields(baseDataset);
 
@@ -176,11 +176,12 @@ export const Configurator = ({
                 }))}
                 value={selectedIndexedView}
                 onChange={(e) => {
-                  setSelectedIndexedView(e.target.value);
+                  const value = e.target.value;
+                  setSelectedIndexedView(value);
                   setDataset({
                     ...dataset,
-                    indexedView: e.target.value,
-                    title: `${dataset.title}.${e.target.value}`,
+                    indexedView: value,
+                    title: `${dataset.title}.${value}`,
                   });
                 }}
                 hasNoInitialSelection
@@ -197,7 +198,7 @@ export const Configurator = ({
           >
             <EuiSelect
               options={languages.map((languageId) => ({
-                text: languageService.getLanguage(languageId)?.title || languageId,
+                text: languageService?.getLanguage(languageId)?.title || languageId,
                 value: languageId,
               }))}
               value={selectedLanguage}
@@ -207,7 +208,7 @@ export const Configurator = ({
               }}
             />
           </EuiFormRow>
-          {!languageService.getLanguage(selectedLanguage)?.hideDatePicker &&
+          {!languageService?.getLanguage(selectedLanguage)?.hideDatePicker &&
             (dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN ? (
               <EuiFormRow
                 label={i18n.translate(
@@ -265,7 +266,7 @@ export const Configurator = ({
         </EuiButton>
         <EuiButton
           onClick={async () => {
-            await queryString.getDatasetService().cacheDataset(dataset, services);
+            await queryString?.getDatasetService().cacheDataset(dataset, services);
             onConfirm({ dataset, language: selectedLanguage });
           }}
           fill
