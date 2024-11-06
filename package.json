@@ -71,6 +71,7 @@
     "lint:style": "scripts/use_node scripts/stylelint",
     "i18n:check": "scripts/use_node scripts/i18n_check --ignore-missing --ignore-unused",
     "i18n:extract": "scripts/use_node scripts/i18n_extract.js",
+    "i18n:integrate": "scripts/use_node scripts/i18n_integrate.js --ignore-missing --ignore-unused --update",
     "makelogs": "scripts/use_node scripts/makelogs",
     "uiFramework:compileCss": "cd packages/osd-ui-framework && yarn compileCss",
     "osd:watch": "scripts/use_node scripts/opensearch_dashboards --dev --logging.json=false",
