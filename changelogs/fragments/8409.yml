@@ -1,2 +1,0 @@
-fix:
-- Fix unprefixed and duplicate i18n identifiers in visAugmenter plugin ([#8409](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8409))

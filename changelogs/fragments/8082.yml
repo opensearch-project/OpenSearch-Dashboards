@@ -1,2 +1,0 @@
-fix:
-- [Discover]Fix infinite loop cause discover hang ([#8082](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8082))

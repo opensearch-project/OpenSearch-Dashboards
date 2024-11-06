@@ -36,6 +36,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
     searchOnLoad: true,
     supportsTimeFilter: false,
     isFieldLoadAsync: true,
+    cacheOptions: true,
   },
 
   toDataset: (path: DataStructure[]): Dataset => {
