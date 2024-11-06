@@ -4,61 +4,77 @@
  */
 
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { Configurator } from './configurator'; // Adjust the import path as needed
+import { Configurator } from './configurator';
 import '@testing-library/jest-dom';
 import React from 'react';
 import { setQueryService, setIndexPatterns } from '../../services';
 import { IntlProvider } from 'react-intl';
+import { Query } from '../../../../data/public';
 
-// Mocking the external service and hook functions
-const mockGetQueryService = jest.fn();
-const mockGetIndexPatterns = jest.fn();
-const mockQueryService = {
-  queryString: {
-    getLanguageService: jest.fn().mockReturnValue({
-      getLanguage: jest.fn().mockImplementation((langId) => ({
-        title:
-          {
-            en: 'English',
-            fr: 'French',
-          }[langId] || 'Unknown', // Default to 'Unknown' if the language isn't found
-        hideDatePicker: false, // Example behavior for showing date picker
-      })),
-    }),
-    getQuery: jest.fn().mockReturnValue({
-      language: 'en', // Default language for testing
-    }),
-    getDatasetService: jest.fn().mockReturnValue({
-      getType: jest.fn().mockReturnValue({
-        supportedLanguages: jest.fn().mockReturnValue(['en', 'fr']), // Mock supported languages
-        indexedViewsService: {
-          getIndexedViews: jest.fn().mockResolvedValue([
-            { name: 'view1', type: 'type1' },
-            { name: 'view2', type: 'type2' },
-          ]), // Mock indexed views
-        },
-        fetchFields: jest.fn().mockResolvedValue([{ name: 'timestamp', type: 'date' }]), // Mock dataset fields
-      }),
-    }),
+const getQueryMock = jest.fn().mockReturnValue({
+  query: '',
+  language: 'lucene',
+  dataset: undefined,
+} as Query);
+
+const languageService = {
+  getDefaultLanguage: () => ({ id: 'lucene', title: 'Lucene' }),
+  getLanguages: () => [
+    { id: 'lucene', title: 'Lucene' },
+    { id: 'kuery', title: 'DQL' },
+  ],
+  getLanguage: (languageId: string) => {
+    const languages = [
+      { id: 'lucene', title: 'Lucene' },
+      { id: 'kuery', title: 'DQL' },
+    ];
+    return languages.find((lang) => lang.id === languageId);
   },
+  setUserQueryLanguage: jest.fn(),
 };
 
-const messages = {
-  'app.welcome': 'Welcome to our application!',
-  'app.logout': 'Log Out',
-};
-
-const mockIndexPatterns = {
-  getPatterns: jest.fn().mockReturnValue([
-    {
-      id: 'pattern1',
-      title: 'Index Pattern 1',
+const datasetService = {
+  getType: jest.fn().mockReturnValue({
+    fetchFields: jest.fn(),
+    supportedLanguages: jest.fn().mockReturnValue(['kuery', 'lucene']),
+    indexedViewsService: {
+      getIndexedViews: jest.fn().mockResolvedValue([
+        { name: 'view1', type: 'type1' },
+        { name: 'view2', type: 'type2' },
+      ]),
     },
-  ]),
+  }),
+  addRecentDataset: jest.fn(),
 };
+
+const fetchFieldsMock = jest.fn().mockResolvedValue([]);
 
 const mockServices = {
-  datasetService: mockQueryService.queryString.getDatasetService(),
+  getQueryService: () => ({
+    queryString: {
+      getQuery: getQueryMock,
+      getLanguageService: () => languageService,
+      getDatasetService: () => datasetService,
+      fetchFields: fetchFieldsMock,
+      getUpdates$: jest.fn().mockReturnValue({
+        subscribe: jest.fn().mockReturnValue({ unsubscribe: jest.fn() }),
+      }),
+    },
+  }),
+  getIndexPatterns: jest.fn().mockResolvedValue([
+    {
+      id: 'indexPattern1',
+      attributes: {
+        title: 'indexPattern1',
+      },
+    },
+    {
+      id: 'indexPattern2',
+      attributes: {
+        title: 'indexPattern2',
+      },
+    },
+  ]),
 };
 
 const mockBaseDataset = {
@@ -68,15 +84,19 @@ const mockBaseDataset = {
   dataSource: { meta: { supportsTimeFilter: true } },
 };
 
+const messages = {
+  'app.welcome': 'Welcome to our application!',
+  'app.logout': 'Log Out',
+};
+
 const mockOnConfirm = jest.fn();
 const mockOnCancel = jest.fn();
 const mockOnPrevious = jest.fn();
 
 beforeEach(() => {
-  // Reset mocks
   jest.clearAllMocks();
-  setQueryService(mockQueryService);
-  setIndexPatterns(mockIndexPatterns);
+  setQueryService(mockServices.getQueryService());
+  setIndexPatterns(mockServices.getIndexPatterns());
 });
 
 describe('Configurator Component', () => {
@@ -103,7 +123,6 @@ describe('Configurator Component', () => {
   it('should call onCancel when cancel button is clicked', () => {
     render(
       <IntlProvider locale="en" messages={messages}>
-        {/* Wrap with IntlProvider */}
         <Configurator
           services={mockServices}
           baseDataset={mockBaseDataset}
@@ -121,7 +140,6 @@ describe('Configurator Component', () => {
   it('should call onPrevious when previous button is clicked', () => {
     render(
       <IntlProvider locale="en" messages={messages}>
-        {/* Wrap with IntlProvider */}
         <Configurator
           services={mockServices}
           baseDataset={mockBaseDataset}
@@ -170,12 +188,12 @@ describe('Configurator Component', () => {
         />
       </IntlProvider>
     );
-    const languageSelect = screen.getByText('English');
-    expect(languageSelect).toBeInTheDocument(); // Check if the select element exists
-    expect(languageSelect.value).toBe('en'); // Ensure the initial language is 'en'
-    fireEvent.change(languageSelect, { target: { value: 'fr' } });
+    const languageSelect = screen.getByText('Lucene');
+    expect(languageSelect).toBeInTheDocument();
+    expect(languageSelect.value).toBe('lucene');
+    fireEvent.change(languageSelect, { target: { value: 'kuery' } });
     await waitFor(() => {
-      expect(languageSelect.value).toBe('fr'); // Ensure the language select value has changed to 'fr'
+      expect(languageSelect.value).toBe('kuery');
     });
     expect(mockOnConfirm).not.toHaveBeenCalled();
   });
@@ -193,22 +211,20 @@ describe('Configurator Component', () => {
       </IntlProvider>
     );
 
-    // Ensure that getIndexedViews is called once when the component mounts
     await waitFor(() => {
       expect(
-        mockQueryService.queryString.getDatasetService().getType().indexedViewsService
+        mockServices.getQueryService().queryString.getDatasetService().getType().indexedViewsService
           .getIndexedViews
       ).toHaveBeenCalledTimes(1);
     });
 
-    // Wait for the indexed views to be displayed in the dropdown
     await waitFor(() => {
       expect(screen.getByText('view1')).toBeInTheDocument();
       expect(screen.getByText('view2')).toBeInTheDocument();
     });
   });
+
   it('should initialize selectedLanguage with the current language from queryString', async () => {
-    // Render the component with the mock data
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
@@ -221,17 +237,14 @@ describe('Configurator Component', () => {
       </IntlProvider>
     );
 
-    // Ensure that the selectedLanguage is set correctly to 'en' based on the mock `getQuery().language`
     await waitFor(() => {
-      expect(screen.getByText('English')).toBeInTheDocument(); // Should show 'English' since 'en' is the current language
+      expect(screen.getByText('Lucene')).toBeInTheDocument();
     });
   });
 
   it('should default selectedLanguage to the first language if currentLanguage is not supported', async () => {
-    // Override the mock query to return an unsupported language ('de')
-    mockQueryService.queryString.getQuery.mockReturnValue({ language: 'de' });
+    mockServices.getQueryService().queryString.getQuery.mockReturnValue({ language: 'de' });
 
-    // Render the component with the updated mock data
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
@@ -244,14 +257,12 @@ describe('Configurator Component', () => {
       </IntlProvider>
     );
 
-    // Ensure that the default language ('en') is selected since 'de' is unsupported
     await waitFor(() => {
-      expect(screen.getByText('English')).toBeInTheDocument(); // Should default to 'English'
+      expect(screen.getByText('Lucene')).toBeInTheDocument(); // Should default to 'Lucene'
     });
   });
 
   it('should display the supported language dropdown correctly', async () => {
-    // Render the component with the mock data
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
@@ -264,20 +275,17 @@ describe('Configurator Component', () => {
       </IntlProvider>
     );
 
-    // Ensure the dropdown has both 'English' and 'French' as options based on the supported languages in mockQueryService
     await waitFor(() => {
-      expect(screen.getByText('English')).toBeInTheDocument();
-      expect(screen.getByText('French')).toBeInTheDocument();
+      expect(screen.getByText('Lucene')).toBeInTheDocument();
+      expect(screen.getByText('DQL')).toBeInTheDocument();
     });
   });
 
   it('should disable the confirm button when submit is disabled', async () => {
-    // Mock the Indexed Views service to return a resolved promise (empty for this test case)
     const mockIndexedViewsService = {
-      getIndexedViews: jest.fn().mockResolvedValue([]), // Mock empty indexed views
+      getIndexedViews: jest.fn().mockResolvedValue([]),
     };
 
-    // Render the Configurator component with the mock data
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
@@ -290,26 +298,19 @@ describe('Configurator Component', () => {
       </IntlProvider>
     );
 
-    // Get the submit button element by its text content
     const submitButton = screen.getByRole('button', { name: /select data/i });
 
-    // Initially, the submit button should be disabled as per the submitDisabled condition
     expect(submitButton).toBeDisabled();
 
-    // Simulate changing the language select input
     const languageSelect = screen.getByLabelText('Language');
-    fireEvent.change(languageSelect, { target: { value: 'fr' } });
-
-    // Wait for any re-renders due to state change, then check if the submit button is enabled
+    fireEvent.change(languageSelect, { target: { value: 'kuery' } });
     await waitFor(() => {
       expect(submitButton).toBeEnabled();
     });
 
-    // Simulate selecting a time field (e.g., 'timestamp') to test further button state changes
     const timeFieldSelect = screen.getByLabelText('Time field');
     fireEvent.change(timeFieldSelect, { target: { value: 'timestamp' } });
 
-    // Wait for re-render, ensuring that the button stays enabled (or is re-disabled if needed)
     await waitFor(() => {
       expect(submitButton).toBeEnabled();
     });
