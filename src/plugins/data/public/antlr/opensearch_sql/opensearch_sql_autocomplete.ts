@@ -140,6 +140,11 @@ export function processVisitedRules(
   for (const [ruleId, rule] of rules) {
     switch (ruleId) {
       case OpenSearchSQLParser.RULE_tableName: {
+        // prevent table suggestion if the previous token is an ID (before WS)
+        if (tokenStream.get(cursorTokenIndex - 2).type === OpenSearchSQLParser.ID) {
+          break;
+        }
+
         if (
           getPreviousToken(
             tokenStream,
@@ -149,11 +154,10 @@ export function processVisitedRules(
           )
         ) {
           suggestViewsOrTables = TableOrViewSuggestion.TABLES;
-        } else if (
-          !getPreviousToken(tokenStream, tokenDictionary, cursorTokenIndex, OpenSearchSQLLexer.ID)
-        ) {
-          suggestViewsOrTables = TableOrViewSuggestion.ALL;
         }
+        // we cannot stop a table suggestion if there exists an identifier because that is common within select clauses
+        suggestViewsOrTables = TableOrViewSuggestion.ALL;
+
         break;
       }
       case OpenSearchSQLParser.RULE_aggregateFunction: {
@@ -176,29 +180,6 @@ export function processVisitedRules(
         break;
       }
       case OpenSearchSQLParser.RULE_predicate: {
-        // console.clear();
-        // console.log('Formatted Token Stream:');
-        // let index = 0;
-        // try {
-        //   while (true) {
-        //     const token = tokenStream.get(index);
-        //     if (!token) break;
-
-        //     const isCurrentToken = index === cursorTokenIndex;
-        //     const tokenInfo = `Token ${index}: ${token.text} (Type: ${token.type})`;
-
-        //     if (isCurrentToken) {
-        //       console.log(`%c${tokenInfo}`, 'background-color: red; font-weight: bold;');
-        //     } else {
-        //       console.log(tokenInfo);
-        //     }
-
-        //     index++;
-        //   }
-        // } catch (error) {
-        //   console.error('Error while iterating through token stream:', error);
-        // }
-
         // console.log(rule.startTokenIndex);
 
         // TODO: set rerunAndConstrain to the predicate parser rule context

@@ -84,7 +84,7 @@ export const getSuggestions = async ({
                 i++;
                 return {
                   text: val.toString(),
-                  insertText: typeof val === 'string' ? `"${val}" ` : `${val} `,
+                  insertText: typeof val === 'string' ? `'${val}' ` : `${val} `,
                   type: monaco.languages.CompletionItemKind.Value,
                   detail: SuggestionItemDetailsTags.Value,
                   sortText: i.toString().padStart(3, '0'), // todo: change based on how many values can be returned
@@ -175,7 +175,7 @@ export const getOpenSearchSqlAutoCompleteSuggestions = (
       // set initial keywords to be context keywords
       initialResult.suggestKeywords = contextResult.suggestKeywords;
     } else {
-      // merge initial and context keywords, removing duplicates
+      // merge initial and context keywords
       const combined = [...initialResult.suggestKeywords, ...contextResult.suggestKeywords];
 
       // ES6 magic to filter out duplicate objects based on id field
