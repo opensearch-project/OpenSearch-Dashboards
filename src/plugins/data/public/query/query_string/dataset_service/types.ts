@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { EuiIconProps } from '@elastic/eui';
-import { Dataset, DatasetField, DatasetSearchOptions, DataStructure } from '../../../../common';
+import {
+  Dataset,
+  DatasetCanvasBannerProps,
+  DatasetField,
+  DatasetSearchOptions,
+  DataStructure,
+} from '../../../../common';
 import { IDataPluginServices } from '../../../types';
 
 /**
@@ -16,12 +22,12 @@ export interface DataStructureFetchOptions {
   paginationToken?: string;
 }
 
-export interface IndexedView {
+export interface DatasetIndexedView {
   name: string;
 }
 
-export interface IndexedViewsService {
-  getIndexedViews: (dataset: Dataset) => Promise<IndexedView[]>;
+export interface DatasetIndexedViewsService {
+  getIndexedViews: (dataset: Dataset) => Promise<DatasetIndexedView[]>;
 }
 
 /**
@@ -93,5 +99,11 @@ export interface DatasetTypeConfig {
   /**
    * Service used for indexedViews related operations
    */
-  indexedViewsService?: IndexedViewsService;
+  indexedViewsService?: DatasetIndexedViewsService;
+  /**
+   * Returns props used to render a banner on the Discover canvas/results section
+   */
+  getSearchBannerProps?: (
+    searchStatus: string
+  ) => DatasetCanvasBannerProps | Promise<DatasetCanvasBannerProps> | undefined;
 }

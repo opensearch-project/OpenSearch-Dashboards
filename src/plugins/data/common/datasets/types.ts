@@ -283,10 +283,4 @@ export type DatasetCanvasBannerProps =
 
 export interface DatasetSearchOptions {
   strategy?: string;
-  /**
-   * Returns props used to render a banner on the Discover canvas/results section
-   */
-  getBannerProps?: (
-    searchStatus: string
-  ) => DatasetCanvasBannerProps | Promise<DatasetCanvasBannerProps> | undefined;
 }

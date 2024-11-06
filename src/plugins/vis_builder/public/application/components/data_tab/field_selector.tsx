@@ -33,7 +33,7 @@ export const FieldSelector = () => {
   const [filteredFields, setFilteredFields] = useState<IndexPatternField[]>([]);
 
   useEffect(() => {
-    const indexFields = indexPattern?.fields.getAll() ?? [];
+    const indexFields = indexPattern?.fields?.getAll() ?? [];
     const filteredSubset = getAvailableFields(indexFields).filter((field) =>
       // case-insensitive field search
       field.displayName.toLowerCase().includes(fieldSearchValue.toLowerCase())

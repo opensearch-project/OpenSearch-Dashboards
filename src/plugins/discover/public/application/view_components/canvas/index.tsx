@@ -52,10 +52,11 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
     };
   });
   const isEnhancementsEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
+  const defaultColumns = uiSettings.get(DEFAULT_COLUMNS_SETTING) || [];
   const filteredColumns = filterColumns(
     columns,
     indexPattern,
-    uiSettings.get(DEFAULT_COLUMNS_SETTING),
+    defaultColumns,
     uiSettings.get(MODIFY_COLUMNS_ON_SWITCH)
   );
   const dispatch = useDispatch();
@@ -152,11 +153,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
     if (query.dataset) {
       const typeConfig = data.query.queryString.getDatasetService().getType(query.dataset.type);
       let bannerData;
-      if (
-        (bannerData = typeConfig
-          ?.getSearchOptions?.(query.dataset)
-          ?.getBannerProps?.(fetchState.status))
-      ) {
+      if ((bannerData = typeConfig?.getSearchBannerProps?.(fetchState.status))) {
         if (bannerData instanceof Promise) {
           bannerData
             .then((newBannerData) => updateCanvasBanner(newBannerData))

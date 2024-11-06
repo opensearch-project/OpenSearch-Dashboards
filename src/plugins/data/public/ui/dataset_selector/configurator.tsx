@@ -22,7 +22,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../../common';
 import { getIndexPatterns, getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
-import { IndexedView } from '../../query/query_string/dataset_service';
+import { DatasetIndexedView } from '../../query/query_string/dataset_service';
 
 export const Configurator = ({
   services,
@@ -66,7 +66,7 @@ export const Configurator = ({
   );
   const indexedViewsService = type?.indexedViewsService;
   const [selectedIndexedView, setSelectedIndexedView] = useState<string>();
-  const [indexedViews, setIndexedViews] = useState<IndexedView[]>([]);
+  const [indexedViews, setIndexedViews] = useState<DatasetIndexedView[]>([]);
   const [isLoadingIndexedViews, setIsLoadingIndexedViews] = useState(false);
 
   useEffect(() => {
