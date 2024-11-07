@@ -68,6 +68,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
             onNameChange={setName}
             onColorChange={handleColorChange}
             onDescriptionChange={setDescription}
+            formErrors={formErrors}
           />
           <EuiSpacer size="m" />
           <div {...generateRightSidebarScrollProps(RightSidebarScrollField.UseCase)}>
