@@ -153,7 +153,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
     if (query.dataset) {
       const typeConfig = data.query.queryString.getDatasetService().getType(query.dataset.type);
       let bannerData;
-      if ((bannerData = typeConfig?.getSearchBannerProps?.(fetchState.status))) {
+      if ((bannerData = typeConfig?.getSearchBannerProps?.(fetchState.status, query.dataset))) {
         if (bannerData instanceof Promise) {
           bannerData
             .then((newBannerData) => updateCanvasBanner(newBannerData))
