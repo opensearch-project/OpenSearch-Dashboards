@@ -5,11 +5,12 @@
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, filter, pairwise } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 import { useLocation } from 'react-router-dom';
+import { useEffectOnce } from 'react-use';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
 import { search } from '../../../../../data/public';
@@ -143,8 +144,45 @@ export const useSearch = (services: DiscoverViewServices) => {
             : ResultStatus.UNINITIALIZED,
         queryStatus: { startTime },
       }),
-    [shouldSearchOnPageLoad, startTime, skipInitialFetch]
+    // we only want data$ observable to be created once, updates will be done through useEffect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
+
+  // re-initialize data$ when the selected dataset changes
+  useEffectOnce(() => {
+    const subscription = data.query.queryString
+      .getUpdates$()
+      .pipe(
+        pairwise(),
+        filter(([prev, curr]) => prev.dataset?.id === curr.dataset?.id)
+      )
+      .subscribe(() => {
+        data$.next({
+          status:
+            shouldSearchOnPageLoad() && !skipInitialFetch.current
+              ? ResultStatus.LOADING
+              : ResultStatus.UNINITIALIZED,
+          queryStatus: { startTime },
+        });
+      });
+    return () => subscription.unsubscribe();
+  });
+
+  useEffect(() => {
+    data$.next({ ...data$.value, queryStatus: { startTime } });
+  }, [data$, startTime]);
+
+  useEffect(() => {
+    data$.next({
+      ...data$.value,
+      status:
+        shouldSearchOnPageLoad() && !skipInitialFetch.current
+          ? ResultStatus.LOADING
+          : ResultStatus.UNINITIALIZED,
+    });
+  }, [data$, shouldSearchOnPageLoad, skipInitialFetch]);
+
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
   const fetch = useCallback(async () => {
