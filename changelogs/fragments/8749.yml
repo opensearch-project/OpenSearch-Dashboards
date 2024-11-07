@@ -1,2 +1,0 @@
-fix:
-- Updates query and language if language is not supported by query data ([#8749](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8749))
