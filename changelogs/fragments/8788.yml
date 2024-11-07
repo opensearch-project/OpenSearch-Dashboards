@@ -1,0 +1,4 @@
+feat:
+- [i18n-dev] Allow updating existing localization files when importing with "i18n:integrate" ([#8788](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8788))
+- [i18n] Add additional translations for de-DE, es-ES, fr-FR, id-ID, it-IT, pt-PT, and tr-TR ([#8788](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8788))
+- [i18n] Add additional translations for ja-JP, ko-KR, zh-CN, and zh-TW ([#8788](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8788))
