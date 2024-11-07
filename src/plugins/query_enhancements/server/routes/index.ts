@@ -92,7 +92,7 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
             error = err;
           }
           return res.custom({
-            statusCode: error.status,
+            statusCode: error.status || err.status,
             body: err.message,
           });
         }
