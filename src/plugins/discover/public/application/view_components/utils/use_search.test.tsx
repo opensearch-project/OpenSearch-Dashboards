@@ -79,11 +79,17 @@ describe('useSearch', () => {
     const services = createMockServices();
     (services.uiSettings.get as jest.Mock).mockReturnValueOnce(true);
 
-    const { result } = renderHook(() => useSearch(services), { wrapper });
+    const { result, waitForNextUpdate } = renderHook(() => useSearch(services), { wrapper });
 
     expect(result.current.data$.getValue()).toEqual(
       expect.objectContaining({ status: ResultStatus.LOADING })
     );
+
+    // useSearch updates state async in useEffect, wait for it to finish to
+    // avoid warning
+    await act(async () => {
+      await waitForNextUpdate();
+    });
   });
 
   it('should initialize with uninitialized state when search on page load is disabled', async () => {
@@ -94,16 +100,20 @@ describe('useSearch', () => {
       value: 10,
     });
 
-    const { result } = renderHook(() => useSearch(services), { wrapper });
+    const { result, waitForNextUpdate } = renderHook(() => useSearch(services), { wrapper });
     expect(result.current.data$.getValue()).toEqual(
       expect.objectContaining({ status: ResultStatus.UNINITIALIZED })
     );
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
   });
 
   it('should update startTime when hook rerenders', async () => {
     const services = createMockServices();
 
-    const { result, rerender } = renderHook(() => useSearch(services), {
+    const { result, rerender, waitForNextUpdate } = renderHook(() => useSearch(services), {
       wrapper,
     });
 
@@ -114,6 +124,10 @@ describe('useSearch', () => {
     const newStartTime = result.current.data$.getValue().queryStatus?.startTime;
     expect(newStartTime).toBeDefined();
     expect(newStartTime).not.toEqual(initialStartTime);
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
   });
 
   it('should reset data observable when dataset changes', async () => {
