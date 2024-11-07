@@ -42,6 +42,13 @@ const overrideSavedObjectId = (savedObject: SavedObject, idGenerator: (id: strin
       const searchSource = JSON.parse(searchSourceString);
       if (searchSource.index) {
         searchSource.index = idGenerator(searchSource.index);
+        if (Array.isArray(searchSource.filter)) {
+          searchSource.filter.forEach((item) => {
+            if (item.meta?.index) {
+              item.meta.index = idGenerator(item.meta.index);
+            }
+          });
+        }
         savedObject.attributes.kibanaSavedObjectMeta.searchSourceJSON = JSON.stringify(
           searchSource
         );
