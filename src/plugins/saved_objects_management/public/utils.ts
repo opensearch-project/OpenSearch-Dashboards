@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CoreStart, WorkspaceObject } from 'opensearch-dashboards/public';
+import { CoreStart } from 'opensearch-dashboards/public';
 import { formatUrlWithWorkspaceId } from '../../../core/public/utils';
 import { SavedObjectWithMetadata } from './types';
 
@@ -19,11 +19,10 @@ export function formatWorkspaceIdParams<
 
 export function formatInspectUrl(
   savedObject: SavedObjectWithMetadata,
-  useUpdatedUX: boolean,
-  currentWorkspace: WorkspaceObject | null | undefined,
   coreStart: CoreStart
 ): string | undefined {
   const { editUrl } = savedObject.meta;
+  const useUpdatedUX = !!coreStart.uiSettings.get('home:useNewHomePage');
   let finalEditUrl = editUrl;
   if (useUpdatedUX && finalEditUrl) {
     finalEditUrl = finalEditUrl.replace(/^\/management\/opensearch-dashboards/, '/app');
@@ -33,6 +32,7 @@ export function formatInspectUrl(
     let inAppUrl = basePath.prepend(finalEditUrl);
     const workspaceEnabled = coreStart.application.capabilities.workspaces.enabled;
     if (workspaceEnabled) {
+      const currentWorkspace = coreStart.workspaces.currentWorkspace$.value;
       if (currentWorkspace) {
         inAppUrl = formatUrlWithWorkspaceId(finalEditUrl, currentWorkspace.id, basePath);
       } else {

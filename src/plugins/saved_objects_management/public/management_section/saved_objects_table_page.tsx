@@ -117,7 +117,7 @@ const SavedObjectsTablePage = ({
       workspaces={coreStart.workspaces}
       perPageConfig={itemsPerPage}
       goInspectObject={(savedObject) => {
-        const inAppUrl = formatInspectUrl(savedObject, useUpdatedUX, currentWorkspace, coreStart);
+        const inAppUrl = formatInspectUrl(savedObject, coreStart);
         if (inAppUrl) {
           return coreStart.application.navigateToUrl(inAppUrl);
         }
