@@ -259,7 +259,7 @@ export interface DatasetField {
 }
 
 export enum DatasetCanvasBannerComponentType {
-  CALLOUT = 'callout',
+  CALLOUT = 'CALLOUT',
   CUSTOM = 'custom',
 }
 
