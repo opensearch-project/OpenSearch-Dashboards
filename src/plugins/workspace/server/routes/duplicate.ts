@@ -90,6 +90,7 @@ export const registerDuplicateRoute = (
         createNewCopies: true,
         workspaces: [targetWorkspace],
         dataSourceEnabled: isDataSourceEnabled,
+        isCopy: true,
       });
 
       return res.ok({ body: result });

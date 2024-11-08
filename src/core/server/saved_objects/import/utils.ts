@@ -185,52 +185,42 @@ const parseJSONSpec = (spec: string) => {
   return undefined;
 };
 
-export async function findDataSourceForObject(
+export function findReferenceDataSourceForObject(
   savedObject: SavedObject,
-  savedObjectsClient: SavedObjectsClientContract,
-  visitedObjects: Set<string> = new Set()
-): Promise<string | null> {
-  const references = savedObject.references;
+  savedObjects: Map<
+    string,
+    SavedObject<{
+      title?: string | undefined;
+    }>
+  >,
+  visited = new Set<string>()
+): SavedObjectReference | null {
+  const { references } = savedObject;
   if (!references || references.length === 0) {
     return null;
   }
 
-  const objectKey = `${savedObject.type}:${savedObject.id}`;
-  if (visitedObjects.has(objectKey)) {
-    return null;
-  }
-  visitedObjects.add(objectKey);
-
   const dataSourceReference = references.find((ref) => ref.type === 'data-source');
   if (dataSourceReference) {
-    return dataSourceReference.id;
+    return dataSourceReference;
   }
 
-  const bulkGetResponse = await savedObjectsClient.bulkGet(
-    references.map((reference) => ({
-      type: reference.type,
-      id: reference.id,
-    }))
-  );
+  visited.add(savedObject.id);
 
-  const referencedObjects = bulkGetResponse.saved_objects;
-  const erroredObjects = referencedObjects.filter(
-    (obj) => obj.error && obj.error.statusCode !== 404
-  );
-
-  if (erroredObjects.length > 0) {
-    const err = Boom.badRequest();
-    err.output.payload.attributes = {
-      objects: erroredObjects,
-    };
-    throw err;
-  }
-
-  for (const referencedObject of referencedObjects) {
-    const dataSource = await findDataSourceForObject(referencedObject, savedObjectsClient);
-    if (dataSource) {
-      return dataSource;
+  for (const { id } of references) {
+    if (visited.has(id)) {
+      continue;
+    }
+    const referenceObject = savedObjects.get(id);
+    if (referenceObject) {
+      const dataSource = findReferenceDataSourceForObject(referenceObject, savedObjects, visited);
+      if (dataSource) {
+        return dataSource;
+      }
     }
   }
+
+  visited.delete(savedObject.id);
+
   return null;
 }
