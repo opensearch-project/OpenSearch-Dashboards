@@ -18,6 +18,7 @@ export {
   WorkspaceFormProps,
   WorkspaceFormDataState,
   WorkspacePermissionSetting,
+  WorkspaceFormErrors,
 } from './types';
 export {
   WorkspaceOperationType,
