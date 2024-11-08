@@ -205,7 +205,7 @@ describe('WorkspaceCreator', () => {
   });
 
   it('should not create workspace when name is empty', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId, getByText } = render(<WorkspaceCreator />);
 
     // Ensure workspace create form rendered
     await waitFor(() => {
@@ -219,6 +219,7 @@ describe('WorkspaceCreator', () => {
       },
     });
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    expect(getByText('Name is required. Enter a name.')).toBeInTheDocument();
     expect(workspaceClientCreate).not.toHaveBeenCalled();
   });
 
