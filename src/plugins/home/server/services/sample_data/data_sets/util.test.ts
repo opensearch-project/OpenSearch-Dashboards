@@ -177,10 +177,25 @@ describe('getSavedObjectsWithDataSource()', () => {
 });
 
 describe('getFinalSavedObjects()', () => {
-  const savedObjects = [
-    { id: 'saved-object-1', type: 'test', attributes: { title: 'Saved object 1' }, references: [] },
-  ];
-  const generateTestDataSet = () => {
+  const generateTestDataSet = (
+    savedObjects: Array<
+      SavedObject<{
+        title: string;
+        kibanaSavedObjectMeta?: {
+          searchSourceJSON: Record<string, unknown>;
+        };
+        visState?: string;
+      }>
+    > = [
+      {
+        id: 'saved-object-1',
+        type: 'search',
+        attributes: { title: 'Saved object 1' },
+        references: [],
+      },
+    ]
+  ) => {
+    const getSavedObjects = () => JSON.parse(JSON.stringify(savedObjects));
     return {
       id: 'foo',
       name: 'Foo',
@@ -192,20 +207,11 @@ describe('getFinalSavedObjects()', () => {
       appLinks: [],
       defaultIndex: '',
       getDataSourceIntegratedDefaultIndex: () => '',
-      savedObjects,
+      savedObjects: getSavedObjects(),
       getDataSourceIntegratedSavedObjects: (dataSourceId?: string, dataSourceTitle?: string) =>
-        savedObjects.map((item) => ({
-          ...item,
-          ...(dataSourceId ? { id: `${dataSourceId}_${item.id}` } : {}),
-          attributes: {
-            ...item.attributes,
-            title: dataSourceTitle
-              ? `${item.attributes.title}_${dataSourceTitle}`
-              : item.attributes.title,
-          },
-        })),
+        getSavedObjectsWithDataSource(getSavedObjects(), dataSourceId, dataSourceTitle),
       getWorkspaceIntegratedSavedObjects: (workspaceId?: string) =>
-        savedObjects.map((item) => ({
+        getSavedObjects().map((item) => ({
           ...item,
           ...(workspaceId ? { id: `${workspaceId}_${item.id}` } : {}),
         })),
@@ -269,7 +275,74 @@ describe('getFinalSavedObjects()', () => {
       getFinalSavedObjects({
         dataset,
       })
-    ).toBe(dataset.savedObjects);
+    ).toEqual(dataset.savedObjects);
+  });
+
+  it('should update index in searchSource for visualization and search saved objects', () => {
+    const dataset = generateTestDataSet([
+      {
+        id: 'saved-object-1',
+        type: 'visualization',
+        attributes: {
+          title: 'Saved object 1',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              index: 'index-pattern',
+              filter: [{ meta: { index: 'index-pattern' } }],
+            }),
+          },
+          visState: JSON.stringify({}),
+        },
+        references: [],
+      },
+      {
+        id: 'saved-object-2',
+        type: 'search',
+        attributes: {
+          title: 'Saved object 2',
+          kibanaSavedObjectMeta: {
+            searchSourceJSON: JSON.stringify({
+              index: 'index-pattern',
+              filter: [{ meta: { index: 'index-pattern' } }],
+            }),
+          },
+        },
+        references: [],
+      },
+    ]);
+    const UPDATED_SEARCH_JSON = JSON.stringify({
+      index: 'workspace-1_datasource-1_index-pattern',
+      filter: [{ meta: { index: 'workspace-1_datasource-1_index-pattern' } }],
+    });
+    expect(
+      getFinalSavedObjects({
+        dataset,
+        workspaceId: 'workspace-1',
+        dataSourceId: 'datasource-1',
+        dataSourceTitle: 'data source 1',
+      })
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'workspace-1_datasource-1_saved-object-1',
+          type: 'visualization',
+          attributes: expect.objectContaining({
+            kibanaSavedObjectMeta: expect.objectContaining({
+              searchSourceJSON: UPDATED_SEARCH_JSON,
+            }),
+          }),
+        }),
+        expect.objectContaining({
+          id: 'workspace-1_datasource-1_saved-object-2',
+          type: 'search',
+          attributes: expect.objectContaining({
+            kibanaSavedObjectMeta: expect.objectContaining({
+              searchSourceJSON: UPDATED_SEARCH_JSON,
+            }),
+          }),
+        }),
+      ])
+    );
   });
 });
 
