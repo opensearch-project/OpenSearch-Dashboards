@@ -62,7 +62,7 @@ export class QueryEnhancementsPlugin
         startServices: core.getStartServices(),
         usageCollector: data.search.usageCollector,
       }),
-      getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title} | head 10`,
+      getQueryString: (currentQuery: Query) => `source = ${currentQuery.dataset?.title}`,
       fields: { filterable: false, visualizable: false },
       docLink: {
         title: i18n.translate('queryEnhancements.pplLanguage.docLink', {
