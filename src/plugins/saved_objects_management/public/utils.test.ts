@@ -43,7 +43,7 @@ describe('Utils', () => {
     expect(obj).toEqual({ foo: 'bar', availableWorkspaces: ['foo', 'bar'], workspaces: ['foo'] });
   });
 
-  describe('navigateToInspectPage', () => {
+  describe('formatInspectUrl', () => {
     const mockCoreStart = coreMock.createStart();
     const savedObject = {
       type: 'dashboard',
