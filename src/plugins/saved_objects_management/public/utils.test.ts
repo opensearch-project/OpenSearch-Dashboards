@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { formatWorkspaceIdParams } from './utils';
+import { coreMock } from '../../../core/public/mocks';
+import { formatInspectUrl, formatWorkspaceIdParams } from './utils';
 
 describe('Utils', () => {
   it('formatWorkspaceIdParams with workspace null/undefined', async () => {
@@ -40,5 +41,85 @@ describe('Utils', () => {
       workspaces: ['foo'],
     });
     expect(obj).toEqual({ foo: 'bar', availableWorkspaces: ['foo', 'bar'], workspaces: ['foo'] });
+  });
+
+  describe('navigateToInspectPage', () => {
+    const mockCoreStart = coreMock.createStart();
+    const savedObject = {
+      type: 'dashboard',
+      id: 'dashboard',
+      attributes: {},
+      references: [],
+      meta: {
+        editUrl: '/management/opensearch-dashboards/objects/savedDashboards/ID1',
+      },
+    };
+
+    beforeEach(() => {
+      mockCoreStart.application.capabilities = {
+        ...mockCoreStart.application.capabilities,
+        workspaces: {
+          ...mockCoreStart.application.capabilities.workspaces,
+          enabled: true,
+        },
+      };
+      jest.clearAllMocks();
+    });
+
+    it('formats URL correctly when useUpdatedUX is false and workspace is disabled', () => {
+      const currentWorkspace = { id: 'workspace1', name: 'workspace1' };
+      mockCoreStart.application.capabilities = {
+        ...mockCoreStart.application.capabilities,
+        workspaces: {
+          ...mockCoreStart.application.capabilities.workspaces,
+          enabled: false,
+        },
+      };
+      const result = formatInspectUrl(savedObject, false, currentWorkspace, mockCoreStart);
+      expect(result).toBe('/management/opensearch-dashboards/objects/savedDashboards/ID1');
+    });
+
+    it('formats URL correctly when useUpdatedUX is false, saved object does not belong to certain workspaces and not in current workspace', () => {
+      const result = formatInspectUrl(savedObject, false, null, mockCoreStart);
+      expect(result).toBe('/management/opensearch-dashboards/objects/savedDashboards/ID1');
+    });
+
+    it('formats URL correctly when useUpdatedUX is true and in current workspace', () => {
+      const savedObjectWithWorkspaces = {
+        ...savedObject,
+        workspaces: ['workspace1'],
+      };
+      const currentWorkspace = { id: 'workspace1', name: 'workspace1' };
+      const result = formatInspectUrl(
+        savedObjectWithWorkspaces,
+        true,
+        currentWorkspace,
+        mockCoreStart
+      );
+
+      expect(result).toBe('http://localhost/w/workspace1/app/objects/savedDashboards/ID1');
+    });
+
+    it('formats URL correctly when useUpdatedUX is true and saved object belongs to certain workspaces', () => {
+      const savedObjectWithWorkspaces = {
+        ...savedObject,
+        workspaces: ['workspace1'],
+      };
+      mockCoreStart.workspaces.workspaceList$.next([{ id: 'workspace1', name: 'workspace1' }]);
+      const result = formatInspectUrl(savedObjectWithWorkspaces, true, null, mockCoreStart);
+
+      expect(result).toBe('http://localhost/w/workspace1/app/objects/savedDashboards/ID1');
+    });
+
+    it('formats URL correctly when useUpdatedUX is true and no workspace permission', () => {
+      const savedObjectWithWorkspaces = {
+        ...savedObject,
+        workspaces: ['workspace1'],
+      };
+      mockCoreStart.workspaces.workspaceList$.next([{ id: 'workspace2', name: 'workspace2' }]);
+      const result = formatInspectUrl(savedObjectWithWorkspaces, true, null, mockCoreStart);
+
+      expect(result).toBe('/app/objects/savedDashboards/ID1');
+    });
   });
 });
