@@ -37,6 +37,7 @@ import {
 } from '../service/data_source_selection_service';
 import { DataSourceError } from '../types';
 import { DATACONNECTIONS_BASE, LOCAL_CLUSTER } from '../constants';
+import { DataConnectionSavedObjectAttributes } from '../../../data_source/common/data_connections';
 
 export const getDirectQueryConnections = async (dataSourceId: string, http: HttpSetup) => {
   const endpoint = `${DATACONNECTIONS_BASE}/dataSourceMDSId=${dataSourceId}`;
@@ -179,6 +180,17 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
           };
         }) || []
     );
+}
+
+export async function getDataConnections(savedObjectsClient: SavedObjectsClientContract) {
+  return savedObjectsClient
+    .find<DataConnectionSavedObjectAttributes>({
+      type: 'data-connection',
+      perPage: 10000,
+    })
+    .then((response) => {
+      return response?.savedObjects;
+    });
 }
 
 export async function getDataSourcesWithFields(
