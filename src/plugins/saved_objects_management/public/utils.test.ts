@@ -116,7 +116,7 @@ describe('Utils', () => {
       expect(result).toBe('http://localhost/w/workspace1/app/objects/savedDashboards/ID1');
     });
 
-    it('formats URL correctly when useUpdatedUX is true and no workspace permission', () => {
+    it('formats URL correctly when useUpdatedUX is true and the object does not belong to any workspace', () => {
       mockCoreStart.workspaces.workspaceList$.next([{ id: 'workspace2', name: 'workspace2' }]);
       const result = formatInspectUrl(savedObjectWithWorkspaces, mockCoreStart);
 

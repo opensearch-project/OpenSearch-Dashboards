@@ -36,7 +36,7 @@ describe('IndexHeader at new home page', () => {
           ...mockCoreStart.application,
           capabilities: {
             ...mockCoreStart.application.capabilities,
-            workspaces: { enabled: true },
+            workspaces: { enabled: props.workspaceEnabled },
           },
         },
         uiSettings: { ...mockCoreStart.uiSettings, get: jest.fn().mockReturnValue(true) },
@@ -69,6 +69,36 @@ describe('IndexHeader at new home page', () => {
     jest.clearAllMocks();
   });
 
+  it('renders the set default button when index is not default and workspace is disabled', () => {
+    const mockHeaderControl = ({ controls }) => {
+      return controls?.[1]?.label ?? null;
+    };
+    const { getByText } = render(
+      getIndexHeader({
+        header: mockHeaderControl,
+        defaultIndex: 'no-default-index',
+        workspaceEnabled: false,
+      })
+    );
+
+    expect(getByText('Set as default index')).toBeInTheDocument();
+  });
+
+  it('does not render the set default button when index is default and workspace is disabled', () => {
+    const mockHeaderControl = ({ controls }) => {
+      return controls?.[1]?.label ?? null;
+    };
+    const { queryByText } = render(
+      getIndexHeader({
+        header: mockHeaderControl,
+        defaultIndex: 'default-index',
+        workspaceEnabled: false,
+      })
+    );
+
+    expect(queryByText('Set as default index')).toBeNull();
+  });
+
   it('renders the set default button when index is not default and user is in workspace', () => {
     const mockHeaderControl = ({ controls }) => {
       return controls?.[1]?.label ?? null;
@@ -78,13 +108,14 @@ describe('IndexHeader at new home page', () => {
         header: mockHeaderControl,
         defaultIndex: 'no-default-index',
         workspace: workspaceObject,
+        workspaceEnabled: true,
       })
     );
 
     expect(getByText('Set as default index')).toBeInTheDocument();
   });
 
-  it('does not renders the set default button when index is default and user is in workspace', () => {
+  it('does not render the set default button when index is default and user is in workspace', () => {
     const mockHeaderControl = ({ controls }) => {
       return controls?.[1]?.label ?? null;
     };
@@ -93,29 +124,38 @@ describe('IndexHeader at new home page', () => {
         header: mockHeaderControl,
         defaultIndex: 'default-index',
         workspace: workspaceObject,
+        workspaceEnabled: true,
       })
     );
 
     expect(queryByText('Set as default index')).toBeNull();
   });
 
-  it('does not renders the set default button when index is not default and user is not in workspace', () => {
+  it('does not render the set default button when index is not default and user is not in workspace', () => {
     const mockHeaderControl = ({ controls }) => {
       return controls?.[1]?.label ?? null;
     };
     const { queryByText } = render(
-      getIndexHeader({ header: mockHeaderControl, defaultIndex: 'no-default-index' })
+      getIndexHeader({
+        header: mockHeaderControl,
+        defaultIndex: 'no-default-index',
+        workspaceEnabled: true,
+      })
     );
 
     expect(queryByText('Set as default index')).toBeNull();
   });
 
-  it('does not renders the set default button when index is default and user is not in workspace', () => {
+  it('does not render the set default button when index is default and user is not in workspace', () => {
     const mockHeaderControl = ({ controls }) => {
       return controls?.[1]?.label ?? null;
     };
     const { queryByText } = render(
-      getIndexHeader({ header: mockHeaderControl, defaultIndex: 'default-index' })
+      getIndexHeader({
+        header: mockHeaderControl,
+        defaultIndex: 'default-index',
+        workspaceEnabled: true,
+      })
     );
 
     expect(queryByText('Set as default index')).toBeNull();
