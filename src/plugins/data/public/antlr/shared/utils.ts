@@ -195,5 +195,28 @@ export const parseQuery = <
     suggestKeywords,
   };
 
+  // console.clear();
+  // console.log('Formatted Token Stream:');
+  // let index = 0;
+  // try {
+  //   while (true) {
+  //     const token = tokenStream.get(index);
+  //     if (!token) break;
+
+  //     const isCurrentToken = index === cursorTokenIndex;
+  //     const tokenInfo = `Token ${index}: ${token.text} (Type: ${token.type})`;
+
+  //     if (isCurrentToken) {
+  //       console.log(`%c${tokenInfo}`, 'background-color: red; font-weight: bold;');
+  //     } else {
+  //       console.log(tokenInfo);
+  //     }
+
+  //     index++;
+  //   }
+  // } catch (error) {
+  //   console.error('Error while iterating through token stream:', error);
+  // }
+
   return enrichAutocompleteResult(result, rules, tokenStream, cursorTokenIndex, cursor, query);
 };
