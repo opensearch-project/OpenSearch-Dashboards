@@ -74,6 +74,7 @@ import {
   SavedObjectsImportError,
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
+import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
@@ -892,10 +893,19 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       successfulCopies,
       targetWorkspace,
     } = this.state;
+    const { applications, http } = this.props;
 
     if (!isShowingDuplicateResultFlyout) {
       return null;
     }
+
+    const targetWorkspaceDataSourceUrl = formatUrlWithWorkspaceId(
+      applications.getUrlForApp('dataSources', {
+        absolute: false,
+      }),
+      targetWorkspace,
+      http.basePath
+    );
 
     return (
       <DuplicateResultFlyout
@@ -906,6 +916,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         onCopy={this.onDuplicate}
         targetWorkspace={targetWorkspace}
         useUpdatedUX={this.props.useUpdatedUX}
+        targetWorkspaceDataSourceUrl={targetWorkspaceDataSourceUrl}
       />
     );
   }

@@ -15,6 +15,7 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiIconTip,
+  EuiLink,
   EuiSmallButton,
   EuiSmallButtonEmpty,
   EuiSpacer,
@@ -59,6 +60,7 @@ export interface DuplicateResultFlyoutProps {
   ) => Promise<void>;
   targetWorkspace: string;
   useUpdatedUX: boolean;
+  targetWorkspaceDataSourceUrl: string;
 }
 
 interface State {
@@ -145,10 +147,18 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
         <FormattedMessage
           id="savedObjectsManagement.objectsTable.copyResult.missingDataSourceDescription"
           defaultMessage="The following {useUpdatedUX, select, true {assets} other {saved objects}} use data sources that do not exist.
-          Please contact OSD admin to assign data sources to the {targetWorkspace}."
+          Please contact OSD admin to assign data sources to the {targetWorkspaceDataSourceLink}."
           values={{
-            targetWorkspace: this.props.workspaceName,
             useUpdatedUX: this.props.useUpdatedUX,
+            targetWorkspaceDataSourceLink: (
+              <EuiLink href={this.props.targetWorkspaceDataSourceUrl} target="_blank">
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.copyResult.missingDataSourceCalloutLinkText"
+                  defaultMessage="{targetWorkspace}"
+                  values={{ targetWorkspace: this.props.workspaceName }}
+                />
+              </EuiLink>
+            ),
           }}
         />
       </p>

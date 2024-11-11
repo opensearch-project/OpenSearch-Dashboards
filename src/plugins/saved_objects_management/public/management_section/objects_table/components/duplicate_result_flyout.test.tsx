@@ -33,6 +33,7 @@ describe('DuplicateResultFlyout', () => {
     onCopy: onCopyMock,
     targetWorkspace: 'target-workspace',
     useUpdatedUX: true,
+    targetWorkspaceDataSourceUrl: '',
   };
 
   const DuplicateResultFlyoutComponent = (props: DuplicateResultFlyoutProps) => {
