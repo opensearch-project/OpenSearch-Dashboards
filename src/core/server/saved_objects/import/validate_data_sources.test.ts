@@ -11,6 +11,20 @@ import * as utilsExports from './utils';
 describe('validateDataSources', () => {
   const savedObjectsClient = savedObjectsClientMock.create();
   const workspaces = ['workspace-1'];
+  const response = {
+    total: 1,
+    saved_objects: [
+      {
+        id: 'data-source-1',
+        type: 'data-source',
+        attributes: {},
+        score: 1,
+        references: [],
+      },
+    ],
+    per_page: 1,
+    page: 0,
+  };
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -36,9 +50,7 @@ describe('validateDataSources', () => {
   });
 
   it('validates data sources within the target workspace', async () => {
-    savedObjectsClient.find.mockResolvedValueOnce({
-      saved_objects: [{ id: 'data-source-1' }],
-    });
+    savedObjectsClient.find.mockResolvedValueOnce(response);
 
     jest.spyOn(utilsExports, 'findReferenceDataSourceForObject').mockImplementation(() => ({
       id: 'data-source-1',
@@ -54,9 +66,7 @@ describe('validateDataSources', () => {
   });
 
   it('accumulates missing data source errors', async () => {
-    savedObjectsClient.find.mockResolvedValueOnce({
-      saved_objects: [{ id: 'data-source-1' }],
-    });
+    savedObjectsClient.find.mockResolvedValueOnce(response);
 
     jest.spyOn(utilsExports, 'findReferenceDataSourceForObject').mockImplementation(() => ({
       id: 'data-source-2',
