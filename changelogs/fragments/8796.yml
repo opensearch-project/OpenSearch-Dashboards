@@ -1,0 +1,2 @@
+fix:
+- Mitigation until getAllSavedQueries gets fixed ([#8796](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8796))
