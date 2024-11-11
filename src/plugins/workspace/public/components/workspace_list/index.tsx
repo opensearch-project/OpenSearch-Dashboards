@@ -355,10 +355,10 @@ export const WorkspaceListInner = ({
             data-test-subj="multi-deletion-button"
           >
             {i18n.translate('workspace.list.page.delete.button.info', {
-              defaultMessage: 'Delete {num} workspace{pluralSuffix, select, true {} other {s}}',
+              defaultMessage:
+                '{selectedCount, plural, one {Delete # workspace} other {Delete # workspaces}}',
               values: {
-                num: selection.length,
-                pluralSuffix: selection.length === 1,
+                selectedCount: selection.length,
               },
             })}
           </EuiButton>

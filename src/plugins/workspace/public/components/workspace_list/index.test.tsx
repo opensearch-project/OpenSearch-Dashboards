@@ -308,9 +308,12 @@ describe('WorkspaceList', () => {
     expect(checkboxes.length).toBeGreaterThanOrEqual(2);
     fireEvent.click(checkboxes[0]);
     expect(getByText('Delete 1 workspace')).toBeInTheDocument();
-    const deleteButton = getByTestId('workspace-list-page-delete-button');
+    const deleteButton = getByTestId('multi-deletion-button');
     fireEvent.click(deleteButton);
     expect(screen.queryByLabelText('mock delete workspace modal')).toBeInTheDocument();
+    const modalCancelButton = screen.getByLabelText('mock delete workspace modal button');
+    fireEvent.click(modalCancelButton);
+    expect(screen.queryByLabelText('mock delete workspace modal')).not.toBeInTheDocument();
   });
 
   it('should display "Delete 2 workspaces" and show modal when two workspaces are selected for deletion', async () => {
@@ -320,9 +323,12 @@ describe('WorkspaceList', () => {
     fireEvent.click(checkboxes[0]);
     fireEvent.click(checkboxes[1]);
     expect(getByText('Delete 2 workspaces')).toBeInTheDocument();
-    const deleteButton = getByTestId('workspace-list-page-delete-button');
+    const deleteButton = getByTestId('multi-deletion-button');
     fireEvent.click(deleteButton);
     expect(screen.queryByLabelText('mock delete workspace modal')).toBeInTheDocument();
+    const modalCancelButton = screen.getByLabelText('mock delete workspace modal button');
+    fireEvent.click(modalCancelButton);
+    expect(screen.queryByLabelText('mock delete workspace modal')).not.toBeInTheDocument();
   });
 
   it('should render data source badge when more than two data sources', async () => {
