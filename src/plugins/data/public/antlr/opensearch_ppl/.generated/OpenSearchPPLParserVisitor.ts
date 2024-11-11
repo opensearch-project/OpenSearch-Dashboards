@@ -1,4 +1,4 @@
-// Generated from grammar/OpenSearchPPLParser.g4 by ANTLR 4.13.1
+// Generated from ./src/plugins/data/public/antlr/opensearch_ppl/grammar/OpenSearchPPLParser.g4 by ANTLR 4.13.1
 
 import { AbstractParseTreeVisitor } from "antlr4ng";
 
@@ -126,8 +126,8 @@ import { TimestampLiteralContext } from "./OpenSearchPPLParser.js";
 import { IntervalUnitContext } from "./OpenSearchPPLParser.js";
 import { TimespanUnitContext } from "./OpenSearchPPLParser.js";
 import { ValueListContext } from "./OpenSearchPPLParser.js";
-import { QualifiedNameContext } from "./OpenSearchPPLParser.js";
-import { TableQualifiedNameContext } from "./OpenSearchPPLParser.js";
+import { IdentsAsQualifiedNameContext } from "./OpenSearchPPLParser.js";
+import { IdentsAsTableQualifiedNameContext } from "./OpenSearchPPLParser.js";
 import { IdentsAsWildcardQualifiedNameContext } from "./OpenSearchPPLParser.js";
 import { IdentContext } from "./OpenSearchPPLParser.js";
 import { TableIdentContext } from "./OpenSearchPPLParser.js";
@@ -903,17 +903,19 @@ export class OpenSearchPPLParserVisitor<Result> extends AbstractParseTreeVisitor
      */
     visitValueList?: (ctx: ValueListContext) => Result;
     /**
-     * Visit a parse tree produced by `OpenSearchPPLParser.qualifiedName`.
+     * Visit a parse tree produced by the `identsAsQualifiedName`
+     * labeled alternative in `OpenSearchPPLParser.qualifiedName`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitQualifiedName?: (ctx: QualifiedNameContext) => Result;
+    visitIdentsAsQualifiedName?: (ctx: IdentsAsQualifiedNameContext) => Result;
     /**
-     * Visit a parse tree produced by `OpenSearchPPLParser.tableQualifiedName`.
+     * Visit a parse tree produced by the `identsAsTableQualifiedName`
+     * labeled alternative in `OpenSearchPPLParser.tableQualifiedName`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitTableQualifiedName?: (ctx: TableQualifiedNameContext) => Result;
+    visitIdentsAsTableQualifiedName?: (ctx: IdentsAsTableQualifiedNameContext) => Result;
     /**
      * Visit a parse tree produced by the `identsAsWildcardQualifiedName`
      * labeled alternative in `OpenSearchPPLParser.wcQualifiedName`.
