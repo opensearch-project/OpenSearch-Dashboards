@@ -46,11 +46,14 @@ const tokenDictionary: TokenDictionary = {
 export function getIgnoredTokens(): number[] {
   const tokens = [];
 
+  const operatorsToInclude = [OpenSearchSQLParser.COMMA];
+
   const firstOperatorIndex = OpenSearchSQLParser.SLASH;
   const lastOperatorIndex = OpenSearchSQLParser.ERROR_RECOGNITION;
   for (let i = firstOperatorIndex; i <= lastOperatorIndex; i++) {
-    // We actually want Star to appear in autocomplete
-    tokens.push(i);
+    if (!operatorsToInclude.includes(i)) {
+      tokens.push(i);
+    }
   }
 
   // Ignoring functions for now, need custom logic for them later
@@ -186,6 +189,8 @@ export function processVisitedRules(
 
         // TODO: make sure that the IN operator can also have values
 
+        // TODO: handle issue where we get the column name no matter if the predicate starts some other way
+
         // need to check if we have a binary comparison predicate
         // if we do, need to find out if we are in the field, value, or operator
         // depending on which, just return an object that will flag any one of those three
@@ -198,16 +203,19 @@ export function processVisitedRules(
         // and we need to check if that middle token is an EQUAL because we only care about that,
         // and we have a WS, we can go to value
 
+        // at start of pred, need to suggest columns
         if (expressionStart === cursorTokenIndex) {
           suggestColumnValuePredicate = ColumnValuePredicate.COLUMN;
           break;
         }
 
+        // another predicate appears, need to suggest equal/operator
         if (expressionStart + 2 === cursorTokenIndex) {
           suggestColumnValuePredicate = ColumnValuePredicate.OPERATOR;
           break;
         }
 
+        // conditional meant to catch binaryComparisonPredicate only
         if (
           tokenStream.get(expressionStart + 2).type === OpenSearchSQLParser.EQUAL_SYMBOL &&
           expressionStart + 4 === cursorTokenIndex
@@ -218,6 +226,7 @@ export function processVisitedRules(
           break;
         }
 
+        // conditional meant to catch inPredicate
         if (
           tokenStream.get(expressionStart + 2).type === OpenSearchSQLParser.IN &&
           tokenStream.get(expressionStart + 4).type === OpenSearchSQLParser.LR_BRACKET &&
