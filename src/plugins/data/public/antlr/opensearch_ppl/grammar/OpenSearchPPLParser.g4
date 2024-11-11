@@ -775,7 +775,7 @@ valueList
    ;
 
 qualifiedName
-   : ident (DOT ident)* # identsAsQualifiedName
+   : ID // ident (DOT ident)* # identsAsQualifiedName
    ;
 
 tableQualifiedName
