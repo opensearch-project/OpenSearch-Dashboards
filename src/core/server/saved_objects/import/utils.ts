@@ -4,7 +4,6 @@
  */
 
 import { parse, stringify } from 'hjson';
-import Boom from '@hapi/boom';
 import { SavedObject, SavedObjectReference, SavedObjectsClientContract } from '../types';
 import { VisualizationObject } from './types';
 
