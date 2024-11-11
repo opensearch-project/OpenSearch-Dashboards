@@ -173,7 +173,7 @@ fromClause
    ;
 
 tableSourceClause
-   : tableSource // (COMMA tableSource)*
+   : tableSource (COMMA tableSource)*
    ;
 
 renameClasue
