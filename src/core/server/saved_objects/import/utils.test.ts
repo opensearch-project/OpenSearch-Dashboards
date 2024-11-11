@@ -370,13 +370,15 @@ describe('findReferenceDataSourceForObject', () => {
       type: 'non-data-source',
       attributes: {},
     },
+    {
+      id: '6',
+      references: [{ id: '7', type: 'index-pattern', name: '7' }],
+      type: 'non-data-source',
+      attributes: {},
+    },
   ];
 
   const ObjectsMap = new Map(savedObjects.map((so) => [so.id, so]));
-
-  test('returns null if no references exist', () => {
-    expect(findReferenceDataSourceForObject(savedObjects[2], ObjectsMap)).toBeNull();
-  });
 
   test('returns the data-source reference if it exists in the references', () => {
     const result = findReferenceDataSourceForObject(savedObjects[0], ObjectsMap);
@@ -387,9 +389,17 @@ describe('findReferenceDataSourceForObject', () => {
     expect(findReferenceDataSourceForObject(savedObjects[1], ObjectsMap)).toBeNull();
   });
 
+  test('returns null if no references exist', () => {
+    expect(findReferenceDataSourceForObject(savedObjects[2], ObjectsMap)).toBeNull();
+  });
+
   test('returns nested data-source reference if found', () => {
     const result = findReferenceDataSourceForObject(savedObjects[3], ObjectsMap);
     expect(result).toEqual({ id: '5', type: 'data-source', name: '5' });
+  });
+
+  test('returns null if the nested references have no data-source reference', () => {
+    expect(findReferenceDataSourceForObject(savedObjects[4], ObjectsMap)).toBeNull();
   });
 
   test('returns null if circular reference', () => {

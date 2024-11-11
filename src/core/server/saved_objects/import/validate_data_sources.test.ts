@@ -10,14 +10,6 @@ import * as utilsExports from './utils';
 
 describe('validateDataSources', () => {
   const savedObjectsClient = savedObjectsClientMock.create();
-  const errorAccumulator: SavedObjectsImportError[] = [
-    {
-      id: '1',
-      type: 'dashboards',
-      meta: {},
-      error: { type: 'missing_references', references: [] },
-    },
-  ];
   const workspaces = ['workspace-1'];
 
   beforeEach(() => {
@@ -25,6 +17,14 @@ describe('validateDataSources', () => {
   });
 
   it('returns empty array if no valid objects', async () => {
+    const errorAccumulator: SavedObjectsImportError[] = [
+      {
+        id: '1',
+        type: 'dashboards',
+        meta: {},
+        error: { type: 'missing_references', references: [] },
+      },
+    ];
     const savedObjects = [{ id: '1', type: 'dashboards', attributes: {}, references: [] }];
     const result = await validateDataSources(
       savedObjects,
@@ -72,7 +72,7 @@ describe('validateDataSources', () => {
     expect(result).toEqual([
       {
         error: {
-          dataSourceName: 'DataSource 2',
+          dataSource: 'data-source-2',
           type: 'missing_data_source',
         },
         id: '1',
