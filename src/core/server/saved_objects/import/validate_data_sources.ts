@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { fetchNestedDependencies } from '../export/inject_nested_depdendencies';
 import { SavedObject, SavedObjectsBaseOptions, SavedObjectsClientContract } from '../types';
 import { SavedObjectsImportError } from './types';
 import { findReferenceDataSourceForObject } from './utils';
@@ -38,11 +39,12 @@ export async function validateDataSources(
       return response?.saved_objects?.map((ds) => ds.id) ?? [];
     });
 
-  const filteredObjectsMap = new Map(savedObjects.map((so) => [so.id, so]));
+  const nestedDependencies = await fetchNestedDependencies(filteredObjects, savedObjectsClient);
+  const nestedObjectsMap = new Map(nestedDependencies.objects.map((object) => [object.id, object]));
 
   for (const object of filteredObjects) {
     const { id, type, attributes } = object;
-    const referenceDS = findReferenceDataSourceForObject(object, filteredObjectsMap);
+    const referenceDS = findReferenceDataSourceForObject(object, nestedObjectsMap);
     if (referenceDS && !assignedDataSourcesInTargetWorkspace.includes(referenceDS.id)) {
       errorMap[`${type}:${id}`] = {
         id,
@@ -51,7 +53,7 @@ export async function validateDataSources(
         meta: { title: attributes?.title },
         error: {
           type: 'missing_data_source',
-          dataSourceName: referenceDS.name,
+          dataSource: referenceDS.id,
         },
       };
     }

@@ -80,8 +80,8 @@ const getErrorMessage = ({ error }: SavedObjectsImportError) => {
     return unsupportedTypeErrorMessage;
   } else if (error.type === 'missing_data_source') {
     return i18n.translate('savedObjectsManagement.objectsTable.copyResult.missingDataSourceError', {
-      defaultMessage: 'Missing data source: {dsName}.',
-      values: { dsName: error.dataSourceName },
+      defaultMessage: 'Missing data source: {ds}',
+      values: { ds: error.dataSource },
     });
   } else if (error.type === 'missing_references') {
     return i18n.translate('savedObjectsManagement.objectsTable.copyResult.missingReferencesError', {

@@ -187,12 +187,7 @@ const parseJSONSpec = (spec: string) => {
 
 export function findReferenceDataSourceForObject(
   savedObject: SavedObject,
-  savedObjects: Map<
-    string,
-    SavedObject<{
-      title?: string | undefined;
-    }>
-  >,
+  savedObjects: Map<string, SavedObject>,
   visited = new Set<string>()
 ): SavedObjectReference | null {
   const { references } = savedObject;

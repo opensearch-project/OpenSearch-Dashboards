@@ -111,7 +111,7 @@ export interface SavedObjectsImportMissingReferencesError {
  */
 export interface SavedObjectsImportMissingDataSourceError {
   type: 'missing_data_source';
-  dataSourceName: string;
+  dataSource: string;
 }
 
 /**
