@@ -258,6 +258,11 @@ export class DatasetService {
       return undefined;
     }
 
+    let dataSource;
+    if (indexPattern.dataSourceRef) {
+      dataSource = await this.indexPatterns?.getDataSource(indexPattern.dataSourceRef?.id);
+    }
+
     const dataType = this.typesRegistry.get(DEFAULT_DATA.SET_TYPES.INDEX_PATTERN);
     if (dataType) {
       const dataset = dataType.toDataset([
@@ -265,8 +270,16 @@ export class DatasetService {
           id: indexPattern.id,
           title: indexPattern.title,
           type: DEFAULT_DATA.SET_TYPES.INDEX_PATTERN,
+          parent: dataSource
+            ? {
+                id: dataSource.id,
+                title: dataSource.attributes?.title,
+                type: dataSource.attributes?.dataSourceEngineType,
+              }
+            : undefined,
         },
       ]);
+
       return { ...dataset, timeFieldName: indexPattern.timeFieldName };
     }
 

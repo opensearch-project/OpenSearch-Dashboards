@@ -11,6 +11,7 @@ import { IDataPluginServices } from '../../../types';
 import { indexPatternTypeConfig } from './lib';
 import { dataPluginMock } from '../../../mocks';
 import { IndexPatternsContract } from '../../..';
+import { waitFor } from '@testing-library/dom';
 
 describe('DatasetService', () => {
   let service: DatasetService;
@@ -187,5 +188,53 @@ describe('DatasetService', () => {
     // TODO: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8814
     expect(service.getRecentDatasets().length).toEqual(0);
     // expect(service.getRecentDatasets().length).toEqual(4);
+  });
+
+  test('test get default dataset ', async () => {
+    jest.clearAllMocks();
+    uiSettings = coreMock.createSetup().uiSettings;
+    uiSettings.get = jest.fn().mockImplementation((setting: string) => {
+      if (setting === UI_SETTINGS.SEARCH_MAX_RECENT_DATASETS) {
+        return 4;
+      } else if (setting === 'defaultIndex') {
+        return 'id';
+      } else if (setting === UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) {
+        return true;
+      }
+    });
+    sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
+    mockDataPluginServices = {} as jest.Mocked<IDataPluginServices>;
+    service = new DatasetService(uiSettings, sessionStorage);
+    indexPatterns = {
+      ...dataPluginMock.createStartContract().indexPatterns,
+      getDataSource: jest.fn().mockReturnValue(
+        Promise.resolve({
+          id: 'id',
+          attributes: {
+            title: 'datasource',
+            dataSourceEngineType: 'OpenSearch',
+          },
+        })
+      ),
+    };
+    service.init(indexPatterns);
+
+    await waitFor(() => {
+      expect(service.getDefault()?.dataSource).toMatchObject({
+        id: 'id',
+        title: 'datasource',
+        type: 'OpenSearch',
+      });
+    });
+
+    indexPatterns = {
+      ...dataPluginMock.createStartContract().indexPatterns,
+      getDataSource: jest.fn().mockReturnValue(Promise.resolve()),
+    };
+    service.init(indexPatterns);
+
+    await waitFor(() => {
+      expect(service.getDefault()?.dataSource).toBe(undefined);
+    });
   });
 });
