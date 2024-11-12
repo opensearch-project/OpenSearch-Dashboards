@@ -6,6 +6,7 @@
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { map } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
+import semver from 'semver';
 import {
   DEFAULT_DATA,
   DataStructure,
@@ -120,11 +121,10 @@ const fetchDataSources = async (client: SavedObjectsClientContract) => {
     perPage: 10000,
   });
   const dataSources: DataStructure[] = response.savedObjects
-    .filter(
-      (savedObject) =>
-        typeof savedObject.attributes?.dataSourceEngineType === 'string' &&
-        !savedObject.attributes?.dataSourceEngineType?.includes('OpenSearch Serverless')
-    )
+    .filter((savedObject) => {
+      const coercedVersion = semver.coerce(savedObject.attributes.dataSourceVersion);
+      return coercedVersion ? semver.satisfies(coercedVersion, '>=1.0.0') : false;
+    })
     .map((savedObject) => ({
       id: savedObject.id,
       title: savedObject.attributes.title,
