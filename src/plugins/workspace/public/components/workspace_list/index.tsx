@@ -347,7 +347,13 @@ export const WorkspaceListInner = ({
     return (
       isDashboardAdmin && (
         <>
-          <EuiButton color="danger" iconType="trash" onClick={onClick} size="s">
+          <EuiButton
+            color="danger"
+            iconType="trash"
+            onClick={onClick}
+            size="s"
+            data-test-subj="multi-deletion-button"
+          >
             Delete {selection.length} Workspace
           </EuiButton>
           {deletedWorkspaces && deletedWorkspaces.length > 0 && (
