@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { EuiIconProps } from '@elastic/eui';
-import { Dataset, DatasetField, DatasetSearchOptions, DataStructure } from '../../../../common';
+import {
+  Dataset,
+  DatasetCanvasBannerProps,
+  DatasetField,
+  DatasetSearchOptions,
+  DataStructure,
+} from '../../../../common';
 import { IDataPluginServices } from '../../../types';
 
 /**
@@ -14,6 +20,14 @@ export interface DataStructureFetchOptions {
   search?: string;
   /** Token for paginated results */
   paginationToken?: string;
+}
+
+export interface DatasetIndexedView {
+  name: string;
+}
+
+export interface DatasetIndexedViewsService {
+  getIndexedViews: (dataset: Dataset) => Promise<DatasetIndexedView[]>;
 }
 
 /**
@@ -74,7 +88,7 @@ export interface DatasetTypeConfig {
    * Retrieves the search options to be used for running the query on the data connection associated
    * with this Dataset
    */
-  getSearchOptions?: () => DatasetSearchOptions;
+  getSearchOptions?: (dataset: Dataset) => DatasetSearchOptions;
   /**
    * Combines a list of user selected data structures into a single one to use in discover.
    * @see https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8362.
@@ -84,4 +98,15 @@ export interface DatasetTypeConfig {
    * Returns a list of sample queries for this dataset type
    */
   getSampleQueries?: (dataset: Dataset, language: string) => any;
+  /**
+   * Service used for indexedViews related operations
+   */
+  indexedViewsService?: DatasetIndexedViewsService;
+  /**
+   * Returns props used to render a banner on the Discover canvas/results section
+   */
+  getSearchBannerProps?: (
+    searchStatus: string,
+    dataset: Dataset
+  ) => DatasetCanvasBannerProps | Promise<DatasetCanvasBannerProps> | undefined;
 }

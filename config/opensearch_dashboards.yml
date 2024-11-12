@@ -339,6 +339,15 @@
 
 # Set the value of this setting to true to enable plugin augmentation on Dashboard
 # vis_augmenter.pluginAugmentationEnabled: true
+dashboardsPlugin.validateJwt: false
+dashboardsPlugin.dqsEnabled: true
+  
+uiSettings:
+  overrides:
+    "home:useNewHomePage": true
+    "query:enhancements:enabled": true
+  defaults:
+    "theme:version": 'v9'
 
 # Set the value to true to enable permission control for saved objects
 # Permission control depends on OpenSearch Dashboards has authentication enabled, set it to false when the security plugin is not installed,

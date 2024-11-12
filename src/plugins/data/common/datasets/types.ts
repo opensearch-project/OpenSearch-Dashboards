@@ -247,6 +247,8 @@ export interface Dataset extends BaseDataset {
   timeFieldName?: string;
   /** Optional language to default to from the language selector */
   language?: string;
+  /** Optional name of the indexed view to search data from */
+  indexedView?: string;
 }
 
 export interface DatasetField {
@@ -255,6 +257,29 @@ export interface DatasetField {
   displayName?: string;
   // TODO:  osdFieldType?
 }
+
+export enum DatasetCanvasBannerComponentType {
+  CALLOUT = 'CALLOUT',
+  CUSTOM = 'custom',
+}
+
+export type DatasetCanvasBannerProps =
+  | {
+      componentType: DatasetCanvasBannerComponentType.CALLOUT;
+      title: string;
+      iconType?: string;
+      content?: React.ReactNode;
+    }
+  | {
+      componentType: DatasetCanvasBannerComponentType.CALLOUT;
+      title?: string;
+      iconType?: string;
+      content: React.ReactNode;
+    }
+  | {
+      componentType: DatasetCanvasBannerComponentType.CUSTOM;
+      content: React.ReactNode;
+    };
 
 export interface DatasetSearchOptions {
   strategy?: string;

@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
 import { DiscoverTable } from './discover_table';
@@ -28,6 +28,7 @@ import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_ty
 import { buildColumns } from '../../utils/columns';
 import './discover_canvas.scss';
 import { HeaderVariant } from '../../../../../../core/public';
+import { CanvasBannerProps } from '../../../../../data/common';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalRef }: ViewProps) {
@@ -41,6 +42,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
       data,
     },
   } = useOpenSearchDashboards<DiscoverViewServices>();
+  const [canvasBanner, setCanvasBanner] = useState<React.ReactNode>(null);
   const { columns } = useSelector((state) => {
     const stateColumns = state.discover.columns;
 
@@ -50,10 +52,11 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
     };
   });
   const isEnhancementsEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
+  const defaultColumns = uiSettings.get(DEFAULT_COLUMNS_SETTING) || [];
   const filteredColumns = filterColumns(
     columns,
     indexPattern,
-    uiSettings.get(DEFAULT_COLUMNS_SETTING),
+    defaultColumns,
     uiSettings.get(MODIFY_COLUMNS_ON_SWITCH)
   );
   const dispatch = useDispatch();
@@ -123,6 +126,50 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
     }
   };
   const showSaveQuery = !!capabilities.discover?.saveQuery;
+  const query = data.query.queryString.getQuery();
+
+  const updateCanvasBanner = useCallback(
+    (bannerData: CanvasBannerProps) => {
+      switch (bannerData.componentType) {
+        case 'callout':
+          setCanvasBanner(
+            <>
+              <EuiSpacer size="s" />
+              <EuiCallOut title={bannerData.title} iconType={bannerData.iconType}>
+                {bannerData.content}
+              </EuiCallOut>
+            </>
+          );
+          break;
+        case 'custom':
+          setCanvasBanner(bannerData.content);
+          break;
+        default:
+          setCanvasBanner(null);
+      }
+    },
+    [setCanvasBanner]
+  );
+
+  useEffect(() => {
+    if (query.dataset) {
+      const typeConfig = data.query.queryString.getDatasetService().getType(query.dataset.type);
+      let bannerData;
+      if ((bannerData = typeConfig?.getSearchBannerProps?.(fetchState.status, query.dataset))) {
+        if (bannerData instanceof Promise) {
+          bannerData
+            .then((newBannerData) => updateCanvasBanner(newBannerData))
+            .catch(() => {
+              // No-op
+            });
+        } else if (bannerData) {
+          updateCanvasBanner(bannerData);
+        } else {
+          setCanvasBanner(null);
+        }
+      }
+    }
+  }, [query.dataset, data, fetchState.status, updateCanvasBanner, setCanvasBanner]);
 
   return (
     <EuiPanel
@@ -145,15 +192,9 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
 
       {indexPattern ? (
         <>
-          {fetchState.status === ResultStatus.NO_RESULTS && (
-            <DiscoverNoResults
-              queryString={data.query.queryString}
-              query={data.query.queryString.getQuery()}
-              savedQuery={data.query.savedQueries}
-              timeFieldName={timeField}
-            />
-          )}
-          {fetchState.status === ResultStatus.ERROR && (
+          {isEnhancementsEnabled && canvasBanner}
+          {(fetchState.status === ResultStatus.NO_RESULTS ||
+            fetchState.status === ResultStatus.ERROR) && (
             <DiscoverNoResults
               queryString={data.query.queryString}
               query={data.query.queryString.getQuery()}
