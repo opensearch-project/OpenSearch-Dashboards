@@ -42,6 +42,12 @@ const datasetService = {
         { name: 'view1', type: 'type1' },
         { name: 'view2', type: 'type2' },
       ]),
+      getConnectedDataSource: jest.fn().mockResolvedValue({
+        id: 'test-connected-data-source-saved-obj',
+        attributes: {
+          title: 'test-connected-data-source-saved-obj',
+        },
+      }),
     },
   }),
   addRecentDataset: jest.fn(),
@@ -81,7 +87,7 @@ const mockBaseDataset = {
   title: 'Sample Dataset',
   type: 'index-pattern',
   timeFieldName: 'timestamp',
-  dataSource: { meta: { supportsTimeFilter: true } },
+  dataSource: { id: 'test-connection-id', meta: { supportsTimeFilter: true } },
 };
 
 const messages = {
@@ -219,6 +225,62 @@ describe('Configurator Component', () => {
     });
   });
 
+  it('should display indexed views when query indexed view toggle is checked', async () => {
+    const container = render(
+      <IntlProvider locale="en" messages={messages}>
+        <Configurator
+          services={mockServices}
+          baseDataset={mockBaseDataset}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          onPrevious={mockOnPrevious}
+        />
+      </IntlProvider>
+    );
+    await waitFor(() => {
+      expect(
+        mockServices.getQueryService().queryString.getDatasetService().getType().indexedViewsService
+          .getIndexedViews
+      ).toHaveBeenCalledTimes(1);
+    });
+
+    fireEvent.click(container.getByText('Query indexed view'));
+
+    await waitFor(() => {
+      expect(screen.getByText('view1')).toBeInTheDocument();
+      expect(screen.getByText('view2')).toBeInTheDocument();
+    });
+  });
+
+  it('should update state correctly when indexed view is selected', async () => {
+    const container = render(
+      <IntlProvider locale="en" messages={messages}>
+        <Configurator
+          services={mockServices}
+          baseDataset={mockBaseDataset}
+          onConfirm={mockOnConfirm}
+          onCancel={mockOnCancel}
+          onPrevious={mockOnPrevious}
+        />
+      </IntlProvider>
+    );
+    fireEvent.click(container.getByText('Query indexed view'));
+    await waitFor(() => {
+      expect(
+        mockServices.getQueryService().queryString.getDatasetService().getType().indexedViewsService
+          .getIndexedViews
+      ).toHaveBeenCalledTimes(1);
+    });
+    const indexedViewSelector = screen.getByText('view1');
+    expect(indexedViewSelector).toBeInTheDocument();
+    expect(indexedViewSelector.value).toBe('view1');
+    fireEvent.change(indexedViewSelector, { target: { value: 'view2' } });
+    await waitFor(() => {
+      expect(indexedViewSelector.value).toBe('view2');
+    });
+    expect(mockOnConfirm).not.toHaveBeenCalled();
+  });
+
   it('should initialize selectedLanguage with the current language from queryString', async () => {
     render(
       <IntlProvider locale="en" messages={messages}>
@@ -277,10 +339,6 @@ describe('Configurator Component', () => {
   });
 
   it('should disable the confirm button when submit is disabled', async () => {
-    const mockIndexedViewsService = {
-      getIndexedViews: jest.fn().mockResolvedValue([]),
-    };
-
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
