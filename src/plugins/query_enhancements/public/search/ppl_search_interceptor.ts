@@ -67,7 +67,7 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       const datasetTypeConfig = this.queryService.queryString
         .getDatasetService()
         .getType(datasetType);
-      strategy = datasetTypeConfig?.getSearchOptions?.(dataset).strategy ?? strategy;
+      strategy = datasetTypeConfig?.getSearchOptions?.().strategy ?? strategy;
     }
 
     return this.runSearch(request, options.abortSignal, strategy);

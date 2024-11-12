@@ -130,11 +130,9 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
   const query = data.query.queryString.getQuery();
 
   const renderQueryResultExtensions = () => {
-    if (!(
-      queryResultsBannerRef.current &&
-      extensionMap &&
-      Object.values(extensionMap).length > 0
-    )) {
+    if (
+      !(queryResultsBannerRef.current && extensionMap && Object.values(extensionMap).length > 0)
+    ) {
       return null;
     }
 
@@ -143,12 +141,12 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
         configMap={extensionMap}
         bannerContainer={queryResultsBannerRef.current}
         dependencies={{
-          query: query,
-          queryStatus: fetchState.status
+          query,
+          queryStatus: fetchState.status,
         }}
       />
-    )
-  }
+    );
+  };
 
   return (
     <EuiPanel
@@ -171,9 +169,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
 
       {indexPattern ? (
         <>
-          {isEnhancementsEnabled && (
-            <div ref={queryResultsBannerRef} />
-          )}
+          {isEnhancementsEnabled && <div ref={queryResultsBannerRef} />}
           {(fetchState.status === ResultStatus.NO_RESULTS ||
             fetchState.status === ResultStatus.ERROR) && (
             <DiscoverNoResults

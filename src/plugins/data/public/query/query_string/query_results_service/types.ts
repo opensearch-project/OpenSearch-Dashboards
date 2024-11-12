@@ -1,11 +1,11 @@
 /*
-* Copyright OpenSearch Contributors
-* SPDX-License-Identifier: Apache-2.0
-*/
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-import { PublicMethodsOf } from "packages/osd-utility-types/target";
-import { QueryResultService } from "./query_result_service";
-import { Query } from "../../../../common";
+import { PublicMethodsOf } from 'packages/osd-utility-types/target';
+import { QueryResultService } from './query_result_service';
+import { Query } from '../../../../common';
 
 export interface QueryResultExtensionConfig {
   /**

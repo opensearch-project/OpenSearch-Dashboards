@@ -233,7 +233,7 @@ export class QueryStringManager {
 
   public getQueryResultService = () => {
     return this.queryResultService;
-  }
+  };
 
   /**
    * Gets the initial query based on the provided partial query object.

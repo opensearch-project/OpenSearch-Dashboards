@@ -49,5 +49,8 @@ export {
 } from './language_service';
 export {
   QueryResultService,
-  QueryResultEnhancements
+  QueryResultEnhancements,
+  QueryResultExtensionConfig,
+  QueryResultExtensionDependencies,
+  QueryResultServiceContract,
 } from './query_results_service';

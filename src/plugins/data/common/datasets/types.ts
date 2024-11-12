@@ -248,7 +248,7 @@ export interface Dataset extends BaseDataset {
   /** Optional language to default to from the language selector */
   language?: string;
   /** Optional reference to the source dataset. Example usage is for indexed views to store the
-   * reference to the table dataset 
+   * reference to the table dataset
    */
   ref?: {
     id: string;
