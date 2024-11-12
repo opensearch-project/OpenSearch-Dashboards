@@ -39,12 +39,14 @@ import { DatasetService, DatasetServiceContract } from './dataset_service';
 import { LanguageService, LanguageServiceContract } from './language_service';
 import { ISearchInterceptor } from '../../search';
 import { getApplication } from '../../services';
+import { QueryResultService, QueryResultServiceContract } from './query_results_service';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;
   private queryHistory: QueryHistory;
   private datasetService!: DatasetServiceContract;
   private languageService!: LanguageServiceContract;
+  private queryResultService!: QueryResultServiceContract;
 
   constructor(
     private readonly storage: DataStorage,
@@ -57,6 +59,7 @@ export class QueryStringManager {
     this.queryHistory = createHistory({ storage: this.sessionStorage });
     this.datasetService = new DatasetService(uiSettings, this.sessionStorage);
     this.languageService = new LanguageService(this.defaultSearchInterceptor, this.storage);
+    this.queryResultService = new QueryResultService();
   }
 
   private getDefaultQueryString() {
@@ -227,6 +230,10 @@ export class QueryStringManager {
   public getLanguageService = () => {
     return this.languageService;
   };
+
+  public getQueryResultService = () => {
+    return this.queryResultService;
+  }
 
   /**
    * Gets the initial query based on the provided partial query object.

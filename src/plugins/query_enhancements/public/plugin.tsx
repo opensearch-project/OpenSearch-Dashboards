@@ -127,10 +127,8 @@ export class QueryEnhancementsPlugin
         startServices: core.getStartServices(),
         usageCollector: data.search.usageCollector,
       }),
-      getQueryString: (currentQuery: Query) => {
-        const source = currentQuery.dataset?.indexedView ?? currentQuery.dataset?.title;
-        return `SELECT * FROM ${source} LIMIT 10`;
-      },
+      getQueryString: (currentQuery: Query) =>
+        `SELECT * FROM ${currentQuery.dataset?.title} LIMIT 10`,
       fields: { filterable: false, visualizable: false },
       docLink: {
         title: i18n.translate('queryEnhancements.sqlLanguage.docLink', {
