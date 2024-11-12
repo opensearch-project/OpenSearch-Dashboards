@@ -1,0 +1,2 @@
+fix:
+- Query Editor state sync issues in Discover ([#8803](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8803))
