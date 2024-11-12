@@ -140,14 +140,14 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
           defaultMessage="Missing Data Source"
         />
       }
-      color="warning"
+      color="danger"
       iconType="help"
     >
       <p>
         <FormattedMessage
           id="savedObjectsManagement.objectsTable.copyResult.missingDataSourceDescription"
-          defaultMessage="The following {useUpdatedUX, select, true {assets} other {saved objects}} use data sources that do not exist.
-          Please contact OSD admin to assign data sources to the {targetWorkspaceDataSourceLink}."
+          defaultMessage="The following {useUpdatedUX, select, true {assets} other {saved objects}} can not be copied,
+          some of the data sources they use are not associated with {targetWorkspaceDataSourceLink}."
           values={{
             useUpdatedUX: this.props.useUpdatedUX,
             targetWorkspaceDataSourceLink: (

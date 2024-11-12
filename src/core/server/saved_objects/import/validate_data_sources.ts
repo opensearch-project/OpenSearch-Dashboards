@@ -8,7 +8,7 @@ import { SavedObject, SavedObjectsBaseOptions, SavedObjectsClientContract } from
 import { SavedObjectsImportError } from './types';
 import { findReferenceDataSourceForObject } from './utils';
 
-// Check whether the target workspace includes the data source from the references of coping assets.
+// Check whether the target workspace includes the data source referenced by the savedObjects.
 export async function validateDataSources(
   savedObjects: Array<SavedObject<{ title?: string }>>,
   savedObjectsClient: SavedObjectsClientContract,

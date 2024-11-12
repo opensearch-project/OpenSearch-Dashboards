@@ -111,7 +111,7 @@ export async function importSavedObjectsFromStream({
   errorAccumulator = [...errorAccumulator, ...validateReferencesResult];
 
   if (isCopy) {
-    // Unable to copy data source among workspaces.
+    // Data sources can only be assigned to workspaces and can not be copied between workspaces.
     collectSavedObjectsResult.collectedObjects = collectSavedObjectsResult.collectedObjects.filter(
       (obj) => obj.type !== 'data-source'
     );

@@ -106,7 +106,7 @@ export interface SavedObjectsImportMissingReferencesError {
 }
 
 /**
- * Represents a failure to import due to missing target workspace assigned data source.
+ * Represents an error that occurs when an import fails due to a missing data source in the target workspace.
  * @public
  */
 export interface SavedObjectsImportMissingDataSourceError {
