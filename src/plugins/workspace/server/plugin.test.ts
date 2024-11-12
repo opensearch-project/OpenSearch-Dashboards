@@ -13,7 +13,6 @@ import {
   updateWorkspaceState,
 } from '../../../core/server/utils';
 import * as serverUtils from '../../../core/server/utils/auth_info';
-import * as utilsExports from './utils';
 import { SavedObjectsPermissionControl } from './permission_control/client';
 
 describe('Workspace server plugin', () => {
@@ -109,6 +108,21 @@ describe('Workspace server plugin', () => {
 
   describe('#setupPermission', () => {
     const setupMock = coreMock.createSetup();
+    const getConfigMock = jest.fn().mockResolvedValue({
+      dashboardAdmin: {
+        users: ['dashboard-admin-user'],
+        groups: [],
+      },
+    });
+    jest.spyOn(setupMock.dynamicConfigService, 'getStartService').mockResolvedValue({
+      ...setupMock.dynamicConfigService.getStartService(),
+      getAsyncLocalStore: jest.fn(),
+      getClient: () => ({
+        getConfig: getConfigMock,
+        bulkGetConfigs: jest.fn(),
+        listConfigs: jest.fn(),
+      }),
+    });
     const initializerContextConfigMock = coreMock.createPluginInitializerContext({
       enabled: true,
       permission: {
@@ -137,13 +151,10 @@ describe('Workspace server plugin', () => {
       expect(toolKitMock.next).toBeCalledTimes(1);
     });
 
-    it('with configuring user as OSD admin', async () => {
+    it('with dynamic config and user is dashboard admin', async () => {
       jest
         .spyOn(serverUtils, 'getPrincipalsFromRequest')
-        .mockImplementation(() => ({ users: [`user1`] }));
-      jest
-        .spyOn(utilsExports, 'getOSDAdminConfigFromYMLConfig')
-        .mockResolvedValue([['group1'], ['user1']]);
+        .mockImplementation(() => ({ users: [`dashboard-admin-user`] }));
 
       await workspacePlugin.setup(setupMock);
       const toolKitMock = httpServerMock.createToolkit();
@@ -160,11 +171,36 @@ describe('Workspace server plugin', () => {
       expect(toolKitMock.next).toBeCalledTimes(1);
     });
 
+    it('with dynamic config and user is not dashboard admin', async () => {
+      jest
+        .spyOn(serverUtils, 'getPrincipalsFromRequest')
+        .mockImplementation(() => ({ users: [`none-dashboard-admin-user`] }));
+
+      await workspacePlugin.setup(setupMock);
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(
+        requestWithWorkspaceInUrl,
+        httpServerMock.createResponseFactory(),
+        toolKitMock
+      );
+
+      expect(getWorkspaceState(requestWithWorkspaceInUrl)).toEqual({
+        isDashboardAdmin: false,
+      });
+      expect(toolKitMock.next).toBeCalledTimes(1);
+    });
+
     it('with configuring wildcard * and anyone will be OSD admin', async () => {
       jest
         .spyOn(serverUtils, 'getPrincipalsFromRequest')
         .mockImplementation(() => ({ users: [`user1`] }));
-      jest.spyOn(utilsExports, 'getOSDAdminConfigFromYMLConfig').mockResolvedValue([[], ['*']]);
+      getConfigMock.mockResolvedValueOnce({
+        dashboardAdmin: {
+          users: ['*'],
+          groups: [],
+        },
+      });
 
       await workspacePlugin.setup(setupMock);
       const toolKitMock = httpServerMock.createToolkit();
@@ -185,7 +221,12 @@ describe('Workspace server plugin', () => {
       jest
         .spyOn(serverUtils, 'getPrincipalsFromRequest')
         .mockImplementation(() => ({ users: [`user1`] }));
-      jest.spyOn(utilsExports, 'getOSDAdminConfigFromYMLConfig').mockResolvedValue([[], []]);
+      getConfigMock.mockResolvedValueOnce({
+        dashboardAdmin: {
+          users: [],
+          groups: [],
+        },
+      });
 
       await workspacePlugin.setup(setupMock);
       const toolKitMock = httpServerMock.createToolkit();
