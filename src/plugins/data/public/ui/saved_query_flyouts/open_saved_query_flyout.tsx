@@ -13,6 +13,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLoadingSpinner,
   EuiSearchBar,
   EuiSearchBarProps,
   EuiSpacer,
@@ -62,10 +63,11 @@ export function OpenSavedQueryFlyout({
   const [languageFilterOptions, setLanguageFilterOptions] = useState<string[]>([]);
   const [selectedQuery, setSelectedQuery] = useState<SavedQuery | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
-
+  const [isLoading, setIsLoading] = useState(false);
   const currentTabIdRef = useRef(selectedTabId);
 
   const fetchAllSavedQueriesForSelectedTab = useCallback(async () => {
+    setIsLoading(true);
     if (queryStringManager.getQuery()?.dataset?.type === 'SECURITY_LAKE') {
       setHasTemplateQueries(true);
     }
@@ -85,6 +87,7 @@ export function OpenSavedQueryFlyout({
         if (Array.isArray(templateQueries)) setSavedQueries(templateQueries);
       }
     }
+    setIsLoading(false);
   }, [savedQueryService, currentTabIdRef, setSavedQueries, queryStringManager]);
 
   const updatePageIndex = useCallback((index: number) => {
@@ -194,7 +197,13 @@ export function OpenSavedQueryFlyout({
         onChange={onChange}
       />
       <EuiSpacer />
-      {queriesOnCurrentPage.length > 0 ? (
+      {isLoading ? (
+        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: '200px' }}>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : queriesOnCurrentPage.length > 0 ? (
         queriesOnCurrentPage.map((query) => (
           <SavedQueryCard
             key={query.id}
@@ -220,7 +229,7 @@ export function OpenSavedQueryFlyout({
         />
       )}
       <EuiSpacer />
-      {queriesOnCurrentPage.length > 0 && (
+      {!isLoading && queriesOnCurrentPage.length > 0 && (
         <EuiTablePagination
           itemsPerPageOptions={[5, 10, 20]}
           itemsPerPage={itemsPerPage}
