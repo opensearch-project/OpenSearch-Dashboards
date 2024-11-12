@@ -34,7 +34,7 @@ export {
   DatasetService,
   DatasetServiceContract,
   DatasetTypeConfig,
-  DatasetIndexedViewsService as IndexedViewsService,
+  DatasetIndexedViewsService,
 } from './dataset_service';
 export {
   LanguageServiceContract,
@@ -47,3 +47,7 @@ export {
   QueryStatus,
   LanguageReference,
 } from './language_service';
+export {
+  QueryResultService,
+  QueryResultEnhancements
+} from './query_results_service';

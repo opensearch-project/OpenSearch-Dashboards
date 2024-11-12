@@ -196,6 +196,7 @@ export class DataPublicPlugin
         if (enhancements.search) searchService.__enhance(enhancements.search);
         if (enhancements.editor)
           queryService.queryString.getLanguageService().__enhance(enhancements.editor);
+        if (enhancements.queryResults) queryService.queryString.getQueryResultService().__enhance(enhancements.queryResults);
       },
     };
   }

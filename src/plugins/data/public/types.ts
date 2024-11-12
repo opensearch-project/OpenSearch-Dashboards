@@ -41,10 +41,12 @@ import { UsageCollectionSetup } from '../../usage_collection/public';
 import { DataSourceStart } from './data_sources/datasource_services/types';
 import { IUiStart } from './ui';
 import { DataStorage } from '../common';
+import { QueryResultEnhancements } from './query/query_string/query_results_service/types';
 
 export interface DataPublicPluginEnhancements {
   search?: SearchEnhancements;
   editor?: EditorEnhancements;
+  queryResults?: QueryResultEnhancements;
 }
 
 export interface DataSetupDependencies {

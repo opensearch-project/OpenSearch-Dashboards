@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { EuiCallOut, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
 import { DiscoverTable } from './discover_table';
@@ -28,7 +28,7 @@ import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_ty
 import { buildColumns } from '../../utils/columns';
 import './discover_canvas.scss';
 import { HeaderVariant } from '../../../../../../core/public';
-import { CanvasBannerProps } from '../../../../../data/common';
+import { QueryResultExtensions } from './query_result_extensions/query_result_extensions';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalRef }: ViewProps) {
@@ -42,7 +42,8 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
       data,
     },
   } = useOpenSearchDashboards<DiscoverViewServices>();
-  const [canvasBanner, setCanvasBanner] = useState<React.ReactNode>(null);
+  const queryResultsBannerRef = useRef<HTMLDivElement>(null);
+  const extensionMap = data.query.queryString.getQueryResultService().getQueryResultExtensionMap();
   const { columns } = useSelector((state) => {
     const stateColumns = state.discover.columns;
 
@@ -128,48 +129,26 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
   const showSaveQuery = !!capabilities.discover?.saveQuery;
   const query = data.query.queryString.getQuery();
 
-  const updateCanvasBanner = useCallback(
-    (bannerData: CanvasBannerProps) => {
-      switch (bannerData.componentType) {
-        case 'callout':
-          setCanvasBanner(
-            <>
-              <EuiSpacer size="s" />
-              <EuiCallOut title={bannerData.title} iconType={bannerData.iconType}>
-                {bannerData.content}
-              </EuiCallOut>
-            </>
-          );
-          break;
-        case 'custom':
-          setCanvasBanner(bannerData.content);
-          break;
-        default:
-          setCanvasBanner(null);
-      }
-    },
-    [setCanvasBanner]
-  );
-
-  useEffect(() => {
-    if (query.dataset) {
-      const typeConfig = data.query.queryString.getDatasetService().getType(query.dataset.type);
-      let bannerData;
-      if ((bannerData = typeConfig?.getSearchBannerProps?.(fetchState.status, query.dataset))) {
-        if (bannerData instanceof Promise) {
-          bannerData
-            .then((newBannerData) => updateCanvasBanner(newBannerData))
-            .catch(() => {
-              // No-op
-            });
-        } else if (bannerData) {
-          updateCanvasBanner(bannerData);
-        } else {
-          setCanvasBanner(null);
-        }
-      }
+  const renderQueryResultExtensions = () => {
+    if (!(
+      queryResultsBannerRef.current &&
+      extensionMap &&
+      Object.values(extensionMap).length > 0
+    )) {
+      return null;
     }
-  }, [query.dataset, data, fetchState.status, updateCanvasBanner, setCanvasBanner]);
+
+    return (
+      <QueryResultExtensions
+        configMap={extensionMap}
+        bannerContainer={queryResultsBannerRef.current}
+        dependencies={{
+          query: query,
+          queryStatus: fetchState.status
+        }}
+      />
+    )
+  }
 
   return (
     <EuiPanel
@@ -192,7 +171,9 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
 
       {indexPattern ? (
         <>
-          {isEnhancementsEnabled && canvasBanner}
+          {isEnhancementsEnabled && (
+            <div ref={queryResultsBannerRef} />
+          )}
           {(fetchState.status === ResultStatus.NO_RESULTS ||
             fetchState.status === ResultStatus.ERROR) && (
             <DiscoverNoResults
@@ -218,6 +199,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
               <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
             </EuiPanel>
           )}
+          {renderQueryResultExtensions()}
         </>
       ) : (
         <>
