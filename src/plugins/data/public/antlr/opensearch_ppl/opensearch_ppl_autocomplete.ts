@@ -73,7 +73,7 @@ const rulesToVisit = new Set([
   OpenSearchPPLParser.RULE_takeAggFunction,
   OpenSearchPPLParser.RULE_timestampFunctionName,
   OpenSearchPPLParser.RULE_getFormatFunction,
-  OpenSearchPPLParser.RULE_tableQualifiedName,
+  OpenSearchPPLParser.RULE_tableIdent,
   OpenSearchPPLParser.RULE_singleFieldRelevanceFunctionName,
   OpenSearchPPLParser.RULE_multiFieldRelevanceFunctionName,
   OpenSearchPPLParser.RULE_positionFunctionName,
@@ -99,7 +99,7 @@ export function processVisitedRules(
         shouldSuggestColumns = true;
         break;
       }
-      case OpenSearchPPLParser.RULE_tableQualifiedName: {
+      case OpenSearchPPLParser.RULE_tableIdent: {
         suggestSourcesOrTables = SourceOrTableSuggestion.TABLES;
       }
     }
