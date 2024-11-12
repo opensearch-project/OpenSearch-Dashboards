@@ -94,7 +94,7 @@ export interface DatasetTypeConfig {
    * Retrieves the search options to be used for running the query on the data connection associated
    * with this Dataset
    */
-  getSearchOptions?: (dataset: Dataset) => DatasetSearchOptions;
+  getSearchOptions?: () => DatasetSearchOptions;
   /**
    * Combines a list of user selected data structures into a single one to use in discover.
    * @see https://github.com/opensearch-project/OpenSearch-Dashboards/issues/8362.

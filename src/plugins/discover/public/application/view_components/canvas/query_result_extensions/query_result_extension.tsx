@@ -1,12 +1,15 @@
 /*
-* Copyright OpenSearch Contributors
-* SPDX-License-Identifier: Apache-2.0
-*/
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
-import { QueryResultExtensionConfig, QueryResultExtensionDependencies } from '../../../../../../data/public/query/query_string/query_results_service';
+import {
+  QueryResultExtensionConfig,
+  QueryResultExtensionDependencies,
+} from '../../../../../../data/public';
 
 export interface QueryResultExtensionProps {
   config: QueryResultExtensionConfig;
@@ -26,18 +29,11 @@ const QueryResultExtensionPortal: React.FC<{ container: Element }> = (props) => 
 export const QueryResultExtension = ({
   config,
   dependencies,
-  bannerContainer
+  bannerContainer,
 }: QueryResultExtensionProps) => {
-  const banner = useMemo(() => config.getBanner?.(dependencies), [
-    config,
-    dependencies,
-  ]);
+  const banner = useMemo(() => config.getBanner?.(dependencies), [config, dependencies]);
 
   return (
-    <QueryResultExtensionPortal
-      container={bannerContainer}
-    >
-      {banner}
-    </QueryResultExtensionPortal>
-  )
-}
+    <QueryResultExtensionPortal container={bannerContainer}>{banner}</QueryResultExtensionPortal>
+  );
+};

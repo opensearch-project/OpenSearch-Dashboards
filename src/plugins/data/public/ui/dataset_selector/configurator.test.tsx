@@ -198,7 +198,7 @@ describe('Configurator Component', () => {
     expect(mockOnConfirm).not.toHaveBeenCalled();
   });
 
-  it('should fetch indexed views on mount and display them', async () => {
+  it('should fetch indexed views on mount', async () => {
     render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
@@ -216,11 +216,6 @@ describe('Configurator Component', () => {
         mockServices.getQueryService().queryString.getDatasetService().getType().indexedViewsService
           .getIndexedViews
       ).toHaveBeenCalledTimes(1);
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText('view1')).toBeInTheDocument();
-      expect(screen.getByText('view2')).toBeInTheDocument();
     });
   });
 

@@ -1,22 +1,25 @@
 /*
-* Copyright OpenSearch Contributors
-* SPDX-License-Identifier: Apache-2.0
-*/
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
 import React, { useMemo } from 'react';
-import { QueryResultExtensionConfig, QueryResultExtensionDependencies } from "../../../../../../data/public/query/query_string/query_results_service";
-import { QueryResultExtension } from "./query_result_extension";
+import {
+  QueryResultExtensionConfig,
+  QueryResultExtensionDependencies,
+} from '../../../../../../data/public';
+import { QueryResultExtension } from './query_result_extension';
 
 export interface QueryResultExtensionsProps {
   configMap?: Record<string, QueryResultExtensionConfig>;
   bannerContainer: Element;
-  dependencies: QueryResultExtensionDependencies
+  dependencies: QueryResultExtensionDependencies;
 }
 
 export const QueryResultExtensions = ({
   bannerContainer,
   configMap,
-  dependencies
+  dependencies,
 }: QueryResultExtensionsProps) => {
   const sortedConfigs = useMemo(() => {
     if (!configMap || Object.keys(configMap).length === 0) return [];
@@ -25,17 +28,16 @@ export const QueryResultExtensions = ({
 
   return (
     <>
-        {Object.values(sortedConfigs).map((config) => {
+      {Object.values(sortedConfigs).map((config) => {
         return (
-          <QueryResultExtension 
+          <QueryResultExtension
             config={config}
             bannerContainer={bannerContainer}
             dependencies={dependencies}
             key={config.id}
           />
-        )
+        );
       })}
     </>
-  )
-}
-
+  );
+};

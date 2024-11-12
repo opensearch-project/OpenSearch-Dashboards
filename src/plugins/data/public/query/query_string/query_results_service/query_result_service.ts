@@ -1,10 +1,9 @@
 /*
-* Copyright OpenSearch Contributors
-* SPDX-License-Identifier: Apache-2.0
-*/
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-import { QueryResultEnhancements, QueryResultExtensionConfig } from "./types";
-
+import { QueryResultEnhancements, QueryResultExtensionConfig } from './types';
 
 export class QueryResultService {
   private queryResultsExtensionMap: Record<string, QueryResultExtensionConfig>;
@@ -22,5 +21,5 @@ export class QueryResultService {
 
   public getQueryResultExtensionMap = () => {
     return this.queryResultsExtensionMap;
-  }
+  };
 }

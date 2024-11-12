@@ -22,11 +22,11 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useEffect, useMemo, useState } from 'react';
+import { cloneDeep } from 'lodash';
 import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../../common';
 import { getIndexPatterns, getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
 import { DatasetIndexedView } from '../../query/query_string/dataset_service';
-import { cloneDeep } from 'lodash';
 
 export const Configurator = ({
   services,
@@ -58,7 +58,7 @@ export const Configurator = ({
   });
 
   const [dataset, setDataset] = useState<Dataset>({
-    ...(cloneDeep(baseDataset)),
+    ...cloneDeep(baseDataset),
     language,
   });
   const [timeFields, setTimeFields] = useState<DatasetField[]>([]);
@@ -98,14 +98,7 @@ export const Configurator = ({
         timeFields &&
         timeFields.length > 0)
     );
-  }, [
-    dataset,
-    language,
-    timeFieldName,
-    timeFields,
-    languageService,
-    isLoadingIndexedViews,
-  ]);
+  }, [dataset, language, timeFieldName, timeFields, languageService, isLoadingIndexedViews]);
 
   useEffect(() => {
     const fetchFields = async () => {
@@ -169,13 +162,14 @@ export const Configurator = ({
                     {i18n.translate(
                       'data.explorer.datasetSelector.advancedSelector.configurator.showAvailableIndexedViewsLabel',
                       {
-                        defaultMessage: 'Query indexed view'
+                        defaultMessage: 'Query indexed view',
                       }
                     )}
-                  </EuiFormLabel>  }
+                  </EuiFormLabel>
+                }
                 onChange={(e) => setSelectIndexedView(e.target.checked)}
               />
-              <EuiSpacer size='m' />
+              <EuiSpacer size="m" />
               {selectIndexedView && (
                 <EuiFormRow
                   label={i18n.translate(
@@ -203,14 +197,16 @@ export const Configurator = ({
                       setSelectedIndexedView(value);
                       let connectedDataSource;
                       if (dataset.dataSource?.id) {
-                        const connectedDataSourceSavedObj: any = await indexedViewsService.getConnectedDataSource(dataset.dataSource.id);
+                        const connectedDataSourceSavedObj: any = await indexedViewsService.getConnectedDataSource(
+                          dataset.dataSource.id
+                        );
                         if (connectedDataSourceSavedObj) {
                           connectedDataSource = {
                             id: connectedDataSourceSavedObj.id,
                             title: connectedDataSourceSavedObj.attributes?.title,
-                            type: 'DATA_SOURCE'
-                          }
-                        }         
+                            type: 'DATA_SOURCE',
+                          };
+                        }
                       }
                       setDataset({
                         ...dataset,
@@ -221,14 +217,13 @@ export const Configurator = ({
                           id: dataset.id,
                           type: dataset.type,
                         },
-                        dataSource: connectedDataSource ?? dataset.dataSource
+                        dataSource: connectedDataSource ?? dataset.dataSource,
                       });
                     }}
                     hasNoInitialSelection
                   />
                 </EuiFormRow>
               )}
-              
             </>
           )}
           <EuiFormRow

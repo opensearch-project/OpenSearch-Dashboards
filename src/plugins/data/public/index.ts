@@ -494,6 +494,11 @@ export {
   PersistedLog,
   LanguageReference,
   DatasetIndexedViewsService,
+  QueryResultEnhancements,
+  QueryResultService,
+  QueryResultExtensionConfig,
+  QueryResultExtensionDependencies,
+  QueryResultServiceContract,
 } from './query';
 
 export { AggsStart } from './search/aggs';
