@@ -237,7 +237,6 @@ describe('OpenSavedQueryFlyout', () => {
       />
     );
 
-    // Wait for loading to finish and check for the empty prompt message
     await waitFor(() => screen.getByText('No saved query found.'));
   });
 
@@ -254,16 +253,12 @@ describe('OpenSavedQueryFlyout', () => {
 
     await waitFor(() => screen.getByText('Saved Query 1'));
 
-    // Change filter (e.g., filter by language or dataset type)
     const filterButton = screen.getByText('Query language');
     fireEvent.click(filterButton);
 
-    // Assume no queries match the selected filter
     fireEvent.change(screen.getByPlaceholderText('Search'), {
       target: { value: 'Non-existing language' },
     });
-
-    // Expect no queries to be shown
     expect(screen.getByText('No saved query found.')).toBeInTheDocument();
   });
 });
