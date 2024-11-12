@@ -1,2 +1,2 @@
 fix:
-- Fix saved query loading and update getSampleQuery interface ([#8848](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8848))
+- Fix template queries loading and update getSampleQuery interface ([#8848](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8848))
