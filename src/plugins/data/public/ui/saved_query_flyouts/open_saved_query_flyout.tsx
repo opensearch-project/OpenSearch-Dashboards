@@ -68,9 +68,23 @@ export function OpenSavedQueryFlyout({
 
   const fetchAllSavedQueriesForSelectedTab = useCallback(async () => {
     setIsLoading(true);
-    if (queryStringManager.getQuery()?.dataset?.type === 'SECURITY_LAKE') {
-      setHasTemplateQueries(true);
+    const query = queryStringManager.getQuery();
+    let templateQueries: any[] = [];
+
+    // fetch sample query based on dataset type
+    if (query?.dataset?.type) {
+      templateQueries =
+        (await queryStringManager
+          .getDatasetService()
+          ?.getType(query.dataset.type)
+          ?.getSampleQueries?.()) || [];
+
+      // Check if any sample query has isTemplate set to true
+      const hasTemplates = templateQueries.some((q) => q?.attributes?.isTemplate);
+      setHasTemplateQueries(hasTemplates);
     }
+
+    // Set queries based on the current tab
     if (currentTabIdRef.current === 'mutable-saved-queries') {
       const allQueries = await savedQueryService.getAllSavedQueries();
       const mutableSavedQueries = allQueries.filter((q) => !q.attributes.isTemplate);
@@ -78,14 +92,7 @@ export function OpenSavedQueryFlyout({
         setSavedQueries(mutableSavedQueries);
       }
     } else if (currentTabIdRef.current === 'template-saved-queries') {
-      const query = queryStringManager.getQuery();
-      if (query?.dataset?.type) {
-        const templateQueries = await queryStringManager
-          .getDatasetService()
-          ?.getType(query.dataset.type)
-          ?.getSampleQueries?.();
-        if (Array.isArray(templateQueries)) setSavedQueries(templateQueries);
-      }
+      setSavedQueries(templateQueries);
     }
     setIsLoading(false);
   }, [savedQueryService, currentTabIdRef, setSavedQueries, queryStringManager]);
