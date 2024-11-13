@@ -8,7 +8,7 @@ import DiscoverCanvas from './index';
 import { useDiscoverContext } from '../context';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { setColumns, useDispatch, useSelector } from '../../utils/state_management';
-import { ResultStatus } from '../utils/use_search';
+import { RefetchSubject, ResultStatus, SearchData, SearchRefetch } from '../utils/use_search';
 import { EuiPanel } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { DataPublicPluginStart, UI_SETTINGS } from 'src/plugins/data/public';
@@ -20,6 +20,7 @@ import { setUISettings } from '../../../../../../plugins/vis_augmenter/public';
 import { createDataExplorerServicesMock } from '../../../../../../plugins/data_explorer/public/utils/mocks';
 import { DiscoverViewServices } from '../../../build_services';
 import { discoverPluginMock } from '../../../mocks';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 // Mocking required modules
 jest.mock('../context', () => ({
@@ -128,14 +129,16 @@ const mockUseOpenSearchDashboards = () => {
 
 // Tests
 describe('DiscoverCanvas', () => {
-  const mockRefetch = { next: jest.fn() };
+  const mockRefetchSubject: RefetchSubject = new Subject<SearchRefetch>();
+  mockRefetchSubject.next('refetch');
+  const data$ = new BehaviorSubject<SearchData>({ status: ResultStatus.LOADING });
   let dataMock: jest.Mocked<DataPublicPluginStart>;
 
   beforeEach(() => {
     dataMock = dataPluginMock.createStartContract();
     useDiscoverContext.mockReturnValue({
-      data$: { getValue: jest.fn().mockReturnValue({ status: ResultStatus.LOADING }) },
-      refetch$: mockRefetch,
+      data$,
+      refetch$: mockRefetchSubject,
       indexPattern: {
         timeFieldName: 'timestamp',
         isTimeBased: jest.fn().mockReturnValue(true),
@@ -150,11 +153,6 @@ describe('DiscoverCanvas', () => {
   });
 
   it('renders without index pattern', () => {
-    useDiscoverContext.mockReturnValueOnce({
-      data$: { getValue: jest.fn().mockReturnValue({ status: ResultStatus.LOADING }) },
-      refetch$: mockRefetch,
-      indexPattern: null,
-    });
 
     render(<DiscoverCanvas setHeaderActionMenu={jest.fn()} history={[]} optionalRef={null} />);
 
@@ -168,11 +166,6 @@ describe('DiscoverCanvas', () => {
   });
 
   it('shows no results when status is NO_RESULTS', () => {
-    useDiscoverContext.mockReturnValueOnce({
-      data$: { getValue: jest.fn().mockReturnValue({ status: ResultStatus.NO_RESULTS }) },
-      refetch$: mockRefetch,
-      indexPattern: { timeFieldName: 'timestamp' },
-    });
 
     render(<DiscoverCanvas setHeaderActionMenu={jest.fn()} history={[]} optionalRef={null} />);
 
@@ -180,11 +173,6 @@ describe('DiscoverCanvas', () => {
   });
 
   it('shows uninitialized state when status is UNINITIALIZED', () => {
-    useDiscoverContext.mockReturnValueOnce({
-      data$: { getValue: jest.fn().mockReturnValue({ status: ResultStatus.UNINITIALIZED }) },
-      refetch$: mockRefetch,
-      indexPattern: { timeFieldName: 'timestamp' },
-    });
 
     render(<DiscoverCanvas setHeaderActionMenu={jest.fn()} history={[]} optionalRef={null} />);
 
@@ -192,11 +180,6 @@ describe('DiscoverCanvas', () => {
   });
 
   it('renders chart and table when status is READY', async () => {
-    useDiscoverContext.mockReturnValueOnce({
-      data$: { getValue: jest.fn().mockReturnValue({ status: ResultStatus.READY, rows: [] }) },
-      refetch$: mockRefetch,
-      indexPattern: { timeFieldName: 'timestamp' },
-    });
 
     render(<DiscoverCanvas setHeaderActionMenu={jest.fn()} history={[]} optionalRef={null} />);
 
@@ -209,12 +192,6 @@ describe('DiscoverCanvas', () => {
     useDispatch.mockReturnValue(dispatchMock);
 
     const newIndexPattern = { timeFieldName: 'timestamp' };
-    useDiscoverContext.mockReturnValueOnce({
-      data$: { getValue: jest.fn().mockReturnValue({ status: ResultStatus.READY }) },
-      refetch$: mockRefetch,
-      indexPattern: newIndexPattern,
-    });
-
     render(<DiscoverCanvas setHeaderActionMenu={jest.fn()} history={[]} optionalRef={null} />);
 
     expect(dispatchMock).toHaveBeenCalledWith({ columns: [] });
