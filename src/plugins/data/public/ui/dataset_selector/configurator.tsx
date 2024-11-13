@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { cloneDeep } from 'lodash';
 import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../../common';
 import { getIndexPatterns, getQueryService } from '../../services';
@@ -47,7 +47,7 @@ export const Configurator = ({
   const indexPatternsService = getIndexPatterns();
   const type = queryString.getDatasetService().getType(baseDataset.type);
   const languages = type?.supportedLanguages(baseDataset) || [];
-  const [selectIndexedView, setSelectIndexedView] = useState(false);
+  const [shouldSelectIndexedView, setShouldSelectIndexedView] = useState(false);
 
   const [language, setLanguage] = useState<string>(() => {
     const currentLanguage = queryString.getQuery().language;
@@ -75,30 +75,35 @@ export const Configurator = ({
   const [isLoadingIndexedViews, setIsLoadingIndexedViews] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     const getIndexedViews = async () => {
       if (indexedViewsService) {
         setIsLoadingIndexedViews(true);
         const fetchedIndexedViews = await indexedViewsService.getIndexedViews(baseDataset);
-        setIsLoadingIndexedViews(false);
-        setIndexedViews(fetchedIndexedViews || []);
+        if (isMounted) {
+          setIsLoadingIndexedViews(false);
+          setIndexedViews(fetchedIndexedViews || []);
+        }
       }
     };
 
     getIndexedViews();
+    return () => {
+      isMounted = false;
+    };
   }, [indexedViewsService, baseDataset]);
 
   const submitDisabled = useMemo(() => {
     return (
-      isLoadingIndexedViews ||
-      (timeFieldName === undefined &&
-        !(
-          languageService?.getLanguage(language)?.hideDatePicker ||
-          dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
-        ) &&
-        timeFields &&
-        timeFields.length > 0)
+      timeFieldName === undefined &&
+      !(
+        languageService.getLanguage(language)?.hideDatePicker ||
+        dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN
+      ) &&
+      timeFields &&
+      timeFields.length > 0
     );
-  }, [dataset, language, timeFieldName, timeFields, languageService, isLoadingIndexedViews]);
+  }, [dataset, language, timeFieldName, timeFields, languageService]);
 
   useEffect(() => {
     const fetchFields = async () => {
@@ -118,6 +123,38 @@ export const Configurator = ({
 
     fetchFields();
   }, [baseDataset, indexPatternsService, queryString, timeFields.length]);
+
+  const updateDatasetForIndexedView = useCallback(async () => {
+    if (!indexedViewsService || !selectedIndexedView) {
+      return dataset;
+    }
+
+    let connectedDataSource;
+    if (dataset.dataSource?.id) {
+      const connectedDataSourceSavedObj: any = await indexedViewsService.getConnectedDataSource(
+        dataset
+      );
+      if (connectedDataSourceSavedObj) {
+        connectedDataSource = {
+          id: connectedDataSourceSavedObj.id,
+          title: connectedDataSourceSavedObj.attributes?.title,
+          type: 'DATA_SOURCE',
+        };
+      }
+    }
+
+    return {
+      ...dataset,
+      id: `${dataset.id}.${selectedIndexedView}`,
+      title: selectedIndexedView,
+      type: DEFAULT_DATA.SET_TYPES.INDEX,
+      sourceDatasetRef: {
+        id: dataset.id,
+        type: dataset.type,
+      },
+      dataSource: connectedDataSource ?? dataset.dataSource,
+    };
+  }, [indexedViewsService, selectedIndexedView, dataset]);
 
   return (
     <>
@@ -156,7 +193,7 @@ export const Configurator = ({
               <EuiSpacer />
               <EuiSwitch
                 compressed
-                checked={selectIndexedView}
+                checked={shouldSelectIndexedView}
                 label={
                   <EuiFormLabel>
                     {i18n.translate(
@@ -167,10 +204,10 @@ export const Configurator = ({
                     )}
                   </EuiFormLabel>
                 }
-                onChange={(e) => setSelectIndexedView(e.target.checked)}
+                onChange={(e) => setShouldSelectIndexedView(e.target.checked)}
               />
               <EuiSpacer size="m" />
-              {selectIndexedView && (
+              {shouldSelectIndexedView && (
                 <EuiFormRow
                   label={i18n.translate(
                     'data.explorer.datasetSelector.advancedSelector.configurator.indexedViewLabel',
@@ -195,30 +232,6 @@ export const Configurator = ({
                     onChange={async (e) => {
                       const value = e.target.value;
                       setSelectedIndexedView(value);
-                      let connectedDataSource;
-                      if (dataset.dataSource?.id) {
-                        const connectedDataSourceSavedObj: any = await indexedViewsService.getConnectedDataSource(
-                          dataset.dataSource.id
-                        );
-                        if (connectedDataSourceSavedObj) {
-                          connectedDataSource = {
-                            id: connectedDataSourceSavedObj.id,
-                            title: connectedDataSourceSavedObj.attributes?.title,
-                            type: 'DATA_SOURCE',
-                          };
-                        }
-                      }
-                      setDataset({
-                        ...dataset,
-                        id: `${dataset.id}.${value}`,
-                        title: value,
-                        type: DEFAULT_DATA.SET_TYPES.INDEX,
-                        ref: {
-                          id: dataset.id,
-                          type: dataset.type,
-                        },
-                        dataSource: connectedDataSource ?? dataset.dataSource,
-                      });
                     }}
                     hasNoInitialSelection
                   />
@@ -247,7 +260,7 @@ export const Configurator = ({
               data-test-subj="advancedSelectorLanguageSelect"
             />
           </EuiFormRow>
-          {!languageService?.getLanguage(language)?.hideDatePicker &&
+          {!languageService.getLanguage(language)?.hideDatePicker &&
             (dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN ? (
               <EuiFormRow
                 label={i18n.translate(
@@ -305,8 +318,12 @@ export const Configurator = ({
         </EuiButton>
         <EuiButton
           onClick={async () => {
-            await queryString?.getDatasetService().cacheDataset(dataset, services);
-            onConfirm({ dataset, language });
+            let newDataset = dataset;
+            if (shouldSelectIndexedView && selectedIndexedView) {
+              newDataset = await updateDatasetForIndexedView();
+            }
+            await queryString.getDatasetService().cacheDataset(newDataset, services);
+            onConfirm({ dataset: newDataset, language });
           }}
           fill
           disabled={submitDisabled}

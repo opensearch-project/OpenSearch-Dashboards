@@ -30,10 +30,8 @@ export interface DatasetIndexedViewsService {
   getIndexedViews: (dataset: Dataset) => Promise<DatasetIndexedView[]>;
   /**
    * Returns the data source saved object connected with the data connection object
-   * @param dataConnectionId Id of the data-connection saved object for which we want the data-source
-   * @returns Data source saved object for the Collection/Cluster attached with the data-connection
    */
-  getConnectedDataSource: (dataConnectionId: string) => Promise<SavedObject>;
+  getConnectedDataSource: (dataset: Dataset) => Promise<SavedObject>;
 }
 
 /**

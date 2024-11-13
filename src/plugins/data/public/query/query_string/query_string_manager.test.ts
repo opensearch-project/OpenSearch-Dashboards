@@ -33,16 +33,6 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { Query } from '../../../common/query';
 import { ISearchInterceptor } from '../../search';
 import { DataStorage, DEFAULT_DATA } from 'src/plugins/data/common';
-import { QueryResultService } from './query_results_service';
-
-const mockGetQueryResultExtensionMap = jest.fn();
-jest.mock('./query_results_service', () => {
-  return {
-    QueryResultService: jest.fn().mockImplementation(() => {
-      return { getQueryResultExtensionMap: mockGetQueryResultExtensionMap };
-    }),
-  };
-});
 
 describe('QueryStringManager', () => {
   let service: QueryStringManager;
@@ -60,16 +50,6 @@ describe('QueryStringManager', () => {
       coreMock.createSetup().uiSettings,
       mockSearchInterceptor,
       coreMock.createStart().notifications
-    );
-  });
-
-  test('Created instance of QueryResultService', () => {
-    expect(QueryResultService).toHaveBeenCalledTimes(1);
-  });
-
-  test('getQueryResultService returns the instantiated query result service', () => {
-    expect(service.getQueryResultService().getQueryResultExtensionMap).toBe(
-      mockGetQueryResultExtensionMap
     );
   });
 

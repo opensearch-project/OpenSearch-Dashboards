@@ -28,7 +28,6 @@ import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_ty
 import { buildColumns } from '../../utils/columns';
 import './discover_canvas.scss';
 import { HeaderVariant } from '../../../../../../core/public';
-import { QueryResultExtensions } from './query_result_extensions/query_result_extensions';
 
 // eslint-disable-next-line import/no-default-export
 export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalRef }: ViewProps) {
@@ -42,8 +41,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
       data,
     },
   } = useOpenSearchDashboards<DiscoverViewServices>();
-  const queryResultsBannerRef = useRef<HTMLDivElement>(null);
-  const extensionMap = data.query.queryString.getQueryResultService().getQueryResultExtensionMap();
   const { columns } = useSelector((state) => {
     const stateColumns = state.discover.columns;
 
@@ -53,11 +50,10 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
     };
   });
   const isEnhancementsEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
-  const defaultColumns = uiSettings.get(DEFAULT_COLUMNS_SETTING) || [];
   const filteredColumns = filterColumns(
     columns,
     indexPattern,
-    defaultColumns,
+    uiSettings.get(DEFAULT_COLUMNS_SETTING),
     uiSettings.get(MODIFY_COLUMNS_ON_SWITCH)
   );
   const dispatch = useDispatch();
@@ -127,26 +123,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
     }
   };
   const showSaveQuery = !!capabilities.discover?.saveQuery;
-  const query = data.query.queryString.getQuery();
-
-  const renderQueryResultExtensions = () => {
-    if (
-      !(queryResultsBannerRef.current && extensionMap && Object.values(extensionMap).length > 0)
-    ) {
-      return null;
-    }
-
-    return (
-      <QueryResultExtensions
-        configMap={extensionMap}
-        bannerContainer={queryResultsBannerRef.current}
-        dependencies={{
-          query,
-          queryStatus: fetchState.status,
-        }}
-      />
-    );
-  };
 
   return (
     <EuiPanel
@@ -169,9 +145,15 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
 
       {indexPattern ? (
         <>
-          {isEnhancementsEnabled && <div ref={queryResultsBannerRef} />}
-          {(fetchState.status === ResultStatus.NO_RESULTS ||
-            fetchState.status === ResultStatus.ERROR) && (
+          {fetchState.status === ResultStatus.NO_RESULTS && (
+            <DiscoverNoResults
+              queryString={data.query.queryString}
+              query={data.query.queryString.getQuery()}
+              savedQuery={data.query.savedQueries}
+              timeFieldName={timeField}
+            />
+          )}
+          {fetchState.status === ResultStatus.ERROR && (
             <DiscoverNoResults
               queryString={data.query.queryString}
               query={data.query.queryString.getQuery()}
@@ -195,7 +177,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
               <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
             </EuiPanel>
           )}
-          {renderQueryResultExtensions()}
         </>
       ) : (
         <>

@@ -47,10 +47,3 @@ export {
   QueryStatus,
   LanguageReference,
 } from './language_service';
-export {
-  QueryResultService,
-  QueryResultEnhancements,
-  QueryResultExtensionConfig,
-  QueryResultExtensionDependencies,
-  QueryResultServiceContract,
-} from './query_results_service';

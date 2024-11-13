@@ -250,7 +250,7 @@ export interface Dataset extends BaseDataset {
   /** Optional reference to the source dataset. Example usage is for indexed views to store the
    * reference to the table dataset
    */
-  ref?: {
+  sourceDatasetRef?: {
     id: string;
     type: string;
   };

@@ -10,6 +10,7 @@ import React from 'react';
 import { setQueryService, setIndexPatterns } from '../../services';
 import { IntlProvider } from 'react-intl';
 import { Query } from '../../../../data/public';
+import { Dataset } from 'src/plugins/data/common';
 
 const getQueryMock = jest.fn().mockReturnValue({
   query: '',
@@ -35,7 +36,7 @@ const languageService = {
 
 const datasetService = {
   getType: jest.fn().mockReturnValue({
-    fetchFields: jest.fn(),
+    fetchFields: jest.fn().mockResolvedValue([{ name: 'timestamp', type: 'date' }]),
     supportedLanguages: jest.fn().mockReturnValue(['kuery', 'lucene']),
     indexedViewsService: {
       getIndexedViews: jest.fn().mockResolvedValue([
@@ -53,7 +54,7 @@ const datasetService = {
   addRecentDataset: jest.fn(),
 };
 
-const fetchFieldsMock = jest.fn().mockResolvedValue([]);
+const fetchFieldsMock = jest.fn().mockResolvedValue([{ name: 'timestamp', type: 'date' }]);
 
 const mockServices = {
   getQueryService: () => ({
@@ -83,11 +84,17 @@ const mockServices = {
   ]),
 };
 
-const mockBaseDataset = {
+const mockBaseDataset: Dataset = {
+  id: 'mock-dataset',
   title: 'Sample Dataset',
   type: 'index-pattern',
   timeFieldName: 'timestamp',
-  dataSource: { id: 'test-connection-id', meta: { supportsTimeFilter: true } },
+  dataSource: {
+    id: 'test-connection-id',
+    meta: { supportsTimeFilter: true },
+    title: 'mock-datasource',
+    type: 'DATA_SOURCE',
+  },
 };
 
 const messages = {
@@ -159,27 +166,6 @@ describe('Configurator Component', () => {
     fireEvent.click(screen.getByText('Back'));
 
     expect(mockOnPrevious).toHaveBeenCalledTimes(1);
-  });
-
-  it('should disable the submit button when conditions are not met', async () => {
-    render(
-      <IntlProvider locale="en" messages={messages}>
-        <Configurator
-          services={mockServices}
-          baseDataset={mockBaseDataset}
-          onConfirm={mockOnConfirm}
-          onCancel={mockOnCancel}
-          onPrevious={mockOnPrevious}
-        />
-      </IntlProvider>
-    );
-
-    const submitButton = screen.getByTestId('advancedSelectorConfirmButton');
-    expect(submitButton).toBeDisabled();
-    fireEvent.change(screen.getByLabelText('Time field'), {
-      target: { value: 'valid-time-field' },
-    });
-    await waitFor(() => expect(submitButton).not.toBeDisabled());
   });
 
   it('should update state correctly when language is selected', async () => {
@@ -339,11 +325,16 @@ describe('Configurator Component', () => {
   });
 
   it('should disable the confirm button when submit is disabled', async () => {
-    render(
+    const mockDataset = {
+      ...mockBaseDataset,
+      timeFieldName: undefined,
+      type: 'index',
+    };
+    const { container } = render(
       <IntlProvider locale="en" messages={messages}>
         <Configurator
           services={mockServices}
-          baseDataset={mockBaseDataset}
+          baseDataset={mockDataset}
           onConfirm={mockOnConfirm}
           onCancel={mockOnCancel}
           onPrevious={mockOnPrevious}
@@ -351,18 +342,17 @@ describe('Configurator Component', () => {
       </IntlProvider>
     );
 
-    const submitButton = screen.getByRole('button', { name: /select data/i });
-
-    expect(submitButton).toBeDisabled();
-
-    const languageSelect = screen.getByLabelText('Language');
-    fireEvent.change(languageSelect, { target: { value: 'kuery' } });
+    const submitButton = container.querySelector(
+      `button[data-test-subj="advancedSelectorConfirmButton"]`
+    ); //  screen.getAllByTestId() // screen.getByRole('button', { name: /select data/i });
     await waitFor(() => {
-      expect(submitButton).toBeEnabled();
+      expect(submitButton).toBeDisabled();
     });
 
-    const timeFieldSelect = screen.getByLabelText('Time field');
-    fireEvent.change(timeFieldSelect, { target: { value: 'timestamp' } });
+    const timeFieldSelect = container.querySelector(
+      `[data-test-subj="advancedSelectorTimeFieldSelect"]`
+    );
+    fireEvent.change(timeFieldSelect!, { target: { value: 'timestamp' } });
 
     await waitFor(() => {
       expect(submitButton).toBeEnabled();
