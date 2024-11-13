@@ -219,6 +219,10 @@ export const useSearch = (services: DiscoverViewServices) => {
     dataset = searchSource.getField('index');
 
     let elapsedMs;
+    let hits;
+    let rows;
+    let bucketInterval = {};
+    let chartData;
     try {
       // Only show loading indicator if we are fetching when the rows are empty
       if (fetchStateRef.current.rows?.length === 0) {
@@ -254,11 +258,9 @@ export const useSearch = (services: DiscoverViewServices) => {
       inspectorRequest
         .stats(getResponseInspectorStats(fetchResp, searchSource))
         .ok({ json: fetchResp });
-      const hits = fetchResp.hits.total as number;
-      const rows = fetchResp.hits.hits;
+      hits = fetchResp.hits.total as number;
+      rows = fetchResp.hits.hits;
       elapsedMs = inspectorRequest.getTime();
-      let bucketInterval = {};
-      let chartData;
       for (const row of rows) {
         const fields = Object.keys(dataset!.flattenHit(row));
         for (const fieldName of fields) {
@@ -322,12 +324,23 @@ export const useSearch = (services: DiscoverViewServices) => {
         }
       }
 
+      // We push the error status to the data$ subject so that the error can be displayed in the query editor footer
+      // Still push the previous search results since we want to keep the previous query result if the current query result in error
       data$.next({
         status: ResultStatus.ERROR,
         queryStatus: {
           body: { error: errorBody },
           elapsedMs,
         },
+        fieldCounts: fetchStateRef.current.fieldCounts,
+        hits,
+        rows,
+        bucketInterval,
+        chartData,
+        title:
+          indexPattern?.title !== searchSource.getDataFrame()?.name
+            ? searchSource.getDataFrame()?.name
+            : indexPattern?.title,
       });
     } finally {
       initalSearchComplete.current = true;

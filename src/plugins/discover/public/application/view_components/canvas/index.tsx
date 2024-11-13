@@ -154,12 +154,10 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
             />
           )}
           {fetchState.status === ResultStatus.ERROR && (
-            <DiscoverNoResults
-              queryString={data.query.queryString}
-              query={data.query.queryString.getQuery()}
-              savedQuery={data.query.savedQueries}
-              timeFieldName={timeField}
-            />
+            <>
+              <MemoizedDiscoverChartContainer {...fetchState} />
+              <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+            </>
           )}
           {fetchState.status === ResultStatus.UNINITIALIZED && (
             <DiscoverUninitialized onRefresh={() => refetch$.next()} />
