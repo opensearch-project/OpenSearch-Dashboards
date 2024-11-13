@@ -212,9 +212,9 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
         <EuiPageContent
           verticalPosition="center"
           paddingSize="none"
-          color="subdued"
+          color="transparent"
+          hasBorder={false}
           hasShadow={false}
-          style={{ backgroundColor: 'transparent' }}
         >
           {isFormReadyToRender && (
             <WorkspaceCreatorForm

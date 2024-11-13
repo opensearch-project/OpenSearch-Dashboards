@@ -31,6 +31,7 @@ import { HttpStart, NotificationsStart, SavedObjectsStart } from '../../../../..
 import { AssociationDataSourceModalMode } from '../../../common/constants';
 import { Logos } from '../../../../../core/common';
 import { ConnectionTypeIcon } from '../workspace_form/connection_type_icon';
+import './association_data_source_modal.scss';
 
 const ConnectionIcon = ({
   connection: { connectionType, type },
@@ -115,7 +116,7 @@ const convertConnectionToOption = ({
       : undefined,
   prepend:
     connection.connectionType === DataSourceConnectionType.DirectQueryConnection ? (
-      <div style={{ marginLeft: 16 }}>
+      <div className="direct-query-connection-icon">
         <ConnectionIcon connection={connection} logos={logos} />
       </div>
     ) : (
@@ -305,7 +306,7 @@ export const AssociationDataSourceModalContent = ({
       <EuiModalFooter>
         <EuiSmallButton onClick={closeModal}>
           <FormattedMessage
-            id="workspace.detail.dataSources.associateModal.close.button"
+            id="workspace.detail.dataSources.associateModal.cancel.button"
             defaultMessage="Cancel"
           />
         </EuiSmallButton>
