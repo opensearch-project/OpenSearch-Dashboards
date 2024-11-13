@@ -30,6 +30,12 @@ export interface DataSourceMeta {
   sessionId?: string;
   /** Optional supportsTimeFilter determines if a time filter is needed */
   supportsTimeFilter?: boolean;
+  /** Optional reference to the original dataset */
+  ref?: {
+    id: string;
+    type: string;
+    title: string;
+  };
 }
 
 /**

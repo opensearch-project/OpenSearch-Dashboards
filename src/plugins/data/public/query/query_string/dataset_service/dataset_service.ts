@@ -98,10 +98,11 @@ export class DatasetService {
     dataset: Dataset,
     services: Partial<IDataPluginServices>
   ): Promise<void> {
-    const type = this.getType(dataset?.type);
+    const datasetType = dataset.dataSource?.meta?.ref?.type || dataset.type;
+    const type = this.getType(datasetType);
     try {
       const asyncType = type?.meta.isFieldLoadAsync ?? false;
-      if (dataset && dataset.type !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
+      if (datasetType !== DEFAULT_DATA.SET_TYPES.INDEX_PATTERN) {
         const fetchedFields = asyncType
           ? ({} as IndexPatternFieldMap)
           : await type?.fetchFields(dataset, services);

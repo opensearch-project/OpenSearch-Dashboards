@@ -19,7 +19,15 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { BaseDataset, DEFAULT_DATA, Dataset, DatasetField, Query } from '../../../common';
+import {
+  BaseDataset,
+  DEFAULT_DATA,
+  DataStructure,
+  DataStructureMeta,
+  Dataset,
+  DatasetField,
+  Query,
+} from '../../../common';
 import { getIndexPatterns, getQueryService } from '../../services';
 import { IDataPluginServices } from '../../types';
 
@@ -50,6 +58,23 @@ export const Configurator = ({
     'data.explorer.datasetSelector.advancedSelector.configurator.timeField.noTimeFieldOptionLabel',
     {
       defaultMessage: "I don't want to use the time filter",
+    }
+  );
+  const [indexedViews, setIndexedViews] = useState<DataStructure[]>([]);
+  const [indexedView, setIndexedView] = useState<DataStructure | undefined>(
+    dataset.dataSource?.meta?.ref
+      ? ({
+          id: dataset.id,
+          title: dataset.title,
+          type: DEFAULT_DATA.SET_TYPES.INDEX,
+          meta: dataset.dataSource.meta,
+        } as DataStructure)
+      : undefined
+  );
+  const noIndexedView = i18n.translate(
+    'data.explorer.datasetSelector.advancedSelector.configurator.indexedView.noIndexedViewOptionLabel',
+    {
+      defaultMessage: "I don't want to use an indexed view",
     }
   );
   const [language, setLanguage] = useState<string>(() => {
@@ -90,6 +115,40 @@ export const Configurator = ({
 
     fetchFields();
   }, [baseDataset, indexPatternsService, queryString, timeFields.length]);
+
+  useEffect(() => {
+    const fetchViews = async () => {
+      if (type?.meta.supportsIndexedViews) {
+        try {
+          const dataSourceStructure: DataStructure = {
+            id: dataset.dataSource?.id || '',
+            title: dataset.dataSource?.title || '',
+            type: 'DATA_SOURCE',
+            children: [],
+          };
+
+          const datasetStructure: DataStructure = {
+            id: dataset.id,
+            title: dataset.title,
+            type: DEFAULT_DATA.SET_TYPES.DATASET,
+            meta: dataset.dataSource?.meta as DataStructureMeta,
+            children: [],
+          };
+
+          const path = dataset.dataSource
+            ? [dataSourceStructure, datasetStructure]
+            : [datasetStructure];
+
+          const result = await type.fetch(services, path);
+          setIndexedViews(result.children || []);
+        } catch (error) {
+          setIndexedViews([]);
+        }
+      }
+    };
+
+    fetchViews();
+  }, [dataset, type?.meta.supportsIndexedViews, services, type]);
 
   return (
     <>
@@ -185,6 +244,40 @@ export const Configurator = ({
                 />
               </EuiFormRow>
             ))}
+          <EuiFormRow
+            label={i18n.translate(
+              'data.explorer.datasetSelector.advancedSelector.configurator.indexedViewLabel',
+              {
+                defaultMessage: 'Available indexed views',
+              }
+            )}
+            helpText={i18n.translate(
+              'data.explorer.datasetSelector.advancedSelector.configurator.indexedViewHelpText',
+              {
+                defaultMessage: 'Select an indexed view to speed up your query.',
+              }
+            )}
+          >
+            <EuiSelect
+              options={[
+                ...indexedViews.map((view) => ({
+                  text: view.title,
+                  value: view.id,
+                })),
+                { text: '-----', value: '-----', disabled: true },
+                { text: noIndexedView, value: noIndexedView },
+              ]}
+              value={indexedView?.id || '-----'}
+              onChange={(e) => {
+                const value = e.target.value === noIndexedView ? undefined : e.target.value;
+                if (!dataset.dataSource) return;
+                // if the indexed views are properly structured we can just set it directly without building it here
+                // see s3 type mock response how we can return the index type and with the correct id
+                const view = indexedViews.find((v) => v.id === value);
+                setIndexedView(view);
+              }}
+            />
+          </EuiFormRow>
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
@@ -202,8 +295,28 @@ export const Configurator = ({
         </EuiButton>
         <EuiButton
           onClick={async () => {
-            await queryString.getDatasetService().cacheDataset(dataset, services);
-            onConfirm({ dataset, language });
+            let configuredDataset = { ...dataset };
+            if (indexedView) {
+              configuredDataset = {
+                id: indexedView.id,
+                title: indexedView.title,
+                type: DEFAULT_DATA.SET_TYPES.INDEX,
+                timeFieldName: dataset.timeFieldName,
+                dataSource: {
+                  ...dataset.dataSource!,
+                  meta: {
+                    ...dataset.dataSource?.meta,
+                    ...indexedView.meta, // This includes the ref to original dataset
+                  },
+                },
+              };
+            }
+
+            await queryString.getDatasetService().cacheDataset(configuredDataset, services);
+            onConfirm({
+              dataset: configuredDataset,
+              language,
+            });
           }}
           fill
           disabled={submitDisabled}
