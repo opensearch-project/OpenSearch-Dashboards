@@ -191,12 +191,6 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
 
   const onSelectLanguage = (languageId: string) => {
     const newQuery = queryString.getInitialQueryByLanguage(languageId);
-    if (newQuery.dataset) {
-      newQuery.dataset = {
-        ...newQuery.dataset,
-        language: languageId,
-      };
-    }
 
     onChange(newQuery);
     onSubmit(newQuery);

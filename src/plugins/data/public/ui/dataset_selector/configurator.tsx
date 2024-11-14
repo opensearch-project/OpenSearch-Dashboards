@@ -57,10 +57,7 @@ export const Configurator = ({
     return languages[0];
   });
 
-  const [dataset, setDataset] = useState<Dataset>({
-    ...cloneDeep(baseDataset),
-    language,
-  });
+  const [dataset, setDataset] = useState<Dataset>(baseDataset);
   const [timeFields, setTimeFields] = useState<DatasetField[]>([]);
   const [timeFieldName, setTimeFieldName] = useState<string | undefined>(dataset.timeFieldName);
   const noTimeFilter = i18n.translate(
