@@ -439,7 +439,7 @@ export const QueryEditorUI: React.FC<Props> = (props) => {
         queryString={queryString}
         onClickRecentQuery={onClickRecentQuery}
       />
-      <div ref={bottomPanelRef} className="osdQueryEditor__bottomPanel" />
+      <div ref={bottomPanelRef} />
       {renderQueryEditorExtensions()}
     </div>
   );

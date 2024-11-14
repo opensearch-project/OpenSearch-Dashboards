@@ -15,6 +15,17 @@ jest.mock('react-dom', () => ({
 
 type QueryEditorExtensionProps = ComponentProps<typeof QueryEditorExtension>;
 
+const mockQuery = {
+  query: 'dummy query',
+  language: 'kuery',
+  dataset: {
+    id: 'db',
+    title: 'db',
+    type: 'index',
+    dataSource: { id: 'testId', type: 'DATA_SOURCE', title: 'testTitle' },
+  },
+};
+
 describe('QueryEditorExtension', () => {
   const getComponentMock = jest.fn();
   const getBannerMock = jest.fn();
@@ -33,9 +44,12 @@ describe('QueryEditorExtension', () => {
       onSelectLanguage: jest.fn(),
       isCollapsed: false,
       setIsCollapsed: jest.fn(),
+      query: mockQuery,
     },
     componentContainer: document.createElement('div'),
     bannerContainer: document.createElement('div'),
+    bottomPanelContainer: document.createElement('div'),
+    queryControlsContainer: document.createElement('div'),
   };
 
   beforeEach(() => {
