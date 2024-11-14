@@ -91,6 +91,7 @@ describe('QueryEditorExtensions', () => {
           onSelectLanguage: expect.any(Function),
           isCollapsed: false,
           setIsCollapsed: expect.any(Function),
+          query: mockQuery,
         },
       }),
       expect.anything()
