@@ -96,7 +96,8 @@ export function OpenSavedQueryFlyout({
         setSavedQueries(templateQueries);
       }
     } catch (e) {
-      console.error(e);
+      // eslint-disable-next-line no-console
+      console.error('Error occurred while retrieving saved queries.', e);
     } finally {
       setIsLoading(false);
     }
