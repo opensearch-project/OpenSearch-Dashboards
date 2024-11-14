@@ -34,6 +34,8 @@ export interface DatasetTypeConfig {
     searchOnLoad?: boolean;
     /** Optional supportsTimeFilter determines if a time filter is needed */
     supportsTimeFilter?: boolean;
+    /** Optional supportsIndexedViews determines if indexed views are supported */
+    supportsIndexedViews?: boolean;
     /** Optional isFieldLoadAsync determines if field loads are async */
     isFieldLoadAsync?: boolean;
     /** Optional cacheOptions determines if the data structure is cacheable. Defaults to false */

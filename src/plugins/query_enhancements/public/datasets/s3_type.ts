@@ -27,6 +27,8 @@ import {
 } from '../../common';
 import S3_ICON from '../assets/s3_mark.svg';
 
+const mockFetchIndexedViews = true;
+
 export const s3TypeConfig: DatasetTypeConfig = {
   id: DATASET.S3,
   title: 'S3 Connections',
@@ -35,6 +37,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
     tooltip: 'Amazon S3 Connections',
     searchOnLoad: true,
     supportsTimeFilter: false,
+    supportsIndexedViews: true,
     isFieldLoadAsync: true,
     cacheOptions: true,
   },
@@ -98,6 +101,18 @@ export const s3TypeConfig: DatasetTypeConfig = {
           children: tables,
         };
       }
+      // Use dataset type (could be TABLE, QUERY, etc) to fetch indexed views
+      case 'DATASET': {
+        const indexedViews = !mockFetchIndexedViews
+          ? await fetchIndexedViews(http, path)
+          : fetchIndexedViewsMock(dataStructure);
+        return {
+          ...dataStructure,
+          columnHeader: 'Indexed Views',
+          hasNext: false,
+          children: indexedViews,
+        };
+      }
       default: {
         const dataSources = await fetchDataSources(client);
         return {
@@ -114,6 +129,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
     dataset: Dataset,
     services?: Partial<IDataPluginServices>
   ): Promise<DatasetField[]> => {
+    if (mockFetchIndexedViews) return [];
     const http = services?.http;
     if (!http) return [];
     return await fetchFields(http, dataset);
@@ -292,6 +308,96 @@ const fetchTables = async (http: HttpSetup, path: DataStructure[]): Promise<Data
   database.meta = setMeta(database, response);
 
   return fetch(http, path, 'TABLE');
+};
+
+const fetchIndexedViewsMock = (dataStructure: DataStructure): DataStructure[] => {
+  return [
+    {
+      id: `${dataStructure.id}.logstash-2015.09.20`,
+      title: 'logstash-2015.09.20',
+      type: DEFAULT_DATA.SET_TYPES.INDEX,
+      parent: dataStructure,
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+        sessionId: (dataStructure.meta as DataStructureCustomMeta)?.sessionId,
+        name: (dataStructure.meta as DataStructureCustomMeta)?.name,
+        ref: {
+          id: dataStructure.id,
+          type: DATASET.S3,
+          title: dataStructure.title,
+        },
+      } as DataStructureCustomMeta,
+    },
+    {
+      id: `${dataStructure.id}.logstash-2015.09.22`,
+      title: 'logstash-2015.09.22',
+      type: DEFAULT_DATA.SET_TYPES.INDEX,
+      parent: dataStructure,
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+        sessionId: (dataStructure.meta as DataStructureCustomMeta)?.sessionId,
+        name: (dataStructure.meta as DataStructureCustomMeta)?.name,
+        ref: {
+          id: dataStructure.id,
+          type: DATASET.S3,
+          title: dataStructure.title,
+        },
+      } as DataStructureCustomMeta,
+    },
+  ];
+};
+
+const fetchIndexedViews = async (
+  http: HttpSetup,
+  path: DataStructure[]
+): Promise<DataStructure[]> => {
+  const abortController = new AbortController();
+  const dataSource = path.find((ds) => ds.type === 'DATA_SOURCE');
+  const dataStructure = path[path.length - 1];
+  const meta = dataStructure.meta as DataStructureCustomMeta;
+
+  try {
+    const response = await http.fetch({
+      method: 'POST',
+      path: trimEnd(API.DATA_SOURCE.ASYNC_JOBS),
+      body: JSON.stringify({
+        lang: 'sql',
+        query: `SHOW MATERIALIZED VIEWS FOR ${dataStructure.title}`,
+        datasource: meta.name,
+        ...(meta.sessionId && { sessionId: meta.sessionId }),
+      }),
+      query: {
+        id: dataSource?.id,
+      },
+      signal: abortController.signal,
+    });
+
+    const views = await handleQueryStatus({
+      fetchStatus: () =>
+        http.fetch({
+          method: 'GET',
+          path: trimEnd(API.DATA_SOURCE.ASYNC_JOBS),
+          query: {
+            id: dataSource?.id,
+            queryId: response.queryId,
+          },
+        }),
+    });
+
+    return views.datarows.map((view: string[]) => ({
+      id: `${dataStructure.id}.${view[0]}`,
+      title: view[0],
+      type: DEFAULT_DATA.SET_TYPES.INDEX,
+      parent: dataStructure,
+      meta: {
+        type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+        sessionId: meta.sessionId,
+        name: meta.name,
+      } as DataStructureCustomMeta,
+    }));
+  } catch (err) {
+    return [];
+  }
 };
 
 /**
