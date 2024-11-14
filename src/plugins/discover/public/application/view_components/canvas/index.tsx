@@ -153,22 +153,17 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
               timeFieldName={timeField}
             />
           )}
-          {fetchState.status === ResultStatus.ERROR && (
-            <>
-              <MemoizedDiscoverChartContainer {...fetchState} />
-              <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
-            </>
-          )}
           {fetchState.status === ResultStatus.UNINITIALIZED && (
             <DiscoverUninitialized onRefresh={() => refetch$.next()} />
           )}
           {fetchState.status === ResultStatus.LOADING && <LoadingSpinner />}
-          {fetchState.status === ResultStatus.READY && isEnhancementsEnabled && (
-            <>
-              <MemoizedDiscoverChartContainer {...fetchState} />
-              <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
-            </>
-          )}
+          {(fetchState.status === ResultStatus.READY || fetchState.status === ResultStatus.ERROR) &&
+            isEnhancementsEnabled && (
+              <>
+                <MemoizedDiscoverChartContainer {...fetchState} />
+                <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+              </>
+            )}
           {fetchState.status === ResultStatus.READY && !isEnhancementsEnabled && (
             <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
               <MemoizedDiscoverChartContainer {...fetchState} />
