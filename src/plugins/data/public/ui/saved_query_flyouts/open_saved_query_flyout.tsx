@@ -96,7 +96,7 @@ export function OpenSavedQueryFlyout({
         setSavedQueries(templateQueries);
       }
     } catch (e) {
-      console.error('Error occurred while fetching saved queries.', e);
+      console.error(e);
     } finally {
       setIsLoading(false);
     }
