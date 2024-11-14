@@ -161,9 +161,12 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
             <DiscoverUninitialized onRefresh={() => refetch$.next()} />
           )}
           {fetchState.status === ResultStatus.LOADING && !rows?.length && <LoadingSpinner />}
+          {fetchState.status === ResultStatus.ERROR && !rows?.length && (
+            <DiscoverUninitialized onRefresh={() => refetch$.next()} />
+          )}
           {(fetchState.status === ResultStatus.READY ||
             (fetchState.status === ResultStatus.LOADING && !!rows?.length) ||
-            fetchState.status === ResultStatus.ERROR) &&
+            (fetchState.status === ResultStatus.ERROR && !!rows?.length)) &&
             (isEnhancementsEnabled ? (
               <>
                 <MemoizedDiscoverChartContainer {...fetchState} />
