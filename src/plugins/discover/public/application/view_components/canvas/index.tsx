@@ -77,8 +77,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
 
   useEffect(() => {
     const subscription = data$.subscribe((next) => {
-      if (next.status === ResultStatus.LOADING) return;
-
       let shouldUpdateState = false;
 
       if (next.status !== fetchState.status) shouldUpdateState = true;
@@ -86,7 +84,8 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
       if (next.bucketInterval && next.bucketInterval !== fetchState.bucketInterval)
         shouldUpdateState = true;
       if (next.chartData && next.chartData !== fetchState.chartData) shouldUpdateState = true;
-      if (next.rows && next.rows !== fetchState.rows) {
+      // we still want to show rows from the previous query while current query is loading
+      if (next.status !== ResultStatus.LOADING && next.rows && next.rows !== fetchState.rows) {
         shouldUpdateState = true;
         setRows(next.rows);
       }
@@ -164,19 +163,20 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
           {fetchState.status === ResultStatus.UNINITIALIZED && (
             <DiscoverUninitialized onRefresh={() => refetch$.next()} />
           )}
-          {fetchState.status === ResultStatus.LOADING && <LoadingSpinner />}
-          {fetchState.status === ResultStatus.READY && isEnhancementsEnabled && (
-            <>
-              <MemoizedDiscoverChartContainer {...fetchState} />
-              <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
-            </>
-          )}
-          {fetchState.status === ResultStatus.READY && !isEnhancementsEnabled && (
-            <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
-              <MemoizedDiscoverChartContainer {...fetchState} />
-              <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
-            </EuiPanel>
-          )}
+          {fetchState.status === ResultStatus.LOADING && !rows?.length && <LoadingSpinner />}
+          {(fetchState.status === ResultStatus.READY ||
+            (fetchState.status === ResultStatus.LOADING && !!rows?.length)) &&
+            (isEnhancementsEnabled ? (
+              <>
+                <MemoizedDiscoverChartContainer {...fetchState} />
+                <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+              </>
+            ) : (
+              <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
+                <MemoizedDiscoverChartContainer {...fetchState} />
+                <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+              </EuiPanel>
+            ))}
         </>
       ) : (
         <>
