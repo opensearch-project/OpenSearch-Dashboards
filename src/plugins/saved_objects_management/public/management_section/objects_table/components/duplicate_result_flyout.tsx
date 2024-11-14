@@ -114,8 +114,8 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
           defaultMessage="Index Pattern Conflicts"
         />
       }
-      color="warning"
-      iconType="help"
+      color="danger"
+      iconType="alert"
     >
       <p>
         <FormattedMessage
@@ -141,7 +141,7 @@ export class DuplicateResultFlyout extends React.Component<DuplicateResultFlyout
         />
       }
       color="danger"
-      iconType="help"
+      iconType="alert"
     >
       <p>
         <FormattedMessage

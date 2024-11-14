@@ -6,7 +6,8 @@
 import { SavedObjectsImportError } from '../types';
 import { validateDataSources } from './validate_data_sources';
 import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
-import * as utilsExports from './utils';
+import * as utilsImports from './utils';
+import * as utilsExport from '../export/inject_nested_depdendencies';
 
 describe('validateDataSources', () => {
   const savedObjectsClient = savedObjectsClientMock.create();
@@ -52,7 +53,7 @@ describe('validateDataSources', () => {
   it('validates data sources within the target workspace', async () => {
     savedObjectsClient.find.mockResolvedValueOnce(response);
 
-    jest.spyOn(utilsExports, 'findReferenceDataSourceForObject').mockImplementation(() => ({
+    jest.spyOn(utilsImports, 'findReferenceDataSourceForObject').mockImplementation(() => ({
       id: 'data-source-1',
       type: 'data-source',
       name: 'DataSource 1',
@@ -68,7 +69,7 @@ describe('validateDataSources', () => {
   it('accumulates missing data source errors', async () => {
     savedObjectsClient.find.mockResolvedValueOnce(response);
 
-    jest.spyOn(utilsExports, 'findReferenceDataSourceForObject').mockImplementation(() => ({
+    jest.spyOn(utilsImports, 'findReferenceDataSourceForObject').mockImplementation(() => ({
       id: 'data-source-2',
       type: 'data-source',
       name: 'DataSource 2',
@@ -83,6 +84,56 @@ describe('validateDataSources', () => {
       {
         error: {
           dataSource: 'data-source-2',
+          type: 'missing_data_source',
+        },
+        id: '1',
+        meta: {
+          title: 'dashboards',
+        },
+        title: 'dashboards',
+        type: 'dashboards',
+      },
+    ]);
+  });
+
+  it('accumulates missing data source errors with data source title', async () => {
+    // Get target workspace data source
+    savedObjectsClient.find.mockResolvedValueOnce(response);
+
+    // Mock source workspace data source
+    jest.spyOn(utilsImports, 'findReferenceDataSourceForObject').mockImplementation(() => ({
+      id: 'data-source-2',
+      type: 'data-source',
+      name: 'DataSource 2',
+    }));
+
+    const savedObject = {
+      id: '1',
+      type: 'dashboards',
+      attributes: { title: 'dashboards' },
+      references: [],
+    };
+
+    jest.spyOn(utilsExport, 'fetchNestedDependencies').mockResolvedValueOnce({
+      missingRefs: [],
+      objects: [
+        {
+          id: 'data-source-2',
+          type: 'data-source',
+          attributes: { title: 'dataSource2' },
+          references: [],
+        },
+        savedObject,
+      ],
+    });
+
+    const savedObjects = [savedObject];
+    const result = await validateDataSources(savedObjects, savedObjectsClient, [], workspaces);
+
+    expect(result).toEqual([
+      {
+        error: {
+          dataSource: 'dataSource2',
           type: 'missing_data_source',
         },
         id: '1',

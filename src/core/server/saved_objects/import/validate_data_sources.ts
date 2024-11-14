@@ -28,6 +28,7 @@ export async function validateDataSources(
   }
 
   const errorMap: { [key: string]: SavedObjectsImportError } = {};
+  // Get the data sources assigned target workspace
   const assignedDataSourcesInTargetWorkspace = await savedObjectsClient
     .find({
       type: 'data-source',
@@ -40,6 +41,12 @@ export async function validateDataSources(
     });
 
   const nestedDependencies = await fetchNestedDependencies(filteredObjects, savedObjectsClient);
+  const sourceDataSourceMap = new Map(
+    (nestedDependencies.objects as Array<SavedObject<{ title?: string }>>)
+      .filter((object) => object.type === 'data-source')
+      .map(({ id, attributes }) => [id, attributes?.title || id])
+  );
+
   const nestedObjectsMap = new Map(nestedDependencies.objects.map((object) => [object.id, object]));
 
   for (const object of filteredObjects) {
@@ -53,7 +60,7 @@ export async function validateDataSources(
         meta: { title: attributes?.title },
         error: {
           type: 'missing_data_source',
-          dataSource: referenceDS.id,
+          dataSource: sourceDataSourceMap.get(referenceDS.id) || referenceDS.id,
         },
       };
     }
