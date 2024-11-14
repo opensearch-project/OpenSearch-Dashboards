@@ -84,7 +84,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
       if (next.bucketInterval && next.bucketInterval !== fetchState.bucketInterval)
         shouldUpdateState = true;
       if (next.chartData && next.chartData !== fetchState.chartData) shouldUpdateState = true;
-      // we still want to show rows from the previous query while current query is loading
+      // we still want to show rows from the previous query while current query is loading or the current query results in error
       if (
         next.status !== ResultStatus.LOADING &&
         next.status !== ResultStatus.ERROR &&
