@@ -464,7 +464,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             indexPatterns={this.props.indexPatterns!}
             showSaveQuery={this.props.showSaveQuery}
             loadedSavedQuery={this.props.savedQuery}
-            onInitiateSave={this.onInitiateSave}
+            onInitiateSave={this.onInitiateSa
             onInitiateSaveAsNew={this.onInitiateSaveNew}
             onLoad={this.onLoadSavedQuery}
             savedQueryService={this.savedQueryService}
@@ -472,7 +472,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             useSaveQueryMenu={useSaveQueryMenu}
             isQueryEditorControl={isQueryEditorControl}
             saveQuery={this.onSave}
-            queryStringManager={this.queryStringManager}
           />
         )
       );

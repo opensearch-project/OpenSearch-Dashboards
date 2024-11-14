@@ -24,16 +24,16 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { QueryStringContract, SavedQuery, SavedQueryService } from '../../query';
+import { SavedQuery, SavedQueryService } from '../../query';
 import { SavedQueryCard } from './saved_query_card';
 import { Query } from '../../../common';
+import { getQueryService } from 'src/plugins/visualize/public/services';
 
 export interface OpenSavedQueryFlyoutProps {
   savedQueryService: SavedQueryService;
   onClose: () => void;
   onQueryOpen: (query: SavedQuery) => void;
   handleQueryDelete: (query: SavedQuery) => Promise<void>;
-  queryStringManager: QueryStringContract;
 }
 
 interface SavedQuerySearchableItem {
@@ -50,7 +50,6 @@ export function OpenSavedQueryFlyout({
   onClose,
   onQueryOpen,
   handleQueryDelete,
-  queryStringManager,
 }: OpenSavedQueryFlyoutProps) {
   const [selectedTabId, setSelectedTabId] = useState<string>('mutable-saved-queries');
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
@@ -65,6 +64,7 @@ export function OpenSavedQueryFlyout({
   const [searchQuery, setSearchQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
   const [isLoading, setIsLoading] = useState(false);
   const currentTabIdRef = useRef(selectedTabId);
+  const queryStringManager = getQueryService().queryString;
 
   const fetchAllSavedQueriesForSelectedTab = useCallback(async () => {
     setIsLoading(true);
@@ -96,7 +96,7 @@ export function OpenSavedQueryFlyout({
         setSavedQueries(templateQueries);
       }
     } catch (e) {
-      console.error("Error occurred while fetching saved queries.", e);
+      console.error('Error occurred while fetching saved queries.', e);
     } finally {
       setIsLoading(false);
     }
