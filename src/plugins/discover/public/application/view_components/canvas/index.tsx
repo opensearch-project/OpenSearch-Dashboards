@@ -85,7 +85,12 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
         shouldUpdateState = true;
       if (next.chartData && next.chartData !== fetchState.chartData) shouldUpdateState = true;
       // we still want to show rows from the previous query while current query is loading
-      if (next.status !== ResultStatus.LOADING && next.rows && next.rows !== fetchState.rows) {
+      if (
+        next.status !== ResultStatus.LOADING &&
+        next.status !== ResultStatus.ERROR &&
+        next.rows &&
+        next.rows !== fetchState.rows
+      ) {
         shouldUpdateState = true;
         setRows(next.rows);
       }
@@ -152,20 +157,13 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
               timeFieldName={timeField}
             />
           )}
-          {fetchState.status === ResultStatus.ERROR && (
-            <DiscoverNoResults
-              queryString={data.query.queryString}
-              query={data.query.queryString.getQuery()}
-              savedQuery={data.query.savedQueries}
-              timeFieldName={timeField}
-            />
-          )}
           {fetchState.status === ResultStatus.UNINITIALIZED && (
             <DiscoverUninitialized onRefresh={() => refetch$.next()} />
           )}
           {fetchState.status === ResultStatus.LOADING && !rows?.length && <LoadingSpinner />}
           {(fetchState.status === ResultStatus.READY ||
-            (fetchState.status === ResultStatus.LOADING && !!rows?.length)) &&
+            (fetchState.status === ResultStatus.LOADING && !!rows?.length) ||
+            fetchState.status === ResultStatus.ERROR) &&
             (isEnhancementsEnabled ? (
               <>
                 <MemoizedDiscoverChartContainer {...fetchState} />
