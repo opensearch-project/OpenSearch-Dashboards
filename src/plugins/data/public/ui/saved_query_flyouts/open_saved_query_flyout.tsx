@@ -27,7 +27,7 @@ import { i18n } from '@osd/i18n';
 import { SavedQuery, SavedQueryService } from '../../query';
 import { SavedQueryCard } from './saved_query_card';
 import { Query } from '../../../common';
-import { getQueryService } from 'src/plugins/visualize/public/services';
+import { getQueryService } from '../../services';
 
 export interface OpenSavedQueryFlyoutProps {
   savedQueryService: SavedQueryService;

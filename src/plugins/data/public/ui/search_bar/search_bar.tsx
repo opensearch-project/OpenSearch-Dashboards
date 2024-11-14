@@ -42,7 +42,7 @@ import {
   SavedQuery,
   SavedQueryAttributes,
   TimeHistoryContract,
-  QueryStatus,
+  QueryStatus
 } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { FilterBar } from '../filter_bar/filter_bar';
