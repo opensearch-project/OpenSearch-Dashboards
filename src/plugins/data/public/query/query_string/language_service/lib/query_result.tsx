@@ -58,24 +58,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     };
   }, [props.queryStatus.startTime]);
 
-  if (elapsedTime > BUFFER_TIME) {
-    if (props.queryStatus.status === ResultStatus.LOADING) {
-      const time = Math.floor(elapsedTime / 1000);
-      return (
-        <EuiButtonEmpty
-          color="text"
-          size="xs"
-          onClick={() => {}}
-          isLoading
-          data-test-subj="queryResultLoading"
-        >
-          {i18n.translate('data.query.languageService.queryResults.loadTime', {
-            defaultMessage: 'Loading {time} s',
-            values: { time },
-          })}
-        </EuiButtonEmpty>
-      );
-    }
+  if (elapsedTime > BUFFER_TIME && props.queryStatus.status === ResultStatus.LOADING) {
     const time = Math.floor(elapsedTime / 1000);
     return (
       <EuiButtonEmpty
@@ -130,7 +113,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     );
   }
 
-  if (!props.queryStatus.body || !props.queryStatus.body.error) {
+  if (props.queryStatus.status === ResultStatus.UNINITIALIZED || !props.queryStatus.body?.error) {
     return null;
   }
 

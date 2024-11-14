@@ -140,7 +140,19 @@ describe('useSearch', () => {
     });
 
     act(() => {
+      mockDatasetUpdates$.next({
+        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
+      });
+    });
+
+    act(() => {
       result.current.data$.next({ status: ResultStatus.READY });
+    });
+
+    act(() => {
+      mockDatasetUpdates$.next({
+        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
+      });
     });
 
     expect(result.current.data$.getValue()).toEqual(
@@ -149,13 +161,7 @@ describe('useSearch', () => {
 
     act(() => {
       mockDatasetUpdates$.next({
-        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
-      });
-      mockDatasetUpdates$.next({
-        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
-      });
-      mockDatasetUpdates$.next({
-        dataset: { id: 'new-dataset-id2', title: 'New Dataset', type: 'INDEX_PATTERN' },
+        dataset: { id: 'different-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
       });
     });
 
@@ -164,7 +170,7 @@ describe('useSearch', () => {
     });
 
     expect(result.current.data$.getValue()).toEqual(
-      expect.objectContaining({ status: ResultStatus.LOADING })
+      expect.objectContaining({ status: ResultStatus.LOADING, rows: [] })
     );
   });
 });
