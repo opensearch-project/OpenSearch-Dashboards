@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { QueryStringManager, SavedQuery, SavedQueryService } from '../../query';
+import { QueryStringContract, SavedQuery, SavedQueryService } from '../../query';
 import { SavedQueryCard } from './saved_query_card';
 import { Query } from '../../../common';
 
@@ -33,7 +33,7 @@ export interface OpenSavedQueryFlyoutProps {
   onClose: () => void;
   onQueryOpen: (query: SavedQuery) => void;
   handleQueryDelete: (query: SavedQuery) => Promise<void>;
-  queryStringManager: QueryStringManager;
+  queryStringManager: QueryStringContract;
 }
 
 interface SavedQuerySearchableItem {

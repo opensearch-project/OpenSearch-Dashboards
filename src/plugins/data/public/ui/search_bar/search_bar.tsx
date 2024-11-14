@@ -43,7 +43,6 @@ import {
   SavedQueryAttributes,
   TimeHistoryContract,
   QueryStatus,
-  QueryStringManager,
 } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { FilterBar } from '../filter_bar/filter_bar';
@@ -101,7 +100,6 @@ export interface SearchBarOwnProps {
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
   queryStatus?: QueryStatus;
-  queryStringManager: QueryStringManager;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -474,7 +472,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             useSaveQueryMenu={useSaveQueryMenu}
             isQueryEditorControl={isQueryEditorControl}
             saveQuery={this.onSave}
-            queryStringManager={this.props.queryStringManager}
+            queryStringManager={this.queryStringManager}
           />
         )
       );
