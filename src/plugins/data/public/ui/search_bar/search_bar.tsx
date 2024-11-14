@@ -464,7 +464,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             indexPatterns={this.props.indexPatterns!}
             showSaveQuery={this.props.showSaveQuery}
             loadedSavedQuery={this.props.savedQuery}
-            onInitiateSave={this.onInitiateSa
+            onInitiateSave={this.onInitiateSave}
             onInitiateSaveAsNew={this.onInitiateSaveNew}
             onLoad={this.onLoadSavedQuery}
             savedQueryService={this.savedQueryService}
