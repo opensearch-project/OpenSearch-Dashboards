@@ -144,11 +144,7 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
     >
       <EuiPopoverTitle>ERRORS</EuiPopoverTitle>
       <div
-        style={{
-          width: '250px',
-          maxHeight: '250px',
-          overflowY: 'auto',
-        }}
+        style={{ width: '250px', maxHeight: '250px', overflowY: 'auto' }}
         className="eui-textBreakWord"
       >
         <EuiText size="s">
