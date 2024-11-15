@@ -226,7 +226,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
 
   function shouldRenderDatePicker(): boolean {
     return (
-      Boolean(props.showDatePicker ?? true) &&
+      Boolean((props.showDatePicker || props.showAutoRefreshOnly) ?? true) &&
       !(
         queryLanguage &&
         data.query.queryString.getLanguageService().getLanguage(queryLanguage)?.hideDatePicker
