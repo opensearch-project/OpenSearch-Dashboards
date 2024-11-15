@@ -37,6 +37,8 @@ exports[`Query Result show error status with error message 2`] = `
     className="eui-textBreakWord"
     style={
       Object {
+        "maxHeight": "250px",
+        "overflowY": "auto",
         "width": "250px",
       }
     }
