@@ -38,7 +38,13 @@ import {
   withOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
 import { Filter, IIndexPattern, Query, TimeRange, UI_SETTINGS } from '../../../common';
-import { SavedQuery, SavedQueryAttributes, TimeHistoryContract, QueryStatus } from '../../query';
+import {
+  SavedQuery,
+  SavedQueryAttributes,
+  TimeHistoryContract,
+  QueryStatus,
+  QueryStringManager,
+} from '../../query';
 import { IDataPluginServices } from '../../types';
 import { FilterBar } from '../filter_bar/filter_bar';
 import { QueryEditorTopRow } from '../query_editor';
@@ -95,6 +101,7 @@ export interface SearchBarOwnProps {
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
   queryStatus?: QueryStatus;
+  queryStringManager: QueryStringManager;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -467,6 +474,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             useSaveQueryMenu={useSaveQueryMenu}
             isQueryEditorControl={isQueryEditorControl}
             saveQuery={this.onSave}
+            queryStringManager={this.props.queryStringManager}
           />
         )
       );

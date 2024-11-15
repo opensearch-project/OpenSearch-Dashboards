@@ -81,5 +81,5 @@ export interface DatasetTypeConfig {
   /**
    * Returns a list of sample queries for this dataset type
    */
-  getSampleQueries?: (dataset: Dataset, language: string) => any;
+  getSampleQueries?: (dataset?: Dataset, language?: string) => Promise<any> | any;
 }

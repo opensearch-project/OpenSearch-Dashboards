@@ -202,6 +202,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           isRefreshPaused={refreshInterval.pause}
           filters={filters}
           query={query}
+          queryStringManager={data.query.queryString}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}

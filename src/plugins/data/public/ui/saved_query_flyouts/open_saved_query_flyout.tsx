@@ -13,6 +13,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLoadingSpinner,
   EuiSearchBar,
   EuiSearchBarProps,
   EuiSpacer,
@@ -23,14 +24,16 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { SavedQuery, SavedQueryService } from '../../query';
+import { QueryStringManager, SavedQuery, SavedQueryService } from '../../query';
 import { SavedQueryCard } from './saved_query_card';
+import { Query } from '../../../common';
 
 export interface OpenSavedQueryFlyoutProps {
   savedQueryService: SavedQueryService;
   onClose: () => void;
   onQueryOpen: (query: SavedQuery) => void;
   handleQueryDelete: (query: SavedQuery) => Promise<void>;
+  queryStringManager: QueryStringManager;
 }
 
 interface SavedQuerySearchableItem {
@@ -47,6 +50,7 @@ export function OpenSavedQueryFlyout({
   onClose,
   onQueryOpen,
   handleQueryDelete,
+  queryStringManager,
 }: OpenSavedQueryFlyoutProps) {
   const [selectedTabId, setSelectedTabId] = useState<string>('mutable-saved-queries');
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
@@ -59,18 +63,39 @@ export function OpenSavedQueryFlyout({
   const [languageFilterOptions, setLanguageFilterOptions] = useState<string[]>([]);
   const [selectedQuery, setSelectedQuery] = useState<SavedQuery | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
+  const [isLoading, setIsLoading] = useState(false);
+  const currentTabIdRef = useRef(selectedTabId);
 
   const fetchAllSavedQueriesForSelectedTab = useCallback(async () => {
-    const allQueries = await savedQueryService.getAllSavedQueries();
-    const templateQueriesPresent = allQueries.some((q) => q.attributes.isTemplate);
-    const queriesForSelectedTab = allQueries.filter(
-      (q) =>
-        (selectedTabId === 'mutable-saved-queries' && !q.attributes.isTemplate) ||
-        (selectedTabId === 'template-saved-queries' && q.attributes.isTemplate)
-    );
-    setSavedQueries(queriesForSelectedTab);
-    setHasTemplateQueries(templateQueriesPresent);
-  }, [savedQueryService, selectedTabId, setSavedQueries]);
+    setIsLoading(true);
+    const query = queryStringManager.getQuery();
+    let templateQueries: any[] = [];
+
+    // fetch sample query based on dataset type
+    if (query?.dataset?.type) {
+      templateQueries =
+        (await queryStringManager
+          .getDatasetService()
+          ?.getType(query.dataset.type)
+          ?.getSampleQueries?.()) || [];
+
+      // Check if any sample query has isTemplate set to true
+      const hasTemplates = templateQueries.some((q) => q?.attributes?.isTemplate);
+      setHasTemplateQueries(hasTemplates);
+    }
+
+    // Set queries based on the current tab
+    if (currentTabIdRef.current === 'mutable-saved-queries') {
+      const allQueries = await savedQueryService.getAllSavedQueries();
+      const mutableSavedQueries = allQueries.filter((q) => !q.attributes.isTemplate);
+      if (currentTabIdRef.current === 'mutable-saved-queries') {
+        setSavedQueries(mutableSavedQueries);
+      }
+    } else if (currentTabIdRef.current === 'template-saved-queries') {
+      setSavedQueries(templateQueries);
+    }
+    setIsLoading(false);
+  }, [savedQueryService, currentTabIdRef, setSavedQueries, queryStringManager]);
 
   const updatePageIndex = useCallback((index: number) => {
     pager.current.goToPageIndex(index);
@@ -179,7 +204,13 @@ export function OpenSavedQueryFlyout({
         onChange={onChange}
       />
       <EuiSpacer />
-      {queriesOnCurrentPage.length > 0 ? (
+      {isLoading ? (
+        <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: '200px' }}>
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : queriesOnCurrentPage.length > 0 ? (
         queriesOnCurrentPage.map((query) => (
           <SavedQueryCard
             key={query.id}
@@ -205,7 +236,7 @@ export function OpenSavedQueryFlyout({
         />
       )}
       <EuiSpacer />
-      {queriesOnCurrentPage.length > 0 && (
+      {!isLoading && queriesOnCurrentPage.length > 0 && (
         <EuiTablePagination
           itemsPerPageOptions={[5, 10, 20]}
           itemsPerPage={itemsPerPage}
@@ -252,6 +283,7 @@ export function OpenSavedQueryFlyout({
           initialSelectedTab={tabs[0]}
           onTabClick={(tab) => {
             setSelectedTabId(tab.id);
+            currentTabIdRef.current = tab.id;
           }}
         />
       </EuiFlyoutBody>
@@ -268,7 +300,19 @@ export function OpenSavedQueryFlyout({
               fill
               onClick={() => {
                 if (selectedQuery) {
-                  onQueryOpen(selectedQuery);
+                  if (
+                    // Template queries are not associated with data sources. Apply data source from current query
+                    selectedQuery.attributes.isTemplate
+                  ) {
+                    const updatedQuery: Query = {
+                      ...queryStringManager?.getQuery(),
+                      query: selectedQuery.attributes.query.query,
+                      language: selectedQuery.attributes.query.language,
+                    };
+                    queryStringManager.setQuery(updatedQuery);
+                  } else {
+                    onQueryOpen(selectedQuery);
+                  }
                   onClose();
                 }
               }}
