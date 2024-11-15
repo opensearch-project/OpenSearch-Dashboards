@@ -91,8 +91,9 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
           } catch (e) {
             error = err;
           }
+          const statusCode = error.status || err.status;
           return res.custom({
-            statusCode: error.status || err.status,
+            statusCode: statusCode === 500 ? 503 : statusCode || 503,
             body: err.message,
           });
         }
