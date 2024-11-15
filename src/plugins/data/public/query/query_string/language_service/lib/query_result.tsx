@@ -143,7 +143,10 @@ export function QueryResult(props: { queryStatus: QueryStatus }) {
       data-test-subj="queryResultError"
     >
       <EuiPopoverTitle>ERRORS</EuiPopoverTitle>
-      <div style={{ width: '250px' }} className="eui-textBreakWord">
+      <div
+        style={{ width: '250px', maxHeight: '250px', overflowY: 'auto' }}
+        className="eui-textBreakWord"
+      >
         <EuiText size="s">
           <p>
             <strong>
