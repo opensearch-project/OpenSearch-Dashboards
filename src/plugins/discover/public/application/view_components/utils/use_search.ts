@@ -155,7 +155,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       .getUpdates$()
       .pipe(
         pairwise(),
-        filter(([prev, curr]) => prev.dataset?.id === curr.dataset?.id)
+        filter(([prev, curr]) => prev.dataset?.id !== curr.dataset?.id)
       )
       .subscribe(() => {
         data$.next({
@@ -164,6 +164,7 @@ export const useSearch = (services: DiscoverViewServices) => {
               ? ResultStatus.LOADING
               : ResultStatus.UNINITIALIZED,
           queryStatus: { startTime },
+          rows: [],
         });
       });
     return () => subscription.unsubscribe();
@@ -186,11 +187,12 @@ export const useSearch = (services: DiscoverViewServices) => {
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
   const fetch = useCallback(async () => {
+    const currentTime = Date.now();
     let dataset = indexPattern;
     if (!dataset) {
       data$.next({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
-        queryStatus: { startTime },
+        queryStatus: { startTime: currentTime },
       });
       return;
     }
@@ -220,10 +222,7 @@ export const useSearch = (services: DiscoverViewServices) => {
 
     let elapsedMs;
     try {
-      // Only show loading indicator if we are fetching when the rows are empty
-      if (fetchStateRef.current.rows?.length === 0) {
-        data$.next({ status: ResultStatus.LOADING, queryStatus: { startTime } });
-      }
+      data$.next({ status: ResultStatus.LOADING, queryStatus: { startTime: currentTime } });
 
       // Initialize inspect adapter for search source
       inspectorAdapters.requests.reset();
@@ -341,7 +340,6 @@ export const useSearch = (services: DiscoverViewServices) => {
     services,
     sort,
     savedSearch?.searchSource,
-    startTime,
     data$,
     shouldSearchOnPageLoad,
     inspectorAdapters.requests,
