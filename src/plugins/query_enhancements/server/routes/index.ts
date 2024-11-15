@@ -17,6 +17,15 @@ import { registerQueryAssistRoutes } from './query_assist';
 import { registerDataSourceConnectionsRoutes } from './data_source_connection';
 
 /**
+ * Coerce status code to 503 for 500 errors from dependency services. Only use
+ * this function to handle errors throw by other services, and not from OSD.
+ */
+export const coerceStatusCode = (statusCode: number) => {
+  if (statusCode === 500) return 503;
+  return statusCode || 503;
+};
+
+/**
  * @experimental
  *
  * This method creates a function that will setup the routes for a search strategy by encapsulating the
@@ -91,9 +100,8 @@ export function defineSearchStrategyRouteProvider(logger: Logger, router: IRoute
           } catch (e) {
             error = err;
           }
-          const statusCode = error.status || err.status;
           return res.custom({
-            statusCode: statusCode === 500 ? 503 : statusCode || 503,
+            statusCode: coerceStatusCode(error.status || err.status),
             body: err.message,
           });
         }
