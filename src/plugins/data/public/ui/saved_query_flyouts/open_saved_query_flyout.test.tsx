@@ -4,13 +4,14 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { OpenSavedQueryFlyout } from './open_saved_query_flyout';
 import { createSavedQueryService } from '../../../public/query/saved_query/saved_query_service';
 import { applicationServiceMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
 import { SavedQueryAttributes } from '../../../public/query/saved_query/types';
 import '@testing-library/jest-dom';
 import { queryStringManagerMock } from '../../../../data/public/query/query_string/query_string_manager.mock';
+import { getQueryService } from '../../services';
 
 const savedQueryAttributesWithTemplate: SavedQueryAttributes = {
   title: 'foo',
@@ -63,6 +64,10 @@ jest.mock('@osd/i18n', () => ({
   },
 }));
 
+jest.mock('../../services', () => ({
+  getQueryService: jest.fn(),
+}));
+
 const mockSavedQueryService = createSavedQueryService(
   // @ts-ignore
   mockSavedObjectsClient,
@@ -100,6 +105,9 @@ jest.spyOn(mockSavedQueryService, 'getAllSavedQueries').mockResolvedValue(savedQ
 describe('OpenSavedQueryFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (getQueryService as jest.Mock).mockReturnValue({
+      queryString: queryStringManagerMock.createSetupContract(),
+    });
   });
 
   it('should render the flyout with correct tabs and content', async () => {
@@ -109,7 +117,6 @@ describe('OpenSavedQueryFlyout', () => {
         onClose={mockOnClose}
         onQueryOpen={mockOnQueryOpen}
         handleQueryDelete={mockHandleQueryDelete}
-        queryStringManager={queryStringManagerMock.createSetupContract()}
       />
     );
 
@@ -141,7 +148,6 @@ describe('OpenSavedQueryFlyout', () => {
         onClose={mockOnClose}
         onQueryOpen={mockOnQueryOpen}
         handleQueryDelete={mockHandleQueryDelete}
-        queryStringManager={queryStringManagerMock.createSetupContract()}
       />
     );
 
@@ -162,7 +168,6 @@ describe('OpenSavedQueryFlyout', () => {
         onClose={mockOnClose}
         onQueryOpen={mockOnQueryOpen}
         handleQueryDelete={mockHandleQueryDelete}
-        queryStringManager={queryStringManagerMock.createSetupContract()}
       />
     );
 
@@ -181,7 +186,6 @@ describe('OpenSavedQueryFlyout', () => {
         onClose={mockOnClose}
         onQueryOpen={mockOnQueryOpen}
         handleQueryDelete={mockHandleQueryDelete}
-        queryStringManager={queryStringManagerMock.createSetupContract()}
       />
     );
 
@@ -214,7 +218,6 @@ describe('OpenSavedQueryFlyout', () => {
         onClose={mockOnClose}
         onQueryOpen={mockOnQueryOpen}
         handleQueryDelete={mockHandleQueryDelete}
-        queryStringManager={queryStringManagerMock.createSetupContract()}
       />
     );
 
