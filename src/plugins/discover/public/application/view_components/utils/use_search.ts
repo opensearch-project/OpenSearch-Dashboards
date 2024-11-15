@@ -127,11 +127,11 @@ export const useSearch = (services: DiscoverViewServices) => {
     // previously saved search or if it is just transient
     return (
       datasetPreference ||
-      services.uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
+      uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
       savedSearch?.id !== undefined ||
       timefilter.getRefreshInterval().pause === false
     );
-  }, [data.query, savedSearch?.id, services.uiSettings, timefilter, uiSettings]);
+  }, [data.query, savedSearch, uiSettings, timefilter]);
 
   const startTime = Date.now();
   const data$ = useMemo(
