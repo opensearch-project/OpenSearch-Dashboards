@@ -115,24 +115,23 @@ export const useSearch = (services: DiscoverViewServices) => {
     requests: new RequestAdapter(),
   };
 
-  const getDatasetAutoSearchOnPageLoadPreference = () => {
-    // Checks the searchOnpageLoadPreference for the current dataset if not specifed defaults to true
-    const datasetType = data.query.queryString.getQuery().dataset?.type;
-
-    const datasetService = data.query.queryString.getDatasetService();
-
-    return !datasetType || (datasetService?.getType(datasetType)?.meta?.searchOnLoad ?? true);
-  };
-
   const shouldSearchOnPageLoad = useCallback(() => {
+    // Checks the searchOnpageLoadPreference for the current dataset if not specifed defaults to UI Settings
+    const { queryString } = data.query;
+    const { dataset } = queryString.getQuery();
+    const typeConfig = dataset ? queryString.getDatasetService().getType(dataset.type) : undefined;
+    const datasetPreference =
+      typeConfig?.meta?.searchOnLoad ?? uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING);
+
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
     return (
+      datasetPreference ||
       services.uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
       savedSearch?.id !== undefined ||
       timefilter.getRefreshInterval().pause === false
     );
-  }, [savedSearch, services.uiSettings, timefilter]);
+  }, [data.query, savedSearch?.id, services.uiSettings, timefilter, uiSettings]);
 
   const startTime = Date.now();
   const data$ = useMemo(
