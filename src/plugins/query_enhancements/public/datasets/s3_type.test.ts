@@ -141,9 +141,7 @@ describe('s3TypeConfig', () => {
 
     it('should fetch data sources for unknown type', async () => {
       mockSavedObjectsClient.find = jest.fn().mockResolvedValue({
-        savedObjects: [
-          { id: 'ds1', attributes: { title: 'DataSource 1', dataSourceVersion: '3.0' } },
-        ],
+        savedObjects: [{ id: 'ds1', attributes: { title: 'DataSource 1' } }],
       });
 
       const result = await s3TypeConfig.fetch(mockServices as IDataPluginServices, [
@@ -152,33 +150,6 @@ describe('s3TypeConfig', () => {
 
       expect(result.children).toHaveLength(1);
       expect(result.children?.[0].title).toBe('DataSource 1');
-      expect(result.hasNext).toBe(true);
-    });
-
-    it('should filter out data sources with versions lower than 1.0.0', async () => {
-      mockSavedObjectsClient.find = jest.fn().mockResolvedValue({
-        savedObjects: [
-          { id: 'ds1', attributes: { title: 'DataSource 1', dataSourceVersion: '1.0' } },
-          {
-            id: 'ds2',
-            attributes: { title: 'DataSource 2', dataSourceVersion: '' },
-          },
-          { id: 'ds3', attributes: { title: 'DataSource 3', dataSourceVersion: '2.17.0' } },
-          {
-            id: 'ds4',
-            attributes: { title: 'DataSource 4', dataSourceVersion: '.0' },
-          },
-        ],
-      });
-
-      const result = await s3TypeConfig.fetch(mockServices as IDataPluginServices, [
-        { id: 'unknown', title: 'Unknown', type: 'UNKNOWN' },
-      ]);
-
-      expect(result.children).toHaveLength(2);
-      expect(result.children?.[0].title).toBe('DataSource 1');
-      expect(result.children?.[1].title).toBe('DataSource 3');
-      expect(result.children?.some((child) => child.title === 'DataSource 2')).toBe(false);
       expect(result.hasNext).toBe(true);
     });
   });

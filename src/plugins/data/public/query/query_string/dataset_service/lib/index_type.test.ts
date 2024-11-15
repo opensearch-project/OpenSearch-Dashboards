@@ -10,11 +10,18 @@ import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { DATA_STRUCTURE_META_TYPES, DataStructure, Dataset } from '../../../../../common';
 import * as services from '../../../../services';
 import { IDataPluginServices } from 'src/plugins/data/public';
+import { of } from 'rxjs';
 
 jest.mock('../../../../services', () => {
+  const mockSearchFunction = jest.fn();
+
   return {
-    getSearchService: jest.fn(),
     getIndexPatterns: jest.fn(),
+    getSearchService: jest.fn(() => ({
+      getDefaultSearchInterceptor: () => ({
+        search: mockSearchFunction,
+      }),
+    })),
     getQueryService: () => ({
       queryString: {
         getLanguageService: () => ({
@@ -90,9 +97,7 @@ describe('indexTypeConfig', () => {
 
   test('should fetch data sources for unknown type', async () => {
     mockSavedObjectsClient.find = jest.fn().mockResolvedValue({
-      savedObjects: [
-        { id: 'ds1', attributes: { title: 'DataSource 1', dataSourceVersion: '3.0' } },
-      ],
+      savedObjects: [{ id: 'ds1', attributes: { title: 'DataSource 1' } }],
     });
 
     const result = await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
@@ -104,30 +109,54 @@ describe('indexTypeConfig', () => {
     expect(result.hasNext).toBe(true);
   });
 
-  test('should filter out data sources with versions lower than 1.0.0', async () => {
-    mockSavedObjectsClient.find = jest.fn().mockResolvedValue({
-      savedObjects: [
-        { id: 'ds1', attributes: { title: 'DataSource 1', dataSourceVersion: '1.0' } },
-        {
-          id: 'ds2',
-          attributes: { title: 'DataSource 2', dataSourceVersion: '' },
+  describe('fetchIndices', () => {
+    test('should extract index names correctly from different formats', async () => {
+      const mockResponse = {
+        rawResponse: {
+          aggregations: {
+            indices: {
+              buckets: [
+                // Serverless format with TIMESERIES
+                { key: '123::TIMESERIES::sample-index-1:0' },
+                // Serverless format without TIMESERIES
+                { key: '123::sample-index-2:0' },
+                // Non-serverless format
+                { key: 'simple-index' },
+              ],
+            },
+          },
         },
-        { id: 'ds3', attributes: { title: 'DataSource 3', dataSourceVersion: '2.17.0' } },
-        {
-          id: 'ds4',
-          attributes: { title: 'DataSource 4', dataSourceVersion: '.0' },
-        },
-      ],
+      };
+
+      const searchService = services.getSearchService();
+      const interceptor = searchService.getDefaultSearchInterceptor();
+      (interceptor.search as jest.Mock).mockReturnValue(of(mockResponse));
+
+      const result = await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
+        { id: 'datasource1', title: 'DataSource 1', type: 'DATA_SOURCE' },
+      ]);
+
+      expect(result.children).toEqual([
+        { id: 'datasource1::sample-index-1', title: 'sample-index-1', type: 'INDEX' },
+        { id: 'datasource1::sample-index-2', title: 'sample-index-2', type: 'INDEX' },
+        { id: 'datasource1::simple-index', title: 'simple-index', type: 'INDEX' },
+      ]);
     });
 
-    const result = await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
-      { id: 'unknown', title: 'Unknown', type: 'UNKNOWN' },
-    ]);
+    test('should handle response without aggregations', async () => {
+      const mockResponse = {
+        rawResponse: {},
+      };
 
-    expect(result.children).toHaveLength(2);
-    expect(result.children?.[0].title).toBe('DataSource 1');
-    expect(result.children?.[1].title).toBe('DataSource 3');
-    expect(result.children?.some((child) => child.title === 'DataSource 2')).toBe(false);
-    expect(result.hasNext).toBe(true);
+      const searchService = services.getSearchService();
+      const interceptor = searchService.getDefaultSearchInterceptor();
+      (interceptor.search as jest.Mock).mockReturnValue(of(mockResponse));
+
+      const result = await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
+        { id: 'datasource1', title: 'DataSource 1', type: 'DATA_SOURCE' },
+      ]);
+
+      expect(result.children).toEqual([]);
+    });
   });
 });

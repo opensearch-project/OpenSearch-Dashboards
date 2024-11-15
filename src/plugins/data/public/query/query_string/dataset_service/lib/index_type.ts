@@ -6,7 +6,6 @@
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { map } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
-import semver from 'semver';
 import {
   DEFAULT_DATA,
   DataStructure,
@@ -120,16 +119,11 @@ const fetchDataSources = async (client: SavedObjectsClientContract) => {
     type: 'data-source',
     perPage: 10000,
   });
-  const dataSources: DataStructure[] = response.savedObjects
-    .filter((savedObject) => {
-      const coercedVersion = semver.coerce(savedObject.attributes.dataSourceVersion);
-      return coercedVersion ? semver.satisfies(coercedVersion, '>=1.0.0') : false;
-    })
-    .map((savedObject) => ({
-      id: savedObject.id,
-      title: savedObject.attributes.title,
-      type: 'DATA_SOURCE',
-    }));
+  const dataSources: DataStructure[] = response.savedObjects.map((savedObject) => ({
+    id: savedObject.id,
+    title: savedObject.attributes.title,
+    type: 'DATA_SOURCE',
+  }));
 
   return injectMetaToDataStructures(dataSources);
 };
@@ -158,9 +152,22 @@ const fetchIndices = async (dataStructure: DataStructure): Promise<string[]> => 
 
   const searchResponseToArray = (response: any) => {
     const { rawResponse } = response;
-    return rawResponse.aggregations
-      ? rawResponse.aggregations.indices.buckets.map((bucket: { key: any }) => bucket.key)
-      : [];
+    if (!rawResponse.aggregations) {
+      return [];
+    }
+
+    return rawResponse.aggregations.indices.buckets.map((bucket: { key: string }) => {
+      const key = bucket.key;
+      // Handle the case of serverless cluster where key format is either:
+      // - datasource-id::TIMESERIES::<index-name>:0
+      // - datasource-id::<index-name>:0
+      // Note: Index names cannot contain ':' or '::' in OpenSearch, so these delimiters
+      // are guaranteed to be part of the serverless format, not the index name
+      const parts = key.split('::');
+      const lastPart = parts[parts.length - 1] || '';
+      // extract index name or return original key if pattern doesn't match
+      return lastPart.split(':')[0] || key;
+    });
   };
 
   return search
