@@ -154,6 +154,37 @@ describe('s3TypeConfig', () => {
     });
   });
 
+  it('should NOT filter out data sources regardless of version', async () => {
+    mockSavedObjectsClient.find = jest.fn().mockResolvedValue({
+      savedObjects: [
+        { id: 'ds1', attributes: { title: 'DataSource 1', dataSourceVersion: '1.0' } },
+        {
+          id: 'ds2',
+          attributes: { title: 'DataSource 2', dataSourceVersion: '' }, // empty version
+        },
+        { id: 'ds3', attributes: { title: 'DataSource 3', dataSourceVersion: '2.17.0' } },
+        {
+          id: 'ds4',
+          attributes: { title: 'DataSource 4', dataSourceVersion: '.0' }, // invalid version
+        },
+      ],
+    });
+
+    const result = await s3TypeConfig.fetch(mockServices as IDataPluginServices, [
+      { id: 'unknown', title: 'Unknown', type: 'UNKNOWN' },
+    ]);
+
+    // Verify all data sources are included
+    expect(result.children).toHaveLength(4);
+    expect(result.children?.map((child) => child.title)).toEqual([
+      'DataSource 1',
+      'DataSource 2',
+      'DataSource 3',
+      'DataSource 4',
+    ]);
+    expect(result.hasNext).toBe(true);
+  });
+
   test('fetchFields returns table fields', async () => {
     const postResponse = {
       queryId: 'd09ZbTgxRHlnWW15czM=',

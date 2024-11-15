@@ -109,6 +109,37 @@ describe('indexTypeConfig', () => {
     expect(result.hasNext).toBe(true);
   });
 
+  test('should NOT filter out data sources regardless of version', async () => {
+    mockSavedObjectsClient.find = jest.fn().mockResolvedValue({
+      savedObjects: [
+        { id: 'ds1', attributes: { title: 'DataSource 1', dataSourceVersion: '1.0' } },
+        {
+          id: 'ds2',
+          attributes: { title: 'DataSource 2', dataSourceVersion: '' }, // empty version
+        },
+        { id: 'ds3', attributes: { title: 'DataSource 3', dataSourceVersion: '2.17.0' } },
+        {
+          id: 'ds4',
+          attributes: { title: 'DataSource 4', dataSourceVersion: '.0' }, // invalid version
+        },
+      ],
+    });
+
+    const result = await indexTypeConfig.fetch(mockServices as IDataPluginServices, [
+      { id: 'unknown', title: 'Unknown', type: 'UNKNOWN' },
+    ]);
+
+    // Verify all data sources are included regardless of version
+    expect(result.children).toHaveLength(4);
+    expect(result.children?.map((child) => child.title)).toEqual([
+      'DataSource 1',
+      'DataSource 2',
+      'DataSource 3',
+      'DataSource 4',
+    ]);
+    expect(result.hasNext).toBe(true);
+  });
+
   describe('fetchIndices', () => {
     test('should extract index names correctly from different formats', async () => {
       const mockResponse = {
@@ -116,7 +147,6 @@ describe('indexTypeConfig', () => {
           aggregations: {
             indices: {
               buckets: [
-                // Serverless format with TIMESERIES
                 { key: '123::TIMESERIES::sample-index-1:0' },
                 // Serverless format without TIMESERIES
                 { key: '123::sample-index-2:0' },

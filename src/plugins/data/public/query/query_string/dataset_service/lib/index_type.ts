@@ -16,6 +16,8 @@ import { DatasetTypeConfig } from '../types';
 import { getSearchService, getIndexPatterns } from '../../../../services';
 import { injectMetaToDataStructures } from './utils';
 
+export const DELIMITER = '::';
+
 export const indexTypeConfig: DatasetTypeConfig = {
   id: DEFAULT_DATA.SET_TYPES.INDEX,
   title: 'Indexes',
@@ -158,13 +160,10 @@ const fetchIndices = async (dataStructure: DataStructure): Promise<string[]> => 
 
     return rawResponse.aggregations.indices.buckets.map((bucket: { key: string }) => {
       const key = bucket.key;
-      // Handle the case of serverless cluster where key format is either:
-      // - datasource-id::TIMESERIES::<index-name>:0
-      // - datasource-id::<index-name>:0
       // Note: Index names cannot contain ':' or '::' in OpenSearch, so these delimiters
-      // are guaranteed to be part of the serverless format, not the index name
-      const parts = key.split('::');
-      const lastPart = parts[parts.length - 1] || '';
+      // are guaranteed not to be part of the regular format of index name
+      const parts = key.split(DELIMITER);
+      const lastPart = parts[parts.length - 1] || key;
       // extract index name or return original key if pattern doesn't match
       return lastPart.split(':')[0] || key;
     });
