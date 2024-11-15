@@ -36,6 +36,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
     searchOnLoad: true,
     supportsTimeFilter: false,
     isFieldLoadAsync: true,
+    cacheOptions: true,
   },
 
   toDataset: (path: DataStructure[]): Dataset => {
@@ -130,7 +131,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
             title: i18n.translate('queryEnhancements.s3Type.sampleQuery.basicPPLQuery', {
               defaultMessage: 'Sample query for PPL',
             }),
-            query: `source = ${dataset.title} | head 10`,
+            query: `source = ${dataset.title}`,
           },
         ];
       case 'SQL':

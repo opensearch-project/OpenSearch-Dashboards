@@ -44,7 +44,6 @@ describe('QueryStringManager', () => {
     storage = new DataStorage(window.localStorage, 'opensearchDashboards.');
     sessionStorage = new DataStorage(window.sessionStorage, 'opensearchDashboards.');
     mockSearchInterceptor = {} as jest.Mocked<ISearchInterceptor>;
-
     service = new QueryStringManager(
       storage,
       sessionStorage,

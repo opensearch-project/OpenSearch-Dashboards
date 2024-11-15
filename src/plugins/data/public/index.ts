@@ -493,6 +493,7 @@ export {
   QueryStart,
   PersistedLog,
   LanguageReference,
+  DatasetIndexedViewsService,
 } from './query';
 
 export { AggsStart } from './search/aggs';

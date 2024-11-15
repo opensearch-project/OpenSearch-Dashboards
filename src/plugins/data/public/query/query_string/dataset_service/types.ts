@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { EuiIconProps } from '@elastic/eui';
-import { Dataset, DatasetField, DatasetSearchOptions, DataStructure } from '../../../../common';
+import {
+  Dataset,
+  DatasetField,
+  DatasetSearchOptions,
+  DataStructure,
+  SavedObject,
+} from '../../../../common';
 import { IDataPluginServices } from '../../../types';
 
 /**
@@ -14,6 +20,18 @@ export interface DataStructureFetchOptions {
   search?: string;
   /** Token for paginated results */
   paginationToken?: string;
+}
+
+export interface DatasetIndexedView {
+  name: string;
+}
+
+export interface DatasetIndexedViewsService {
+  getIndexedViews: (dataset: Dataset) => Promise<DatasetIndexedView[]>;
+  /**
+   * Returns the data source saved object connected with the data connection object
+   */
+  getConnectedDataSource: (dataset: Dataset) => Promise<SavedObject>;
 }
 
 /**
@@ -36,6 +54,8 @@ export interface DatasetTypeConfig {
     supportsTimeFilter?: boolean;
     /** Optional isFieldLoadAsync determines if field loads are async */
     isFieldLoadAsync?: boolean;
+    /** Optional cacheOptions determines if the data structure is cacheable. Defaults to false */
+    cacheOptions?: boolean;
   };
   /**
    * Converts a DataStructure to a Dataset.
@@ -81,5 +101,9 @@ export interface DatasetTypeConfig {
   /**
    * Returns a list of sample queries for this dataset type
    */
-  getSampleQueries?: (dataset: Dataset, language: string) => any;
+  getSampleQueries?: (dataset?: Dataset, language?: string) => Promise<any> | any;
+  /**
+   * Service used for indexedViews related operations
+   */
+  indexedViewsService?: DatasetIndexedViewsService;
 }
