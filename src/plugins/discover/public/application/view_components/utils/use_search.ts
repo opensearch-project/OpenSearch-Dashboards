@@ -345,9 +345,6 @@ export const useSearch = (services: DiscoverViewServices) => {
   ]);
 
   useEffect(() => {
-    if (!getDatasetAutoSearchOnPageLoadPreference()) {
-      skipInitialFetch.current = true;
-    }
     const fetch$ = merge(
       refetch$,
       filterManager.getFetches$(),
@@ -378,8 +375,6 @@ export const useSearch = (services: DiscoverViewServices) => {
     return () => {
       subscription.unsubscribe();
     };
-    // disabling the eslint since we are not adding getDatasetAutoSearchOnPageLoadPreference since this changes when dataset changes and these chnages are already part of data.query.queryString
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     data$,
     data.query.queryString,
