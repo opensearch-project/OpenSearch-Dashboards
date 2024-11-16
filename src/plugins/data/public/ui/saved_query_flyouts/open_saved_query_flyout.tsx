@@ -308,7 +308,9 @@ export function OpenSavedQueryFlyout({
                 if (selectedQuery) {
                   if (
                     // Template queries are not associated with data sources. Apply data source from current query
-                    selectedQuery.attributes.isTemplate
+                    selectedQuery.attributes.isTemplate ||
+                    // Associating a saved query with a data source is optional. If no data source is present, keep the current source.
+                    !selectedQuery.attributes.query.dataset?.dataSource
                   ) {
                     const updatedQuery: Query = {
                       ...queryStringManager?.getQuery(),
