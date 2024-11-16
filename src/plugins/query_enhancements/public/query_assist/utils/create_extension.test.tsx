@@ -12,6 +12,7 @@ import { QueryEditorExtensionDependencies, QueryStringContract } from '../../../
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { ConfigSchema } from '../../../common/config';
 import { clearCache, createQueryAssistExtension } from './create_extension';
+import { ResultStatus } from '../../../../discover/public';
 
 const coreSetupMock = coreMock.createSetup({
   pluginStartDeps: {
@@ -54,6 +55,8 @@ describe('CreateExtension', () => {
     onSelectLanguage: jest.fn(),
     isCollapsed: false,
     setIsCollapsed: jest.fn(),
+    query: mockQueryWithIndexPattern,
+    fetchStatus: ResultStatus.NO_RESULTS,
   };
   afterEach(() => {
     jest.clearAllMocks();

@@ -775,11 +775,11 @@ valueList
    ;
 
 qualifiedName
-   : ID // (DOT ident)* # identsAsQualifiedName
+   : ID // ident (DOT ident)* # identsAsQualifiedName
    ;
 
 tableQualifiedName
-   : ID // tableIdent (DOT ident)* # identsAsTableQualifiedName
+   : tableIdent (DOT ident)* # identsAsTableQualifiedName
    ;
 
 wcQualifiedName

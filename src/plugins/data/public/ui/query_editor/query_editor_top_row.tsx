@@ -72,7 +72,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
-  const { uiSettings, storage, appName } = opensearchDashboards.services;
+  const { uiSettings, storage, appName, data } = opensearchDashboards.services;
 
   const queryLanguage = props.query && props.query.language;
   const persistedLog: PersistedLog | undefined = React.useMemo(
@@ -225,7 +225,17 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function shouldRenderDatePicker(): boolean {
-    return Boolean(props.showDatePicker ?? true) ?? (props.showAutoRefreshOnly && true);
+    return (
+      Boolean((props.showDatePicker || props.showAutoRefreshOnly) ?? true) &&
+      !(
+        queryLanguage &&
+        data.query.queryString.getLanguageService().getLanguage(queryLanguage)?.hideDatePicker
+      ) &&
+      (props.query?.dataset
+        ? data.query.queryString.getDatasetService().getType(props.query.dataset.type)?.meta
+            ?.supportsTimeFilter !== false
+        : true)
+    );
   }
 
   function shouldRenderQueryEditor(): boolean {

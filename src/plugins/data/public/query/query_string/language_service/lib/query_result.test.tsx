@@ -27,6 +27,17 @@ describe('Query Result', () => {
     expect(component).toMatchSnapshot();
   });
 
+  it('should not render if status is uninitialized', () => {
+    const props = {
+      queryStatus: {
+        status: ResultStatus.UNINITIALIZED,
+        startTime: Number.NEGATIVE_INFINITY,
+      },
+    };
+    const component = shallowWithIntl(<QueryResult {...props} />);
+    expect(component.isEmptyRender()).toBe(true);
+  });
+
   it('shows ready status with complete message', () => {
     const props = {
       queryStatus: {
