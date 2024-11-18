@@ -86,7 +86,7 @@ const run = async () => {
   );
   //ToDo: Remove when opensearch-js is released to include https://github.com/opensearch-project/opensearch-js/pull/889
   promises.push(
-    patchFile('node_modules/@opensearch-project/opensearch/lib/Serializer.js', [
+    patchFile('node_modules/@opensearch-project/opensearch-next/lib/Serializer.js', [
       {
         from: 'val < Number.MAX_SAFE_INTEGER',
         to: 'val < Number.MIN_SAFE_INTEGER',
