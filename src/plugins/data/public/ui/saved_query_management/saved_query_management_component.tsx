@@ -45,7 +45,7 @@ import {
 import { i18n } from '@osd/i18n';
 import React, { useCallback, useEffect, useState, Fragment, useRef } from 'react';
 import { sortBy } from 'lodash';
-import { QueryStringManager, SavedQuery, SavedQueryService } from '../..';
+import { SavedQuery, SavedQueryService } from '../..';
 import { SavedQueryListItem } from './saved_query_list_item';
 import {
   toMountPoint,
@@ -70,7 +70,6 @@ interface Props {
   onClearSavedQuery: () => void;
   closeMenuPopover: () => void;
   saveQuery: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
-  queryStringManager: QueryStringManager;
 }
 
 export function SavedQueryManagementComponent({
@@ -84,7 +83,6 @@ export function SavedQueryManagementComponent({
   closeMenuPopover,
   useNewSavedQueryUI,
   saveQuery,
-  queryStringManager,
 }: Props) {
   const [savedQueries, setSavedQueries] = useState([] as SavedQuery[]);
   const [count, setTotalCount] = useState(0);
@@ -258,7 +256,6 @@ export function SavedQueryManagementComponent({
                   onClose={() => openSavedQueryFlyout?.close().then()}
                   onQueryOpen={onLoad}
                   handleQueryDelete={handleDelete}
-                  queryStringManager={queryStringManager}
                 />
               )
             );
