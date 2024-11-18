@@ -19,6 +19,8 @@ import { generateRightSidebarScrollProps, RightSidebarScrollField } from './util
 import { CreatorDetailsPanel } from './creator_details_panel';
 
 import './workspace_creator_form.scss';
+import { WorkspacePrivacySettingPanel } from '../workspace_form/workspace_privacy_setting_panel';
+import { WorkspacePrivacyItemType } from '../workspace_form/constants';
 
 interface WorkspaceCreatorFormProps extends WorkspaceFormProps {
   isSubmitting: boolean;
@@ -38,6 +40,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
     numberOfErrors,
     setName,
     setDescription,
+    setSelectedPrivacyType,
     handleFormSubmit,
     handleColorChange,
     handleUseCaseChange,
@@ -109,6 +112,13 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
                 />
               </EuiPanel>
             </>
+          )}
+          <EuiSpacer size="m" />
+          {isDashboardAdmin && (
+            <WorkspacePrivacySettingPanel
+              onPrivacyTypeChange={setSelectedPrivacyType}
+              currentPrivacyType={formData.privacyType}
+            />
           )}
         </EuiForm>
       </EuiFlexItem>

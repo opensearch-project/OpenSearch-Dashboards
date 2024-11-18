@@ -18,6 +18,12 @@ export enum WorkspacePermissionItemType {
   Group = 'group',
 }
 
+export enum WorkspacePrivacyItemType {
+  PrivateToCollaborators = 'privat-to-collaborators',
+  AnyoneCanView = 'anyone-can-view',
+  AnyoneCanEdit = 'anyone-can-edit',
+}
+
 export const optionIdToWorkspacePermissionModesMap: {
   [key: string]: WorkspacePermissionMode[];
 } = {

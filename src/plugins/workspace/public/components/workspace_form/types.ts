@@ -103,6 +103,7 @@ export interface WorkspaceFormDataState
   extends Omit<WorkspaceFormSubmitData, 'name' | 'permissionSettings'> {
   name: string;
   useCase: string | undefined;
+  privacyType: string;
   selectedDataSourceConnections: DataSourceConnection[];
   permissionSettings: Array<
     Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
