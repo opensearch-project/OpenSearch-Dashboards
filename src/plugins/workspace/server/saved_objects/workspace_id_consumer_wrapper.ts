@@ -15,6 +15,7 @@ import {
   SavedObjectsFindOptions,
   SavedObjectsErrorHelpers,
   SavedObjectsClientWrapperOptions,
+  SavedObject,
 } from '../../../../core/server';
 import { IWorkspaceClientImpl } from '../types';
 
@@ -50,19 +51,19 @@ export class WorkspaceIdConsumerWrapper {
   }
 
   private async checkWorkspacesExist(
-    finalOptions: SavedObjectsCreateOptions,
+    workspaces: SavedObject['workspaces'] | null,
     wrapperOptions: SavedObjectsClientWrapperOptions
   ) {
-    if (finalOptions.workspaces?.length) {
+    if (workspaces?.length) {
       let invalidWorkspaces: string[] = [];
       // If only has one workspace, we should use get to optimize performance
-      if (finalOptions.workspaces.length === 1) {
+      if (workspaces.length === 1) {
         const workspaceGet = await this.workspaceClient.get(
           { request: wrapperOptions.request },
-          finalOptions.workspaces[0]
+          workspaces[0]
         );
         if (!workspaceGet.success) {
-          invalidWorkspaces = [finalOptions.workspaces[0]];
+          invalidWorkspaces = [workspaces[0]];
         }
       } else {
         const workspaceList = await this.workspaceClient.list(
@@ -77,7 +78,7 @@ export class WorkspaceIdConsumerWrapper {
           const workspaceIdsSet = new Set(
             workspaceList.result.workspaces.map((workspace) => workspace.id)
           );
-          invalidWorkspaces = finalOptions.workspaces.filter(
+          invalidWorkspaces = workspaces.filter(
             (targetWorkspace) => !workspaceIdsSet.has(targetWorkspace)
           );
         }
@@ -87,8 +88,7 @@ export class WorkspaceIdConsumerWrapper {
         throw SavedObjectsErrorHelpers.decorateBadRequestError(
           new Error(
             i18n.translate('workspace.id_consumer.invalid', {
-              defaultMessage: 'Invalid workspaces: {invalidWorkspaces}',
-              values: { invalidWorkspaces: invalidWorkspaces.join(', ') },
+              defaultMessage: 'Exist invalid workspaces',
             })
           )
         );
@@ -103,7 +103,7 @@ export class WorkspaceIdConsumerWrapper {
         const finalOptions = this.isConfigType(type)
           ? options
           : this.formatWorkspaceIdParams(wrapperOptions.request, options);
-        await this.checkWorkspacesExist(finalOptions, wrapperOptions);
+        await this.checkWorkspacesExist(finalOptions?.workspaces, wrapperOptions);
         return wrapperOptions.client.create(type, attributes, finalOptions);
       },
       bulkCreate: async <T = unknown>(
@@ -111,7 +111,7 @@ export class WorkspaceIdConsumerWrapper {
         options: SavedObjectsCreateOptions = {}
       ) => {
         const finalOptions = this.formatWorkspaceIdParams(wrapperOptions.request, options);
-        await this.checkWorkspacesExist(finalOptions, wrapperOptions);
+        await this.checkWorkspacesExist(finalOptions?.workspaces, wrapperOptions);
         return wrapperOptions.client.bulkCreate(objects, finalOptions);
       },
       checkConflicts: (
@@ -131,7 +131,7 @@ export class WorkspaceIdConsumerWrapper {
           this.isConfigType(options.type as string) && options.sortField === 'buildNum'
             ? options
             : this.formatWorkspaceIdParams(wrapperOptions.request, options);
-        await this.checkWorkspacesExist(finalOptions, wrapperOptions);
+        await this.checkWorkspacesExist(finalOptions?.workspaces, wrapperOptions);
         return wrapperOptions.client.find(finalOptions);
       },
       bulkGet: wrapperOptions.client.bulkGet,
