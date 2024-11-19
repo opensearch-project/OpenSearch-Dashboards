@@ -30,4 +30,11 @@
 
 export { connectToQueryState, connectStorageToQueryState } from './connect_to_query_state';
 export { syncQueryStateWithUrl } from './sync_state_with_url';
-export { QueryState, QueryStateChange } from './types';
+export {
+  QueryState,
+  QueryStateChange,
+  QueryStateTrigger,
+  QUERY_STATE_TRIGGER_TYPES,
+} from './types';
+
+export * from './triggers';

@@ -468,6 +468,8 @@ export {
   connectToQueryState,
   syncQueryStateWithUrl,
   QueryState,
+  QueryStateTrigger,
+  QUERY_STATE_TRIGGER_TYPES,
   getDefaultQuery,
   FilterManager,
   QueryStringContract,

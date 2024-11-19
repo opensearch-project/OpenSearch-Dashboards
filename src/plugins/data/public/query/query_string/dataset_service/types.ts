@@ -11,9 +11,12 @@ import {
   SavedObject,
 } from '../../../../common';
 import { IDataPluginServices } from '../../../types';
+import { QUERY_STATE_TRIGGER_TYPES } from '../..';
 
 /**
  * Options for fetching the data structure.
+ *
+ * @experimental This interface is experimental and might change in future releases.
  */
 export interface DataStructureFetchOptions {
   /** Search string to filter results */
@@ -22,20 +25,39 @@ export interface DataStructureFetchOptions {
   paginationToken?: string;
 }
 
+/**
+ * Used by the indexed views service
+ *
+ * @experimental This interface is experimental and might change in future releases.
+ */
 export interface DatasetIndexedView {
   name: string;
 }
 
+/**
+ * Service used for indexedViews related operations
+ *
+ * @experimental These interfaces are experimental and might change in future releases.
+ */
 export interface DatasetIndexedViewsService {
+  /**
+   * Retrieves the indexed views for the given dataset
+   * @param {Dataset} dataset - The dataset to retrieve indexed views for
+   * @returns {Promise<DatasetIndexedView[]>} A promise that resolves to an array of indexed views
+   */
   getIndexedViews: (dataset: Dataset) => Promise<DatasetIndexedView[]>;
   /**
-   * Returns the data source saved object connected with the data connection object
+   * Retrieves the data source saved object connected with the data connection object
+   * @param {Dataset} dataset - The dataset to retrieve the data source for
+   * @returns {Promise<SavedObject>} A promise that resolves to the connected data source
    */
   getConnectedDataSource: (dataset: Dataset) => Promise<SavedObject>;
 }
 
 /**
  * Configuration for handling dataset operations.
+ *
+ * @experimental These interfaces are experimental and might change in future releases.
  */
 export interface DatasetTypeConfig {
   /** Unique identifier for the dataset handler */
@@ -50,6 +72,11 @@ export interface DatasetTypeConfig {
     tooltip?: string;
     /** Optional preference for search on page load else defaulted to true */
     searchOnLoad?: boolean;
+    /**
+     * Optional preference for which triggers should not update the query state.
+     * If empty (default), all known triggers will update the query state.
+     */
+    suppressQueryStateTriggers?: QUERY_STATE_TRIGGER_TYPES[];
     /** Optional supportsTimeFilter determines if a time filter is needed */
     supportsTimeFilter?: boolean;
     /** Optional isFieldLoadAsync determines if field loads are async */

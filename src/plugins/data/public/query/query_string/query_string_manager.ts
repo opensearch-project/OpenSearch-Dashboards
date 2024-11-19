@@ -39,6 +39,7 @@ import { DatasetService, DatasetServiceContract } from './dataset_service';
 import { LanguageService, LanguageServiceContract } from './language_service';
 import { ISearchInterceptor } from '../../search';
 import { getApplication } from '../../services';
+import { QUERY_STATE_TRIGGER_TYPES, QueryStateTrigger } from '../state_sync';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;
@@ -151,10 +152,20 @@ export class QueryStringManager {
   /**
    * Updates the query.
    * @param {Query} query
+   * @experimental
+   * @param {QUERY_STATE_TRIGGER_TYPES} triggerId - The action that triggered this update. This param is experimental and may change in the future.
    */
-  public setQuery = (query: Partial<Query>) => {
+  public setQuery = (query: Partial<Query>, triggerId?: QUERY_STATE_TRIGGER_TYPES) => {
     const curQuery = this.query$.getValue();
     let newQuery = { ...curQuery, ...query };
+
+    if (triggerId && newQuery.dataset) {
+      const suppressedTriggers = this.datasetService.getType(newQuery.dataset.type)?.meta
+        ?.suppressQueryStateTriggers;
+      if (suppressedTriggers && suppressedTriggers.includes(triggerId)) {
+        return;
+      }
+    }
     if (!isEqual(curQuery, newQuery)) {
       // Check if dataset changed and if new dataset has language restrictions
       if (newQuery.dataset && !isEqual(curQuery.dataset, newQuery.dataset)) {

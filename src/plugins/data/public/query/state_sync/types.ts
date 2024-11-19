@@ -50,3 +50,20 @@ export interface QueryStateChange extends QueryStateChangePartial {
   appFilters?: boolean; // specifies if app filters change
   globalFilters?: boolean; // specifies if global filters change
 }
+
+export enum QUERY_STATE_TRIGGER_TYPES {
+  DATASET_CHANGED = 'DATASET_CHANGED',
+  FIELD_SELECTED = 'FIELD_SELECTED',
+  LANGUAGE_CHANGED = 'LANGUAGE_CHANGED',
+  PAGE_LOADED = 'PAGE_LOADED',
+  SAVED_QUERY_LOADED = 'SAVED_QUERY_LOADED',
+  SAVED_SEARCH_LOADED = 'SAVED_SEARCH_LOADED',
+  SAVED_TEMPLATE_LOADED = 'SAVED_TEMPLATE_LOADED',
+  USER_SUBMITTED = 'USER_SUBMITTED',
+}
+
+export interface QueryStateTrigger {
+  id: QUERY_STATE_TRIGGER_TYPES;
+  title: string;
+  description: string;
+}
