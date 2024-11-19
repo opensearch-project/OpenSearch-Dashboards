@@ -16,6 +16,7 @@ import {
 import { DatasetTypeConfig } from '../types';
 import { getSearchService, getIndexPatterns } from '../../../../services';
 import { injectMetaToDataStructures } from './utils';
+import { QUERY_STATE_TRIGGER_TYPES } from '../../../state_sync';
 
 export const indexTypeConfig: DatasetTypeConfig = {
   id: DEFAULT_DATA.SET_TYPES.INDEX,
@@ -24,6 +25,7 @@ export const indexTypeConfig: DatasetTypeConfig = {
     icon: { type: 'logoOpenSearch' },
     tooltip: 'OpenSearch Indexes',
     searchOnLoad: true,
+    suppressQueryStateTriggers: [QUERY_STATE_TRIGGER_TYPES.SAVED_TEMPLATE_LOADED],
   },
 
   toDataset: (path) => {

@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { SavedQuery, SavedQueryService } from '../../query';
+import { QUERY_STATE_TRIGGER_TYPES, SavedQuery, SavedQueryService } from '../../query';
 import { SavedQueryCard } from './saved_query_card';
 import { Query } from '../../../common';
 import { getQueryService } from '../../services';
@@ -78,7 +78,7 @@ export function OpenSavedQueryFlyout({
           (await queryStringManager
             .getDatasetService()
             ?.getType(query.dataset.type)
-            ?.getSampleQueries?.()) || [];
+            ?.getSampleQueries?.(query.dataset, query.language)) || [];
 
         // Check if any sample query has isTemplate set to true
         const hasTemplates = templateQueries.some((q) => q?.attributes?.isTemplate);
@@ -315,7 +315,9 @@ export function OpenSavedQueryFlyout({
                       query: selectedQuery.attributes.query.query,
                       language: selectedQuery.attributes.query.language,
                     };
-                    queryStringManager.setQuery(updatedQuery);
+                    queryStringManager.setQuery(updatedQuery, {
+                      trigger: QUERY_STATE_TRIGGER_TYPES.SAVED_TEMPLATE_LOADED,
+                    });
                   } else {
                     onQueryOpen(selectedQuery);
                   }

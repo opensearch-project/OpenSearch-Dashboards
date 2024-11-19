@@ -16,7 +16,12 @@ import {
   Dataset,
   DatasetField,
 } from '../../../data/common';
-import { DatasetTypeConfig, IDataPluginServices, OSD_FIELD_TYPES } from '../../../data/public';
+import {
+  DatasetTypeConfig,
+  IDataPluginServices,
+  OSD_FIELD_TYPES,
+  QUERY_STATE_TRIGGER_TYPES,
+} from '../../../data/public';
 import {
   API,
   DATASET,
@@ -34,6 +39,7 @@ export const s3TypeConfig: DatasetTypeConfig = {
     icon: { type: S3_ICON },
     tooltip: 'Amazon S3 Connections',
     searchOnLoad: true,
+    suppressQueryStateTriggers: [QUERY_STATE_TRIGGER_TYPES.SAVED_TEMPLATE_LOADED],
     supportsTimeFilter: false,
     isFieldLoadAsync: true,
     cacheOptions: true,

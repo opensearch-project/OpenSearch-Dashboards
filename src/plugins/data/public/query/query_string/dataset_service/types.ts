@@ -11,7 +11,7 @@ import {
   SavedObject,
 } from '../../../../common';
 import { IDataPluginServices } from '../../../types';
-import { QUERY_STATE_TRIGGER_TYPES } from '../..';
+import { QUERY_STATE_TRIGGER_TYPES } from '../../..';
 
 /**
  * Options for fetching the data structure.
@@ -128,7 +128,7 @@ export interface DatasetTypeConfig {
   /**
    * Returns a list of sample queries for this dataset type
    */
-  getSampleQueries?: (dataset?: Dataset, language?: string) => Promise<any> | any;
+  getSampleQueries?: (dataset: Dataset, language: string) => Promise<any> | any;
   /**
    * Service used for indexedViews related operations
    */

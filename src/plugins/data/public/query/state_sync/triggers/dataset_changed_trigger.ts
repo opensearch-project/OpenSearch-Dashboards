@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { QUERY_STATE_TRIGGER_TYPES, QueryStateTrigger } from '../types';
+import { QueryStateTrigger, QUERY_STATE_TRIGGER_TYPES } from '../types';
 
 export const DATASET_CHANGED_TRIGGER: QueryStateTrigger = {
   id: QUERY_STATE_TRIGGER_TYPES.DATASET_CHANGED,

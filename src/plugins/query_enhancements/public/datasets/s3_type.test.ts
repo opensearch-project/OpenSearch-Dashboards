@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// s3_type.test.ts
-
 import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { IDataPluginServices, OSD_FIELD_TYPES } from 'src/plugins/data/public';
 import {

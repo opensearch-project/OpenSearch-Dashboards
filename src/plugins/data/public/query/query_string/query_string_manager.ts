@@ -29,7 +29,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { skip } from 'rxjs/operators';
+import { skip, filter } from 'rxjs/operators';
 import { CoreStart, NotificationsSetup } from 'opensearch-dashboards/public';
 import { isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
@@ -39,13 +39,14 @@ import { DatasetService, DatasetServiceContract } from './dataset_service';
 import { LanguageService, LanguageServiceContract } from './language_service';
 import { ISearchInterceptor } from '../../search';
 import { getApplication } from '../../services';
-import { QUERY_STATE_TRIGGER_TYPES, QueryStateTrigger } from '../state_sync';
+import { QUERY_STATE_TRIGGER_TYPES } from '../state_sync';
 
 export class QueryStringManager {
   private query$: BehaviorSubject<Query>;
   private queryHistory: QueryHistory;
   private datasetService!: DatasetServiceContract;
   private languageService!: LanguageServiceContract;
+  private skipNextEmission!: boolean;
 
   constructor(
     private readonly storage: DataStorage,
@@ -58,6 +59,7 @@ export class QueryStringManager {
     this.queryHistory = createHistory({ storage: this.sessionStorage });
     this.datasetService = new DatasetService(uiSettings, this.sessionStorage);
     this.languageService = new LanguageService(this.defaultSearchInterceptor, this.storage);
+    this.skipNextEmission = false;
   }
 
   private getDefaultQueryString() {
@@ -108,7 +110,16 @@ export class QueryStringManager {
   }
 
   public getUpdates$ = () => {
-    return this.query$.asObservable().pipe(skip(1));
+    return this.query$.asObservable().pipe(
+      skip(1),
+      filter(() => {
+        if (this.skipNextEmission) {
+          this.skipNextEmission = false;
+          return false;
+        }
+        return true;
+      })
+    );
   };
 
   public getQuery = (): Query => {
@@ -152,18 +163,19 @@ export class QueryStringManager {
   /**
    * Updates the query.
    * @param {Query} query
-   * @experimental
-   * @param {QUERY_STATE_TRIGGER_TYPES} triggerId - The action that triggered this update. This param is experimental and may change in the future.
    */
-  public setQuery = (query: Partial<Query>, triggerId?: QUERY_STATE_TRIGGER_TYPES) => {
+  public setQuery = (
+    query: Partial<Query>,
+    { trigger }: { trigger?: QUERY_STATE_TRIGGER_TYPES } = {}
+  ) => {
     const curQuery = this.query$.getValue();
     let newQuery = { ...curQuery, ...query };
 
-    if (triggerId && newQuery.dataset) {
+    if (trigger && newQuery.dataset) {
       const suppressedTriggers = this.datasetService.getType(newQuery.dataset.type)?.meta
         ?.suppressQueryStateTriggers;
-      if (suppressedTriggers && suppressedTriggers.includes(triggerId)) {
-        return;
+      if (suppressedTriggers && suppressedTriggers.includes(trigger)) {
+        this.skipNextEmission = true;
       }
     }
     if (!isEqual(curQuery, newQuery)) {
