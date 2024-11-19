@@ -152,24 +152,24 @@ jobs:
           command: yarn cypress:run-without-security --browser ${{ env.CYPRESS_BROWSER }} --spec ${{ env.SPEC }}
 
       # Screenshots are only captured on failure, will change this once we do visual regression tests
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: ftr-cypress-screenshots
+          name: ftr-cypress-screenshots-${{ matrix.group }}
           path: ${{ env.FTR_PATH }}/cypress/screenshots
           retention-days: 1
-      
-      - uses: actions/upload-artifact@v3
+
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ftr-cypress-videos
+          name: ftr-cypress-videos-${{ matrix.group }}
           path: ${{ env.FTR_PATH }}/cypress/videos
           retention-days: 1
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ftr-cypress-results
+          name: ftr-cypress-results-${{ matrix.group }}
           path: ${{ env.FTR_PATH }}/cypress/results
           retention-days: 1
 
@@ -207,6 +207,6 @@ jobs:
             '${{ env.SPEC }}'
             ```
 
-            #### Link to results: 
+            #### Link to results:
             ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           edit-mode: replace
