@@ -14,6 +14,9 @@ import {
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
   SavedObjectsErrorHelpers,
+  SavedObject,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResponse,
 } from '../../../../core/server';
 import { IWorkspaceClientImpl } from '../types';
 
@@ -22,6 +25,19 @@ const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
 type WorkspaceOptions = Pick<SavedObjectsBaseOptions, 'workspaces'> | undefined;
 
 export class WorkspaceIdConsumerWrapper {
+  private getWorkspaceIdFromOptionsAndRequest<T extends WorkspaceOptions>(
+    request: OpenSearchDashboardsRequest,
+    options?: T
+  ): string | undefined {
+    const workspaceState = getWorkspaceState(request);
+    const workspaceIdParsedFromRequest = workspaceState?.requestWorkspaceId;
+    const workspaceIdsInUserOptions = options?.workspaces;
+
+    return workspaceIdsInUserOptions?.length === 1
+      ? workspaceIdsInUserOptions[0]
+      : workspaceIdParsedFromRequest;
+  }
+
   private formatWorkspaceIdParams<T extends WorkspaceOptions>(
     request: OpenSearchDashboardsRequest,
     options?: T
@@ -126,8 +142,45 @@ export class WorkspaceIdConsumerWrapper {
         }
         return wrapperOptions.client.find(finalOptions);
       },
-      bulkGet: wrapperOptions.client.bulkGet,
-      get: wrapperOptions.client.get,
+      bulkGet: async <T = unknown>(
+        objects: SavedObjectsBulkGetObject[] = [],
+        options: SavedObjectsBaseOptions = {}
+      ): Promise<SavedObjectsBulkResponse<T>> => {
+        const objectToBulkGet = await wrapperOptions.client.bulkGet<T>(objects, options);
+        const workspace = this.getWorkspaceIdFromOptionsAndRequest(wrapperOptions.request, options);
+
+        // If there is a workspace in options or request, objects should belong to the workspace.
+        // Otherwise, get all the objects.
+        const filteredSavedObjects = workspace
+          ? objectToBulkGet.saved_objects.filter((ob) => ob.workspaces?.includes(workspace))
+          : objectToBulkGet.saved_objects;
+
+        return {
+          ...objectToBulkGet,
+          saved_objects: filteredSavedObjects,
+        };
+      },
+      get: async <T = unknown>(
+        type: string,
+        id: string,
+        options: SavedObjectsBaseOptions = {}
+      ): Promise<SavedObject<T>> => {
+        const objectToGet = await wrapperOptions.client.get<T>(type, id, options);
+
+        if (type !== 'workspace' && type !== 'config') {
+          const workspace = this.getWorkspaceIdFromOptionsAndRequest(
+            wrapperOptions.request,
+            options
+          );
+
+          // If there is a workspace in options or request, object should belong to the workspace.
+          if (workspace && !objectToGet.workspaces?.includes(workspace)) {
+            throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+          }
+        }
+
+        return objectToGet;
+      },
       update: wrapperOptions.client.update,
       bulkUpdate: wrapperOptions.client.bulkUpdate,
       addToNamespaces: wrapperOptions.client.addToNamespaces,

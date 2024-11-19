@@ -8,6 +8,7 @@ import { SavedObject } from '../../../../core/public';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { WorkspaceIdConsumerWrapper } from './workspace_id_consumer_wrapper';
 import { workspaceClientMock } from '../workspace_client.mock';
+import { SavedObjectsErrorHelpers } from '../../../../core/server';
 
 describe('WorkspaceIdConsumerWrapper', () => {
   const requestHandlerContext = coreMock.createRequestHandlerContext();
@@ -194,6 +195,176 @@ describe('WorkspaceIdConsumerWrapper', () => {
       expect(mockedClient.find).toBeCalledWith({
         type: ['dashboard', 'visualization'],
       });
+    });
+  });
+
+  describe('get', () => {
+    beforeEach(() => {
+      mockedClient.get.mockClear();
+    });
+
+    it(`Should get object belonging to options.workspaces`, async () => {
+      const savedObject = {
+        type: 'dashboard',
+        id: 'dashboard_id',
+        attributes: {},
+        references: [],
+        workspaces: ['foo'],
+      };
+      mockedClient.get.mockResolvedValueOnce(savedObject);
+      const result = await wrapperClient.get(savedObject.type, savedObject.id, {
+        workspaces: savedObject.workspaces,
+      });
+      expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {
+        workspaces: savedObject.workspaces,
+      });
+      expect(result).toEqual(savedObject);
+    });
+
+    it(`Should get object belonging to the workspace in request`, async () => {
+      const savedObject = {
+        type: 'dashboard',
+        id: 'dashboard_id',
+        attributes: {},
+        references: [],
+        workspaces: ['foo'],
+      };
+      mockedClient.get.mockResolvedValueOnce(savedObject);
+      const result = await wrapperClient.get(savedObject.type, savedObject.id);
+      expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {});
+      expect(result).toEqual(savedObject);
+    });
+
+    it(`Should get object if the object type is workspace`, async () => {
+      const savedObject = {
+        type: 'workspace',
+        id: 'workspace_id',
+        attributes: {},
+        references: [],
+      };
+      mockedClient.get.mockResolvedValueOnce(savedObject);
+      const result = await wrapperClient.get(savedObject.type, savedObject.id);
+      expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {});
+      expect(result).toEqual(savedObject);
+    });
+
+    it(`Should get object if the object type is config`, async () => {
+      const savedObject = {
+        type: 'config',
+        id: 'config_id',
+        attributes: {},
+        references: [],
+      };
+      mockedClient.get.mockResolvedValueOnce(savedObject);
+      const result = await wrapperClient.get(savedObject.type, savedObject.id);
+      expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {});
+      expect(result).toEqual(savedObject);
+    });
+
+    it(`Should get object when there is no workspace in options/request`, async () => {
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+      updateWorkspaceState(mockRequest, {});
+      const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
+        client: mockedClient,
+        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+        request: mockRequest,
+      });
+      const savedObject = {
+        type: 'dashboard',
+        id: 'dashboard_id',
+        attributes: {},
+        references: [],
+      };
+      mockedClient.get.mockResolvedValueOnce(savedObject);
+      const result = await mockedWrapperClient.get(savedObject.type, savedObject.id);
+      expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {});
+      expect(result).toEqual(savedObject);
+    });
+
+    it(`Should throw error when the object is not belong to the workspace`, async () => {
+      const savedObject = {
+        type: 'dashboard',
+        id: 'dashboard_id',
+        attributes: {},
+        references: [],
+        workspaces: ['noo'],
+      };
+      mockedClient.get.mockResolvedValueOnce(savedObject);
+      expect(wrapperClient.get(savedObject.type, savedObject.id)).rejects.toMatchInlineSnapshot(
+        `[Error: Saved object [dashboard/dashboard_id] not found]`
+      );
+      expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {});
+    });
+
+    it(`Should throw error when the object does not exist`, async () => {
+      mockedClient.get.mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      expect(wrapperClient.get('type', 'id')).rejects.toMatchInlineSnapshot(`[Error: Not Found]`);
+      expect(mockedClient.get).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('bulkGet', () => {
+    const payload = [
+      { id: 'dashboard1', type: 'dashboard' },
+      { type: 'visualization', id: 'visualization1' },
+    ];
+    const savedObjects = [
+      {
+        type: 'dashboard',
+        id: 'dashboard_id',
+        attributes: {},
+        references: [],
+        workspaces: ['foo'],
+      },
+      {
+        type: 'dashboard',
+        id: 'dashboard_id',
+        attributes: {},
+        references: [],
+        workspaces: ['noo'],
+      },
+    ];
+    const options = { workspaces: ['foo'] };
+    beforeEach(() => {
+      mockedClient.bulkGet.mockClear();
+    });
+
+    it(`Should bulkGet objects belonging to options.workspaces`, async () => {
+      mockedClient.bulkGet.mockResolvedValueOnce({ saved_objects: savedObjects });
+      const result = await wrapperClient.bulkGet(payload, options);
+      expect(mockedClient.bulkGet).toBeCalledWith(payload, options);
+      expect(result).toEqual({ saved_objects: [savedObjects[0]] });
+    });
+
+    it(`Should bulkGet objects belonging to the workspace in request`, async () => {
+      mockedClient.bulkGet.mockResolvedValueOnce({ saved_objects: savedObjects });
+      const result = await wrapperClient.bulkGet(payload);
+      expect(mockedClient.bulkGet).toBeCalledWith(payload, {});
+      expect(result).toEqual({ saved_objects: [savedObjects[0]] });
+    });
+
+    it(`Should bulkGet objects when there is no workspace in options/request`, async () => {
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+      updateWorkspaceState(mockRequest, {});
+      const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
+        client: mockedClient,
+        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+        request: mockRequest,
+      });
+      mockedClient.bulkGet.mockResolvedValueOnce({ saved_objects: savedObjects });
+      const result = await mockedWrapperClient.bulkGet(payload);
+      expect(mockedClient.bulkGet).toBeCalledWith(payload, {});
+      expect(result).toEqual({ saved_objects: savedObjects });
+    });
+
+    it(`Should throw error when the objects do not exist`, async () => {
+      mockedClient.bulkGet.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError()
+      );
+      expect(wrapperClient.bulkGet(payload)).rejects.toMatchInlineSnapshot(`[Error: Not Found]`);
+      expect(mockedClient.bulkGet).toBeCalledWith(payload, {});
     });
   });
 });
