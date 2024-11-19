@@ -17,10 +17,12 @@ import {
   SavedObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
+  WORKSPACE_TYPE,
 } from '../../../../core/server';
 import { IWorkspaceClientImpl } from '../types';
 
 const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
+const excludeTypes = [UI_SETTINGS_SAVED_OBJECTS_TYPE, WORKSPACE_TYPE];
 
 type WorkspaceOptions = Pick<SavedObjectsBaseOptions, 'workspaces'> | undefined;
 
@@ -167,7 +169,7 @@ export class WorkspaceIdConsumerWrapper {
       ): Promise<SavedObject<T>> => {
         const objectToGet = await wrapperOptions.client.get<T>(type, id, options);
 
-        if (type !== 'workspace' && type !== 'config') {
+        if (!excludeTypes.includes(type)) {
           const workspace = this.getWorkspaceIdFromOptionsAndRequest(
             wrapperOptions.request,
             options

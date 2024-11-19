@@ -312,5 +312,82 @@ describe('workspace_id_consumer integration test', () => {
       expect(importWithWorkspacesResult.body.success).toEqual(true);
       expect(findResult.body.saved_objects[0].workspaces).toEqual([createdFooWorkspace.id]);
     });
+
+    it('get', async () => {
+      await clearFooAndBar();
+      const createResultFoo = await osdTestServer.request
+        .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...dashboard,
+            id: 'foo',
+          },
+        ])
+        .expect(200);
+
+      const getResult = await osdTestServer.request
+        .get(root, `/w/${createdFooWorkspace.id}/api/saved_objects/${dashboard.type}/foo`)
+        .expect(200);
+
+      expect(getResult.body.total).toEqual(1);
+      expect(getResult.body.saved_objects[0].workspaces).toEqual([createdBarWorkspace.id]);
+
+      await Promise.all(
+        [...createResultFoo.body.saved_objects].map((item) =>
+          deleteItem({
+            type: item.type,
+            id: item.id,
+          })
+        )
+      );
+    });
+
+    it('bulk get', async () => {
+      await clearFooAndBar();
+      const createResultFoo = await osdTestServer.request
+        .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...dashboard,
+            id: 'foo',
+          },
+        ])
+        .expect(200);
+
+      const createResultBar = await osdTestServer.request
+        .post(root, `/w/${createdBarWorkspace.id}/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...dashboard,
+            id: 'bar',
+          },
+        ])
+        .expect(200);
+
+      const bulkGetResultWithWorkspace = await osdTestServer.request
+        .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_get`)
+        .expect(200);
+
+      expect(
+        (bulkGetResultWithWorkspace.body.saved_objects as any[]).every((item) =>
+          isEqual(item.workspaces, [createdFooWorkspace.id])
+        )
+      ).toEqual(true);
+
+      const bulkGetResultWithoutWorkspace = await osdTestServer.request
+        .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_get`)
+        .expect(200);
+
+      expect(bulkGetResultWithoutWorkspace.body.saved_objects.length).toEqual(2);
+
+      await Promise.all(
+        [...createResultFoo.body.saved_objects, ...createResultBar.body.saved_objects].map((item) =>
+          deleteItem({
+            type: item.type,
+            id: item.id,
+          })
+        )
+      );
+    });
   });
 });

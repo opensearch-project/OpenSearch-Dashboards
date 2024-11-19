@@ -288,7 +288,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
         id: 'dashboard_id',
         attributes: {},
         references: [],
-        workspaces: ['noo'],
+        workspaces: ['bar'],
       };
       mockedClient.get.mockResolvedValueOnce(savedObject);
       expect(wrapperClient.get(savedObject.type, savedObject.id)).rejects.toMatchInlineSnapshot(
@@ -322,7 +322,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
         id: 'dashboard_id',
         attributes: {},
         references: [],
-        workspaces: ['noo'],
+        workspaces: ['bar'],
       },
     ];
     const options = { workspaces: ['foo'] };
