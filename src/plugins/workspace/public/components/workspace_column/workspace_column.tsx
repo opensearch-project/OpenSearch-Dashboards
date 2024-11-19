@@ -22,7 +22,7 @@ export function WorkspaceColumn({ coreSetup, workspaces }: WorkspaceColumnProps)
     return map.set(ws.id, ws.name);
   }, new Map<string, string>());
 
-  const workspaceNames = workspaces?.map((wsId) => wsLookUp?.get(wsId));
+  const workspaceNames = workspaces?.map((wsId) => wsLookUp?.get(wsId)).filter((ws) => ws);
 
   const toggleBadgePopover = () => {
     setShowBadgePopover(!showBadgePopover);
@@ -61,7 +61,7 @@ export function WorkspaceColumn({ coreSetup, workspaces }: WorkspaceColumnProps)
                 panelPaddingSize="s"
                 data-test-subj="workspace-column-popover"
               >
-                {workspaceNames?.slice(1).map((ws) => (
+                {workspaceNames.slice(1).map((ws) => (
                   <EuiText key={ws} size="xs">
                     {ws}
                   </EuiText>

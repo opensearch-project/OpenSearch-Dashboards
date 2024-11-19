@@ -21,17 +21,17 @@ describe('workspace column in saved objects page', () => {
   ];
   coreSetup.workspaces.workspaceList$.next(workspaceList);
 
-  it('should show workspace name badge correctly', () => {
+  it('should show workspace name badge correctly', async () => {
     const workspaces = ['ws-1', 'ws-2'];
-    const { getByTestId, getByText, container } = render(
+    const { findByTestId, findByText, container } = render(
       <WorkspaceColumn coreSetup={coreSetup} workspaces={workspaces} />
     );
-    const badge = getByTestId('workspace-column-more-workspaces-badge');
+    const badge = await findByTestId('workspace-column-more-workspaces-badge');
     expect(badge).toBeInTheDocument();
     fireEvent.click(badge);
-    expect(getByTestId('workspace-column-popover')).toBeInTheDocument();
-    expect(getByText('foo')).toBeInTheDocument();
-    expect(getByText('bar')).toBeInTheDocument();
+    expect(await findByTestId('workspace-column-popover')).toBeInTheDocument();
+    expect(await findByText('foo')).toBeInTheDocument();
+    expect(await findByText('bar')).toBeInTheDocument();
     expect(container).toMatchInlineSnapshot(`
       <div>
         <div

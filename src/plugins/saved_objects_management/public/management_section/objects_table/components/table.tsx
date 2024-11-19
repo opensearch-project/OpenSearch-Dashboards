@@ -223,7 +223,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
               <EuiIcon
                 aria-label={getSavedObjectLabel(type)}
-                type={object.type === 'config' ? 'gear' : object.meta.icon || 'app'}
+                type={object.meta.icon || 'app'}
                 size="s"
                 data-test-subj="objectType"
               />
