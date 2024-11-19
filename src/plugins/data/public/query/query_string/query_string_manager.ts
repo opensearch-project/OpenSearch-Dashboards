@@ -81,7 +81,14 @@ export class QueryStringManager {
     ) {
       const language = this.languageService.getLanguage(defaultLanguageId);
       const newQuery = { ...query, dataset: defaultDataset };
-      const newQueryString = language?.getQueryString(newQuery) || '';
+
+      const typeConfig = this.datasetService.getType(defaultDataset.type);
+      const defaultDatasetQueryString = typeConfig?.getDefaultQueryString?.(
+        defaultDataset,
+        newQuery.language
+      );
+      const newQueryString =
+        defaultDatasetQueryString ?? (language?.getQueryString(newQuery) || '');
 
       return {
         ...newQuery,
@@ -244,13 +251,15 @@ export class QueryStringManager {
 
     // Both language and dataset provided - generate fresh query
     if (language && dataset) {
+      const typeConfig = this.datasetService.getType(dataset.type);
+      const queryString = typeConfig?.getDefaultQueryString?.(dataset, language);
       const languageService = this.languageService.getLanguage(language);
       const newQuery = {
         language,
         dataset,
         query: '',
       };
-      newQuery.query = languageService?.getQueryString(newQuery) || '';
+      newQuery.query = queryString ?? (languageService?.getQueryString(newQuery) || '');
       return newQuery;
     }
 
@@ -279,7 +288,12 @@ export class QueryStringManager {
       ...curQuery,
       language: languageId,
     };
-    const queryString = language?.getQueryString(newQuery) || '';
+    let defaultDatasetQueryString;
+    if (curQuery.dataset) {
+      const typeConfig = this.datasetService.getType(curQuery.dataset.type);
+      defaultDatasetQueryString = typeConfig?.getDefaultQueryString?.(curQuery.dataset, languageId);
+    }
+    const queryString = defaultDatasetQueryString ?? (language?.getQueryString(newQuery) || '');
     this.languageService.setUserQueryString(queryString);
 
     return {
@@ -302,7 +316,9 @@ export class QueryStringManager {
       language: languageId,
       dataset: newDataset,
     };
-    const queryString = language?.getQueryString(newQuery) || '';
+    const typeConfig = this.datasetService.getType(newDataset.type);
+    const defaultDatasetQueryString = typeConfig?.getDefaultQueryString?.(newDataset, languageId);
+    const queryString = defaultDatasetQueryString ?? (language?.getQueryString(newQuery) || '');
 
     return {
       ...newQuery,

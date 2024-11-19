@@ -106,4 +106,8 @@ export interface DatasetTypeConfig {
    * Service used for indexedViews related operations
    */
   indexedViewsService?: DatasetIndexedViewsService;
+  /**
+   * Returns the default query that is added to the query editor when a dataset is selected.
+   */
+  getDefaultQueryString?: (dataset: Dataset, language: string) => string | void;
 }
