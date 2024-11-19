@@ -26,7 +26,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { SavedQuery, SavedQueryService } from '../../query';
 import { SavedQueryCard } from './saved_query_card';
-import { Query } from '../../../common';
 import { getQueryService } from '../../services';
 
 export interface OpenSavedQueryFlyoutProps {
@@ -306,21 +305,16 @@ export function OpenSavedQueryFlyout({
               fill
               onClick={() => {
                 if (selectedQuery) {
-                  if (
-                    // Template queries are not associated with data sources. Apply data source from current query
-                    selectedQuery.attributes.isTemplate ||
-                    // Associating a saved query with a data source is optional. If no data source is present, keep the current source.
-                    !selectedQuery.attributes.query.dataset?.dataSource
-                  ) {
-                    const updatedQuery: Query = {
-                      ...queryStringManager?.getQuery(),
-                      query: selectedQuery.attributes.query.query,
-                      language: selectedQuery.attributes.query.language,
-                    };
-                    queryStringManager.setQuery(updatedQuery);
-                  } else {
-                    onQueryOpen(selectedQuery);
-                  }
+                  onQueryOpen({
+                    ...selectedQuery,
+                    attributes: {
+                      ...selectedQuery.attributes,
+                      query: {
+                        ...selectedQuery.attributes.query,
+                        dataset: queryStringManager.getQuery().dataset,
+                      },
+                    },
+                  });
                   onClose();
                 }
               }}
