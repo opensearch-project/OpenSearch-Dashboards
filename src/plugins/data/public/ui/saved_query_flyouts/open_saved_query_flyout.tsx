@@ -24,16 +24,16 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { QueryStringManager, SavedQuery, SavedQueryService } from '../../query';
+import { SavedQuery, SavedQueryService } from '../../query';
 import { SavedQueryCard } from './saved_query_card';
 import { Query } from '../../../common';
+import { getQueryService } from '../../services';
 
 export interface OpenSavedQueryFlyoutProps {
   savedQueryService: SavedQueryService;
   onClose: () => void;
   onQueryOpen: (query: SavedQuery) => void;
   handleQueryDelete: (query: SavedQuery) => Promise<void>;
-  queryStringManager: QueryStringManager;
 }
 
 interface SavedQuerySearchableItem {
@@ -50,7 +50,6 @@ export function OpenSavedQueryFlyout({
   onClose,
   onQueryOpen,
   handleQueryDelete,
-  queryStringManager,
 }: OpenSavedQueryFlyoutProps) {
   const [selectedTabId, setSelectedTabId] = useState<string>('mutable-saved-queries');
   const [savedQueries, setSavedQueries] = useState<SavedQuery[]>([]);
@@ -65,36 +64,43 @@ export function OpenSavedQueryFlyout({
   const [searchQuery, setSearchQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
   const [isLoading, setIsLoading] = useState(false);
   const currentTabIdRef = useRef(selectedTabId);
+  const queryStringManager = getQueryService().queryString;
 
   const fetchAllSavedQueriesForSelectedTab = useCallback(async () => {
     setIsLoading(true);
-    const query = queryStringManager.getQuery();
-    let templateQueries: any[] = [];
+    try {
+      const query = queryStringManager.getQuery();
+      let templateQueries: any[] = [];
 
-    // fetch sample query based on dataset type
-    if (query?.dataset?.type) {
-      templateQueries =
-        (await queryStringManager
-          .getDatasetService()
-          ?.getType(query.dataset.type)
-          ?.getSampleQueries?.()) || [];
+      // fetch sample query based on dataset type
+      if (query?.dataset?.type) {
+        templateQueries =
+          (await queryStringManager
+            .getDatasetService()
+            ?.getType(query.dataset.type)
+            ?.getSampleQueries?.()) || [];
 
-      // Check if any sample query has isTemplate set to true
-      const hasTemplates = templateQueries.some((q) => q?.attributes?.isTemplate);
-      setHasTemplateQueries(hasTemplates);
-    }
-
-    // Set queries based on the current tab
-    if (currentTabIdRef.current === 'mutable-saved-queries') {
-      const allQueries = await savedQueryService.getAllSavedQueries();
-      const mutableSavedQueries = allQueries.filter((q) => !q.attributes.isTemplate);
-      if (currentTabIdRef.current === 'mutable-saved-queries') {
-        setSavedQueries(mutableSavedQueries);
+        // Check if any sample query has isTemplate set to true
+        const hasTemplates = templateQueries.some((q) => q?.attributes?.isTemplate);
+        setHasTemplateQueries(hasTemplates);
       }
-    } else if (currentTabIdRef.current === 'template-saved-queries') {
-      setSavedQueries(templateQueries);
+
+      // Set queries based on the current tab
+      if (currentTabIdRef.current === 'mutable-saved-queries') {
+        const allQueries = await savedQueryService.getAllSavedQueries();
+        const mutableSavedQueries = allQueries.filter((q) => !q.attributes.isTemplate);
+        if (currentTabIdRef.current === 'mutable-saved-queries') {
+          setSavedQueries(mutableSavedQueries);
+        }
+      } else if (currentTabIdRef.current === 'template-saved-queries') {
+        setSavedQueries(templateQueries);
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Error occurred while retrieving saved queries.', e);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, [savedQueryService, currentTabIdRef, setSavedQueries, queryStringManager]);
 
   const updatePageIndex = useCallback((index: number) => {

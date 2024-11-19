@@ -59,7 +59,7 @@ import {
 import { FilterEditor } from './filter_editor';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { SavedQueryManagementComponent } from '../saved_query_management';
-import { QueryStringManager, SavedQuery, SavedQueryService } from '../../query';
+import { SavedQuery, SavedQueryService } from '../../query';
 import { SavedQueryMeta } from '../saved_query_form';
 import { getUseNewSavedQueriesUI } from '../../services';
 
@@ -79,7 +79,6 @@ interface Props {
   useSaveQueryMenu: boolean;
   isQueryEditorControl: boolean;
   saveQuery: (savedQueryMeta: SavedQueryMeta, saveAsNew?: boolean) => Promise<void>;
-  queryStringManager: QueryStringManager;
 }
 const maxFilterWidth = 600;
 
@@ -311,7 +310,6 @@ const FilterOptionsUI = (props: Props) => {
           key={'savedQueryManagement'}
           useNewSavedQueryUI={getUseNewSavedQueriesUI()}
           saveQuery={props.saveQuery}
-          queryStringManager={props.queryStringManager}
         />,
       ]}
       data-test-subj="save-query-panel"
