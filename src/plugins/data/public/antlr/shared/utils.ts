@@ -165,6 +165,7 @@ export const parseQuery = <
   getParseTree(parser);
 
   const core = new CodeCompletionCore(parser);
+  core.showDebugOutput = true;
   core.ignoredTokens = ignoredTokens;
   core.preferredRules = rulesToVisit;
   const cursorTokenIndex = findCursorTokenIndex(tokenStream, cursor, tokenDictionary.SPACE);
@@ -196,6 +197,7 @@ export const parseQuery = <
   };
 
   // console.clear();
+  // console.log('cursorTokenIndex', cursorTokenIndex);
   // console.log('Formatted Token Stream:');
   // let index = 0;
   // try {
