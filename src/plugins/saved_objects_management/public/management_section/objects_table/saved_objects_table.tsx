@@ -1226,7 +1226,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             pageIndex={page}
             pageSize={perPage}
             items={savedObjects}
-            workspaceNameIdLookup={this.workspaceNameIdLookup}
             totalItemCount={filteredItemCount}
             isSearching={isSearching}
             onShowRelationships={this.onShowRelationships}
