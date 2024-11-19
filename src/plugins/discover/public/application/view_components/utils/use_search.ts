@@ -5,11 +5,12 @@
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, filter, pairwise } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { useEffect } from 'react';
 import { cloneDeep } from 'lodash';
 import { useLocation } from 'react-router-dom';
+import { useEffectOnce } from 'react-use';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
 import { search } from '../../../../../data/public';
@@ -114,24 +115,23 @@ export const useSearch = (services: DiscoverViewServices) => {
     requests: new RequestAdapter(),
   };
 
-  const getDatasetAutoSearchOnPageLoadPreference = () => {
-    // Checks the searchOnpageLoadPreference for the current dataset if not specifed defaults to true
-    const datasetType = data.query.queryString.getQuery().dataset?.type;
-
-    const datasetService = data.query.queryString.getDatasetService();
-
-    return !datasetType || (datasetService?.getType(datasetType)?.meta?.searchOnLoad ?? true);
-  };
-
   const shouldSearchOnPageLoad = useCallback(() => {
+    // Checks the searchOnpageLoadPreference for the current dataset if not specifed defaults to UI Settings
+    const { queryString } = data.query;
+    const { dataset } = queryString.getQuery();
+    const typeConfig = dataset ? queryString.getDatasetService().getType(dataset.type) : undefined;
+    const datasetPreference =
+      typeConfig?.meta?.searchOnLoad ?? uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING);
+
     // A saved search is created on every page load, so we check the ID to see if we're loading a
     // previously saved search or if it is just transient
     return (
-      services.uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
+      datasetPreference ||
+      uiSettings.get(SEARCH_ON_PAGE_LOAD_SETTING) ||
       savedSearch?.id !== undefined ||
       timefilter.getRefreshInterval().pause === false
     );
-  }, [savedSearch, services.uiSettings, timefilter]);
+  }, [data.query, savedSearch, uiSettings, timefilter]);
 
   const startTime = Date.now();
   const data$ = useMemo(
@@ -143,16 +143,55 @@ export const useSearch = (services: DiscoverViewServices) => {
             : ResultStatus.UNINITIALIZED,
         queryStatus: { startTime },
       }),
-    [shouldSearchOnPageLoad, startTime, skipInitialFetch]
+    // we only want data$ observable to be created once, updates will be done through useEffect
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
+
+  // re-initialize data$ when the selected dataset changes
+  useEffectOnce(() => {
+    const subscription = data.query.queryString
+      .getUpdates$()
+      .pipe(
+        pairwise(),
+        filter(([prev, curr]) => prev.dataset?.id !== curr.dataset?.id)
+      )
+      .subscribe(() => {
+        data$.next({
+          status:
+            shouldSearchOnPageLoad() && !skipInitialFetch.current
+              ? ResultStatus.LOADING
+              : ResultStatus.UNINITIALIZED,
+          queryStatus: { startTime },
+          rows: [],
+        });
+      });
+    return () => subscription.unsubscribe();
+  });
+
+  useEffect(() => {
+    data$.next({ ...data$.value, queryStatus: { startTime } });
+  }, [data$, startTime]);
+
+  useEffect(() => {
+    data$.next({
+      ...data$.value,
+      status:
+        shouldSearchOnPageLoad() && !skipInitialFetch.current
+          ? ResultStatus.LOADING
+          : ResultStatus.UNINITIALIZED,
+    });
+  }, [data$, shouldSearchOnPageLoad, skipInitialFetch]);
+
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
   const fetch = useCallback(async () => {
+    const currentTime = Date.now();
     let dataset = indexPattern;
     if (!dataset) {
       data$.next({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
-        queryStatus: { startTime },
+        queryStatus: { startTime: currentTime },
       });
       return;
     }
@@ -182,10 +221,7 @@ export const useSearch = (services: DiscoverViewServices) => {
 
     let elapsedMs;
     try {
-      // Only show loading indicator if we are fetching when the rows are empty
-      if (fetchStateRef.current.rows?.length === 0) {
-        data$.next({ status: ResultStatus.LOADING, queryStatus: { startTime } });
-      }
+      data$.next({ status: ResultStatus.LOADING, queryStatus: { startTime: currentTime } });
 
       // Initialize inspect adapter for search source
       inspectorAdapters.requests.reset();
@@ -303,16 +339,12 @@ export const useSearch = (services: DiscoverViewServices) => {
     services,
     sort,
     savedSearch?.searchSource,
-    startTime,
     data$,
     shouldSearchOnPageLoad,
     inspectorAdapters.requests,
   ]);
 
   useEffect(() => {
-    if (!getDatasetAutoSearchOnPageLoadPreference()) {
-      skipInitialFetch.current = true;
-    }
     const fetch$ = merge(
       refetch$,
       filterManager.getFetches$(),
@@ -343,8 +375,6 @@ export const useSearch = (services: DiscoverViewServices) => {
     return () => {
       subscription.unsubscribe();
     };
-    // disabling the eslint since we are not adding getDatasetAutoSearchOnPageLoadPreference since this changes when dataset changes and these chnages are already part of data.query.queryString
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     data$,
     data.query.queryString,

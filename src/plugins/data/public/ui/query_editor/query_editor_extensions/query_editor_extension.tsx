@@ -7,13 +7,15 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { Observable } from 'rxjs';
-import { DataStructureMeta } from '../../../../common';
+import { DataStructureMeta, Query } from '../../../../common';
+import { ResultStatus } from '../../../query/query_string/language_service/lib';
 
 interface QueryEditorExtensionProps {
   config: QueryEditorExtensionConfig;
   dependencies: QueryEditorExtensionDependencies;
   componentContainer: Element;
   bannerContainer: Element;
+  bottomPanelContainer: Element;
   queryControlsContainer: Element;
 }
 
@@ -34,6 +36,14 @@ export interface QueryEditorExtensionDependencies {
    * Set whether the query editor is collapsed.
    */
   setIsCollapsed: (isCollapsed: boolean) => void;
+  /**
+   * Currently set Query
+   */
+  query: Query;
+  /**
+   * Fetch status for the currently running query
+   */
+  fetchStatus?: ResultStatus;
 }
 
 export interface QueryEditorExtensionConfig {
@@ -74,6 +84,12 @@ export interface QueryEditorExtensionConfig {
   getSearchBarButton?: (
     dependencies: QueryEditorExtensionDependencies
   ) => React.ReactElement | null;
+  /**
+   * Returns the footer element that is rendered at the bottom of the query editor.
+   * @param dependencies - The dependencies required for the extension.
+   * @returns The component the query editor extension.
+   */
+  getBottomPanel?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
 }
 const QueryEditorExtensionPortal: React.FC<{ container: Element }> = (props) => {
   if (!props.children) return null;
@@ -99,6 +115,11 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
   ]);
 
   const queryControlButtons = useMemo(() => props.config.getSearchBarButton?.(props.dependencies), [
+    props.config,
+    props.dependencies,
+  ]);
+
+  const bottomPanel = useMemo(() => props.config.getBottomPanel?.(props.dependencies), [
     props.config,
     props.dependencies,
   ]);
@@ -129,6 +150,9 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
       </QueryEditorExtensionPortal>
       <QueryEditorExtensionPortal container={props.queryControlsContainer}>
         {queryControlButtons}
+      </QueryEditorExtensionPortal>
+      <QueryEditorExtensionPortal container={props.bottomPanelContainer}>
+        {bottomPanel}
       </QueryEditorExtensionPortal>
     </>
   );

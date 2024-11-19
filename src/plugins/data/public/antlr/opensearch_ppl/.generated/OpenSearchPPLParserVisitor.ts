@@ -128,7 +128,7 @@ import { IntervalUnitContext } from "./OpenSearchPPLParser.js";
 import { TimespanUnitContext } from "./OpenSearchPPLParser.js";
 import { ValueListContext } from "./OpenSearchPPLParser.js";
 import { QualifiedNameContext } from "./OpenSearchPPLParser.js";
-import { TableQualifiedNameContext } from "./OpenSearchPPLParser.js";
+import { IdentsAsTableQualifiedNameContext } from "./OpenSearchPPLParser.js";
 import { IdentsAsWildcardQualifiedNameContext } from "./OpenSearchPPLParser.js";
 import { IdentContext } from "./OpenSearchPPLParser.js";
 import { TableIdentContext } from "./OpenSearchPPLParser.js";
@@ -917,11 +917,12 @@ export class OpenSearchPPLParserVisitor<Result> extends AbstractParseTreeVisitor
      */
     visitQualifiedName?: (ctx: QualifiedNameContext) => Result;
     /**
-     * Visit a parse tree produced by `OpenSearchPPLParser.tableQualifiedName`.
+     * Visit a parse tree produced by the `identsAsTableQualifiedName`
+     * labeled alternative in `OpenSearchPPLParser.tableQualifiedName`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitTableQualifiedName?: (ctx: TableQualifiedNameContext) => Result;
+    visitIdentsAsTableQualifiedName?: (ctx: IdentsAsTableQualifiedNameContext) => Result;
     /**
      * Visit a parse tree produced by the `identsAsWildcardQualifiedName`
      * labeled alternative in `OpenSearchPPLParser.wcQualifiedName`.
