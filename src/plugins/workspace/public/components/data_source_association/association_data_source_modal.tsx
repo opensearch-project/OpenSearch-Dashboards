@@ -114,14 +114,17 @@ const convertConnectionToOption = ({
     selectedConnectionIds.includes(connection.id)
       ? ('on' as const)
       : undefined,
-  prepend:
-    connection.connectionType === DataSourceConnectionType.DirectQueryConnection ? (
-      <div className="direct-query-connection-icon">
-        <ConnectionIcon connection={connection} logos={logos} />
-      </div>
-    ) : (
+  prepend: (
+    <div
+      className={
+        connection.connectionType === DataSourceConnectionType.DirectQueryConnection
+          ? 'dsm-associate-modal-direct-query-connection-icon'
+          : ''
+      }
+    >
       <ConnectionIcon connection={connection} logos={logos} />
-    ),
+    </div>
+  ),
   parentId: connection.parentId,
 });
 
