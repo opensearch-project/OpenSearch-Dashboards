@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import * as Rx from 'rxjs';
 import moment from 'moment';
 import {
@@ -122,6 +122,7 @@ export const RecentItems = ({
     []
   );
   const navLinks = useObservable(navLinks$, []);
+  const prevNavLinksRef = useRef<ChromeNavLink[]>();
   const loadingCount = useObservable(loadingCount$, 0);
 
   const handleItemClick = (link: string) => {
@@ -143,7 +144,9 @@ export const RecentItems = ({
             setIsPreferencesPopoverOpen((IsPreferencesPopoverOpe) => !IsPreferencesPopoverOpe);
           }}
         >
-          Preferences
+          {i18n.translate('core.header.recent.preferences', {
+            defaultMessage: 'Preferences',
+          })}
         </EuiButtonEmpty>
       }
       isOpen={isPreferencesPopoverOpen}
@@ -152,7 +155,11 @@ export const RecentItems = ({
         setIsPreferencesPopoverOpen(false);
       }}
     >
-      <EuiPopoverTitle>Preferences</EuiPopoverTitle>
+      <EuiPopoverTitle>
+        {i18n.translate('core.header.recent.preferences.title', {
+          defaultMessage: 'Preferences',
+        })}
+      </EuiPopoverTitle>
       <EuiRadioGroup
         options={recentsRadios}
         idSelected={recentsRadioIdSelected}
@@ -162,7 +169,13 @@ export const RecentItems = ({
         }}
         name="radio group"
         legend={{
-          children: <span>Recents</span>,
+          children: (
+            <span>
+              {i18n.translate('core.header.recent.preferences.legend', {
+                defaultMessage: 'Recents',
+              })}
+            </span>
+          ),
         }}
       />
     </EuiPopover>
@@ -213,11 +226,14 @@ export const RecentItems = ({
         type: item.meta?.type || '',
         id: item.id,
       }));
-
-    if (savedObjects.length) {
+    // Deep compare navLinks to avoid unnecessary requests
+    if (
+      savedObjects.length &&
+      JSON.stringify(prevNavLinksRef.current) !== JSON.stringify(navLinks)
+    ) {
       bulkGetDetail(savedObjects, http).then((res) => {
         const filteredNavLinks = navLinks.filter((link) => !link.hidden);
-        const formatDetailedSavedObjects = res.map((obj) => {
+        const formatDetailedSavedObjects = res.flatMap((obj) => {
           const recentAccessItem = recentlyAccessedItems.find(
             (item) => item.id === obj.id
           ) as ChromeRecentlyAccessedHistoryItem;
@@ -225,33 +241,30 @@ export const RecentItems = ({
           const findWorkspace = workspaceList.find(
             (workspace) => workspace.id === recentAccessItem.workspaceId
           );
-          return {
-            ...recentAccessItem,
-            ...obj,
-            ...recentAccessItem.meta,
-            updatedAt: moment(obj?.updated_at).valueOf(),
-            workspaceName: findWorkspace?.name,
-            link: createRecentNavLink(recentAccessItem, filteredNavLinks, basePath, navigateToUrl)
-              .href,
-          };
+          // If the workspace id is existing but the workspace is deleted, filter the item
+          if (recentAccessItem.workspaceId && !findWorkspace) {
+            return [];
+          }
+
+          return [
+            {
+              ...recentAccessItem,
+              ...obj,
+              ...recentAccessItem.meta,
+              updatedAt: moment(obj?.updated_at).valueOf(),
+              workspaceName: findWorkspace?.name,
+              link: createRecentNavLink(recentAccessItem, filteredNavLinks, basePath, navigateToUrl)
+                .href,
+            },
+          ];
         });
-        // here I write this argument to avoid Unnecessary re-rendering
-        if (JSON.stringify(formatDetailedSavedObjects) !== JSON.stringify(detailedSavedObjects)) {
-          setDetailedSavedObjects(formatDetailedSavedObjects);
-        }
+        setDetailedSavedObjects(formatDetailedSavedObjects);
       });
     }
-  }, [
-    navLinks,
-    basePath,
-    navigateToUrl,
-    recentlyAccessedItems,
-    http,
-    workspaceList,
-    detailedSavedObjects,
-  ]);
+    prevNavLinksRef.current = navLinks;
+  }, [navLinks, basePath, navigateToUrl, recentlyAccessedItems, http, workspaceList]);
 
-  const selectedRecentsItems = useMemo(() => {
+  const selectedRecentItems = useMemo(() => {
     return detailedSavedObjects.slice(0, Number(recentsRadioIdSelected));
   }, [detailedSavedObjects, recentsRadioIdSelected]);
 
@@ -283,9 +296,9 @@ export const RecentItems = ({
           </h4>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {selectedRecentsItems.length > 0 ? (
+        {selectedRecentItems.length > 0 ? (
           <EuiListGroup flush={true} gutterSize="s">
-            {selectedRecentsItems.map((item) => (
+            {selectedRecentItems.map((item) => (
               <EuiListGroupItem
                 onClick={() => handleItemClick(item.link)}
                 key={item.link}
@@ -309,7 +322,9 @@ export const RecentItems = ({
           </EuiListGroup>
         ) : (
           <EuiText color="subdued" size="s">
-            No recently viewed items
+            {i18n.translate('core.header.recent.no.recents', {
+              defaultMessage: 'No recently viewed items',
+            })}
           </EuiText>
         )}
         <EuiSpacer size="s" />
