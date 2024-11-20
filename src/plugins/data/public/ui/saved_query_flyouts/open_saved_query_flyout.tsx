@@ -122,6 +122,7 @@ export function OpenSavedQueryFlyout({
     fetchAllSavedQueriesForSelectedTab();
     setSearchQuery(EuiSearchBar.Query.MATCH_ALL);
     updatePageIndex(0);
+    setSelectedQuery(undefined);
   }, [selectedTabId, fetchAllSavedQueriesForSelectedTab, updatePageIndex]);
 
   useEffect(() => {
@@ -343,7 +344,7 @@ export function OpenSavedQueryFlyout({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              // disabled={!selectedQuery}
+              disabled={!selectedQuery}
               fill
               onClick={onQueryAction}
               data-testid="open-query-action-button"
