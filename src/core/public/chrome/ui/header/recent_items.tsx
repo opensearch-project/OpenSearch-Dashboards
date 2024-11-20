@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React, { useMemo, useState, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import * as Rx from 'rxjs';
 import moment from 'moment';
 import {
@@ -122,7 +122,6 @@ export const RecentItems = ({
     []
   );
   const navLinks = useObservable(navLinks$, []);
-  const prevNavLinksRef = useRef<ChromeNavLink[]>();
   const loadingCount = useObservable(loadingCount$, 0);
 
   const handleItemClick = (link: string) => {
@@ -226,13 +225,8 @@ export const RecentItems = ({
         type: item.meta?.type || '',
         id: item.id,
       }));
-    // Deep compare navLinks to avoid unnecessary requests
-    if (
-      savedObjects.length &&
-      JSON.stringify(prevNavLinksRef.current) !== JSON.stringify(navLinks)
-    ) {
+    if (savedObjects.length) {
       bulkGetDetail(savedObjects, http).then((res) => {
-        const filteredNavLinks = navLinks.filter((link) => !link.hidden);
         const formatDetailedSavedObjects = res.flatMap((obj) => {
           const recentAccessItem = recentlyAccessedItems.find(
             (item) => item.id === obj.id
@@ -253,16 +247,13 @@ export const RecentItems = ({
               ...recentAccessItem.meta,
               updatedAt: moment(obj?.updated_at).valueOf(),
               workspaceName: findWorkspace?.name,
-              link: createRecentNavLink(recentAccessItem, filteredNavLinks, basePath, navigateToUrl)
-                .href,
             },
           ];
         });
         setDetailedSavedObjects(formatDetailedSavedObjects);
       });
     }
-    prevNavLinksRef.current = navLinks;
-  }, [navLinks, basePath, navigateToUrl, recentlyAccessedItems, http, workspaceList]);
+  }, [recentlyAccessedItems, http, workspaceList]);
 
   const selectedRecentItems = useMemo(() => {
     return detailedSavedObjects.slice(0, Number(recentsRadioIdSelected));
@@ -300,7 +291,16 @@ export const RecentItems = ({
           <EuiListGroup flush={true} gutterSize="s">
             {selectedRecentItems.map((item) => (
               <EuiListGroupItem
-                onClick={() => handleItemClick(item.link)}
+                onClick={() =>
+                  handleItemClick(
+                    createRecentNavLink(
+                      item,
+                      navLinks.filter((link) => !link.hidden),
+                      basePath,
+                      navigateToUrl
+                    ).href
+                  )
+                }
                 key={item.link}
                 style={{ padding: '1px' }}
                 label={
