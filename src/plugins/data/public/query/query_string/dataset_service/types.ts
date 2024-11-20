@@ -8,6 +8,7 @@ import {
   DatasetField,
   DatasetSearchOptions,
   DataStructure,
+  Query,
   SavedObject,
 } from '../../../../common';
 import { IDataPluginServices } from '../../../types';
@@ -104,4 +105,8 @@ export interface DatasetTypeConfig {
    * Service used for indexedViews related operations
    */
   indexedViewsService?: DatasetIndexedViewsService;
+  /**
+   * Returns the initial query that is added to the query editor when a dataset is selected.
+   */
+  getInitialQueryString?: (query: Query) => string | void;
 }
