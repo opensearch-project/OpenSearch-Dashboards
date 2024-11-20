@@ -27,6 +27,7 @@ export const DiscoverNoIndexPatterns: React.FC = () => {
       alignItems="center"
       gutterSize="none"
       className="discoverNoIndexPatterns-centerPanel"
+      data-test-subj="discoverNoIndexPatterns"
     >
       <EuiFlexItem grow={false}>
         <EuiPanel paddingSize="l">

@@ -135,6 +135,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
           onClick={() => setPopover(!isPopoverOpen)}
           className="languageSelector__button"
           iconType="arrowDown"
+          data-test-subj="queryEditorLanguageSelector"
         >
           {selectedLanguage.label}
         </EuiSmallButtonEmpty>

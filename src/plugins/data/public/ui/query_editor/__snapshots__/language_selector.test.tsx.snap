@@ -617,6 +617,7 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
       button={
         <EuiSmallButtonEmpty
           className="languageSelector__button"
+          data-test-subj="queryEditorLanguageSelector"
           iconSide="right"
           iconType="arrowDown"
           onClick={[Function]}
@@ -640,12 +641,14 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
         >
           <EuiSmallButtonEmpty
             className="languageSelector__button"
+            data-test-subj="queryEditorLanguageSelector"
             iconSide="right"
             iconType="arrowDown"
             onClick={[Function]}
           >
             <EuiButtonEmpty
               className="languageSelector__button"
+              data-test-subj="queryEditorLanguageSelector"
               iconSide="right"
               iconType="arrowDown"
               onClick={[Function]}
@@ -653,6 +656,7 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
             >
               <button
                 className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small languageSelector__button"
+                data-test-subj="queryEditorLanguageSelector"
                 disabled={false}
                 onClick={[Function]}
                 type="button"
@@ -1283,6 +1287,7 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
       button={
         <EuiSmallButtonEmpty
           className="languageSelector__button"
+          data-test-subj="queryEditorLanguageSelector"
           iconSide="right"
           iconType="arrowDown"
           onClick={[Function]}
@@ -1306,12 +1311,14 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
         >
           <EuiSmallButtonEmpty
             className="languageSelector__button"
+            data-test-subj="queryEditorLanguageSelector"
             iconSide="right"
             iconType="arrowDown"
             onClick={[Function]}
           >
             <EuiButtonEmpty
               className="languageSelector__button"
+              data-test-subj="queryEditorLanguageSelector"
               iconSide="right"
               iconType="arrowDown"
               onClick={[Function]}
@@ -1319,6 +1326,7 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
             >
               <button
                 className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small languageSelector__button"
+                data-test-subj="queryEditorLanguageSelector"
                 disabled={false}
                 onClick={[Function]}
                 type="button"
