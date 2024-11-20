@@ -17,12 +17,10 @@ import {
   SavedObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkResponse,
-  WORKSPACE_TYPE,
 } from '../../../../core/server';
 import { IWorkspaceClientImpl } from '../types';
 
 const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
-const excludeTypes = [UI_SETTINGS_SAVED_OBJECTS_TYPE, WORKSPACE_TYPE];
 
 type WorkspaceOptions = Pick<SavedObjectsBaseOptions, 'workspaces'> | undefined;
 
@@ -51,6 +49,26 @@ export class WorkspaceIdConsumerWrapper {
 
   private isConfigType(type: string): boolean {
     return type === UI_SETTINGS_SAVED_OBJECTS_TYPE;
+  }
+
+  // If the object.workspaces is null/[] (as global object), return it directly.
+  // If the workspace is specified, validate whether the object exists in the workspace.
+  private validateObjectExistInWorkspaces<T>(
+    object: SavedObject<T>,
+    workspace: string
+  ): SavedObject<T> {
+    if (object.workspaces && object.workspaces.length > 0) {
+      if (!object.workspaces.includes(workspace)) {
+        return {
+          ...object,
+          error: {
+            ...SavedObjectsErrorHelpers.createGenericNotFoundError(object.type, object.id).output
+              .payload,
+          },
+        };
+      }
+    }
+    return object;
   }
 
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
@@ -138,24 +156,12 @@ export class WorkspaceIdConsumerWrapper {
         const objectToBulkGet = await wrapperOptions.client.bulkGet<T>(objects, options);
         const { workspaces } = this.formatWorkspaceIdParams(wrapperOptions.request, options);
 
-        // If there is a workspace in options or request, objects should belong to the workspace.
-        // Otherwise, get all the objects.
         if (workspaces?.length === 1) {
-          const workspace = workspaces[0];
-          const savedObjects: Array<SavedObject<T>> = objectToBulkGet.saved_objects.map((object) =>
-            object.workspaces?.includes(workspace)
-              ? object
-              : {
-                  ...object,
-                  error: {
-                    ...SavedObjectsErrorHelpers.createGenericNotFoundError(object.type, object.id)
-                      .output.payload,
-                  },
-                }
-          );
           return {
             ...objectToBulkGet,
-            saved_objects: savedObjects,
+            saved_objects: objectToBulkGet.saved_objects.map((object) =>
+              this.validateObjectExistInWorkspaces(object, workspaces[0])
+            ),
           };
         }
 
@@ -167,12 +173,11 @@ export class WorkspaceIdConsumerWrapper {
         options: SavedObjectsBaseOptions = {}
       ): Promise<SavedObject<T>> => {
         const objectToGet = await wrapperOptions.client.get<T>(type, id, options);
+        const { workspaces } = this.formatWorkspaceIdParams(wrapperOptions.request, options);
 
-        if (!excludeTypes.includes(type)) {
-          const { workspaces } = this.formatWorkspaceIdParams(wrapperOptions.request, options);
-
-          // If there is a workspace in options or request, object should belong to the workspace.
-          if (workspaces?.length === 1 && !objectToGet.workspaces?.includes(workspaces[0])) {
+        if (workspaces?.length === 1) {
+          const validatedObject = this.validateObjectExistInWorkspaces(objectToGet, workspaces[0]);
+          if (validatedObject.error) {
             throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
           }
         }

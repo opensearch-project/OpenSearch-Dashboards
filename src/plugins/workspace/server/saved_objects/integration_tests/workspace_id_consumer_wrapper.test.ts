@@ -321,6 +321,10 @@ describe('workspace_id_consumer integration test', () => {
 
     it('get', async () => {
       await clearFooAndBar();
+      await osdTestServer.request.delete(
+        root,
+        `/api/saved_objects/${config.type}/${packageInfo.version}`
+      );
       const createResultFoo = await osdTestServer.request
         .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_create`)
         .send([
@@ -341,6 +345,15 @@ describe('workspace_id_consumer integration test', () => {
         ])
         .expect(200);
 
+      await osdTestServer.request
+        .post(root, `/api/saved_objects/${config.type}/${packageInfo.version}`)
+        .send({
+          attributes: {
+            legacyConfig: 'foo',
+          },
+        })
+        .expect(200);
+
       const getResultWithRequestWorkspace = await osdTestServer.request
         .get(root, `/w/${createdFooWorkspace.id}/api/saved_objects/${dashboard.type}/foo`)
         .expect(200);
@@ -351,6 +364,14 @@ describe('workspace_id_consumer integration test', () => {
         .get(root, `/api/saved_objects/${dashboard.type}/bar`)
         .expect(200);
       expect(getResultWithoutRequestWorkspace.body.id).toEqual('bar');
+
+      const getGlobalResultWithinWorkspace = await osdTestServer.request
+        .get(
+          root,
+          `/w/${createdFooWorkspace.id}/api/saved_objects/${config.type}/${packageInfo.version}`
+        )
+        .expect(200);
+      expect(getGlobalResultWithinWorkspace.body.id).toEqual(packageInfo.version);
 
       await osdTestServer.request
         .get(root, `/w/${createdFooWorkspace.id}/api/saved_objects/${dashboard.type}/bar`)
@@ -363,6 +384,10 @@ describe('workspace_id_consumer integration test', () => {
             id: item.id,
           })
         )
+      );
+      await osdTestServer.request.delete(
+        root,
+        `/api/saved_objects/${config.type}/${packageInfo.version}`
       );
     });
 
