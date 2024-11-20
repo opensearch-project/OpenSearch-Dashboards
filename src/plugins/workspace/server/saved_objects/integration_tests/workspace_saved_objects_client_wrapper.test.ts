@@ -250,7 +250,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           perPage: 999,
           page: 1,
         })
-      ).rejects.toMatchInlineSnapshot(`[Error: Invalid workspaces: workspace-1]`);
+      ).rejects.toMatchInlineSnapshot(`[Error: Exist invalid workspaces]`);
     });
 
     it('should return consistent inner workspace data when user permitted', async () => {
@@ -358,7 +358,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
             workspaces: ['workspace-1'],
           }
         )
-      ).rejects.toMatchInlineSnapshot(`[Error: Invalid workspaces: workspace-1]`);
+      ).rejects.toMatchInlineSnapshot(`[Error: Exist invalid workspaces]`);
     });
 
     it('should able to create saved objects into permitted workspaces after create called', async () => {
@@ -468,7 +468,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         notPermittedSavedObjectedClient.bulkCreate([{ type: 'dashboard', attributes: {} }], {
           workspaces: ['workspace-1'],
         })
-      ).rejects.toMatchInlineSnapshot(`[Error: Invalid workspaces: workspace-1]`);
+      ).rejects.toMatchInlineSnapshot(`[Error: Exist invalid workspaces]`);
     });
 
     it('should able to create saved objects into permitted workspaces after bulkCreate called', async () => {
