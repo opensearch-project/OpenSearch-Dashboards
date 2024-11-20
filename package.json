@@ -102,6 +102,7 @@
     "**/cpy/globby": "^10.0.1",
     "**/d3-color": "^3.1.0",
     "**/elasticsearch/agentkeepalive": "^4.5.0",
+    "**/eslint/cross-spawn": "^7.0.5",
     "**/es5-ext": "^0.10.63",
     "**/fetch-mock/path-to-regexp": "^3.3.0",
     "**/follow-redirects": "^1.15.4",

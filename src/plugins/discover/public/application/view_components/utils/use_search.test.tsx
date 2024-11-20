@@ -110,6 +110,48 @@ describe('useSearch', () => {
     });
   });
 
+  it('should initialize with uninitialized state when dataset type config search on page load is disabled', async () => {
+    const services = createMockServices();
+    (services.uiSettings.get as jest.Mock).mockReturnValueOnce(true);
+    (services.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+      meta: { searchOnLoad: false },
+    });
+    (services.data.query.timefilter.timefilter.getRefreshInterval as jest.Mock).mockReturnValue({
+      pause: true,
+      value: 10,
+    });
+
+    const { result, waitForNextUpdate } = renderHook(() => useSearch(services), { wrapper });
+    expect(result.current.data$.getValue()).toEqual(
+      expect.objectContaining({ status: ResultStatus.UNINITIALIZED })
+    );
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+  });
+
+  it('should initialize with uninitialized state when dataset type config search on page load is enabled but the UI setting is disabled', async () => {
+    const services = createMockServices();
+    (services.uiSettings.get as jest.Mock).mockReturnValueOnce(false);
+    (services.data.query.queryString.getDatasetService as jest.Mock).mockReturnValue({
+      meta: { searchOnLoad: true },
+    });
+    (services.data.query.timefilter.timefilter.getRefreshInterval as jest.Mock).mockReturnValue({
+      pause: true,
+      value: 10,
+    });
+
+    const { result, waitForNextUpdate } = renderHook(() => useSearch(services), { wrapper });
+    expect(result.current.data$.getValue()).toEqual(
+      expect.objectContaining({ status: ResultStatus.UNINITIALIZED })
+    );
+
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+  });
+
   it('should update startTime when hook rerenders', async () => {
     const services = createMockServices();
 
@@ -140,7 +182,19 @@ describe('useSearch', () => {
     });
 
     act(() => {
+      mockDatasetUpdates$.next({
+        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
+      });
+    });
+
+    act(() => {
       result.current.data$.next({ status: ResultStatus.READY });
+    });
+
+    act(() => {
+      mockDatasetUpdates$.next({
+        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
+      });
     });
 
     expect(result.current.data$.getValue()).toEqual(
@@ -149,13 +203,7 @@ describe('useSearch', () => {
 
     act(() => {
       mockDatasetUpdates$.next({
-        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
-      });
-      mockDatasetUpdates$.next({
-        dataset: { id: 'new-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
-      });
-      mockDatasetUpdates$.next({
-        dataset: { id: 'new-dataset-id2', title: 'New Dataset', type: 'INDEX_PATTERN' },
+        dataset: { id: 'different-dataset-id', title: 'New Dataset', type: 'INDEX_PATTERN' },
       });
     });
 
@@ -164,7 +212,7 @@ describe('useSearch', () => {
     });
 
     expect(result.current.data$.getValue()).toEqual(
-      expect.objectContaining({ status: ResultStatus.LOADING })
+      expect.objectContaining({ status: ResultStatus.LOADING, rows: [] })
     );
   });
 });
