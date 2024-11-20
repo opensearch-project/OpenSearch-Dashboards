@@ -63,6 +63,16 @@ export class QueryStringManager {
     return this.storage.get('userQueryString') || '';
   }
 
+  private getInitialDatasetQueryString(query: Query, dataset: Dataset) {
+    const { language } = query;
+
+    const languageConfig = this.languageService.getLanguage(language);
+    const typeConfig = this.datasetService.getType(dataset.type);
+    return (
+      typeConfig?.getInitialQueryString?.(query) ?? (languageConfig?.getQueryString(query) || '')
+    );
+  }
+
   public getDefaultQuery(): Query {
     const defaultLanguageId = this.getDefaultLanguage();
     const defaultQuery = this.getDefaultQueryString();
@@ -79,20 +89,11 @@ export class QueryStringManager {
       defaultDataset &&
       this.languageService
     ) {
-      const language = this.languageService.getLanguage(defaultLanguageId);
       const newQuery = { ...query, dataset: defaultDataset };
-
-      const typeConfig = this.datasetService.getType(defaultDataset.type);
-      const defaultDatasetQueryString = typeConfig?.getDefaultQueryString?.(
-        defaultDataset,
-        newQuery.language
-      );
-      const newQueryString =
-        defaultDatasetQueryString ?? (language?.getQueryString(newQuery) || '');
 
       return {
         ...newQuery,
-        query: newQueryString,
+        query: this.getInitialDatasetQueryString(newQuery, defaultDataset),
       };
     }
 
@@ -251,15 +252,12 @@ export class QueryStringManager {
 
     // Both language and dataset provided - generate fresh query
     if (language && dataset) {
-      const typeConfig = this.datasetService.getType(dataset.type);
-      const queryString = typeConfig?.getDefaultQueryString?.(dataset, language);
-      const languageService = this.languageService.getLanguage(language);
       const newQuery = {
         language,
         dataset,
         query: '',
       };
-      newQuery.query = queryString ?? (languageService?.getQueryString(newQuery) || '');
+      newQuery.query = this.getInitialDatasetQueryString(newQuery, dataset);
       return newQuery;
     }
 
@@ -288,12 +286,11 @@ export class QueryStringManager {
       ...curQuery,
       language: languageId,
     };
-    let defaultDatasetQueryString;
+    let queryString = language?.getQueryString(newQuery) || '';
+
     if (curQuery.dataset) {
-      const typeConfig = this.datasetService.getType(curQuery.dataset.type);
-      defaultDatasetQueryString = typeConfig?.getDefaultQueryString?.(curQuery.dataset, languageId);
+      queryString = this.getInitialDatasetQueryString(newQuery, curQuery.dataset) ?? queryString;
     }
-    const queryString = defaultDatasetQueryString ?? (language?.getQueryString(newQuery) || '');
     this.languageService.setUserQueryString(queryString);
 
     return {
@@ -310,19 +307,15 @@ export class QueryStringManager {
     const curQuery = this.query$.getValue();
     // Use dataset's preferred language or fallback to current language
     const languageId = newDataset.language || curQuery.language;
-    const language = this.languageService.getLanguage(languageId);
     const newQuery = {
       ...curQuery,
       language: languageId,
       dataset: newDataset,
     };
-    const typeConfig = this.datasetService.getType(newDataset.type);
-    const defaultDatasetQueryString = typeConfig?.getDefaultQueryString?.(newDataset, languageId);
-    const queryString = defaultDatasetQueryString ?? (language?.getQueryString(newQuery) || '');
 
     return {
       ...newQuery,
-      query: queryString,
+      query: this.getInitialDatasetQueryString(newQuery, newDataset),
     };
   };
 
