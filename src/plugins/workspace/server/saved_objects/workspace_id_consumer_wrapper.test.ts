@@ -306,8 +306,8 @@ describe('WorkspaceIdConsumerWrapper', () => {
 
   describe('bulkGet', () => {
     const payload = [
-      { id: 'dashboard1', type: 'dashboard' },
-      { type: 'visualization', id: 'visualization1' },
+      { id: 'dashboard_id', type: 'dashboard' },
+      { id: 'visualization_id', type: 'visualization' },
     ];
     const savedObjects = [
       {
@@ -318,8 +318,8 @@ describe('WorkspaceIdConsumerWrapper', () => {
         workspaces: ['foo'],
       },
       {
-        type: 'dashboard',
-        id: 'dashboard_id',
+        type: 'visualization',
+        id: 'visualization_id',
         attributes: {},
         references: [],
         workspaces: ['bar'],
@@ -334,14 +334,70 @@ describe('WorkspaceIdConsumerWrapper', () => {
       mockedClient.bulkGet.mockResolvedValueOnce({ saved_objects: savedObjects });
       const result = await wrapperClient.bulkGet(payload, options);
       expect(mockedClient.bulkGet).toBeCalledWith(payload, options);
-      expect(result).toEqual({ saved_objects: [savedObjects[0]] });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "saved_objects": Array [
+            Object {
+              "attributes": Object {},
+              "id": "dashboard_id",
+              "references": Array [],
+              "type": "dashboard",
+              "workspaces": Array [
+                "foo",
+              ],
+            },
+            Object {
+              "attributes": Object {},
+              "error": Object {
+                "error": "Not Found",
+                "message": "Saved object [visualization/visualization_id] not found",
+                "statusCode": 404,
+              },
+              "id": "visualization_id",
+              "references": Array [],
+              "type": "visualization",
+              "workspaces": Array [
+                "bar",
+              ],
+            },
+          ],
+        }
+      `);
     });
 
     it(`Should bulkGet objects belonging to the workspace in request`, async () => {
       mockedClient.bulkGet.mockResolvedValueOnce({ saved_objects: savedObjects });
       const result = await wrapperClient.bulkGet(payload);
       expect(mockedClient.bulkGet).toBeCalledWith(payload, {});
-      expect(result).toEqual({ saved_objects: [savedObjects[0]] });
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "saved_objects": Array [
+            Object {
+              "attributes": Object {},
+              "id": "dashboard_id",
+              "references": Array [],
+              "type": "dashboard",
+              "workspaces": Array [
+                "foo",
+              ],
+            },
+            Object {
+              "attributes": Object {},
+              "error": Object {
+                "error": "Not Found",
+                "message": "Saved object [visualization/visualization_id] not found",
+                "statusCode": 404,
+              },
+              "id": "visualization_id",
+              "references": Array [],
+              "type": "visualization",
+              "workspaces": Array [
+                "bar",
+              ],
+            },
+          ],
+        }
+      `);
     });
 
     it(`Should bulkGet objects when there is no workspace in options/request`, async () => {

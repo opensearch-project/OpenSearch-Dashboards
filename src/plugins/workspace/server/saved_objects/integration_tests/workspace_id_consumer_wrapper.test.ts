@@ -331,14 +331,33 @@ describe('workspace_id_consumer integration test', () => {
         ])
         .expect(200);
 
-      const getResult = await osdTestServer.request
-        .get(root, `/w/${createdFooWorkspace.id}/api/saved_objects/${dashboard.type}/foo`)
+      const createResultBar = await osdTestServer.request
+        .post(root, `/w/${createdBarWorkspace.id}/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...dashboard,
+            id: 'bar',
+          },
+        ])
         .expect(200);
 
-      expect(getResult).toEqual(1);
+      const getResultWithRequestWorkspace = await osdTestServer.request
+        .get(root, `/w/${createdFooWorkspace.id}/api/saved_objects/${dashboard.type}/foo`)
+        .expect(200);
+      expect(getResultWithRequestWorkspace.body.id).toEqual('foo');
+      expect(getResultWithRequestWorkspace.body.workspaces).toEqual([createdFooWorkspace.id]);
+
+      const getResultWithoutRequestWorkspace = await osdTestServer.request
+        .get(root, `/api/saved_objects/${dashboard.type}/bar`)
+        .expect(200);
+      expect(getResultWithoutRequestWorkspace.body.id).toEqual('bar');
+
+      await osdTestServer.request
+        .get(root, `/w/${createdFooWorkspace.id}/api/saved_objects/${dashboard.type}/bar`)
+        .expect(404);
 
       await Promise.all(
-        [...createResultFoo.body.saved_objects].map((item) =>
+        [...createResultFoo.body.saved_objects, ...createResultBar.body.saved_objects].map((item) =>
           deleteItem({
             type: item.type,
             id: item.id,
@@ -347,52 +366,80 @@ describe('workspace_id_consumer integration test', () => {
       );
     });
 
-    // it('bulk get', async () => {
-    //   await clearFooAndBar();
-    //   const createResultFoo = await osdTestServer.request
-    //     .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_create`)
-    //     .send([
-    //       {
-    //         ...dashboard,
-    //         id: 'foo',
-    //       },
-    //     ])
-    //     .expect(200);
+    it('bulk get', async () => {
+      await clearFooAndBar();
+      const createResultFoo = await osdTestServer.request
+        .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...dashboard,
+            id: 'foo',
+          },
+        ])
+        .expect(200);
 
-    //   const createResultBar = await osdTestServer.request
-    //     .post(root, `/w/${createdBarWorkspace.id}/api/saved_objects/_bulk_create`)
-    //     .send([
-    //       {
-    //         ...dashboard,
-    //         id: 'bar',
-    //       },
-    //     ])
-    //     .expect(200);
+      const createResultBar = await osdTestServer.request
+        .post(root, `/w/${createdBarWorkspace.id}/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...dashboard,
+            id: 'bar',
+          },
+        ])
+        .expect(200);
 
-    //   const bulkGetResultWithWorkspace = await osdTestServer.request
-    //     .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_get`)
-    //     .expect(200);
+      const payload = [
+        { id: 'foo', type: 'dashboard' },
+        { id: 'bar', type: 'dashboard' },
+      ];
+      const bulkGetResultWithWorkspace = await osdTestServer.request
+        .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_get`)
+        .send(payload)
+        .expect(200);
 
-    //   expect(
-    //     (bulkGetResultWithWorkspace.body.saved_objects as any[]).every((item) =>
-    //       isEqual(item.workspaces, [createdFooWorkspace.id])
-    //     )
-    //   ).toEqual(true);
+      expect(bulkGetResultWithWorkspace.body.saved_objects.length).toEqual(2);
+      expect(bulkGetResultWithWorkspace.body.saved_objects[0].id).toEqual('foo');
+      expect(bulkGetResultWithWorkspace.body.saved_objects[0].workspaces).toEqual([
+        createdFooWorkspace.id,
+      ]);
+      expect(bulkGetResultWithWorkspace.body.saved_objects[0]?.error).toBeUndefined();
+      expect(bulkGetResultWithWorkspace.body.saved_objects[1].id).toEqual('bar');
+      expect(bulkGetResultWithWorkspace.body.saved_objects[1].workspaces).toEqual([
+        createdBarWorkspace.id,
+      ]);
+      expect(bulkGetResultWithWorkspace.body.saved_objects[1]?.error).toMatchInlineSnapshot(`
+        Object {
+          "error": "Not Found",
+          "message": "Saved object [dashboard/bar] not found",
+          "statusCode": 404,
+        }
+      `);
 
-    //   const bulkGetResultWithoutWorkspace = await osdTestServer.request
-    //     .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_get`)
-    //     .expect(200);
+      const bulkGetResultWithoutWorkspace = await osdTestServer.request
+        .post(root, `/api/saved_objects/_bulk_get`)
+        .send(payload)
+        .expect(200);
 
-    //   expect(bulkGetResultWithoutWorkspace.body.saved_objects.length).toEqual(2);
+      expect(bulkGetResultWithoutWorkspace.body.saved_objects.length).toEqual(2);
+      expect(bulkGetResultWithoutWorkspace.body.saved_objects[0].id).toEqual('foo');
+      expect(bulkGetResultWithoutWorkspace.body.saved_objects[0].workspaces).toEqual([
+        createdFooWorkspace.id,
+      ]);
+      expect(bulkGetResultWithoutWorkspace.body.saved_objects[0]?.error).toBeUndefined();
+      expect(bulkGetResultWithoutWorkspace.body.saved_objects[1].id).toEqual('bar');
+      expect(bulkGetResultWithoutWorkspace.body.saved_objects[1].workspaces).toEqual([
+        createdBarWorkspace.id,
+      ]);
+      expect(bulkGetResultWithoutWorkspace.body.saved_objects[1]?.error).toBeUndefined();
 
-    //   await Promise.all(
-    //     [...createResultFoo.body.saved_objects, ...createResultBar.body.saved_objects].map((item) =>
-    //       deleteItem({
-    //         type: item.type,
-    //         id: item.id,
-    //       })
-    //     )
-    //   );
-    // });
+      await Promise.all(
+        [...createResultFoo.body.saved_objects, ...createResultBar.body.saved_objects].map((item) =>
+          deleteItem({
+            type: item.type,
+            id: item.id,
+          })
+        )
+      );
+    });
   });
 });

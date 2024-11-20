@@ -27,19 +27,6 @@ const excludeTypes = [UI_SETTINGS_SAVED_OBJECTS_TYPE, WORKSPACE_TYPE];
 type WorkspaceOptions = Pick<SavedObjectsBaseOptions, 'workspaces'> | undefined;
 
 export class WorkspaceIdConsumerWrapper {
-  private getWorkspaceIdFromOptionsAndRequest<T extends WorkspaceOptions>(
-    request: OpenSearchDashboardsRequest,
-    options?: T
-  ): string | undefined {
-    const workspaceState = getWorkspaceState(request);
-    const workspaceIdParsedFromRequest = workspaceState?.requestWorkspaceId;
-    const workspaceIdsInUserOptions = options?.workspaces;
-
-    return workspaceIdsInUserOptions?.length === 1
-      ? workspaceIdsInUserOptions[0]
-      : workspaceIdParsedFromRequest;
-  }
-
   private formatWorkspaceIdParams<T extends WorkspaceOptions>(
     request: OpenSearchDashboardsRequest,
     options?: T
@@ -149,18 +136,30 @@ export class WorkspaceIdConsumerWrapper {
         options: SavedObjectsBaseOptions = {}
       ): Promise<SavedObjectsBulkResponse<T>> => {
         const objectToBulkGet = await wrapperOptions.client.bulkGet<T>(objects, options);
-        const workspace = this.getWorkspaceIdFromOptionsAndRequest(wrapperOptions.request, options);
+        const { workspaces } = this.formatWorkspaceIdParams(wrapperOptions.request, options);
 
         // If there is a workspace in options or request, objects should belong to the workspace.
         // Otherwise, get all the objects.
-        const filteredSavedObjects = workspace
-          ? objectToBulkGet.saved_objects.filter((ob) => ob.workspaces?.includes(workspace))
-          : objectToBulkGet.saved_objects;
+        if (workspaces?.length === 1) {
+          const workspace = workspaces[0];
+          const savedObjects: Array<SavedObject<T>> = objectToBulkGet.saved_objects.map((object) =>
+            object.workspaces?.includes(workspace)
+              ? object
+              : {
+                  ...object,
+                  error: {
+                    ...SavedObjectsErrorHelpers.createGenericNotFoundError(object.type, object.id)
+                      .output.payload,
+                  },
+                }
+          );
+          return {
+            ...objectToBulkGet,
+            saved_objects: savedObjects,
+          };
+        }
 
-        return {
-          ...objectToBulkGet,
-          saved_objects: filteredSavedObjects,
-        };
+        return objectToBulkGet;
       },
       get: async <T = unknown>(
         type: string,
@@ -170,13 +169,10 @@ export class WorkspaceIdConsumerWrapper {
         const objectToGet = await wrapperOptions.client.get<T>(type, id, options);
 
         if (!excludeTypes.includes(type)) {
-          const workspace = this.getWorkspaceIdFromOptionsAndRequest(
-            wrapperOptions.request,
-            options
-          );
+          const { workspaces } = this.formatWorkspaceIdParams(wrapperOptions.request, options);
 
           // If there is a workspace in options or request, object should belong to the workspace.
-          if (workspace && !objectToGet.workspaces?.includes(workspace)) {
+          if (workspaces?.length === 1 && !objectToGet.workspaces?.includes(workspaces[0])) {
             throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
           }
         }
