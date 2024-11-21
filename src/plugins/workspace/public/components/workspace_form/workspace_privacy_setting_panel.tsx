@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiCheckableCard,
+  EuiCheckbox,
   EuiCompressedFormRow,
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,37 +15,86 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { WorkspacePrivacyItemType } from './constants';
+import {
+  optionIdToWorkspacePermissionModesMap,
+  privacyTypeEditDescription,
+  privacyTypeEditTitle,
+  privacyTypePrivateDescription,
+  privacyTypePrivateTitle,
+  privacyTypeViewDescription,
+  privacyTypeViewTitle,
+  WorkspacePermissionItemType,
+  WorkspacePrivacyItemType,
+} from './constants';
+import { WorkspacePermissionSetting } from './types';
+import { PermissionModeId } from '../../../../../core/public';
 
 export interface WorkspacePrivacySettingProps {
-  onPrivacyTypeChange: (newValue: WorkspacePrivacyItemType) => void;
-  currentPrivacyType: string;
+  onPermissionChange: (
+    value: Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
+  ) => void;
+  permissionSettings: Array<
+    Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
+  >;
+  goToCollaborators: boolean;
+  onGoToCollaboratorsChange: (value: boolean) => void;
 }
 
 export const WorkspacePrivacySettingPanel = ({
-  onPrivacyTypeChange,
-  currentPrivacyType,
+  onPermissionChange,
+  permissionSettings,
+  goToCollaborators,
+  onGoToCollaboratorsChange,
 }: WorkspacePrivacySettingProps) => {
+  const [privacyType, setPrivacyType] = useState(WorkspacePrivacyItemType.PrivateToCollaborators);
+  const workspaceAdmin = permissionSettings[0];
+
   const options = [
     {
       id: WorkspacePrivacyItemType.PrivateToCollaborators,
-      label: i18n.translate('workspace.privacy.privateToCollaborators.title', {
-        defaultMessage: 'Private to collaborators',
-      }),
+      label: privacyTypePrivateTitle,
+      description: privacyTypePrivateDescription,
     },
     {
       id: WorkspacePrivacyItemType.AnyoneCanView,
-      label: i18n.translate('workspace.privacy.anyoneCanView.title', {
-        defaultMessage: 'Anyone can view',
-      }),
+      label: privacyTypeViewTitle,
+      description: privacyTypeViewDescription,
     },
     {
       id: WorkspacePrivacyItemType.AnyoneCanEdit,
-      label: i18n.translate('workspace.privacy.anyoneCanEdit.title', {
-        defaultMessage: 'Anyone can edit',
-      }),
+      label: privacyTypeEditTitle,
+      description: privacyTypeEditDescription,
     },
   ];
+
+  useEffect(() => {
+    if (privacyType === WorkspacePrivacyItemType.PrivateToCollaborators) {
+      onPermissionChange([workspaceAdmin]);
+    }
+    if (privacyType === WorkspacePrivacyItemType.AnyoneCanView) {
+      onPermissionChange([
+        workspaceAdmin,
+        {
+          id: 1,
+          type: WorkspacePermissionItemType.User,
+          userId: '*',
+          modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read],
+        },
+      ]);
+    }
+    if (privacyType === WorkspacePrivacyItemType.AnyoneCanEdit) {
+      onPermissionChange([
+        workspaceAdmin,
+        {
+          id: 1,
+          type: WorkspacePermissionItemType.User,
+          userId: '*',
+          modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.ReadAndWrite],
+        },
+      ]);
+    }
+    // console.log(permissionSettings);
+  }, [privacyType, onPermissionChange, workspaceAdmin]);
 
   return (
     <EuiPanel>
@@ -62,15 +112,15 @@ export const WorkspacePrivacySettingPanel = ({
       </EuiText>
       <EuiSpacer size="m" />
       <EuiCompressedFormRow
-        label={i18n.translate('workspace.form.workspaceUseCase.name.label', {
-          defaultMessage: 'Select use case',
+        label={i18n.translate('workspace.form.privacy.name.label', {
+          defaultMessage: 'Workspace privacy',
         })}
         // isInvalid={!!formErrors.features}
         // error={formErrors.features?.message}
         fullWidth
       >
         <EuiFlexGroup gutterSize="s">
-          {options.map(({ id, label }) => (
+          {options.map(({ id, label, description }) => (
             <EuiFlexItem key={id}>
               <EuiCheckableCard
                 id={id}
@@ -79,13 +129,30 @@ export const WorkspacePrivacySettingPanel = ({
                     <h4>{label}</h4>
                   </EuiText>
                 }
-                onChange={() => onPrivacyTypeChange(id)}
-                checked={currentPrivacyType === id}
-              />
+                onChange={() => setPrivacyType(id)}
+                checked={privacyType === id}
+              >
+                <EuiText size="xs">{description}</EuiText>
+              </EuiCheckableCard>
             </EuiFlexItem>
           ))}
         </EuiFlexGroup>
       </EuiCompressedFormRow>
+      <EuiSpacer size="m" />
+      <EuiText size="s">
+        {i18n.translate('workspace.form.panels.privacy.jumpToCollaborators.description', {
+          defaultMessage: 'You can assign workspace administrators once the workspace is created.',
+        })}
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiCheckbox
+        id="jump_to_collaborators_checkbox"
+        checked={goToCollaborators}
+        onChange={(event) => onGoToCollaboratorsChange(event.target.checked)}
+        label={i18n.translate('workspace.form.panels.privacy.jumpToCollaborators.label', {
+          defaultMessage: 'Go to configure the collaborators right after creating the workspace.',
+        })}
+      />
     </EuiPanel>
   );
 };

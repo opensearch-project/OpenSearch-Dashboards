@@ -20,10 +20,11 @@ import { CreatorDetailsPanel } from './creator_details_panel';
 
 import './workspace_creator_form.scss';
 import { WorkspacePrivacySettingPanel } from '../workspace_form/workspace_privacy_setting_panel';
-import { WorkspacePrivacyItemType } from '../workspace_form/constants';
 
 interface WorkspaceCreatorFormProps extends WorkspaceFormProps {
   isSubmitting: boolean;
+  goToCollaborators: boolean;
+  onGoToCollaboratorsChange: (value: boolean) => void;
 }
 
 export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
@@ -40,11 +41,11 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
     numberOfErrors,
     setName,
     setDescription,
-    setSelectedPrivacyType,
     handleFormSubmit,
     handleColorChange,
     handleUseCaseChange,
     setSelectedDataSourceConnections,
+    setPermissionSettings,
   } = useWorkspaceForm(props);
 
   const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin ?? false;
@@ -116,8 +117,10 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
           <EuiSpacer size="m" />
           {isDashboardAdmin && (
             <WorkspacePrivacySettingPanel
-              onPrivacyTypeChange={setSelectedPrivacyType}
-              currentPrivacyType={formData.privacyType}
+              onPermissionChange={setPermissionSettings}
+              permissionSettings={formData.permissionSettings}
+              goToCollaborators={props.goToCollaborators}
+              onGoToCollaboratorsChange={props.onGoToCollaboratorsChange}
             />
           )}
         </EuiForm>

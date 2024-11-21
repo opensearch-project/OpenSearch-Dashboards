@@ -17,7 +17,7 @@ import {
   WorkspaceFormDataState,
 } from './types';
 import { getNumberOfChanges, getNumberOfErrors, validateWorkspaceForm } from './utils';
-import { WorkspacePermissionItemType, WorkspacePrivacyItemType } from './constants';
+import { WorkspacePermissionItemType } from './constants';
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
@@ -34,9 +34,6 @@ export const useWorkspaceForm = ({
   const [color, setColor] = useState(defaultValues?.color);
   const defaultValuesRef = useRef(defaultValues);
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedPrivacyType, setSelectedPrivacyType] = useState(
-    WorkspacePrivacyItemType.PrivateToCollaborators
-  );
 
   const [featureConfigs, setFeatureConfigs] = useState<string[]>(defaultValues?.features ?? []);
   const selectedUseCase = useMemo(() => getFirstUseCaseOfFeatureConfigs(featureConfigs), [
@@ -63,7 +60,6 @@ export const useWorkspaceForm = ({
     description,
     features: featureConfigs,
     useCase: selectedUseCase,
-    privacyType: selectedPrivacyType,
     color,
     permissionSettings,
     selectedDataSourceConnections,
@@ -98,7 +94,6 @@ export const useWorkspaceForm = ({
       name: submitFormData.name!,
       description: submitFormData.description,
       color: submitFormData.color || '#FFFFFF',
-      privacyType: submitFormData.privacyType,
       features: submitFormData.features,
       permissionSettings: submitFormData.permissionSettings as WorkspacePermissionSetting[],
       selectedDataSourceConnections: submitFormData.selectedDataSourceConnections,
@@ -153,7 +148,6 @@ export const useWorkspaceForm = ({
     setName(resetValues?.name ?? '');
     setDescription(resetValues?.description ?? '');
     setColor(resetValues?.color);
-    setSelectedPrivacyType(WorkspacePrivacyItemType.PrivateToCollaborators);
     setFeatureConfigs(resetValues?.features ?? []);
     setFormErrors({});
     setIsEditing(false);
@@ -171,7 +165,6 @@ export const useWorkspaceForm = ({
     handleResetForm,
     setName,
     setDescription,
-    setSelectedPrivacyType,
     handleFormSubmit,
     handleColorChange,
     handleUseCaseChange,

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiPage, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 import { useObservable } from 'react-use';
@@ -25,6 +25,7 @@ import {
 } from '../workspace_form';
 import { WorkspaceAttributeWithPermission } from '../../../../../core/types';
 import { WorkspaceClient } from '../../workspace_client';
+import { WorkspaceCollaboratorPrivacySettingPanel } from '../workspace_form/workspace_collaborator_privacy_setting_panel';
 
 export const WorkspaceCollaborators = () => {
   const {
@@ -116,13 +117,23 @@ export const WorkspaceCollaborators = () => {
         ]}
         setMountPoint={application?.setAppRightControls}
       />
-      <EuiPanel>
-        <WorkspaceCollaboratorTable
-          permissionSettings={permissionSettings}
-          displayedCollaboratorTypes={displayedCollaboratorTypes}
-          handleSubmitPermissionSettings={handleSubmitPermissionSettings}
-        />
-      </EuiPanel>
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <WorkspaceCollaboratorPrivacySettingPanel
+            permissionSettings={permissionSettings}
+            // onPermissionChange={handleSubmitPermissionSettings}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiPanel>
+            <WorkspaceCollaboratorTable
+              permissionSettings={permissionSettings}
+              displayedCollaboratorTypes={displayedCollaboratorTypes}
+              handleSubmitPermissionSettings={handleSubmitPermissionSettings}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPage>
   );
 };

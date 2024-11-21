@@ -108,6 +108,42 @@ export const detailsColorHelpText = i18n.translate(
   }
 );
 
+export const privacyTypePrivateTitle = i18n.translate(
+  'workspace.privacy.privateToCollaborators.title',
+  {
+    defaultMessage: 'Private to collaborators',
+  }
+);
+
+export const privacyTypeViewTitle = i18n.translate('workspace.privacy.anyoneCanView.title', {
+  defaultMessage: 'Anyone can view',
+});
+
+export const privacyTypeEditTitle = i18n.translate('workspace.privacy.anyoneCanEdit.title', {
+  defaultMessage: 'Anyone can edit',
+});
+
+export const privacyTypePrivateDescription = i18n.translate(
+  'workspace.privacy.privateToCollaborators.description',
+  {
+    defaultMessage: 'Only collaborators can access the workspace.',
+  }
+);
+
+export const privacyTypeViewDescription = i18n.translate(
+  'workspace.privacy.anyoneCanView.description',
+  {
+    defaultMessage: 'Anyone can view workspace assets.',
+  }
+);
+
+export const privacyTypeEditDescription = i18n.translate(
+  'workspace.privacy.anyoneCanEdit.description',
+  {
+    defaultMessage: 'Anyone can view and edit workspace assets.',
+  }
+);
+
 export const PERMISSION_TYPE_LABEL_ID = 'workspace-form-permission-type-label';
 export const PERMISSION_COLLABORATOR_LABEL_ID = 'workspace-form-permission-collaborator-label';
 export const PERMISSION_ACCESS_LEVEL_LABEL_ID = 'workspace-form-permission-access-level-label';
