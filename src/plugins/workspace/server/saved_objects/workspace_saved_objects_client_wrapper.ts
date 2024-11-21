@@ -476,7 +476,6 @@ export class WorkspaceSavedObjectsClientWrapper {
             ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
             return {
               ...object,
-              id: '',
               workspaces: [],
               attributes: null,
               error: {
