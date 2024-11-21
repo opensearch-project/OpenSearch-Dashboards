@@ -53,7 +53,7 @@ export class WorkspaceIdConsumerWrapper {
 
   // If the object.workspaces is null/[] (as global object), return it directly.
   // If the workspace is specified, validate whether the object exists in the workspace.
-  private validateObjectExistInWorkspaces<T>(
+  private formatObjectForWorkspaceValidation<T>(
     object: SavedObject<T>,
     workspace: string
   ): SavedObject<T> {
@@ -160,7 +160,7 @@ export class WorkspaceIdConsumerWrapper {
           return {
             ...objectToBulkGet,
             saved_objects: objectToBulkGet.saved_objects.map((object) =>
-              this.validateObjectExistInWorkspaces(object, workspaces[0])
+              this.formatObjectForWorkspaceValidation(object, workspaces[0])
             ),
           };
         }
@@ -176,7 +176,10 @@ export class WorkspaceIdConsumerWrapper {
         const { workspaces } = this.formatWorkspaceIdParams(wrapperOptions.request, options);
 
         if (workspaces?.length === 1) {
-          const validatedObject = this.validateObjectExistInWorkspaces(objectToGet, workspaces[0]);
+          const validatedObject = this.formatObjectForWorkspaceValidation(
+            objectToGet,
+            workspaces[0]
+          );
           if (validatedObject.error) {
             throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
           }
