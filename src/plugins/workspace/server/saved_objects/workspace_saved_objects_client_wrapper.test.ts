@@ -660,12 +660,11 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           permissionControlMock,
           requestMock,
         } = generateWorkspaceSavedObjectsClientWrapper();
-        let errorCatched;
-        try {
-          await wrapper.bulkGet([{ type: 'dashboard', id: 'not-permitted-dashboard' }]);
-        } catch (e) {
-          errorCatched = e;
-        }
+
+        const result = await wrapper.bulkGet([
+          { type: 'dashboard', id: 'not-permitted-dashboard' },
+        ]);
+
         expect(permissionControlMock.validate).toHaveBeenCalledWith(
           requestMock,
           {
@@ -674,8 +673,24 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           },
           ['library_read', 'library_write']
         );
-        expect(errorCatched?.message).toEqual('Invalid saved objects permission');
+
+        expect(result.saved_objects).toEqual([
+          {
+            id: '',
+            type: 'dashboard',
+            attributes: null,
+            error: {
+              error: 'Invalid saved objects permission',
+              statusCode: 403,
+              message: 'Permission denied',
+            },
+            permissions: {},
+            references: [],
+            workspaces: [],
+          },
+        ]);
       });
+
       it('should call permission validateSavedObjectsACL with object', async () => {
         const { wrapper, permissionControlMock } = generateWorkspaceSavedObjectsClientWrapper();
         try {

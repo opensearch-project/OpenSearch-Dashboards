@@ -100,7 +100,7 @@ export interface SavedObject<T = unknown> {
   updated_at?: string;
   error?: SavedObjectError;
   /** {@inheritdoc SavedObjectAttributes} */
-  attributes: T;
+  attributes: T | null;
   /** {@inheritdoc SavedObjectReference} */
   references: SavedObjectReference[];
   /** {@inheritdoc SavedObjectsMigrationVersion} */
