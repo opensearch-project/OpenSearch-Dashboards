@@ -141,6 +141,7 @@ export const Configurator = ({
                 setLanguage(e.target.value);
                 setDataset({ ...dataset, language: e.target.value });
               }}
+              data-test-subj="advancedSelectorLanguageSelect"
             />
           </EuiFormRow>
           {!languageService.getLanguage(language)?.hideDatePicker &&
@@ -180,6 +181,7 @@ export const Configurator = ({
                     setDataset({ ...dataset, timeFieldName: value });
                   }}
                   hasNoInitialSelection
+                  data-test-subj="advancedSelectorTimeFieldSelect"
                 />
               </EuiFormRow>
             ))}
@@ -205,6 +207,7 @@ export const Configurator = ({
           }}
           fill
           disabled={submitDisabled}
+          data-test-subj="advancedSelectorConfirmButton"
         >
           <FormattedMessage
             id="data.explorer.datasetSelector.advancedSelector.confirm"

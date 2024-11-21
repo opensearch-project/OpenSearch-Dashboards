@@ -146,6 +146,7 @@ export const DatasetSelector = ({
           checked: id === selectedDatasetId ? 'on' : undefined,
           key: id,
           prepend: <EuiIcon type={datasetService.getType(type)!.meta.icon.type} />,
+          'data-test-subj': `datasetOption-${id}`,
         });
       });
       return datasetOptions.length > 1 ? datasetOptions : [];
@@ -214,6 +215,7 @@ export const DatasetSelector = ({
             appearance={appearance}
             {...buttonProps}
             className="datasetSelector__button"
+            data-test-subj="datasetSelectorButton"
             iconType="arrowDown"
             iconSide="right"
             onClick={togglePopover}
@@ -252,6 +254,7 @@ export const DatasetSelector = ({
       <EuiPopoverFooter paddingSize="none" className="datasetSelector__footer">
         <EuiButton
           className="datasetSelector__advancedButton"
+          data-test-subj="datasetSelectorAdvancedButton"
           iconType="gear"
           iconSide="right"
           iconSize="s"
