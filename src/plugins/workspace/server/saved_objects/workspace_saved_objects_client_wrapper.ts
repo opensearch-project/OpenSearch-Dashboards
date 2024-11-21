@@ -451,25 +451,50 @@ export class WorkspaceSavedObjectsClientWrapper {
         getWorkspacesFromSavedObjects(objectToBulkGet.saved_objects)
       );
 
-      for (const object of objectToBulkGet.saved_objects) {
-        if (
-          !(await this.validateWorkspacesAndSavedObjectsPermissions(
-            object,
-            wrapperOptions.request,
-            [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
-            [WorkspacePermissionMode.Write, WorkspacePermissionMode.Read],
-            false
-          ))
-        ) {
-          ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
-          throw generateSavedObjectsPermissionError();
-        }
-      }
+      const processedObjects = await Promise.all(
+        objectToBulkGet.saved_objects.map(async (object) => {
+          if (validateIsWorkspaceDataSourceAndConnectionObjectType(object.type)) {
+            const hasPermission = this.validateDataSourcePermissions(
+              object,
+              wrapperOptions.request
+            );
+            if (!hasPermission) {
+              ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
+              throw generateDataSourcePermissionError();
+            }
+          }
+
+          if (
+            !(await this.validateWorkspacesAndSavedObjectsPermissions(
+              object,
+              wrapperOptions.request,
+              [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
+              [WorkspacePermissionMode.Write, WorkspacePermissionMode.Read],
+              false
+            ))
+          ) {
+            ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
+            return {
+              ...object,
+              id: '',
+              workspaces: [],
+              attributes: null,
+              error: {
+                error: 'Invalid saved objects permission',
+                statusCode: 403,
+                message: 'Permission denied',
+              },
+            };
+          }
+          return object;
+        })
+      );
+
       ACLAuditor?.increment(
         ACLAuditorStateKey.VALIDATE_SUCCESS,
         objectToBulkGet.saved_objects.length
       );
-      return objectToBulkGet;
+      return { saved_objects: processedObjects };
     };
 
     const findWithWorkspacePermissionControl = async <T = unknown>(
