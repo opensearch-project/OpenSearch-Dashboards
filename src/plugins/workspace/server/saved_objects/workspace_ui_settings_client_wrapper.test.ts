@@ -6,7 +6,7 @@
 import { loggerMock } from '@osd/logging/target/mocks';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { WorkspaceUiSettingsClientWrapper } from './workspace_ui_settings_client_wrapper';
-import { WORKSPACE_TYPE } from '../../../../core/server';
+import { SavedObjectsErrorHelpers, WORKSPACE_TYPE } from '../../../../core/server';
 import {
   DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
   DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID,
@@ -49,6 +49,29 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
         });
       }
       return Promise.reject();
+    });
+
+    clientMock.bulkGet.mockImplementation(async (savedObjectsToGet) => {
+      return {
+        saved_objects: [
+          {
+            id: 'workspace-1',
+            type: WORKSPACE_TYPE,
+            references: [],
+            attributes: {
+              uiSettings: {
+                defaultDashboard: 'default-dashboard-workspace',
+                defaultIndex: 'index-pattern-1',
+              },
+            },
+          },
+        ].filter(
+          (item) =>
+            !!savedObjectsToGet?.find(
+              (objectToGet) => objectToGet.id === item.id && objectToGet.type === item.type
+            )
+        ),
+      };
     });
 
     const wrapper = new WorkspaceUiSettingsClientWrapper(logger);
@@ -184,5 +207,106 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
     expect(logger.error).toBeCalledWith(
       `Unable to get workspaceObject with id: ${invalidWorkspaceId}`
     );
+  });
+
+  it('should throw bad request error when not permitted to update ui settings', async () => {
+    const { wrappedClient, clientMock } = createWrappedClient();
+    clientMock.bulkUpdate.mockImplementation(async () => {
+      throw new Error('Failed to update ui setting');
+    });
+    clientMock.get.mockImplementation(async (type, id) => {
+      if (type === 'index-pattern') {
+        return Promise.resolve({
+          id: 'index-pattern-1',
+          references: [],
+          type: 'index-pattern',
+          attributes: {},
+          workspaces: ['workspace-1'],
+        });
+      }
+      return Promise.reject('not found');
+    });
+
+    let error;
+    try {
+      await wrappedClient.delete('index-pattern', 'index-pattern-1');
+    } catch (e) {
+      error = e;
+    }
+    expect(SavedObjectsErrorHelpers.isBadRequestError(error)).toBe(true);
+  });
+
+  it('should able to delete global index pattern', async () => {
+    const { wrappedClient, clientMock } = createWrappedClient();
+    clientMock.get.mockImplementation(async (type) => {
+      if (type === 'index-pattern') {
+        return Promise.resolve({
+          id: 'global-index-pattern-1',
+          references: [],
+          type: 'index-pattern',
+          attributes: {},
+        });
+      }
+      return Promise.reject('not found');
+    });
+
+    let error;
+    try {
+      await wrappedClient.delete('index-pattern', 'global-index-pattern-1');
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toBeUndefined();
+    expect(clientMock.delete).toHaveBeenCalled();
+  });
+
+  it('should able to delete not index pattern saved objects', async () => {
+    const { wrappedClient, clientMock } = createWrappedClient();
+
+    let error;
+    try {
+      await wrappedClient.delete('workspace', 'workspace-1');
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toBeUndefined();
+    expect(clientMock.delete).toHaveBeenCalled();
+  });
+
+  it('should able to delete global index pattern if permitted', async () => {
+    const { wrappedClient, clientMock } = createWrappedClient();
+
+    clientMock.get.mockImplementation(async (type, id) => {
+      if (type === 'config') {
+        return Promise.resolve({
+          id,
+          references: [],
+          type: 'config',
+          attributes: {
+            defaultDashboard: 'new-dashboard-id',
+            defaultIndex: 'index-pattern-1',
+          },
+          workspaces: ['workspace-1'],
+        });
+      } else if (type === 'index-pattern') {
+        return Promise.resolve({
+          id: 'index-pattern-1',
+          references: [],
+          type: 'index-pattern',
+          attributes: {},
+          workspaces: ['workspace-1'],
+        });
+      }
+      return Promise.reject('not found');
+    });
+
+    let error;
+    try {
+      await wrappedClient.delete('index-pattern', 'index-pattern-1');
+    } catch (e) {
+      error = e;
+    }
+    expect(error).toBeUndefined();
+    expect(clientMock.delete).toHaveBeenCalled();
   });
 });

@@ -7,6 +7,8 @@ import { IUiSettingsClient, WorkspaceAttribute } from 'src/core/server';
 
 import * as osdTestServer from '../../../../../core/test_helpers/osd_server';
 import { httpServerMock } from '../../../../../core/server/mocks';
+import * as utilsExports from '../../../../../core/server/utils/auth_info';
+import { SavedObjectsErrorHelpers } from '../../../../../core/server';
 
 describe('workspace ui settings saved object client wrapper', () => {
   let opensearchServer: osdTestServer.TestOpenSearchUtils;
@@ -89,5 +91,96 @@ describe('workspace ui settings saved object client wrapper', () => {
 
     await globalUiSettingsClient.set('defaultIndex', 'global-index-new');
     expect(await globalUiSettingsClient.get('defaultIndex')).toBe('global-index-new');
+  });
+
+  describe('default index pattern', () => {
+    const workspaceId = 'test-1';
+    let internalSavedObjectsRepository;
+
+    beforeAll(async () => {
+      internalSavedObjectsRepository = osd.coreStart.savedObjects.createInternalRepository([
+        'workspace',
+      ]);
+    });
+
+    beforeEach(async () => {
+      await internalSavedObjectsRepository.create(
+        'workspace',
+        {
+          name: 'test default index workspace',
+          features: ['use-case-all'],
+          uiSettings: {
+            defaultIndex: 'index-pattern-1',
+          },
+        },
+        {
+          id: workspaceId,
+          permissions: {
+            write: { users: ['foo'] },
+            library_write: { users: ['foo'] },
+            read: { users: ['bar'] },
+            library_read: { users: ['bar'] },
+          },
+          overwrite: true,
+        }
+      );
+      await internalSavedObjectsRepository.create(
+        'index-pattern',
+        {},
+        {
+          id: 'index-pattern-1',
+          workspaces: [workspaceId],
+          overwrite: true,
+        }
+      );
+    });
+
+    it('should not able to delete default index pattern if not permitted', async () => {
+      const notPermittedRequest = httpServerMock.createOpenSearchDashboardsRequest();
+
+      jest.spyOn(utilsExports, 'getPrincipalsFromRequest').mockImplementation((request) => {
+        if (request === notPermittedRequest) {
+          return { users: ['bar'] };
+        }
+        return { users: ['foo'] };
+      });
+
+      const notPermittedSavedObjectedClient = osd.coreStart.savedObjects.getScopedClient(
+        notPermittedRequest
+      );
+
+      let error;
+      try {
+        await notPermittedSavedObjectedClient.delete('index-pattern', 'index-pattern-1');
+      } catch (e) {
+        error = e;
+      }
+      expect(SavedObjectsErrorHelpers.isBadRequestError(error)).toBeTruthy();
+    });
+
+    it('should not able to delete default index pattern if permitted', async () => {
+      const savedObjectsClient = osd.coreStart.savedObjects.getScopedClient(
+        httpServerMock.createOpenSearchDashboardsRequest()
+      );
+
+      jest.spyOn(utilsExports, 'getPrincipalsFromRequest').mockImplementation((request) => {
+        return { users: ['foo'] };
+      });
+
+      let error;
+      try {
+        await savedObjectsClient.delete('index-pattern', 'index-pattern-1');
+      } catch (e) {
+        error = e;
+      }
+      expect(error).toBeUndefined();
+
+      try {
+        await savedObjectsClient.get('index-pattern', 'index-pattern-1');
+      } catch (e) {
+        error = e;
+      }
+      expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBeTruthy();
+    });
   });
 });

@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
+
 import { getWorkspaceState } from '../../../../core/server/utils';
 import {
   SavedObject,
@@ -16,6 +18,8 @@ import {
   OpenSearchDashboardsRequest,
   SavedObjectsClientContract,
   CURRENT_USER_PLACEHOLDER,
+  SavedObjectsDeleteOptions,
+  SavedObjectsErrorHelpers,
 } from '../../../../core/server';
 import { WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID } from '../../common/constants';
 import { Logger } from '../../../../core/server';
@@ -144,6 +148,59 @@ export class WorkspaceUiSettingsClientWrapper {
       return wrapperOptions.client.update(type, id, attributes, options);
     };
 
+    const deleteUiSettingsWithWorkspace = async (
+      type: string,
+      id: string,
+      options: SavedObjectsDeleteOptions = {}
+    ) => {
+      if (type !== 'index-pattern') {
+        return wrapperOptions.client.delete(type, id, options);
+      }
+      const indexPatternObject = await wrapperOptions.client.get<WorkspaceAttribute>(
+        'index-pattern',
+        id
+      );
+      if (!indexPatternObject.workspaces || indexPatternObject.workspaces?.length === 0) {
+        return wrapperOptions.client.delete(type, id, options);
+      }
+      const workspaceObjects = await this.getWorkspaceTypeEnabledClient(
+        wrapperOptions.request
+      ).bulkGet<{ uiSettings?: { [DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID]?: string } }>(
+        indexPatternObject.workspaces.map((workspaceId) => ({
+          type: WORKSPACE_TYPE,
+          id: workspaceId,
+        }))
+      );
+
+      const defaultIndexPatternWorkspaces = workspaceObjects.saved_objects.filter(
+        ({ attributes }) => attributes?.uiSettings?.[DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID] === id
+      );
+      try {
+        await this.getWorkspaceTypeEnabledClient(wrapperOptions.request).bulkUpdate(
+          defaultIndexPatternWorkspaces.map((savedObject) => ({
+            ...savedObject,
+            attributes: {
+              ...savedObject.attributes,
+              uiSettings: {
+                ...savedObject.attributes.uiSettings,
+                [DEFAULT_INDEX_PATTERN_UI_SETTINGS_ID]: null,
+              },
+            },
+          }))
+        );
+      } catch (error) {
+        throw SavedObjectsErrorHelpers.decorateBadRequestError(
+          new Error(
+            i18n.translate('workspace.uiSettings.failedDeleteDefaultIndexPatternSetting', {
+              defaultMessage: 'Failed to delete default index pattern setting',
+            })
+          )
+        );
+      }
+
+      return wrapperOptions.client.delete(type, id, options);
+    };
+
     return {
       ...wrapperOptions.client,
       checkConflicts: wrapperOptions.client.checkConflicts,
@@ -154,7 +211,7 @@ export class WorkspaceUiSettingsClientWrapper {
       bulkGet: wrapperOptions.client.bulkGet,
       create: wrapperOptions.client.create,
       bulkCreate: wrapperOptions.client.bulkCreate,
-      delete: wrapperOptions.client.delete,
+      delete: deleteUiSettingsWithWorkspace,
       bulkUpdate: wrapperOptions.client.bulkUpdate,
       deleteByWorkspace: wrapperOptions.client.deleteByWorkspace,
       get: getUiSettingsWithWorkspace,
