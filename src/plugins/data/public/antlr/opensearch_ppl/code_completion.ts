@@ -37,7 +37,7 @@ export const getSuggestions = async ({
     const finalSuggestions: QuerySuggestion[] = [];
 
     if (suggestions.suggestColumns) {
-      finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} `));
+      finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} `, '3'));
     }
 
     if (suggestions.suggestValuesForColumn) {
@@ -45,23 +45,25 @@ export const getSuggestions = async ({
       const dataset = services.data.query.queryString.getQuery().dataset;
 
       // take the column and push in values for that column
-      const res = await fetchColumnValues(
+      const values = await fetchColumnValues(
         [indexPattern.title],
         suggestions.suggestValuesForColumn,
         services,
+        indexPattern.fields.find((field) => field.name === suggestions.suggestValuesForColumn),
         dataset
       );
 
       let i = 0;
       finalSuggestions.push(
-        ...res.body.fields[0].values.map((val: any) => {
+        ...values.map((val: any) => {
           i++;
           return {
             text: val.toString(),
             insertText: typeof val === 'string' ? `"${val}" ` : `${val} `,
             type: monaco.languages.CompletionItemKind.Value,
             detail: SuggestionItemDetailsTags.Value,
-            sortText: i.toString().padStart(3, '0'), // todo: change based on how many values can be returned
+            // keeps the order of sorted values, places them above everything except sortText '0' reserved for PIPE
+            sortText: i.toString().padStart(values.length.toString().length + 1, '0'),
           };
         })
       );
@@ -95,13 +97,22 @@ export const getSuggestions = async ({
       });
     }
 
+    if (suggestions.suggestRenameAs) {
+      finalSuggestions.push({
+        text: 'as',
+        insertText: 'as ',
+        type: monaco.languages.CompletionItemKind.Keyword,
+        detail: SuggestionItemDetailsTags.Keyword,
+      });
+    }
+
     // create the keyword sortlist
     const suggestionImportance = new Map<number, string>();
     suggestionImportance.set(OpenSearchPPLParser.PIPE, '0');
     suggestionImportance.set(OpenSearchPPLParser.COMMA, '1');
+    suggestionImportance.set(OpenSearchPPLParser.EQUAL, '1');
     suggestionImportance.set(OpenSearchPPLParser.PLUS, '2');
     suggestionImportance.set(OpenSearchPPLParser.MINUS, '2');
-    suggestionImportance.set(OpenSearchPPLParser.EQUAL, '2');
     suggestionImportance.set(OpenSearchPPLParser.SOURCE, '2');
 
     // Fill in PPL keywords
@@ -112,10 +123,12 @@ export const getSuggestions = async ({
           insertText: `${sk.value.toLowerCase()} `,
           type: monaco.languages.CompletionItemKind.Keyword,
           detail: SuggestionItemDetailsTags.Keyword,
-          sortText: suggestionImportance.get(sk.id) ?? sk.value.toLowerCase(),
+          // sortText is the only option to sort suggestions, compares strings
+          sortText: suggestionImportance.get(sk.id) ?? '9' + sk.value.toLowerCase(), // '9' used to devalue every other suggestion
         }))
       );
     }
+
     return finalSuggestions;
   } catch (e) {
     return [];

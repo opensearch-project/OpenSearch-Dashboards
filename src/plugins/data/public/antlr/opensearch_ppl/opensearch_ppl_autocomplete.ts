@@ -48,6 +48,7 @@ export function getIgnoredTokens(): number[] {
     OpenSearchPPLParser.NOT,
     OpenSearchPPLParser.LT_PRTHS,
     OpenSearchPPLParser.RT_PRTHS,
+    OpenSearchPPLParser.IN,
   ];
   for (let i = firstFunctionIndex; i <= lastFunctionIndex; i++) {
     if (!operatorsToInclude.includes(i)) {
@@ -68,6 +69,9 @@ const tokenDictionary: any = {
   SOURCE: OpenSearchPPLParser.SOURCE,
   PIPE: OpenSearchPPLParser.PIPE,
   ID: OpenSearchPPLParser.ID,
+  EQUAL: OpenSearchPPLParser.EQUAL,
+  IN: OpenSearchPPLParser.IN,
+  COMMA: OpenSearchPPLParser.COMMA,
 };
 
 const rulesToVisit = new Set([
@@ -83,6 +87,10 @@ const rulesToVisit = new Set([
   OpenSearchPPLParser.RULE_positionFunctionName,
   OpenSearchPPLParser.RULE_evalFunctionName,
   OpenSearchPPLParser.RULE_literalValue,
+  OpenSearchPPLParser.RULE_integerLiteral,
+  OpenSearchPPLParser.RULE_decimalLiteral,
+  OpenSearchPPLParser.RULE_keywordsCanBeId,
+  OpenSearchPPLParser.RULE_renameClasue,
 ]);
 
 export function processVisitedRules(
@@ -94,9 +102,15 @@ export function processVisitedRules(
   let suggestAggregateFunctions = false;
   let shouldSuggestColumns = false;
   let suggestValuesForColumn: string | undefined;
+  let suggestRenameAs = false;
 
   for (const [ruleId, rule] of rules) {
     switch (ruleId) {
+      case OpenSearchPPLParser.RULE_integerLiteral:
+      case OpenSearchPPLParser.RULE_decimalLiteral:
+      case OpenSearchPPLParser.RULE_keywordsCanBeId: {
+        break;
+      }
       case OpenSearchPPLParser.RULE_statsFunctionName: {
         suggestAggregateFunctions = true;
         break;
@@ -109,8 +123,50 @@ export function processVisitedRules(
         suggestSourcesOrTables = SourceOrTableSuggestion.TABLES;
         break;
       }
+      case OpenSearchPPLParser.RULE_renameClasue: {
+        // if we're in the rename rule, we're either suggesting
+        // field first token
+        // 'as' second token
+        // nothing third token, because it should be user specified
+
+        const expressionStart = rule.startTokenIndex;
+        if (expressionStart === cursorTokenIndex) {
+          shouldSuggestColumns = true;
+          break;
+        }
+
+        if (expressionStart + 2 === cursorTokenIndex) {
+          suggestRenameAs = true;
+          break;
+        }
+
+        break;
+      }
       case OpenSearchPPLParser.RULE_literalValue: {
+        // on its own, this rule would be triggered for relevance expressions and span. span
+        // has its own rule, and relevance ....
+        // todo: create span rule
+        // todo: check if relevance expressions have incorrect behavior here
         let currentIndex = cursorTokenIndex - 1;
+
+        // get the last token that appears other than whitespace
+        const lastToken =
+          tokenStream.get(currentIndex).type === tokenDictionary.SPACE
+            ? tokenStream.get(currentIndex - 1)
+            : tokenStream.get(currentIndex);
+
+        // we only want to get the value if the very last token before WS is =, or
+        // if its paren/comma and we pass by IN later. we don't need to check that we pass IN
+        // because there is no valid syntax that will encounter the literal value rule with the
+        // tokens '(' or ','
+        if (
+          ![tokenDictionary.EQUAL, tokenDictionary.OPENING_BRACKET, tokenDictionary.COMMA].includes(
+            lastToken.type
+          )
+        ) {
+          break;
+        }
+
         while (currentIndex > -1) {
           const token = tokenStream.get(currentIndex);
           if (token.type === tokenDictionary.PIPE) {
@@ -132,6 +188,7 @@ export function processVisitedRules(
     suggestAggregateFunctions,
     shouldSuggestColumns,
     suggestValuesForColumn,
+    suggestRenameAs,
   };
 }
 

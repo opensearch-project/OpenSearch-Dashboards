@@ -48,7 +48,7 @@ export const getSuggestions = async ({
     if (suggestions.suggestColumns?.tables?.length) {
       // NOTE:  currently the suggestions return the table present in the query, but since the
       //        parameters already provide that, it may not be needed anymore
-      finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} `));
+      finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} `, '2'));
     }
 
     if (suggestions.suggestColumnValuePredicate) {
@@ -71,23 +71,26 @@ export const getSuggestions = async ({
             const dataset = services.data.query.queryString.getQuery().dataset;
 
             // take the column and push in values for that column
-            const res = await fetchColumnValues(
+            const values = await fetchColumnValues(
               [indexPattern.title],
               suggestions.suggestValuesForColumn,
               services,
+              indexPattern.fields.find(
+                (field) => field.name === suggestions.suggestValuesForColumn
+              ),
               dataset
             );
 
             let i = 0;
             finalSuggestions.push(
-              ...res.body.fields[0].values.map((val: any) => {
+              ...values.map((val: any) => {
                 i++;
                 return {
                   text: val.toString(),
                   insertText: typeof val === 'string' ? `'${val}' ` : `${val} `,
                   type: monaco.languages.CompletionItemKind.Value,
                   detail: SuggestionItemDetailsTags.Value,
-                  sortText: i.toString().padStart(3, '0'), // todo: change based on how many values can be returned
+                  sortText: i.toString().padStart(values.length.toString().length + 1, '0'),
                 };
               })
             );

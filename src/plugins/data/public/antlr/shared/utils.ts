@@ -96,33 +96,49 @@ export const fetchData = (
   });
 };
 
-export const fetchColumnValues = (
+export const fetchColumnValues = async (
   tables: string[],
   column: string,
   services: IDataPluginServices,
+  fieldInOsd: IndexPatternField | undefined,
   dataset?: Dataset
-) => {
-  if (!services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES)) {
-    return new Promise(() => []);
+): Promise<string[]> => {
+  // default to true/false values for type boolean
+  if (fieldInOsd?.type === 'boolean') {
+    return ['true', 'false'];
+  }
+
+  const allowedType = ['string'];
+  // don't return values if ui settings prevent it or the field type isn't allowed
+  // todo: check if a field's aggretability means anything
+  if (
+    !services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES) ||
+    !fieldInOsd ||
+    !allowedType.includes(fieldInOsd.type)
+  ) {
+    return [];
   }
   const limit = services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_SUGGEST_VALUES_LIMIT);
 
-  return fetchFromAPI(
-    services.http,
-    JSON.stringify({
-      query: {
-        query: `SELECT ${column} FROM ${tables[0]} GROUP BY ${column} ORDER BY COUNT(${column}) DESC LIMIT ${limit}`,
-        language: 'SQL',
-        dataset,
-        format: 'jdbc',
-      },
-    })
-  );
+  return (
+    await fetchFromAPI(
+      services.http,
+      JSON.stringify({
+        query: {
+          query: `SELECT ${column} FROM ${tables[0]} GROUP BY ${column} ORDER BY COUNT(${column}) DESC LIMIT ${limit}`,
+          language: 'SQL',
+          dataset,
+          format: 'jdbc',
+        },
+      })
+    )
+  ).body.fields[0].values;
 };
 
 export const fetchFieldSuggestions = (
   indexPattern: IndexPattern,
-  modifyInsertText?: (input: string) => string
+  modifyInsertText?: (input: string) => string,
+  sortTextImportance?: string
 ) => {
   const filteredFields = indexPattern.fields.filter(
     (idxField: IndexPatternField) => !idxField?.subType
@@ -133,6 +149,7 @@ export const fetchFieldSuggestions = (
       text: field.name,
       type: monaco.languages.CompletionItemKind.Field,
       detail: `Field: ${field.esTypes?.[0] ?? field.type}`,
+      sortText: sortTextImportance,
       ...(modifyInsertText && { insertText: modifyInsertText(field.name) }), // optionally include insert text if fn exists
     };
   });
@@ -165,7 +182,7 @@ export const parseQuery = <
   getParseTree(parser);
 
   const core = new CodeCompletionCore(parser);
-  core.showDebugOutput = true;
+  // core.showDebugOutput = true;
   core.ignoredTokens = ignoredTokens;
   core.preferredRules = rulesToVisit;
   const cursorTokenIndex = findCursorTokenIndex(tokenStream, cursor, tokenDictionary.SPACE);

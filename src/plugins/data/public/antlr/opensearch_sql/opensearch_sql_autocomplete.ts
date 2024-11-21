@@ -191,6 +191,8 @@ export function processVisitedRules(
 
         // TODO: handle issue where we get the column name no matter if the predicate starts some other way
 
+        // TODO: verify that WS jumping does not lead to bad behavior
+
         // need to check if we have a binary comparison predicate
         // if we do, need to find out if we are in the field, value, or operator
         // depending on which, just return an object that will flag any one of those three
