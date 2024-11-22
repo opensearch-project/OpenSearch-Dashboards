@@ -905,13 +905,13 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         ]);
 
         const result1 = await wrapper.bulkGet([
-          { type: 'data-source', id: 'global-data-source-empty-workspaces' },
+          { type: 'data-connection', id: 'global-data-connection-empty-workspaces' },
         ]);
         expect(result1.saved_objects).toEqual([
           {
             attributes: {},
-            id: 'global-data-source-empty-workspaces',
-            type: 'data-source',
+            type: 'data-connection',
+            id: 'global-data-connection-empty-workspaces',
             references: [],
             workspaces: [],
             error: {
