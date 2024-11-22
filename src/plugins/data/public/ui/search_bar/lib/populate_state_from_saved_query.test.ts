@@ -47,6 +47,11 @@ describe('populateStateFromSavedQuery', () => {
       query: {
         query: 'test',
         language: 'kuery',
+        dataset: {
+          id: 'saved-query-dataset',
+          title: 'saved-query-dataset',
+          type: 'INDEX',
+        },
       },
     },
   };
@@ -57,12 +62,15 @@ describe('populateStateFromSavedQuery', () => {
     dataMock.query.filterManager.getGlobalFilters = jest.fn().mockReturnValue([]);
   });
 
-  it('should set query', async () => {
+  it('should set query with current dataset', async () => {
     const savedQuery: SavedQuery = {
       ...baseSavedQuery,
     };
     populateStateFromSavedQuery(dataMock.query, savedQuery);
-    expect(dataMock.query.queryString.setQuery).toHaveBeenCalled();
+    expect(dataMock.query.queryString.setQuery).toHaveBeenCalledWith({
+      ...savedQuery.attributes.query,
+      dataset: dataMock.query.queryString.getQuery().dataset,
+    });
   });
 
   it('should set filters', async () => {
