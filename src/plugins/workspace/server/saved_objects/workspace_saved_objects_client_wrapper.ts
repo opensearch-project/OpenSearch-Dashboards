@@ -450,7 +450,7 @@ export class WorkspaceSavedObjectsClientWrapper {
         wrapperOptions.request,
         getWorkspacesFromSavedObjects(objectToBulkGet.saved_objects)
       );
-
+      let flag = true;
       const processedObjects = await Promise.all(
         objectToBulkGet.saved_objects.map(async (object) => {
           if (validateIsWorkspaceDataSourceAndConnectionObjectType(object.type)) {
@@ -459,8 +459,17 @@ export class WorkspaceSavedObjectsClientWrapper {
               wrapperOptions.request
             );
             if (!hasPermission) {
+              flag = false;
               ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
-              throw generateDataSourcePermissionError();
+              return {
+                ...object,
+                workspaces: [],
+                attributes: {} as T,
+                error: {
+                  ...generateDataSourcePermissionError().output.payload,
+                  statusCode: 403,
+                },
+              };
             }
           }
 
@@ -473,15 +482,15 @@ export class WorkspaceSavedObjectsClientWrapper {
               false
             ))
           ) {
+            flag = false;
             ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
             return {
               ...object,
               workspaces: [],
-              attributes: null,
+              attributes: {} as T,
               error: {
-                error: 'Invalid saved objects permission',
+                ...generateSavedObjectsPermissionError().output.payload,
                 statusCode: 403,
-                message: 'Permission denied',
               },
             };
           }
@@ -489,10 +498,12 @@ export class WorkspaceSavedObjectsClientWrapper {
         })
       );
 
-      ACLAuditor?.increment(
-        ACLAuditorStateKey.VALIDATE_SUCCESS,
-        objectToBulkGet.saved_objects.length
-      );
+      if (flag) {
+        ACLAuditor?.increment(
+          ACLAuditorStateKey.VALIDATE_SUCCESS,
+          objectToBulkGet.saved_objects.length
+        );
+      }
       return { saved_objects: processedObjects };
     };
 
