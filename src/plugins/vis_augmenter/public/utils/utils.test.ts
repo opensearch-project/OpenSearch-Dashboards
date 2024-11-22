@@ -664,6 +664,9 @@ describe('utils', () => {
   });
 
   describe('isEligibleForDataSource', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
     it('returns true if the Vis indexPattern does not have a dataSourceRef', async () => {
       const indexPatternsMock = dataPluginMock.createStartContract().indexPatterns;
       indexPatternsMock.getDataSource = jest.fn().mockReturnValue(undefined);
@@ -698,11 +701,57 @@ describe('utils', () => {
       } as Vis;
       expect(await isEligibleForDataSource(vis)).toEqual(true);
     });
-    it.skip('returns false if the Vis indexPattern has a dataSourceRef with an incompatible version', async () => {
+    it('returns false if the Vis indexPattern has a dataSourceRef with an incompatible version', async () => {
       const indexPatternsMock = dataPluginMock.createStartContract().indexPatterns;
       indexPatternsMock.getDataSource = jest.fn().mockReturnValue({
         id: '456',
+        attributes: {
+          dataSourceVersion: '.0',
+        },
       });
+      setIndexPatterns(indexPatternsMock);
+      const vis = {
+        data: {
+          indexPattern: {
+            id: '123',
+            dataSourceRef: {
+              id: '456',
+            },
+          },
+        },
+      } as Vis;
+      expect(await isEligibleForDataSource(vis)).toEqual(false);
+    });
+    it('returns false if the Vis indexPattern has a dataSourceRef with an undefined version', async () => {
+      const indexPatternsMock = dataPluginMock.createStartContract().indexPatterns;
+      indexPatternsMock.getDataSource = jest.fn().mockReturnValue({
+        id: '456',
+        attributes: {
+          dataSourceVersion: undefined,
+        },
+      });
+      setIndexPatterns(indexPatternsMock);
+      const vis = {
+        data: {
+          indexPattern: {
+            id: '123',
+            dataSourceRef: {
+              id: '456',
+            },
+          },
+        },
+      } as Vis;
+      expect(await isEligibleForDataSource(vis)).toEqual(false);
+    });
+    it('returns false if the Vis indexPattern has a dataSourceRef with an empty string version', async () => {
+      const indexPatternsMock = dataPluginMock.createStartContract().indexPatterns;
+      indexPatternsMock.getDataSource = jest.fn().mockReturnValue({
+        id: '456',
+        attributes: {
+          dataSourceVersion: '',
+        },
+      });
+      setIndexPatterns(indexPatternsMock);
       const vis = {
         data: {
           indexPattern: {
