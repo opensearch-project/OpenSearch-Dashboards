@@ -676,17 +676,17 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
 
         expect(result.saved_objects).toEqual([
           {
-            id: '',
+            id: 'not-permitted-dashboard',
             type: 'dashboard',
-            attributes: null,
+            attributes: {},
             error: {
-              error: 'Invalid saved objects permission',
+              error: 'Forbidden',
+              message: 'Invalid saved objects permission',
               statusCode: 403,
-              message: 'Permission denied',
             },
+            workspaces: [],
             permissions: {},
             references: [],
-            workspaces: [],
           },
         ]);
       });
@@ -730,6 +730,197 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           ],
           {}
         );
+      });
+      it('should validate data source or data connection workspace field', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        const result1 = await wrapper.bulkGet([
+          {
+            type: 'data-source',
+            id: 'workspace-1-data-source',
+          },
+        ]);
+
+        expect(result1.saved_objects).toEqual([
+          {
+            id: 'workspace-1-data-source',
+            type: 'data-source',
+            attributes: {},
+            error: {
+              error: 'Forbidden',
+              message: 'Invalid data source permission, please associate it to current workspace',
+              statusCode: 403,
+            },
+            workspaces: [],
+            references: [],
+          },
+        ]);
+
+        const result2 = await wrapper.bulkGet([
+          {
+            type: 'data-connection',
+            id: 'workspace-1-data-connection',
+          },
+        ]);
+
+        expect(result2.saved_objects).toEqual([
+          {
+            type: 'data-connection',
+            id: 'workspace-1-data-connection',
+            attributes: {},
+            error: {
+              error: 'Forbidden',
+              message: 'Invalid data source permission, please associate it to current workspace',
+              statusCode: 403,
+            },
+            workspaces: [],
+            references: [],
+          },
+        ]);
+
+        let result = await wrapper.bulkGet([
+          {
+            type: 'data-source',
+            id: 'workspace-2-data-source',
+          },
+        ]);
+        expect(result).toEqual({
+          saved_objects: [
+            {
+              attributes: {
+                title: 'Workspace 2 data source',
+              },
+              id: 'workspace-2-data-source',
+              type: 'data-source',
+              workspaces: ['mock-request-workspace-id'],
+              references: [],
+            },
+          ],
+        });
+
+        result = await await wrapper.bulkGet([
+          {
+            type: 'data-connection',
+            id: 'workspace-2-data-connection',
+          },
+        ]);
+        expect(result).toEqual({
+          saved_objects: [
+            {
+              attributes: {
+                title: 'Workspace 2 data connection',
+              },
+              id: 'workspace-2-data-connection',
+              type: 'data-connection',
+              workspaces: ['mock-request-workspace-id'],
+              references: [],
+            },
+          ],
+        });
+      });
+
+      it('should not validate data source or data connection when not in workspace', async () => {
+        const { wrapper, requestMock } = generateWorkspaceSavedObjectsClientWrapper();
+        updateWorkspaceState(requestMock, { requestWorkspaceId: undefined });
+        let result = await wrapper.bulkGet([
+          {
+            type: 'data-source',
+            id: 'workspace-1-data-source',
+          },
+        ]);
+        expect(result).toEqual({
+          saved_objects: [
+            {
+              attributes: {
+                title: 'Workspace 1 data source',
+              },
+              id: 'workspace-1-data-source',
+              type: 'data-source',
+              workspaces: ['workspace-1'],
+              references: [],
+            },
+          ],
+        });
+
+        result = await wrapper.bulkGet([
+          {
+            type: 'data-connection',
+            id: 'workspace-1-data-connection',
+          },
+        ]);
+        expect(result).toEqual({
+          saved_objects: [
+            {
+              attributes: {
+                title: 'Workspace 1 data connection',
+              },
+              id: 'workspace-1-data-connection',
+              type: 'data-connection',
+              workspaces: ['workspace-1'],
+              references: [],
+            },
+          ],
+        });
+      });
+
+      it('should throw permission error when tried to bulk get global data source or data connection', async () => {
+        const { wrapper, requestMock } = generateWorkspaceSavedObjectsClientWrapper();
+        updateWorkspaceState(requestMock, { requestWorkspaceId: undefined });
+
+        const result = await wrapper.bulkGet([{ type: 'data-source', id: 'global-data-source' }]);
+        expect(result.saved_objects).toEqual([
+          {
+            attributes: {},
+            id: 'global-data-source',
+            type: 'data-source',
+            references: [],
+            workspaces: [],
+            error: {
+              error: 'Forbidden',
+              message: 'Invalid data source permission, please associate it to current workspace',
+              statusCode: 403,
+            },
+          },
+        ]);
+      });
+
+      it('should throw permission error when tried to bulk get a empty workspace global data source or data connection', async () => {
+        const { wrapper, requestMock } = generateWorkspaceSavedObjectsClientWrapper();
+        updateWorkspaceState(requestMock, { requestWorkspaceId: undefined });
+        const result = await wrapper.bulkGet([
+          { type: 'data-source', id: 'global-data-source-empty-workspaces' },
+        ]);
+        expect(result.saved_objects).toEqual([
+          {
+            attributes: {},
+            id: 'global-data-source-empty-workspaces',
+            type: 'data-source',
+            references: [],
+            workspaces: [],
+            error: {
+              error: 'Forbidden',
+              message: 'Invalid data source permission, please associate it to current workspace',
+              statusCode: 403,
+            },
+          },
+        ]);
+
+        const result1 = await wrapper.bulkGet([
+          { type: 'data-source', id: 'global-data-source-empty-workspaces' },
+        ]);
+        expect(result1.saved_objects).toEqual([
+          {
+            attributes: {},
+            id: 'global-data-source-empty-workspaces',
+            type: 'data-source',
+            references: [],
+            workspaces: [],
+            error: {
+              error: 'Forbidden',
+              message: 'Invalid data source permission, please associate it to current workspace',
+              statusCode: 403,
+            },
+          },
+        ]);
       });
     });
     describe('find', () => {
