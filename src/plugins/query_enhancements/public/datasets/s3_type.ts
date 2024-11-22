@@ -6,7 +6,6 @@
 import { i18n } from '@osd/i18n';
 import { trimEnd } from 'lodash';
 import { HttpSetup, SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import semver from 'semver';
 import {
   DATA_STRUCTURE_META_TYPES,
   DEFAULT_DATA,
@@ -197,22 +196,17 @@ const fetchDataSources = async (client: SavedObjectsClientContract): Promise<Dat
     type: 'data-source',
     perPage: 10000,
   });
-  const dataSources: DataStructure[] = resp.savedObjects
-    .filter((savedObject) => {
-      const coercedVersion = semver.coerce(savedObject.attributes.dataSourceVersion);
-      return coercedVersion ? semver.satisfies(coercedVersion, '>=1.0.0') : false;
-    })
-    .map((savedObject) => ({
-      id: savedObject.id,
-      title: savedObject.attributes.title,
-      type: 'DATA_SOURCE',
-      meta: {
-        query: {
-          id: savedObject.id,
-        },
-        type: DATA_STRUCTURE_META_TYPES.CUSTOM,
-      } as DataStructureCustomMeta,
-    }));
+  const dataSources: DataStructure[] = resp.savedObjects.map((savedObject) => ({
+    id: savedObject.id,
+    title: savedObject.attributes.title,
+    type: 'DATA_SOURCE',
+    meta: {
+      query: {
+        id: savedObject.id,
+      },
+      type: DATA_STRUCTURE_META_TYPES.CUSTOM,
+    } as DataStructureCustomMeta,
+  }));
   return dataSources;
 };
 
