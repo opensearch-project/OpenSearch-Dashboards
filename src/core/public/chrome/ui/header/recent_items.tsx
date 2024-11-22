@@ -220,14 +220,21 @@ export const RecentItems = ({
 
   useEffect(() => {
     const savedObjects = recentlyAccessedItems
-      .filter((item) => item.meta?.type)
+      .filter(
+        (item) =>
+          item.meta?.type &&
+          (!item.workspaceId ||
+            // If the workspace id is existing but the workspace is deleted, filter the item
+            (item.workspaceId &&
+              !!workspaceList.find((workspace) => workspace.id === item.workspaceId)))
+      )
       .map((item) => ({
         type: item.meta?.type || '',
         id: item.id,
       }));
     if (savedObjects.length) {
       bulkGetDetail(savedObjects, http).then((res) => {
-        const formatDetailedSavedObjects = res.flatMap((obj) => {
+        const formatDetailedSavedObjects = res.map((obj) => {
           const recentAccessItem = recentlyAccessedItems.find(
             (item) => item.id === obj.id
           ) as ChromeRecentlyAccessedHistoryItem;
@@ -235,20 +242,14 @@ export const RecentItems = ({
           const findWorkspace = workspaceList.find(
             (workspace) => workspace.id === recentAccessItem.workspaceId
           );
-          // If the workspace id is existing but the workspace is deleted, filter the item
-          if (recentAccessItem.workspaceId && !findWorkspace) {
-            return [];
-          }
 
-          return [
-            {
-              ...recentAccessItem,
-              ...obj,
-              ...recentAccessItem.meta,
-              updatedAt: moment(obj?.updated_at).valueOf(),
-              workspaceName: findWorkspace?.name,
-            },
-          ];
+          return {
+            ...recentAccessItem,
+            ...obj,
+            ...recentAccessItem.meta,
+            updatedAt: moment(obj?.updated_at).valueOf(),
+            workspaceName: findWorkspace?.name,
+          };
         });
         setDetailedSavedObjects(formatDetailedSavedObjects);
       });
