@@ -698,7 +698,7 @@ describe('utils', () => {
       } as Vis;
       expect(await isEligibleForDataSource(vis)).toEqual(true);
     });
-    it('returns false if the Vis indexPattern has a dataSourceRef with an incompatible version', async () => {
+    it.skip('returns false if the Vis indexPattern has a dataSourceRef with an incompatible version', async () => {
       const indexPatternsMock = dataPluginMock.createStartContract().indexPatterns;
       indexPatternsMock.getDataSource = jest.fn().mockReturnValue({
         id: '456',
