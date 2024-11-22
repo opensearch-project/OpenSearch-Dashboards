@@ -24,7 +24,10 @@ import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
 import { getUISettings, getIndexPatterns } from '../services';
 import { IUiSettingsClient } from '../../../../core/public';
 
-export const isEligibleForVisLayers = (vis: Vis, uiSettingsClient?: IUiSettingsClient): boolean => {
+export const isEligibleForVisLayers = async (
+  vis: Vis,
+  uiSettingsClient?: IUiSettingsClient
+): Promise<boolean> => {
   // Only support a date histogram
   const dateHistograms = vis.data?.aggs?.byTypeName?.('date_histogram');
   if (!Array.isArray(dateHistograms) || dateHistograms.length !== 1) return false;
@@ -55,7 +58,7 @@ export const isEligibleForVisLayers = (vis: Vis, uiSettingsClient?: IUiSettingsC
     return false;
 
   // Check if the vis datasource is eligible for the augmentation
-  if (!isEligibleForDataSource(vis)) return false;
+  if (!(await isEligibleForDataSource(vis))) return false;
 
   // Checks if the augmentation setting is enabled
   const config = uiSettingsClient ?? getUISettings();
