@@ -4,6 +4,7 @@
  */
 
 import { get, isEmpty } from 'lodash';
+import semver from 'semver';
 import { Vis } from '../../../../plugins/visualizations/public';
 import {
   formatExpression,
@@ -20,7 +21,7 @@ import {
   VisLayerErrorTypes,
 } from '../';
 import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
-import { getUISettings } from '../services';
+import { getUISettings, getIndexPatterns } from '../services';
 import { IUiSettingsClient } from '../../../../core/public';
 
 export const isEligibleForVisLayers = (vis: Vis, uiSettingsClient?: IUiSettingsClient): boolean => {
@@ -52,6 +53,9 @@ export const isEligibleForVisLayers = (vis: Vis, uiSettingsClient?: IUiSettingsC
     vis.params.seriesParams.some((seriesParam: { type: string }) => seriesParam.type !== 'line')
   )
     return false;
+
+  // Check if the vis datasource is eligible for the augmentation
+  if (!isEligibleForDataSource(vis)) return false;
 
   // Checks if the augmentation setting is enabled
   const config = uiSettingsClient ?? getUISettings();
@@ -163,7 +167,6 @@ export const getAnyErrors = (visLayers: VisLayer[], visTitle: string): Error | u
  * @param visLayers the produced VisLayers containing details if the resource has been deleted
  * @param visualizationsLoader the visualizations saved object loader to handle deletion
  */
-
 export const cleanupStaleObjects = (
   augmentVisSavedObjs: ISavedAugmentVis[],
   visLayers: VisLayer[],
@@ -186,4 +189,18 @@ export const cleanupStaleObjects = (
     });
     loader?.delete(objIdsToDelete);
   }
+};
+
+/**
+ * Returns true if the Vis is eligible to be used with the DataSource feature.
+ * @param vis - The Vis to check
+ * @returns true if the Vis is eligible for the DataSource feature, false otherwise
+ */
+export const isEligibleForDataSource = async (vis: Vis) => {
+  const dataSourceRef = vis.data.indexPattern?.dataSourceRef;
+  if (!dataSourceRef) return true;
+  const dataSource = await getIndexPatterns().getDataSource(dataSourceRef.id);
+  if (!dataSource || !dataSource.attributes) return false;
+  const version = semver.coerce(dataSource.attributes.dataSourceVersion);
+  return version ? semver.satisfies(version, '>=1.0.0') : false;
 };
