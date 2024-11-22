@@ -1,2 +1,2 @@
 fix:
-- Fix toggle column action in Doc Viewer Tab ([#8905](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8905))
+- Fix toggle column action in the discover page ([#8905](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8905))
