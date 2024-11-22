@@ -211,9 +211,9 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           type: 'dashboard',
           attributes: {},
           error: {
-            error: 'Invalid saved objects permission',
+            error: 'Forbidden',
             statusCode: 403,
-            message: 'Permission denied',
+            message: 'Invalid saved objects permission',
           },
           workspaces: [],
         },
