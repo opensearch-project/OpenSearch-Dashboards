@@ -32,7 +32,7 @@ export const toExpressionAst = async (vis: Vis, params: any) => {
   if (
     params.visLayers == null ||
     Object.keys(params.visLayers).length === 0 ||
-    !isEligibleForVisLayers(vis)
+    !(await isEligibleForVisLayers(vis))
   ) {
     // Render using vislib instead of vega-lite
     const visConfig = { ...vis.params, dimensions };

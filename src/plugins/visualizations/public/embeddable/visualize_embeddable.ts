@@ -541,7 +541,7 @@ export class VisualizeEmbeddable
         this.visAugmenterConfig?.visLayerResourceIds
       );
 
-      if (!isEmpty(augmentVisSavedObjs) && !aborted && isEligibleForVisLayers(this.vis)) {
+      if (!isEmpty(augmentVisSavedObjs) && !aborted && (await isEligibleForVisLayers(this.vis))) {
         const visLayersPipeline = buildPipelineFromAugmentVisSavedObjs(augmentVisSavedObjs);
         // The initial input for the pipeline will just be an empty arr of VisLayers. As plugin
         // expression functions are ran, they will incrementally append their generated VisLayers to it.

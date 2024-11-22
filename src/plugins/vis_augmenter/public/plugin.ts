@@ -13,6 +13,7 @@ import {
   setUiActions,
   setEmbeddable,
   setQueryService,
+  setIndexPatterns,
   setVisualizations,
   setCore,
 } from './services';
@@ -62,6 +63,7 @@ export class VisAugmenterPlugin
     setUiActions(uiActions);
     setEmbeddable(embeddable);
     setQueryService(data.query);
+    setIndexPatterns(data.indexPatterns);
     setVisualizations(visualizations);
     setCore(core);
     setFlyoutState(VIEW_EVENTS_FLYOUT_STATE.CLOSED);
