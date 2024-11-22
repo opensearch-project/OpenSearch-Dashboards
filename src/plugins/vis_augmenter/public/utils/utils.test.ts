@@ -62,7 +62,7 @@ describe('utils', () => {
           aggs: VALID_AGGS,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(vis)).toEqual(false);
+      expect(await isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with no date_histogram', async () => {
       const invalidConfigStates = [
@@ -89,7 +89,7 @@ describe('utils', () => {
           invalidAggs,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(vis)).toEqual(false);
+      expect(await isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with invalid aggs counts', async () => {
       const invalidConfigStates = [
@@ -113,7 +113,7 @@ describe('utils', () => {
           invalidAggs,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(vis)).toEqual(false);
+      expect(await isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with no metric aggs', async () => {
       const invalidConfigStates = [
@@ -135,7 +135,7 @@ describe('utils', () => {
           invalidAggs,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(vis)).toEqual(false);
+      expect(await isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with series param is not line type', async () => {
       const vis = ({
@@ -156,7 +156,7 @@ describe('utils', () => {
           aggs: VALID_AGGS,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(vis)).toEqual(false);
+      expect(await isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with series param not all being line type', async () => {
       const vis = ({
@@ -180,7 +180,7 @@ describe('utils', () => {
           aggs: VALID_AGGS,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(vis)).toEqual(false);
+      expect(await isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with invalid x-axis due to no segment aggregation', async () => {
       const badConfigStates = [
@@ -218,7 +218,7 @@ describe('utils', () => {
           badAggs,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(invalidVis)).toEqual(false);
+      expect(await isEligibleForVisLayers(invalidVis)).toEqual(false);
     });
     it('vis is ineligible with xaxis not on bottom', async () => {
       const invalidVis = ({
@@ -239,7 +239,7 @@ describe('utils', () => {
           aggs: VALID_AGGS,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(invalidVis)).toEqual(false);
+      expect(await isEligibleForVisLayers(invalidVis)).toEqual(false);
     });
     it('vis is ineligible with no seriesParams', async () => {
       const invalidVis = ({
@@ -255,16 +255,16 @@ describe('utils', () => {
           aggs: VALID_AGGS,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(invalidVis)).toEqual(false);
+      expect(await isEligibleForVisLayers(invalidVis)).toEqual(false);
     });
     it('vis is ineligible with valid type and disabled setting', async () => {
       uiSettingsMock.get.mockImplementation((key: string) => {
         return key !== PLUGIN_AUGMENTATION_ENABLE_SETTING;
       });
-      expect(isEligibleForVisLayers(VALID_VIS)).toEqual(false);
+      expect(await isEligibleForVisLayers(VALID_VIS)).toEqual(false);
     });
     it('vis is eligible with valid type', async () => {
-      expect(isEligibleForVisLayers(VALID_VIS)).toEqual(true);
+      expect(await isEligibleForVisLayers(VALID_VIS)).toEqual(true);
     });
   });
 
