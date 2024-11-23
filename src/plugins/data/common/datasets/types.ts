@@ -265,5 +265,16 @@ export interface DatasetField {
 
 export interface DatasetSearchOptions {
   strategy?: string;
-  withTimeParametersSupport?(): boolean;
+  /*
+   * Whether to include the raw time filter in the search
+   * defaults to false and if the dataset type supportsTimeFilter
+   * then the time filter will be included automatically into the query.
+   * If true, the time filter will be included in the search request as
+   * a param but leave the query unchanged.
+   *
+   * Using this will override the time filter in the query.
+   * Using this will disable aggregation based on the time filter automatically.
+   * Search strategy will need to handle the logic for that and ensure consistency.
+   */
+  includeTimeFilter?: boolean;
 }

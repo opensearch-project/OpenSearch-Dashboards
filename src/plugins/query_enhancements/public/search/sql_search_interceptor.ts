@@ -62,6 +62,16 @@ export class SQLSearchInterceptor extends SearchInterceptor {
         .getDatasetService()
         .getType(datasetType);
       strategy = datasetTypeConfig?.getSearchOptions?.().strategy ?? strategy;
+
+      if (datasetTypeConfig?.getSearchOptions?.().includeTimeFilter) {
+        request.params = {
+          ...request.params,
+          body: {
+            ...request.params.body,
+            timeRange: this.queryService.timefilter.timefilter.getTime(),
+          },
+        };
+      }
     }
 
     return this.runSearch(request, options.abortSignal, strategy);
