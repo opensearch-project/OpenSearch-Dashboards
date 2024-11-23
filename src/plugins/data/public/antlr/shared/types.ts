@@ -62,7 +62,7 @@ export interface ColumnAliasSuggestion {
 export enum ColumnValuePredicate {
   COLUMN = 'COLUMN',
   VALUE = 'VALUE',
-  EQ_OPERATOR = 'EQ_OPERATOR',
+  OPERATOR = 'OPERATOR',
   LPAREN = 'LPAREN',
   END_IN_TERM = 'END_IN_TERM',
 }

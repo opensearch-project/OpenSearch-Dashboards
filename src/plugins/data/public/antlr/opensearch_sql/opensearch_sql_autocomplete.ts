@@ -202,50 +202,60 @@ export function processVisitedRules(
 
         const expressionStart = rule.startTokenIndex;
 
-        // basically walk through the tokens between the expressionStart and cursorTokenIndex,
-        // if we're only on the first token, we're in the column. if theres a first token, WS,
-        // then another token like EOF, we need to suggest operators. if we're past an operator,
-        // and we need to check if that middle token is an EQUAL because we only care about that,
-        // and we have a WS, we can go to value
+        // from expression start to cursortoken index, grab all the tokens and put them in a list. ignore the whitespace tokens
+        const sigTokens = [];
+        for (let i = expressionStart; i < cursorTokenIndex; i++) {
+          const token = tokenStream.get(i);
+          if (token.type !== OpenSearchSQLParser.SPACE) {
+            sigTokens.push(token);
+          }
+        }
 
-        // at start of pred, need to suggest columns
-        if (expressionStart === cursorTokenIndex) {
+        // if we don't have any tokens so far, suggest fields
+        if (sigTokens.length === 0) {
           suggestColumnValuePredicate = ColumnValuePredicate.COLUMN;
           break;
         }
 
-        // another predicate appears, need to suggest equal/operator
-        if (expressionStart + 2 === cursorTokenIndex) {
-          suggestColumnValuePredicate = ColumnValuePredicate.EQ_OPERATOR;
+        // if we have one token that is an ID, we have to suggest operators
+        if (sigTokens.length === 1 && sigTokens[0].type === OpenSearchSQLParser.ID) {
+          suggestColumnValuePredicate = ColumnValuePredicate.OPERATOR;
           break;
         }
 
-        // conditional meant to catch binaryComparisonPredicate only
+        // if our second token is an EQUAL, and we have no other tokens, we're in a binaryComparisonPredicate
+        // and should suggest values
         if (
-          tokenStream.get(expressionStart + 2).type === OpenSearchSQLParser.EQUAL_SYMBOL &&
-          expressionStart + 4 === cursorTokenIndex
+          sigTokens.length === 2 &&
+          sigTokens[0].type === OpenSearchSQLParser.ID &&
+          sigTokens[1].type === OpenSearchSQLParser.EQUAL_SYMBOL
         ) {
           suggestColumnValuePredicate = ColumnValuePredicate.VALUE;
-          suggestValuesForColumn = tokenStream.get(expressionStart).text; // todo: seems like this breaks if we have some extra stuff in front for our pred
+          suggestValuesForColumn = sigTokens[0].text;
           break;
         }
 
+        // if our second token is an IN, and we have no other tokens, we're in an inPredicate and should
+        // suggest LPAREN
         if (
-          tokenStream.get(expressionStart + 2).type === OpenSearchSQLParser.IN &&
-          expressionStart + 4 === cursorTokenIndex
+          sigTokens.length === 2 &&
+          sigTokens[0].type === OpenSearchSQLParser.ID &&
+          sigTokens[1].type === OpenSearchSQLParser.IN
         ) {
           suggestColumnValuePredicate = ColumnValuePredicate.LPAREN;
           break;
         }
 
-        // conditional meant to catch inPredicate
+        // if we're in an inPredicate and the syntax is right, we should suggest values or a post
+        // value-term suggestion (comma/RPAREN)
         if (
-          tokenStream.get(expressionStart + 2).type === OpenSearchSQLParser.IN &&
-          tokenStream.get(expressionStart + 4).type === OpenSearchSQLParser.LR_BRACKET &&
-          tokenStream.get(cursorTokenIndex - 2).type !== OpenSearchSQLParser.RR_BRACKET &&
-          expressionStart + 4 < cursorTokenIndex
+          sigTokens.length >= 3 &&
+          sigTokens[0].type === OpenSearchSQLParser.ID &&
+          sigTokens[1].type === OpenSearchSQLParser.IN &&
+          sigTokens[2].type === OpenSearchSQLParser.LR_BRACKET &&
+          sigTokens[sigTokens.length - 1].type !== OpenSearchSQLParser.RR_BRACKET
         ) {
-          if (tokenStream.get(cursorTokenIndex - 2).type === OpenSearchSQLParser.STRING_LITERAL) {
+          if (sigTokens[sigTokens.length - 1].type === OpenSearchSQLParser.STRING_LITERAL) {
             suggestColumnValuePredicate = ColumnValuePredicate.END_IN_TERM;
           } else {
             suggestColumnValuePredicate = ColumnValuePredicate.VALUE;

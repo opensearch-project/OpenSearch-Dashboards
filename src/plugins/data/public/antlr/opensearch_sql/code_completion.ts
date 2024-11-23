@@ -58,13 +58,20 @@ export const getSuggestions = async ({
           finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} `, '2'));
           break;
         }
-        case ColumnValuePredicate.EQ_OPERATOR: {
+        case ColumnValuePredicate.OPERATOR: {
           finalSuggestions.push({
             text: '=',
             insertText: '= ',
             type: monaco.languages.CompletionItemKind.Operator,
             detail: SuggestionItemDetailsTags.Operator,
             sortText: '0',
+          });
+          finalSuggestions.push({
+            text: 'IN',
+            insertText: 'IN ( ',
+            type: monaco.languages.CompletionItemKind.Operator,
+            detail: SuggestionItemDetailsTags.Operator,
+            sortText: '01',
           });
           break;
         }
