@@ -224,18 +224,58 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     );
   }
 
+  /**
+   * Determines if the date picker should be rendered based on UI settings, dataset configuration, and language settings.
+   *
+   * @returns {boolean} Whether the date picker should be rendered
+   *
+   * UI Settings permutations (isDatePickerEnabled):
+   * - showDatePicker=true || showAutoRefreshOnly=true => true
+   * - showDatePicker=false && showAutoRefreshOnly=false => false
+   * - both undefined => true (default)
+   * If isDatePickerEnabled is false, returns false immediately
+   *
+   * Dataset Type permutations (datasetType?.meta?.supportsTimeFilter):
+   * - supportsTimeFilter=true => true
+   * - supportsTimeFilter=false => false
+   * - supportsTimeFilter=undefined && dataset exists => falls through to language check
+   * - no dataset => falls through to language check
+   *
+   * Language permutations (when dataset.meta.supportsTimeFilter is undefined):
+   * - queryLanguage=undefined => true (shows date picker)
+   * - queryLanguage exists:
+   *   - hideDatePicker=true => false
+   *   - hideDatePicker=false => true
+   *   - hideDatePicker=undefined => true
+   *
+   * Example scenarios:
+   * 1. {showDatePicker: false} => false
+   * 2. {dataset: {type: 'x', meta: {supportsTimeFilter: true}}} => true
+   * 3. {dataset: {type: 'x', meta: {supportsTimeFilter: false}}} => false
+   * 4. {dataset: {type: 'x'}, queryLanguage: 'sql', hideDatePicker: true} => false
+   * 5. {dataset: {type: 'x'}, queryLanguage: 'sql', hideDatePicker: false} => true
+   * 6. {dataset: {type: 'x'}, queryLanguage: undefined} => true (no language restrictions)
+   * 7. No configuration => true (default behavior shows date picker)
+   */
   function shouldRenderDatePicker(): boolean {
-    return (
-      Boolean((props.showDatePicker || props.showAutoRefreshOnly) ?? true) &&
-      !(
-        queryLanguage &&
-        data.query.queryString.getLanguageService().getLanguage(queryLanguage)?.hideDatePicker
-      ) &&
-      (props.query?.dataset
-        ? data.query.queryString.getDatasetService().getType(props.query.dataset.type)?.meta
-            ?.supportsTimeFilter !== false
-        : true)
+    const { queryString } = data.query;
+    const datasetService = queryString.getDatasetService();
+    const languageService = queryString.getLanguageService();
+    const isDatePickerEnabled = Boolean(
+      (props.showDatePicker || props.showAutoRefreshOnly) ?? true
     );
+    if (!isDatePickerEnabled) return false;
+
+    // Get dataset type configuration
+    const datasetType = props.query?.dataset
+      ? datasetService.getType(props.query?.dataset.type)
+      : undefined;
+    // Check if dataset type explicitly configures the `supportsTimeFilter` option
+    if (datasetType?.meta?.supportsTimeFilter !== undefined) {
+      return Boolean(datasetType?.meta?.supportsTimeFilter);
+    }
+
+    return Boolean(!(queryLanguage && languageService.getLanguage(queryLanguage)?.hideDatePicker));
   }
 
   function shouldRenderQueryEditor(): boolean {

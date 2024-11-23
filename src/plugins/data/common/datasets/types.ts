@@ -265,4 +265,5 @@ export interface DatasetField {
 
 export interface DatasetSearchOptions {
   strategy?: string;
+  withTimeParametersSupport?: boolean;
 }
