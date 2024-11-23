@@ -21,11 +21,12 @@ import {
   PluginResource,
   VisLayerErrorTypes,
   SavedObjectLoaderAugmentVis,
+  isEligibleForDataSource,
 } from '../';
 import { PLUGIN_AUGMENTATION_ENABLE_SETTING } from '../../common/constants';
 import { AggConfigs } from '../../../data/common';
 import { uiSettingsServiceMock } from '../../../../core/public/mocks';
-import { setUISettings } from '../services';
+import { setIndexPatterns, setUISettings } from '../services';
 import {
   STUB_INDEX_PATTERN_WITH_FIELDS,
   TYPES_REGISTRY,
@@ -35,6 +36,7 @@ import {
   createPointInTimeEventsVisLayer,
   createVisLayer,
 } from '../mocks';
+import { dataPluginMock } from 'src/plugins/data/public/mocks';
 
 describe('utils', () => {
   const uiSettingsMock = uiSettingsServiceMock.createStartContract();
@@ -60,7 +62,7 @@ describe('utils', () => {
           aggs: VALID_AGGS,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(vis)).toEqual(false);
+      expect(await isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with no date_histogram', async () => {
       const invalidConfigStates = [
@@ -87,7 +89,7 @@ describe('utils', () => {
           invalidAggs,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(vis)).toEqual(false);
+      expect(await isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with invalid aggs counts', async () => {
       const invalidConfigStates = [
@@ -111,7 +113,7 @@ describe('utils', () => {
           invalidAggs,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(vis)).toEqual(false);
+      expect(await isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with no metric aggs', async () => {
       const invalidConfigStates = [
@@ -133,7 +135,7 @@ describe('utils', () => {
           invalidAggs,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(vis)).toEqual(false);
+      expect(await isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with series param is not line type', async () => {
       const vis = ({
@@ -154,7 +156,7 @@ describe('utils', () => {
           aggs: VALID_AGGS,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(vis)).toEqual(false);
+      expect(await isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with series param not all being line type', async () => {
       const vis = ({
@@ -178,7 +180,7 @@ describe('utils', () => {
           aggs: VALID_AGGS,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(vis)).toEqual(false);
+      expect(await isEligibleForVisLayers(vis)).toEqual(false);
     });
     it('vis is ineligible with invalid x-axis due to no segment aggregation', async () => {
       const badConfigStates = [
@@ -216,7 +218,7 @@ describe('utils', () => {
           badAggs,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(invalidVis)).toEqual(false);
+      expect(await isEligibleForVisLayers(invalidVis)).toEqual(false);
     });
     it('vis is ineligible with xaxis not on bottom', async () => {
       const invalidVis = ({
@@ -237,7 +239,7 @@ describe('utils', () => {
           aggs: VALID_AGGS,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(invalidVis)).toEqual(false);
+      expect(await isEligibleForVisLayers(invalidVis)).toEqual(false);
     });
     it('vis is ineligible with no seriesParams', async () => {
       const invalidVis = ({
@@ -253,16 +255,16 @@ describe('utils', () => {
           aggs: VALID_AGGS,
         },
       } as unknown) as Vis;
-      expect(isEligibleForVisLayers(invalidVis)).toEqual(false);
+      expect(await isEligibleForVisLayers(invalidVis)).toEqual(false);
     });
     it('vis is ineligible with valid type and disabled setting', async () => {
       uiSettingsMock.get.mockImplementation((key: string) => {
         return key !== PLUGIN_AUGMENTATION_ENABLE_SETTING;
       });
-      expect(isEligibleForVisLayers(VALID_VIS)).toEqual(false);
+      expect(await isEligibleForVisLayers(VALID_VIS)).toEqual(false);
     });
     it('vis is eligible with valid type', async () => {
-      expect(isEligibleForVisLayers(VALID_VIS)).toEqual(true);
+      expect(await isEligibleForVisLayers(VALID_VIS)).toEqual(true);
     });
   });
 
@@ -658,6 +660,109 @@ describe('utils', () => {
       cleanupStaleObjects(augmentVisObjs, visLayers, augmentVisLoader);
 
       expect(mockDeleteFn).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('isEligibleForDataSource', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+    it('returns true if the Vis indexPattern does not have a dataSourceRef', async () => {
+      const indexPatternsMock = dataPluginMock.createStartContract().indexPatterns;
+      indexPatternsMock.getDataSource = jest.fn().mockReturnValue(undefined);
+      setIndexPatterns(indexPatternsMock);
+      const vis = {
+        data: {
+          indexPattern: {
+            id: '123',
+          },
+        },
+      } as Vis;
+      expect(await isEligibleForDataSource(vis)).toEqual(true);
+    });
+    it('returns true if the Vis indexPattern has a dataSourceRef with a compatible version', async () => {
+      const indexPatternsMock = dataPluginMock.createStartContract().indexPatterns;
+      indexPatternsMock.getDataSource = jest.fn().mockReturnValue({
+        id: '456',
+        attributes: {
+          dataSourceVersion: '1.2.3',
+        },
+      });
+      setIndexPatterns(indexPatternsMock);
+      const vis = {
+        data: {
+          indexPattern: {
+            id: '123',
+            dataSourceRef: {
+              id: '456',
+            },
+          },
+        },
+      } as Vis;
+      expect(await isEligibleForDataSource(vis)).toEqual(true);
+    });
+    it('returns false if the Vis indexPattern has a dataSourceRef with an incompatible version', async () => {
+      const indexPatternsMock = dataPluginMock.createStartContract().indexPatterns;
+      indexPatternsMock.getDataSource = jest.fn().mockReturnValue({
+        id: '456',
+        attributes: {
+          dataSourceVersion: '.0',
+        },
+      });
+      setIndexPatterns(indexPatternsMock);
+      const vis = {
+        data: {
+          indexPattern: {
+            id: '123',
+            dataSourceRef: {
+              id: '456',
+            },
+          },
+        },
+      } as Vis;
+      expect(await isEligibleForDataSource(vis)).toEqual(false);
+    });
+    it('returns false if the Vis indexPattern has a dataSourceRef with an undefined version', async () => {
+      const indexPatternsMock = dataPluginMock.createStartContract().indexPatterns;
+      indexPatternsMock.getDataSource = jest.fn().mockReturnValue({
+        id: '456',
+        attributes: {
+          dataSourceVersion: undefined,
+        },
+      });
+      setIndexPatterns(indexPatternsMock);
+      const vis = {
+        data: {
+          indexPattern: {
+            id: '123',
+            dataSourceRef: {
+              id: '456',
+            },
+          },
+        },
+      } as Vis;
+      expect(await isEligibleForDataSource(vis)).toEqual(false);
+    });
+    it('returns false if the Vis indexPattern has a dataSourceRef with an empty string version', async () => {
+      const indexPatternsMock = dataPluginMock.createStartContract().indexPatterns;
+      indexPatternsMock.getDataSource = jest.fn().mockReturnValue({
+        id: '456',
+        attributes: {
+          dataSourceVersion: '',
+        },
+      });
+      setIndexPatterns(indexPatternsMock);
+      const vis = {
+        data: {
+          indexPattern: {
+            id: '123',
+            dataSourceRef: {
+              id: '456',
+            },
+          },
+        },
+      } as Vis;
+      expect(await isEligibleForDataSource(vis)).toEqual(false);
     });
   });
 });
