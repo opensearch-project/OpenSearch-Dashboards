@@ -152,6 +152,20 @@ export const Configurator = ({
     };
   }, [indexedViewsService, selectedIndexedView, dataset]);
 
+  const shouldRenderDatePickerField = useCallback(() => {
+    const datasetType = queryString.getDatasetService().getType(dataset.type);
+
+    // Check dataset type configuration first
+    const supportsTimeFilter = datasetType?.meta?.supportsTimeFilter;
+    if (supportsTimeFilter !== undefined) {
+      return Boolean(supportsTimeFilter);
+    }
+
+    // Fall back to language configuration
+    const languageConfig = languageService.getLanguage(language);
+    return !languageConfig?.hideDatePicker;
+  }, [dataset.type, language, queryString, languageService]);
+
   return (
     <>
       <EuiModalHeader>
@@ -256,7 +270,7 @@ export const Configurator = ({
               data-test-subj="advancedSelectorLanguageSelect"
             />
           </EuiFormRow>
-          {!languageService.getLanguage(language)?.hideDatePicker &&
+          {shouldRenderDatePickerField() &&
             (dataset.type === DEFAULT_DATA.SET_TYPES.INDEX_PATTERN ? (
               <EuiFormRow
                 label={i18n.translate(
