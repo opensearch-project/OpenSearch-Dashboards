@@ -183,15 +183,18 @@ export function processVisitedRules(
         break;
       }
       case OpenSearchSQLParser.RULE_predicate: {
-        // console.log(rule.startTokenIndex);
+        /**
+         * NEW PLAN:
+         * create a list of the tokens from the start of the pedicate to the end. do we have that capability? if so:
+         * go through, remove all with type WS
+         * do all of the below, but now we know we only have "significant tokens"
+         *
+         * also todo: make sure duplicate tokens such as commas are removed, need new system for that
+         */
 
         // TODO: set rerunAndConstrain to the predicate parser rule context
 
-        // TODO: make sure that the IN operator can also have values
-
         // TODO: handle issue where we get the column name no matter if the predicate starts some other way
-
-        // TODO: verify that WS jumping does not lead to bad behavior
 
         // need to check if we have a binary comparison predicate
         // if we do, need to find out if we are in the field, value, or operator
@@ -213,7 +216,7 @@ export function processVisitedRules(
 
         // another predicate appears, need to suggest equal/operator
         if (expressionStart + 2 === cursorTokenIndex) {
-          suggestColumnValuePredicate = ColumnValuePredicate.OPERATOR;
+          suggestColumnValuePredicate = ColumnValuePredicate.EQ_OPERATOR;
           break;
         }
 
@@ -223,8 +226,15 @@ export function processVisitedRules(
           expressionStart + 4 === cursorTokenIndex
         ) {
           suggestColumnValuePredicate = ColumnValuePredicate.VALUE;
-          // console.log('prev field', tokenStream.get(expressionStart).text);
           suggestValuesForColumn = tokenStream.get(expressionStart).text; // todo: seems like this breaks if we have some extra stuff in front for our pred
+          break;
+        }
+
+        if (
+          tokenStream.get(expressionStart + 2).type === OpenSearchSQLParser.IN &&
+          expressionStart + 4 === cursorTokenIndex
+        ) {
+          suggestColumnValuePredicate = ColumnValuePredicate.LPAREN;
           break;
         }
 
@@ -232,44 +242,15 @@ export function processVisitedRules(
         if (
           tokenStream.get(expressionStart + 2).type === OpenSearchSQLParser.IN &&
           tokenStream.get(expressionStart + 4).type === OpenSearchSQLParser.LR_BRACKET &&
+          tokenStream.get(cursorTokenIndex - 2).type !== OpenSearchSQLParser.RR_BRACKET &&
           expressionStart + 4 < cursorTokenIndex
         ) {
-          suggestColumnValuePredicate = ColumnValuePredicate.VALUE;
-          // console.log('prev field', tokenStream.get(expressionStart).text);
-          suggestValuesForColumn = tokenStream.get(expressionStart).text;
-          break;
-        }
-
-        break;
-      }
-      case OpenSearchSQLParser.RULE_predicate: {
-        // need to check if we have a binary comparison predicate
-        // if we do, need to find out if we are in the field, value, or operator
-        // depending on which, just return an object that will flag any one of those three
-
-        const expressionStart = rule.startTokenIndex;
-
-        // basically walk through the tokens between the expressionStart and cursorTokenIndex,
-        // if we're only on the first token, we're in the column. if theres a first token, WS,
-        // then another token like EOF, we need to suggest operators. if we're past an operator,
-        // and we need to check if that middle token is an EQUAL because we only care about that,
-        // and we have a WS, we can go to value
-
-        if (expressionStart === cursorTokenIndex) {
-          suggestColumnValuePredicate = ColumnValuePredicate.COLUMN;
-          break;
-        }
-
-        if (expressionStart + 2 === cursorTokenIndex) {
-          suggestColumnValuePredicate = ColumnValuePredicate.OPERATOR;
-          break;
-        }
-
-        if (
-          tokenStream.get(expressionStart + 2).type === OpenSearchSQLParser.EQUAL_SYMBOL &&
-          expressionStart + 4 === cursorTokenIndex
-        ) {
-          suggestColumnValuePredicate = ColumnValuePredicate.VALUE;
+          if (tokenStream.get(cursorTokenIndex - 2).type === OpenSearchSQLParser.STRING_LITERAL) {
+            suggestColumnValuePredicate = ColumnValuePredicate.END_IN_TERM;
+          } else {
+            suggestColumnValuePredicate = ColumnValuePredicate.VALUE;
+            suggestValuesForColumn = tokenStream.get(expressionStart).text;
+          }
           break;
         }
 

@@ -14,6 +14,7 @@ import { SQL_SYMBOLS } from './constants';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { fetchColumnValues, fetchFieldSuggestions, parseQuery } from '../shared/utils';
 import { SuggestionItemDetailsTags } from '../shared/constants';
+import { OpenSearchSQLParser } from './.generated/OpenSearchSQLParser';
 
 export interface SuggestionParams {
   position: monaco.Position;
@@ -46,7 +47,7 @@ export const getSuggestions = async ({
 
     // Fetch columns and values
     if (suggestions.suggestColumns?.tables?.length) {
-      // NOTE:  currently the suggestions return the table present in the query, but since the
+      // NOTE:  currently 'suggestions' returns the table present in the query, but since the
       //        parameters already provide that, it may not be needed anymore
       finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} `, '2'));
     }
@@ -54,16 +55,45 @@ export const getSuggestions = async ({
     if (suggestions.suggestColumnValuePredicate) {
       switch (suggestions.suggestColumnValuePredicate) {
         case ColumnValuePredicate.COLUMN: {
-          finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} `));
+          finalSuggestions.push(...fetchFieldSuggestions(indexPattern, (f: any) => `${f} `, '2'));
           break;
         }
-        case ColumnValuePredicate.OPERATOR: {
+        case ColumnValuePredicate.EQ_OPERATOR: {
           finalSuggestions.push({
             text: '=',
             insertText: '= ',
             type: monaco.languages.CompletionItemKind.Operator,
             detail: SuggestionItemDetailsTags.Operator,
+            sortText: '0',
           });
+          break;
+        }
+        case ColumnValuePredicate.LPAREN: {
+          finalSuggestions.push({
+            text: '(',
+            insertText: '( ',
+            type: monaco.languages.CompletionItemKind.Operator,
+            detail: SuggestionItemDetailsTags.Operator,
+            sortText: '0',
+          });
+          break;
+        }
+        case ColumnValuePredicate.END_IN_TERM: {
+          finalSuggestions.push({
+            text: ',',
+            insertText: ', ',
+            type: monaco.languages.CompletionItemKind.Operator,
+            detail: SuggestionItemDetailsTags.Operator,
+            sortText: '0',
+          });
+          finalSuggestions.push({
+            text: ')',
+            insertText: ') ',
+            type: monaco.languages.CompletionItemKind.Operator,
+            detail: SuggestionItemDetailsTags.Operator,
+            sortText: '1',
+          });
+          break;
         }
         case ColumnValuePredicate.VALUE: {
           if (suggestions.suggestValuesForColumn) {
@@ -95,6 +125,7 @@ export const getSuggestions = async ({
               })
             );
           }
+          break;
         }
       }
     }
@@ -120,6 +151,9 @@ export const getSuggestions = async ({
       });
     }
 
+    const suggestionImportance = new Map<number, string>();
+    suggestionImportance.set(OpenSearchSQLParser.STAR, '1');
+
     // Fill in SQL keywords
     if (suggestions.suggestKeywords?.length) {
       finalSuggestions.push(
@@ -128,9 +162,11 @@ export const getSuggestions = async ({
           type: monaco.languages.CompletionItemKind.Keyword,
           insertText: `${sk.value} `,
           detail: SuggestionItemDetailsTags.Keyword,
+          sortText: suggestionImportance.get(sk.id) ?? '9' + sk.value.toLowerCase(),
         }))
       );
     }
+
     return finalSuggestions;
   } catch (error) {
     // TODO: Handle errors appropriately, possibly logging or displaying a message to the user
