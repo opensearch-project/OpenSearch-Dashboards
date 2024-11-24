@@ -66,13 +66,6 @@ export const getSuggestions = async ({
             detail: SuggestionItemDetailsTags.Operator,
             sortText: '0',
           });
-          finalSuggestions.push({
-            text: 'IN',
-            insertText: 'IN ( ',
-            type: monaco.languages.CompletionItemKind.Operator,
-            detail: SuggestionItemDetailsTags.Operator,
-            sortText: '01',
-          });
           break;
         }
         case ColumnValuePredicate.LPAREN: {
@@ -98,7 +91,7 @@ export const getSuggestions = async ({
             insertText: ') ',
             type: monaco.languages.CompletionItemKind.Operator,
             detail: SuggestionItemDetailsTags.Operator,
-            sortText: '1',
+            sortText: '08',
           });
           break;
         }
@@ -160,6 +153,7 @@ export const getSuggestions = async ({
 
     const suggestionImportance = new Map<number, string>();
     suggestionImportance.set(OpenSearchSQLParser.STAR, '1');
+    suggestionImportance.set(OpenSearchSQLParser.IN, '09');
 
     // Fill in SQL keywords
     if (suggestions.suggestKeywords?.length) {
@@ -197,7 +191,7 @@ export const getOpenSearchSqlAutoCompleteSuggestions = (
     cursor,
   });
 
-  if (!initialResult?.suggestColumnValuePredicate) {
+  if (!initialResult?.rerunAndCombine) {
     return initialResult;
   }
 
@@ -212,7 +206,6 @@ export const getOpenSearchSqlAutoCompleteSuggestions = (
     enrichAutocompleteResult: openSearchSqlAutocompleteData.enrichAutocompleteResult,
     query,
     cursor,
-    // context: initialResult.rerunAndConstrain,
   });
 
   // only need to modify initial results if there are context keywords

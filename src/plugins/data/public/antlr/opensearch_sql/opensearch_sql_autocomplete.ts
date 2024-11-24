@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ParserRuleContext, ParseTree, TokenStream } from 'antlr4ng';
+import { ParseTree, TokenStream } from 'antlr4ng';
 import * as c3 from 'antlr4-c3';
 import { ColumnAliasSymbol, TableSymbol } from './symbol_table';
 import {
@@ -46,14 +46,10 @@ const tokenDictionary: TokenDictionary = {
 export function getIgnoredTokens(): number[] {
   const tokens = [];
 
-  const operatorsToInclude = [OpenSearchSQLParser.COMMA];
-
   const firstOperatorIndex = OpenSearchSQLParser.SLASH;
   const lastOperatorIndex = OpenSearchSQLParser.ERROR_RECOGNITION;
   for (let i = firstOperatorIndex; i <= lastOperatorIndex; i++) {
-    if (!operatorsToInclude.includes(i)) {
-      tokens.push(i);
-    }
+    tokens.push(i);
   }
 
   // Ignoring functions for now, need custom logic for them later
@@ -138,7 +134,7 @@ export function processVisitedRules(
   let shouldSuggestColumnAliases = false;
   let suggestValuesForColumn: string | undefined;
   let suggestColumnValuePredicate: ColumnValuePredicate | undefined;
-  let rerunAndConstrain: ParserRuleContext | undefined;
+  let rerunAndCombine = false;
 
   for (const [ruleId, rule] of rules) {
     switch (ruleId) {
@@ -183,26 +179,16 @@ export function processVisitedRules(
         break;
       }
       case OpenSearchSQLParser.RULE_predicate: {
+        rerunAndCombine = true;
         /**
-         * NEW PLAN:
-         * create a list of the tokens from the start of the pedicate to the end. do we have that capability? if so:
-         * go through, remove all with type WS
-         * do all of the below, but now we know we only have "significant tokens"
-         *
-         * also todo: make sure duplicate tokens such as commas are removed, need new system for that
+         * creates a list of the tokens from the start of the pedicate to the end
+         * intentionally omit all tokens with type SPACE
+         * now we know we only have "significant tokens"
          */
-
-        // TODO: set rerunAndConstrain to the predicate parser rule context
-
-        // TODO: handle issue where we get the column name no matter if the predicate starts some other way
-
-        // need to check if we have a binary comparison predicate
-        // if we do, need to find out if we are in the field, value, or operator
-        // depending on which, just return an object that will flag any one of those three
 
         const expressionStart = rule.startTokenIndex;
 
-        // from expression start to cursortoken index, grab all the tokens and put them in a list. ignore the whitespace tokens
+        // from expressionStart to cursorTokenIndex, grab all the tokens and put them in a list. ignore the whitespace tokens
         const sigTokens = [];
         for (let i = expressionStart; i < cursorTokenIndex; i++) {
           const token = tokenStream.get(i);
@@ -270,7 +256,7 @@ export function processVisitedRules(
   }
 
   return {
-    rerunAndConstrain,
+    rerunAndCombine,
     suggestViewsOrTables,
     suggestAggregateFunctions,
     suggestScalarFunctions,

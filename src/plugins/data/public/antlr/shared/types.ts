@@ -95,7 +95,7 @@ export interface CursorPosition {
 export interface OpenSearchSqlAutocompleteResult extends AutocompleteResultBase {
   suggestViewsOrTables?: TableOrViewSuggestion;
   suggestColumnValuePredicate?: ColumnValuePredicate;
-  rerunAndConstrain?: ParserRuleContext;
+  rerunAndCombine?: boolean;
 }
 
 export interface OpenSearchPplAutocompleteResult extends AutocompleteResultBase {
