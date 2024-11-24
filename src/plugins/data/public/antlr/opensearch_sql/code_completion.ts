@@ -72,8 +72,8 @@ export const getSuggestions = async ({
           finalSuggestions.push({
             text: '(',
             insertText: '( ',
-            type: monaco.languages.CompletionItemKind.Operator,
-            detail: SuggestionItemDetailsTags.Operator,
+            type: monaco.languages.CompletionItemKind.Keyword,
+            detail: SuggestionItemDetailsTags.Keyword,
             sortText: '0',
           });
           break;
@@ -82,15 +82,15 @@ export const getSuggestions = async ({
           finalSuggestions.push({
             text: ',',
             insertText: ', ',
-            type: monaco.languages.CompletionItemKind.Operator,
-            detail: SuggestionItemDetailsTags.Operator,
+            type: monaco.languages.CompletionItemKind.Keyword,
+            detail: SuggestionItemDetailsTags.Keyword,
             sortText: '0',
           });
           finalSuggestions.push({
             text: ')',
             insertText: ') ',
-            type: monaco.languages.CompletionItemKind.Operator,
-            detail: SuggestionItemDetailsTags.Operator,
+            type: monaco.languages.CompletionItemKind.Keyword,
+            detail: SuggestionItemDetailsTags.Keyword,
             sortText: '08',
           });
           break;
