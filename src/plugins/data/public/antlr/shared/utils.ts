@@ -149,8 +149,8 @@ export const fetchFieldSuggestions = (
       text: field.name,
       type: monaco.languages.CompletionItemKind.Field,
       detail: `Field: ${field.esTypes?.[0] ?? field.type}`,
-      sortText: sortTextImportance,
       ...(modifyInsertText && { insertText: modifyInsertText(field.name) }), // optionally include insert text if fn exists
+      ...(sortTextImportance && { sortText: sortTextImportance }),
     };
   });
 
