@@ -28,6 +28,7 @@ import {
 } from './constants';
 import { WorkspacePermissionSetting } from './types';
 import { PermissionModeId } from '../../../../../core/public';
+import './workspace_privacy_setting.scss';
 
 export interface WorkspacePrivacySettingProps {
   onPermissionChange: (
@@ -122,6 +123,7 @@ export const WorkspacePrivacySettingPanel = ({
           {options.map(({ id, label, description }) => (
             <EuiFlexItem key={id}>
               <EuiCheckableCard
+                className="workspace-privacy-setting-item"
                 id={id}
                 label={
                   <EuiText size="s">
