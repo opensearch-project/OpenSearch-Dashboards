@@ -267,7 +267,7 @@ class DataFormatPickerUI extends Component {
                   defaultMessage="See {numeralJsLink}"
                   values={{
                     numeralJsLink: (
-                      <EuiLink href="http://numeraljs.com/#format" target="_BLANK">
+                      <EuiLink href="https://numeraljs.com/#format" target="_BLANK">
                         Numeral.js
                       </EuiLink>
                     ),
