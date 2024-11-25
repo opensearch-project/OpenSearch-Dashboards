@@ -33,12 +33,18 @@ export const searchForDevTools = async (
       <EuiFlexItem>
         <EuiIcon type="consoleApp" color="text" />
       </EuiFlexItem>
-      <EuiFlexItem>{props.title}</EuiFlexItem>
+      <EuiFlexItem>
+        <EuiHighlight search={query}>{props.title}</EuiHighlight>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 
   return tools
-    .filter((tool) => tool.title.toLowerCase().includes(query.toLowerCase()))
+    .filter(
+      (tool) =>
+        tool.title.toLowerCase().includes(query.toLowerCase()) ||
+        props.title.toLowerCase().includes(query.toLowerCase())
+    )
     .map((tool) => ({
       breadcrumbs: [
         {
