@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BehaviorSubject, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
+
 import { LanguageConfig } from './types';
 import { getDQLLanguageConfig, getLuceneLanguageConfig } from './lib';
 import { ISearchInterceptor } from '../../../search';
@@ -19,6 +22,7 @@ import { luceneLanguageReference } from './lib/lucene_language_reference';
 
 export class LanguageService {
   private languages: Map<string, LanguageConfig> = new Map();
+  private languages$: BehaviorSubject<Map<string, LanguageConfig>> = new BehaviorSubject(new Map());
   private queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>;
 
   constructor(
@@ -54,12 +58,28 @@ export class LanguageService {
     );
   }
 
-  public registerLanguage(config: LanguageConfig): void {
+  private setLanguage(config: LanguageConfig) {
     this.languages.set(config.id, config);
+    this.languages$.next(this.languages);
+  }
+
+  public registerLanguage(config: LanguageConfig): void {
+    this.setLanguage(config);
+  }
+
+  public updateLanguageConfig(languageId: string, config: Partial<LanguageConfig>) {
+    const language = this.languages.get(languageId);
+    if (language) {
+      this.setLanguage({ ...language, ...config });
+    }
   }
 
   public getLanguage(languageId: string): LanguageConfig | undefined {
     return this.languages.get(languageId);
+  }
+
+  public getLanguage$(languageId: string) {
+    return this.languages$.pipe(switchMap((languages) => of(languages.get(languageId))));
   }
 
   public getLanguages(): LanguageConfig[] {

@@ -15,6 +15,8 @@ import {
 import classNames from 'classnames';
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useObservable } from 'react-use';
+import { of } from 'rxjs';
 import {
   DatasetSelector,
   DatasetSelectorAppearance,
@@ -69,12 +71,19 @@ export interface QueryEditorTopRowProps {
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
 export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
+  const queryLanguage = props.query && props.query.language;
+
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName, data } = opensearchDashboards.services;
 
-  const queryLanguage = props.query && props.query.language;
+  const language = useObservable(
+    queryLanguage
+      ? data.query.queryString.getLanguageService().getLanguage$(queryLanguage)
+      : of(undefined)
+  );
+
   const persistedLog: PersistedLog | undefined = React.useMemo(
     () =>
       queryLanguage && uiSettings && storage && appName
@@ -227,10 +236,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   function shouldRenderDatePicker(): boolean {
     return (
       Boolean((props.showDatePicker || props.showAutoRefreshOnly) ?? true) &&
-      !(
-        queryLanguage &&
-        data.query.queryString.getLanguageService().getLanguage(queryLanguage)?.hideDatePicker
-      ) &&
+      !(queryLanguage && language?.hideDatePicker) &&
       (props.query?.dataset
         ? data.query.queryString.getDatasetService().getType(props.query.dataset.type)?.meta
             ?.supportsTimeFilter !== false

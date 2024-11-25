@@ -75,12 +75,21 @@ export class PPLSearchInterceptor extends SearchInterceptor {
 
   private buildQuery() {
     const query: Query = this.queryService.queryString.getQuery();
+    const language = this.queryService.queryString.getLanguageService().getLanguage('PPL');
     const dataset = query.dataset;
     if (!dataset || !dataset.timeFieldName) return query;
+
     const [baseQuery, ...afterPipeParts] = query.query.split('|');
     const afterPipe = afterPipeParts.length > 0 ? ` | ${afterPipeParts.join('|').trim()}` : '';
-    const timeFilter = this.getTimeFilter(dataset.timeFieldName);
-    return { ...query, query: baseQuery + timeFilter + afterPipe };
+
+    // If hideDatePicker is NOT set specifically to `true`, it should include time filter to the ppl query
+    const includeTimeFilter = language?.hideDatePicker !== true;
+    if (includeTimeFilter) {
+      const timeFilter = this.getTimeFilter(dataset.timeFieldName);
+      return { ...query, query: baseQuery + timeFilter + afterPipe };
+    }
+
+    return { ...query, query: baseQuery + afterPipe };
   }
 
   private getAggConfig(request: IOpenSearchDashboardsSearchRequest, query: Query) {

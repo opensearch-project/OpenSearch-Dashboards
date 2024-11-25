@@ -39,6 +39,7 @@ export class QueryEnhancementsPlugin
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
     this.storage = new DataStorage(window.localStorage, 'discover.queryAssist.');
+    setStorage(this.storage);
   }
 
   public setup(
@@ -203,7 +204,6 @@ export class QueryEnhancementsPlugin
     core: CoreStart,
     deps: QueryEnhancementsPluginStartDependencies
   ): QueryEnhancementsPluginStart {
-    setStorage(this.storage);
     setData(deps.data);
     return {};
   }
