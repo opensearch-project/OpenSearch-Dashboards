@@ -10,7 +10,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiLink,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -32,22 +31,33 @@ import {
   privacyTypeViewTitle,
   WorkspacePermissionItemType,
   WorkspacePrivacyItemType,
+  optionIdToWorkspacePermissionModesMap,
 } from './constants';
 import { WorkspacePermissionSetting } from './types';
 import { WorkspacePermissionMode } from '../../../common/constants';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { CoreStart, IWorkspaceResponse } from '../../../../../core/public';
+import { PermissionModeId } from '../../../../../core/public';
 
 export interface WorkspacePrivacySettingProps {
-  //   onPermissionChange: (
-  //     value: Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
-  //   ) => void;
   permissionSettings: Array<
     Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
   >;
+  handleSubmitPermissionSettings: (
+    permissionSettings: WorkspacePermissionSetting[]
+  ) => Promise<IWorkspaceResponse<boolean>>;
 }
 
 export const WorkspaceCollaboratorPrivacySettingPanel = ({
   permissionSettings,
+  handleSubmitPermissionSettings,
 }: WorkspacePrivacySettingProps) => {
+  const {
+    services: { notifications },
+  } = useOpenSearchDashboards<{
+    CoreStart: CoreStart;
+  }>();
+
   const [isOpen, setIsOpen] = useState(false);
   const [selectedPrivacyType, setSelectedPrivacyType] = useState(
     WorkspacePrivacyItemType.PrivateToCollaborators
@@ -98,7 +108,6 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
     const modes = permissionSettings.find(
       (item) => item.type === WorkspacePermissionItemType.User && item.userId === '*'
     )?.modes;
-    // console.log(modes);
     if (modes) {
       return modes.includes(WorkspacePermissionMode.LibraryRead)
         ? WorkspacePrivacyItemType.AnyoneCanView
@@ -113,14 +122,68 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
     setIsOpen(true);
   };
 
-  const handleChange = () => {};
+  const successfulMessage = {
+    title: i18n.translate('workspace.collaborator.changePrivacyType.success.message', {
+      defaultMessage: `Change workspace privacy successfully.`,
+    }),
+  };
 
-  //   console.log(privacyType);
+  const handleChange = async () => {
+    if (selectedPrivacyType === WorkspacePrivacyItemType.PrivateToCollaborators) {
+      let newSettings = permissionSettings;
+      newSettings = newSettings.filter(
+        (item) => !(item.type === WorkspacePermissionItemType.User && item.userId === '*')
+      );
+      const result = await handleSubmitPermissionSettings(
+        newSettings as WorkspacePermissionSetting[]
+      );
+      if (result?.success) {
+        notifications?.toasts?.addSuccess(successfulMessage);
+      }
+    }
+    if (selectedPrivacyType === WorkspacePrivacyItemType.AnyoneCanView) {
+      let newSettings = permissionSettings;
+      newSettings = newSettings.filter(
+        (item) => !(item.type === WorkspacePermissionItemType.User && item.userId === '*')
+      );
+      newSettings.push({
+        id: newSettings.length,
+        type: WorkspacePermissionItemType.User,
+        userId: '*',
+        modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read],
+      });
+      const result = await handleSubmitPermissionSettings(
+        newSettings as WorkspacePermissionSetting[]
+      );
+      if (result?.success) {
+        notifications?.toasts?.addSuccess(successfulMessage);
+      }
+    }
+    if (selectedPrivacyType === WorkspacePrivacyItemType.AnyoneCanEdit) {
+      let newSettings = permissionSettings;
+      newSettings = newSettings.filter(
+        (item) => !(item.type === WorkspacePermissionItemType.User && item.userId === '*')
+      );
+      newSettings.push({
+        id: newSettings.length,
+        type: WorkspacePermissionItemType.User,
+        userId: '*',
+        modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.ReadAndWrite],
+      });
+      const result = await handleSubmitPermissionSettings(
+        newSettings as WorkspacePermissionSetting[]
+      );
+      if (result?.success) {
+        notifications?.toasts?.addSuccess(successfulMessage);
+      }
+    }
+    setIsOpen(false);
+  };
 
   return (
     <EuiPanel>
-      <EuiFlexGroup>
-        <EuiFlexItem>
+      <EuiFlexGroup justifyContent="flexStart" gutterSize="s">
+        <EuiFlexItem grow={false}>
           <EuiText size="s">
             <h3>
               {i18n.translate('workspace.form.collaborators.panels.privacy.title', {
@@ -129,12 +192,12 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
             </h3>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiLink onClick={handleModalOpen}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty size="xs" onClick={handleModalOpen}>
             {i18n.translate('workspace.form.collaborators.panels.privacy.edit', {
               defaultMessage: 'Edit',
             })}
-          </EuiLink>
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
@@ -168,7 +231,7 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
                 onChange={(value) => setSelectedPrivacyType(value)}
               />
             </EuiFormRow>
-            <EuiText size="xs" color="subdued">
+            <EuiText size="xs" color="subdued" style={{ paddingLeft: '2px' }}>
               {selectedPrivacyType === WorkspacePrivacyItemType.PrivateToCollaborators
                 ? privacyTypePrivateDescription
                 : privacyType === WorkspacePrivacyItemType.AnyoneCanView

@@ -93,7 +93,6 @@ export const WorkspacePrivacySettingPanel = ({
         },
       ]);
     }
-    // console.log(permissionSettings);
   }, [privacyType, onPermissionChange, workspaceAdmin]);
 
   return (

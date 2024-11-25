@@ -121,7 +121,7 @@ export const WorkspaceCollaborators = () => {
         <EuiFlexItem>
           <WorkspaceCollaboratorPrivacySettingPanel
             permissionSettings={permissionSettings}
-            // onPermissionChange={handleSubmitPermissionSettings}
+            handleSubmitPermissionSettings={handleSubmitPermissionSettings}
           />
         </EuiFlexItem>
         <EuiFlexItem>
