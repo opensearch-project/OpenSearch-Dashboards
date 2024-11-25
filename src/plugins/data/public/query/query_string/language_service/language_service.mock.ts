@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { createEditor, DQLBody, SingleLineInput } from '../../../ui';
 import { LanguageServiceContract } from './language_service';
 import { LanguageConfig } from './types';
@@ -47,9 +48,11 @@ const createSetupLanguageServiceMock = (): jest.Mocked<LanguageServiceContract> 
       languages.set(language.id, language);
     }),
     getLanguage: jest.fn((id: string) => languages.get(id)),
+    getLanguage$: jest.fn((id: string) => new BehaviorSubject(languages.get(id))),
     getLanguages: jest.fn(() => Array.from(languages.values())),
     getDefaultLanguage: jest.fn(() => languages.get('kuery') || languages.values().next().value),
     getQueryEditorExtensionMap: jest.fn().mockReturnValue({}),
+    updateLanguageConfig: jest.fn(),
     resetUserQuery: jest.fn(),
     getUserQueryLanguageBlocklist: jest.fn().mockReturnValue([]),
     setUserQueryLanguageBlocklist: jest.fn().mockReturnValue(true),
