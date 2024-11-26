@@ -1,0 +1,2 @@
+fix:
+- Add min-width to discover table header ([#8927](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8927))
