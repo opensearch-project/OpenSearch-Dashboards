@@ -39,12 +39,12 @@ export const searchForDevTools = async (
     </EuiFlexGroup>
   );
 
-  return tools
-    .filter(
-      (tool) =>
-        tool.title.toLowerCase().includes(query.toLowerCase()) ||
-        props.title.toLowerCase().includes(query.toLowerCase())
-    )
+  const titleMatched = props.title.toLowerCase().includes(query.toLowerCase());
+  const matchedTools = titleMatched
+    ? tools
+    : tools.filter((tool) => tool.title.toLowerCase().includes(query.toLowerCase()));
+
+  return matchedTools
     .map((tool) => ({
       breadcrumbs: [
         {
