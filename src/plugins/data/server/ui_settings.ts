@@ -431,7 +431,7 @@ export function getUiSettings(
           'data.advancedSettings.format.numberFormat.numeralFormatLinkText',
         values: {
           numeralFormatLink:
-            '<a href="https://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
             i18n.translate('data.advancedSettings.format.numberFormat.numeralFormatLinkText', {
               defaultMessage: 'numeral format',
             }) +
@@ -453,7 +453,7 @@ export function getUiSettings(
           'data.advancedSettings.format.percentFormat.numeralFormatLinkText',
         values: {
           numeralFormatLink:
-            '<a href="https://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
             i18n.translate('data.advancedSettings.format.percentFormat.numeralFormatLinkText', {
               defaultMessage: 'numeral format',
             }) +
@@ -475,7 +475,7 @@ export function getUiSettings(
           'data.advancedSettings.format.bytesFormat.numeralFormatLinkText',
         values: {
           numeralFormatLink:
-            '<a href="https://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
             i18n.translate('data.advancedSettings.format.bytesFormat.numeralFormatLinkText', {
               defaultMessage: 'numeral format',
             }) +
@@ -497,7 +497,7 @@ export function getUiSettings(
           'data.advancedSettings.format.currencyFormat.numeralFormatLinkText',
         values: {
           numeralFormatLink:
-            '<a href="https://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
             i18n.translate('data.advancedSettings.format.currencyFormat.numeralFormatLinkText', {
               defaultMessage: 'numeral format',
             }) +
@@ -523,7 +523,7 @@ export function getUiSettings(
           'data.advancedSettings.format.formattingLocaleText',
         values: {
           numeralLanguageLink:
-            '<a href="https://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
+            '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">' +
             i18n.translate(
               'data.advancedSettings.format.formattingLocale.numeralLanguageLinkText',
               {
