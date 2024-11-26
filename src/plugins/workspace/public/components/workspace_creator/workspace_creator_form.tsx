@@ -45,7 +45,8 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
     handleColorChange,
     handleUseCaseChange,
     setSelectedDataSourceConnections,
-    setPermissionSettings,
+    privacyType,
+    setPrivacyType,
   } = useWorkspaceForm(props);
 
   const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin ?? false;
@@ -117,8 +118,8 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
           <EuiSpacer size="m" />
           {isDashboardAdmin && (
             <WorkspacePrivacySettingPanel
-              onPermissionChange={setPermissionSettings}
-              permissionSettings={formData.permissionSettings}
+              privacyType={privacyType}
+              onPrivacyTypeChange={setPrivacyType}
               goToCollaborators={props.goToCollaborators}
               onGoToCollaboratorsChange={props.onGoToCollaboratorsChange}
             />

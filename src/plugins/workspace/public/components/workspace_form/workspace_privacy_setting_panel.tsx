@@ -16,40 +16,29 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
-  optionIdToWorkspacePermissionModesMap,
   privacyTypeEditDescription,
   privacyTypeEditTitle,
   privacyTypePrivateDescription,
   privacyTypePrivateTitle,
   privacyTypeViewDescription,
   privacyTypeViewTitle,
-  WorkspacePermissionItemType,
   WorkspacePrivacyItemType,
 } from './constants';
-import { WorkspacePermissionSetting } from './types';
-import { PermissionModeId } from '../../../../../core/public';
 import './workspace_privacy_setting.scss';
 
 export interface WorkspacePrivacySettingProps {
-  onPermissionChange: (
-    value: Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
-  ) => void;
-  permissionSettings: Array<
-    Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
-  >;
+  privacyType: WorkspacePrivacyItemType;
+  onPrivacyTypeChange: (newPrivacyType: WorkspacePrivacyItemType) => void;
   goToCollaborators: boolean;
   onGoToCollaboratorsChange: (value: boolean) => void;
 }
 
 export const WorkspacePrivacySettingPanel = ({
-  onPermissionChange,
-  permissionSettings,
+  privacyType,
+  onPrivacyTypeChange,
   goToCollaborators,
   onGoToCollaboratorsChange,
 }: WorkspacePrivacySettingProps) => {
-  const [privacyType, setPrivacyType] = useState(WorkspacePrivacyItemType.PrivateToCollaborators);
-  const workspaceAdmin = permissionSettings[0];
-
   const options = [
     {
       id: WorkspacePrivacyItemType.PrivateToCollaborators,
@@ -67,34 +56,6 @@ export const WorkspacePrivacySettingPanel = ({
       description: privacyTypeEditDescription,
     },
   ];
-
-  useEffect(() => {
-    if (privacyType === WorkspacePrivacyItemType.PrivateToCollaborators) {
-      onPermissionChange([workspaceAdmin]);
-    }
-    if (privacyType === WorkspacePrivacyItemType.AnyoneCanView) {
-      onPermissionChange([
-        workspaceAdmin,
-        {
-          id: 1,
-          type: WorkspacePermissionItemType.User,
-          userId: '*',
-          modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read],
-        },
-      ]);
-    }
-    if (privacyType === WorkspacePrivacyItemType.AnyoneCanEdit) {
-      onPermissionChange([
-        workspaceAdmin,
-        {
-          id: 1,
-          type: WorkspacePermissionItemType.User,
-          userId: '*',
-          modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.ReadAndWrite],
-        },
-      ]);
-    }
-  }, [privacyType, onPermissionChange, workspaceAdmin]);
 
   return (
     <EuiPanel>
@@ -130,7 +91,7 @@ export const WorkspacePrivacySettingPanel = ({
                     <h4>{label}</h4>
                   </EuiText>
                 }
-                onChange={() => setPrivacyType(id)}
+                onChange={() => onPrivacyTypeChange(id)}
                 checked={privacyType === id}
               >
                 <EuiText size="xs">{description}</EuiText>
