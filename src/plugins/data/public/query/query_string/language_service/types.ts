@@ -61,11 +61,6 @@ export interface LanguageConfig {
   };
   editorSupportedAppNames?: string[];
   supportedAppNames?: string[];
-  /**
-   * @deprecated
-   *
-   * Use `datasetTypeConfig.supportsTimeFilter` instead
-   */
   hideDatePicker?: boolean;
   sampleQueries?: SampleQuery[];
 }

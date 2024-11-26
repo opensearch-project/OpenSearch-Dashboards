@@ -45,8 +45,8 @@ export interface DatasetTypeConfig {
   title: string;
   languageOverrides?: {
     [language: string]: {
-      /** The overrides transfer the responsibility of handling the input from
-       * the language interceptor to the dataset types strategy. */
+      /** The override transfers the responsibility of handling the input from
+       * the language interceptor to the dataset type search strategy. */
       hideDatePicker?: boolean;
     };
   };

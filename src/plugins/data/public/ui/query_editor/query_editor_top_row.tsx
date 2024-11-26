@@ -236,26 +236,16 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
    * If isDatePickerEnabled is false, returns false immediately
    *
    * Dataset Type permutations (datasetType?.meta?.supportsTimeFilter):
-   * - supportsTimeFilter=true => true
    * - supportsTimeFilter=false => false
-   * - supportsTimeFilter=undefined && dataset exists => falls through to language check
-   * - no dataset => falls through to language check
    *
-   * Language permutations (when dataset.meta.supportsTimeFilter is undefined):
+   * Language permutations (when dataset.meta.supportsTimeFilter is undefined or true):
    * - queryLanguage=undefined => true (shows date picker)
    * - queryLanguage exists:
+   *   - languageOverrides[queryLanguage].hideDatePicker=true => false
+   *   - languageOverrides[queryLanguage].hideDatePicker=false => true
    *   - hideDatePicker=true => false
    *   - hideDatePicker=false => true
    *   - hideDatePicker=undefined => true
-   *
-   * Example scenarios:
-   * 1. {showDatePicker: false} => false
-   * 2. {dataset: {type: 'x', meta: {supportsTimeFilter: true}}} => true
-   * 3. {dataset: {type: 'x', meta: {supportsTimeFilter: false}}} => false
-   * 4. {dataset: {type: 'x'}, queryLanguage: 'sql', hideDatePicker: true} => false
-   * 5. {dataset: {type: 'x'}, queryLanguage: 'sql', hideDatePicker: false} => true
-   * 6. {dataset: {type: 'x'}, queryLanguage: undefined} => true (no language restrictions)
-   * 7. No configuration => true (default behavior shows date picker)
    */
   function shouldRenderDatePicker(): boolean {
     const { queryString } = data.query;
