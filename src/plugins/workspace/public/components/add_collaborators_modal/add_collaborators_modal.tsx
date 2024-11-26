@@ -84,6 +84,29 @@ export const AddCollaboratorsModal = ({
   const [isAdding, setIsAdding] = useState(false);
 
   const handleAddCollaborators = async () => {
+    const singleStarUserIds =
+      permissionType === 'user'
+        ? validInnerCollaborators.flatMap(({ id, collaboratorId }) =>
+            collaboratorId.trim() === '*' ? id : []
+          )
+        : [];
+    if (singleStarUserIds.length > 0) {
+      setErrors(
+        singleStarUserIds.reduce(
+          (previousErrors, id) => ({
+            ...previousErrors,
+            [id]: i18n.translate('workspace.addCollaboratorsModal.errors.invalidUserFormat', {
+              defaultMessage: 'Invalid {inputLabel} format',
+              values: {
+                inputLabel,
+              },
+            }),
+          }),
+          {}
+        )
+      );
+      return;
+    }
     const collaboratorId2IdsMap = validInnerCollaborators.reduce<{
       [key: string]: number[];
     }>((previousValue, collaborator) => {
