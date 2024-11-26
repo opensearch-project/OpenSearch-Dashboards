@@ -17,12 +17,7 @@ import {
 import { i18n } from '@osd/i18n';
 import {
   optionIdToWorkspacePermissionModesMap,
-  privacyTypeEditDescription,
-  privacyTypeEditTitle,
-  privacyTypePrivateDescription,
-  privacyTypePrivateTitle,
-  privacyTypeViewDescription,
-  privacyTypeViewTitle,
+  privacyType2CopyMap,
   WorkspacePermissionItemType,
   WorkspacePrivacyItemType,
 } from './constants';
@@ -51,22 +46,14 @@ export const WorkspacePrivacySettingPanel = ({
   const workspaceAdmin = permissionSettings[0];
 
   const options = [
-    {
-      id: WorkspacePrivacyItemType.PrivateToCollaborators,
-      label: privacyTypePrivateTitle,
-      description: privacyTypePrivateDescription,
-    },
-    {
-      id: WorkspacePrivacyItemType.AnyoneCanView,
-      label: privacyTypeViewTitle,
-      description: privacyTypeViewDescription,
-    },
-    {
-      id: WorkspacePrivacyItemType.AnyoneCanEdit,
-      label: privacyTypeEditTitle,
-      description: privacyTypeEditDescription,
-    },
-  ];
+    WorkspacePrivacyItemType.PrivateToCollaborators,
+    WorkspacePrivacyItemType.AnyoneCanView,
+    WorkspacePrivacyItemType.AnyoneCanEdit,
+  ].map((value) => ({
+    id: value,
+    label: privacyType2CopyMap[value].title,
+    description: privacyType2CopyMap[value].description,
+  }));
 
   useEffect(() => {
     if (privacyType === WorkspacePrivacyItemType.PrivateToCollaborators) {
@@ -115,8 +102,6 @@ export const WorkspacePrivacySettingPanel = ({
         label={i18n.translate('workspace.form.privacy.name.label', {
           defaultMessage: 'Workspace privacy',
         })}
-        // isInvalid={!!formErrors.features}
-        // error={formErrors.features?.message}
         fullWidth
       >
         <EuiFlexGroup gutterSize="s">

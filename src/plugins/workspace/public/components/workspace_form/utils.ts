@@ -12,6 +12,7 @@ import {
   optionIdToWorkspacePermissionModesMap,
   permissionModeOptions,
   WorkspacePermissionItemType,
+  WorkspacePrivacyItemType,
 } from './constants';
 
 import {
@@ -447,4 +448,50 @@ export const getNumberOfChanges = (
     count++;
   }
   return count;
+};
+
+export const getPrivacyTypeFromPermissionSettings = (
+  permissionSettings: Array<
+    Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
+  >
+) => {
+  const modes = permissionSettings.find(
+    (item) => item.type === WorkspacePermissionItemType.User && item.userId === '*'
+  )?.modes;
+  if (modes?.includes(WorkspacePermissionMode.LibraryWrite)) {
+    return WorkspacePrivacyItemType.AnyoneCanEdit;
+  }
+  if (modes?.includes(WorkspacePermissionMode.LibraryRead)) {
+    return WorkspacePrivacyItemType.AnyoneCanView;
+  }
+  return WorkspacePrivacyItemType.PrivateToCollaborators;
+};
+
+export const generatePermissionSettingsWithPrivacyType = (
+  permissionSettings: Array<
+    Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
+  >,
+  privacyType: WorkspacePrivacyItemType
+) => {
+  const newSettings = permissionSettings.filter(
+    (item) => !(item.type === WorkspacePermissionItemType.User && item.userId === '*')
+  );
+
+  if (
+    privacyType === WorkspacePrivacyItemType.AnyoneCanView ||
+    privacyType === WorkspacePrivacyItemType.AnyoneCanEdit
+  ) {
+    newSettings.push({
+      id: generateNextPermissionSettingsId(newSettings),
+      type: WorkspacePermissionItemType.User,
+      userId: '*',
+      modes:
+        optionIdToWorkspacePermissionModesMap[
+          privacyType === WorkspacePrivacyItemType.AnyoneCanView
+            ? PermissionModeId.Read
+            : PermissionModeId.ReadAndWrite
+        ],
+    });
+  }
+  return newSettings;
 };

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 import { useObservable } from 'react-use';
@@ -117,23 +117,20 @@ export const WorkspaceCollaborators = () => {
         ]}
         setMountPoint={application?.setAppRightControls}
       />
-      <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          <WorkspaceCollaboratorPrivacySettingPanel
+      <div>
+        <WorkspaceCollaboratorPrivacySettingPanel
+          permissionSettings={permissionSettings}
+          handleSubmitPermissionSettings={handleSubmitPermissionSettings}
+        />
+        <EuiSpacer />
+        <EuiPanel>
+          <WorkspaceCollaboratorTable
             permissionSettings={permissionSettings}
+            displayedCollaboratorTypes={displayedCollaboratorTypes}
             handleSubmitPermissionSettings={handleSubmitPermissionSettings}
           />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiPanel>
-            <WorkspaceCollaboratorTable
-              permissionSettings={permissionSettings}
-              displayedCollaboratorTypes={displayedCollaboratorTypes}
-              handleSubmitPermissionSettings={handleSubmitPermissionSettings}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </EuiPanel>
+      </div>
     </EuiPage>
   );
 };

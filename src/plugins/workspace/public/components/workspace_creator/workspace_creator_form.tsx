@@ -49,6 +49,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
   } = useWorkspaceForm(props);
 
   const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin ?? false;
+  const isPermissionEnabled = !!application?.capabilities.workspaces.permissionEnabled;
 
   return (
     <EuiFlexGroup className="workspaceCreateFormContainer">
@@ -115,7 +116,7 @@ export const WorkspaceCreatorForm = (props: WorkspaceCreatorFormProps) => {
             </>
           )}
           <EuiSpacer size="m" />
-          {isDashboardAdmin && (
+          {isDashboardAdmin && isPermissionEnabled && (
             <WorkspacePrivacySettingPanel
               onPermissionChange={setPermissionSettings}
               permissionSettings={formData.permissionSettings}
