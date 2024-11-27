@@ -28,6 +28,7 @@ interface QueryAssistInputProps {
 export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const queryString = services.data.query.queryString;
+  const timefilter = services.data.query.timefilter;
   const inputRef = useRef<HTMLInputElement>(null);
   const storage = getStorage();
   const persistedLog: PersistedLog = useMemo(
@@ -51,6 +52,17 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     });
     return () => subscription.unsubscribe();
   }, [queryString]);
+
+  useEffect(() => {
+    // Disable time filter when the assistant query input is expanded
+    const disabled = !(props.dependencies.isCollapsed || isQueryAssistCollapsed);
+    timefilter.timefilter.setDisabled(disabled);
+  }, [props.dependencies.isCollapsed, isQueryAssistCollapsed, timefilter]);
+
+  useEffect(() => {
+    // reset the time filter state to false when query assist bar unmounted
+    return () => timefilter.timefilter.setDisabled(false);
+  }, [timefilter]);
 
   const onSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();

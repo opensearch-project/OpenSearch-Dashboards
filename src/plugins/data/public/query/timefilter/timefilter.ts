@@ -51,6 +51,8 @@ export class Timefilter {
   private autoRefreshFetch$ = new Subject();
   private fetch$ = new Subject();
 
+  private disabled$ = new BehaviorSubject(false);
+
   private _time: TimeRange;
   private _refreshInterval!: RefreshInterval;
   private _history: TimeHistoryContract;
@@ -172,6 +174,18 @@ export class Timefilter {
       );
     }
   };
+
+  public setDisabled(val: boolean) {
+    this.disabled$.next(val);
+  }
+
+  public getDisabled$() {
+    return this.disabled$;
+  }
+
+  public isDisabled() {
+    return this.disabled$.value;
+  }
 
   public createFilter = (indexPattern: IndexPattern, timeRange?: TimeRange) => {
     return getTime(indexPattern, timeRange ? timeRange : this._time, {
