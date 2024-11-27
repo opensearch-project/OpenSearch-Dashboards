@@ -77,11 +77,11 @@ jobs:
           - group: 9
             config: standard
             test_location: ftr
-          # Query enhanced tests
+          # Dashboard tests with query enhanced
           - group: 10
             config: query_enhanced
-            test_location: ftr
-          # Dashboard tests
+            test_location: source
+          # Dashboard tests with no query enhanced
           - group: 11
             config: dashboard
             test_location: source
