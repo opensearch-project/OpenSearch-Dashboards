@@ -84,8 +84,9 @@
     "spec_to_console": "scripts/use_node scripts/spec_to_console",
     "pkg-version": "scripts/use_node -e \"console.log(require('./package.json').version)\"",
     "release_note:generate": "scripts/use_node scripts/generate_release_note",
-    "cypress:run-without-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --headless --env SECURITY_ENABLED=false",
-    "cypress:run-with-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --headless --env SECURITY_ENABLED=true,openSearchUrl=https://localhost:9200,WAIT_FOR_LOADER_BUFFER_MS=500",
+    "cypress:run-without-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --env SECURITY_ENABLED=false",
+    "cypress:run-with-security": "env TZ=America/Los_Angeles NO_COLOR=1 cypress run --env SECURITY_ENABLED=true,openSearchUrl=https://localhost:9200,WAIT_FOR_LOADER_BUFFER_MS=500",
+    "osd:ciGroup10": "echo \"apps/query_enhancement/*.js\"",
     "osd:ciGroup11": "echo \"dashboard_sanity_test_spec.js\"",
     "generate:opensearchsqlantlr": "./node_modules/antlr4ng-cli/index.js -Dlanguage=TypeScript -o ./src/plugins/data/public/antlr/opensearch_sql/.generated -visitor -no-listener -Xexact-output-dir ./src/plugins/data/public/antlr/opensearch_sql/grammar/OpenSearchSQLLexer.g4 ./src/plugins/data/public/antlr/opensearch_sql/grammar/OpenSearchSQLParser.g4",
     "generate:opensearchpplantlr": "./node_modules/antlr4ng-cli/index.js -Dlanguage=TypeScript -o ./src/plugins/data/public/antlr/opensearch_ppl/.generated -visitor -no-listener -Xexact-output-dir ./src/plugins/data/public/antlr/opensearch_ppl/grammar/OpenSearchPPLLexer.g4 ./src/plugins/data/public/antlr/opensearch_ppl/grammar/OpenSearchPPLParser.g4"
