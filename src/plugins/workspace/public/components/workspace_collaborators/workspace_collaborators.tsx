@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 import { useObservable } from 'react-use';

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   EuiCheckableCard,
   EuiCheckbox,
@@ -15,12 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import {
-  optionIdToWorkspacePermissionModesMap,
-  privacyType2CopyMap,
-  WorkspacePermissionItemType,
-  WorkspacePrivacyItemType,
-} from './constants';
+import { privacyType2CopyMap, WorkspacePrivacyItemType, workspacePrivacyTitle } from './constants';
 import './workspace_privacy_setting.scss';
 
 export interface WorkspacePrivacySettingProps {
@@ -61,12 +56,7 @@ export const WorkspacePrivacySettingPanel = ({
         })}
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiCompressedFormRow
-        label={i18n.translate('workspace.form.privacy.name.label', {
-          defaultMessage: 'Workspace privacy',
-        })}
-        fullWidth
-      >
+      <EuiCompressedFormRow label={workspacePrivacyTitle} fullWidth>
         <EuiFlexGroup gutterSize="s">
           {options.map(({ id, label, description }) => (
             <EuiFlexItem key={id}>

@@ -447,5 +447,55 @@ export const getNumberOfChanges = (
   ) {
     count++;
   }
+  if (
+    newFormData.permissionSettings &&
+    initialFormData.permissionSettings &&
+    convertPermissionsToPrivacyType(newFormData.permissionSettings) !==
+      convertPermissionsToPrivacyType(initialFormData.permissionSettings)
+  ) {
+    count++;
+  }
   return count;
+};
+
+export const convertPermissionsToPrivacyType = (
+  permissionSettings: WorkspaceFormDataState['permissionSettings']
+) => {
+  const modes = permissionSettings.find(
+    (item) => item.type === WorkspacePermissionItemType.User && item.userId === '*'
+  )?.modes;
+  if (modes?.includes(WorkspacePermissionMode.LibraryWrite)) {
+    return WorkspacePrivacyItemType.AnyoneCanEdit;
+  }
+  if (modes?.includes(WorkspacePermissionMode.LibraryRead)) {
+    return WorkspacePrivacyItemType.AnyoneCanView;
+  }
+  return WorkspacePrivacyItemType.PrivateToCollaborators;
+};
+
+export const getPermissionSettingsWithPrivacyType = (
+  permissionSettings: WorkspaceFormDataState['permissionSettings'],
+  privacyType: WorkspacePrivacyItemType
+) => {
+  const newSettings = permissionSettings.filter(
+    (item) => !(item.type === WorkspacePermissionItemType.User && item.userId === '*')
+  );
+
+  if (
+    privacyType === WorkspacePrivacyItemType.AnyoneCanView ||
+    privacyType === WorkspacePrivacyItemType.AnyoneCanEdit
+  ) {
+    newSettings.push({
+      id: generateNextPermissionSettingsId(permissionSettings),
+      type: WorkspacePermissionItemType.User,
+      userId: '*',
+      modes:
+        optionIdToWorkspacePermissionModesMap[
+          privacyType === WorkspacePrivacyItemType.AnyoneCanView
+            ? PermissionModeId.Read
+            : PermissionModeId.ReadAndWrite
+        ],
+    });
+  }
+  return newSettings;
 };

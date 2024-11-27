@@ -5,7 +5,6 @@
 
 import React, { useState, useMemo } from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,26 +14,18 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiPanel,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import _ from 'lodash';
 import { i18n } from '@osd/i18n';
-import {
-  WorkspacePermissionItemType,
-  WorkspacePrivacyItemType,
-  optionIdToWorkspacePermissionModesMap,
-  privacyType2CopyMap,
-} from './constants';
+import { WorkspacePrivacyItemType, privacyType2CopyMap, workspacePrivacyTitle } from './constants';
 import { WorkspacePermissionSetting } from './types';
-import { WorkspacePermissionMode } from '../../../common/constants';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { CoreStart, IWorkspaceResponse } from '../../../../../core/public';
-import { PermissionModeId } from '../../../../../core/public';
-import {
-  generatePermissionSettingsWithPrivacyType,
-  getPrivacyTypeFromPermissionSettings,
-} from './utils';
+import { convertPermissionsToPrivacyType, getPermissionSettingsWithPrivacyType } from './utils';
 import { WorkspacePrivacySettingSelect } from './workspace_privacy_setting_select';
 
 export interface WorkspacePrivacySettingProps {
@@ -61,9 +52,9 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
     WorkspacePrivacyItemType.PrivateToCollaborators
   );
 
-  const privacyType = useMemo(() => {
-    return getPrivacyTypeFromPermissionSettings(permissionSettings);
-  }, [permissionSettings]);
+  const privacyType = useMemo(() => convertPermissionsToPrivacyType(permissionSettings), [
+    permissionSettings,
+  ]);
 
   const handleModalOpen = () => {
     setSelectedPrivacyType(privacyType);
@@ -74,7 +65,7 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
     let result;
     try {
       result = await handleSubmitPermissionSettings(
-        generatePermissionSettingsWithPrivacyType(
+        getPermissionSettingsWithPrivacyType(
           permissionSettings,
           selectedPrivacyType
         ) as WorkspacePermissionSetting[]
@@ -102,11 +93,7 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
       <EuiFlexGroup justifyContent="flexStart" alignItems="baseline" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiText size="s">
-            <h3>
-              {i18n.translate('workspace.form.collaborators.panels.privacy.title', {
-                defaultMessage: 'Workspace privacy',
-              })}
-            </h3>
+            <h3>{workspacePrivacyTitle}</h3>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -130,11 +117,7 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
       {isOpen && (
         <EuiModal onClose={() => setIsOpen(false)}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              {i18n.translate('workspace.form.collaborators.panels.privacy.modal.titile', {
-                defaultMessage: 'Workspace Privacy',
-              })}
-            </EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>{workspacePrivacyTitle}</EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <WorkspacePrivacySettingSelect
@@ -143,16 +126,16 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
             />
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={() => setIsOpen(false)}>
+            <EuiSmallButtonEmpty onClick={() => setIsOpen(false)}>
               {i18n.translate('workspace.form.collaborators.panels.privacy.modal.cancel', {
                 defaultMessage: 'Cancel',
               })}
-            </EuiButtonEmpty>
-            <EuiButton onClick={handleChange} fill>
+            </EuiSmallButtonEmpty>
+            <EuiSmallButton onClick={handleChange} fill>
               {i18n.translate('workspace.form.collaborators.panels.privacy.modal.save', {
                 defaultMessage: 'Save changes',
               })}
-            </EuiButton>
+            </EuiSmallButton>
           </EuiModalFooter>
         </EuiModal>
       )}

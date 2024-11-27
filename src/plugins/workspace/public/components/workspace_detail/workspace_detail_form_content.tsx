@@ -8,8 +8,11 @@ import {
   EuiCompressedColorPicker,
   EuiCompressedFormRow,
   EuiDescribedFormGroup,
+  EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import { FormattedMessage } from '@osd/i18n/react';
 import { useObservable } from 'react-use';
 import {
   detailsName,
@@ -18,6 +21,8 @@ import {
   detailsColorHelpText,
   detailsDescriptionIntroduction,
   detailsUseCaseHelpText,
+  workspacePrivacyTitle,
+  privacyType2CopyMap,
 } from '../workspace_form/constants';
 import { CoreStart } from '../../../../../core/public';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
@@ -27,6 +32,7 @@ import { WorkspaceUseCase as WorkspaceUseCaseObject } from '../../types';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceNameField } from '../workspace_form/fields/workspace_name_field';
 import { WorkspaceDescriptionField } from '../workspace_form/fields/workspace_description_field';
+import { WorkspacePrivacySettingSelect } from '../workspace_form/workspace_privacy_setting_select';
 
 interface WorkspaceDetailFormContentProps {
   availableUseCases: Array<
@@ -45,9 +51,11 @@ export const WorkspaceDetailFormContent = ({
     setDescription,
     handleColorChange,
     handleUseCaseChange,
+    privacyType,
+    setPrivacyType,
   } = useWorkspaceFormContext();
   const {
-    services: { workspaces },
+    services: { workspaces, application },
   } = useOpenSearchDashboards<CoreStart>();
   const [value, setValue] = useState(formData.useCase);
   const currentWorkspace = useObservable(workspaces.currentWorkspace$);
@@ -137,6 +145,38 @@ export const WorkspaceDetailFormContent = ({
             data-test-subj="workspaceForm-workspaceDetails-colorPicker"
           />
         </EuiCompressedFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={<h3>{workspacePrivacyTitle}</h3>}
+        description={
+          <FormattedMessage
+            id="workspace.form.details.panels.privacy.description"
+            defaultMessage="Manage who can view or edit workspace and assign workspace administrators on the {collaboratorsLink} page."
+            values={{
+              collaboratorsLink: (
+                <EuiLink onClick={() => application.navigateToApp('workspace_collaborators')}>
+                  <FormattedMessage
+                    id="workspace.form.details.panels.privacy.linkToCollaborators"
+                    defaultMessage="Collaborators"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        }
+      >
+        {isEditing ? (
+          <WorkspacePrivacySettingSelect
+            selectedPrivacyType={privacyType}
+            onSelectedPrivacyTypeChange={setPrivacyType}
+          />
+        ) : (
+          <EuiCompressedFormRow label={privacyType2CopyMap[privacyType].title}>
+            <EuiText size="xs" color="subdued">
+              {privacyType2CopyMap[privacyType].description}
+            </EuiText>
+          </EuiCompressedFormRow>
+        )}
       </EuiDescribedFormGroup>
     </>
   );

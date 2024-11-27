@@ -4,9 +4,8 @@
  */
 
 import React from 'react';
-import { i18n } from '@osd/i18n';
-import { EuiFormRow, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
-import { privacyType2CopyMap, WorkspacePrivacyItemType } from './constants';
+import { EuiCompressedSuperSelect, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { privacyType2CopyMap, WorkspacePrivacyItemType, workspacePrivacyTitle } from './constants';
 
 export interface WorkspacePrivacySettingSelectProps {
   selectedPrivacyType: WorkspacePrivacyItemType;
@@ -36,12 +35,8 @@ export const WorkspacePrivacySettingSelect = ({
   }));
   return (
     <>
-      <EuiFormRow
-        label={i18n.translate('workspace.form.collaborators.panels.privacy.modal.label', {
-          defaultMessage: 'Workspace Privacy',
-        })}
-      >
-        <EuiSuperSelect
+      <EuiFormRow label={workspacePrivacyTitle}>
+        <EuiCompressedSuperSelect
           compressed
           hasDividers
           options={options}

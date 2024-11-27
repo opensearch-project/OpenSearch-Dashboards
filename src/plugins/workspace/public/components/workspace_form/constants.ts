@@ -108,6 +108,13 @@ export const detailsColorHelpText = i18n.translate(
   }
 );
 
+export const workspacePrivacyTitle = i18n.translate(
+  'workspace.form.collaborators.panels.privacy.title',
+  {
+    defaultMessage: 'Workspace privacy',
+  }
+);
+
 export const privacyType2CopyMap = {
   [WorkspacePrivacyItemType.PrivateToCollaborators]: {
     title: i18n.translate('workspace.privacy.privateToCollaborators.title', {
