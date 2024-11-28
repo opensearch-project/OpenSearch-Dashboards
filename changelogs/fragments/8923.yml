@@ -1,0 +1,2 @@
+fix:
+- Revert "Keep previous query result if current query result in error" ([#8923](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8923))
