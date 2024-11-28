@@ -453,12 +453,36 @@ export class WorkspaceSavedObjectsClientWrapper {
       let flag = true;
       const processedObjects = await Promise.all(
         objectToBulkGet.saved_objects.map(async (object) => {
-          if (validateIsWorkspaceDataSourceAndConnectionObjectType(object.type)) {
-            const hasPermission = this.validateDataSourcePermissions(
-              object,
-              wrapperOptions.request
-            );
-            if (!hasPermission) {
+          try {
+            if (validateIsWorkspaceDataSourceAndConnectionObjectType(object.type)) {
+              const hasPermission = this.validateDataSourcePermissions(
+                object,
+                wrapperOptions.request
+              );
+              if (!hasPermission) {
+                flag = false;
+                ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
+                return {
+                  ...object,
+                  workspaces: [],
+                  attributes: {} as T,
+                  error: {
+                    ...generateDataSourcePermissionError().output.payload,
+                    statusCode: 403,
+                  },
+                };
+              }
+            }
+
+            if (
+              !(await this.validateWorkspacesAndSavedObjectsPermissions(
+                object,
+                wrapperOptions.request,
+                [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
+                [WorkspacePermissionMode.Write, WorkspacePermissionMode.Read],
+                false
+              ))
+            ) {
               flag = false;
               ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
               return {
@@ -466,35 +490,28 @@ export class WorkspaceSavedObjectsClientWrapper {
                 workspaces: [],
                 attributes: {} as T,
                 error: {
-                  ...generateDataSourcePermissionError().output.payload,
+                  ...generateSavedObjectsPermissionError().output.payload,
                   statusCode: 403,
                 },
               };
             }
-          }
-
-          if (
-            !(await this.validateWorkspacesAndSavedObjectsPermissions(
-              object,
-              wrapperOptions.request,
-              [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite],
-              [WorkspacePermissionMode.Write, WorkspacePermissionMode.Read],
-              false
-            ))
-          ) {
+            return object;
+          } catch (error) {
             flag = false;
             ACLAuditor?.increment(ACLAuditorStateKey.VALIDATE_FAILURE, 1);
+
+            const formattedError = {
+              message: error?.message || 'unexpected error',
+              error: error?.error,
+              statusCode: error.statusCode,
+            };
             return {
               ...object,
               workspaces: [],
               attributes: {} as T,
-              error: {
-                ...generateSavedObjectsPermissionError().output.payload,
-                statusCode: 403,
-              },
+              error: formattedError,
             };
           }
-          return object;
         })
       );
 
