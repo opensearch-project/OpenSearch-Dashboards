@@ -131,7 +131,11 @@ export const WorkspaceCollaboratorPrivacySettingPanel = ({
                 defaultMessage: 'Cancel',
               })}
             </EuiSmallButtonEmpty>
-            <EuiSmallButton onClick={handleChange} fill>
+            <EuiSmallButton
+              onClick={handleChange}
+              fill
+              disabled={selectedPrivacyType === privacyType}
+            >
               {i18n.translate('workspace.form.collaborators.panels.privacy.modal.save', {
                 defaultMessage: 'Save changes',
               })}
