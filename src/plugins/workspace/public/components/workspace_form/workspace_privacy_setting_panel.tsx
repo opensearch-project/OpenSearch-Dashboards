@@ -13,6 +13,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { privacyType2CopyMap, WorkspacePrivacyItemType, workspacePrivacyTitle } from './constants';
@@ -85,12 +86,13 @@ export const WorkspacePrivacySettingPanel = ({
       </EuiText>
       <EuiSpacer size="m" />
       <EuiCheckbox
-        id="jump_to_collaborators_checkbox"
+        id={htmlIdGenerator()()}
         checked={goToCollaborators}
         onChange={(event) => onGoToCollaboratorsChange(event.target.checked)}
         label={i18n.translate('workspace.form.panels.privacy.jumpToCollaborators.label', {
           defaultMessage: 'Go to configure the collaborators right after creating the workspace.',
         })}
+        data-test-subj="jumpToCollaboratorsCheckbox"
       />
     </EuiPanel>
   );

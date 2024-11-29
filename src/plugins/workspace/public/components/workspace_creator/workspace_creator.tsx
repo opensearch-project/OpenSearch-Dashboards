@@ -146,11 +146,11 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               ?.features[0].id;
             // Redirect page after one second, leave one second time to show create successful toast.
             window.setTimeout(() => {
-              if (isPermissionEnabled && goToCollaborators) {
+              if (isPermissionEnabled) {
                 navigateToAppWithinWorkspace(
                   { application, http },
                   newWorkspaceId,
-                  WORKSPACE_COLLABORATORS_APP_ID
+                  goToCollaborators ? WORKSPACE_COLLABORATORS_APP_ID : WORKSPACE_DETAIL_APP_ID
                 );
                 return;
               }

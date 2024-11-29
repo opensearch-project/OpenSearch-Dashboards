@@ -521,8 +521,8 @@ describe('WorkspaceCreator', () => {
     jest.useRealTimers();
   });
 
-  it('should redirect to workspace setting collaborators page if permission enabled', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+  it('should redirect to workspace detail page if jump to permission enabled', async () => {
+    const { getByTestId } = render(<WorkspaceCreator isDashboardAdmin />);
     const navigateToCollaboratorsMock = jest.fn();
     jest
       .spyOn(workspaceUtilsExports, 'navigateToAppWithinWorkspace')
@@ -536,6 +536,35 @@ describe('WorkspaceCreator', () => {
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
     });
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
+    jest.useFakeTimers();
+    jest.runAllTimers();
+    await waitFor(() => {
+      expect(navigateToCollaboratorsMock).toHaveBeenCalledWith(
+        expect.anything(),
+        'successResult',
+        'workspace_detail'
+      );
+    });
+    jest.useRealTimers();
+  });
+
+  it('should redirect to workspace setting collaborators page if jump to collaborators checked', async () => {
+    const { getByTestId } = render(<WorkspaceCreator isDashboardAdmin />);
+    const navigateToCollaboratorsMock = jest.fn();
+    jest
+      .spyOn(workspaceUtilsExports, 'navigateToAppWithinWorkspace')
+      .mockImplementation(navigateToCollaboratorsMock);
+
+    // Ensure workspace create form rendered
+    await waitFor(() => {
+      expect(getByTestId('workspaceForm-bottomBar-createButton')).toBeInTheDocument();
+    });
+    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
+    fireEvent.input(nameInput, {
+      target: { value: 'test workspace name' },
+    });
+    fireEvent.click(getByTestId('jumpToCollaboratorsCheckbox'));
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     jest.useFakeTimers();
     jest.runAllTimers();
