@@ -302,12 +302,65 @@ describe('WorkspaceIdConsumerWrapper', () => {
       expect(wrapperClient.get('type', 'id')).rejects.toMatchInlineSnapshot(`[Error: Not Found]`);
       expect(mockedClient.get).toHaveBeenCalledTimes(1);
     });
+
+    it(`Should throw error when the options.workspaces has more than one workspace.`, async () => {
+      const savedObject = {
+        type: 'dashboard',
+        id: 'dashboard_id',
+        attributes: {},
+        references: [],
+        workspaces: ['bar'],
+      };
+      const options = { workspaces: ['foo', 'bar'] };
+      expect(
+        wrapperClient.get(savedObject.type, savedObject.id, options)
+      ).rejects.toMatchInlineSnapshot(`[Error: Multiple workspace parameters: Bad Request]`);
+      expect(mockedClient.get).not.toBeCalled();
+    });
+
+    it(`Should get data source when user is data source admin`, async () => {
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+      updateWorkspaceState(mockRequest, { isDataSourceAdmin: true, requestWorkspaceId: 'foo' });
+      const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
+        client: mockedClient,
+        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+        request: mockRequest,
+      });
+      const savedObject = {
+        type: 'data-source',
+        id: 'data-source_id',
+        attributes: {},
+        references: [],
+      };
+      mockedClient.get.mockResolvedValueOnce(savedObject);
+      const result = await mockedWrapperClient.get(savedObject.type, savedObject.id);
+      expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {});
+      expect(result).toEqual(savedObject);
+    });
+
+    it(`Should throw error when the object is global data source`, async () => {
+      const savedObject = {
+        type: 'data-source',
+        id: 'data-source_id',
+        attributes: {},
+        references: [],
+      };
+      mockedClient.get.mockResolvedValueOnce(savedObject);
+      mockedClient.get.mockResolvedValueOnce(savedObject);
+      expect(wrapperClient.get(savedObject.type, savedObject.id)).rejects.toMatchInlineSnapshot(
+        `[Error: Saved object [data-source/data-source_id] not found]`
+      );
+      expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {});
+    });
   });
 
   describe('bulkGet', () => {
     const payload = [
       { id: 'dashboard_id', type: 'dashboard' },
       { id: 'visualization_id', type: 'visualization' },
+      { id: 'global_data_source_id', type: 'data-source' },
+      { id: 'data_source_id', type: 'data-source' },
     ];
     const savedObjects = [
       {
@@ -323,6 +376,31 @@ describe('WorkspaceIdConsumerWrapper', () => {
         attributes: {},
         references: [],
         workspaces: ['bar'],
+      },
+      {
+        type: 'config',
+        id: 'config_id',
+        attributes: {},
+        references: [],
+      },
+      {
+        type: 'workspace',
+        id: 'workspace_id',
+        attributes: {},
+        references: [],
+      },
+      {
+        type: 'data-source',
+        id: 'global_data_source_id',
+        attributes: {},
+        references: [],
+      },
+      {
+        type: 'data-source',
+        id: 'data_source_id',
+        attributes: {},
+        references: [],
+        workspaces: ['foo'],
       },
     ];
     const options = { workspaces: ['foo'] };
@@ -360,6 +438,38 @@ describe('WorkspaceIdConsumerWrapper', () => {
                 "bar",
               ],
             },
+            Object {
+              "attributes": Object {},
+              "id": "config_id",
+              "references": Array [],
+              "type": "config",
+            },
+            Object {
+              "attributes": Object {},
+              "id": "workspace_id",
+              "references": Array [],
+              "type": "workspace",
+            },
+            Object {
+              "attributes": Object {},
+              "error": Object {
+                "error": "Not Found",
+                "message": "Saved object [data-source/global_data_source_id] not found",
+                "statusCode": 404,
+              },
+              "id": "global_data_source_id",
+              "references": Array [],
+              "type": "data-source",
+            },
+            Object {
+              "attributes": Object {},
+              "id": "data_source_id",
+              "references": Array [],
+              "type": "data-source",
+              "workspaces": Array [
+                "foo",
+              ],
+            },
           ],
         }
       `);
@@ -395,6 +505,38 @@ describe('WorkspaceIdConsumerWrapper', () => {
                 "bar",
               ],
             },
+            Object {
+              "attributes": Object {},
+              "id": "config_id",
+              "references": Array [],
+              "type": "config",
+            },
+            Object {
+              "attributes": Object {},
+              "id": "workspace_id",
+              "references": Array [],
+              "type": "workspace",
+            },
+            Object {
+              "attributes": Object {},
+              "error": Object {
+                "error": "Not Found",
+                "message": "Saved object [data-source/global_data_source_id] not found",
+                "statusCode": 404,
+              },
+              "id": "global_data_source_id",
+              "references": Array [],
+              "type": "data-source",
+            },
+            Object {
+              "attributes": Object {},
+              "id": "data_source_id",
+              "references": Array [],
+              "type": "data-source",
+              "workspaces": Array [
+                "foo",
+              ],
+            },
           ],
         }
       `);
@@ -421,6 +563,84 @@ describe('WorkspaceIdConsumerWrapper', () => {
       );
       expect(wrapperClient.bulkGet(payload)).rejects.toMatchInlineSnapshot(`[Error: Not Found]`);
       expect(mockedClient.bulkGet).toBeCalledWith(payload, {});
+    });
+
+    it(`Should throw error when the options.workspaces has more than one workspace.`, async () => {
+      expect(
+        wrapperClient.bulkGet(payload, { workspaces: ['foo', 'var'] })
+      ).rejects.toMatchInlineSnapshot(`[Error: Multiple workspace parameters: Bad Request]`);
+      expect(mockedClient.bulkGet).not.toBeCalled();
+    });
+
+    it(`Should bulkGet data source when user is data source admin`, async () => {
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(mockedWorkspaceClient);
+      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+      updateWorkspaceState(mockRequest, { isDataSourceAdmin: true, requestWorkspaceId: 'foo' });
+      const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
+        client: mockedClient,
+        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+        request: mockRequest,
+      });
+
+      mockedClient.bulkGet.mockResolvedValueOnce({ saved_objects: savedObjects });
+      const result = await mockedWrapperClient.bulkGet(payload);
+      expect(mockedClient.bulkGet).toBeCalledWith(payload, {});
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "saved_objects": Array [
+            Object {
+              "attributes": Object {},
+              "id": "dashboard_id",
+              "references": Array [],
+              "type": "dashboard",
+              "workspaces": Array [
+                "foo",
+              ],
+            },
+            Object {
+              "attributes": Object {},
+              "error": Object {
+                "error": "Not Found",
+                "message": "Saved object [visualization/visualization_id] not found",
+                "statusCode": 404,
+              },
+              "id": "visualization_id",
+              "references": Array [],
+              "type": "visualization",
+              "workspaces": Array [
+                "bar",
+              ],
+            },
+            Object {
+              "attributes": Object {},
+              "id": "config_id",
+              "references": Array [],
+              "type": "config",
+            },
+            Object {
+              "attributes": Object {},
+              "id": "workspace_id",
+              "references": Array [],
+              "type": "workspace",
+            },
+            Object {
+              "attributes": Object {},
+              "id": "global_data_source_id",
+              "references": Array [],
+              "type": "data-source",
+            },
+            Object {
+              "attributes": Object {},
+              "id": "data_source_id",
+              "references": Array [],
+              "type": "data-source",
+              "workspaces": Array [
+                "foo",
+              ],
+            },
+          ],
+        }
+      `);
     });
   });
 });
