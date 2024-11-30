@@ -134,7 +134,7 @@ export function processVisitedRules(
   let shouldSuggestColumnAliases = false;
   let suggestValuesForColumn: string | undefined;
   let suggestColumnValuePredicate: ColumnValuePredicate | undefined;
-  let rerunAndCombine = false;
+  const rerunWithoutRules: number[] = [];
 
   for (const [ruleId, rule] of rules) {
     switch (ruleId) {
@@ -179,7 +179,7 @@ export function processVisitedRules(
         break;
       }
       case OpenSearchSQLParser.RULE_predicate: {
-        rerunAndCombine = true;
+        rerunWithoutRules.push(ruleId);
         /**
          * creates a list of the tokens from the start of the pedicate to the end
          * intentionally omit all tokens with type SPACE
@@ -256,7 +256,7 @@ export function processVisitedRules(
   }
 
   return {
-    rerunAndCombine,
+    rerunWithoutRules,
     suggestViewsOrTables,
     suggestAggregateFunctions,
     suggestScalarFunctions,

@@ -26,6 +26,7 @@ export interface AutocompleteResultBase {
   suggestColumnAliases?: ColumnAliasSuggestion[];
   suggestDatabases?: boolean;
   suggestValuesForColumn?: string;
+  rerunWithoutRules?: number[];
 }
 
 export interface ParserSyntaxError extends TokenPosition {
@@ -95,7 +96,6 @@ export interface CursorPosition {
 export interface OpenSearchSqlAutocompleteResult extends AutocompleteResultBase {
   suggestViewsOrTables?: TableOrViewSuggestion;
   suggestColumnValuePredicate?: ColumnValuePredicate;
-  rerunAndCombine?: boolean;
 }
 
 export interface OpenSearchPplAutocompleteResult extends AutocompleteResultBase {
@@ -156,4 +156,5 @@ export interface ParsingSubject<A extends AutocompleteResultBase, L, P> {
   query: string;
   cursor: CursorPosition;
   context?: ParserRuleContext;
+  previousResultKeywords?: KeywordSuggestion[];
 }
