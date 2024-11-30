@@ -94,6 +94,7 @@ const rulesToVisit = new Set([
   OpenSearchPPLParser.RULE_decimalLiteral,
   OpenSearchPPLParser.RULE_keywordsCanBeId,
   OpenSearchPPLParser.RULE_renameClasue,
+  OpenSearchPPLParser.RULE_logicalExpression,
 ]);
 
 export function processVisitedRules(
@@ -105,13 +106,23 @@ export function processVisitedRules(
   let suggestAggregateFunctions = false;
   let shouldSuggestColumns = false;
   let suggestValuesForColumn: string | undefined;
-  let suggestRenameAs = false;
+  let suggestRenameAs: boolean = false;
+  const rerunWithoutRules: number[] = [];
 
   for (const [ruleId, rule] of rules) {
     switch (ruleId) {
       case OpenSearchPPLParser.RULE_integerLiteral:
       case OpenSearchPPLParser.RULE_decimalLiteral:
       case OpenSearchPPLParser.RULE_keywordsCanBeId: {
+        break;
+      }
+      case OpenSearchPPLParser.RULE_logicalExpression: {
+        if (!rule.ruleList.includes(OpenSearchPPLParser.RULE_pplCommands)) {
+          // if our rule's parents doesn't include pplCommands, it must come through the 'commands' rule. this means
+          // we'd want the preferred rule descendant of logicalExpression to be active, so we rerun the completion
+          // engine's parse without this preferred rule blocking those descendants
+          rerunWithoutRules.push(ruleId);
+        }
         break;
       }
       case OpenSearchPPLParser.RULE_statsFunctionName: {
@@ -212,6 +223,7 @@ export function processVisitedRules(
     shouldSuggestColumns,
     suggestValuesForColumn,
     suggestRenameAs,
+    rerunWithoutRules,
   };
 }
 

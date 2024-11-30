@@ -643,7 +643,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
             this.state = 229;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            if ((((_la) & ~0x1F) === 0 && ((1 << _la) & 1610612764) !== 0)) {
+            if ((((_la) & ~0x1F) === 0 && ((1 << _la) & 1610612764) !== 0) || ((((_la - 61)) & ~0x1F) === 0 && ((1 << (_la - 61)) & 4139033521) !== 0) || ((((_la - 94)) & ~0x1F) === 0 && ((1 << (_la - 94)) & 2197815311) !== 0) || ((((_la - 172)) & ~0x1F) === 0 && ((1 << (_la - 172)) & 4294967295) !== 0) || ((((_la - 204)) & ~0x1F) === 0 && ((1 << (_la - 204)) & 4294967295) !== 0) || ((((_la - 236)) & ~0x1F) === 0 && ((1 << (_la - 236)) & 4261412863) !== 0) || ((((_la - 268)) & ~0x1F) === 0 && ((1 << (_la - 268)) & 2097151) !== 0) || ((((_la - 328)) & ~0x1F) === 0 && ((1 << (_la - 328)) & 109) !== 0)) {
                 {
                 this.state = 228;
                 this.pplStatement();
@@ -763,6 +763,152 @@ export class OpenSearchPPLParser extends antlr.Parser {
             case OpenSearchPPLParser.SEARCH:
             case OpenSearchPPLParser.SOURCE:
             case OpenSearchPPLParser.INDEX:
+            case OpenSearchPPLParser.NOT:
+            case OpenSearchPPLParser.TRUE:
+            case OpenSearchPPLParser.FALSE:
+            case OpenSearchPPLParser.CONVERT_TZ:
+            case OpenSearchPPLParser.DATETIME:
+            case OpenSearchPPLParser.DAY:
+            case OpenSearchPPLParser.DAY_OF_YEAR:
+            case OpenSearchPPLParser.HOUR:
+            case OpenSearchPPLParser.HOUR_OF_DAY:
+            case OpenSearchPPLParser.INTERVAL:
+            case OpenSearchPPLParser.MICROSECOND:
+            case OpenSearchPPLParser.MINUTE:
+            case OpenSearchPPLParser.MINUTE_OF_DAY:
+            case OpenSearchPPLParser.MINUTE_OF_HOUR:
+            case OpenSearchPPLParser.MONTH:
+            case OpenSearchPPLParser.MONTH_OF_YEAR:
+            case OpenSearchPPLParser.QUARTER:
+            case OpenSearchPPLParser.SECOND:
+            case OpenSearchPPLParser.SECOND_OF_MINUTE:
+            case OpenSearchPPLParser.WEEK:
+            case OpenSearchPPLParser.WEEK_OF_YEAR:
+            case OpenSearchPPLParser.YEAR:
+            case OpenSearchPPLParser.PLUS:
+            case OpenSearchPPLParser.MINUS:
+            case OpenSearchPPLParser.LT_PRTHS:
+            case OpenSearchPPLParser.ABS:
+            case OpenSearchPPLParser.CBRT:
+            case OpenSearchPPLParser.CEIL:
+            case OpenSearchPPLParser.CEILING:
+            case OpenSearchPPLParser.CONV:
+            case OpenSearchPPLParser.CRC32:
+            case OpenSearchPPLParser.E:
+            case OpenSearchPPLParser.EXP:
+            case OpenSearchPPLParser.FLOOR:
+            case OpenSearchPPLParser.LN:
+            case OpenSearchPPLParser.LOG:
+            case OpenSearchPPLParser.LOG10:
+            case OpenSearchPPLParser.LOG2:
+            case OpenSearchPPLParser.MOD:
+            case OpenSearchPPLParser.PI:
+            case OpenSearchPPLParser.POSITION:
+            case OpenSearchPPLParser.POW:
+            case OpenSearchPPLParser.POWER:
+            case OpenSearchPPLParser.RAND:
+            case OpenSearchPPLParser.ROUND:
+            case OpenSearchPPLParser.SIGN:
+            case OpenSearchPPLParser.SQRT:
+            case OpenSearchPPLParser.TRUNCATE:
+            case OpenSearchPPLParser.ACOS:
+            case OpenSearchPPLParser.ASIN:
+            case OpenSearchPPLParser.ATAN:
+            case OpenSearchPPLParser.ATAN2:
+            case OpenSearchPPLParser.COS:
+            case OpenSearchPPLParser.COT:
+            case OpenSearchPPLParser.DEGREES:
+            case OpenSearchPPLParser.RADIANS:
+            case OpenSearchPPLParser.SIN:
+            case OpenSearchPPLParser.TAN:
+            case OpenSearchPPLParser.ADDDATE:
+            case OpenSearchPPLParser.ADDTIME:
+            case OpenSearchPPLParser.CURDATE:
+            case OpenSearchPPLParser.CURRENT_DATE:
+            case OpenSearchPPLParser.CURRENT_TIME:
+            case OpenSearchPPLParser.CURRENT_TIMESTAMP:
+            case OpenSearchPPLParser.CURTIME:
+            case OpenSearchPPLParser.DATE:
+            case OpenSearchPPLParser.DATEDIFF:
+            case OpenSearchPPLParser.DATE_ADD:
+            case OpenSearchPPLParser.DATE_FORMAT:
+            case OpenSearchPPLParser.DATE_SUB:
+            case OpenSearchPPLParser.DAYNAME:
+            case OpenSearchPPLParser.DAYOFMONTH:
+            case OpenSearchPPLParser.DAYOFWEEK:
+            case OpenSearchPPLParser.DAYOFYEAR:
+            case OpenSearchPPLParser.DAY_OF_MONTH:
+            case OpenSearchPPLParser.DAY_OF_WEEK:
+            case OpenSearchPPLParser.EXTRACT:
+            case OpenSearchPPLParser.FROM_DAYS:
+            case OpenSearchPPLParser.FROM_UNIXTIME:
+            case OpenSearchPPLParser.GET_FORMAT:
+            case OpenSearchPPLParser.LAST_DAY:
+            case OpenSearchPPLParser.LOCALTIME:
+            case OpenSearchPPLParser.LOCALTIMESTAMP:
+            case OpenSearchPPLParser.MAKEDATE:
+            case OpenSearchPPLParser.MAKETIME:
+            case OpenSearchPPLParser.MONTHNAME:
+            case OpenSearchPPLParser.NOW:
+            case OpenSearchPPLParser.PERIOD_ADD:
+            case OpenSearchPPLParser.PERIOD_DIFF:
+            case OpenSearchPPLParser.SEC_TO_TIME:
+            case OpenSearchPPLParser.STR_TO_DATE:
+            case OpenSearchPPLParser.SUBDATE:
+            case OpenSearchPPLParser.SUBTIME:
+            case OpenSearchPPLParser.SYSDATE:
+            case OpenSearchPPLParser.TIME:
+            case OpenSearchPPLParser.TIMEDIFF:
+            case OpenSearchPPLParser.TIMESTAMP:
+            case OpenSearchPPLParser.TIMESTAMPADD:
+            case OpenSearchPPLParser.TIMESTAMPDIFF:
+            case OpenSearchPPLParser.TIME_FORMAT:
+            case OpenSearchPPLParser.TIME_TO_SEC:
+            case OpenSearchPPLParser.TO_DAYS:
+            case OpenSearchPPLParser.TO_SECONDS:
+            case OpenSearchPPLParser.UNIX_TIMESTAMP:
+            case OpenSearchPPLParser.UTC_DATE:
+            case OpenSearchPPLParser.UTC_TIME:
+            case OpenSearchPPLParser.UTC_TIMESTAMP:
+            case OpenSearchPPLParser.WEEKDAY:
+            case OpenSearchPPLParser.YEARWEEK:
+            case OpenSearchPPLParser.SUBSTR:
+            case OpenSearchPPLParser.SUBSTRING:
+            case OpenSearchPPLParser.LTRIM:
+            case OpenSearchPPLParser.RTRIM:
+            case OpenSearchPPLParser.TRIM:
+            case OpenSearchPPLParser.LOWER:
+            case OpenSearchPPLParser.UPPER:
+            case OpenSearchPPLParser.CONCAT:
+            case OpenSearchPPLParser.CONCAT_WS:
+            case OpenSearchPPLParser.LENGTH:
+            case OpenSearchPPLParser.STRCMP:
+            case OpenSearchPPLParser.RIGHT:
+            case OpenSearchPPLParser.LEFT:
+            case OpenSearchPPLParser.ASCII:
+            case OpenSearchPPLParser.LOCATE:
+            case OpenSearchPPLParser.REPLACE:
+            case OpenSearchPPLParser.REVERSE:
+            case OpenSearchPPLParser.CAST:
+            case OpenSearchPPLParser.LIKE:
+            case OpenSearchPPLParser.ISNULL:
+            case OpenSearchPPLParser.ISNOTNULL:
+            case OpenSearchPPLParser.IFNULL:
+            case OpenSearchPPLParser.NULLIF:
+            case OpenSearchPPLParser.IF:
+            case OpenSearchPPLParser.TYPEOF:
+            case OpenSearchPPLParser.MATCH:
+            case OpenSearchPPLParser.MATCH_PHRASE:
+            case OpenSearchPPLParser.MATCH_PHRASE_PREFIX:
+            case OpenSearchPPLParser.MATCH_BOOL_PREFIX:
+            case OpenSearchPPLParser.SIMPLE_QUERY_STRING:
+            case OpenSearchPPLParser.MULTI_MATCH:
+            case OpenSearchPPLParser.QUERY_STRING:
+            case OpenSearchPPLParser.ID:
+            case OpenSearchPPLParser.INTEGER_LITERAL:
+            case OpenSearchPPLParser.DECIMAL_LITERAL:
+            case OpenSearchPPLParser.DQUOTA_STRING:
+            case OpenSearchPPLParser.SQUOTA_STRING:
                 this.enterOuterAlt(localContext, 1);
                 {
                 this.state = 245;
@@ -941,21 +1087,67 @@ export class OpenSearchPPLParser extends antlr.Parser {
         this.enterRule(localContext, 12, OpenSearchPPLParser.RULE_searchCommand);
         let _la: number;
         try {
-            localContext = new SearchFromContext(localContext);
-            this.enterOuterAlt(localContext, 1);
-            {
-            this.state = 269;
+            this.state = 284;
             this.errorHandler.sync(this);
-            _la = this.tokenStream.LA(1);
-            if (_la === 2) {
+            switch (this.interpreter.adaptivePredict(this.tokenStream, 7, this.context) ) {
+            case 1:
+                localContext = new SearchFromContext(localContext);
+                this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 268;
-                this.match(OpenSearchPPLParser.SEARCH);
+                this.state = 269;
+                this.errorHandler.sync(this);
+                _la = this.tokenStream.LA(1);
+                if (_la === 2) {
+                    {
+                    this.state = 268;
+                    this.match(OpenSearchPPLParser.SEARCH);
+                    }
                 }
-            }
 
-            this.state = 271;
-            this.fromClause();
+                this.state = 271;
+                this.fromClause();
+                }
+                break;
+            case 2:
+                localContext = new SearchFromFilterContext(localContext);
+                this.enterOuterAlt(localContext, 2);
+                {
+                this.state = 273;
+                this.errorHandler.sync(this);
+                _la = this.tokenStream.LA(1);
+                if (_la === 2) {
+                    {
+                    this.state = 272;
+                    this.match(OpenSearchPPLParser.SEARCH);
+                    }
+                }
+
+                this.state = 275;
+                this.fromClause();
+                this.state = 276;
+                this.logicalExpression(0);
+                }
+                break;
+            case 3:
+                localContext = new SearchFilterFromContext(localContext);
+                this.enterOuterAlt(localContext, 3);
+                {
+                this.state = 279;
+                this.errorHandler.sync(this);
+                _la = this.tokenStream.LA(1);
+                if (_la === 2) {
+                    {
+                    this.state = 278;
+                    this.match(OpenSearchPPLParser.SEARCH);
+                    }
+                }
+
+                this.state = 281;
+                this.logicalExpression(0);
+                this.state = 282;
+                this.fromClause();
+                }
+                break;
             }
         }
         catch (re) {
@@ -977,9 +1169,9 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 273;
+            this.state = 286;
             this.match(OpenSearchPPLParser.DESCRIBE);
-            this.state = 274;
+            this.state = 287;
             this.tableSourceClause();
             }
         }
@@ -1002,9 +1194,9 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 276;
+            this.state = 289;
             this.match(OpenSearchPPLParser.SHOW);
-            this.state = 277;
+            this.state = 290;
             this.match(OpenSearchPPLParser.DATASOURCES);
             }
         }
@@ -1027,9 +1219,9 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 279;
+            this.state = 292;
             this.match(OpenSearchPPLParser.WHERE);
-            this.state = 280;
+            this.state = 293;
             this.logicalExpression(0);
             }
         }
@@ -1053,14 +1245,14 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 282;
+            this.state = 295;
             this.match(OpenSearchPPLParser.FIELDS);
-            this.state = 284;
+            this.state = 297;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 118 || _la === 119) {
                 {
-                this.state = 283;
+                this.state = 296;
                 _la = this.tokenStream.LA(1);
                 if(!(_la === 118 || _la === 119)) {
                 this.errorHandler.recoverInline(this);
@@ -1072,7 +1264,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 }
             }
 
-            this.state = 286;
+            this.state = 299;
             this.fieldList();
             }
         }
@@ -1096,23 +1288,23 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 288;
+            this.state = 301;
             this.match(OpenSearchPPLParser.RENAME);
-            this.state = 289;
+            this.state = 302;
             this.renameClasue();
-            this.state = 294;
+            this.state = 307;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (_la === 110) {
                 {
                 {
-                this.state = 290;
+                this.state = 303;
                 this.match(OpenSearchPPLParser.COMMA);
-                this.state = 291;
+                this.state = 304;
                 this.renameClasue();
                 }
                 }
-                this.state = 296;
+                this.state = 309;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
@@ -1138,88 +1330,88 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 297;
+            this.state = 310;
             this.match(OpenSearchPPLParser.STATS);
-            this.state = 301;
+            this.state = 314;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 42) {
                 {
-                this.state = 298;
+                this.state = 311;
                 this.match(OpenSearchPPLParser.PARTITIONS);
-                this.state = 299;
+                this.state = 312;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 300;
+                this.state = 313;
                 localContext._partitions = this.integerLiteral();
                 }
             }
 
-            this.state = 306;
+            this.state = 319;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 43) {
                 {
-                this.state = 303;
+                this.state = 316;
                 this.match(OpenSearchPPLParser.ALLNUM);
-                this.state = 304;
+                this.state = 317;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 305;
+                this.state = 318;
                 localContext._allnum = this.booleanLiteral();
                 }
             }
 
-            this.state = 311;
+            this.state = 324;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 44) {
                 {
-                this.state = 308;
+                this.state = 321;
                 this.match(OpenSearchPPLParser.DELIM);
-                this.state = 309;
+                this.state = 322;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 310;
+                this.state = 323;
                 localContext._delim = this.stringLiteral();
                 }
             }
 
-            this.state = 313;
+            this.state = 326;
             this.statsAggTerm();
-            this.state = 318;
+            this.state = 331;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (_la === 110) {
                 {
                 {
-                this.state = 314;
+                this.state = 327;
                 this.match(OpenSearchPPLParser.COMMA);
-                this.state = 315;
+                this.state = 328;
                 this.statsAggTerm();
                 }
                 }
-                this.state = 320;
+                this.state = 333;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
-            this.state = 322;
+            this.state = 335;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 28) {
                 {
-                this.state = 321;
+                this.state = 334;
                 this.statsByClause();
                 }
             }
 
-            this.state = 327;
+            this.state = 340;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 41) {
                 {
-                this.state = 324;
+                this.state = 337;
                 this.match(OpenSearchPPLParser.DEDUP_SPLITVALUES);
-                this.state = 325;
+                this.state = 338;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 326;
+                this.state = 339;
                 localContext._dedupsplit = this.booleanLiteral();
                 }
             }
@@ -1246,44 +1438,44 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 329;
+            this.state = 342;
             this.match(OpenSearchPPLParser.DEDUP);
-            this.state = 331;
+            this.state = 344;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 118 || _la === 119 || _la === 330) {
                 {
-                this.state = 330;
+                this.state = 343;
                 localContext._number_ = this.integerLiteral();
                 }
             }
 
-            this.state = 333;
+            this.state = 346;
             this.fieldList();
-            this.state = 337;
+            this.state = 350;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 39) {
                 {
-                this.state = 334;
+                this.state = 347;
                 this.match(OpenSearchPPLParser.KEEPEMPTY);
-                this.state = 335;
+                this.state = 348;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 336;
+                this.state = 349;
                 localContext._keepempty = this.booleanLiteral();
                 }
             }
 
-            this.state = 342;
+            this.state = 355;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 40) {
                 {
-                this.state = 339;
+                this.state = 352;
                 this.match(OpenSearchPPLParser.CONSECUTIVE);
-                this.state = 340;
+                this.state = 353;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 341;
+                this.state = 354;
                 localContext._consecutive = this.booleanLiteral();
                 }
             }
@@ -1309,9 +1501,9 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 344;
+            this.state = 357;
             this.match(OpenSearchPPLParser.SORT);
-            this.state = 345;
+            this.state = 358;
             this.sortbyClause();
             }
         }
@@ -1335,23 +1527,23 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 347;
+            this.state = 360;
             this.match(OpenSearchPPLParser.EVAL);
-            this.state = 348;
+            this.state = 361;
             this.evalClause();
-            this.state = 353;
+            this.state = 366;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (_la === 110) {
                 {
                 {
-                this.state = 349;
+                this.state = 362;
                 this.match(OpenSearchPPLParser.COMMA);
-                this.state = 350;
+                this.state = 363;
                 this.evalClause();
                 }
                 }
-                this.state = 355;
+                this.state = 368;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
@@ -1377,26 +1569,26 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 356;
+            this.state = 369;
             this.match(OpenSearchPPLParser.HEAD);
-            this.state = 358;
+            this.state = 371;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 118 || _la === 119 || _la === 330) {
                 {
-                this.state = 357;
+                this.state = 370;
                 localContext._number_ = this.integerLiteral();
                 }
             }
 
-            this.state = 362;
+            this.state = 375;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 5) {
                 {
-                this.state = 360;
+                this.state = 373;
                 this.match(OpenSearchPPLParser.FROM);
-                this.state = 361;
+                this.state = 374;
                 localContext._from_ = this.integerLiteral();
                 }
             }
@@ -1423,26 +1615,26 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 364;
+            this.state = 377;
             this.match(OpenSearchPPLParser.TOP);
-            this.state = 366;
+            this.state = 379;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 118 || _la === 119 || _la === 330) {
                 {
-                this.state = 365;
+                this.state = 378;
                 localContext._number_ = this.integerLiteral();
                 }
             }
 
-            this.state = 368;
+            this.state = 381;
             this.fieldList();
-            this.state = 370;
+            this.state = 383;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 28) {
                 {
-                this.state = 369;
+                this.state = 382;
                 this.byClause();
                 }
             }
@@ -1469,16 +1661,16 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 372;
+            this.state = 385;
             this.match(OpenSearchPPLParser.RARE);
-            this.state = 373;
+            this.state = 386;
             this.fieldList();
-            this.state = 375;
+            this.state = 388;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 28) {
                 {
-                this.state = 374;
+                this.state = 387;
                 this.byClause();
                 }
             }
@@ -1504,14 +1696,14 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 377;
+            this.state = 390;
             this.match(OpenSearchPPLParser.GROK);
             {
-            this.state = 378;
+            this.state = 391;
             localContext._source_field = this.expression();
             }
             {
-            this.state = 379;
+            this.state = 392;
             localContext._pattern = this.stringLiteral();
             }
             }
@@ -1535,14 +1727,14 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 381;
+            this.state = 394;
             this.match(OpenSearchPPLParser.PARSE);
             {
-            this.state = 382;
+            this.state = 395;
             localContext._source_field = this.expression();
             }
             {
-            this.state = 383;
+            this.state = 396;
             localContext._pattern = this.stringLiteral();
             }
             }
@@ -1567,24 +1759,24 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 385;
+            this.state = 398;
             this.match(OpenSearchPPLParser.PATTERNS);
-            this.state = 389;
+            this.state = 402;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (_la === 21 || _la === 23) {
                 {
                 {
-                this.state = 386;
+                this.state = 399;
                 this.patternsParameter();
                 }
                 }
-                this.state = 391;
+                this.state = 404;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
             {
-            this.state = 392;
+            this.state = 405;
             localContext._source_field = this.expression();
             }
             }
@@ -1606,18 +1798,18 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new PatternsParameterContext(this.context, this.state);
         this.enterRule(localContext, 44, OpenSearchPPLParser.RULE_patternsParameter);
         try {
-            this.state = 400;
+            this.state = 413;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case OpenSearchPPLParser.NEW_FIELD:
                 this.enterOuterAlt(localContext, 1);
                 {
                 {
-                this.state = 394;
+                this.state = 407;
                 this.match(OpenSearchPPLParser.NEW_FIELD);
-                this.state = 395;
+                this.state = 408;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 396;
+                this.state = 409;
                 localContext._new_field = this.stringLiteral();
                 }
                 }
@@ -1626,11 +1818,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 this.enterOuterAlt(localContext, 2);
                 {
                 {
-                this.state = 397;
+                this.state = 410;
                 this.match(OpenSearchPPLParser.PATTERN);
-                this.state = 398;
+                this.state = 411;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 399;
+                this.state = 412;
                 localContext._pattern = this.stringLiteral();
                 }
                 }
@@ -1659,7 +1851,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 402;
+            this.state = 415;
             _la = this.tokenStream.LA(1);
             if(!(_la === 18 || _la === 19)) {
             this.errorHandler.recoverInline(this);
@@ -1690,19 +1882,19 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 404;
+            this.state = 417;
             this.match(OpenSearchPPLParser.KMEANS);
-            this.state = 408;
+            this.state = 421;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (((((_la - 45)) & ~0x1F) === 0 && ((1 << (_la - 45)) & 7) !== 0)) {
                 {
                 {
-                this.state = 405;
+                this.state = 418;
                 this.kmeansParameter();
                 }
                 }
-                this.state = 410;
+                this.state = 423;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
@@ -1725,18 +1917,18 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new KmeansParameterContext(this.context, this.state);
         this.enterRule(localContext, 50, OpenSearchPPLParser.RULE_kmeansParameter);
         try {
-            this.state = 420;
+            this.state = 433;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case OpenSearchPPLParser.CENTROIDS:
                 this.enterOuterAlt(localContext, 1);
                 {
                 {
-                this.state = 411;
+                this.state = 424;
                 this.match(OpenSearchPPLParser.CENTROIDS);
-                this.state = 412;
+                this.state = 425;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 413;
+                this.state = 426;
                 localContext._centroids = this.integerLiteral();
                 }
                 }
@@ -1745,11 +1937,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 this.enterOuterAlt(localContext, 2);
                 {
                 {
-                this.state = 414;
+                this.state = 427;
                 this.match(OpenSearchPPLParser.ITERATIONS);
-                this.state = 415;
+                this.state = 428;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 416;
+                this.state = 429;
                 localContext._iterations = this.integerLiteral();
                 }
                 }
@@ -1758,11 +1950,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 this.enterOuterAlt(localContext, 3);
                 {
                 {
-                this.state = 417;
+                this.state = 430;
                 this.match(OpenSearchPPLParser.DISTANCE_TYPE);
-                this.state = 418;
+                this.state = 431;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 419;
+                this.state = 432;
                 localContext._distance_type = this.stringLiteral();
                 }
                 }
@@ -1791,19 +1983,19 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 422;
+            this.state = 435;
             this.match(OpenSearchPPLParser.AD);
-            this.state = 426;
+            this.state = 439;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (((((_la - 48)) & ~0x1F) === 0 && ((1 << (_la - 48)) & 2047) !== 0) || _la === 215) {
                 {
                 {
-                this.state = 423;
+                this.state = 436;
                 this.adParameter();
                 }
                 }
-                this.state = 428;
+                this.state = 441;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
@@ -1826,18 +2018,18 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new AdParameterContext(this.context, this.state);
         this.enterRule(localContext, 54, OpenSearchPPLParser.RULE_adParameter);
         try {
-            this.state = 465;
+            this.state = 478;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case OpenSearchPPLParser.NUMBER_OF_TREES:
                 this.enterOuterAlt(localContext, 1);
                 {
                 {
-                this.state = 429;
+                this.state = 442;
                 this.match(OpenSearchPPLParser.NUMBER_OF_TREES);
-                this.state = 430;
+                this.state = 443;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 431;
+                this.state = 444;
                 localContext._number_of_trees = this.integerLiteral();
                 }
                 }
@@ -1846,11 +2038,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 this.enterOuterAlt(localContext, 2);
                 {
                 {
-                this.state = 432;
+                this.state = 445;
                 this.match(OpenSearchPPLParser.SHINGLE_SIZE);
-                this.state = 433;
+                this.state = 446;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 434;
+                this.state = 447;
                 localContext._shingle_size = this.integerLiteral();
                 }
                 }
@@ -1859,11 +2051,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 this.enterOuterAlt(localContext, 3);
                 {
                 {
-                this.state = 435;
+                this.state = 448;
                 this.match(OpenSearchPPLParser.SAMPLE_SIZE);
-                this.state = 436;
+                this.state = 449;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 437;
+                this.state = 450;
                 localContext._sample_size = this.integerLiteral();
                 }
                 }
@@ -1872,11 +2064,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 this.enterOuterAlt(localContext, 4);
                 {
                 {
-                this.state = 438;
+                this.state = 451;
                 this.match(OpenSearchPPLParser.OUTPUT_AFTER);
-                this.state = 439;
+                this.state = 452;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 440;
+                this.state = 453;
                 localContext._output_after = this.integerLiteral();
                 }
                 }
@@ -1885,11 +2077,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 this.enterOuterAlt(localContext, 5);
                 {
                 {
-                this.state = 441;
+                this.state = 454;
                 this.match(OpenSearchPPLParser.TIME_DECAY);
-                this.state = 442;
+                this.state = 455;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 443;
+                this.state = 456;
                 localContext._time_decay = this.decimalLiteral();
                 }
                 }
@@ -1898,11 +2090,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 this.enterOuterAlt(localContext, 6);
                 {
                 {
-                this.state = 444;
+                this.state = 457;
                 this.match(OpenSearchPPLParser.ANOMALY_RATE);
-                this.state = 445;
+                this.state = 458;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 446;
+                this.state = 459;
                 localContext._anomaly_rate = this.decimalLiteral();
                 }
                 }
@@ -1911,11 +2103,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 this.enterOuterAlt(localContext, 7);
                 {
                 {
-                this.state = 447;
+                this.state = 460;
                 this.match(OpenSearchPPLParser.CATEGORY_FIELD);
-                this.state = 448;
+                this.state = 461;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 449;
+                this.state = 462;
                 localContext._category_field = this.stringLiteral();
                 }
                 }
@@ -1924,11 +2116,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 this.enterOuterAlt(localContext, 8);
                 {
                 {
-                this.state = 450;
+                this.state = 463;
                 this.match(OpenSearchPPLParser.TIME_FIELD);
-                this.state = 451;
+                this.state = 464;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 452;
+                this.state = 465;
                 localContext._time_field = this.stringLiteral();
                 }
                 }
@@ -1937,11 +2129,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 this.enterOuterAlt(localContext, 9);
                 {
                 {
-                this.state = 453;
+                this.state = 466;
                 this.match(OpenSearchPPLParser.DATE_FORMAT);
-                this.state = 454;
+                this.state = 467;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 455;
+                this.state = 468;
                 localContext._date_format = this.stringLiteral();
                 }
                 }
@@ -1950,11 +2142,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 this.enterOuterAlt(localContext, 10);
                 {
                 {
-                this.state = 456;
+                this.state = 469;
                 this.match(OpenSearchPPLParser.TIME_ZONE);
-                this.state = 457;
+                this.state = 470;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 458;
+                this.state = 471;
                 localContext._time_zone = this.stringLiteral();
                 }
                 }
@@ -1963,11 +2155,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 this.enterOuterAlt(localContext, 11);
                 {
                 {
-                this.state = 459;
+                this.state = 472;
                 this.match(OpenSearchPPLParser.TRAINING_DATA_SIZE);
-                this.state = 460;
+                this.state = 473;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 461;
+                this.state = 474;
                 localContext._training_data_size = this.integerLiteral();
                 }
                 }
@@ -1976,11 +2168,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 this.enterOuterAlt(localContext, 12);
                 {
                 {
-                this.state = 462;
+                this.state = 475;
                 this.match(OpenSearchPPLParser.ANOMALY_SCORE_THRESHOLD);
-                this.state = 463;
+                this.state = 476;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 464;
+                this.state = 477;
                 localContext._anomaly_score_threshold = this.decimalLiteral();
                 }
                 }
@@ -2009,19 +2201,19 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 467;
+            this.state = 480;
             this.match(OpenSearchPPLParser.ML);
-            this.state = 471;
+            this.state = 484;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while ((((_la) & ~0x1F) === 0 && ((1 << _la) & 3892314108) !== 0) || ((((_la - 32)) & ~0x1F) === 0 && ((1 << (_la - 32)) & 134217719) !== 0) || ((((_la - 68)) & ~0x1F) === 0 && ((1 << (_la - 68)) & 2147475455) !== 0) || ((((_la - 111)) & ~0x1F) === 0 && ((1 << (_la - 111)) & 4279238657) !== 0) || ((((_la - 143)) & ~0x1F) === 0 && ((1 << (_la - 143)) & 4294967295) !== 0) || ((((_la - 175)) & ~0x1F) === 0 && ((1 << (_la - 175)) & 4294967295) !== 0) || ((((_la - 207)) & ~0x1F) === 0 && ((1 << (_la - 207)) & 4294377471) !== 0) || ((((_la - 239)) & ~0x1F) === 0 && ((1 << (_la - 239)) & 4290772895) !== 0) || ((((_la - 271)) & ~0x1F) === 0 && ((1 << (_la - 271)) & 4294707191) !== 0) || ((((_la - 303)) & ~0x1F) === 0 && ((1 << (_la - 303)) & 67108863) !== 0) || _la === 335) {
                 {
                 {
-                this.state = 468;
+                this.state = 481;
                 this.mlArg();
                 }
                 }
-                this.state = 473;
+                this.state = 486;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
@@ -2047,11 +2239,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
             this.enterOuterAlt(localContext, 1);
             {
             {
-            this.state = 474;
+            this.state = 487;
             localContext._argName = this.ident();
-            this.state = 475;
+            this.state = 488;
             this.match(OpenSearchPPLParser.EQUAL);
-            this.state = 476;
+            this.state = 489;
             localContext._argValue = this.literalValue();
             }
             }
@@ -2073,28 +2265,28 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new FromClauseContext(this.context, this.state);
         this.enterRule(localContext, 60, OpenSearchPPLParser.RULE_fromClause);
         try {
-            this.state = 484;
+            this.state = 497;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case OpenSearchPPLParser.SOURCE:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 478;
+                this.state = 491;
                 this.match(OpenSearchPPLParser.SOURCE);
-                this.state = 479;
+                this.state = 492;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 480;
+                this.state = 493;
                 this.tableSourceClause();
                 }
                 break;
             case OpenSearchPPLParser.INDEX:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 481;
+                this.state = 494;
                 this.match(OpenSearchPPLParser.INDEX);
-                this.state = 482;
+                this.state = 495;
                 this.match(OpenSearchPPLParser.EQUAL);
-                this.state = 483;
+                this.state = 496;
                 this.tableSourceClause();
                 }
                 break;
@@ -2121,7 +2313,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 486;
+            this.state = 499;
             this.tableSource();
             }
         }
@@ -2144,11 +2336,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 488;
+            this.state = 501;
             localContext._orignalField = this.wcFieldExpression();
-            this.state = 489;
+            this.state = 502;
             this.match(OpenSearchPPLParser.AS);
-            this.state = 490;
+            this.state = 503;
             localContext._renamedField = this.wcFieldExpression();
             }
         }
@@ -2171,9 +2363,9 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 492;
+            this.state = 505;
             this.match(OpenSearchPPLParser.BY);
-            this.state = 493;
+            this.state = 506;
             this.fieldList();
             }
         }
@@ -2194,37 +2386,37 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new StatsByClauseContext(this.context, this.state);
         this.enterRule(localContext, 68, OpenSearchPPLParser.RULE_statsByClause);
         try {
-            this.state = 504;
+            this.state = 517;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 30, this.context) ) {
+            switch (this.interpreter.adaptivePredict(this.tokenStream, 33, this.context) ) {
             case 1:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 495;
+                this.state = 508;
                 this.match(OpenSearchPPLParser.BY);
-                this.state = 496;
+                this.state = 509;
                 this.fieldList();
                 }
                 break;
             case 2:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 497;
+                this.state = 510;
                 this.match(OpenSearchPPLParser.BY);
-                this.state = 498;
+                this.state = 511;
                 this.bySpanClause();
                 }
                 break;
             case 3:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 499;
+                this.state = 512;
                 this.match(OpenSearchPPLParser.BY);
-                this.state = 500;
+                this.state = 513;
                 this.bySpanClause();
-                this.state = 501;
+                this.state = 514;
                 this.match(OpenSearchPPLParser.COMMA);
-                this.state = 502;
+                this.state = 515;
                 this.fieldList();
                 }
                 break;
@@ -2250,16 +2442,16 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 506;
+            this.state = 519;
             this.spanClause();
-            this.state = 509;
+            this.state = 522;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 27) {
                 {
-                this.state = 507;
+                this.state = 520;
                 this.match(OpenSearchPPLParser.AS);
-                this.state = 508;
+                this.state = 521;
                 localContext._alias = this.qualifiedName();
                 }
             }
@@ -2286,27 +2478,27 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 511;
+            this.state = 524;
             this.match(OpenSearchPPLParser.SPAN);
-            this.state = 512;
+            this.state = 525;
             this.match(OpenSearchPPLParser.LT_PRTHS);
-            this.state = 513;
+            this.state = 526;
             this.fieldExpression();
-            this.state = 514;
+            this.state = 527;
             this.match(OpenSearchPPLParser.COMMA);
-            this.state = 515;
+            this.state = 528;
             localContext._value = this.literalValue();
-            this.state = 517;
+            this.state = 530;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 31 || ((((_la - 70)) & ~0x1F) === 0 && ((1 << (_la - 70)) & 174612545) !== 0) || ((((_la - 321)) & ~0x1F) === 0 && ((1 << (_la - 321)) & 127) !== 0)) {
                 {
-                this.state = 516;
+                this.state = 529;
                 localContext._unit = this.timespanUnit();
                 }
             }
 
-            this.state = 519;
+            this.state = 532;
             this.match(OpenSearchPPLParser.RT_PRTHS);
             }
         }
@@ -2330,21 +2522,21 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 521;
+            this.state = 534;
             this.sortField();
-            this.state = 526;
+            this.state = 539;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (_la === 110) {
                 {
                 {
-                this.state = 522;
+                this.state = 535;
                 this.match(OpenSearchPPLParser.COMMA);
-                this.state = 523;
+                this.state = 536;
                 this.sortField();
                 }
                 }
-                this.state = 528;
+                this.state = 541;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
@@ -2369,11 +2561,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 529;
+            this.state = 542;
             this.fieldExpression();
-            this.state = 530;
+            this.state = 543;
             this.match(OpenSearchPPLParser.EQUAL);
-            this.state = 531;
+            this.state = 544;
             this.expression();
             }
         }
@@ -2397,16 +2589,16 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 533;
+            this.state = 546;
             this.statsFunction();
-            this.state = 536;
+            this.state = 549;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 27) {
                 {
-                this.state = 534;
+                this.state = 547;
                 this.match(OpenSearchPPLParser.AS);
-                this.state = 535;
+                this.state = 548;
                 localContext._alias = this.wcFieldExpression();
                 }
             }
@@ -2431,20 +2623,20 @@ export class OpenSearchPPLParser extends antlr.Parser {
         this.enterRule(localContext, 80, OpenSearchPPLParser.RULE_statsFunction);
         let _la: number;
         try {
-            this.state = 553;
+            this.state = 566;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 35, this.context) ) {
+            switch (this.interpreter.adaptivePredict(this.tokenStream, 38, this.context) ) {
             case 1:
                 localContext = new StatsFunctionCallContext(localContext);
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 538;
+                this.state = 551;
                 this.statsFunctionName();
-                this.state = 539;
+                this.state = 552;
                 this.match(OpenSearchPPLParser.LT_PRTHS);
-                this.state = 540;
+                this.state = 553;
                 this.valueExpression(0);
-                this.state = 541;
+                this.state = 554;
                 this.match(OpenSearchPPLParser.RT_PRTHS);
                 }
                 break;
@@ -2452,11 +2644,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 localContext = new CountAllFunctionCallContext(localContext);
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 543;
+                this.state = 556;
                 this.match(OpenSearchPPLParser.COUNT);
-                this.state = 544;
+                this.state = 557;
                 this.match(OpenSearchPPLParser.LT_PRTHS);
-                this.state = 545;
+                this.state = 558;
                 this.match(OpenSearchPPLParser.RT_PRTHS);
                 }
                 break;
@@ -2464,7 +2656,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 localContext = new DistinctCountFunctionCallContext(localContext);
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 546;
+                this.state = 559;
                 _la = this.tokenStream.LA(1);
                 if(!(_la === 137 || _la === 171)) {
                 this.errorHandler.recoverInline(this);
@@ -2473,11 +2665,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                     this.errorHandler.reportMatch(this);
                     this.consume();
                 }
-                this.state = 547;
+                this.state = 560;
                 this.match(OpenSearchPPLParser.LT_PRTHS);
-                this.state = 548;
+                this.state = 561;
                 this.valueExpression(0);
-                this.state = 549;
+                this.state = 562;
                 this.match(OpenSearchPPLParser.RT_PRTHS);
                 }
                 break;
@@ -2485,7 +2677,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 localContext = new PercentileAggFunctionCallContext(localContext);
                 this.enterOuterAlt(localContext, 4);
                 {
-                this.state = 551;
+                this.state = 564;
                 this.percentileAggFunction();
                 }
                 break;
@@ -2493,7 +2685,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 localContext = new TakeAggFunctionCallContext(localContext);
                 this.enterOuterAlt(localContext, 5);
                 {
-                this.state = 552;
+                this.state = 565;
                 this.takeAggFunction();
                 }
                 break;
@@ -2519,7 +2711,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 555;
+            this.state = 568;
             _la = this.tokenStream.LA(1);
             if(!(((((_la - 135)) & ~0x1F) === 0 && ((1 << (_la - 135)) & 500003) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -2550,25 +2742,25 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 557;
+            this.state = 570;
             this.match(OpenSearchPPLParser.TAKE);
-            this.state = 558;
+            this.state = 571;
             this.match(OpenSearchPPLParser.LT_PRTHS);
-            this.state = 559;
+            this.state = 572;
             this.fieldExpression();
-            this.state = 562;
+            this.state = 575;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 110) {
                 {
-                this.state = 560;
+                this.state = 573;
                 this.match(OpenSearchPPLParser.COMMA);
-                this.state = 561;
+                this.state = 574;
                 localContext._size = this.integerLiteral();
                 }
             }
 
-            this.state = 564;
+            this.state = 577;
             this.match(OpenSearchPPLParser.RT_PRTHS);
             }
         }
@@ -2591,19 +2783,19 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 566;
+            this.state = 579;
             this.match(OpenSearchPPLParser.PERCENTILE);
-            this.state = 567;
+            this.state = 580;
             this.match(OpenSearchPPLParser.LESS);
-            this.state = 568;
+            this.state = 581;
             localContext._value = this.integerLiteral();
-            this.state = 569;
+            this.state = 582;
             this.match(OpenSearchPPLParser.GREATER);
-            this.state = 570;
+            this.state = 583;
             this.match(OpenSearchPPLParser.LT_PRTHS);
-            this.state = 571;
+            this.state = 584;
             localContext._aggField = this.fieldExpression();
-            this.state = 572;
+            this.state = 585;
             this.match(OpenSearchPPLParser.RT_PRTHS);
             }
         }
@@ -2624,27 +2816,27 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new ExpressionContext(this.context, this.state);
         this.enterRule(localContext, 88, OpenSearchPPLParser.RULE_expression);
         try {
-            this.state = 577;
+            this.state = 590;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 37, this.context) ) {
+            switch (this.interpreter.adaptivePredict(this.tokenStream, 40, this.context) ) {
             case 1:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 574;
+                this.state = 587;
                 this.logicalExpression(0);
                 }
                 break;
             case 2:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 575;
+                this.state = 588;
                 this.comparisonExpression();
                 }
                 break;
             case 3:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 576;
+                this.state = 589;
                 this.valueExpression(0);
                 }
                 break;
@@ -2682,16 +2874,16 @@ export class OpenSearchPPLParser extends antlr.Parser {
             let alternative: number;
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 585;
+            this.state = 598;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 38, this.context) ) {
+            switch (this.interpreter.adaptivePredict(this.tokenStream, 41, this.context) ) {
             case 1:
                 {
                 localContext = new ComparsionContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
 
-                this.state = 580;
+                this.state = 593;
                 this.comparisonExpression();
                 }
                 break;
@@ -2700,9 +2892,9 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 localContext = new LogicalNotContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 581;
+                this.state = 594;
                 this.match(OpenSearchPPLParser.NOT);
-                this.state = 582;
+                this.state = 595;
                 this.logicalExpression(6);
                 }
                 break;
@@ -2711,7 +2903,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 localContext = new BooleanExprContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 583;
+                this.state = 596;
                 this.booleanExpression();
                 }
                 break;
@@ -2720,15 +2912,15 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 localContext = new RelevanceExprContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 584;
+                this.state = 597;
                 this.relevanceExpression();
                 }
                 break;
             }
             this.context!.stop = this.tokenStream.LT(-1);
-            this.state = 600;
+            this.state = 613;
             this.errorHandler.sync(this);
-            alternative = this.interpreter.adaptivePredict(this.tokenStream, 41, this.context);
+            alternative = this.interpreter.adaptivePredict(this.tokenStream, 44, this.context);
             while (alternative !== 2 && alternative !== antlr.ATN.INVALID_ALT_NUMBER) {
                 if (alternative === 1) {
                     if (this.parseListeners != null) {
@@ -2736,21 +2928,21 @@ export class OpenSearchPPLParser extends antlr.Parser {
                     }
                     previousContext = localContext;
                     {
-                    this.state = 598;
+                    this.state = 611;
                     this.errorHandler.sync(this);
-                    switch (this.interpreter.adaptivePredict(this.tokenStream, 40, this.context) ) {
+                    switch (this.interpreter.adaptivePredict(this.tokenStream, 43, this.context) ) {
                     case 1:
                         {
                         localContext = new LogicalOrContext(new LogicalExpressionContext(parentContext, parentState));
                         (localContext as LogicalOrContext)._left = previousContext;
                         this.pushNewRecursionContext(localContext, _startState, OpenSearchPPLParser.RULE_logicalExpression);
-                        this.state = 587;
+                        this.state = 600;
                         if (!(this.precpred(this.context, 5))) {
                             throw this.createFailedPredicateException("this.precpred(this.context, 5)");
                         }
-                        this.state = 588;
+                        this.state = 601;
                         this.match(OpenSearchPPLParser.OR);
-                        this.state = 589;
+                        this.state = 602;
                         (localContext as LogicalOrContext)._right = this.logicalExpression(6);
                         }
                         break;
@@ -2759,21 +2951,21 @@ export class OpenSearchPPLParser extends antlr.Parser {
                         localContext = new LogicalAndContext(new LogicalExpressionContext(parentContext, parentState));
                         (localContext as LogicalAndContext)._left = previousContext;
                         this.pushNewRecursionContext(localContext, _startState, OpenSearchPPLParser.RULE_logicalExpression);
-                        this.state = 590;
+                        this.state = 603;
                         if (!(this.precpred(this.context, 4))) {
                             throw this.createFailedPredicateException("this.precpred(this.context, 4)");
                         }
-                        this.state = 592;
+                        this.state = 605;
                         this.errorHandler.sync(this);
                         _la = this.tokenStream.LA(1);
                         if (_la === 63) {
                             {
-                            this.state = 591;
+                            this.state = 604;
                             this.match(OpenSearchPPLParser.AND);
                             }
                         }
 
-                        this.state = 594;
+                        this.state = 607;
                         (localContext as LogicalAndContext)._right = this.logicalExpression(5);
                         }
                         break;
@@ -2782,22 +2974,22 @@ export class OpenSearchPPLParser extends antlr.Parser {
                         localContext = new LogicalXorContext(new LogicalExpressionContext(parentContext, parentState));
                         (localContext as LogicalXorContext)._left = previousContext;
                         this.pushNewRecursionContext(localContext, _startState, OpenSearchPPLParser.RULE_logicalExpression);
-                        this.state = 595;
+                        this.state = 608;
                         if (!(this.precpred(this.context, 3))) {
                             throw this.createFailedPredicateException("this.precpred(this.context, 3)");
                         }
-                        this.state = 596;
+                        this.state = 609;
                         this.match(OpenSearchPPLParser.XOR);
-                        this.state = 597;
+                        this.state = 610;
                         (localContext as LogicalXorContext)._right = this.logicalExpression(4);
                         }
                         break;
                     }
                     }
                 }
-                this.state = 602;
+                this.state = 615;
                 this.errorHandler.sync(this);
-                alternative = this.interpreter.adaptivePredict(this.tokenStream, 41, this.context);
+                alternative = this.interpreter.adaptivePredict(this.tokenStream, 44, this.context);
             }
             }
         }
@@ -2818,18 +3010,18 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new ComparisonExpressionContext(this.context, this.state);
         this.enterRule(localContext, 92, OpenSearchPPLParser.RULE_comparisonExpression);
         try {
-            this.state = 611;
+            this.state = 624;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 42, this.context) ) {
+            switch (this.interpreter.adaptivePredict(this.tokenStream, 45, this.context) ) {
             case 1:
                 localContext = new CompareExprContext(localContext);
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 603;
+                this.state = 616;
                 (localContext as CompareExprContext)._left = this.valueExpression(0);
-                this.state = 604;
+                this.state = 617;
                 this.comparisonOperator();
-                this.state = 605;
+                this.state = 618;
                 (localContext as CompareExprContext)._right = this.valueExpression(0);
                 }
                 break;
@@ -2837,11 +3029,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 localContext = new InExprContext(localContext);
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 607;
+                this.state = 620;
                 this.valueExpression(0);
-                this.state = 608;
+                this.state = 621;
                 this.match(OpenSearchPPLParser.IN);
-                this.state = 609;
+                this.state = 622;
                 this.valueList();
                 }
                 break;
@@ -2879,16 +3071,16 @@ export class OpenSearchPPLParser extends antlr.Parser {
             let alternative: number;
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 623;
+            this.state = 636;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 43, this.context) ) {
+            switch (this.interpreter.adaptivePredict(this.tokenStream, 46, this.context) ) {
             case 1:
                 {
                 localContext = new ValueExpressionDefaultContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
 
-                this.state = 614;
+                this.state = 627;
                 this.primaryExpression();
                 }
                 break;
@@ -2897,7 +3089,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 localContext = new PositionFunctionCallContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 615;
+                this.state = 628;
                 this.positionFunction();
                 }
                 break;
@@ -2906,7 +3098,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 localContext = new ExtractFunctionCallContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 616;
+                this.state = 629;
                 this.extractFunction();
                 }
                 break;
@@ -2915,7 +3107,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 localContext = new GetFormatFunctionCallContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 617;
+                this.state = 630;
                 this.getFormatFunction();
                 }
                 break;
@@ -2924,7 +3116,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 localContext = new TimestampFunctionCallContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 618;
+                this.state = 631;
                 this.timestampFunction();
                 }
                 break;
@@ -2933,19 +3125,19 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 localContext = new ParentheticValueExprContext(localContext);
                 this.context = localContext;
                 previousContext = localContext;
-                this.state = 619;
+                this.state = 632;
                 this.match(OpenSearchPPLParser.LT_PRTHS);
-                this.state = 620;
+                this.state = 633;
                 this.valueExpression(0);
-                this.state = 621;
+                this.state = 634;
                 this.match(OpenSearchPPLParser.RT_PRTHS);
                 }
                 break;
             }
             this.context!.stop = this.tokenStream.LT(-1);
-            this.state = 633;
+            this.state = 646;
             this.errorHandler.sync(this);
-            alternative = this.interpreter.adaptivePredict(this.tokenStream, 45, this.context);
+            alternative = this.interpreter.adaptivePredict(this.tokenStream, 48, this.context);
             while (alternative !== 2 && alternative !== antlr.ATN.INVALID_ALT_NUMBER) {
                 if (alternative === 1) {
                     if (this.parseListeners != null) {
@@ -2953,19 +3145,19 @@ export class OpenSearchPPLParser extends antlr.Parser {
                     }
                     previousContext = localContext;
                     {
-                    this.state = 631;
+                    this.state = 644;
                     this.errorHandler.sync(this);
-                    switch (this.interpreter.adaptivePredict(this.tokenStream, 44, this.context) ) {
+                    switch (this.interpreter.adaptivePredict(this.tokenStream, 47, this.context) ) {
                     case 1:
                         {
                         localContext = new BinaryArithmeticContext(new ValueExpressionContext(parentContext, parentState));
                         (localContext as BinaryArithmeticContext)._left = previousContext;
                         this.pushNewRecursionContext(localContext, _startState, OpenSearchPPLParser.RULE_valueExpression);
-                        this.state = 625;
+                        this.state = 638;
                         if (!(this.precpred(this.context, 8))) {
                             throw this.createFailedPredicateException("this.precpred(this.context, 8)");
                         }
-                        this.state = 626;
+                        this.state = 639;
                         (localContext as BinaryArithmeticContext)._binaryOperator = this.tokenStream.LT(1);
                         _la = this.tokenStream.LA(1);
                         if(!(((((_la - 120)) & ~0x1F) === 0 && ((1 << (_la - 120)) & 7) !== 0))) {
@@ -2975,7 +3167,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
                             this.errorHandler.reportMatch(this);
                             this.consume();
                         }
-                        this.state = 627;
+                        this.state = 640;
                         (localContext as BinaryArithmeticContext)._right = this.valueExpression(9);
                         }
                         break;
@@ -2984,11 +3176,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
                         localContext = new BinaryArithmeticContext(new ValueExpressionContext(parentContext, parentState));
                         (localContext as BinaryArithmeticContext)._left = previousContext;
                         this.pushNewRecursionContext(localContext, _startState, OpenSearchPPLParser.RULE_valueExpression);
-                        this.state = 628;
+                        this.state = 641;
                         if (!(this.precpred(this.context, 7))) {
                             throw this.createFailedPredicateException("this.precpred(this.context, 7)");
                         }
-                        this.state = 629;
+                        this.state = 642;
                         (localContext as BinaryArithmeticContext)._binaryOperator = this.tokenStream.LT(1);
                         _la = this.tokenStream.LA(1);
                         if(!(_la === 118 || _la === 119)) {
@@ -2998,16 +3190,16 @@ export class OpenSearchPPLParser extends antlr.Parser {
                             this.errorHandler.reportMatch(this);
                             this.consume();
                         }
-                        this.state = 630;
+                        this.state = 643;
                         (localContext as BinaryArithmeticContext)._right = this.valueExpression(8);
                         }
                         break;
                     }
                     }
                 }
-                this.state = 635;
+                this.state = 648;
                 this.errorHandler.sync(this);
-                alternative = this.interpreter.adaptivePredict(this.tokenStream, 45, this.context);
+                alternative = this.interpreter.adaptivePredict(this.tokenStream, 48, this.context);
             }
             }
         }
@@ -3028,34 +3220,34 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new PrimaryExpressionContext(this.context, this.state);
         this.enterRule(localContext, 96, OpenSearchPPLParser.RULE_primaryExpression);
         try {
-            this.state = 640;
+            this.state = 653;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 46, this.context) ) {
+            switch (this.interpreter.adaptivePredict(this.tokenStream, 49, this.context) ) {
             case 1:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 636;
+                this.state = 649;
                 this.evalFunctionCall();
                 }
                 break;
             case 2:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 637;
+                this.state = 650;
                 this.dataTypeFunctionCall();
                 }
                 break;
             case 3:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 638;
+                this.state = 651;
                 this.fieldExpression();
                 }
                 break;
             case 4:
                 this.enterOuterAlt(localContext, 4);
                 {
-                this.state = 639;
+                this.state = 652;
                 this.literalValue();
                 }
                 break;
@@ -3080,17 +3272,17 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 642;
+            this.state = 655;
             this.positionFunctionName();
-            this.state = 643;
+            this.state = 656;
             this.match(OpenSearchPPLParser.LT_PRTHS);
-            this.state = 644;
+            this.state = 657;
             this.functionArg();
-            this.state = 645;
+            this.state = 658;
             this.match(OpenSearchPPLParser.IN);
-            this.state = 646;
+            this.state = 659;
             this.functionArg();
-            this.state = 647;
+            this.state = 660;
             this.match(OpenSearchPPLParser.RT_PRTHS);
             }
         }
@@ -3113,7 +3305,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 649;
+            this.state = 662;
             this.booleanFunctionCall();
             }
         }
@@ -3134,7 +3326,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new RelevanceExpressionContext(this.context, this.state);
         this.enterRule(localContext, 102, OpenSearchPPLParser.RULE_relevanceExpression);
         try {
-            this.state = 653;
+            this.state = 666;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case OpenSearchPPLParser.MATCH:
@@ -3143,7 +3335,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
             case OpenSearchPPLParser.MATCH_BOOL_PREFIX:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 651;
+                this.state = 664;
                 this.singleFieldRelevanceFunction();
                 }
                 break;
@@ -3152,7 +3344,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
             case OpenSearchPPLParser.QUERY_STRING:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 652;
+                this.state = 665;
                 this.multiFieldRelevanceFunction();
                 }
                 break;
@@ -3180,33 +3372,33 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 655;
+            this.state = 668;
             this.singleFieldRelevanceFunctionName();
-            this.state = 656;
+            this.state = 669;
             this.match(OpenSearchPPLParser.LT_PRTHS);
-            this.state = 657;
+            this.state = 670;
             localContext._field = this.relevanceField();
-            this.state = 658;
+            this.state = 671;
             this.match(OpenSearchPPLParser.COMMA);
-            this.state = 659;
+            this.state = 672;
             localContext._query = this.relevanceQuery();
-            this.state = 664;
+            this.state = 677;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (_la === 110) {
                 {
                 {
-                this.state = 660;
+                this.state = 673;
                 this.match(OpenSearchPPLParser.COMMA);
-                this.state = 661;
+                this.state = 674;
                 this.relevanceArg();
                 }
                 }
-                this.state = 666;
+                this.state = 679;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
-            this.state = 667;
+            this.state = 680;
             this.match(OpenSearchPPLParser.RT_PRTHS);
             }
         }
@@ -3230,53 +3422,53 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 669;
+            this.state = 682;
             this.multiFieldRelevanceFunctionName();
-            this.state = 670;
+            this.state = 683;
             this.match(OpenSearchPPLParser.LT_PRTHS);
-            this.state = 671;
+            this.state = 684;
             this.match(OpenSearchPPLParser.LT_SQR_PRTHS);
-            this.state = 672;
+            this.state = 685;
             localContext._field = this.relevanceFieldAndWeight();
-            this.state = 677;
+            this.state = 690;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (_la === 110) {
                 {
                 {
-                this.state = 673;
+                this.state = 686;
                 this.match(OpenSearchPPLParser.COMMA);
-                this.state = 674;
+                this.state = 687;
                 localContext._field = this.relevanceFieldAndWeight();
                 }
                 }
-                this.state = 679;
+                this.state = 692;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
-            this.state = 680;
+            this.state = 693;
             this.match(OpenSearchPPLParser.RT_SQR_PRTHS);
-            this.state = 681;
+            this.state = 694;
             this.match(OpenSearchPPLParser.COMMA);
-            this.state = 682;
+            this.state = 695;
             localContext._query = this.relevanceQuery();
-            this.state = 687;
+            this.state = 700;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (_la === 110) {
                 {
                 {
-                this.state = 683;
+                this.state = 696;
                 this.match(OpenSearchPPLParser.COMMA);
-                this.state = 684;
+                this.state = 697;
                 this.relevanceArg();
                 }
                 }
-                this.state = 689;
+                this.state = 702;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
-            this.state = 690;
+            this.state = 703;
             this.match(OpenSearchPPLParser.RT_PRTHS);
             }
         }
@@ -3297,7 +3489,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new TableSourceContext(this.context, this.state);
         this.enterRule(localContext, 108, OpenSearchPPLParser.RULE_tableSource);
         try {
-            this.state = 694;
+            this.state = 707;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case OpenSearchPPLParser.SEARCH:
@@ -3571,14 +3763,14 @@ export class OpenSearchPPLParser extends antlr.Parser {
             case OpenSearchPPLParser.BQUOTA_STRING:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 692;
+                this.state = 705;
                 this.tableQualifiedName();
                 }
                 break;
             case OpenSearchPPLParser.ID_DATE_SUFFIX:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 693;
+                this.state = 706;
                 this.match(OpenSearchPPLParser.ID_DATE_SUFFIX);
                 }
                 break;
@@ -3605,13 +3797,13 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 696;
+            this.state = 709;
             this.qualifiedName();
-            this.state = 697;
+            this.state = 710;
             this.match(OpenSearchPPLParser.LT_PRTHS);
-            this.state = 698;
+            this.state = 711;
             this.functionArgs();
-            this.state = 699;
+            this.state = 712;
             this.match(OpenSearchPPLParser.RT_PRTHS);
             }
         }
@@ -3635,21 +3827,21 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 701;
+            this.state = 714;
             this.fieldExpression();
-            this.state = 706;
+            this.state = 719;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (_la === 110) {
                 {
                 {
-                this.state = 702;
+                this.state = 715;
                 this.match(OpenSearchPPLParser.COMMA);
-                this.state = 703;
+                this.state = 716;
                 this.fieldExpression();
                 }
                 }
-                this.state = 708;
+                this.state = 721;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
@@ -3675,21 +3867,21 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 709;
+            this.state = 722;
             this.wcFieldExpression();
-            this.state = 714;
+            this.state = 727;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (_la === 110) {
                 {
                 {
-                this.state = 710;
+                this.state = 723;
                 this.match(OpenSearchPPLParser.COMMA);
-                this.state = 711;
+                this.state = 724;
                 this.wcFieldExpression();
                 }
                 }
-                this.state = 716;
+                this.state = 729;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
@@ -3715,12 +3907,12 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 718;
+            this.state = 731;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 118 || _la === 119) {
                 {
-                this.state = 717;
+                this.state = 730;
                 _la = this.tokenStream.LA(1);
                 if(!(_la === 118 || _la === 119)) {
                 this.errorHandler.recoverInline(this);
@@ -3732,7 +3924,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 }
             }
 
-            this.state = 720;
+            this.state = 733;
             this.sortFieldExpression();
             }
         }
@@ -3753,65 +3945,65 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new SortFieldExpressionContext(this.context, this.state);
         this.enterRule(localContext, 118, OpenSearchPPLParser.RULE_sortFieldExpression);
         try {
-            this.state = 743;
+            this.state = 756;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case OpenSearchPPLParser.ID:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 722;
+                this.state = 735;
                 this.fieldExpression();
                 }
                 break;
             case OpenSearchPPLParser.AUTO:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 723;
+                this.state = 736;
                 this.match(OpenSearchPPLParser.AUTO);
-                this.state = 724;
+                this.state = 737;
                 this.match(OpenSearchPPLParser.LT_PRTHS);
-                this.state = 725;
+                this.state = 738;
                 this.fieldExpression();
-                this.state = 726;
+                this.state = 739;
                 this.match(OpenSearchPPLParser.RT_PRTHS);
                 }
                 break;
             case OpenSearchPPLParser.STR:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 728;
+                this.state = 741;
                 this.match(OpenSearchPPLParser.STR);
-                this.state = 729;
+                this.state = 742;
                 this.match(OpenSearchPPLParser.LT_PRTHS);
-                this.state = 730;
+                this.state = 743;
                 this.fieldExpression();
-                this.state = 731;
+                this.state = 744;
                 this.match(OpenSearchPPLParser.RT_PRTHS);
                 }
                 break;
             case OpenSearchPPLParser.IP:
                 this.enterOuterAlt(localContext, 4);
                 {
-                this.state = 733;
+                this.state = 746;
                 this.match(OpenSearchPPLParser.IP);
-                this.state = 734;
+                this.state = 747;
                 this.match(OpenSearchPPLParser.LT_PRTHS);
-                this.state = 735;
+                this.state = 748;
                 this.fieldExpression();
-                this.state = 736;
+                this.state = 749;
                 this.match(OpenSearchPPLParser.RT_PRTHS);
                 }
                 break;
             case OpenSearchPPLParser.NUM:
                 this.enterOuterAlt(localContext, 5);
                 {
-                this.state = 738;
+                this.state = 751;
                 this.match(OpenSearchPPLParser.NUM);
-                this.state = 739;
+                this.state = 752;
                 this.match(OpenSearchPPLParser.LT_PRTHS);
-                this.state = 740;
+                this.state = 753;
                 this.fieldExpression();
-                this.state = 741;
+                this.state = 754;
                 this.match(OpenSearchPPLParser.RT_PRTHS);
                 }
                 break;
@@ -3838,7 +4030,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 745;
+            this.state = 758;
             this.qualifiedName();
             }
         }
@@ -3861,7 +4053,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 747;
+            this.state = 760;
             this.wcQualifiedName();
             }
         }
@@ -3884,13 +4076,13 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 749;
+            this.state = 762;
             this.evalFunctionName();
-            this.state = 750;
+            this.state = 763;
             this.match(OpenSearchPPLParser.LT_PRTHS);
-            this.state = 751;
+            this.state = 764;
             this.functionArgs();
-            this.state = 752;
+            this.state = 765;
             this.match(OpenSearchPPLParser.RT_PRTHS);
             }
         }
@@ -3913,17 +4105,17 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 754;
+            this.state = 767;
             this.match(OpenSearchPPLParser.CAST);
-            this.state = 755;
+            this.state = 768;
             this.match(OpenSearchPPLParser.LT_PRTHS);
-            this.state = 756;
+            this.state = 769;
             this.expression();
-            this.state = 757;
+            this.state = 770;
             this.match(OpenSearchPPLParser.AS);
-            this.state = 758;
+            this.state = 771;
             this.convertedDataType();
-            this.state = 759;
+            this.state = 772;
             this.match(OpenSearchPPLParser.RT_PRTHS);
             }
         }
@@ -3946,13 +4138,13 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 761;
+            this.state = 774;
             this.conditionFunctionBase();
-            this.state = 762;
+            this.state = 775;
             this.match(OpenSearchPPLParser.LT_PRTHS);
-            this.state = 763;
+            this.state = 776;
             this.functionArgs();
-            this.state = 764;
+            this.state = 777;
             this.match(OpenSearchPPLParser.RT_PRTHS);
             }
         }
@@ -3973,76 +4165,76 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new ConvertedDataTypeContext(this.context, this.state);
         this.enterRule(localContext, 130, OpenSearchPPLParser.RULE_convertedDataType);
         try {
-            this.state = 776;
+            this.state = 789;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case OpenSearchPPLParser.DATE:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 766;
+                this.state = 779;
                 localContext._typeName = this.match(OpenSearchPPLParser.DATE);
                 }
                 break;
             case OpenSearchPPLParser.TIME:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 767;
+                this.state = 780;
                 localContext._typeName = this.match(OpenSearchPPLParser.TIME);
                 }
                 break;
             case OpenSearchPPLParser.TIMESTAMP:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 768;
+                this.state = 781;
                 localContext._typeName = this.match(OpenSearchPPLParser.TIMESTAMP);
                 }
                 break;
             case OpenSearchPPLParser.INT:
                 this.enterOuterAlt(localContext, 4);
                 {
-                this.state = 769;
+                this.state = 782;
                 localContext._typeName = this.match(OpenSearchPPLParser.INT);
                 }
                 break;
             case OpenSearchPPLParser.INTEGER:
                 this.enterOuterAlt(localContext, 5);
                 {
-                this.state = 770;
+                this.state = 783;
                 localContext._typeName = this.match(OpenSearchPPLParser.INTEGER);
                 }
                 break;
             case OpenSearchPPLParser.DOUBLE:
                 this.enterOuterAlt(localContext, 6);
                 {
-                this.state = 771;
+                this.state = 784;
                 localContext._typeName = this.match(OpenSearchPPLParser.DOUBLE);
                 }
                 break;
             case OpenSearchPPLParser.LONG:
                 this.enterOuterAlt(localContext, 7);
                 {
-                this.state = 772;
+                this.state = 785;
                 localContext._typeName = this.match(OpenSearchPPLParser.LONG);
                 }
                 break;
             case OpenSearchPPLParser.FLOAT:
                 this.enterOuterAlt(localContext, 8);
                 {
-                this.state = 773;
+                this.state = 786;
                 localContext._typeName = this.match(OpenSearchPPLParser.FLOAT);
                 }
                 break;
             case OpenSearchPPLParser.STRING:
                 this.enterOuterAlt(localContext, 9);
                 {
-                this.state = 774;
+                this.state = 787;
                 localContext._typeName = this.match(OpenSearchPPLParser.STRING);
                 }
                 break;
             case OpenSearchPPLParser.BOOLEAN:
                 this.enterOuterAlt(localContext, 10);
                 {
-                this.state = 775;
+                this.state = 788;
                 localContext._typeName = this.match(OpenSearchPPLParser.BOOLEAN);
                 }
                 break;
@@ -4067,7 +4259,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new EvalFunctionNameContext(this.context, this.state);
         this.enterRule(localContext, 132, OpenSearchPPLParser.RULE_evalFunctionName);
         try {
-            this.state = 784;
+            this.state = 797;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case OpenSearchPPLParser.ABS:
@@ -4104,7 +4296,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
             case OpenSearchPPLParser.TAN:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 778;
+                this.state = 791;
                 this.mathematicalFunctionName();
                 }
                 break;
@@ -4175,7 +4367,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
             case OpenSearchPPLParser.YEARWEEK:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 779;
+                this.state = 792;
                 this.dateTimeFunctionName();
                 }
                 break;
@@ -4198,7 +4390,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
             case OpenSearchPPLParser.REVERSE:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 780;
+                this.state = 793;
                 this.textFunctionName();
                 }
                 break;
@@ -4210,21 +4402,21 @@ export class OpenSearchPPLParser extends antlr.Parser {
             case OpenSearchPPLParser.IF:
                 this.enterOuterAlt(localContext, 4);
                 {
-                this.state = 781;
+                this.state = 794;
                 this.conditionFunctionBase();
                 }
                 break;
             case OpenSearchPPLParser.TYPEOF:
                 this.enterOuterAlt(localContext, 5);
                 {
-                this.state = 782;
+                this.state = 795;
                 this.systemFunctionName();
                 }
                 break;
             case OpenSearchPPLParser.POSITION:
                 this.enterOuterAlt(localContext, 6);
                 {
-                this.state = 783;
+                this.state = 796;
                 this.positionFunctionName();
                 }
                 break;
@@ -4252,26 +4444,26 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 794;
+            this.state = 807;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if ((((_la) & ~0x1F) === 0 && ((1 << _la) & 3892314108) !== 0) || ((((_la - 32)) & ~0x1F) === 0 && ((1 << (_la - 32)) & 134217719) !== 0) || ((((_la - 65)) & ~0x1F) === 0 && ((1 << (_la - 65)) & 4294967291) !== 0) || ((((_la - 97)) & ~0x1F) === 0 && ((1 << (_la - 97)) & 274743299) !== 0) || ((((_la - 131)) & ~0x1F) === 0 && ((1 << (_la - 131)) & 4294967281) !== 0) || ((((_la - 163)) & ~0x1F) === 0 && ((1 << (_la - 163)) & 4294967295) !== 0) || ((((_la - 195)) & ~0x1F) === 0 && ((1 << (_la - 195)) & 4294967295) !== 0) || ((((_la - 227)) & ~0x1F) === 0 && ((1 << (_la - 227)) & 4294967295) !== 0) || ((((_la - 259)) & ~0x1F) === 0 && ((1 << (_la - 259)) & 3229614075) !== 0) || ((((_la - 291)) & ~0x1F) === 0 && ((1 << (_la - 291)) & 4294967295) !== 0) || ((((_la - 323)) & ~0x1F) === 0 && ((1 << (_la - 323)) & 7615) !== 0)) {
                 {
-                this.state = 786;
+                this.state = 799;
                 this.functionArg();
-                this.state = 791;
+                this.state = 804;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
                 while (_la === 110) {
                     {
                     {
-                    this.state = 787;
+                    this.state = 800;
                     this.match(OpenSearchPPLParser.COMMA);
-                    this.state = 788;
+                    this.state = 801;
                     this.functionArg();
                     }
                     }
-                    this.state = 793;
+                    this.state = 806;
                     this.errorHandler.sync(this);
                     _la = this.tokenStream.LA(1);
                 }
@@ -4299,19 +4491,19 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 799;
+            this.state = 812;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 60, this.context) ) {
+            switch (this.interpreter.adaptivePredict(this.tokenStream, 63, this.context) ) {
             case 1:
                 {
-                this.state = 796;
+                this.state = 809;
                 this.ident();
-                this.state = 797;
+                this.state = 810;
                 this.match(OpenSearchPPLParser.EQUAL);
                 }
                 break;
             }
-            this.state = 801;
+            this.state = 814;
             this.valueExpression(0);
             }
         }
@@ -4334,11 +4526,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 803;
+            this.state = 816;
             this.relevanceArgName();
-            this.state = 804;
+            this.state = 817;
             this.match(OpenSearchPPLParser.EQUAL);
-            this.state = 805;
+            this.state = 818;
             this.relevanceArgValue();
             }
         }
@@ -4362,7 +4554,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 807;
+            this.state = 820;
             _la = this.tokenStream.LA(1);
             if(!(_la === 7 || _la === 56 || ((((_la - 289)) & ~0x1F) === 0 && ((1 << (_la - 289)) & 2147483647) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -4390,33 +4582,33 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new RelevanceFieldAndWeightContext(this.context, this.state);
         this.enterRule(localContext, 142, OpenSearchPPLParser.RULE_relevanceFieldAndWeight);
         try {
-            this.state = 817;
+            this.state = 830;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 61, this.context) ) {
+            switch (this.interpreter.adaptivePredict(this.tokenStream, 64, this.context) ) {
             case 1:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 809;
+                this.state = 822;
                 localContext._field = this.relevanceField();
                 }
                 break;
             case 2:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 810;
+                this.state = 823;
                 localContext._field = this.relevanceField();
-                this.state = 811;
+                this.state = 824;
                 localContext._weight = this.relevanceFieldWeight();
                 }
                 break;
             case 3:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 813;
+                this.state = 826;
                 localContext._field = this.relevanceField();
-                this.state = 814;
+                this.state = 827;
                 this.match(OpenSearchPPLParser.BIT_XOR_OP);
-                this.state = 815;
+                this.state = 828;
                 localContext._weight = this.relevanceFieldWeight();
                 }
                 break;
@@ -4439,20 +4631,20 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new RelevanceFieldWeightContext(this.context, this.state);
         this.enterRule(localContext, 144, OpenSearchPPLParser.RULE_relevanceFieldWeight);
         try {
-            this.state = 821;
+            this.state = 834;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 62, this.context) ) {
+            switch (this.interpreter.adaptivePredict(this.tokenStream, 65, this.context) ) {
             case 1:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 819;
+                this.state = 832;
                 this.integerLiteral();
                 }
                 break;
             case 2:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 820;
+                this.state = 833;
                 this.decimalLiteral();
                 }
                 break;
@@ -4475,13 +4667,13 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new RelevanceFieldContext(this.context, this.state);
         this.enterRule(localContext, 146, OpenSearchPPLParser.RULE_relevanceField);
         try {
-            this.state = 825;
+            this.state = 838;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case OpenSearchPPLParser.ID:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 823;
+                this.state = 836;
                 this.qualifiedName();
                 }
                 break;
@@ -4489,7 +4681,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
             case OpenSearchPPLParser.SQUOTA_STRING:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 824;
+                this.state = 837;
                 this.stringLiteral();
                 }
                 break;
@@ -4516,7 +4708,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 827;
+            this.state = 840;
             this.relevanceArgValue();
             }
         }
@@ -4537,13 +4729,13 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new RelevanceArgValueContext(this.context, this.state);
         this.enterRule(localContext, 150, OpenSearchPPLParser.RULE_relevanceArgValue);
         try {
-            this.state = 831;
+            this.state = 844;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case OpenSearchPPLParser.ID:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 829;
+                this.state = 842;
                 this.qualifiedName();
                 }
                 break;
@@ -4561,7 +4753,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
             case OpenSearchPPLParser.SQUOTA_STRING:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 830;
+                this.state = 843;
                 this.literalValue();
                 }
                 break;
@@ -4586,160 +4778,160 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new MathematicalFunctionNameContext(this.context, this.state);
         this.enterRule(localContext, 152, OpenSearchPPLParser.RULE_mathematicalFunctionName);
         try {
-            this.state = 856;
+            this.state = 869;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case OpenSearchPPLParser.ABS:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 833;
+                this.state = 846;
                 this.match(OpenSearchPPLParser.ABS);
                 }
                 break;
             case OpenSearchPPLParser.CBRT:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 834;
+                this.state = 847;
                 this.match(OpenSearchPPLParser.CBRT);
                 }
                 break;
             case OpenSearchPPLParser.CEIL:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 835;
+                this.state = 848;
                 this.match(OpenSearchPPLParser.CEIL);
                 }
                 break;
             case OpenSearchPPLParser.CEILING:
                 this.enterOuterAlt(localContext, 4);
                 {
-                this.state = 836;
+                this.state = 849;
                 this.match(OpenSearchPPLParser.CEILING);
                 }
                 break;
             case OpenSearchPPLParser.CONV:
                 this.enterOuterAlt(localContext, 5);
                 {
-                this.state = 837;
+                this.state = 850;
                 this.match(OpenSearchPPLParser.CONV);
                 }
                 break;
             case OpenSearchPPLParser.CRC32:
                 this.enterOuterAlt(localContext, 6);
                 {
-                this.state = 838;
+                this.state = 851;
                 this.match(OpenSearchPPLParser.CRC32);
                 }
                 break;
             case OpenSearchPPLParser.E:
                 this.enterOuterAlt(localContext, 7);
                 {
-                this.state = 839;
+                this.state = 852;
                 this.match(OpenSearchPPLParser.E);
                 }
                 break;
             case OpenSearchPPLParser.EXP:
                 this.enterOuterAlt(localContext, 8);
                 {
-                this.state = 840;
+                this.state = 853;
                 this.match(OpenSearchPPLParser.EXP);
                 }
                 break;
             case OpenSearchPPLParser.FLOOR:
                 this.enterOuterAlt(localContext, 9);
                 {
-                this.state = 841;
+                this.state = 854;
                 this.match(OpenSearchPPLParser.FLOOR);
                 }
                 break;
             case OpenSearchPPLParser.LN:
                 this.enterOuterAlt(localContext, 10);
                 {
-                this.state = 842;
+                this.state = 855;
                 this.match(OpenSearchPPLParser.LN);
                 }
                 break;
             case OpenSearchPPLParser.LOG:
                 this.enterOuterAlt(localContext, 11);
                 {
-                this.state = 843;
+                this.state = 856;
                 this.match(OpenSearchPPLParser.LOG);
                 }
                 break;
             case OpenSearchPPLParser.LOG10:
                 this.enterOuterAlt(localContext, 12);
                 {
-                this.state = 844;
+                this.state = 857;
                 this.match(OpenSearchPPLParser.LOG10);
                 }
                 break;
             case OpenSearchPPLParser.LOG2:
                 this.enterOuterAlt(localContext, 13);
                 {
-                this.state = 845;
+                this.state = 858;
                 this.match(OpenSearchPPLParser.LOG2);
                 }
                 break;
             case OpenSearchPPLParser.MOD:
                 this.enterOuterAlt(localContext, 14);
                 {
-                this.state = 846;
+                this.state = 859;
                 this.match(OpenSearchPPLParser.MOD);
                 }
                 break;
             case OpenSearchPPLParser.PI:
                 this.enterOuterAlt(localContext, 15);
                 {
-                this.state = 847;
+                this.state = 860;
                 this.match(OpenSearchPPLParser.PI);
                 }
                 break;
             case OpenSearchPPLParser.POW:
                 this.enterOuterAlt(localContext, 16);
                 {
-                this.state = 848;
+                this.state = 861;
                 this.match(OpenSearchPPLParser.POW);
                 }
                 break;
             case OpenSearchPPLParser.POWER:
                 this.enterOuterAlt(localContext, 17);
                 {
-                this.state = 849;
+                this.state = 862;
                 this.match(OpenSearchPPLParser.POWER);
                 }
                 break;
             case OpenSearchPPLParser.RAND:
                 this.enterOuterAlt(localContext, 18);
                 {
-                this.state = 850;
+                this.state = 863;
                 this.match(OpenSearchPPLParser.RAND);
                 }
                 break;
             case OpenSearchPPLParser.ROUND:
                 this.enterOuterAlt(localContext, 19);
                 {
-                this.state = 851;
+                this.state = 864;
                 this.match(OpenSearchPPLParser.ROUND);
                 }
                 break;
             case OpenSearchPPLParser.SIGN:
                 this.enterOuterAlt(localContext, 20);
                 {
-                this.state = 852;
+                this.state = 865;
                 this.match(OpenSearchPPLParser.SIGN);
                 }
                 break;
             case OpenSearchPPLParser.SQRT:
                 this.enterOuterAlt(localContext, 21);
                 {
-                this.state = 853;
+                this.state = 866;
                 this.match(OpenSearchPPLParser.SQRT);
                 }
                 break;
             case OpenSearchPPLParser.TRUNCATE:
                 this.enterOuterAlt(localContext, 22);
                 {
-                this.state = 854;
+                this.state = 867;
                 this.match(OpenSearchPPLParser.TRUNCATE);
                 }
                 break;
@@ -4755,7 +4947,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
             case OpenSearchPPLParser.TAN:
                 this.enterOuterAlt(localContext, 23);
                 {
-                this.state = 855;
+                this.state = 868;
                 this.trigonometricFunctionName();
                 }
                 break;
@@ -4783,7 +4975,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 858;
+            this.state = 871;
             _la = this.tokenStream.LA(1);
             if(!(((((_la - 195)) & ~0x1F) === 0 && ((1 << (_la - 195)) & 1023) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -4814,7 +5006,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 860;
+            this.state = 873;
             _la = this.tokenStream.LA(1);
             if(!(((((_la - 68)) & ~0x1F) === 0 && ((1 << (_la - 68)) & 1038960967) !== 0) || ((((_la - 205)) & ~0x1F) === 0 && ((1 << (_la - 205)) & 4292607999) !== 0) || ((((_la - 237)) & ~0x1F) === 0 && ((1 << (_la - 237)) & 523903) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -4844,17 +5036,17 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 862;
+            this.state = 875;
             this.match(OpenSearchPPLParser.GET_FORMAT);
-            this.state = 863;
+            this.state = 876;
             this.match(OpenSearchPPLParser.LT_PRTHS);
-            this.state = 864;
+            this.state = 877;
             this.getFormatType();
-            this.state = 865;
+            this.state = 878;
             this.match(OpenSearchPPLParser.COMMA);
-            this.state = 866;
+            this.state = 879;
             this.functionArg();
-            this.state = 867;
+            this.state = 880;
             this.match(OpenSearchPPLParser.RT_PRTHS);
             }
         }
@@ -4878,7 +5070,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 869;
+            this.state = 882;
             _la = this.tokenStream.LA(1);
             if(!(_la === 69 || ((((_la - 212)) & ~0x1F) === 0 && ((1 << (_la - 212)) & 2684354561) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -4908,17 +5100,17 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 871;
+            this.state = 884;
             this.match(OpenSearchPPLParser.EXTRACT);
-            this.state = 872;
+            this.state = 885;
             this.match(OpenSearchPPLParser.LT_PRTHS);
-            this.state = 873;
+            this.state = 886;
             this.datetimePart();
-            this.state = 874;
+            this.state = 887;
             this.match(OpenSearchPPLParser.FROM);
-            this.state = 875;
+            this.state = 888;
             this.functionArg();
-            this.state = 876;
+            this.state = 889;
             this.match(OpenSearchPPLParser.RT_PRTHS);
             }
         }
@@ -4942,7 +5134,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 878;
+            this.state = 891;
             _la = this.tokenStream.LA(1);
             if(!(((((_la - 70)) & ~0x1F) === 0 && ((1 << (_la - 70)) & 174608449) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -4973,7 +5165,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 880;
+            this.state = 893;
             _la = this.tokenStream.LA(1);
             if(!(((((_la - 71)) & ~0x1F) === 0 && ((1 << (_la - 71)) & 138560215) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -5001,7 +5193,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new DatetimePartContext(this.context, this.state);
         this.enterRule(localContext, 168, OpenSearchPPLParser.RULE_datetimePart);
         try {
-            this.state = 884;
+            this.state = 897;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case OpenSearchPPLParser.DAY:
@@ -5015,7 +5207,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
             case OpenSearchPPLParser.YEAR:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 882;
+                this.state = 895;
                 this.simpleDateTimePart();
                 }
                 break;
@@ -5032,7 +5224,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
             case OpenSearchPPLParser.YEAR_MONTH:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 883;
+                this.state = 896;
                 this.complexDateTimePart();
                 }
                 break;
@@ -5059,21 +5251,21 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 886;
+            this.state = 899;
             this.timestampFunctionName();
-            this.state = 887;
+            this.state = 900;
             this.match(OpenSearchPPLParser.LT_PRTHS);
-            this.state = 888;
+            this.state = 901;
             this.simpleDateTimePart();
-            this.state = 889;
+            this.state = 902;
             this.match(OpenSearchPPLParser.COMMA);
-            this.state = 890;
+            this.state = 903;
             localContext._firstArg = this.functionArg();
-            this.state = 891;
+            this.state = 904;
             this.match(OpenSearchPPLParser.COMMA);
-            this.state = 892;
+            this.state = 905;
             localContext._secondArg = this.functionArg();
-            this.state = 893;
+            this.state = 906;
             this.match(OpenSearchPPLParser.RT_PRTHS);
             }
         }
@@ -5097,7 +5289,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 895;
+            this.state = 908;
             _la = this.tokenStream.LA(1);
             if(!(_la === 244 || _la === 245)) {
             this.errorHandler.recoverInline(this);
@@ -5128,7 +5320,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 897;
+            this.state = 910;
             _la = this.tokenStream.LA(1);
             if(!(((((_la - 275)) & ~0x1F) === 0 && ((1 << (_la - 275)) & 63) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -5158,7 +5350,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 899;
+            this.state = 912;
             this.match(OpenSearchPPLParser.TYPEOF);
             }
         }
@@ -5182,7 +5374,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 901;
+            this.state = 914;
             _la = this.tokenStream.LA(1);
             if(!(((((_la - 256)) & ~0x1F) === 0 && ((1 << (_la - 256)) & 262111) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -5212,7 +5404,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 903;
+            this.state = 916;
             this.match(OpenSearchPPLParser.POSITION);
             }
         }
@@ -5236,7 +5428,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 905;
+            this.state = 918;
             _la = this.tokenStream.LA(1);
             if(!(_la === 67 || ((((_la - 112)) & ~0x1F) === 0 && ((1 << (_la - 112)) & 63) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -5267,7 +5459,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 907;
+            this.state = 920;
             _la = this.tokenStream.LA(1);
             if(!(((((_la - 282)) & ~0x1F) === 0 && ((1 << (_la - 282)) & 15) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -5298,7 +5490,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 909;
+            this.state = 922;
             _la = this.tokenStream.LA(1);
             if(!(((((_la - 286)) & ~0x1F) === 0 && ((1 << (_la - 286)) & 7) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -5326,48 +5518,48 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new LiteralValueContext(this.context, this.state);
         this.enterRule(localContext, 188, OpenSearchPPLParser.RULE_literalValue);
         try {
-            this.state = 917;
+            this.state = 930;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 67, this.context) ) {
+            switch (this.interpreter.adaptivePredict(this.tokenStream, 70, this.context) ) {
             case 1:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 911;
+                this.state = 924;
                 this.intervalLiteral();
                 }
                 break;
             case 2:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 912;
+                this.state = 925;
                 this.stringLiteral();
                 }
                 break;
             case 3:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 913;
+                this.state = 926;
                 this.integerLiteral();
                 }
                 break;
             case 4:
                 this.enterOuterAlt(localContext, 4);
                 {
-                this.state = 914;
+                this.state = 927;
                 this.decimalLiteral();
                 }
                 break;
             case 5:
                 this.enterOuterAlt(localContext, 5);
                 {
-                this.state = 915;
+                this.state = 928;
                 this.booleanLiteral();
                 }
                 break;
             case 6:
                 this.enterOuterAlt(localContext, 6);
                 {
-                this.state = 916;
+                this.state = 929;
                 this.datetimeLiteral();
                 }
                 break;
@@ -5392,11 +5584,11 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 919;
+            this.state = 932;
             this.match(OpenSearchPPLParser.INTERVAL);
-            this.state = 920;
+            this.state = 933;
             this.valueExpression(0);
-            this.state = 921;
+            this.state = 934;
             this.intervalUnit();
             }
         }
@@ -5420,7 +5612,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 923;
+            this.state = 936;
             _la = this.tokenStream.LA(1);
             if(!(_la === 333 || _la === 334)) {
             this.errorHandler.recoverInline(this);
@@ -5451,12 +5643,12 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 926;
+            this.state = 939;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 118 || _la === 119) {
                 {
-                this.state = 925;
+                this.state = 938;
                 _la = this.tokenStream.LA(1);
                 if(!(_la === 118 || _la === 119)) {
                 this.errorHandler.recoverInline(this);
@@ -5468,7 +5660,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 }
             }
 
-            this.state = 928;
+            this.state = 941;
             this.match(OpenSearchPPLParser.INTEGER_LITERAL);
             }
         }
@@ -5492,12 +5684,12 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 931;
+            this.state = 944;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 118 || _la === 119) {
                 {
-                this.state = 930;
+                this.state = 943;
                 _la = this.tokenStream.LA(1);
                 if(!(_la === 118 || _la === 119)) {
                 this.errorHandler.recoverInline(this);
@@ -5509,7 +5701,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
                 }
             }
 
-            this.state = 933;
+            this.state = 946;
             this.match(OpenSearchPPLParser.DECIMAL_LITERAL);
             }
         }
@@ -5533,7 +5725,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 935;
+            this.state = 948;
             _la = this.tokenStream.LA(1);
             if(!(_la === 65 || _la === 66)) {
             this.errorHandler.recoverInline(this);
@@ -5561,27 +5753,27 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new DatetimeLiteralContext(this.context, this.state);
         this.enterRule(localContext, 200, OpenSearchPPLParser.RULE_datetimeLiteral);
         try {
-            this.state = 940;
+            this.state = 953;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case OpenSearchPPLParser.DATE:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 937;
+                this.state = 950;
                 this.dateLiteral();
                 }
                 break;
             case OpenSearchPPLParser.TIME:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 938;
+                this.state = 951;
                 this.timeLiteral();
                 }
                 break;
             case OpenSearchPPLParser.TIMESTAMP:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 939;
+                this.state = 952;
                 this.timestampLiteral();
                 }
                 break;
@@ -5608,9 +5800,9 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 942;
+            this.state = 955;
             this.match(OpenSearchPPLParser.DATE);
-            this.state = 943;
+            this.state = 956;
             localContext._date = this.stringLiteral();
             }
         }
@@ -5633,9 +5825,9 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 945;
+            this.state = 958;
             this.match(OpenSearchPPLParser.TIME);
-            this.state = 946;
+            this.state = 959;
             localContext._time = this.stringLiteral();
             }
         }
@@ -5658,9 +5850,9 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 948;
+            this.state = 961;
             this.match(OpenSearchPPLParser.TIMESTAMP);
-            this.state = 949;
+            this.state = 962;
             localContext._timestamp = this.stringLiteral();
             }
         }
@@ -5684,7 +5876,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 951;
+            this.state = 964;
             _la = this.tokenStream.LA(1);
             if(!(((((_la - 70)) & ~0x1F) === 0 && ((1 << (_la - 70)) & 451728879) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -5715,7 +5907,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 953;
+            this.state = 966;
             _la = this.tokenStream.LA(1);
             if(!(_la === 31 || ((((_la - 70)) & ~0x1F) === 0 && ((1 << (_la - 70)) & 174612545) !== 0) || ((((_la - 321)) & ~0x1F) === 0 && ((1 << (_la - 321)) & 127) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -5746,27 +5938,27 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 955;
+            this.state = 968;
             this.match(OpenSearchPPLParser.LT_PRTHS);
-            this.state = 956;
+            this.state = 969;
             this.literalValue();
-            this.state = 961;
+            this.state = 974;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (_la === 110) {
                 {
                 {
-                this.state = 957;
+                this.state = 970;
                 this.match(OpenSearchPPLParser.COMMA);
-                this.state = 958;
+                this.state = 971;
                 this.literalValue();
                 }
                 }
-                this.state = 963;
+                this.state = 976;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
-            this.state = 964;
+            this.state = 977;
             this.match(OpenSearchPPLParser.RT_PRTHS);
             }
         }
@@ -5789,7 +5981,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 966;
+            this.state = 979;
             this.match(OpenSearchPPLParser.ID);
             }
         }
@@ -5814,21 +6006,21 @@ export class OpenSearchPPLParser extends antlr.Parser {
             localContext = new IdentsAsTableQualifiedNameContext(localContext);
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 968;
+            this.state = 981;
             this.tableIdent();
-            this.state = 973;
+            this.state = 986;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (_la === 111) {
                 {
                 {
-                this.state = 969;
+                this.state = 982;
                 this.match(OpenSearchPPLParser.DOT);
-                this.state = 970;
+                this.state = 983;
                 this.ident();
                 }
                 }
-                this.state = 975;
+                this.state = 988;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
@@ -5855,21 +6047,21 @@ export class OpenSearchPPLParser extends antlr.Parser {
             localContext = new IdentsAsWildcardQualifiedNameContext(localContext);
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 976;
+            this.state = 989;
             this.wildcard();
-            this.state = 981;
+            this.state = 994;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (_la === 111) {
                 {
                 {
-                this.state = 977;
+                this.state = 990;
                 this.match(OpenSearchPPLParser.DOT);
-                this.state = 978;
+                this.state = 991;
                 this.wildcard();
                 }
                 }
-                this.state = 983;
+                this.state = 996;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
@@ -5893,42 +6085,42 @@ export class OpenSearchPPLParser extends antlr.Parser {
         this.enterRule(localContext, 220, OpenSearchPPLParser.RULE_ident);
         let _la: number;
         try {
-            this.state = 994;
+            this.state = 1007;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case OpenSearchPPLParser.DOT:
             case OpenSearchPPLParser.ID:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 985;
+                this.state = 998;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
                 if (_la === 111) {
                     {
-                    this.state = 984;
+                    this.state = 997;
                     this.match(OpenSearchPPLParser.DOT);
                     }
                 }
 
-                this.state = 987;
+                this.state = 1000;
                 this.match(OpenSearchPPLParser.ID);
                 }
                 break;
             case OpenSearchPPLParser.BACKTICK:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 988;
+                this.state = 1001;
                 this.match(OpenSearchPPLParser.BACKTICK);
-                this.state = 989;
+                this.state = 1002;
                 this.ident();
-                this.state = 990;
+                this.state = 1003;
                 this.match(OpenSearchPPLParser.BACKTICK);
                 }
                 break;
             case OpenSearchPPLParser.BQUOTA_STRING:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 992;
+                this.state = 1005;
                 this.match(OpenSearchPPLParser.BQUOTA_STRING);
                 }
                 break;
@@ -6198,7 +6390,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
             case OpenSearchPPLParser.Y:
                 this.enterOuterAlt(localContext, 4);
                 {
-                this.state = 993;
+                this.state = 1006;
                 this.keywordsCanBeId();
                 }
                 break;
@@ -6226,17 +6418,17 @@ export class OpenSearchPPLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 997;
+            this.state = 1010;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             if (_la === 329) {
                 {
-                this.state = 996;
+                this.state = 1009;
                 this.match(OpenSearchPPLParser.CLUSTER);
                 }
             }
 
-            this.state = 999;
+            this.state = 1012;
             this.ident();
             }
         }
@@ -6259,38 +6451,38 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let _la: number;
         try {
             let alternative: number;
-            this.state = 1024;
+            this.state = 1037;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 79, this.context) ) {
+            switch (this.interpreter.adaptivePredict(this.tokenStream, 82, this.context) ) {
             case 1:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 1001;
+                this.state = 1014;
                 this.ident();
-                this.state = 1006;
+                this.state = 1019;
                 this.errorHandler.sync(this);
-                alternative = this.interpreter.adaptivePredict(this.tokenStream, 77, this.context);
+                alternative = this.interpreter.adaptivePredict(this.tokenStream, 80, this.context);
                 while (alternative !== 2 && alternative !== antlr.ATN.INVALID_ALT_NUMBER) {
                     if (alternative === 1) {
                         {
                         {
-                        this.state = 1002;
+                        this.state = 1015;
                         this.match(OpenSearchPPLParser.MODULE);
-                        this.state = 1003;
+                        this.state = 1016;
                         this.ident();
                         }
                         }
                     }
-                    this.state = 1008;
+                    this.state = 1021;
                     this.errorHandler.sync(this);
-                    alternative = this.interpreter.adaptivePredict(this.tokenStream, 77, this.context);
+                    alternative = this.interpreter.adaptivePredict(this.tokenStream, 80, this.context);
                 }
-                this.state = 1010;
+                this.state = 1023;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
                 if (_la === 122) {
                     {
-                    this.state = 1009;
+                    this.state = 1022;
                     this.match(OpenSearchPPLParser.MODULE);
                     }
                 }
@@ -6300,33 +6492,33 @@ export class OpenSearchPPLParser extends antlr.Parser {
             case 2:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 1012;
+                this.state = 1025;
                 this.match(OpenSearchPPLParser.SINGLE_QUOTE);
-                this.state = 1013;
+                this.state = 1026;
                 this.wildcard();
-                this.state = 1014;
+                this.state = 1027;
                 this.match(OpenSearchPPLParser.SINGLE_QUOTE);
                 }
                 break;
             case 3:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 1016;
+                this.state = 1029;
                 this.match(OpenSearchPPLParser.DOUBLE_QUOTE);
-                this.state = 1017;
+                this.state = 1030;
                 this.wildcard();
-                this.state = 1018;
+                this.state = 1031;
                 this.match(OpenSearchPPLParser.DOUBLE_QUOTE);
                 }
                 break;
             case 4:
                 this.enterOuterAlt(localContext, 4);
                 {
-                this.state = 1020;
+                this.state = 1033;
                 this.match(OpenSearchPPLParser.BACKTICK);
-                this.state = 1021;
+                this.state = 1034;
                 this.wildcard();
-                this.state = 1022;
+                this.state = 1035;
                 this.match(OpenSearchPPLParser.BACKTICK);
                 }
                 break;
@@ -6349,706 +6541,706 @@ export class OpenSearchPPLParser extends antlr.Parser {
         let localContext = new KeywordsCanBeIdContext(this.context, this.state);
         this.enterRule(localContext, 226, OpenSearchPPLParser.RULE_keywordsCanBeId);
         try {
-            this.state = 1126;
+            this.state = 1139;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 80, this.context) ) {
+            switch (this.interpreter.adaptivePredict(this.tokenStream, 83, this.context) ) {
             case 1:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 1026;
+                this.state = 1039;
                 this.match(OpenSearchPPLParser.D);
                 }
                 break;
             case 2:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 1027;
+                this.state = 1040;
                 this.timespanUnit();
                 }
                 break;
             case 3:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 1028;
+                this.state = 1041;
                 this.match(OpenSearchPPLParser.SPAN);
                 }
                 break;
             case 4:
                 this.enterOuterAlt(localContext, 4);
                 {
-                this.state = 1029;
+                this.state = 1042;
                 this.evalFunctionName();
                 }
                 break;
             case 5:
                 this.enterOuterAlt(localContext, 5);
                 {
-                this.state = 1030;
+                this.state = 1043;
                 this.relevanceArgName();
                 }
                 break;
             case 6:
                 this.enterOuterAlt(localContext, 6);
                 {
-                this.state = 1031;
+                this.state = 1044;
                 this.intervalUnit();
                 }
                 break;
             case 7:
                 this.enterOuterAlt(localContext, 7);
                 {
-                this.state = 1032;
+                this.state = 1045;
                 this.dateTimeFunctionName();
                 }
                 break;
             case 8:
                 this.enterOuterAlt(localContext, 8);
                 {
-                this.state = 1033;
+                this.state = 1046;
                 this.textFunctionName();
                 }
                 break;
             case 9:
                 this.enterOuterAlt(localContext, 9);
                 {
-                this.state = 1034;
+                this.state = 1047;
                 this.mathematicalFunctionName();
                 }
                 break;
             case 10:
                 this.enterOuterAlt(localContext, 10);
                 {
-                this.state = 1035;
+                this.state = 1048;
                 this.positionFunctionName();
                 }
                 break;
             case 11:
                 this.enterOuterAlt(localContext, 11);
                 {
-                this.state = 1036;
+                this.state = 1049;
                 this.match(OpenSearchPPLParser.SEARCH);
                 }
                 break;
             case 12:
                 this.enterOuterAlt(localContext, 12);
                 {
-                this.state = 1037;
+                this.state = 1050;
                 this.match(OpenSearchPPLParser.DESCRIBE);
                 }
                 break;
             case 13:
                 this.enterOuterAlt(localContext, 13);
                 {
-                this.state = 1038;
+                this.state = 1051;
                 this.match(OpenSearchPPLParser.SHOW);
                 }
                 break;
             case 14:
                 this.enterOuterAlt(localContext, 14);
                 {
-                this.state = 1039;
+                this.state = 1052;
                 this.match(OpenSearchPPLParser.FROM);
                 }
                 break;
             case 15:
                 this.enterOuterAlt(localContext, 15);
                 {
-                this.state = 1040;
+                this.state = 1053;
                 this.match(OpenSearchPPLParser.WHERE);
                 }
                 break;
             case 16:
                 this.enterOuterAlt(localContext, 16);
                 {
-                this.state = 1041;
+                this.state = 1054;
                 this.match(OpenSearchPPLParser.FIELDS);
                 }
                 break;
             case 17:
                 this.enterOuterAlt(localContext, 17);
                 {
-                this.state = 1042;
+                this.state = 1055;
                 this.match(OpenSearchPPLParser.RENAME);
                 }
                 break;
             case 18:
                 this.enterOuterAlt(localContext, 18);
                 {
-                this.state = 1043;
+                this.state = 1056;
                 this.match(OpenSearchPPLParser.STATS);
                 }
                 break;
             case 19:
                 this.enterOuterAlt(localContext, 19);
                 {
-                this.state = 1044;
+                this.state = 1057;
                 this.match(OpenSearchPPLParser.DEDUP);
                 }
                 break;
             case 20:
                 this.enterOuterAlt(localContext, 20);
                 {
-                this.state = 1045;
+                this.state = 1058;
                 this.match(OpenSearchPPLParser.SORT);
                 }
                 break;
             case 21:
                 this.enterOuterAlt(localContext, 21);
                 {
-                this.state = 1046;
+                this.state = 1059;
                 this.match(OpenSearchPPLParser.EVAL);
                 }
                 break;
             case 22:
                 this.enterOuterAlt(localContext, 22);
                 {
-                this.state = 1047;
+                this.state = 1060;
                 this.match(OpenSearchPPLParser.HEAD);
                 }
                 break;
             case 23:
                 this.enterOuterAlt(localContext, 23);
                 {
-                this.state = 1048;
+                this.state = 1061;
                 this.match(OpenSearchPPLParser.TOP);
                 }
                 break;
             case 24:
                 this.enterOuterAlt(localContext, 24);
                 {
-                this.state = 1049;
+                this.state = 1062;
                 this.match(OpenSearchPPLParser.RARE);
                 }
                 break;
             case 25:
                 this.enterOuterAlt(localContext, 25);
                 {
-                this.state = 1050;
+                this.state = 1063;
                 this.match(OpenSearchPPLParser.PARSE);
                 }
                 break;
             case 26:
                 this.enterOuterAlt(localContext, 26);
                 {
-                this.state = 1051;
+                this.state = 1064;
                 this.match(OpenSearchPPLParser.METHOD);
                 }
                 break;
             case 27:
                 this.enterOuterAlt(localContext, 27);
                 {
-                this.state = 1052;
+                this.state = 1065;
                 this.match(OpenSearchPPLParser.REGEX);
                 }
                 break;
             case 28:
                 this.enterOuterAlt(localContext, 28);
                 {
-                this.state = 1053;
+                this.state = 1066;
                 this.match(OpenSearchPPLParser.PUNCT);
                 }
                 break;
             case 29:
                 this.enterOuterAlt(localContext, 29);
                 {
-                this.state = 1054;
+                this.state = 1067;
                 this.match(OpenSearchPPLParser.GROK);
                 }
                 break;
             case 30:
                 this.enterOuterAlt(localContext, 30);
                 {
-                this.state = 1055;
+                this.state = 1068;
                 this.match(OpenSearchPPLParser.PATTERN);
                 }
                 break;
             case 31:
                 this.enterOuterAlt(localContext, 31);
                 {
-                this.state = 1056;
+                this.state = 1069;
                 this.match(OpenSearchPPLParser.PATTERNS);
                 }
                 break;
             case 32:
                 this.enterOuterAlt(localContext, 32);
                 {
-                this.state = 1057;
+                this.state = 1070;
                 this.match(OpenSearchPPLParser.NEW_FIELD);
                 }
                 break;
             case 33:
                 this.enterOuterAlt(localContext, 33);
                 {
-                this.state = 1058;
+                this.state = 1071;
                 this.match(OpenSearchPPLParser.KMEANS);
                 }
                 break;
             case 34:
                 this.enterOuterAlt(localContext, 34);
                 {
-                this.state = 1059;
+                this.state = 1072;
                 this.match(OpenSearchPPLParser.AD);
                 }
                 break;
             case 35:
                 this.enterOuterAlt(localContext, 35);
                 {
-                this.state = 1060;
+                this.state = 1073;
                 this.match(OpenSearchPPLParser.ML);
                 }
                 break;
             case 36:
                 this.enterOuterAlt(localContext, 36);
                 {
-                this.state = 1061;
+                this.state = 1074;
                 this.match(OpenSearchPPLParser.SOURCE);
                 }
                 break;
             case 37:
                 this.enterOuterAlt(localContext, 37);
                 {
-                this.state = 1062;
+                this.state = 1075;
                 this.match(OpenSearchPPLParser.INDEX);
                 }
                 break;
             case 38:
                 this.enterOuterAlt(localContext, 38);
                 {
-                this.state = 1063;
+                this.state = 1076;
                 this.match(OpenSearchPPLParser.DESC);
                 }
                 break;
             case 39:
                 this.enterOuterAlt(localContext, 39);
                 {
-                this.state = 1064;
+                this.state = 1077;
                 this.match(OpenSearchPPLParser.DATASOURCES);
                 }
                 break;
             case 40:
                 this.enterOuterAlt(localContext, 40);
                 {
-                this.state = 1065;
+                this.state = 1078;
                 this.match(OpenSearchPPLParser.SORTBY);
                 }
                 break;
             case 41:
                 this.enterOuterAlt(localContext, 41);
                 {
-                this.state = 1066;
+                this.state = 1079;
                 this.match(OpenSearchPPLParser.STR);
                 }
                 break;
             case 42:
                 this.enterOuterAlt(localContext, 42);
                 {
-                this.state = 1067;
+                this.state = 1080;
                 this.match(OpenSearchPPLParser.IP);
                 }
                 break;
             case 43:
                 this.enterOuterAlt(localContext, 43);
                 {
-                this.state = 1068;
+                this.state = 1081;
                 this.match(OpenSearchPPLParser.NUM);
                 }
                 break;
             case 44:
                 this.enterOuterAlt(localContext, 44);
                 {
-                this.state = 1069;
+                this.state = 1082;
                 this.match(OpenSearchPPLParser.KEEPEMPTY);
                 }
                 break;
             case 45:
                 this.enterOuterAlt(localContext, 45);
                 {
-                this.state = 1070;
+                this.state = 1083;
                 this.match(OpenSearchPPLParser.CONSECUTIVE);
                 }
                 break;
             case 46:
                 this.enterOuterAlt(localContext, 46);
                 {
-                this.state = 1071;
+                this.state = 1084;
                 this.match(OpenSearchPPLParser.DEDUP_SPLITVALUES);
                 }
                 break;
             case 47:
                 this.enterOuterAlt(localContext, 47);
                 {
-                this.state = 1072;
+                this.state = 1085;
                 this.match(OpenSearchPPLParser.PARTITIONS);
                 }
                 break;
             case 48:
                 this.enterOuterAlt(localContext, 48);
                 {
-                this.state = 1073;
+                this.state = 1086;
                 this.match(OpenSearchPPLParser.ALLNUM);
                 }
                 break;
             case 49:
                 this.enterOuterAlt(localContext, 49);
                 {
-                this.state = 1074;
+                this.state = 1087;
                 this.match(OpenSearchPPLParser.DELIM);
                 }
                 break;
             case 50:
                 this.enterOuterAlt(localContext, 50);
                 {
-                this.state = 1075;
+                this.state = 1088;
                 this.match(OpenSearchPPLParser.CENTROIDS);
                 }
                 break;
             case 51:
                 this.enterOuterAlt(localContext, 51);
                 {
-                this.state = 1076;
+                this.state = 1089;
                 this.match(OpenSearchPPLParser.ITERATIONS);
                 }
                 break;
             case 52:
                 this.enterOuterAlt(localContext, 52);
                 {
-                this.state = 1077;
+                this.state = 1090;
                 this.match(OpenSearchPPLParser.DISTANCE_TYPE);
                 }
                 break;
             case 53:
                 this.enterOuterAlt(localContext, 53);
                 {
-                this.state = 1078;
+                this.state = 1091;
                 this.match(OpenSearchPPLParser.NUMBER_OF_TREES);
                 }
                 break;
             case 54:
                 this.enterOuterAlt(localContext, 54);
                 {
-                this.state = 1079;
+                this.state = 1092;
                 this.match(OpenSearchPPLParser.SHINGLE_SIZE);
                 }
                 break;
             case 55:
                 this.enterOuterAlt(localContext, 55);
                 {
-                this.state = 1080;
+                this.state = 1093;
                 this.match(OpenSearchPPLParser.SAMPLE_SIZE);
                 }
                 break;
             case 56:
                 this.enterOuterAlt(localContext, 56);
                 {
-                this.state = 1081;
+                this.state = 1094;
                 this.match(OpenSearchPPLParser.OUTPUT_AFTER);
                 }
                 break;
             case 57:
                 this.enterOuterAlt(localContext, 57);
                 {
-                this.state = 1082;
+                this.state = 1095;
                 this.match(OpenSearchPPLParser.TIME_DECAY);
                 }
                 break;
             case 58:
                 this.enterOuterAlt(localContext, 58);
                 {
-                this.state = 1083;
+                this.state = 1096;
                 this.match(OpenSearchPPLParser.ANOMALY_RATE);
                 }
                 break;
             case 59:
                 this.enterOuterAlt(localContext, 59);
                 {
-                this.state = 1084;
+                this.state = 1097;
                 this.match(OpenSearchPPLParser.CATEGORY_FIELD);
                 }
                 break;
             case 60:
                 this.enterOuterAlt(localContext, 60);
                 {
-                this.state = 1085;
+                this.state = 1098;
                 this.match(OpenSearchPPLParser.TIME_FIELD);
                 }
                 break;
             case 61:
                 this.enterOuterAlt(localContext, 61);
                 {
-                this.state = 1086;
+                this.state = 1099;
                 this.match(OpenSearchPPLParser.TIME_ZONE);
                 }
                 break;
             case 62:
                 this.enterOuterAlt(localContext, 62);
                 {
-                this.state = 1087;
+                this.state = 1100;
                 this.match(OpenSearchPPLParser.TRAINING_DATA_SIZE);
                 }
                 break;
             case 63:
                 this.enterOuterAlt(localContext, 63);
                 {
-                this.state = 1088;
+                this.state = 1101;
                 this.match(OpenSearchPPLParser.ANOMALY_SCORE_THRESHOLD);
                 }
                 break;
             case 64:
                 this.enterOuterAlt(localContext, 64);
                 {
-                this.state = 1089;
+                this.state = 1102;
                 this.match(OpenSearchPPLParser.AVG);
                 }
                 break;
             case 65:
                 this.enterOuterAlt(localContext, 65);
                 {
-                this.state = 1090;
+                this.state = 1103;
                 this.match(OpenSearchPPLParser.COUNT);
                 }
                 break;
             case 66:
                 this.enterOuterAlt(localContext, 66);
                 {
-                this.state = 1091;
+                this.state = 1104;
                 this.match(OpenSearchPPLParser.DISTINCT_COUNT);
                 }
                 break;
             case 67:
                 this.enterOuterAlt(localContext, 67);
                 {
-                this.state = 1092;
+                this.state = 1105;
                 this.match(OpenSearchPPLParser.ESTDC);
                 }
                 break;
             case 68:
                 this.enterOuterAlt(localContext, 68);
                 {
-                this.state = 1093;
+                this.state = 1106;
                 this.match(OpenSearchPPLParser.ESTDC_ERROR);
                 }
                 break;
             case 69:
                 this.enterOuterAlt(localContext, 69);
                 {
-                this.state = 1094;
+                this.state = 1107;
                 this.match(OpenSearchPPLParser.MAX);
                 }
                 break;
             case 70:
                 this.enterOuterAlt(localContext, 70);
                 {
-                this.state = 1095;
+                this.state = 1108;
                 this.match(OpenSearchPPLParser.MEAN);
                 }
                 break;
             case 71:
                 this.enterOuterAlt(localContext, 71);
                 {
-                this.state = 1096;
+                this.state = 1109;
                 this.match(OpenSearchPPLParser.MEDIAN);
                 }
                 break;
             case 72:
                 this.enterOuterAlt(localContext, 72);
                 {
-                this.state = 1097;
+                this.state = 1110;
                 this.match(OpenSearchPPLParser.MIN);
                 }
                 break;
             case 73:
                 this.enterOuterAlt(localContext, 73);
                 {
-                this.state = 1098;
+                this.state = 1111;
                 this.match(OpenSearchPPLParser.MODE);
                 }
                 break;
             case 74:
                 this.enterOuterAlt(localContext, 74);
                 {
-                this.state = 1099;
+                this.state = 1112;
                 this.match(OpenSearchPPLParser.RANGE);
                 }
                 break;
             case 75:
                 this.enterOuterAlt(localContext, 75);
                 {
-                this.state = 1100;
+                this.state = 1113;
                 this.match(OpenSearchPPLParser.STDEV);
                 }
                 break;
             case 76:
                 this.enterOuterAlt(localContext, 76);
                 {
-                this.state = 1101;
+                this.state = 1114;
                 this.match(OpenSearchPPLParser.STDEVP);
                 }
                 break;
             case 77:
                 this.enterOuterAlt(localContext, 77);
                 {
-                this.state = 1102;
+                this.state = 1115;
                 this.match(OpenSearchPPLParser.SUM);
                 }
                 break;
             case 78:
                 this.enterOuterAlt(localContext, 78);
                 {
-                this.state = 1103;
+                this.state = 1116;
                 this.match(OpenSearchPPLParser.SUMSQ);
                 }
                 break;
             case 79:
                 this.enterOuterAlt(localContext, 79);
                 {
-                this.state = 1104;
+                this.state = 1117;
                 this.match(OpenSearchPPLParser.VAR_SAMP);
                 }
                 break;
             case 80:
                 this.enterOuterAlt(localContext, 80);
                 {
-                this.state = 1105;
+                this.state = 1118;
                 this.match(OpenSearchPPLParser.VAR_POP);
                 }
                 break;
             case 81:
                 this.enterOuterAlt(localContext, 81);
                 {
-                this.state = 1106;
+                this.state = 1119;
                 this.match(OpenSearchPPLParser.STDDEV_SAMP);
                 }
                 break;
             case 82:
                 this.enterOuterAlt(localContext, 82);
                 {
-                this.state = 1107;
+                this.state = 1120;
                 this.match(OpenSearchPPLParser.STDDEV_POP);
                 }
                 break;
             case 83:
                 this.enterOuterAlt(localContext, 83);
                 {
-                this.state = 1108;
+                this.state = 1121;
                 this.match(OpenSearchPPLParser.PERCENTILE);
                 }
                 break;
             case 84:
                 this.enterOuterAlt(localContext, 84);
                 {
-                this.state = 1109;
+                this.state = 1122;
                 this.match(OpenSearchPPLParser.TAKE);
                 }
                 break;
             case 85:
                 this.enterOuterAlt(localContext, 85);
                 {
-                this.state = 1110;
+                this.state = 1123;
                 this.match(OpenSearchPPLParser.FIRST);
                 }
                 break;
             case 86:
                 this.enterOuterAlt(localContext, 86);
                 {
-                this.state = 1111;
+                this.state = 1124;
                 this.match(OpenSearchPPLParser.LAST);
                 }
                 break;
             case 87:
                 this.enterOuterAlt(localContext, 87);
                 {
-                this.state = 1112;
+                this.state = 1125;
                 this.match(OpenSearchPPLParser.LIST);
                 }
                 break;
             case 88:
                 this.enterOuterAlt(localContext, 88);
                 {
-                this.state = 1113;
+                this.state = 1126;
                 this.match(OpenSearchPPLParser.VALUES);
                 }
                 break;
             case 89:
                 this.enterOuterAlt(localContext, 89);
                 {
-                this.state = 1114;
+                this.state = 1127;
                 this.match(OpenSearchPPLParser.EARLIEST);
                 }
                 break;
             case 90:
                 this.enterOuterAlt(localContext, 90);
                 {
-                this.state = 1115;
+                this.state = 1128;
                 this.match(OpenSearchPPLParser.EARLIEST_TIME);
                 }
                 break;
             case 91:
                 this.enterOuterAlt(localContext, 91);
                 {
-                this.state = 1116;
+                this.state = 1129;
                 this.match(OpenSearchPPLParser.LATEST);
                 }
                 break;
             case 92:
                 this.enterOuterAlt(localContext, 92);
                 {
-                this.state = 1117;
+                this.state = 1130;
                 this.match(OpenSearchPPLParser.LATEST_TIME);
                 }
                 break;
             case 93:
                 this.enterOuterAlt(localContext, 93);
                 {
-                this.state = 1118;
+                this.state = 1131;
                 this.match(OpenSearchPPLParser.PER_DAY);
                 }
                 break;
             case 94:
                 this.enterOuterAlt(localContext, 94);
                 {
-                this.state = 1119;
+                this.state = 1132;
                 this.match(OpenSearchPPLParser.PER_HOUR);
                 }
                 break;
             case 95:
                 this.enterOuterAlt(localContext, 95);
                 {
-                this.state = 1120;
+                this.state = 1133;
                 this.match(OpenSearchPPLParser.PER_MINUTE);
                 }
                 break;
             case 96:
                 this.enterOuterAlt(localContext, 96);
                 {
-                this.state = 1121;
+                this.state = 1134;
                 this.match(OpenSearchPPLParser.PER_SECOND);
                 }
                 break;
             case 97:
                 this.enterOuterAlt(localContext, 97);
                 {
-                this.state = 1122;
+                this.state = 1135;
                 this.match(OpenSearchPPLParser.RATE);
                 }
                 break;
             case 98:
                 this.enterOuterAlt(localContext, 98);
                 {
-                this.state = 1123;
+                this.state = 1136;
                 this.match(OpenSearchPPLParser.SPARKLINE);
                 }
                 break;
             case 99:
                 this.enterOuterAlt(localContext, 99);
                 {
-                this.state = 1124;
+                this.state = 1137;
                 this.match(OpenSearchPPLParser.C);
                 }
                 break;
             case 100:
                 this.enterOuterAlt(localContext, 100);
                 {
-                this.state = 1125;
+                this.state = 1138;
                 this.match(OpenSearchPPLParser.DC);
                 }
                 break;
@@ -7099,7 +7291,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
     }
 
     public static readonly _serializedATN: number[] = [
-        4,1,336,1129,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,
+        4,1,336,1142,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,
         7,6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,
         13,2,14,7,14,2,15,7,15,2,16,7,16,2,17,7,17,2,18,7,18,2,19,7,19,2,
         20,7,20,2,21,7,21,2,22,7,22,2,23,7,23,2,24,7,24,2,25,7,25,2,26,7,
@@ -7120,72 +7312,73 @@ export class OpenSearchPPLParser extends antlr.Parser {
         8,0,1,0,1,0,1,1,1,1,1,2,1,2,1,3,1,3,1,3,5,3,241,8,3,10,3,12,3,244,
         9,3,1,4,1,4,1,4,3,4,249,8,4,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,
         1,5,1,5,1,5,1,5,1,5,1,5,1,5,3,5,267,8,5,1,6,3,6,270,8,6,1,6,1,6,
-        1,7,1,7,1,7,1,8,1,8,1,8,1,9,1,9,1,9,1,10,1,10,3,10,285,8,10,1,10,
-        1,10,1,11,1,11,1,11,1,11,5,11,293,8,11,10,11,12,11,296,9,11,1,12,
-        1,12,1,12,1,12,3,12,302,8,12,1,12,1,12,1,12,3,12,307,8,12,1,12,1,
-        12,1,12,3,12,312,8,12,1,12,1,12,1,12,5,12,317,8,12,10,12,12,12,320,
-        9,12,1,12,3,12,323,8,12,1,12,1,12,1,12,3,12,328,8,12,1,13,1,13,3,
-        13,332,8,13,1,13,1,13,1,13,1,13,3,13,338,8,13,1,13,1,13,1,13,3,13,
-        343,8,13,1,14,1,14,1,14,1,15,1,15,1,15,1,15,5,15,352,8,15,10,15,
-        12,15,355,9,15,1,16,1,16,3,16,359,8,16,1,16,1,16,3,16,363,8,16,1,
-        17,1,17,3,17,367,8,17,1,17,1,17,3,17,371,8,17,1,18,1,18,1,18,3,18,
-        376,8,18,1,19,1,19,1,19,1,19,1,20,1,20,1,20,1,20,1,21,1,21,5,21,
-        388,8,21,10,21,12,21,391,9,21,1,21,1,21,1,22,1,22,1,22,1,22,1,22,
-        1,22,3,22,401,8,22,1,23,1,23,1,24,1,24,5,24,407,8,24,10,24,12,24,
-        410,9,24,1,25,1,25,1,25,1,25,1,25,1,25,1,25,1,25,1,25,3,25,421,8,
-        25,1,26,1,26,5,26,425,8,26,10,26,12,26,428,9,26,1,27,1,27,1,27,1,
+        3,6,274,8,6,1,6,1,6,1,6,1,6,3,6,280,8,6,1,6,1,6,1,6,3,6,285,8,6,
+        1,7,1,7,1,7,1,8,1,8,1,8,1,9,1,9,1,9,1,10,1,10,3,10,298,8,10,1,10,
+        1,10,1,11,1,11,1,11,1,11,5,11,306,8,11,10,11,12,11,309,9,11,1,12,
+        1,12,1,12,1,12,3,12,315,8,12,1,12,1,12,1,12,3,12,320,8,12,1,12,1,
+        12,1,12,3,12,325,8,12,1,12,1,12,1,12,5,12,330,8,12,10,12,12,12,333,
+        9,12,1,12,3,12,336,8,12,1,12,1,12,1,12,3,12,341,8,12,1,13,1,13,3,
+        13,345,8,13,1,13,1,13,1,13,1,13,3,13,351,8,13,1,13,1,13,1,13,3,13,
+        356,8,13,1,14,1,14,1,14,1,15,1,15,1,15,1,15,5,15,365,8,15,10,15,
+        12,15,368,9,15,1,16,1,16,3,16,372,8,16,1,16,1,16,3,16,376,8,16,1,
+        17,1,17,3,17,380,8,17,1,17,1,17,3,17,384,8,17,1,18,1,18,1,18,3,18,
+        389,8,18,1,19,1,19,1,19,1,19,1,20,1,20,1,20,1,20,1,21,1,21,5,21,
+        401,8,21,10,21,12,21,404,9,21,1,21,1,21,1,22,1,22,1,22,1,22,1,22,
+        1,22,3,22,414,8,22,1,23,1,23,1,24,1,24,5,24,420,8,24,10,24,12,24,
+        423,9,24,1,25,1,25,1,25,1,25,1,25,1,25,1,25,1,25,1,25,3,25,434,8,
+        25,1,26,1,26,5,26,438,8,26,10,26,12,26,441,9,26,1,27,1,27,1,27,1,
         27,1,27,1,27,1,27,1,27,1,27,1,27,1,27,1,27,1,27,1,27,1,27,1,27,1,
         27,1,27,1,27,1,27,1,27,1,27,1,27,1,27,1,27,1,27,1,27,1,27,1,27,1,
-        27,1,27,1,27,1,27,1,27,1,27,1,27,3,27,466,8,27,1,28,1,28,5,28,470,
-        8,28,10,28,12,28,473,9,28,1,29,1,29,1,29,1,29,1,30,1,30,1,30,1,30,
-        1,30,1,30,3,30,485,8,30,1,31,1,31,1,32,1,32,1,32,1,32,1,33,1,33,
-        1,33,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,3,34,505,8,34,
-        1,35,1,35,1,35,3,35,510,8,35,1,36,1,36,1,36,1,36,1,36,1,36,3,36,
-        518,8,36,1,36,1,36,1,37,1,37,1,37,5,37,525,8,37,10,37,12,37,528,
-        9,37,1,38,1,38,1,38,1,38,1,39,1,39,1,39,3,39,537,8,39,1,40,1,40,
+        27,1,27,1,27,1,27,1,27,1,27,1,27,3,27,479,8,27,1,28,1,28,5,28,483,
+        8,28,10,28,12,28,486,9,28,1,29,1,29,1,29,1,29,1,30,1,30,1,30,1,30,
+        1,30,1,30,3,30,498,8,30,1,31,1,31,1,32,1,32,1,32,1,32,1,33,1,33,
+        1,33,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,1,34,3,34,518,8,34,
+        1,35,1,35,1,35,3,35,523,8,35,1,36,1,36,1,36,1,36,1,36,1,36,3,36,
+        531,8,36,1,36,1,36,1,37,1,37,1,37,5,37,538,8,37,10,37,12,37,541,
+        9,37,1,38,1,38,1,38,1,38,1,39,1,39,1,39,3,39,550,8,39,1,40,1,40,
         1,40,1,40,1,40,1,40,1,40,1,40,1,40,1,40,1,40,1,40,1,40,1,40,1,40,
-        3,40,554,8,40,1,41,1,41,1,42,1,42,1,42,1,42,1,42,3,42,563,8,42,1,
+        3,40,567,8,40,1,41,1,41,1,42,1,42,1,42,1,42,1,42,3,42,576,8,42,1,
         42,1,42,1,43,1,43,1,43,1,43,1,43,1,43,1,43,1,43,1,44,1,44,1,44,3,
-        44,578,8,44,1,45,1,45,1,45,1,45,1,45,1,45,3,45,586,8,45,1,45,1,45,
-        1,45,1,45,1,45,3,45,593,8,45,1,45,1,45,1,45,1,45,5,45,599,8,45,10,
-        45,12,45,602,9,45,1,46,1,46,1,46,1,46,1,46,1,46,1,46,1,46,3,46,612,
-        8,46,1,47,1,47,1,47,1,47,1,47,1,47,1,47,1,47,1,47,1,47,3,47,624,
-        8,47,1,47,1,47,1,47,1,47,1,47,1,47,5,47,632,8,47,10,47,12,47,635,
-        9,47,1,48,1,48,1,48,1,48,3,48,641,8,48,1,49,1,49,1,49,1,49,1,49,
-        1,49,1,49,1,50,1,50,1,51,1,51,3,51,654,8,51,1,52,1,52,1,52,1,52,
-        1,52,1,52,1,52,5,52,663,8,52,10,52,12,52,666,9,52,1,52,1,52,1,53,
-        1,53,1,53,1,53,1,53,1,53,5,53,676,8,53,10,53,12,53,679,9,53,1,53,
-        1,53,1,53,1,53,1,53,5,53,686,8,53,10,53,12,53,689,9,53,1,53,1,53,
-        1,54,1,54,3,54,695,8,54,1,55,1,55,1,55,1,55,1,55,1,56,1,56,1,56,
-        5,56,705,8,56,10,56,12,56,708,9,56,1,57,1,57,1,57,5,57,713,8,57,
-        10,57,12,57,716,9,57,1,58,3,58,719,8,58,1,58,1,58,1,59,1,59,1,59,
+        44,591,8,44,1,45,1,45,1,45,1,45,1,45,1,45,3,45,599,8,45,1,45,1,45,
+        1,45,1,45,1,45,3,45,606,8,45,1,45,1,45,1,45,1,45,5,45,612,8,45,10,
+        45,12,45,615,9,45,1,46,1,46,1,46,1,46,1,46,1,46,1,46,1,46,3,46,625,
+        8,46,1,47,1,47,1,47,1,47,1,47,1,47,1,47,1,47,1,47,1,47,3,47,637,
+        8,47,1,47,1,47,1,47,1,47,1,47,1,47,5,47,645,8,47,10,47,12,47,648,
+        9,47,1,48,1,48,1,48,1,48,3,48,654,8,48,1,49,1,49,1,49,1,49,1,49,
+        1,49,1,49,1,50,1,50,1,51,1,51,3,51,667,8,51,1,52,1,52,1,52,1,52,
+        1,52,1,52,1,52,5,52,676,8,52,10,52,12,52,679,9,52,1,52,1,52,1,53,
+        1,53,1,53,1,53,1,53,1,53,5,53,689,8,53,10,53,12,53,692,9,53,1,53,
+        1,53,1,53,1,53,1,53,5,53,699,8,53,10,53,12,53,702,9,53,1,53,1,53,
+        1,54,1,54,3,54,708,8,54,1,55,1,55,1,55,1,55,1,55,1,56,1,56,1,56,
+        5,56,718,8,56,10,56,12,56,721,9,56,1,57,1,57,1,57,5,57,726,8,57,
+        10,57,12,57,729,9,57,1,58,3,58,732,8,58,1,58,1,58,1,59,1,59,1,59,
         1,59,1,59,1,59,1,59,1,59,1,59,1,59,1,59,1,59,1,59,1,59,1,59,1,59,
-        1,59,1,59,1,59,1,59,1,59,3,59,744,8,59,1,60,1,60,1,61,1,61,1,62,
+        1,59,1,59,1,59,1,59,1,59,3,59,757,8,59,1,60,1,60,1,61,1,61,1,62,
         1,62,1,62,1,62,1,62,1,63,1,63,1,63,1,63,1,63,1,63,1,63,1,64,1,64,
         1,64,1,64,1,64,1,65,1,65,1,65,1,65,1,65,1,65,1,65,1,65,1,65,1,65,
-        3,65,777,8,65,1,66,1,66,1,66,1,66,1,66,1,66,3,66,785,8,66,1,67,1,
-        67,1,67,5,67,790,8,67,10,67,12,67,793,9,67,3,67,795,8,67,1,68,1,
-        68,1,68,3,68,800,8,68,1,68,1,68,1,69,1,69,1,69,1,69,1,70,1,70,1,
-        71,1,71,1,71,1,71,1,71,1,71,1,71,1,71,3,71,818,8,71,1,72,1,72,3,
-        72,822,8,72,1,73,1,73,3,73,826,8,73,1,74,1,74,1,75,1,75,3,75,832,
+        3,65,790,8,65,1,66,1,66,1,66,1,66,1,66,1,66,3,66,798,8,66,1,67,1,
+        67,1,67,5,67,803,8,67,10,67,12,67,806,9,67,3,67,808,8,67,1,68,1,
+        68,1,68,3,68,813,8,68,1,68,1,68,1,69,1,69,1,69,1,69,1,70,1,70,1,
+        71,1,71,1,71,1,71,1,71,1,71,1,71,1,71,3,71,831,8,71,1,72,1,72,3,
+        72,835,8,72,1,73,1,73,3,73,839,8,73,1,74,1,74,1,75,1,75,3,75,845,
         8,75,1,76,1,76,1,76,1,76,1,76,1,76,1,76,1,76,1,76,1,76,1,76,1,76,
-        1,76,1,76,1,76,1,76,1,76,1,76,1,76,1,76,1,76,1,76,1,76,3,76,857,
+        1,76,1,76,1,76,1,76,1,76,1,76,1,76,1,76,1,76,1,76,1,76,3,76,870,
         8,76,1,77,1,77,1,78,1,78,1,79,1,79,1,79,1,79,1,79,1,79,1,79,1,80,
         1,80,1,81,1,81,1,81,1,81,1,81,1,81,1,81,1,82,1,82,1,83,1,83,1,84,
-        1,84,3,84,885,8,84,1,85,1,85,1,85,1,85,1,85,1,85,1,85,1,85,1,85,
+        1,84,3,84,898,8,84,1,85,1,85,1,85,1,85,1,85,1,85,1,85,1,85,1,85,
         1,86,1,86,1,87,1,87,1,88,1,88,1,89,1,89,1,90,1,90,1,91,1,91,1,92,
-        1,92,1,93,1,93,1,94,1,94,1,94,1,94,1,94,1,94,3,94,918,8,94,1,95,
-        1,95,1,95,1,95,1,96,1,96,1,97,3,97,927,8,97,1,97,1,97,1,98,3,98,
-        932,8,98,1,98,1,98,1,99,1,99,1,100,1,100,1,100,3,100,941,8,100,1,
+        1,92,1,93,1,93,1,94,1,94,1,94,1,94,1,94,1,94,3,94,931,8,94,1,95,
+        1,95,1,95,1,95,1,96,1,96,1,97,3,97,940,8,97,1,97,1,97,1,98,3,98,
+        945,8,98,1,98,1,98,1,99,1,99,1,100,1,100,1,100,3,100,954,8,100,1,
         101,1,101,1,101,1,102,1,102,1,102,1,103,1,103,1,103,1,104,1,104,
-        1,105,1,105,1,106,1,106,1,106,1,106,5,106,960,8,106,10,106,12,106,
-        963,9,106,1,106,1,106,1,107,1,107,1,108,1,108,1,108,5,108,972,8,
-        108,10,108,12,108,975,9,108,1,109,1,109,1,109,5,109,980,8,109,10,
-        109,12,109,983,9,109,1,110,3,110,986,8,110,1,110,1,110,1,110,1,110,
-        1,110,1,110,1,110,3,110,995,8,110,1,111,3,111,998,8,111,1,111,1,
-        111,1,112,1,112,1,112,5,112,1005,8,112,10,112,12,112,1008,9,112,
-        1,112,3,112,1011,8,112,1,112,1,112,1,112,1,112,1,112,1,112,1,112,
-        1,112,1,112,1,112,1,112,1,112,3,112,1025,8,112,1,113,1,113,1,113,
+        1,105,1,105,1,106,1,106,1,106,1,106,5,106,973,8,106,10,106,12,106,
+        976,9,106,1,106,1,106,1,107,1,107,1,108,1,108,1,108,5,108,985,8,
+        108,10,108,12,108,988,9,108,1,109,1,109,1,109,5,109,993,8,109,10,
+        109,12,109,996,9,109,1,110,3,110,999,8,110,1,110,1,110,1,110,1,110,
+        1,110,1,110,1,110,3,110,1008,8,110,1,111,3,111,1011,8,111,1,111,
+        1,111,1,112,1,112,1,112,5,112,1018,8,112,10,112,12,112,1021,9,112,
+        1,112,3,112,1024,8,112,1,112,1,112,1,112,1,112,1,112,1,112,1,112,
+        1,112,1,112,1,112,1,112,1,112,3,112,1038,8,112,1,113,1,113,1,113,
         1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,
         1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,
         1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,
@@ -7194,7 +7387,7 @@ export class OpenSearchPPLParser extends antlr.Parser {
         1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,
         1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,
         1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,
-        1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,3,113,1127,
+        1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,1,113,3,113,1140,
         8,113,1,113,0,2,90,94,114,0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,
         30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,
         74,76,78,80,82,84,86,88,90,92,94,96,98,100,102,104,106,108,110,112,
@@ -7210,35 +7403,35 @@ export class OpenSearchPPLParser extends antlr.Parser {
         93,93,98,98,1,0,244,245,1,0,275,280,2,0,256,260,262,273,2,0,67,67,
         112,117,1,0,282,285,1,0,286,288,1,0,333,334,1,0,65,66,9,0,70,73,
         75,78,80,80,82,82,84,85,88,89,91,93,95,95,97,98,9,0,31,31,70,70,
-        76,76,83,84,89,89,91,92,95,95,97,97,321,327,1279,0,229,1,0,0,0,2,
+        76,76,83,84,89,89,91,92,95,95,97,97,321,327,1296,0,229,1,0,0,0,2,
         233,1,0,0,0,4,235,1,0,0,0,6,237,1,0,0,0,8,248,1,0,0,0,10,266,1,0,
-        0,0,12,269,1,0,0,0,14,273,1,0,0,0,16,276,1,0,0,0,18,279,1,0,0,0,
-        20,282,1,0,0,0,22,288,1,0,0,0,24,297,1,0,0,0,26,329,1,0,0,0,28,344,
-        1,0,0,0,30,347,1,0,0,0,32,356,1,0,0,0,34,364,1,0,0,0,36,372,1,0,
-        0,0,38,377,1,0,0,0,40,381,1,0,0,0,42,385,1,0,0,0,44,400,1,0,0,0,
-        46,402,1,0,0,0,48,404,1,0,0,0,50,420,1,0,0,0,52,422,1,0,0,0,54,465,
-        1,0,0,0,56,467,1,0,0,0,58,474,1,0,0,0,60,484,1,0,0,0,62,486,1,0,
-        0,0,64,488,1,0,0,0,66,492,1,0,0,0,68,504,1,0,0,0,70,506,1,0,0,0,
-        72,511,1,0,0,0,74,521,1,0,0,0,76,529,1,0,0,0,78,533,1,0,0,0,80,553,
-        1,0,0,0,82,555,1,0,0,0,84,557,1,0,0,0,86,566,1,0,0,0,88,577,1,0,
-        0,0,90,585,1,0,0,0,92,611,1,0,0,0,94,623,1,0,0,0,96,640,1,0,0,0,
-        98,642,1,0,0,0,100,649,1,0,0,0,102,653,1,0,0,0,104,655,1,0,0,0,106,
-        669,1,0,0,0,108,694,1,0,0,0,110,696,1,0,0,0,112,701,1,0,0,0,114,
-        709,1,0,0,0,116,718,1,0,0,0,118,743,1,0,0,0,120,745,1,0,0,0,122,
-        747,1,0,0,0,124,749,1,0,0,0,126,754,1,0,0,0,128,761,1,0,0,0,130,
-        776,1,0,0,0,132,784,1,0,0,0,134,794,1,0,0,0,136,799,1,0,0,0,138,
-        803,1,0,0,0,140,807,1,0,0,0,142,817,1,0,0,0,144,821,1,0,0,0,146,
-        825,1,0,0,0,148,827,1,0,0,0,150,831,1,0,0,0,152,856,1,0,0,0,154,
-        858,1,0,0,0,156,860,1,0,0,0,158,862,1,0,0,0,160,869,1,0,0,0,162,
-        871,1,0,0,0,164,878,1,0,0,0,166,880,1,0,0,0,168,884,1,0,0,0,170,
-        886,1,0,0,0,172,895,1,0,0,0,174,897,1,0,0,0,176,899,1,0,0,0,178,
-        901,1,0,0,0,180,903,1,0,0,0,182,905,1,0,0,0,184,907,1,0,0,0,186,
-        909,1,0,0,0,188,917,1,0,0,0,190,919,1,0,0,0,192,923,1,0,0,0,194,
-        926,1,0,0,0,196,931,1,0,0,0,198,935,1,0,0,0,200,940,1,0,0,0,202,
-        942,1,0,0,0,204,945,1,0,0,0,206,948,1,0,0,0,208,951,1,0,0,0,210,
-        953,1,0,0,0,212,955,1,0,0,0,214,966,1,0,0,0,216,968,1,0,0,0,218,
-        976,1,0,0,0,220,994,1,0,0,0,222,997,1,0,0,0,224,1024,1,0,0,0,226,
-        1126,1,0,0,0,228,230,3,2,1,0,229,228,1,0,0,0,229,230,1,0,0,0,230,
+        0,0,12,284,1,0,0,0,14,286,1,0,0,0,16,289,1,0,0,0,18,292,1,0,0,0,
+        20,295,1,0,0,0,22,301,1,0,0,0,24,310,1,0,0,0,26,342,1,0,0,0,28,357,
+        1,0,0,0,30,360,1,0,0,0,32,369,1,0,0,0,34,377,1,0,0,0,36,385,1,0,
+        0,0,38,390,1,0,0,0,40,394,1,0,0,0,42,398,1,0,0,0,44,413,1,0,0,0,
+        46,415,1,0,0,0,48,417,1,0,0,0,50,433,1,0,0,0,52,435,1,0,0,0,54,478,
+        1,0,0,0,56,480,1,0,0,0,58,487,1,0,0,0,60,497,1,0,0,0,62,499,1,0,
+        0,0,64,501,1,0,0,0,66,505,1,0,0,0,68,517,1,0,0,0,70,519,1,0,0,0,
+        72,524,1,0,0,0,74,534,1,0,0,0,76,542,1,0,0,0,78,546,1,0,0,0,80,566,
+        1,0,0,0,82,568,1,0,0,0,84,570,1,0,0,0,86,579,1,0,0,0,88,590,1,0,
+        0,0,90,598,1,0,0,0,92,624,1,0,0,0,94,636,1,0,0,0,96,653,1,0,0,0,
+        98,655,1,0,0,0,100,662,1,0,0,0,102,666,1,0,0,0,104,668,1,0,0,0,106,
+        682,1,0,0,0,108,707,1,0,0,0,110,709,1,0,0,0,112,714,1,0,0,0,114,
+        722,1,0,0,0,116,731,1,0,0,0,118,756,1,0,0,0,120,758,1,0,0,0,122,
+        760,1,0,0,0,124,762,1,0,0,0,126,767,1,0,0,0,128,774,1,0,0,0,130,
+        789,1,0,0,0,132,797,1,0,0,0,134,807,1,0,0,0,136,812,1,0,0,0,138,
+        816,1,0,0,0,140,820,1,0,0,0,142,830,1,0,0,0,144,834,1,0,0,0,146,
+        838,1,0,0,0,148,840,1,0,0,0,150,844,1,0,0,0,152,869,1,0,0,0,154,
+        871,1,0,0,0,156,873,1,0,0,0,158,875,1,0,0,0,160,882,1,0,0,0,162,
+        884,1,0,0,0,164,891,1,0,0,0,166,893,1,0,0,0,168,897,1,0,0,0,170,
+        899,1,0,0,0,172,908,1,0,0,0,174,910,1,0,0,0,176,912,1,0,0,0,178,
+        914,1,0,0,0,180,916,1,0,0,0,182,918,1,0,0,0,184,920,1,0,0,0,186,
+        922,1,0,0,0,188,930,1,0,0,0,190,932,1,0,0,0,192,936,1,0,0,0,194,
+        939,1,0,0,0,196,944,1,0,0,0,198,948,1,0,0,0,200,953,1,0,0,0,202,
+        955,1,0,0,0,204,958,1,0,0,0,206,961,1,0,0,0,208,964,1,0,0,0,210,
+        966,1,0,0,0,212,968,1,0,0,0,214,979,1,0,0,0,216,981,1,0,0,0,218,
+        989,1,0,0,0,220,1007,1,0,0,0,222,1010,1,0,0,0,224,1037,1,0,0,0,226,
+        1139,1,0,0,0,228,230,3,2,1,0,229,228,1,0,0,0,229,230,1,0,0,0,230,
         231,1,0,0,0,231,232,5,0,0,1,232,1,1,0,0,0,233,234,3,4,2,0,234,3,
         1,0,0,0,235,236,3,6,3,0,236,5,1,0,0,0,237,242,3,8,4,0,238,239,5,
         109,0,0,239,241,3,10,5,0,240,238,1,0,0,0,241,244,1,0,0,0,242,240,
@@ -7254,307 +7447,312 @@ export class OpenSearchPPLParser extends antlr.Parser {
         266,258,1,0,0,0,266,259,1,0,0,0,266,260,1,0,0,0,266,261,1,0,0,0,
         266,262,1,0,0,0,266,263,1,0,0,0,266,264,1,0,0,0,266,265,1,0,0,0,
         267,11,1,0,0,0,268,270,5,2,0,0,269,268,1,0,0,0,269,270,1,0,0,0,270,
-        271,1,0,0,0,271,272,3,60,30,0,272,13,1,0,0,0,273,274,5,3,0,0,274,
-        275,3,62,31,0,275,15,1,0,0,0,276,277,5,4,0,0,277,278,5,33,0,0,278,
-        17,1,0,0,0,279,280,5,6,0,0,280,281,3,90,45,0,281,19,1,0,0,0,282,
-        284,5,7,0,0,283,285,7,0,0,0,284,283,1,0,0,0,284,285,1,0,0,0,285,
-        286,1,0,0,0,286,287,3,112,56,0,287,21,1,0,0,0,288,289,5,8,0,0,289,
-        294,3,64,32,0,290,291,5,110,0,0,291,293,3,64,32,0,292,290,1,0,0,
-        0,293,296,1,0,0,0,294,292,1,0,0,0,294,295,1,0,0,0,295,23,1,0,0,0,
-        296,294,1,0,0,0,297,301,5,9,0,0,298,299,5,42,0,0,299,300,5,112,0,
-        0,300,302,3,194,97,0,301,298,1,0,0,0,301,302,1,0,0,0,302,306,1,0,
-        0,0,303,304,5,43,0,0,304,305,5,112,0,0,305,307,3,198,99,0,306,303,
-        1,0,0,0,306,307,1,0,0,0,307,311,1,0,0,0,308,309,5,44,0,0,309,310,
-        5,112,0,0,310,312,3,192,96,0,311,308,1,0,0,0,311,312,1,0,0,0,312,
-        313,1,0,0,0,313,318,3,78,39,0,314,315,5,110,0,0,315,317,3,78,39,
-        0,316,314,1,0,0,0,317,320,1,0,0,0,318,316,1,0,0,0,318,319,1,0,0,
-        0,319,322,1,0,0,0,320,318,1,0,0,0,321,323,3,68,34,0,322,321,1,0,
-        0,0,322,323,1,0,0,0,323,327,1,0,0,0,324,325,5,41,0,0,325,326,5,112,
-        0,0,326,328,3,198,99,0,327,324,1,0,0,0,327,328,1,0,0,0,328,25,1,
-        0,0,0,329,331,5,10,0,0,330,332,3,194,97,0,331,330,1,0,0,0,331,332,
-        1,0,0,0,332,333,1,0,0,0,333,337,3,112,56,0,334,335,5,39,0,0,335,
-        336,5,112,0,0,336,338,3,198,99,0,337,334,1,0,0,0,337,338,1,0,0,0,
-        338,342,1,0,0,0,339,340,5,40,0,0,340,341,5,112,0,0,341,343,3,198,
-        99,0,342,339,1,0,0,0,342,343,1,0,0,0,343,27,1,0,0,0,344,345,5,11,
-        0,0,345,346,3,74,37,0,346,29,1,0,0,0,347,348,5,12,0,0,348,353,3,
-        76,38,0,349,350,5,110,0,0,350,352,3,76,38,0,351,349,1,0,0,0,352,
-        355,1,0,0,0,353,351,1,0,0,0,353,354,1,0,0,0,354,31,1,0,0,0,355,353,
-        1,0,0,0,356,358,5,13,0,0,357,359,3,194,97,0,358,357,1,0,0,0,358,
-        359,1,0,0,0,359,362,1,0,0,0,360,361,5,5,0,0,361,363,3,194,97,0,362,
-        360,1,0,0,0,362,363,1,0,0,0,363,33,1,0,0,0,364,366,5,14,0,0,365,
-        367,3,194,97,0,366,365,1,0,0,0,366,367,1,0,0,0,367,368,1,0,0,0,368,
-        370,3,112,56,0,369,371,3,66,33,0,370,369,1,0,0,0,370,371,1,0,0,0,
-        371,35,1,0,0,0,372,373,5,15,0,0,373,375,3,112,56,0,374,376,3,66,
-        33,0,375,374,1,0,0,0,375,376,1,0,0,0,376,37,1,0,0,0,377,378,5,20,
-        0,0,378,379,3,88,44,0,379,380,3,192,96,0,380,39,1,0,0,0,381,382,
-        5,16,0,0,382,383,3,88,44,0,383,384,3,192,96,0,384,41,1,0,0,0,385,
-        389,5,22,0,0,386,388,3,44,22,0,387,386,1,0,0,0,388,391,1,0,0,0,389,
-        387,1,0,0,0,389,390,1,0,0,0,390,392,1,0,0,0,391,389,1,0,0,0,392,
-        393,3,88,44,0,393,43,1,0,0,0,394,395,5,23,0,0,395,396,5,112,0,0,
-        396,401,3,192,96,0,397,398,5,21,0,0,398,399,5,112,0,0,399,401,3,
-        192,96,0,400,394,1,0,0,0,400,397,1,0,0,0,401,45,1,0,0,0,402,403,
-        7,1,0,0,403,47,1,0,0,0,404,408,5,24,0,0,405,407,3,50,25,0,406,405,
-        1,0,0,0,407,410,1,0,0,0,408,406,1,0,0,0,408,409,1,0,0,0,409,49,1,
-        0,0,0,410,408,1,0,0,0,411,412,5,45,0,0,412,413,5,112,0,0,413,421,
-        3,194,97,0,414,415,5,46,0,0,415,416,5,112,0,0,416,421,3,194,97,0,
-        417,418,5,47,0,0,418,419,5,112,0,0,419,421,3,192,96,0,420,411,1,
-        0,0,0,420,414,1,0,0,0,420,417,1,0,0,0,421,51,1,0,0,0,422,426,5,25,
-        0,0,423,425,3,54,27,0,424,423,1,0,0,0,425,428,1,0,0,0,426,424,1,
-        0,0,0,426,427,1,0,0,0,427,53,1,0,0,0,428,426,1,0,0,0,429,430,5,48,
-        0,0,430,431,5,112,0,0,431,466,3,194,97,0,432,433,5,49,0,0,433,434,
-        5,112,0,0,434,466,3,194,97,0,435,436,5,50,0,0,436,437,5,112,0,0,
-        437,466,3,194,97,0,438,439,5,51,0,0,439,440,5,112,0,0,440,466,3,
-        194,97,0,441,442,5,52,0,0,442,443,5,112,0,0,443,466,3,196,98,0,444,
-        445,5,53,0,0,445,446,5,112,0,0,446,466,3,196,98,0,447,448,5,54,0,
-        0,448,449,5,112,0,0,449,466,3,192,96,0,450,451,5,55,0,0,451,452,
-        5,112,0,0,452,466,3,192,96,0,453,454,5,215,0,0,454,455,5,112,0,0,
-        455,466,3,192,96,0,456,457,5,56,0,0,457,458,5,112,0,0,458,466,3,
-        192,96,0,459,460,5,57,0,0,460,461,5,112,0,0,461,466,3,194,97,0,462,
-        463,5,58,0,0,463,464,5,112,0,0,464,466,3,196,98,0,465,429,1,0,0,
-        0,465,432,1,0,0,0,465,435,1,0,0,0,465,438,1,0,0,0,465,441,1,0,0,
-        0,465,444,1,0,0,0,465,447,1,0,0,0,465,450,1,0,0,0,465,453,1,0,0,
-        0,465,456,1,0,0,0,465,459,1,0,0,0,465,462,1,0,0,0,466,55,1,0,0,0,
-        467,471,5,26,0,0,468,470,3,58,29,0,469,468,1,0,0,0,470,473,1,0,0,
-        0,471,469,1,0,0,0,471,472,1,0,0,0,472,57,1,0,0,0,473,471,1,0,0,0,
-        474,475,3,220,110,0,475,476,5,112,0,0,476,477,3,188,94,0,477,59,
-        1,0,0,0,478,479,5,29,0,0,479,480,5,112,0,0,480,485,3,62,31,0,481,
-        482,5,30,0,0,482,483,5,112,0,0,483,485,3,62,31,0,484,478,1,0,0,0,
-        484,481,1,0,0,0,485,61,1,0,0,0,486,487,3,108,54,0,487,63,1,0,0,0,
-        488,489,3,122,61,0,489,490,5,27,0,0,490,491,3,122,61,0,491,65,1,
-        0,0,0,492,493,5,28,0,0,493,494,3,112,56,0,494,67,1,0,0,0,495,496,
-        5,28,0,0,496,505,3,112,56,0,497,498,5,28,0,0,498,505,3,70,35,0,499,
-        500,5,28,0,0,500,501,3,70,35,0,501,502,5,110,0,0,502,503,3,112,56,
-        0,503,505,1,0,0,0,504,495,1,0,0,0,504,497,1,0,0,0,504,499,1,0,0,
-        0,505,69,1,0,0,0,506,509,3,72,36,0,507,508,5,27,0,0,508,510,3,214,
-        107,0,509,507,1,0,0,0,509,510,1,0,0,0,510,71,1,0,0,0,511,512,5,320,
-        0,0,512,513,5,125,0,0,513,514,3,120,60,0,514,515,5,110,0,0,515,517,
-        3,188,94,0,516,518,3,210,105,0,517,516,1,0,0,0,517,518,1,0,0,0,518,
-        519,1,0,0,0,519,520,5,126,0,0,520,73,1,0,0,0,521,526,3,116,58,0,
-        522,523,5,110,0,0,523,525,3,116,58,0,524,522,1,0,0,0,525,528,1,0,
-        0,0,526,524,1,0,0,0,526,527,1,0,0,0,527,75,1,0,0,0,528,526,1,0,0,
-        0,529,530,3,120,60,0,530,531,5,112,0,0,531,532,3,88,44,0,532,77,
-        1,0,0,0,533,536,3,80,40,0,534,535,5,27,0,0,535,537,3,122,61,0,536,
-        534,1,0,0,0,536,537,1,0,0,0,537,79,1,0,0,0,538,539,3,82,41,0,539,
-        540,5,125,0,0,540,541,3,94,47,0,541,542,5,126,0,0,542,554,1,0,0,
-        0,543,544,5,136,0,0,544,545,5,125,0,0,545,554,5,126,0,0,546,547,
-        7,2,0,0,547,548,5,125,0,0,548,549,3,94,47,0,549,550,5,126,0,0,550,
-        554,1,0,0,0,551,554,3,86,43,0,552,554,3,84,42,0,553,538,1,0,0,0,
-        553,543,1,0,0,0,553,546,1,0,0,0,553,551,1,0,0,0,553,552,1,0,0,0,
-        554,81,1,0,0,0,555,556,7,3,0,0,556,83,1,0,0,0,557,558,5,155,0,0,
-        558,559,5,125,0,0,559,562,3,120,60,0,560,561,5,110,0,0,561,563,3,
-        194,97,0,562,560,1,0,0,0,562,563,1,0,0,0,563,564,1,0,0,0,564,565,
-        5,126,0,0,565,85,1,0,0,0,566,567,5,154,0,0,567,568,5,114,0,0,568,
-        569,3,194,97,0,569,570,5,113,0,0,570,571,5,125,0,0,571,572,3,120,
-        60,0,572,573,5,126,0,0,573,87,1,0,0,0,574,578,3,90,45,0,575,578,
-        3,92,46,0,576,578,3,94,47,0,577,574,1,0,0,0,577,575,1,0,0,0,577,
-        576,1,0,0,0,578,89,1,0,0,0,579,580,6,45,-1,0,580,586,3,92,46,0,581,
-        582,5,61,0,0,582,586,3,90,45,6,583,586,3,100,50,0,584,586,3,102,
-        51,0,585,579,1,0,0,0,585,581,1,0,0,0,585,583,1,0,0,0,585,584,1,0,
-        0,0,586,600,1,0,0,0,587,588,10,5,0,0,588,589,5,62,0,0,589,599,3,
-        90,45,6,590,592,10,4,0,0,591,593,5,63,0,0,592,591,1,0,0,0,592,593,
-        1,0,0,0,593,594,1,0,0,0,594,599,3,90,45,5,595,596,10,3,0,0,596,597,
-        5,64,0,0,597,599,3,90,45,4,598,587,1,0,0,0,598,590,1,0,0,0,598,595,
-        1,0,0,0,599,602,1,0,0,0,600,598,1,0,0,0,600,601,1,0,0,0,601,91,1,
-        0,0,0,602,600,1,0,0,0,603,604,3,94,47,0,604,605,3,182,91,0,605,606,
-        3,94,47,0,606,612,1,0,0,0,607,608,3,94,47,0,608,609,5,60,0,0,609,
-        610,3,212,106,0,610,612,1,0,0,0,611,603,1,0,0,0,611,607,1,0,0,0,
-        612,93,1,0,0,0,613,614,6,47,-1,0,614,624,3,96,48,0,615,624,3,98,
-        49,0,616,624,3,162,81,0,617,624,3,158,79,0,618,624,3,170,85,0,619,
-        620,5,125,0,0,620,621,3,94,47,0,621,622,5,126,0,0,622,624,1,0,0,
-        0,623,613,1,0,0,0,623,615,1,0,0,0,623,616,1,0,0,0,623,617,1,0,0,
-        0,623,618,1,0,0,0,623,619,1,0,0,0,624,633,1,0,0,0,625,626,10,8,0,
-        0,626,627,7,4,0,0,627,632,3,94,47,9,628,629,10,7,0,0,629,630,7,0,
-        0,0,630,632,3,94,47,8,631,625,1,0,0,0,631,628,1,0,0,0,632,635,1,
-        0,0,0,633,631,1,0,0,0,633,634,1,0,0,0,634,95,1,0,0,0,635,633,1,0,
-        0,0,636,641,3,124,62,0,637,641,3,126,63,0,638,641,3,120,60,0,639,
-        641,3,188,94,0,640,636,1,0,0,0,640,637,1,0,0,0,640,638,1,0,0,0,640,
-        639,1,0,0,0,641,97,1,0,0,0,642,643,3,180,90,0,643,644,5,125,0,0,
-        644,645,3,136,68,0,645,646,5,60,0,0,646,647,3,136,68,0,647,648,5,
-        126,0,0,648,99,1,0,0,0,649,650,3,128,64,0,650,101,1,0,0,0,651,654,
-        3,104,52,0,652,654,3,106,53,0,653,651,1,0,0,0,653,652,1,0,0,0,654,
-        103,1,0,0,0,655,656,3,184,92,0,656,657,5,125,0,0,657,658,3,146,73,
-        0,658,659,5,110,0,0,659,664,3,148,74,0,660,661,5,110,0,0,661,663,
-        3,138,69,0,662,660,1,0,0,0,663,666,1,0,0,0,664,662,1,0,0,0,664,665,
-        1,0,0,0,665,667,1,0,0,0,666,664,1,0,0,0,667,668,5,126,0,0,668,105,
-        1,0,0,0,669,670,3,186,93,0,670,671,5,125,0,0,671,672,5,127,0,0,672,
-        677,3,142,71,0,673,674,5,110,0,0,674,676,3,142,71,0,675,673,1,0,
-        0,0,676,679,1,0,0,0,677,675,1,0,0,0,677,678,1,0,0,0,678,680,1,0,
-        0,0,679,677,1,0,0,0,680,681,5,128,0,0,681,682,5,110,0,0,682,687,
-        3,148,74,0,683,684,5,110,0,0,684,686,3,138,69,0,685,683,1,0,0,0,
-        686,689,1,0,0,0,687,685,1,0,0,0,687,688,1,0,0,0,688,690,1,0,0,0,
-        689,687,1,0,0,0,690,691,5,126,0,0,691,107,1,0,0,0,692,695,3,216,
-        108,0,693,695,5,332,0,0,694,692,1,0,0,0,694,693,1,0,0,0,695,109,
-        1,0,0,0,696,697,3,214,107,0,697,698,5,125,0,0,698,699,3,134,67,0,
-        699,700,5,126,0,0,700,111,1,0,0,0,701,706,3,120,60,0,702,703,5,110,
-        0,0,703,705,3,120,60,0,704,702,1,0,0,0,705,708,1,0,0,0,706,704,1,
-        0,0,0,706,707,1,0,0,0,707,113,1,0,0,0,708,706,1,0,0,0,709,714,3,
-        122,61,0,710,711,5,110,0,0,711,713,3,122,61,0,712,710,1,0,0,0,713,
-        716,1,0,0,0,714,712,1,0,0,0,714,715,1,0,0,0,715,115,1,0,0,0,716,
-        714,1,0,0,0,717,719,7,0,0,0,718,717,1,0,0,0,718,719,1,0,0,0,719,
-        720,1,0,0,0,720,721,3,118,59,0,721,117,1,0,0,0,722,744,3,120,60,
-        0,723,724,5,35,0,0,724,725,5,125,0,0,725,726,3,120,60,0,726,727,
-        5,126,0,0,727,744,1,0,0,0,728,729,5,36,0,0,729,730,5,125,0,0,730,
-        731,3,120,60,0,731,732,5,126,0,0,732,744,1,0,0,0,733,734,5,37,0,
-        0,734,735,5,125,0,0,735,736,3,120,60,0,736,737,5,126,0,0,737,744,
-        1,0,0,0,738,739,5,38,0,0,739,740,5,125,0,0,740,741,3,120,60,0,741,
-        742,5,126,0,0,742,744,1,0,0,0,743,722,1,0,0,0,743,723,1,0,0,0,743,
-        728,1,0,0,0,743,733,1,0,0,0,743,738,1,0,0,0,744,119,1,0,0,0,745,
-        746,3,214,107,0,746,121,1,0,0,0,747,748,3,218,109,0,748,123,1,0,
-        0,0,749,750,3,132,66,0,750,751,5,125,0,0,751,752,3,134,67,0,752,
-        753,5,126,0,0,753,125,1,0,0,0,754,755,5,274,0,0,755,756,5,125,0,
-        0,756,757,3,88,44,0,757,758,5,27,0,0,758,759,3,130,65,0,759,760,
-        5,126,0,0,760,127,1,0,0,0,761,762,3,174,87,0,762,763,5,125,0,0,763,
-        764,3,134,67,0,764,765,5,126,0,0,765,129,1,0,0,0,766,777,5,212,0,
-        0,767,777,5,241,0,0,768,777,5,243,0,0,769,777,5,102,0,0,770,777,
-        5,103,0,0,771,777,5,104,0,0,772,777,5,105,0,0,773,777,5,106,0,0,
-        774,777,5,107,0,0,775,777,5,108,0,0,776,766,1,0,0,0,776,767,1,0,
-        0,0,776,768,1,0,0,0,776,769,1,0,0,0,776,770,1,0,0,0,776,771,1,0,
-        0,0,776,772,1,0,0,0,776,773,1,0,0,0,776,774,1,0,0,0,776,775,1,0,
-        0,0,777,131,1,0,0,0,778,785,3,152,76,0,779,785,3,156,78,0,780,785,
-        3,178,89,0,781,785,3,174,87,0,782,785,3,176,88,0,783,785,3,180,90,
-        0,784,778,1,0,0,0,784,779,1,0,0,0,784,780,1,0,0,0,784,781,1,0,0,
-        0,784,782,1,0,0,0,784,783,1,0,0,0,785,133,1,0,0,0,786,791,3,136,
-        68,0,787,788,5,110,0,0,788,790,3,136,68,0,789,787,1,0,0,0,790,793,
-        1,0,0,0,791,789,1,0,0,0,791,792,1,0,0,0,792,795,1,0,0,0,793,791,
-        1,0,0,0,794,786,1,0,0,0,794,795,1,0,0,0,795,135,1,0,0,0,796,797,
-        3,220,110,0,797,798,5,112,0,0,798,800,1,0,0,0,799,796,1,0,0,0,799,
-        800,1,0,0,0,800,801,1,0,0,0,801,802,3,94,47,0,802,137,1,0,0,0,803,
-        804,3,140,70,0,804,805,5,112,0,0,805,806,3,150,75,0,806,139,1,0,
-        0,0,807,808,7,5,0,0,808,141,1,0,0,0,809,818,3,146,73,0,810,811,3,
-        146,73,0,811,812,3,144,72,0,812,818,1,0,0,0,813,814,3,146,73,0,814,
-        815,5,134,0,0,815,816,3,144,72,0,816,818,1,0,0,0,817,809,1,0,0,0,
-        817,810,1,0,0,0,817,813,1,0,0,0,818,143,1,0,0,0,819,822,3,194,97,
-        0,820,822,3,196,98,0,821,819,1,0,0,0,821,820,1,0,0,0,822,145,1,0,
-        0,0,823,826,3,214,107,0,824,826,3,192,96,0,825,823,1,0,0,0,825,824,
-        1,0,0,0,826,147,1,0,0,0,827,828,3,150,75,0,828,149,1,0,0,0,829,832,
-        3,214,107,0,830,832,3,188,94,0,831,829,1,0,0,0,831,830,1,0,0,0,832,
-        151,1,0,0,0,833,857,5,172,0,0,834,857,5,173,0,0,835,857,5,174,0,
-        0,836,857,5,175,0,0,837,857,5,176,0,0,838,857,5,177,0,0,839,857,
-        5,178,0,0,840,857,5,179,0,0,841,857,5,180,0,0,842,857,5,181,0,0,
-        843,857,5,182,0,0,844,857,5,183,0,0,845,857,5,184,0,0,846,857,5,
-        185,0,0,847,857,5,186,0,0,848,857,5,188,0,0,849,857,5,189,0,0,850,
-        857,5,190,0,0,851,857,5,191,0,0,852,857,5,192,0,0,853,857,5,193,
-        0,0,854,857,5,194,0,0,855,857,3,154,77,0,856,833,1,0,0,0,856,834,
-        1,0,0,0,856,835,1,0,0,0,856,836,1,0,0,0,856,837,1,0,0,0,856,838,
-        1,0,0,0,856,839,1,0,0,0,856,840,1,0,0,0,856,841,1,0,0,0,856,842,
-        1,0,0,0,856,843,1,0,0,0,856,844,1,0,0,0,856,845,1,0,0,0,856,846,
-        1,0,0,0,856,847,1,0,0,0,856,848,1,0,0,0,856,849,1,0,0,0,856,850,
-        1,0,0,0,856,851,1,0,0,0,856,852,1,0,0,0,856,853,1,0,0,0,856,854,
-        1,0,0,0,856,855,1,0,0,0,857,153,1,0,0,0,858,859,7,6,0,0,859,155,
-        1,0,0,0,860,861,7,7,0,0,861,157,1,0,0,0,862,863,5,226,0,0,863,864,
-        5,125,0,0,864,865,3,160,80,0,865,866,5,110,0,0,866,867,3,136,68,
-        0,867,868,5,126,0,0,868,159,1,0,0,0,869,870,7,8,0,0,870,161,1,0,
-        0,0,871,872,5,223,0,0,872,873,5,125,0,0,873,874,3,168,84,0,874,875,
-        5,5,0,0,875,876,3,136,68,0,876,877,5,126,0,0,877,163,1,0,0,0,878,
-        879,7,9,0,0,879,165,1,0,0,0,880,881,7,10,0,0,881,167,1,0,0,0,882,
-        885,3,164,82,0,883,885,3,166,83,0,884,882,1,0,0,0,884,883,1,0,0,
-        0,885,169,1,0,0,0,886,887,3,172,86,0,887,888,5,125,0,0,888,889,3,
-        164,82,0,889,890,5,110,0,0,890,891,3,136,68,0,891,892,5,110,0,0,
-        892,893,3,136,68,0,893,894,5,126,0,0,894,171,1,0,0,0,895,896,7,11,
-        0,0,896,173,1,0,0,0,897,898,7,12,0,0,898,175,1,0,0,0,899,900,5,281,
-        0,0,900,177,1,0,0,0,901,902,7,13,0,0,902,179,1,0,0,0,903,904,5,187,
-        0,0,904,181,1,0,0,0,905,906,7,14,0,0,906,183,1,0,0,0,907,908,7,15,
-        0,0,908,185,1,0,0,0,909,910,7,16,0,0,910,187,1,0,0,0,911,918,3,190,
-        95,0,912,918,3,192,96,0,913,918,3,194,97,0,914,918,3,196,98,0,915,
-        918,3,198,99,0,916,918,3,200,100,0,917,911,1,0,0,0,917,912,1,0,0,
-        0,917,913,1,0,0,0,917,914,1,0,0,0,917,915,1,0,0,0,917,916,1,0,0,
-        0,918,189,1,0,0,0,919,920,5,81,0,0,920,921,3,94,47,0,921,922,3,208,
-        104,0,922,191,1,0,0,0,923,924,7,17,0,0,924,193,1,0,0,0,925,927,7,
-        0,0,0,926,925,1,0,0,0,926,927,1,0,0,0,927,928,1,0,0,0,928,929,5,
-        330,0,0,929,195,1,0,0,0,930,932,7,0,0,0,931,930,1,0,0,0,931,932,
-        1,0,0,0,932,933,1,0,0,0,933,934,5,331,0,0,934,197,1,0,0,0,935,936,
-        7,18,0,0,936,199,1,0,0,0,937,941,3,202,101,0,938,941,3,204,102,0,
-        939,941,3,206,103,0,940,937,1,0,0,0,940,938,1,0,0,0,940,939,1,0,
-        0,0,941,201,1,0,0,0,942,943,5,212,0,0,943,944,3,192,96,0,944,203,
-        1,0,0,0,945,946,5,241,0,0,946,947,3,192,96,0,947,205,1,0,0,0,948,
-        949,5,243,0,0,949,950,3,192,96,0,950,207,1,0,0,0,951,952,7,19,0,
-        0,952,209,1,0,0,0,953,954,7,20,0,0,954,211,1,0,0,0,955,956,5,125,
-        0,0,956,961,3,188,94,0,957,958,5,110,0,0,958,960,3,188,94,0,959,
-        957,1,0,0,0,960,963,1,0,0,0,961,959,1,0,0,0,961,962,1,0,0,0,962,
-        964,1,0,0,0,963,961,1,0,0,0,964,965,5,126,0,0,965,213,1,0,0,0,966,
-        967,5,328,0,0,967,215,1,0,0,0,968,973,3,222,111,0,969,970,5,111,
-        0,0,970,972,3,220,110,0,971,969,1,0,0,0,972,975,1,0,0,0,973,971,
-        1,0,0,0,973,974,1,0,0,0,974,217,1,0,0,0,975,973,1,0,0,0,976,981,
-        3,224,112,0,977,978,5,111,0,0,978,980,3,224,112,0,979,977,1,0,0,
-        0,980,983,1,0,0,0,981,979,1,0,0,0,981,982,1,0,0,0,982,219,1,0,0,
-        0,983,981,1,0,0,0,984,986,5,111,0,0,985,984,1,0,0,0,985,986,1,0,
-        0,0,986,987,1,0,0,0,987,995,5,328,0,0,988,989,5,131,0,0,989,990,
-        3,220,110,0,990,991,5,131,0,0,991,995,1,0,0,0,992,995,5,335,0,0,
-        993,995,3,226,113,0,994,985,1,0,0,0,994,988,1,0,0,0,994,992,1,0,
-        0,0,994,993,1,0,0,0,995,221,1,0,0,0,996,998,5,329,0,0,997,996,1,
-        0,0,0,997,998,1,0,0,0,998,999,1,0,0,0,999,1000,3,220,110,0,1000,
-        223,1,0,0,0,1001,1006,3,220,110,0,1002,1003,5,122,0,0,1003,1005,
-        3,220,110,0,1004,1002,1,0,0,0,1005,1008,1,0,0,0,1006,1004,1,0,0,
-        0,1006,1007,1,0,0,0,1007,1010,1,0,0,0,1008,1006,1,0,0,0,1009,1011,
-        5,122,0,0,1010,1009,1,0,0,0,1010,1011,1,0,0,0,1011,1025,1,0,0,0,
-        1012,1013,5,129,0,0,1013,1014,3,224,112,0,1014,1015,5,129,0,0,1015,
-        1025,1,0,0,0,1016,1017,5,130,0,0,1017,1018,3,224,112,0,1018,1019,
-        5,130,0,0,1019,1025,1,0,0,0,1020,1021,5,131,0,0,1021,1022,3,224,
-        112,0,1022,1023,5,131,0,0,1023,1025,1,0,0,0,1024,1001,1,0,0,0,1024,
-        1012,1,0,0,0,1024,1016,1,0,0,0,1024,1020,1,0,0,0,1025,225,1,0,0,
-        0,1026,1127,5,31,0,0,1027,1127,3,210,105,0,1028,1127,5,320,0,0,1029,
-        1127,3,132,66,0,1030,1127,3,140,70,0,1031,1127,3,208,104,0,1032,
-        1127,3,156,78,0,1033,1127,3,178,89,0,1034,1127,3,152,76,0,1035,1127,
-        3,180,90,0,1036,1127,5,2,0,0,1037,1127,5,3,0,0,1038,1127,5,4,0,0,
-        1039,1127,5,5,0,0,1040,1127,5,6,0,0,1041,1127,5,7,0,0,1042,1127,
-        5,8,0,0,1043,1127,5,9,0,0,1044,1127,5,10,0,0,1045,1127,5,11,0,0,
-        1046,1127,5,12,0,0,1047,1127,5,13,0,0,1048,1127,5,14,0,0,1049,1127,
-        5,15,0,0,1050,1127,5,16,0,0,1051,1127,5,17,0,0,1052,1127,5,18,0,
-        0,1053,1127,5,19,0,0,1054,1127,5,20,0,0,1055,1127,5,21,0,0,1056,
-        1127,5,22,0,0,1057,1127,5,23,0,0,1058,1127,5,24,0,0,1059,1127,5,
-        25,0,0,1060,1127,5,26,0,0,1061,1127,5,29,0,0,1062,1127,5,30,0,0,
-        1063,1127,5,32,0,0,1064,1127,5,33,0,0,1065,1127,5,34,0,0,1066,1127,
-        5,36,0,0,1067,1127,5,37,0,0,1068,1127,5,38,0,0,1069,1127,5,39,0,
-        0,1070,1127,5,40,0,0,1071,1127,5,41,0,0,1072,1127,5,42,0,0,1073,
-        1127,5,43,0,0,1074,1127,5,44,0,0,1075,1127,5,45,0,0,1076,1127,5,
-        46,0,0,1077,1127,5,47,0,0,1078,1127,5,48,0,0,1079,1127,5,49,0,0,
-        1080,1127,5,50,0,0,1081,1127,5,51,0,0,1082,1127,5,52,0,0,1083,1127,
-        5,53,0,0,1084,1127,5,54,0,0,1085,1127,5,55,0,0,1086,1127,5,56,0,
-        0,1087,1127,5,57,0,0,1088,1127,5,58,0,0,1089,1127,5,135,0,0,1090,
-        1127,5,136,0,0,1091,1127,5,137,0,0,1092,1127,5,138,0,0,1093,1127,
-        5,139,0,0,1094,1127,5,140,0,0,1095,1127,5,141,0,0,1096,1127,5,142,
-        0,0,1097,1127,5,143,0,0,1098,1127,5,144,0,0,1099,1127,5,145,0,0,
-        1100,1127,5,146,0,0,1101,1127,5,147,0,0,1102,1127,5,148,0,0,1103,
-        1127,5,149,0,0,1104,1127,5,150,0,0,1105,1127,5,151,0,0,1106,1127,
-        5,152,0,0,1107,1127,5,153,0,0,1108,1127,5,154,0,0,1109,1127,5,155,
-        0,0,1110,1127,5,156,0,0,1111,1127,5,157,0,0,1112,1127,5,158,0,0,
-        1113,1127,5,159,0,0,1114,1127,5,160,0,0,1115,1127,5,161,0,0,1116,
-        1127,5,162,0,0,1117,1127,5,163,0,0,1118,1127,5,164,0,0,1119,1127,
-        5,165,0,0,1120,1127,5,166,0,0,1121,1127,5,167,0,0,1122,1127,5,168,
-        0,0,1123,1127,5,169,0,0,1124,1127,5,170,0,0,1125,1127,5,171,0,0,
-        1126,1026,1,0,0,0,1126,1027,1,0,0,0,1126,1028,1,0,0,0,1126,1029,
-        1,0,0,0,1126,1030,1,0,0,0,1126,1031,1,0,0,0,1126,1032,1,0,0,0,1126,
-        1033,1,0,0,0,1126,1034,1,0,0,0,1126,1035,1,0,0,0,1126,1036,1,0,0,
-        0,1126,1037,1,0,0,0,1126,1038,1,0,0,0,1126,1039,1,0,0,0,1126,1040,
-        1,0,0,0,1126,1041,1,0,0,0,1126,1042,1,0,0,0,1126,1043,1,0,0,0,1126,
-        1044,1,0,0,0,1126,1045,1,0,0,0,1126,1046,1,0,0,0,1126,1047,1,0,0,
-        0,1126,1048,1,0,0,0,1126,1049,1,0,0,0,1126,1050,1,0,0,0,1126,1051,
-        1,0,0,0,1126,1052,1,0,0,0,1126,1053,1,0,0,0,1126,1054,1,0,0,0,1126,
-        1055,1,0,0,0,1126,1056,1,0,0,0,1126,1057,1,0,0,0,1126,1058,1,0,0,
-        0,1126,1059,1,0,0,0,1126,1060,1,0,0,0,1126,1061,1,0,0,0,1126,1062,
-        1,0,0,0,1126,1063,1,0,0,0,1126,1064,1,0,0,0,1126,1065,1,0,0,0,1126,
-        1066,1,0,0,0,1126,1067,1,0,0,0,1126,1068,1,0,0,0,1126,1069,1,0,0,
-        0,1126,1070,1,0,0,0,1126,1071,1,0,0,0,1126,1072,1,0,0,0,1126,1073,
-        1,0,0,0,1126,1074,1,0,0,0,1126,1075,1,0,0,0,1126,1076,1,0,0,0,1126,
-        1077,1,0,0,0,1126,1078,1,0,0,0,1126,1079,1,0,0,0,1126,1080,1,0,0,
-        0,1126,1081,1,0,0,0,1126,1082,1,0,0,0,1126,1083,1,0,0,0,1126,1084,
-        1,0,0,0,1126,1085,1,0,0,0,1126,1086,1,0,0,0,1126,1087,1,0,0,0,1126,
-        1088,1,0,0,0,1126,1089,1,0,0,0,1126,1090,1,0,0,0,1126,1091,1,0,0,
-        0,1126,1092,1,0,0,0,1126,1093,1,0,0,0,1126,1094,1,0,0,0,1126,1095,
-        1,0,0,0,1126,1096,1,0,0,0,1126,1097,1,0,0,0,1126,1098,1,0,0,0,1126,
-        1099,1,0,0,0,1126,1100,1,0,0,0,1126,1101,1,0,0,0,1126,1102,1,0,0,
-        0,1126,1103,1,0,0,0,1126,1104,1,0,0,0,1126,1105,1,0,0,0,1126,1106,
-        1,0,0,0,1126,1107,1,0,0,0,1126,1108,1,0,0,0,1126,1109,1,0,0,0,1126,
-        1110,1,0,0,0,1126,1111,1,0,0,0,1126,1112,1,0,0,0,1126,1113,1,0,0,
-        0,1126,1114,1,0,0,0,1126,1115,1,0,0,0,1126,1116,1,0,0,0,1126,1117,
-        1,0,0,0,1126,1118,1,0,0,0,1126,1119,1,0,0,0,1126,1120,1,0,0,0,1126,
-        1121,1,0,0,0,1126,1122,1,0,0,0,1126,1123,1,0,0,0,1126,1124,1,0,0,
-        0,1126,1125,1,0,0,0,1127,227,1,0,0,0,81,229,242,248,266,269,284,
-        294,301,306,311,318,322,327,331,337,342,353,358,362,366,370,375,
-        389,400,408,420,426,465,471,484,504,509,517,526,536,553,562,577,
-        585,592,598,600,611,623,631,633,640,653,664,677,687,694,706,714,
-        718,743,776,784,791,794,799,817,821,825,831,856,884,917,926,931,
-        940,961,973,981,985,994,997,1006,1010,1024,1126
+        271,1,0,0,0,271,285,3,60,30,0,272,274,5,2,0,0,273,272,1,0,0,0,273,
+        274,1,0,0,0,274,275,1,0,0,0,275,276,3,60,30,0,276,277,3,90,45,0,
+        277,285,1,0,0,0,278,280,5,2,0,0,279,278,1,0,0,0,279,280,1,0,0,0,
+        280,281,1,0,0,0,281,282,3,90,45,0,282,283,3,60,30,0,283,285,1,0,
+        0,0,284,269,1,0,0,0,284,273,1,0,0,0,284,279,1,0,0,0,285,13,1,0,0,
+        0,286,287,5,3,0,0,287,288,3,62,31,0,288,15,1,0,0,0,289,290,5,4,0,
+        0,290,291,5,33,0,0,291,17,1,0,0,0,292,293,5,6,0,0,293,294,3,90,45,
+        0,294,19,1,0,0,0,295,297,5,7,0,0,296,298,7,0,0,0,297,296,1,0,0,0,
+        297,298,1,0,0,0,298,299,1,0,0,0,299,300,3,112,56,0,300,21,1,0,0,
+        0,301,302,5,8,0,0,302,307,3,64,32,0,303,304,5,110,0,0,304,306,3,
+        64,32,0,305,303,1,0,0,0,306,309,1,0,0,0,307,305,1,0,0,0,307,308,
+        1,0,0,0,308,23,1,0,0,0,309,307,1,0,0,0,310,314,5,9,0,0,311,312,5,
+        42,0,0,312,313,5,112,0,0,313,315,3,194,97,0,314,311,1,0,0,0,314,
+        315,1,0,0,0,315,319,1,0,0,0,316,317,5,43,0,0,317,318,5,112,0,0,318,
+        320,3,198,99,0,319,316,1,0,0,0,319,320,1,0,0,0,320,324,1,0,0,0,321,
+        322,5,44,0,0,322,323,5,112,0,0,323,325,3,192,96,0,324,321,1,0,0,
+        0,324,325,1,0,0,0,325,326,1,0,0,0,326,331,3,78,39,0,327,328,5,110,
+        0,0,328,330,3,78,39,0,329,327,1,0,0,0,330,333,1,0,0,0,331,329,1,
+        0,0,0,331,332,1,0,0,0,332,335,1,0,0,0,333,331,1,0,0,0,334,336,3,
+        68,34,0,335,334,1,0,0,0,335,336,1,0,0,0,336,340,1,0,0,0,337,338,
+        5,41,0,0,338,339,5,112,0,0,339,341,3,198,99,0,340,337,1,0,0,0,340,
+        341,1,0,0,0,341,25,1,0,0,0,342,344,5,10,0,0,343,345,3,194,97,0,344,
+        343,1,0,0,0,344,345,1,0,0,0,345,346,1,0,0,0,346,350,3,112,56,0,347,
+        348,5,39,0,0,348,349,5,112,0,0,349,351,3,198,99,0,350,347,1,0,0,
+        0,350,351,1,0,0,0,351,355,1,0,0,0,352,353,5,40,0,0,353,354,5,112,
+        0,0,354,356,3,198,99,0,355,352,1,0,0,0,355,356,1,0,0,0,356,27,1,
+        0,0,0,357,358,5,11,0,0,358,359,3,74,37,0,359,29,1,0,0,0,360,361,
+        5,12,0,0,361,366,3,76,38,0,362,363,5,110,0,0,363,365,3,76,38,0,364,
+        362,1,0,0,0,365,368,1,0,0,0,366,364,1,0,0,0,366,367,1,0,0,0,367,
+        31,1,0,0,0,368,366,1,0,0,0,369,371,5,13,0,0,370,372,3,194,97,0,371,
+        370,1,0,0,0,371,372,1,0,0,0,372,375,1,0,0,0,373,374,5,5,0,0,374,
+        376,3,194,97,0,375,373,1,0,0,0,375,376,1,0,0,0,376,33,1,0,0,0,377,
+        379,5,14,0,0,378,380,3,194,97,0,379,378,1,0,0,0,379,380,1,0,0,0,
+        380,381,1,0,0,0,381,383,3,112,56,0,382,384,3,66,33,0,383,382,1,0,
+        0,0,383,384,1,0,0,0,384,35,1,0,0,0,385,386,5,15,0,0,386,388,3,112,
+        56,0,387,389,3,66,33,0,388,387,1,0,0,0,388,389,1,0,0,0,389,37,1,
+        0,0,0,390,391,5,20,0,0,391,392,3,88,44,0,392,393,3,192,96,0,393,
+        39,1,0,0,0,394,395,5,16,0,0,395,396,3,88,44,0,396,397,3,192,96,0,
+        397,41,1,0,0,0,398,402,5,22,0,0,399,401,3,44,22,0,400,399,1,0,0,
+        0,401,404,1,0,0,0,402,400,1,0,0,0,402,403,1,0,0,0,403,405,1,0,0,
+        0,404,402,1,0,0,0,405,406,3,88,44,0,406,43,1,0,0,0,407,408,5,23,
+        0,0,408,409,5,112,0,0,409,414,3,192,96,0,410,411,5,21,0,0,411,412,
+        5,112,0,0,412,414,3,192,96,0,413,407,1,0,0,0,413,410,1,0,0,0,414,
+        45,1,0,0,0,415,416,7,1,0,0,416,47,1,0,0,0,417,421,5,24,0,0,418,420,
+        3,50,25,0,419,418,1,0,0,0,420,423,1,0,0,0,421,419,1,0,0,0,421,422,
+        1,0,0,0,422,49,1,0,0,0,423,421,1,0,0,0,424,425,5,45,0,0,425,426,
+        5,112,0,0,426,434,3,194,97,0,427,428,5,46,0,0,428,429,5,112,0,0,
+        429,434,3,194,97,0,430,431,5,47,0,0,431,432,5,112,0,0,432,434,3,
+        192,96,0,433,424,1,0,0,0,433,427,1,0,0,0,433,430,1,0,0,0,434,51,
+        1,0,0,0,435,439,5,25,0,0,436,438,3,54,27,0,437,436,1,0,0,0,438,441,
+        1,0,0,0,439,437,1,0,0,0,439,440,1,0,0,0,440,53,1,0,0,0,441,439,1,
+        0,0,0,442,443,5,48,0,0,443,444,5,112,0,0,444,479,3,194,97,0,445,
+        446,5,49,0,0,446,447,5,112,0,0,447,479,3,194,97,0,448,449,5,50,0,
+        0,449,450,5,112,0,0,450,479,3,194,97,0,451,452,5,51,0,0,452,453,
+        5,112,0,0,453,479,3,194,97,0,454,455,5,52,0,0,455,456,5,112,0,0,
+        456,479,3,196,98,0,457,458,5,53,0,0,458,459,5,112,0,0,459,479,3,
+        196,98,0,460,461,5,54,0,0,461,462,5,112,0,0,462,479,3,192,96,0,463,
+        464,5,55,0,0,464,465,5,112,0,0,465,479,3,192,96,0,466,467,5,215,
+        0,0,467,468,5,112,0,0,468,479,3,192,96,0,469,470,5,56,0,0,470,471,
+        5,112,0,0,471,479,3,192,96,0,472,473,5,57,0,0,473,474,5,112,0,0,
+        474,479,3,194,97,0,475,476,5,58,0,0,476,477,5,112,0,0,477,479,3,
+        196,98,0,478,442,1,0,0,0,478,445,1,0,0,0,478,448,1,0,0,0,478,451,
+        1,0,0,0,478,454,1,0,0,0,478,457,1,0,0,0,478,460,1,0,0,0,478,463,
+        1,0,0,0,478,466,1,0,0,0,478,469,1,0,0,0,478,472,1,0,0,0,478,475,
+        1,0,0,0,479,55,1,0,0,0,480,484,5,26,0,0,481,483,3,58,29,0,482,481,
+        1,0,0,0,483,486,1,0,0,0,484,482,1,0,0,0,484,485,1,0,0,0,485,57,1,
+        0,0,0,486,484,1,0,0,0,487,488,3,220,110,0,488,489,5,112,0,0,489,
+        490,3,188,94,0,490,59,1,0,0,0,491,492,5,29,0,0,492,493,5,112,0,0,
+        493,498,3,62,31,0,494,495,5,30,0,0,495,496,5,112,0,0,496,498,3,62,
+        31,0,497,491,1,0,0,0,497,494,1,0,0,0,498,61,1,0,0,0,499,500,3,108,
+        54,0,500,63,1,0,0,0,501,502,3,122,61,0,502,503,5,27,0,0,503,504,
+        3,122,61,0,504,65,1,0,0,0,505,506,5,28,0,0,506,507,3,112,56,0,507,
+        67,1,0,0,0,508,509,5,28,0,0,509,518,3,112,56,0,510,511,5,28,0,0,
+        511,518,3,70,35,0,512,513,5,28,0,0,513,514,3,70,35,0,514,515,5,110,
+        0,0,515,516,3,112,56,0,516,518,1,0,0,0,517,508,1,0,0,0,517,510,1,
+        0,0,0,517,512,1,0,0,0,518,69,1,0,0,0,519,522,3,72,36,0,520,521,5,
+        27,0,0,521,523,3,214,107,0,522,520,1,0,0,0,522,523,1,0,0,0,523,71,
+        1,0,0,0,524,525,5,320,0,0,525,526,5,125,0,0,526,527,3,120,60,0,527,
+        528,5,110,0,0,528,530,3,188,94,0,529,531,3,210,105,0,530,529,1,0,
+        0,0,530,531,1,0,0,0,531,532,1,0,0,0,532,533,5,126,0,0,533,73,1,0,
+        0,0,534,539,3,116,58,0,535,536,5,110,0,0,536,538,3,116,58,0,537,
+        535,1,0,0,0,538,541,1,0,0,0,539,537,1,0,0,0,539,540,1,0,0,0,540,
+        75,1,0,0,0,541,539,1,0,0,0,542,543,3,120,60,0,543,544,5,112,0,0,
+        544,545,3,88,44,0,545,77,1,0,0,0,546,549,3,80,40,0,547,548,5,27,
+        0,0,548,550,3,122,61,0,549,547,1,0,0,0,549,550,1,0,0,0,550,79,1,
+        0,0,0,551,552,3,82,41,0,552,553,5,125,0,0,553,554,3,94,47,0,554,
+        555,5,126,0,0,555,567,1,0,0,0,556,557,5,136,0,0,557,558,5,125,0,
+        0,558,567,5,126,0,0,559,560,7,2,0,0,560,561,5,125,0,0,561,562,3,
+        94,47,0,562,563,5,126,0,0,563,567,1,0,0,0,564,567,3,86,43,0,565,
+        567,3,84,42,0,566,551,1,0,0,0,566,556,1,0,0,0,566,559,1,0,0,0,566,
+        564,1,0,0,0,566,565,1,0,0,0,567,81,1,0,0,0,568,569,7,3,0,0,569,83,
+        1,0,0,0,570,571,5,155,0,0,571,572,5,125,0,0,572,575,3,120,60,0,573,
+        574,5,110,0,0,574,576,3,194,97,0,575,573,1,0,0,0,575,576,1,0,0,0,
+        576,577,1,0,0,0,577,578,5,126,0,0,578,85,1,0,0,0,579,580,5,154,0,
+        0,580,581,5,114,0,0,581,582,3,194,97,0,582,583,5,113,0,0,583,584,
+        5,125,0,0,584,585,3,120,60,0,585,586,5,126,0,0,586,87,1,0,0,0,587,
+        591,3,90,45,0,588,591,3,92,46,0,589,591,3,94,47,0,590,587,1,0,0,
+        0,590,588,1,0,0,0,590,589,1,0,0,0,591,89,1,0,0,0,592,593,6,45,-1,
+        0,593,599,3,92,46,0,594,595,5,61,0,0,595,599,3,90,45,6,596,599,3,
+        100,50,0,597,599,3,102,51,0,598,592,1,0,0,0,598,594,1,0,0,0,598,
+        596,1,0,0,0,598,597,1,0,0,0,599,613,1,0,0,0,600,601,10,5,0,0,601,
+        602,5,62,0,0,602,612,3,90,45,6,603,605,10,4,0,0,604,606,5,63,0,0,
+        605,604,1,0,0,0,605,606,1,0,0,0,606,607,1,0,0,0,607,612,3,90,45,
+        5,608,609,10,3,0,0,609,610,5,64,0,0,610,612,3,90,45,4,611,600,1,
+        0,0,0,611,603,1,0,0,0,611,608,1,0,0,0,612,615,1,0,0,0,613,611,1,
+        0,0,0,613,614,1,0,0,0,614,91,1,0,0,0,615,613,1,0,0,0,616,617,3,94,
+        47,0,617,618,3,182,91,0,618,619,3,94,47,0,619,625,1,0,0,0,620,621,
+        3,94,47,0,621,622,5,60,0,0,622,623,3,212,106,0,623,625,1,0,0,0,624,
+        616,1,0,0,0,624,620,1,0,0,0,625,93,1,0,0,0,626,627,6,47,-1,0,627,
+        637,3,96,48,0,628,637,3,98,49,0,629,637,3,162,81,0,630,637,3,158,
+        79,0,631,637,3,170,85,0,632,633,5,125,0,0,633,634,3,94,47,0,634,
+        635,5,126,0,0,635,637,1,0,0,0,636,626,1,0,0,0,636,628,1,0,0,0,636,
+        629,1,0,0,0,636,630,1,0,0,0,636,631,1,0,0,0,636,632,1,0,0,0,637,
+        646,1,0,0,0,638,639,10,8,0,0,639,640,7,4,0,0,640,645,3,94,47,9,641,
+        642,10,7,0,0,642,643,7,0,0,0,643,645,3,94,47,8,644,638,1,0,0,0,644,
+        641,1,0,0,0,645,648,1,0,0,0,646,644,1,0,0,0,646,647,1,0,0,0,647,
+        95,1,0,0,0,648,646,1,0,0,0,649,654,3,124,62,0,650,654,3,126,63,0,
+        651,654,3,120,60,0,652,654,3,188,94,0,653,649,1,0,0,0,653,650,1,
+        0,0,0,653,651,1,0,0,0,653,652,1,0,0,0,654,97,1,0,0,0,655,656,3,180,
+        90,0,656,657,5,125,0,0,657,658,3,136,68,0,658,659,5,60,0,0,659,660,
+        3,136,68,0,660,661,5,126,0,0,661,99,1,0,0,0,662,663,3,128,64,0,663,
+        101,1,0,0,0,664,667,3,104,52,0,665,667,3,106,53,0,666,664,1,0,0,
+        0,666,665,1,0,0,0,667,103,1,0,0,0,668,669,3,184,92,0,669,670,5,125,
+        0,0,670,671,3,146,73,0,671,672,5,110,0,0,672,677,3,148,74,0,673,
+        674,5,110,0,0,674,676,3,138,69,0,675,673,1,0,0,0,676,679,1,0,0,0,
+        677,675,1,0,0,0,677,678,1,0,0,0,678,680,1,0,0,0,679,677,1,0,0,0,
+        680,681,5,126,0,0,681,105,1,0,0,0,682,683,3,186,93,0,683,684,5,125,
+        0,0,684,685,5,127,0,0,685,690,3,142,71,0,686,687,5,110,0,0,687,689,
+        3,142,71,0,688,686,1,0,0,0,689,692,1,0,0,0,690,688,1,0,0,0,690,691,
+        1,0,0,0,691,693,1,0,0,0,692,690,1,0,0,0,693,694,5,128,0,0,694,695,
+        5,110,0,0,695,700,3,148,74,0,696,697,5,110,0,0,697,699,3,138,69,
+        0,698,696,1,0,0,0,699,702,1,0,0,0,700,698,1,0,0,0,700,701,1,0,0,
+        0,701,703,1,0,0,0,702,700,1,0,0,0,703,704,5,126,0,0,704,107,1,0,
+        0,0,705,708,3,216,108,0,706,708,5,332,0,0,707,705,1,0,0,0,707,706,
+        1,0,0,0,708,109,1,0,0,0,709,710,3,214,107,0,710,711,5,125,0,0,711,
+        712,3,134,67,0,712,713,5,126,0,0,713,111,1,0,0,0,714,719,3,120,60,
+        0,715,716,5,110,0,0,716,718,3,120,60,0,717,715,1,0,0,0,718,721,1,
+        0,0,0,719,717,1,0,0,0,719,720,1,0,0,0,720,113,1,0,0,0,721,719,1,
+        0,0,0,722,727,3,122,61,0,723,724,5,110,0,0,724,726,3,122,61,0,725,
+        723,1,0,0,0,726,729,1,0,0,0,727,725,1,0,0,0,727,728,1,0,0,0,728,
+        115,1,0,0,0,729,727,1,0,0,0,730,732,7,0,0,0,731,730,1,0,0,0,731,
+        732,1,0,0,0,732,733,1,0,0,0,733,734,3,118,59,0,734,117,1,0,0,0,735,
+        757,3,120,60,0,736,737,5,35,0,0,737,738,5,125,0,0,738,739,3,120,
+        60,0,739,740,5,126,0,0,740,757,1,0,0,0,741,742,5,36,0,0,742,743,
+        5,125,0,0,743,744,3,120,60,0,744,745,5,126,0,0,745,757,1,0,0,0,746,
+        747,5,37,0,0,747,748,5,125,0,0,748,749,3,120,60,0,749,750,5,126,
+        0,0,750,757,1,0,0,0,751,752,5,38,0,0,752,753,5,125,0,0,753,754,3,
+        120,60,0,754,755,5,126,0,0,755,757,1,0,0,0,756,735,1,0,0,0,756,736,
+        1,0,0,0,756,741,1,0,0,0,756,746,1,0,0,0,756,751,1,0,0,0,757,119,
+        1,0,0,0,758,759,3,214,107,0,759,121,1,0,0,0,760,761,3,218,109,0,
+        761,123,1,0,0,0,762,763,3,132,66,0,763,764,5,125,0,0,764,765,3,134,
+        67,0,765,766,5,126,0,0,766,125,1,0,0,0,767,768,5,274,0,0,768,769,
+        5,125,0,0,769,770,3,88,44,0,770,771,5,27,0,0,771,772,3,130,65,0,
+        772,773,5,126,0,0,773,127,1,0,0,0,774,775,3,174,87,0,775,776,5,125,
+        0,0,776,777,3,134,67,0,777,778,5,126,0,0,778,129,1,0,0,0,779,790,
+        5,212,0,0,780,790,5,241,0,0,781,790,5,243,0,0,782,790,5,102,0,0,
+        783,790,5,103,0,0,784,790,5,104,0,0,785,790,5,105,0,0,786,790,5,
+        106,0,0,787,790,5,107,0,0,788,790,5,108,0,0,789,779,1,0,0,0,789,
+        780,1,0,0,0,789,781,1,0,0,0,789,782,1,0,0,0,789,783,1,0,0,0,789,
+        784,1,0,0,0,789,785,1,0,0,0,789,786,1,0,0,0,789,787,1,0,0,0,789,
+        788,1,0,0,0,790,131,1,0,0,0,791,798,3,152,76,0,792,798,3,156,78,
+        0,793,798,3,178,89,0,794,798,3,174,87,0,795,798,3,176,88,0,796,798,
+        3,180,90,0,797,791,1,0,0,0,797,792,1,0,0,0,797,793,1,0,0,0,797,794,
+        1,0,0,0,797,795,1,0,0,0,797,796,1,0,0,0,798,133,1,0,0,0,799,804,
+        3,136,68,0,800,801,5,110,0,0,801,803,3,136,68,0,802,800,1,0,0,0,
+        803,806,1,0,0,0,804,802,1,0,0,0,804,805,1,0,0,0,805,808,1,0,0,0,
+        806,804,1,0,0,0,807,799,1,0,0,0,807,808,1,0,0,0,808,135,1,0,0,0,
+        809,810,3,220,110,0,810,811,5,112,0,0,811,813,1,0,0,0,812,809,1,
+        0,0,0,812,813,1,0,0,0,813,814,1,0,0,0,814,815,3,94,47,0,815,137,
+        1,0,0,0,816,817,3,140,70,0,817,818,5,112,0,0,818,819,3,150,75,0,
+        819,139,1,0,0,0,820,821,7,5,0,0,821,141,1,0,0,0,822,831,3,146,73,
+        0,823,824,3,146,73,0,824,825,3,144,72,0,825,831,1,0,0,0,826,827,
+        3,146,73,0,827,828,5,134,0,0,828,829,3,144,72,0,829,831,1,0,0,0,
+        830,822,1,0,0,0,830,823,1,0,0,0,830,826,1,0,0,0,831,143,1,0,0,0,
+        832,835,3,194,97,0,833,835,3,196,98,0,834,832,1,0,0,0,834,833,1,
+        0,0,0,835,145,1,0,0,0,836,839,3,214,107,0,837,839,3,192,96,0,838,
+        836,1,0,0,0,838,837,1,0,0,0,839,147,1,0,0,0,840,841,3,150,75,0,841,
+        149,1,0,0,0,842,845,3,214,107,0,843,845,3,188,94,0,844,842,1,0,0,
+        0,844,843,1,0,0,0,845,151,1,0,0,0,846,870,5,172,0,0,847,870,5,173,
+        0,0,848,870,5,174,0,0,849,870,5,175,0,0,850,870,5,176,0,0,851,870,
+        5,177,0,0,852,870,5,178,0,0,853,870,5,179,0,0,854,870,5,180,0,0,
+        855,870,5,181,0,0,856,870,5,182,0,0,857,870,5,183,0,0,858,870,5,
+        184,0,0,859,870,5,185,0,0,860,870,5,186,0,0,861,870,5,188,0,0,862,
+        870,5,189,0,0,863,870,5,190,0,0,864,870,5,191,0,0,865,870,5,192,
+        0,0,866,870,5,193,0,0,867,870,5,194,0,0,868,870,3,154,77,0,869,846,
+        1,0,0,0,869,847,1,0,0,0,869,848,1,0,0,0,869,849,1,0,0,0,869,850,
+        1,0,0,0,869,851,1,0,0,0,869,852,1,0,0,0,869,853,1,0,0,0,869,854,
+        1,0,0,0,869,855,1,0,0,0,869,856,1,0,0,0,869,857,1,0,0,0,869,858,
+        1,0,0,0,869,859,1,0,0,0,869,860,1,0,0,0,869,861,1,0,0,0,869,862,
+        1,0,0,0,869,863,1,0,0,0,869,864,1,0,0,0,869,865,1,0,0,0,869,866,
+        1,0,0,0,869,867,1,0,0,0,869,868,1,0,0,0,870,153,1,0,0,0,871,872,
+        7,6,0,0,872,155,1,0,0,0,873,874,7,7,0,0,874,157,1,0,0,0,875,876,
+        5,226,0,0,876,877,5,125,0,0,877,878,3,160,80,0,878,879,5,110,0,0,
+        879,880,3,136,68,0,880,881,5,126,0,0,881,159,1,0,0,0,882,883,7,8,
+        0,0,883,161,1,0,0,0,884,885,5,223,0,0,885,886,5,125,0,0,886,887,
+        3,168,84,0,887,888,5,5,0,0,888,889,3,136,68,0,889,890,5,126,0,0,
+        890,163,1,0,0,0,891,892,7,9,0,0,892,165,1,0,0,0,893,894,7,10,0,0,
+        894,167,1,0,0,0,895,898,3,164,82,0,896,898,3,166,83,0,897,895,1,
+        0,0,0,897,896,1,0,0,0,898,169,1,0,0,0,899,900,3,172,86,0,900,901,
+        5,125,0,0,901,902,3,164,82,0,902,903,5,110,0,0,903,904,3,136,68,
+        0,904,905,5,110,0,0,905,906,3,136,68,0,906,907,5,126,0,0,907,171,
+        1,0,0,0,908,909,7,11,0,0,909,173,1,0,0,0,910,911,7,12,0,0,911,175,
+        1,0,0,0,912,913,5,281,0,0,913,177,1,0,0,0,914,915,7,13,0,0,915,179,
+        1,0,0,0,916,917,5,187,0,0,917,181,1,0,0,0,918,919,7,14,0,0,919,183,
+        1,0,0,0,920,921,7,15,0,0,921,185,1,0,0,0,922,923,7,16,0,0,923,187,
+        1,0,0,0,924,931,3,190,95,0,925,931,3,192,96,0,926,931,3,194,97,0,
+        927,931,3,196,98,0,928,931,3,198,99,0,929,931,3,200,100,0,930,924,
+        1,0,0,0,930,925,1,0,0,0,930,926,1,0,0,0,930,927,1,0,0,0,930,928,
+        1,0,0,0,930,929,1,0,0,0,931,189,1,0,0,0,932,933,5,81,0,0,933,934,
+        3,94,47,0,934,935,3,208,104,0,935,191,1,0,0,0,936,937,7,17,0,0,937,
+        193,1,0,0,0,938,940,7,0,0,0,939,938,1,0,0,0,939,940,1,0,0,0,940,
+        941,1,0,0,0,941,942,5,330,0,0,942,195,1,0,0,0,943,945,7,0,0,0,944,
+        943,1,0,0,0,944,945,1,0,0,0,945,946,1,0,0,0,946,947,5,331,0,0,947,
+        197,1,0,0,0,948,949,7,18,0,0,949,199,1,0,0,0,950,954,3,202,101,0,
+        951,954,3,204,102,0,952,954,3,206,103,0,953,950,1,0,0,0,953,951,
+        1,0,0,0,953,952,1,0,0,0,954,201,1,0,0,0,955,956,5,212,0,0,956,957,
+        3,192,96,0,957,203,1,0,0,0,958,959,5,241,0,0,959,960,3,192,96,0,
+        960,205,1,0,0,0,961,962,5,243,0,0,962,963,3,192,96,0,963,207,1,0,
+        0,0,964,965,7,19,0,0,965,209,1,0,0,0,966,967,7,20,0,0,967,211,1,
+        0,0,0,968,969,5,125,0,0,969,974,3,188,94,0,970,971,5,110,0,0,971,
+        973,3,188,94,0,972,970,1,0,0,0,973,976,1,0,0,0,974,972,1,0,0,0,974,
+        975,1,0,0,0,975,977,1,0,0,0,976,974,1,0,0,0,977,978,5,126,0,0,978,
+        213,1,0,0,0,979,980,5,328,0,0,980,215,1,0,0,0,981,986,3,222,111,
+        0,982,983,5,111,0,0,983,985,3,220,110,0,984,982,1,0,0,0,985,988,
+        1,0,0,0,986,984,1,0,0,0,986,987,1,0,0,0,987,217,1,0,0,0,988,986,
+        1,0,0,0,989,994,3,224,112,0,990,991,5,111,0,0,991,993,3,224,112,
+        0,992,990,1,0,0,0,993,996,1,0,0,0,994,992,1,0,0,0,994,995,1,0,0,
+        0,995,219,1,0,0,0,996,994,1,0,0,0,997,999,5,111,0,0,998,997,1,0,
+        0,0,998,999,1,0,0,0,999,1000,1,0,0,0,1000,1008,5,328,0,0,1001,1002,
+        5,131,0,0,1002,1003,3,220,110,0,1003,1004,5,131,0,0,1004,1008,1,
+        0,0,0,1005,1008,5,335,0,0,1006,1008,3,226,113,0,1007,998,1,0,0,0,
+        1007,1001,1,0,0,0,1007,1005,1,0,0,0,1007,1006,1,0,0,0,1008,221,1,
+        0,0,0,1009,1011,5,329,0,0,1010,1009,1,0,0,0,1010,1011,1,0,0,0,1011,
+        1012,1,0,0,0,1012,1013,3,220,110,0,1013,223,1,0,0,0,1014,1019,3,
+        220,110,0,1015,1016,5,122,0,0,1016,1018,3,220,110,0,1017,1015,1,
+        0,0,0,1018,1021,1,0,0,0,1019,1017,1,0,0,0,1019,1020,1,0,0,0,1020,
+        1023,1,0,0,0,1021,1019,1,0,0,0,1022,1024,5,122,0,0,1023,1022,1,0,
+        0,0,1023,1024,1,0,0,0,1024,1038,1,0,0,0,1025,1026,5,129,0,0,1026,
+        1027,3,224,112,0,1027,1028,5,129,0,0,1028,1038,1,0,0,0,1029,1030,
+        5,130,0,0,1030,1031,3,224,112,0,1031,1032,5,130,0,0,1032,1038,1,
+        0,0,0,1033,1034,5,131,0,0,1034,1035,3,224,112,0,1035,1036,5,131,
+        0,0,1036,1038,1,0,0,0,1037,1014,1,0,0,0,1037,1025,1,0,0,0,1037,1029,
+        1,0,0,0,1037,1033,1,0,0,0,1038,225,1,0,0,0,1039,1140,5,31,0,0,1040,
+        1140,3,210,105,0,1041,1140,5,320,0,0,1042,1140,3,132,66,0,1043,1140,
+        3,140,70,0,1044,1140,3,208,104,0,1045,1140,3,156,78,0,1046,1140,
+        3,178,89,0,1047,1140,3,152,76,0,1048,1140,3,180,90,0,1049,1140,5,
+        2,0,0,1050,1140,5,3,0,0,1051,1140,5,4,0,0,1052,1140,5,5,0,0,1053,
+        1140,5,6,0,0,1054,1140,5,7,0,0,1055,1140,5,8,0,0,1056,1140,5,9,0,
+        0,1057,1140,5,10,0,0,1058,1140,5,11,0,0,1059,1140,5,12,0,0,1060,
+        1140,5,13,0,0,1061,1140,5,14,0,0,1062,1140,5,15,0,0,1063,1140,5,
+        16,0,0,1064,1140,5,17,0,0,1065,1140,5,18,0,0,1066,1140,5,19,0,0,
+        1067,1140,5,20,0,0,1068,1140,5,21,0,0,1069,1140,5,22,0,0,1070,1140,
+        5,23,0,0,1071,1140,5,24,0,0,1072,1140,5,25,0,0,1073,1140,5,26,0,
+        0,1074,1140,5,29,0,0,1075,1140,5,30,0,0,1076,1140,5,32,0,0,1077,
+        1140,5,33,0,0,1078,1140,5,34,0,0,1079,1140,5,36,0,0,1080,1140,5,
+        37,0,0,1081,1140,5,38,0,0,1082,1140,5,39,0,0,1083,1140,5,40,0,0,
+        1084,1140,5,41,0,0,1085,1140,5,42,0,0,1086,1140,5,43,0,0,1087,1140,
+        5,44,0,0,1088,1140,5,45,0,0,1089,1140,5,46,0,0,1090,1140,5,47,0,
+        0,1091,1140,5,48,0,0,1092,1140,5,49,0,0,1093,1140,5,50,0,0,1094,
+        1140,5,51,0,0,1095,1140,5,52,0,0,1096,1140,5,53,0,0,1097,1140,5,
+        54,0,0,1098,1140,5,55,0,0,1099,1140,5,56,0,0,1100,1140,5,57,0,0,
+        1101,1140,5,58,0,0,1102,1140,5,135,0,0,1103,1140,5,136,0,0,1104,
+        1140,5,137,0,0,1105,1140,5,138,0,0,1106,1140,5,139,0,0,1107,1140,
+        5,140,0,0,1108,1140,5,141,0,0,1109,1140,5,142,0,0,1110,1140,5,143,
+        0,0,1111,1140,5,144,0,0,1112,1140,5,145,0,0,1113,1140,5,146,0,0,
+        1114,1140,5,147,0,0,1115,1140,5,148,0,0,1116,1140,5,149,0,0,1117,
+        1140,5,150,0,0,1118,1140,5,151,0,0,1119,1140,5,152,0,0,1120,1140,
+        5,153,0,0,1121,1140,5,154,0,0,1122,1140,5,155,0,0,1123,1140,5,156,
+        0,0,1124,1140,5,157,0,0,1125,1140,5,158,0,0,1126,1140,5,159,0,0,
+        1127,1140,5,160,0,0,1128,1140,5,161,0,0,1129,1140,5,162,0,0,1130,
+        1140,5,163,0,0,1131,1140,5,164,0,0,1132,1140,5,165,0,0,1133,1140,
+        5,166,0,0,1134,1140,5,167,0,0,1135,1140,5,168,0,0,1136,1140,5,169,
+        0,0,1137,1140,5,170,0,0,1138,1140,5,171,0,0,1139,1039,1,0,0,0,1139,
+        1040,1,0,0,0,1139,1041,1,0,0,0,1139,1042,1,0,0,0,1139,1043,1,0,0,
+        0,1139,1044,1,0,0,0,1139,1045,1,0,0,0,1139,1046,1,0,0,0,1139,1047,
+        1,0,0,0,1139,1048,1,0,0,0,1139,1049,1,0,0,0,1139,1050,1,0,0,0,1139,
+        1051,1,0,0,0,1139,1052,1,0,0,0,1139,1053,1,0,0,0,1139,1054,1,0,0,
+        0,1139,1055,1,0,0,0,1139,1056,1,0,0,0,1139,1057,1,0,0,0,1139,1058,
+        1,0,0,0,1139,1059,1,0,0,0,1139,1060,1,0,0,0,1139,1061,1,0,0,0,1139,
+        1062,1,0,0,0,1139,1063,1,0,0,0,1139,1064,1,0,0,0,1139,1065,1,0,0,
+        0,1139,1066,1,0,0,0,1139,1067,1,0,0,0,1139,1068,1,0,0,0,1139,1069,
+        1,0,0,0,1139,1070,1,0,0,0,1139,1071,1,0,0,0,1139,1072,1,0,0,0,1139,
+        1073,1,0,0,0,1139,1074,1,0,0,0,1139,1075,1,0,0,0,1139,1076,1,0,0,
+        0,1139,1077,1,0,0,0,1139,1078,1,0,0,0,1139,1079,1,0,0,0,1139,1080,
+        1,0,0,0,1139,1081,1,0,0,0,1139,1082,1,0,0,0,1139,1083,1,0,0,0,1139,
+        1084,1,0,0,0,1139,1085,1,0,0,0,1139,1086,1,0,0,0,1139,1087,1,0,0,
+        0,1139,1088,1,0,0,0,1139,1089,1,0,0,0,1139,1090,1,0,0,0,1139,1091,
+        1,0,0,0,1139,1092,1,0,0,0,1139,1093,1,0,0,0,1139,1094,1,0,0,0,1139,
+        1095,1,0,0,0,1139,1096,1,0,0,0,1139,1097,1,0,0,0,1139,1098,1,0,0,
+        0,1139,1099,1,0,0,0,1139,1100,1,0,0,0,1139,1101,1,0,0,0,1139,1102,
+        1,0,0,0,1139,1103,1,0,0,0,1139,1104,1,0,0,0,1139,1105,1,0,0,0,1139,
+        1106,1,0,0,0,1139,1107,1,0,0,0,1139,1108,1,0,0,0,1139,1109,1,0,0,
+        0,1139,1110,1,0,0,0,1139,1111,1,0,0,0,1139,1112,1,0,0,0,1139,1113,
+        1,0,0,0,1139,1114,1,0,0,0,1139,1115,1,0,0,0,1139,1116,1,0,0,0,1139,
+        1117,1,0,0,0,1139,1118,1,0,0,0,1139,1119,1,0,0,0,1139,1120,1,0,0,
+        0,1139,1121,1,0,0,0,1139,1122,1,0,0,0,1139,1123,1,0,0,0,1139,1124,
+        1,0,0,0,1139,1125,1,0,0,0,1139,1126,1,0,0,0,1139,1127,1,0,0,0,1139,
+        1128,1,0,0,0,1139,1129,1,0,0,0,1139,1130,1,0,0,0,1139,1131,1,0,0,
+        0,1139,1132,1,0,0,0,1139,1133,1,0,0,0,1139,1134,1,0,0,0,1139,1135,
+        1,0,0,0,1139,1136,1,0,0,0,1139,1137,1,0,0,0,1139,1138,1,0,0,0,1140,
+        227,1,0,0,0,84,229,242,248,266,269,273,279,284,297,307,314,319,324,
+        331,335,340,344,350,355,366,371,375,379,383,388,402,413,421,433,
+        439,478,484,497,517,522,530,539,549,566,575,590,598,605,611,613,
+        624,636,644,646,653,666,677,690,700,707,719,727,731,756,789,797,
+        804,807,812,830,834,838,844,869,897,930,939,944,953,974,986,994,
+        998,1007,1010,1019,1023,1037,1139
     ];
 
     private static __ATN: antlr.ATN;
@@ -7779,6 +7977,28 @@ export class SearchCommandContext extends antlr.ParserRuleContext {
         super.copyFrom(ctx);
     }
 }
+export class SearchFromFilterContext extends SearchCommandContext {
+    public constructor(ctx: SearchCommandContext) {
+        super(ctx.parent, ctx.invokingState);
+        super.copyFrom(ctx);
+    }
+    public fromClause(): FromClauseContext {
+        return this.getRuleContext(0, FromClauseContext)!;
+    }
+    public logicalExpression(): LogicalExpressionContext {
+        return this.getRuleContext(0, LogicalExpressionContext)!;
+    }
+    public SEARCH(): antlr.TerminalNode | null {
+        return this.getToken(OpenSearchPPLParser.SEARCH, 0);
+    }
+    public override accept<Result>(visitor: OpenSearchPPLParserVisitor<Result>): Result | null {
+        if (visitor.visitSearchFromFilter) {
+            return visitor.visitSearchFromFilter(this);
+        } else {
+            return visitor.visitChildren(this);
+        }
+    }
+}
 export class SearchFromContext extends SearchCommandContext {
     public constructor(ctx: SearchCommandContext) {
         super(ctx.parent, ctx.invokingState);
@@ -7793,6 +8013,28 @@ export class SearchFromContext extends SearchCommandContext {
     public override accept<Result>(visitor: OpenSearchPPLParserVisitor<Result>): Result | null {
         if (visitor.visitSearchFrom) {
             return visitor.visitSearchFrom(this);
+        } else {
+            return visitor.visitChildren(this);
+        }
+    }
+}
+export class SearchFilterFromContext extends SearchCommandContext {
+    public constructor(ctx: SearchCommandContext) {
+        super(ctx.parent, ctx.invokingState);
+        super.copyFrom(ctx);
+    }
+    public logicalExpression(): LogicalExpressionContext {
+        return this.getRuleContext(0, LogicalExpressionContext)!;
+    }
+    public fromClause(): FromClauseContext {
+        return this.getRuleContext(0, FromClauseContext)!;
+    }
+    public SEARCH(): antlr.TerminalNode | null {
+        return this.getToken(OpenSearchPPLParser.SEARCH, 0);
+    }
+    public override accept<Result>(visitor: OpenSearchPPLParserVisitor<Result>): Result | null {
+        if (visitor.visitSearchFilterFrom) {
+            return visitor.visitSearchFilterFrom(this);
         } else {
             return visitor.visitChildren(this);
         }

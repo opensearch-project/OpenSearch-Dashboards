@@ -202,7 +202,8 @@ export const parseQuery = <
   query,
   cursor,
   context,
-}: ParsingSubject<A, L, P>) => {
+  previousResultKeywords,
+}: ParsingSubject<A, L, P>): AutocompleteResultBase => {
   const parser = createParser(Lexer, Parser, query);
   const { tokenStream } = parser;
   const errorListener = new GeneralErrorListener(tokenDictionary.SPACE);
@@ -242,5 +243,96 @@ export const parseQuery = <
     suggestKeywords,
   };
 
-  return enrichAutocompleteResult(result, rules, tokenStream, cursorTokenIndex, cursor, query);
+  // console.clear();
+  // console.log('cursorTokenIndex', cursorTokenIndex);
+  // console.log('Formatted Token Stream:');
+  // let index = 0;
+  // try {
+  //   while (true) {
+  //     const token = tokenStream.get(index);
+  //     if (!token) break;
+
+  //     const isCurrentToken = index === cursorTokenIndex;
+  //     const tokenInfo = `Token ${index}: ${token.text} (Type: ${token.type})`;
+
+  //     if (isCurrentToken) {
+  //       console.log(`%c${tokenInfo}`, 'background-color: red; font-weight: bold;');
+  //     } else {
+  //       console.log(tokenInfo);
+  //     }
+
+  //     index++;
+  //   }
+  // } catch (error) {
+  //   console.error('Error while iterating through token stream:', error);
+  // }
+
+  const currentResult = enrichAutocompleteResult(
+    result,
+    rules,
+    tokenStream,
+    cursorTokenIndex,
+    cursor,
+    query
+  );
+
+  // combine previous and current result
+  if (previousResultKeywords) {
+    // only need to modify initial results if there are context keywords
+    if (!currentResult?.suggestKeywords) {
+      // set initial keywords to be context keywords
+      currentResult.suggestKeywords = previousResultKeywords;
+    } else {
+      // merge initial and context keywords
+      const combined = [...currentResult.suggestKeywords, ...previousResultKeywords];
+
+      // ES6 magic to filter out duplicate objects based on id field
+      currentResult.suggestKeywords = combined.filter(
+        (item, index, self) => index === self.findIndex((other) => other.id === item.id)
+      );
+    }
+  }
+
+  // return when we don't have any more rerun and combine rules
+  if (!currentResult?.rerunWithoutRules || currentResult.rerunWithoutRules.length === 0) {
+    return currentResult;
+  }
+
+  // pop the top/last rule in the rerun and combine list
+  const nextRuleToAvoid = currentResult.rerunWithoutRules.pop();
+  if (!nextRuleToAvoid) {
+    // rerunWithoutRules being undefined or empty should lead to early return up above
+    throw new Error('nextRuleToAvoid is undefined');
+  }
+
+  const nextRulesToVisit = new Set(
+    Array.from(rulesToVisit).filter((rule) => rule !== nextRuleToAvoid)
+  );
+
+  /**
+   * TODO:
+   *
+   * need to handle the issue where the previous results findings from things like
+   * if we should suggest operators, persist. rn only the keywords are persisting
+   * across runs
+   *
+   * might have to fix the issue in a way where we grab all characteristics across runs,
+   * this thing might break for ppl if we need characteristics from later runs, where we
+   * unlease descendants
+   */
+
+  // call parseQuery again without specified rule and with this run's result
+  return parseQuery({
+    Lexer,
+    Parser,
+    tokenDictionary,
+    ignoredTokens,
+    rulesToVisit: nextRulesToVisit,
+    getParseTree,
+    enrichAutocompleteResult,
+    query,
+    cursor,
+    context,
+    previousResultKeywords: currentResult.suggestKeywords,
+  });
 };

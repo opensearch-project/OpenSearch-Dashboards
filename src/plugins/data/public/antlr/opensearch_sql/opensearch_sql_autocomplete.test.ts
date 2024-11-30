@@ -338,7 +338,7 @@ describe('enrichAutocompleteResult', () => {
   it('should correctly enrich the autocomplete result with additional suggestions', () => {
     const baseResult = { errors: [], suggestKeywords: [] };
     const rules = new Map();
-    const tokenStream = null;
+    const tokenStream = (null as unknown) as TokenStream;
     const cursorTokenIndex = 0;
     const cursor = { line: 1, column: 1 };
     const query = 'SELECT * FROM table';
@@ -359,9 +359,9 @@ describe('enrichAutocompleteResult', () => {
   it('should handle suggestions for columns and templates', () => {
     const baseResult = { errors: [], suggestKeywords: [] };
     const rules = new Map();
-    const tokenStream = {
+    const tokenStream = ({
       getText: jest.fn().mockReturnValue('column_name'),
-    };
+    } as unknown) as TokenStream;
     const cursorTokenIndex = 0;
     const cursor = { line: 1, column: 1 };
     const query = 'SELECT column_name FROM table';
@@ -382,7 +382,7 @@ describe('enrichAutocompleteResult', () => {
   it('should handle errors gracefully and return base result', () => {
     const baseResult = { errors: [], suggestKeywords: [] };
     const rules = new Map();
-    const tokenStream = null;
+    const tokenStream = (null as unknown) as TokenStream;
     const cursorTokenIndex = 0;
     const cursor = { line: 1, column: 1 };
     const query = 'SELECT * FROM table';
