@@ -25,6 +25,15 @@ const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
 
 type WorkspaceOptions = Pick<SavedObjectsBaseOptions, 'workspaces'> | undefined;
 
+const generateSavedObjectsForbiddenError = () =>
+  SavedObjectsErrorHelpers.decorateForbiddenError(
+    new Error(
+      i18n.translate('workspace.id_consumer.saved_objects.forbidden', {
+        defaultMessage: 'Saved object does not belong to the workspace',
+      })
+    )
+  );
+
 export class WorkspaceIdConsumerWrapper {
   private formatWorkspaceIdParams<T extends WorkspaceOptions>(
     request: OpenSearchDashboardsRequest,
@@ -57,6 +66,10 @@ export class WorkspaceIdConsumerWrapper {
     workspace: string,
     request: OpenSearchDashboardsRequest
   ) {
+    // Keep the original object error
+    if (!!object?.error) {
+      return true;
+    }
     // Data source is a workspace level object, validate if the request has access to the data source within the requested workspace.
     if (validateIsWorkspaceDataSourceAndConnectionObjectType(object.type)) {
       if (!!getWorkspaceState(request).isDataSourceAdmin) {
@@ -177,8 +190,7 @@ export class WorkspaceIdConsumerWrapper {
                 : {
                     ...object,
                     error: {
-                      ...SavedObjectsErrorHelpers.createGenericNotFoundError(object.type, object.id)
-                        .output.payload,
+                      ...generateSavedObjectsForbiddenError().output.payload,
                     },
                   };
             }),
@@ -204,7 +216,7 @@ export class WorkspaceIdConsumerWrapper {
           workspaces?.length === 1 &&
           !this.validateObjectInAWorkspace(objectToGet, workspaces[0], wrapperOptions.request)
         ) {
-          throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
+          throw generateSavedObjectsForbiddenError();
         }
 
         // Allow access if no specific workspace is requested.

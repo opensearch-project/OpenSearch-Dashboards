@@ -375,7 +375,7 @@ describe('workspace_id_consumer integration test', () => {
 
       await osdTestServer.request
         .get(root, `/w/${createdFooWorkspace.id}/api/saved_objects/${dashboard.type}/bar`)
-        .expect(404);
+        .expect(403);
 
       await Promise.all(
         [...createResultFoo.body.saved_objects, ...createResultBar.body.saved_objects].map((item) =>
@@ -434,9 +434,9 @@ describe('workspace_id_consumer integration test', () => {
       ]);
       expect(bulkGetResultWithWorkspace.body.saved_objects[1]?.error).toMatchInlineSnapshot(`
         Object {
-          "error": "Not Found",
-          "message": "Saved object [dashboard/bar] not found",
-          "statusCode": 404,
+          "error": "Forbidden",
+          "message": "Saved object does not belong to the workspace",
+          "statusCode": 403,
         }
       `);
 

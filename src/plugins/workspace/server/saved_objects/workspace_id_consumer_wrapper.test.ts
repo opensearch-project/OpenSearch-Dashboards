@@ -292,7 +292,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       };
       mockedClient.get.mockResolvedValueOnce(savedObject);
       expect(wrapperClient.get(savedObject.type, savedObject.id)).rejects.toMatchInlineSnapshot(
-        `[Error: Saved object [dashboard/dashboard_id] not found]`
+        `[Error: Saved object does not belong to the workspace]`
       );
       expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {});
     });
@@ -349,7 +349,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       mockedClient.get.mockResolvedValueOnce(savedObject);
       mockedClient.get.mockResolvedValueOnce(savedObject);
       expect(wrapperClient.get(savedObject.type, savedObject.id)).rejects.toMatchInlineSnapshot(
-        `[Error: Saved object [data-source/data-source_id] not found]`
+        `[Error: Saved object does not belong to the workspace]`
       );
       expect(mockedClient.get).toBeCalledWith(savedObject.type, savedObject.id, {});
     });
@@ -358,6 +358,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
   describe('bulkGet', () => {
     const payload = [
       { id: 'dashboard_id', type: 'dashboard' },
+      { id: 'dashboard_error_id', type: 'dashboard' },
       { id: 'visualization_id', type: 'visualization' },
       { id: 'global_data_source_id', type: 'data-source' },
       { id: 'data_source_id', type: 'data-source' },
@@ -369,6 +370,17 @@ describe('WorkspaceIdConsumerWrapper', () => {
         attributes: {},
         references: [],
         workspaces: ['foo'],
+      },
+      {
+        type: 'dashboard',
+        id: 'dashboard_error_id',
+        attributes: {},
+        references: [],
+        error: {
+          statusCode: 404,
+          error: 'Not Found',
+          message: 'Saved object [dashboard/dashboard_error_id] not found',
+        },
       },
       {
         type: 'visualization',
@@ -428,8 +440,19 @@ describe('WorkspaceIdConsumerWrapper', () => {
               "attributes": Object {},
               "error": Object {
                 "error": "Not Found",
-                "message": "Saved object [visualization/visualization_id] not found",
+                "message": "Saved object [dashboard/dashboard_error_id] not found",
                 "statusCode": 404,
+              },
+              "id": "dashboard_error_id",
+              "references": Array [],
+              "type": "dashboard",
+            },
+            Object {
+              "attributes": Object {},
+              "error": Object {
+                "error": "Forbidden",
+                "message": "Saved object does not belong to the workspace",
+                "statusCode": 403,
               },
               "id": "visualization_id",
               "references": Array [],
@@ -453,9 +476,9 @@ describe('WorkspaceIdConsumerWrapper', () => {
             Object {
               "attributes": Object {},
               "error": Object {
-                "error": "Not Found",
-                "message": "Saved object [data-source/global_data_source_id] not found",
-                "statusCode": 404,
+                "error": "Forbidden",
+                "message": "Saved object does not belong to the workspace",
+                "statusCode": 403,
               },
               "id": "global_data_source_id",
               "references": Array [],
@@ -495,8 +518,19 @@ describe('WorkspaceIdConsumerWrapper', () => {
               "attributes": Object {},
               "error": Object {
                 "error": "Not Found",
-                "message": "Saved object [visualization/visualization_id] not found",
+                "message": "Saved object [dashboard/dashboard_error_id] not found",
                 "statusCode": 404,
+              },
+              "id": "dashboard_error_id",
+              "references": Array [],
+              "type": "dashboard",
+            },
+            Object {
+              "attributes": Object {},
+              "error": Object {
+                "error": "Forbidden",
+                "message": "Saved object does not belong to the workspace",
+                "statusCode": 403,
               },
               "id": "visualization_id",
               "references": Array [],
@@ -520,9 +554,9 @@ describe('WorkspaceIdConsumerWrapper', () => {
             Object {
               "attributes": Object {},
               "error": Object {
-                "error": "Not Found",
-                "message": "Saved object [data-source/global_data_source_id] not found",
-                "statusCode": 404,
+                "error": "Forbidden",
+                "message": "Saved object does not belong to the workspace",
+                "statusCode": 403,
               },
               "id": "global_data_source_id",
               "references": Array [],
@@ -601,8 +635,19 @@ describe('WorkspaceIdConsumerWrapper', () => {
               "attributes": Object {},
               "error": Object {
                 "error": "Not Found",
-                "message": "Saved object [visualization/visualization_id] not found",
+                "message": "Saved object [dashboard/dashboard_error_id] not found",
                 "statusCode": 404,
+              },
+              "id": "dashboard_error_id",
+              "references": Array [],
+              "type": "dashboard",
+            },
+            Object {
+              "attributes": Object {},
+              "error": Object {
+                "error": "Forbidden",
+                "message": "Saved object does not belong to the workspace",
+                "statusCode": 403,
               },
               "id": "visualization_id",
               "references": Array [],
