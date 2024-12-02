@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-const { defineConfig } = require('cypress');
+import { defineConfig } from 'cypress';
+import webpackPreprocessor from '@cypress/webpack-preprocessor';
 
 module.exports = defineConfig({
   defaultCommandTimeout: 60000,
@@ -31,9 +32,11 @@ module.exports = defineConfig({
   },
 });
 
-function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions): Cypress.PluginConfigOptions {
-  const webpackPreprocessor = require('@cypress/webpack-preprocessor');
-  const webpackOptions = webpackPreprocessor.defaultOptions.webpackOptions;
+function setupNodeEvents(
+  on: Cypress.PluginEvents,
+  config: Cypress.PluginConfigOptions
+): Cypress.PluginConfigOptions {
+  const { webpackOptions } = webpackPreprocessor.defaultOptions;
 
   /**
    * By default, cypress' internal webpack preprocessor doesn't allow imports without file extensions.
@@ -43,7 +46,7 @@ function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigO
    * This extra rule relaxes this a bit by allowing imports without file extension
    *     ex. import module from './module'
    */
-  webpackOptions.module.rules.unshift({
+  webpackOptions!.module!.rules.unshift({
     test: /\.m?js/,
     resolve: {
       enforceExtension: false,
