@@ -1,0 +1,2 @@
+refactor:
+- [Workspace] Isolate objects based on workspace when calling get/bulkGet ([#8888](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/8888))
