@@ -202,7 +202,7 @@ export const parseQuery = <
   query,
   cursor,
   context,
-  previousResultKeywords,
+  previousResult,
 }: ParsingSubject<A, L, P>): AutocompleteResultBase => {
   const parser = createParser(Lexer, Parser, query);
   const { tokenStream } = parser;
@@ -277,21 +277,47 @@ export const parseQuery = <
   );
 
   // combine previous and current result
-  if (previousResultKeywords) {
-    // only need to modify initial results if there are context keywords
-    if (!currentResult?.suggestKeywords) {
-      // set initial keywords to be context keywords
-      currentResult.suggestKeywords = previousResultKeywords;
-    } else {
-      // merge initial and context keywords
-      const combined = [...currentResult.suggestKeywords, ...previousResultKeywords];
+  const combinedResult: A = {};
 
-      // ES6 magic to filter out duplicate objects based on id field
-      currentResult.suggestKeywords = combined.filter(
-        (item, index, self) => index === self.findIndex((other) => other.id === item.id)
-      );
-    }
+  // look at every field in both results then combine inside of combinedResult
+
+  if (previousResult) {
+    Object.keys({ ...currentResult, ...previousResult }).forEach((key) => {
+      const currentField = currentResult[key as keyof A];
+      const previousField = previousResult[key as keyof A];
+
+      if (currentField && previousField) {
+        combinedResult[key as keyof A] = {
+          ...currentField,
+          suggestKeywords: [
+            ...(previousField.suggestKeywords ?? []),
+            ...(currentField.suggestKeywords ?? []),
+          ],
+        };
+      } else if (currentField) {
+        combinedResult[key as keyof A] = currentField;
+      } else if (previousField) {
+        combinedResult[key as keyof A] = previousField;
+      }
+    });
   }
+
+  // // combine previous and current result
+  // if (previousResultKeywords) {
+  //   // only need to modify initial results if there are context keywords
+  //   if (!currentResult?.suggestKeywords) {
+  //     // set initial keywords to be context keywords
+  //     currentResult.suggestKeywords = previousResultKeywords;
+  //   } else {
+  //     // merge initial and context keywords
+  //     const combined = [...currentResult.suggestKeywords, ...previousResultKeywords];
+
+  //     // ES6 magic to filter out duplicate objects based on id field
+  //     currentResult.suggestKeywords = combined.filter(
+  //       (item, index, self) => index === self.findIndex((other) => other.id === item.id)
+  //     );
+  //   }
+  // }
 
   // return when we don't have any more rerun and combine rules
   if (!currentResult?.rerunWithoutRules || currentResult.rerunWithoutRules.length === 0) {
@@ -333,6 +359,6 @@ export const parseQuery = <
     query,
     cursor,
     context,
-    previousResultKeywords: currentResult.suggestKeywords,
+    previousResultKeywords: currentResult,
   });
 };
