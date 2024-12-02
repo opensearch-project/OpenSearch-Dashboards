@@ -387,16 +387,6 @@ interface PermissionSettingLike
     Omit<Partial<WorkspaceUserGroupPermissionSetting>, 'type'> {
   type?: string;
 }
-const isSamePermissionSetting = (a: PermissionSettingLike, b: PermissionSettingLike) => {
-  return (
-    a.id === b.id &&
-    a.type === b.type &&
-    a.userId === b.userId &&
-    a.group === b.group &&
-    a.modes?.length === b.modes?.length &&
-    a.modes?.every((mode) => b.modes?.includes(mode))
-  );
-};
 
 export const isWorkspacePermissionSetting = (
   permissionSetting: PermissionSettingLike
@@ -448,10 +438,8 @@ export const getNumberOfChanges = (
     count++;
   }
   if (
-    newFormData.permissionSettings &&
-    initialFormData.permissionSettings &&
-    convertPermissionsToPrivacyType(newFormData.permissionSettings) !==
-      convertPermissionsToPrivacyType(initialFormData.permissionSettings)
+    convertPermissionsToPrivacyType(newFormData.permissionSettings ?? []) !==
+    convertPermissionsToPrivacyType(initialFormData.permissionSettings ?? [])
   ) {
     count++;
   }
