@@ -56,7 +56,7 @@ export const pplSearchStrategyProvider = (
           for (const [key, aggQueryString] of Object.entries(aggConfig.qs)) {
             request.body.query.query = aggQueryString;
             const rawAggs: any = await pplFacet.describeQuery(context, request);
-            if (!rawAggs.success) handleFacetError(rawResponse);
+            if (!rawAggs.success) continue;
             (dataFrame as IDataFrameWithAggs).aggs = {};
             (dataFrame as IDataFrameWithAggs).aggs[key] = rawAggs.data.datarows?.map((hit: any) => {
               return {
