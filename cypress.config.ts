@@ -27,11 +27,11 @@ module.exports = defineConfig({
   e2e: {
     baseUrl: 'http://localhost:5601',
     specPattern: 'cypress/integration/**/*_spec.{js,jsx,ts,tsx}',
-    setupNodeEvents: setupNodeEvents,
+    setupNodeEvents,
   },
 });
 
-function setupNodeEvents(on, config) {
+function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions): Cypress.PluginConfigOptions {
   const webpackPreprocessor = require('@cypress/webpack-preprocessor');
   const webpackOptions = webpackPreprocessor.defaultOptions.webpackOptions;
 
@@ -53,7 +53,7 @@ function setupNodeEvents(on, config) {
   on(
     'file:preprocessor',
     webpackPreprocessor({
-      webpackOptions: webpackOptions,
+      webpackOptions,
     })
   );
 
