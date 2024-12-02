@@ -37,10 +37,11 @@ import { track } from './track';
 
 // @ts-ignore
 import { retrieveAutoCompleteInfo } from '../../../lib/mappings/mappings';
+import { UI_SETTINGS } from '../../../../../data/common';
 
 export const useSendCurrentRequestToOpenSearch = (dataSourceId?: string) => {
   const {
-    services: { history, settings, notifications, trackUiMetric, http },
+    services: { history, settings, notifications, trackUiMetric, http, uiSettings },
   } = useServicesContext();
 
   const dispatch = useRequestActionContext();
@@ -64,7 +65,14 @@ export const useSendCurrentRequestToOpenSearch = (dataSourceId?: string) => {
       // Fire and forget
       setTimeout(() => track(requests, editor, trackUiMetric), 0);
 
-      const results = await sendRequestToOpenSearch({ http, requests, dataSourceId });
+      const withLongNumeralsSupport = await uiSettings.get(UI_SETTINGS.DATA_WITH_LONG_NUMERALS);
+
+      const results = await sendRequestToOpenSearch({
+        http,
+        requests,
+        dataSourceId,
+        withLongNumeralsSupport,
+      });
 
       results.forEach(({ request: { path, method, data } }) => {
         try {
@@ -112,5 +120,14 @@ export const useSendCurrentRequestToOpenSearch = (dataSourceId?: string) => {
         });
       }
     }
-  }, [dispatch, http, dataSourceId, settings, notifications.toasts, trackUiMetric, history]);
+  }, [
+    dispatch,
+    http,
+    dataSourceId,
+    settings,
+    notifications.toasts,
+    trackUiMetric,
+    history,
+    uiSettings,
+  ]);
 };
