@@ -28,7 +28,7 @@ import { CoreStart, IWorkspaceResponse } from '../../../../../core/public';
 import { convertPermissionsToPrivacyType, getPermissionSettingsWithPrivacyType } from './utils';
 import { WorkspacePrivacySettingSelect } from './workspace_privacy_setting_select';
 
-export interface WorkspacePrivacySettingProps {
+export interface WorkspaceCollaboratorPrivacySettingProps {
   permissionSettings: Array<
     Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
   >;
@@ -40,7 +40,7 @@ export interface WorkspacePrivacySettingProps {
 export const WorkspaceCollaboratorPrivacySettingPanel = ({
   permissionSettings,
   handleSubmitPermissionSettings,
-}: WorkspacePrivacySettingProps) => {
+}: WorkspaceCollaboratorPrivacySettingProps) => {
   const {
     services: { notifications },
   } = useOpenSearchDashboards<{

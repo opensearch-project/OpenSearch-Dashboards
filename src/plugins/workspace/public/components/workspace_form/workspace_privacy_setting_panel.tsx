@@ -63,6 +63,7 @@ export const WorkspacePrivacySettingPanel = ({
             <EuiFlexItem key={id}>
               <EuiCheckableCard
                 className="workspace-privacy-setting-item"
+                data-test-subj="workspace-privacyType-Card"
                 id={id}
                 label={
                   <EuiText size="s">
