@@ -27,5 +27,35 @@ module.exports = defineConfig({
   e2e: {
     baseUrl: 'http://localhost:5601',
     specPattern: 'cypress/integration/**/*_spec.{js,jsx,ts,tsx}',
+    setupNodeEvents: setupNodeEvents,
   },
 });
+
+function setupNodeEvents(on, config) {
+  const webpackPreprocessor = require('@cypress/webpack-preprocessor');
+  const webpackOptions = webpackPreprocessor.defaultOptions.webpackOptions;
+
+  /**
+   * By default, cypress' internal webpack preprocessor doesn't allow imports without file extensions.
+   * This makes our life a bit hard since if any file in our testing dependency graph has an import without
+   * the .js extension our cypress build will fail.
+   *
+   * This extra rule relaxes this a bit by allowing imports without file extension
+   *     ex. import module from './module'
+   */
+  webpackOptions.module.rules.unshift({
+    test: /\.m?js/,
+    resolve: {
+      enforceExtension: false,
+    },
+  });
+
+  on(
+    'file:preprocessor',
+    webpackPreprocessor({
+      webpackOptions: webpackOptions,
+    })
+  );
+
+  return config;
+}
