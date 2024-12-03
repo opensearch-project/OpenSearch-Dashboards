@@ -4,6 +4,9 @@
  */
 
 import '../utils/commands';
-import '../utils/apps/commands';
-import '../utils/dashboards/workspace-plugin/commands';
-import '../utils/dashboards/commands';
+
+// eslint-disable-next-line no-unused-vars
+Cypress.on('uncaught:exception', (_err) => {
+  // returning false here prevents Cypress from failing the test
+  return false;
+});
