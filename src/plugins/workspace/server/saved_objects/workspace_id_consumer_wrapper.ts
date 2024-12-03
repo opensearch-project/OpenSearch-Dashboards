@@ -14,12 +14,25 @@ import {
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
   SavedObjectsErrorHelpers,
+  SavedObject,
+  SavedObjectsBulkGetObject,
+  SavedObjectsBulkResponse,
 } from '../../../../core/server';
 import { IWorkspaceClientImpl } from '../types';
+import { validateIsWorkspaceDataSourceAndConnectionObjectType } from '../../common/utils';
 
 const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
 
 type WorkspaceOptions = Pick<SavedObjectsBaseOptions, 'workspaces'> | undefined;
+
+const generateSavedObjectsForbiddenError = () =>
+  SavedObjectsErrorHelpers.decorateForbiddenError(
+    new Error(
+      i18n.translate('workspace.id_consumer.saved_objects.forbidden', {
+        defaultMessage: 'Saved object does not belong to the workspace',
+      })
+    )
+  );
 
 export class WorkspaceIdConsumerWrapper {
   private formatWorkspaceIdParams<T extends WorkspaceOptions>(
@@ -46,6 +59,36 @@ export class WorkspaceIdConsumerWrapper {
 
   private isConfigType(type: string): boolean {
     return type === UI_SETTINGS_SAVED_OBJECTS_TYPE;
+  }
+
+  private validateObjectInAWorkspace<T>(
+    object: SavedObject<T>,
+    workspace: string,
+    request: OpenSearchDashboardsRequest
+  ) {
+    // Keep the original object error
+    if (!!object?.error) {
+      return true;
+    }
+    // Data source is a workspace level object, validate if the request has access to the data source within the requested workspace.
+    if (validateIsWorkspaceDataSourceAndConnectionObjectType(object.type)) {
+      if (!!getWorkspaceState(request).isDataSourceAdmin) {
+        return true;
+      }
+      // Deny access if the object is a global data source (no workspaces assigned)
+      if (!object.workspaces || object.workspaces.length === 0) {
+        return false;
+      }
+    }
+    /*
+     * Allow access if the requested workspace matches one of the object's assigned workspaces
+     * This ensures that the user can only access data sources within their current workspace
+     */
+    if (object.workspaces && object.workspaces.length > 0) {
+      return object.workspaces.includes(workspace);
+    }
+    // Allow access if the object is a global object (object.workspaces is null/[])
+    return true;
   }
 
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
@@ -126,8 +169,59 @@ export class WorkspaceIdConsumerWrapper {
         }
         return wrapperOptions.client.find(finalOptions);
       },
-      bulkGet: wrapperOptions.client.bulkGet,
-      get: wrapperOptions.client.get,
+      bulkGet: async <T = unknown>(
+        objects: SavedObjectsBulkGetObject[] = [],
+        options: SavedObjectsBaseOptions = {}
+      ): Promise<SavedObjectsBulkResponse<T>> => {
+        const { workspaces } = this.formatWorkspaceIdParams(wrapperOptions.request, options);
+        if (!!workspaces && workspaces.length > 1) {
+          // Version 2.18 does not support the passing of multiple workspaces.
+          throw SavedObjectsErrorHelpers.createBadRequestError('Multiple workspace parameters');
+        }
+
+        const objectToBulkGet = await wrapperOptions.client.bulkGet<T>(objects, options);
+
+        if (workspaces?.length === 1) {
+          return {
+            ...objectToBulkGet,
+            saved_objects: objectToBulkGet.saved_objects.map((object) => {
+              return this.validateObjectInAWorkspace(object, workspaces[0], wrapperOptions.request)
+                ? object
+                : {
+                    ...object,
+                    error: {
+                      ...generateSavedObjectsForbiddenError().output.payload,
+                    },
+                  };
+            }),
+          };
+        }
+
+        return objectToBulkGet;
+      },
+      get: async <T = unknown>(
+        type: string,
+        id: string,
+        options: SavedObjectsBaseOptions = {}
+      ): Promise<SavedObject<T>> => {
+        const { workspaces } = this.formatWorkspaceIdParams(wrapperOptions.request, options);
+        if (!!workspaces && workspaces.length > 1) {
+          // Version 2.18 does not support the passing of multiple workspaces.
+          throw SavedObjectsErrorHelpers.createBadRequestError('Multiple workspace parameters');
+        }
+
+        const objectToGet = await wrapperOptions.client.get<T>(type, id, options);
+
+        if (
+          workspaces?.length === 1 &&
+          !this.validateObjectInAWorkspace(objectToGet, workspaces[0], wrapperOptions.request)
+        ) {
+          throw generateSavedObjectsForbiddenError();
+        }
+
+        // Allow access if no specific workspace is requested.
+        return objectToGet;
+      },
       update: wrapperOptions.client.update,
       bulkUpdate: wrapperOptions.client.bulkUpdate,
       addToNamespaces: wrapperOptions.client.addToNamespaces,
