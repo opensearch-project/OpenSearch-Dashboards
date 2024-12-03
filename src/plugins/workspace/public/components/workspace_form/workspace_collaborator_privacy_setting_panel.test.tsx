@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import {
   privacyType2CopyMap,
   WorkspacePermissionItemType,
@@ -15,6 +15,7 @@ import {
   WorkspaceCollaboratorPrivacySettingPanel,
   WorkspaceCollaboratorPrivacySettingProps,
 } from './workspace_collaborator_privacy_setting_panel';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
 const permissionSettingsView = [
   {
@@ -45,6 +46,20 @@ const permissionSettingsEdit = [
   },
 ];
 
+jest.mock('../../../../opensearch_dashboards_react/public', () => {
+  return {
+    useOpenSearchDashboards: jest.fn().mockReturnValue({
+      services: {
+        notifications: {
+          toasts: {
+            addError: jest.fn(),
+            addSuccess: jest.fn(),
+          },
+        },
+      },
+    }),
+  };
+});
 const setup = (options?: Partial<WorkspaceCollaboratorPrivacySettingProps>) => {
   const handleSubmitPermissionSettingsMock = jest.fn();
   const permissionSettings = [
@@ -114,5 +129,57 @@ describe('WorkspaceCollaboratorPrivacySettingPanel', () => {
     );
     fireEvent.click(renderResult.getByText('Save changes'));
     expect(handleSubmitPermissionSettingsMock).toHaveBeenCalledWith(permissionSettingsView);
+  });
+
+  it('should call addSuccess when successfully update the privacy type', async () => {
+    const mockHandleSubmitPermissionSettings = jest.fn();
+    mockHandleSubmitPermissionSettings.mockResolvedValue({ success: true });
+    const { renderResult } = setup({
+      handleSubmitPermissionSettings: mockHandleSubmitPermissionSettings,
+    });
+
+    expect(mockHandleSubmitPermissionSettings).not.toHaveBeenCalled();
+    fireEvent.click(renderResult.getByText('Edit'));
+    fireEvent.click(
+      renderResult.getByText(
+        privacyType2CopyMap[WorkspacePrivacyItemType.PrivateToCollaborators].title
+      )
+    );
+    fireEvent.click(
+      renderResult.getByText(privacyType2CopyMap[WorkspacePrivacyItemType.AnyoneCanEdit].title)
+    );
+    fireEvent.click(renderResult.getByText('Save changes'));
+    const addSuccessMock = useOpenSearchDashboards().services.notifications?.toasts.addSuccess;
+    await waitFor(() => {
+      expect(addSuccessMock).toHaveBeenCalledWith({
+        title: 'Change workspace privacy successfully.',
+      });
+    });
+  });
+
+  it('should call addError when successfully update the privacy type', async () => {
+    const mockHandleSubmitPermissionSettings = jest.fn();
+    mockHandleSubmitPermissionSettings.mockRejectedValue(new Error('Something went wrong'));
+    const { renderResult } = setup({
+      handleSubmitPermissionSettings: mockHandleSubmitPermissionSettings,
+    });
+
+    expect(mockHandleSubmitPermissionSettings).not.toHaveBeenCalled();
+    fireEvent.click(renderResult.getByText('Edit'));
+    fireEvent.click(
+      renderResult.getByText(
+        privacyType2CopyMap[WorkspacePrivacyItemType.PrivateToCollaborators].title
+      )
+    );
+    fireEvent.click(
+      renderResult.getByText(privacyType2CopyMap[WorkspacePrivacyItemType.AnyoneCanEdit].title)
+    );
+    fireEvent.click(renderResult.getByText('Save changes'));
+    const addErrorMock = useOpenSearchDashboards().services.notifications?.toasts.addError;
+    await waitFor(() => {
+      expect(addErrorMock).toHaveBeenCalledWith(expect.any(Error), {
+        title: 'Error updating workspace privacy type',
+      });
+    });
   });
 });
