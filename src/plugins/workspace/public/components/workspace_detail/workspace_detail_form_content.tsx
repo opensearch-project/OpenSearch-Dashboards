@@ -60,6 +60,7 @@ export const WorkspaceDetailFormContent = ({
   const [value, setValue] = useState(formData.useCase);
   const currentWorkspace = useObservable(workspaces.currentWorkspace$);
   const currentUseCase = getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features ?? []);
+  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   useEffect(() => {
     setValue(formData.useCase);
@@ -146,38 +147,40 @@ export const WorkspaceDetailFormContent = ({
           />
         </EuiCompressedFormRow>
       </EuiDescribedFormGroup>
-      <EuiDescribedFormGroup
-        title={<h3>{workspacePrivacyTitle}</h3>}
-        description={
-          <FormattedMessage
-            id="workspace.form.details.panels.privacy.description"
-            defaultMessage="Manage who can view or edit workspace and assign workspace administrators on the {collaboratorsLink} page."
-            values={{
-              collaboratorsLink: (
-                <EuiLink onClick={() => application.navigateToApp('workspace_collaborators')}>
-                  <FormattedMessage
-                    id="workspace.form.details.panels.privacy.linkToCollaborators"
-                    defaultMessage="Collaborators"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        }
-      >
-        {isEditing ? (
-          <WorkspacePrivacySettingSelect
-            selectedPrivacyType={privacyType}
-            onSelectedPrivacyTypeChange={setPrivacyType}
-          />
-        ) : (
-          <EuiCompressedFormRow label={privacyType2CopyMap[privacyType].title}>
-            <EuiText size="xs" color="subdued">
-              {privacyType2CopyMap[privacyType].description}
-            </EuiText>
-          </EuiCompressedFormRow>
-        )}
-      </EuiDescribedFormGroup>
+      {isPermissionEnabled && (
+        <EuiDescribedFormGroup
+          title={<h3>{workspacePrivacyTitle}</h3>}
+          description={
+            <FormattedMessage
+              id="workspace.form.details.panels.privacy.description"
+              defaultMessage="Manage who can view or edit workspace and assign workspace administrators on the {collaboratorsLink} page."
+              values={{
+                collaboratorsLink: (
+                  <EuiLink onClick={() => application.navigateToApp('workspace_collaborators')}>
+                    <FormattedMessage
+                      id="workspace.form.details.panels.privacy.linkToCollaborators"
+                      defaultMessage="Collaborators"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
+        >
+          {isEditing ? (
+            <WorkspacePrivacySettingSelect
+              selectedPrivacyType={privacyType}
+              onSelectedPrivacyTypeChange={setPrivacyType}
+            />
+          ) : (
+            <EuiCompressedFormRow label={privacyType2CopyMap[privacyType].title}>
+              <EuiText size="xs" color="subdued">
+                {privacyType2CopyMap[privacyType].description}
+              </EuiText>
+            </EuiCompressedFormRow>
+          )}
+        </EuiDescribedFormGroup>
+      )}
     </>
   );
 };

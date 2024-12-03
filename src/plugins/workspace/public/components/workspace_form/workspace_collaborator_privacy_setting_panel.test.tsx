@@ -157,7 +157,7 @@ describe('WorkspaceCollaboratorPrivacySettingPanel', () => {
     });
   });
 
-  it('should call addError when successfully update the privacy type', async () => {
+  it('should call addError when error update the privacy type', async () => {
     const mockHandleSubmitPermissionSettings = jest.fn();
     mockHandleSubmitPermissionSettings.mockRejectedValue(new Error('Something went wrong'));
     const { renderResult } = setup({
