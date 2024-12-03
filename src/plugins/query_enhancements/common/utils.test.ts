@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { handleFacetError } from './utils';
+import { throwFacetError } from './utils';
 
 describe('handleFacetError', () => {
   const error = new Error('mock-error');
@@ -16,9 +16,9 @@ describe('handleFacetError', () => {
       data: error,
     };
 
-    expect(() => handleFacetError(response)).toThrowError();
+    expect(() => throwFacetError(response)).toThrowError();
     try {
-      handleFacetError(response);
+      throwFacetError(response);
     } catch (err: any) {
       expect(err.message).toBe('test error message');
       expect(err.name).toBe('400');
