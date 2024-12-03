@@ -2594,15 +2594,15 @@
   version "1.0.6"
   resolved "https://github.com/opensearch-project/opensearch-dashboards-test-library/archive/refs/tags/1.0.6.tar.gz#f2f489832a75191e243c6d2b42d49047265d9ce3"
 
-"@opensearch-project/opensearch@^2.13.0":
-  version "2.13.0"
-  resolved "https://registry.yarnpkg.com/@opensearch-project/opensearch/-/opensearch-2.13.0.tgz#e60c1a3a3dd059562f1d901aa8d3659035cb1781"
-  integrity sha512-Bu3jJ7pKzumbMMeefu7/npAWAvFu5W9SlbBow1ulhluqUpqc7QoXe0KidDrMy7Dy3BQrkI6llR3cWL4lQTZOFw==
+"@opensearch-project/opensearch@^2.9.0":
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/@opensearch-project/opensearch/-/opensearch-2.9.0.tgz#319b4d174540b6d000c31477a56618e5054c6fcb"
+  integrity sha512-BXPWSBME1rszZ8OvtBVQ9F6kLiZSENDSFPawbPa1fv0GouuQfWxkKSI9TcnfGLp869fgLTEIfeC5Qexd4RbAYw==
   dependencies:
     aws4 "^1.11.0"
     debug "^4.3.1"
     hpagent "^1.2.0"
-    json11 "^2.0.0"
+    json11 "^1.0.4"
     ms "^2.1.3"
     secure-json-parse "^2.4.0"
 
@@ -11393,7 +11393,7 @@ json-stringify-safe@5.0.1, json-stringify-safe@^5.0.1, json-stringify-safe@~5.0.
   resolved "https://registry.yarnpkg.com/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz#1296a2d58fd45f19a0f6ce01d65701e2c735b6eb"
   integrity sha1-Epai1Y/UXxmg9s4B1lcB4sc1tus=
 
-json11@^2.0.0:
+json11@^1.0.4, json11@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/json11/-/json11-2.0.0.tgz#06c4ad0a40b50c5de99a87f6d3028593137e5641"
   integrity sha512-VuKJKUSPEJape+daTm70Nx7vdcdorf4S6LCyN2z0jUVH4UrQ4ftXo2kC0bnHpCREmxHuHqCNVPA75BjI3CB6Ag==
